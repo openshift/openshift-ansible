@@ -44,6 +44,7 @@
     - logging-kibana
     - logging-kibana-proxy
     - logging-curator
+    - logging-mux
   ignore_errors: yes
   register: delete_result
   changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
@@ -109,5 +110,6 @@
     - logging-curator
     - logging-elasticsearch
     - logging-fluentd
+    - logging-mux
   register: delete_result
   changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0

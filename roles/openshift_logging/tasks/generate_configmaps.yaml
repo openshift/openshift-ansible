@@ -134,3 +134,43 @@
       when: fluentd_configmap.stdout is defined
       changed_when: no
   check_mode: no
+
+- block:
+    - copy:
+        src: fluent.conf
+        dest: "{{mktemp.stdout}}/fluent-mux.conf"
+      when: fluentd_mux_config_contents is undefined
+      changed_when: no
+
+    - copy:
+        src: secure-forward.conf
+        dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
+      when: fluentd_mux_securefoward_contents is undefined
+      changed_when: no
+
+    - copy:
+        content: "{{fluentd_mux_config_contents}}"
+        dest: "{{mktemp.stdout}}/fluent-mux.conf"
+      when: fluentd_mux_config_contents is defined
+      changed_when: no
+
+    - copy:
+        content: "{{fluentd_mux_secureforward_contents}}"
+        dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
+      when: fluentd_mux_secureforward_contents is defined
+      changed_when: no
+
+    - command: >
+        {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create configmap logging-mux
+        --from-file=fluent.conf={{mktemp.stdout}}/fluent-mux.conf
+        --from-file=secure-forward.conf={{mktemp.stdout}}/secure-forward-mux.conf -o yaml --dry-run
+      register: mux_configmap
+      changed_when: no
+
+    - copy:
+        content: "{{mux_configmap.stdout}}"
+        dest: "{{mktemp.stdout}}/templates/logging-mux-configmap.yaml"
+      when: mux_configmap.stdout is defined
+      changed_when: no
+  check_mode: no
+  when: openshift_logging_use_mux

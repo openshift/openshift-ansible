@@ -27,6 +27,10 @@
   loop_control:
     loop_var: install_component
 
+- name: Install logging mux
+  include: "{{ role_path }}/tasks/install_mux.yaml"
+  when: openshift_logging_use_mux
+
 - find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
   register: object_def_files
   changed_when: no

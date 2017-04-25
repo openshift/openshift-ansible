@@ -119,6 +119,15 @@ openshift_logging_es_ops_number_of_replicas: 0
 # storage related defaults
 openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_access_modes | default(['ReadWriteOnce']) }}"
 
+# mux - secure_forward listener service
+openshift_logging_mux_allow_external: False
+openshift_logging_use_mux: "{{ openshift_logging_mux_allow_external | default(False) }}"
+# this tells the fluentd node agent to use mux instead of sending directly to Elasticsearch
+openshift_logging_use_mux_client: False
+openshift_logging_mux_hostname: "{{ 'mux.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+openshift_logging_mux_port: 24284
+openshift_logging_mux_cpu_limit: 100m
+openshift_logging_mux_memory_limit: 512Mi
 
 # following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
 #es_logging_contents:
@@ -127,3 +136,5 @@ openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_acc
 #fluentd_config_contents:
 #fluentd_throttle_contents:
 #fluentd_secureforward_contents:
+#fluentd_mux_config_contents:
+#fluentd_mux_secureforward_contents:
