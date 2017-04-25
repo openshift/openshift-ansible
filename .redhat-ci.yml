@@ -18,28 +18,13 @@ packages:
   - openssl-devel
   - redhat-rpm-config
 
-context: 'fedora/25/atomic | origin/v1.5.0-rc.0'
+context: 'fedora/25/atomic | origin/v3.6.0-alpha.1'
 
 env:
-  OPENSHIFT_IMAGE_TAG: v1.5.0-rc.0
+  OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.1
 
 tests:
-  - pip install ansible==2.2.2.0  # F25 currently has 2.2.1, so install from pypi
-  - ansible -vvv -i .redhat-ci.inventory nodes -a 'rpm-ostree status'
-  - ansible-playbook -vvv -i .redhat-ci.inventory playbooks/byo/config.yml
-  # run a small subset of origin conformance tests to sanity check the cluster
-  # NB: we run it on the master since we may be in a different OSP network
-  - ssh ocp-master docker run --rm --net=host --privileged
-    -v /etc/origin/master/admin.kubeconfig:/config fedora:25 sh -c
-    '"dnf install -y origin-tests &&
-      KUBECONFIG=/config /usr/libexec/origin/extended.test --ginkgo.v=1
-      --ginkgo.noColor --ginkgo.focus=\"Services.*NodePort|EmptyDir\""'
+  - sh .redhat-ci.sh
 
----
-
-inherit: true
-
-context: 'fedora/25/atomic | origin/v3.6.0-alpha.0'
-
-env:
-  OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.0
+artifacts:
+  - journals/
