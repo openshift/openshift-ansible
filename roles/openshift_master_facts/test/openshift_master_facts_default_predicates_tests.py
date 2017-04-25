@@ -55,6 +55,8 @@ DEFAULT_PREDICATES_1_5 = [
     {'name': 'CheckNodeDiskPressure'},
 ]
 
+DEFAULT_PREDICATES_3_6 = DEFAULT_PREDICATES_1_5
+
 REGION_PREDICATE = {
     'name': 'Region',
     'argument': {
@@ -75,9 +77,8 @@ TEST_VARS = [
     ('3.4', 'openshift-enterprise', DEFAULT_PREDICATES_1_4),
     ('1.5', 'origin', DEFAULT_PREDICATES_1_5),
     ('3.5', 'openshift-enterprise', DEFAULT_PREDICATES_1_5),
-    ('1.6', 'origin', DEFAULT_PREDICATES_1_5),
-    ('3.6', 'origin', DEFAULT_PREDICATES_1_5),
-    ('3.6', 'openshift-enterprise', DEFAULT_PREDICATES_1_5),
+    ('3.6', 'origin', DEFAULT_PREDICATES_3_6),
+    ('3.6', 'openshift-enterprise', DEFAULT_PREDICATES_3_6),
 ]
 
 
