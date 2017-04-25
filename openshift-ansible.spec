@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.36
+Version:        3.6.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.37-1
+- Differentiate between service serving router certificate and custom
+  openshift_hosted_router_certificate when replacing the router certificate.
+  (abutcher@redhat.com)
+
 * Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.36-1
 - Update swap disable tasks (rteague@redhat.com)
 - Removing resource version to remove object conflicts caused by race
