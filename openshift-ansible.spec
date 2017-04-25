@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.60
+Version:        3.5.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.61-1
+- BACKPORT 1.5: Removing resource version to avoid race conditions in
+  lib_openshift. (kwoodson@redhat.com)
+- Allowing CA cert to still be generated is we are doing standalone heapster
+  (ewolinet@redhat.com)
+- Switch from ignoring to passing on checks (rteague@redhat.com)
+
 * Mon Apr 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.60-1
 - Fix issue where the password would not be passed to the htpasswd command
   (mwringe@redhat.com)
