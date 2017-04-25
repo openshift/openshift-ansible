@@ -37,6 +37,12 @@
     mode: 0700
   when: etcd_is_thirdparty | bool
 
+- name: Create configuration file in sysconfig
+  file:
+    path: /etc/sysconfig/etcd
+    state: touch
+  when: etcd_is_thirdparty | bool
+
   # TODO: retest with symlink to confirm it does or does not function
 - name: Copy service file for etcd instance
   copy:
