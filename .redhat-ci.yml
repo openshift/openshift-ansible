@@ -1,0 +1,33 @@
+---
+
+branches:
+  - release-1.5
+
+cluster:
+  hosts:
+    - name: ocp-master
+      distro: fedora/25/atomic
+    - name: ocp-node1
+      distro: fedora/25/atomic
+    - name: ocp-node2
+      distro: fedora/25/atomic
+  container:
+    image: fedora:25
+
+packages:
+  - gcc
+  - python-pip
+  - python-devel
+  - openssl-devel
+  - redhat-rpm-config
+
+context: 'fedora/25/atomic | origin/v1.5.0'
+
+env:
+  OPENSHIFT_IMAGE_TAG: v1.5.0
+
+tests:
+  - sh .redhat-ci.sh
+
+artifacts:
+  - journals/
