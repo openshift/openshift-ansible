@@ -39,7 +39,10 @@
   with_items: "{{ mux_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
-  when: openshift_logging_use_mux
+  when:
+  - mux_dc.results is defined
+  - mux_dc.results.results is defined
+  - openshift_logging_use_mux
 
 - name: Retrieve elasticsearch
   oc_obj:
