@@ -29,7 +29,7 @@
   with_together:
   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}"
   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() }}"
-  - "{{ es_indices }}"
+  - "{{ es_indices | default([]) }}"
   loop_control:
     loop_var: deployment
 ## if it does not then we should create one that does and attach it
@@ -97,7 +97,7 @@
   with_together:
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() }}"
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() }}"
-  - "{{ es_ops_indices }}"
+  - "{{ es_ops_indices | default([]) }}"
   loop_control:
     loop_var: deployment
   when:
