@@ -44,7 +44,7 @@ class OpenShiftVersionTests(unittest.TestCase):
                         {'name': 'oo_version_gte_3_5_or_1_5',
                          'positive_enterprise_version': '3.6.0',
                          'negative_enterprise_version': '3.4.0',
-                         'positive_origin_version': '1.6.0',
+                         'positive_origin_version': '3.6.0',
                          'negative_origin_version': '1.4.0'}]
 
     def test_legacy_gte_filters(self):

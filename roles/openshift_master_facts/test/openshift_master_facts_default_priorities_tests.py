@@ -42,6 +42,8 @@ DEFAULT_PRIORITIES_1_5 = [
     {'name': 'TaintTolerationPriority', 'weight': 1}
 ]
 
+DEFAULT_PRIORITIES_3_6 = DEFAULT_PRIORITIES_1_5
+
 ZONE_PRIORITY = {
     'name': 'Zone',
     'argument': {
@@ -63,9 +65,8 @@ TEST_VARS = [
     ('3.4', 'openshift-enterprise', DEFAULT_PRIORITIES_1_4),
     ('1.5', 'origin', DEFAULT_PRIORITIES_1_5),
     ('3.5', 'openshift-enterprise', DEFAULT_PRIORITIES_1_5),
-    ('1.6', 'origin', DEFAULT_PRIORITIES_1_5),
-    ('3.6', 'origin', DEFAULT_PRIORITIES_1_5),
-    ('3.6', 'openshift-enterprise', DEFAULT_PRIORITIES_1_5),
+    ('3.6', 'origin', DEFAULT_PRIORITIES_3_6),
+    ('3.6', 'openshift-enterprise', DEFAULT_PRIORITIES_3_6),
 ]
 
 

@@ -41,7 +41,7 @@ class LookupModule(LookupBase):
                 raise AnsibleError("Either OpenShift needs to be installed or openshift_release needs to be specified")
 
         if deployment_type == 'origin':
-            if short_version not in ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '3.6', 'latest']:
+            if short_version not in ['1.1', '1.2', '1.3', '1.4', '1.5', '3.6', 'latest']:
                 raise AnsibleError("Unknown short_version %s" % short_version)
         elif deployment_type == 'openshift-enterprise':
             if short_version not in ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', 'latest']:

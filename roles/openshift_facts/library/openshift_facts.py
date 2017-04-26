@@ -911,7 +911,7 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_3_or_1_3 = version >= LooseVersion('1.3.0')
                 version_gte_3_4_or_1_4 = version >= LooseVersion('1.4.0')
                 version_gte_3_5_or_1_5 = version >= LooseVersion('1.5.0')
-                version_gte_3_6_or_1_6 = version >= LooseVersion('3.6.0') or version >= LooseVersion('1.6.0')
+                version_gte_3_6 = version >= LooseVersion('3.6.0')
             else:
                 version_gte_3_1_or_1_1 = version >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('3.1.1')
@@ -919,25 +919,26 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_3_or_1_3 = version >= LooseVersion('3.3.0')
                 version_gte_3_4_or_1_4 = version >= LooseVersion('3.4.0')
                 version_gte_3_5_or_1_5 = version >= LooseVersion('3.5.0')
-                version_gte_3_6_or_1_6 = version >= LooseVersion('3.6.0')
+                version_gte_3_6 = version >= LooseVersion('3.6.0')
         else:
+            # 'Latest' version is set to True, 'Next' versions set to False
             version_gte_3_1_or_1_1 = True
             version_gte_3_1_1_or_1_1_1 = True
             version_gte_3_2_or_1_2 = True
             version_gte_3_3_or_1_3 = True
             version_gte_3_4_or_1_4 = True
             version_gte_3_5_or_1_5 = True
-            version_gte_3_6_or_1_6 = False
+            version_gte_3_6 = True
         facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
         facts['common']['version_gte_3_3_or_1_3'] = version_gte_3_3_or_1_3
         facts['common']['version_gte_3_4_or_1_4'] = version_gte_3_4_or_1_4
         facts['common']['version_gte_3_5_or_1_5'] = version_gte_3_5_or_1_5
-        facts['common']['version_gte_3_6_or_1_6'] = version_gte_3_6_or_1_6
+        facts['common']['version_gte_3_6'] = version_gte_3_6
 
-        if version_gte_3_6_or_1_6:
-            examples_content_version = 'v1.6'
+        if version_gte_3_6:
+            examples_content_version = 'v3.6'
         elif version_gte_3_5_or_1_5:
             examples_content_version = 'v1.5'
         elif version_gte_3_4_or_1_4:
