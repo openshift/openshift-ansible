@@ -1,0 +1,76 @@
+---
+# This playbook sets up the docker-registry service to use OpenStack swift as backend storage.
+# Usage:
+#  oc login https://openshift.example.com:8443
+#  source openstackrc
+#  ansible-playbook swift_registry.yml 
+#
+# This removes the registry-storage volume from the deploymentconfig !
+
+- hosts: localhost
+  gather_facts: False
+
+  vars:
+    os_auth_url: "{{ lookup('env', 'OS_AUTH_URL') }}"
+    os_container: "registry-container"
+    os_username: "{{ lookup('env', 'OS_USERNAME') }}"
+    os_password: "{{ lookup('env', 'OS_PASSWORD') }}"
+    os_tenant_id: "{{ lookup('env', 'OS_TENANT_ID') }}"
+    os_tmp_path: "{{ os_tmp_pathfile | default('/var/tmp/config.yml')}}"
+    os_delete_tmp_file: "{{ os_delete_tmp | default(True) }}"
+
+  tasks:
+
+  - name: Check for OS creds
+    fail: 
+      msg: "Couldn't find {{ item }} creds in ENV"
+    when: "{{ item }} == ''"
+    with_items:
+    - os_username
+    - os_password
+
+  - name: Scale down registry
+    command: oc scale --replicas=0 dc/docker-registry
+
+  - name: Set up registry environment variable
+    command: oc env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/docker/registry/config.yml
+
+  - name: Generate docker registry config
+    template: src="swift_registry.j2" dest={{ os_tmp_path }} mode=0600
+
+  - name: Determine if new secrets are needed
+    command: oc get secrets
+    register: secrets
+
+  - name: Create registry secrets
+    command: oc secrets new registry-config {{ os_tmp_path }}
+    when: "'dockerregistry' not in secrets.stdout"
+
+  - name: Determine if service account contains secrets
+    command: oc describe serviceaccount/registry
+    register: serviceaccount
+
+  - name: Add secrets to registry service account
+    command: oc secrets add serviceaccount/registry secrets/registry-config 
+    when: "'dockerregistry' not in serviceaccount.stdout"
+
+  - name: Determine if deployment config contains secrets
+    command: oc volume dc/docker-registry --list
+    register: dc 
+  
+  - name: Delete registry-storage volume (optional)
+    command: oc volume dc/docker-registry --remove --name=registry-storage
+
+  - name: Add secrets to registry deployment config
+    command: oc volume dc/docker-registry --add --name=registry-config -m /etc/docker/registry/ --type=secret --secret-name=registry-config --overwrite
+    when: "'dockersecrets' not in dc.stdout"
+
+  - name: Wait for deployment config to take effect before scaling up
+    pause: seconds=30
+
+  - name: Scale up registry
+    command: oc scale --replicas=1 dc/docker-registry
+
+  - name: Delete temporary config file
+    file: path={{ os_tmp_path }} state=absent
+    when: os_delete_tmp_file | bool
