@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.61
+Version:        3.5.62
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 26 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.62-1
+- add .redhat-ci.yml for release-1.5 branch (jlebon@redhat.com)
+- Updating logic for generating pvcs and their counts to prevent reuse when
+  looping (ewolinet@redhat.com)
+- Replace original router cert variable names. (abutcher@redhat.com)
+
 * Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.61-1
 - BACKPORT 1.5: Removing resource version to avoid race conditions in
   lib_openshift. (kwoodson@redhat.com)
