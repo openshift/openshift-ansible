@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.37
+Version:        3.6.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 26 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.38-1
+- .redhat-ci.yml: also publish journal logs (jlebon@redhat.com)
+- Standardize all Origin versioning on 3.6 (rteague@redhat.com)
+- integration tests: add CI scripts (lmeyer@redhat.com)
+- preflight int tests: define image builds to support tests (lmeyer@redhat.com)
+- preflight int tests: generalize; add tests (lmeyer@redhat.com)
+- Add stub of preflight integration tests (rhcarvalho@gmail.com)
+- Move Python unit tests to subdirectory (rhcarvalho@gmail.com)
+- Revert "Add /etc/sysconfig/etcd to etcd_container" (sdodson@redhat.com)
+- Replace original router cert variable names. (abutcher@redhat.com)
+- oc_obj: Allow for multiple kinds in delete (jarrpa@redhat.com)
+- Update v1.5 content (sdodson@redhat.com)
+- Update v1.6 content (sdodson@redhat.com)
+- Make the rhel_subscribe role subscribe to OSE 3.5 channel by default
+  (lhuard@amadeus.com)
+- Addressing yamllint (ewolinet@redhat.com)
+- Updating kibana-proxy secret key for server-tls entry (ewolinet@redhat.com)
+- Pick from issue3896 (ewolinet@redhat.com)
+- Cleanup comments and remove extraneous tasks (sdodson@redhat.com)
+- Store backups in /var/lib/etcd/openshift-backup (sdodson@redhat.com)
+- Create member/snap directory encase it doesn't exist (sdodson@redhat.com)
+- Copy v3 data dir when performing backup (sdodson@redhat.com)
+
 * Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.37-1
 - Differentiate between service serving router certificate and custom
   openshift_hosted_router_certificate when replacing the router certificate.
