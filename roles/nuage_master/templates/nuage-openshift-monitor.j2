@@ -15,12 +15,10 @@ vspVersion: {{ vsp_version }}
 enterpriseName: {{ enterprise }} 
 # Name of the domain in which pods will reside
 domainName: {{ domain }}
-# CSP admin user's password
-cspAdminPassword: {{ nuage_master_cspadminpasswd }}
-# Enterprise admin user name
-enterpriseAdminUser: {{ nuage_master_adminusername }}
-# Enterprise admin password
-enterpriseAdminPassword: {{ nuage_master_adminuserpasswd }}
+# VSD generated user certificate file location on master node
+userCertificateFile: {{ cert_output_dir }}/{{ vsd_user_cert_file | basename }}
+# VSD generated user key file location on master node
+userKeyFile: {{ cert_output_dir }}/{{ vsd_user_key_file | basename }}
 # Location where logs should be saved
 log_dir: {{ nuage_mon_rest_server_logdir }}
 # Monitor rest server parameters

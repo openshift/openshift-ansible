@@ -20,6 +20,21 @@
   become: yes
   yum: name={{ plugin_rpm }} state=present
 
+- name: Assure CNI conf dir exists
+  become: yes
+  file: path="{{ cni_conf_dir }}" state=directory
+
+- name: Assures Openshift CNI bin dir exists
+  become: yes
+  file: path="{{ cni_bin_dir }}" state=directory
+
+- name: Install CNI loopback plugin
+  become: yes
+  copy:
+    src: "{{ k8s_cni_loopback_plugin }}"
+    dest: "{{ cni_bin_dir }}/{{ k8s_cni_loopback_plugin | basename }}"
+    mode: 0755
+
 - name: Copy the certificates and keys
   become: yes
   copy: src="/tmp/{{ item }}" dest="{{ vsp_openshift_dir }}/{{ item }}"
