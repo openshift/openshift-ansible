@@ -1,4 +1,4 @@
-heat_template_version: 2014-10-16
+heat_template_version: 2016-10-14
 
 description: OpenShift cluster server
 
@@ -8,6 +8,12 @@ parameters:
     type: string
     label: Name
     description: Name
+
+  group:
+    type: string
+    label: Host Group
+    description: The Primary Ansible Host Group
+    default: host
 
   cluster_env:
     type: string
@@ -83,6 +89,11 @@ parameters:
       - range: { min: 1, max: 1024 }
         description: must be between 1 and 1024 Gb.
 
+  node_labels:
+    type: json
+    description: OpenShift Node Labels
+    default: {"region": "default" }
+
 outputs:
 
   name:
@@ -120,13 +131,16 @@ resources:
       flavor:    { get_param: flavor }
       networks:
         - port:  { get_resource: port }
-      user_data: { get_file: user-data }
+      user_data:
+        get_file: user-data
       user_data_format: RAW
       metadata:
+        group: { get_param: group }
         environment: { get_param: cluster_env }
         clusterid: { get_param: cluster_id }
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
+        node_labels: { get_param: node_labels }
 
   port:
     type: OS::Neutron::Port
