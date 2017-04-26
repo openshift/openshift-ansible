@@ -24,7 +24,7 @@ env:
   OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.1
 
 tests:
-  - sh .redhat-ci.sh
+  - ./.redhat-ci.sh
 
 artifacts:
   - journals/
