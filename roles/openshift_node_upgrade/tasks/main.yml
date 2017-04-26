@@ -124,7 +124,7 @@
 
   when:
   - swap_result.stdout_lines | length > 0
-  - openshift_disable_swap | default(true)
+  - openshift_disable_swap | default(true) | bool
   # End Disable Swap Block
 
 # Restart all services
