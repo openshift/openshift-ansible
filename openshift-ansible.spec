@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.62
+Version:        3.5.63
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.63-1
+- Compatibility updates to openshift_logging role for ansible 2.2.2.0+
+  (esauer@redhat.com)
+- Adding defaults for es_indices (ewolinet@redhat.com)
+
 * Wed Apr 26 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.62-1
 - add .redhat-ci.yml for release-1.5 branch (jlebon@redhat.com)
 - Updating logic for generating pvcs and their counts to prevent reuse when
