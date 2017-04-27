@@ -8,6 +8,8 @@ g_lb_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-lb'] | default([])
 
 g_nfs_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-nfs'] | default([])) }}"
 
+g_glusterfs_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-glusterfs'] | default([])) }}"
+
 g_master_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-master'] | default([])) }}"
 
 g_new_master_hosts: "{{ g_all_hosts | intersect(groups['tag_host-type-new-master'] | default([])) }}"
