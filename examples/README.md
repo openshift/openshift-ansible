@@ -69,19 +69,19 @@ To run these examples we prepare the inventory and ssh keys as in the other exam
 
 Additionally we allocate a `PersistentVolumeClaim` to store the reports:
 
-	oc create -f - <<PVC
-	---
-	apiVersion: v1
-	kind: PersistentVolumeClaim
-	metadata:
-	  name: certcheck-reports
-	spec:
-	  accessModes:
-		- ReadWriteOnce
-	  resources:
-		requests:
-		  storage: 1Gi
-	PVC
+    oc create -f - <<PVC
+    ---
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: certcheck-reports
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+    PVC
 
 With that we can run the `Job` once:
 

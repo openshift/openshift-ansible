@@ -20,28 +20,34 @@ kind: Job
 metadata:
   name: certificate-check
 spec:
-  containers:
-  - name: openshift-ansible
-    image: openshift/openshift-ansible
-    env:
-    - name: PLAYBOOK_FILE
-      value: playbooks/certificate_expiry/easy-mode-upload.yaml
-    - name: INVENTORY_FILE
-      value: /tmp/inventory/hosts       # from configmap vol below
-    - name: ANSIBLE_PRIVATE_KEY_FILE    # from secret vol below
-      value: /opt/app-root/src/.ssh/id_rsa/ssh-privatekey
-    - name: CERT_EXPIRY_WARN_DAYS
-      value: "45"      # must be a string, don't forget the quotes
-    volumeMounts:
-    - name: sshkey
-      mountPath: /opt/app-root/src/.ssh/id_rsa
-    - name: inventory
-      mountPath: /tmp/inventory
-  volumes:
-  - name: sshkey
-    secret:
-      secretName: sshkey
-  - name: inventory
-    configMap:
-      name: inventory
-  restartPolicy: Never
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: certificate-check
+    spec:
+      containers:
+      - name: openshift-ansible
+        image: openshift/openshift-ansible
+        env:
+        - name: PLAYBOOK_FILE
+          value: playbooks/certificate_expiry/easy-mode-upload.yaml
+        - name: INVENTORY_FILE
+          value: /tmp/inventory/hosts       # from configmap vol below
+        - name: ANSIBLE_PRIVATE_KEY_FILE    # from secret vol below
+          value: /opt/app-root/src/.ssh/id_rsa/ssh-privatekey
+        - name: CERT_EXPIRY_WARN_DAYS
+          value: "45"      # must be a string, don't forget the quotes
+        volumeMounts:
+        - name: sshkey
+          mountPath: /opt/app-root/src/.ssh/id_rsa
+        - name: inventory
+          mountPath: /tmp/inventory
+      volumes:
+      - name: sshkey
+        secret:
+          secretName: sshkey
+      - name: inventory
+        configMap:
+          name: inventory
+      restartPolicy: Never
