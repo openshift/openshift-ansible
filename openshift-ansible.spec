@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.79
+Version:        3.4.80
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.80-1
+- [os_firewall] Fix default iptables args. (abutcher@redhat.com)
+- [os_firewall] Add -w flag to wait for iptables xtables lock.
+  (abutcher@redhat.com)
+
 * Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.79-1
 - tox tests: pin test requirement versions (again) (lmeyer@redhat.com)
 - tox tests: pin test requirement versions (lmeyer@redhat.com)
