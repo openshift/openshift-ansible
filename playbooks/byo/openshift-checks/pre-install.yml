@@ -1,0 +1,3 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+- include: ../../common/openshift-checks/pre-install.yml

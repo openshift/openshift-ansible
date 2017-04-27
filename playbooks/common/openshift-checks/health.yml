@@ -1,0 +1,10 @@
+---
+- name: Run OpenShift health checks
+  hosts: OSEv3
+  roles:
+    - openshift_health_checker
+  post_tasks:
+    - action: openshift_health_check  # https://github.com/ansible/ansible/issues/20513
+      args:
+        checks:
+          - '@health'
