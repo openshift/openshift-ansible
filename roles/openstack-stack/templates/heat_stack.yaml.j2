@@ -342,6 +342,31 @@ resources:
           port_range_min: 53
           port_range_max: 53
           remote_ip_prefix: {{ node_ingress_cidr }}
+{% if num_masters is greaterthan 1 %}
+  lb-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: openshift-ansible-{{ stack_name }}-lb-secgrp
+      description: Security group for {{ stack_name }} cluster Load Balancer
+      rules:
+      - direction: ingress
+        protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+        remote_ip_prefix: {{ ssh_ingress_cidr }}
+      - direction: ingress
+        protocol: tcp
+        port_range_min: {{ openshift_master_api_port | default(8443) }}
+        port_range_max: {{ openshift_master_api_port | default(8443) }}
+        remote_ip_prefix: {{ lb_ingress_cidr }}
+  {% if openshift_master_console_port is defined and openshift_master_console_port is not equalto openshift_master_api_port %}
+      - direction: ingress
+        protocol: tcp
+        port_range_min: {{ openshift_master_console_port | default(8443) }}
+        port_range_max: {{ openshift_master_console_port | default(8443) }}
+        remote_ip_prefix: {{ lb_ingress_cidr }}
+  {% endif %}
+{% endif %}
 
   etcd:
     type: OS::Heat::ResourceGroup
@@ -382,6 +407,47 @@ resources:
     depends_on:
       - interface
 
+{% if num_masters is greaterthan 1 %}
+  loadbalancer:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: 1
+      resource_def:
+        type: server.yaml
+        properties:
+          name:
+            str_replace:
+              template: k8s_type-%index%.cluster_id
+              params:
+                cluster_id: {{ stack_name }}
+                k8s_type: lb
+          cluster_env: {{ dns_domain }}
+          cluster_id:  {{ stack_name }}
+          group:
+            str_replace:
+              template: k8s_type.cluster_id
+              params:
+                k8s_type: lb
+                cluster_id: {{ stack_name }}
+          type:        lb
+          image:       {{ openstack_image }}
+          flavor:      {{ lb_flavor }}
+          key_name:    {{ ssh_public_key }}
+          net:         { get_resource: net }
+          subnet:      { get_resource: subnet }
+          secgrp:
+            - { get_resource: lb-secgrp }
+          floating_network: {{ external_network }}
+          net_name:
+            str_replace:
+              template: openshift-ansible-cluster_id-net
+              params:
+                cluster_id: {{ stack_name }}
+          volume_size: 5
+    depends_on:
+      - interface
+{% endif %}
+
   masters:
     type: OS::Heat::ResourceGroup
     properties:
@@ -412,6 +478,9 @@ resources:
           secgrp:
             - { get_resource: master-secgrp }
             - { get_resource: node-secgrp }
+{% if num_etcd is equalto 0 %}
+            - { get_resource: etcd-secgrp }
+{% endif %}
           floating_network: {{ external_network }}
           net_name:
             str_replace:

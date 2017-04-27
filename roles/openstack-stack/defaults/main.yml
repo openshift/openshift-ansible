@@ -2,6 +2,8 @@
 dns_volume_size: 1
 ssh_ingress_cidr: 0.0.0.0/0
 node_ingress_cidr: 0.0.0.0/0
+master_ingress_cidr: 0.0.0.0/0
+lb_ingress_cidr: 0.0.0.0/0
 num_etcd: 0
 num_masters: 1
 num_nodes: 1
