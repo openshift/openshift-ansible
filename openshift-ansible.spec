@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.40
+Version:        3.6.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.41-1
+- Add bool for proper conditional handling (rteague@redhat.com)
+
 * Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.40-1
 - Fix cluster creation with `bin/cluster` when there’s no glusterfs node
   (lhuard@amadeus.com)
