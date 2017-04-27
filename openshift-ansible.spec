@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.72
+Version:        3.3.73
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.3.73-1
+- [os_firewall] Fix default iptables args. (abutcher@redhat.com)
+- [os_firewall] Add -w flag to wait for iptables xtables lock.
+  (abutcher@redhat.com)
+
 * Wed Apr 12 2017 Scott Dodson <sdodson@redhat.com> 3.3.72-1
 - Fix playbooks/byo/openshift_facts.yml include path (sdodson@redhat.com)
 
