@@ -63,12 +63,12 @@
   - block:
     - debug:
         msg: "WARNING: openshift_master_scheduler_predicates is set to defaults from an earlier release of OpenShift current defaults are: {{ openshift_master_scheduler_default_predicates }}"
-      when: "openshift_master_scheduler_predicates in older_predicates + older_predicates_no_region + [prev_predicates] + [prev_predicates_no_region]"
+      when: openshift_master_scheduler_predicates in older_predicates + older_predicates_no_region + [prev_predicates] + [prev_predicates_no_region]
 
     - debug:
         msg: "WARNING: openshift_master_scheduler_predicates does not match current defaults of: {{ openshift_master_scheduler_default_predicates }}"
-      when: "openshift_master_scheduler_predicates != openshift_master_scheduler_default_predicates"
-    when: "openshift_master_scheduler_predicates | default(none) is not none"
+      when: openshift_master_scheduler_predicates != openshift_master_scheduler_default_predicates
+    when: openshift_master_scheduler_predicates | default(none) is not none
 
   # Handle cases where openshift_master_predicates is not defined
   - block:
@@ -87,7 +87,7 @@
       when: "{{ openshift_master_scheduler_current_predicates != default_predicates_no_region and
                 openshift_master_scheduler_current_predicates in older_predicates_no_region + [prev_predicates_no_region] }}"
 
-    when: "openshift_master_scheduler_predicates | default(none) is none"
+    when: openshift_master_scheduler_predicates | default(none) is none
 
 
 # Upgrade priorities
@@ -120,12 +120,12 @@
   - block:
     - debug:
         msg: "WARNING: openshift_master_scheduler_priorities is set to defaults from an earlier release of OpenShift current defaults are: {{ openshift_master_scheduler_default_priorities }}"
-      when: "openshift_master_scheduler_priorities in older_priorities + older_priorities_no_zone + [prev_priorities] + [prev_priorities_no_zone]"
+      when: openshift_master_scheduler_priorities in older_priorities + older_priorities_no_zone + [prev_priorities] + [prev_priorities_no_zone]
 
     - debug:
         msg: "WARNING: openshift_master_scheduler_priorities does not match current defaults of: {{ openshift_master_scheduler_default_priorities }}"
-      when: "openshift_master_scheduler_priorities != openshift_master_scheduler_default_priorities"
-    when: "openshift_master_scheduler_priorities | default(none) is not none"
+      when: openshift_master_scheduler_priorities != openshift_master_scheduler_default_priorities
+    when: openshift_master_scheduler_priorities | default(none) is not none
 
   # Handle cases where openshift_master_priorities is not defined
   - block:
@@ -144,7 +144,7 @@
       when: "{{ openshift_master_scheduler_current_priorities != default_priorities_no_zone and
                 openshift_master_scheduler_current_priorities in older_priorities_no_zone + [prev_priorities_no_zone] }}"
 
-    when: "openshift_master_scheduler_priorities | default(none) is none"
+    when: openshift_master_scheduler_priorities | default(none) is none
 
 
 # Update scheduler

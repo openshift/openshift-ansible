@@ -14,7 +14,7 @@
 # Need `command` here because heketi-storage.json contains multiple objects.
 - name: Copy heketi DB to GlusterFS volume
   command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{ mktemp.stdout }}/heketi-storage.json -n {{ openshift_storage_glusterfs_namespace }}"
-  when: "setup_storage.rc == 0"
+  when: setup_storage.rc == 0
 
 - name: Wait for copy job to finish
   oc_obj:
@@ -34,7 +34,7 @@
   - "heketi_job.results.results | count > 0"
   # Fail when pod's 'Failed' status is True
   - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Failed'}) | map('bool') | select | list | count == 1"
-  when: "setup_storage.rc == 0"
+  when: setup_storage.rc == 0
 
 - name: Delete deploy resources
   oc_obj:

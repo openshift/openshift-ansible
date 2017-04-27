@@ -23,7 +23,7 @@
   changed_when: false
 
 - set_fact: openshift_metrics_cassandra_pvc_prefix="hawkular-metrics"
-  when: "not openshift_metrics_cassandra_pvc_prefix or openshift_metrics_cassandra_pvc_prefix == ''"
+  when: not openshift_metrics_cassandra_pvc_prefix or openshift_metrics_cassandra_pvc_prefix == ''
 
 - name: generate hawkular-cassandra persistent volume claims
   template:

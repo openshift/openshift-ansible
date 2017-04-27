@@ -81,7 +81,7 @@
     secrets new metrics-deployer nothing=/dev/null
   register: metrics_deployer_secret
   changed_when: metrics_deployer_secret.rc == 0
-  failed_when: "metrics_deployer_secret.rc == 1 and 'already exists' not in metrics_deployer_secret.stderr"
+  failed_when: metrics_deployer_secret.rc == 1 and 'already exists' not in metrics_deployer_secret.stderr
 
 # TODO: extend this to allow user passed in certs or generating cert with
 # OpenShift CA
