@@ -27,7 +27,8 @@ A role should be considered for decomposition if it:
 side by side.
 1) Has different entry points for upgrading and installing a product
 
-Large roles should be responsible for:
+Large roles<sup>1</sup> should be responsible for:
+> 1 or composing playbooks
 
 1) Composing smaller roles to provide a full solution such as an Openshift Master
 1) Ensuring that smaller roles are called in the correct order if necessary
@@ -312,4 +313,41 @@ roles should be able to fall within these guidelines.
 
 # Additional considerations
 
-Playbooks including playbooks (link to rteague's presentation?)
+## Playbooks including playbooks
+In some circumstances it does not make sense to have a composing role but instead
+a playbook would be best for orchestrating the role flow. Decisions made regarding
+playbooks including playbooks will need to be taken into consideration as part of
+defining this process.
+Ref: (link to rteague's presentation?)
+
+## Role dependencies
+We want to make sure that our roles do not have any extra or unnecessary dependencies
+in meta/main.yml without:
+
+1. Proposing the inclusion in a team meeting or as part of the PR review and getting agreement
+1. Documenting in meta/main.yml why it is there and when it was agreed to (date)
+
+## Avoiding overly verbose roles
+When we are splitting our roles up into smaller components we want to ensure we
+avoid creating roles that are, for a lack of a better term, overly verbose. What
+do we mean by that? If we have `openshift_master` as an example, and we were to
+split it up, we would have a component for `etcd`, `docker`, and possibly for
+its rpms/configs. We would want to avoid creating a role that would just create
+certificates as those would make sense to be contained with the rpms and configs.
+Likewise, when it comes to being able to restart the master, we wouldn't have a
+role where that was its sole purpose.
+
+The same would apply for the `etcd` and `docker` roles. Anything that is required
+as part of installing `etcd` such as generating certificates, installing rpms,
+and upgrading data between versions should all be contained within the single
+`etcd` role.
+
+## Enforcing standards
+Certain naming standards like variable names could be verified as part of a Travis
+test. If we were going to also enforce that a role either has tasks or includes
+(for example) then we could create tests for that as well.
+
+## CI tests for individual roles
+If we are able to correctly split up roles, it should be possible to test role
+installations/upgrades like unit tests (assuming they would be able to be installed
+independently of other components).
