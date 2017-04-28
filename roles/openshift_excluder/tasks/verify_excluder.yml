@@ -11,7 +11,7 @@
     failed_when: false
     changed_when: false
 
-  - name: Docker excluder version detected
+  - name: "{{ excluder }} version detected"
     debug:
       msg: "{{ excluder }}: {{ excluder_version.stdout }}"
 
