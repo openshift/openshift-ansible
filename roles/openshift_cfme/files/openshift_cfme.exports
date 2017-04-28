@@ -1,0 +1,3 @@
+/exports/miq-pv01 *(rw,no_root_squash,no_wdelay)
+/exports/miq-pv02 *(rw,no_root_squash,no_wdelay)
+/exports/miq-pv03 *(rw,no_root_squash,no_wdelay)

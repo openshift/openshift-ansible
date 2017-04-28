@@ -1,0 +1,8 @@
+---
+- name: Uninstall CFME
+  hosts: masters
+  tasks:
+  - name: Run the CFME Uninstall Role Tasks
+    include_role:
+      name: openshift_cfme
+      tasks_from: uninstall

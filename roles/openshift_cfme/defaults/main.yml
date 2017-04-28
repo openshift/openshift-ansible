@@ -1,0 +1,38 @@
+---
+# Namespace for the CFME project
+openshift_cfme_project: cfme
+# Namespace/project description
+openshift_cfme_project_description: ManageIQ - CloudForms Management Engine
+# Basic user assigned the `admin` role for the project
+openshift_cfme_user: cfme
+# Project system account for enabling privileged pods
+openshift_cfme_service_account: "system:serviceaccount:{{ openshift_cfme_project }}:default"
+# All the required exports
+openshift_cfme_pv_exports:
+  - miq-pv01
+  - miq-pv02
+  - miq-pv03
+# PV template files and their created object names
+openshift_cfme_pv_data:
+  - pv_name: miq-pv01
+    pv_template: miq-pv-db.yaml
+    pv_label: CFME DB PV
+  - pv_name: miq-pv02
+    pv_template: miq-pv-region.yaml
+    pv_label: CFME Region PV
+  - pv_name: miq-pv03
+    pv_template: miq-pv-server.yaml
+    pv_label: CFME Server PV
+
+# Tuning parameter to use more than 5 images at once from an ImageStream
+openshift_cfme_maxImagesBulkImportedPerRepository: 100
+# Hostname/IP of the NFS server. Currently defaults to first master
+openshift_cfme_nfs_server: "{{ groups.nfs.0 }}"
+# TODO: Refactor '_install_app' variable. This is just for testing but
+# maybe in the future it should control the entire yes/no for CFME.
+#
+# Whether or not the manageiq app should be initialized ('oc new-app
+# --template=manageiq). If False everything UP TO 'new-app' is ran.
+openshift_cfme_install_app: False
+# Docker image to pull
+openshift_cfme_container_image: "docker.io/manageiq/manageiq-pods:app-latest-fine"

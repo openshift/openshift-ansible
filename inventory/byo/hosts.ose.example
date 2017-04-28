@@ -190,6 +190,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # or
 #openshift_master_request_header_ca_file=<path to local ca file to use>
 
+# CloudForms Management Engine (ManageIQ) App Install
+#
+# Enables installation of MIQ server. Recommended for dedicated
+# clusters only. See roles/openshift_cfme/README.md for instructions
+# and requirements.
+#openshift_cfme_install_app=False
+
 # Cloud Provider Configuration
 #
 # Note: You may make use of environment variables rather than store
