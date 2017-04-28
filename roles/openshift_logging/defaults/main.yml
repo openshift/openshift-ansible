@@ -22,10 +22,10 @@ openshift_logging_curator_ops_nodeselector: "{{ openshift_hosted_logging_curator
 
 openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 openshift_logging_kibana_cpu_limit: null
-openshift_logging_kibana_memory_limit: null
+openshift_logging_kibana_memory_limit: 736Mi
 openshift_logging_kibana_proxy_debug: false
 openshift_logging_kibana_proxy_cpu_limit: null
-openshift_logging_kibana_proxy_memory_limit: null
+openshift_logging_kibana_proxy_memory_limit: 96Mi
 openshift_logging_kibana_replica_count: 1
 openshift_logging_kibana_edge_term_policy: Redirect
 
@@ -46,10 +46,10 @@ openshift_logging_kibana_ca: ""
 
 openshift_logging_kibana_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 openshift_logging_kibana_ops_cpu_limit: null
-openshift_logging_kibana_ops_memory_limit: null
+openshift_logging_kibana_ops_memory_limit: 736Mi
 openshift_logging_kibana_ops_proxy_debug: false
 openshift_logging_kibana_ops_proxy_cpu_limit: null
-openshift_logging_kibana_ops_proxy_memory_limit: null
+openshift_logging_kibana_ops_proxy_memory_limit: 96Mi
 openshift_logging_kibana_ops_replica_count: 1
 
 #The absolute path on the control node to the cert file to use
