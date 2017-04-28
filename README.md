@@ -83,7 +83,10 @@ See [README_CONTAINER_IMAGE.md](README_CONTAINER_IMAGE.md) for information on ho
 
 See the [hooks documentation](HOOKS.md).
 
-
 ## Contributing
 
 See the [contribution guide](CONTRIBUTING.md).
+
+## Building openshift-ansible RPMs and container images
+
+See the [build instructions](BUILD.md).
