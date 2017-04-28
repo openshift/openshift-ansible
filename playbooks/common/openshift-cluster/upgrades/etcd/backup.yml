@@ -1,6 +1,6 @@
 ---
 - name: Backup etcd
-  hosts: etcd_hosts_to_backup
+  hosts: oo_etcd_hosts_to_backup
   vars:
     embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' if not openshift.common.is_etcd_system_container else 'runc exec etcd etcdctl' }}"
@@ -87,10 +87,10 @@
   tasks:
   - set_fact:
       etcd_backup_completed: "{{ hostvars
-                                 | oo_select_keys(groups.etcd_hosts_to_backup)
+                                 | oo_select_keys(groups.oo_etcd_hosts_to_backup)
                                  | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
   - set_fact:
-      etcd_backup_failed: "{{ groups.etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
+      etcd_backup_failed: "{{ groups.oo_etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
   - fail:
       msg: "Upgrade cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
     when: etcd_backup_failed | length > 0
