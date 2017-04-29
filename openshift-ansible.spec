@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.42
+Version:        3.6.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Apr 29 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.43-1
+- Document the Pull Request process (rhcarvalho@gmail.com)
+- Add Table of Contents (rhcarvalho@gmail.com)
+- Improve Contribution Guide (rhcarvalho@gmail.com)
+- Replace absolute with relative URLs (rhcarvalho@gmail.com)
+- Move repo structure to a separate document (rhcarvalho@gmail.com)
+- Remove outdated information about PRs (rhcarvalho@gmail.com)
+- Move link to BUILD.md to README.md (rhcarvalho@gmail.com)
+- Adding checks for starting mux for 2.2.0 (ewolinet@redhat.com)
+- Fix OpenShift registry deployment on OSE 3.2 (lhuard@amadeus.com)
+
 * Fri Apr 28 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.42-1
 - Fix certificate check Job examples (pep@redhat.com)
 - Add python-boto requirement (pep@redhat.com)
