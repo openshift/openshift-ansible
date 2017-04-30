@@ -4,9 +4,9 @@
   when: not openshift.common.is_atomic | bool
 
 - name: Configure etcd profile.d alises
-  copy:
-    src: etcdctl.sh
-    dest: /etc/profile.d/etcdctl.sh
+  template:
+    dest: "/etc/profile.d/etcdctl.sh"
+    src: etcdctl.sh.j2
     mode: 0755
     owner: root
     group: root

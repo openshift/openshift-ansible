@@ -1,0 +1,14 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-etcd/config.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_deployment_subtype: "{{ deployment_subtype | default(none) }}"

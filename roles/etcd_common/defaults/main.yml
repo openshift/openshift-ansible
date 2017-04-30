@@ -35,3 +35,6 @@ etcd_ip: "{{ ansible_default_ipv4.address }}"
 etcd_is_atomic: False
 etcd_is_containerized: False
 etcd_is_thirdparty: False
+
+# etcd dir vars
+etcd_data_dir: /var/lib/etcd/

@@ -24,3 +24,4 @@ dependencies:
   - service: etcd peering
     port: "{{ etcd_peer_port }}/tcp"
 - role: etcd_server_certificates
+- role: etcd_common
