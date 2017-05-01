@@ -17,7 +17,8 @@ from openshift_cert_expiry import FakeOpenSSLCertificate  # noqa: E402
 
 @pytest.fixture(scope='module')
 def fake_valid_cert(valid_cert):
-    cmd = ['openssl', 'x509', '-in', str(valid_cert['cert_file']), '-text']
+    cmd = ['openssl', 'x509', '-in', str(valid_cert['cert_file']), '-text',
+           '-nameopt', 'oneline']
     cert = subprocess.check_output(cmd)
     return FakeOpenSSLCertificate(cert.decode('utf8'))
 
