@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.63
+Version:        3.5.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -270,6 +270,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.64-1
+- Updating htpasswd logic to not mount a volume for creating file
+  (ewolinet@redhat.com)
+- Differentiate between service serving router certificate and custom
+  openshift_hosted_router_certificate when replacing the router certificate.
+  (abutcher@redhat.com)
+- Updating logging and metrics to restart api, ha and controllers when updating
+  master config (ewolinet@redhat.com)
+
 * Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.63-1
 - Compatibility updates to openshift_logging role for ansible 2.2.2.0+
   (esauer@redhat.com)
