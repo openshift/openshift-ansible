@@ -571,9 +571,16 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # network blocks should be private and should not conflict with network blocks
 # in your infrastructure that pods may require access to. Can not be changed
 # after deployment.
+#
+# WARNING : Do not pick subnets that overlap with the default Docker bridge subnet of
+# 172.17.0.0/16.  Your installation will fail and/or your configuration change will
+# cause the Pod SDN or Cluster SDN to fail.
+#
+# WORKAROUND : If you must use an overlapping subnet, you can configure a non conflicting
+# docker0 CIDR range by adding '--bip=192.168.2.1/24' to DOCKER_NETWORK_OPTIONS
+# environment variable located in /etc/sysconfig/docker-network.
 #osm_cluster_network_cidr=10.128.0.0/14
 #openshift_portal_net=172.30.0.0/16
-
 
 # ExternalIPNetworkCIDRs controls what values are acceptable for the
 # service external IP field. If empty, no externalIP may be set. It
