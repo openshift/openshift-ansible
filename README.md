@@ -36,7 +36,7 @@ not practical to start over at 1.0.
     ***
 
     Requirements:
-    - Ansible >= 2.2.0
+    - Ansible >= 2.2.2.0
     - Jinja >= 2.7
     - pyOpenSSL
     - python-lxml
