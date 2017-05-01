@@ -13,7 +13,7 @@ class DockerImageAvailability(OpenShiftCheck):
     name = "docker_image_availability"
     tags = ["preflight"]
 
-    skopeo_image = "openshift/openshift-ansible"
+    dependencies = ["skopeo", "python-docker-py"]
 
     deployment_image_info = {
         "origin": {
@@ -35,44 +35,32 @@ class DockerImageAvailability(OpenShiftCheck):
         return super(DockerImageAvailability, cls).is_active(task_vars) and has_valid_deployment_type
 
     def run(self, tmp, task_vars):
+        msg, failed, changed = self.ensure_dependencies(task_vars)
+
+        # exit early if Skopeo update fails
+        if failed:
+            if "No package matching" in msg:
+                msg = "Ensure that all required dependencies can be installed via `yum`.\n"
+            return {
+                "failed": True,
+                "changed": changed,
+                "msg": (
+                    "Unable to update or install required dependency packages on this host;\n"
+                    "These are required in order to check Docker image availability:"
+                    "\n    {deps}\n{msg}"
+                ).format(deps=',\n    '.join(self.dependencies), msg=msg),
+            }
+
         required_images = self.required_images(task_vars)
         missing_images = set(required_images) - set(self.local_images(required_images, task_vars))
 
         # exit early if all images were found locally
         if not missing_images:
-            return {"changed": False}
-
-        msg, failed, changed = self.update_skopeo_image(task_vars)
-
-        # exit early if Skopeo update fails
-        if failed:
-            if "Error connecting: Error while fetching server API version" in msg:
-                msg = (
-                    "It appears Docker is not running.\n"
-                    "Please start Docker on this host before running this check.\n"
-                    "The full error reported was:\n  " + msg
-                    )
-
-            elif "Failed to import docker-py" in msg:
-                msg = (
-                    "The required Python docker-py module is not installed.\n"
-                    "Suggestion: install the python-docker-py package on this host."
-                    )
-            else:
-                msg = "The full message reported by the docker_image module was:\n" + msg
-            return {
-                "failed": True,
-                "changed": changed,
-                "msg": (
-                    "Unable to update the {img_name} image on this host;\n"
-                    "This is required in order to check Docker image availability.\n"
-                    "{msg}"
-                    ).format(img_name=self.skopeo_image, msg=msg),
-            }
+            return {"changed": changed}
 
         registries = self.known_docker_registries(task_vars)
         if not registries:
-            return {"failed": True, "msg": "Unable to retrieve any docker registries."}
+            return {"failed": True, "msg": "Unable to retrieve any docker registries.", "changed": changed}
 
         available_images = self.available_images(missing_images, registries, task_vars)
         unavailable_images = set(missing_images) - set(available_images)
@@ -81,9 +69,9 @@ class DockerImageAvailability(OpenShiftCheck):
             return {
                 "failed": True,
                 "msg": (
-                    "One or more required images are not available: {}.\n"
+                    "One or more required Docker images are not available:\n    {}\n"
                     "Configured registries: {}"
-                ).format(", ".join(sorted(unavailable_images)), ", ".join(registries)),
+                ).format(",\n    ".join(sorted(unavailable_images)), ", ".join(registries)),
                 "changed": changed,
             }
 
@@ -94,23 +82,46 @@ class DockerImageAvailability(OpenShiftCheck):
         image_info = self.deployment_image_info[deployment_type]
 
         openshift_release = get_var(task_vars, "openshift_release", default="latest")
-        openshift_image_tag = get_var(task_vars, "openshift_image_tag", default=openshift_release)
-        if openshift_image_tag and openshift_image_tag[0] != 'v':
-            openshift_image_tag = 'v' + openshift_image_tag
-
+        openshift_image_tag = get_var(task_vars, "openshift_image_tag")
         is_containerized = get_var(task_vars, "openshift", "common", "is_containerized")
-        images = set(self.non_qualified_docker_images(image_info["namespace"], image_info["name"], openshift_release,
-                                                      is_containerized))
+
+        images = set(self.required_docker_images(
+            image_info["namespace"],
+            image_info["name"],
+            ["registry-console"] if "enterprise" in deployment_type else [],  # include enterprise-only image names
+            openshift_release,
+            is_containerized,
+        ))
 
         # append images with qualified image tags to our list of required images.
         # these are images with a (v0.0.0.0) tag, rather than a standard release
         # format tag (v0.0). We want to check this set in both containerized and
         # non-containerized installations.
         images.update(
-            self.qualified_docker_images(image_info["namespace"], image_info["name"], openshift_image_tag)
+            self.required_qualified_docker_images(
+                image_info["namespace"],
+                image_info["name"],
+                openshift_image_tag,
+            ),
         )
 
         return images
+
+    @staticmethod
+    def required_docker_images(namespace, name, additional_image_names, version, is_containerized):
+        if is_containerized:
+            return ["{}/{}:{}".format(namespace, name, version)] if name else []
+
+        # include additional non-containerized images specific to the current deployment type
+        return ["{}/{}:{}".format(namespace, img_name, version) for img_name in additional_image_names]
+
+    @staticmethod
+    def required_qualified_docker_images(namespace, name, version):
+        # pylint: disable=invalid-name
+        return [
+            "{}/{}-{}:{}".format(namespace, name, suffix, version)
+            for suffix in ["haproxy-router", "docker-registry", "deployer", "pod"]
+        ]
 
     def local_images(self, images, task_vars):
         """Filter a list of images and return those available locally."""
@@ -126,27 +137,25 @@ class DockerImageAvailability(OpenShiftCheck):
 
         return bool(result.get("images", []))
 
-    def known_docker_registries(self, task_vars):
-        result = self.module_executor("docker_info", {}, task_vars)
-        if result.get("failed", False):
-            return False
+    @staticmethod
+    def known_docker_registries(task_vars):
+        docker_facts = get_var(task_vars, "openshift", "docker")
+        regs = set(docker_facts["additional_registries"])
 
-        docker_info = result.get("info", {})
-        return [registry.get("Name", "") for registry in docker_info.get("Registries", {})]
+        deployment_type = get_var(task_vars, "openshift_deployment_type")
+        if deployment_type == "origin":
+            regs.update(["docker.io"])
+        elif "enterprise" in deployment_type:
+            regs.update(["registry.access.redhat.com"])
+
+        return list(regs)
 
     def available_images(self, images, registries, task_vars):
         """Inspect existing images using Skopeo and return all images successfully inspected."""
         return [
             image for image in images
-            if self.is_image_available(image, registries, task_vars)
+            if any(self.is_available_skopeo_image(image, registry, task_vars) for registry in registries)
         ]
-
-    def is_image_available(self, image, registries, task_vars):
-        for registry in registries:
-            if self.is_available_skopeo_image(image, registry, task_vars):
-                return True
-
-        return False
 
     def is_available_skopeo_image(self, image, registry, task_vars):
         """Uses Skopeo to determine if required image exists in a given registry."""
@@ -156,32 +165,15 @@ class DockerImageAvailability(OpenShiftCheck):
             image=image,
         )
 
-        args = {
-            "name": "skopeo_inspect",
-            "image": self.skopeo_image,
-            "command": cmd_str,
-            "detach": False,
-            "cleanup": True,
-        }
-        result = self.module_executor("docker_container", args, task_vars)
-        return not result.get("failed", False)
+        args = {"_raw_params": cmd_str}
+        result = self.module_executor("command", args, task_vars)
+        return not result.get("failed", False) and result.get("rc", 0) == 0
 
-    @staticmethod
-    def non_qualified_docker_images(namespace, name, version, is_containerized):
-        if is_containerized:
-            return ["{}/{}:{}".format(namespace, name, version)] if name else []
+    # ensures that the skopeo and python-docker-py packages exist
+    # check is skipped on atomic installations
+    def ensure_dependencies(self, task_vars):
+        if get_var(task_vars, "openshift", "common", "is_atomic"):
+            return "", False, False
 
-        return ["{}/{}:{}".format(namespace, name, version)] if name else []
-
-    @staticmethod
-    def qualified_docker_images(namespace, name, version):
-        return [
-            "{}/{}-{}:{}".format(namespace, name, suffix, version)
-            for suffix in ["haproxy-router", "docker-registry", "deployer", "pod"]
-        ]
-
-    # ensures that the skopeo docker image exists, and updates it
-    # with latest if image was already present locally.
-    def update_skopeo_image(self, task_vars):
-        result = self.module_executor("docker_image", {"name": self.skopeo_image}, task_vars)
-        return result.get("msg", ""), result.get("failed", False), result.get("changed", False)
+        result = self.module_executor("yum", {"name": self.dependencies, "state": "latest"}, task_vars)
+        return result.get("msg", ""), result.get("failed", False) or result.get("rc", 0) != 0, result.get("changed")
