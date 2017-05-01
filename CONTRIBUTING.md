@@ -150,6 +150,13 @@ be reinstalled.
 
 Here are some useful tips that might improve your workflow while working on this repository.
 
+#### Git Hooks
+
+Git hooks are included in this repository to aid in development. Check
+out the README in the
+[hack/hooks](http://github.com/openshift/openshift-ansible/blob/master/hack/hooks/README.md)
+directory for more information.
+
 #### Activating a virtualenv managed by tox
 
 If you want to enter a virtualenv created by tox to do additional debugging, you
