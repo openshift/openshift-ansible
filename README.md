@@ -24,11 +24,11 @@ not practical to start over at 1.0.
 - Install base dependencies:
   - Fedora:
   ```
-    dnf install -y ansible-2.1.0.0 pyOpenSSL python-cryptography
+    dnf install -y ansible-2.2.2.0 pyOpenSSL python-cryptography
   ```
    - OSX:
   ```
-    # Install ansible 2.1.0.0 and python 2
+    # Install ansible 2.2.2.0 and python 2
     brew install ansible python
   ```
 - Setup for a specific cloud:
