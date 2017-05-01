@@ -40,12 +40,18 @@
   - hawkular-metrics
   - hawkular-jgroups-keystore
 
-- name: generate htpasswd file for hawkular metrics
+- name: generate htpasswd content for hawkular metrics
   shell: >
-    docker run -i -a STDIN -a STDOUT -v "{{ mktemp.stdout }}"
-    "{{ openshift_metrics_httpd_image }}" htpasswd -ni hawkular
-    > '{{ mktemp.stdout }}/hawkular-metrics.htpasswd'
-    < '{{ mktemp.stdout }}/hawkular-metrics.pwd'
+    docker run -i -a STDIN -a STDOUT "{{ openshift_metrics_httpd_image }}" htpasswd -ni hawkular
+    < "{{ mktemp.stdout}}/hawkular-metrics.pwd"
+  no_log: true
+  register: metrics_htpasswd
+
+- name: create htpasswd file with generated content
+  copy:
+    content: "{{ metrics_htpasswd.stdout }}"
+    dest: "{{ mktemp.stdout }}/hawkular-metrics.htpasswd"
+  no_log: true
 
 - include: import_jks_certs.yaml
 
