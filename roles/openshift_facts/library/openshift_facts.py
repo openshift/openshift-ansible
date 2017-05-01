@@ -1892,14 +1892,16 @@ class OpenShiftFacts(object):
             )
         self.role = role
 
+        # Collect system facts and preface each fact with 'ansible_'.
         try:
-            # ansible-2.1
             # pylint: disable=too-many-function-args,invalid-name
             self.system_facts = ansible_facts(module, ['hardware', 'network', 'virtual', 'facter'])  # noqa: F405
+            additional_facts = {}
             for (k, v) in self.system_facts.items():
-                self.system_facts["ansible_%s" % k.replace('-', '_')] = v
+                additional_facts["ansible_%s" % k.replace('-', '_')] = v
+            self.system_facts.update(additional_facts)
         except UnboundLocalError:
-            # ansible-2.2
+            # ansible-2.2,2.3
             self.system_facts = get_all_facts(module)['ansible_facts']  # noqa: F405
 
         self.facts = self.generate_facts(local_facts,
