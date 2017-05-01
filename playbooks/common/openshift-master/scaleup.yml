@@ -51,7 +51,7 @@
     changed_when: false
 
 - name: Configure docker hosts
-  hosts: oo_masters_to-config:oo_nodes_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
     docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"

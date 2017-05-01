@@ -1,13 +1,14 @@
 ---
 # NOTE: requires openshift_facts be run
 - name: Verify compatible yum/subscription-manager combination
-  hosts: l_oo_all_hosts
+  hosts: oo_all_hosts
   gather_facts: no
   tasks:
   # See:
   #   https://bugzilla.redhat.com/show_bug.cgi?id=1395047
   #   https://bugzilla.redhat.com/show_bug.cgi?id=1282961
   #   https://github.com/openshift/openshift-ansible/issues/1138
+  #   Consider the repoquery module for this work
   - name: Check for bad combinations of yum and subscription-manager
     command: >
       {{ repoquery_cmd }} --installed --qf '%{version}' "yum"
