@@ -37,6 +37,7 @@ class RepoQueryTest(unittest.TestCase):
             'verbose': False,
             'show_duplicates': False,
             'match_version': None,
+            'ignore_excluders': False,
         }
 
         valid_stderr = '''Repo rhel-7-server-extras-rpms forced skip_if_unavailable=True due to: /etc/pki/entitlement/3268107132875399464-key.pem

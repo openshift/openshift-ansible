@@ -89,8 +89,16 @@
 - block:
   - name: Set openshift_version for containerized installation
     include: set_version_containerized.yml
-  - name: Determine openshift rpm version
-    include: rpm_version.yml
+  - name: Get available {{ openshift.common.service_type}} version
+    repoquery:
+      name: "{{ openshift.common.service_type}}"
+      ignore_excluders: true
+    register: rpm_results
+  - fail:
+      msg: "Package {{ openshift.common.service_type}} not found"
+    when: not rpm_results.results.package_found
+  - set_fact:
+      openshift_rpm_version: "{{ rpm_results.results.versions.available_versions.0 | default('0.0', True) }}"
   - name: Fail if rpm version and docker image version are different
     fail:
       msg: "OCP rpm version {{ openshift_rpm_version }} is different from OCP image version {{ openshift_version }}"

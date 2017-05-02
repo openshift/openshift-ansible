@@ -25,16 +25,19 @@ None
 
 Dependencies
 ------------
+- openshift_facts
+- openshift_repos
+- lib_utils
 
 Tasks to include
 ----------------
 
-- exclude: enable excluders (assuming excluders are installed)
-- unexclude: disable excluders (assuming excluders are installed)
+- exclude: enable excluders
+- unexclude: disable excluders
 - install: install excluders (installation is followed by excluder enabling)
-- enable: enable excluders (optionally with installation step)
-- disabled: disable excluders (optionally with installation and status step, the status check that can override which excluder gets enabled/disabled)
-- status: determine status of excluders
+- enable: enable excluders (install excluder(s) if not installed)
+- disabled: disable excluders (install excluder(s) if not installed)
+
 
 Example Playbook
 ----------------
