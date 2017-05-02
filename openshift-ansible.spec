@@ -25,6 +25,7 @@ Requires:      openshift-ansible-docs = %{version}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
+Requires:      python-passlib
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -441,7 +442,7 @@ Atomic OpenShift Utilities includes
 - Add default pvc prefix fix for ops pvcs (ewolinet@redhat.com)
 
 * Wed Mar 15 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.35-1
-- 
+-
 
 * Wed Mar 15 2017 Scott Dodson <sdodson@redhat.com> 3.5.34-1
 - Updating kibana hostname default to be openshift_master_default_subdomain

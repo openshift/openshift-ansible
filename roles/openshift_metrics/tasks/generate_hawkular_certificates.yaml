@@ -33,25 +33,26 @@
   changed_when: no
 
 - name: generate password for hawkular metrics and jgroups
-  copy:
-    dest: "{{ mktemp.stdout }}/{{ item }}.pwd"
-    content: "{{ 15 | oo_random_word }}"
+  local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
   - hawkular-jgroups-keystore
 
-- name: generate htpasswd content for hawkular metrics
-  shell: >
-    docker run -i -a STDIN -a STDOUT "{{ openshift_metrics_httpd_image }}" htpasswd -ni hawkular
-    < "{{ mktemp.stdout}}/hawkular-metrics.pwd"
+- local_action: slurp src="{{ local_tmp.stdout }}/hawkular-metrics.pwd"
+  register: hawkular_metrics_pwd
   no_log: true
-  register: metrics_htpasswd
 
-- name: create htpasswd file with generated content
-  copy:
-    content: "{{ metrics_htpasswd.stdout }}"
-    dest: "{{ mktemp.stdout }}/hawkular-metrics.htpasswd"
+- name: generate htpasswd file for hawkular metrics
+  local_action: htpasswd path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
   no_log: true
+
+- copy:
+    src: "{{ local_tmp.stdout }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - hawkular-metrics.pwd
+  - hawkular-metrics.htpasswd
+  - hawkular-jgroups-keystore.pwd
 
 - include: import_jks_certs.yaml
 
