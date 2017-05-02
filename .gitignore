@@ -1,7 +1,6 @@
 *~
-#*#
-.idea
-*.iml
+\#*#
+.idea/
 *.komodoproject
 .loadpath
 .project
@@ -15,9 +14,13 @@
 .DS_Store
 gce.ini
 multi_ec2.yaml
-multi_inventory.yaml
 .vagrant
 .tags*
-ansible.cfg
 *.retry
 .vscode/*
+.cache
+.tox/
+.coverage
+*.egg-info
+.eggs
+cover/
