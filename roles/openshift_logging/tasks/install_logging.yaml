@@ -8,14 +8,33 @@
   oc_project:
     state: present
     name: "{{ openshift_logging_namespace }}"
+    node_selector: "{{ openshift_logging_nodeselector | default(null) }}"
 
-- name: Install logging mux
-  include: "{{ role_path }}/tasks/install_mux.yaml"
-  when: openshift_logging_use_mux
+- name: Labelling logging project
+  oc_label:
+    state: present
+    kind: namespace
+    name: "{{ openshift_logging_namespace }}"
+    labels:
+    - key: "{{ item.key }}"
+      value: "{{ item.value }}"
+  with_dict: "{{ openshift_logging_labels | default({}) }}"
+  when:
+  - openshift_logging_labels is defined
+  - openshift_logging_labels is dict
 
-- find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
-  register: object_def_files
-  changed_when: no
+- name: Labelling logging project
+  oc_label:
+    state: present
+    kind: namespace
+    name: "{{ openshift_logging_namespace }}"
+    labels:
+    - key: "{{ openshift_logging_label_key }}"
+      value: "{{ openshift_logging_label_value }}"
+  when:
+  - openshift_logging_label_key is defined
+  - openshift_logging_label_key != ""
+  - openshift_logging_label_value is defined
 
 - name: Create logging cert directory
   file:
@@ -166,6 +185,20 @@
   when:
   - openshift_logging_use_ops | bool
 
+## Mux
+- include_role:
+    name: openshift_logging_mux
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_mux_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
+    openshift_logging_mux_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_mux_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_mux_image_prefix: "{{ openshift_logging_image_prefix }}"
+    openshift_logging_mux_image_version: "{{ openshift_logging_image_version }}"
+    openshift_logging_mux_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
+  when:
+  - openshift_logging_use_mux | bool
+
 
 ## Fluentd
 - include_role:
@@ -174,5 +207,10 @@
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_fluentd_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
     openshift_logging_fluentd_use_journal: "{{ openshift.docker.options | search('journald') }}"
+    openshift_logging_fluentd_image_prefix: "{{ openshift_logging_image_prefix }}"
+    openshift_logging_fluentd_image_version: "{{ openshift_logging_image_version }}"
+    openshift_logging_fluentd_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
+    openshift_logging_fluentd_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_fluentd_namespace: "{{ openshift_logging_namespace }}"
 
 - include: update_master_config.yaml

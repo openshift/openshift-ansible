@@ -15,8 +15,8 @@ index:
     flush_threshold_period: 5m
 
 node:
-  master: {% if deploy_type in ['data-master', 'master'] %}true{% else %}false{% endif %}
-  data: {% if deploy_type in ['data-master', 'data-client'] %}true{% else %}false{% endif %}
+  master: ${IS_MASTER}
+  data: ${HAS_DATA}
 
 network:
   host: 0.0.0.0
