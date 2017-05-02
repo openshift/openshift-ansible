@@ -7,27 +7,27 @@
   tasks:
   - fail:
       msg: This playbook requires g_etcd_hosts to be set
-    when: "{{ g_etcd_hosts is not defined }}"
+    when: g_etcd_hosts is not defined
 
   - fail:
       msg: This playbook requires g_master_hosts or g_new_master_hosts to be set
-    when: "{{ g_master_hosts is not defined and g_new_master_hosts is not defined }}"
+    when: g_master_hosts is not defined and g_new_master_hosts is not defined
 
   - fail:
       msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
-    when: "{{ g_node_hosts is not defined and g_new_node_hosts is not defined }}"
+    when: g_node_hosts is not defined and g_new_node_hosts is not defined
 
   - fail:
       msg: This playbook requires g_lb_hosts to be set
-    when: "{{ g_lb_hosts is not defined }}"
+    when: g_lb_hosts is not defined
 
   - fail:
       msg: This playbook requires g_nfs_hosts to be set
-    when: "{{ g_nfs_hosts is not defined }}"
+    when: g_nfs_hosts is not defined
 
   - fail:
       msg: The nfs group must be limited to one host
-    when: "{{ (groups[g_nfs_hosts] | default([])) | length > 1 }}"
+    when: (groups[g_nfs_hosts] | default([])) | length > 1
 
   - name: Evaluate oo_all_hosts
     add_host:
@@ -82,7 +82,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_master_hosts | default([]) }}"
-    when: "{{ g_nodeonmaster | default(false) | bool and not g_new_node_hosts | default(false) | bool }}"
+    when: g_nodeonmaster | default(false) | bool and not g_new_node_hosts | default(false) | bool
     changed_when: no
 
   - name: Evaluate oo_first_etcd
@@ -90,7 +90,7 @@
       name: "{{ g_etcd_hosts[0] }}"
       groups: oo_first_etcd
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-    when: "{{ g_etcd_hosts|length > 0 }}"
+    when: g_etcd_hosts|length > 0
     changed_when: no
 
   - name: Evaluate oo_first_master
@@ -99,7 +99,7 @@
       groups: oo_first_master
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
-    when: "{{ g_master_hosts|length > 0 }}"
+    when: g_master_hosts|length > 0
     changed_when: no
 
   - name: Evaluate oo_lb_to_config
