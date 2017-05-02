@@ -35,6 +35,7 @@
       metrics-infra: hawkular-cassandra
     access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
+    storage_type: "{{ openshift_metrics_cassandra_selector_storage_type }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when:
   - openshift_metrics_cassandra_storage_type != 'emptydir'
