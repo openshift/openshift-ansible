@@ -25,6 +25,7 @@ Requires:      openshift-ansible-docs = %{version}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
+Requires:      python-passlib
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -286,17 +287,17 @@ Atomic OpenShift Utilities includes
 - Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
 
 * Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.48-1
-- 
+-
 
 * Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.47-1
-- 
+-
 
 * Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.46-1
 - Contrib: Hook to verify modules match assembled fragments
   (tbielawa@redhat.com)
 
 * Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.45-1
-- 
+-
 
 * Sun Apr 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.44-1
 - Refactor etcd roles (jchaloup@redhat.com)
@@ -367,7 +368,7 @@ Atomic OpenShift Utilities includes
 - Remove v1.5 and v1.6 metrics/logging templates (sdodson@redhat.com)
 
 * Sun Apr 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.35-1
-- 
+-
 
 * Fri Apr 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.34-1
 - GlusterFS: provide default for groups.oo_glusterfs_to_config in with_items
