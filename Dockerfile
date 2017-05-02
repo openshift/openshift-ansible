@@ -16,6 +16,12 @@ LABEL name="openshift-ansible" \
 
 USER root
 
+# Create a symlink to /opt/app-root/src so that files under /usr/share/ansible are accessible.
+# This is required since the system-container uses by default the playbook under
+# /usr/share/ansible/openshift-ansible.  With this change we won't need to keep two different
+# configurations for the two images.
+RUN mkdir -p /usr/share/ansible/ && ln -s /opt/app-root/src /usr/share/ansible/openshift-ansible
+
 RUN INSTALL_PKGS="skopeo" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
