@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.49
+Version:        3.6.50
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.50-1
+- Don't double quote when conditions (sdodson@redhat.com)
+- Remove jinja template delimeters from when conditions (sdodson@redhat.com)
+- move excluder upgrade validation tasks under openshift_excluder role
+  (jchaloup@redhat.com)
+- Fix test compatibility with OpenSSL 1.1.0 (pierre-
+  louis.bonicoli@libregerbil.fr)
+
 * Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.49-1
 - Warn users about conflicts with docker0 CIDR range (lpsantil@gmail.com)
 - Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
