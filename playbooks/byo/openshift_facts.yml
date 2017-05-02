@@ -8,7 +8,7 @@
   - always
 
 - name: Gather Cluster facts
-  hosts: OSEv3
+  hosts: g_all_hosts
   roles:
   - openshift_facts
   tasks:

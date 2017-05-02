@@ -1,5 +1,7 @@
 ---
-- hosts: OSEv3
+- include: ../openshift-cluster/initialize_groups.yml
+
+- hosts: g_all_hosts
   name: run OpenShift health checks
   roles:
     - openshift_health_checker

@@ -4,7 +4,7 @@
   - always
 
 - name: Subscribe hosts, update repos and update OS packages
-  hosts: l_oo_all_hosts
+  hosts: g_all_hosts
   roles:
   - role: rhel_subscribe
     when: deployment_type in ['atomic-enterprise', 'enterprise', 'openshift-enterprise'] and
