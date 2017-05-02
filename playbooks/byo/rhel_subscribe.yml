@@ -3,10 +3,6 @@
   tags:
   - always
 
-- include: ../common/openshift-cluster/std_include.yml
-  tags:
-  - always
-
 - name: Subscribe hosts, update repos and update OS packages
   hosts: l_oo_all_hosts
   roles:
