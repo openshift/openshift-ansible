@@ -14,7 +14,7 @@
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
     dest: '{{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | difference([""]) | join(".") }}'
-  when: '{{ ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"] }}'
+  when: ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"]
   register: downloaded_image
 
 - name: Uncompress xz compressed base cloud image

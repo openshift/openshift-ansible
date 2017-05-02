@@ -14,7 +14,7 @@
 
 - name: Install Heapster Standalone
   include: install_heapster.yaml
-  when: "{{ openshift_metrics_heapster_standalone | bool }}"
+  when: openshift_metrics_heapster_standalone | bool
 
 - find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
   register: object_def_files
@@ -48,7 +48,7 @@
 
 - name: Scaling down cluster to recognize changes
   include: stop_metrics.yaml
-  when: "{{ existing_metrics_rc.stdout_lines | length > 0 }}"
+  when: existing_metrics_rc.stdout_lines | length > 0
 
 - name: Scaling up cluster
   include: start_metrics.yaml
