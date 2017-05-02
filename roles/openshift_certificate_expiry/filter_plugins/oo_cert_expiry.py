@@ -35,7 +35,7 @@ Example playbook usage:
     become: no
     run_once: yes
     delegate_to: localhost
-    when: "{{ openshift_certificate_expiry_save_json_results|bool }}"
+    when: openshift_certificate_expiry_save_json_results|bool
     copy:
       content: "{{ hostvars|oo_cert_expiry_results_to_json() }}"
       dest: "{{ openshift_certificate_expiry_json_results_path }}"
