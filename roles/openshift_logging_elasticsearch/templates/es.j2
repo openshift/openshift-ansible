@@ -4,14 +4,14 @@ metadata:
   name: "{{deploy_name}}"
   labels:
     provider: openshift
-    component: elasticsearch
+    component: "{{component}}"
     deployment: "{{deploy_name}}"
     logging-infra: "{{logging_component}}"
 spec:
   replicas: {{replicas|default(0)}}
   selector:
     provider: openshift
-    component: elasticsearch
+    component: "{{component}}"
     deployment: "{{deploy_name}}"
     logging-infra: "{{logging_component}}"
   strategy:
@@ -22,7 +22,7 @@ spec:
       labels:
         logging-infra: "{{logging_component}}"
         provider: openshift
-        component: elasticsearch
+        component: "{{component}}"
         deployment: "{{deploy_name}}"
     spec:
       terminationGracePeriod: 600
@@ -86,6 +86,14 @@ spec:
             -
               name: "RECOVER_AFTER_TIME"
               value: "{{openshift_logging_elasticsearch_recover_after_time}}"
+            -
+              name: "IS_MASTER"
+              value: "{% if deploy_type in ['data-master', 'master'] %}true{% else %}false{% endif %}"
+
+            -
+              name: "HAS_DATA"
+              value: "{% if deploy_type in ['data-master', 'data-client'] %}true{% else %}false{% endif %}"
+
           volumeMounts:
             - name: elasticsearch
               mountPath: /etc/elasticsearch/secret
@@ -101,7 +109,7 @@ spec:
             secretName: logging-elasticsearch
         - name: elasticsearch-config
           configMap:
-            name: {{ es_configmap }}
+            name: logging-elasticsearch
         - name: elasticsearch-storage
 {% if openshift_logging_elasticsearch_storage_type == 'pvc' %}
           persistentVolumeClaim:

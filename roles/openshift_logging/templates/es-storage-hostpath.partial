@@ -1,2 +1,0 @@
-          hostPath:
-            path: {{es_storage['path']}}

@@ -41,7 +41,9 @@
   when:
   - openshift_logging_image_pull_secret == ''
 
-- set_fact: kibana_name="{{ 'logging-kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
+- set_fact:
+    kibana_name: "{{ 'logging-kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
+    kibana_component: "{{ 'kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
 
 - name: Retrieving the cert to use when generating secrets for the logging components
   slurp:
@@ -52,6 +54,21 @@
     - { name: "kibana_internal_key", file: "kibana-internal.key"}
     - { name: "kibana_internal_cert", file: "kibana-internal.crt"}
     - { name: "server_tls", file: "server-tls.json"}
+
+# services
+- name: Set {{ kibana_name }} service
+  oc_service:
+    state: present
+    name: "{{ kibana_name }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
+    selector:
+      component: "{{ kibana_component }}"
+      provider: openshift
+#    labels:
+#    - logging-infra: 'support'
+    ports:
+    - port: 443
+      targetPort: "oaproxy"
 
 # create routes
 # TODO: set up these certs differently?
@@ -94,6 +111,7 @@
       provider: openshift
   changed_when: no
 
+# This currently has an issue if the host name changes
 - name: Setting Kibana route
   oc_obj:
     state: present
@@ -181,7 +199,7 @@
     src: kibana.j2
     dest: "{{ tempdir }}/templates/kibana-dc.yaml"
   vars:
-    component: kibana
+    component: "{{ kibana_component }}"
     logging_component: kibana
     deploy_name: "{{ kibana_name }}"
     image: "{{ openshift_logging_image_prefix }}logging-kibana:{{ openshift_logging_image_version }}"

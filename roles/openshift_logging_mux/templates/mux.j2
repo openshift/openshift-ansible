@@ -26,7 +26,7 @@ spec:
         provider: openshift
         component: "{{component}}"
     spec:
-      serviceAccountName: aggregated-logging-fluentd
+      serviceAccountName: aggregated-logging-mux
 {% if mux_node_selector is iterable and mux_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in mux_node_selector.iteritems() %}
@@ -68,33 +68,33 @@ spec:
           readOnly: true
         env:
         - name: "K8S_HOST_URL"
-          value: "{{openshift_logging_master_url}}"
+          value: "{{openshift_logging_mux_master_url}}"
         - name: "ES_HOST"
-          value: "{{openshift_logging_es_host}}"
+          value: "{{openshift_logging_mux_app_host}}"
         - name: "ES_PORT"
-          value: "{{openshift_logging_es_port}}"
+          value: "{{openshift_logging_mux_app_port}}"
         - name: "ES_CLIENT_CERT"
-          value: "{{openshift_logging_es_client_cert}}"
+          value: "{{openshift_logging_mux_app_client_cert}}"
         - name: "ES_CLIENT_KEY"
-          value: "{{openshift_logging_es_client_key}}"
+          value: "{{openshift_logging_mux_app_client_key}}"
         - name: "ES_CA"
-          value: "{{openshift_logging_es_ca}}"
+          value: "{{openshift_logging_mux_app_ca}}"
         - name: "OPS_HOST"
-          value: "{{ops_host}}"
+          value: "{{openshift_logging_mux_ops_host}}"
         - name: "OPS_PORT"
-          value: "{{ops_port}}"
+          value: "{{openshift_logging_mux_ops_port}}"
         - name: "OPS_CLIENT_CERT"
-          value: "{{openshift_logging_es_ops_client_cert}}"
+          value: "{{openshift_logging_mux_ops_client_cert}}"
         - name: "OPS_CLIENT_KEY"
-          value: "{{openshift_logging_es_ops_client_key}}"
+          value: "{{openshift_logging_mux_ops_client_key}}"
         - name: "OPS_CA"
-          value: "{{openshift_logging_es_ops_ca}}"
+          value: "{{openshift_logging_mux_ops_ca}}"
         - name: "USE_JOURNAL"
           value: "false"
         - name: "JOURNAL_SOURCE"
-          value: "{{openshift_logging_fluentd_journal_source | default('')}}"
+          value: "{{openshift_logging_mux_journal_source | default('')}}"
         - name: "JOURNAL_READ_FROM_HEAD"
-          value: "{{openshift_logging_fluentd_journal_read_from_head|lower}}"
+          value: "{{openshift_logging_mux_journal_read_from_head|lower}}"
         - name: FORWARD_LISTEN_HOST
           value: "{{ openshift_logging_mux_hostname }}"
         - name: FORWARD_LISTEN_PORT
@@ -102,14 +102,14 @@ spec:
         - name: USE_MUX
           value: "true"
         - name: MUX_ALLOW_EXTERNAL
-          value: "{{ openshift_logging_mux_allow_external| default('false') }}"
+          value: "{{ openshift_logging_mux_allow_external | default('false') }}"
       volumes:
       - name: config
         configMap:
           name: logging-mux
       - name: certs
         secret:
-          secretName: logging-fluentd
+          secretName: logging-mux
       - name: dockerhostname
         hostPath:
           path: /etc/hostname

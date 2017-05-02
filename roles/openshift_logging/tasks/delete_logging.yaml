@@ -1,7 +1,4 @@
 ---
-- name: stop logging
-  include: stop_cluster.yaml
-
 # delete the deployment objects that we had created
 - name: delete logging api objects
   oc_obj:

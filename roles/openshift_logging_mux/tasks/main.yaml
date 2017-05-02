@@ -1,0 +1,202 @@
+---
+- fail:
+    msg: Application logs destination is required
+  when: not openshift_logging_mux_app_host or openshift_logging_mux_app_host == ''
+
+- fail:
+    msg: Operations logs destination is required
+  when: not openshift_logging_mux_ops_host or openshift_logging_mux_ops_host == ''
+
+- include: determine_version.yaml
+
+# allow passing in a tempdir
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/templates"
+    mode: 0755
+  changed_when: False
+
+# we want to make sure we have all the necessary components here
+
+# create service account
+- name: Create Mux service account
+  oc_serviceaccount:
+    state: present
+    name: "aggregated-logging-mux"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
+  when: openshift_logging_image_pull_secret != ''
+
+- name: Create Mux service account
+  oc_serviceaccount:
+    state: present
+    name: "aggregated-logging-mux"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+  when:
+  - openshift_logging_image_pull_secret == ''
+
+# set service account scc
+- name: Set privileged permissions for Mux
+  oc_adm_policy_user:
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+    user: "system:serviceaccount:{{ openshift_logging_mux_namespace }}:aggregated-logging-mux"
+
+# set service account permissions
+- name: Set cluster-reader permissions for Mux
+  oc_adm_policy_user:
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    resource_kind: cluster-role
+    resource_name: cluster-reader
+    state: present
+    user: "system:serviceaccount:{{ openshift_logging_mux_namespace }}:aggregated-logging-mux"
+
+# set hostmount-anyuid permissions
+- name: Set hostmount-anyuid permissions for Mux
+  oc_adm_policy_user:
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    resource_kind: scc
+    resource_name: hostmount-anyuid
+    state: present
+    user: "system:serviceaccount:{{ openshift_logging_mux_namespace }}:aggregated-logging-mux"
+
+# create Mux configmap
+- copy:
+    src: fluent.conf
+    dest: "{{mktemp.stdout}}/fluent-mux.conf"
+  when: fluentd_mux_config_contents is undefined
+  changed_when: no
+
+- copy:
+    src: secure-forward.conf
+    dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
+  when: fluentd_mux_securefoward_contents is undefined
+  changed_when: no
+
+- copy:
+    content: "{{fluentd_mux_config_contents}}"
+    dest: "{{mktemp.stdout}}/fluent-mux.conf"
+  when: fluentd_mux_config_contents is defined
+  changed_when: no
+
+- copy:
+    content: "{{fluentd_mux_secureforward_contents}}"
+    dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
+  when: fluentd_mux_secureforward_contents is defined
+  changed_when: no
+
+- name: Set Mux configmap
+  oc_configmap:
+    state: present
+    name: "logging-mux"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    from_file:
+      fluent.conf: "{{ tempdir }}/fluent-mux.conf"
+      secure-forward.conf: "{{ tempdir }}/secure-forward-mux.conf"
+
+# create Mux secret
+- name: Set logging-mux secret
+  oc_secret:
+    state: present
+    name: logging-mux
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    files:
+    - name: ca
+      path: "{{ generated_certs_dir }}/ca.crt"
+    - name: key
+      path: "{{ generated_certs_dir }}/system.logging.mux.key"
+    - name: cert
+      path: "{{ generated_certs_dir }}/system.logging.mux.crt"
+    - name: shared_key
+      path: "{{ generated_certs_dir }}/mux_shared_key"
+
+# services
+- name: Set logging-mux service for external communication
+  oc_service:
+    state: present
+    name: "logging-mux"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    selector:
+      component: mux
+      provider: openshift
+#    labels:
+#    - logging-infra: 'support'
+    ports:
+    - name: mux-forward
+      port: "{{ openshift_logging_mux_port }}"
+      targetPort: "mux-forward"
+#    externalIPs:
+#    - "{{ ansible_eth0.ipv4.address }}"
+  when: openshift_logging_mux_allow_external | bool
+
+- name: Set logging-mux service for internal communication
+  oc_service:
+    state: present
+    name: "logging-mux"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    selector:
+      component: mux
+      provider: openshift
+#    labels:
+#    - logging-infra: 'support'
+    ports:
+    - name: mux-forward
+      port: "{{ openshift_logging_mux_port }}"
+      targetPort: "mux-forward"
+  when: not openshift_logging_mux_allow_external | bool
+
+# create Mux DC
+- name: Generating mux deploymentconfig
+  template:
+    src: mux.j2
+    dest: "{{mktemp.stdout}}/templates/logging-mux-dc.yaml"
+  vars:
+    component: mux
+    logging_component: mux
+    deploy_name: "logging-{{ component }}"
+    image: "{{ openshift_logging_image_prefix }}logging-fluentd:{{ openshift_logging_image_version }}"
+    es_host: "{{ openshift_logging_mux_app_host }}"
+    es_port: "{{ openshift_logging_mux_app_port }}"
+    ops_host: "{{ openshift_logging_mux_ops_host }}"
+    ops_port: "{{ openshift_logging_mux_ops_port }}"
+    mux_cpu_limit: "{{ openshift_logging_mux_cpu_limit }}"
+    mux_memory_limit: "{{ openshift_logging_mux_memory_limit }}"
+    replicas: "{{ openshift_logging_mux_replicas | default(0) }}"
+    mux_node_selector: "{{ openshift_logging_mux_nodeselector | default({}) }}"
+  check_mode: no
+  changed_when: no
+
+- name: Set logging-mux DC
+  oc_obj:
+    state: present
+    name: logging-mux
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    kind: dc
+    files:
+    - "{{ tempdir }}/templates/logging-mux-dc.yaml"
+    delete_after: true
+
+# Scale up Mux
+- name: Start Mux
+  oc_scale:
+    kind: dc
+    name: "logging-mux"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    replicas: "{{ openshift_logging_mux_replicas | default (1) }}"
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False
