@@ -1,10 +1,20 @@
 ---
 - block:
-    - copy:
-        src: elasticsearch-logging.yml
+    - fail:
+        msg: "The openshift_logging_es_log_appenders '{{openshift_logging_es_log_appenders}}' has an unrecognized option and only supports the following as a list: {{es_log_appenders | join(', ')}}"
+      when:
+        - es_logging_contents is undefined
+        - "{{ openshift_logging_es_log_appenders | list | difference(es_log_appenders) | length != 0 }}"
+      changed_when: no
+
+    - template:
+        src: elasticsearch-logging.yml.j2
         dest: "{{mktemp.stdout}}/elasticsearch-logging.yml"
+      vars:
+        root_logger: "{{openshift_logging_es_log_appenders | join(', ')}}"
       when: es_logging_contents is undefined
       changed_when: no
+      check_mode: no
 
     - template:
         src: elasticsearch.yml.j2
