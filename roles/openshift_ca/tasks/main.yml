@@ -95,7 +95,7 @@
     {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
     --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
-    --hostnames={{ openshift.common.all_hostnames | join(',') }}
+    --hostnames={{ hostvars[openshift_ca_host].openshift.common.all_hostnames | join(',') }}
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}
