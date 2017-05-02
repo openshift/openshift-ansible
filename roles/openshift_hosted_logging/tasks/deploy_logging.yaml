@@ -36,7 +36,7 @@
   command: >
     {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig secrets new logging-deployer {{ openshift_hosted_logging_secret_vars | default('nothing=/dev/null') }}
   register: secret_output
-  failed_when: "secret_output.rc == 1 and 'exists' not in secret_output.stderr"
+  failed_when: secret_output.rc == 1 and 'exists' not in secret_output.stderr
 
 - name: "Create templates for logging accounts and the deployer"
   command: >
@@ -60,21 +60,21 @@
     {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
     policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
   register: permiss_output
-  failed_when: "permiss_output.rc == 1 and 'exists' not in permiss_output.stderr"
+  failed_when: permiss_output.rc == 1 and 'exists' not in permiss_output.stderr
 
 - name: "Set permissions for fluentd"
   command: >
     {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig
     policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
   register: fluentd_output
-  failed_when: "fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr"
+  failed_when: fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr
 
 - name: "Set additional permissions for fluentd"
   command: >
     {{ openshift.common.client_binary }} adm policy --config={{ mktemp.stdout }}/admin.kubeconfig
     add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
   register: fluentd2_output
-  failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
+  failed_when: fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr
 
 - name: "Add rolebinding-reader to aggregated-logging-elasticsearch"
   command: >
@@ -82,13 +82,13 @@
     policy add-cluster-role-to-user rolebinding-reader \
     system:serviceaccount:logging:aggregated-logging-elasticsearch
   register: rolebinding_reader_output
-  failed_when: "rolebinding_reader_output == 1 and 'exists' not in rolebinding_reader_output.stderr"
+  failed_when: rolebinding_reader_output == 1 and 'exists' not in rolebinding_reader_output.stderr
 
 - name: "Create ConfigMap for deployer parameters"
   command: >
     {{ openshift.common.client_binary}} --config={{ mktemp.stdout }}/admin.kubeconfig create configmap logging-deployer {{ deployer_cmap_params }}
   register: deployer_configmap_output
-  failed_when: "deployer_configmap_output.rc == 1 and 'exists' not in deployer_configmap_output.stderr"
+  failed_when: deployer_configmap_output.rc == 1 and 'exists' not in deployer_configmap_output.stderr
 
 - name: "Process the deployer template"
   shell: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-app logging-deployer-template {{ oc_new_app_values }}"

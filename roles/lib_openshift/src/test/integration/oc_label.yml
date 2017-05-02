@@ -15,7 +15,7 @@
   - name: ensure needed vars are defined
     fail:
       msg: "{{ item }} not defined"
-    when: "{{ item }} is not defined"
+    when: item is not defined
     with_items:
     - cli_master_test  # ansible inventory instance to run playbook against
 

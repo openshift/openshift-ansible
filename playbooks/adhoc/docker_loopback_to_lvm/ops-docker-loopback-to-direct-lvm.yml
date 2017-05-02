@@ -24,7 +24,7 @@
   pre_tasks:
   - fail:
       msg: "This playbook requires {{item}} to be set."
-    when: "{{ item }} is not defined or {{ item }} == ''"
+    when: item is not defined or item == ''
     with_items:
     - cli_docker_device
 

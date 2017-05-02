@@ -20,7 +20,7 @@
   loop_control:
     loop_var: object
   when: metrics_cassandra_rc is defined
-  changed_when: "{{metrics_cassandra_rc | length > 0 }}"
+  changed_when: metrics_cassandra_rc | length > 0
 
 - command: >
     {{openshift.common.client_binary}}
@@ -42,7 +42,7 @@
   with_items: "{{metrics_metrics_rc.stdout_lines}}"
   loop_control:
     loop_var: object
-  changed_when: "{{metrics_metrics_rc | length > 0 }}"
+  changed_when: metrics_metrics_rc | length > 0
 
 - command: >
     {{openshift.common.client_binary}}

@@ -194,7 +194,7 @@
     state: stopped
   when: openshift_master_ha | bool
   register: task_result
-  failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"

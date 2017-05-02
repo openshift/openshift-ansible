@@ -19,7 +19,7 @@
 - name: Create temp directory for all our templates
   file: path={{mktemp.stdout}}/templates state=directory mode=0755
   changed_when: False
-  when: "{{ openshift_metrics_install_metrics | bool }}"
+  when: openshift_metrics_install_metrics | bool
 
 - name: Create temp directory local on control node
   local_action: command mktemp -d

@@ -7,7 +7,7 @@
     enabled: no
     masked: yes
   register: task_result
-  failed_when: "task_result|failed and 'could not' not in task_result.msg|lower"
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
 
 - name: Wait 10 seconds after disabling firewalld
   pause:

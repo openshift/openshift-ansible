@@ -163,7 +163,7 @@
 - name: Load heketi topology
   command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
   register: topology_load
-  failed_when: "topology_load.rc != 0 or 'Unable' in topology_load.stdout"
+  failed_when: topology_load.rc != 0 or 'Unable' in topology_load.stdout
   when:
   - openshift_storage_glusterfs_is_native
   - openshift_storage_glusterfs_heketi_topology_load
@@ -172,7 +172,7 @@
   when: openshift_storage_glusterfs_heketi_is_native and openshift_storage_glusterfs_heketi_is_missing
 
 - include: glusterfs_registry.yml
-  when: "openshift.hosted.registry.storage.kind == 'glusterfs'"
+  when: openshift.hosted.registry.storage.kind == 'glusterfs'
 
 - name: Delete temp directory
   file:

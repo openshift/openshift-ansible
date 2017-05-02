@@ -45,4 +45,4 @@
 
 - name: Create GlusterFS registry volume
   command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
-  when: "'{{ openshift.hosted.registry.storage.glusterfs.path }}' not in registry_volume.stdout"
+  when: "'openshift.hosted.registry.storage.glusterfs.path' not in registry_volume.stdout"
