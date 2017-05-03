@@ -105,7 +105,7 @@
 
 - name: Docker | Restart docker
   service:
-    name: docker
+    name: "{{ openshift.docker.service_name }}"
     state: restarted
   when: docker_updated|changed
 

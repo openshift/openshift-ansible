@@ -6,7 +6,9 @@
 # - openshift.master.api_port
 
 - name: Restart docker
-  service: name=docker state=restarted
+  service:
+    name: "{{ openshift.docker.service_name }}"
+    state: restarted
 
 - name: Update docker facts
   openshift_facts:

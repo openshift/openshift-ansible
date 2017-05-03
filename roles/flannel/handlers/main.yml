@@ -5,4 +5,6 @@
 
 - name: restart docker
   become: yes
-  systemd: name=docker state=restarted
+  systemd:
+    name: "{{ openshift.docker.service_name }}"
+    state: restarted

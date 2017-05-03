@@ -2,7 +2,7 @@
 
 - name: restart docker
   systemd:
-    name: docker
+    name: "{{ openshift.docker.service_name }}"
     state: restarted
   when: not docker_service_status_changed | default(false) | bool
 
