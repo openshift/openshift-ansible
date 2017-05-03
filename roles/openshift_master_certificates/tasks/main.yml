@@ -64,10 +64,10 @@
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}
     --overwrite=false
+  when: inventory_hostname != openshift_ca_host
   with_items: "{{ hostvars
                   | oo_select_keys(groups['oo_masters_to_config'])
-                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True})
-                  | difference([openshift_ca_host])}}"
+                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
@@ -94,8 +94,8 @@
     creates: "{{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/openshift-master.kubeconfig"
   with_items: "{{ hostvars
                   | oo_select_keys(groups['oo_masters_to_config'])
-                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True})
-                  | difference([openshift_ca_host])}}"
+                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
+  when: inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
