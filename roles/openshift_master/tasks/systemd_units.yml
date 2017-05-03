@@ -90,6 +90,7 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     line: "{{ item }}"
   with_items: "{{ master_api_aws.stdout_lines | default([]) }}"
+  no_log: True
 
 - name: Preserve Master Controllers Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
