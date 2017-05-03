@@ -1,0 +1,27 @@
+---
+- name: Check for existence of docker CAs
+  stat:
+    path: "{{ item.cert }}"
+  register: docker_ca_cert_stats
+  changed_when: false
+  with_items:
+  - "{{ docker_ca_certs | default([]) }}"
+
+- name: Copy CA certificates into ca-trust
+  command: >
+    cp {{ item.cert }} /etc/pki/ca-trust/source/anchors/{{ item.id }}-{{ item.cert | basename }}
+  args:
+    creates: "/etc/pki/ca-trust/source/anchors/{{ item.id }}-{{ item.cert | basename }}"
+  register: docker_ca_trust
+  when: "{{ docker_ca_cert_stats is defined and item.cert in (docker_ca_cert_stats.results | oo_collect('stat') | oo_collect('path', {'exists':True})) }}"
+  with_items:
+  - "{{ docker_ca_certs | default([]) }}"
+
+- debug: var=docker_ca_trust
+
+- name: Update CA Trust
+  command: >
+    update-ca-trust
+  when: docker_ca_trust is defined and docker_ca_trust | changed
+  notify:
+  - restart docker
