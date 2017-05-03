@@ -24,7 +24,7 @@ IMPORT_EXCEPTION = None
 try:
     import yum  # pylint: disable=import-error
 except ImportError as err:
-    IMPORT_EXCEPTION = err  # in tox test env, yum import fails
+    IMPORT_EXCEPTION = err
 
 
 class AosVersionException(Exception):
