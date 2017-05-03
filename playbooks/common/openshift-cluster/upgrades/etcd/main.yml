@@ -14,7 +14,9 @@
 - name: Drop etcdctl profiles
   hosts: oo_etcd_hosts_to_upgrade
   tasks:
-  - include: roles/etcd/tasks/etcdctl.yml
+  - include_role:
+      name: etcd_common
+      tasks_from: etcdctl.yml
 
 - name: Perform etcd upgrade
   include: ./upgrade.yml

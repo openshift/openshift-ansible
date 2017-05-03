@@ -120,7 +120,9 @@
     enabled: yes
   register: start_result
 
-- include: etcdctl.yml
+- include_role:
+    name: etcd_common
+    tasks_from: etcdctl.yml
   when: openshift_etcd_etcdctl_profile | default(true) | bool
 
 - name: Set fact etcd_service_status_changed
