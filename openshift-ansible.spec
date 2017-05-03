@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.81
+Version:        3.4.82
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 03 2017 Scott Dodson <sdodson@redhat.com> 3.4.82-1
+- Remove jinja delimeters and double quotes from when conditions
+  (sdodson@redhat.com)
+- Differentiate between service serving router certificate and custom
+  openshift_hosted_router_certificate when replacing the router certificate.
+  (abutcher@redhat.com)
+- Use openshift_ca_host's hostnames to sign the CA (sdodson@redhat.com)
+
 * Tue May 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.81-1
 - Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
 
