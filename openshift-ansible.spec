@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.55
+Version:        3.2.56
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 03 2017 Scott Dodson <sdodson@redhat.com> 3.2.56-1
+- Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
+- Differentiate between service serving router certificate and custom
+  openshift_hosted_router_certificate when replacing the router certificate.
+  (abutcher@redhat.com)
+
 * Wed Apr 12 2017 Scott Dodson <sdodson@redhat.com> 3.2.55-1
 - Fix playbooks/byo/openshift_facts.yml include path (sdodson@redhat.com)
 
