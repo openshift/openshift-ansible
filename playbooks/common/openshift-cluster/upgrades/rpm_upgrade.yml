@@ -1,7 +1,26 @@
 ---
 # We verified latest rpm available is suitable, so just yum update.
-- name: Upgrade packages
-  package: "name={{ openshift.common.service_type }}-{{ component }}{{ openshift_pkg_version }} state=present"
+
+# Master package upgrade ends up depending on node and sdn packages, we need to be explicit
+# with all versions to avoid yum from accidentally jumping to something newer than intended:
+- name: Upgrade master packages
+  package: name={{ item }} state=present
+  when: component == "master"
+  with_items:
+  - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-master{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-clients{{ openshift_pkg_version }}"
+
+- name: Upgrade node packages
+  package: name={{ item }} state=present
+  when: component == "node"
+  with_items:
+  - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version }}"
+  - "{{ openshift.common.service_type }}-clients{{ openshift_pkg_version }}"
 
 - name: Ensure python-yaml present for config upgrade
   package: name=PyYAML state=present
