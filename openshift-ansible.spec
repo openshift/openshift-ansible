@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.65
+Version:        3.5.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.66-1
+- Upgrade specific rpms instead of just master/node. (dgoodwin@redhat.com)
+- Updating openshift_metrics to use htpasswd module instead of making a docker
+  call. Updating requirement to include python-passlib (ewolinet@redhat.com)
+- move excluder upgrade validation tasks under openshift_excluder role
+  (jchaloup@redhat.com)
+- Remove jinja delimeters and double quotes from when conditions
+  (sdodson@redhat.com)
+- Use openshift_ca_host's hostnames to sign the CA (sdodson@redhat.com)
+- Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
+
 * Tue May 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.65-1
 - bug 1432607.  Allow configuration of ES log destination (jcantril@redhat.com)
 
