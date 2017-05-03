@@ -1052,7 +1052,7 @@ class OpenShiftCLI(object):
 
         stdout, stderr = proc.communicate(input_data)
 
-        return proc.returncode, stdout.decode(), stderr.decode()
+        return proc.returncode, stdout.decode('utf-8'), stderr.decode('utf-8')
 
     # pylint: disable=too-many-arguments,too-many-branches
     def openshift_cmd(self, cmd, oadm=False, output=False, output_type='json', input_data=None):
