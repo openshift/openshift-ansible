@@ -10,17 +10,6 @@
 
 - include: ../initialize_facts.yml
 
-- name: Ensure clean repo cache in the event repos have been changed manually
-  hosts: oo_all_hosts
-  tags:
-  - pre_upgrade
-  tasks:
-  - name: Clean package cache
-    command: "{{ ansible_pkg_mgr }} clean all"
-    when: not openshift.common.is_atomic | bool
-    args:
-      warn: no
-
 - name: Ensure firewall is not switched during upgrade
   hosts: oo_all_hosts
   tasks:
