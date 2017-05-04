@@ -26,9 +26,23 @@
 - debug: var=docker_image_count.stdout
   when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
+# docker-1.12.6-6 adds a systemd timer to run cleanup
+# stop it if it exists
+- systemd:
+    name: docker-cleanup.timer
+    state: stopped
+  failed_when: false
+
 - service: name=docker state=stopped
 
 - name: Upgrade Docker
   package: name=docker{{ '-' + docker_version }} state=present
+
+# And since we may've just upgraded to a version that has the timer
+# stop it again
+- systemd:
+    name: docker-cleanup.timer
+    state: stopped
+  failed_when: false
 
 # starting docker happens back in ../main.yml where it calls ../restart.yml
