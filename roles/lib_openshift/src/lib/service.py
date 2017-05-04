@@ -15,7 +15,8 @@ class ServiceConfig(object):
                  cluster_ip=None,
                  portal_ip=None,
                  session_affinity=None,
-                 service_type=None):
+                 service_type=None,
+                 external_ips=None):
         ''' constructor for handling service options '''
         self.name = sname
         self.namespace = namespace
@@ -26,6 +27,7 @@ class ServiceConfig(object):
         self.portal_ip = portal_ip
         self.session_affinity = session_affinity
         self.service_type = service_type
+        self.external_ips = external_ips
         self.data = {}
 
         self.create_dict()
@@ -38,8 +40,9 @@ class ServiceConfig(object):
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
         if self.labels:
-            for lab, lab_value  in self.labels.items():
-                self.data['metadata'][lab] = lab_value
+            self.data['metadata']['labels'] = {}
+            for lab, lab_value in self.labels.items():
+                self.data['metadata']['labels'][lab] = lab_value
         self.data['spec'] = {}
 
         if self.ports:
@@ -61,6 +64,10 @@ class ServiceConfig(object):
         if self.service_type:
             self.data['spec']['type'] = self.service_type
 
+        if self.external_ips:
+            self.data['spec']['externalIPs'] = self.external_ips
+
+
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Service(Yedit):
     ''' Class to model the oc service object '''
@@ -69,6 +76,7 @@ class Service(Yedit):
     cluster_ip = "spec.clusterIP"
     selector_path = 'spec.selector'
     kind = 'Service'
+    external_ips = "spec.externalIPs"
 
     def __init__(self, content):
         '''Service constructor'''
@@ -129,3 +137,50 @@ class Service(Yedit):
     def add_portal_ip(self, pip):
         '''add cluster ip'''
         self.put(Service.portal_ip, pip)
+
+    def get_external_ips(self):
+        ''' get a list of external_ips '''
+        return self.get(Service.external_ips) or []
+
+    def add_external_ips(self, inc_external_ips):
+        ''' add an external_ip to the external_ips list '''
+        if not isinstance(inc_external_ips, list):
+            inc_external_ips = [inc_external_ips]
+
+        external_ips = self.get_external_ips()
+        if not external_ips:
+            self.put(Service.external_ips, inc_external_ips)
+        else:
+            external_ips.extend(inc_external_ips)
+
+        return True
+
+    def find_external_ips(self, inc_external_ip):
+        ''' find a specific external IP '''
+        val = None
+        try:
+            idx = self.get_external_ips().index(inc_external_ip)
+            val = self.get_external_ips()[idx]
+        except ValueError:
+            pass
+
+        return val
+
+    def delete_external_ips(self, inc_external_ips):
+        ''' remove an external IP from a service '''
+        if not isinstance(inc_external_ips, list):
+            inc_external_ips = [inc_external_ips]
+
+        external_ips = self.get(Service.external_ips) or []
+
+        if not external_ips:
+            return True
+
+        removed = False
+        for inc_external_ip in inc_external_ips:
+            external_ip = self.find_external_ips(inc_external_ip)
+            if external_ip:
+                external_ips.remove(external_ip)
+                removed = True
+
+        return removed

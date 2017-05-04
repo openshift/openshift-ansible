@@ -143,7 +143,7 @@ class Registry(OpenShiftCLI):
 
     def prepare_registry(self):
         ''' prepare a registry for instantiation '''
-        options = self.config.to_option_list()
+        options = self.config.to_option_list(ascommalist='labels')
 
         cmd = ['registry']
         cmd.extend(options)

@@ -222,7 +222,7 @@ class Router(OpenShiftCLI):
             # No certificate was passed to us.  do not pass one to oc adm router
             self.config.config_options['default_cert']['include'] = False
 
-        options = self.config.to_option_list()
+        options = self.config.to_option_list(ascommalist='labels')
 
         cmd = ['router', self.config.name]
         cmd.extend(options)

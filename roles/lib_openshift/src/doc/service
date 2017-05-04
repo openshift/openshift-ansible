@@ -89,6 +89,13 @@ options:
     - LoadBalancer
     - ExternalName
     aliases: []
+  externalips:
+    description:
+    - A list of the external IPs that are exposed for this service.
+    - https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
