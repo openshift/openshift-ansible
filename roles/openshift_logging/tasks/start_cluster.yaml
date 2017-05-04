@@ -36,7 +36,7 @@
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: "{{ openshift_logging_mux_replica_count | default (1) }}"
-  with_items: "{{ mux_dc.results.results[0]['items'] if 'results' in mux_dc else {} | map(attribute='metadata.name') | list }}"
+  with_items: "{{ mux_dc.results.results[0]['items'] | map(attribute='metadata.name') | list if 'results' in mux_dc else [] }}"
   loop_control:
     loop_var: object
   when:
