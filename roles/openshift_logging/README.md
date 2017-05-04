@@ -91,8 +91,6 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_es_ops_pvc_prefix`: logging-es-ops
 - `openshift_logging_es_ops_recover_after_time`: 5m
 - `openshift_logging_es_ops_storage_group`: 65534
-- `openshift_logging_es_ops_number_of_shards`: The number of primary shards for every new index created in ES. Defaults to '1'.
-- `openshift_logging_es_ops_number_of_replicas`: The number of replica shards per primary shard for every new index. Defaults to '0'. 
 - `openshift_logging_kibana_ops_hostname`: The Operations Kibana hostname. Defaults to 'kibana-ops.example.com'.
 - `openshift_logging_kibana_ops_cpu_limit`: The amount of CPU to allocate to Kibana or unset if not specified.
 - `openshift_logging_kibana_ops_memory_limit`: The amount of memory to allocate to Kibana or unset if not specified.

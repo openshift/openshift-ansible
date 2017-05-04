@@ -117,8 +117,6 @@ openshift_logging_es_ops_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_
 openshift_logging_es_ops_recover_after_time: 5m
 openshift_logging_es_ops_storage_group: "{{ openshift_hosted_logging_elasticsearch_storage_group | default('65534') }}"
 openshift_logging_es_ops_nodeselector: "{{ openshift_hosted_logging_elasticsearch_ops_nodeselector | default('') | map_from_pairs }}"
-openshift_logging_es_ops_number_of_shards: 1
-openshift_logging_es_ops_number_of_replicas: 0
 
 # storage related defaults
 openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_access_modes | default(['ReadWriteOnce']) }}"
