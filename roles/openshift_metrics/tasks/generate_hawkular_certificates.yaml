@@ -14,20 +14,22 @@
   changed_when: no
 
 - name: generate password for hawkular metrics
-  local_action: copy dest="{{ local_tmp.stdout}}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
+  local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
 
+- local_action: slurp src="{{ local_tmp.stdout }}/hawkular-metrics.pwd"
+  register: hawkular_metrics_pwd
+  no_log: true
+
 - name: generate htpasswd file for hawkular metrics
-  local_action: >
-    shell htpasswd -ci
-    '{{ local_tmp.stdout }}/hawkular-metrics.htpasswd' hawkular
-    < '{{ local_tmp.stdout }}/hawkular-metrics.pwd'
+  local_action: htpasswd path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
+  no_log: true
 
 - name: copy local generated passwords to target
   copy:
-    src: "{{local_tmp.stdout}}/{{item}}"
-    dest: "{{mktemp.stdout}}/{{item}}"
+    src: "{{ local_tmp.stdout }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - hawkular-metrics.pwd
   - hawkular-metrics.htpasswd
