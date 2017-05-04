@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.52
+Version:        3.6.53
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -273,6 +273,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu May 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.53-1
+- Correctly setting the primary and replica shard count settings
+  (ewolinet@redhat.com)
+- System container docker (smilner@redhat.com)
+- Stop logging AWS credentials in master role. (dgoodwin@redhat.com)
+- Remove set operations from openshift_master_certificates iteration.
+  (abutcher@redhat.com)
+- Refactor system fact gathering to avoid dictionary size change during
+  iteration. (abutcher@redhat.com)
+- Refactor secret generation for python3. (abutcher@redhat.com)
+- redhat-ci: use requirements.txt (jlebon@redhat.com)
+
 * Wed May 03 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.52-1
 - Making mux with_items list evaluate as empty if didnt get objects before
   (ewolinet@redhat.com)
