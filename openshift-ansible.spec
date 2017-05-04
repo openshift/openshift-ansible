@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.66
+Version:        3.5.67
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu May 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.67-1
+- bug 1441369. Kibana memory limits (jcantril@redhat.com)
+
 * Wed May 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.66-1
 - Upgrade specific rpms instead of just master/node. (dgoodwin@redhat.com)
 - Updating openshift_metrics to use htpasswd module instead of making a docker
