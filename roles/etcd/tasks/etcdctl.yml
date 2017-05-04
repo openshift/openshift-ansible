@@ -3,10 +3,10 @@
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not openshift.common.is_atomic | bool
 
-- name: Configure etcd profile.d alises
-  template:
+- name: Configure etcd profile.d aliases
+  copy:
     dest: "/etc/profile.d/etcdctl.sh"
-    src: etcdctl.sh.j2
+    src: etcdctl.sh
     mode: 0755
     owner: root
     group: root
