@@ -137,7 +137,7 @@
     name: "{{ openshift.common.hostname | lower }}"
   register: node_output
   delegate_to: "{{ groups.oo_first_master.0 }}"
-  until: node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  until: node_output.results.returncode == 0 and node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
   # Give the node two minutes to come back online.
   retries: 24
   delay: 5
