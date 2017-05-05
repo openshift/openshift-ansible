@@ -32,7 +32,6 @@
   roles:
   - lib_openshift
   - openshift_facts
-  - docker
   - openshift_node_upgrade
 
   post_tasks:
