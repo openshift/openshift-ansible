@@ -5,12 +5,13 @@
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
 
+- set_fact:
+    l_use_system_container: "{{ openshift.docker.use_system_container | default(False) }}"
+
 - name: Use Package Docker if Requested
   include: package_docker.yml
-  when: openshift.docker.use_system_container is not defined or openshift.docker.use_system_container == False
+  when: not l_use_system_container
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
-  when:
-  - openshift.docker.use_system_container is defined
-  - openshift.docker.use_system_container is True
+  when: l_use_system_container
