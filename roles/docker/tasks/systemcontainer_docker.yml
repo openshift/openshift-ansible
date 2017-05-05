@@ -68,10 +68,10 @@
     # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
     - name: Use a testing registry if requested
       set_fact:
-        l_docker_image_prepend: "{{ openshift.docker.systemcontainer_image_registry_override }}/"
+        l_docker_image_prepend: "{{ docker_systemcontainer_image_registry_override }}/"
       when:
-        - openshift.docker.systemcontainer_image_registry_override is defined
-        - openshift.docker.systemcontainer_image_registry_override != ""
+        - docker_systemcontainer_image_registry_override is defined
+        - docker_systemcontainer_image_registry_override != ""
 
     - name: Set the full image name
       set_fact:

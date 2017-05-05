@@ -61,6 +61,7 @@ def migrate_docker_facts(facts):
             'blocked_registries',
             'options',
             'use_system_container',
+            'systemcontainer_image_registry_override',
         ),
         'node': (
             'log_driver',
