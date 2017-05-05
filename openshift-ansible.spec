@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.53
+Version:        3.6.54
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri May 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.54-1
+- Allow oc_ modules to pass unicode results (rteague@redhat.com)
+- Ensure repo cache is clean on the first run (rteague@redhat.com)
+- move etcdctl.yml from etcd to etcd_common role (jchaloup@redhat.com)
+- Modified pick from release-1.5 for updating hawkular htpasswd generation
+  (ewolinet@redhat.com)
+
 * Thu May 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.53-1
 - Correctly setting the primary and replica shard count settings
   (ewolinet@redhat.com)
