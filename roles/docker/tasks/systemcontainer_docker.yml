@@ -75,7 +75,7 @@
 
     - name: Set the full image name
       set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}container-engine-docker:latest"
+        l_docker_image: "{{ l_docker_image_prepend }}container-engine:latest"
 
 - name: Pre-pull Container Enginer System Container image
   command: "atomic pull --storage ostree {{ l_docker_image }}"
@@ -103,8 +103,8 @@
 
 - name: Install Container Enginer System Container
   oc_atomic_container:
-    name: container-engine-docker
-    image: "container-engine-docker"
+    name: container-engine
+    image: "container-engine"
     state: latest
     values:
       - "system-package no"

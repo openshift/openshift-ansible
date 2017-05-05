@@ -1796,8 +1796,8 @@ def set_container_facts_if_unset(facts):
     # If openshift_docker_use_system_container is set and is True ....
     if 'use_system_container' in list(facts['docker'].keys()):
         if facts['docker']['use_system_container'] is True:
-            # ... set the service name to container-engine-docker
-            facts['docker']['service_name'] = 'container-engine-docker'
+            # ... set the service name to container-engine
+            facts['docker']['service_name'] = 'container-engine'
 
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']
