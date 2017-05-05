@@ -5,6 +5,8 @@
   # and is evaluated early. Values such as "20%" can also be used.
   serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
   any_errors_fatal: true
+  vars:
+    skip_docker_role: false
 
   pre_tasks:
   - name: Load lib_openshift modules
