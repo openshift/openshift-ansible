@@ -42,3 +42,22 @@ The progress of the build can be monitored with:
 Once built, the image will be visible in the Image Stream created by the same command:
 
         oc describe imagestream openshift-ansible
+
+## Build the Atomic System Container
+
+A system container runs using runC instead of Docker and it is managed
+by the [atomic](https://github.com/projectatomic/atomic/) tool.  As it
+doesn't require Docker to run, the installer can run on a node of the
+cluster without interfering with the Docker daemon that is configured
+by the installer itself.
+
+The first step is to build the [container image](#build-an-openshift-ansible-container-image)
+as described before.  The container image already contains all the
+required files to run as a system container.
+
+Once the container image is built, we can import it into the OSTree
+storage:
+
+```
+atomic pull --storage ostree docker:openshift/openshift-ansible:latest
+```
