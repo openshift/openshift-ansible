@@ -59,8 +59,7 @@ def migrate_docker_facts(facts):
             'additional_registries',
             'insecure_registries',
             'blocked_registries',
-            'options',
-            'use_system_container',
+            'options'
         ),
         'node': (
             'log_driver',
@@ -1795,9 +1794,9 @@ def set_container_facts_if_unset(facts):
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
     # If openshift_docker_use_system_container is set and is True ....
     if 'use_system_container' in list(facts['docker'].keys()):
-        if facts['docker']['use_system_container'] is True:
-            # ... set the service name to container-engine-docker
-            facts['docker']['service_name'] = 'container-engine-docker'
+        if facts['docker']['use_system_container']:
+            # ... set the service name to container-engine
+            facts['docker']['service_name'] = 'container-engine'
 
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']

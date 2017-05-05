@@ -34,7 +34,9 @@
     "ip-masq": false,
     "labels": [],
     "live-restore": true,
+{% if docker_log_driver is defined  %}
     "log-driver": "{{ docker_log_driver }}",
+{% endif %}
     "log-level": "",
     "log-opts": {{ docker_log_options|default({}) }},
     "max-concurrent-downloads": 3,
@@ -59,6 +61,6 @@
     "tlsverify": true,
     "userns-remap": "",
     "add-registry": {{  docker_additional_registries|default([]) }},
-    "blocked-registries": {{ docker_blocked_registries|defaukt([]) }},
+    "blocked-registries": {{ docker_blocked_registries|default([]) }},
     "userland-proxy-path": "/usr/libexec/docker/docker-proxy-current"
 }

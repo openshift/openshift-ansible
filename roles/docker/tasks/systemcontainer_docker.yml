@@ -53,29 +53,29 @@
 
     - name: Set to default prepend
       set_fact:
-        l_docker_image_prepend: "gscrivano/"
+        l_docker_image_prepend: "gscrivano"
 
     - name: Use Red Hat Registry for image when distribution is Red Hat
       set_fact:
-        l_docker_image_prepend: "registry.access.redhat.com/openshift3/"
+        l_docker_image_prepend: "registry.access.redhat.com/openshift3"
       when: ansible_distribution == 'RedHat'
 
     - name: Use Fedora Registry for image when distribution is Fedora
       set_fact:
-        l_docker_image_prepend: "registry.fedoraproject.org/"
+        l_docker_image_prepend: "registry.fedoraproject.org"
       when: ansible_distribution == 'Fedora'
 
     # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
     - name: Use a testing registry if requested
       set_fact:
-        l_docker_image_prepend: "{{ openshift.docker.systemcontainer_image_registry_override }}/"
+        l_docker_image_prepend: "{{ openshift_docker_systemcontainer_image_registry_override }}"
       when:
-        - openshift.docker.systemcontainer_image_registry_override is defined
-        - openshift.docker.systemcontainer_image_registry_override != ""
+        - openshift_docker_systemcontainer_image_registry_override is defined
+        - openshift_docker_systemcontainer_image_registry_override != ""
 
     - name: Set the full image name
       set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}container-engine-docker:latest"
+        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
 
 - name: Pre-pull Container Enginer System Container image
   command: "atomic pull --storage ostree {{ l_docker_image }}"
@@ -103,11 +103,11 @@
 
 - name: Install Container Enginer System Container
   oc_atomic_container:
-    name: container-engine-docker
-    image: "container-engine-docker"
+    name: "{{ openshift.docker.service_name }}"
+    image: "{{ l_docker_image }}"
     state: latest
     values:
-      - "system-package no"
+      - "system-package=no"
 
 - name: Configure Container Engine Service File
   template:
@@ -117,7 +117,7 @@
 # Configure container-engine using the daemon.json file
 - name: Configure Container Engine
   template:
-    dest: "{{ docker_conf }}/daemon.json"
+    dest: "{{ docker_conf_dir }}/daemon.json"
     src: daemon.json
 
 # Enable and start the container-engine service
