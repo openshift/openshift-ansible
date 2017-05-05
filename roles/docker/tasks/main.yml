@@ -7,10 +7,10 @@
 
 - name: Use Package Docker if Requested
   include: package_docker.yml
-  when: openshift.docker.use_system_container is not defined or openshift.docker.use_system_container == False
+  when: docker_use_system_container is not defined or docker_use_system_container == False
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
   when:
-  - openshift.docker.use_system_container is defined
-  - openshift.docker.use_system_container is True
+  - docker_use_system_container is defined
+  - docker_use_system_container is True
