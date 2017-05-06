@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.54
+Version:        3.6.55
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat May 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.55-1
+- Fix 1448368, and some other minors issues (ghuang@redhat.com)
+- mux startup is broken without this fix (rmeggins@redhat.com)
+- Dockerfile: create symlink for /opt/app-root/src (gscrivan@redhat.com)
+- docs: Add basic system container dev docs (smilner@redhat.com)
+- installer: Add system container variable for log saving (smilner@redhat.com)
+- installer: support running as a system container (gscrivan@redhat.com)
+
 * Fri May 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.54-1
 - Allow oc_ modules to pass unicode results (rteague@redhat.com)
 - Ensure repo cache is clean on the first run (rteague@redhat.com)
