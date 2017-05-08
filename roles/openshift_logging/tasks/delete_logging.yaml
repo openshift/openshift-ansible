@@ -12,30 +12,31 @@
     - svc
     - routes
     - templates
-    - daemonset
-  register: delete_result
-
+    - ds
 
 # delete the oauthclient
 - name: delete oauthclient kibana-proxy
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig delete oauthclient kibana-proxy --ignore-not-found=true
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
+  oc_obj:
+    state: absent
+    kind: oauthclient
+    namespace: "{{ openshift_logging_namespace }}"
+    name: kibana-proxy
 
 # delete any image streams that we may have created
 - name: delete logging is
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete is -l logging-infra=support -n {{ openshift_logging_namespace }} --ignore-not-found=true
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
+  oc_obj:
+    state: absent
+    kind: is
+    namespace: "{{ openshift_logging_namespace }}"
+    selector: "logging-infra=support"
 
 # delete our old secrets
 - name: delete logging secrets
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete secret {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
+  oc_obj:
+    state: absent
+    kind: secret
+    namespace: "{{ openshift_logging_namespace }}"
+    name: "{{ item }}"
   with_items:
     - logging-fluentd
     - logging-elasticsearch
@@ -43,71 +44,55 @@
     - logging-kibana-proxy
     - logging-curator
     - logging-mux
-  ignore_errors: yes
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
-
-# delete role bindings
-- name: delete rolebindings
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete rolebinding {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
-  with_items:
-    - logging-elasticsearch-view-role
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
-
-# delete cluster role bindings
-- name: delete cluster role bindings
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete clusterrolebindings {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
-  with_items:
-    - rolebinding-reader
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
-
-# delete cluster roles
-- name: delete cluster roles
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete clusterroles {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
-  with_items:
-    - rolebinding-reader
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
 
 # delete our service accounts
 - name: delete service accounts
   oc_serviceaccount:
-    name: "{{ item }}"
-    namespace: "{{ openshift_logging_namespace }}"
     state: absent
+    namespace: "{{ openshift_logging_namespace }}"
+    name: "{{ item }}"
   with_items:
     - aggregated-logging-elasticsearch
     - aggregated-logging-kibana
     - aggregated-logging-curator
     - aggregated-logging-fluentd
 
-# delete our roles
-- name: delete roles
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete clusterrole {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
+# delete role bindings
+- name: delete rolebindings
+  oc_obj:
+    state: absent
+    kind: rolebinding
+    namespace: "{{ openshift_logging_namespace }}"
+    name: logging-elasticsearch-view-role
+
+# delete cluster role bindings
+- name: delete cluster role bindings
+  oc_obj:
+    state: absent
+    kind: clusterrolebindings
+    namespace: "{{ openshift_logging_namespace }}"
+    name: rolebinding-reader
+
+# delete cluster roles
+- name: delete cluster roles
+  oc_obj:
+    state: absent
+    kind: clusterrole
+    namespace: "{{ openshift_logging_namespace }}"
+    name: "{{ item }}"
   with_items:
+    - rolebinding-reader
     - daemonset-admin
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
 
 # delete our configmaps
 - name: delete configmaps
-  command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete configmap {{ item }} -n {{ openshift_logging_namespace }} --ignore-not-found=true
+  oc_obj:
+    state: absent
+    kind: configmap
+    namespace: "{{ openshift_logging_namespace }}"
+    name: "{{ item }}"
   with_items:
     - logging-curator
     - logging-elasticsearch
     - logging-fluentd
     - logging-mux
-  register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
