@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.58
+Version:        3.6.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.59-1
+- Updating logging and metrics to restart api, ha and controllers when updating
+  master config (ewolinet@redhat.com)
+- Adding defaults for es_indices (ewolinet@redhat.com)
+- Updating logic for generating pvcs and their counts to prevent reuse when
+  looping (ewolinet@redhat.com)
+
 * Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.58-1
 - Moving Dockerfile content to images dir (jupierce@redhat.com)
 
