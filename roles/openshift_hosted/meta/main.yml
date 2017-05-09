@@ -15,3 +15,8 @@ dependencies:
 - role: openshift_cli
 - role: openshift_hosted_facts
 - role: lib_openshift
+- role: os_firewall
+  os_firewall_allow:
+  - service: Docker Registry Port
+    port: 5000/tcp
+  when: openshift.common.use_calico | bool
