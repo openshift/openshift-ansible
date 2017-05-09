@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.67
+Version:        3.5.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.68-1
+- Adding signed router cert and fixing server_cert bug. (kwoodson@redhat.com)
+- Allow oc_ modules to pass unicode results (rteague@redhat.com)
+- Correctly setting the primary and replica shard count settings
+  (ewolinet@redhat.com)
+
 * Thu May 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.67-1
 - bug 1441369. Kibana memory limits (jcantril@redhat.com)
 
