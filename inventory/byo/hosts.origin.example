@@ -735,7 +735,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
 # Enable API service auditing, available as of 1.3
-#openshift_master_audit_config={"basicAuditEnabled": true}
+#openshift_master_audit_config={"enabled": true}
 
 # Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
 # by deployment_type=origin
