@@ -1,4 +1,3 @@
-# vim: expandtab:tabstop=4:shiftwidth=4
 """
 Ansible module for warning about etcd volume size past a defined threshold.
 """
