@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.66
+Version:        3.6.67
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.67-1
+- byo: correct option name (gscrivan@redhat.com)
+- Fail if rpm version != docker image version (jchaloup@redhat.com)
+- Perform package upgrades in one transaction (sdodson@redhat.com)
+- Properly fail if OpenShift RPM version is undefined (rteague@redhat.com)
+
 * Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.66-1
 - Fix issue with Travis-CI using old pip version (rteague@redhat.com)
 - Remove vim configuration from Python files (rhcarvalho@gmail.com)
