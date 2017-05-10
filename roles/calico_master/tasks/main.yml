@@ -39,3 +39,10 @@
     resource_kind: scc
     resource_name: privileged
     state: present
+
+- name: Download Calicoctl
+  become: yes
+  get_url:
+    url: "{{ calico_url_calicoctl }}"
+    dest: "{{ calicoctl_bin_dir }}"
+    mode: a+x
