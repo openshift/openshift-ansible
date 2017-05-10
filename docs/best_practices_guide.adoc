@@ -14,25 +14,6 @@ This guide complies with https://www.ietf.org/rfc/rfc2119.txt[RFC2119].
 
 == Python
 
-=== Python Source Files
-
-'''
-[[Python-source-files-MUST-contain-the-following-vim-mode-line]]
-[cols="2v,v"]
-|===
-| <<Python-source-files-MUST-contain-the-following-vim-mode-line, Rule>>
-| Python source files MUST contain the following vim mode line.
-|===
-
-[source]
-----
-# vim: expandtab:tabstop=4:shiftwidth=4
-----
-
-Since most developers contributing to this repository use vim, this rule helps to promote consistency.
-
-If mode lines for other editors are needed, please open a GitHub issue.
-
 === Method Signatures
 
 '''

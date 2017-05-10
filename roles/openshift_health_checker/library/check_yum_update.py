@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# vim: expandtab:tabstop=4:shiftwidth=4
 '''
 Ansible module to test whether a yum update or install will succeed,
 without actually performing it or running yum.
