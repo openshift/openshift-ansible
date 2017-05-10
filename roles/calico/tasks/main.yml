@@ -7,7 +7,7 @@
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-calico-{{ openshift.common.hostname }}"
 
-- name: Assure the calico certs have been generated
+- name: Calico Node | Assure the calico certs have been generated
   stat:
     path: "{{ item }}"
   with_items:
@@ -15,12 +15,12 @@
   - "{{ calico_etcd_cert_file}}"
   - "{{ calico_etcd_key_file }}"
 
-- name: Configure Calico service unit file
+- name: Calico Node | Configure Calico service unit file
   template:
     dest: "/lib/systemd/system/calico.service"
     src: calico.service.j2
 
-- name: Enable calico
+- name: Calico Node | Enable calico
   become: yes
   systemd:
     name: calico
@@ -29,46 +29,46 @@
     enabled: yes
   register: start_result
 
-- name: Assure CNI conf dir exists
+- name: Calico Node | Assure CNI conf dir exists
   become: yes
   file: path="{{ cni_conf_dir }}" state=directory
 
-- name: Generate Calico CNI config
+- name: Calico Node | Generate Calico CNI config
   become: yes
   template:
-    src: "calico.conf.j2"
+    src: "10-calico.conf.j2"
     dest: "{{ cni_conf_dir }}/10-calico.conf"
 
-- name: Assures Kuberentes CNI bin dir exists
+- name: Calico Node | Assures Kuberentes CNI bin dir exists
   become: yes
   file: path="{{ cni_bin_dir }}" state=directory
 
-- name: Download Calico CNI Plugin
+- name: Calico Node | Download Calico CNI Plugin
   become: yes
   get_url:
     url: "{{ calico_url_cni }}"
     dest: "{{ cni_bin_dir }}"
     mode: a+x
 
-- name: Download Calico IPAM Plugin
+- name: Calico Node | Download Calico IPAM Plugin
   become: yes
   get_url:
     url: "{{ calico_url_ipam }}"
     dest: "{{ cni_bin_dir }}"
     mode: a+x
 
-- name: Download and unzip standard CNI plugins
+- name: Calico Node | Download and extract standard CNI plugins
   become: yes
   unarchive:
     remote_src: True
     src: "{{ cni_url }}"
     dest: "{{ cni_bin_dir }}"
 
-- name: Assure Calico conf dir exists
+- name: Calico Node | Assure Calico conf dir exists
   become: yes
   file: path=/etc/calico/ state=directory
 
-- name: Set calicoctl.cfg
+- name: Calico Node | Set calicoctl.cfg
   template:
-    src: calico.cfg.j2
+    src: calicoctl.cfg.j2
     dest: "/etc/calico/calicoctl.cfg"
