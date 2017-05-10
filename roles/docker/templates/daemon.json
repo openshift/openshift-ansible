@@ -61,6 +61,6 @@
     "tlsverify": true,
     "userns-remap": "",
     "add-registry": {{ l_docker_additional_registries }},
-    "blocked-registries": {{ l_docker_blocked_registries }},
+    "block-registries": {{ l_docker_blocked_registries }},
     "userland-proxy-path": "/usr/libexec/docker/docker-proxy-current"
 }
