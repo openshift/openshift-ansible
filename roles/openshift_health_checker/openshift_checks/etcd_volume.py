@@ -17,8 +17,8 @@ class EtcdVolume(OpenShiftCheck):
         ansible_mounts = get_var(task_vars, "ansible_mounts")
 
         etcd_mount_path = self._get_etcd_mount_path(ansible_mounts)
-        etcd_disk_size_available = int(etcd_mount_path["size_available"])
-        etcd_disk_size_total = int(etcd_mount_path["size_total"])
+        etcd_disk_size_available = float(etcd_mount_path["size_available"])
+        etcd_disk_size_total = float(etcd_mount_path["size_total"])
         etcd_disk_size_used = etcd_disk_size_total - etcd_disk_size_available
 
         size_limit_percent = get_var(
@@ -27,7 +27,7 @@ class EtcdVolume(OpenShiftCheck):
             default=self.etcd_default_size_limit_percent
         )
 
-        if float(etcd_disk_size_used) / float(etcd_disk_size_total) > size_limit_percent:
+        if etcd_disk_size_used / etcd_disk_size_total > size_limit_percent:
             msg = ("Current etcd volume usage ({actual:.2f} GB) for the volume \"{volume}\" "
                    "is greater than the storage limit ({limit:.2f} GB).")
             msg = msg.format(
