@@ -28,7 +28,7 @@
   when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_calico | default(false) | bool
 
 - fail:
-    msg: Calico can not be used with Flannel in Openshift. Set either openshift_use_calico or openshift_use_flannel, but not both
+    msg: The Calico playbook does not yet integrate with the Flannel playbook in Openshift. Set either openshift_use_calico or openshift_use_flannel, but not both.
   when: openshift_use_calico | default(false) | bool and openshift_use_flannel | default(false) | bool
 
 - fail:
