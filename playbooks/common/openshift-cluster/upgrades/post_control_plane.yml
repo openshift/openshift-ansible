@@ -9,6 +9,8 @@
                          replace ( '${version}', openshift_image_tag ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) |
                       replace ( '${version}', openshift_image_tag ) }}"
+    registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') |
+                                replace ( '${version}', openshift.common.short_version ) }}"
 
   pre_tasks:
   - name: Load lib_openshift modules
@@ -60,6 +62,26 @@
         spec.template.spec.containers[0].image: "{{ registry_image }}"
     when:
     - _default_registry.results.results[0] != {}
+
+  - name: Check for registry-console
+    oc_obj:
+      state: list
+      kind: dc
+      name: registry-console
+    register: _registry_console
+    when:
+    - openshift.common.deployment_type != 'origin'
+
+  - name: Update registry-console image to current version
+    oc_edit:
+      kind: dc
+      name: registry-console
+      namespace: default
+      content:
+        spec.template.spec.containers[0].image: "{{ registry_console_image }}"
+    when:
+    - openshift.common.deployment_type != 'origin'
+    - _registry_console.results.results[0] != {}
 
   roles:
   - openshift_manageiq
