@@ -51,7 +51,7 @@
 	    "path": "/usr/libexec/docker/docker-runc-current"
 	}
     },
-    "selinux-enabled": {{ docker_selinux_enabled|default(true) }},
+    "selinux-enabled": {{ l_docker_selinux_enabled }},
     "storage-driver": "",
     "storage-opts": [],
     "tls": true,

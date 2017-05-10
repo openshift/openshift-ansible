@@ -121,6 +121,7 @@
     l_docker_log_options: "{{ docker_log_options | default({}) | to_json }}"
     l_docker_additional_registries: "{{ docker_additional_registries | default([]) | to_json }}"
     l_docker_blocked_registries: "{{ docker_blocked_registries | default([]) | to_json }}"
+    l_docker_selinux_enabled: "{{ docker_selinux_enabled | default(true) | to_json }}"
 
 # Configure container-engine using the daemon.json file
 - name: Configure Container Engine
