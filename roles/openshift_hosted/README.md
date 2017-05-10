@@ -28,6 +28,14 @@ From this role:
 | openshift_hosted_registry_selector    | region=infra                             | Node selector used when creating registry. The OpenShift registry will only be deployed to nodes matching this selector. |
 | openshift_hosted_registry_cert_expire_days | `730` (2 years)                     | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later.                             |
 
+If you specify `openshift_hosted_registry_kind=glusterfs`, the following
+variables also control configuration behavior:
+
+| Name                                         | Default value | Description                                                                  |
+|----------------------------------------------|---------------|------------------------------------------------------------------------------|
+| openshift_hosted_registry_glusterfs_swap     | False         | Whether to swap an existing registry's storage volume for a GlusterFS volume |
+| openshift_hosted_registry_glusterfs_swapcopy | True          | If swapping, also copy the current contents of the registry volume           |
+
 Dependencies
 ------------
 

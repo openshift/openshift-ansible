@@ -8,10 +8,24 @@ Requirements
 
 * Ansible 2.2
 
+Host Groups
+-----------
+
+The following group is expected to be populated for this role to run:
+
+* `[glusterfs]`
+
+Additionally, the following group may be specified either in addition to or
+instead of the above group to deploy a GlusterFS cluster for use by a natively
+hosted Docker registry:
+
+* `[glusterfs_registry]`
+
 Role Variables
 --------------
 
-From this role:
+This role has the following variables that control the integration of a
+GlusterFS cluster into a new or existing OpenShift cluster:
 
 | Name                                             | Default value           |                                         |
 |--------------------------------------------------|-------------------------|-----------------------------------------|
@@ -31,6 +45,25 @@ From this role:
 | openshift_storage_glusterfs_heketi_url           | Undefined               | URL for the heketi REST API, dynamically determined in native mode
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 
+Each role variable also has a corresponding variable to optionally configure a
+separate GlusterFS cluster for use as storage for an integrated Docker
+registry. These variables start with the prefix
+`openshift_storage_glusterfs_registry_` and, for the most part, default to the
+values in their corresponding non-registry variables. The following variables
+are an exception:
+
+| Name                                              | Default value         |                                         |
+|---------------------------------------------------|-----------------------|-----------------------------------------|
+| openshift_storage_glusterfs_registry_namespace    | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
+| openshift_storage_glusterfs_registry_nodeselector | 'storagenode=registry'| This allows for the logical separation of the registry GlusterFS cluster from any regular-use GlusterFS clusters
+
+Additionally, this role's behavior responds to the following registry-specific
+variable:
+
+| Name                                         | Default value | Description                                                                  |
+|----------------------------------------------|---------------|------------------------------------------------------------------------------|
+| openshift_hosted_registry_glusterfs_swap     | False         | Whether to swap an existing registry's storage volume for a GlusterFS volume |
+
 Dependencies
 ------------
 
@@ -47,6 +80,7 @@ Example Playbook
   hosts: oo_first_master
   roles:
   - role: openshift_storage_glusterfs
+    when: groups.oo_glusterfs_to_config | default([]) | count > 0
 ```
 
 License

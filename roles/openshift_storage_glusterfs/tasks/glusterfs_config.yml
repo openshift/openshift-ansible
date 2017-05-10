@@ -1,0 +1,22 @@
+---
+- set_fact:
+    glusterfs_timeout: "{{ openshift_storage_glusterfs_timeout }}"
+    glusterfs_namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    glusterfs_is_native: "{{ openshift_storage_glusterfs_is_native }}"
+    glusterfs_nodeselector: "{{ openshift_storage_glusterfs_nodeselector | map_from_pairs }}"
+    glusterfs_image: "{{ openshift_storage_glusterfs_image }}"
+    glusterfs_version: "{{ openshift_storage_glusterfs_version }}"
+    glusterfs_wipe: "{{ openshift_storage_glusterfs_wipe }}"
+    glusterfs_heketi_is_native: "{{ openshift_storage_glusterfs_heketi_is_native }}"
+    glusterfs_heketi_is_missing: "{{ openshift_storage_glusterfs_heketi_is_missing }}"
+    glusterfs_heketi_deploy_is_missing: "{{ openshift_storage_glusterfs_heketi_deploy_is_missing }}"
+    glusterfs_heketi_image: "{{ openshift_storage_glusterfs_heketi_image }}"
+    glusterfs_heketi_version: "{{ openshift_storage_glusterfs_heketi_version }}"
+    glusterfs_heketi_admin_key: "{{ openshift_storage_glusterfs_heketi_admin_key }}"
+    glusterfs_heketi_user_key: "{{ openshift_storage_glusterfs_heketi_user_key }}"
+    glusterfs_heketi_topology_load: "{{ openshift_storage_glusterfs_heketi_topology_load }}"
+    glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_heketi_wipe }}"
+    glusterfs_heketi_url: "{{ openshift_storage_glusterfs_heketi_url }}"
+    glusterfs_nodes: "{{ g_glusterfs_hosts }}"
+
+- include: glusterfs_common.yml

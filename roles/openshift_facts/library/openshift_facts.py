@@ -2167,7 +2167,9 @@ class OpenShiftFacts(object):
                         glusterfs=dict(
                             endpoints='glusterfs-registry-endpoints',
                             path='glusterfs-registry-volume',
-                            readOnly=False),
+                            readOnly=False,
+                            swap=False,
+                            swapcopy=True),
                         host=None,
                         access=dict(
                             modes=['ReadWriteMany']

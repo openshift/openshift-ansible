@@ -8,7 +8,7 @@
 
 - name: Create deploy-heketi resources
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: template
     name: deploy-heketi
     state: present
@@ -17,18 +17,18 @@
 
 - name: Deploy deploy-heketi pod
   oc_process:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     template_name: "deploy-heketi"
     create: True
     params:
-      IMAGE_NAME: "{{ openshift_storage_glusterfs_heketi_image }}"
-      IMAGE_VERSION: "{{ openshift_storage_glusterfs_heketi_version }}"
-      HEKETI_USER_KEY: "{{ openshift_storage_glusterfs_heketi_user_key }}"
-      HEKETI_ADMIN_KEY: "{{ openshift_storage_glusterfs_heketi_admin_key }}"
+      IMAGE_NAME: "{{ glusterfs_heketi_image }}"
+      IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
+      HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
+      HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
 
 - name: Wait for deploy-heketi pod
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
     selector: "glusterfs=deploy-heketi-pod,deploy-heketi=support"
@@ -38,4 +38,4 @@
   # Pod's 'Ready' status must be True
   - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (openshift_storage_glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout / 10) | int }}"
