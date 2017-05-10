@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.62
+Version:        3.6.66
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.66-1
+- Fix issue with Travis-CI using old pip version (rteague@redhat.com)
+- Remove vim configuration from Python files (rhcarvalho@gmail.com)
+- Use local variables for daemon.json template (smilner@redhat.com)
+- Fix additional master cert & client config creation. (abutcher@redhat.com)
+
 * Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.62-1
 - 
 
