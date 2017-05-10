@@ -8,6 +8,7 @@ import sys
 import os
 import logging
 import yaml
+import re
 from ooinstall.variants import find_variant
 from ooinstall.utils import debug_env
 
@@ -188,6 +189,10 @@ def write_host(host, role, inventory, schedulable=None):
 
     if host.preconfigured:
         return
+    
+    # Assuming host.connect_to is a hostname if it's not all-numeric
+    if not re.match(r"[\d.]+$", host.connect_to):
+        host.public_hostname = host.hostname = host.connect_to
 
     facts = ''
     for prop in HOST_VARIABLES_MAP:
