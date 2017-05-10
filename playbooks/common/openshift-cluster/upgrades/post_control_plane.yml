@@ -8,6 +8,7 @@
     openshift_deployment_type: "{{ deployment_type }}"
     registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', openshift_image_tag ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', openshift_image_tag ) }}"
+    registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') | replace ( '${version}', openshift.common.short_version ) }}"
     oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
   roles:
   - openshift_manageiq
@@ -60,6 +61,24 @@
       {{ oc_cmd }} patch dc/docker-registry -n default -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"registry","image":"{{ registry_image }}"}]}}}}'
       --api-version=v1
+
+  - name: Check for registry-console
+    command: >
+      {{ oc_cmd }} get -n default dc/registry-console
+    register: _registry_console
+    failed_when: false
+    changed_when: false
+    when:
+    - openshift.common.deployment_type != 'origin'
+
+  - name: Update registry-console image to current version
+    when: _registry_console.rc == 0
+    command: >
+      {{ oc_cmd }} patch dc/registry-console -n default -p
+      '{"spec":{"template":{"spec":{"containers":[{"name":"registry-console","image":"{{ registry_console_image }}"}]}}}}'
+      --api-version=v1
+    when:
+    - openshift.common.deployment_type != 'origin'
 
 # Check for warnings to be printed at the end of the upgrade:
 - name: Check for warnings
