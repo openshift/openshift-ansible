@@ -46,14 +46,14 @@
 - name: Download Calico CNI Plugin
   become: yes
   get_url:
-    url: https://github.com/projectcalico/cni-plugin/releases/download/v1.5.5/calico
+    url: "{{ calico_url_cni }}"
     dest: "{{ cni_bin_dir }}"
     mode: a+x
 
 - name: Download Calico IPAM Plugin
   become: yes
   get_url:
-    url: https://github.com/projectcalico/cni-plugin/releases/download/v1.5.5/calico-ipam
+    url: "{{ calico_url_ipam }}"
     dest: "{{ cni_bin_dir }}"
     mode: a+x
 
@@ -61,7 +61,7 @@
   become: yes
   unarchive:
     remote_src: True
-    src: https://github.com/containernetworking/cni/releases/download/v0.4.0/cni-amd64-v0.4.0.tgz
+    src: "{{ cni_url }}"
     dest: "{{ cni_bin_dir }}"
 
 - name: Assure Calico conf dir exists
