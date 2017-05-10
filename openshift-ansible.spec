@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.68
+Version:        3.5.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.69-1
+- byo: correct option name (gscrivan@redhat.com)
+- Bumping up default_ose_version for registering a 3.5 system
+  (ewolinet@redhat.com)
+- Fix issue with Travis-CI using old pip version (rteague@redhat.com)
+- Perform package upgrades in one transaction (sdodson@redhat.com)
+
 * Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.68-1
 - Adding signed router cert and fixing server_cert bug. (kwoodson@redhat.com)
 - Allow oc_ modules to pass unicode results (rteague@redhat.com)
