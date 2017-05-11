@@ -274,6 +274,29 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com>
+- use docker_log_driver and /etc/docker/daemon.json to determine log driver
+  (rmeggins@redhat.com)
+- byo: correct option name (gscrivan@redhat.com)
+- polish etcd_common role (jchaloup@redhat.com)
+- Note existence of Fedora tests and how to rerun (rhcarvalho@gmail.com)
+- Fail if rpm version != docker image version (jchaloup@redhat.com)
+- Remove vim configuration from Python files (rhcarvalho@gmail.com)
+- Perform package upgrades in one transaction (sdodson@redhat.com)
+- Updating oc_obj to use get instead of getattr (ewolinet@redhat.com)
+- Properly fail if OpenShift RPM version is undefined (rteague@redhat.com)
+- Use local variables for daemon.json template (smilner@redhat.com)
+- Fix additional master cert & client config creation. (abutcher@redhat.com)
+- GlusterFS: Allow swapping an existing registry's backend storage
+  (jarrpa@redhat.com)
+- GlusterFS: Allow for a separate registry-specific playbook
+  (jarrpa@redhat.com)
+- GlusterFS: Improve role documentation (jarrpa@redhat.com)
+- hosted_registry: Get correct pod selector for GlusterFS storage
+  (jarrpa@redhat.com)
+- hosted registry: Fix typo (jarrpa@redhat.com)
+- oc_volume: Add missing parameter documentation (jarrpa@redhat.com)
+
 * Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.0-1
 - Tag stage branch
 

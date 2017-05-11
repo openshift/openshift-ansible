@@ -1,6 +1,6 @@
 ---
 - name: Create heketi DB volume
-  command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' setup-openshift-heketi-storage --listfile {{ mktemp.stdout }}/heketi-storage.json"
+  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' setup-openshift-heketi-storage --listfile {{ mktemp.stdout }}/heketi-storage.json"
   register: setup_storage
   failed_when: False
 
@@ -13,12 +13,12 @@
 
 # Need `command` here because heketi-storage.json contains multiple objects.
 - name: Copy heketi DB to GlusterFS volume
-  command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{ mktemp.stdout }}/heketi-storage.json -n {{ openshift_storage_glusterfs_namespace }}"
+  command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{ mktemp.stdout }}/heketi-storage.json -n {{ glusterfs_namespace }}"
   when: setup_storage.rc == 0
 
 - name: Wait for copy job to finish
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: job
     state: list
     name: "heketi-storage-copy-job"
@@ -28,7 +28,7 @@
   # Pod's 'Complete' status must be True
   - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (openshift_storage_glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout / 10) | int }}"
   failed_when:
   - "'results' in heketi_job.results"
   - "heketi_job.results.results | count > 0"
@@ -38,7 +38,7 @@
 
 - name: Delete deploy resources
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: "{{ item.kind }}"
     name: "{{ item.name | default(omit) }}"
     selector: "{{ item.selector | default(omit) }}"
@@ -55,7 +55,7 @@
 
 - name: Create heketi resources
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: template
     name: heketi
     state: present
@@ -64,18 +64,18 @@
 
 - name: Deploy heketi pod
   oc_process:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     template_name: "heketi"
     create: True
     params:
-      IMAGE_NAME: "{{ openshift_storage_glusterfs_heketi_image }}"
-      IMAGE_VERSION: "{{ openshift_storage_glusterfs_heketi_version }}"
-      HEKETI_USER_KEY: "{{ openshift_storage_glusterfs_heketi_user_key }}"
-      HEKETI_ADMIN_KEY: "{{ openshift_storage_glusterfs_heketi_admin_key }}"
+      IMAGE_NAME: "{{ glusterfs_heketi_image }}"
+      IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
+      HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
+      HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
 
 - name: Wait for heketi pod
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
     selector: "glusterfs=heketi-pod"
@@ -85,11 +85,11 @@
   # Pod's 'Ready' status must be True
   - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (openshift_storage_glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout / 10) | int }}"
 
 - name: Determine heketi URL
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     state: list
     kind: ep
     selector: "glusterfs=heketi-service"
@@ -98,12 +98,12 @@
   - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"
   - "heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port != ''"
   delay: 10
-  retries: "{{ (openshift_storage_glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout / 10) | int }}"
 
 - name: Set heketi URL
   set_fact:
-    openshift_storage_glusterfs_heketi_url: "{{ heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip }}:{{ heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port }}"
+    glusterfs_heketi_url: "{{ heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip }}:{{ heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port }}"
 
 - name: Verify heketi service
-  command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' cluster list"
+  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' cluster list"
   changed_when: False

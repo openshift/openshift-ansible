@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# vim: expandtab:tabstop=4:shiftwidth=4
 '''
 Ansible module for yum-based systems determining if multiple releases
 of an OpenShift package are available, and if the release requested

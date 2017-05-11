@@ -43,6 +43,15 @@ simplifying the workflow towards a single infrastructure in the future.
   job is also posted to the Pull Request as comments and summarized at the
   bottom of the Pull Request page.
 
+### Fedora tests
+
+There are a set of tests that run on Fedora infrastructure. They are started
+automatically with every pull request.
+
+They are implemented using the [`redhat-ci` framework](https://github.com/jlebon/redhat-ci).
+
+To re-run tests, write a comment containing `bot, retest this please`.
+
 ## Triggering merge
 
 After a PR is properly reviewed and a set of

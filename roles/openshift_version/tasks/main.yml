@@ -86,8 +86,16 @@
   include: set_version_rpm.yml
   when: not is_containerized | bool
 
-- name: Set openshift_version for containerized installation
-  include: set_version_containerized.yml
+- block:
+  - name: Set openshift_version for containerized installation
+    include: set_version_containerized.yml
+  - name: Determine openshift rpm version
+    include: rpm_version.yml
+  - name: Fail if rpm version and docker image version are different
+    fail:
+      msg: "OCP rpm version {{ openshift_rpm_version }} is different from OCP image version {{ openshift_version }}"
+    # Both versions have the same string representation
+    when: openshift_rpm_version != openshift_version
   when: is_containerized | bool
 
 # Warn if the user has provided an openshift_image_tag but is not doing a containerized install

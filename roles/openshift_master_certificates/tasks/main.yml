@@ -64,7 +64,7 @@
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}
     --overwrite=false
-  when: inventory_hostname != openshift_ca_host
+  when: item != openshift_ca_host
   with_items: "{{ hostvars
                   | oo_select_keys(groups['oo_masters_to_config'])
                   | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
@@ -95,7 +95,7 @@
   with_items: "{{ hostvars
                   | oo_select_keys(groups['oo_masters_to_config'])
                   | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
-  when: inventory_hostname != openshift_ca_host
+  when: item != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 

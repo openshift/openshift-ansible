@@ -12,7 +12,9 @@
     - service: glusterfs_bricks
       port: "49152-49251/tcp"
   roles:
-  - os_firewall
+  - role: os_firewall
+    when:
+    - openshift_storage_glusterfs_is_native | default(True)
 
 - name: Configure GlusterFS
   hosts: oo_first_master

@@ -1,7 +1,30 @@
 ---
+- set_fact:
+    glusterfs_timeout: "{{ openshift_storage_glusterfs_registry_timeout }}"
+    glusterfs_namespace: "{{ openshift_storage_glusterfs_registry_namespace }}"
+    glusterfs_is_native: "{{ openshift_storage_glusterfs_registry_is_native }}"
+    glusterfs_nodeselector: "{{ openshift_storage_glusterfs_registry_nodeselector | map_from_pairs }}"
+    glusterfs_image: "{{ openshift_storage_glusterfs_registry_image }}"
+    glusterfs_version: "{{ openshift_storage_glusterfs_registry_version }}"
+    glusterfs_wipe: "{{ openshift_storage_glusterfs_registry_wipe }}"
+    glusterfs_heketi_is_native: "{{ openshift_storage_glusterfs_registry_heketi_is_native }}"
+    glusterfs_heketi_is_missing: "{{ openshift_storage_glusterfs_registry_heketi_is_missing }}"
+    glusterfs_heketi_deploy_is_missing: "{{ openshift_storage_glusterfs_registry_heketi_deploy_is_missing }}"
+    glusterfs_heketi_image: "{{ openshift_storage_glusterfs_registry_heketi_image }}"
+    glusterfs_heketi_version: "{{ openshift_storage_glusterfs_registry_heketi_version }}"
+    glusterfs_heketi_admin_key: "{{ openshift_storage_glusterfs_registry_heketi_admin_key }}"
+    glusterfs_heketi_user_key: "{{ openshift_storage_glusterfs_registry_heketi_user_key }}"
+    glusterfs_heketi_topology_load: "{{ openshift_storage_glusterfs_registry_heketi_topology_load }}"
+    glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_registry_heketi_wipe }}"
+    glusterfs_heketi_url: "{{ openshift_storage_glusterfs_registry_heketi_url }}"
+    glusterfs_nodes: "{{ g_glusterfs_registry_hosts }}"
+
+- include: glusterfs_common.yml
+  when: g_glusterfs_registry_hosts != g_glusterfs_hosts
+
 - name: Delete pre-existing GlusterFS registry resources
   oc_obj:
-    namespace: "{{ openshift_storage_glusterfs_namespace }}"
+    namespace: "{{ glusterfs_namespace }}"
     kind: "{{ item.kind }}"
     name: "{{ item.name | default(omit) }}"
     selector: "{{ item.selector | default(omit) }}"
@@ -23,7 +46,7 @@
 
 - name: Create GlusterFS registry endpoints
   oc_obj:
-    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    namespace: "{{ glusterfs_namespace }}"
     state: present
     kind: endpoints
     name: glusterfs-registry-endpoints
@@ -32,7 +55,7 @@
 
 - name: Create GlusterFS registry service
   oc_obj:
-    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    namespace: "{{ glusterfs_namespace }}"
     state: present
     kind: service
     name: glusterfs-registry-endpoints
@@ -40,9 +63,9 @@
     - "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
 
 - name: Check if GlusterFS registry volume exists
-  command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' volume list"
+  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' volume list"
   register: registry_volume
 
 - name: Create GlusterFS registry volume
-  command: "heketi-cli -s http://{{ openshift_storage_glusterfs_heketi_url }} --user admin --secret '{{ openshift_storage_glusterfs_heketi_admin_key }}' volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
-  when: "'openshift.hosted.registry.storage.glusterfs.path' not in registry_volume.stdout"
+  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
+  when: "openshift.hosted.registry.storage.glusterfs.path not in registry_volume.stdout"

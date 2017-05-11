@@ -1,5 +1,4 @@
 #!/usr/bin/env python2
-# vim: expandtab:tabstop=4:shiftwidth=4
 
 import argparse
 import ConfigParser

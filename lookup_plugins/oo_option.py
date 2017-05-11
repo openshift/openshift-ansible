@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-# vim: expandtab:tabstop=4:shiftwidth=4
-
 '''
 oo_option lookup plugin for openshift-ansible
 
