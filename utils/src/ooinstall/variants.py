@@ -47,7 +47,7 @@ REG = Variant('openshift-enterprise', 'Registry', [
 ])
 
 origin = Variant('origin', 'OpenShift Origin', [
-    Version('1.4', 'origin'),
+    Version('1.5', 'origin'),
 ])
 
 LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform', [
