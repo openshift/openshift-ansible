@@ -1,9 +1,9 @@
 [Unit]
 After={{ openshift.common.service_type }}-master.service
-After=docker.service
+After={{ openshift.docker.service_name }}.service
 After=openvswitch.service
-PartOf=docker.service
-Requires=docker.service
+PartOf={{ openshift.docker.service_name }}.service
+Requires={{ openshift.docker.service_name }}.service
 {% if openshift.common.use_openshift_sdn %}
 Requires=openvswitch.service
 After=ovsdb-server.service
@@ -25,4 +25,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy=docker.service
+WantedBy={{ openshift.docker.service_name }}.service

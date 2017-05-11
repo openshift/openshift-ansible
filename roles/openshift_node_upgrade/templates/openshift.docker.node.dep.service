@@ -1,6 +1,6 @@
 [Unit]
-Requires=docker.service
-After=docker.service
+Requires={{ openshift.docker.service_name }}.service
+After={{ openshift.docker.service_name }}.service
 PartOf={{ openshift.common.service_type }}-node.service
 Before={{ openshift.common.service_type }}-node.service
 
