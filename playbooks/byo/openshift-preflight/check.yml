@@ -1,8 +1,9 @@
 ---
 - include: ../openshift-cluster/initialize_groups.yml
 
-- hosts: g_all_hosts
-  name: run OpenShift health checks
+- name: Run OpenShift health checks
+  # Temporarily reverting to OSEv3 until group standardization is complete
+  hosts: OSEv3
   roles:
     - openshift_health_checker
   post_tasks:
