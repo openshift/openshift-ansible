@@ -52,6 +52,10 @@
 
 - set_fact: es_indices={{ es_indices | default([]) + [item | int - 1] }}
   with_sequence: count={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
+  when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
+
+- set_fact: es_indices=[]
+  when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count == 0
 
 # TODO: add more vars
 # We don't allow scaling down of ES nodes currently
@@ -94,6 +98,10 @@
   with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
   when:
   - openshift_logging_use_ops | bool
+  - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
+
+- set_fact: es_ops_indices=[]
+  when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count == 0
 
 # TODO: add more vars
 - include_role:
