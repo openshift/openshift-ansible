@@ -1,15 +1,12 @@
 ---
-# input variables
-# - repoquery_cmd
-# - openshift_upgrade_target
-- include: init.yml
-
-- include: verify_excluder.yml
+- name: Verify Docker Excluder version
+  include: verify_excluder.yml
   vars:
-    excluder: "{{ openshift.common.service_type }}-docker-excluder"
-  when: docker_excluder_on
+    excluder: "{{ r_openshift_excluder_service_type }}-docker-excluder"
+  when: r_openshift_excluder_enable_docker_excluder | bool
 
-- include: verify_excluder.yml
+- name: Verify OpenShift Excluder version
+  include: verify_excluder.yml
   vars:
-    excluder: "{{ openshift.common.service_type }}-excluder"
-  when: openshift_excluder_on
+    excluder: "{{ r_openshift_excluder_service_type }}-excluder"
+  when: r_openshift_excluder_enable_openshift_excluder | bool

@@ -1,18 +1,6 @@
 ---
-# input variables:
-- block:
-  - include: init.yml
+- name: Install excluders
+  include: install.yml
 
-  - include: install.yml
-    vars:
-      install_docker_excluder: "{{ docker_excluder_on | bool }}"
-      install_openshift_excluder: "{{ openshift_excluder_on | bool }}"
-    when: docker_excluder_on or openshift_excluder_on | bool
-
-  - include: exclude.yml
-    vars:
-      exclude_docker_excluder: "{{ docker_excluder_on | bool }}"
-      exclude_openshift_excluder: "{{ openshift_excluder_on | bool }}"
-
-  when:
-  - not openshift.common.is_atomic | bool
+- name: Enable excluders
+  include: exclude.yml
