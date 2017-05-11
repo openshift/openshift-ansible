@@ -46,11 +46,16 @@ class ActionModule(ActionBase):
 
         result["checks"] = check_results = {}
 
+        user_disabled_checks = [
+            check.strip()
+            for check in task_vars.get("openshift_disable_check", "").split(",")
+        ]
+
         for check_name in resolved_checks:
             display.banner("CHECK [{} : {}]".format(check_name, task_vars["ansible_host"]))
             check = known_checks[check_name]
 
-            if check.is_active(task_vars):
+            if check_name not in user_disabled_checks and check.is_active(task_vars):
                 try:
                     r = check.run(tmp, task_vars)
                 except OpenShiftCheckException as e:
@@ -58,6 +63,8 @@ class ActionModule(ActionBase):
                     r["failed"] = True
                     r["msg"] = str(e)
             else:
+                # TODO(rhcarvalho): we may want to provide some distinctive
+                # complementary message to know why a check was skipped.
                 r = {"skipped": True}
 
             check_results[check_name] = r
