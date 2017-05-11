@@ -103,6 +103,22 @@ spec:
             -
              name: "OAP_DEBUG"
              value: "{{openshift_logging_kibana_proxy_debug}}"
+            -
+             name: "OAP_OAUTH_SECRET_FILE"
+             value: "/secret/oauth-secret"
+            -
+             name: "OAP_SERVER_CERT_FILE"
+             value: "/secret/server-cert"
+            -
+             name: "OAP_SERVER_KEY_FILE"
+             value: "/secret/server-key"
+            -
+             name: "OAP_SERVER_TLS_FILE"
+             value: "/secret/server-tls.json"
+            -
+             name: "OAP_SERVER_SESSION_SECRET_FILE"
+             value: "/secret/session-secret"
+
           volumeMounts:
             - name: kibana-proxy
               mountPath: /secret
