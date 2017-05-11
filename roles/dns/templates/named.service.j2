@@ -1,7 +1,7 @@
 [Unit]
-Requires=docker.service
-After=docker.service
-PartOf=docker.service
+Requires={{ openshift.docker.service_name }}.service
+After={{ openshift.docker.service_name }}.service
+PartOf={{ openshift.docker.service_name }}.service
 
 [Service]
 Type=simple
@@ -12,4 +12,4 @@ ExecStart=/usr/bin/docker run --name bind -p 53:53/udp -v /var/log:/var/log -v /
 ExecStop=/usr/bin/docker stop bind
 
 [Install]
-WantedBy=docker.service
+WantedBy={{ openshift.docker.service_name }}.service

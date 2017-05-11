@@ -1,7 +1,7 @@
 [Unit]
-After=docker.service
-Requires=docker.service
-PartOf=docker.service
+After={{ openshift.docker.service_name }}.service
+Requires={{ openshift.docker.service_name }}.service
+PartOf={{ openshift.docker.service_name }}.service
 After=etcd_container.service
 Wants=etcd_container.service
 
@@ -15,4 +15,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy=docker.service
+WantedBy={{ openshift.docker.service_name }}.service
