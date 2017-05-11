@@ -10,7 +10,7 @@ ENVIRONMENT=HTTPS_PROXY={{ docker_http_proxy }}
 {%- if "no_proxy" in openshift.common %}
 ENVIRONMENT=NO_PROXY={{ docker_no_proxy }}
 {%- endif %}
-{%- if os_firewall_use_firewalld|default(true) %}
+{%- if os_firewall_use_firewalld|default(false) %}
 [Unit]
 Wants=iptables.service
 After=iptables.service
