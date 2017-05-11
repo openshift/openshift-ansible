@@ -76,7 +76,7 @@ openshift_metrics_<COMPONENT>_(limits|requests)_(memory|cpu): <VALUE>
 ```
 e.g
 ```
-openshift_metrics_cassandra_limits_memory: 1G
+openshift_metrics_cassandra_limits_memory: 1Gi
 openshift_metrics_hawkular_requests_cpu: 100
 ```
 
