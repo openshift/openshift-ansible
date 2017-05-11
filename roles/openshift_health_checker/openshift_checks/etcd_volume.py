@@ -1,3 +1,5 @@
+"""A health check for OpenShift clusters."""
+
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
 
 
