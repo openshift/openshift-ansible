@@ -9,9 +9,9 @@ class EtcdVolume(OpenShiftCheck):
     name = "etcd_volume"
     tags = ["etcd", "health"]
 
-    # pylint: disable=invalid-name
-    default_etcd_device_usage_threshold_percent = 90
-    # where to find ectd data, higher priority first.
+    # Default device usage threshold. Value should be in the range [0, 100].
+    default_threshold_percent = 90
+    # Where to find ectd data, higher priority first.
     supported_mount_paths = ["/var/lib/etcd", "/var/lib", "/var", "/"]
 
     @classmethod
@@ -29,7 +29,7 @@ class EtcdVolume(OpenShiftCheck):
         threshold = get_var(
             task_vars,
             "etcd_device_usage_threshold_percent",
-            default=self.default_etcd_device_usage_threshold_percent
+            default=self.default_threshold_percent
         )
 
         used_percent = 100.0 * used / total
