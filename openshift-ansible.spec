@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.65.1
+Version:        3.6.65.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.2-1
+- Rename blocked-registries to block-registries (smilner@redhat.com)
+- Ensure true is lowercase in daemon.json (smilner@redhat.com)
+- Add service file templates for master and node (smilner@redhat.com)
+- Update systemd units to use proper container service name
+  (smilner@redhat.com)
+
 * Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.1-1
 - use docker_log_driver and /etc/docker/daemon.json to determine log driver
   (rmeggins@redhat.com)
