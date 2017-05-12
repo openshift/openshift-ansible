@@ -1,0 +1,18 @@
+---
+# INPUT etcd_upgrade_version
+# INPUT etcd_rpm_version
+# INPUT openshift.common.is_containerized
+- name: Upgrade to {{ etcd_upgrade_version }}
+  hosts: oo_etcd_hosts_to_upgrade
+  serial: 1
+  roles:
+  - role: etcd_upgrade
+    r_etcd_upgrade_action: upgrade
+    r_etcd_upgrade_mechanism: rpm
+    r_etcd_upgrade_version: "{{ etcd_upgrade_version }}"
+    r_etcd_common_etcd_runtime: "host"
+    etcd_peer: "{{ openshift.common.hostname }}"
+    when:
+    - etcd_rpm_version.stdout | default('99') | version_compare(etcd_upgrade_version, '<')
+    - ansible_distribution == 'RedHat'
+    - not openshift.common.is_containerized | bool

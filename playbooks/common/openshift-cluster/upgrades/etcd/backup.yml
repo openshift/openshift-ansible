@@ -1,84 +1,14 @@
 ---
 - name: Backup etcd
   hosts: oo_etcd_hosts_to_backup
-  vars:
-    embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' if not openshift.common.is_etcd_system_container else 'runc exec etcd etcdctl' }}"
-    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
-  - openshift_facts
-  tasks:
-  # Ensure we persist the etcd role for this host in openshift_facts
-  - openshift_facts:
-      role: etcd
-      local_facts: {}
-    when: "'etcd' not in openshift"
-  - set_fact:
-      etcd_backup_dir: "{{ openshift.etcd.etcd_data_dir }}/openshift-backup-{{ backup_tag | default('') }}{{ timestamp }}"
-
-  # TODO: replace shell module with command and update later checks
-  - name: Check available disk space for etcd backup
-    shell: df --output=avail -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1
-    register: avail_disk
-    # AUDIT:changed_when: `false` because we are only inspecting
-    # state, not manipulating anything
-    changed_when: false
-
-  # TODO: replace shell module with command and update later checks
-  - name: Check current etcd disk usage
-    shell: du --exclude='*openshift-backup*' -k {{ openshift.etcd.etcd_data_dir }} | tail -n 1 | cut -f1
-    register: etcd_disk_usage
-    when: embedded_etcd | bool
-    # AUDIT:changed_when: `false` because we are only inspecting
-    # state, not manipulating anything
-    changed_when: false
-
-  - name: Abort if insufficient disk space for etcd backup
-    fail:
-      msg: >
-        {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
-        {{ avail_disk.stdout }} Kb available.
-    when: (embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
-
-  # For non containerized and non embedded we should have the correct version of
-  # etcd installed already. So don't do anything.
-  #
-  # For containerized installs we now exec into etcd_container
-  #
-  # For embedded non containerized we need to ensure we have the latest version
-  # etcd on the host.
-  - name: Install latest etcd for embedded
-    package:
-      name: etcd
-      state: latest
-    when:
-    - embedded_etcd | bool
-    - not openshift.common.is_atomic | bool
-
-  - name: Generate etcd backup
-    command: >
-      {{ etcdctl_command }} backup --data-dir={{ openshift.etcd.etcd_data_dir }}
-      --backup-dir={{ etcd_backup_dir }}
-
-  # According to the docs change you can simply copy snap/db
-  # https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
-  - name: Check for v3 data store
-    stat:
-      path: "{{ openshift.etcd.etcd_data_dir }}/member/snap/db"
-    register: v3_db
-
-  - name: Copy etcd v3 data store
-    command: >
-      cp -a {{ openshift.etcd.etcd_data_dir }}/member/snap/db
-      {{ etcd_backup_dir }}/member/snap/
-    when: v3_db.stat.exists
-
-  - set_fact:
-      etcd_backup_complete: True
-
-  - name: Display location of etcd backup
-    debug:
-      msg: "Etcd backup created in {{ etcd_backup_dir }}"
+  - role: openshift_facts
+  - role: etcd_upgrade
+    r_etcd_upgrade_action: backup
+    r_etcd_backup_tag: etcd_backup_tag
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    r_etcd_upgrade_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    r_etcd_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
 
 - name: Gate on etcd backup
   hosts: localhost
@@ -88,7 +18,7 @@
   - set_fact:
       etcd_backup_completed: "{{ hostvars
                                  | oo_select_keys(groups.oo_etcd_hosts_to_backup)
-                                 | oo_collect('inventory_hostname', {'etcd_backup_complete': true}) }}"
+                                 | oo_collect('inventory_hostname', {'r_etcd_upgrade_backup_complete': true}) }}"
   - set_fact:
       etcd_backup_failed: "{{ groups.oo_etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
   - fail:

@@ -15,6 +15,9 @@
     l_is_etcd_system_container: "{{ (use_etcd_system_container | default(use_system_containers) | bool) }}"
 - set_fact:
     l_any_system_container: "{{ l_is_etcd_system_container or l_is_openvswitch_system_container or l_is_node_system_container or l_is_master_system_container }}"
+- set_fact:
+    l_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if l_is_containerized else 'host' }}"
+
 
 - name: Validate python version
   fail:
@@ -80,6 +83,7 @@
       is_node_system_container: "{{ l_is_node_system_container | default(false) }}"
       is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
       is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
+      etcd_runtime: "{{ l_etcd_runtime }}"
       system_images_registry: "{{ system_images_registry | default('') }}"
       public_hostname: "{{ openshift_public_hostname | default(None) }}"
       public_ip: "{{ openshift_public_ip | default(None) }}"

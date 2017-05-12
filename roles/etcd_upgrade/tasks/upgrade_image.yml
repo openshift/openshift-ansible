@@ -1,27 +1,28 @@
 ---
+# INPUT r_etcd_upgrade_version
 - name: Verify cluster is healthy pre-upgrade
-  command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
+  command: "{{ etcdctlv2 }} cluster-health"
 
 - name: Get current image
-  shell: grep 'ExecStart=' /etc/systemd/system/etcd_container.service | awk '{print $NF}'
+  shell: "grep 'ExecStart=' {{ etcd_service_file }} | awk '{print $NF}'"
   register: current_image
 
 - name: Set new_etcd_image
   set_fact:
-    new_etcd_image: "{{ current_image.stdout | regex_replace('/etcd.*$','/etcd:' ~ upgrade_version ) }}"
+    new_etcd_image: "{{ current_image.stdout | regex_replace('/etcd.*$','/etcd:' ~ r_etcd_upgrade_version ) }}"
 
 - name: Pull new etcd image
   command: "docker pull {{ new_etcd_image }}"
 
 - name: Update to latest etcd image
   replace:
-    dest: /etc/systemd/system/etcd_container.service
+    dest: "{{ etcd_service_file }}"
     regexp: "{{ current_image.stdout }}$"
     replace: "{{ new_etcd_image }}"
 
 - name: Restart etcd_container
   systemd:
-    name: etcd_container
+    name: "{{ etcd_service }}"
     daemon_reload: yes
     state: restarted
 
@@ -30,16 +31,17 @@
 ## the container may be newer than etcdctl on the host. Assumes etcd3 obsoletes etcd (7.3.1)
 - name: Upgrade etcd for etcdctl when not atomic
   package: name=etcd state=latest
-  when: not openshift.common.is_atomic | bool
+  when: not l_ostree_booted.stat.exists | bool
 
 - name: Verify cluster is healthy
-  command: "etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt -C https://{{ openshift.common.hostname }}:2379 cluster-health"
+  command: "{{ etcdctlv2 }} cluster-health"
   register: etcdctl
   until: etcdctl.rc == 0
   retries: 3
   delay: 10
 
 - name: Store new etcd_image
+  # DEPENDENCY openshift_facts
   openshift_facts:
     role: etcd
     local_facts:
