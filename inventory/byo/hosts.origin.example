@@ -400,6 +400,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Default value: 'region=infra'
 #openshift_hosted_registry_selector='region=infra'
 #
+# Registry host (optional)
+# The host for the registry route
+# Default value: 'docker-registry-default.{{openshift_master_default_subdomain}}'
+#openshift_hosted_registry_routehost=docker-registry-default.example.org
+#
 # Registry replicas (optional)
 # Unless specified, openshift-ansible will calculate the replica count
 # based on the number of nodes matching the openshift registry selector.
