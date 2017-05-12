@@ -62,26 +62,26 @@ objects:
             privileged: true
           readinessProbe:
             timeoutSeconds: 3
-            initialDelaySeconds: 100
+            initialDelaySeconds: 40
             exec:
               command:
               - "/bin/bash"
               - "-c"
               - systemctl status glusterd.service
-            periodSeconds: 10
+            periodSeconds: 25
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 15
           livenessProbe:
             timeoutSeconds: 3
-            initialDelaySeconds: 100
+            initialDelaySeconds: 40
             exec:
               command:
               - "/bin/bash"
               - "-c"
               - systemctl status glusterd.service
-            periodSeconds: 10
+            periodSeconds: 25
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 15
           resources: {}
           terminationMessagePath: "/dev/termination-log"
         volumes:
