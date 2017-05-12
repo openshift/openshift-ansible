@@ -61,13 +61,11 @@
 
 - name: Label GlusterFS nodes
   oc_label:
-    name: "{{ glusterfs_host }}"
+    name: "{{ hostvars[item].openshift.common.hostname }}"
     kind: node
     state: add
     labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
-  loop_control:
-    loop_var: glusterfs_host
 
 - name: Copy GlusterFS DaemonSet template
   copy:
