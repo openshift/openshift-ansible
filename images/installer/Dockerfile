@@ -46,6 +46,6 @@ ADD . /tmp/src
 RUN /usr/libexec/s2i/assemble
 
 # Add files for running as a system container
-COPY system-container/root /
+COPY images/installer/system-container/root /
 
 CMD [ "/usr/libexec/s2i/run" ]
