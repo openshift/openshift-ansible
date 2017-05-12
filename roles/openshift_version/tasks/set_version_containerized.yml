@@ -10,9 +10,13 @@
     openshift_version: "{{ openshift_release }}"
   when: openshift_release is defined and openshift_version is not defined
 
+- name: Set default image tag based on OCP versus origin
+  set_fact:
+    l_image_tag: "{{ 'v3.4' if openshift.common.deployment_type == 'openshift-enterprise' else 'latest' }}"
+
 - name: Lookup latest containerized version if no version specified
   command: >
-    docker run --rm {{ openshift.common.cli_image }}:latest version
+    docker run --rm {{ openshift.common.cli_image }}:{{ l_image_tag }} version
   register: cli_image_version
   when: openshift_version is not defined
 
@@ -36,4 +40,3 @@
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: openshift_version is defined and openshift_version.split('.') | length == 2
-
