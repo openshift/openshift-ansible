@@ -89,6 +89,7 @@
     params:
       IMAGE_NAME: "{{ glusterfs_image }}"
       IMAGE_VERSION: "{{ glusterfs_version }}"
+      NODE_LABELS: "{{ glusterfs_nodeselector }}"
 
 - name: Wait for GlusterFS pods
   oc_obj:

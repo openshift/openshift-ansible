@@ -28,8 +28,7 @@ objects:
         labels:
           glusterfs-node: pod
       spec:
-        nodeSelector:
-          storagenode: glusterfs
+        nodeSelector: "${{NODE_LABELS}}"
         hostNetwork: true
         containers:
         - name: glusterfs
@@ -120,6 +119,10 @@ objects:
         dnsPolicy: ClusterFirst
         securityContext: {}
 parameters:
+- name: NODE_LABELS
+  displayName: Daemonset Node Labels
+  description: Labels which define the daemonset node selector.
+  value: '{ "storagenode": "glusterfs" }'
 - name: IMAGE_NAME
   displayName: GlusterFS container name
   required: True
