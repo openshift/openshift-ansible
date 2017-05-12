@@ -378,6 +378,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cockpit_deployer_prefix=registry.example.com/myrepo/
 # Override image version, defaults to latest for origin, matches the product version for enterprise
 #openshift_cockpit_deployer_version=1.4.1
+#
+# Registry console host (optional)
+# The host for the registry console route
+# Default value: 'registry-console-default.{{openshift_master_default_subdomain}}'
+#openshift_cockpit_registry_console_routehost=registry-console-default.example.org
 
 # Openshift Registry Options
 #
