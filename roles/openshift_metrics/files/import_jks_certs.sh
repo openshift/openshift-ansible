@@ -20,11 +20,11 @@ set -ex
 
 function import_certs() {
   dir=$CERT_DIR
-  hawkular_metrics_keystore_password=$(echo $METRICS_KEYSTORE_PASSWD | base64 -d)
-  hawkular_cassandra_keystore_password=$(echo $CASSANDRA_KEYSTORE_PASSWD | base64 -d)
-  hawkular_metrics_truststore_password=$(echo $METRICS_TRUSTSTORE_PASSWD | base64 -d)
-  hawkular_cassandra_truststore_password=$(echo $CASSANDRA_TRUSTSTORE_PASSWD | base64 -d)
-  hawkular_jgroups_password=$(echo $JGROUPS_PASSWD | base64 -d)
+  hawkular_metrics_keystore_password=$(echo $METRICS_KEYSTORE_PASSWD | base64 --decode)
+  hawkular_cassandra_keystore_password=$(echo $CASSANDRA_KEYSTORE_PASSWD | base64 --decode)
+  hawkular_metrics_truststore_password=$(echo $METRICS_TRUSTSTORE_PASSWD | base64 --decode)
+  hawkular_cassandra_truststore_password=$(echo $CASSANDRA_TRUSTSTORE_PASSWD | base64 --decode)
+  hawkular_jgroups_password=$(echo $JGROUPS_PASSWD | base64 --decode)
 
   if [ -f $dir/hawkular-cassandra.truststore ]; then
     cassandra_alias=`keytool -noprompt -list -keystore $dir/hawkular-cassandra.truststore -storepass ${hawkular_cassandra_truststore_password} | sed -n '7~2s/,.*$//p'`
@@ -55,7 +55,7 @@ function import_certs() {
       -srcstorepass $hawkular_cassandra_keystore_password \
       -deststorepass $hawkular_cassandra_keystore_password
   fi
-  
+
   if [[ ! ${cassandra_alias[*]} =~ hawkular-metrics ]]; then
     echo "Importing the Hawkular Certificate into the Cassandra Truststore"
     keytool -noprompt -import -v -trustcacerts -alias hawkular-metrics \
@@ -64,7 +64,7 @@ function import_certs() {
       -trustcacerts \
       -storepass $hawkular_cassandra_truststore_password
   fi
-  
+
   if [[ ! ${hawkular_alias[*]} =~ hawkular-cassandra ]]; then
     echo "Importing the Cassandra Certificate into the Hawkular Truststore"
     keytool -noprompt -import -v -trustcacerts -alias hawkular-cassandra \
