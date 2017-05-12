@@ -59,6 +59,28 @@ class CallbackModule(CallbackBase):
                 indented = u'{}{}'.format(subsequent_indent, entry)
                 self._display.display(indented)
 
+        if self.__failures:
+            failed_checks = [
+                name
+                for name, result in failure['result']._result.get('checks', []).items()
+                for failure in self.__failures
+                if result.get('failed', False)
+            ]
+            # FIXME: get name of currently running playbook, if possible.
+            NAME_OF_PLAYBOOK = 'playbooks/byo/config.yml'
+            msg = (
+                "\nThe execution of the playbook '{}' includes checks designed "
+                'to ensure it can complete successfully. One or more of these '
+                'checks failed. You may choose to disable checks by setting an '
+                'Ansible variable:\n\n'
+                '    openshift_disable_check={}\n\n'
+                'Set the variable to a comma-separated list of check names. '
+                'Check names are shown in the failure summary above.\n'
+                'The variable can be set in the inventory or passed in the '
+                'command line using the -e flag to ansible-playbook.'
+            ).format(NAME_OF_PLAYBOOK, ','.join(sorted(set(failed_checks))))
+            self._display.display(msg)
+
 
 # Reason: disable pylint protected-access because we need to access _*
 #         attributes of a task result to implement this method.
