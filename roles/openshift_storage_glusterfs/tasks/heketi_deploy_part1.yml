@@ -38,4 +38,4 @@
   # Pod's 'Ready' status must be True
   - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"

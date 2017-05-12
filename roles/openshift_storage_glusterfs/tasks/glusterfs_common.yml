@@ -39,7 +39,7 @@
   register: heketi_pod
   until: "heketi_pod.results.results[0]['items'] | count == 0"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when: glusterfs_heketi_wipe
 
 - name: Wait for heketi pods to terminate
@@ -51,7 +51,7 @@
   register: heketi_pod
   until: "heketi_pod.results.results[0]['items'] | count == 0"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when: glusterfs_heketi_wipe
 
 - name: Create heketi service account
@@ -130,7 +130,7 @@
   - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"
   - "heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port != ''"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_url is undefined

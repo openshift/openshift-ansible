@@ -28,7 +28,7 @@
   # Pod's 'Complete' status must be True
   - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   failed_when:
   - "'results' in heketi_job.results"
   - "heketi_job.results.results | count > 0"
@@ -85,7 +85,7 @@
   # Pod's 'Ready' status must be True
   - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
 - name: Determine heketi URL
   oc_obj:
@@ -98,7 +98,7 @@
   - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"
   - "heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port != ''"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
 - name: Set heketi URL
   set_fact:

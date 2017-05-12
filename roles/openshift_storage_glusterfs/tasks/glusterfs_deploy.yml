@@ -104,4 +104,4 @@
   # There must be as many pods with 'Ready' staus  True as there are nodes expecting those pods
   - "glusterfs_pods.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == glusterfs_nodes | count"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
