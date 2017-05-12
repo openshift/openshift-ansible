@@ -1,0 +1,5 @@
+---
+# EXPECTS openshift.common.is_containerized
+# EXPECTS embedded_etcd
+# EXPECTS openshift.common.is_etcd_system_container
+etcdctl_command: "{{ 'etcdctl' if not openshift.common.is_containerized or embedded_etcd else 'docker exec etcd_container etcdctl' if not openshift.common.is_etcd_system_container else 'runc exec etcd etcdctl' }}"

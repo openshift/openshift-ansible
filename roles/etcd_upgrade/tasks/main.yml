@@ -1,0 +1,13 @@
+---
+# INPUT etcd_upgrade_version
+# INPUT openshift.common.is_containerized
+- set_fact:
+    l_upgrade_mechanism: "rpm"
+
+- set_fact:
+    l_upgrade_mechanism: "image"
+  when:
+  - openshift.common.is_containerized | bool
+
+- name: "Upgrade {{ l_upgrade_mechanism }} based etcd"
+  include: upgrade_{{ l_upgrade_mechanism }}.yml
