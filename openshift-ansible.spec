@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.65.2
+Version:        3.6.65.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri May 12 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.3-1
+- doc: Add link to daemon.json upstream doc (smilner@redhat.com)
+- Remove unused daemon.json keys (smilner@redhat.com)
+- bug 1441369. Kibana memory limits bug 1439451. Kibana crash
+  (jcantril@redhat.com)
+- Extend repoquery command (of lib_utils role) to ignore excluders
+  (jchaloup@redhat.com)
+- lower case in /etc/daemon.json and correct block-registry (ghuang@redhat.com)
+- Fix for yedit custom separators (mwoodson@redhat.com)
+- Updating 3.6 enterprise registry-console template image version
+  (ewolinet@redhat.com)
+- Default to iptables on master (sdodson@redhat.com)
+- Temporarily revert to OSEv3 host group usage (rteague@redhat.com)
+- Fix for OpenShift SDN Check (vincent.schwarzer@yahoo.de)
+- Updating size suffix for metrics in role (ewolinet@redhat.com)
+- run excluders over selected set of hosts during control_plane/node upgrade
+  (jchaloup@redhat.com)
+
 * Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.2-1
 - Rename blocked-registries to block-registries (smilner@redhat.com)
 - Ensure true is lowercase in daemon.json (smilner@redhat.com)
