@@ -93,7 +93,7 @@
 
 - name: Ensure docker.service.d directory exists
   file:
-    path: "{{ docker_systemd_dir }}"
+    path: "{{ container_engine_systemd_dir }}"
     state: directory
 
 - name: Ensure /etc/docker directory exists
@@ -111,7 +111,7 @@
 
 - name: Configure Container Engine Service File
   template:
-    dest: "{{ docker_systemd_dir }}/custom.conf"
+    dest: "{{ container_engine_systemd_dir }}/custom.conf"
     src: systemcontainercustom.conf.j2
 
 # Set local versions of facts that must be in json format for daemon.json
