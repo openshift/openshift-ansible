@@ -24,12 +24,18 @@
     msg: |
       openshift-ansible requires Python 3 for {{ ansible_distribution }};
       For information on enabling Python 3 with Ansible, see https://docs.ansible.com/ansible/python_3_support.html
-  when: ansible_distribution == 'Fedora' and ansible_python['version']['major'] != 3
+  when:
+  - ansible_distribution == 'Fedora'
+  - ansible_python['version']['major'] != 3
+  - r_openshift_facts_ran is not defined
 
 - name: Validate python version
   fail:
     msg: "openshift-ansible requires Python 2 for {{ ansible_distribution }}"
-  when: ansible_distribution != 'Fedora' and ansible_python['version']['major'] != 2
+  when:
+  - ansible_distribution != 'Fedora'
+  - ansible_python['version']['major'] != 2
+  - r_openshift_facts_ran is not defined
 
 # Fail as early as possible if Atomic and old version of Docker
 - block:
@@ -48,7 +54,9 @@
       that:
       - l_atomic_docker_version.stdout | replace('"', '') | version_compare('1.12','>=')
 
-  when: l_is_atomic | bool
+  when:
+  - l_is_atomic | bool
+  - r_openshift_facts_ran is not defined
 
 - name: Load variables
   include_vars: "{{ item }}"
@@ -59,7 +67,9 @@
 - name: Ensure various deps are installed
   package: name={{ item }} state=present
   with_items: "{{ required_packages }}"
-  when: not l_is_atomic | bool
+  when:
+  - not l_is_atomic | bool
+  - r_openshift_facts_ran is not defined
 
 - name: Ensure various deps for running system containers are installed
   package: name={{ item }} state=present
@@ -67,6 +77,7 @@
   when:
   - not l_is_atomic | bool
   - l_any_system_container | bool
+  - r_openshift_facts_ran is not defined
 
 - name: Gather Cluster facts and set is_containerized if needed
   openshift_facts:
@@ -99,3 +110,7 @@
 - name: Set repoquery command
   set_fact:
     repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
+
+- name: Register that this already ran
+  set_fact:
+    r_openshift_facts_ran: True

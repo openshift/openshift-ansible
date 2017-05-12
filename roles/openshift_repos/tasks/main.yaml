@@ -4,7 +4,8 @@
     path: /run/ostree-booted
   register: ostree_booted
 
-- block:
+- when: not ostree_booted.stat.exists
+  block:
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
 
@@ -24,41 +25,40 @@
     - openshift_additional_repos | length == 0
     notify: refresh cache
 
-  # Note: OpenShift repositories under CentOS may be shipped through the
-  # "centos-release-openshift-origin" package which configures the repository.
-  # This task matches the file names provided by the package so that they are
-  # not installed twice in different files and remains idempotent.
-  - name: Configure origin gpg keys if needed
-    copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-    with_items:
-    - src: origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS
-      dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS
-    - src: origin/repos/openshift-ansible-centos-paas-sig.repo
-      dest: /etc/yum.repos.d/CentOS-OpenShift-Origin.repo
-    notify: refresh cache
-    when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution != "Fedora"
-    - openshift_deployment_type == 'origin'
-    - openshift_enable_origin_repo | default(true) | bool
-
   # Singleton block
-  - when: r_osr_first_run | default(true)
+  - when: r_openshift_repos_has_run is not defined
     block:
+
+    # Note: OpenShift repositories under CentOS may be shipped through the
+    # "centos-release-openshift-origin" package which configures the repository.
+    # This task matches the file names provided by the package so that they are
+    # not installed twice in different files and remains idempotent.
+    - name: Configure origin gpg keys if needed
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+      - src: origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS
+        dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS
+      - src: origin/repos/openshift-ansible-centos-paas-sig.repo
+        dest: /etc/yum.repos.d/CentOS-OpenShift-Origin.repo
+      notify: refresh cache
+      when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution != "Fedora"
+      - openshift_deployment_type == 'origin'
+      - openshift_enable_origin_repo | default(true) | bool
+
     - name: Ensure clean repo cache in the event repos have been changed manually
       debug:
         msg: "First run of openshift_repos"
       changed_when: true
       notify: refresh cache
 
-    - name: Set fact r_osr_first_run false
+    - name: Record that openshift_repos already ran
       set_fact:
-        r_osr_first_run: false
+        r_openshift_repos_has_run: True
 
   # Force running ALL handlers now, because we expect repo cache to be cleared
   # if changes have been made.
   - meta: flush_handlers
-
-  when: not ostree_booted.stat.exists
