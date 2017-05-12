@@ -27,7 +27,7 @@
     state: present
   when: not openshift.common.is_atomic | bool
 
-# If we are on atomic, set http_proxy and https_proxy in /etc/atomic.conf
+# Set http_proxy and https_proxy in /etc/atomic.conf
 - block:
 
     - name: Add http_proxy to /etc/atomic.conf
@@ -45,9 +45,6 @@
       when:
         - openshift.common.https_proxy is defined
         - openshift.common.https_proxy != ''
-
-  when: openshift.common.is_atomic | bool
-
 
 - block:
 
