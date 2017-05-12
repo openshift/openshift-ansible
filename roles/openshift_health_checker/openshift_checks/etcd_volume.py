@@ -14,9 +14,10 @@ class EtcdVolume(OpenShiftCheck):
 
     @classmethod
     def is_active(cls, task_vars):
-        # TODO: only execute this check on hosts in the 'ectd' group?
-        # Maybe also 'masters' if there are no standalone etcd hosts?
-        return super(EtcdVolume, cls).is_active(task_vars)
+        etcd_hosts = get_var(task_vars, "groups", "etcd", default=[]) or get_var(task_vars, "groups", "masters",
+                                                                                 default=[]) or []
+        is_etcd_host = get_var(task_vars, "ansible_ssh_host") in etcd_hosts
+        return super(EtcdVolume, cls).is_active(task_vars) and is_etcd_host
 
     def run(self, tmp, task_vars):
         mount_info = self._etcd_mount_info(task_vars)
