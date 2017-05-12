@@ -35,8 +35,10 @@ class OCObjectValidator(OpenShiftCLI):
             # check if it uses a reserved name
             name = namespace['metadata']['name']
             if not any((name == 'kube',
+                        name == 'kubernetes',
                         name == 'openshift',
                         name.startswith('kube-'),
+                        name.startswith('kubernetes-'),
                         name.startswith('openshift-'),)):
                 return False
 
