@@ -967,7 +967,7 @@ class OpenShiftCLI(object):
         else:
             cmd.append(template_name)
         if params:
-            param_str = ["{}={}".format(key, value) for key, value in params.items()]
+            param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
             cmd.append('-v')
             cmd.extend(param_str)
 
