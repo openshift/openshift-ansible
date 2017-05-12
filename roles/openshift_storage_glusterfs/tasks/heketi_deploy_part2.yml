@@ -46,7 +46,6 @@
   with_items:
   - kind: "template,route,service,jobs,dc,secret"
     selector: "deploy-heketi"
-  failed_when: False
 
 - name: Copy heketi template
   copy:
