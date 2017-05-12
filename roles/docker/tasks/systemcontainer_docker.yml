@@ -41,7 +41,7 @@
     daemon_reload: yes
   ignore_errors: True
 
-# Set http_proxy and https_proxy in /etc/atomic.conf
+# Set http_proxy, https_proxy, and no_proxy in /etc/atomic.conf
 - block:
 
     - name: Add http_proxy to /etc/atomic.conf
@@ -59,6 +59,14 @@
       when:
         - openshift.common.https_proxy is defined
         - openshift.common.https_proxy != ''
+
+    - name: Add no_proxy to /etc/atomic.conf
+      lineinfile:
+        path: /etc/atomic.conf
+        line: "no_proxy={{ openshift.common.no_proxy | default('') }}"
+      when:
+        - openshift.common.no_proxy is defined
+        - openshift.common.no_proxy != ''
 
 - block:
 
