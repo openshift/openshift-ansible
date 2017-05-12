@@ -1,10 +1,9 @@
 #!/bin/bash
 set -xeuo pipefail
 
-# F25 currently has 2.2.1, so install from pypi
-pip install ansible==2.2.2.0
+pip install -r requirements.txt
 
-# do a simple ping to make sure the nodes are available
+# ping the nodes to check they're responding and register their ostree versions
 ansible -vvv -i .redhat-ci.inventory nodes -a 'rpm-ostree status'
 
 upload_journals() {
