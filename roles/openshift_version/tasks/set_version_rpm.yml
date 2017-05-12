@@ -8,7 +8,17 @@
   - openshift_version is not defined
 
 - block:
-  - include: rpm_version.yml
+  - name: Get available {{ openshift.common.service_type}} version
+    repoquery:
+      name: "{{ openshift.common.service_type}}"
+      ignore_excluders: true
+    register: rpm_results
+
+  - fail:
+      msg: "Package {{ openshift.common.service_type}} not found"
+    when: not rpm_results.results.package_found
+
   - set_fact:
-      openshift_version: "{{ openshift_rpm_version }}"
-  when: openshift_version is not defined
+      openshift_version: "{{ rpm_results.results.versions.available_versions.0 | default('0.0', True) }}"
+  when:
+  - openshift_version is not defined

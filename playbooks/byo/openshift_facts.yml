@@ -8,7 +8,8 @@
   - always
 
 - name: Gather Cluster facts
-  hosts: g_all_hosts
+  # Temporarily reverting to OSEv3 until group standardization is complete
+  hosts: OSEv3
   roles:
   - openshift_facts
   tasks:

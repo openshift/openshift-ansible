@@ -3,9 +3,15 @@
   tags:
   - always
 
-- include: disable_excluder.yml
+- name: Disable excluders
+  hosts: oo_masters_to_config:oo_nodes_to_config
   tags:
   - always
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: openshift_excluder
+      tasks_from: disable
 
 - include: ../openshift-etcd/config.yml
   tags:
@@ -39,6 +45,12 @@
   tags:
   - hosted
 
-- include: reset_excluder.yml
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_masters_to_config:oo_nodes_to_config
   tags:
   - always
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: openshift_excluder
+      tasks_from: enable
