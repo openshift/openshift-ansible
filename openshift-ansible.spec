@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.65.3
+Version:        3.6.65.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat May 13 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.4-1
+- Remove userland-proxy-path from daemon.json (smilner@redhat.com)
+- Fix whistespace issues in custom template (smilner@redhat.com)
+- Always add proxy items to atomic.conf (smilner@redhat.com)
+- Move container-engine systemd environment to updated location
+  (smilner@redhat.com)
+- Reserve kubernetes and 'kubernetes-' prefixed namespaces
+  (jliggitt@redhat.com)
+
 * Fri May 12 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.3-1
 - doc: Add link to daemon.json upstream doc (smilner@redhat.com)
 - Remove unused daemon.json keys (smilner@redhat.com)
