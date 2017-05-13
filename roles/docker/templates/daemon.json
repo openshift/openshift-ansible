@@ -16,6 +16,5 @@
     },
     "selinux-enabled": {{ l_docker_selinux_enabled | lower }},
     "add-registry": {{ l_docker_additional_registries }},
-    "block-registry": {{ l_docker_blocked_registries }},
-    "userland-proxy-path": "/usr/libexec/docker/docker-proxy-current"
+    "block-registry": {{ l_docker_blocked_registries }}
 }
