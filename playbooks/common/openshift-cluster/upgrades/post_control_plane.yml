@@ -8,6 +8,7 @@
     openshift_deployment_type: "{{ deployment_type }}"
     registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', openshift_image_tag ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', openshift_image_tag ) }}"
+    registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') | replace ( '${version}', openshift.common.short_version ) }}"
     oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
 
   pre_tasks:
@@ -59,6 +60,26 @@
     # AUDIT:changed_when_note: `false` not being set here. What we
     # need to do is check the current registry image version and see
     # if this task needs to be ran.
+
+  - name: Check for registry-console
+    oc_obj:
+      state: list
+      kind: dc
+      name: registry-console
+    register: _registry_console
+    when:
+    - openshift.common.deployment_type != 'origin'
+
+  - name: Update registry-console image to current version
+    oc_edit:
+      kind: dc
+      name: registry-console
+      namespace: default
+      content:
+        spec.template.spec.containers[0].image: "{{ registry_console_image }}"
+    when:
+    - openshift.common.deployment_type != 'origin'
+    - _registry_console.results.results[0] != {}
 
   roles:
   - openshift_manageiq
