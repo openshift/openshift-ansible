@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.67
+Version:        3.6.68
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,54 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat May 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.68-1
+- Updating registry-console image version during a post_control_plane upgrade
+  (ewolinet@redhat.com)
+- Remove userland-proxy-path from daemon.json (smilner@redhat.com)
+- Fix whistespace issues in custom template (smilner@redhat.com)
+- Always add proxy items to atomic.conf (smilner@redhat.com)
+- Move container-engine systemd environment to updated location
+  (smilner@redhat.com)
+- doc: Add link to daemon.json upstream doc (smilner@redhat.com)
+- Remove unused daemon.json keys (smilner@redhat.com)
+- bug 1448860. Change recovery_after_nodes to match node_quorum
+  (jcantril@redhat.com)
+- bug 1441369. Kibana memory limits bug 1439451. Kibana crash
+  (jcantril@redhat.com)
+- Extend repoquery command (of lib_utils role) to ignore excluders
+  (jchaloup@redhat.com)
+- lower case in /etc/daemon.json and correct block-registry (ghuang@redhat.com)
+- Fix for yedit custom separators (mwoodson@redhat.com)
+- Updating 3.6 enterprise registry-console template image version
+  (ewolinet@redhat.com)
+- Default to iptables on master (sdodson@redhat.com)
+- Rename blocked-registries to block-registries (smilner@redhat.com)
+- Ensure true is lowercase in daemon.json (smilner@redhat.com)
+- use docker_log_driver and /etc/docker/daemon.json to determine log driver
+  (rmeggins@redhat.com)
+- Temporarily revert to OSEv3 host group usage (rteague@redhat.com)
+- Add service file templates for master and node (smilner@redhat.com)
+- Update systemd units to use proper container service name
+  (smilner@redhat.com)
+- polish etcd_common role (jchaloup@redhat.com)
+- Note existence of Fedora tests and how to rerun (rhcarvalho@gmail.com)
+- Fix for OpenShift SDN Check (vincent.schwarzer@yahoo.de)
+- Updating oc_obj to use get instead of getattr (ewolinet@redhat.com)
+- Updating size suffix for metrics in role (ewolinet@redhat.com)
+- GlusterFS: Allow swapping an existing registry's backend storage
+  (jarrpa@redhat.com)
+- GlusterFS: Allow for a separate registry-specific playbook
+  (jarrpa@redhat.com)
+- GlusterFS: Improve role documentation (jarrpa@redhat.com)
+- hosted_registry: Get correct pod selector for GlusterFS storage
+  (jarrpa@redhat.com)
+- hosted registry: Fix typo (jarrpa@redhat.com)
+- run excluders over selected set of hosts during control_plane/node upgrade
+  (jchaloup@redhat.com)
+- Reserve kubernetes and 'kubernetes-' prefixed namespaces
+  (jliggitt@redhat.com)
+- oc_volume: Add missing parameter documentation (jarrpa@redhat.com)
+
 * Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.67-1
 - byo: correct option name (gscrivan@redhat.com)
 - Fail if rpm version != docker image version (jchaloup@redhat.com)
