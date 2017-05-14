@@ -27,6 +27,20 @@
     state: present
   when: not openshift.common.is_atomic | bool
 
+# Make sure Docker is installed so we are able to use the client
+- name: Install Docker so we can use the client
+  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
+  when: not openshift.common.is_atomic | bool
+
+# Make sure docker is disabled. Errors are ignored.
+- name: Disable Docker
+  systemd:
+    name: docker
+    enabled: no
+    state: stopped
+    daemon_reload: yes
+  ignore_errors: True
+
 # Set http_proxy and https_proxy in /etc/atomic.conf
 - block:
 
@@ -78,17 +92,7 @@
   command: "atomic pull --storage ostree {{ l_docker_image }}"
   changed_when: false
 
-# Make sure docker is disabled Errors are ignored as docker may not
-# be installed.
-- name: Disable Docker
-  systemd:
-    name: docker
-    enabled: no
-    state: stopped
-    daemon_reload: yes
-  ignore_errors: True
-
-- name: Ensure docker.service.d directory exists
+- name: Ensure container-engine.service.d directory exists
   file:
     path: "{{ container_engine_systemd_dir }}"
     state: directory

@@ -1302,7 +1302,7 @@ def get_version_output(binary, version_cmd):
 def get_docker_version_info():
     """ Parses and returns the docker version info """
     result = None
-    if is_service_running('docker'):
+    if is_service_running('docker') or is_service_running('container-engine'):
         version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
         if 'Server' in version_info:
             result = {
