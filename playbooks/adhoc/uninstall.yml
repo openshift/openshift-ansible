@@ -305,8 +305,15 @@
   - shell: systemctl daemon-reload
     changed_when: False
 
+  - name: restart container-engine
+    service: name=container-engine state=restarted
+    ignore_errors: true
+    register: container_engine
+
   - name: restart docker
     service: name=docker state=restarted
+    ignore_errors: true
+    when: "container_engine.state != 'started'"
 
   - name: restart NetworkManager
     service: name=NetworkManager state=restarted
