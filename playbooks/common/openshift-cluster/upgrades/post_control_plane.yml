@@ -72,13 +72,13 @@
     - openshift.common.deployment_type != 'origin'
 
   - name: Update registry-console image to current version
-    when: _registry_console.rc == 0
     command: >
       {{ oc_cmd }} patch dc/registry-console -n default -p
       '{"spec":{"template":{"spec":{"containers":[{"name":"registry-console","image":"{{ registry_console_image }}"}]}}}}'
       --api-version=v1
     when:
     - openshift.common.deployment_type != 'origin'
+    - _registry_console.rc == 0
 
 # Check for warnings to be printed at the end of the upgrade:
 - name: Check for warnings
