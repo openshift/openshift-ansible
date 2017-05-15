@@ -1,5 +1,5 @@
 ---
-# INPUT etcd_upgrade_version
+# INPUT r_etcd_upgrade_version
 # INPUT openshift.common.is_atomic
 - name: Verify cluster is healthy pre-upgrade
   # ORIGIN etcdctlv2 etcd_upgrade.vars
@@ -12,7 +12,7 @@
 
 - name: Set new_etcd_image
   set_fact:
-    new_etcd_image: "{{ current_image.stdout | regex_replace('/etcd.*$','/etcd:' ~ etcd_upgrade_version ) }}"
+    new_etcd_image: "{{ current_image.stdout | regex_replace('/etcd.*$','/etcd:' ~ r_etcd_upgrade_version ) }}"
 
 - name: Pull new etcd image
   command: "docker pull {{ new_etcd_image }}"

@@ -3,7 +3,8 @@
   hosts: oo_first_etcd
   any_errors_fatal: true
   roles:
-    - etcd_common
+    - role: etcd_common
+      r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
   post_tasks:
     - name: Determine if generated etcd certificates exist
       stat:
@@ -27,7 +28,8 @@
   hosts: oo_etcd_to_config
   any_errors_fatal: true
   roles:
-    - etcd_common
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
   post_tasks:
     - name: Backup etcd certificates
       command: >
@@ -50,6 +52,7 @@
       etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
       openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+      r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
 
 - name: Redeploy etcd client certificates for masters
   hosts: oo_masters_to_config
@@ -63,4 +66,5 @@
       etcd_cert_prefix: "master.etcd-"
       openshift_ca_host: "{{ groups.oo_first_master.0 }}"
       openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
+      r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
       when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config

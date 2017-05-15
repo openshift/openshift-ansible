@@ -1,5 +1,4 @@
 ---
-# TODO(jchaloup): get rid of the openshift.common, e.g. introduce etcd_containerized = True|False
-etcd_service: "{{ 'etcd' if openshift.common.is_etcd_system_container | bool or not etcd_is_containerized | bool else 'etcd_container' }}"
-# Location of the service file is fixed and meant to be changed
+etcd_service: "{{ 'etcd_container' if r_etcd_common_etcd_runtime == 'docker' else 'etcd' }}"
+# Location of the service file is fixed and not meant to be changed
 etcd_service_file: "/etc/systemd/system/{{ etcd_service }}.service"

@@ -1,5 +1,5 @@
 ---
-# INPUT etcd_upgrade_version
+# INPUT r_etcd_upgrade_version?
 
 # F23 GA'd with etcd 2.0, currently has 2.2 in updates
 # F24 GA'd with etcd-2.2, currently has 2.2 in updates
@@ -13,9 +13,9 @@
   command: "{{ etcdctlv2 }} cluster-health"
 
 - set_fact:
-    l_etcd_target_package: "{{ 'etcd' if etcd_upgrade_version is not defined else 'etcd-'+etcd_upgrade_version+'*' }}"
+    l_etcd_target_package: "{{ 'etcd' if r_etcd_upgrade_version is not defined else 'etcd-'+r_etcd_upgrade_version+'*' }}"
 
-- name: Update etcd RPM
+- name: Update etcd RPM to {{ l_etcd_target_package }}
   package:
     name: "{{ l_etcd_target_package }}"
     state: latest

@@ -1,0 +1,11 @@
+---
+# INPUT r_etcd_upgrade_version
+# INPUT r_etcd_upgrade_mechanism
+- name: Failt if r_etcd_upgrade_mechanism is not set during upgrade
+  fail:
+    msg: "r_etcd_upgrade_mechanism can be only set to 'rpm' or 'image'"
+  when:
+  - r_etcd_upgrade_mechanism not in ['rpm', 'image']
+
+- name: "Upgrade {{ r_etcd_upgrade_mechanism }} based etcd"
+  include: upgrade_{{ r_etcd_upgrade_mechanism }}.yml

@@ -1,13 +1,9 @@
 ---
-# INPUT etcd_upgrade_version
-# INPUT openshift.common.is_containerized
-- set_fact:
-    l_upgrade_mechanism: "rpm"
-
-- set_fact:
-    l_upgrade_mechanism: "image"
+# INPUT r_etcd_upgrade_action
+- name: Fail if invalid etcd_upgrade_action provided
+  fail:
+    msg: "etcd_upgrade role can only be called with 'upgrade' or 'backup'"
   when:
-  - openshift.common.is_containerized | bool
+  - r_etcd_upgrade_action not in ['upgrade', 'backup']
 
-- name: "Upgrade {{ l_upgrade_mechanism }} based etcd"
-  include: upgrade_{{ l_upgrade_mechanism }}.yml
+- include: "{{ r_etcd_upgrade_action }}.yml"

@@ -9,7 +9,8 @@
 - name: Backup existing etcd CA certificate directories
   hosts: oo_etcd_to_config
   roles:
-  - etcd_common
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
   tasks:
   - name: Determine if CA certificate directory exists
     stat:
@@ -52,7 +53,8 @@
   vars:
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
   roles:
-  - etcd_common
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
   tasks:
   - name: Create a tarball of the etcd ca certs
     command: >
@@ -98,7 +100,8 @@
 - name: Retrieve etcd CA certificate
   hosts: oo_first_etcd
   roles:
-  - etcd_common
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
   tasks:
   - name: Retrieve etcd CA certificate
     fetch:
