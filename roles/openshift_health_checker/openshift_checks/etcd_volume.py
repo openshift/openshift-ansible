@@ -29,7 +29,7 @@ class EtcdVolume(OpenShiftCheck):
 
         threshold = get_var(
             task_vars,
-            "r_openshift_health_checker_etcd_device_usage_threshold_percent",
+            "etcd_device_usage_threshold_percent",
             default=self.default_threshold_percent
         )
 
