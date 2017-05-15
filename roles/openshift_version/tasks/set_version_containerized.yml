@@ -12,7 +12,7 @@
 
 - name: Set default image tag based on OCP versus origin
   set_fact:
-    l_image_tag: "{{ 'v3.4' if openshift.common.deployment_type == 'openshift-enterprise' else 'latest' }}"
+    l_image_tag: "{{ 'v3.3' if openshift.common.deployment_type == 'openshift-enterprise' else 'latest' }}"
 
 - name: Lookup latest containerized version if no version specified
   command: >
