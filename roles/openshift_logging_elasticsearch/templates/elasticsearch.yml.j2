@@ -8,7 +8,6 @@ script:
 index:
   number_of_shards: 1
   number_of_replicas: 0
-  auto_expand_replicas: 0-2
   unassigned.node_left.delayed_timeout: 2m
   translog:
     flush_threshold_size: 256mb
@@ -29,6 +28,7 @@ cloud:
 discovery:
   type: kubernetes
   zen.ping.multicast.enabled: false
+  zen.minimum_master_nodes: {{es_min_masters}}
 
 gateway:
   expected_master_nodes: ${NODE_QUORUM}
@@ -37,6 +37,8 @@ gateway:
   recover_after_time: ${RECOVER_AFTER_TIME}
 
 io.fabric8.elasticsearch.authentication.users: ["system.logging.kibana", "system.logging.fluentd", "system.logging.curator", "system.admin"]
+io.fabric8.elasticsearch.kibana.mapping.app: /usr/share/elasticsearch/index_patterns/com.redhat.viaq-openshift.index-pattern.json
+io.fabric8.elasticsearch.kibana.mapping.ops: /usr/share/elasticsearch/index_patterns/com.redhat.viaq-openshift.index-pattern.json
 
 openshift.config:
   use_common_data_model: true
