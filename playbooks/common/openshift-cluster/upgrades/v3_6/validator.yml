@@ -7,4 +7,6 @@
   hosts: oo_first_master
   roles:
   - { role: lib_openshift }
-  tasks: []
+  tasks:
+  - name: Check for invalid namespaces and SDN errors
+    oc_objectvalidator:
