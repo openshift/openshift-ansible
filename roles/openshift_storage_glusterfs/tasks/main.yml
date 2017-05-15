@@ -11,8 +11,7 @@
 
 - include: glusterfs_registry.yml
   when:
-  - groups.glusterfs_registry | default([]) | count > 0
-  - "openshift.hosted.registry.storage.kind == 'glusterfs' or openshift.hosted.registry.glusterfs.swap"
+  - "groups.glusterfs_registry | default([]) | count > 0 or openshift.hosted.registry.storage.kind == 'glusterfs' or openshift.hosted.registry.glusterfs.swap"
 
 - name: Delete temp directory
   file:

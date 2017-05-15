@@ -21,7 +21,7 @@
 
 - include: glusterfs_common.yml
   when:
-  - "'glusterfs_registry' in groups"
+  - groups.glusterfs_registry | default([]) | count > 0
   - "'glusterfs' not in groups or groups.glusterfs_registry != groups.glusterfs"
 
 - name: Delete pre-existing GlusterFS registry resources
