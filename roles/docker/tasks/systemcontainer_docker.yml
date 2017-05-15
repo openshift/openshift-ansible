@@ -46,24 +46,24 @@
 
     - name: Add http_proxy to /etc/atomic.conf
       lineinfile:
-        path: /etc/atomic.conf
-        line: "http_proxy={{ openshift.common.http_proxy | default('') }}"
+        dest: /etc/atomic.conf
+        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
       when:
         - openshift.common.http_proxy is defined
         - openshift.common.http_proxy != ''
 
     - name: Add https_proxy to /etc/atomic.conf
       lineinfile:
-        path: /etc/atomic.conf
-        line: "https_proxy={{ openshift.common.https_proxy | default('') }}"
+        dest: /etc/atomic.conf
+        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
       when:
         - openshift.common.https_proxy is defined
         - openshift.common.https_proxy != ''
 
     - name: Add no_proxy to /etc/atomic.conf
       lineinfile:
-        path: /etc/atomic.conf
-        line: "no_proxy={{ openshift.common.no_proxy | default('') }}"
+        dest: /etc/atomic.conf
+        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
       when:
         - openshift.common.no_proxy is defined
         - openshift.common.no_proxy != ''
