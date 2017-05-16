@@ -37,7 +37,7 @@ LOGGING_INFRA_KEY = "logging-infra"
 # selectors for filtering resources
 DS_FLUENTD_SELECTOR = LOGGING_INFRA_KEY + "=" + "fluentd"
 LOGGING_SELECTOR = LOGGING_INFRA_KEY + "=" + "support"
-ROUTE_SELECTOR = "component=support, logging-infra=support, provider=openshift"
+ROUTE_SELECTOR = "component=support,logging-infra=support,provider=openshift"
 COMPONENTS = ["kibana", "curator", "elasticsearch", "fluentd", "kibana_ops", "curator_ops", "elasticsearch_ops"]
 
 
