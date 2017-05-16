@@ -28,6 +28,7 @@
   register: local_tmp
   changed_when: False
   check_mode: no
+  become: no
 
 - debug: msg="Created local temp dir {{local_tmp.stdout}}"
 
