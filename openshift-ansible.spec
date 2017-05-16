@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.71
+Version:        3.5.72
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.72-1
+- Updating registry-console image version as part of post_control_plane upgrade
+  (ewolinet@redhat.com)
+- Fix the missing file problem (me@fale.io)
+- Add /etc/sysconfig/etcd to etcd_container (me@fale.io)
+
 * Fri May 12 2017 Scott Dodson <sdodson@redhat.com> 3.5.71-1
 - Updating base64 decode switch for OSX (ewolinet@redhat.com)
 - Use v3.5 images on the release-1.5 branch (sdodson@redhat.com)
