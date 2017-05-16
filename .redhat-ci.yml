@@ -18,10 +18,10 @@ packages:
   - openssl-devel
   - redhat-rpm-config
 
-context: 'fedora/25/atomic | origin/v3.6.0-alpha.1'
+context: 'fedora/25/atomic | origin/latest'
 
 env:
-  OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.1
+  OPENSHIFT_IMAGE_TAG: latest
 
 tests:
   - ./.redhat-ci.sh
