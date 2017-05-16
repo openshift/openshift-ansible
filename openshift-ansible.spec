@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.65.4
-Release:        1%{?dist}
+Version:        3.6.65.5
+Release:        stage
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -274,6 +274,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.65.5-stage
+- 
+
 * Sat May 13 2017 Scott Dodson <sdodson@redhat.com> 3.6.65.4-1
 - Remove userland-proxy-path from daemon.json (smilner@redhat.com)
 - Fix whistespace issues in custom template (smilner@redhat.com)
