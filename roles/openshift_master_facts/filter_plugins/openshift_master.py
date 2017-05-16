@@ -468,7 +468,8 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
     """
     def __init__(self, api_version, idp):
         IdentityProviderOauthBase.__init__(self, api_version, idp)
-        self._optional += [['organizations']]
+        self._optional += [['organizations'],
+                           ['teams']]
 
 
 class FilterModule(object):
