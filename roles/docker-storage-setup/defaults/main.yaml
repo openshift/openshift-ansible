@@ -1,0 +1,5 @@
+---
+docker_dev: "/dev/sdb"
+docker_vg: "docker-vol"
+docker_data_size: "95%VG"
+docker_dm_basesize: "3G"
