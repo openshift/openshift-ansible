@@ -33,7 +33,7 @@
   register: create_master_unit_file
 
 - name: Install Master service file
-  template:
+  copy:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: "{{ openshift.common.service_type }}-master.service"
   register: create_master_unit_file
