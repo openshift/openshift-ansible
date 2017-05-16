@@ -25,9 +25,11 @@ class ActionModule(ActionBase):
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
+        task_vars = task_vars or {}
 
-        if task_vars is None:
-            task_vars = {}
+        # vars are not supportably available in the callback plugin,
+        # so record any it will need in the result.
+        result['playbook_context'] = task_vars.get('r_openshift_health_checker_playbook_context')
 
         if "openshift" not in task_vars:
             result["failed"] = True
