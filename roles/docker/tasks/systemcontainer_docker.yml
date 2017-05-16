@@ -46,7 +46,7 @@
 
     - name: Add http_proxy to /etc/atomic.conf
       lineinfile:
-        path: /etc/atomic.conf
+        dest: /etc/atomic.conf
         line: "http_proxy={{ openshift.common.http_proxy | default('') }}"
       when:
         - openshift.common.http_proxy is defined
@@ -54,7 +54,7 @@
 
     - name: Add https_proxy to /etc/atomic.conf
       lineinfile:
-        path: /etc/atomic.conf
+        dest: /etc/atomic.conf
         line: "https_proxy={{ openshift.common.https_proxy | default('') }}"
       when:
         - openshift.common.https_proxy is defined
