@@ -84,7 +84,6 @@
   register: g_etcd_client_mktemp
   changed_when: False
   when: etcd_client_certs_missing | bool
-  delegate_to: localhost
   become: no
 
 - name: Create a tarball of the etcd certs
@@ -133,8 +132,7 @@
   when: etcd_client_certs_missing | bool
 
 - name: Delete temporary directory
-  file: name={{ g_etcd_client_mktemp.stdout }} state=absent
+  local_action: file path="{{ g_etcd_client_mktemp.stdout }}" state=absent
   changed_when: False
   when: etcd_client_certs_missing | bool
-  delegate_to: localhost
   become: no
