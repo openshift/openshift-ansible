@@ -2,43 +2,61 @@
 - name: Determine etcd version
   hosts: oo_etcd_hosts_to_upgrade
   tasks:
-  - name: Record RPM based etcd version
-    command: rpm -qa --qf '%{version}' etcd\*
-    args:
-      warn: no
-    register: etcd_rpm_version
-    failed_when: false
+  - block:
+    - name: Record RPM based etcd version
+      command: rpm -qa --qf '%{version}' etcd\*
+      args:
+        warn: no
+      register: etcd_rpm_version
+      failed_when: false
+      # AUDIT:changed_when: `false` because we are only inspecting
+      # state, not manipulating anything
+      changed_when: false
+
+    - debug:
+        msg: "Etcd rpm version {{ etcd_rpm_version.stdout }} detected"
     when: not openshift.common.is_containerized | bool
-    # AUDIT:changed_when: `false` because we are only inspecting
-    # state, not manipulating anything
-    changed_when: false
 
-  - name: Record containerized etcd version
-    command: docker exec etcd_container rpm -qa --qf '%{version}' etcd\*
-    register: etcd_container_version
-    failed_when: false
-    when: openshift.common.is_containerized | bool
-    # AUDIT:changed_when: `false` because we are only inspecting
-    # state, not manipulating anything
-    changed_when: false
+  - block:
+    - name: Record containerized etcd version (docker)
+      command: docker exec etcd_container rpm -qa --qf '%{version}' etcd\*
+      register: etcd_container_version_docker
+      failed_when: false
+      # AUDIT:changed_when: `false` because we are only inspecting
+      # state, not manipulating anything
+      changed_when: false
+      when:
+      - not openshift.common.is_etcd_system_container | bool
 
-  - name: Record containerized etcd version
-    command: docker exec etcd_container rpm -qa --qf '%{version}' etcd\*
-    register: etcd_container_version
-    failed_when: false
-    when: openshift.common.is_containerized | bool and not openshift.common.is_etcd_system_container | bool
-    # AUDIT:changed_when: `false` because we are only inspecting
-    # state, not manipulating anything
-    changed_when: false
+      # Given a register variables is set even if the whwen condition
+      # is false, we need to set etcd_container_version separately
+    - set_fact:
+        etcd_container_version: "{{ etcd_container_version_docker.stdout }}"
+      when:
+      - not openshift.common.is_etcd_system_container | bool
 
-  - name: Record containerized etcd version
-    command: runc exec etcd_container rpm -qa --qf '%{version}' etcd\*
-    register: etcd_container_version
-    failed_when: false
-    when: openshift.common.is_containerized | bool and openshift.common.is_etcd_system_container | bool
-    # AUDIT:changed_when: `false` because we are only inspecting
-    # state, not manipulating anything
-    changed_when: false
+    - name: Record containerized etcd version (runc)
+      command: runc exec etcd_container rpm -qa --qf '%{version}' etcd\*
+      register: etcd_container_version_runc
+      failed_when: false
+      # AUDIT:changed_when: `false` because we are only inspecting
+      # state, not manipulating anything
+      changed_when: false
+      when:
+      - openshift.common.is_etcd_system_container | bool
+
+      # Given a register variables is set even if the whwen condition
+      # is false, we need to set etcd_container_version separately
+    - set_fact:
+        etcd_container_version: "{{ etcd_container_version_runc.stdout }}"
+      when:
+      - openshift.common.is_etcd_system_container | bool
+
+    - debug:
+        msg: "Etcd containerized version {{ etcd_container_version }} detected"
+
+    when:
+    - openshift.common.is_containerized | bool
 
 # I really dislike this copy/pasta but I wasn't able to find a way to get it to loop
 # through hosts, then loop through tasks only when appropriate
@@ -67,7 +85,7 @@
     upgrade_version: 2.2.5
   tasks:
   - include: containerized_tasks.yml
-    when: etcd_container_version.stdout | default('99') | version_compare('2.2','<') and openshift.common.is_containerized | bool
+    when: etcd_container_version | default('99') | version_compare('2.2','<') and openshift.common.is_containerized | bool
 
 - name: Upgrade RPM hosts to 2.3
   hosts: oo_etcd_hosts_to_upgrade
@@ -85,7 +103,7 @@
     upgrade_version: 2.3.7
   tasks:
   - include: containerized_tasks.yml
-    when: etcd_container_version.stdout | default('99') | version_compare('2.3','<') and openshift.common.is_containerized | bool
+    when: etcd_container_version | default('99') | version_compare('2.3','<') and openshift.common.is_containerized | bool
 
 - name: Upgrade RPM hosts to 3.0
   hosts: oo_etcd_hosts_to_upgrade
@@ -103,7 +121,7 @@
     upgrade_version: 3.0.15
   tasks:
   - include: containerized_tasks.yml
-    when: etcd_container_version.stdout | default('99') | version_compare('3.0','<') and openshift.common.is_containerized | bool
+    when: etcd_container_version | default('99') | version_compare('3.0','<') and openshift.common.is_containerized | bool
 
 - name: Upgrade fedora to latest
   hosts: oo_etcd_hosts_to_upgrade
