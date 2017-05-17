@@ -215,7 +215,9 @@ oc_scale.py:
 - ../../lib_utils/src/class/yedit.py
 - lib/base.py
 - lib/deploymentconfig.py
+- lib/deployment.py
 - lib/replicationcontroller.py
+- lib/replicaset.py
 - class/oc_scale.py
 - ansible/oc_scale.py
 

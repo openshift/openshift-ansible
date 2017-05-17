@@ -76,12 +76,12 @@
     curator_name: "{{ 'logging-curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
     curator_component: "{{ 'curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
-# DC
+# Deployment
 # TODO: scale should not exceed 1
-- name: Generate Curator deploymentconfig
+- name: Generate Curator deployment
   template:
     src: curator.j2
-    dest: "{{ tempdir }}/templates/curator-dc.yaml"
+    dest: "{{ tempdir }}/templates/curator-deployment.yaml"
   vars:
     component: "{{ curator_component }}"
     logging_component: curator
@@ -96,14 +96,14 @@
   check_mode: no
   changed_when: no
 
-- name: Set Curator DC
+- name: Set Curator deployment
   oc_obj:
     state: present
     name: "{{ curator_name }}"
     namespace: "{{ openshift_logging_namespace }}"
-    kind: dc
+    kind: deployment
     files:
-    - "{{ tempdir }}/templates/curator-dc.yaml"
+    - "{{ tempdir }}/templates/curator-deployment.yaml"
     delete_after: true
 
 - name: Delete temp directory

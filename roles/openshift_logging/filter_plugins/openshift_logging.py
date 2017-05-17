@@ -5,9 +5,9 @@
 import random
 
 
-def es_storage(os_logging_facts, dc_name, pvc_claim, root='elasticsearch'):
+def es_storage(os_logging_facts, deployment_name, pvc_claim, root='elasticsearch'):
     '''Return a hash with the desired storage for the given ES instance'''
-    deploy_config = os_logging_facts[root]['deploymentconfigs'].get(dc_name)
+    deploy_config = os_logging_facts[root]['deployments'].get(deployment_name)
     if deploy_config:
         storage = deploy_config['volumes']['elasticsearch-storage']
         if storage.get('hostPath'):

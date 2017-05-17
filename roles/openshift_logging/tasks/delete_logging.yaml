@@ -7,8 +7,8 @@
     namespace: "{{ openshift_logging_namespace }}"
     selector: "logging-infra"
   with_items:
-    - dc
-    - rc
+    - deployment
+    - rs
     - svc
     - routes
     - templates

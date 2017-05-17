@@ -1,11 +1,11 @@
 ---
 - name: Validate Elasticsearch cluster size
   fail: msg="The openshift_logging_es_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
-  when: openshift_logging_facts.elasticsearch.deploymentconfigs | length > openshift_logging_es_cluster_size|int
+  when: openshift_logging_facts.elasticsearch.deployments | length > openshift_logging_es_cluster_size|int
 
 - name: Validate Elasticsearch Ops cluster size
   fail: msg="The openshift_logging_es_ops_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
-  when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs | length > openshift_logging_es_ops_cluster_size|int
+  when: openshift_logging_facts.elasticsearch_ops.deployments | length > openshift_logging_es_ops_cluster_size|int
 
 - fail:
     msg: Invalid deployment type, one of ['data-master', 'data-client', 'master', 'client'] allowed
@@ -242,11 +242,11 @@
     es_deploy_name: "{{ openshift_logging_elasticsearch_deployment_name }}"
   when: openshift_logging_elasticsearch_deployment_name != ""
 
-# DC
-- name: Set ES dc templates
+# Deployment
+- name: Set ES deployment templates
   template:
     src: es.j2
-    dest: "{{ tempdir }}/templates/logging-es-dc.yml"
+    dest: "{{ tempdir }}/templates/logging-es-deployment.yml"
   vars:
     es_cluster_name: "{{ es_component }}"
     component: "{{ es_component }}"
@@ -259,14 +259,14 @@
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     replicas: 1
 
-- name: Set ES dc
+- name: Set ES deployment
   oc_obj:
     state: present
     name: "{{ es_deploy_name }}"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-    kind: dc
+    kind: deployment
     files:
-    - "{{ tempdir }}/templates/logging-es-dc.yml"
+    - "{{ tempdir }}/templates/logging-es-deployment.yml"
     delete_after: true
 
 ## Placeholder for migration when necessary ##
