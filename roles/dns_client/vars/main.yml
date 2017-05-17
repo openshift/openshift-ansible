@@ -1,0 +1,6 @@
+---
+# TODO eth0 is hardcoded here...
+network_conf_file: /etc/sysconfig/network-scripts/ifcfg-eth0
+dhclient_conf_file: /etc/dhcp/dhclient-eth0.conf
+dns_domain: "{{ lookup('env', 'CLOUD_DOMAIN')|default('example.com', true) }}"
+dns_server: "{{ hostvars[groups.dns[0]].openshift.common.ip }}"
