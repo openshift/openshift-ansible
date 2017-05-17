@@ -1,10 +1,13 @@
 ---
-etcd_initial_cluster_state: new
-etcd_initial_cluster_token: etcd-cluster-1
+# install, upgrade, backup
+r_etcd_action: install
 
-etcd_initial_advertise_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}"
-etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}"
-etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
-etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
+r_etcd_initial_cluster_state: new
+r_etcd_initial_cluster_token: etcd-cluster-1
 
-etcd_systemd_dir: "/etc/systemd/system/{{ etcd_service }}.service.d"
+r_etcd_initial_advertise_peer_urls: "{{ r_etcd_common_peer_url_scheme }}://{{ etcd_ip }}:{{ r_etcd_common_peer_port }}"
+r_etcd_listen_peer_urls: "{{ r_etcd_common_peer_url_scheme }}://{{ etcd_ip }}:{{ r_etcd_common_peer_port }}"
+r_etcd_advertise_client_urls: "{{ r_etcd_common_url_scheme }}://{{ etcd_ip }}:{{ r_etcd_common_client_port }}"
+r_etcd_listen_client_urls: "{{ r_etcd_common_url_scheme }}://{{ etcd_ip }}:{{ r_etcd_common_client_port }}"
+
+r_etcd_common_systemd_dir: "/etc/systemd/system/{{ r_etcd_common_service }}.service.d"

@@ -4,12 +4,12 @@
 # INPUT openshift.common.is_atomic
 # OUTPUT etcd_backup_complete
 - set_fact:
-    # ORIGIN etcd_data_dir etcd_common.defaults
-    l_etcd_backup_dir: "{{ etcd_data_dir }}/openshift-backup-{{ r_etcd_backup_tag | default('') }}{{ r_etcd_backup_sufix_name }}"
+    # ORIGIN r_etcd_common_data_dir etcd_common.defaults
+    l_etcd_backup_dir: "{{ r_etcd_common_data_dir }}/openshift-backup-{{ r_etcd_backup_tag | default('') }}{{ r_etcd_backup_sufix_name }}"
 
 # TODO: replace shell module with command and update later checks
 - name: Check available disk space for etcd backup
-  shell: df --output=avail -k {{ etcd_data_dir }} | tail -n 1
+  shell: df --output=avail -k {{ r_etcd_common_data_dir }} | tail -n 1
   register: avail_disk
   # AUDIT:changed_when: `false` because we are only inspecting
   # state, not manipulating anything
@@ -17,8 +17,8 @@
 
 # TODO: replace shell module with command and update later checks
 - name: Check current etcd disk usage
-  # ORIGIN etcd_data_dir etcd_common.defaults
-  shell: du --exclude='*openshift-backup*' -k {{ etcd_data_dir }} | tail -n 1 | cut -f1
+  # ORIGIN r_etcd_common_data_dir etcd_common.defaults
+  shell: du --exclude='*openshift-backup*' -k {{ r_etcd_common_data_dir }} | tail -n 1 | cut -f1
   register: etcd_disk_usage
   when: r_etcd_upgrade_embedded_etcd | bool
   # AUDIT:changed_when: `false` because we are only inspecting
@@ -50,21 +50,21 @@
 - name: Generate etcd backup
   # ORIGIN etcdctl_command defaults
   command: >
-    {{ etcdctl_command }} backup --data-dir={{ etcd_data_dir }}
+    {{ etcdctl_command }} backup --data-dir={{ r_etcd_common_data_dir }}
     --backup-dir={{ l_etcd_backup_dir }}
 
 # According to the docs change you can simply copy snap/db
 # https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
 - name: Check for v3 data store
   stat:
-    # ORIGIN etcd_data_dir etcd_common.defaults
-    path: "{{ etcd_data_dir }}/member/snap/db"
+    # ORIGIN r_etcd_common_data_dir etcd_common.defaults
+    path: "{{ r_etcd_common_data_dir }}/member/snap/db"
   register: v3_db
 
 - name: Copy etcd v3 data store
-  # ORIGIN etcd_data_dir etcd_common.defaults
+  # ORIGIN r_etcd_common_data_dir etcd_common.defaults
   command: >
-    cp -a {{ etcd_data_dir }}/member/snap/db
+    cp -a {{ r_etcd_common_data_dir }}/member/snap/db
     {{ l_etcd_backup_dir }}/member/snap/
   when: v3_db.stat.exists
 

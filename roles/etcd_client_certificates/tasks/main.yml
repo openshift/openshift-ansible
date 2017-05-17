@@ -1,14 +1,14 @@
 ---
 - name: Ensure CA certificate exists on etcd_ca_host
   stat:
-    path: "{{ etcd_ca_cert }}"
+    path: "{{ r_etcd_common_ca_cert }}"
   register: g_ca_cert_stat_result
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
 
 - fail:
     msg: >
-      CA certificate {{ etcd_ca_cert }} doesn't exist on CA host
+      CA certificate {{ r_etcd_common_ca_cert }} doesn't exist on CA host
       {{ etcd_ca_host }}. Apply 'etcd_ca' role to
       {{ etcd_ca_host }}.
   when: not g_ca_cert_stat_result.stat.exists | bool
@@ -33,7 +33,7 @@
 
 - name: Ensure generated_certs directory present
   file:
-    path: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    path: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     state: directory
     mode: 0700
   when: etcd_client_certs_missing | bool
@@ -42,13 +42,13 @@
 - name: Create the client csr
   command: >
     openssl req -new -keyout {{ etcd_cert_prefix }}client.key
-    -config {{ etcd_openssl_conf }}
+    -config {{ r_etcd_common_openssl_conf }}
     -out {{ etcd_cert_prefix }}client.csr
-    -reqexts {{ etcd_req_ext }} -batch -nodes
+    -reqexts {{ r_etcd_common_req_ext }} -batch -nodes
     -subj /CN={{ etcd_hostname }}
   args:
-    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+    chdir: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ r_etcd_common_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'client.csr' }}"
   environment:
     SAN: "IP:{{ etcd_ip }},DNS:{{ etcd_hostname }}"
@@ -60,12 +60,12 @@
 - name: Sign and create the client crt
   delegated_serial_command:
     command: >
-      openssl ca -name {{ etcd_ca_name }} -config {{ etcd_openssl_conf }}
+      openssl ca -name {{ r_etcd_common_ca_name }} -config {{ r_etcd_common_openssl_conf }}
       -out {{ etcd_cert_prefix }}client.crt
       -in {{ etcd_cert_prefix }}client.csr
       -batch
-    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+    chdir: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ r_etcd_common_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'client.crt' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
@@ -73,8 +73,8 @@
   delegate_to: "{{ etcd_ca_host }}"
 
 - file:
-    src: "{{ etcd_ca_cert }}"
-    dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
+    src: "{{ r_etcd_common_ca_cert }}"
+    dest: "{{ r_etcd_common_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
     state: hard
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
@@ -89,10 +89,10 @@
 
 - name: Create a tarball of the etcd certs
   command: >
-    tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
-      -C {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }} .
+    tar -czvf {{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
+      -C {{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }} .
   args:
-    creates: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    creates: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
@@ -101,7 +101,7 @@
 
 - name: Retrieve the etcd cert tarballs
   fetch:
-    src: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    src: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ g_etcd_client_mktemp.stdout }}/"
     flat: yes
     fail_on_missing: yes

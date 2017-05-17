@@ -22,8 +22,8 @@
 
 - name: Restart etcd
   service:
-    # ORIGIN etcd_service etcd_common.vars
-    name: "{{ etcd_service }}"
+    # ORIGIN r_etcd_common_service etcd_common.vars
+    name: "{{ r_etcd_common_service }}"
     state: restarted
 
 - name: Verify cluster is healthy

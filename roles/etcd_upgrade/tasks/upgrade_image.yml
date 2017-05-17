@@ -6,8 +6,8 @@
   command: "{{ etcdctlv2 }} cluster-health"
 
 - name: Get current image
-  # ORIGIN etcd_service_file etcd_common.vars
-  shell: "grep 'ExecStart=' {{ etcd_service_file }} | awk '{print $NF}'"
+  # ORIGIN r_etcd_common_service_file etcd_common.vars
+  shell: "grep 'ExecStart=' {{ r_etcd_common_service_file }} | awk '{print $NF}'"
   register: current_image
 
 - name: Set new_etcd_image
@@ -19,15 +19,15 @@
 
 - name: Update to latest etcd image
   replace:
-    # ORIGIN etcd_service_file etcd_common.vars
-    dest: "{{ etcd_service_file }}"
+    # ORIGIN r_etcd_common_service_file etcd_common.vars
+    dest: "{{ r_etcd_common_service_file }}"
     regexp: "{{ current_image.stdout }}$"
     replace: "{{ new_etcd_image }}"
 
 - name: Restart etcd_container
   systemd:
-    # ORIGIN etcd_service etcd_common.vars
-    name: "{{ etcd_service }}"
+    # ORIGIN r_etcd_common_service etcd_common.vars
+    name: "{{ r_etcd_common_service }}"
     daemon_reload: yes
     state: restarted
 

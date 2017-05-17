@@ -1,64 +1,64 @@
 {% macro initial_cluster() -%}
 {% for host in etcd_peers | default([]) -%}
 {% if loop.last -%}
-{{ hostvars[host].etcd_hostname }}={{ etcd_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ etcd_peer_port }}
+{{ hostvars[host].etcd_hostname }}={{ r_etcd_common_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ r_etcd_common_peer_port }}
 {%- else -%}
-{{ hostvars[host].etcd_hostname }}={{ etcd_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ etcd_peer_port }},
+{{ hostvars[host].etcd_hostname }}={{ r_etcd_common_peer_url_scheme }}://{{ hostvars[host].etcd_ip }}:{{ r_etcd_common_peer_port }},
 {%- endif -%}
 {% endfor -%}
 {% endmacro -%}
 
-{% if (etcd_peers | default([]) | length > 1) or (etcd_is_thirdparty) %}
+{% if (etcd_peers | default([]) | length > 1) or (r_etcd_common_is_thirdparty) %}
 ETCD_NAME={{ etcd_hostname }}
-ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
+ETCD_LISTEN_PEER_URLS={{ r_etcd_listen_peer_urls }}
 {% else %}
 ETCD_NAME=default
 {% endif %}
-ETCD_DATA_DIR={{ etcd_data_dir }}
+ETCD_DATA_DIR={{ r_etcd_common_data_dir }}
 #ETCD_SNAPSHOT_COUNTER=10000
 ETCD_HEARTBEAT_INTERVAL=500
 ETCD_ELECTION_TIMEOUT=2500
-ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
+ETCD_LISTEN_CLIENT_URLS={{ r_etcd_listen_client_urls }}
 #ETCD_MAX_SNAPSHOTS=5
 #ETCD_MAX_WALS=5
 #ETCD_CORS=
 
-{% if etcd_is_thirdparty %}
+{% if r_etcd_common_is_thirdparty %}
 #[cluster]
-ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
+ETCD_INITIAL_ADVERTISE_PEER_URLS={{ r_etcd_initial_advertise_peer_urls }}
 
 # TODO: This needs to be altered to support the correct etcd instances
-ETCD_INITIAL_CLUSTER={{ etcd_hostname}}={{ etcd_initial_advertise_peer_urls }}
-ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
+ETCD_INITIAL_CLUSTER={{ etcd_hostname}}={{ r_etcd_initial_advertise_peer_urls }}
+ETCD_INITIAL_CLUSTER_STATE={{ r_etcd_initial_cluster_state }}
 ETCD_INITIAL_CLUSTER_TOKEN=thirdparty-etcd-cluster-1
 {% endif %}
 
 {% if etcd_peers | default([]) | length > 1 %}
 #[cluster]
-ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
+ETCD_INITIAL_ADVERTISE_PEER_URLS={{ r_etcd_initial_advertise_peer_urls }}
 ETCD_INITIAL_CLUSTER={{ initial_cluster() }}
-ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
-ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
+ETCD_INITIAL_CLUSTER_STATE={{ r_etcd_initial_cluster_state }}
+ETCD_INITIAL_CLUSTER_TOKEN={{ r_etcd_initial_cluster_token }}
 #ETCD_DISCOVERY=
 #ETCD_DISCOVERY_SRV=
 #ETCD_DISCOVERY_FALLBACK=proxy
 #ETCD_DISCOVERY_PROXY=
 {% endif %}
-ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
+ETCD_ADVERTISE_CLIENT_URLS={{ r_etcd_advertise_client_urls }}
 
 #[proxy]
 #ETCD_PROXY=off
 
 #[security]
-{% if etcd_url_scheme == 'https' -%}
-ETCD_CA_FILE={{ etcd_ca_file }}
-ETCD_CERT_FILE={{ etcd_cert_file }}
-ETCD_KEY_FILE={{ etcd_key_file }}
+{% if r_etcd_common_url_scheme == 'https' -%}
+ETCD_CA_FILE={{ r_etcd_common_ca_file }}
+ETCD_CERT_FILE={{ r_etcd_common_cert_file }}
+ETCD_KEY_FILE={{ r_etcd_common_key_file }}
 {% endif -%}
-{% if etcd_peer_url_scheme == 'https' -%}
-ETCD_PEER_CA_FILE={{ etcd_peer_ca_file }}
-ETCD_PEER_CERT_FILE={{ etcd_peer_cert_file }}
-ETCD_PEER_KEY_FILE={{ etcd_peer_key_file }}
+{% if r_etcd_common_peer_url_scheme == 'https' -%}
+ETCD_PEER_CA_FILE={{ r_etcd_common_peer_ca_file }}
+ETCD_PEER_CERT_FILE={{ r_etcd_common_peer_cert_file }}
+ETCD_PEER_KEY_FILE={{ r_etcd_common_peer_key_file }}
 {% endif -%}
 
 #[logging]
