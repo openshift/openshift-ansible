@@ -1534,6 +1534,10 @@ class CAServerCert(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
+        # Filter non-strings from hostnames list s.t. the omit filter
+        # may be used to conditionally add a hostname.
+        params['hostnames'] = [host for host in params['hostnames'] if isinstance(host, string_types)]
+
         config = CAServerCertConfig(params['kubeconfig'],
                                     params['debug'],
                                     {'cert':          {'value': params['cert'], 'include': True},
@@ -1582,6 +1586,10 @@ class CAServerCert(OpenShiftCLI):
 # -*- -*- -*- End included fragment: class/oc_adm_ca_server_cert.py -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ansible/oc_adm_ca_server_cert.py -*- -*- -*-
+
+
+# pylint: disable=wrong-import-position
+from ansible.module_utils.six import string_types
 
 def main():
     '''
