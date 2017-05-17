@@ -3,6 +3,7 @@
 
 - set_fact:
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
+    is_atomic: "{{ openshift.common.is_atomic | default(False) | bool }}"
 
 # Block attempts to install origin without specifying some kind of version information.
 # This is because the latest tags for origin are usually alpha builds, which should not
@@ -86,9 +87,11 @@
   include: set_version_rpm.yml
   when: not is_containerized | bool
 
+- name: Set openshift_version for containerized installation
+  include: set_version_containerized.yml
+  when: is_containerized | bool
+
 - block:
-  - name: Set openshift_version for containerized installation
-    include: set_version_containerized.yml
   - name: Get available {{ openshift.common.service_type}} version
     repoquery:
       name: "{{ openshift.common.service_type}}"
@@ -104,7 +107,9 @@
       msg: "OCP rpm version {{ openshift_rpm_version }} is different from OCP image version {{ openshift_version }}"
     # Both versions have the same string representation
     when: openshift_rpm_version != openshift_version
-  when: is_containerized | bool
+  when:
+  - is_containerized | bool
+  - not is_atomic | bool
 
 # Warn if the user has provided an openshift_image_tag but is not doing a containerized install
 # NOTE: This will need to be modified/removed for future container + rpm installations work.
