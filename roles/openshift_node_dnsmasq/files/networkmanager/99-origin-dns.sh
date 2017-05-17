@@ -45,7 +45,8 @@ if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
   def_route_int=$(/sbin/ip route get to ${def_route} | awk '{print $3}')
   def_route_ip=$(/sbin/ip route get to ${def_route} | awk '{print $5}')
   if [[ ${DEVICE_IFACE} == ${def_route_int} && \
-       -n "${IP4_NAMESERVERS}" ]]; then
+       -n "${IP4_NAMESERVERS}" && \
+       "${IP4_NAMESERVERS}" != "${def_route_ip}" ]]; then
     if [ ! -f /etc/dnsmasq.d/origin-dns.conf ]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
 no-resolv
