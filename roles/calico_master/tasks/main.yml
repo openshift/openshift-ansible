@@ -1,5 +1,5 @@
 ---
-- name: Assure the calico certs have been generated
+- name: Calico Master | Assure the calico certs have been generated
   stat:
     path: "{{ item }}"
   with_items:
@@ -7,17 +7,17 @@
   - "{{ calico_etcd_cert_file}}"
   - "{{ calico_etcd_key_file }}"
 
-- name: Create temp directory for policy controller definition
+- name: Calico Master | Create temp directory for policy controller definition
   command: mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: mktemp
   changed_when: False
 
-- name: Write Calico Policy Controller definition
+- name: Calico Master | Write Calico Policy Controller definition
   template:
     dest: "{{ mktemp.stdout }}/calico-policy-controller.yml"
     src: calico-policy-controller.yml.j2
 
-- name: Launch Calico Policy Controller
+- name: Calico Master | Launch Calico Policy Controller
   command: >
     {{ openshift.common.client_binary }} create
     -f {{ mktemp.stdout }}/calico-policy-controller.yml
@@ -26,14 +26,14 @@
   failed_when: ('already exists' not in calico_create_output.stderr) and ('created' not in calico_create_output.stdout)
   changed_when: ('created' in calico_create_output.stdout)
 
-- name: Delete temp directory
+- name: Calico Master | Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"
     state: absent
   changed_when: False
 
 
-- name: oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico
+- name: Calico Master | oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:calico
   oc_adm_policy_user:
     user: system:serviceaccount:kube-system:calico
     resource_kind: scc
