@@ -1,0 +1,7 @@
+---
+# ORIGIN r_etcd_common_peer_cert_file etcd_common.defaults
+# ORIGIN r_etcd_common_peer_key_file etcd_common.defaults
+# ORIGIN r_etcd_common_peer_ca_file etcd_common.defaults
+# ORIGIN r_etcd_common_client_port etcd_common.defaults
+# EXPECTS etcd_peer
+etcdctlv2: "etcdctl --cert-file {{ r_etcd_common_peer_cert_file }} --key-file {{ r_etcd_common_peer_key_file }} --ca-file {{ r_etcd_common_peer_ca_file }} -C https://{{ etcd_peer }}:{{ r_etcd_common_client_port }}"

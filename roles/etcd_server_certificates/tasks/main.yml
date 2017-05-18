@@ -1,7 +1,7 @@
 ---
 - name: Install etcd
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
-  when: not etcd_is_containerized | bool
+  when: not r_etcd_common_is_containerized | bool
 
 - name: Check status of etcd certificates
   stat:
@@ -22,7 +22,7 @@
 
 - name: Ensure generated_certs directory present
   file:
-    path: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    path: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     state: directory
     mode: 0700
   when: etcd_server_certs_missing | bool
@@ -31,13 +31,13 @@
 - name: Create the server csr
   command: >
     openssl req -new -keyout {{ etcd_cert_prefix }}server.key
-    -config {{ etcd_openssl_conf }}
+    -config {{ r_etcd_common_openssl_conf }}
     -out {{ etcd_cert_prefix }}server.csr
-    -reqexts {{ etcd_req_ext }} -batch -nodes
+    -reqexts {{ r_etcd_common_req_ext }} -batch -nodes
     -subj /CN={{ etcd_hostname }}
   args:
-    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+    chdir: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ r_etcd_common_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'server.csr' }}"
   environment:
     SAN: "IP:{{ etcd_ip }},DNS:{{ etcd_hostname }}"
@@ -49,12 +49,12 @@
 - name: Sign and create the server crt
   delegated_serial_command:
     command: >
-      openssl ca -name {{ etcd_ca_name }} -config {{ etcd_openssl_conf }}
+      openssl ca -name {{ r_etcd_common_ca_name }} -config {{ r_etcd_common_openssl_conf }}
       -out {{ etcd_cert_prefix }}server.crt
       -in {{ etcd_cert_prefix }}server.csr
-      -extensions {{ etcd_ca_exts_server }} -batch
-    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+      -extensions {{ r_etcd_common_ca_exts_server }} -batch
+    chdir: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ r_etcd_common_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'server.crt' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
@@ -64,13 +64,13 @@
 - name: Create the peer csr
   command: >
     openssl req -new -keyout {{ etcd_cert_prefix }}peer.key
-    -config {{ etcd_openssl_conf }}
+    -config {{ r_etcd_common_openssl_conf }}
     -out {{ etcd_cert_prefix }}peer.csr
-    -reqexts {{ etcd_req_ext }} -batch -nodes
+    -reqexts {{ r_etcd_common_req_ext }} -batch -nodes
     -subj /CN={{ etcd_hostname }}
   args:
-    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+    chdir: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ r_etcd_common_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'peer.csr' }}"
   environment:
     SAN: "IP:{{ etcd_ip }},DNS:{{ etcd_hostname }}"
@@ -82,12 +82,12 @@
 - name: Sign and create the peer crt
   delegated_serial_command:
     command: >
-      openssl ca -name {{ etcd_ca_name }} -config {{ etcd_openssl_conf }}
+      openssl ca -name {{ r_etcd_common_ca_name }} -config {{ r_etcd_common_openssl_conf }}
       -out {{ etcd_cert_prefix }}peer.crt
       -in {{ etcd_cert_prefix }}peer.csr
-      -extensions {{ etcd_ca_exts_peer }} -batch
-    chdir: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
-    creates: "{{ etcd_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
+      -extensions {{ r_etcd_common_ca_exts_peer }} -batch
+    chdir: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}"
+    creates: "{{ r_etcd_common_generated_certs_dir ~ '/' ~  etcd_cert_subdir ~ '/'
                  ~ etcd_cert_prefix ~ 'peer.crt' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
@@ -95,8 +95,8 @@
   delegate_to: "{{ etcd_ca_host }}"
 
 - file:
-    src: "{{ etcd_ca_cert }}"
-    dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
+    src: "{{ r_etcd_common_ca_cert }}"
+    dest: "{{ r_etcd_common_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
     state: hard
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
@@ -111,10 +111,10 @@
 
 - name: Create a tarball of the etcd certs
   command: >
-    tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
-      -C {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }} .
+    tar -czvf {{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
+      -C {{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }} .
   args:
-    creates: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    creates: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
@@ -123,7 +123,7 @@
 
 - name: Retrieve etcd cert tarball
   fetch:
-    src: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    src: "{{ r_etcd_common_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ g_etcd_server_mktemp.stdout }}/"
     flat: yes
     fail_on_missing: yes
@@ -145,17 +145,17 @@
 
 - name: Create a tarball of the etcd ca certs
   command: >
-    tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz
-      -C {{ etcd_ca_dir }} .
+    tar -czvf {{ r_etcd_common_generated_certs_dir }}/{{ r_etcd_common_ca_name }}.tgz
+      -C {{ r_etcd_common_ca_dir }} .
   args:
-    creates: "{{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz"
+    creates: "{{ r_etcd_common_generated_certs_dir }}/{{ r_etcd_common_ca_name }}.tgz"
     warn: no
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Retrieve etcd ca cert tarball
   fetch:
-    src: "{{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz"
+    src: "{{ r_etcd_common_generated_certs_dir }}/{{ r_etcd_common_ca_name }}.tgz"
     dest: "{{ g_etcd_server_mktemp.stdout }}/"
     flat: yes
     fail_on_missing: yes
@@ -165,14 +165,14 @@
 
 - name: Ensure ca directory exists
   file:
-    path: "{{ etcd_ca_dir }}"
+    path: "{{ r_etcd_common_ca_dir }}"
     state: directory
   when: etcd_server_certs_missing | bool
 
 - name: Unarchive etcd ca cert tarballs
   unarchive:
-    src: "{{ g_etcd_server_mktemp.stdout }}/{{ etcd_ca_name }}.tgz"
-    dest: "{{ etcd_ca_dir }}"
+    src: "{{ g_etcd_server_mktemp.stdout }}/{{ r_etcd_common_ca_name }}.tgz"
+    dest: "{{ r_etcd_common_ca_dir }}"
   when: etcd_server_certs_missing | bool
 
 - name: Delete temporary directory
@@ -186,30 +186,30 @@
   file:
     path: "{{ item }}"
     mode: 0600
-    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-  when: etcd_url_scheme == 'https'
+    owner: "{{ 'etcd' if not r_etcd_common_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not r_etcd_common_is_containerized | bool else omit }}"
+  when: r_etcd_common_url_scheme == 'https'
   with_items:
-  - "{{ etcd_ca_file }}"
-  - "{{ etcd_cert_file }}"
-  - "{{ etcd_key_file }}"
+  - "{{ r_etcd_common_ca_file }}"
+  - "{{ r_etcd_common_cert_file }}"
+  - "{{ r_etcd_common_key_file }}"
 
 - name: Validate permissions on peer certificate files
   file:
     path: "{{ item }}"
     mode: 0600
-    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-  when: etcd_peer_url_scheme == 'https'
+    owner: "{{ 'etcd' if not r_etcd_common_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not r_etcd_common_is_containerized | bool else omit }}"
+  when: r_etcd_common_peer_url_scheme == 'https'
   with_items:
-  - "{{ etcd_peer_ca_file }}"
-  - "{{ etcd_peer_cert_file }}"
-  - "{{ etcd_peer_key_file }}"
+  - "{{ r_etcd_common_peer_ca_file }}"
+  - "{{ r_etcd_common_peer_cert_file }}"
+  - "{{ r_etcd_common_peer_key_file }}"
 
 - name: Validate permissions on the config dir
   file:
-    path: "{{ etcd_conf_dir }}"
+    path: "{{ r_etcd_common_conf_dir }}"
     state: directory
-    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
+    owner: "{{ 'etcd' if not r_etcd_common_is_containerized | bool else omit }}"
+    group: "{{ 'etcd' if not r_etcd_common_is_containerized | bool else omit }}"
     mode: 0700

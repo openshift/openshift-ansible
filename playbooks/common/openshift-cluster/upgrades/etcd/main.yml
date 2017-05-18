@@ -8,7 +8,7 @@
 - name: Backup etcd before upgrading anything
   include: backup.yml
   vars:
-    backup_tag: "pre-upgrade-"
+    etcd_backup_tag: "pre-upgrade-"
   when: openshift_etcd_backup | default(true) | bool
 
 - name: Drop etcdctl profiles

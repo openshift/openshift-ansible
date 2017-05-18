@@ -1,0 +1,4 @@
+---
+r_etcd_common_service: "{{ 'etcd_container' if r_etcd_common_etcd_runtime == 'docker' else 'etcd' }}"
+# Location of the service file is fixed and not meant to be changed
+r_etcd_common_service_file: "/etc/systemd/system/{{ r_etcd_common_service }}.service"

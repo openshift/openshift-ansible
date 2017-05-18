@@ -7,4 +7,5 @@
     etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    r_etcd_common_etcd_runtime: "{{ 'runc' if openshift.common.is_etcd_system_container | bool else 'docker' if openshift.common.is_containerized | bool else 'host' }}"
   - role: nickhammond.logrotate

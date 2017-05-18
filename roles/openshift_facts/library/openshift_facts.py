@@ -778,7 +778,7 @@ def set_etcd_facts_if_unset(facts):
     if 'master' in facts and safe_get_bool(facts['master']['embedded_etcd']):
         etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
 
-        if 'etcd_data_dir' not in etcd_facts:
+        if 'r_etcd_common_data_dir' not in etcd_facts:
             try:
                 # Parse master config to find actual etcd data dir:
                 master_cfg_path = os.path.join(facts['common']['config_base'],
@@ -787,7 +787,7 @@ def set_etcd_facts_if_unset(facts):
                 config = yaml.safe_load(master_cfg_f.read())
                 master_cfg_f.close()
 
-                etcd_facts['etcd_data_dir'] = \
+                etcd_facts['r_etcd_common_data_dir'] = \
                     config['etcdConfig']['storageDirectory']
 
                 facts['etcd'] = etcd_facts
@@ -806,11 +806,11 @@ def set_etcd_facts_if_unset(facts):
             ini_fp = io.StringIO(ini_str)
             config = configparser.RawConfigParser()
             config.readfp(ini_fp)
-            etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
-            if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
-                etcd_data_dir = etcd_data_dir[1:-1]
+            r_etcd_common_data_dir = config.get('root', 'ETCD_DATA_DIR')
+            if r_etcd_common_data_dir.startswith('"') and r_etcd_common_data_dir.endswith('"'):
+                r_etcd_common_data_dir = r_etcd_common_data_dir[1:-1]
 
-            etcd_facts['etcd_data_dir'] = etcd_data_dir
+            etcd_facts['r_etcd_common_data_dir'] = r_etcd_common_data_dir
             facts['etcd'] = etcd_facts
 
         # We don't want exceptions bubbling up here:
