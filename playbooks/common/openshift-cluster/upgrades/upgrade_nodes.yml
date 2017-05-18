@@ -34,6 +34,9 @@
   - openshift_facts
   - docker
   - openshift_node_upgrade
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
   post_tasks:
   - name: Set node schedulability
@@ -46,13 +49,3 @@
     register: node_schedulable
     until: node_schedulable|succeeded
     when: node_unschedulable|changed
-
-- name: Re-enable excluder if it was previously enabled
-  hosts: oo_nodes_to_config
-  tags:
-  - always
-  gather_facts: no
-  tasks:
-  - include_role:
-      name: openshift_excluder
-      tasks_from: enable

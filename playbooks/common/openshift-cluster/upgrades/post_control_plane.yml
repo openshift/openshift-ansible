@@ -124,7 +124,7 @@
   tags:
   - always
   gather_facts: no
-  tasks:
-  - include_role:
-      name: openshift_excluder
-      tasks_from: enable
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
