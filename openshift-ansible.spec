@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        v3.6.77
-Release:        stage
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
