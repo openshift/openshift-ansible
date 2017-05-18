@@ -495,6 +495,7 @@ class FilterModule(object):
         return u(yaml.dump([idp.to_dict() for idp in idp_list],
                            allow_unicode=True,
                            default_flow_style=False,
+                           width=float("inf"),
                            Dumper=AnsibleDumper))
 
     @staticmethod
