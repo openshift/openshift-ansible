@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        v3.5.5.17
+Version:        3.5.5.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu May 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.18-1
+- 
+
 * Thu May 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> v3.5.5.17-1
 - Default image policy on new clusters to on (ccoleman@redhat.com)
 
