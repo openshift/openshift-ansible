@@ -5,7 +5,7 @@ After=openvswitch.service
 PartOf={{ openshift.docker.service_name }}.service
 Requires={{ openshift.docker.service_name }}.service
 {% if openshift.common.use_openshift_sdn %}
-Requires=openvswitch.service
+Wants=openvswitch.service
 {% endif %}
 Wants={{ openshift.common.service_type }}-master.service
 Requires={{ openshift.common.service_type }}-node-dep.service
