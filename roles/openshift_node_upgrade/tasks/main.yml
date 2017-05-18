@@ -127,6 +127,12 @@
   - openshift_disable_swap | default(true) | bool
   # End Disable Swap Block
 
+- name: Reset selinux context
+  command: restorecon -RF {{ openshift.common.data_dir }}/openshift.local.volumes
+  when:
+  - ansible_selinux is defined
+  - ansible_selinux.status == 'enabled'
+
 # Restart all services
 - include: restart.yml
 
