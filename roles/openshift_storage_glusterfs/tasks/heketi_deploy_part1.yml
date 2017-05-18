@@ -25,6 +25,7 @@
       IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
+      HEKETI_KUBE_NAMESPACE: "{{ glusterfs_namespace }}"
 
 - name: Wait for deploy-heketi pod
   oc_obj:

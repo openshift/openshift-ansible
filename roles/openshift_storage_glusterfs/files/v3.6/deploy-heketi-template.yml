@@ -81,6 +81,8 @@ objects:
             value: '14'
           - name: HEKETI_KUBE_GLUSTER_DAEMONSET
             value: '1'
+          - name: HEKETI_KUBE_NAMESPACE
+            value: ${HEKETI_KUBE_NAMESPACE}
           ports:
           - containerPort: 8080
           volumeMounts:
@@ -107,6 +109,10 @@ parameters:
 - name: HEKETI_ADMIN_KEY
   displayName: Heketi Administrator Secret
   description: Set secret for administration of the Heketi service as user _admin_
+- name: HEKETI_KUBE_NAMESPACE
+  displayName: Namespace
+  description: Set the namespace where the GlusterFS pods reside
+  value: default
 - name: IMAGE_NAME
   displayName: GlusterFS container name
   required: True
