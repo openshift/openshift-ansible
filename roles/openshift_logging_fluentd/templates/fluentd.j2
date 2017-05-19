@@ -59,6 +59,9 @@ spec:
         - name: dockercfg
           mountPath: /etc/sysconfig/docker
           readOnly: true
+        - name: dockerdaemoncfg
+          mountPath: /etc/docker
+          readOnly: true
         env:
         - name: "K8S_HOST_URL"
           value: "{{ openshift_logging_fluentd_master_url }}"
@@ -115,3 +118,6 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
+      - name: dockerdaemoncfg
+        hostPath:
+          path: /etc/docker

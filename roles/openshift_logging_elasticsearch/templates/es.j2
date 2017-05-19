@@ -78,9 +78,6 @@ spec:
               name: "NODE_QUORUM"
               value: "{{es_node_quorum | int}}"
             -
-              name: "RECOVER_AFTER_NODES"
-              value: "{{es_recover_after_nodes}}"
-            -
               name: "RECOVER_EXPECTED_NODES"
               value: "{{es_recover_expected_nodes}}"
             -
@@ -103,6 +100,13 @@ spec:
               readOnly: true
             - name: elasticsearch-storage
               mountPath: /elasticsearch/persistent
+          readinessProbe:
+            exec:
+              command:
+              - "/usr/share/elasticsearch/probe/readiness.sh"
+            initialDelaySeconds: 5
+            timeoutSeconds: 4
+            periodSeconds: 5
       volumes:
         - name: elasticsearch
           secret:
