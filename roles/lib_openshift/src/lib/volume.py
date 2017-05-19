@@ -2,7 +2,7 @@
 # flake8: noqa
 
 class Volume(object):
-    ''' Class to model an openshift volume object'''
+    ''' Class to represent an openshift volume object'''
     volume_mounts_path = {"pod": "spec.containers[0].volumeMounts",
                           "dc":  "spec.template.spec.containers[0].volumeMounts",
                           "rc":  "spec.template.spec.containers[0].volumeMounts",
@@ -34,5 +34,10 @@ class Volume(object):
         elif volume_type == 'hostpath':
             volume['hostPath'] = {}
             volume['hostPath']['path'] = volume_info['path']
+        elif volume_type == 'configmap':
+            volume['configMap'] = {}
+            volume['configMap']['name'] = volume_info['configmap_name']
+            volume_mount = {'mountPath': volume_info['path'],
+                            'name': volume_info['name']}
 
         return (volume, volume_mount)
