@@ -12,3 +12,9 @@ calico_etcd_key_file: "/etc/origin/calico/calico.etcd-client.key"
 
 calico_url_cni: "https://github.com/projectcalico/cni-plugin/releases/download/v1.5.5/calico"
 calico_url_ipam: "https://github.com/projectcalico/cni-plugin/releases/download/v1.5.5/calico-ipam"
+
+calico_ipv4pool_ipip: "always"
+calico_ipv4pool_cidr: "192.168.0.0/16"
+
+calico_log_dir: "/var/log/calico"
+calico_node_image: "calico/node:v1.1.0"
