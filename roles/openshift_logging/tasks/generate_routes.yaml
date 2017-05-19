@@ -75,3 +75,95 @@
       provider: openshift
   when: openshift_logging_use_ops | bool
   changed_when: no
+
+- set_fact: es_key={{ lookup('file', openshift_logging_es_key) | b64encode }}
+  when:
+    - openshift_logging_es_key | trim | length > 0
+    - openshift_logging_es_allow_external | bool
+  changed_when: false
+
+- set_fact: es_cert={{ lookup('file', openshift_logging_es_cert)| b64encode  }}
+  when:
+    - openshift_logging_es_cert | trim | length > 0
+    - openshift_logging_es_allow_external | bool
+  changed_when: false
+
+- set_fact: es_ca={{ lookup('file', openshift_logging_es_ca_ext)| b64encode  }}
+  when:
+    - openshift_logging_es_ca_ext | trim | length > 0
+    - openshift_logging_es_allow_external | bool
+  changed_when: false
+
+- set_fact: es_ca={{key_pairs | entry_from_named_pair('ca_file') }}
+  when:
+    - es_ca is not defined
+    - openshift_logging_es_allow_external | bool
+  changed_when: false
+
+- name: Generating Elasticsearch logging routes
+  template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-logging-es-route.yaml
+  tags: routes
+  vars:
+    obj_name: "logging-es"
+    route_host: "{{openshift_logging_es_hostname}}"
+    service_name: "logging-es"
+    tls_key: "{{es_key | default('') | b64decode}}"
+    tls_cert: "{{es_cert | default('') | b64decode}}"
+    tls_ca_cert: "{{es_ca | b64decode}}"
+    tls_dest_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    edge_term_policy: "{{openshift_logging_es_edge_term_policy | default('') }}"
+    labels:
+      component: support
+      logging-infra: support
+      provider: openshift
+  changed_when: no
+  when: openshift_logging_es_allow_external | bool
+
+- set_fact: es_ops_key={{ lookup('file', openshift_logging_es_ops_key) | b64encode }}
+  when:
+  - openshift_logging_es_ops_allow_external | bool
+  - openshift_logging_use_ops | bool
+  - "{{ openshift_logging_es_ops_key | trim | length > 0 }}"
+  changed_when: false
+
+- set_fact: es_ops_cert={{ lookup('file', openshift_logging_es_ops_cert)| b64encode  }}
+  when:
+  - openshift_logging_es_ops_allow_external | bool
+  - openshift_logging_use_ops | bool
+  - "{{openshift_logging_es_ops_cert | trim | length > 0}}"
+  changed_when: false
+
+- set_fact: es_ops_ca={{ lookup('file', openshift_logging_es_ops_ca_ext)| b64encode  }}
+  when:
+  - openshift_logging_es_ops_allow_external | bool
+  - openshift_logging_use_ops | bool
+  - "{{openshift_logging_es_ops_ca_ext | trim | length > 0}}"
+  changed_when: false
+
+- set_fact: es_ops_ca={{key_pairs | entry_from_named_pair('ca_file') }}
+  when:
+  - openshift_logging_es_ops_allow_external | bool
+  - openshift_logging_use_ops | bool
+  - es_ops_ca is not defined
+  changed_when: false
+
+- name: Generating Elasticsearch logging ops routes
+  template: src=route_reencrypt.j2 dest={{mktemp.stdout}}/templates/logging-logging-es-ops-route.yaml
+  tags: routes
+  vars:
+    obj_name: "logging-es-ops"
+    route_host: "{{openshift_logging_es_ops_hostname}}"
+    service_name: "logging-es-ops"
+    tls_key: "{{es_ops_key | default('') | b64decode}}"
+    tls_cert: "{{es_ops_cert | default('') | b64decode}}"
+    tls_ca_cert: "{{es_ops_ca | b64decode}}"
+    tls_dest_ca_cert: "{{key_pairs | entry_from_named_pair('ca_file')| b64decode }}"
+    edge_term_policy: "{{openshift_logging_es_ops_edge_term_policy | default('') }}"
+    labels:
+      component: support
+      logging-infra: support
+      provider: openshift
+  when:
+  - openshift_logging_es_ops_allow_external | bool
+  - openshift_logging_use_ops | bool
+  changed_when: no

@@ -97,3 +97,30 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_kibana_ops_proxy_cpu_limit`: The amount of CPU to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_proxy_memory_limit`: The amount of memory to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_replica_count`: The number of replicas Kibana ops should be scaled up to. Defaults to 1.
+
+Elasticsearch can be exposed for external clients outside of the cluster.
+- `openshift_logging_es_allow_external`: True (default is False) - if this is
+  True, Elasticsearch will be exposed as a Route
+- `openshift_logging_es_hostname`: The external facing hostname to use for
+  the route and the TLS server certificate (default is "es." +
+  `openshift_master_default_subdomain`)
+- `openshift_logging_es_cert`: The location of the certificate Elasticsearch
+  uses for the external TLS server cert (default is a generated cert)
+- `openshift_logging_es_key`: The location of the key Elasticsearch
+  uses for the external TLS server cert (default is a generated key)
+- `openshift_logging_es_ca_ext`: The location of the CA cert for the cert
+  Elasticsearch uses for the external TLS server cert (default is the internal
+  CA)
+Elasticsearch OPS too, if using an OPS cluster:
+- `openshift_logging_es_ops_allow_external`: True (default is False) - if this is
+  True, Elasticsearch will be exposed as a Route
+- `openshift_logging_es_ops_hostname`: The external facing hostname to use for
+  the route and the TLS server certificate (default is "es-ops." +
+  `openshift_master_default_subdomain`)
+- `openshift_logging_es_ops_cert`: The location of the certificate Elasticsearch
+  uses for the external TLS server cert (default is a generated cert)
+- `openshift_logging_es_ops_key`: The location of the key Elasticsearch
+  uses for the external TLS server cert (default is a generated key)
+- `openshift_logging_es_ops_ca_ext`: The location of the CA cert for the cert
+  Elasticsearch uses for the external TLS server cert (default is the internal
+  CA)

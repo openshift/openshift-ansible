@@ -60,6 +60,24 @@
     - procure_component: mux
   when: openshift_logging_use_mux
 
+- include: procure_server_certs.yaml
+  loop_control:
+    loop_var: cert_info
+  with_items:
+    - procure_component: es
+      hostnames: "es, {{openshift_logging_es_hostname}}"
+  when: openshift_logging_es_allow_external | bool
+
+- include: procure_server_certs.yaml
+  loop_control:
+    loop_var: cert_info
+  with_items:
+    - procure_component: es-ops
+      hostnames: "es-ops, {{openshift_logging_es_ops_hostname}}"
+  when:
+    - openshift_logging_es_allow_external | bool
+    - openshift_logging_use_ops | bool
+
 - name: Copy proxy TLS configuration file
   copy: src=server-tls.json dest={{generated_certs_dir}}/server-tls.json
   when: server_tls_json is undefined
@@ -107,6 +125,14 @@
   loop_control:
     loop_var: node_name
   when: openshift_logging_use_mux
+
+- name: Generate PEM cert for Elasticsearch external route
+  include: generate_pems.yaml component={{node_name}}
+  with_items:
+    - system.logging.es
+  loop_control:
+    loop_var: node_name
+  when: openshift_logging_es_allow_external | bool
 
 - name: Creating necessary JKS certs
   include: generate_jks.yaml

@@ -99,6 +99,22 @@ openshift_logging_es_config: {}
 openshift_logging_es_number_of_shards: 1
 openshift_logging_es_number_of_replicas: 0
 
+# for exposing es to external (outside of the cluster) clients
+openshift_logging_es_allow_external: False
+openshift_logging_es_hostname: "{{ 'es.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+
+#The absolute path on the control node to the cert file to use
+#for the public facing es certs
+openshift_logging_es_cert: ""
+
+#The absolute path on the control node to the key file to use
+#for the public facing es certs
+openshift_logging_es_key: ""
+
+#The absolute path on the control node to the CA file to use
+#for the public facing es certs
+openshift_logging_es_ca_ext: ""
+
 # allow cluster-admin or cluster-reader to view operations index
 openshift_logging_es_ops_allow_cluster_reader: False
 
@@ -117,6 +133,22 @@ openshift_logging_es_ops_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_
 openshift_logging_es_ops_recover_after_time: 5m
 openshift_logging_es_ops_storage_group: "{{ openshift_hosted_logging_elasticsearch_storage_group | default('65534') }}"
 openshift_logging_es_ops_nodeselector: "{{ openshift_hosted_logging_elasticsearch_ops_nodeselector | default('') | map_from_pairs }}"
+
+# for exposing es-ops to external (outside of the cluster) clients
+openshift_logging_es_ops_allow_external: False
+openshift_logging_es_ops_hostname: "{{ 'es-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+
+#The absolute path on the control node to the cert file to use
+#for the public facing es-ops certs
+openshift_logging_es_ops_cert: ""
+
+#The absolute path on the control node to the key file to use
+#for the public facing es-ops certs
+openshift_logging_es_ops_key: ""
+
+#The absolute path on the control node to the CA file to use
+#for the public facing es-ops certs
+openshift_logging_es_ops_ca_ext: ""
 
 # storage related defaults
 openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_access_modes | default(['ReadWriteOnce']) }}"
