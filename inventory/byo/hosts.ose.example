@@ -320,7 +320,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #  selector: type=router1
 #  images: "openshift3/ose-${component}:${version}"
 #  edits: []
-#  certificates:
+#  certificate:
 #    certfile: /path/to/certificate/abc.crt
 #    keyfile: /path/to/certificate/abc.key
 #    cafile: /path/to/certificate/ca.crt
@@ -334,7 +334,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #  serviceaccount: router
 #  selector: type=router2
 #  images: "openshift3/ose-${component}:${version}"
-#  certificates:
+#  certificate:
 #    certfile: /path/to/certificate/xyz.crt
 #    keyfile: /path/to/certificate/xyz.key
 #    cafile: /path/to/certificate/ca.crt
