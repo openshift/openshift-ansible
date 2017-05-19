@@ -117,7 +117,7 @@
   debug:
     msg: >
       openshift_image_tag is used for containerized installs. If you are trying to
-      specify an image for a non-container install see oreg_url.
+      specify an image for a non-container install see oreg_url or oreg_url_master or oreg_url_node.
   when:
   - not is_containerized | bool
   - openshift_image_tag is defined
