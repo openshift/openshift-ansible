@@ -313,7 +313,7 @@
   - name: restart docker
     service: name=docker state=restarted
     ignore_errors: true
-    when: "container_engine.state != 'started'"
+    when: not (container_engine | changed)
 
   - name: restart NetworkManager
     service: name=NetworkManager state=restarted
