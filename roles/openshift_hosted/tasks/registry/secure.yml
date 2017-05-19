@@ -1,65 +1,68 @@
 ---
-- name: Set fact docker_registry_route_hostname
+- name: Configure facts for docker-registry
   set_fact:
-    docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+    openshift_hosted_registry_routecertificates: "{{ ('routecertificates' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routecertificates, {}) }}"
+    openshift_hosted_registry_routehost: "{{ ('routehost' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routehost, False) }}"
+    openshift_hosted_registry_routetermination: "{{ ('routetermination' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routetermination, 'passthrough') }}"
 
-- name: Get the certificate contents for registry
-  copy:
-    backup: True
-    dest: "/etc/origin/master/named_certificates/{{ item.value | basename }}"
-    src: "{{ item.value }}"
-  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
-  with_dict: "{{ openshift_hosted_registry_routecertificates }}"
+- name: Include reencrypt route configuration
+  include: secure/reencrypt.yml
+  static: no
+  when: openshift_hosted_registry_routetermination == 'reencrypt'
 
-# When certificates are defined we will create the reencrypt
-# docker-registry route
-- name: Create a reencrypt route for docker-registry
-  oc_route:
-    name: docker-registry
-    namespace: "{{ openshift_hosted_registry_namespace }}"
-    service_name: docker-registry
-    tls_termination: "{{ openshift_hosted_registry_routetermination }}"
-    host: "{{ openshift_hosted_registry_routehost | default(docker_registry_route_hostname) }}"
-    cert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
-    key_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
-    cacert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
-    dest_cacert_path: /etc/origin/master/ca.crt
-  when:
-  - "'cafile' in openshift_hosted_registry_routecertificates"
-  - "'certfile' in openshift_hosted_registry_routecertificates"
-  - "'keyfile' in openshift_hosted_registry_routecertificates"
-
-# When routetermination is passthrough we will create the route
-- name: Create passthrough route for docker-registry
-  oc_route:
-    name: docker-registry
-    namespace: "{{ openshift_hosted_registry_namespace }}"
-    service_name: docker-registry
-    tls_termination: "{{ openshift_hosted_registry_routetermination }}"
-    host: "{{ openshift_hosted_registry_routehost | ternary(openshift_hosted_registry_routehost, docker_registry_route_hostname) }}"
+- name: Include passthrough route configuration
+  include: secure/passthrough.yml
+  static: no
   when: openshift_hosted_registry_routetermination == 'passthrough'
 
-- name: Retrieve registry service IP
+- name: Fetch the docker-registry route
+  oc_route:
+    name: docker-registry
+    namespace: default
+    state: list
+  register: docker_registry_route
+
+- name: Retrieve registry service for the clusterip
   oc_service:
     namespace: "{{ openshift_hosted_registry_namespace }}"
     name: docker-registry
     state: list
-  register: docker_registry_service_ip
+  register: docker_registry_service
 
-- name: Create registry certificates
+- name: Generate self-signed docker-registry certificates
   oc_adm_ca_server_cert:
     signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
     signer_key: "{{ openshift_master_config_dir }}/ca.key"
     signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
     hostnames:
-    - "{{ docker_registry_service_ip.results.clusterip }}"
-    - "{{ openshift_hosted_registry_name }}.default.svc"
-    - "{{ openshift_hosted_registry_name }}.default.svc.{{ openshift.common.dns_domain }}"
-    - "{{ docker_registry_route_hostname }}"
-    cert: "{{ openshift_master_config_dir }}/registry.crt"
-    key: "{{ openshift_master_config_dir }}/registry.key"
+    - "{{ docker_registry_service.results.clusterip }}"
+    - "{{ docker_registry_route.results[0].spec.host }}"
+    cert: "{{ docker_registry_cert_path }}"
+    key: "{{ docker_registry_key_path }}"
     expire_days: "{{ openshift_hosted_registry_cert_expire_days if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool else omit }}"
-  register: server_cert_out
+  register: registry_self_cert
+  when: docker_registry_self_signed
+
+# Setting up REGISTRY_HTTP_TLS_CLIENTCAS as the cacert doesn't seem to work.
+# If we need to set up a cacert, bundle it with the cert.
+- when: docker_registry_cacert_path is defined
+  block:
+  - name: Retrieve certificate files to generate certificate bundle
+    slurp:
+      src: "{{ item }}"
+    with_items:
+    - "{{ docker_registry_cert_path }}"
+    - "{{ docker_registry_cacert_path }}"
+    register: certificate_files
+
+  - name: Generate certificate bundle
+    copy:
+      content: "{{ certificate_files.results | map(attribute='content') | map('b64decode') | join('') }}"
+      dest: "{{ openshift_master_config_dir }}/named_certificates/docker-registry.pem"
+
+  - name: Reset the certificate path to use the bundle
+    set_fact:
+      docker_registry_cert_path: "{{ openshift_master_config_dir }}/named_certificates/docker-registry.pem"
 
 - name: Create the secret for the registry certificates
   oc_secret:
@@ -67,9 +70,9 @@
     namespace: "{{ openshift_hosted_registry_namespace }}"
     files:
     - name: registry.crt
-      path: "{{ openshift_master_config_dir }}/registry.crt"
+      path: "{{ docker_registry_cert_path }}"
     - name: registry.key
-      path: "{{ openshift_master_config_dir }}/registry.key"
+      path: "{{ docker_registry_key_path }}"
   register: create_registry_certificates_secret_out
 
 - name: Add the secret to the registry's pod service accounts
@@ -99,9 +102,15 @@
       value: HTTPS
       action: put
 
+- name: Detect if there has been certificate changes
+  set_fact:
+    registry_cert_changed: true
+  when: ( registry_self_cert is defined and registry_self_cert.changed ) or
+        create_registry_certificates_secret_out.changed
+
 - name: Update openshift_hosted facts with secure registry variables
   set_fact:
     openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(registry_secure_volume_mounts) }}"
     openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine(registry_secure_env_vars) }}"
     openshift_hosted_registry_edits: "{{ openshift_hosted_registry_edits | union(registry_secure_edits) }}"
-    openshift_hosted_registry_force: "{{ openshift_hosted_registry_force | union([server_cert_out.changed]) | union([create_registry_certificates_secret_out.changed]) }}"
+    openshift_hosted_registry_force: "{{ openshift_hosted_registry_force | union([registry_cert_changed | default(false)]) }}"
