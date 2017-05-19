@@ -16,6 +16,14 @@
   lineinfile: dest={{ vrs_config }} regexp=^STANDBY_CONTROLLER line='STANDBY_CONTROLLER={{ vsc_standby_ip }}'
   when: vsc_standby_ip is defined
 
+- set_fact:
+    proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
+
+- name: Set the service ip subnet
+  become: yes
+  lineinfile: dest={{ vrs_config }} regexp=^K8S_SERVICE_IPV4_SUBNET line='K8S_SERVICE_IPV4_SUBNET={{ openshift.common.portal_net }}'
+  when: "proxy_mode == 'iptables'"
+
 - name: Install plugin rpm
   become: yes
   yum: name={{ plugin_rpm }} state=present

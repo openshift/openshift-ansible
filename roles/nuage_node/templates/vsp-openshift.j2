@@ -22,6 +22,10 @@ nuageMonClientKey: {{ rest_client_key }}
 nuageMonServerCA: {{ rest_server_ca_cert }}
 # Nuage vport mtu size
 interfaceMTU: {{ vport_mtu  }}
+{% if proxy_mode == "iptables" %}
+# Service CIDR
+serviceCIDR: {{ openshift.common.portal_net }}
+{% endif %}
 # Logging level for the plugin
 # allowed options are: "dbg", "info", "warn", "err", "emer", "off"
 logLevel: {{ plugin_log_level }}
