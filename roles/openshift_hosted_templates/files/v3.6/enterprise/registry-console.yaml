@@ -103,9 +103,9 @@ parameters:
   - description: 'Specify "registry/repository" prefix for container image; e.g. for "registry.access.redhat.com/openshift3/registry-console:latest", set prefix "registry.access.redhat.com/openshift3/"'
     name: IMAGE_PREFIX
     value: "registry.access.redhat.com/openshift3/"
-  - description: 'Specify image version; e.g. for "registry.access.redhat.com/openshift3/registry-console:3.6", set version "3.6"'
+  - description: 'Specify image version; e.g. for "registry.access.redhat.com/openshift3/registry-console:v3.6", set version "v3.6"'
     name: IMAGE_VERSION
-    value: "3.6"
+    value: "v3.6"
   - description: "The public URL for the Openshift OAuth Provider, e.g. https://openshift.example.com:8443"
     name: OPENSHIFT_OAUTH_PROVIDER_URL
     required: true
