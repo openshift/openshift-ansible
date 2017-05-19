@@ -107,7 +107,6 @@
   register: g_etcd_server_mktemp
   changed_when: False
   when: etcd_server_certs_missing | bool
-  delegate_to: localhost
 
 - name: Create a tarball of the etcd certs
   command: >
@@ -176,11 +175,10 @@
   when: etcd_server_certs_missing | bool
 
 - name: Delete temporary directory
-  file: name={{ g_etcd_server_mktemp.stdout }} state=absent
+  local_action: file path="{{ g_etcd_server_mktemp.stdout }}" state=absent
   become: no
   changed_when: False
   when: etcd_server_certs_missing | bool
-  delegate_to: localhost
 
 - name: Validate permissions on certificate files
   file:

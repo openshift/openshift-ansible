@@ -103,7 +103,6 @@
   register: node_cert_mktemp
   changed_when: False
   when: node_certs_missing | bool
-  delegate_to: localhost
   become: no
 
 - name: Create a tarball of the node config directories
@@ -141,10 +140,10 @@
     dest: "{{ openshift_node_cert_dir }}"
   when: node_certs_missing | bool
 
-- file: name={{ node_cert_mktemp.stdout }} state=absent
+- name: Delete local temp directory
+  local_action: file path="{{ node_cert_mktemp.stdout }}" state=absent
   changed_when: False
   when: node_certs_missing | bool
-  delegate_to: localhost
   become: no
 
 - name: Copy OpenShift CA to system CA trust

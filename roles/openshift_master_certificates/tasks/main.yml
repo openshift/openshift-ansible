@@ -124,7 +124,6 @@
   register: g_master_certs_mktemp
   changed_when: False
   when: master_certs_missing | bool
-  delegate_to: localhost
   become: no
 
 - name: Create a tarball of the master certs
@@ -158,10 +157,10 @@
     dest: "{{ openshift_master_config_dir }}"
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
-- file: name={{ g_master_certs_mktemp.stdout }} state=absent
+- name: Delete local temp directory
+  local_action: file path="{{ g_master_certs_mktemp.stdout }}" state=absent
   changed_when: False
   when: master_certs_missing | bool
-  delegate_to: localhost
   become: no
 
 - name: Lookup default group for ansible_ssh_user
