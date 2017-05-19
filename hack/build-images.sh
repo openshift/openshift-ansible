@@ -10,7 +10,7 @@ source_root=$(dirname "${0}")/..
 prefix="openshift/openshift-ansible"
 version="latest"
 verbose=false
-options=""
+options="-f images/installer/Dockerfile"
 help=false
 
 for args in "$@"

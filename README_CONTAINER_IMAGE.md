@@ -1,6 +1,6 @@
 # Containerized openshift-ansible to run playbooks
 
-The [Dockerfile](Dockerfile) in this repository uses the [playbook2image](https://github.com/aweiteka/playbook2image) source-to-image base image to containerize `openshift-ansible`. The resulting image can run any of the provided playbooks. See [BUILD.md](BUILD.md) for image build instructions.
+The [Dockerfile](images/installer/Dockerfile) in this repository uses the [playbook2image](https://github.com/openshift/playbook2image) source-to-image base image to containerize `openshift-ansible`. The resulting image can run any of the provided playbooks. See [BUILD.md](BUILD.md) for image build instructions.
 
 The image is designed to **run as a non-root user**. The container's UID is mapped to the username `default` at runtime. Therefore, the container's environment reflects that user's settings, and the configuration should match that. For example `$HOME` is `/opt/app-root/src`, so ssh keys are expected to be under `/opt/app-root/src/.ssh`. If you ran a container as `root` you would have to adjust the container's configuration accordingly, e.g. by placing ssh keys under `/root/.ssh` instead. Nevertheless, the expectation is that containers will be run as non-root; for example, this container image can be run inside OpenShift under the default `restricted` [security context constraint](https://docs.openshift.org/latest/architecture/additional_concepts/authorization.html#security-context-constraints).
 
@@ -8,7 +8,7 @@ The image is designed to **run as a non-root user**. The container's UID is mapp
 
 ## Usage
 
-The `playbook2image` base image provides several options to control the behaviour of the containers. For more details on these options see the [playbook2image](https://github.com/aweiteka/playbook2image) documentation.
+The `playbook2image` base image provides several options to control the behaviour of the containers. For more details on these options see the [playbook2image](https://github.com/openshift/playbook2image) documentation.
 
 At the very least, when running a container you must specify:
 
