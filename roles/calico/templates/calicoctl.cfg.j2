@@ -3,7 +3,7 @@ kind: calicoApiConfig
 metadata:
 spec:
   datastoreType: "etcdv2"
-  etcdEndpoints: "{{ etcd_endpoints }}"
+  etcdEndpoints: "{{ calico_etcd_endpoints }}"
   etcdKeyFile: "{{ calico_etcd_key_file }}"
   etcdCertFile: "{{ calico_etcd_cert_file }}"
   etcdCaCertFile: "{{ calico_etcd_ca_cert_file }}"

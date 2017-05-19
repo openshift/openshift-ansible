@@ -78,7 +78,7 @@ spec:
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
-              value: {{ etcd_endpoints }}
+              value: {{ calico_etcd_endpoints }}
             # Location of the CA certificate for etcd.
             - name: ETCD_CA_CERT_FILE
               value: {{ calico_etcd_ca_cert_file }}
@@ -96,10 +96,10 @@ spec:
           volumeMounts:
             # Mount in the etcd TLS secrets.
             - name: certs
-              mountPath: /etc/origin/calico
+              mountPath: {{ calico_etcd_cert_dir }}
 
       volumes:
         # Mount in the etcd TLS secrets.
         - name: certs
           hostPath:
-            path: /etc/origin/calico
+            path: {{ calico_etcd_cert_dir }}

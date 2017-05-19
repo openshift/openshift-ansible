@@ -1,19 +1,36 @@
 ---
-- include: ../../../roles/etcd_client_certificates/tasks/main.yml
-  vars:
-    etcd_cert_prefix: calico.etcd-
-    etcd_cert_config_dir: "{{ openshift.common.config_base }}/calico"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    etcd_cert_subdir: "openshift-calico-{{ openshift.common.hostname }}"
+- name: Calico Node | Error if invalid cert arguments
+  fail:
+    msg: "Must provide all or none for the following etcd params: calico_etcd_cert_dir, calico_etcd_ca_cert_file, calico_etcd_cert_file, calico_etcd_key_file, calico_etcd_endpoints"
+  when: (calico_etcd_cert_dir is defined or calico_etcd_ca_cert_file is defined or calico_etcd_cert_file is defined or calico_etcd_key_file is defined or calico_etcd_endpoints is defined) and not (calico_etcd_cert_dir is defined and calico_etcd_ca_cert_file is defined and calico_etcd_cert_file is defined and calico_etcd_key_file is defined and calico_etcd_endpoints is defined)
 
-- name: Calico Node | Assure the calico certs have been generated
+- name: Calico Node | Generate certs if not provided
+  include: gen_certs.yml
+  when: item is not defined
+  with_items:
+    - calico_etcd_ca_cert_file
+    - calico_etcd_cert_file
+    - calico_etcd_key_file
+    - calico_etcd_endpoints
+    - calico_etcd_cert_dir
+
+- name: Calico Node | Error if no certs set.
+  fail:
+    msg: "Invalid etcd configuration for calico."
+  when: item is not defined or item == ''
+  with_items:
+    - calico_etcd_ca_cert_file
+    - calico_etcd_cert_file
+    - calico_etcd_key_file
+    - calico_etcd_endpoints
+
+- name: Calico Node | Assure the calico certs are present
   stat:
     path: "{{ item }}"
   with_items:
-  - "{{ calico_etcd_ca_cert_file }}"
-  - "{{ calico_etcd_cert_file}}"
-  - "{{ calico_etcd_key_file }}"
+    - "{{ calico_etcd_ca_cert_file }}"
+    - "{{ calico_etcd_cert_file}}"
+    - "{{ calico_etcd_key_file }}"
 
 - name: Calico Node | Configure Calico service unit file
   template:

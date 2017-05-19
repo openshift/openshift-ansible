@@ -1,0 +1,17 @@
+---
+- name: Calico Node | Generate OpenShift-etcd certs
+  include: ../../../roles/etcd_client_certificates/tasks/main.yml
+  vars:
+    etcd_cert_prefix: calico.etcd-
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/calico"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-calico-{{ openshift.common.hostname }}"
+
+- name: Calico Node | Set etcd cert location facts
+  set_fact:
+    calico_etcd_ca_cert_file: "/etc/origin/calico/calico.etcd-ca.crt"
+    calico_etcd_cert_file: "/etc/origin/calico/calico.etcd-client.crt"
+    calico_etcd_key_file: "/etc/origin/calico/calico.etcd-client.key"
+    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls | join(',') }}"
+    calico_etcd_cert_dir: "/etc/origin/calico/"

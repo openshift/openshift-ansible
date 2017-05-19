@@ -13,8 +13,8 @@ ExecStart=/usr/bin/docker run --net=host --privileged \
  -e CALICO_IPV4POOL_IPIP={{ calico_ipv4pool_ipip }} \
  -e CALICO_IPV4POOL_CIDR={{ calico_ipv4pool_cidr }} \
  -e FELIX_IPV6SUPPORT=false \
- -e ETCD_ENDPOINTS={{ etcd_endpoints }} \
- -v /etc/origin/calico:/etc/origin/calico \
+ -e ETCD_ENDPOINTS={{ calico_etcd_endpoints }} \
+ -v {{ calico_etcd_cert_dir }}:{{ calico_etcd_cert_dir }}  \
  -e ETCD_CA_CERT_FILE={{ calico_etcd_ca_cert_file }} \
  -e ETCD_CERT_FILE={{ calico_etcd_cert_file }} \
  -e ETCD_KEY_FILE={{ calico_etcd_key_file }} \
