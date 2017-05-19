@@ -5,6 +5,10 @@
 - set_fact: fluentd_ops_port={{ (openshift_logging_use_ops | bool) | ternary(openshift_logging_es_ops_port, openshift_logging_es_port) }}
   check_mode: no
 
+- set_fact: openshift_logging_fluentd_use_journal={{ "journald" in openshift.docker.options }}
+  check_mode: no
+  when: "openshift_logging_fluentd_use_journal == ''"
+
 - name: Generating Fluentd daemonset
   template: src=fluentd.j2 dest={{mktemp.stdout}}/templates/logging-fluentd.yaml
   vars:
