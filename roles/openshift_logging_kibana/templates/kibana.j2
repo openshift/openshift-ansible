@@ -53,6 +53,12 @@ spec:
               value: "{{ es_host }}"
             - name: "ES_PORT"
               value: "{{ es_port }}"
+            -
+              name: "KIBANA_MEMORY_LIMIT"
+              valueFrom:
+                resourceFieldRef:
+                  containerName: kibana
+                  resource: limits.memory
           volumeMounts:
             - name: kibana
               mountPath: /etc/kibana/keys
@@ -103,6 +109,27 @@ spec:
             -
              name: "OAP_DEBUG"
              value: "{{ openshift_logging_kibana_proxy_debug }}"
+            -
+             name: "OAP_OAUTH_SECRET_FILE"
+             value: "/secret/oauth-secret"
+            -
+             name: "OAP_SERVER_CERT_FILE"
+             value: "/secret/server-cert"
+            -
+             name: "OAP_SERVER_KEY_FILE"
+             value: "/secret/server-key"
+            -
+             name: "OAP_SERVER_TLS_FILE"
+             value: "/secret/server-tls.json"
+            -
+             name: "OAP_SESSION_SECRET_FILE"
+             value: "/secret/session-secret"
+            -
+             name: "OCP_AUTH_PROXY_MEMORY_LIMIT"
+             valueFrom:
+               resourceFieldRef:
+                 containerName: kibana-proxy
+                 resource: limits.memory
           volumeMounts:
             - name: kibana-proxy
               mountPath: /secret
