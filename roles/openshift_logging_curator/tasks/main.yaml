@@ -91,7 +91,7 @@
     es_port: "{{ openshift_logging_curator_es_port }}"
     curator_cpu_limit: "{{ openshift_logging_curator_cpu_limit }}"
     curator_memory_limit: "{{ openshift_logging_curator_memory_limit }}"
-    replicas: "{{ openshift_logging_curator_replicas | default (0)}}"
+    replicas: "{{ openshift_logging_curator_replicas | default (1) }}"
     curator_node_selector: "{{openshift_logging_curator_nodeselector | default({})}}"
   check_mode: no
   changed_when: no
@@ -105,15 +105,6 @@
     files:
     - "{{ tempdir }}/templates/curator-dc.yaml"
     delete_after: true
-
-# scale up
-- name: Start Curator
-  oc_scale:
-    kind: dc
-    name: "{{ curator_name }}"
-    namespace: "{{ openshift_logging_namespace }}"
-    replicas: "{{ openshift_logging_curator_replicas | default (1) }}"
-
 
 - name: Delete temp directory
   file:

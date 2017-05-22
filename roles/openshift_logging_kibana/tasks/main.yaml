@@ -210,7 +210,7 @@
     kibana_memory_limit: "{{ openshift_logging_kibana_memory_limit }}"
     kibana_proxy_cpu_limit: "{{ openshift_logging_kibana_proxy_cpu_limit }}"
     kibana_proxy_memory_limit: "{{ openshift_logging_kibana_proxy_memory_limit }}"
-    replicas: "{{ openshift_logging_kibana_replicas | default (0) }}"
+    replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
     kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
 
 - name: Set Kibana DC
@@ -222,14 +222,6 @@
     files:
     - "{{ tempdir }}/templates/kibana-dc.yaml"
     delete_after: true
-
-# Scale up Kibana -- is this really necessary?
-- name: Start Kibana
-  oc_scale:
-    kind: dc
-    name: "{{ kibana_name }}"
-    namespace: "{{ openshift_logging_namespace }}"
-    replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
 
 # update master configs?
 
