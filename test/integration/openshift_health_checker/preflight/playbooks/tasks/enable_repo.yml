@@ -6,4 +6,4 @@
     dest: /etc/yum.repos.d/{{ repo_name }}.repo
     section: "{{ repo_name }}"
     option: enabled
-    value: 1
+    value: "{{ repo_enabled | default(1) }}"
