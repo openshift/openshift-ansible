@@ -114,7 +114,7 @@
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
     es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
-    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas | default(0) }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas | default(1) }}"
   when: es_config_contents is undefined
   changed_when: no
 
@@ -256,6 +256,7 @@
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
+    replicas: 1
 
 - name: Set ES dc
   oc_obj:
@@ -266,14 +267,6 @@
     files:
     - "{{ tempdir }}/templates/logging-es-dc.yml"
     delete_after: true
-
-# scale up
-- name: Start Elasticsearch
-  oc_scale:
-    kind: dc
-    name: "{{ es_deploy_name }}"
-    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-    replicas: 1
 
 ## Placeholder for migration when necessary ##
 

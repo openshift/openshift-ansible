@@ -7,7 +7,7 @@ script:
 
 index:
   number_of_shards: {{ es_number_of_shards | default ('1') }}
-  number_of_replicas: {{ es_number_of_replicas | default ('0') }}
+  number_of_replicas: {{ es_number_of_replicas | default ('1') }}
   unassigned.node_left.delayed_timeout: 2m
   translog:
     flush_threshold_size: 256mb

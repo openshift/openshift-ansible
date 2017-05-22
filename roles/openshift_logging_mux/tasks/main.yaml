@@ -172,7 +172,7 @@
     ops_port: "{{ openshift_logging_mux_ops_port }}"
     mux_cpu_limit: "{{ openshift_logging_mux_cpu_limit }}"
     mux_memory_limit: "{{ openshift_logging_mux_memory_limit }}"
-    replicas: "{{ openshift_logging_mux_replicas | default(0) }}"
+    replicas: "{{ openshift_logging_mux_replicas | default(1) }}"
     mux_node_selector: "{{ openshift_logging_mux_nodeselector | default({}) }}"
   check_mode: no
   changed_when: no
@@ -186,14 +186,6 @@
     files:
     - "{{ tempdir }}/templates/logging-mux-dc.yaml"
     delete_after: true
-
-# Scale up Mux
-- name: Start Mux
-  oc_scale:
-    kind: dc
-    name: "logging-mux"
-    namespace: "{{ openshift_logging_mux_namespace }}"
-    replicas: "{{ openshift_logging_mux_replicas | default (1) }}"
 
 - name: Delete temp directory
   file:
