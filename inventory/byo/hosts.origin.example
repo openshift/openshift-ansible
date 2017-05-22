@@ -791,9 +791,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Upgrade Control
 #
 # By default nodes are upgraded in a serial manner one at a time and all failures
-# are fatal
+# are fatal, one set of variables for normal nodes, one set of variables for
+# nodes that are part of control plane as the number of hosts may be different
+# in those two groups.
 #openshift_upgrade_nodes_serial=1
 #openshift_upgrade_nodes_max_fail_percentage=0
+#openshift_upgrade_control_plane_nodes_serial=1
+#openshift_upgrade_control_plane_nodes_max_fail_percentage=0
 #
 # You can specify the number of nodes to upgrade at once. We do not currently
 # attempt to verify that you have capacity to drain this many nodes at once
