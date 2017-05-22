@@ -256,6 +256,7 @@
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
+    replicas: 1
 
 - name: Set ES dc
   oc_obj:
@@ -266,14 +267,6 @@
     files:
     - "{{ tempdir }}/templates/logging-es-dc.yml"
     delete_after: true
-
-# scale up
-- name: Start Elasticsearch
-  oc_scale:
-    kind: dc
-    name: "{{ es_deploy_name }}"
-    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-    replicas: 1
 
 ## Placeholder for migration when necessary ##
 
