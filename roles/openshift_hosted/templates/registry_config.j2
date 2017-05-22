@@ -10,8 +10,12 @@ storage:
     blobdescriptor: inmemory
 {% if openshift_hosted_registry_storage_provider | default('') == 's3' %}
   s3:
+{%   if openshift_hosted_registry_storage_s3_accesskey is defined %}
     accesskey: {{ openshift_hosted_registry_storage_s3_accesskey }}
+{%   endif %}
+{%   if openshift_hosted_registry_storage_s3_secretkey is defined %}
     secretkey: {{ openshift_hosted_registry_storage_s3_secretkey }}
+{%   endif %}
     region: {{ openshift_hosted_registry_storage_s3_region }}
 {%   if openshift_hosted_registry_storage_s3_regionendpoint is defined %}
     regionendpoint: {{ openshift_hosted_registry_storage_s3_regionendpoint }}
