@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.69
+Version:        3.6.80
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.80-1
+- RPM workaround for the move of cert playbooks (pep@redhat.com)
+- health check playbooks: relocate and expand (lmeyer@redhat.com)
+
 * Tue May 23 2017 Scott Dodson <sdodson@redhat.com> 3.6.69-1
 - preflight int tests: fix for openshift_version dep (lmeyer@redhat.com)
 - Removing requirement to pass aws credentials (esauer@redhat.com)
