@@ -21,3 +21,4 @@
       docker_container:
         name: "{{ inventory_hostname }}"
         state: absent
+      failed_when: False
