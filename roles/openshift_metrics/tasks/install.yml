@@ -103,7 +103,7 @@
   modify_yaml:
     dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
     yaml_key: assetConfig.metricsPublicURL
-    yaml_value: "https://{{ metrics_hostname }}/hawkular/metrics"
+    yaml_value: "{{ openshift_hosted_metrics_deploy_url }}"
   notify: restart master
 
 - name: Store metrics public_url
