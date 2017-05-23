@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.68
+Version:        3.6.69
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -274,6 +274,84 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 23 2017 Scott Dodson <sdodson@redhat.com> 3.6.69-1
+- preflight int tests: fix for openshift_version dep (lmeyer@redhat.com)
+- Removing requirement to pass aws credentials (esauer@redhat.com)
+- Workaround sysctl module issue with py3 by converting task to lineinfile.
+  (abutcher@redhat.com)
+- inventory: rename certificates->certificate in router example
+  (smilner@redhat.com)
+- remove skopeo dependency on docker-py (jvallejo@redhat.com)
+- improve error handling for missing vars (jvallejo@redhat.com)
+- lib/base: Allow for more complex template params (jarrpa@redhat.com)
+- Fix yamllint problems (sdodson@redhat.com)
+- add ability to expose Elasticsearch as an external route
+  (rmeggins@redhat.com)
+- Parameterized Calico/Node Arguments (vincent.schwarzer@yahoo.de)
+- Fix auditConfig for non-HA environments (rteague@redhat.com)
+- Added Docker Registry Port 5000 to Firewalld (vincent.schwarzer@yahoo.de)
+- Added Calicoctl to deployment of Master Nodes (vincent.schwarzer@yahoo.de)
+- move etcd upgrade related code into etcd_upgrade role (jchaloup@redhat.com)
+- Localhost TMP Dir Fix (vincent.schwarzer@yahoo.de)
+- Adjusted Naming Schema of Calico Roles (vincent.schwarzer@yahoo.de)
+- Update hosts.*.example to include openshift_hosted_metrics_deployer_version
+  (pat2man@gmail.com)
+- Fix gpg key path in our repo (sdodson@redhat.com)
+- Uninstall: restart docker when container-engine restart hasn't changed.
+  (abutcher@redhat.com)
+- add etcd cluster size check (jvallejo@redhat.com)
+- fix etcd_container_version detection (jchaloup@redhat.com)
+- systemcontainercustom.conf.j2: use Environment instead of ENVIRONMENT
+  (gscrivan@redhat.com)
+- node, systemd: change Requires to Wants for openvswitch (gscrivan@redhat.com)
+- Add teams attribute to github identity provider (dms@redhat.com)
+- Don't escalate privileges in local tmpdir creation (skuznets@redhat.com)
+- Remove use of local_action with delegate_to and switch 'delegate_to:
+  localhost' temporary directory cleanup actions to local_actions.
+  (abutcher@redhat.com)
+- Rework openshift_excluders role (rteague@redhat.com)
+- Add regexp for container-engine lineinfile (smilner@redhat.com)
+- Default image policy on new clusters to on (ccoleman@redhat.com)
+- revert role-specific var name (jvallejo@redhat.com)
+- Filter non-strings from the oc_adm_ca_server_cert hostnames parameter.
+  (abutcher@redhat.com)
+- Don't set-up origin repositories if they've already been configured
+  (dms@redhat.com)
+- byo inventory versions 1.5 -> 3.6 (smilner@redhat.com)
+- byo inventory versions 3.5 -> 3.6 (smilner@redhat.com)
+- use dest instead of path for lineinfile (smilner@redhat.com)
+- openshift_version: skip rpm version==image version on Atomic
+  (gscrivan@redhat.com)
+- Add NO_PROXY workaround for container-engine atomic command
+  (smilner@redhat.com)
+- Add no_proxy to atomic.conf (smilner@redhat.com)
+- Include object validation in 3.6 upgrades (sdodson@redhat.com)
+- uninstall: handle container-engine (gscrivan@redhat.com)
+- Added Calico BGP Port 179 to Firewalld (vincent.schwarzer@yahoo.de)
+- Fixed for python3 with Fedora 25 Atomic (donny@fortnebula.com)
+- Add docker package for container-engine install (smilner@redhat.com)
+- Fix python3 error in repoquery (jpeeler@redhat.com)
+- check if hostname is in list of etcd hosts (jvallejo@redhat.com)
+- Fix templating of static service files (rteague@redhat.com)
+- Fix container image build references (pep@redhat.com)
+- Reset selinux context on /var/lib/origin/openshift.common.volumes
+  (sdodson@redhat.com)
+- Adding assert to check for python-passlib on control host
+  (ewolinet@redhat.com)
+- Update variable name to standard (rhcarvalho@gmail.com)
+- Make class attribute name shorter (rhcarvalho@gmail.com)
+- Add module docstring (rhcarvalho@gmail.com)
+- Update check (rhcarvalho@gmail.com)
+- Change based on feedback (vincent.schwarzer@yahoo.de)
+- Removed Hardcoded Calico URLs (vincent.schwarzer@yahoo.de)
+- int -> float (rhcarvalho@gmail.com)
+- Remove vim line (rhcarvalho@gmail.com)
+- add etcd volume check (jvallejo@redhat.com)
+- Added additional Calico Network Plugin Checks (vincent.schwarzer@yahoo.de)
+- Ensure good return code for specific until loops (smilner@redhat.com)
+- add template service broker configurable (jminter@redhat.com)
+- Prevent line wrap in yaml dump of IDP, fixes #3912 (rikkuness@gmail.com)
+
 * Sat May 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.68-1
 - Updating registry-console image version during a post_control_plane upgrade
   (ewolinet@redhat.com)
