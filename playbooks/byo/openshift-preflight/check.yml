@@ -1,15 +1,3 @@
 ---
-- include: ../openshift-cluster/initialize_groups.yml
-
-- name: Run OpenShift health checks
-  # Temporarily reverting to OSEv3 until group standardization is complete
-  hosts: OSEv3
-  roles:
-    - openshift_health_checker
-  post_tasks:
-    # NOTE: we need to use the old "action: name" syntax until
-    # https://github.com/ansible/ansible/issues/20513 is fixed.
-    - action: openshift_health_check
-      args:
-        checks:
-          - '@preflight'
+# location is moved; this file remains so existing instructions keep working
+- include: ../openshift-checks/pre-install.yml

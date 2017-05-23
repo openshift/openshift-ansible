@@ -161,23 +161,29 @@ BuildArch:     noarch
 %files playbooks
 %{_datadir}/ansible/%{name}/playbooks
 
-# We moved playbooks/common/openshift-master/library up to the top and replaced
-# it with a symlink. RPM doesn't handle this so we have to do some pre-transaction
-# magic. See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
+# Along the history of openshift-ansible, some playbook directories had to be
+# moved and were replaced with symlinks for backwards compatibility.
+# RPM doesn't handle this so we have to do some pre-transaction magic.
+# See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
 %pretrans playbooks -p <lua>
--- Define the path to directory being replaced below.
+-- Define the paths to directories being replaced below.
 -- DO NOT add a trailing slash at the end.
-path = "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library"
-st = posix.stat(path)
-if st and st.type == "directory" then
-  status = os.rename(path, path .. ".rpmmoved")
-  if not status then
-    suffix = 0
-    while not status do
-      suffix = suffix + 1
-      status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+dirs_to_sym = {
+    "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library",
+    "/usr/share/ansible/openshift-ansible/playbooks/certificate_expiry"
+}
+for i,path in ipairs(dirs_to_sym) do
+  st = posix.stat(path)
+  if st and st.type == "directory" then
+    status = os.rename(path, path .. ".rpmmoved")
+    if not status then
+      suffix = 0
+      while not status do
+        suffix = suffix + 1
+        status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+      end
+      os.rename(path, path .. ".rpmmoved")
     end
-    os.rename(path, path .. ".rpmmoved")
   end
 end
 

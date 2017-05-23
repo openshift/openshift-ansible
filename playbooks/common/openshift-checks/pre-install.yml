@@ -1,0 +1,10 @@
+---
+- hosts: OSEv3
+  name: run OpenShift pre-install checks
+  roles:
+    - openshift_health_checker
+  post_tasks:
+    - action: openshift_health_check  # https://github.com/ansible/ansible/issues/20513
+      args:
+        checks:
+          - '@preflight'
