@@ -1,3 +1,5 @@
+---
+# Install default storage classes in GCE & AWS
 - name: Ensure storageclass object
   oc_obj:
     kind: storageclass
