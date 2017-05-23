@@ -21,11 +21,22 @@ Requires:      ansible >= 2.2.2.0
 Requires:      python2
 Requires:      python-six
 Requires:      tar
-Requires:      openshift-ansible-docs = %{version}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
+Obsoletes:     %{name}-callback-plugins <= 3.7
+Obsoletes:     %{name}-docs <= 3.7
+Obsoletes:     %{name}-filter-plugins <= 3.7
+Obsoletes:     %{name}-lookup-plugins <= 3.7
+Obsoletes:     %{name}-playbooks <= 3.7
+Obsoletes:     %{name}-roles <= 3.7
+Provides:      %{name}-callback-plugins
+Provides:      %{name}-docs
+Provides:      %{name}-filter-plugins
+Provides:      %{name}-lookup-plugins
+Provides:      %{name}-playbooks
+Provides:      %{name}-roles
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -124,143 +135,49 @@ popd
 # Base openshift-ansible files
 %files
 %doc README*
+%doc  docs
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
 %{_datadir}/ansible/%{name}/library
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-docs subpackage
-# ----------------------------------------------------------------------------------
-%package docs
-Summary:       Openshift and Atomic Enterprise Ansible documents
-Requires:      %{name} = %{version}
-BuildArch:     noarch
-
-%description docs
-%{summary}.
-
-%files docs
-%doc  docs
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-playbooks subpackage
-# ----------------------------------------------------------------------------------
-%package playbooks
-Summary:       Openshift and Atomic Enterprise Ansible Playbooks
-Requires:      %{name} = %{version}
-Requires:      %{name}-roles = %{version}
-Requires:      %{name}-lookup-plugins = %{version}
-Requires:      %{name}-filter-plugins = %{version}
-Requires:      %{name}-callback-plugins = %{version}
-BuildArch:     noarch
-
-%description playbooks
-%{summary}.
-
-%files playbooks
 %{_datadir}/ansible/%{name}/playbooks
-
-# Along the history of openshift-ansible, some playbook directories had to be
-# moved and were replaced with symlinks for backwards compatibility.
-# RPM doesn't handle this so we have to do some pre-transaction magic.
-# See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
-%pretrans playbooks -p <lua>
--- Define the paths to directories being replaced below.
--- DO NOT add a trailing slash at the end.
-dirs_to_sym = {
-    "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library",
-    "/usr/share/ansible/openshift-ansible/playbooks/certificate_expiry"
-}
-for i,path in ipairs(dirs_to_sym) do
-  st = posix.stat(path)
-  if st and st.type == "directory" then
-    status = os.rename(path, path .. ".rpmmoved")
-    if not status then
-      suffix = 0
-      while not status do
-        suffix = suffix + 1
-        status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
-      end
-      os.rename(path, path .. ".rpmmoved")
-    end
-  end
-end
-
-%package roles
-# ----------------------------------------------------------------------------------
-# openshift-ansible-roles subpackage
-# ----------------------------------------------------------------------------------
-Summary:       Openshift and Atomic Enterprise Ansible roles
-Requires:      %{name} = %{version}
-Requires:      %{name}-lookup-plugins = %{version}
-Requires:      %{name}-filter-plugins = %{version}
-Requires:      %{name}-callback-plugins = %{version}
-BuildArch:     noarch
-
-%description roles
-%{summary}.
-
-%files roles
 %{_datadir}/ansible/%{name}/roles
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-filter-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package filter-plugins
-Summary:       Openshift and Atomic Enterprise Ansible filter plugins
-Requires:      %{name} = %{version}
-BuildArch:     noarch
-Requires:      pyOpenSSL
-
-%description filter-plugins
-%{summary}.
-
-%files filter-plugins
 %{_datadir}/ansible_plugins/filter_plugins
 %{_datadir}/ansible/plugins/filter
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-lookup-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package lookup-plugins
-Summary:       Openshift and Atomic Enterprise Ansible lookup plugins
-Requires:      %{name} = %{version}
-BuildArch:     noarch
-
-%description lookup-plugins
-%{summary}.
-
-%files lookup-plugins
 %{_datadir}/ansible_plugins/lookup_plugins
 %{_datadir}/ansible/plugins/lookup
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-callback-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package callback-plugins
-Summary:       Openshift and Atomic Enterprise Ansible callback plugins
-Requires:      %{name} = %{version}
-BuildArch:     noarch
-
-%description callback-plugins
-%{summary}.
-
-%files callback-plugins
 %{_datadir}/ansible_plugins/callback_plugins
 %{_datadir}/ansible/plugins/callback
 
+# We moved playbooks/common/openshift-master/library up to the top and replaced
+# it with a symlink. RPM doesn't handle this so we have to do some pre-transaction
+# magic. See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
+
+%pretrans -p <lua>
+-- Define the path to directory being replaced below.
+-- DO NOT add a trailing slash at the end.
+path = "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library"
+st = posix.stat(path)
+if st and st.type == "directory" then
+  status = os.rename(path, path .. ".rpmmoved")
+  if not status then
+    suffix = 0
+    while not status do
+      suffix = suffix + 1
+      status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+    end
+    os.rename(path, path .. ".rpmmoved")
+  end
+end
+
+
+%package -n atomic-openshift-utils
 # ----------------------------------------------------------------------------------
 # atomic-openshift-utils subpackage
 # ----------------------------------------------------------------------------------
-
-%package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
-Requires:      %{name}-playbooks = %{version}
+Requires:      %{name} = %{version}
 Requires:      python-click
 Requires:      python-setuptools
 Requires:      PyYAML
