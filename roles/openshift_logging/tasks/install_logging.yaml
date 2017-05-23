@@ -57,16 +57,13 @@
 - set_fact: es_indices=[]
   when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count == 0
 
-# TODO: add more vars
 # We don't allow scaling down of ES nodes currently
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_deployment_name: "{{ item.0 }}"
-# TODO: fix this logic when we have existing DC but no PVC
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix ~ '-' ~ item.2 if item.1 is none else item.1 }}"
-##
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if openshift_logging_es_pvc_dynamic | bool else 'emptydir' }}"
@@ -84,7 +81,7 @@
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if openshift_logging_es_pvc_dynamic | bool else 'emptydir' }}"
@@ -103,7 +100,7 @@
 - set_fact: es_ops_indices=[]
   when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count == 0
 
-# TODO: add more vars
+
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
@@ -130,11 +127,16 @@
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
 
-  with_sequence: count={{ ( ( openshift_logging_es_ops_cluster_size | int ) - ( openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count ) ) }}
+    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if openshift_logging_es_pvc_dynamic | bool else 'emptydir' }}"
+    openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
+    openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
+    openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+
+  with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
   when:
   - openshift_logging_use_ops | bool
 

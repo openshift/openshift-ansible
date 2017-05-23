@@ -130,14 +130,16 @@
     selector:
       component: mux
       provider: openshift
-#    labels:
-#    - logging-infra: 'support'
+    # pending #4091
+    #labels:
+    #- logging-infra: 'support'
     ports:
     - name: mux-forward
       port: "{{ openshift_logging_mux_port }}"
       targetPort: "mux-forward"
-#    externalIPs:
-#    - "{{ ansible_eth0.ipv4.address }}"
+  # pending #4091
+  #  externalIPs:
+  #  - "{{ ansible_eth0.ipv4.address }}"
   when: openshift_logging_mux_allow_external | bool
 
 - name: Set logging-mux service for internal communication
@@ -148,8 +150,9 @@
     selector:
       component: mux
       provider: openshift
-#    labels:
-#    - logging-infra: 'support'
+    # pending #4091
+    #labels:
+    #- logging-infra: 'support'
     ports:
     - name: mux-forward
       port: "{{ openshift_logging_mux_port }}"

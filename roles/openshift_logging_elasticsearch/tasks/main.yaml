@@ -138,7 +138,6 @@
     from_file:
       elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
       logging.yml: "{{ tempdir }}/elasticsearch-logging.yml"
-#  when:
 
 
 # secret
@@ -174,8 +173,9 @@
     selector:
       component: "{{ es_component }}"
       provider: openshift
-#    labels:
-#    - logging-infra: 'support'
+    # pending #4091
+    #labels:
+    #- logging-infra: 'support'
     ports:
     - port: 9300
 
@@ -187,8 +187,9 @@
     selector:
       component: "{{ es_component }}"
       provider: openshift
-#    labels:
-#    - logging-infra: 'support'
+    # pending #4091
+    #labels:
+    #- logging-infra: 'support'
     ports:
     - port: 9200
       targetPort: "restapi"

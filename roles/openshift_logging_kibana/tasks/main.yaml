@@ -3,8 +3,6 @@
 
 - include: determine_version.yaml
 
-- debug: var=tempdir
-
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -64,8 +62,9 @@
     selector:
       component: "{{ kibana_component }}"
       provider: openshift
-#    labels:
-#    - logging-infra: 'support'
+    # pending #4091
+    #labels:
+    #- logging-infra: 'support'
     ports:
     - port: 443
       targetPort: "oaproxy"
@@ -174,13 +173,14 @@
     state: present
     name: "logging-kibana-proxy"
     namespace: "{{ openshift_logging_namespace }}"
-#    files:
-#    - name: server-key
-#      path: "{{ generated_certs_dir }}/kibana-internal.key"
-#    - name: server-cert
-#      path: "{{ generated_certs_dir }}/kibana-internal.crt"
-#    - name: server-tls
-#      path: "{{ generated_certs_dir }}/server-tls.json"
+    # TODO: when possible to have both files and contents for oc_secret use this
+    #files:
+    #- name: server-key
+    #  path: "{{ generated_certs_dir }}/kibana-internal.key"
+    #- name: server-cert
+    #  path: "{{ generated_certs_dir }}/kibana-internal.crt"
+    #- name: server-tls
+    #  path: "{{ generated_certs_dir }}/server-tls.json"
     contents:
     - path: oauth-secret
       data: "{{ oauth_secret }}"
