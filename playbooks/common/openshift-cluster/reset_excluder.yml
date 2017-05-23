@@ -1,8 +1,0 @@
----
-- name: Re-enable excluder if it was previously enabled
-  hosts: oo_masters_to_config:oo_nodes_to_config
-  gather_facts: no
-  tasks:
-  - include_role:
-      name: openshift_excluder
-      tasks_from: enable

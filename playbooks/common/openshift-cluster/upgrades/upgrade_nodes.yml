@@ -47,6 +47,12 @@
     until: node_schedulable|succeeded
     when: node_unschedulable|changed
 
-- include: ../reset_excluder.yml
-  tags:
-  - always
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_nodes_to_config
+   tags:
+   - always
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: openshift_excluder
+      tasks_from: enable

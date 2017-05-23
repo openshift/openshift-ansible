@@ -54,7 +54,7 @@
   tags:
   - pre_upgrade
 
-- include: ../disable_excluder.yml
+- include: ../disable_master_excluders.yml
   tags:
   - pre_upgrade
 
