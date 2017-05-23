@@ -18,6 +18,7 @@ spec:
       timeoutSeconds: 600
       updatePeriodSeconds: 1
     type: Rolling
+  paused: true
   template:
     metadata:
       name: "{{deploy_name}}"

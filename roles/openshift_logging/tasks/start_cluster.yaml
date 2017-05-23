@@ -30,12 +30,22 @@
   register: mux_dc
   when: openshift_logging_use_mux
 
-- name: start mux
+- name: scale up mux
   oc_scale:
     kind: dc
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: "{{ openshift_logging_mux_replica_count | default (1) }}"
+  with_items: "{{ mux_dc.results.results[0]['items'] | map(attribute='metadata.name') | list if 'results' in mux_dc else [] }}"
+  loop_control:
+    loop_var: object
+  when:
+  - mux_dc.results is defined
+  - mux_dc.results.results is defined
+  - openshift_logging_use_mux
+
+- name: start mux deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
   with_items: "{{ mux_dc.results.results[0]['items'] | map(attribute='metadata.name') | list if 'results' in mux_dc else [] }}"
   loop_control:
     loop_var: object
@@ -52,12 +62,18 @@
     namespace: "{{openshift_logging_namespace}}"
   register: es_dc
 
-- name: start elasticsearch
+- name: scale up elasticsearch
   oc_scale:
     kind: dc
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: 1
+  with_items: "{{ es_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+
+- name: start elasticsearch deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
   with_items: "{{ es_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
@@ -70,12 +86,18 @@
     namespace: "{{openshift_logging_namespace}}"
   register: kibana_dc
 
-- name: start kibana
+- name: scale up kibana
   oc_scale:
     kind: dc
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: "{{ openshift_logging_kibana_replica_count | default (1) }}"
+  with_items: "{{ kibana_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+
+- name: start kibana deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
   with_items: "{{ kibana_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
@@ -88,12 +110,18 @@
     namespace: "{{openshift_logging_namespace}}"
   register: curator_dc
 
-- name: start curator
+- name: scale up curator
   oc_scale:
     kind: dc
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: 1
+  with_items: "{{ curator_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+
+- name: start curator deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
   with_items: "{{ curator_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
@@ -106,12 +134,19 @@
     namespace: "{{openshift_logging_namespace}}"
   register: es_dc
 
-- name: start elasticsearch-ops
+- name: scale up elasticsearch-ops
   oc_scale:
     kind: dc
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: 1
+  with_items: "{{ es_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_ops | bool
+
+- name: start elasticsearch-ops deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
   with_items: "{{ es_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
@@ -125,7 +160,7 @@
     namespace: "{{openshift_logging_namespace}}"
   register: kibana_dc
 
-- name: start kibana-ops
+- name: scale up kibana-ops
   oc_scale:
     kind: dc
     name: "{{ object }}"
@@ -136,7 +171,14 @@
     loop_var: object
   when: openshift_logging_use_ops | bool
 
-- name: Retrieve curator
+- name: start kibana-ops deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
+  with_items: "{{ kibana_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_ops | bool
+
+- name: Retrieve curator-ops
   oc_obj:
     state: list
     kind: dc
@@ -144,12 +186,19 @@
     namespace: "{{openshift_logging_namespace}}"
   register: curator_dc
 
-- name: start curator-ops
+- name: scale up curator-ops
   oc_scale:
     kind: dc
     name: "{{ object }}"
     namespace: "{{openshift_logging_namespace}}"
     replicas: 1
+  with_items: "{{ curator_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  loop_control:
+    loop_var: object
+  when: openshift_logging_use_ops | bool
+
+- name: start curator-ops deployment
+  command: '{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rollout resume dc {{ object }} --namespace {{ openshift_logging_namespace }}'
   with_items: "{{ curator_dc.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   loop_control:
     loop_var: object
