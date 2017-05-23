@@ -8,13 +8,17 @@
 
 - name: Success when AOS version matches openshift_release
   hosts: all
+  pre_tasks:
+
+    # run before roles to prevent openshift_version breaking
+    - include: tasks/enable_repo.yml
+      vars: { repo_name: "ose-3.2" }
+
   roles:
     - openshift_health_checker
-  tasks:
-    - block:
 
-        - include: tasks/enable_repo.yml
-          vars: { repo_name: "ose-3.2" }
+  post_tasks:
+    - block:
 
         - action: openshift_health_check
           args:
