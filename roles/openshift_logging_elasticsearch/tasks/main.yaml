@@ -87,8 +87,8 @@
     roleRef:
       name: view
     subjects:
-      - kind: ServiceAccount
-        name: aggregated-logging-elasticsearch
+    - kind: ServiceAccount
+      name: aggregated-logging-elasticsearch
   changed_when: no
 
 - name: Set logging-elasticsearch-view-role role

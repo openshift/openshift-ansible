@@ -50,10 +50,10 @@
     src: "{{ generated_certs_dir }}/{{ item.file }}"
   register: key_pairs
   with_items:
-    - { name: "ca_file", file: "ca.crt" }
-    - { name: "kibana_internal_key", file: "kibana-internal.key"}
-    - { name: "kibana_internal_cert", file: "kibana-internal.crt"}
-    - { name: "server_tls", file: "server-tls.json"}
+  - { name: "ca_file", file: "ca.crt" }
+  - { name: "kibana_internal_key", file: "kibana-internal.key"}
+  - { name: "kibana_internal_cert", file: "kibana-internal.crt"}
+  - { name: "server_tls", file: "server-tls.json"}
 
 # services
 - name: Set {{ kibana_name }} service
