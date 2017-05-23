@@ -61,6 +61,13 @@ spec:
             - name: kibana
               mountPath: /etc/kibana/keys
               readOnly: true
+          readinessProbe:
+            exec:
+              command:
+              - "/usr/share/kibana/probe/readiness.sh"
+            initialDelaySeconds: 5
+            timeoutSeconds: 4
+            periodSeconds: 5
         -
           name: "kibana-proxy"
           image: {{proxy_image}}
