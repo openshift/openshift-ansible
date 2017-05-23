@@ -13,7 +13,7 @@ class MemoryAvailability(OpenShiftCheck):
     recommended_memory_bytes = {
         "masters": 16 * 10**9,
         "nodes": 8 * 10**9,
-        "etcd": 20 * 10**9,
+        "etcd": 8 * 10**9,
     }
 
     @classmethod

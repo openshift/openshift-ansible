@@ -39,7 +39,7 @@ def test_is_active(group_names, is_active):
     (
         ['etcd'],
         0,
-        22200,
+        8200,
     ),
     (
         ['masters', 'nodes'],
@@ -82,8 +82,14 @@ def test_succeeds_with_recommended_memory(group_names, configured_min, ansible_m
     (
         ['etcd'],
         0,
-        -1,
-        ['0.0 GB'],
+        7000,
+        ['7.0 GB'],
+    ),
+    (
+        ['etcd', 'masters'],
+        0,
+        9000,  # enough memory for etcd, not enough for a master
+        ['9.0 GB'],
     ),
     (
         ['nodes', 'masters'],
