@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.5.18
+Version:        3.5.5.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.19-1
+- Fix auditConfig for non-HA environments (rteague@redhat.com)
+- Workaround sysctl module issue with py3 by converting task to lineinfile.
+  (abutcher@redhat.com)
+- Remove std_include from rhel_subscribe playbook. (abutcher@redhat.com)
+- Fixing a compatibility issue with python 2.7 to 3.5 when reading from
+  subprocess. (kwoodson@redhat.com)
+- Picking from issue #3477 (ewolinet@redhat.com)
+
 * Thu May 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.18-1
 - 
 
