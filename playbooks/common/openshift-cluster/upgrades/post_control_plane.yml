@@ -10,7 +10,7 @@
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) |
                       replace ( '${version}', openshift_image_tag ) }}"
     registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') |
-                                replace ( '${version}', openshift.common.short_version ) }}"
+                                replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
 
   pre_tasks:
   - name: Load lib_openshift modules
