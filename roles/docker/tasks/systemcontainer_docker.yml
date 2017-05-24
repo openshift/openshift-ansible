@@ -124,8 +124,6 @@
     name: "{{ openshift.docker.service_name }}"
     image: "{{ l_docker_image }}"
     state: latest
-    values:
-      - "system-package=no"
 
 - name: Configure Container Engine Service File
   template:
