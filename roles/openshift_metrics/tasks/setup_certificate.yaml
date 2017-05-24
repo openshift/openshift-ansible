@@ -1,7 +1,7 @@
 ---
 - name: generate {{ component }} keys
   command: >
-    {{ openshift.common.admin_binary }} ca create-server-cert
+    {{ openshift.common.client_binary }} adm ca create-server-cert
     --config={{ mktemp.stdout }}/admin.kubeconfig
     --key='{{ mktemp.stdout }}/{{ component }}.key'
     --cert='{{ mktemp.stdout }}/{{ component }}.crt'

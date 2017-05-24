@@ -7,3 +7,4 @@ pyOpenSSL==16.2.0
 # We need to disable ruamel.yaml for now because of test failures
 #ruamel.yaml
 six==1.10.0
+passlib==1.6.5

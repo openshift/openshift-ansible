@@ -1,7 +1,7 @@
 ---
 - name: generate ca certificate chain
   command: >
-    {{ openshift.common.admin_binary }} ca create-signer-cert
+    {{ openshift.common.client_binary }} adm ca create-signer-cert
     --config={{ mktemp.stdout }}/admin.kubeconfig
     --key='{{ mktemp.stdout }}/ca.key'
     --cert='{{ mktemp.stdout }}/ca.crt'
