@@ -119,6 +119,12 @@
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+    openshift_logging_es_key: "{{ openshift_logging_es_ops_key }}"
+    openshift_logging_es_cert: "{{ openshift_logging_es_ops_cert }}"
+    openshift_logging_es_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
+    openshift_logging_es_hostname: "{{ openshift_logging_es_ops_hostname }}"
+    openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
+    openshift_logging_es_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
 
   with_together:
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs }}"
@@ -141,6 +147,12 @@
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+    openshift_logging_es_key: "{{ openshift_logging_es_ops_key }}"
+    openshift_logging_es_cert: "{{ openshift_logging_es_ops_cert }}"
+    openshift_logging_es_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
+    openshift_logging_es_hostname: "{{ openshift_logging_es_ops_hostname }}"
+    openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
+    openshift_logging_es_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
 
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
   when:
