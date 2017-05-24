@@ -73,7 +73,9 @@ from ansible.module_utils.basic import AnsibleModule
 def _install(module, container, image, values_list):
     ''' install a container using atomic CLI.  values_list is the list of --set arguments.
     container is the name given to the container.  image is the image to use for the installation. '''
-    args = ['atomic', 'install', "--system", '--name=%s' % container] + values_list + [image]
+    # NOTE: system-package=no is hardcoded. This should be changed to an option in the future.
+    args = ['atomic', 'install', '--system', '--system-package=no',
+            '--name=%s' % container] + values_list + [image]
     rc, out, err = module.run_command(args, check_rc=False)
     if rc != 0:
         return rc, out, err, False
