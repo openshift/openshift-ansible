@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.80
+Version:        3.6.82
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,22 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.82-1
+- Fixing tux warnings and some final clean up (ewolinet@redhat.com)
+- Appease travis (sdodson@redhat.com)
+- preflight int tests: fix test flake (lmeyer@redhat.com)
+- Add a readiness probe to the Kibana container (skuznets@redhat.com)
+- Create logging deployments with non-zero replica counts (skuznets@redhat.com)
+- Pulling changes from master branch (ewolinet@redhat.com)
+- Adding some missing changes (ewolinet@redhat.com)
+- fixing available variables for 2.3.0 (ewolinet@redhat.com)
+- Updating pvc generation names (ewolinet@redhat.com)
+- updating delete_logging to use modules (ewolinet@redhat.com)
+- Pulling in changes from master (ewolinet@redhat.com)
+- Decomposing openshift_logging role into subcomponent roles
+  (ewolinet@redhat.com)
+- Fix renaming error with calico template files (djosborne10@gmail.com)
+
 * Tue May 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.80-1
 - RPM workaround for the move of cert playbooks (pep@redhat.com)
 - health check playbooks: relocate and expand (lmeyer@redhat.com)
