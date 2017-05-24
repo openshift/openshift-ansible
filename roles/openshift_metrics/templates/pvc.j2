@@ -18,6 +18,13 @@ metadata:
 {% endfor %}
 {% endif %}
 spec:
+{% if pv_selector is defined and pv_selector is mapping %}
+  selector:
+    matchLabels:
+{% for key,value in pv_selector.iteritems() %}
+      {{key}}: {{value}}
+{% endfor %}
+{% endif %}
   accessModes:
 {% for mode in access_modes %}
     - {{ mode }}

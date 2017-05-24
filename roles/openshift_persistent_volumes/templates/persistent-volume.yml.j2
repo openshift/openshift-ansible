@@ -7,6 +7,12 @@ items:
   kind: PersistentVolume
   metadata:
     name: "{{ volume.name }}"
+{% if volume.labels is defined and volume.labels is mapping %}
+    labels:
+{% for key,value in volume.labels.iteritems() %}
+      {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
   spec:
     capacity:
       storage: "{{ volume.capacity }}"
