@@ -21,6 +21,7 @@
     --key={{generated_certs_dir}}/ca.key --cert={{generated_certs_dir}}/ca.crt
     --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test
   check_mode: no
+  become: false
   when:
     - not ca_key_file.stat.exists
     - not ca_cert_file.stat.exists
