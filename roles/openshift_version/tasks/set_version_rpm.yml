@@ -3,16 +3,22 @@
   set_fact:
     # Expects a leading "-" in inventory, strip it off here, and remove trailing release,
     openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
-  when: openshift_pkg_version is defined and openshift_version is not defined
+  when:
+  - openshift_pkg_version is defined
+  - openshift_version is not defined
 
-- name: Gather common package version
-  command: >
-    {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type}}"
-  register: common_version
-  failed_when: false
-  changed_when: false
-  when: openshift_version is not defined
+- block:
+  - name: Get available {{ openshift.common.service_type}} version
+    repoquery:
+      name: "{{ openshift.common.service_type}}"
+      ignore_excluders: true
+    register: rpm_results
 
-- set_fact:
-    openshift_version: "{{ common_version.stdout | default('0.0', True) }}"
-  when: openshift_version is not defined
+  - fail:
+      msg: "Package {{ openshift.common.service_type}} not found"
+    when: not rpm_results.results.package_found
+
+  - set_fact:
+      openshift_version: "{{ rpm_results.results.versions.available_versions.0 | default('0.0', True) }}"
+  when:
+  - openshift_version is not defined
