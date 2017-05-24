@@ -1,7 +1,7 @@
 ---
 - name: create the docker-storage-setup config file
-  copy:
-    src: docker-storage-setup
+  template:
+    src: "{{ role_path }}/templates/docker-storage-setup.j2"
     dest: /etc/sysconfig/docker-storage-setup
     owner: root
     group: root
