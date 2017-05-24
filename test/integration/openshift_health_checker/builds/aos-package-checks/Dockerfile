@@ -25,6 +25,8 @@ RUN cd /root/rpmbuild/SOURCES && \
     rpmbuild -bb /root/ose-3.3.spec  && \
     mkdir /mnt/localrepo/ose-3.{2,3} && \
     cp /root/rpmbuild/RPMS/noarch/atomic-openshift*-3.2-1.noarch.rpm /mnt/localrepo/ose-3.2 && \
+    cp /root/rpmbuild/RPMS/noarch/{openvswitch-2.4,docker-1.10}-1.noarch.rpm /mnt/localrepo/ose-3.2 && \
     createrepo /mnt/localrepo/ose-3.2 && \
     cp /root/rpmbuild/RPMS/noarch/atomic-openshift*-3.3-1.noarch.rpm /mnt/localrepo/ose-3.3 && \
+    cp /root/rpmbuild/RPMS/noarch/{openvswitch-2.4,docker-1.10}-1.noarch.rpm /mnt/localrepo/ose-3.3 && \
     createrepo /mnt/localrepo/ose-3.3
