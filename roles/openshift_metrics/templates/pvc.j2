@@ -25,3 +25,8 @@ spec:
   resources:
     requests:
       storage: {{size}}
+{% if openshift_metrics_cassandra_pvc_prefix is defined and openshift_metrics_cassandra_pvc_prefix %}
+  selector:
+    matchLabels:
+      name: {{ openshift_metrics_cassandra_pvc_prefix }}
+{% endif %}

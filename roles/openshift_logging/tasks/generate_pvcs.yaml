@@ -16,7 +16,7 @@
     obj_name: "{{claim_name}}"
     size: "{{es_pvc_size}}"
     access_modes: "{{ es_access_modes | list }}"
-    pv_selector: "{{es_pv_selector}}"
+    pv_selector: "{{es_pv_selector | default(['name': openshift_hosted_logging_storage_volume_name])}}"
   with_items:
     - "{{es_pvc_pool | default([])}}"
   loop_control:
