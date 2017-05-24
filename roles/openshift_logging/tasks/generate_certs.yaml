@@ -51,14 +51,14 @@
   with_items:
     - procure_component: mux
       hostnames: "logging-mux, {{openshift_logging_mux_hostname}}"
-  when: openshift_logging_use_mux
+  when: openshift_logging_use_mux | bool
 
 - include: procure_shared_key.yaml
   loop_control:
     loop_var: shared_key_info
   with_items:
     - procure_component: mux
-  when: openshift_logging_use_mux
+  when: openshift_logging_use_mux | bool
 
 - include: procure_server_certs.yaml
   loop_control:
