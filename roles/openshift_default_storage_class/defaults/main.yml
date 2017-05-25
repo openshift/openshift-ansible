@@ -1,11 +1,11 @@
 ---
 openshift_storageclass_defaults:
   aws:
-    name: ebs
+    name: gp2
     provisioner: kubernetes.io/aws-ebs
     type: gp2
   gcp:
-    name: gcppd
+    name: standard
     provisioner: kubernetes.io/gce-pd
     type: pd-standard
 
