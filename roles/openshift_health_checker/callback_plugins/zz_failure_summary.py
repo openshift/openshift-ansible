@@ -2,6 +2,12 @@
 Ansible callback plugin.
 '''
 
+# Reason: In several locations below we disable pylint protected-access
+#         for Ansible objects that do not give us any public way
+#         to access the full details we need to report check failures.
+# Status: disabled permanently or until Ansible object has a public API.
+# This does leave the code more likely to be broken by future Ansible changes.
+
 from pprint import pformat
 
 from ansible.plugins.callback import CallbackBase
@@ -20,10 +26,16 @@ class CallbackModule(CallbackBase):
     CALLBACK_TYPE = 'aggregate'
     CALLBACK_NAME = 'failure_summary'
     CALLBACK_NEEDS_WHITELIST = False
+    _playbook_file = None
 
     def __init__(self):
         super(CallbackModule, self).__init__()
         self.__failures = []
+
+    def v2_playbook_on_start(self, playbook):
+        super(CallbackModule, self).v2_playbook_on_start(playbook)
+        # re: playbook attrs see top comment  # pylint: disable=protected-access
+        self._playbook_file = playbook._file_name
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         super(CallbackModule, self).v2_runner_on_failed(result, ignore_errors)
@@ -31,27 +43,20 @@ class CallbackModule(CallbackBase):
 
     def v2_playbook_on_stats(self, stats):
         super(CallbackModule, self).v2_playbook_on_stats(stats)
-        # TODO: update condition to consider a host var or env var to
-        # enable/disable the summary, so that we can control the output from a
-        # play.
         if self.__failures:
-            self._print_failure_summary()
+            self._print_failure_details(self.__failures)
 
-    def _print_failure_summary(self):
-        '''Print a summary of failed tasks (including ignored failures).'''
+    def _print_failure_details(self, failures):
+        '''Print a summary of failed tasks or checks.'''
         self._display.display(u'\nFailure summary:\n')
 
-        # TODO: group failures by host or by task. If grouped by host, it is
-        # easy to see all problems of a given host. If grouped by task, it is
-        # easy to see what hosts needs the same fix.
-
-        width = len(str(len(self.__failures)))
+        width = len(str(len(failures)))
         initial_indent_format = u'  {{:>{width}}}. '.format(width=width)
         initial_indent_len = len(initial_indent_format.format(0))
         subsequent_indent = u' ' * initial_indent_len
         subsequent_extra_indent = u' ' * (initial_indent_len + 10)
 
-        for i, failure in enumerate(self.__failures, 1):
+        for i, failure in enumerate(failures, 1):
             entries = _format_failure(failure)
             self._display.display(u'\n{}{}'.format(initial_indent_format.format(i), entries[0]))
             for entry in entries[1:]:
@@ -59,11 +64,52 @@ class CallbackModule(CallbackBase):
                 indented = u'{}{}'.format(subsequent_indent, entry)
                 self._display.display(indented)
 
+        failed_checks = set()
+        playbook_context = None
+        # re: result attrs see top comment  # pylint: disable=protected-access
+        for failure in failures:
+            # get context from check task result since callback plugins cannot access task vars
+            playbook_context = playbook_context or failure['result']._result.get('playbook_context')
+            failed_checks.update(
+                name
+                for name, result in failure['result']._result.get('checks', {}).items()
+                if result.get('failed')
+            )
+        if failed_checks:
+            self._print_check_failure_summary(failed_checks, playbook_context)
 
-# Reason: disable pylint protected-access because we need to access _*
-#         attributes of a task result to implement this method.
-# Status: permanently disabled unless Ansible's API changes.
-# pylint: disable=protected-access
+    def _print_check_failure_summary(self, failed_checks, context):
+        checks = ','.join(sorted(failed_checks))
+        # NOTE: context is not set if all failures occurred prior to checks task
+        summary = (
+            '\n'
+            'The execution of "{playbook}"\n'
+            'includes checks designed to fail early if the requirements\n'
+            'of the playbook are not met. One or more of these checks\n'
+            'failed. To disregard these results, you may choose to\n'
+            'disable failing checks by setting an Ansible variable:\n\n'
+            '   openshift_disable_check={checks}\n\n'
+            'Failing check names are shown in the failure details above.\n'
+            'Some checks may be configurable by variables if your requirements\n'
+            'are different from the defaults; consult check documentation.\n'
+            'Variables can be set in the inventory or passed on the\n'
+            'command line using the -e flag to ansible-playbook.\n'
+        ).format(playbook=self._playbook_file, checks=checks)
+        if context in ['pre-install', 'health']:
+            summary = (
+                '\n'
+                'You may choose to configure or disable failing checks by\n'
+                'setting Ansible variables. To disable those above:\n\n'
+                '    openshift_disable_check={checks}\n\n'
+                'Consult check documentation for configurable variables.\n'
+                'Variables can be set in the inventory or passed on the\n'
+                'command line using the -e flag to ansible-playbook.\n'
+            ).format(checks=checks)
+        # other expected contexts: install, upgrade
+        self._display.display(summary)
+
+
+# re: result attrs see top comment  # pylint: disable=protected-access
 def _format_failure(failure):
     '''Return a list of pretty-formatted text entries describing a failure, including
     relevant information about it. Expect that the list of text entries will be joined
@@ -100,11 +146,8 @@ def _format_failed_checks(checks):
         return stringc(pformat(checks), C.COLOR_ERROR)
 
 
-# Reason: disable pylint protected-access because we need to access _*
-#         attributes of obj to implement this function.
-#         This is inspired by ansible.playbook.base.Base.dump_me.
-# Status: permanently disabled unless Ansible's API changes.
-# pylint: disable=protected-access
+# This is inspired by ansible.playbook.base.Base.dump_me.
+# re: play/task/block attrs see top comment  # pylint: disable=protected-access
 def _get_play(obj):
     '''Given a task or block, recursively tries to find its parent play.'''
     if hasattr(obj, '_play'):

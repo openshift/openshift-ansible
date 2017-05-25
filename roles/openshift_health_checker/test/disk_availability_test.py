@@ -42,9 +42,10 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
         assert word in str(excinfo.value)
 
 
-@pytest.mark.parametrize('group_names,ansible_mounts', [
+@pytest.mark.parametrize('group_names,configured_min,ansible_mounts', [
     (
         ['masters'],
+        0,
         [{
             'mount': '/',
             'size_available': 40 * 10**9 + 1,
@@ -52,6 +53,7 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
     ),
     (
         ['nodes'],
+        0,
         [{
             'mount': '/',
             'size_available': 15 * 10**9 + 1,
@@ -59,6 +61,7 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
     ),
     (
         ['etcd'],
+        0,
         [{
             'mount': '/',
             'size_available': 20 * 10**9 + 1,
@@ -66,6 +69,15 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
     ),
     (
         ['etcd'],
+        1,  # configure lower threshold
+        [{
+            'mount': '/',
+            'size_available': 1 * 10**9 + 1,  # way smaller than recommended
+        }],
+    ),
+    (
+        ['etcd'],
+        0,
         [{
             # not enough space on / ...
             'mount': '/',
@@ -77,9 +89,10 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
         }],
     ),
 ])
-def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
+def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansible_mounts):
     task_vars = dict(
         group_names=group_names,
+        openshift_check_min_host_disk_gb=configured_min,
         ansible_mounts=ansible_mounts,
     )
 
@@ -89,9 +102,10 @@ def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
     assert not result.get('failed', False)
 
 
-@pytest.mark.parametrize('group_names,ansible_mounts,extra_words', [
+@pytest.mark.parametrize('group_names,configured_min,ansible_mounts,extra_words', [
     (
         ['masters'],
+        0,
         [{
             'mount': '/',
             'size_available': 1,
@@ -99,7 +113,17 @@ def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
         ['0.0 GB'],
     ),
     (
+        ['masters'],
+        100,  # set a higher threshold
+        [{
+            'mount': '/',
+            'size_available': 50 * 10**9,  # would normally be enough...
+        }],
+        ['100.0 GB'],
+    ),
+    (
         ['nodes'],
+        0,
         [{
             'mount': '/',
             'size_available': 1 * 10**9,
@@ -108,6 +132,7 @@ def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
     ),
     (
         ['etcd'],
+        0,
         [{
             'mount': '/',
             'size_available': 1,
@@ -116,6 +141,7 @@ def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
     ),
     (
         ['nodes', 'masters'],
+        0,
         [{
             'mount': '/',
             # enough space for a node, not enough for a master
@@ -125,6 +151,7 @@ def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
     ),
     (
         ['etcd'],
+        0,
         [{
             # enough space on / ...
             'mount': '/',
@@ -137,9 +164,10 @@ def test_succeeds_with_recommended_disk_space(group_names, ansible_mounts):
         ['0.0 GB'],
     ),
 ])
-def test_fails_with_insufficient_disk_space(group_names, ansible_mounts, extra_words):
+def test_fails_with_insufficient_disk_space(group_names, configured_min, ansible_mounts, extra_words):
     task_vars = dict(
         group_names=group_names,
+        openshift_check_min_host_disk_gb=configured_min,
         ansible_mounts=ansible_mounts,
     )
 

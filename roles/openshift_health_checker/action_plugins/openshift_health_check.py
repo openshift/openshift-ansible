@@ -25,9 +25,11 @@ class ActionModule(ActionBase):
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
+        task_vars = task_vars or {}
 
-        if task_vars is None:
-            task_vars = {}
+        # vars are not supportably available in the callback plugin,
+        # so record any it will need in the result.
+        result['playbook_context'] = task_vars.get('r_openshift_health_checker_playbook_context')
 
         if "openshift" not in task_vars:
             result["failed"] = True
@@ -46,19 +48,27 @@ class ActionModule(ActionBase):
 
         result["checks"] = check_results = {}
 
+        user_disabled_checks = [
+            check.strip()
+            for check in task_vars.get("openshift_disable_check", "").split(",")
+        ]
+
         for check_name in resolved_checks:
             display.banner("CHECK [{} : {}]".format(check_name, task_vars["ansible_host"]))
             check = known_checks[check_name]
 
-            if check.is_active(task_vars):
+            if not check.is_active(task_vars):
+                r = dict(skipped=True, skipped_reason="Not active for this host")
+            elif check_name in user_disabled_checks:
+                r = dict(skipped=True, skipped_reason="Disabled by user request")
+            else:
                 try:
                     r = check.run(tmp, task_vars)
                 except OpenShiftCheckException as e:
-                    r = {}
-                    r["failed"] = True
-                    r["msg"] = str(e)
-            else:
-                r = {"skipped": True}
+                    r = dict(
+                        failed=True,
+                        msg=str(e),
+                    )
 
             check_results[check_name] = r
 

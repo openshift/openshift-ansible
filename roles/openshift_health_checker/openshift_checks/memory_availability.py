@@ -13,7 +13,7 @@ class MemoryAvailability(OpenShiftCheck):
     recommended_memory_bytes = {
         "masters": 16 * 10**9,
         "nodes": 8 * 10**9,
-        "etcd": 20 * 10**9,
+        "etcd": 8 * 10**9,
     }
 
     @classmethod
@@ -27,7 +27,9 @@ class MemoryAvailability(OpenShiftCheck):
         group_names = get_var(task_vars, "group_names")
         total_memory_bytes = get_var(task_vars, "ansible_memtotal_mb") * 10**6
 
-        min_memory_bytes = max(self.recommended_memory_bytes.get(name, 0) for name in group_names)
+        recommended_min = max(self.recommended_memory_bytes.get(name, 0) for name in group_names)
+        configured_min = int(get_var(task_vars, "openshift_check_min_host_memory_gb", default=0)) * 10**9
+        min_memory_bytes = configured_min or recommended_min
 
         if total_memory_bytes < min_memory_bytes:
             return {

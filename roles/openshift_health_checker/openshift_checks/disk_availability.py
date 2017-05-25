@@ -27,9 +27,11 @@ class DiskAvailability(NotContainerizedMixin, OpenShiftCheck):
     def run(self, tmp, task_vars):
         group_names = get_var(task_vars, "group_names")
         ansible_mounts = get_var(task_vars, "ansible_mounts")
-
-        min_free_bytes = max(self.recommended_disk_space_bytes.get(name, 0) for name in group_names)
         free_bytes = self.openshift_available_disk(ansible_mounts)
+
+        recommended_min = max(self.recommended_disk_space_bytes.get(name, 0) for name in group_names)
+        configured_min = int(get_var(task_vars, "openshift_check_min_host_disk_gb", default=0)) * 10**9
+        min_free_bytes = configured_min or recommended_min
 
         if free_bytes < min_free_bytes:
             return {
