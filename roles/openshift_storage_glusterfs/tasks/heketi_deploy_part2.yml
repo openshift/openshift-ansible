@@ -16,93 +16,44 @@
   command: "{{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig create -f {{ mktemp.stdout }}/heketi-storage.json -n {{ glusterfs_namespace }}"
   when: setup_storage.rc == 0
 
-- name: Wait for copy job to finish
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: job
-    state: list
-    name: "heketi-storage-copy-job"
-  register: heketi_job
-  until:
-  - "'results' in heketi_job.results and heketi_job.results.results | count > 0"
-  # Pod's 'Complete' status must be True
-  - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
-  delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
-  failed_when:
-  - "'results' in heketi_job.results"
-  - "heketi_job.results.results | count > 0"
-  # Fail when pod's 'Failed' status is True
-  - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Failed'}) | map('bool') | select | list | count == 1"
-  when: setup_storage.rc == 0
+- name: Deploy and wait
+  openshift:
+    project: "{{ glusterfs_namespace }}"
+    timeout: "{{glusterfs_timeout}}"
+    script: |
 
-- name: Delete deploy resources
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: "{{ item.kind }}"
-    name: "{{ item.name | default(omit) }}"
-    selector: "{{ item.selector | default(omit) }}"
-    state: absent
-  with_items:
-  - kind: "template,route,service,jobs,dc,secret"
-    selector: "deploy-heketi"
-  failed_when: False
+      deploy_res = oc.create_or_replace("{{ mktemp.stdout }}/heketi-storage.json")
 
-- name: Copy heketi template
-  copy:
-    src: "{{ openshift.common.examples_content_version }}/heketi-template.yml"
-    dest: "{{ mktemp.stdout }}/heketi-template.yml"
+      deploy_res.narrow("job")
+          .related("pods")
+          .until_any(lambda pod: pod.status.phase == "Succeeded")
 
-- name: Create heketi resources
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: template
-    name: heketi
-    state: present
-    files:
-    - "{{ mktemp.stdout }}/heketi-template.yml"
+      deploy_res.delete()  # Delete deploy resources
 
-- name: Deploy heketi pod
-  oc_process:
-    namespace: "{{ glusterfs_namespace }}"
-    template_name: "heketi"
-    create: True
-    params:
-      IMAGE_NAME: "{{ glusterfs_heketi_image }}"
-      IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
-      HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
-      HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
+      # No need to create this template in openshift, just process it directly
+      heketi_objs = oc.process("{{ openshift.common.examples_content_version }}/heketi-template.yml",
+        parameters= {
+          "IMAGE_NAME": "{{ glusterfs_heketi_image }}"
+          "IMAGE_VERSION": "{{ glusterfs_heketi_version }}"
+          "HEKETI_USER_KEY": "{{ glusterfs_heketi_user_key }}"
+          "HEKETI_ADMIN_KEY": "{{ glusterfs_heketi_admin_key }}"
+        }
+      )
 
-- name: Wait for heketi pod
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: pod
-    state: list
-    selector: "glusterfs=heketi-pod"
-  register: heketi_pod
-  until:
-  - "heketi_pod.results.results[0]['items'] | count > 0"
-  # Pod's 'Ready' status must be True
-  - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
-  delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+      heketi_res = oc.create_or_replace(heketi_objs)
 
-- name: Determine heketi URL
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    state: list
-    kind: ep
-    selector: "glusterfs=heketi-service"
-  register: heketi_url
-  until:
-  - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"
-  - "heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port != ''"
-  delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+      # Wait until heketi pod is Ready
+      heketi_res.narrow("pod")
+        .until_any(
+          lambda pod: pod.status.conditions.can_match({"type": "Ready", "status": "True"})
+        )
 
-- name: Set heketi URL
-  set_fact:
-    glusterfs_heketi_url: "{{ heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip }}:{{ heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port }}"
+      # Require at least one endpoint to be ready
+      heketi_res.narrow("endpoint").until_all(1, lambda ep: ep.subsets[0].addresses[0].ip != "")
+      endpoint = heketi_res.narrow("endpoint").object()
+
+      new_facts.glusterfs_heketi_url = endpoint.subsets[0].addresses[0].ip +
+                                  ":" + endpoint.subsets[0].ports[0].port
 
 - name: Verify heketi service
   command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' cluster list"
