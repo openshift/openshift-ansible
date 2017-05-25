@@ -8,7 +8,7 @@ def map_from_pairs(source, delim="="):
     if source == '':
         return dict()
 
-    return dict(source.split(delim) for item in source.split(","))
+    return dict(item.split(delim) for item in source.split(","))
 
 
 # pylint: disable=too-few-public-methods
