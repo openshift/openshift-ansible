@@ -1,0 +1,12 @@
+# Molecule managed
+
+---
+all:
+  hosts:
+    openshift_excluder_upgrade-excluder_upgrade: &id001
+      ansible_connection: docker
+openshift_excluder_upgrade:
+  hosts:
+    openshift_excluder_upgrade-excluder_upgrade: *id001
+ungrouped:
+  vars: {}

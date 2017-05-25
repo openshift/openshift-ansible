@@ -1,0 +1,88 @@
+---
+# enable 3.4 repo only
+- hosts: openshift_excluder_upgrade
+  gather_facts: no
+  tasks:
+  - debug: var=install_version
+  - debug: var=upgrade_version
+  # https://github.com/ansible/ansible-modules-extras/issues/2384
+  - name: "Disable 3.3 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.3.repo
+      section: ocp-3.3
+      option: enabled
+      value: "{{ '1' if install_version | string == '3.3' else '0' }}"
+  - name: "Enable 3.4 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.4.repo
+      section: ocp-3.4
+      option: enabled
+      value: "{{ '1' if install_version | string == '3.4' else '0' }}"
+  - name: "Disable 3.5 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.5.repo
+      section: ocp-3.5
+      option: enabled
+      value: "{{ '1' if install_version | string == '3.5' else '0' }}"
+
+# # install 3.4 excluders (repeat the same process as is carried during installation, i.e. disable -> enable)
+- hosts: openshift_excluder_upgrade
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_enable_docker_excluder: "{{ install_enable_docker_excluder }}"
+    r_openshift_excluder_enable_openshift_excluder: "{{ install_enable_openshift_excluder }}"
+  post_tasks:
+  - name: Install docker
+    package:
+      name: "docker-{{ docker_install_version | string }}*"
+      state: present
+    when: docker_install_version is defined
+
+- hosts: openshift_excluder_upgrade
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_enable_docker_excluder: "{{ install_enable_docker_excluder }}"
+    r_openshift_excluder_enable_openshift_excluder: "{{ install_enable_openshift_excluder }}"
+
+# # enable 3.5 repo only
+- hosts: openshift_excluder_upgrade
+  tasks:
+  - name: "Enable 3.4 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.4.repo
+      section: ocp-3.4
+      option: enabled
+      value: "{{ '1' if upgrade_version | string == '3.4' else '0' }}"
+  - name: "Enable 3.5 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.5.repo
+      section: ocp-3.5
+      option: enabled
+      value: "{{ '1' if upgrade_version | string == '3.5' else '0' }}"
+
+# install 3.5 excluders (repeat the same process as is carried during installation, i.e. disable -> enable)
+- hosts: openshift_excluder_upgrade
+  roles:
+    - role: openshift_excluder
+      r_openshift_excluder_action: disable
+      r_openshift_excluder_package_state: latest
+      r_openshift_excluder_docker_package_state: latest
+      r_openshift_excluder_enable_docker_excluder: "{{ upgrade_enable_docker_excluder }}"
+      r_openshift_excluder_enable_openshift_excluder: "{{ upgrade_enable_openshift_excluder }}"
+  post_tasks:
+  - name: Update docker to the latest available
+    package:
+      name: "docker-{{ docker_upgrade_version | string}}*"
+      state: present
+    when: docker_upgrade_version is defined
+
+- hosts: openshift_excluder_upgrade
+  roles:
+    - role: openshift_excluder
+      r_openshift_excluder_action: enable
+      r_openshift_excluder_package_state: latest
+      r_openshift_excluder_docker_package_state: latest
+      r_openshift_excluder_enable_docker_excluder: "{{ upgrade_enable_docker_excluder }}"
+      r_openshift_excluder_enable_openshift_excluder: "{{ upgrade_enable_openshift_excluder }}"

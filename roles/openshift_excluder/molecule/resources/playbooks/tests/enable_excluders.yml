@@ -1,0 +1,28 @@
+---
+- hosts: openshift_excluder_enable
+  gather_facts: no
+  tasks:
+  - debug: var=install_version
+  - name: "Disable 3.3 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.3.repo
+      section: ocp-3.3
+      option: enabled
+      value: "{{ '1' if install_version | string == '3.3' else '0' }}"
+  - name: "Enable 3.4 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.4.repo
+      section: ocp-3.4
+      option: enabled
+      value: "{{ '1' if install_version | string == '3.4' else '0' }}"
+  - name: "Disable 3.5 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/ocp-3.5.repo
+      section: ocp-3.5
+      option: enabled
+      value: "{{ '1' if install_version | string == '3.5' else '0' }}"
+
+- hosts: openshift_excluder_enable
+  roles:
+    - role: openshift_excluder
+      r_openshift_excluder_action: enable
