@@ -1,0 +1,53 @@
+---
+# enable 3.4 repo only
+- hosts: openshift_excluder_upgrade_34_35
+  tasks:
+  # https://github.com/ansible/ansible-modules-extras/issues/2384
+  - name: "Disable 3.3 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/aos-qa.repo
+      section: rhel-7-rhaos-3.3-rpms
+      option: enabled
+      value: 0
+  - name: "Enable 3.4 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/aos-qa.repo
+      section: rhel-7-rhaos-3.4-rpms
+      option: enabled
+      value: 1
+  - name: "Disable 3.5 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/aos-qa.repo
+      section: rhel-7-rhaos-3.5-rpms
+      option: enabled
+      value: 0
+
+# # install 3.4 excluders (repeat the same process as is carried during installation, i.e. disable -> enable)
+- hosts: openshift_excluder_upgrade_34_35
+  roles:
+    - role: openshift_excluder
+      r_openshift_excluder_action: disable
+    - role: openshift_excluder
+      r_openshift_excluder_action: enable
+
+# # enable 3.5 repo only
+- hosts: openshift_excluder_upgrade_34_35
+  tasks:
+  - name: "Enable 3.5 repository"
+    ini_file:
+      dest: /etc/yum.repos.d/aos-qa.repo
+      section: rhel-7-rhaos-3.5-rpms
+      option: enabled
+      value: 1
+
+# install 3.5 excluders (repeat the same process as is carried during installation, i.e. disable -> enable)
+- hosts: openshift_excluder_upgrade_34_35
+  roles:
+    - role: openshift_excluder
+      r_openshift_excluder_action: disable
+      r_openshift_excluder_package_state: latest
+      r_openshift_excluder_docker_package_state: latest
+    - role: openshift_excluder
+      r_openshift_excluder_action: enable
+      r_openshift_excluder_package_state: latest
+      r_openshift_excluder_docker_package_state: latest
