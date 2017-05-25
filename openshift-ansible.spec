@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.5.19
+Version:        3.5.5.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu May 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.20-1
+- Prepending v to registry-console version (ewolinet@redhat.com)
+- Revert "Add /etc/sysconfig/etcd to etcd_container" (abutcher@redhat.com)
+- Update atomic ci origin image to 1.5.1. (abutcher@redhat.com)
+
 * Tue May 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.19-1
 - Fix auditConfig for non-HA environments (rteague@redhat.com)
 - Workaround sysctl module issue with py3 by converting task to lineinfile.
