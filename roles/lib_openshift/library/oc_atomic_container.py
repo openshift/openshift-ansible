@@ -159,7 +159,9 @@ def core(module):
         module.fail_json(rc=rc, msg=err)
         return
 
-    containers = json.loads(out)
+    # NOTE: "or '[]' is a workaround until atomic containers list --json
+    # provides an empty list when no containers are present.
+    containers = json.loads(out or '[]')
     present = len(containers) > 0
     old_image = containers[0]["image_name"] if present else None
 
