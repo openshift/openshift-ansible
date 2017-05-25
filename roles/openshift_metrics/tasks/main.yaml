@@ -1,5 +1,5 @@
 ---
-- local_action: shell rpm -q python-passlib || echo not installed
+- local_action: shell rpm -qa 'python*-passlib' || echo not installed
   register: passlib_result
 
 - name: Check that python-passlib is available on the control host
