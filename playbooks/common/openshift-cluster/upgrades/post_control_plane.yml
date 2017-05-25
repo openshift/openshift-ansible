@@ -8,7 +8,7 @@
     openshift_deployment_type: "{{ deployment_type }}"
     registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  | replace ( '${version}', openshift_image_tag ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) | replace ( '${version}', openshift_image_tag ) }}"
-    registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') | replace ( '${version}', openshift.common.short_version ) }}"
+    registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') | replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
     oc_cmd: "{{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
 
   pre_tasks:
