@@ -5,10 +5,10 @@ openshift_logging_elasticsearch_image_version: "{{ openshift_hosted_logging_depl
 openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_image_pull_secret | default('') }}"
 openshift_logging_elasticsearch_namespace: logging
 
-openshift_logging_elasticsearch_nodeselector: ""
-openshift_logging_elasticsearch_cpu_limit: 100m
-openshift_logging_elasticsearch_memory_limit: 512Mi
-openshift_logging_elasticsearch_recover_after_time: 5m
+openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector | default('') }}"
+openshift_logging_elasticsearch_cpu_limit: 1000m
+openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit | default('1Gi') }}"
+openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_recover_after_time | default('5m') }}"
 
 openshift_logging_elasticsearch_replica_count: 1
 
