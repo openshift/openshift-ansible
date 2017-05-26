@@ -37,6 +37,11 @@ def test_is_active(group_names, is_active):
         2000,  # too low for recommended but not for configured
     ),
     (
+        ['nodes'],
+        2,  # configure threshold where adjustment pushes it over
+        1900,
+    ),
+    (
         ['etcd'],
         0,
         8200,
@@ -65,38 +70,44 @@ def test_succeeds_with_recommended_memory(group_names, configured_min, ansible_m
         ['masters'],
         0,
         0,
-        ['0.0 GB'],
+        ['0.0 GiB'],
     ),
     (
         ['nodes'],
         0,
         100,
-        ['0.1 GB'],
+        ['0.1 GiB'],
     ),
     (
         ['nodes'],
         24,  # configure higher threshold
-        20000,  # enough to meet recommended but not configured
-        ['20.0 GB'],
+        20 * 1024,  # enough to meet recommended but not configured
+        ['20.0 GiB'],
+    ),
+    (
+        ['nodes'],
+        24,  # configure higher threshold
+        22 * 1024,  # not enough for adjustment to push over threshold
+        ['22.0 GiB'],
     ),
     (
         ['etcd'],
         0,
-        7000,
-        ['7.0 GB'],
+        6 * 1024,
+        ['6.0 GiB'],
     ),
     (
         ['etcd', 'masters'],
         0,
-        9000,  # enough memory for etcd, not enough for a master
-        ['9.0 GB'],
+        9 * 1024,  # enough memory for etcd, not enough for a master
+        ['9.0 GiB'],
     ),
     (
         ['nodes', 'masters'],
         0,
         # enough memory for a node, not enough for a master
-        11000,
-        ['11.0 GB'],
+        11 * 1024,
+        ['11.0 GiB'],
     ),
 ])
 def test_fails_with_insufficient_memory(group_names, configured_min, ansible_memtotal_mb, extra_words):
