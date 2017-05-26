@@ -30,6 +30,7 @@ spec:
 {% endif %}
       containers:
       - image: "{{ openshift_metrics_image_prefix }}metrics-cassandra:{{ openshift_metrics_image_version }}"
+        imagePullPolicy: Always
         name: hawkular-cassandra-{{ node }}
         ports:
         - name: cql-port
