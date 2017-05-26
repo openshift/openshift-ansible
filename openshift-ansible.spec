@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.84
+Version:        3.6.85
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu May 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.85-1
+- Prepending v to registry-console version (ewolinet@redhat.com)
+- memory health check: adjust threshold for etcd (lmeyer@redhat.com)
+- health checks: specify check skip reason (lmeyer@redhat.com)
+- health checks: configure failure output in playbooks (lmeyer@redhat.com)
+- disk/memory checks: make threshold configurable (lmeyer@redhat.com)
+- Show help on how to disable checks after failure (rhcarvalho@gmail.com)
+- Allow disabling checks via Ansible variable (rhcarvalho@gmail.com)
+- Verify memory and disk requirements before install (rhcarvalho@gmail.com)
+- filter_plugins: Allow for multiple pairs in map_from_pairs()
+  (jarrpa@redhat.com)
+
 * Wed May 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.84-1
 - oc_process: Better error output on failed template() call (jarrpa@redhat.com)
 
