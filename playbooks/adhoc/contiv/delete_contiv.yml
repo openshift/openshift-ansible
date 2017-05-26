@@ -1,5 +1,5 @@
 ---
-- name: delete contiv
+- name: Uninstall contiv
   hosts: all
   gather_facts: False
   tasks:
