@@ -147,3 +147,6 @@
   # Give the node two minutes to come back online.
   retries: 24
   delay: 5
+
+- include_role:
+    name: openshift_node_dnsmasq
