@@ -22,7 +22,7 @@
         iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
         kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
         labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
-        registry_url: "{{ oreg_url | default(none) }}"
+        registry_url: "{{ oreg_url_node | default(oreg_url) | default(None) }}"
         schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
         storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"

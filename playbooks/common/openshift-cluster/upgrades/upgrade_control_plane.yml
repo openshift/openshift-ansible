@@ -107,8 +107,8 @@
     yedit:
       src: "{{ openshift.common.config_base }}/master/master-config.yaml"
       key: 'imageConfig.format'
-      value: "{{ oreg_url }}"
-    when: oreg_url is defined
+      value: "{{ oreg_url | default(oreg_url_master) }}"
+    when: oreg_url is defined or oreg_url_master is defined
 
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
