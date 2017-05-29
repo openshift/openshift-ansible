@@ -44,7 +44,7 @@ spec:
           resources:
             limits:
               memory: "{{es_memory_limit}}"
-{% if es_cpu_limit is defined and es_cpu_limit is not none %}
+{% if es_cpu_limit %}
               cpu: "{{es_cpu_limit}}"
 {% endif %}
             requests:
