@@ -20,5 +20,7 @@
 - include: ../../common/openshift-node/restart.yml
 
 - include: ../../common/openshift-cluster/redeploy-certificates/router.yml
+  when: openshift_hosted_manage_router | default(true) | bool
 
 - include: ../../common/openshift-cluster/redeploy-certificates/registry.yml
+  when: openshift_hosted_manage_registry | default(true) | bool
