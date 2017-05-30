@@ -69,7 +69,7 @@
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix ~ '-' ~ item.2 if item.1 is none else item.1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
-    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind == 'nfs')  else 'emptydir' }}"
+    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs')  else 'emptydir' }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
@@ -87,7 +87,7 @@
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
-    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind == 'nfs')  else 'emptydir' }}"
+    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs')  else 'emptydir' }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
@@ -113,7 +113,7 @@
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
 
-    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind == 'nfs')  else 'emptydir' }}"
+    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs')  else 'emptydir' }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
@@ -134,7 +134,7 @@
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
 
-    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind == 'nfs')  else 'emptydir' }}"
+    openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs')  else 'emptydir' }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
