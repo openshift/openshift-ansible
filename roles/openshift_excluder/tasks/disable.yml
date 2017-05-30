@@ -5,10 +5,12 @@
     include: verify_upgrade.yml
 
 # unexclude the current openshift/origin-excluder if it is installed so it can be updated
-- name: Disable OpenShift excluder so it can be updated
+- name: Disable excluders before the upgrade to remove older excluding expressions
   include: unexclude.yml
   vars:
-    unexclude_docker_excluder: false
+    # before the docker excluder can be updated, it needs to be disabled
+    # to remove older excluded packages that are no longer excluded
+    unexclude_docker_excluder: "{{ r_openshift_excluder_enable_docker_excluder }}"
     unexclude_openshift_excluder: "{{ r_openshift_excluder_enable_openshift_excluder }}"
 
 # Install any excluder that is enabled
