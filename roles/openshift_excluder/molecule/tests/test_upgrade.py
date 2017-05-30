@@ -24,10 +24,10 @@ def test_docker_excluder(Package, Command):
 
     # upgraded and enabled in 3.5
     if ansible_vars["upgrade_enable_docker_excluder"]:
-        assert p.version.startswith("3.5")
+        assert p.version.startswith(ansible_vars["upgrade_version"])
     # not upgraded
     else:
-        assert p.version.startswith("3.4")
+        assert p.version.startswith(ansible_vars["install_version"])
 
 
 def test_openshift_excluder(Package, Command):
@@ -47,7 +47,7 @@ def test_openshift_excluder(Package, Command):
 
     # upgraded and enabled in 3.5
     if ansible_vars["upgrade_enable_openshift_excluder"]:
-        assert p.version.startswith("3.5")
+        assert p.version.startswith(ansible_vars["upgrade_version"])
     # not upgraded
     else:
-        assert p.version.startswith("3.4")
+        assert p.version.startswith(ansible_vars["install_version"])

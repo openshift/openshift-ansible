@@ -97,6 +97,8 @@ scenarios:
     upgrade_enable_openshift_excluder: true
     install_version: '3.4'
     upgrade_version: '3.5'
+    docker_install_version: '1.12'
+    docker_upgrade_version: '1.12'
   containers:
   - openshift_excluder_upgrade
   playbook: playbooks/upgrade_excluders.yml
@@ -113,6 +115,20 @@ scenarios:
     upgrade_enable_openshift_excluder: false
     install_version: 3.4
     upgrade_version: 3.5
+  containers:
+  - openshift_excluder_upgrade
+  playbook: playbooks/upgrade_excluders.yml
+- name: Upgrade excluders from 3.3 to 3.4
+  vars:
+    r_openshift_excluder_service_type: atomic-openshift
+    install_enable_docker_excluder: true
+    install_enable_openshift_excluder: true
+    upgrade_enable_docker_excluder: true
+    upgrade_enable_openshift_excluder: true
+    install_version: '3.3'
+    upgrade_version: '3.4'
+    docker_install_version: '1.10'
+    docker_upgrade_version: '1.12'
   containers:
   - openshift_excluder_upgrade
   playbook: playbooks/upgrade_excluders.yml
