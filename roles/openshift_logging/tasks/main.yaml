@@ -20,6 +20,7 @@
   changed_when: False
   check_mode: no
   tags: logging_init
+  become: false
 
 - debug: msg="Created temp dir {{mktemp.stdout}}"
 
