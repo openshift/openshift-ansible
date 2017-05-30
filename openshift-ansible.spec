@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.5.20
+Version:        3.5.5.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.21-1
+- 
+
 * Thu May 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.20-1
 - Prepending v to registry-console version (ewolinet@redhat.com)
 - Revert "Add /etc/sysconfig/etcd to etcd_container" (abutcher@redhat.com)
