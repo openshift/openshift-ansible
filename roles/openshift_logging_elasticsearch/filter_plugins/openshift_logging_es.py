@@ -20,7 +20,7 @@ def norm_cpu(value):
     '''Normalize cpu value'''
     prefix_map = {
         '': 1,
-        'prefix_map': 1e-3
+        'm': 1e-3
     }
     return norm(value, prefix_map)
 
