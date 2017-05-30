@@ -46,3 +46,139 @@
     msg: |-
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
       Please set it to a version string like "3.4".
+
+# Add additional registry configuration checks
+# ================================== BOTH NFS AND GLUSTERFS ======================================
+# Inventory/hosts file has both glusterfs_registry and nfs registry enabled - user should 
+# choose which one they really want.
+- name: Abort when both nfs and glusterfs_registry are enabled
+  when:
+    - "'nfs' in group_names"
+    - "'glusterfs_registry' in group_names"
+  fail:
+    msg: |-
+      Conflicting registry types are defined, 'nfs' and 'glusterfs_registry' group_names 
+      are both defined in the inventory/hosts file. Please choose one or the other and rerun the playbook. 
+
+# ============================  GLUSTERFS ====================================
+# Inventory/hosts file indicates that registry storage kind is glusterfs
+# but glusterfs_registry does not exist in the group_names OSEv3
+# Y, NA, N
+- name: Abort when registry_storage_kind is glusterfs but no groups exist
+  when:
+    - openshift_hosted_registry_storage_kind == 'glusterfs'
+    - "'glusterfs_registry' not in group_names"
+    - "'glusterfs' not in group_names"
+  fail:
+    msg: |-
+      openshift_hosted_registry_storage_kind=glusterfs is enabled but there
+      is no 'glusterfs_registry' group_name in OSEv3:children defined in the
+      inventory/hosts file.  Please add 'glusterfs_registry' group_name or
+      remove the [glusterfs_registry] hosts group and rerun the playbook.
+
+# Inventory/hosts file indicates that registry storage kind is glusterfs
+# and [glusterfs_registry] group exists but nfs does not exist in the group_names OSEv3
+# +regstorage  +[nfs]  -nfs
+# Y, Y, N
+- name: Abort when registry_storage_kind is glusterfs and glusterfs_registry group is defined but no glusterfs_registry group_name exists
+  when:
+    - openshift_hosted_registry_storage_kind == 'glusterfs'
+    - groups.glusterfs_registry is defined
+    - "'glusterfs_registry' not in group_names"
+  fail:
+    msg: |-
+      openshift_hosted_registry_storage_kind=glusterfs is enabled but there
+      is no 'glusterfs_registry' group_name in OSEv3:children defined in the 
+      inventory/hosts file. Please add 'glusterfs_registry' group_name to get an 
+      glusterfs registry or remove the openshift_hosted_registry_storage_kind=glusterfs variable
+      and [glusterfs_registry] hosts group to not install glusterfs registry and rerun the playbook.
+
+# Inventory/hosts file indicates that registry storage kind is glusterfs
+# but [glusterfs_registry] hosts group does not exist
+# +regstorage  -[glusterfs_registry]  +glusterfs_registry
+# Y, N, Y
+- name: Abort when glusterfs_registry group and group_name are defined but registry storage does not match
+  when:
+    - openshift_hosted_registry_storage_kind != 'glusterfs'
+    - openshift_hosted_registry_storage_kind is defined
+    - groups.glusterfs_registry is defined
+    - "'glusterfs_registry' in group_names"
+  fail:
+    msg: |-
+      Conflicting registry storage kind, glusterfs_registry group_name and [glusterfs_registry] host groups are both defined 
+      but existing openshift_hosted_registry_storage_kind="{{ openshift_hosted_registry_storage_kind }}" 
+      does not match expected value of 'glusterfs' in the inventory/hosts file. change this variable to 
+      'glusterfs' to get glusterfs registry and rerun the playbook.
+
+
+# ================================= NFS ==========================================================
+# Inventory/hosts file indicates that registry storage kind is nfs
+# but nfs does not exist in the group_names OSEv3
+# +regstorage  -[nfs]  -nfs
+# Y, N, N
+- name: Abort when registry_storage_kind is nfs but no nfs group_name exists
+  when:
+    - openshift_hosted_registry_storage_kind == 'nfs'
+    - groups.nfs is not defined
+    - "'nfs' not in group_names"
+  fail:
+    msg: |-
+      openshift_hosted_registry_storage_kind=nfs is enabled but there
+      is no 'nfs' group_name in OSEv3:children defined in the 
+      inventory/hosts file. Please add 'nfs' group_name and [nfs] hosts group to get an 
+      nfs registry or remove the openshift_hosted_registry_storage_kind=nfs variable
+      to not install an nfs registry and rerun the playbook.
+
+# Inventory/hosts file indicates that registry storage kind is nfs
+# and [nfs] group exists but nfs does not exist in the group_names OSEv3
+# +regstorage  +[nfs]  -nfs
+# Y, Y, N
+- name: Abort when registry_storage_kind is nfs and nfs group is defined but no nfs group_name exists
+  when:
+    - openshift_hosted_registry_storage_kind == 'nfs'
+    - groups.nfs is defined
+    - "'nfs' not in group_names"
+  fail:
+    msg: |-
+      openshift_hosted_registry_storage_kind=nfs is enabled but there
+      is no 'nfs' group_name in OSEv3:children defined in the 
+      inventory/hosts file. Please add 'nfs' group_name to get an 
+      nfs registry or remove the openshift_hosted_registry_storage_kind=nfs variable
+      and [nfs] hosts group to not install nfs registry and rerun the playbook.
+
+# Inventory/hosts file indicates that registry storage kind is nfs
+# but [nfs] hosts group does not exist
+# -regstorage  +[nfs]  -nfs
+# N, Y, N
+- name: Abort when nfs group exists but no group_name
+  when:
+    - openshift_hosted_registry_storage_kind is not defined
+    - groups.nfs is defined
+    - "'nfs' not in group_names"
+  fail:
+    msg: |-
+      [nfs] group is defined but there
+      is no 'nfs' group_name defined in the OSEv3:children 
+      section of the inventory/hosts file. Please add the 'nfs' group_name 
+      or remove the [nfs] hosts group and rerun the playbook.
+
+
+# Inventory/hosts file has 'nfs' group_name defined in OSEv3:children
+# and the [nfs] group defined
+# but the openshift_hosted_registry_storage_kind=nfs does not exist
+# -regstorage  +[glusterfs_registry]  +[glusterfs_registry]
+# N, Y, Y
+- name: Abort when nfs group and group_name is defined but registry storage does not match
+  when:
+    - openshift_hosted_registry_storage_kind != 'nfs'
+    - openshift_hosted_registry_storage_kind is defined
+    - groups.nfs is defined
+    - "'nfs' in group_names"
+  fail:
+    msg: |-
+      Conflicting registry storage kind, nfs group_name and [nfs] group are both defined 
+      but existing openshift_hosted_registry_storage_kind="{{ openshift_hosted_registry_storage_kind }}" 
+      does not match expected value of 'nfs' in the inventory/hosts file. Remove this variable to get 
+      default nfs registry or change to 'nfs' and rerun the playbook.
+
+
