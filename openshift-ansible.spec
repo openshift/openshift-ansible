@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.85
+Version:        3.6.86
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.86-1
+- Reduce memory requirement to 2gb for fedora ci jobs (sdodson@redhat.com)
+- openshift_logging: increasing *_elasticsearch_* default CPU and memory
+  (jwozniak@redhat.com)
+- Updating python-passlib assert (ewolinet@redhat.com)
+- allow to configure oreg_url specifically for node or master. refs #4233
+  (tobias@tobru.ch)
+- Updating registry-console version to be v3.6 instead of 3.6
+  (ewolinet@redhat.com)
+
 * Thu May 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.85-1
 - Prepending v to registry-console version (ewolinet@redhat.com)
 - memory health check: adjust threshold for etcd (lmeyer@redhat.com)
