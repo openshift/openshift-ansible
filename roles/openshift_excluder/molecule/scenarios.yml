@@ -12,11 +12,11 @@ containers:
   ansible_groups:
     - openshift_excluder_enable
   dockerfile: Dockerfile
-- name: openshift_excluder_upgrade_34_35
+- name: openshift_excluder_upgrade
   image: rhel7-ansible
   image_version: latest
   ansible_groups:
-    - openshift_excluder_upgrade_34_35
+    - openshift_excluder_upgrade
   dockerfile: Dockerfile
 scenarios:
 ##########################################
@@ -91,6 +91,28 @@ scenarios:
 - name: Upgrade excluders from 3.4 to 3.5
   vars:
     r_openshift_excluder_service_type: atomic-openshift
+    install_enable_docker_excluder: true
+    install_enable_openshift_excluder: true
+    upgrade_enable_docker_excluder: true
+    upgrade_enable_openshift_excluder: true
+    install_version: '3.4'
+    upgrade_version: '3.5'
   containers:
-  - openshift_excluder_upgrade_34_35
+  - openshift_excluder_upgrade
+  playbook: playbooks/upgrade_excluders.yml
+- name: Upgrade excluders from 3.4 to 3.5 (ignoring openshift excluder)
+  description: >
+    This simulates a scenario where the openshift excluder is disabled and re-enabled
+    even if it is ignored. Since in order to update docker excluder the openshift
+    excluder must be disabled.
+  vars:
+    r_openshift_excluder_service_type: atomic-openshift
+    install_enable_docker_excluder: true
+    install_enable_openshift_excluder: true
+    upgrade_enable_docker_excluder: true
+    upgrade_enable_openshift_excluder: false
+    install_version: 3.4
+    upgrade_version: 3.5
+  containers:
+  - openshift_excluder_upgrade
   playbook: playbooks/upgrade_excluders.yml
