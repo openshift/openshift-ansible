@@ -82,7 +82,7 @@ etcdClientInfo:
   certFile: master.etcd-client.crt
   keyFile: master.etcd-client.key
   urls:
-{% for etcd_url in openshift.master.etcd_urls %}
+{% for etcd_url in openshift.master.etcd_urls | oo_sort_etcd_urls_local_first(openshift.common.hostname) %}
     - {{ etcd_url }}
 {% endfor %}
 {% if openshift.master.embedded_etcd | bool %}
