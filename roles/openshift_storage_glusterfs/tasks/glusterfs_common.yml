@@ -10,6 +10,11 @@
 
 - name: Make sure heketi-client is installed
   package: name=heketi-client state=present
+  when: not openshift.common.is_atomic | bool
+
+- name: Verify heketi-cli is installed
+  shell: "command -v heketi-cli >/dev/null 2>&1 || { echo >&2 'ERROR: heketi-cli must be installed.'; exit 1; }"
+  changed_when: False
 
 - name: Delete pre-existing heketi resources
   oc_obj:
