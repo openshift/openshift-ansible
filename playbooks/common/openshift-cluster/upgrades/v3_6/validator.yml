@@ -6,7 +6,54 @@
 - name: Verify 3.6 specific upgrade checks
   hosts: oo_first_master
   roles:
-  - { role: lib_openshift }
+  - { role: openshift }
+
   tasks:
-  - name: Check for invalid namespaces and SDN errors
-    oc_objectvalidator:
+
+  - name: Set validator error message
+    set_fact:
+      validator_error_msg: >
+        If you are a supported customer please contact Red Hat Support providing the complete output above.
+        If you are not a customer please contact users@lists.openshift.redhat.com for assistance.
+
+  - name: Check for protected namespaces
+    openshift:
+      script: |
+        oc.selector("projects").narrow(
+            # Eliminate any projects created by the system
+            lambda project: project.metadata.annotations["openshift.io/requester"] is not Missing
+        ).narrow(
+            # Select from user projects any which violate privileged naming convention
+            lambda project:
+            project.metadata.name == "openshift" or
+            project.metadata.name.startswith("openshift-") or
+            project.metadata.name == "kubernetes" or
+            project.metadata.name.startswith("kube-") or
+            project.metadata.name.startswith("kubernetes-")
+        ).for_each(
+            # Throw an exception if any are detected
+            lambda project: error("Invalid use of protected project name: " +
+                project.metadata.name + ". {{validator_error_msg}}")
+        )
+
+  - name: Check for invalid hostsubnet
+    openshift:
+      script: |
+        oc.selector("hostsubnet").narrow(
+          lambda hostsubnet: hostsubnet.metadata.name != hostsubnet.host
+        ).for_each(
+          lambda hostsubnet: error("Hostsubnets name does not match host attribute: " +
+            hostsubnet.metadata.name + ". {{validator_error_msg}}")
+        )
+
+  - name: Check for invalid netnamespace
+    openshift:
+      script: |
+        oc.selector("netnamespace").narrow(
+          lambda netnamespace: netnamespace.metadata.name != netnamespace.netname
+        ).for_each(
+          lambda netnamespace: error("Netnamespace name does not match netname attribute: " +
+            netnamespace.metadata.name + ". {{validator_error_msg}}")
+        )
+
+
