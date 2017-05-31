@@ -5,6 +5,14 @@
 # - openshift.common.hostname
 # - openshift.master.api_port
 
+# NOTE: This is needed to make sure we are using the correct set
+#       of systemd unit files. The RPMs lay down defaults but
+#       the install/upgrade may override them in /etc/systemd/system/.
+# NOTE: We don't use the systemd module as some versions of the module
+#       require a service to be part of the call.
+- name: Reload systemd to ensure latest unit files
+  command: systemctl daemon-reload
+
 - name: Restart docker
   service:
     name: "{{ openshift.docker.service_name }}"
