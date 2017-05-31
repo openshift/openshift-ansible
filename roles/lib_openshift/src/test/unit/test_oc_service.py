@@ -39,6 +39,7 @@ class OCServiceTest(unittest.TestCase):
                   'selector': None,
                   'session_affinity': None,
                   'service_type': None,
+                  'external_ips': None,
                   'kubeconfig': '/etc/origin/master/admin.kubeconfig',
                   'debug': False}
 
@@ -124,6 +125,7 @@ class OCServiceTest(unittest.TestCase):
                   'selector': {'router': 'router'},
                   'session_affinity': 'ClientIP',
                   'service_type': 'ClusterIP',
+                  'external_ips': None,
                   'kubeconfig': '/etc/origin/master/admin.kubeconfig',
                   'debug': False}
 
@@ -303,3 +305,183 @@ class OCServiceTest(unittest.TestCase):
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
         self.assertEqual(locate_oc_binary(), oc_bin)
+
+    @mock.patch('oc_service.Utils.create_tmpfile_copy')
+    @mock.patch('oc_service.OCService._run')
+    def test_create_with_labels(self, mock_cmd, mock_tmpfile_copy):
+        ''' Testing a create service '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'ports': {'name': '9000-tcp',
+                            'port': 9000,
+                            'protocol': 'TCP',
+                            'targetPOrt': 9000},
+                  'state': 'present',
+                  'labels': {'component': 'some_component', 'infra': 'true'},
+                  'clusterip': None,
+                  'portalip': None,
+                  'selector': {'router': 'router'},
+                  'session_affinity': 'ClientIP',
+                  'service_type': 'ClusterIP',
+                  'external_ips': None,
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        service = '''{
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "router",
+                "namespace": "default",
+                "selfLink": "/api/v1/namespaces/default/services/router",
+                "uid": "fabd2440-e3d8-11e6-951c-0e3dd518cefa",
+                "resourceVersion": "3206",
+                "creationTimestamp": "2017-01-26T15:06:14Z",
+                "labels": {"component": "some_component", "infra": "true"}
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "80-tcp",
+                        "protocol": "TCP",
+                        "port": 80,
+                        "targetPort": 80
+                    },
+                    {
+                        "name": "443-tcp",
+                        "protocol": "TCP",
+                        "port": 443,
+                        "targetPort": 443
+                    },
+                    {
+                        "name": "1936-tcp",
+                        "protocol": "TCP",
+                        "port": 1936,
+                        "targetPort": 1936
+                    },
+                    {
+                        "name": "5000-tcp",
+                        "protocol": "TCP",
+                        "port": 5000,
+                        "targetPort": 5000
+                    }
+                ],
+                "selector": {
+                    "router": "router"
+                },
+                "clusterIP": "172.30.129.161",
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }'''
+        mock_cmd.side_effect = [
+            (1, '', 'Error from server: services "router" not found'),
+            (1, '', 'Error from server: services "router" not found'),
+            (0, service, ''),
+            (0, service, '')
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCService.run_ansible(params, False)
+
+        self.assertTrue(results['changed'])
+        self.assertTrue(results['results']['returncode'] == 0)
+        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
+        self.assertEqual(results['results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
+
+    @mock.patch('oc_service.Utils.create_tmpfile_copy')
+    @mock.patch('oc_service.OCService._run')
+    def test_create_with_external_ips(self, mock_cmd, mock_tmpfile_copy):
+        ''' Testing a create service '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'ports': {'name': '9000-tcp',
+                            'port': 9000,
+                            'protocol': 'TCP',
+                            'targetPOrt': 9000},
+                  'state': 'present',
+                  'labels': {'component': 'some_component', 'infra': 'true'},
+                  'clusterip': None,
+                  'portalip': None,
+                  'selector': {'router': 'router'},
+                  'session_affinity': 'ClientIP',
+                  'service_type': 'ClusterIP',
+                  'external_ips': ['1.2.3.4', '5.6.7.8'],
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        service = '''{
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "router",
+                "namespace": "default",
+                "selfLink": "/api/v1/namespaces/default/services/router",
+                "uid": "fabd2440-e3d8-11e6-951c-0e3dd518cefa",
+                "resourceVersion": "3206",
+                "creationTimestamp": "2017-01-26T15:06:14Z",
+                "labels": {"component": "some_component", "infra": "true"}
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "80-tcp",
+                        "protocol": "TCP",
+                        "port": 80,
+                        "targetPort": 80
+                    },
+                    {
+                        "name": "443-tcp",
+                        "protocol": "TCP",
+                        "port": 443,
+                        "targetPort": 443
+                    },
+                    {
+                        "name": "1936-tcp",
+                        "protocol": "TCP",
+                        "port": 1936,
+                        "targetPort": 1936
+                    },
+                    {
+                        "name": "5000-tcp",
+                        "protocol": "TCP",
+                        "port": 5000,
+                        "targetPort": 5000
+                    }
+                ],
+                "selector": {
+                    "router": "router"
+                },
+                "clusterIP": "172.30.129.161",
+                "externalIPs": ["1.2.3.4", "5.6.7.8"],
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }'''
+        mock_cmd.side_effect = [
+            (1, '', 'Error from server: services "router" not found'),
+            (1, '', 'Error from server: services "router" not found'),
+            (0, service, ''),
+            (0, service, '')
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCService.run_ansible(params, False)
+
+        self.assertTrue(results['changed'])
+        self.assertTrue(results['results']['returncode'] == 0)
+        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'router')
+        self.assertEqual(results['results']['results'][0]['metadata']['labels'], {"component": "some_component", "infra": "true"})
+        self.assertEqual(results['results']['results'][0]['spec']['externalIPs'], ["1.2.3.4", "5.6.7.8"])

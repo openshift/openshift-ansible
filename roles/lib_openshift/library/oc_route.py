@@ -1429,7 +1429,6 @@ class Utils(object):  # pragma: no cover
             print('returning true')
         return True
 
-
 class OpenShiftCLIConfig(object):
     '''Generic Config'''
     def __init__(self, rname, namespace, kubeconfig, options):
@@ -1443,18 +1442,28 @@ class OpenShiftCLIConfig(object):
         ''' return config options '''
         return self._options
 
-    def to_option_list(self):
-        '''return all options as a string'''
-        return self.stringify()
+    def to_option_list(self, ascommalist=''):
+        '''return all options as a string
+           if ascommalist is set to the name of a key, and
+           the value of that key is a dict, format the dict
+           as a list of comma delimited key=value pairs'''
+        return self.stringify(ascommalist)
 
-    def stringify(self):
-        ''' return the options hash as cli params in a string '''
+    def stringify(self, ascommalist=''):
+        ''' return the options hash as cli params in a string
+            if ascommalist is set to the name of a key, and
+            the value of that key is a dict, format the dict
+            as a list of comma delimited key=value pairs '''
         rval = []
         for key in sorted(self.config_options.keys()):
             data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
+                if key == ascommalist:
+                    val = ','.join(['{}={}'.format(kk, vv) for kk, vv in sorted(data['value'].items())])
+                else:
+                    val = data['value']
+                rval.append('--{}={}'.format(key.replace('_', '-'), val))
 
         return rval
 

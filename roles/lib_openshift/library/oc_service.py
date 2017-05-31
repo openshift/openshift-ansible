@@ -140,6 +140,13 @@ options:
     - LoadBalancer
     - ExternalName
     aliases: []
+  externalips:
+    description:
+    - A list of the external IPs that are exposed for this service.
+    - https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
@@ -1425,7 +1432,6 @@ class Utils(object):  # pragma: no cover
             print('returning true')
         return True
 
-
 class OpenShiftCLIConfig(object):
     '''Generic Config'''
     def __init__(self, rname, namespace, kubeconfig, options):
@@ -1439,18 +1445,28 @@ class OpenShiftCLIConfig(object):
         ''' return config options '''
         return self._options
 
-    def to_option_list(self):
-        '''return all options as a string'''
-        return self.stringify()
+    def to_option_list(self, ascommalist=''):
+        '''return all options as a string
+           if ascommalist is set to the name of a key, and
+           the value of that key is a dict, format the dict
+           as a list of comma delimited key=value pairs'''
+        return self.stringify(ascommalist)
 
-    def stringify(self):
-        ''' return the options hash as cli params in a string '''
+    def stringify(self, ascommalist=''):
+        ''' return the options hash as cli params in a string
+            if ascommalist is set to the name of a key, and
+            the value of that key is a dict, format the dict
+            as a list of comma delimited key=value pairs '''
         rval = []
         for key in sorted(self.config_options.keys()):
             data = self.config_options[key]
             if data['include'] \
                and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--{}={}'.format(key.replace('_', '-'), data['value']))
+                if key == ascommalist:
+                    val = ','.join(['{}={}'.format(kk, vv) for kk, vv in sorted(data['value'].items())])
+                else:
+                    val = data['value']
+                rval.append('--{}={}'.format(key.replace('_', '-'), val))
 
         return rval
 
@@ -1473,7 +1489,8 @@ class ServiceConfig(object):
                  cluster_ip=None,
                  portal_ip=None,
                  session_affinity=None,
-                 service_type=None):
+                 service_type=None,
+                 external_ips=None):
         ''' constructor for handling service options '''
         self.name = sname
         self.namespace = namespace
@@ -1484,6 +1501,7 @@ class ServiceConfig(object):
         self.portal_ip = portal_ip
         self.session_affinity = session_affinity
         self.service_type = service_type
+        self.external_ips = external_ips
         self.data = {}
 
         self.create_dict()
@@ -1496,8 +1514,9 @@ class ServiceConfig(object):
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
         if self.labels:
-            for lab, lab_value  in self.labels.items():
-                self.data['metadata'][lab] = lab_value
+            self.data['metadata']['labels'] = {}
+            for lab, lab_value in self.labels.items():
+                self.data['metadata']['labels'][lab] = lab_value
         self.data['spec'] = {}
 
         if self.ports:
@@ -1519,6 +1538,10 @@ class ServiceConfig(object):
         if self.service_type:
             self.data['spec']['type'] = self.service_type
 
+        if self.external_ips:
+            self.data['spec']['externalIPs'] = self.external_ips
+
+
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Service(Yedit):
     ''' Class to model the oc service object '''
@@ -1527,6 +1550,7 @@ class Service(Yedit):
     cluster_ip = "spec.clusterIP"
     selector_path = 'spec.selector'
     kind = 'Service'
+    external_ips = "spec.externalIPs"
 
     def __init__(self, content):
         '''Service constructor'''
@@ -1588,6 +1612,53 @@ class Service(Yedit):
         '''add cluster ip'''
         self.put(Service.portal_ip, pip)
 
+    def get_external_ips(self):
+        ''' get a list of external_ips '''
+        return self.get(Service.external_ips) or []
+
+    def add_external_ips(self, inc_external_ips):
+        ''' add an external_ip to the external_ips list '''
+        if not isinstance(inc_external_ips, list):
+            inc_external_ips = [inc_external_ips]
+
+        external_ips = self.get_external_ips()
+        if not external_ips:
+            self.put(Service.external_ips, inc_external_ips)
+        else:
+            external_ips.extend(inc_external_ips)
+
+        return True
+
+    def find_external_ips(self, inc_external_ip):
+        ''' find a specific external IP '''
+        val = None
+        try:
+            idx = self.get_external_ips().index(inc_external_ip)
+            val = self.get_external_ips()[idx]
+        except ValueError:
+            pass
+
+        return val
+
+    def delete_external_ips(self, inc_external_ips):
+        ''' remove an external IP from a service '''
+        if not isinstance(inc_external_ips, list):
+            inc_external_ips = [inc_external_ips]
+
+        external_ips = self.get(Service.external_ips) or []
+
+        if not external_ips:
+            return True
+
+        removed = False
+        for inc_external_ip in inc_external_ips:
+            external_ip = self.find_external_ips(inc_external_ip)
+            if external_ip:
+                external_ips.remove(external_ip)
+                removed = True
+
+        return removed
+
 # -*- -*- -*- End included fragment: lib/service.py -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: class/oc_service.py -*- -*- -*-
@@ -1610,13 +1681,15 @@ class OCService(OpenShiftCLI):
                  ports,
                  session_affinity,
                  service_type,
+                 external_ips,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OCVolume '''
         super(OCService, self).__init__(namespace, kubeconfig, verbose)
         self.namespace = namespace
         self.config = ServiceConfig(sname, namespace, ports, selector, labels,
-                                    cluster_ip, portal_ip, session_affinity, service_type)
+                                    cluster_ip, portal_ip, session_affinity, service_type,
+                                    external_ips)
         self.user_svc = Service(content=self.config.data)
         self.svc = None
 
@@ -1685,6 +1758,7 @@ class OCService(OpenShiftCLI):
                            params['ports'],
                            params['session_affinity'],
                            params['service_type'],
+                           params['external_ips'],
                            params['kubeconfig'],
                            params['debug'])
 
@@ -1786,6 +1860,7 @@ def main():
             ports=dict(default=None, type='list'),
             session_affinity=dict(default='None', type='str'),
             service_type=dict(default='ClusterIP', type='str'),
+            external_ips=dict(default=None, type='list'),
         ),
         supports_check_mode=True,
     )

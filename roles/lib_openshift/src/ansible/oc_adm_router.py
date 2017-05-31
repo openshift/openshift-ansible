@@ -21,7 +21,7 @@ def main():
             key_file=dict(default=None, type='str'),
             images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
             latest_images=dict(default=False, type='bool'),
-            labels=dict(default=None, type='list'),
+            labels=dict(default=None, type='dict'),
             ports=dict(default=['80:80', '443:443'], type='list'),
             replicas=dict(default=1, type='int'),
             selector=dict(default=None, type='str'),
