@@ -32,9 +32,8 @@
 
 # delete our old secrets
 - name: delete logging secrets
-  oc_obj:
+  oc_secret:
     state: absent
-    kind: secret
     namespace: "{{ openshift_logging_namespace }}"
     name: "{{ item }}"
   with_items:
