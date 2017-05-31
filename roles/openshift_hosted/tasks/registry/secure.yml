@@ -55,6 +55,7 @@
     - "{{ docker_registry_service_ip.results.clusterip }}"
     - "{{ openshift_hosted_registry_name }}.default.svc"
     - "{{ openshift_hosted_registry_name }}.default.svc.{{ openshift.common.dns_domain }}"
+    - "{{ openshift_hosted_registry_routehost | default(omit) }}"
     - "{{ docker_registry_route_hostname }}"
     cert: "{{ openshift_master_config_dir }}/registry.crt"
     key: "{{ openshift_master_config_dir }}/registry.key"

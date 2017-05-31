@@ -1,6 +1,10 @@
 ---
 - block:
 
+  - name: Set fact docker_registry_console_route_hostname
+    set_fact:
+      docker_registry_console_route_hostname: "{{ 'registry-console-default.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+
   # When openshift_hosted_manage_registry=true the openshift_hosted
   # role will create the appropriate route for the docker-registry.
   # When openshift_hosted_manage_registry=false then this code will
@@ -21,6 +25,7 @@
       service_name: registry-console
       state: present
       tls_termination: passthrough
+      host: "{{ openshift_cockpit_registry_console_routehost | default(docker_registry_console_route_hostname) }}"
     register: registry_console_cockpit_kube
 
   # XXX: Required for items still using command

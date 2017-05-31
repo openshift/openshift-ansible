@@ -382,6 +382,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cockpit_deployer_prefix=registry.example.com/myrepo/
 # Override image version, defaults to latest for origin, matches the product version for enterprise
 #openshift_cockpit_deployer_version=1.4.1
+#
+# Registry console host (optional)
+# The host for the registry console route
+# Default value: 'registry-console-default.{{openshift_master_default_subdomain}}'
+#openshift_cockpit_registry_console_routehost=registry-console-default.example.org
 
 # Openshift Registry Options
 #
@@ -398,6 +403,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Registry will only be created if nodes matching this label are present.
 # Default value: 'region=infra'
 #openshift_hosted_registry_selector='region=infra'
+#
+# Registry host (optional)
+# The host for the registry route
+# Default value: 'docker-registry-default.{{openshift_master_default_subdomain}}'
+#openshift_hosted_registry_routehost=docker-registry-default.example.org
 #
 # Registry replicas (optional)
 # Unless specified, openshift-ansible will calculate the replica count
