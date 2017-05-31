@@ -102,7 +102,7 @@
         l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
-- name: Pre-pull Container Enginer System Container image
+- name: Pre-pull Container Engine System Container image
   command: "atomic pull --storage ostree {{ l_docker_image }}"
   changed_when: false
   environment:
@@ -119,13 +119,11 @@
     path: "{{ docker_conf_dir }}"
     state: directory
 
-- name: Install Container Enginer System Container
+- name: Install Container Engine System Container
   oc_atomic_container:
     name: "{{ openshift.docker.service_name }}"
     image: "{{ l_docker_image }}"
     state: latest
-    values:
-      - "system-package=no"
 
 - name: Configure Container Engine Service File
   template:
