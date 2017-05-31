@@ -21,6 +21,35 @@
   register: metrics_route_dest_ca_cert
   changed_when: false
 
+- name: Hawkular Role to read secrets
+  oc_clusterrole:
+    name: hawkular-reads-logging-ca-cert
+    rules:
+    - apiGroups:
+      - ""
+      verbs:
+      - get
+      resources:
+      - secrets
+
+## TODO: how to restrict this to allow the user 'hawkular' to read only a very specific secret?
+## For now, generic (and dangerous), but make sure to change this before getting this merged
+- name: Allow Hawkular to read the Logging CA cert secret
+  oc_adm_policy_user:
+    user: system:serviceaccount:{{openshift_metrics_project}}:hawkular
+    resource_kind: cluster-role
+    resource_name: hawkular-reads-logging-ca-cert
+    state: present
+
+## TODO: cluster-admin can read stuff from Elasticsearch. Until they add a more appropriate role,
+## we have to use this.
+- name: Allow Hawkular to access Elasticsearch on logging
+  oc_adm_policy_user:
+    user: hawkular
+    resource_kind: cluster-role
+    resource_name: cluster-admin
+    state: present
+
 - block:
   - set_fact: hawkular_key={{ lookup('file', openshift_metrics_hawkular_key) }}
     when: openshift_metrics_hawkular_key | exists
