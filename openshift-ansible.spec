@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.86
+Version:        3.6.87
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.87-1
+- Adding default value for openshift_hosted_logging_storage_kind
+  (ewolinet@redhat.com)
+- memory check: use GiB/MiB and adjust memtotal (lmeyer@redhat.com)
+- bool (sdodson@redhat.com)
+- Metrics: update the imagePullPolicy to be always (mwringe@redhat.com)
+- Updating to generate PVC when storage type is passed in as nfs
+  (ewolinet@redhat.com)
+- disable become for local actions (Mathias.Merscher@dg-i.net)
+
 * Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.86-1
 - Reduce memory requirement to 2gb for fedora ci jobs (sdodson@redhat.com)
 - openshift_logging: increasing *_elasticsearch_* default CPU and memory
