@@ -30,7 +30,8 @@
 
 - set_fact:
     openshift_release: "{{ openshift_release | string }}"
-  when: openshift_release is defined
+  when:
+  - openshift_release is defined
 
 # Verify that the image tag is in a valid format
 - when:
@@ -106,7 +107,11 @@
     fail:
       msg: "OCP rpm version {{ openshift_rpm_version }} is different from OCP image version {{ openshift_version }}"
     # Both versions have the same string representation
-    when: openshift_rpm_version != openshift_version
+    when:
+    - openshift_rpm_version != openshift_version
+    # if openshift_pkg_version or openshift_image_tag is defined, user gives a permission the rpm and docker image versions can differ
+    - openshift_pkg_version is not defined
+    - openshift_image_tag is not defined
   when:
   - is_containerized | bool
   - not is_atomic | bool
