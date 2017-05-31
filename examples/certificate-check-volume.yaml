@@ -4,10 +4,10 @@
 # The generated reports are stored in a Persistent Volume using
 # the playbook 'html_and_json_timestamp.yaml'.
 #
-# This example uses the openshift/openshift-ansible container image.
+# This example uses the openshift/origin-ansible container image.
 # (see README_CONTAINER_IMAGE.md in the top level dir for more details).
 #
-# The following objects are xpected to be configured before the creation
+# The following objects are expected to be configured before the creation
 # of this Job:
 #   - A ConfigMap named 'inventory' with a key named 'hosts' that
 #     contains the the Ansible inventory file
@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: openshift-ansible
-        image: openshift/openshift-ansible
+        image: openshift/origin-ansible
         env:
         - name: PLAYBOOK_FILE
           value: playbooks/certificate_expiry/html_and_json_timestamp.yaml

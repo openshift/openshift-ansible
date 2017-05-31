@@ -26,16 +26,18 @@ tito build --rpm
 
 ## Build an openshift-ansible container image
 
+**NOTE**: the examples below use "openshift-ansible" as the name of the image to build for simplicity and illustration purposes, and also to prevent potential confusion between custom built images and official releases. See [README_CONTAINER_IMAGE.md](README_CONTAINER_IMAGE.md) for details about the released container images for openshift-ansible.
+
 To build a container image of `openshift-ansible` using standalone **Docker**:
 
         cd openshift-ansible
-        docker build -f images/installer/Dockerfile -t openshift/openshift-ansible .
+        docker build -f images/installer/Dockerfile -t openshift-ansible .
 
 ### Building on OpenShift
 
 To build an openshift-ansible image using an **OpenShift** [build and image stream](https://docs.openshift.org/latest/architecture/core_concepts/builds_and_image_streams.html) the straightforward command would be:
 
-        oc new-build docker.io/aweiteka/playbook2image~https://github.com/openshift/openshift-ansible
+        oc new-build registry.centos.org/openshift/playbook2image~https://github.com/openshift/openshift-ansible
 
 However: because the `Dockerfile` for this repository is not in the top level directory, and because we can't change the build context to the `images/installer` path as it would cause the build to fail, the `oc new-app` command above will create a build configuration using the *source to image* strategy, which is the default approach of the [playbook2image](https://github.com/openshift/playbook2image) base image. This does build an image successfully, but unfortunately the resulting image will be missing some customizations that are handled by the [Dockerfile](images/installer/Dockerfile) in this repo.
 
@@ -48,7 +50,7 @@ At the time of this writing there is no straightforward option to [set the docke
 ```
 curl -s https://raw.githubusercontent.com/openshift/openshift-ansible/master/images/installer/Dockerfile |
      oc new-build -D - \
-        --docker-image=docker.io/aweiteka/playbook2image \
+        --docker-image=registry.centos.org/openshift/playbook2image \
 	    https://github.com/openshift/openshift-ansible
 ```
 
@@ -76,5 +78,5 @@ Once the container image is built, we can import it into the OSTree
 storage:
 
 ```
-atomic pull --storage ostree docker:openshift/openshift-ansible:latest
+atomic pull --storage ostree docker:openshift-ansible:latest
 ```

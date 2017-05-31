@@ -2,7 +2,7 @@ FROM openshift3/playbook2image
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
-LABEL name="openshift3/openshift-ansible" \
+LABEL name="openshift3/ose-ansible" \
       summary="OpenShift's installation and configuration tool" \
       description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
       url="https://github.com/openshift/openshift-ansible" \

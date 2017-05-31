@@ -12,7 +12,7 @@ set -o pipefail
 STARTTIME=$(date +%s)
 OS_ROOT=$(dirname "${BASH_SOURCE}")/..
 
-PREFIX="${PREFIX:-openshift/openshift-ansible}"
+PREFIX="${PREFIX:-openshift/origin-ansible}"
 
 # Go to the top of the tree.
 cd "${OS_ROOT}"

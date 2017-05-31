@@ -4,10 +4,10 @@
 # The generated reports are uploaded to a location in the master
 # hosts, using the playbook 'easy-mode-upload.yaml'.
 #
-# This example uses the openshift/openshift-ansible container image.
+# This example uses the openshift/origin-ansible container image.
 # (see README_CONTAINER_IMAGE.md in the top level dir for more details).
 #
-# The following objects are xpected to be configured before the creation
+# The following objects are expected to be configured before the creation
 # of this Job:
 #   - A ConfigMap named 'inventory' with a key named 'hosts' that
 #     contains the the Ansible inventory file
@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: openshift-ansible
-        image: openshift/openshift-ansible
+        image: openshift/origin-ansible
         env:
         - name: PLAYBOOK_FILE
           value: playbooks/certificate_expiry/easy-mode-upload.yaml
