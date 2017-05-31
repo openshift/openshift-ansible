@@ -21,12 +21,16 @@
   with_items:
   - kind: "template,route,service,dc,jobs,secret"
     selector: "deploy-heketi"
-  - kind: "template,route,service,dc"
-    name: "heketi"
-  - kind: "svc,ep"
+  - kind: "svc"
     name: "heketi-storage-endpoints"
+  - kind: "template,route,service,dc"
+    name: "heketi-{{ glusterfs_name }}"
+  - kind: "svc"
+    name: "heketi-db-{{ glusterfs_name }}-endpoints"
   - kind: "sa"
-    name: "heketi-service-account"
+    name: "heketi-{{ glusterfs_name }}-service-account"
+  - kind: "secret"
+    name: "heketi-{{ glusterfs_name }}-secret"
   failed_when: False
   when: glusterfs_heketi_wipe
 
@@ -35,7 +39,7 @@
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
-    selector: "glusterfs=deploy-heketi-pod"
+    selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   until: "heketi_pod.results.results[0]['items'] | count == 0"
   delay: 10
@@ -47,7 +51,7 @@
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
-    selector: "glusterfs=heketi-pod"
+    selector: "glusterfs=heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   until: "heketi_pod.results.results[0]['items'] | count == 0"
   delay: 10
@@ -57,13 +61,13 @@
 - name: Create heketi service account
   oc_serviceaccount:
     namespace: "{{ glusterfs_namespace }}"
-    name: heketi-service-account
+    name: "heketi-{{ glusterfs_name }}-service-account"
     state: present
   when: glusterfs_heketi_is_native
 
 - name: Add heketi service account to privileged SCC
   oc_adm_policy_user:
-    user: "system:serviceaccount:{{ glusterfs_namespace }}:heketi-service-account"
+    user: "system:serviceaccount:{{ glusterfs_namespace }}:heketi-{{ glusterfs_name }}-service-account"
     resource_kind: scc
     resource_name: privileged
     state: present
@@ -71,7 +75,7 @@
 
 - name: Allow heketi service account to view/edit pods
   oc_adm_policy_user:
-    user: "system:serviceaccount:{{ glusterfs_namespace }}:heketi-service-account"
+    user: "system:serviceaccount:{{ glusterfs_namespace }}:heketi-{{ glusterfs_name }}-service-account"
     resource_kind: role
     resource_name: edit
     state: present
@@ -82,7 +86,7 @@
     namespace: "{{ glusterfs_namespace }}"
     state: list
     kind: pod
-    selector: "glusterfs=deploy-heketi-pod,deploy-heketi=support"
+    selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   when: glusterfs_heketi_is_native
 
@@ -100,7 +104,7 @@
     namespace: "{{ glusterfs_namespace }}"
     state: list
     kind: pod
-    selector: "glusterfs=heketi-pod"
+    selector: "glusterfs=heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   when: glusterfs_heketi_is_native
 
@@ -124,7 +128,7 @@
     namespace: "{{ glusterfs_namespace }}"
     state: list
     kind: ep
-    selector: "glusterfs in (deploy-heketi-service, heketi-service)"
+    selector: "glusterfs in (deploy-heketi-{{ glusterfs_name }}-service, heketi-{{ glusterfs_name }}-service)"
   register: heketi_url
   until:
   - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"

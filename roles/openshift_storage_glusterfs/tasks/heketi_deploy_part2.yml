@@ -46,6 +46,36 @@
   with_items:
   - kind: "template,route,service,jobs,dc,secret"
     selector: "deploy-heketi"
+  - kind: "svc"
+    name: "heketi-storage-endpoints"
+
+- name: Generate heketi endpoints
+  template:
+    src: "{{ openshift.common.examples_content_version }}/heketi-endpoints.yml.j2"
+    dest: "{{ mktemp.stdout }}/heketi-endpoints.yml"
+
+- name: Generate heketi service
+  template:
+    src: "{{ openshift.common.examples_content_version }}/heketi-service.yml.j2"
+    dest: "{{ mktemp.stdout }}/heketi-service.yml"
+
+- name: Create heketi endpoints
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    state: present
+    kind: endpoints
+    name: "heketi-db-{{ glusterfs_name }}-endpoints"
+    files:
+    - "{{ mktemp.stdout }}/heketi-endpoints.yml"
+
+- name: Create heketi service
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    state: present
+    kind: service
+    name: "heketi-db-{{ glusterfs_name }}-endpoints"
+    files:
+    - "{{ mktemp.stdout }}/heketi-service.yml"
 
 - name: Copy heketi template
   copy:
@@ -72,13 +102,14 @@
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
       HEKETI_KUBE_NAMESPACE: "{{ glusterfs_namespace }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
 
 - name: Wait for heketi pod
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
-    selector: "glusterfs=heketi-pod"
+    selector: "glusterfs=heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   until:
   - "heketi_pod.results.results[0]['items'] | count > 0"
@@ -92,7 +123,7 @@
     namespace: "{{ glusterfs_namespace }}"
     state: list
     kind: ep
-    selector: "glusterfs=heketi-service"
+    selector: "glusterfs=heketi-{{ glusterfs_name }}-service"
   register: heketi_url
   until:
   - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"

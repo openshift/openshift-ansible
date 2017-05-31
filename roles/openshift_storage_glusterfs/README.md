@@ -73,7 +73,8 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_timeout              | 300                     | Seconds to wait for pods to become ready
 | openshift_storage_glusterfs_namespace            | 'default'               | Namespace in which to create GlusterFS resources
 | openshift_storage_glusterfs_is_native            | True                    | GlusterFS should be containerized
-| openshift_storage_glusterfs_nodeselector         | 'storagenode=glusterfs' | Selector to determine which nodes will host GlusterFS pods in native mode
+| openshift_storage_glusterfs_name                 | 'storage'               | A name to identify the GlusterFS cluster, which will be used in resource names
+| openshift_storage_glusterfs_nodeselector         | 'glusterfs=storage-host'| Selector to determine which nodes will host GlusterFS pods in native mode. **NOTE:** The label value is taken from the cluster name
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
@@ -96,7 +97,7 @@ are an exception:
 | Name                                              | Default value         | Description                             |
 |---------------------------------------------------|-----------------------|-----------------------------------------|
 | openshift_storage_glusterfs_registry_namespace    | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
-| openshift_storage_glusterfs_registry_nodeselector | 'storagenode=registry'| This allows for the logical separation of the registry GlusterFS cluster from any regular-use GlusterFS clusters
+| openshift_storage_glusterfs_registry_name         | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
 
 Additionally, this role's behavior responds to the following registry-specific
 variables:

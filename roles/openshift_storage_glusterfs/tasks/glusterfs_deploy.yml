@@ -6,9 +6,14 @@
 - name: Delete pre-existing GlusterFS resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
-    kind: "template,daemonset"
-    name: glusterfs
+    kind: "{{ item.kind }}"
+    name: "{{ item.name }}"
     state: absent
+  with_items:
+  - kind: template
+    name: glusterfs
+  - kind: daemonset
+    name: "glusterfs-{{ glusterfs_name }}"
   when: glusterfs_wipe
 
 - name: Unlabel any existing GlusterFS nodes
@@ -72,7 +77,7 @@
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: template
-    name: glusterfs
+    name: "glusterfs"
     state: present
     files:
     - "{{ mktemp.stdout }}/glusterfs-template.yml"
@@ -86,13 +91,14 @@
       IMAGE_NAME: "{{ glusterfs_image }}"
       IMAGE_VERSION: "{{ glusterfs_version }}"
       NODE_LABELS: "{{ glusterfs_nodeselector }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
 
 - name: Wait for GlusterFS pods
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
-    selector: "glusterfs-node=pod"
+    selector: "glusterfs={{ glusterfs_name }}-pod"
   register: glusterfs_pods
   until:
   - "glusterfs_pods.results.results[0]['items'] | count > 0"

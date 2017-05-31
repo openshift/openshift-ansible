@@ -26,13 +26,14 @@
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
       HEKETI_KUBE_NAMESPACE: "{{ glusterfs_namespace }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
 
 - name: Wait for deploy-heketi pod
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
-    selector: "glusterfs=deploy-heketi-pod,deploy-heketi=support"
+    selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   until:
   - "heketi_pod.results.results[0]['items'] | count > 0"

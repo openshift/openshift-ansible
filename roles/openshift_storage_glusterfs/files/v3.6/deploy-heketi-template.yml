@@ -13,43 +13,43 @@ objects:
 - kind: Service
   apiVersion: v1
   metadata:
-    name: deploy-heketi
+    name: deploy-heketi-${CLUSTER_NAME}
     labels:
-      glusterfs: deploy-heketi-service
+      glusterfs: deploy-heketi-${CLUSTER_NAME}-service
       deploy-heketi: support
     annotations:
       description: Exposes Heketi service
   spec:
     ports:
-    - name: deploy-heketi
+    - name: deploy-heketi-${CLUSTER_NAME}
       port: 8080
       targetPort: 8080
     selector:
-      name: deploy-heketi
+      glusterfs: deploy-heketi-${CLUSTER_NAME}-pod
 - kind: Route
   apiVersion: v1
   metadata:
-    name: deploy-heketi
+    name: deploy-heketi-${CLUSTER_NAME}
     labels:
-      glusterfs: deploy-heketi-route
+      glusterfs: deploy-heketi-${CLUSTER_NAME}-route
       deploy-heketi: support
   spec:
     to:
       kind: Service
-      name: deploy-heketi
+      name: deploy-heketi-${CLUSTER_NAME}
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
-    name: deploy-heketi
+    name: deploy-heketi-${CLUSTER_NAME}
     labels:
-      glusterfs: deploy-heketi-dc
+      glusterfs: deploy-heketi-${CLUSTER_NAME}-dc
       deploy-heketi: support
     annotations:
       description: Defines how to deploy Heketi
   spec:
     replicas: 1
     selector:
-      name: deploy-heketi
+      glusterfs: deploy-heketi-${CLUSTER_NAME}-pod
     triggers:
     - type: ConfigChange
     strategy:
@@ -58,11 +58,10 @@ objects:
       metadata:
         name: deploy-heketi
         labels:
-          name: deploy-heketi
-          glusterfs: deploy-heketi-pod
+          glusterfs: deploy-heketi-${CLUSTER_NAME}-pod
           deploy-heketi: support
       spec:
-        serviceAccountName: heketi-service-account
+        serviceAccountName: heketi-${CLUSTER_NAME}-service-account
         containers:
         - name: heketi
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
@@ -117,3 +116,6 @@ parameters:
 - name: IMAGE_VERSION
   displayName: heketi container versiona
   required: True
+- name: CLUSTER_NAME
+  displayName: GlusterFS cluster name
+  value: glusterfs

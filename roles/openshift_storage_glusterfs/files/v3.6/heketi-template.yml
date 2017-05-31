@@ -12,9 +12,9 @@ objects:
 - kind: Service
   apiVersion: v1
   metadata:
-    name: heketi
+    name: heketi-${CLUSTER_NAME}
     labels:
-      glusterfs: heketi-service
+      glusterfs: heketi-${CLUSTER_NAME}-service
     annotations:
       description: Exposes Heketi service
   spec:
@@ -23,40 +23,40 @@ objects:
       port: 8080
       targetPort: 8080
     selector:
-      glusterfs: heketi-pod
+      glusterfs: heketi-${CLUSTER_NAME}-pod
 - kind: Route
   apiVersion: v1
   metadata:
-    name: heketi
+    name: heketi-${CLUSTER_NAME}
     labels:
-      glusterfs: heketi-route
+      glusterfs: heketi-${CLUSTER_NAME}-route
   spec:
     to:
       kind: Service
-      name: heketi
+      name: heketi-${CLUSTER_NAME}
 - kind: DeploymentConfig
   apiVersion: v1
   metadata:
-    name: heketi
+    name: heketi-${CLUSTER_NAME}
     labels:
-      glusterfs: heketi-dc
+      glusterfs: heketi-${CLUSTER_NAME}-dc
     annotations:
       description: Defines how to deploy Heketi
   spec:
     replicas: 1
     selector:
-      glusterfs: heketi-pod
+      glusterfs: heketi-${CLUSTER_NAME}-pod
     triggers:
     - type: ConfigChange
     strategy:
       type: Recreate
     template:
       metadata:
-        name: heketi
+        name: heketi-${CLUSTER_NAME}
         labels:
-          glusterfs: heketi-pod
+          glusterfs: heketi-${CLUSTER_NAME}-pod
       spec:
-        serviceAccountName: heketi-service-account
+        serviceAccountName: heketi-${CLUSTER_NAME}-service-account
         containers:
         - name: heketi
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
@@ -96,7 +96,7 @@ objects:
         volumes:
         - name: db
           glusterfs:
-            endpoints: heketi-storage-endpoints
+            endpoints: heketi-db-${CLUSTER_NAME}-endpoints
             path: heketidbstorage
 parameters:
 - name: HEKETI_USER_KEY
@@ -115,3 +115,6 @@ parameters:
 - name: IMAGE_VERSION
   displayName: heketi container versiona
   required: True
+- name: CLUSTER_NAME
+  displayName: GlusterFS cluster name
+  value: glusterfs
