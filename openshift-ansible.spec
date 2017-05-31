@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.89
+Version:        3.6.89.0
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.6.89.0-1
+- AMP 2.0 (sdodson@redhat.com)
+- add support for oc_service for labels, externalIPs (rmeggins@redhat.com)
+- [JMAN4-161] Add templates and pv example for cloudforms jboss middleware
+  manager (pgier@redhat.com)
+
 * Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.6.89-1
 - Adding default value for openshift_hosted_logging_storage_kind
   (ewolinet@redhat.com)
