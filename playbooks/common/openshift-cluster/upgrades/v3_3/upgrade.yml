@@ -74,11 +74,21 @@
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_upgrade_targets.yml
+- include: ../../../../common/openshift-master/validate_restart.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_docker_upgrade_targets.yml
+- name: Verify upgrade targets
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade
+  tasks:
+  - include: ../pre/verify_upgrade_targets.yml
+  tags:
+  - pre_upgrade
+
+- name: Verify docker upgrade targets
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
+  tasks:
+  - include: ../pre/verify_docker_upgrade_targets.yml
   tags:
   - pre_upgrade
 
