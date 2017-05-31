@@ -79,11 +79,17 @@
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_upgrade_targets.yml
+- name: Verify upgrade targets
+  hosts: oo_nodes_to_upgrade
+  tasks:
+  - include: ../pre/verify_upgrade_targets.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_docker_upgrade_targets.yml
+- name: Verify docker upgrade targets
+  hosts: oo_nodes_to_upgrade
+  tasks:
+  - include: ../pre/verify_docker_upgrade_targets.yml
   tags:
   - pre_upgrade
 
