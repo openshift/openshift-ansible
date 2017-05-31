@@ -9,10 +9,12 @@ class SecretConfig(object):
                  sname,
                  namespace,
                  kubeconfig,
-                 secrets=None):
+                 secrets=None,
+                 stype=None):
         ''' constructor for handling secret options '''
         self.kubeconfig = kubeconfig
         self.name = sname
+        self.type = stype
         self.namespace = namespace
         self.secrets = secrets
         self.data = {}
@@ -23,6 +25,7 @@ class SecretConfig(object):
         ''' assign the correct properties for a secret dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
+        self.data['type'] = self.type
         self.data['metadata'] = {}
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
