@@ -74,7 +74,7 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_es_storage_group`: The storage group used for ES. Defaults to '65534'.
 - `openshift_logging_es_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the pod will land.
 - `openshift_logging_es_number_of_shards`: The number of primary shards for every new index created in ES. Defaults to '1'.
-- `openshift_logging_es_number_of_replicas`: The number of replica shards per primary shard for every new index. Defaults to '0'.
+- `openshift_logging_es_number_of_replicas`: The number of replica shards per primary shard for every new index. Defaults to '1'.
 
 When `openshift_logging_use_ops` is `True`, there are some additional vars. These work the
 same as above for their non-ops counterparts, but apply to the OPS cluster instance:
