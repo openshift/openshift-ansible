@@ -37,7 +37,7 @@
         cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
 
   # End Block
-  when: openshift_hosted_router_create_certificate
+  when: openshift_hosted_router_create_certificate | bool
 
 - name: Get the certificate contents for router
   copy:
@@ -46,7 +46,7 @@
     src: "{{ item }}"
   with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
                   oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
-  when: not openshift_hosted_router_create_certificate
+  when: not openshift_hosted_router_create_certificate | bool
 
 - name: Create the router service account(s)
   oc_serviceaccount:
