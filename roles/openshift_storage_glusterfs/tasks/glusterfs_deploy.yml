@@ -1,9 +1,5 @@
 ---
 - assert:
-    that: "glusterfs_nodeselector.keys() | count == 1"
-    msg: Only one GlusterFS nodeselector key pair should be provided
-
-- assert:
     that: "glusterfs_nodes | count >= 3"
     msg: There must be at least three GlusterFS nodes specified
 
@@ -17,7 +13,7 @@
 
 - name: Unlabel any existing GlusterFS nodes
   oc_label:
-    name: "{{ item }}"
+    name: "{{ hostvars[item].openshift.common.hostname }}"
     kind: node
     state: absent
     labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"

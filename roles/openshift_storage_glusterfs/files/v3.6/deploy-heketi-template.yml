@@ -9,8 +9,6 @@ metadata:
   annotations:
     description: Bootstrap Heketi installation
     tags: glusterfs,heketi,installation
-labels:
-  template: deploy-heketi
 objects:
 - kind: Service
   apiVersion: v1
@@ -66,7 +64,7 @@ objects:
       spec:
         serviceAccountName: heketi-service-account
         containers:
-        - name: deploy-heketi
+        - name: heketi
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
           env:
           - name: HEKETI_USER_KEY
@@ -114,8 +112,8 @@ parameters:
   description: Set the namespace where the GlusterFS pods reside
   value: default
 - name: IMAGE_NAME
-  displayName: GlusterFS container name
+  displayName: heketi container name
   required: True
 - name: IMAGE_VERSION
-  displayName: GlusterFS container versiona
+  displayName: heketi container versiona
   required: True

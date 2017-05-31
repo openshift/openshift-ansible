@@ -52,7 +52,7 @@
     src: "{{ openshift.common.examples_content_version }}/heketi-template.yml"
     dest: "{{ mktemp.stdout }}/heketi-template.yml"
 
-- name: Create heketi resources
+- name: Create heketi template
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: template

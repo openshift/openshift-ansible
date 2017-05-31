@@ -6,11 +6,11 @@
   with_items:
   - "deploy-heketi-template.yml"
 
-- name: Create deploy-heketi resources
+- name: Create deploy-heketi template
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: template
-    name: deploy-heketi
+    name: "deploy-heketi"
     state: present
     files:
     - "{{ mktemp.stdout }}/deploy-heketi-template.yml"

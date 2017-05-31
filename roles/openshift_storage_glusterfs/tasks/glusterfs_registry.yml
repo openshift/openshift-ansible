@@ -28,8 +28,7 @@
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: "{{ item.kind }}"
-    name: "{{ item.name | default(omit) }}"
-    selector: "{{ item.selector | default(omit) }}"
+    name: "{{ item.name }}"
     state: absent
   with_items:
   - kind: "svc,ep"

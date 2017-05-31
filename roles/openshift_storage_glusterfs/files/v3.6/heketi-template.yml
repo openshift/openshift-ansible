@@ -8,8 +8,6 @@ metadata:
   annotations:
     description: Heketi service deployment template
     tags: glusterfs,heketi
-labels:
-  template: heketi
 objects:
 - kind: Service
   apiVersion: v1
@@ -112,8 +110,8 @@ parameters:
   description: Set the namespace where the GlusterFS pods reside
   value: default
 - name: IMAGE_NAME
-  displayName: GlusterFS container name
+  displayName: heketi container name
   required: True
 - name: IMAGE_VERSION
-  displayName: GlusterFS container versiona
+  displayName: heketi container versiona
   required: True
