@@ -89,9 +89,6 @@ spec:
             - name: config
               mountPath: /etc/curator/settings
               readOnly: true
-            - name: elasticsearch-storage
-              mountPath: /elasticsearch/persistent
-              readOnly: true
       volumes:
         - name: certs
           secret:
@@ -99,5 +96,3 @@ spec:
         - name: config
           configMap:
             name: logging-curator
-        - name: elasticsearch-storage
-          emptyDir: {}
