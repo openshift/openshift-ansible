@@ -22,6 +22,11 @@ As part of the configuration, a particular GlusterFS cluster may be
 specified to provide backend storage for a natively-hosted Docker
 registry.
 
+Unless configured otherwise, a StorageClass will be automatically
+created for each non-registry GlusterFS cluster. This will allow
+applications which can mount PersistentVolumes to request
+dynamically-provisioned GlusterFS volumes.
+
 Requirements
 ------------
 
@@ -75,6 +80,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_is_native            | True                    | GlusterFS should be containerized
 | openshift_storage_glusterfs_name                 | 'storage'               | A name to identify the GlusterFS cluster, which will be used in resource names
 | openshift_storage_glusterfs_nodeselector         | 'glusterfs=storage-host'| Selector to determine which nodes will host GlusterFS pods in native mode. **NOTE:** The label value is taken from the cluster name
+| openshift_storage_glusterfs_storageclass         | True                    | Automatically create a StorageClass for each GlusterFS cluster
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
@@ -98,6 +104,7 @@ are an exception:
 |-------------------------------------------------------|-----------------------|-----------------------------------------|
 | openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
 | openshift_storage_glusterfs_registry_name             | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
+| openshift_storage_glusterfs_registry_storageclass     | False                 | It is recommended to not create a StorageClass for GlusterFS clusters serving registry storage, so as to avoid performance penalties
 | openshift_storage_glusterfs_registry_heketi_admin_key | auto-generated        | Separate from the above
 | openshift_storage_glusterfs_registry_heketi_user_key  | auto-generated        | Separate from the above
 

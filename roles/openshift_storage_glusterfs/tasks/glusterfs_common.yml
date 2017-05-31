@@ -179,3 +179,18 @@
     contents:
     - path: key
       data: "{{ glusterfs_heketi_user_key }}"
+
+- name: Generate GlusterFS StorageClass file
+  template:
+    src: "{{ openshift.common.examples_content_version }}/glusterfs-storageclass.yml.j2"
+    dest: "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
+
+- name: Create GlusterFS StorageClass
+  oc_obj:
+    state: present
+    kind: storageclass
+    name: "glusterfs-{{ glusterfs_name }}"
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
+  when:
+  - glusterfs_storageclass
