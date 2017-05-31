@@ -30,7 +30,7 @@
   - kind: "sa"
     name: "heketi-{{ glusterfs_name }}-service-account"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-secret"
+    name: "heketi-{{ glusterfs_name }}-user-secret"
   failed_when: False
   when: glusterfs_heketi_wipe
 
@@ -168,3 +168,14 @@
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_is_missing
+
+- name: Create heketi user secret
+  oc_secret:
+    namespace: "{{ glusterfs_namespace }}"
+    state: present
+    name: "heketi-{{ glusterfs_name }}-user-secret"
+    type: "kubernetes.io/glusterfs"
+    force: True
+    contents:
+    - path: key
+      data: "{{ glusterfs_heketi_user_key }}"

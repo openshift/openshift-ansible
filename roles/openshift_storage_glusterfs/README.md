@@ -81,8 +81,8 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_is_native     | True                    | heketi should be containerized
 | openshift_storage_glusterfs_heketi_image         | 'heketi/heketi'         | Container image to use for heketi pods, enterprise default is 'rhgs3/rhgs-volmanager-rhel7'
 | openshift_storage_glusterfs_heketi_version       | 'latest'                | Container image version to use for heketi pods
-| openshift_storage_glusterfs_heketi_admin_key     | ''                      | String to use as secret key for performing heketi commands as admin
-| openshift_storage_glusterfs_heketi_user_key      | ''                      | String to use as secret key for performing heketi commands as user that can only view or modify volumes
+| openshift_storage_glusterfs_heketi_admin_key     | auto-generated          | String to use as secret key for performing heketi commands as admin
+| openshift_storage_glusterfs_heketi_user_key      | auto-generated          | String to use as secret key for performing heketi commands as user that can only view or modify volumes
 | openshift_storage_glusterfs_heketi_topology_load | True                    | Load the GlusterFS topology information into heketi
 | openshift_storage_glusterfs_heketi_url           | Undefined               | URL for the heketi REST API, dynamically determined in native mode
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
@@ -94,10 +94,12 @@ registry. These variables start with the prefix
 values in their corresponding non-registry variables. The following variables
 are an exception:
 
-| Name                                              | Default value         | Description                             |
-|---------------------------------------------------|-----------------------|-----------------------------------------|
-| openshift_storage_glusterfs_registry_namespace    | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
-| openshift_storage_glusterfs_registry_name         | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
+| Name                                                  | Default value         | Description                             |
+|-------------------------------------------------------|-----------------------|-----------------------------------------|
+| openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
+| openshift_storage_glusterfs_registry_name             | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
+| openshift_storage_glusterfs_registry_heketi_admin_key | auto-generated        | Separate from the above
+| openshift_storage_glusterfs_registry_heketi_user_key  | auto-generated        | Separate from the above
 
 Additionally, this role's behavior responds to the following registry-specific
 variables:
