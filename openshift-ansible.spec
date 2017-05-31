@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.5.21
+Version:        3.5.74
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.5.74-1
+- [JMAN4-161] Add templates and pv example for cloudforms jboss middleware
+  manager (pgier@redhat.com)
+
 * Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.21-1
 - 
 
