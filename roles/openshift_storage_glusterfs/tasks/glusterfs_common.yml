@@ -5,9 +5,6 @@
     name: "{{ glusterfs_namespace }}"
   when: glusterfs_is_native or glusterfs_heketi_is_native
 
-- include: glusterfs_deploy.yml
-  when: glusterfs_is_native
-
 - name: Make sure heketi-client is installed
   package: name=heketi-client state=present
   when: not openshift.common.is_atomic | bool
@@ -62,6 +59,9 @@
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when: glusterfs_heketi_wipe
+
+- include: glusterfs_deploy.yml
+  when: glusterfs_is_native
 
 - name: Create heketi service account
   oc_serviceaccount:
