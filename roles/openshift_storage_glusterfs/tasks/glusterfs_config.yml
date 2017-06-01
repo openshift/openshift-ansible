@@ -17,6 +17,6 @@
     glusterfs_heketi_topology_load: "{{ openshift_storage_glusterfs_heketi_topology_load }}"
     glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_heketi_wipe }}"
     glusterfs_heketi_url: "{{ openshift_storage_glusterfs_heketi_url }}"
-    glusterfs_nodes: "{{ g_glusterfs_hosts }}"
+    glusterfs_nodes: "{{ groups.oo_glusterfs_to_config }}"
 
 - include: glusterfs_common.yml
