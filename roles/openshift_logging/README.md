@@ -35,15 +35,21 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_curator_log_level`: The log level for the Curator process. Defaults to 'ERROR'.
 - `openshift_logging_curator_cpu_limit`: The amount of CPU to allocate to Curator. Default is '100m'.
 - `openshift_logging_curator_memory_limit`: The amount of memory to allocate to Curator. Unset if not specified.
+- `openshift_logging_curator_cpu_request`: The amount of CPU to request for Curator. Default is '100m'.
+- `openshift_logging_curator_memory_request`: The amount of memory to request for Curator. Unset if not specified.
 - `openshift_logging_curator_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the curator pod will land.
 - `openshift_logging_image_pull_secret`: The name of an existing pull secret to link to the logging service accounts
 
 - `openshift_logging_kibana_hostname`: The Kibana hostname. Defaults to 'kibana.example.com'.
 - `openshift_logging_kibana_cpu_limit`: The amount of CPU to allocate to Kibana or unset if not specified.
 - `openshift_logging_kibana_memory_limit`: The amount of memory to allocate to Kibana or unset if not specified.
+- `openshift_logging_kibana_cpu_request`: The amount of CPU to request for Kibana or unset if not specified.
+- `openshift_logging_kibana_memory_request`: The amount of memory to request for Kibana or unset if not specified.
 - `openshift_logging_kibana_proxy_debug`: When "True", set the Kibana Proxy log level to DEBUG. Defaults to 'false'.
 - `openshift_logging_kibana_proxy_cpu_limit`: The amount of CPU to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_proxy_memory_limit`: The amount of memory to allocate to Kibana proxy or unset if not specified.
+- `openshift_logging_kibana_proxy_cpu_request`: The amount of CPU to request for Kibana proxy or unset if not specified.
+- `openshift_logging_kibana_proxy_memory_request`: The amount of memory to request for Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_replica_count`: The number of replicas Kibana should be scaled up to. Defaults to 1.
 - `openshift_logging_kibana_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the pod will land.
 - `openshift_logging_kibana_edge_term_policy`: Insecure Edge Termination Policy. Defaults to Redirect.
@@ -51,6 +57,8 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_fluentd_nodeselector`: The node selector that the Fluentd daemonset uses to determine where to deploy to. Defaults to '"logging-infra-fluentd": "true"'.
 - `openshift_logging_fluentd_cpu_limit`: The CPU limit for Fluentd pods. Defaults to '100m'.
 - `openshift_logging_fluentd_memory_limit`: The memory limit for Fluentd pods. Defaults to '512Mi'.
+- `openshift_logging_fluentd_cpu_request`: The CPU request for Fluentd pods. Defaults to '100m'.
+- `openshift_logging_fluentd_memory_request`: The memory request for Fluentd pods. Defaults to '512Mi'.
 - `openshift_logging_fluentd_es_copy`: Whether or not to use the ES_COPY feature for Fluentd (DEPRECATED). Defaults to 'False'.
 - `openshift_logging_fluentd_use_journal`: NOTE: Fluentd will attempt to detect whether or not Docker is using the journald log driver when using the default of empty.
 - `openshift_logging_fluentd_journal_read_from_head`: If empty, Fluentd will use its internal default, which is false.
@@ -65,6 +73,8 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_es_cluster_size`: The number of ES cluster members. Defaults to '1'.
 - `openshift_logging_es_cpu_limit`:  The amount of CPU limit for the ES cluster.  Unused if not set
 - `openshift_logging_es_memory_limit`: The amount of RAM that should be assigned to ES. Defaults to '8Gi'.
+- `openshift_logging_es_cpu_request`:  The amount of CPU lrequest for the ES cluster.  Unused if not set
+- `openshift_logging_es_memory_request`: The amount of RAM that should be requested for ES. Defaults to '8Gi'.
 - `openshift_logging_es_log_appenders`: The list of rootLogger appenders for ES logs which can be: 'file', 'console'. Defaults to 'file'.
 - `openshift_logging_es_pv_selector`: A key/value map added to a PVC in order to select specific PVs.  Defaults to 'None'.
 - `openshift_logging_es_pvc_dynamic`: Whether or not to add the dynamic PVC annotation for any generated PVCs. Defaults to 'False'.
@@ -86,6 +96,8 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_es_ops_cluster_size`: 1
 - `openshift_logging_es_ops_cpu_limit`:  The amount of CPU limit for the ES cluster.  Unused if not set
 - `openshift_logging_es_ops_memory_limit`: 8Gi
+- `openshift_logging_es_ops_cpu_request`:  The CPU request for the ES cluster.  Unused if not set
+- `openshift_logging_es_ops_memory_request`: 8Gi
 - `openshift_logging_es_ops_pvc_dynamic`: False
 - `openshift_logging_es_ops_pvc_size`: ""
 - `openshift_logging_es_ops_pvc_prefix`: logging-es-ops
@@ -94,8 +106,12 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_kibana_ops_hostname`: The Operations Kibana hostname. Defaults to 'kibana-ops.example.com'.
 - `openshift_logging_kibana_ops_cpu_limit`: The amount of CPU to allocate to Kibana or unset if not specified.
 - `openshift_logging_kibana_ops_memory_limit`: The amount of memory to allocate to Kibana or unset if not specified.
+- `openshift_logging_kibana_ops_cpu_request`: The amount of CPU to request for Kibana or unset if not specified.
+- `openshift_logging_kibana_ops_memory_request`: The amount of memory to request for Kibana or unset if not specified.
 - `openshift_logging_kibana_ops_proxy_cpu_limit`: The amount of CPU to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_proxy_memory_limit`: The amount of memory to allocate to Kibana proxy or unset if not specified.
+- `openshift_logging_kibana_ops_proxy_cpu_request`: The amount of CPU to request for Kibana proxy or unset if not specified.
+- `openshift_logging_kibana_ops_proxy_memory_request`: The amount of memory to request for Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_replica_count`: The number of replicas Kibana ops should be scaled up to. Defaults to 1.
 
 Elasticsearch can be exposed for external clients outside of the cluster.
