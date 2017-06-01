@@ -1,8 +1,9 @@
 # pylint: disable=missing-docstring
 from openshift_checks import OpenShiftCheck, get_var
+from openshift_checks.mixins import DockerHostMixin
 
 
-class DockerImageAvailability(OpenShiftCheck):
+class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     """Check that required Docker images are available.
 
     This check attempts to ensure that required docker images are
@@ -36,19 +37,11 @@ class DockerImageAvailability(OpenShiftCheck):
 
     def run(self, tmp, task_vars):
         msg, failed, changed = self.ensure_dependencies(task_vars)
-
-        # exit early if Skopeo update fails
         if failed:
-            if "No package matching" in msg:
-                msg = "Ensure that all required dependencies can be installed via `yum`.\n"
             return {
                 "failed": True,
                 "changed": changed,
-                "msg": (
-                    "Unable to update or install required dependency packages on this host;\n"
-                    "These are required in order to check Docker image availability:"
-                    "\n    {deps}\n{msg}"
-                ).format(deps=',\n    '.join(self.dependencies), msg=msg),
+                "msg": "Some dependencies are required in order to check Docker image availability.\n" + msg
             }
 
         required_images = self.required_images(task_vars)
@@ -168,12 +161,3 @@ class DockerImageAvailability(OpenShiftCheck):
         args = {"_raw_params": cmd_str}
         result = self.module_executor("command", args, task_vars)
         return not result.get("failed", False) and result.get("rc", 0) == 0
-
-    # ensures that the skopeo and python-docker-py packages exist
-    # check is skipped on atomic installations
-    def ensure_dependencies(self, task_vars):
-        if get_var(task_vars, "openshift", "common", "is_atomic"):
-            return "", False, False
-
-        result = self.module_executor("yum", {"name": self.dependencies, "state": "latest"}, task_vars)
-        return result.get("msg", ""), result.get("failed", False) or result.get("rc", 0) != 0, result.get("changed")

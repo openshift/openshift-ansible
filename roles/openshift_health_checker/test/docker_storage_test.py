@@ -1,243 +1,224 @@
 import pytest
-import json
+
+from openshift_checks import OpenShiftCheckException
+from openshift_checks.docker_storage import DockerStorage
 
 
-from openshift_checks.docker_storage import DockerStorage, OpenShiftCheckException
+def dummy_check(execute_module=None):
+    def dummy_exec(self, status, task_vars):
+        raise Exception("dummy executor called")
+    return DockerStorage(execute_module=execute_module or dummy_exec)
 
 
-@pytest.mark.parametrize('is_containerized,is_active', [
-    (False, False),
-    (True, True),
+@pytest.mark.parametrize('is_containerized, group_names, is_active', [
+    (False, ["masters", "etcd"], False),
+    (False, ["masters", "nodes"], True),
+    (True, ["etcd"], True),
 ])
-def test_is_active(is_containerized, is_active):
+def test_is_active(is_containerized, group_names, is_active):
     task_vars = dict(
         openshift=dict(common=dict(is_containerized=is_containerized)),
+        group_names=group_names,
     )
     assert DockerStorage.is_active(task_vars=task_vars) == is_active
 
 
-@pytest.mark.parametrize('stdout,message,failed,extra_words', [
-    (None, "", True, ["no thinpool usage data"]),
-    ("", "", False, ["Invalid JSON value returned by lvs command"]),
-    (None, "invalid response", True, ["invalid response"]),
-    ("invalid", "invalid response", False, ["Invalid JSON value"]),
+non_atomic_task_vars = {"openshift": {"common": {"is_atomic": False}}}
+
+
+@pytest.mark.parametrize('docker_info, failed, expect_msg', [
+    (
+        dict(failed=True, msg="Error connecting: Error while fetching server API version"),
+        True,
+        ["Is docker running on this host?"],
+    ),
+    (
+        dict(msg="I have no info"),
+        True,
+        ["missing info"],
+    ),
+    (
+        dict(info={
+            "Driver": "devicemapper",
+            "DriverStatus": [("Pool Name", "docker-docker--pool")],
+        }),
+        False,
+        [],
+    ),
+    (
+        dict(info={
+            "Driver": "devicemapper",
+            "DriverStatus": [("Data loop file", "true")],
+        }),
+        True,
+        ["loopback devices with the Docker devicemapper storage driver"],
+    ),
+    (
+        dict(info={
+            "Driver": "overlay2",
+            "DriverStatus": []
+        }),
+        False,
+        [],
+    ),
+    (
+        dict(info={
+            "Driver": "overlay",
+        }),
+        True,
+        ["unsupported Docker storage driver"],
+    ),
+    (
+        dict(info={
+            "Driver": "unsupported",
+        }),
+        True,
+        ["unsupported Docker storage driver"],
+    ),
 ])
-def test_get_lvs_data_with_failed_response(stdout, message, failed, extra_words):
+def test_check_storage_driver(docker_info, failed, expect_msg):
     def execute_module(module_name, args, tmp=None, task_vars=None):
-        if module_name != "command":
-            return {
-                "changed": False,
-            }
+        if module_name == "yum":
+            return {}
+        if module_name != "docker_info":
+            raise ValueError("not expecting module " + module_name)
+        return docker_info
 
-        response = {
-            "stdout": stdout,
-            "msg": message,
-            "failed": failed,
-        }
-
-        if stdout is None:
-            response.pop("stdout")
-
-        return response
-
-    task_vars = dict(
-        max_thinpool_data_usage_percent=90.0
-    )
-
-    check = DockerStorage(execute_module=execute_module)
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
-
-    for word in extra_words:
-        assert word in str(excinfo.value)
-
-
-@pytest.mark.parametrize('limit_percent,failed,extra_words', [
-    ("90.0", False, []),
-    (80.0, False, []),
-    ("invalid percent", True, ["Unable to convert", "to float", "invalid percent"]),
-    ("90%", True, ["Unable to convert", "to float", "90%"]),
-])
-def test_invalid_value_for_thinpool_usage_limit(limit_percent, failed, extra_words):
-    def execute_module(module_name, args, tmp=None, task_vars=None):
-        if module_name != "command":
-            return {
-                "changed": False,
-            }
-
-        return {
-            "stdout": json.dumps({
-                "report": [
-                    {
-                        "lv": [
-                            {"lv_name": "docker-pool", "vg_name": "docker", "lv_attr": "twi-aot---", "lv_size": "6.95g",
-                             "pool_lv": "", "origin": "", "data_percent": "58.96", "metadata_percent": "4.77",
-                             "move_pv": "", "mirror_log": "", "copy_percent": "", "convert_lv": ""},
-                        ]
-                    }
-                ]
-            }),
-            "failed": False,
-        }
-
-    task_vars = dict(
-        max_thinpool_data_usage_percent=limit_percent
-    )
-
-    check = DockerStorage(execute_module=execute_module).run(tmp=None, task_vars=task_vars)
+    check = dummy_check(execute_module=execute_module)
+    check._check_dm_usage = lambda status, task_vars: dict()  # stub out for this test
+    result = check.run(tmp=None, task_vars=non_atomic_task_vars)
 
     if failed:
-        assert check["failed"]
-
-        for word in extra_words:
-            assert word in check["msg"]
+        assert result["failed"]
     else:
-        assert not check.get("failed", False)
+        assert not result.get("failed", False)
+
+    for word in expect_msg:
+        assert word in result["msg"]
 
 
-def test_get_lvs_data_with_valid_response():
-    def execute_module(module_name, args, tmp=None, task_vars=None):
-        if module_name != "command":
-            return {
-                "changed": False,
-            }
+enough_space = {
+    "Pool Name": "docker--vg-docker--pool",
+    "Data Space Used": "19.92 MB",
+    "Data Space Total": "8.535 GB",
+    "Metadata Space Used": "40.96 kB",
+    "Metadata Space Total": "25.17 MB",
+}
 
-        return {
-            "stdout": json.dumps({
-                "report": [
-                    {
-                        "lv": [
-                            {"lv_name": "docker-pool", "vg_name": "docker", "lv_attr": "twi-aot---", "lv_size": "6.95g",
-                             "pool_lv": "", "origin": "", "data_percent": "58.96", "metadata_percent": "4.77",
-                             "move_pv": "", "mirror_log": "", "copy_percent": "", "convert_lv": ""}
-                        ]
-                    }
-                ]
-            })
-        }
-
-    task_vars = dict(
-        max_thinpool_data_usage_percent="90"
-    )
-
-    check = DockerStorage(execute_module=execute_module).run(tmp=None, task_vars=task_vars)
-    assert not check.get("failed", False)
+not_enough_space = {
+    "Pool Name": "docker--vg-docker--pool",
+    "Data Space Used": "10 GB",
+    "Data Space Total": "10 GB",
+    "Metadata Space Used": "42 kB",
+    "Metadata Space Total": "43 kB",
+}
 
 
-@pytest.mark.parametrize('response,extra_words', [
+@pytest.mark.parametrize('task_vars, driver_status, vg_free, success, expect_msg', [
     (
-        {
-            "report": [{}],
-        },
-        ["no thinpool usage data"],
+        {"max_thinpool_data_usage_percent": "not a float"},
+        enough_space,
+        "12g",
+        False,
+        ["is not a percentage"],
     ),
     (
-        {
-            "report": [
-                {
-                    "lv": [
-                        {"vg_name": "docker", "lv_attr": "twi-aot---", "lv_size": "6.95g",
-                         "move_pv": "", "mirror_log": "", "copy_percent": "", "convert_lv": ""}
-                    ]
-                }
-            ],
-        },
-        ["no thinpool usage data"],
+        {},
+        {},  # empty values from driver status
+        "bogus",  # also does not parse as bytes
+        False,
+        ["Could not interpret", "as bytes"],
     ),
     (
-        {
-            "report": [
-                {
-                    "lv": [],
-                }
-            ],
-        },
-        ["no thinpool usage data"],
+        {},
+        enough_space,
+        "12.00g",
+        True,
+        [],
     ),
     (
-        {
-            "report": [
-                {
-                    "lv": [
-                        {"lv_name": "docker-pool", "vg_name": "docker", "lv_attr": "twi-aot---", "lv_size": "6.95g",
-                         "pool_lv": "", "origin": "", "data_percent": "58.96",
-                         "move_pv": "", "mirror_log": "", "copy_percent": "", "convert_lv": ""}
-                    ]
-                }
-            ],
-        },
-        ["no thinpool usage data"],
+        {},
+        not_enough_space,
+        "0.00",
+        False,
+        ["data usage", "metadata usage", "higher than threshold"],
     ),
 ])
-def test_get_lvs_data_with_incomplete_response(response, extra_words):
-    def execute_module(module_name, args, tmp=None, task_vars=None):
-        if module_name != "command":
-            return {
-                "changed": False,
-            }
+def test_dm_usage(task_vars, driver_status, vg_free, success, expect_msg):
+    check = dummy_check()
+    check._get_vg_free = lambda pool, task_vars: vg_free
+    result = check._check_dm_usage(driver_status, task_vars)
+    result_success = not result.get("failed")
 
-        return {
-            "stdout": json.dumps(response)
-        }
+    assert result_success is success
+    for msg in expect_msg:
+        assert msg in result["msg"]
 
-    task_vars = dict(
-        max_thinpool_data_usage_percent=90.0
+
+@pytest.mark.parametrize('pool, command_returns, raises, returns', [
+    (
+        "foo-bar",
+        {  # vgs missing
+            "msg": "[Errno 2] No such file or directory",
+            "failed": True,
+            "cmd": "/sbin/vgs",
+            "rc": 2,
+        },
+        "Failed to run /sbin/vgs",
+        None,
+    ),
+    (
+        "foo",  # no hyphen in name - should not happen
+        {},
+        "name does not have the expected format",
+        None,
+    ),
+    (
+        "foo-bar",
+        dict(stdout="  4.00g\n"),
+        None,
+        "4.00g",
+    ),
+    (
+        "foo-bar",
+        dict(stdout="\n"),  # no matching VG
+        "vgs did not find this VG",
+        None,
     )
-
-    check = DockerStorage(execute_module=execute_module)
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
-
-    assert "no thinpool usage data" in str(excinfo.value)
-
-
-@pytest.mark.parametrize('response,extra_words', [
-    (
-        {
-            "report": [
-                {
-                    "lv": [
-                        {"lv_name": "docker-pool", "vg_name": "docker", "lv_attr": "twi-aot---", "lv_size": "6.95g",
-                         "pool_lv": "", "origin": "", "data_percent": "100.0", "metadata_percent": "90.0",
-                         "move_pv": "", "mirror_log": "", "copy_percent": "", "convert_lv": ""}
-                    ]
-                }
-            ],
-        },
-        ["thinpool data usage above maximum threshold"],
-    ),
-    (
-        {
-            "report": [
-                {
-                    "lv": [
-                        {"lv_name": "docker-pool", "vg_name": "docker", "lv_attr": "twi-aot---", "lv_size": "6.95g",
-                         "pool_lv": "", "origin": "", "data_percent": "10.0", "metadata_percent": "91.0",
-                         "move_pv": "", "mirror_log": "", "copy_percent": "", "convert_lv": ""}
-                    ]
-                }
-            ],
-        },
-        ["thinpool metadata usage above maximum threshold"],
-    ),
 ])
-def test_get_lvs_data_with_high_thinpool_usage(response, extra_words):
+def test_vg_free(pool, command_returns, raises, returns):
     def execute_module(module_name, args, tmp=None, task_vars=None):
         if module_name != "command":
-            return {
-                "changed": False,
-            }
+            raise ValueError("not expecting module " + module_name)
+        return command_returns
 
-        return {
-            "stdout": json.dumps(response),
-        }
+    check = dummy_check(execute_module=execute_module)
+    if raises:
+        with pytest.raises(OpenShiftCheckException) as err:
+            check._get_vg_free(pool, {})
+        assert raises in str(err.value)
+    else:
+        ret = check._get_vg_free(pool, {})
+        assert ret == returns
 
-    task_vars = dict(
-        max_thinpool_data_usage_percent="90"
-    )
 
-    check = DockerStorage(execute_module=execute_module).run(tmp=None, task_vars=task_vars)
+@pytest.mark.parametrize('string, expect_bytes', [
+    ("12", 12.0),
+    ("12 k", 12.0 * 1024),
+    ("42.42 MB", 42.42 * 1024**2),
+    ("12g", 12.0 * 1024**3),
+])
+def test_convert_to_bytes(string, expect_bytes):
+    got = DockerStorage._convert_to_bytes(string)
+    assert got == expect_bytes
 
-    assert check["failed"]
-    for word in extra_words:
-        assert word in check["msg"]
+
+@pytest.mark.parametrize('string', [
+    "bork",
+    "42 Qs",
+])
+def test_convert_to_bytes_error(string):
+    with pytest.raises(ValueError) as err:
+        DockerStorage._convert_to_bytes(string)
+    assert "Cannot convert" in str(err.value)
+    assert string in str(err.value)

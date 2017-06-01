@@ -3,19 +3,25 @@ import pytest
 from openshift_checks.docker_image_availability import DockerImageAvailability
 
 
-@pytest.mark.parametrize('deployment_type,is_active', [
-    ("origin", True),
-    ("openshift-enterprise", True),
-    ("enterprise", False),
-    ("online", False),
-    ("invalid", False),
-    ("", False),
+@pytest.mark.parametrize('deployment_type, is_containerized, group_names, expect_active', [
+    ("origin", True, [], True),
+    ("openshift-enterprise", True, [], True),
+    ("enterprise", True, [], False),
+    ("online", True, [], False),
+    ("invalid", True, [], False),
+    ("", True, [], False),
+    ("origin", False, [], False),
+    ("openshift-enterprise", False, [], False),
+    ("origin", False, ["nodes", "masters"], True),
+    ("openshift-enterprise", False, ["etcd"], False),
 ])
-def test_is_active(deployment_type, is_active):
+def test_is_active(deployment_type, is_containerized, group_names, expect_active):
     task_vars = dict(
+        openshift=dict(common=dict(is_containerized=is_containerized)),
         openshift_deployment_type=deployment_type,
+        group_names=group_names,
     )
-    assert DockerImageAvailability.is_active(task_vars=task_vars) == is_active
+    assert DockerImageAvailability.is_active(task_vars=task_vars) == expect_active
 
 
 @pytest.mark.parametrize("is_containerized,is_atomic", [
