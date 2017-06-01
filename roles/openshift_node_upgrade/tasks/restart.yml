@@ -23,6 +23,12 @@
     - "{{ openshift.common.service_type }}-node"
   failed_when: false
 
+- name: Re-enable docker-cleanup.timer
+  systemd:
+    name: docker-cleanup.timer
+    state: started
+  failed_when: false
+
 - name: Wait for master API to come back online
   wait_for:
     host: "{{ openshift.common.hostname }}"
