@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.92
+Version:        3.4.93
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 01 2017 Scott Dodson <sdodson@redhat.com> 3.4.93-1
+- Add missing AMP 2.0 files (sdodson@redhat.com)
+- Skip router/registry cert redeploy when
+  openshift_hosted_manage_{router,registry}=false (abutcher@redhat.com)
+- AMP 2.0 (sdodson@redhat.com)
+
 * Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.4.92-1
 - [JMAN4-161] Add templates and pv example for cloudforms jboss middleware
   manager (pgier@redhat.com)
