@@ -19,4 +19,7 @@ nuage_plugin_rest_client_crt_dir: "{{ nuage_ca_master_crt_dir }}/{{ ansible_node
 nuage_ca_master_plugin_key: "{{ nuage_plugin_rest_client_crt_dir }}/nuageMonClient.key"
 nuage_ca_master_plugin_crt: "{{ nuage_plugin_rest_client_crt_dir }}/nuageMonClient.crt"
 
+cni_conf_dir: "/etc/cni/net.d/"
+cni_bin_dir: "/opt/cni/bin/"
+
 nuage_plugin_crt_dir: /usr/share/vsp-openshift

@@ -33,6 +33,14 @@
 
 - include: certificates.yml
 
+- name: Install Nuage VSD user certificate
+  become: yes
+  copy: src="{{ vsd_user_cert_file }}" dest="{{ cert_output_dir }}/{{ vsd_user_cert_file | basename }}"
+
+- name: Install Nuage VSD user key
+  become: yes
+  copy: src="{{ vsd_user_key_file }}" dest="{{ cert_output_dir }}/{{ vsd_user_key_file | basename }}"
+
 - name: Create nuage-openshift-monitor.yaml
   become: yes
   template: src=nuage-openshift-monitor.j2 dest=/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml owner=root mode=0644
