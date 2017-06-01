@@ -8,7 +8,6 @@
 XPAAS_VERSION=ose-v1.3.5
 ORIGIN_VERSION=${1:-v1.4}
 RHAMP_TAG=2.0.0.GA
-RHAMP_TEMPLATE=https://raw.githubusercontent.com/3scale/rhamp-openshift-templates/${RHAMP_TAG}/apicast-gateway/apicast-gateway-template.yml
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
 TEMP=`mktemp -d`
@@ -16,6 +15,7 @@ pushd $TEMP
 
 wget https://github.com/openshift/origin/archive/master.zip -O origin-master.zip
 wget https://github.com/jboss-openshift/application-templates/archive/${XPAAS_VERSION}.zip -O application-templates-master.zip
+wget https://github.com/3scale/rhamp-openshift-templates/archive/${RHAMP_TAG}.zip -O amp.zip
 unzip origin-master.zip
 unzip application-templates-master.zip
 unzip amp.zip
