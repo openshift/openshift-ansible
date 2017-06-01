@@ -13,12 +13,14 @@ class OCSecret(OpenShiftCLI):
     def __init__(self,
                  namespace,
                  secret_name=None,
+                 secret_type=None,
                  decode=False,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
         super(OCSecret, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.name = secret_name
+        self.type = secret_type
         self.decode = decode
 
     def get(self):
@@ -49,6 +51,8 @@ class OCSecret(OpenShiftCLI):
 
         secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
         cmd = ['secrets', 'new', self.name]
+        if self.type is not None:
+            cmd.append("--type=%s" % (self.type))
         cmd.extend(secrets)
 
         results = self.openshift_cmd(cmd)
@@ -82,6 +86,8 @@ class OCSecret(OpenShiftCLI):
 
         secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
         cmd = ['-ojson', 'secrets', 'new', self.name]
+        if self.type is not None:
+            cmd.extend(["--type=%s" % (self.type)])
         cmd.extend(secrets)
 
         return self.openshift_cmd(cmd, output=True)
@@ -94,6 +100,7 @@ class OCSecret(OpenShiftCLI):
 
         ocsecret = OCSecret(params['namespace'],
                             params['name'],
+                            params['type'],
                             params['decode'],
                             kubeconfig=params['kubeconfig'],
                             verbose=params['debug'])

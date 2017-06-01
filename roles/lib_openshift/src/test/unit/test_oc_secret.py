@@ -38,6 +38,7 @@ class OCSecretTest(unittest.TestCase):
             'state': 'present',
             'namespace': 'default',
             'name': 'testsecretname',
+            'type': 'Opaque',
             'contents': [{
                 'path': "/tmp/somesecret.json",
                 'data': "{'one': 1, 'two': 2, 'three': 3}",
@@ -74,7 +75,7 @@ class OCSecretTest(unittest.TestCase):
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
             mock.call(['oc', 'get', 'secrets', 'testsecretname', '-o', 'json', '-n', 'default'], None),
-            mock.call(['oc', 'secrets', 'new', 'testsecretname', mock.ANY, '-n', 'default'], None),
+            mock.call(['oc', 'secrets', 'new', 'testsecretname', '--type=Opaque', mock.ANY, '-n', 'default'], None),
         ])
 
         mock_write.assert_has_calls([
