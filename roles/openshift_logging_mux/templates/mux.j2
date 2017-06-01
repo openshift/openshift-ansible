@@ -37,7 +37,7 @@ spec:
       - name: "mux"
         image: {{image}}
         imagePullPolicy: Always
-{% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) %}
+{% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) or (mux_memory_request is defined and mux_memory_request is not none) or (mux_cpu_request is defined and mux_cpu_request is not none) %}
         resources:
           limits:
 {% if mux_cpu_limit is not none %}
@@ -45,6 +45,13 @@ spec:
 {% endif %}
 {% if mux_memory_limit is not none %}
             memory: "{{mux_memory_limit}}"
+{% endif %}
+          requests:
+{% if mux_cpu_request is not none %}
+            cpu: "{{mux_cpu_request}}"
+{% endif %}
+{% if mux_memory_request is not none %}
+            memory: "{{mux_memory_request}}"
 {% endif %}
 {% endif %}
         ports:
