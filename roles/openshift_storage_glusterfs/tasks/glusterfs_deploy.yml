@@ -61,7 +61,7 @@
 
 - name: Label GlusterFS nodes
   oc_label:
-    name: "{{ glusterfs_host }}"
+    name: "{{ hostvars[glusterfs_host].glusterfs_hostname | default(glusterfs_host) }}"
     kind: node
     state: add
     labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
