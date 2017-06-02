@@ -1,0 +1,39 @@
+env_id: "openshift"
+openstack_dns_domain: "example.com"
+openstack_nameservers: ["192.168.1.1"]
+openstack_ssh_public_key: "openshift"
+openstack_default_image_name: "rhel73"
+openstack_default_flavor: "m1.medium"
+openstack_external_network_name: "public"
+
+openstack_num_masters: 1
+openstack_num_infra: 1
+openstack_num_nodes: 2
+
+docker_volume_size: "15"
+
+# TODO(shadower): this is identical to `openstack_dns_domain`.
+# We should make it so it's not duplicated here.
+dns_domain: "example.com"
+
+# TODO(shadower): this is identical to `openstack_nameservers`.
+# We should make it so it's not duplicated here.
+public_dns_forwarder: "192.168.1.1"
+
+openstack_subnet_prefix: "192.168.99"
+
+# # Red Hat subscription
+# rhsm_register: True
+# rhsm_repos:
+#  - "rhel-7-server-rpms"
+#  - "rhel-7-server-ose-3.5-rpms"
+#  - "rhel-7-server-extras-rpms"
+#  - "rhel-7-fast-datapath-rpms"
+# rhsm_username: '<username>'
+# rhsm_password: '<password>'
+# rhsm_pool: '<pool id>'
+
+
+# NOTE(shadower): Do not change this value. The Ansible user is currently
+# hardcoded to `openshift`.
+ansible_user: openshift

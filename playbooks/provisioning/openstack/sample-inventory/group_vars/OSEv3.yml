@@ -1,0 +1,10 @@
+---
+openshift_deployment_type: openshift-enterprise
+openshift_release: v3.5
+openshift_master_default_subdomain: "apps.openshift.example.com"
+
+# NOTE(shadower): do not remove this line, otherwise the default node labels
+# won't be set up.
+openshift_node_labels: "{{ openstack.metadata.node_labels }}"
+
+osm_default_node_selector: 'region=primary'
