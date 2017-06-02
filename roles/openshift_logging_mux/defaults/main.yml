@@ -9,8 +9,8 @@ openshift_logging_mux_namespace: logging
 
 ### Common settings
 openshift_logging_mux_nodeselector: "{{ openshift_hosted_logging_mux_nodeselector_label | default('') | map_from_pairs }}"
-openshift_logging_mux_cpu_limit: 100m
-openshift_logging_mux_memory_limit: 512Mi
+openshift_logging_mux_cpu_limit: 500m
+openshift_logging_mux_memory_limit: 1Gi
 
 openshift_logging_mux_replicas: 1
 
@@ -26,9 +26,14 @@ openshift_logging_mux_use_journal: "{{ openshift_hosted_logging_use_journal | de
 openshift_logging_mux_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
 openshift_logging_mux_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
 
-openshift_logging_mux_allow_external: false
+openshift_logging_mux_allow_external: False
 openshift_logging_mux_hostname: "{{ 'mux.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
 openshift_logging_mux_port: 24284
+# the namespace to use for undefined projects should come first, followed by any
+# additional namespaces to create by default - users will typically not need to set this
+openshift_logging_mux_default_namespaces: ["mux-undefined"]
+# extra namespaces to create for mux clients - users will need to set this
+openshift_logging_mux_namespaces: []
 
 openshift_logging_mux_app_client_cert: /etc/fluent/keys/cert
 openshift_logging_mux_app_client_key: /etc/fluent/keys/key

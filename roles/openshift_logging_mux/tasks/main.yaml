@@ -130,16 +130,14 @@
     selector:
       component: mux
       provider: openshift
-    # pending #4091
-    #labels:
-    #- logging-infra: 'support'
+    labels:
+      logging-infra: 'support'
     ports:
     - name: mux-forward
       port: "{{ openshift_logging_mux_port }}"
       targetPort: "mux-forward"
-  # pending #4091
-  #  externalIPs:
-  #  - "{{ ansible_eth0.ipv4.address }}"
+    external_ips:
+    - "{{ ansible_eth0.ipv4.address }}"
   when: openshift_logging_mux_allow_external | bool
 
 - name: Set logging-mux service for internal communication
@@ -150,9 +148,8 @@
     selector:
       component: mux
       provider: openshift
-    # pending #4091
-    #labels:
-    #- logging-infra: 'support'
+    labels:
+      logging-infra: 'support'
     ports:
     - name: mux-forward
       port: "{{ openshift_logging_mux_port }}"
@@ -189,6 +186,13 @@
     files:
     - "{{ tempdir }}/templates/logging-mux-dc.yaml"
     delete_after: true
+
+- name: Add mux namespaces
+  oc_project:
+    state: present
+    name: "{{ item }}"
+    node_selector: ""
+  with_items: "{{ openshift_logging_mux_namespaces | union(openshift_logging_mux_default_namespaces) }}"
 
 - name: Delete temp directory
   file:

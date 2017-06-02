@@ -124,3 +124,34 @@ Elasticsearch OPS too, if using an OPS cluster:
 - `openshift_logging_es_ops_ca_ext`: The location of the CA cert for the cert
   Elasticsearch uses for the external TLS server cert (default is the internal
   CA)
+
+### mux - secure_forward listener service
+- `openshift_logging_use_mux`: Default `False`.  If this is `True`, a service
+  called `mux` will be deployed.  This service will act as a Fluentd
+  secure_forward forwarder for the node agent Fluentd daemonsets running in the
+  cluster.  This can be used to reduce the number of connections to the
+  OpenShift API server, by using `mux` and configuring each node Fluentd to
+  send raw logs to mux and turn off the k8s metadata plugin.
+- `openshift_logging_mux_allow_external`: Default `False`.  If this is `True`,
+  the `mux` service will be deployed, and it will be configured to allow
+  Fluentd clients running outside of the cluster to send logs using
+  secure_forward.  This allows OpenShift logging to be used as a central
+  logging service for clients other than OpenShift, or other OpenShift
+  clusters.
+- `openshift_logging_use_mux_client`: Default `False`.  If this is `True`, the
+  node agent Fluentd services will be configured to send logs to the mux
+  service rather than directly to Elasticsearch.
+- `openshift_logging_mux_hostname`: Default is "mux." +
+  `openshift_master_default_subdomain`.  This is the hostname *external*_
+  clients will use to connect to mux, and will be used in the TLS server cert
+  subject.
+- `openshift_logging_mux_port`: 24284
+- `openshift_logging_mux_cpu_limit`: 100m
+- `openshift_logging_mux_memory_limit`: 512Mi
+- `openshift_logging_mux_default_namespaces`: Default `["mux-undefined"]` - the
+ first value in the list is the namespace to use for undefined projects,
+ followed by any additional namespaces to create by default - users will
+ typically not need to set this
+- `openshift_logging_mux_namespaces`: Default `[]` - additional namespaces to
+  create for _external_ mux clients to associate with their logs - users will
+  need to set this

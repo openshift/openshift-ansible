@@ -124,7 +124,7 @@
     - system.logging.mux
   loop_control:
     loop_var: node_name
-  when: openshift_logging_use_mux
+  when: openshift_logging_use_mux | bool
 
 - name: Generate PEM cert for Elasticsearch external route
   include: generate_pems.yaml component={{node_name}}
