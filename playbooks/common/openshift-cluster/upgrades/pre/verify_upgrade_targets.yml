@@ -1,45 +1,41 @@
 ---
-- name: Verify upgrade targets
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade
+- name: Fail when OpenShift is not installed
+  fail:
+    msg: Verify OpenShift is already installed
+  when: openshift.common.version is not defined
 
-  tasks:
-  - name: Fail when OpenShift is not installed
-    fail:
-      msg: Verify OpenShift is already installed
-    when: openshift.common.version is not defined
+- name: Verify containers are available for upgrade
+  command: >
+    docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool
 
-  - name: Verify containers are available for upgrade
+- when: not openshift.common.is_containerized | bool
+  block:
+  - name: Check latest available OpenShift RPM version
     command: >
-      docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
-    register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"
-    when: openshift.common.is_containerized | bool
+      {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type }}"
+    failed_when: false
+    changed_when: false
+    register: avail_openshift_version
 
-  - when: not openshift.common.is_containerized | bool
-    block:
-    - name: Check latest available OpenShift RPM version
-      command: >
-        {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type }}"
-      failed_when: false
-      changed_when: false
-      register: avail_openshift_version
-
-    - name: Fail when unable to determine available OpenShift RPM version
-      fail:
-        msg: "Unable to determine available OpenShift RPM version"
-      when:
-      - avail_openshift_version.stdout == ''
-
-    - name: Verify OpenShift RPMs are available for upgrade
-      fail:
-        msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but {{ openshift_upgrade_target }} or greater is required"
-      when:
-      - not avail_openshift_version | skipped
-      - avail_openshift_version.stdout | default('0.0', True) | version_compare(openshift_release, '<')
-
-  - name: Fail when openshift version does not meet minium requirement for Origin upgrade
+  - name: Fail when unable to determine available OpenShift RPM version
     fail:
-      msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
+      msg: "Unable to determine available OpenShift RPM version"
     when:
-    - deployment_type == 'origin'
-    - openshift.common.version | version_compare(openshift_upgrade_min,'<')
+    - avail_openshift_version.stdout == ''
+
+  - name: Verify OpenShift RPMs are available for upgrade
+    fail:
+      msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but {{ openshift_upgrade_target }} or greater is required"
+    when:
+    - not avail_openshift_version | skipped
+    - avail_openshift_version.stdout | default('0.0', True) | version_compare(openshift_release, '<')
+
+- name: Fail when openshift version does not meet minium requirement for Origin upgrade
+  fail:
+    msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
+  when:
+  - deployment_type == 'origin'
+  - openshift.common.version | version_compare(openshift_upgrade_min,'<')
