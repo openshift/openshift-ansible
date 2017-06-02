@@ -9,7 +9,7 @@
                          replace ( '${version}', openshift_image_tag ) }}"
     router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) |
                       replace ( '${version}', openshift_image_tag ) }}"
-    registry_console_image: "{{ openshift.master.registry_url | replace ( '${component}', 'registry-console') |
+    registry_console_image: "{{ openshift.master.registry_url | regex_replace ( '(origin|ose)-\\${component}', 'registry-console') |
                                 replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
 
   pre_tasks:
