@@ -328,8 +328,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # router's default certificate.
 #openshift_hosted_router_certificate={"certfile": "/path/to/router.crt", "keyfile": "/path/to/router.key", "cafile": "/path/to/router-ca.crt"}
 #
-# Disable management of the OpenShift Router
-#openshift_hosted_manage_router=false
+# Manage the OpenShift Router (optional)
+#openshift_hosted_manage_router=true
 #
 # Router sharding support has been added and can be achieved by supplying the correct
 # data to the inventory.  The variable to house the data is openshift_hosted_routers
@@ -406,8 +406,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Validity of the auto-generated certificate in days (optional)
 #openshift_hosted_registry_cert_expire_days=730
 #
-# Disable management of the OpenShift Registry
-#openshift_hosted_manage_registry=false
+# Manage the OpenShift Registry (optional)
+#openshift_hosted_manage_registry=true
 
 # Registry Storage Options
 #
