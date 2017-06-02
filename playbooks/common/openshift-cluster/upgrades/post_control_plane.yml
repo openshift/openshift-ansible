@@ -117,6 +117,12 @@
     - not grep_plugin_order_override | skipped
     - grep_plugin_order_override.rc == 0
 
-- include: ../reset_excluder.yml
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_masters_to_config
   tags:
   - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"

@@ -18,6 +18,7 @@ def main():
             verbose=dict(default=False, required=False, type='bool'),
             show_duplicates=dict(default=False, required=False, type='bool'),
             match_version=dict(default=None, required=False, type='str'),
+            ignore_excluders=dict(default=False, required=False, type='bool'),
         ),
         supports_check_mode=False,
         required_if=[('show_duplicates', True, ['name'])],

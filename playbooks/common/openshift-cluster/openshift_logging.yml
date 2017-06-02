@@ -7,7 +7,7 @@
   - openshift_logging
 
 - name: Update Master configs
-  hosts: masters:!oo_first_master
+  hosts: oo_masters:!oo_first_master
   tasks:
   - block:
     - include_role:

@@ -1,41 +1,43 @@
 ---
-- name: Verify upgrade targets
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade
-  vars:
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-  pre_tasks:
-  - fail:
-      msg: Verify OpenShift is already installed
-    when: openshift.common.version is not defined
+- fail:
+    msg: Verify OpenShift is already installed
+  when: openshift.common.version is not defined
 
-  - fail:
-      msg: Verify the correct version was found
-    when: verify_upgrade_version is defined and openshift_version != verify_upgrade_version
+- fail:
+    msg: Verify the correct version was found
+  when: verify_upgrade_version is defined and openshift_version != verify_upgrade_version
 
-  - set_fact:
-      g_new_service_name: "{{ 'origin' if deployment_type =='origin' else 'atomic-openshift' }}"
-    when: not openshift.common.is_containerized | bool
+- name: Verify containers are available for upgrade
+  command: >
+    docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when: openshift.common.is_containerized | bool
 
-  - name: Verify containers are available for upgrade
-    command: >
-      docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
-    register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"
-    when: openshift.common.is_containerized | bool
-
+- block:
   - name: Check latest available OpenShift RPM version
-    command: >
-      {{ repoquery_cmd }} --qf '%{version}' "{{ openshift.common.service_type }}"
-    failed_when: false
-    changed_when: false
-    register: avail_openshift_version
-    when: not openshift.common.is_containerized | bool
+    repoquery:
+      name: "{{ openshift.common.service_type }}"
+      ignore_excluders: true
+    register: repoquery_out
+
+  - name: Fail when {{ openshift.common.service_type }} package is not found
+    fail:
+      msg: "Package {{ openshift.common.service_type }} not found"
+    when: not repoquery_out.results.package_found
+
+  - name: Set fact avail_openshift_version
+    set_fact:
+      avail_openshift_version: "{{ repoquery_out.results.versions.available_versions.0 }}"
 
   - name: Verify OpenShift RPMs are available for upgrade
     fail:
-      msg: "OpenShift {{ avail_openshift_version.stdout }} is available, but {{ openshift_upgrade_target }} or greater is required"
-    when: not openshift.common.is_containerized | bool and not avail_openshift_version | skipped and avail_openshift_version.stdout | default('0.0', True) | version_compare(openshift_release, '<')
+      msg: "OpenShift {{ avail_openshift_version }} is available, but {{ openshift_upgrade_target }} or greater is required"
+    when:
+    - avail_openshift_version | default('0.0', True) | version_compare(openshift_release, '<')
 
-  - fail:
-      msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
-    when: deployment_type == 'origin' and openshift.common.version | version_compare(openshift_upgrade_min,'<')
+  when: not openshift.common.is_containerized | bool
+
+- fail:
+    msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
+  when: deployment_type == 'origin' and openshift.common.version | version_compare(openshift_upgrade_min,'<')

@@ -1,26 +1,4 @@
 ---
-- name: Create initial host groups for localhost
-  hosts: localhost
-  connection: local
-  become: no
-  gather_facts: no
-  tags:
-  - always
-  tasks:
-  - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
-  - name: Evaluate group l_oo_all_hosts
-    add_host:
-      name: "{{ item }}"
-      groups: l_oo_all_hosts
-    with_items: "{{ g_all_hosts | default([]) }}"
-    changed_when: False
-
-- name: Create initial host groups for all hosts
-  hosts: l_oo_all_hosts
-  gather_facts: no
-  tags:
-  - always
-  tasks:
-  - include_vars: ../../byo/openshift-cluster/cluster_hosts.yml
+- include: initialize_groups.yml
 
 - include: ../../common/openshift-cluster/enable_dnsmasq.yml

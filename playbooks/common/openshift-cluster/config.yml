@@ -26,9 +26,15 @@
       openshift_docker_selinux_enabled: "{{ lookup('oo_option', 'docker_selinux_enabled') }}"
     when: openshift_docker_selinux_enabled is not defined
 
-- include: disable_excluder.yml
+- name: Disable excluders
+  hosts: oo_masters_to_config:oo_nodes_to_config
   tags:
   - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - include: ../openshift-etcd/config.yml
   tags:
@@ -58,6 +64,12 @@
   tags:
   - hosted
 
-- include: reset_excluder.yml
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_masters_to_config:oo_nodes_to_config
   tags:
   - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"

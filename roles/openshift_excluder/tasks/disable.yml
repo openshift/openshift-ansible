@@ -1,47 +1,40 @@
 ---
-# input variables
-# - excluder_package_state
-# - docker_excluder_package_state
-- include: init.yml
+- when: r_openshift_excluder_verify_upgrade
+  block:
+  - name: Include verify_upgrade.yml when upgrading
+    include: verify_upgrade.yml
 
 # unexclude the current openshift/origin-excluder if it is installed so it can be updated
-- include: unexclude.yml
+- name: Disable excluders before the upgrade to remove older excluding expressions
+  include: unexclude.yml
   vars:
-    unexclude_docker_excluder: false
-    unexclude_openshift_excluder: "{{ openshift_excluder_on | bool }}"
-  when:
-  - not openshift.common.is_atomic | bool
+    # before the docker excluder can be updated, it needs to be disabled
+    # to remove older excluded packages that are no longer excluded
+    unexclude_docker_excluder: "{{ r_openshift_excluder_enable_docker_excluder }}"
+    unexclude_openshift_excluder: "{{ r_openshift_excluder_enable_openshift_excluder }}"
 
 # Install any excluder that is enabled
-- include: install.yml
-  vars:
-    # Both docker_excluder_on and openshift_excluder_on are set in openshift_excluder->init task
-    install_docker_excluder: "{{ docker_excluder_on | bool }}"
-    install_openshift_excluder: "{{ openshift_excluder_on | bool }}"
-  when: docker_excluder_on or openshift_excluder_on
-
-  # if the docker excluder is not enabled, we don't care about its status
-  # it the docker excluder is enabled, we install it and in case its status is non-zero
-  # it is enabled no matter what
+- name: Include install.yml
+  include: install.yml
 
 # And finally adjust an excluder in order to update host components correctly. First
 # exclude then unexclude
-- block:
-  - include: exclude.yml
-    vars:
-      # Enable the docker excluder only if it is overrided
-      # BZ #1430612: docker excluders should be enabled even during installation and upgrade
-      exclude_docker_excluder: "{{ docker_excluder_on | bool }}"
-      # excluder is to be disabled by default
-      exclude_openshift_excluder: false
-  # All excluders that are to be disabled are disabled
-  - include: unexclude.yml
-    vars:
-      # If the docker override  is not set, default to the generic behaviour
-      # BZ #1430612: docker excluders should be enabled even during installation and upgrade
-      unexclude_docker_excluder: false
-      # disable openshift excluder is never overrided to be enabled
-      # disable it if the docker excluder is enabled
-      unexclude_openshift_excluder: "{{ openshift_excluder_on | bool }}"
-  when:
-  - not openshift.common.is_atomic | bool
+- name: Include exclude.yml
+  include: exclude.yml
+  vars:
+    # Enable the docker excluder only if it is overridden
+    # BZ #1430612: docker excluders should be enabled even during installation and upgrade
+    exclude_docker_excluder: "{{ r_openshift_excluder_enable_docker_excluder }}"
+    # excluder is to be disabled by default
+    exclude_openshift_excluder: false
+
+# All excluders that are to be disabled are disabled
+- name: Include unexclude.yml
+  include: unexclude.yml
+  vars:
+    # If the docker override  is not set, default to the generic behaviour
+    # BZ #1430612: docker excluders should be enabled even during installation and upgrade
+    unexclude_docker_excluder: false
+    # disable openshift excluder is never overridden to be enabled
+    # disable it if the docker excluder is enabled
+    unexclude_openshift_excluder: "{{ r_openshift_excluder_enable_openshift_excluder }}"

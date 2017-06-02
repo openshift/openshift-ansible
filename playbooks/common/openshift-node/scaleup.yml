@@ -27,12 +27,24 @@
   - openshift_facts
   - openshift_docker
 
-- include: ../openshift-cluster/disable_excluder.yml
+- name: Disable excluders
+  hosts: oo_nodes_to_config
   tags:
   - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - include: ../openshift-node/config.yml
 
-- include: ../openshift-cluster/reset_excluder.yml
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_nodes_to_config
   tags:
   - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
