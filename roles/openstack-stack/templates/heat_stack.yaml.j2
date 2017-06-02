@@ -289,6 +289,11 @@ resources:
           port_range_min: 30000
           port_range_max: 32767
           remote_ip_prefix: {{ node_ingress_cidr }}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+          remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
 
   infra-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -338,10 +343,20 @@ resources:
           port_range_max: 53
           remote_ip_prefix: {{ node_ingress_cidr }}
         - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+          remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
+        - direction: ingress
           protocol: tcp
           port_range_min: 53
           port_range_max: 53
           remote_ip_prefix: {{ node_ingress_cidr }}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 53
+          port_range_max: 53
+          remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
 {% if num_masters is greaterthan 1 %}
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
