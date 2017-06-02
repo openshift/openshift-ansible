@@ -16,6 +16,7 @@
   delegate_to: localhost
 
 - name: Set Dynamic Inventory Filters
+  become: false
   shell: >
     export OS_INV_FILTER_KEY=clusterid && OS_INV_FILTER_VALUE={{ env_id }}
   delegate_to: localhost
