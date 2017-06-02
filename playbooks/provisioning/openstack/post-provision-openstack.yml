@@ -2,25 +2,30 @@
 
 # Assign hostnames
 - hosts: cluster_hosts
+  become: true
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre_tasks.yml
   roles:
   - role: hostnames
 
 # Subscribe DNS Host to allow for configuration below
 - hosts: dns
+  become: true
   roles:
-    - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
+  - role: subscription-manager
+    when: hostvars.localhost.rhsm_register
+    tags: 'subscription-manager'
 
 # Determine which DNS server(s) to use for our generated records
 - hosts: localhost
-  roles: 
+  roles:
   - dns-server-detect
 
 # Build the DNS Server Views and Configure DNS Server(s)
 - hosts: dns
+  become: true
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre_tasks.yml
   - name: "Generate dns-server views"
     include: openstack_dns_views.yml
   roles:
@@ -29,20 +34,15 @@
 # Build and process DNS Records
 - hosts: localhost
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre_tasks.yml
   - name: "Generate dns records"
     include: openstack_dns_records.yml
   roles:
   - role: dns
 
-# Use newly configured DNS server for this container ...
-- hosts: localhost
-  tasks:
-  - name: "Edit /etc/resolv.conf in container"
-    shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {{ public_dns_server }} \\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
-
 # OpenShift Pre-Requisites
 - hosts: OSEv3
+  become: true
   tasks:
   - name: "Edit /etc/resolv.conf on masters/nodes"
     lineinfile:

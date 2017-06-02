@@ -8,6 +8,7 @@
 # - other prep (install additional packages, etc.)
 #
 - hosts: OSEv3
+  become: true
   roles:
     - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
     - { role: docker, tags: 'docker' }
