@@ -488,7 +488,7 @@ parameters:
     name: "POSTGRESQL_IMG_NAME"
     displayName: "PostgreSQL Image Name"
     description: "This is the PostgreSQL image name requested to deploy."
-    value: "registry.access.redhat.com/cloudforms/cfme-openshift-postgresql"
+    value: "registry.access.redhat.com/cloudforms45/cfme-openshift-postgresql"
   -
     name: "POSTGRESQL_IMG_TAG"
     displayName: "PostgreSQL Image Tag"
@@ -498,7 +498,7 @@ parameters:
     name: "MEMCACHED_IMG_NAME"
     displayName: "Memcached Image Name"
     description: "This is the Memcached image name requested to deploy."
-    value: "registry.access.redhat.com/cloudforms/cfme-openshift-memcached"
+    value: "registry.access.redhat.com/cloudforms45/cfme-openshift-memcached"
   -
     name: "MEMCACHED_IMG_TAG"
     displayName: "Memcached Image Tag"
@@ -508,7 +508,7 @@ parameters:
     name: "APPLICATION_IMG_NAME"
     displayName: "Application Image Name"
     description: "This is the Application image name requested to deploy."
-    value: "registry.access.redhat.com/cloudforms/cfme-openshift-app"
+    value: "registry.access.redhat.com/cloudforms45/cfme-openshift-app"
   -
     name: "APPLICATION_IMG_TAG"
     displayName: "Application Image Tag"
