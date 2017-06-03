@@ -33,7 +33,12 @@ class OCObject(OpenShiftCLI):
 
     def delete(self):
         '''delete the object'''
-        return self._delete(self.kind, name=self.name, selector=self.selector)
+        results = self._delete(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
+                '\"{}\" not found'.format(self.name) in results['stderr']):
+            results['returncode'] = 0
+
+        return results
 
     def create(self, files=None, content=None):
         '''
