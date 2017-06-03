@@ -48,6 +48,7 @@ class OCSecretTest(unittest.TestCase):
             'debug': False,
             'files': None,
             'delete_after': True,
+            'force': False,
         }
 
         # Return values of our mocked function call. These get returned once per call.

@@ -44,7 +44,7 @@ class OCSecret(OpenShiftCLI):
         '''delete a secret by name'''
         return self._delete('secrets', self.name)
 
-    def create(self, files=None, contents=None):
+    def create(self, files=None, contents=None, force=False):
         '''Create a secret '''
         if not files:
             files = Utils.create_tmp_files_from_contents(contents)
@@ -53,6 +53,8 @@ class OCSecret(OpenShiftCLI):
         cmd = ['secrets', 'new', self.name]
         if self.type is not None:
             cmd.append("--type=%s" % (self.type))
+            if force:
+                cmd.append('--confirm')
         cmd.extend(secrets)
 
         results = self.openshift_cmd(cmd)
@@ -65,7 +67,7 @@ class OCSecret(OpenShiftCLI):
            This receives a list of file names and converts it into a secret.
            The secret is then written to disk and passed into the `oc replace` command.
         '''
-        secret = self.prep_secret(files)
+        secret = self.prep_secret(files, force)
         if secret['returncode'] != 0:
             return secret
 
@@ -77,7 +79,7 @@ class OCSecret(OpenShiftCLI):
 
         return self._replace(sfile_path, force=force)
 
-    def prep_secret(self, files=None, contents=None):
+    def prep_secret(self, files=None, contents=None, force=False):
         ''' return what the secret would look like if created
             This is accomplished by passing -ojson.  This will most likely change in the future
         '''
@@ -88,6 +90,8 @@ class OCSecret(OpenShiftCLI):
         cmd = ['-ojson', 'secrets', 'new', self.name]
         if self.type is not None:
             cmd.extend(["--type=%s" % (self.type)])
+            if force:
+                cmd.append('--confirm')
         cmd.extend(secrets)
 
         return self.openshift_cmd(cmd, output=True)
@@ -150,7 +154,7 @@ class OCSecret(OpenShiftCLI):
                     return {'changed': True,
                             'msg': 'Would have performed a create.'}
 
-                api_rval = ocsecret.create(files, params['contents'])
+                api_rval = ocsecret.create(files, params['contents'], force=params['force'])
 
                 # Remove files
                 if files and params['delete_after']:
@@ -167,7 +171,7 @@ class OCSecret(OpenShiftCLI):
             ########
             # Update
             ########
-            secret = ocsecret.prep_secret(params['files'], params['contents'])
+            secret = ocsecret.prep_secret(params['files'], params['contents'], force=params['force'])
 
             if secret['returncode'] != 0:
                 return {'failed': True, 'msg': secret}
