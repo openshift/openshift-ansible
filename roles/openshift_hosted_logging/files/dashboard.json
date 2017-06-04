@@ -1,0 +1,13 @@
+{
+  "title": "my-first-dashboard",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"id\":\"hostnames\",\"type\":\"visualization\",\"panelIndex\":1,\"size_x\":7,\"size_y\":4,\"col\":1,\"row\":1}]",
+  "optionsJSON": "{\"darkTheme\":true}",
+  "uiStateJSON": "{}",
+  "version": 1,
+  "timeRestore": false,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}}}]}"
+  }
+}
