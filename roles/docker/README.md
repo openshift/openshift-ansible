@@ -3,7 +3,7 @@ Docker
 
 Ensures docker package or system container is installed, and optionally raises timeout for systemd-udevd.service to 5 minutes.
 
-daemon.json items may be found at https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+container-daemon.json items may be found at https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 
 Requirements
 ------------
