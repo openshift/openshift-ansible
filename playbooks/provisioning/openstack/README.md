@@ -31,6 +31,10 @@ etc.). The result is an environment ready for openshift-ansible.
 
     cp openshift-ansible-contrib/playbooks/provisioning/openstack/sample-inventory/clouds.yaml clouds.yaml
 
+### Copy ansible config
+
+    cp openshift-ansible-contrib/playbooks/provisioning/openstack/sample-inventory/ansible.cfg ansible.cfg
+
 ### Update `inventory/group_vars/all.yml`
 
 Pay special attention to the values in the first paragraph -- these
