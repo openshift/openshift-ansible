@@ -71,3 +71,13 @@
     until: node_sched.rc == 0
     retries: 3
     delay: 1
+
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_nodes_to_config
+  tags:
+  - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"

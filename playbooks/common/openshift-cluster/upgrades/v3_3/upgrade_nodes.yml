@@ -47,6 +47,10 @@
   tags:
   - pre_upgrade
 
+- include: ../disable_node_excluders.yml
+  tags:
+  - pre_upgrade
+
 - include: ../../../../common/openshift-cluster/initialize_openshift_version.yml
   tags:
   - pre_upgrade
