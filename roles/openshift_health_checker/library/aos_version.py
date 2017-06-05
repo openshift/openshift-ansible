@@ -16,8 +16,6 @@ of release availability already. Without duplicating all that, we would
 like the user to have a helpful error message if we detect things will
 not work out right. Note that if openshift_release is not specified in
 the inventory, the version comparison checks just pass.
-
-TODO: fail gracefully on non-yum systems (dnf in Fedora)
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -26,7 +24,7 @@ IMPORT_EXCEPTION = None
 try:
     import yum  # pylint: disable=import-error
 except ImportError as err:
-    IMPORT_EXCEPTION = err  # in tox test env, yum import fails
+    IMPORT_EXCEPTION = err
 
 
 class AosVersionException(Exception):
@@ -37,12 +35,10 @@ class AosVersionException(Exception):
 
 
 def main():
-    '''Entrypoint for this Ansible module'''
+    """Entrypoint for this Ansible module"""
     module = AnsibleModule(
         argument_spec=dict(
-            requested_openshift_release=dict(type="str", default=''),
-            openshift_deployment_type=dict(required=True),
-            rpm_prefix=dict(required=True),  # atomic-openshift, origin, ...?
+            package_list=dict(type="list", required=True),
         ),
         supports_check_mode=True
     )
@@ -51,30 +47,35 @@ def main():
         module.fail_json(msg="aos_version module could not import yum: %s" % IMPORT_EXCEPTION)
 
     # determine the packages we will look for
-    rpm_prefix = module.params['rpm_prefix']
-    if not rpm_prefix:
-        module.fail_json(msg="rpm_prefix must not be empty")
-    expected_pkgs = set([
-        rpm_prefix,
-        rpm_prefix + '-master',
-        rpm_prefix + '-node',
-    ])
+    package_list = module.params['package_list']
+    if not package_list:
+        module.fail_json(msg="package_list must not be empty")
 
-    # determine what level of precision the user specified for the openshift version.
-    # should look like a version string with possibly many segments e.g. "3.4.1":
-    requested_openshift_release = module.params['requested_openshift_release']
+    # generate set with only the names of expected packages
+    expected_pkg_names = [p["name"] for p in package_list]
+
+    # gather packages that require a multi_minor_release check
+    multi_minor_pkgs = [p for p in package_list if p["check_multi"]]
+
+    # generate list of packages with a specified (non-empty) version
+    # should look like a version string with possibly many segments e.g. "3.4.1"
+    versioned_pkgs = [p for p in package_list if p["version"]]
 
     # get the list of packages available and complain if anything is wrong
     try:
-        pkgs = _retrieve_available_packages(expected_pkgs)
-        if requested_openshift_release:
-            _check_precise_version_found(pkgs, expected_pkgs, requested_openshift_release)
-            _check_higher_version_found(pkgs, expected_pkgs, requested_openshift_release)
-        if module.params['openshift_deployment_type'] in ['openshift-enterprise']:
-            _check_multi_minor_release(pkgs, expected_pkgs)
+        pkgs = _retrieve_available_packages(expected_pkg_names)
+        if versioned_pkgs:
+            _check_precise_version_found(pkgs, _to_dict(versioned_pkgs))
+            _check_higher_version_found(pkgs, _to_dict(versioned_pkgs))
+        if multi_minor_pkgs:
+            _check_multi_minor_release(pkgs, _to_dict(multi_minor_pkgs))
     except AosVersionException as excinfo:
         module.fail_json(msg=str(excinfo))
     module.exit_json(changed=False)
+
+
+def _to_dict(pkg_list):
+    return {pkg["name"]: pkg for pkg in pkg_list}
 
 
 def _retrieve_available_packages(expected_pkgs):
@@ -104,56 +105,60 @@ def _retrieve_available_packages(expected_pkgs):
 
 
 class PreciseVersionNotFound(AosVersionException):
-    '''Exception for reporting packages not available at given release'''
-    def __init__(self, requested_release, not_found):
-        msg = ['Not all of the required packages are available at requested version %s:' % requested_release]
-        msg += ['  ' + name for name in not_found]
+    """Exception for reporting packages not available at given version"""
+    def __init__(self, not_found):
+        msg = ['Not all of the required packages are available at their requested version']
+        msg += ['{}:{} '.format(pkg["name"], pkg["version"]) for pkg in not_found]
         msg += ['Please check your subscriptions and enabled repositories.']
         AosVersionException.__init__(self, '\n'.join(msg), not_found)
 
 
-def _check_precise_version_found(pkgs, expected_pkgs, requested_openshift_release):
+def _check_precise_version_found(pkgs, expected_pkgs_dict):
     # see if any packages couldn't be found at requested release version
     # we would like to verify that the latest available pkgs have however specific a version is given.
     # so e.g. if there is a package version 3.4.1.5 the check passes; if only 3.4.0, it fails.
 
-    pkgs_precise_version_found = {}
+    pkgs_precise_version_found = set()
     for pkg in pkgs:
-        if pkg.name not in expected_pkgs:
+        if pkg.name not in expected_pkgs_dict:
             continue
         # does the version match, to the precision requested?
         # and, is it strictly greater, at the precision requested?
-        match_version = '.'.join(pkg.version.split('.')[:requested_openshift_release.count('.') + 1])
-        if match_version == requested_openshift_release:
-            pkgs_precise_version_found[pkg.name] = True
+        expected_pkg_version = expected_pkgs_dict[pkg.name]["version"]
+        match_version = '.'.join(pkg.version.split('.')[:expected_pkg_version.count('.') + 1])
+        if match_version == expected_pkg_version:
+            pkgs_precise_version_found.add(pkg.name)
 
     not_found = []
-    for name in expected_pkgs:
+    for name, pkg in expected_pkgs_dict.items():
         if name not in pkgs_precise_version_found:
-            not_found.append(name)
+            not_found.append(pkg)
 
     if not_found:
-        raise PreciseVersionNotFound(requested_openshift_release, not_found)
+        raise PreciseVersionNotFound(not_found)
 
 
 class FoundHigherVersion(AosVersionException):
-    '''Exception for reporting that a higher version than requested is available'''
-    def __init__(self, requested_release, higher_found):
+    """Exception for reporting that a higher version than requested is available"""
+    def __init__(self, higher_found):
         msg = ['Some required package(s) are available at a version',
-               'that is higher than requested %s:' % requested_release]
+               'that is higher than requested']
         msg += ['  ' + name for name in higher_found]
         msg += ['This will prevent installing the version you requested.']
         msg += ['Please check your enabled repositories or adjust openshift_release.']
         AosVersionException.__init__(self, '\n'.join(msg), higher_found)
 
 
-def _check_higher_version_found(pkgs, expected_pkgs, requested_openshift_release):
-    req_release_arr = [int(segment) for segment in requested_openshift_release.split(".")]
+def _check_higher_version_found(pkgs, expected_pkgs_dict):
+    expected_pkg_names = list(expected_pkgs_dict)
+
     # see if any packages are available in a version higher than requested
     higher_version_for_pkg = {}
     for pkg in pkgs:
-        if pkg.name not in expected_pkgs:
+        if pkg.name not in expected_pkg_names:
             continue
+        expected_pkg_version = expected_pkgs_dict[pkg.name]["version"]
+        req_release_arr = [int(segment) for segment in expected_pkg_version.split(".")]
         version = [int(segment) for segment in pkg.version.split(".")]
         too_high = version[:len(req_release_arr)] > req_release_arr
         higher_than_seen = version > higher_version_for_pkg.get(pkg.name, [])
@@ -164,11 +169,11 @@ def _check_higher_version_found(pkgs, expected_pkgs, requested_openshift_release
         higher_found = []
         for name, version in higher_version_for_pkg.items():
             higher_found.append(name + '-' + '.'.join(str(segment) for segment in version))
-        raise FoundHigherVersion(requested_openshift_release, higher_found)
+        raise FoundHigherVersion(higher_found)
 
 
 class FoundMultiRelease(AosVersionException):
-    '''Exception for reporting multiple minor releases found for same package'''
+    """Exception for reporting multiple minor releases found for same package"""
     def __init__(self, multi_found):
         msg = ['Multiple minor versions of these packages are available']
         msg += ['  ' + name for name in multi_found]
@@ -176,18 +181,18 @@ class FoundMultiRelease(AosVersionException):
         AosVersionException.__init__(self, '\n'.join(msg), multi_found)
 
 
-def _check_multi_minor_release(pkgs, expected_pkgs):
+def _check_multi_minor_release(pkgs, expected_pkgs_dict):
     # see if any packages are available in more than one minor version
     pkgs_by_name_version = {}
     for pkg in pkgs:
         # keep track of x.y (minor release) versions seen
         minor_release = '.'.join(pkg.version.split('.')[:2])
         if pkg.name not in pkgs_by_name_version:
-            pkgs_by_name_version[pkg.name] = {}
-        pkgs_by_name_version[pkg.name][minor_release] = True
+            pkgs_by_name_version[pkg.name] = set()
+        pkgs_by_name_version[pkg.name].add(minor_release)
 
     multi_found = []
-    for name in expected_pkgs:
+    for name in expected_pkgs_dict:
         if name in pkgs_by_name_version and len(pkgs_by_name_version[name]) > 1:
             multi_found.append(name)
 

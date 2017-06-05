@@ -20,6 +20,10 @@
   post_tasks:
     - block:
 
+        # disable extras so we control docker version
+        - include: tasks/enable_repo.yml
+          vars: { repo_file: "CentOS-Base", repo_name: "extras", repo_enabled: 0 }
+
         - action: openshift_health_check
           args:
             checks: [ 'package_version' ]

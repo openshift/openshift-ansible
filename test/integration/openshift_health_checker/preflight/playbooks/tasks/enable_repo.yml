@@ -3,7 +3,7 @@
   # believe it or not we can't use the yum_repository module for this.
   # https://github.com/ansible/ansible-modules-extras/issues/2384
   ini_file:
-    dest: /etc/yum.repos.d/{{ repo_name }}.repo
+    dest: /etc/yum.repos.d/{{ repo_file | default(repo_name) }}.repo
     section: "{{ repo_name }}"
     option: enabled
     value: "{{ repo_enabled | default(1) }}"

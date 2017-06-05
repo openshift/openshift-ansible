@@ -1,24 +1,132 @@
 import pytest
 
-from openshift_checks.package_version import PackageVersion
+from openshift_checks.package_version import PackageVersion, OpenShiftCheckException
 
 
-def test_package_version():
+@pytest.mark.parametrize('openshift_release, extra_words', [
+    ('111.7.0', ["no recommended version of Open vSwitch"]),
+    ('0.0.0', ["no recommended version of Docker"]),
+])
+def test_openshift_version_not_supported(openshift_release, extra_words):
+    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+        return {}
+
     task_vars = dict(
         openshift=dict(common=dict(service_type='origin')),
-        openshift_release='3.5',
+        openshift_release=openshift_release,
+        openshift_image_tag='v' + openshift_release,
+        openshift_deployment_type='origin',
+    )
+
+    check = PackageVersion(execute_module=execute_module)
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.run(tmp=None, task_vars=task_vars)
+
+    for word in extra_words:
+        assert word in str(excinfo.value)
+
+
+def test_invalid_openshift_release_format():
+    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+        return {}
+
+    task_vars = dict(
+        openshift=dict(common=dict(service_type='origin')),
+        openshift_image_tag='v0',
+        openshift_deployment_type='origin',
+    )
+
+    check = PackageVersion(execute_module=execute_module)
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.run(tmp=None, task_vars=task_vars)
+    assert "invalid version" in str(excinfo.value)
+
+
+@pytest.mark.parametrize('openshift_release', [
+    "3.5",
+    "3.6",
+    "3.4",
+    "3.3",
+])
+def test_package_version(openshift_release):
+    task_vars = dict(
+        openshift=dict(common=dict(service_type='origin')),
+        openshift_release=openshift_release,
+        openshift_image_tag='v' + openshift_release,
         openshift_deployment_type='origin',
     )
     return_value = object()
 
     def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
         assert module_name == 'aos_version'
-        assert 'requested_openshift_release' in module_args
-        assert 'openshift_deployment_type' in module_args
-        assert 'rpm_prefix' in module_args
-        assert module_args['requested_openshift_release'] == task_vars['openshift_release']
-        assert module_args['openshift_deployment_type'] == task_vars['openshift_deployment_type']
-        assert module_args['rpm_prefix'] == task_vars['openshift']['common']['service_type']
+        assert "package_list" in module_args
+
+        for pkg in module_args["package_list"]:
+            if "-master" in pkg["name"] or "-node" in pkg["name"]:
+                assert pkg["version"] == task_vars["openshift_release"]
+
+        return return_value
+
+    check = PackageVersion(execute_module=execute_module)
+    result = check.run(tmp=None, task_vars=task_vars)
+    assert result is return_value
+
+
+@pytest.mark.parametrize('deployment_type,openshift_release,expected_ovs_version', [
+    ("openshift-enterprise", "3.5", "2.6"),
+    ("origin", "3.6", "2.6"),
+    ("openshift-enterprise", "3.4", "2.4"),
+    ("origin", "3.3", "2.4"),
+])
+def test_ovs_package_version(deployment_type, openshift_release, expected_ovs_version):
+    task_vars = dict(
+        openshift=dict(common=dict(service_type='origin')),
+        openshift_release=openshift_release,
+        openshift_image_tag='v' + openshift_release,
+        openshift_deployment_type=deployment_type,
+    )
+    return_value = object()
+
+    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+        assert module_name == 'aos_version'
+        assert "package_list" in module_args
+
+        for pkg in module_args["package_list"]:
+            if pkg["name"] == "openvswitch":
+                assert pkg["version"] == expected_ovs_version
+
+        return return_value
+
+    check = PackageVersion(execute_module=execute_module)
+    result = check.run(tmp=None, task_vars=task_vars)
+    assert result is return_value
+
+
+@pytest.mark.parametrize('deployment_type,openshift_release,expected_docker_version', [
+    ("origin", "3.5", "1.12"),
+    ("openshift-enterprise", "3.4", "1.12"),
+    ("origin", "3.3", "1.10"),
+    ("openshift-enterprise", "3.2", "1.10"),
+    ("origin", "3.1", "1.8"),
+    ("openshift-enterprise", "3.1", "1.8"),
+])
+def test_docker_package_version(deployment_type, openshift_release, expected_docker_version):
+    task_vars = dict(
+        openshift=dict(common=dict(service_type='origin')),
+        openshift_release=openshift_release,
+        openshift_image_tag='v' + openshift_release,
+        openshift_deployment_type=deployment_type,
+    )
+    return_value = object()
+
+    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+        assert module_name == 'aos_version'
+        assert "package_list" in module_args
+
+        for pkg in module_args["package_list"]:
+            if pkg["name"] == "docker":
+                assert pkg["version"] == expected_docker_version
+
         return return_value
 
     check = PackageVersion(execute_module=execute_module)

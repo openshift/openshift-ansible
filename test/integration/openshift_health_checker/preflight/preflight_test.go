@@ -66,7 +66,7 @@ func TestPackageVersionMismatches(t *testing.T) {
 		ExitCode: 2,
 		Output: []string{
 			"check \"package_version\":",
-			"Not all of the required packages are available at requested version",
+			"Not all of the required packages are available at their requested version",
 		},
 	}.Run(t)
 }
