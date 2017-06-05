@@ -1,0 +1,26 @@
+---
+# input variables:
+# - unexclude_docker_excluder
+# - unexclude_openshift_excluder
+
+- name: Check for docker-excluder
+  stat:
+    path: /sbin/{{ r_openshift_excluder_service_type }}-docker-excluder
+  register: docker_excluder_stat
+
+- name: disable docker excluder
+  command: "{{ r_openshift_excluder_service_type }}-docker-excluder unexclude"
+  when:
+  - unexclude_docker_excluder | default(false) | bool
+  - docker_excluder_stat.stat.exists
+
+- name: Check for openshift excluder
+  stat:
+    path: /sbin/{{ r_openshift_excluder_service_type }}-excluder
+  register: openshift_excluder_stat
+
+- name: disable openshift excluder
+  command: "{{ r_openshift_excluder_service_type }}-excluder unexclude"
+  when:
+  - unexclude_openshift_excluder | default(false) | bool
+  - openshift_excluder_stat.stat.exists
