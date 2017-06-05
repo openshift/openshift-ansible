@@ -34,3 +34,5 @@
   set_fact:
     openshift_master_default_subdomain: "{{ openshift_app_domain }}.{{ full_dns_domain }}"
   delegate_to: localhost
+  when:
+  - openshift_master_default_subdomain is undefined
