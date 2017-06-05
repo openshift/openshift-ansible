@@ -18,7 +18,7 @@
 - name: Set Dynamic Inventory Filters
   become: false
   shell: >
-    export OS_INV_FILTER_KEY=clusterid && OS_INV_FILTER_VALUE={{ env_id }}
+    export OS_INV_FILTER_KEY=clusterid && export OS_INV_FILTER_VALUE={{ env_id }}
   delegate_to: localhost
 
 - name: Updating DNS domain to include env_id (if not empty)

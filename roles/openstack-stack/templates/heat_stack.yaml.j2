@@ -142,17 +142,18 @@ resources:
 #            cluster_id: {{ stack_name }}
 #      public_key: {{ ssh_public_key }}
 
-  master-secgrp:
+{% if openstack_flat_secgrp|bool %}
+  flat-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
       name:
         str_replace:
-          template: openshift-ansible-cluster_id-master-secgrp
+          template: openshift-ansible-cluster_id-flat-secgrp
           params:
             cluster_id: {{ stack_name }}
       description:
         str_replace:
-          template: Security group for cluster_id OpenShift cluster master
+          template: Security group for cluster_id OpenShift cluster
           params:
             cluster_id: {{ stack_name }}
       rules:
@@ -168,10 +169,6 @@ resources:
         - direction: ingress
           protocol: tcp
           port_range_min: 8443
-          port_range_max: 8443
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 8444
           port_range_max: 8444
         - direction: ingress
           protocol: tcp
@@ -204,10 +201,118 @@ resources:
         - direction: ingress
           protocol: udp
           port_range_min: 5404
-          port_range_max: 5404
+          port_range_max: 5405
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 9090
+          port_range_max: 9090
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 2379
+          port_range_max: 2380
+          remote_mode: remote_group_id
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 10250
+          port_range_max: 10250
+          remote_mode: remote_group_id
         - direction: ingress
           protocol: udp
-          port_range_min: 5405
+          port_range_min: 10250
+          port_range_max: 10250
+          remote_mode: remote_group_id
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 10255
+          port_range_max: 10255
+          remote_mode: remote_group_id
+        - direction: ingress
+          protocol: udp
+          port_range_min: 10255
+          port_range_max: 10255
+          remote_mode: remote_group_id
+        - direction: ingress
+          protocol: udp
+          port_range_min: 4789
+          port_range_max: 4789
+          remote_mode: remote_group_id
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+          remote_ip_prefix: {{ node_ingress_cidr }}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+          remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 443
+          port_range_max: 443
+{% else %}
+  master-secgrp:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-master-secgrp
+          params:
+            cluster_id: {{ stack_name }}
+      description:
+        str_replace:
+          template: Security group for cluster_id OpenShift cluster master
+          params:
+            cluster_id: {{ stack_name }}
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+          remote_ip_prefix: {{ ssh_ingress_cidr }}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 4001
+          port_range_max: 4001
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 8443
+          port_range_max: 8444
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 53
+          port_range_max: 53
+        - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 8053
+          port_range_max: 8053
+        - direction: ingress
+          protocol: udp
+          port_range_min: 8053
+          port_range_max: 8053
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 24224
+          port_range_max: 24224
+        - direction: ingress
+          protocol: udp
+          port_range_min: 24224
+          port_range_max: 24224
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 2224
+          port_range_max: 2224
+        - direction: ingress
+          protocol: udp
+          port_range_min: 5404
           port_range_max: 5405
         - direction: ingress
           protocol: tcp
@@ -317,6 +422,7 @@ resources:
           protocol: tcp
           port_range_min: 443
           port_range_max: 443
+{% endif %}
 
   dns-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -411,7 +517,7 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
-            - { get_resource: etcd-secgrp }
+            - { get_resource: {% if openstack_flat_secgrp|bool %}flat-secgrp{% else %}etcd-secgrp{% endif %} }
           floating_network: {{ external_network }}
           net_name:
             str_replace:
@@ -491,10 +597,14 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
+{% if openstack_flat_secgrp|bool %}
+            - { get_resource: flat-secgrp }
+{% else %}
             - { get_resource: master-secgrp }
             - { get_resource: node-secgrp }
 {% if num_etcd is equalto 0 %}
             - { get_resource: etcd-secgrp }
+{% endif %}
 {% endif %}
           floating_network: {{ external_network }}
           net_name:
@@ -538,7 +648,7 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
-            - { get_resource: node-secgrp }
+            - { get_resource: {% if openstack_flat_secgrp|bool %}flat-secgrp{% else %}node-secgrp{% endif %} }
           floating_network: {{ external_network }}
           net_name:
             str_replace:
@@ -581,8 +691,12 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
+{% if openstack_flat_secgrp|bool %}
+            - { get_resource: flat-secgrp }
+{% else %}
             - { get_resource: node-secgrp }
             - { get_resource: infra-secgrp }
+{% endif %}
           floating_network: {{ external_network }}
           net_name:
             str_replace:
@@ -621,7 +735,11 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
+{% if openstack_flat_secgrp|bool %}
+            - { get_resource: flat-secgrp }
+{% else %}
             - { get_resource: node-secgrp }
+{% endif %}
             - { get_resource: dns-secgrp }
           floating_network: {{ external_network }}
           net_name:
