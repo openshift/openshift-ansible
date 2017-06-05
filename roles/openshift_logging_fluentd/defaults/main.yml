@@ -8,8 +8,8 @@ openshift_logging_fluentd_namespace: logging
 
 ### Common settings
 openshift_logging_fluentd_nodeselector: "{{ openshift_hosted_logging_fluentd_nodeselector_label | default('logging-infra-fluentd=true') | map_from_pairs }}"
-openshift_logging_fluentd_cpu_limit: "{{ openshift_hosted_logging_fluentd_cpu_limit | default('100m') }}"
-openshift_logging_fluentd_memory_limit: "{{ openshift_hosted_logging_fluentd_memory_limit | default('512Mi') }}"
+openshift_logging_fluentd_cpu_limit: 100m
+openshift_logging_fluentd_memory_limit: 512Mi
 openshift_logging_fluentd_hosts: ['--all']
 
 # float time in seconds to wait between node labelling
