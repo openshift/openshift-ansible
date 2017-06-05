@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.77
+Version:        3.5.78
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,22 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jun 05 2017 Scott Dodson <sdodson@redhat.com> 3.5.78-1
+- inventory: rename certificates->certificate in router example
+  (smilner@redhat.com)
+- Updating image for registry_console (ewolinet@redhat.com)
+- backport #4321 verify upgrade targets separately for each group
+  (jchaloup@redhat.com)
+- disable docker-excluder during its upgrade (jchaloup@redhat.com)
+- replace repoquery command with module (jchaloup@redhat.com)
+- backport #4176 'Rework openshift_excluders role' to 1.5 (rteague@redhat.com)
+- backport #4065 'Extend repoquery command (of lib_utils role) to ignore
+  excluders' to 1.5 (jchaloup@redhat.com)
+- backport #3879 'run excluders over selected set of hosts during
+  control_plane/node upgrade' to 1.5 (jchaloup@redhat.com)
+- backport #4038 'Upgrade Refactor' to 1.5 (jchaloup@redhat.com)
+- Refactor initialize groups tasks (backport for 1.5) (rteague@redhat.com)
+
 * Fri Jun 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.77-1
 - 
 
