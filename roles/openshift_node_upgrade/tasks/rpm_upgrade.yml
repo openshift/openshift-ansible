@@ -12,3 +12,18 @@
 - name: Ensure python-yaml present for config upgrade
   package: name=PyYAML state=present
   when: not openshift.common.is_atomic | bool
+
+- name: Install Node service file
+  template:
+    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    src: "{{ openshift.common.service_type }}-node.service.j2"
+  register: l_node_unit
+
+# NOTE: This is needed to make sure we are using the correct set
+#       of systemd unit files. The RPMs lay down defaults but
+#       the install/upgrade may override them in /etc/systemd/system/.
+# NOTE: We don't use the systemd module as some versions of the module
+#       require a service to be part of the call.
+- name: Reload systemd units
+  command: systemctl daemon-reload
+  when: l_node_unit | changed
