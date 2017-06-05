@@ -102,6 +102,21 @@
   notify:
   - restart docker
 
+- stat: path=/etc/sysconfig/docker-network
+  register: sysconfig_docker_network_check
+
+- name: Configure Docker Network OPTIONS
+  lineinfile:
+    dest: /etc/sysconfig/docker-network
+    regexp: '^DOCKER_NETWORK_OPTIONS=.*$'
+    line: "DOCKER_NETWORK_OPTIONS='\
+      {% if openshift.node is defined and openshift.node.sdn_mtu is defined %} --mtu={{ openshift.node.sdn_mtu }}{% endif %}'"
+  when:
+  - sysconfig_docker_network_check.stat.isreg is defined
+  - sysconfig_docker_network_check.stat.isreg
+  notify:
+  - restart docker
+
 - name: Start the Docker service
   systemd:
     name: docker
