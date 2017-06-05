@@ -9,10 +9,10 @@ openshift_logging_mux_namespace: logging
 
 ### Common settings
 openshift_logging_mux_nodeselector: "{{ openshift_hosted_logging_mux_nodeselector_label | default('') | map_from_pairs }}"
-openshift_logging_mux_cpu_limit: "{{ openshift_hosted_logging_mux_cpu_limit | default('500m') }}"
-openshift_logging_mux_memory_limit: "{{ openshift_hosted_logging_mux_memory_limit | default('1Gi') }}"
-openshift_logging_mux_buffer_queue_limit: "{{ openshift_hosted_logging_mux_buffer_queue_limit | default('1024') }}"
-openshift_logging_mux_buffer_size_limit: "{{ openshift_hosted_logging_mux_buffer_size_limit | default('1m') }}"
+openshift_logging_mux_cpu_limit: "{{ openshift_logging_mux_cpu_limit | default('500m') }}"
+openshift_logging_mux_memory_limit: "{{ openshift_logging_mux_memory_limit | default('1Gi') }}"
+openshift_logging_mux_buffer_queue_limit: "{{ openshift_logging_mux_buffer_queue_limit | default('1024') }}"
+openshift_logging_mux_buffer_size_limit: "{{ openshift_logging_mux_buffer_size_limit | default('1m') }}"
 
 openshift_logging_mux_replicas: 1
 

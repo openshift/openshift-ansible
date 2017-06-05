@@ -25,6 +25,8 @@
 - openshift_hosted_logging_use_journal: If this is unset or empty, logging will try to figure out from docker which log driver it is using (json-file or journald).  You can set this param to "true" or "false" to force logging to use journal or not (but make sure you are sure which one docker is using).
 - openshift_hosted_logging_journal_source: By default, if this param is unset or empty, logging will use `/var/log/journal` if it exists, or `/run/log/journal` if not.  You can use this param to force logging to use a different location.
 - openshift_hosted_logging_journal_read_from_head: Set to `true` to have fluentd read from the beginning of the journal, to get historical log data.  Default is `false`.  *WARNING* Using `true` may take several minutes or even hours, depending on the size of the journal, until any new records show up in Elasticsearch, and will cause fluentd to consume a lot of CPU and RAM resources.
+- openshift_hosted_logging_fluentd_cpu_limit: The CPU limit for Fluentd pods. Defaults to "100m".
+- openshift_hosted_logging_fluentd_memory_limit: The memory limit for Fluentd pods. Defaults to '512Mi'.
 
 When `openshift_hosted_logging_enable_ops_cluster` is `True`, there are some
 additional vars.  These work the same as above for their non-ops counterparts,
