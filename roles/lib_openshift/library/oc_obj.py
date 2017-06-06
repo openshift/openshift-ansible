@@ -1557,7 +1557,8 @@ class OCObject(OpenShiftCLI):
         if state == 'absent':
             # verify its not in our results
             if (params['name'] is not None or params['selector'] is not None) and \
-               (len(api_rval['results']) == 0 or len(api_rval['results'][0].get('items', [])) == 0):
+               (len(api_rval['results']) == 0 or \
+               ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
                 return {'changed': False, 'state': state}
 
             if check_mode:
