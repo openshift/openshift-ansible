@@ -799,6 +799,35 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 #etcd_ca_default_days=1825
 
+# Upgrade Control
+#
+# By default nodes are upgraded in a serial manner one at a time and all failures
+# are fatal, one set of variables for normal nodes, one set of variables for
+# nodes that are part of control plane as the number of hosts may be different
+# in those two groups.
+#openshift_upgrade_nodes_serial=1
+#openshift_upgrade_nodes_max_fail_percentage=0
+#openshift_upgrade_control_plane_nodes_serial=1
+#openshift_upgrade_control_plane_nodes_max_fail_percentage=0
+#
+# You can specify the number of nodes to upgrade at once. We do not currently
+# attempt to verify that you have capacity to drain this many nodes at once
+# so please be careful when specifying these values. You should also verify that
+# the expected number of nodes are all schedulable and ready before starting an
+# upgrade. If it's not possible to drain the requested nodes the upgrade will
+# stall indefinitely until the drain is successful.
+#
+# If you're upgrading more than one node at a time you can specify the maximum
+# percentage of failure within the batch before the upgrade is aborted. Any
+# nodes that do fail are ignored for the rest of the playbook run and you should
+# take care to investigate the failure and return the node to service so that
+# your cluster.
+#
+# The percentage must exceed the value, this would fail on two failures
+# openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=49
+# where as this would not
+# openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=50
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com

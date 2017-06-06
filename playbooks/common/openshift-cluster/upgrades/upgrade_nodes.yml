@@ -4,7 +4,7 @@
   # This var must be set with -e on invocation, as it is not a per-host inventory var
   # and is evaluated early. Values such as "20%" can also be used.
   serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
-  any_errors_fatal: true
+  max_fail_percentage: "{{ openshift_upgrade_nodes_max_fail_percentage | default(0) }}"
 
   pre_tasks:
   - name: Load lib_openshift modules
