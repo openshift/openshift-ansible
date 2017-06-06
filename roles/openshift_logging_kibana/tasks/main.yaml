@@ -125,6 +125,7 @@
 - name: Generate proxy session
   set_fact:
     session_secret: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(200) }}"
+  when: session_secret is not defined
   check_mode: no
 
 # gen oauth_secret -- if necessary
@@ -132,6 +133,7 @@
 - name: Generate oauth client secret
   set_fact:
     oauth_secret: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(64) }}"
+  when: oauth_secret is not defined
   check_mode: no
 
 # create oauth client
@@ -141,7 +143,9 @@
     dest: "{{ tempdir }}/templates/oauth-client.yml"
   vars:
     kibana_hostname: "{{ openshift_logging_kibana_hostname }}"
+    kibana_ops_hostname: "{{ openshift_logging_kibana_ops_hostname }}"
     secret: "{{ oauth_secret }}"
+  when: do_oauth_client is defined and do_oauth_client | bool
 
 - name: Set kibana-proxy oauth-client
   oc_obj:
@@ -152,6 +156,7 @@
     files:
     - "{{ tempdir }}/templates/oauth-client.yml"
     delete_after: true
+  when: do_oauth_client is defined and do_oauth_client | bool
 
 # create Kibana secret
 - name: Set Kibana secret

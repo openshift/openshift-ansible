@@ -7,6 +7,9 @@ metadata:
 secret: {{secret}}
 redirectURIs:
 - https://{{kibana_hostname}}
+{% if openshift_logging_use_ops %}
+- https://{{kibana_ops_hostname}}
+{% endif %}
 scopeRestrictions:
 - literals:
   - user:info
