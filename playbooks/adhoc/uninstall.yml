@@ -393,10 +393,19 @@
     - "{{ directories.results | default([]) }}"
     - files
 
+  - set_fact:
+      client_users: "{{ [ansible_ssh_user, 'root'] | unique }}"
+
+  - name: Remove client kubeconfigs
+    file:
+      path: "~{{ item }}/.kube"
+      state: absent
+    with_items:
+    - "{{ client_users }}"
+
   - name: Remove remaining files
     file: path={{ item }} state=absent
     with_items:
-    - "~{{ ansible_ssh_user }}/.kube"
     - /etc/ansible/facts.d/openshift.fact
     - /etc/atomic-enterprise
     - /etc/corosync
@@ -421,7 +430,6 @@
     - /etc/sysconfig/origin-master
     - /etc/sysconfig/origin-master-api
     - /etc/sysconfig/origin-master-controllers
-    - /root/.kube
     - /usr/share/openshift/examples
     - /var/lib/atomic-enterprise
     - /var/lib/openshift
