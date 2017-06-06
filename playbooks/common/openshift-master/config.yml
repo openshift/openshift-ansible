@@ -117,6 +117,7 @@
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
