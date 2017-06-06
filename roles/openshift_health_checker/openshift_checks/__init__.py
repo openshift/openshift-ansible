@@ -66,16 +66,26 @@ class OpenShiftCheck(object):
 LOADER_EXCLUDES = (
     "__init__.py",
     "mixins.py",
+    "logging.py",
 )
 
 
-def load_checks():
+def load_checks(path=None, subpkg=""):
     """Dynamically import all check modules for the side effect of registering checks."""
-    return [
-        import_module(__package__ + "." + name[:-3])
-        for name in os.listdir(os.path.dirname(__file__))
-        if name.endswith(".py") and name not in LOADER_EXCLUDES
-    ]
+    if path is None:
+        path = os.path.dirname(__file__)
+
+    modules = []
+
+    for name in os.listdir(path):
+        if os.path.isdir(os.path.join(path, name)):
+            modules = modules + load_checks(os.path.join(path, name), subpkg + "." + name)
+            continue
+
+        if name.endswith(".py") and name not in LOADER_EXCLUDES:
+            modules.append(import_module(__package__ + subpkg + "." + name[:-3]))
+
+    return modules
 
 
 def get_var(task_vars, *keys, **kwargs):
