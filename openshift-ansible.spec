@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.78
+Version:        3.5.79
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.79-1
+- 
+
 * Mon Jun 05 2017 Scott Dodson <sdodson@redhat.com> 3.5.78-1
 - inventory: rename certificates->certificate in router example
   (smilner@redhat.com)
