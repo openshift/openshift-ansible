@@ -206,6 +206,7 @@
 
 - name: Start and enable node dep
   systemd:
+    daemon_reload: yes
     name: "{{ openshift.common.service_type }}-node-dep"
     enabled: yes
     state: started

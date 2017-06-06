@@ -177,6 +177,7 @@
 # https://github.com/openshift/origin/issues/6447
 - name: Start and enable master
   systemd:
+    daemon_reload: yes
     name: "{{ openshift.common.service_type }}-master"
     enabled: yes
     state: started
