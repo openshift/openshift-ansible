@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.89.0
+Version:        3.6.89.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,40 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.1-1
+- Updating image for registry_console (ewolinet@redhat.com)
+- add elasticseatch, fluentd, kibana check (jvallejo@redhat.com)
+- show correct default value in inventory (mmckinst@redhat.com)
+- Skip service restarts within ca redeployment playbook when expired
+  certificates are detected. (abutcher@redhat.com)
+- Add mtu setting to /etc/sysconfig/docker-network (sdodson@redhat.com)
+- Add daemon_reload parameter to service tasks (tbielawa@redhat.com)
+- mux uses fluentd cert/key to talk to ES (rmeggins@redhat.com)
+- fix curator host, port params; remove curator es volumes
+  (rmeggins@redhat.com)
+- add mux docs; allow to specify mux namespaces (rmeggins@redhat.com)
+- oc_secret: allow for specifying secret type (jarrpa@redhat.com)
+- Revert "Merge pull request #4271 from DG-i/master" (skuznets@redhat.com)
+- verify upgrade targets separately for each group (masters, nodes, etcd)
+  (jchaloup@redhat.com)
+- Updating Kibana-proxy secret key name, fixing deleting secrets, fixed extra
+  ES dc creation (ewolinet@redhat.com)
+- upgrade: Reload systemd before restart (smilner@redhat.com)
+- Skip router/registry cert redeploy when
+  openshift_hosted_manage_{router,registry}=false (abutcher@redhat.com)
+- disable docker excluder before it is updated to remove older excluded
+  packages (jchaloup@redhat.com)
+- Support byo etcd for calico (djosborne10@gmail.com)
+- preflight int tests: fix for package_version changes (lmeyer@redhat.com)
+- Remove unnecessary comment. (rhcarvalho@gmail.com)
+- update aos_version module to support generic pkgs and versions
+  (jvallejo@redhat.com)
+- Add separate variables for control plane nodes (sdodson@redhat.com)
+- Copy Nuage VSD generated user certificates to Openshift master nodes
+  (sneha.deshpande@nokia.com)
+- add existing_ovs_version check (jvallejo@redhat.com)
+- Tolerate failures in the node upgrade playbook (sdodson@redhat.com)
+
 * Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.6.89.0-1
 - AMP 2.0 (sdodson@redhat.com)
 - add support for oc_service for labels, externalIPs (rmeggins@redhat.com)
