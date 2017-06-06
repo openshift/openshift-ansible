@@ -179,7 +179,7 @@
     #  path: "{{ generated_certs_dir }}/kibana-internal.key"
     #- name: server-cert
     #  path: "{{ generated_certs_dir }}/kibana-internal.crt"
-    #- name: server-tls
+    #- name: server-tls.json
     #  path: "{{ generated_certs_dir }}/server-tls.json"
     contents:
     - path: oauth-secret
@@ -190,7 +190,7 @@
       data: "{{ key_pairs | entry_from_named_pair('kibana_internal_key') | b64decode }}"
     - path: server-cert
       data: "{{ key_pairs | entry_from_named_pair('kibana_internal_cert') | b64decode }}"
-    - path: server-tls
+    - path: server-tls.json
       data: "{{ key_pairs | entry_from_named_pair('server_tls') | b64decode }}"
 
 # create Kibana DC

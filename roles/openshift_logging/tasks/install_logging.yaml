@@ -10,7 +10,7 @@
     name: "{{ openshift_logging_namespace }}"
     node_selector: "{{ openshift_logging_nodeselector | default(null) }}"
 
-- name: Labelling logging project
+- name: Labeling logging project
   oc_label:
     state: present
     kind: namespace
@@ -23,7 +23,7 @@
   - openshift_logging_labels is defined
   - openshift_logging_labels is dict
 
-- name: Labelling logging project
+- name: Labeling logging project
   oc_label:
     state: present
     kind: namespace
@@ -78,6 +78,8 @@
   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs }}"
   - "{{ openshift_logging_facts.elasticsearch.pvcs }}"
   - "{{ es_indices }}"
+  when:
+  - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
 # Create any new DC that may be required
 - include_role:
@@ -124,6 +126,7 @@
   - "{{ es_ops_indices }}"
   when:
   - openshift_logging_use_ops | bool
+  - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
 # Create any new DC that may be required
 - include_role:
