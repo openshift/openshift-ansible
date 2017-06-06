@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.0.100
+Version:        3.0.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -205,6 +205,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 06 2017 Scott Dodson <sdodson@redhat.com> 3.0.101-1
+- etcd3 blocks on marking etcd as started until quorum is achieved
+  (sdodson@redhat.com)
+
 * Tue Apr 18 2017 Scott Dodson <sdodson@redhat.com> 3.0.100-1
 - Backport openshift_cli changes from release-1.2 (sdodson@redhat.com)
 
