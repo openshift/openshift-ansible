@@ -906,9 +906,10 @@ def oo_image_tag_to_rpm_version(version, include_dash=False):
         # Strip release from requested version, we no longer support this.
         version = version.split('-')[0]
 
-    if include_dash and version and not version.startswith("-"):
+    if include_dash and version and not version.startswith("-") and not version.equal(""):
         version = "-" + version
-
+    else:
+        version = "-*"
     return version
 
 
