@@ -71,7 +71,7 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
-- name: Generate the master client config
+- name: Generate the loopback master client config
   command: >
     {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
       {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
@@ -80,8 +80,8 @@
       --certificate-authority={{ openshift_ca_cert }}
       --client-dir={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}
       --groups=system:masters,system:openshift-master
-      --master={{ openshift.master.api_url }}
-      --public-master={{ openshift.master.public_api_url }}
+      --master={{ hostvars[item].openshift.master.loopback_api_url }}
+      --public-master={{ hostvars[item].openshift.master.loopback_api_url }}
       --signer-cert={{ openshift_ca_cert }}
       --signer-key={{ openshift_ca_key }}
       --signer-serial={{ openshift_ca_serial }}
