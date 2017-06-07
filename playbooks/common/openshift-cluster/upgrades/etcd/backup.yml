@@ -3,7 +3,6 @@
   hosts: etcd_hosts_to_backup
   vars:
     embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   roles:
   - openshift_facts
   tasks:
@@ -12,6 +11,9 @@
       role: etcd
       local_facts: {}
     when: "'etcd' not in openshift"
+
+  - set_fact:
+      etcd_backup_dir: "{{ openshift.common.data_dir }}/etcd-backup-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
 
   - stat: path=/var/lib/openshift
     register: var_lib_openshift
@@ -68,14 +70,27 @@
   - name: Generate etcd backup
     command: >
       etcdctl backup --data-dir={{ openshift.etcd.etcd_data_dir }}
-      --backup-dir={{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}
+      --backup-dir={{ etcd_backup_dir }}
+
+  # According to the docs change you can simply copy snap/db
+  # https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
+  - name: Check for v3 data store
+    stat:
+      path: "{{ openshift.etcd.etcd_data_dir }}/member/snap/db"
+    register: v3_db
+
+  - name: Copy etcd v3 data store
+    command: >
+      cp -a {{ openshift.etcd.etcd_data_dir }}/member/snap/db
+      {{ etcd_backup_dir }}/member/snap/
+    when: v3_db.stat.exists
 
   - set_fact:
       etcd_backup_complete: True
 
   - name: Display location of etcd backup
     debug:
-      msg: "Etcd backup created in {{ openshift.common.data_dir }}/etcd-backup-{{ backup_tag | default('') }}{{ timestamp }}"
+      msg: "Etcd backup created in {{ etcd_backup_dir }}"
 
 - name: Gate on etcd backup
   hosts: localhost
