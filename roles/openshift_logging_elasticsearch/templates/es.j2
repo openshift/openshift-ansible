@@ -84,6 +84,9 @@ spec:
               name: "RECOVER_AFTER_TIME"
               value: "{{openshift_logging_elasticsearch_recover_after_time}}"
             -
+              name: "READINESS_PROBE_TIMEOUT"
+              value: "30"
+            -
               name: "IS_MASTER"
               value: "{% if deploy_type in ['data-master', 'master'] %}true{% else %}false{% endif %}"
 
@@ -104,8 +107,8 @@ spec:
             exec:
               command:
               - "/usr/share/elasticsearch/probe/readiness.sh"
-            initialDelaySeconds: 5
-            timeoutSeconds: 4
+            initialDelaySeconds: 10
+            timeoutSeconds: 30
             periodSeconds: 5
       volumes:
         - name: elasticsearch
