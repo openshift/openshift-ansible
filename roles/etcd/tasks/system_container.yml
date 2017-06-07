@@ -85,3 +85,5 @@
       - ETCD_PEER_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
       - ETCD_PEER_CERT_FILE={{ etcd_system_container_conf_dir }}/peer.crt
       - ETCD_PEER_KEY_FILE={{ etcd_system_container_conf_dir }}/peer.key
+      - ETCD_TRUSTED_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
+      - ETCD_PEER_TRUSTED_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
