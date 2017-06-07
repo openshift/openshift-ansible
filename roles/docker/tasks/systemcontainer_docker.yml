@@ -130,8 +130,8 @@
     dest: "{{ container_engine_systemd_dir }}/custom.conf"
     src: systemcontainercustom.conf.j2
 
-# Set local versions of facts that must be in json format for daemon.json
-# NOTE: When jinja2.9+ is used the daemon.json file can move to using tojson
+# Set local versions of facts that must be in json format for container-daemon.json
+# NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
 - set_fact:
     l_docker_insecure_registries: "{{ docker_insecure_registries | default([]) | to_json }}"
     l_docker_log_options: "{{ docker_log_options | default({}) | to_json }}"
@@ -139,10 +139,12 @@
     l_docker_blocked_registries: "{{ docker_blocked_registries | default([]) | to_json }}"
     l_docker_selinux_enabled: "{{ docker_selinux_enabled | default(true) | to_json }}"
 
-# Configure container-engine using the daemon.json file
+# Configure container-engine using the container-daemon.json file
+# NOTE: daemon.json and container-daemon.json have been seperated to avoid
+#       collision.
 - name: Configure Container Engine
   template:
-    dest: "{{ docker_conf_dir }}/daemon.json"
+    dest: "{{ docker_conf_dir }}/container-daemon.json"
     src: daemon.json
 
 # Enable and start the container-engine service
