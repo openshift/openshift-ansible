@@ -3,7 +3,8 @@
 r_etcd_common_etcd_runtime: "docker"
 
 # etcd server vars
-etcd_conf_dir: "{{ '/etc/etcd' if r_etcd_common_etcd_runtime != 'runc' else '/var/lib/etcd/etcd.etcd/etc'  }}"
+etcd_conf_dir: '/etc/etcd'
+r_etcd_common_system_container_host_dir: /var/lib/etcd/etcd.etcd
 etcd_system_container_conf_dir: /var/lib/etcd/etc
 etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
 etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
