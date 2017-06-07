@@ -578,9 +578,32 @@ class FilterModule(object):
             htpasswd_entries[user] = passwd
         return htpasswd_entries
 
+    @staticmethod
+    def oo_sort_etcd_urls_local_first(etcd_urls, hostname):
+        ''' Ensure the first etcd server listed in etcd_urls is the local etcd instance
+            when etcd is colocated with the master.
+
+             Ex: etcd_urls = [ 'https://master1.example.com:2379',
+                               'https://master2.example.com:2379',
+                               'https://master3.example.com:2379' ]
+                 hostname  = 'master2.example.com',
+                 returns [ 'https://master2.example.com:2379',
+                           'https://master1.example.com:2379',
+                           'https://master3.example.com:2379' ]
+        '''
+        sorted_etcd_urls = []
+        for etcd_url in etcd_urls:
+            if hostname in etcd_url and etcd_url not in sorted_etcd_urls:
+                sorted_etcd_urls.append(etcd_url)
+        for etcd_url in etcd_urls:
+            if etcd_url not in sorted_etcd_urls:
+                sorted_etcd_urls.append(etcd_url)
+        return sorted_etcd_urls
+
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
                 "validate_pcs_cluster": self.validate_pcs_cluster,
                 "certificates_to_synchronize": self.certificates_to_synchronize,
-                "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}
+                "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file,
+                "oo_sort_etcd_urls_local_first": self.oo_sort_etcd_urls_local_first}
