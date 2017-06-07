@@ -17,7 +17,7 @@
 
 - name: Generate certificates
   command: >
-    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig ca create-signer-cert
+    {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig ca create-signer-cert
     --key={{generated_certs_dir}}/ca.key --cert={{generated_certs_dir}}/ca.crt
     --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test
   check_mode: no

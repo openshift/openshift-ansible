@@ -22,7 +22,7 @@ USER root
 # configurations for the two images.
 RUN mkdir -p /usr/share/ansible/ && ln -s /opt/app-root/src /usr/share/ansible/openshift-ansible
 
-RUN INSTALL_PKGS="skopeo" && \
+RUN INSTALL_PKGS="skopeo openssl java-1.8.0-openjdk-headless httpd-tools" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
     yum clean all
