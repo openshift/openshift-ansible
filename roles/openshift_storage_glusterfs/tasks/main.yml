@@ -7,7 +7,7 @@
 
 - include: glusterfs_config.yml
   when:
-  - g_glusterfs_hosts | default([]) | count > 0
+  - groups.oo_glusterfs_to_config | default([]) | count > 0
 
 - include: glusterfs_registry.yml
   when:
