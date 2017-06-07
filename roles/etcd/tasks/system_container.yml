@@ -15,6 +15,32 @@
       {%- endif -%}
       {% endfor -%}
 
+- name: Check etcd system container package
+  command: >
+    atomic containers list --no-trunc -a -f container=etcd -f backend=ostree
+  register: etcd_result
+
+- name: Unmask etcd service
+  systemd:
+    name: etcd
+    state: stopped
+    enabled: yes
+    masked: no
+    daemon_reload: yes
+  register: task_result
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+  when: "'etcd' in etcd_result.stdout"
+
+- name: Disable etcd_container
+  systemd:
+    name: etcd_container
+    state: stopped
+    enabled: no
+    masked: yes
+    daemon_reload: yes
+  register: task_result
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+
 - name: Check for previous etcd data store
   stat:
     path: "{{ etcd_data_dir }}/member/"
