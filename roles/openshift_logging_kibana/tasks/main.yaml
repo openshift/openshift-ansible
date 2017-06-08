@@ -55,7 +55,7 @@
 # gen session_secret if necessary
 - name: Generate session secret
   copy:
-    content: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(200) }}"
+    content: "{{ 200 | oo_random_word }}"
     dest: "{{ generated_certs_dir }}/session_secret"
   when:
   - not session_secret_file.stat.exists
@@ -63,7 +63,7 @@
 # gen oauth_secret if necessary
 - name: Generate oauth secret
   copy:
-    content: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(64) }}"
+    content: "{{ 64 | oo_random_word }}"
     dest: "{{ generated_certs_dir }}/oauth_secret"
   when:
   - not oauth_secret_file.stat.exists
