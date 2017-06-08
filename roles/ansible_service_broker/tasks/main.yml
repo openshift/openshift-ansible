@@ -1,0 +1,8 @@
+---
+# do any asserts here
+
+- include: install.yml
+  when: not  ansible_service_broker_remove|default(false) | bool
+
+- include: remove.yml
+  when: ansible_service_broker_remove|default(false) | bool

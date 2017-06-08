@@ -5,4 +5,4 @@
   hosts: oo_first_master
   roles:
   - openshift_service_catalog
-  - openshift_service_catalog_broker
+  - ansible_service_broker
