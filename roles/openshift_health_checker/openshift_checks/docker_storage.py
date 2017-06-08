@@ -34,7 +34,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
             }
 
         # attempt to get the docker info hash from the API
-        info = self.execute_module("docker_info", {}, task_vars)
+        info = self.execute_module("docker_info", {}, task_vars=task_vars)
         if info.get("failed"):
             return {"failed": True, "changed": changed,
                     "msg": "Failed to query Docker API. Is docker running on this host?"}
@@ -146,7 +146,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         vgs_cmd = "/sbin/vgs --noheadings -o vg_free --select vg_name=" + vg_name
         # should return free space like "  12.00g" if the VG exists; empty if it does not
 
-        ret = self.execute_module("command", {"_raw_params": vgs_cmd}, task_vars)
+        ret = self.execute_module("command", {"_raw_params": vgs_cmd}, task_vars=task_vars)
         if ret.get("failed") or ret.get("rc", 0) != 0:
             raise OpenShiftCheckException(
                 "Is LVM installed? Failed to run /sbin/vgs "

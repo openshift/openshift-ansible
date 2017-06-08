@@ -25,7 +25,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             packages.update(self.node_packages(rpm_prefix))
 
         args = {"packages": sorted(set(packages))}
-        return self.execute_module("check_yum_update", args, tmp, task_vars)
+        return self.execute_module("check_yum_update", args, tmp=tmp, task_vars=task_vars)
 
     @staticmethod
     def master_packages(rpm_prefix):
@@ -36,7 +36,6 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             "bash-completion",
             "cockpit-bridge",
             "cockpit-docker",
-            "cockpit-kubernetes",
             "cockpit-shell",
             "cockpit-ws",
             "etcd",

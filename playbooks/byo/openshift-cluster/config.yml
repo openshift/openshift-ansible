@@ -15,6 +15,11 @@
       checks:
       - disk_availability
       - memory_availability
+      - package_availability
+      - package_update
+      - package_version
+      - docker_image_availability
+      - docker_storage
 
 - include: ../../common/openshift-cluster/std_include.yml
   tags:

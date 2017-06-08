@@ -43,7 +43,7 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
                 },
             ],
         }
-        return self.execute_module("rpm_version", args, task_vars)
+        return self.execute_module("rpm_version", args, task_vars=task_vars)
 
     def get_required_ovs_version(self, task_vars):
         """Return the correct Open vSwitch version for the current OpenShift version"""
