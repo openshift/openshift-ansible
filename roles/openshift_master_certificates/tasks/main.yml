@@ -1,25 +1,17 @@
 ---
-- set_fact:
-    openshift_master_certs_no_etcd:
-    - admin.crt
-    - master.kubelet-client.crt
-    - "{{ 'master.proxy-client.crt' if openshift.common.version_gte_3_1_or_1_1 else omit }}"
-    - master.server.crt
-    - openshift-master.crt
-    - openshift-registry.crt
-    - openshift-router.crt
-    - etcd.server.crt
-    openshift_master_certs_etcd:
-    - master.etcd-client.crt
-
-- set_fact:
-    openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd )) if openshift_master_etcd_hosts | length > 0 else openshift_master_certs_no_etcd }}"
-
 - name: Check status of master certificates
   stat:
     path: "{{ openshift_master_config_dir }}/{{ item }}"
   with_items:
-  - "{{ openshift_master_certs }}"
+  - admin.crt
+  - ca.crt
+  - ca-bundle.crt
+  - master.etcd-client.crt
+  - master.kubelet-client.crt
+  - master.proxy-client.crt
+  - master.server.crt
+  - openshift-master.crt
+  - service-signer.crt
   register: g_master_cert_stat_result
   when: not openshift_certificates_redeploy | default(false) | bool
 
