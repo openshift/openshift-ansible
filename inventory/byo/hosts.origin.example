@@ -40,7 +40,7 @@ openshift_release=v3.6
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.6.0
+#openshift_pkg_version=3.6.0
 
 # Install the openshift examples
 #openshift_install_examples=true
@@ -621,9 +621,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure master API and console ports.
 #openshift_master_api_port=8443
 #openshift_master_console_port=8443
-
-# set RPM version for debugging purposes
-#openshift_pkg_version=-1.1
 
 # Configure custom ca certificate
 #openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
