@@ -7,7 +7,7 @@ set -o pipefail
 STARTTIME=$(date +%s)
 source_root=$(dirname "${0}")/..
 
-prefix="openshift/openshift-ansible"
+prefix="openshift/origin-ansible"
 version="latest"
 verbose=false
 options="-f images/installer/Dockerfile"
@@ -44,7 +44,7 @@ if [ "$help" = true ]; then
   echo "Options: "
   echo "  --prefix=PREFIX"
   echo "  The prefix to use for the image names."
-  echo "  default: openshift/openshift-ansible"
+  echo "  default: openshift/origin-ansible"
   echo
   echo "  --version=VERSION"
   echo "  The version used to tag the image"

@@ -1,11 +1,11 @@
 # Using playbook2image as a base
-# See https://github.com/aweiteka/playbook2image for details on the image
+# See https://github.com/openshift/playbook2image for details on the image
 # including documentation for the settings/env vars referenced below
-FROM docker.io/aweiteka/playbook2image:latest
+FROM registry.centos.org/openshift/playbook2image:latest
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
-LABEL name="openshift-ansible" \
+LABEL name="openshift/origin-ansible" \
       summary="OpenShift's installation and configuration tool" \
       description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
       url="https://github.com/openshift/openshift-ansible" \

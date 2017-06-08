@@ -6,6 +6,12 @@ The image is designed to **run as a non-root user**. The container's UID is mapp
 
 **Note**: at this time there are known issues that prevent to run this image for installation/upgrade purposes (i.e. run one of the config/upgrade playbooks) from within one of the hosts that is also an installation target at the same time: if the playbook you want to run attempts to manage the docker daemon and restart it (like install/upgrade playbooks do) this would kill the container itself during its operation.
 
+## A note about the name of the image
+
+The released container images for openshift-ansible follow the naming scheme determined by OpenShift's `imageConfig.format` configuration option. This means that the released image name is `openshift/origin-ansible` instead of `openshift/openshift-ansible`.
+
+This provides consistency with other images used by the platform and it's also a requirement for some use cases like using the image from [`oc cluster up`](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md).
+
 ## Usage
 
 The `playbook2image` base image provides several options to control the behaviour of the containers. For more details on these options see the [playbook2image](https://github.com/openshift/playbook2image) documentation.
@@ -26,7 +32,7 @@ Here is an example of how to run a containerized `openshift-ansible` playbook th
            -e INVENTORY_FILE=/tmp/inventory \
            -e PLAYBOOK_FILE=playbooks/byo/openshift-checks/certificate_expiry/default.yaml \
            -e OPTS="-v" -t \
-           openshift/openshift-ansible
+           openshift/origin-ansible
 
 You might want to adjust some of the options in the example to match your environment and/or preferences. For example: you might want to create a separate directory on the host where you'll copy the ssh key and inventory files prior to invocation to avoid unwanted SELinux re-labeling of the original files or paths (see below).
 
@@ -46,7 +52,7 @@ Here is a detailed explanation of the options used in the command above:
 
 Further usage examples are available in the [examples directory](examples/) with samples of how to use the image from within OpenShift.
 
-Additional usage information for images built from `playbook2image` like this one can be found in the [playbook2image examples](https://github.com/aweiteka/playbook2image/tree/master/examples).
+Additional usage information for images built from `playbook2image` like this one can be found in the [playbook2image examples](https://github.com/openshift/playbook2image/tree/master/examples).
 
 ## Running openshift-ansible as a System Container
 
@@ -59,8 +65,8 @@ If the inventory file needs additional files then it can use the path `/var/lib/
 Run the ansible system container:
 
 ```sh
-atomic install --system --set INVENTORY_FILE=$(pwd)/inventory.origin openshift/openshift-ansible
-systemctl start openshift-ansible
+atomic install --system --set INVENTORY_FILE=$(pwd)/inventory.origin openshift/origin-ansible
+systemctl start origin-ansible
 ```
 
 The `INVENTORY_FILE` variable says to the installer what inventory file on the host will be bind mounted inside the container.  In the example above, a file called `inventory.origin` in the current directory is used as the inventory file for the installer.
@@ -68,5 +74,5 @@ The `INVENTORY_FILE` variable says to the installer what inventory file on the h
 And to finally cleanup the container:
 
 ```
-atomic uninstall openshift-ansible
+atomic uninstall origin-ansible
 ```
