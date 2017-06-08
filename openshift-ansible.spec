@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.79
+Version:        3.5.80
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.80-1
+- skip installation of base package in openshift_ca when scalling up master
+  (jchaloup@redhat.com)
+- Metrics: update the imagePullPolicy to be always (mwringe@redhat.com)
+
 * Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.79-1
 - 
 
