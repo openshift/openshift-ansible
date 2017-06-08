@@ -27,6 +27,7 @@ spec:
       containers:
       - name: heapster
         image: {{openshift_metrics_image_prefix}}metrics-heapster:{{openshift_metrics_image_version}}
+        imagePullPolicy: Always
         ports:
         - containerPort: 8082
           name: "http-endpoint"
