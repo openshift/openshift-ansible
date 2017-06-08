@@ -1,0 +1,140 @@
+---
+
+- name: create openshift-ansible-service-broker project
+  oc_project:
+    name: openshift-ansible-service-broker
+
+- name: create ansible-service-broker serviceaccount
+  oc_serviceaccount:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    state: present
+
+- name: create ansible-service-broker service
+  oc_service:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    labels:
+      app: ansible-service-broker
+      service: asb
+    ports:
+      - name: port-1338
+        port: 1338
+    selector:
+      app: ansible-service-broker
+      service: asb
+
+- name: create etcd service
+  oc_service:
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    ports:
+      - name: etcd-advertise
+        port: 2379
+    selector:
+      app: ansible-service-broker
+      service: etcd
+
+- name: create route for ansible-service-broker service
+  oc_route:
+    name: asb-1338
+    namespace: openshift-ansible-service-broker
+    service_name: asb
+    port: 1338
+
+- name: create persistent volume claim for etcd
+  oc_pvc:
+    state: present
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    volume_capacity: 1G
+    access_modes:
+    - ReadWriteOnce
+
+- name: create etcd deployment
+  oc_obj:
+    state: present
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    kind: Deployment
+    content:
+      path: /tmp/dcout
+      data:
+        apiVersion: extensions/v1beta1
+        kind: Deployment
+        metadata:
+          name: etcd
+          namespace: openshift-ansible-service-broker
+          labels:
+            app: ansible-service-broker
+            service: etcd
+        spec:
+          strategy:
+            type: Recreate
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                app: ansible-service-broker
+                service: etcd
+            spec:
+              restartPolicy: Always
+              containers:
+                - image: "ansibleapp/ansible-service-broker-etcd:latest"
+                  name: main
+                  imagePullPolicy: IfNotPresent
+                  workingDir: /etcd
+                  args:
+                    - ./etcd
+                    - --data-dir=/data
+                    - "--listen-client-urls=http://0.0.0.0:2379"
+                    - "--advertise-client-urls=http://0.0.0.0:2379"
+                  ports:
+                  - containerPort: 2379
+                    protocol: TCP
+                  env:
+                  - name: ETCDCTL_API
+                    value: "3"
+                  volumeMounts:
+                  - mountPath: /data
+                    name: etcd
+              volumes:
+              - name: etcd
+                persistentVolumeClaim:
+                  claimName: etcd
+
+- name: create ansible-service-broker deployment
+  oc_obj:
+    state: present
+    name: asb
+    namespace: openshift-ansible-service-broker
+    kind: Deployment
+    content:
+      path: /tmp/dcout
+      data:
+        apiVersion: extensions/v1beta1
+        kind: Deployment
+        metadata:
+          name: asb
+          namespace: openshift-ansible-service-broker
+          labels:
+            app: openshift-ansible-service-broker
+            service: asb
+        spec:
+          strategy:
+            type: Recreate
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                app: openshift-ansible-service-broker
+                service: asb
+            spec:
+              restartPolicy: Always
+              containers:
+                - image: "ansibleplaybookbundle/ansible-service-broker:latest"
+                  name: asb
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 1338
+                      protocol: TCP
