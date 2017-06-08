@@ -3,6 +3,8 @@
 # is localhost, so no hostname value (or public_hostname) value is getting
 # assigned
 
+- include: ../../common/openshift-cluster/std_include.yml
+
 - hosts: localhost
   gather_facts: no
   tasks:
