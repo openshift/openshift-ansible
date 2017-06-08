@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.89.3
+Version:        3.6.89.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.4-1
+- Guard check for container install based on openshift dictionary key
+  (ayoung@redhat.com)
+- Separate client config removal in uninstall s.t. ansible_ssh_user is removed
+  from with_items. (abutcher@redhat.com)
+- Remove supported/implemented barrier for registry object storage providers.
+  (abutcher@redhat.com)
+- Add node unit file on upgrade (smilner@redhat.com)
+- fix up openshift-ansible for use with 'oc cluster up' (jcantril@redhat.com)
+- specify all logging index mappings for kibana (jcantril@redhat.com)
+- openshift-master: set r_etcd_common_etcd_runtime (gscrivan@redhat.com)
+- rename daemon.json to container-daemon.json (smilner@redhat.com)
+- Updating probe timeout and exposing variable to adjust timeout in image
+  (ewolinet@redhat.com)
+- Do not attempt to override openstack nodename (jdetiber@redhat.com)
+- Update image stream to openshift/origin:2c55ade (skuznets@redhat.com)
+
 * Wed Jun 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.3-1
 - Use local openshift.master.loopback_url when generating initial master
   loopback kubeconfigs. (abutcher@redhat.com)
