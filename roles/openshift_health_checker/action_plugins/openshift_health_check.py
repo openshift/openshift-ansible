@@ -38,13 +38,12 @@ class ActionModule(ActionBase):
 
         try:
             known_checks = self.load_known_checks()
+            args = self._task.args
+            resolved_checks = resolve_checks(args.get("checks", []), known_checks.values())
         except OpenShiftCheckException as e:
             result["failed"] = True
             result["msg"] = str(e)
             return result
-
-        args = self._task.args
-        resolved_checks = resolve_checks(args.get("checks", []), known_checks.values())
 
         result["checks"] = check_results = {}
 
