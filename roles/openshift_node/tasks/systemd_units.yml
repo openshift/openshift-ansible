@@ -8,6 +8,9 @@
     src: openshift.docker.node.dep.service
   register: install_node_dep_result
   when: openshift.common.is_containerized | bool
+  notify:
+  - reload systemd units
+  - restart node
 
 - block:
   - name: Pre-pull node image
@@ -21,6 +24,9 @@
       dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
       src: openshift.docker.node.service
     register: install_node_result
+    notify:
+    - reload systemd units
+    - restart node
   when:
   - openshift.common.is_containerized | bool
   - not openshift.common.is_node_system_container | bool
@@ -31,6 +37,9 @@
     src: "{{ openshift.common.service_type }}-node.service.j2"
   register: install_node_result
   when: not openshift.common.is_containerized | bool
+  notify:
+  - reload systemd units
+  - restart node
 
 - name: Create the openvswitch service env file
   template:
@@ -39,6 +48,7 @@
   when: openshift.common.is_containerized | bool
   register: install_ovs_sysconfig
   notify:
+  - reload systemd units
   - restart openvswitch
 
 - name: Install Node system container
@@ -67,6 +77,7 @@
   when: openshift.common.use_openshift_sdn | default(true) | bool
   register: install_oom_fix_result
   notify:
+  - reload systemd units
   - restart openvswitch
 
 - block:
@@ -81,6 +92,7 @@
       dest: "/etc/systemd/system/openvswitch.service"
       src: openvswitch.docker.service
     notify:
+    - reload systemd units
     - restart openvswitch
   when:
   - openshift.common.is_containerized | bool
@@ -117,10 +129,5 @@
   - regex: '^NO_PROXY='
     line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
   when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
-  notify:
-  - restart node
-
-- name: Reload systemd units
-  command: systemctl daemon-reload
   notify:
   - restart node
