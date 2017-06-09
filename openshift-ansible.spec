@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.79
+Version:        3.6.98
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -77,6 +77,9 @@ find -L %{buildroot}%{_datadir}/ansible/%{name}/playbooks -name filter_plugins -
 cp -rp roles %{buildroot}%{_datadir}/ansible/%{name}/
 # remove contiv role
 rm -rf %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/*
+# touch a file in contiv so that it can be added to SCM's
+touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
+
 # openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
 pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
 ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
@@ -158,23 +161,29 @@ BuildArch:     noarch
 %files playbooks
 %{_datadir}/ansible/%{name}/playbooks
 
-# We moved playbooks/common/openshift-master/library up to the top and replaced
-# it with a symlink. RPM doesn't handle this so we have to do some pre-transaction
-# magic. See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
+# Along the history of openshift-ansible, some playbook directories had to be
+# moved and were replaced with symlinks for backwards compatibility.
+# RPM doesn't handle this so we have to do some pre-transaction magic.
+# See https://fedoraproject.org/wiki/Packaging:Directory_Replacement
 %pretrans playbooks -p <lua>
--- Define the path to directory being replaced below.
+-- Define the paths to directories being replaced below.
 -- DO NOT add a trailing slash at the end.
-path = "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library"
-st = posix.stat(path)
-if st and st.type == "directory" then
-  status = os.rename(path, path .. ".rpmmoved")
-  if not status then
-    suffix = 0
-    while not status do
-      suffix = suffix + 1
-      status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+dirs_to_sym = {
+    "/usr/share/ansible/openshift-ansible/playbooks/common/openshift-master/library",
+    "/usr/share/ansible/openshift-ansible/playbooks/certificate_expiry"
+}
+for i,path in ipairs(dirs_to_sym) do
+  st = posix.stat(path)
+  if st and st.type == "directory" then
+    status = os.rename(path, path .. ".rpmmoved")
+    if not status then
+      suffix = 0
+      while not status do
+        suffix = suffix + 1
+        status = os.rename(path .. ".rpmmoved", path .. ".rpmmoved." .. suffix)
+      end
+      os.rename(path, path .. ".rpmmoved")
     end
-    os.rename(path, path .. ".rpmmoved")
   end
 end
 
@@ -271,366 +280,840 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
-* Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.79-1
+* Fri Jun 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.98-1
 - 
 
-* Mon Jun 05 2017 Scott Dodson <sdodson@redhat.com> 3.5.78-1
-- inventory: rename certificates->certificate in router example
-  (smilner@redhat.com)
+* Fri Jun 09 2017 Scott Dodson <sdodson@redhat.com> 3.6.97-1
+- Updated to using oo_random_word for secret gen (ewolinet@redhat.com)
+- Updating kibana to store session and oauth secrets for reuse, fix oauthclient
+  generation for ops (ewolinet@redhat.com)
+
+* Thu Jun 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.5-1
+- Rename container image to origin-ansible / ose-ansible (pep@redhat.com)
+
+* Thu Jun 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.4-1
+- Guard check for container install based on openshift dictionary key
+  (ayoung@redhat.com)
+- Separate client config removal in uninstall s.t. ansible_ssh_user is removed
+  from with_items. (abutcher@redhat.com)
+- Remove supported/implemented barrier for registry object storage providers.
+  (abutcher@redhat.com)
+- Add node unit file on upgrade (smilner@redhat.com)
+- fix up openshift-ansible for use with 'oc cluster up' (jcantril@redhat.com)
+- specify all logging index mappings for kibana (jcantril@redhat.com)
+- openshift-master: set r_etcd_common_etcd_runtime (gscrivan@redhat.com)
+- rename daemon.json to container-daemon.json (smilner@redhat.com)
+- Updating probe timeout and exposing variable to adjust timeout in image
+  (ewolinet@redhat.com)
+- Do not attempt to override openstack nodename (jdetiber@redhat.com)
+- Update image stream to openshift/origin:2c55ade (skuznets@redhat.com)
+
+* Wed Jun 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.3-1
+- Use local openshift.master.loopback_url when generating initial master
+  loopback kubeconfigs. (abutcher@redhat.com)
+
+* Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.2-1
+- 
+
+* Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.1-1
 - Updating image for registry_console (ewolinet@redhat.com)
-- backport #4321 verify upgrade targets separately for each group
+- add elasticseatch, fluentd, kibana check (jvallejo@redhat.com)
+- show correct default value in inventory (mmckinst@redhat.com)
+- Skip service restarts within ca redeployment playbook when expired
+  certificates are detected. (abutcher@redhat.com)
+- Add mtu setting to /etc/sysconfig/docker-network (sdodson@redhat.com)
+- Add daemon_reload parameter to service tasks (tbielawa@redhat.com)
+- mux uses fluentd cert/key to talk to ES (rmeggins@redhat.com)
+- fix curator host, port params; remove curator es volumes
+  (rmeggins@redhat.com)
+- add mux docs; allow to specify mux namespaces (rmeggins@redhat.com)
+- oc_secret: allow for specifying secret type (jarrpa@redhat.com)
+- Revert "Merge pull request #4271 from DG-i/master" (skuznets@redhat.com)
+- verify upgrade targets separately for each group (masters, nodes, etcd)
   (jchaloup@redhat.com)
-- disable docker-excluder during its upgrade (jchaloup@redhat.com)
-- replace repoquery command with module (jchaloup@redhat.com)
-- backport #4176 'Rework openshift_excluders role' to 1.5 (rteague@redhat.com)
-- backport #4065 'Extend repoquery command (of lib_utils role) to ignore
-  excluders' to 1.5 (jchaloup@redhat.com)
-- backport #3879 'run excluders over selected set of hosts during
-  control_plane/node upgrade' to 1.5 (jchaloup@redhat.com)
-- backport #4038 'Upgrade Refactor' to 1.5 (jchaloup@redhat.com)
-- Refactor initialize groups tasks (backport for 1.5) (rteague@redhat.com)
-
-* Fri Jun 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.77-1
-- 
-
-* Fri Jun 02 2017 Scott Dodson <sdodson@redhat.com> 3.5.76-1
-- 
-
-* Thu Jun 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.22-1
-- 
-
-* Thu Jun 01 2017 Scott Dodson <sdodson@redhat.com> 3.5.75-1
+- Updating Kibana-proxy secret key name, fixing deleting secrets, fixed extra
+  ES dc creation (ewolinet@redhat.com)
+- upgrade: Reload systemd before restart (smilner@redhat.com)
 - Skip router/registry cert redeploy when
   openshift_hosted_manage_{router,registry}=false (abutcher@redhat.com)
-- AMP 2.0 (sdodson@redhat.com)
-- Removing logging and metrics hosted templates (ewolinet@redhat.com)
+- disable docker excluder before it is updated to remove older excluded
+  packages (jchaloup@redhat.com)
+- Support byo etcd for calico (djosborne10@gmail.com)
+- preflight int tests: fix for package_version changes (lmeyer@redhat.com)
+- Remove unnecessary comment. (rhcarvalho@gmail.com)
+- update aos_version module to support generic pkgs and versions
+  (jvallejo@redhat.com)
+- Add separate variables for control plane nodes (sdodson@redhat.com)
+- Copy Nuage VSD generated user certificates to Openshift master nodes
+  (sneha.deshpande@nokia.com)
+- add existing_ovs_version check (jvallejo@redhat.com)
+- Tolerate failures in the node upgrade playbook (sdodson@redhat.com)
 
-* Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.5.74-1
+* Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.6.89.0-1
+- AMP 2.0 (sdodson@redhat.com)
+- add support for oc_service for labels, externalIPs (rmeggins@redhat.com)
 - [JMAN4-161] Add templates and pv example for cloudforms jboss middleware
   manager (pgier@redhat.com)
 
-* Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.21-1
-- 
+* Wed May 31 2017 Scott Dodson <sdodson@redhat.com> 3.6.89-1
+- Adding default value for openshift_hosted_logging_storage_kind
+  (ewolinet@redhat.com)
+- memory check: use GiB/MiB and adjust memtotal (lmeyer@redhat.com)
+- bool (sdodson@redhat.com)
+- Metrics: update the imagePullPolicy to be always (mwringe@redhat.com)
+- Remove typos that got reintroduced (smilner@redhat.com)
+- oc_atomic_container: Workaround for invalid json from atomic command
+  (smilner@redhat.com)
+- Remove system-package=no from container-engine install (smilner@redhat.com)
+- oc_atomic_container: Hard code system-package=no (smilner@redhat.com)
+- Updating to generate PVC when storage type is passed in as nfs
+  (ewolinet@redhat.com)
+- disable become for local actions (Mathias.Merscher@dg-i.net)
+- check for rpm version and docker image version equality only if
+  openshift_pkg_version and openshift_image_tag are not defined
+  (jchaloup@redhat.com)
 
-* Thu May 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.20-1
+* Tue May 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.86-1
+- Reduce memory requirement to 2gb for fedora ci jobs (sdodson@redhat.com)
+- openshift_logging: increasing *_elasticsearch_* default CPU and memory
+  (jwozniak@redhat.com)
+- Updating python-passlib assert (ewolinet@redhat.com)
+- allow to configure oreg_url specifically for node or master. refs #4233
+  (tobias@tobru.ch)
+- Updating registry-console version to be v3.6 instead of 3.6
+  (ewolinet@redhat.com)
+
+* Thu May 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.85-1
 - Prepending v to registry-console version (ewolinet@redhat.com)
-- Revert "Add /etc/sysconfig/etcd to etcd_container" (abutcher@redhat.com)
-- Update atomic ci origin image to 1.5.1. (abutcher@redhat.com)
+- memory health check: adjust threshold for etcd (lmeyer@redhat.com)
+- health checks: specify check skip reason (lmeyer@redhat.com)
+- health checks: configure failure output in playbooks (lmeyer@redhat.com)
+- disk/memory checks: make threshold configurable (lmeyer@redhat.com)
+- Show help on how to disable checks after failure (rhcarvalho@gmail.com)
+- Allow disabling checks via Ansible variable (rhcarvalho@gmail.com)
+- Verify memory and disk requirements before install (rhcarvalho@gmail.com)
+- filter_plugins: Allow for multiple pairs in map_from_pairs()
+  (jarrpa@redhat.com)
 
-* Tue May 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.19-1
-- Fix auditConfig for non-HA environments (rteague@redhat.com)
+* Wed May 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.84-1
+- oc_process: Better error output on failed template() call (jarrpa@redhat.com)
+
+* Wed May 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.83-1
+- Allow a hostname to resolve to 127.0.0.1 during validation (dms@redhat.com)
+
+* Wed May 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.82-1
+- Fixing tux warnings and some final clean up (ewolinet@redhat.com)
+- Appease travis (sdodson@redhat.com)
+- preflight int tests: fix test flake (lmeyer@redhat.com)
+- Add a readiness probe to the Kibana container (skuznets@redhat.com)
+- Create logging deployments with non-zero replica counts (skuznets@redhat.com)
+- Pulling changes from master branch (ewolinet@redhat.com)
+- Adding some missing changes (ewolinet@redhat.com)
+- fixing available variables for 2.3.0 (ewolinet@redhat.com)
+- Updating pvc generation names (ewolinet@redhat.com)
+- updating delete_logging to use modules (ewolinet@redhat.com)
+- Pulling in changes from master (ewolinet@redhat.com)
+- Decomposing openshift_logging role into subcomponent roles
+  (ewolinet@redhat.com)
+- Fix renaming error with calico template files (djosborne10@gmail.com)
+
+* Tue May 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.80-1
+- RPM workaround for the move of cert playbooks (pep@redhat.com)
+- health check playbooks: relocate and expand (lmeyer@redhat.com)
+
+* Tue May 23 2017 Scott Dodson <sdodson@redhat.com> 3.6.69-1
+- preflight int tests: fix for openshift_version dep (lmeyer@redhat.com)
+- Removing requirement to pass aws credentials (esauer@redhat.com)
 - Workaround sysctl module issue with py3 by converting task to lineinfile.
   (abutcher@redhat.com)
-- Remove std_include from rhel_subscribe playbook. (abutcher@redhat.com)
-- Fixing a compatibility issue with python 2.7 to 3.5 when reading from
-  subprocess. (kwoodson@redhat.com)
-- Picking from issue #3477 (ewolinet@redhat.com)
-
-* Thu May 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.5.18-1
-- 
-
-* Thu May 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> v3.5.5.17-1
+- inventory: rename certificates->certificate in router example
+  (smilner@redhat.com)
+- remove skopeo dependency on docker-py (jvallejo@redhat.com)
+- improve error handling for missing vars (jvallejo@redhat.com)
+- lib/base: Allow for more complex template params (jarrpa@redhat.com)
+- Fix yamllint problems (sdodson@redhat.com)
+- add ability to expose Elasticsearch as an external route
+  (rmeggins@redhat.com)
+- Parameterized Calico/Node Arguments (vincent.schwarzer@yahoo.de)
+- Fix auditConfig for non-HA environments (rteague@redhat.com)
+- Added Docker Registry Port 5000 to Firewalld (vincent.schwarzer@yahoo.de)
+- Added Calicoctl to deployment of Master Nodes (vincent.schwarzer@yahoo.de)
+- move etcd upgrade related code into etcd_upgrade role (jchaloup@redhat.com)
+- Localhost TMP Dir Fix (vincent.schwarzer@yahoo.de)
+- Adjusted Naming Schema of Calico Roles (vincent.schwarzer@yahoo.de)
+- Update hosts.*.example to include openshift_hosted_metrics_deployer_version
+  (pat2man@gmail.com)
+- Fix gpg key path in our repo (sdodson@redhat.com)
+- Uninstall: restart docker when container-engine restart hasn't changed.
+  (abutcher@redhat.com)
+- add etcd cluster size check (jvallejo@redhat.com)
+- fix etcd_container_version detection (jchaloup@redhat.com)
+- systemcontainercustom.conf.j2: use Environment instead of ENVIRONMENT
+  (gscrivan@redhat.com)
+- node, systemd: change Requires to Wants for openvswitch (gscrivan@redhat.com)
+- Add teams attribute to github identity provider (dms@redhat.com)
+- Don't escalate privileges in local tmpdir creation (skuznets@redhat.com)
+- Remove use of local_action with delegate_to and switch 'delegate_to:
+  localhost' temporary directory cleanup actions to local_actions.
+  (abutcher@redhat.com)
+- Rework openshift_excluders role (rteague@redhat.com)
+- Add regexp for container-engine lineinfile (smilner@redhat.com)
 - Default image policy on new clusters to on (ccoleman@redhat.com)
-
-* Tue May 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.72-1
-- Updating registry-console image version as part of post_control_plane upgrade
+- revert role-specific var name (jvallejo@redhat.com)
+- Filter non-strings from the oc_adm_ca_server_cert hostnames parameter.
+  (abutcher@redhat.com)
+- Don't set-up origin repositories if they've already been configured
+  (dms@redhat.com)
+- byo inventory versions 1.5 -> 3.6 (smilner@redhat.com)
+- byo inventory versions 3.5 -> 3.6 (smilner@redhat.com)
+- use dest instead of path for lineinfile (smilner@redhat.com)
+- openshift_version: skip rpm version==image version on Atomic
+  (gscrivan@redhat.com)
+- Add NO_PROXY workaround for container-engine atomic command
+  (smilner@redhat.com)
+- Add no_proxy to atomic.conf (smilner@redhat.com)
+- Include object validation in 3.6 upgrades (sdodson@redhat.com)
+- uninstall: handle container-engine (gscrivan@redhat.com)
+- Added Calico BGP Port 179 to Firewalld (vincent.schwarzer@yahoo.de)
+- Fixed for python3 with Fedora 25 Atomic (donny@fortnebula.com)
+- Add docker package for container-engine install (smilner@redhat.com)
+- Fix python3 error in repoquery (jpeeler@redhat.com)
+- check if hostname is in list of etcd hosts (jvallejo@redhat.com)
+- Fix templating of static service files (rteague@redhat.com)
+- Fix container image build references (pep@redhat.com)
+- Reset selinux context on /var/lib/origin/openshift.common.volumes
+  (sdodson@redhat.com)
+- Adding assert to check for python-passlib on control host
   (ewolinet@redhat.com)
-- Fix the missing file problem (me@fale.io)
-- Add /etc/sysconfig/etcd to etcd_container (me@fale.io)
+- Update variable name to standard (rhcarvalho@gmail.com)
+- Make class attribute name shorter (rhcarvalho@gmail.com)
+- Add module docstring (rhcarvalho@gmail.com)
+- Update check (rhcarvalho@gmail.com)
+- Change based on feedback (vincent.schwarzer@yahoo.de)
+- Removed Hardcoded Calico URLs (vincent.schwarzer@yahoo.de)
+- int -> float (rhcarvalho@gmail.com)
+- Remove vim line (rhcarvalho@gmail.com)
+- add etcd volume check (jvallejo@redhat.com)
+- Added additional Calico Network Plugin Checks (vincent.schwarzer@yahoo.de)
+- Ensure good return code for specific until loops (smilner@redhat.com)
+- add template service broker configurable (jminter@redhat.com)
+- Prevent line wrap in yaml dump of IDP, fixes #3912 (rikkuness@gmail.com)
 
-* Fri May 12 2017 Scott Dodson <sdodson@redhat.com> 3.5.71-1
-- Updating base64 decode switch for OSX (ewolinet@redhat.com)
-- Use v3.5 images on the release-1.5 branch (sdodson@redhat.com)
-- Fix Origin version variant (rteague@redhat.com)
+* Sat May 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.68-1
+- Updating registry-console image version during a post_control_plane upgrade
+  (ewolinet@redhat.com)
+- Remove userland-proxy-path from daemon.json (smilner@redhat.com)
+- Fix whistespace issues in custom template (smilner@redhat.com)
+- Always add proxy items to atomic.conf (smilner@redhat.com)
+- Move container-engine systemd environment to updated location
+  (smilner@redhat.com)
+- doc: Add link to daemon.json upstream doc (smilner@redhat.com)
+- Remove unused daemon.json keys (smilner@redhat.com)
+- bug 1448860. Change recovery_after_nodes to match node_quorum
+  (jcantril@redhat.com)
+- bug 1441369. Kibana memory limits bug 1439451. Kibana crash
+  (jcantril@redhat.com)
+- Extend repoquery command (of lib_utils role) to ignore excluders
+  (jchaloup@redhat.com)
+- lower case in /etc/daemon.json and correct block-registry (ghuang@redhat.com)
+- Fix for yedit custom separators (mwoodson@redhat.com)
+- Updating 3.6 enterprise registry-console template image version
+  (ewolinet@redhat.com)
+- Default to iptables on master (sdodson@redhat.com)
+- Rename blocked-registries to block-registries (smilner@redhat.com)
+- Ensure true is lowercase in daemon.json (smilner@redhat.com)
+- use docker_log_driver and /etc/docker/daemon.json to determine log driver
+  (rmeggins@redhat.com)
+- Temporarily revert to OSEv3 host group usage (rteague@redhat.com)
+- Add service file templates for master and node (smilner@redhat.com)
+- Update systemd units to use proper container service name
+  (smilner@redhat.com)
+- polish etcd_common role (jchaloup@redhat.com)
+- Note existence of Fedora tests and how to rerun (rhcarvalho@gmail.com)
+- Fix for OpenShift SDN Check (vincent.schwarzer@yahoo.de)
+- Updating oc_obj to use get instead of getattr (ewolinet@redhat.com)
+- Updating size suffix for metrics in role (ewolinet@redhat.com)
+- GlusterFS: Allow swapping an existing registry's backend storage
+  (jarrpa@redhat.com)
+- GlusterFS: Allow for a separate registry-specific playbook
+  (jarrpa@redhat.com)
+- GlusterFS: Improve role documentation (jarrpa@redhat.com)
+- hosted_registry: Get correct pod selector for GlusterFS storage
+  (jarrpa@redhat.com)
+- hosted registry: Fix typo (jarrpa@redhat.com)
+- run excluders over selected set of hosts during control_plane/node upgrade
+  (jchaloup@redhat.com)
 - Reserve kubernetes and 'kubernetes-' prefixed namespaces
   (jliggitt@redhat.com)
-- redhat-ci: use requirements.txt (jlebon@redhat.com)
+- oc_volume: Add missing parameter documentation (jarrpa@redhat.com)
 
-* Thu May 11 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.70-1
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.67-1
+- byo: correct option name (gscrivan@redhat.com)
+- Fail if rpm version != docker image version (jchaloup@redhat.com)
+- Perform package upgrades in one transaction (sdodson@redhat.com)
+- Properly fail if OpenShift RPM version is undefined (rteague@redhat.com)
+
+* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.66-1
+- Fix issue with Travis-CI using old pip version (rteague@redhat.com)
+- Remove vim configuration from Python files (rhcarvalho@gmail.com)
+- Use local variables for daemon.json template (smilner@redhat.com)
+- Fix additional master cert & client config creation. (abutcher@redhat.com)
+
+* Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.62-1
 - 
 
-* Wed May 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.69-1
-- byo: correct option name (gscrivan@redhat.com)
-- Bumping up default_ose_version for registering a 3.5 system
-  (ewolinet@redhat.com)
-- Fix issue with Travis-CI using old pip version (rteague@redhat.com)
-- Perform package upgrades in one transaction (sdodson@redhat.com)
+* Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.61-1
+- 
 
-* Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.68-1
-- Adding signed router cert and fixing server_cert bug. (kwoodson@redhat.com)
+* Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.60-1
+- 
+
+* Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.59-1
+- Updating logging and metrics to restart api, ha and controllers when updating
+  master config (ewolinet@redhat.com)
+- Adding defaults for es_indices (ewolinet@redhat.com)
+- Updating logic for generating pvcs and their counts to prevent reuse when
+  looping (ewolinet@redhat.com)
+
+* Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.58-1
+- Moving Dockerfile content to images dir (jupierce@redhat.com)
+
+* Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.57-1
+- 
+
+* Sun May 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.56-1
+- 
+
+* Sat May 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.55-1
+- Fix 1448368, and some other minors issues (ghuang@redhat.com)
+- mux startup is broken without this fix (rmeggins@redhat.com)
+- Dockerfile: create symlink for /opt/app-root/src (gscrivan@redhat.com)
+- docs: Add basic system container dev docs (smilner@redhat.com)
+- installer: Add system container variable for log saving (smilner@redhat.com)
+- installer: support running as a system container (gscrivan@redhat.com)
+
+* Fri May 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.54-1
 - Allow oc_ modules to pass unicode results (rteague@redhat.com)
+- Ensure repo cache is clean on the first run (rteague@redhat.com)
+- move etcdctl.yml from etcd to etcd_common role (jchaloup@redhat.com)
+- Modified pick from release-1.5 for updating hawkular htpasswd generation
+  (ewolinet@redhat.com)
+
+* Thu May 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.53-1
 - Correctly setting the primary and replica shard count settings
   (ewolinet@redhat.com)
+- System container docker (smilner@redhat.com)
+- Stop logging AWS credentials in master role. (dgoodwin@redhat.com)
+- Remove set operations from openshift_master_certificates iteration.
+  (abutcher@redhat.com)
+- Refactor system fact gathering to avoid dictionary size change during
+  iteration. (abutcher@redhat.com)
+- Refactor secret generation for python3. (abutcher@redhat.com)
+- redhat-ci: use requirements.txt (jlebon@redhat.com)
 
-* Thu May 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.67-1
-- bug 1441369. Kibana memory limits (jcantril@redhat.com)
+* Wed May 03 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.52-1
+- Making mux with_items list evaluate as empty if didnt get objects before
+  (ewolinet@redhat.com)
+- etcd Upgrade Refactor (rteague@redhat.com)
+- v3.3 Upgrade Refactor (rteague@redhat.com)
+- v3.4 Upgrade Refactor (rteague@redhat.com)
+- v3.5 Upgrade Refactor (rteague@redhat.com)
+- v3.6 Upgrade Refactor (rteague@redhat.com)
+- Fix variants for v3.6 (rteague@redhat.com)
+- Normalizing groups. (kwoodson@redhat.com)
+- Use openshift_ca_host's hostnames to sign the CA (sdodson@redhat.com)
 
-* Wed May 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.66-1
-- Upgrade specific rpms instead of just master/node. (dgoodwin@redhat.com)
-- Updating openshift_metrics to use htpasswd module instead of making a docker
-  call. Updating requirement to include python-passlib (ewolinet@redhat.com)
+* Tue May 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.51-1
+- Remove std_include from playbooks/byo/rhel_subscribe.yml
+  (abutcher@redhat.com)
+- Adding way to add labels and nodeselectors to logging project
+  (ewolinet@redhat.com)
+
+* Tue May 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.50-1
+- Don't double quote when conditions (sdodson@redhat.com)
+- Remove jinja template delimeters from when conditions (sdodson@redhat.com)
 - move excluder upgrade validation tasks under openshift_excluder role
   (jchaloup@redhat.com)
-- Remove jinja delimeters and double quotes from when conditions
-  (sdodson@redhat.com)
-- Use openshift_ca_host's hostnames to sign the CA (sdodson@redhat.com)
+- Fix test compatibility with OpenSSL 1.1.0 (pierre-
+  louis.bonicoli@libregerbil.fr)
+
+* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.49-1
+- Warn users about conflicts with docker0 CIDR range (lpsantil@gmail.com)
 - Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
 
-* Tue May 02 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.65-1
-- bug 1432607.  Allow configuration of ES log destination (jcantril@redhat.com)
+* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.48-1
+-
 
-* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.64-1
-- Updating htpasswd logic to not mount a volume for creating file
-  (ewolinet@redhat.com)
+* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.47-1
+-
+
+* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.46-1
+- Contrib: Hook to verify modules match assembled fragments
+  (tbielawa@redhat.com)
+
+* Mon May 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.45-1
+-
+
+* Sun Apr 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.44-1
+- Refactor etcd roles (jchaloup@redhat.com)
+
+* Sat Apr 29 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.43-1
+- Document the Pull Request process (rhcarvalho@gmail.com)
+- Add Table of Contents (rhcarvalho@gmail.com)
+- Improve Contribution Guide (rhcarvalho@gmail.com)
+- Replace absolute with relative URLs (rhcarvalho@gmail.com)
+- Move repo structure to a separate document (rhcarvalho@gmail.com)
+- Remove outdated information about PRs (rhcarvalho@gmail.com)
+- Move link to BUILD.md to README.md (rhcarvalho@gmail.com)
+- Adding checks for starting mux for 2.2.0 (ewolinet@redhat.com)
+- Fix OpenShift registry deployment on OSE 3.2 (lhuard@amadeus.com)
+
+* Fri Apr 28 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.42-1
+- Fix certificate check Job examples (pep@redhat.com)
+- Add python-boto requirement (pep@redhat.com)
+
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.41-1
+- Add bool for proper conditional handling (rteague@redhat.com)
+
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.40-1
+- Fix cluster creation with `bin/cluster` when there’s no glusterfs node
+  (lhuard@amadeus.com)
+
+* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.39-1
+- Move container build instructions to BUILD.md (pep@redhat.com)
+- Elaborate container image usage instructions (pep@redhat.com)
+
+* Wed Apr 26 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.38-1
+- .redhat-ci.yml: also publish journal logs (jlebon@redhat.com)
+- Standardize all Origin versioning on 3.6 (rteague@redhat.com)
+- integration tests: add CI scripts (lmeyer@redhat.com)
+- preflight int tests: define image builds to support tests (lmeyer@redhat.com)
+- preflight int tests: generalize; add tests (lmeyer@redhat.com)
+- Add stub of preflight integration tests (rhcarvalho@gmail.com)
+- Move Python unit tests to subdirectory (rhcarvalho@gmail.com)
+- Revert "Add /etc/sysconfig/etcd to etcd_container" (sdodson@redhat.com)
+- Replace original router cert variable names. (abutcher@redhat.com)
+- oc_obj: Allow for multiple kinds in delete (jarrpa@redhat.com)
+- Update v1.5 content (sdodson@redhat.com)
+- Update v1.6 content (sdodson@redhat.com)
+- Make the rhel_subscribe role subscribe to OSE 3.5 channel by default
+  (lhuard@amadeus.com)
+- Addressing yamllint (ewolinet@redhat.com)
+- Updating kibana-proxy secret key for server-tls entry (ewolinet@redhat.com)
+- Pick from issue3896 (ewolinet@redhat.com)
+- Cleanup comments and remove extraneous tasks (sdodson@redhat.com)
+- Store backups in /var/lib/etcd/openshift-backup (sdodson@redhat.com)
+- Create member/snap directory encase it doesn't exist (sdodson@redhat.com)
+- Copy v3 data dir when performing backup (sdodson@redhat.com)
+
+* Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.37-1
 - Differentiate between service serving router certificate and custom
   openshift_hosted_router_certificate when replacing the router certificate.
   (abutcher@redhat.com)
-- Updating logging and metrics to restart api, ha and controllers when updating
-  master config (ewolinet@redhat.com)
 
-* Thu Apr 27 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.63-1
-- Compatibility updates to openshift_logging role for ansible 2.2.2.0+
-  (esauer@redhat.com)
-- Adding defaults for es_indices (ewolinet@redhat.com)
+* Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.36-1
+- Update swap disable tasks (rteague@redhat.com)
+- Removing resource version to remove object conflicts caused by race
+  conditions. (kwoodson@redhat.com)
+- cast openshift_logging_use_mux_client to bool (rmeggins@redhat.com)
+- mux does not require privileged, only hostmount-anyuid (rmeggins@redhat.com)
+- Switched Heapster to use certificates generated by OpenShift
+  (juraci@kroehling.de)
+- Use metrics and logging deployer tag v3.4 for enterprise (sdodson@redhat.com)
+- Remove v1.5 and v1.6 metrics/logging templates (sdodson@redhat.com)
 
-* Wed Apr 26 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.62-1
-- add .redhat-ci.yml for release-1.5 branch (jlebon@redhat.com)
-- Updating logic for generating pvcs and their counts to prevent reuse when
-  looping (ewolinet@redhat.com)
-- Replace original router cert variable names. (abutcher@redhat.com)
+* Sun Apr 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.35-1
+-
 
-* Tue Apr 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.61-1
-- BACKPORT 1.5: Removing resource version to avoid race conditions in
-  lib_openshift. (kwoodson@redhat.com)
-- Allowing CA cert to still be generated is we are doing standalone heapster
-  (ewolinet@redhat.com)
-- Switch from ignoring to passing on checks (rteague@redhat.com)
+* Fri Apr 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.34-1
+- GlusterFS: provide default for groups.oo_glusterfs_to_config in with_items
+  (jarrpa@redhat.com)
 
-* Mon Apr 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.60-1
-- Fix issue where the password would not be passed to the htpasswd command
-  (mwringe@redhat.com)
-- Fix BZ#1422541 (weshi@redhat.com)
+* Fri Apr 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.33-1
+- Adding module calls instead of command for idempotency. (kwoodson@redhat.com)
+- Use return_value when value is constant (pierre-
+  louis.bonicoli@libregerbil.fr)
+- Add missing mock for locate_oc_binary method (pierre-
+  louis.bonicoli@libregerbil.fr)
 
-* Mon Apr 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.59-1
-- Update v1.5 content (sdodson@redhat.com)
-
-* Fri Apr 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.58-1
+* Fri Apr 21 2017 Scott Dodson <sdodson@redhat.com> 3.6.32-1
 - Don't check excluder versions when they're not enabled (sdodson@redhat.com)
 
-* Thu Apr 20 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.57-1
-- Patch to enable import_jks_certs.sh to work on OSX (ccallega@redhat.com)
-
-* Wed Apr 19 2017 Scott Dodson <sdodson@redhat.com> 3.5.56-1
-- Fix 1441915 (rteague@redhat.com)
-
-* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.55-1
-- Fix indentation (sdodson@redhat.com)
+* Fri Apr 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.31-1
 - Stop all services prior to upgrading, start all services after
   (sdodson@redhat.com)
-- Adding a query for the existing docker-registry route. (kwoodson@redhat.com)
-- Removing docker-registry route from cockpit-ui. (kwoodson@redhat.com)
-- Add evaluate_groups to openshift_logging (rteague@redhat.com)
-- Updating image logic (ewolinet@redhat.com)
-- Remove check for httpd-tools and update to use docker run to build htpasswd
-  file (ewolinet@redhat.com)
-- make htpasswd tasks remote actions instead of local (ewolinet@redhat.com)
-- Also fix logging (sdodson@redhat.com)
-- Fix trailing ) (sdodson@redhat.com)
-- tox tests: pin test requirement versions (lmeyer@redhat.com)
+
+* Thu Apr 20 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.30-1
+- Add Ansible syntax checks to tox (rteague@redhat.com)
+- Add /etc/sysconfig/etcd to etcd_container (me@fale.io)
+- openshift_version: improve messaging (lmeyer@redhat.com)
+- Simplify memory availability check, review tests (rhcarvalho@gmail.com)
+- Simplify mixin class (rhcarvalho@gmail.com)
+- Simplify disk availability check, review tests (rhcarvalho@gmail.com)
+- add disk and memory availability check tests (jvallejo@redhat.com)
+- add ram and storage preflight check (jvallejo@redhat.com)
+- Fix paths for file includes (rteague@redhat.com)
+- Fix instantiation of action plugin in test fixture (rhcarvalho@gmail.com)
+- Introduce Elasticsearch readiness probe (lukas.vlcek@gmail.com)
+- added a empty file to the contiv empty dir. This allows contiv to be vendored
+  in git (mwoodson@redhat.com)
+
+* Wed Apr 19 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.29-1
+- Create openshift-metrics entrypoint playbook (rteague@redhat.com)
+
+* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.28-1
+- Minor v3.6 upgrade docs fixes (rteague@redhat.com)
+
+* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.27-1
+- repo: start testing PRs on Fedora Atomic Host (jlebon@redhat.com)
+
+* Tue Apr 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.26-1
+- Correct role dependencies (rteague@redhat.com)
+- Allow for GlusterFS to provide registry storage (jarrpa@redhat.com)
+- Integrate GlusterFS into OpenShift installation (jarrpa@redhat.com)
+- GlusterFS playbook and role (jarrpa@redhat.com)
+
+* Mon Apr 17 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.25-1
 - Fix default image tag for enterprise (sdodson@redhat.com)
-- Deleting fluentd pods after DS patching to ensure pods are updated
-  (ewolinet@redhat.com)
-- making yammlint happy (ewolinet@redhat.com)
-- Updating to only create PVC when necessary and attach to the DS, otherwise
-  leave it be (ewolinet@redhat.com)
+- Cast etcd_debug to a boolean (skuznets@redhat.com)
 
-* Thu Apr 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.54-1
+* Fri Apr 14 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.24-1
 - tox tests: pin test requirement versions (lmeyer@redhat.com)
-- master-api: add mount for /var/log (gscrivan@redhat.com)
-- master: add mount for /var/log (gscrivan@redhat.com)
+- This is no longer a widely encountered issue (sdodson@redhat.com)
+- Standardize use of byo and common for network_manager.yml
+  (rteague@redhat.com)
+- Disable swap space on nodes at install and upgrade (rteague@redhat.com)
+- Do not check package version on non-master/node (rhcarvalho@gmail.com)
 
-* Mon Apr 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.53-1
-- Cleanup comments and remove extraneous tasks (sdodson@redhat.com)
-- Store backups in /var/lib/etcd/openshift-backup (sdodson@redhat.com)
-- Updating kibana-proxy secret key for server-tls entry (ewolinet@redhat.com)
+* Thu Apr 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.23-1
+- Refactor initialize groups tasks (rteague@redhat.com)
+- tox tests: pin test requirement versions (lmeyer@redhat.com)
+- skip PackageAvailability check if not yum (jvallejo@redhat.com)
+- Document service_type for openshift-enterprise (rhcarvalho@gmail.com)
+- Remove references to outdated deployment_type (rhcarvalho@gmail.com)
+- Update deployment_type documentation (rhcarvalho@gmail.com)
+- Document merge time trends page (rhcarvalho@gmail.com)
+- Remove outdated documentation (rhcarvalho@gmail.com)
+- Remove outdated build instructions (rhcarvalho@gmail.com)
+- openshift_sanitize_inventory: disallow conflicting deployment types
+  (lmeyer@redhat.com)
+- Refactor docker upgrade playbooks (rteague@redhat.com)
+- Changed Hawkular Metrics secrets to use a format similar to the one
+  automatically generated by OpenShift (juraci@kroehling.de)
 
-* Fri Apr 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.52-1
-- Create member/snap directory encase it doesn't exist (sdodson@redhat.com)
-
-* Thu Apr 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.51-1
-- Copy v3 data dir when performing backup (sdodson@redhat.com)
-- unexclude excluder if it is to be upgraded and already installed
-  (jchaloup@redhat.com)
+* Wed Apr 12 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.22-1
+- Fixed spelling mistake. (kwoodson@redhat.com)
+- Remove unnecessary folder refs (rteague@redhat.com)
+- Switching commands for modules during upgrade of router and registry.
+  (kwoodson@redhat.com)
+- Fixing a compatibility issue with python 2.7 to 3.5 when reading from
+  subprocess. (kwoodson@redhat.com)
+- Refactor use of initialize_oo_option_facts.yml (rteague@redhat.com)
+- preflight checks: refactor and fix aos_version (lmeyer@redhat.com)
 - Add external provisioners playbook starting with aws efs (mawong@redhat.com)
 
-* Wed Apr 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.50-1
-- bug 1435144. Remove unneeded upgrade in openshift_logging role
-  (jcantril@redhat.com)
+* Tue Apr 11 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.21-1
+- Adding a query for the existing docker-registry route. (kwoodson@redhat.com)
+- Removing docker-registry route from cockpit-ui. (kwoodson@redhat.com)
 
-* Tue Apr 04 2017 Scott Dodson <sdodson@redhat.com> 3.5.49-1
-- Revert back to iptables as the default for 3.5 (sdodson@redhat.com)
+* Fri Apr 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.20-1
+- Fixed a bug when oc command fails. (kwoodson@redhat.com)
+- openshift_sanitize_inventory: validate release (lmeyer@redhat.com)
 
-* Mon Apr 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.48-1
+* Fri Apr 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.19-1
+- Add example scheduled certificate check (pep@redhat.com)
+- Switch from ignoring to passing on checks (rteague@redhat.com)
+- Add tests for action plugin (rhcarvalho@gmail.com)
+- Remove unnecessary code (rhcarvalho@gmail.com)
+- Make resolve_checks more strict (rhcarvalho@gmail.com)
+
+* Fri Apr 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.18-1
+- master-api: add mount for /var/log (gscrivan@redhat.com)
+- master: add mount for /var/log (gscrivan@redhat.com)
+- unexclude excluder if it is to be upgraded and already installed
+  (jchaloup@redhat.com)
+- Bump calico policy controller (djosborne10@gmail.com)
+- Fixed a string format and a lint space issue (kwoodson@redhat.com)
+- Fixed name and selector to be mutually exclusive (kwoodson@redhat.com)
+- Adding ability to delete by selector. (kwoodson@redhat.com)
+- Adding delete with selector support. (kwoodson@redhat.com)
+
+* Thu Apr 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.17-1
+- Adding signed router cert and fixing server_cert bug. (kwoodson@redhat.com)
+
+* Wed Apr 05 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.16-1
+- Removing test coverage for shared code. (kwoodson@redhat.com)
+- Port 10255 unnecessary.  Removing all instances (ccallega@redhat.com)
+- oo_filters: Disable pylint too-many-lines test (jarrpa@redhat.com)
+- oo_collect: Allow list elements to be lists of dict (jarrpa@redhat.com)
+- oc_label: handle case where _get() returns no results (jarrpa@redhat.com)
+- Addressing py27-yamllint (esauer@redhat.com)
+- Add 'docker-registry.default.svc' to cert-redeploy too (sdodson@redhat.com)
+- Support unicode output when dumping yaml (rteague@redhat.com)
+- Add docker-registry.default.svc short name to registry service signing
+  (sdodson@redhat.com)
+- oc_configmap: Add missing check for name (jarrpa@redhat.com)
+- oo_collect: Update comments to show source of failure (jarrpa@redhat.com)
+- openshift_facts: Allow examples_content_version to be set to v1.6
+  (jarrpa@redhat.com)
+- Restart polkitd to workaround a bug in polkitd (sdodson@redhat.com)
+- Add names to openshift_image_tag asserts (smilner@redhat.com)
+- doc: Remove atomic-openshift deployment type (smilner@redhat.com)
+- openshift_version now requires prepended version formats (smilner@redhat.com)
+- Warn if openshift_image_tag is defined by hand for package installs
+  (smilner@redhat.com)
+- Verify openshift_image_tag is valid during openshift_version main
+  (smilner@redhat.com)
+- Add openshift_version fact fallback debug messages (smilner@redhat.com)
+- cleanup: when in openshift_version tasks are multiline (smilner@redhat.com)
+- Compatibility updates to openshift_logging role for ansible 2.2.2.0+
+  (esauer@redhat.com)
+
+* Tue Apr 04 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.15-1
+- Document etcd_ca_default_days in example inventories. (abutcher@redhat.com)
 - Fixed a bug. Ansible requires a msg param when module.fail_json.
   (kwoodson@redhat.com)
 
-* Mon Apr 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.47-1
-- Fix BZ#1438160 (weshi@redhat.com)
-- Setting defaults on openshift_hosted. (kwoodson@redhat.com)
+* Sat Apr 01 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.14-1
+- Update v1.5 content (sdodson@redhat.com)
+- Add v1.6 content (sdodson@redhat.com)
+- Fix generated code (sdodson@redhat.com)
+- bug 1432607.  Allow configuration of ES log destination (jcantril@redhat.com)
+- openshift_facts: install python3-dbus package on Fedora nodes.
+  (vsemushi@redhat.com)
+- Remove kube-nfs-volumes role (mawong@redhat.com)
 
-* Wed Mar 29 2017 Scott Dodson <sdodson@redhat.com> 3.5.46-1
+* Fri Mar 31 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.13-1
+- fixed decode switch so it works on OSX (stobias@harborfreight.com)
+- Wait for firewalld polkit policy to be defined (sdodson@redhat.com)
 - Correct copy task to use remote source (rteague@redhat.com)
-- Removing initial setting of metrics image prefix/version
+- validate and normalize inventory variables (lmeyer@redhat.com)
+- Fixed spacing. (kwoodson@redhat.com)
+- Fixed docs.  Fixed add_resource. (kwoodson@redhat.com)
+- Fixing linting for spaces. (kwoodson@redhat.com)
+- Removing initial setting of metrics image prefix and version
   (ewolinet@redhat.com)
-- Make atomic-openshift-utils require playbooks of the same version
-  (sdodson@redhat.com)
+- Adding clusterrole to the toolbox. (kwoodson@redhat.com)
+- Fixed a bug in oc_volume. (kwoodson@redhat.com)
+- Adding a few more test cases.  Fixed a bug when key was empty. Safeguard
+  against yedit module being passed an empty key (kwoodson@redhat.com)
+- Added the ability to do multiple edits (kwoodson@redhat.com)
+- fix es config merge so template does not need quoting. gen then merge
+  (jcantril@redhat.com)
+
+* Thu Mar 30 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.12-1
+- Update example inventory files to mention certificate validity parameters.
+  (vsemushi@redhat.com)
+- openshift_hosted: add openshift_hosted_registry_cert_expire_days parameter.
+  (vsemushi@redhat.com)
+- oc_adm_ca_server_cert.py: re-generate. (vsemushi@redhat.com)
+- oc_adm_ca_server_cert: add expire_days parameter. (vsemushi@redhat.com)
+- openshift_ca: add openshift_ca_cert_expire_days and
+  openshift_master_cert_expire_days parameters. (vsemushi@redhat.com)
+- redeploy-certificates/registry.yml: add
+  openshift_hosted_registry_cert_expire_days parameter. (vsemushi@redhat.com)
+- openshift_master_certificates: add openshift_master_cert_expire_days
+  parameter. (vsemushi@redhat.com)
+- openshift_node_certificates: add openshift_node_cert_expire_days parameter.
+  (vsemushi@redhat.com)
+- Update Dockerfile.rhel7 to reflect changes to Dockerfile (pep@redhat.com)
+
+* Wed Mar 29 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.11-1
+- Add etcd_debug and etcd_log_package_levels variables (sdodson@redhat.com)
 - Make the OCP available version detection excluder free (jchaloup@redhat.com)
+- Add test scaffold for docker_image_availability.py (rhcarvalho@gmail.com)
+- Add unit tests for package_version.py (rhcarvalho@gmail.com)
+- Add unit tests for package_update.py (rhcarvalho@gmail.com)
+- Add unit tests for package_availability.py (rhcarvalho@gmail.com)
+- Add unit tests for mixins.py (rhcarvalho@gmail.com)
+- Test recursively finding subclasses (rhcarvalho@gmail.com)
+- Test OpenShift health check loader (rhcarvalho@gmail.com)
+- Rename module_executor -> execute_module (rhcarvalho@gmail.com)
+- Use oo_version_gte_3_6+ for future versions and treat 1.x origin as legacy.
+  Add tests. (abutcher@redhat.com)
+- Added 3.5 -> 3.6 upgrade playbooks (skuznets@redhat.com)
+- Add oo_version_gte_X_X_or_Y_Y version comparison filters.
+  (abutcher@redhat.com)
 
-* Fri Mar 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.45-1
-- Update s2i-dotnetcore content (sdodson@redhat.com)
+* Tue Mar 28 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.10-1
+- Use meta/main.yml for role dependencies (rteague@redhat.com)
+- Upgrade specific rpms instead of just master/node. (dgoodwin@redhat.com)
+- Adding namespace to doc. (kwoodson@redhat.com)
+- Add calico. (djosborne10@gmail.com)
+- Fixing up test cases, linting, and added a return. (kwoodson@redhat.com)
+- first step in ocimage (ihorvath@redhat.com)
+- ocimage (ihorvath@redhat.com)
+- Setting defaults on openshift_hosted. (kwoodson@redhat.com)
+- rebase and regenerate (jdiaz@redhat.com)
+- fix up things flagged by flake8 (jdiaz@redhat.com)
+- clean up and clarify docs/comments (jdiaz@redhat.com)
+- add oc_user ansible module (jdiaz@redhat.com)
+- Fix etcd cert generation (djosborne10@gmail.com)
 
-* Fri Mar 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.44-1
-- Correct a typo in metrics role (sdodson@redhat.com)
+* Sat Mar 25 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.9-1
+- Found this while searching the metrics role for logging, is this wrong?
+  (sdodson@redhat.com)
 - Fix overriding openshift_{logging,metrics}_image_prefix (sdodson@redhat.com)
-- Revert "fix quoting issues in logging es template" (ewolinet@redhat.com)
-- also missing quotes for number_of_shards and number_of_replicas
-  (rmeggins@redhat.com)
-- es_min_masters must be quoted (rmeggins@redhat.com)
 - Make linter happy (sdodson@redhat.com)
-
-* Thu Mar 23 2017 Scott Dodson <sdodson@redhat.com> 3.5.43-1
 - Specify enterprise defaults for logging and metrics images
   (sdodson@redhat.com)
+- Update s2i-dotnetcore content (sdodson@redhat.com)
+- Stop all services before upgrading openvswitch (sdodson@redhat.com)
+- Bug 1434300 - Log entries are generated in ES after deployed logging stacks
+  via ansible, but can not be found in kibana. (rmeggins@redhat.com)
+- Adding error checking to the delete. (kwoodson@redhat.com)
+- Updated comment. (kwoodson@redhat.com)
+- Fixed doc.  Updated test to change existing key.  Updated module spec for
+  required name param. (kwoodson@redhat.com)
+- Adding oc_configmap to lib_openshift. (kwoodson@redhat.com)
 
-* Thu Mar 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.42-1
+* Fri Mar 24 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.8-1
+- vendor patched upstream docker_container module. (jvallejo@redhat.com)
+- add docker_image_availability check (jvallejo@redhat.com)
 - Do not use auto_expand_replicas (lukas.vlcek@gmail.com)
+- Adding tests to increase TC. (kwoodson@redhat.com)
+- Adding a pvc create test case. (kwoodson@redhat.com)
+- Cherry picking from #3711 (ewolinet@redhat.com)
+
+* Thu Mar 23 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.7-1
+- openshift_logging calculate min_masters to fail early on split brain
+  (jcantril@redhat.com)
+- Fixed linting and configmap_name param (kwoodson@redhat.com)
+- Adding configmap support. (kwoodson@redhat.com)
+- Make /rootfs mount rslave (sdodson@redhat.com)
+- Update imageConfig.format on upgrades to match oreg_url (sdodson@redhat.com)
+- Adding configmap support and adding tests. (kwoodson@redhat.com)
+- Adding oc_volume to lib_openshift. (kwoodson@redhat.com)
+- upgrade: restart ovs-vswitchd and ovsdb-server (gscrivan@redhat.com)
+- Make atomic-openshift-utils require playbooks of the same version
+  (sdodson@redhat.com)
+
+* Wed Mar 22 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.6-1
+- Fix copy-pasta docstrings (rhcarvalho@gmail.com)
+- Rename _ns -> node_selector (rhcarvalho@gmail.com)
+- Reindent code (rhcarvalho@gmail.com)
 - Update the failure methods and add required variables/functions
   (tbielawa@redhat.com)
 - Import the default ansible output callback on_failed methods
   (tbielawa@redhat.com)
+- Switched Cassandra to use certificates generated by OpenShift
+  (juraci@kroehling.de)
+- Allow user to specify additions to ES config (jcantril@redhat.com)
 
-* Wed Mar 22 2017 Scott Dodson <sdodson@redhat.com> 3.5.41-1
-- Stop all services before upgrading openvswitch (sdodson@redhat.com)
-- openshift_logging calculate min_masters to fail early on split brain
-  (jcantril@redhat.com)
-- Bug 1434300 - Log entries are generated in ES after deployed logging stacks
-  via ansible, but can not be found in kibana. (rmeggins@redhat.com)
-- Make /rootfs mount rslave (sdodson@redhat.com)
-
-* Wed Mar 22 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.40-1
-- Adding option to specify different cert/key/ca for kibana ops route
-  (ewolinet@redhat.com)
-
-* Mon Mar 20 2017 Scott Dodson <sdodson@redhat.com> 3.5.39-1
+* Tue Mar 21 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.5-1
 - Attempt to match version of excluders to target version (sdodson@redhat.com)
 - Get rid of adjust.yml (sdodson@redhat.com)
 - Protect against missing commands (sdodson@redhat.com)
 - Simplify excluder enablement logic a bit more (sdodson@redhat.com)
+- Add tito releaser for 3.6 (smunilla@redhat.com)
+- Adding oc_group to lib_openshift (kwoodson@redhat.com)
+- preflight checks: improve user output from checks (lmeyer@redhat.com)
+- preflight checks: bypass RPM excludes (lmeyer@redhat.com)
+- acceptschema2 default: true (aweiteka@redhat.com)
+- Do not require python-six via openshift_facts (rhcarvalho@gmail.com)
 
-* Mon Mar 20 2017 Scott Dodson <sdodson@redhat.com> 3.5.38-1
-- Automatic commit of package [openshift-ansible] release [3.5.37-1].
-  (sdodson@redhat.com)
-- Add router svcacct cluster-reader role (rteague@redhat.com)
-- Updating descriptions and examples (ewolinet@redhat.com)
-- Fix get_router_replicas infrastructure node count. (abutcher@redhat.com)
+* Sat Mar 18 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.4-1
+- Cherry picking from #3689 (ewolinet@redhat.com)
+- Moving projects task within openshift_hosted (rteague@redhat.com)
+- Refactor openshift_projects role (rteague@redhat.com)
+- Add unit tests for existing health checks (rhcarvalho@gmail.com)
+- Do not update when properties when not passed. (kwoodson@redhat.com)
+- change shell to bash in generate_jks.sh (l@lmello.eu.org)
 
-* Fri Mar 17 2017 Scott Dodson <sdodson@redhat.com> 3.5.37-1
+* Fri Mar 17 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.3-1
+- enable docker excluder since the time it is installed (jchaloup@redhat.com)
+
+* Thu Mar 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.2-1
 - enable excluders during node/master scaling up (jchaloup@redhat.com)
+- Fixing variable naming for 35 scoping. (kwoodson@redhat.com)
+- Fix get_router_replicas infrastructure node count. (abutcher@redhat.com)
+- Fix containerized openvswitch race (sdodson@redhat.com)
+
+* Thu Mar 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.1-1
+- Bump version to 3.6.0 (smunilla@redhat.com)
+- Improve CONTRIBUTING guide with testing tricks (rhcarvalho@gmail.com)
+- Update versions in example inventories (sdodson@redhat.com)
 - Only call excluder playbooks on masters and nodes (sdodson@redhat.com)
 - Since we've decided that we're no longer paying attention to current status
   remove this as it was toggling things (sdodson@redhat.com)
 - Remove travis notifications (jdetiber@redhat.com)
-- Update versions in example inventories (sdodson@redhat.com)
-- Fix containerized openvswitch race (sdodson@redhat.com)
-
-* Thu Mar 16 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.36-1
-- Add default pvc prefix fix for ops pvcs (ewolinet@redhat.com)
-
-* Wed Mar 15 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.35-1
--
-
-* Wed Mar 15 2017 Scott Dodson <sdodson@redhat.com> 3.5.34-1
-- Updating kibana hostname default to be openshift_master_default_subdomain
-  instead of openshift.common.dns_domain (ewolinet@redhat.com)
-- Updating to use pvc access mode as a list (ewolinet@redhat.com)
-- Addressing default pvc prefixes being empty (ewolinet@redhat.com)
-- Updating inventory examples for kibana hostname (ewolinet@redhat.com)
-
-* Wed Mar 15 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.33-1
-- bug 1431935. es_pvc_pool is undefined if you specify 'G' for storage size
-  (jcantril@redhat.com)
-
-* Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.32-1
+- Removing dependency on master facts for master_public_url default
+  (ewolinet@redhat.com)
+- don't assume openshift_upgrade_target is in a form d.d (jchaloup@redhat.com)
+- Cherry picked from #3657 (ewolinet@redhat.com)
+- Revert "Enable docker during installation and upgrade by default"
+  (skuznets@redhat.com)
+- Nuage service account handling by single master
+  (vishal.patil@nuagenetworks.net)
+- Add router svcacct cluster-reader role (rteague@redhat.com)
+- Cherry picking from #3644 (ewolinet@redhat.com)
+- Revert module_utils six for openshift_health_checker (jdetiber@redhat.com)
 - Refactor and remove openshift_serviceaccount (rteague@redhat.com)
-
-* Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.31-1
-- Removing openshift_master_facts to resolve bz (ewolinet@redhat.com)
-- enable docker excluder since the time it is installed (jchaloup@redhat.com)
-- validate excluders on non-atomic hosts only (jchaloup@redhat.com)
-- re-enable excluders if they are enabled after openshift version detection
-  (jchaloup@redhat.com)
-- extend the excluders to containerized deployment (jchaloup@redhat.com)
-- Automatic commit of package [openshift-ansible] release [3.5.30-1].
-  (tdawson@redhat.com)
-
-* Mon Mar 13 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.30-1
 - Fix typo (sdodson@redhat.com)
-- Fix incorrect comparison when detecting petsets (tbielawa@redhat.com)
-- New role (tbielawa@redhat.com)
-
-* Mon Mar 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.29-1
+- Force to use TLSv1.2 (related to https://github.com/openshift/openshift-
+  ansible/pull/2707) (olivier@openkumo.fr)
+- Raise on dry-run failures. (kwoodson@redhat.com)
+- validate excluders on non-atomic hosts only (jchaloup@redhat.com)
+- enable docker excluder since the time it is installed (jchaloup@redhat.com)
+- cherry picking from #3621 #3614 #3627 (ewolinet@redhat.com)
+- Renaming oadm_manage_node to oc_adm_manage_node (rteague@redhat.com)
 - add 'hawkular/metrics' when updating config (jcantril@redhat.com)
 - update all the masters (jcantril@redhat.com)
 - bug 1430661. Update masterConfig metricsPublicURL on install
   (jcantril@redhat.com)
-- cherry picking from #3616 (ewolinet@redhat.com)
-- Alway generate secret templates and let oc_apply detect if they actually
-  change (ewolinet@redhat.com)
-- Updating defaults for PVC names and surrounding with quotations in templates
-  (ewolinet@redhat.com)
-- updating inventory files to accurately list variable that sets
-  loggingPublicURL (ewolinet@redhat.com)
+- nuage: Move role back to config (smilner@redhat.com)
+- Fix incorrect comparison when detecting petsets (tbielawa@redhat.com)
+- Removed unused, unwanted, incorrectly committed code. (kwoodson@redhat.com)
+- Minor updates to README_CONTAINER_IMAGE.md (pep@redhat.com)
+- Fix references to openshift_set_node_ip in inventory examples
+  (gskgoskk@gmail.com)
+- Bug 1428711 - [IntService_public_324] ES pod is unable to read
+  searchguard.truststore after upgarde logging from 3.3.1 to 3.5.0
+  (rmeggins@redhat.com)
 - bug 1428249. Use ES hostmount storage if it exists (jcantril@redhat.com)
-- bug 1420425. Allow setting of public facing certs for kibana in
-  openshift_logging role (jcantril@redhat.com)
-
-* Wed Mar 08 2017 Scott Dodson <sdodson@redhat.com> 3.5.28-1
+- Use ansible.compat.six where possible (jdetiber@redhat.com)
+- Remove debug task (tbielawa@redhat.com)
+- Use six from ansible.module_utils for remote hosts (jdetiber@redhat.com)
+- re-enable excluders if they are enabled after openshift version detection
+  (jchaloup@redhat.com)
+- Allow overriding minTLSVersion and cipherSuites (meggen@redhat.com)
+- extend the excluders to containerized deployment (jchaloup@redhat.com)
+- Fixing the way policies are found.  The old method was unreliable.  This
+  method searches all and matches on properties. (kwoodson@redhat.com)
 - openshift_excluders depends on openshift_repos (sdodson@redhat.com)
 - add ability to specify an etcd version (mmckinst@umich.edu)
-- Adding scripts for building and pushing images (bleanhar@redhat.com)
-
-* Wed Mar 08 2017 Scott Dodson <sdodson@redhat.com> 3.5.27-1
+- Lowering test coverage percentage. (kwoodson@redhat.com)
+- Removing ordereddict.  Replaced with sorted keys. (kwoodson@redhat.com)
+- New role (tbielawa@redhat.com)
+- Fixed for linting. (kwoodson@redhat.com)
 - enable excluders by default (jchaloup@redhat.com)
 - ignore the docker excluder status if it is not enabled by a user
   (jchaloup@redhat.com)
-
-* Tue Mar 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.26-1
 - Fix pylint/pyflakes errors on master (sdodson@redhat.com)
 - Identify PetSets in 3.4 clusters and fail if any are detected
   (tbielawa@redhat.com)
 - More logging fixes (ewolinet@redhat.com)
+- Fix for issue 3541 (srampal@cisco.com)
+- Fix to OpenshiftCLIConfig to support an ordereddict.  This was breaking test
+  cases. (kwoodson@redhat.com)
 - - update excluders to latest, in non-upgrade scenarios do not update - check
   both available excluder versions are at most of upgrade target version - get
   excluder status through status command - make excluders enablement
   configurable (jchaloup@redhat.com)
+- Adding scripts for building and pushing images (bleanhar@redhat.com)
+- Adding test_oc_adm_router. (kwoodson@redhat.com)
 - Loosely couple docker to iptables service (rteague@redhat.com)
 - Generic message directing people to contact support (sdodson@redhat.com)
 - Fixing plugin, nodeselectors, and secret pull check (ewolinet@redhat.com)
 - Adding into the origin inventory doc. (kwoodson@redhat.com)
 - Add oc_objectvalidator to upgrade check (sdodson@redhat.com)
 - Augmenting documentation for router sharding. (kwoodson@redhat.com)
+- Adding router test. (kwoodson@redhat.com)
 - openshift_facts: ensure system containers deps are installed
   (gscrivan@redhat.com)
 - Preserve order of Docker registries (eric.mountain@amadeus.com)
 - Updating metrics defaults (ewolinet@redhat.com)
 - Enable coveralls.io (jdetiber@redhat.com)
-- Adding some more logging defaults (ewolinet@redhat.com)
-- Updating stdout check for changed_when (ewolinet@redhat.com)
-- Resolving yammlint errors (ewolinet@redhat.com)
-- Adding changed_whens for role, rolebinding, and scc reconciliation based on
-  output from oadm policy command (ewolinet@redhat.com)
-
-* Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.25-1
 - Fix indentation of run_once (sdodson@redhat.com)
 - Update docs for test consolidation and remove the Makefile
   (jdetiber@redhat.com)
@@ -643,8 +1126,6 @@ Atomic OpenShift Utilities includes
   (rmeggins@redhat.com)
 - separate out test tool configs from setup.cfg (jdetiber@redhat.com)
 - Dockerfile and docs to run containerized playbooks (pep@redhat.com)
-
-* Mon Mar 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.24-1
 - Lower test coverage percentage. (kwoodson@redhat.com)
 - Mock runs differntly on travis.  Fix the mock test params to be ANY.
   (kwoodson@redhat.com)
@@ -666,17 +1147,16 @@ Atomic OpenShift Utilities includes
 - Rewrap long lines (rhcarvalho@gmail.com)
 - Remove unused argument (rhcarvalho@gmail.com)
 - Remove unused Makefile variables (rhcarvalho@gmail.com)
-- Added ports. (kwoodson@redhat.com)
-- Fixed router name to produce 2nd router. (kwoodson@redhat.com)
-- Updated to work with an array of routers. (kwoodson@redhat.com)
-- Adding support for router sharding. (kwoodson@redhat.com)
-
-* Fri Mar 03 2017 Scott Dodson <sdodson@redhat.com> 3.5.23-1
+- Adding some more logging defaults (ewolinet@redhat.com)
 - node/sdn: make /var/lib/cni persistent to ensure IPAM allocations stick
   around across node restart (dcbw@redhat.com)
 - BZ1422348 - Don't install python-ruamel-yaml (sdodson@redhat.com)
 - Re-generate modules (sdodson@redhat.com)
 - Only set ownership to etcd for thirdparty datadir (sdodson@redhat.com)
+- Added ports. (kwoodson@redhat.com)
+- Fixed router name to produce 2nd router. (kwoodson@redhat.com)
+- Updated to work with an array of routers. (kwoodson@redhat.com)
+- Adding support for router sharding. (kwoodson@redhat.com)
 - Removing the openshift_master_facts dependency (ewolinet@redhat.com)
 - bug 1420256. Initialize openshift_logging pvc_facts to empty
   (jcantril@redhat.com)
@@ -684,72 +1164,14 @@ Atomic OpenShift Utilities includes
 - Correct config for hosted registry (rteague@redhat.com)
 - Fixing checkout for bindings with -binding suffix (jupierce@redhat.com)
 - Leave an empty contiv role directory (sdodson@redhat.com)
+- Updating stdout check for changed_when (ewolinet@redhat.com)
 - test fixes for openshift_certificates_expiry (jdetiber@redhat.com)
 - oadm_policy_group/adm_policy_user module (jupierce@redhat.com)
 - Fail on Atomic if docker is too old (smilner@redhat.com)
 - Remove contiv role and playbook from rpm packages (sdodson@redhat.com)
+- Resolving yammlint errors (ewolinet@redhat.com)
 - Fixed error handling when oc adm ca create-server-cert fails.  Fixed a logic
   error in secure. (kwoodson@redhat.com)
-- regenerate lib_openshift with yedit exception changes (jdiaz@redhat.com)
-- raise exceptions when walking through object path (jdiaz@redhat.com)
-- Combined (squashed) commit for all changes related to adding Contiv support
-  into Openshift Ansible. This is the first (beta) release of Contiv with
-  Openshift and is only supported for Openshift Origin + Bare metal deployments
-  at the time of this commit. Please refer to the Openshift and Contiv official
-  documentation for details of the level of support for different features and
-  modes of operation. (srampal@cisco.com)
-
-* Thu Mar 02 2017 Scott Dodson <sdodson@redhat.com> 3.5.22-1
-- Automatic commit of package [openshift-ansible] release [3.5.21-1].
-  (sdodson@redhat.com)
-- Only set ownership to etcd for thirdparty datadir (sdodson@redhat.com)
-- bug 1420256. Initialize openshift_logging pvc_facts to empty
-  (jcantril@redhat.com)
-- Add oc_adm_policy_user task cluster-role policy (rteague@redhat.com)
-- Correct config for hosted registry (rteague@redhat.com)
-- Fixing checkout for bindings with -binding suffix (jupierce@redhat.com)
-- Leave an empty contiv role directory (sdodson@redhat.com)
-- test fixes for openshift_certificates_expiry (jdetiber@redhat.com)
-- oadm_policy_group/adm_policy_user module (jupierce@redhat.com)
-- Fail on Atomic if docker is too old (smilner@redhat.com)
-- Remove contiv role and playbook from rpm packages (sdodson@redhat.com)
-- Fixed error handling when oc adm ca create-server-cert fails.  Fixed a logic
-  error in secure. (kwoodson@redhat.com)
-- Combined (squashed) commit for all changes related to adding Contiv support
-  into Openshift Ansible. This is the first (beta) release of Contiv with
-  Openshift and is only supported for Openshift Origin + Bare metal deployments
-  at the time of this commit. Please refer to the Openshift and Contiv official
-  documentation for details of the level of support for different features and
-  modes of operation. (srampal@cisco.com)
-- Revert "Removed JGroups cert and password generation." (sdodson@redhat.com)
-- Do not attempt to override openstack nodename (jdetiber@redhat.com)
-
-* Thu Mar 02 2017 Scott Dodson <sdodson@redhat.com> 3.5.21-1
-- Only set ownership to etcd for thirdparty datadir (sdodson@redhat.com)
-- bug 1420256. Initialize openshift_logging pvc_facts to empty
-  (jcantril@redhat.com)
-- Add oc_adm_policy_user task cluster-role policy (rteague@redhat.com)
-- Correct config for hosted registry (rteague@redhat.com)
-- Fixing checkout for bindings with -binding suffix (jupierce@redhat.com)
-- Leave an empty contiv role directory (sdodson@redhat.com)
-- test fixes for openshift_certificates_expiry (jdetiber@redhat.com)
-- oadm_policy_group/adm_policy_user module (jupierce@redhat.com)
-- Fail on Atomic if docker is too old (smilner@redhat.com)
-- Remove contiv role and playbook from rpm packages (sdodson@redhat.com)
-- Fixed error handling when oc adm ca create-server-cert fails.  Fixed a logic
-  error in secure. (kwoodson@redhat.com)
-- Combined (squashed) commit for all changes related to adding Contiv support
-  into Openshift Ansible. This is the first (beta) release of Contiv with
-  Openshift and is only supported for Openshift Origin + Bare metal deployments
-  at the time of this commit. Please refer to the Openshift and Contiv official
-  documentation for details of the level of support for different features and
-  modes of operation. (srampal@cisco.com)
-
-* Wed Mar 01 2017 Scott Dodson <sdodson@redhat.com> 3.5.20-1
-- Add ca-bundle.crt to list of certs to synchronize. (abutcher@redhat.com)
-- Do not force custom ca cert deployment. (abutcher@redhat.com)
-
-* Wed Mar 01 2017 Scott Dodson <sdodson@redhat.com> 3.5.19-1
 - removing extra when condition (kwoodson@redhat.com)
 - Removing run_once. (kwoodson@redhat.com)
 - Adding the activeDeadlineSeconds.  Removed debug. (kwoodson@redhat.com)
@@ -761,40 +1183,40 @@ Atomic OpenShift Utilities includes
 - Add FIS templates (sdodson@redhat.com)
 - Removed duplicate host param. (kwoodson@redhat.com)
 - Fixed failures on create when objects exist. (kwoodson@redhat.com)
+- Add ca-bundle.crt to list of certs to synchronize. (abutcher@redhat.com)
+- Do not force custom ca cert deployment. (abutcher@redhat.com)
+- regenerate lib_openshift with yedit exception changes (jdiaz@redhat.com)
+- Adding changed_whens for role, rolebinding, and scc reconciliation based on
+  output from oadm policy command (ewolinet@redhat.com)
+- raise exceptions when walking through object path (jdiaz@redhat.com)
 - logging fluentd filter was renamed to viaq (rmeggins@redhat.com)
+- Add 'persistentVolumeClaim' to volume_info type (rteague@redhat.com)
 - Updating delete/recreate with replace --force. (kwoodson@redhat.com)
 - Fixed logic error.  Ensure both svc and dc exist. (kwoodson@redhat.com)
 - Modified base debug statements.  Fixed oc_secret debug/verbose flag.  Added
   reencrypt for route. (kwoodson@redhat.com)
 - Adding support for a route with certs and reencrypt. (kwoodson@redhat.com)
-- install the latest excluders (jchaloup@redhat.com)
-
-* Tue Feb 28 2017 Scott Dodson <sdodson@redhat.com> 3.5.18-1
-- Add 'persistentVolumeClaim' to volume_info type (rteague@redhat.com)
 - node: use the new oc_atomic_container module (gscrivan@redhat.com)
 - master: use the new oc_atomic_container module (gscrivan@redhat.com)
 - etcd: use the new oc_atomic_container module (gscrivan@redhat.com)
 - lib_openshift: new module atomic_container (gscrivan@redhat.com)
+- Combined (squashed) commit for all changes related to adding Contiv support
+  into Openshift Ansible. This is the first (beta) release of Contiv with
+  Openshift and is only supported for Openshift Origin + Bare metal deployments
+  at the time of this commit. Please refer to the Openshift and Contiv official
+  documentation for details of the level of support for different features and
+  modes of operation. (srampal@cisco.com)
 - Re-generate lib_openshift (sdodson@redhat.com)
-- Correct fact creation for pvc (rteague@redhat.com)
-- Add SDNValidator Module (mkhan@redhat.com)
-
-* Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.17-1
 - Make s3_volume_mount available to set_fact call (smilner@redhat.com)
-- Create hosted registry service (rteague@redhat.com)
-
-* Mon Feb 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.16-1
+- Correct fact creation for pvc (rteague@redhat.com)
 - [oc_obj] Move namespace argument to end of command. (abutcher@redhat.com)
+- Create hosted registry service (rteague@redhat.com)
 - Correct typo in haproxy router collection. (abutcher@redhat.com)
 - Fix issue #3505, add notes about origin upgrade versions support in BYO
   upgrade README file (contact@stephane-klein.info)
 - Moving replica logic to filter_plugin to fix skipped task variable behavior.
   (kwoodson@redhat.com)
-- Removed JGroups cert and password generation. (juraci@kroehling.de)
-- openshift_logging default to 2 replicas of primary shards
-  (jcantril@redhat.com)
-
-* Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.15-1
+- install the latest excluders (jchaloup@redhat.com)
 - openshift_hosted: Update tasks to use oc_ modules (rteague@redhat.com)
 - Rebased. (kwoodson@redhat.com)
 - Fixed indentation (kwoodson@redhat.com)
@@ -804,20 +1226,17 @@ Atomic OpenShift Utilities includes
 - Revert "Add centos paas sig common" (sdodson@redhat.com)
 - Fix Quick Installer failed due to a Python method failure
   (tbielawa@redhat.com)
+- Removed JGroups cert and password generation. (juraci@kroehling.de)
 - Fix symlink to lookup_plugins/oo_option.py (jchaloup@redhat.com)
-- Prepare for origin moving to OCP version scheme (ccoleman@redhat.com)
-- BZ1414276 - Quote ansible_ssh_user when determining group id
-  (sdodson@redhat.com)
-- bug 1417261. Quote name and secrets in logging templates
-  (jcantril@redhat.com)
-
-* Fri Feb 24 2017 Scott Dodson <sdodson@redhat.com> 3.5.14-1
 - Use 2 and 3 friendly urlparse in oo_filters (smilner@redhat.com)
 - Update v1.5 content (sdodson@redhat.com)
 - Update v1.4 content (sdodson@redhat.com)
 - xPaaS ose-v1.3.6 (sdodson@redhat.com)
+- Prepare for origin moving to OCP version scheme (ccoleman@redhat.com)
 - initialize_openshift_version: handle excluder packages (gscrivan@redhat.com)
 - Add insecure edge termination policy for kibana. (whearn@redhat.com)
+- openshift_logging default to 2 replicas of primary shards
+  (jcantril@redhat.com)
 - Fixing doc for oc_adm_ca_server_cert. (kwoodson@redhat.com)
 - Convert selectattr tests to use 'match' (rteague@redhat.com)
 - Re-generate lib_openshift and lib_utils libraries (sdodson@redhat.com)
@@ -825,6 +1244,8 @@ Atomic OpenShift Utilities includes
 - Updated for pylint. Fixed create doc. (kwoodson@redhat.com)
 - Attempt to handle router preparation errors. (kwoodson@redhat.com)
 - Fixing the generate tox tests. (kwoodson@redhat.com)
+- BZ1414276 - Quote ansible_ssh_user when determining group id
+  (sdodson@redhat.com)
 - Moving import to local class. (kwoodson@redhat.com)
 - Added required_together.  Added two minor bug fixes for when data is not
   passed. (kwoodson@redhat.com)
@@ -843,20 +1264,7 @@ Atomic OpenShift Utilities includes
   (kwoodson@redhat.com)
 - Added backup feature.  Fixed a bug with reading the certificate and verifying
   names.  Added force option. (kwoodson@redhat.com)
-- Added copy support when modifying cert and key on existence
-  (kwoodson@redhat.com)
-- Small spacing fix. (kwoodson@redhat.com)
-- Updated doc and defined defaults for signer_* (kwoodson@redhat.com)
-- Removing cmd, fixed docs and comments. (kwoodson@redhat.com)
-- Rename of oadm_ca to oc_adm_ca.  Decided to whittle down to the direct call,
-  server_cert. (kwoodson@redhat.com)
-- Fixing doc. (kwoodson@redhat.com)
-- Adding oadm_ca to lib_openshift. (kwoodson@redhat.com)
-- add dependency on openshift_repos (sdodson@redhat.com)
-- Add centos paas sig common (sdodson@redhat.com)
-- Disentangle openshift_repos from openshift_facts (sdodson@redhat.com)
-
-* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.13-1
+- Add SDNValidator Module (mkhan@redhat.com)
 - bug 1425321. Default the master api port based on the facts
   (jcantril@redhat.com)
 - Bug 1420219 - No log entry can be found in Kibana UI after deploying logging
@@ -867,7 +1275,17 @@ Atomic OpenShift Utilities includes
 - Implement fake openssl cert classes (tbielawa@redhat.com)
 - Removed oadm_ references in doc. (kwoodson@redhat.com)
 - Remove unused plays (jhadvig@redhat.com)
+- Remove pytest-related dependencies from setup.py (rhcarvalho@gmail.com)
+- Added copy support when modifying cert and key on existence
+  (kwoodson@redhat.com)
+- Small spacing fix. (kwoodson@redhat.com)
+- Updated doc and defined defaults for signer_* (kwoodson@redhat.com)
 - Removed unused code.  Made tests executable. (kwoodson@redhat.com)
+- Removing cmd, fixed docs and comments. (kwoodson@redhat.com)
+- Rename of oadm_ca to oc_adm_ca.  Decided to whittle down to the direct call,
+  server_cert. (kwoodson@redhat.com)
+- Fixing doc. (kwoodson@redhat.com)
+- Adding oadm_ca to lib_openshift. (kwoodson@redhat.com)
 - Fixing docs. Fixed default_cert suggestion. (kwoodson@redhat.com)
 - Renamed modules, fixed docs, renamed variables, and cleaned up logic.
   (kwoodson@redhat.com)
@@ -876,13 +1294,10 @@ Atomic OpenShift Utilities includes
 - Adding router and registry to lib_openshift. (kwoodson@redhat.com)
 - bug 142026. Ensure Ops PVC prefix are initialized to empty when ops e…
   nabled (jcantril@redhat.com)
-
-* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.12-1
-- Remove pytest-related dependencies from setup.py (rhcarvalho@gmail.com)
-
-* Tue Feb 21 2017 Scott Dodson <sdodson@redhat.com> 3.5.11-1
 - Reverting logic for verify api handler to be uniform with other ways we
   verify, will be uniformly updated in future (ewolinet@redhat.com)
+- bug 1417261. Quote name and secrets in logging templates
+  (jcantril@redhat.com)
 - openshift_facts: handle 'latest' version (gscrivan@redhat.com)
 - Surrounding node selector values with quotes (ewolinet@redhat.com)
 - Raise the bar on coverage requirements (rhcarvalho@gmail.com)
@@ -914,9 +1329,12 @@ Atomic OpenShift Utilities includes
 - Document how to find dead Python code (rhcarvalho@gmail.com)
 - updating until statments on uri module for api verification
   (ewolinet@redhat.com)
+- add dependency on openshift_repos (sdodson@redhat.com)
 - Fixing a bug by removing default debug (kwoodson@redhat.com)
 - Updating to use uri module instead (ewolinet@redhat.com)
 - Updating node playbooks to use oc_obj (rteague@redhat.com)
+- Add centos paas sig common (sdodson@redhat.com)
+- Disentangle openshift_repos from openshift_facts (sdodson@redhat.com)
 - Adding missing handler to resolve error that it was not found
   (ewolinet@redhat.com)
 - String compatibility for python2,3 (kwoodson@redhat.com)
@@ -927,14 +1345,7 @@ Atomic OpenShift Utilities includes
 - Fix typo, add symlinks for roles (sdodson@redhat.com)
 - Resolve deprecation warning (rteague@redhat.com)
 - Revert temporary hack to skip router/registry upgrade. (dgoodwin@redhat.com)
-- Register cloudfront privkey when required (smilner@redhat.com)
-- Removing trailing spaces (esauer@redhat.com)
-- Making router pods scale with infra nodes (esauer@redhat.com)
-
-* Thu Feb 16 2017 Scott Dodson <sdodson@redhat.com> 3.5.10-1
 - Don't attempt to install python-ruamel-yaml on atomic (sdodson@redhat.com)
-
-* Thu Feb 16 2017 Scott Dodson <sdodson@redhat.com> 3.5.9-1
 - Pleasing the linting gods. (kwoodson@redhat.com)
 - Fixed tests for pyyaml vs ruamel.  Added import logic.  Fixed safe load.
   (kwoodson@redhat.com)
@@ -942,6 +1353,7 @@ Atomic OpenShift Utilities includes
 - Adding fallback support for pyyaml. (kwoodson@redhat.com)
 - bug 1420217. Default ES memory to be compariable to 3.4 deployer
   (jcantril@redhat.com)
+- Register cloudfront privkey when required (smilner@redhat.com)
 - initialize oo_nodes_to_upgrade group when running control plane upgrade only
   (jchaloup@redhat.com)
 - adding some quotes for safety (ewolinet@redhat.com)
@@ -958,22 +1370,16 @@ Atomic OpenShift Utilities includes
 - Add upgrade job step after the entire upgrade performs (maszulik@redhat.com)
 - Ansible Lint cleanup and making filter/lookup plugins used by
   openshift_master_facts available within the role (jdetiber@redhat.com)
-- node, vars/main.yml: define l_is_ha and l_is_same_version
-  (gscrivan@redhat.com)
-- master, vars/main.yml: define l_is_ha and l_is_same_version
-  (gscrivan@redhat.com)
-- node: simplify when conditionals (gscrivan@redhat.com)
-- openvswitch: simplify when conditionals (gscrivan@redhat.com)
-- uninstall: delete master-api and master-controllers (gscrivan@redhat.com)
-- master: support HA deployments with system containers (gscrivan@redhat.com)
-
-* Tue Feb 14 2017 Scott Dodson <sdodson@redhat.com> 3.5.8-1
 - Update variant_version (smilner@redhat.com)
 - Add block+when skip to `openshift_facts` tasks (tbielawa@redhat.com)
 - Trying to fix up/audit note some changes (tbielawa@redhat.com)
 - updating defaults for logging and metrics roles (ewolinet@redhat.com)
 - Fix logic for checking docker-registry (rteague@redhat.com)
+- node, vars/main.yml: define l_is_ha and l_is_same_version
+  (gscrivan@redhat.com)
 - Modify playbooks to use oc_obj module (rteague@redhat.com)
+- master, vars/main.yml: define l_is_ha and l_is_same_version
+  (gscrivan@redhat.com)
 - oc route commands now using the oc_route module (smilner@redhat.com)
 - Modify playbooks to use oc_label module (rteague@redhat.com)
 - Fix cases where child classes override OpenShiftCLI values
@@ -984,49 +1390,49 @@ Atomic OpenShift Utilities includes
 - Fix Bug 1419654 Remove legacy config_base fallback to /etc/openshift
   (sdodson@redhat.com)
 - Modify playbooks to use oadm_manage_node module (rteague@redhat.com)
+- Removing trailing spaces (esauer@redhat.com)
 - Removed adhoc s3_registry (smilner@redhat.com)
 - replace 'oc service' command with its lib_openshift equivalent
   (jchaloup@redhat.com)
+- Making router pods scale with infra nodes (esauer@redhat.com)
+- Provisioning of nfs share and PV for logging ops (efreiber@redhat.com)
 - Add libselinux-python dependency for localhost (sdodson@redhat.com)
 - oc secrets now done via oc_secret module (smilner@redhat.com)
 - More fixes for reboot/wait for hosts. (dgoodwin@redhat.com)
+- fix openshift_logging where defaults filter needs quoting
+  (jcantril@redhat.com)
 - Do not hard code package names (rhcarvalho@gmail.com)
 - Refactor code to access values from task_vars (rhcarvalho@gmail.com)
 - oc serviceaccount now done via oc_serviceaccount module (smilner@redhat.com)
-- Include rpm/git paths in expiry README. (tbielawa@redhat.com)
-- Fixing docs, linting, and comments. (kwoodson@redhat.com)
-- Document how to create new checks (rhcarvalho@gmail.com)
-- Introduce tag notation for checks (rhcarvalho@gmail.com)
-- Replace multi-role checks with action plugin (rhcarvalho@gmail.com)
-- Reword module documentation (rhcarvalho@gmail.com)
-- Separate import groups with a blank line (rhcarvalho@gmail.com)
-- Remove commented-out debugging code (rhcarvalho@gmail.com)
-- Replace service account secrets handling with oc_serviceaccount_secret module
-  (jchaloup@redhat.com)
-- Make the cert expiry playbooks runnable (tbielawa@redhat.com)
-- Pleasing the linting bot. (kwoodson@redhat.com)
-- Adding integration tests. (kwoodson@redhat.com)
-- Adding oc_env to lib_openshift. (kwoodson@redhat.com)
-
-* Fri Feb 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.7-1
-- Provisioning of nfs share and PV for logging ops (efreiber@redhat.com)
-- fix openshift_logging where defaults filter needs quoting
-  (jcantril@redhat.com)
 - bug 1420229. Bounce metrics components to recognize changes on updates or
   upgrades (jcantril@redhat.com)
+- node: simplify when conditionals (gscrivan@redhat.com)
+- openvswitch: simplify when conditionals (gscrivan@redhat.com)
+- uninstall: delete master-api and master-controllers (gscrivan@redhat.com)
+- master: support HA deployments with system containers (gscrivan@redhat.com)
 - Ensure etcd client certs are regenerated with embedded etcd.
   (abutcher@redhat.com)
 - bug 1420425. Allow setting of public facing certs for kibana in
   openshift_logging role (jcantril@redhat.com)
 - bug 1399523. Ops pvc should have different prefix from non-ops for
   openshift_logging (jcantril@redhat.com)
+- Include rpm/git paths in expiry README. (tbielawa@redhat.com)
+- Fixing docs, linting, and comments. (kwoodson@redhat.com)
 - fix bug 1420204. Default openshift_logging_use_journal to empty so fluentd
   detects and is consistent with deployer (jcantril@redhat.com)
 - Let pylint use as many CPUs as available (rhcarvalho@gmail.com)
 - Add note about extraneous virtualenvs (rhcarvalho@gmail.com)
+- Document how to create new checks (rhcarvalho@gmail.com)
+- Introduce tag notation for checks (rhcarvalho@gmail.com)
+- Replace multi-role checks with action plugin (rhcarvalho@gmail.com)
 - Removing the /usr/bin/ansible-playbook dependency in in the spec file
   (mwoodson@redhat.com)
 - use the correct name for the ruamel-yaml python module (jchaloup@redhat.com)
+- Reword module documentation (rhcarvalho@gmail.com)
+- Separate import groups with a blank line (rhcarvalho@gmail.com)
+- Remove commented-out debugging code (rhcarvalho@gmail.com)
+- Replace service account secrets handling with oc_serviceaccount_secret module
+  (jchaloup@redhat.com)
 - node: refactor Docker container tasks in a block (gscrivan@redhat.com)
 - etcd: use as system container (gscrivan@redhat.com)
 - Implement uninstall for system containers (gscrivan@redhat.com)
@@ -1036,37 +1442,33 @@ Atomic OpenShift Utilities includes
 - Bug 1420234 - illegal_argument_exception in Kibana UI. (rmeggins@redhat.com)
 - bug 1420538. Allow users to set supplementalGroup for Cassandra
   (jcantril@redhat.com)
-- bug 1419962. fix openshift_metrics pwd issue after reinstall where cassandra
-  has incorrect pwd exception (jcantril@redhat.com)
-- node: ensure conntrack-tools is installed (gscrivan@redhat.com)
-- Updating defaults to pull from previously defined variable names used in
-  playbooks (ewolinet@redhat.com)
-- fixup! master: latest use same predicates as last version
-  (gscrivan@redhat.com)
-- fixup! master: latest use same priorities as last version
-  (gscrivan@redhat.com)
-- Set image change triggers to auto=true for OCP 3.4 - for v1.5
-  (simaishi@redhat.com)
-- Set image change triggers to auto=true for OCP 3.4
-  (https://github.com/ManageIQ/manageiq-pods/pull/88) (simaishi@redhat.com)
-- master: latest use same predicates as last version (gscrivan@redhat.com)
-- master: latest use same priorities as last version (gscrivan@redhat.com)
-- Reverting commit 3257 and renaming master_url to openshift_logging_master_url
-  (ewolinet@redhat.com)
-
-* Thu Feb 09 2017 Scott Dodson <sdodson@redhat.com> 3.5.6-1
 - Document openshift_cockpit_deployer_prefix and add
   openshift_cockpit_deployer_version (sdodson@redhat.com)
+- Make the cert expiry playbooks runnable (tbielawa@redhat.com)
 - Ensure embedded etcd config uses CA bundle. (abutcher@redhat.com)
 - bug 1420684. On logging upgrade use the correct value for namespace
   (jcantril@redhat.com)
 - Fixing docs. (kwoodson@redhat.com)
+- bug 1419962. fix openshift_metrics pwd issue after reinstall where cassandra
+  has incorrect pwd exception (jcantril@redhat.com)
 - Fixing for linters. (kwoodson@redhat.com)
 - Adding test cases. (kwoodson@redhat.com)
 - Fixing docs. (kwoodson@redhat.com)
 - oc process (ihorvath@redhat.com)
+- node: ensure conntrack-tools is installed (gscrivan@redhat.com)
+- Updating defaults to pull from previously defined variable names used in
+  playbooks (ewolinet@redhat.com)
+- Pleasing the linting bot. (kwoodson@redhat.com)
+- fixup! master: latest use same predicates as last version
+  (gscrivan@redhat.com)
+- fixup! master: latest use same priorities as last version
+  (gscrivan@redhat.com)
+- Adding integration tests. (kwoodson@redhat.com)
+- Set image change triggers to auto=true for OCP 3.4 - for v1.5
+  (simaishi@redhat.com)
 - Reference class instead of self.__class__ within super constructor to avoid
   calling self forever. (abutcher@redhat.com)
+- Adding oc_env to lib_openshift. (kwoodson@redhat.com)
 - Fixing for flake8 spacing. (kwoodson@redhat.com)
 - Fixing tests for linters. (kwoodson@redhat.com)
 - Adding port support for route. (kwoodson@redhat.com)
@@ -1074,24 +1476,25 @@ Atomic OpenShift Utilities includes
   claims (jcantril@redhat.com)
 - Added temporary kubeconfig file. Fixed tests to coincide with tmpfile.
   (kwoodson@redhat.com)
+- Set image change triggers to auto=true for OCP 3.4
+  (https://github.com/ManageIQ/manageiq-pods/pull/88) (simaishi@redhat.com)
 - fixes 1419839.  Install only heapster for openshift_metrics when heapster
   standalone flag is set (jcantril@redhat.com)
 - Adding code to copy kubeconfig before running oc commands.
   (kwoodson@redhat.com)
+- master: latest use same predicates as last version (gscrivan@redhat.com)
+- master: latest use same priorities as last version (gscrivan@redhat.com)
 - Changed lib_openshift to use real temporary files. (twiest@redhat.com)
 - Fixed ansible module unit and integration tests and added runners.
   (twiest@redhat.com)
-- [openshift_ca] Reference client binary from openshift_ca_host.
-  (abutcher@redhat.com)
-
-* Tue Feb 07 2017 Scott Dodson <sdodson@redhat.com> 3.5.5-1
 - Moving to ansible variable. (kwoodson@redhat.com)
 - Specifying port for wait_for call. (kwoodson@redhat.com)
+- Reverting commit 3257 and renaming master_url to openshift_logging_master_url
+  (ewolinet@redhat.com)
+- [openshift_ca] Reference client binary from openshift_ca_host.
+  (abutcher@redhat.com)
 - Fix playbooks/byo/openshift_facts.yml include path (sdodson@redhat.com)
 - Add missing symlink to roles (rhcarvalho@gmail.com)
-- Copies CloudFront pem file to registry hosts (smilner@redhat.com)
-
-* Mon Feb 06 2017 Scott Dodson <sdodson@redhat.com> 3.5.4-1
 - Bump registry-console to 3.5 (sdodson@redhat.com)
 - Added oc_serviceaccount_secret to lib_openshift. (twiest@redhat.com)
 - fix 1406057. Allow openshift_metrics nodeselectors for components
@@ -1103,6 +1506,7 @@ Atomic OpenShift Utilities includes
 - Add excluder management to upgrade and config playbooks (sdodson@redhat.com)
 - Add openshift_excluder role (sdodson@redhat.com)
 - Fix RHEL Subscribe std_include path (tbielawa@redhat.com)
+- Copies CloudFront pem file to registry hosts (smilner@redhat.com)
 - Remove legacy router/registry certs and client configs from synchronized
   master certs. (abutcher@redhat.com)
 - Bump registry to 3.4 (sdodson@redhat.com)
