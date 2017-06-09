@@ -124,6 +124,12 @@
     edits: "{{ openshift_hosted_registry_edits }}"
     force: "{{ True|bool in openshift_hosted_registry_force }}"
 
+- name: Ensure OpenShift registry correctly rolls out
+  command: |
+    oc rollout status deploymentconfig {{ openshift_hosted_registry_name }} \
+                      --namespace {{ openshift_hosted_registry_namespace }} \
+                      --config {{ openshift.common.config_base }}/master/admin.kubeconfig
+
 - include: storage/glusterfs.yml
   when:
   - openshift.hosted.registry.storage.kind | default(none) == 'glusterfs' or openshift.hosted.registry.storage.glusterfs.swap

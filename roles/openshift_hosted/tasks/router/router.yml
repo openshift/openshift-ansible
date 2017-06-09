@@ -55,7 +55,7 @@
     state: present
   with_items: "{{ openshift_hosted_routers }}"
 
-- name: Grant the router serivce account(s) access to the appropriate scc
+- name: Grant the router service account(s) access to the appropriate scc
   oc_adm_policy_user:
     user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
     namespace: "{{ item.namespace }}"
@@ -89,18 +89,10 @@
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
-  register: routerout
 
-# This should probably move to module
-- name: wait for deploy
-  pause:
-    seconds: 30
-  when: routerout.changed
-
-- name: Ensure router replica count matches desired
-  oc_scale:
-    kind: dc
-    name: "{{ item.name | default('router') }}"
-    namespace: "{{ item.namespace | default('default') }}"
-    replicas: "{{ item.replicas }}"
+- name: Ensure OpenShift router correctly rolls out
+  command: |
+    oc rollout status deploymentconfig {{ item.name }} \
+                      --namespace {{ item.namespace | default('default') }} \
+                      --config {{ openshift.common.config_base }}/master/admin.kubeconfig
   with_items: "{{ openshift_hosted_routers }}"
