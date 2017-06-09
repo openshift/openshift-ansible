@@ -50,4 +50,6 @@ class DockerHostMixin(object):
                 "Unable to install required packages on this host:\n"
                 "    {deps}\n{msg}"
             ).format(deps=',\n    '.join(self.dependencies), msg=msg)
-        return msg, result.get("failed") or result.get("rc", 0) != 0, result.get("changed")
+        failed = result.get("failed", False) or result.get("rc", 0) != 0
+        changed = result.get("changed", False)
+        return msg, failed, changed
