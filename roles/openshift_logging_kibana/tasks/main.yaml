@@ -43,6 +43,31 @@
     kibana_name: "{{ 'logging-kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     kibana_component: "{{ 'kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
 
+# Check {{ generated_certs_dir }} for session_secret and oauth_secret
+- name: Checking for session_secret
+  stat: path="{{generated_certs_dir}}/session_secret"
+  register: session_secret_file
+
+- name: Checking for oauth_secret
+  stat: path="{{generated_certs_dir}}/oauth_secret"
+  register: oauth_secret_file
+
+# gen session_secret if necessary
+- name: Generate session secret
+  copy:
+    content: "{{ 200 | oo_random_word }}"
+    dest: "{{ generated_certs_dir }}/session_secret"
+  when:
+  - not session_secret_file.stat.exists
+
+# gen oauth_secret if necessary
+- name: Generate oauth secret
+  copy:
+    content: "{{ 64 | oo_random_word }}"
+    dest: "{{ generated_certs_dir }}/oauth_secret"
+  when:
+  - not oauth_secret_file.stat.exists
+
 - name: Retrieving the cert to use when generating secrets for the logging components
   slurp:
     src: "{{ generated_certs_dir }}/{{ item.file }}"
@@ -52,6 +77,8 @@
   - { name: "kibana_internal_key", file: "kibana-internal.key"}
   - { name: "kibana_internal_cert", file: "kibana-internal.crt"}
   - { name: "server_tls", file: "server-tls.json"}
+  - { name: "session_secret", file: "session_secret" }
+  - { name: "oauth_secret", file: "oauth_secret" }
 
 # services
 - name: Set {{ kibana_name }} service
@@ -120,19 +147,16 @@
     files:
     - "{{ tempdir }}/templates/kibana-route.yaml"
 
-# gen session_secret -- if necessary
-# TODO: make idempotent
-- name: Generate proxy session
-  set_fact:
-    session_secret: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(200) }}"
-  check_mode: no
+# preserve list of current hostnames
+- name: Get current oauthclient hostnames
+  oc_obj:
+    state: list
+    name: kibana-proxy
+    namespace: "{{ openshift_logging_namespace }}"
+    kind: oauthclient
+  register: oauth_client_list
 
-# gen oauth_secret -- if necessary
-# TODO: make idempotent
-- name: Generate oauth client secret
-  set_fact:
-    oauth_secret: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(64) }}"
-  check_mode: no
+- set_fact: proxy_hostnames={{ oauth_client_list.results.results[0].redirectURIs | default ([]) + ['https://' ~ openshift_logging_kibana_hostname] }}
 
 # create oauth client
 - name: Create oauth-client template
@@ -140,8 +164,8 @@
     src: oauth-client.j2
     dest: "{{ tempdir }}/templates/oauth-client.yml"
   vars:
-    kibana_hostname: "{{ openshift_logging_kibana_hostname }}"
-    secret: "{{ oauth_secret }}"
+    kibana_hostnames: "{{ proxy_hostnames | unique }}"
+    secret: "{{ key_pairs | entry_from_named_pair('oauth_secret') | b64decode }}"
 
 - name: Set kibana-proxy oauth-client
   oc_obj:
@@ -183,9 +207,9 @@
     #  path: "{{ generated_certs_dir }}/server-tls.json"
     contents:
     - path: oauth-secret
-      data: "{{ oauth_secret }}"
+      data: "{{ key_pairs | entry_from_named_pair('oauth_secret') | b64decode }}"
     - path: session-secret
-      data: "{{ session_secret }}"
+      data: "{{ key_pairs | entry_from_named_pair('session_secret') | b64decode }}"
     - path: server-key
       data: "{{ key_pairs | entry_from_named_pair('kibana_internal_key') | b64decode }}"
     - path: server-cert
