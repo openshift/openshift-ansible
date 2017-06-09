@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.97
+Version:        3.6.98
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.98-1
+- 
+
 * Fri Jun 09 2017 Scott Dodson <sdodson@redhat.com> 3.6.97-1
 - Updated to using oo_random_word for secret gen (ewolinet@redhat.com)
 - Updating kibana to store session and oauth secrets for reuse, fix oauthclient
