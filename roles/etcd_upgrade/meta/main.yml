@@ -14,3 +14,4 @@ galaxy_info:
   - system
 dependencies:
 - role: etcd_common
+  r_etcd_common_embedded_etcd: "{{ r_etcd_upgrade_embedded_etcd }}"
