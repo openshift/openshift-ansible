@@ -5,14 +5,6 @@
     name: "{{ glusterfs_namespace }}"
   when: glusterfs_is_native or glusterfs_heketi_is_native
 
-- name: Make sure heketi-client is installed
-  package: name=heketi-client state=present
-  when: not openshift.common.is_atomic | bool
-
-- name: Verify heketi-cli is installed
-  shell: "command -v heketi-cli >/dev/null 2>&1 || { echo >&2 'ERROR: heketi-cli must be installed.'; exit 1; }"
-  changed_when: False
-
 - name: Delete pre-existing heketi resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
@@ -25,6 +17,8 @@
     selector: "deploy-heketi"
   - kind: "svc"
     name: "heketi-storage-endpoints"
+  - kind: "secret"
+    name: "heketi-{{ glusterfs_name }}-topology-secret"
   - kind: "template,route,service,dc"
     name: "heketi-{{ glusterfs_name }}"
   - kind: "svc"
@@ -122,39 +116,6 @@
   # heketi is not missing when there are one or more pods with matching labels whose 'Ready' status is True
   - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
 
-- include: heketi_deploy_part1.yml
-  when:
-  - glusterfs_heketi_is_native
-  - glusterfs_heketi_deploy_is_missing
-  - glusterfs_heketi_is_missing
-
-- name: Determine heketi URL
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    state: list
-    kind: ep
-    selector: "glusterfs in (deploy-heketi-{{ glusterfs_name }}-service, heketi-{{ glusterfs_name }}-service)"
-  register: heketi_url
-  until:
-  - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"
-  - "heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port != ''"
-  delay: 10
-  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
-  when:
-  - glusterfs_heketi_is_native
-  - glusterfs_heketi_url is undefined
-
-- name: Set heketi URL
-  set_fact:
-    glusterfs_heketi_url: "{{ heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip }}:{{ heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port }}"
-  when:
-  - glusterfs_heketi_is_native
-  - glusterfs_heketi_url is undefined
-
-- name: Verify heketi service
-  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' cluster list"
-  changed_when: False
-
 - name: Generate topology file
   template:
     src: "{{ openshift.common.examples_content_version }}/topology.json.j2"
@@ -162,8 +123,28 @@
   when:
   - glusterfs_heketi_topology_load
 
+- include: heketi_deploy_part1.yml
+  when:
+  - glusterfs_heketi_is_native
+  - glusterfs_heketi_deploy_is_missing
+  - glusterfs_heketi_is_missing
+
+- name: Set heketi URL
+  set_fact:
+    glusterfs_heketi_url: "localhost:8080"
+  when:
+  - glusterfs_heketi_is_native
+
+- name: Set heketi-cli command
+  set_fact:
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}oc rsh {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {% endif %}heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}'"
+
+- name: Verify heketi service
+  command: "{{ glusterfs_heketi_client }} cluster list"
+  changed_when: False
+
 - name: Load heketi topology
-  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
+  command: "{{ glusterfs_heketi_client }} topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
   register: topology_load
   failed_when: "topology_load.rc != 0 or 'Unable' in topology_load.stdout"
   when:

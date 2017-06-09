@@ -85,6 +85,8 @@ objects:
           volumeMounts:
           - name: db
             mountPath: /var/lib/heketi
+          - name: topology
+            mountPath: ${TOPOLOGY_PATH}
           readinessProbe:
             timeoutSeconds: 3
             initialDelaySeconds: 3
@@ -99,6 +101,9 @@ objects:
               port: 8080
         volumes:
         - name: db
+        - name: topology
+          secret:
+            secretName: heketi-${CLUSTER_NAME}-topology-secret
 parameters:
 - name: HEKETI_USER_KEY
   displayName: Heketi User Secret
@@ -119,3 +124,6 @@ parameters:
 - name: CLUSTER_NAME
   displayName: GlusterFS cluster name
   value: glusterfs
+- name: TOPOLOGY_PATH
+  displayName: heketi topology file location
+  required: True

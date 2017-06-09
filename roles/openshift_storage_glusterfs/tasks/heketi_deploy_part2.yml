@@ -1,8 +1,10 @@
 ---
 - name: Create heketi DB volume
-  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' setup-openshift-heketi-storage --listfile {{ mktemp.stdout }}/heketi-storage.json"
+  command: "{{ glusterfs_heketi_client }} setup-openshift-heketi-storage --listfile /tmp/heketi-storage.json"
   register: setup_storage
-  failed_when: False
+
+- name: Copy heketi-storage list
+  shell: "{{ openshift.common.client_binary }} rsh {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
 
 # This is used in the subsequent task
 - name: Copy the admin client config
@@ -48,6 +50,8 @@
     selector: "deploy-heketi"
   - kind: "svc"
     name: "heketi-storage-endpoints"
+  - kind: "secret"
+    name: "heketi-{{ glusterfs_name }}-topology-secret"
 
 - name: Generate heketi endpoints
   template:
@@ -118,23 +122,10 @@
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
-- name: Determine heketi URL
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    state: list
-    kind: ep
-    selector: "glusterfs=heketi-{{ glusterfs_name }}-service"
-  register: heketi_url
-  until:
-  - "heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip != ''"
-  - "heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port != ''"
-  delay: 10
-  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
-
-- name: Set heketi URL
+- name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_url: "{{ heketi_url.results.results[0]['items'][0].subsets[0].addresses[0].ip }}:{{ heketi_url.results.results[0]['items'][0].subsets[0].ports[0].port }}"
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}oc rsh {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {% endif %}heketi-cli -s http://localhost:8080 --user admin --secret '{{ glusterfs_heketi_admin_key }}'"
 
 - name: Verify heketi service
-  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' cluster list"
+  command: "{{ glusterfs_heketi_client }} cluster list"
   changed_when: False

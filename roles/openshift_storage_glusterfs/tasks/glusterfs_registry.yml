@@ -66,9 +66,9 @@
     - "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
 
 - name: Check if GlusterFS registry volume exists
-  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' volume list"
+  command: "{{ glusterfs_heketi_client }} volume list"
   register: registry_volume
 
 - name: Create GlusterFS registry volume
-  command: "heketi-cli -s http://{{ glusterfs_heketi_url }} --user admin --secret '{{ glusterfs_heketi_admin_key }}' volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
+  command: "{{ glusterfs_heketi_client }} volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
   when: "openshift.hosted.registry.storage.glusterfs.path not in registry_volume.stdout"
