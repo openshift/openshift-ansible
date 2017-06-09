@@ -1,0 +1,19 @@
+---
+# Install default storage classes in GCE & AWS
+- name: Ensure storageclass object
+  oc_obj:
+    kind: storageclass
+    name: "{{ openshift_storageclass_name }}"
+    content:
+      path: /tmp/openshift_storageclass
+      data:
+        kind: StorageClass
+        apiVersion: storage.k8s.io/v1beta1
+        metadata:
+          name: "{{ openshift_storageclass_name }}"
+          annotations:
+            storageclass.beta.kubernetes.io/is-default-class: "true"
+        provisioner: "{{ openshift_storageclass_provisioner }}"
+        parameters:
+          type: "{{ openshift_storageclass_type }}"
+  run_once: true
