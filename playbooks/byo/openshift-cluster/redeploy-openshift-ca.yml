@@ -3,4 +3,4 @@
   tags:
   - always
 
-- include: ../../common/openshift-cluster/redeploy-certificates/ca.yml
+- include: ../../common/openshift-cluster/redeploy-certificates/openshift-ca.yml
