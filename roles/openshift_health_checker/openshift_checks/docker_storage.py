@@ -64,7 +64,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 )
                 return {"failed": True, "changed": changed, "msg": msg}
             result = self._check_dm_usage(driver_status, task_vars)
-            result["changed"] = changed
+            result['changed'] = result.get('changed', False) or changed
             return result
 
         # TODO(lmeyer): determine how to check usage for overlay2
