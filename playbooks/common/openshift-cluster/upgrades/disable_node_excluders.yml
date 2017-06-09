@@ -1,6 +1,6 @@
 ---
 - name: Disable excluders
-  hosts: oo_nodes_to_config
+  hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   gather_facts: no
   roles:
   - role: openshift_excluder
