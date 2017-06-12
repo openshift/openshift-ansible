@@ -8,7 +8,7 @@ Wants=etcd_container.service
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master
 ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type }}-master
-ExecStart=/usr/bin/docker run --rm --privileged --net=host --name {{ openshift.common.service_type }}-master --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-master -v {{ openshift.common.data_dir }}:{{ openshift.common.data_dir }} -v /var/log:/var/log -v /var/run/docker.sock:/var/run/docker.sock -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} {{ openshift.master.master_image }}:${IMAGE_VERSION} start master --config=${CONFIG_FILE} $OPTIONS
+ExecStart=/usr/bin/docker run --rm --privileged --net=host --name {{ openshift.common.service_type }}-master --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-master -v {{ openshift.common.data_dir }}:{{ openshift.common.data_dir }} -v /var/log:/var/log -v /var/run/docker.sock:/var/run/docker.sock -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} -v /etc/pki:/etc/pki:ro {{ openshift.master.master_image }}:${IMAGE_VERSION} start master --config=${CONFIG_FILE} $OPTIONS
 ExecStartPost=/usr/bin/sleep 10
 ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-master
 Restart=always
