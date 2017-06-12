@@ -1,8 +1,8 @@
 ---
 r_etcd_upgrade_action: upgrade
 r_etcd_upgrade_mechanism: rpm
-r_etcd_upgrade_embedded_etcd: False
-
+r_etcd_upgrade_embedded_etcd: false
+r_etcd_common_embedded_etcd: "{{ r_etcd_upgrade_embedded_etcd }}"
 # etcd run on a host => use etcdctl command directly
 # etcd run as a docker container => use docker exec
 # etcd run as a runc container => use runc exec
