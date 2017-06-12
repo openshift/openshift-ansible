@@ -1,7 +1,7 @@
 ---
 - name: "Cleaning yum repositories"
   command: "yum clean all"
-  
+
 - name: "Install required packages"
   yum:
     name: "{{ item }}"
@@ -13,7 +13,6 @@
     - bind-utils
     - bridge-utils
     - bash-completion
-    - atomic-openshift-utils
     - vim-enhanced
 
 - name: "Update all packages (this can take a very long time)"

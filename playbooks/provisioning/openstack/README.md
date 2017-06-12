@@ -96,6 +96,12 @@ The full list of options is available in this sample inventory:
 
 https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.ose.example
 
+Note, that in order to deploy OpenShift origin, you should update the following
+variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
+
+    deployment_type: origin
+    origin_release: 1.5.1
+    openshift_deployment_type: "{{ deployment_type }}"
 
 ## Deployment
 
@@ -111,8 +117,11 @@ file, this is how you stat the provisioning process:
 
 Once it succeeds, you can install openshift by running:
 
-    ansible-playbook --timeout 30 --become --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
+    ansible-playbook --become --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/openshift-node/network_manager.yml
+    ansible-playbook --become --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
 
+Note, the `network_manager.yml` is only required if you're deploying OpenShift
+origin.
 
 ## License
 
