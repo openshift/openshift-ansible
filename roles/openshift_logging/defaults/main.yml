@@ -116,7 +116,7 @@ openshift_logging_es_key: ""
 openshift_logging_es_ca_ext: ""
 
 # allow cluster-admin or cluster-reader to view operations index
-openshift_logging_es_ops_allow_cluster_reader: False
+openshift_logging_es_ops_allow_cluster_reader: True
 
 openshift_logging_es_ops_host: logging-es-ops
 openshift_logging_es_ops_port: 9200
