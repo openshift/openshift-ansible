@@ -715,7 +715,7 @@ def oo_openshift_env(hostvars):
     return facts
 
 
-# pylint: disable=too-many-branches, too-many-nested-blocks
+# pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements
 def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
     """ Generate list of persistent volumes based on oo_openshift_env
         storage options set in host variables.
