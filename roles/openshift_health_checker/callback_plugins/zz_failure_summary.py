@@ -101,7 +101,7 @@ class CallbackModule(CallbackBase):
             'Variables can be set in the inventory or passed on the\n'
             'command line using the -e flag to ansible-playbook.\n\n'
         ).format(playbook=self._playbook_file, checks=checks)
-        if context in ['pre-install', 'health']:
+        if context in ['pre-install', 'health', 'adhoc']:
             summary = (  # user was expecting to run checks, less explanation needed
                 '\n'
                 'You may choose to configure or disable failing checks by\n'

@@ -26,6 +26,9 @@ callback plugin summarizes execution errors at the end of a playbook run.
 3. Certificate expiry playbooks ([certificate_expiry](certificate_expiry)) -
    check that certificates in use are valid and not expiring soon.
 
+4. Adhoc playbook ([adhoc.yml](adhoc.yml)) - use it to run adhoc checks.
+   See the [next section](#the-adhoc-playbook) for a usage example.
+
 ## Running
 
 With a [recent installation of Ansible](../../../README.md#setup), run the playbook
@@ -57,6 +60,34 @@ against your inventory file. Here is the step-by-step:
     ```console
     $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/certificate_expiry/default.yaml -v
     ```
+
+### The adhoc playbook
+
+The adhoc playbook gives flexibility to run any check or a custom group of
+checks. What will be run is determined by the `openshift_checks` variable,
+which, among other ways supported by Ansible, can be set on the command line
+using the `-e` flag.
+
+For example, to run the `docker_storage` check:
+
+```console
+$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml -e openshift_checks=docker_storage
+```
+
+To run more checks, use a comma-separated list of check names:
+
+```console
+$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml -e openshift_checks=docker_storage,disk_availability
+```
+
+To run an entire class of checks, use the name of a check group tag, prefixed by `@`. This will run all checks tagged `preflight`:
+
+```console
+$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml -e openshift_checks=@preflight
+```
+
+It is valid to specify multiple check tags and individual check names together
+in a comma-separated list.
 
 ## Running in a container
 
