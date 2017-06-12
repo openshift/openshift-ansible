@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.56
+Version:        3.2.57
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jun 12 2017 Scott Dodson <sdodson@redhat.com> 3.2.57-1
+- Backport fixes to accomodate etcd v3 backup (sdodson@redhat.com)
+- Skip router/registry cert redeploy when
+  openshift_hosted_manage_{router,registry}=false (abutcher@redhat.com)
+
 * Wed May 03 2017 Scott Dodson <sdodson@redhat.com> 3.2.56-1
 - Bump ansible rpm dependency to 2.2.2.0 (sdodson@redhat.com)
 - Differentiate between service serving router certificate and custom
