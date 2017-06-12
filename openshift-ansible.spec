@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.98
+Version:        3.6.99
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,22 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jun 12 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.99-1
+- Replace repoquery with module (jchaloup@redhat.com)
+- Consider previous value of 'changed' when updating (rhcarvalho@gmail.com)
+- Improve code readability (rhcarvalho@gmail.com)
+- Disable excluder only on nodes that are not masters (jchaloup@redhat.com)
+- Added includes to specify openshift version for libvirt cluster create.
+  Otherwise bin/cluster create fails on unknown version for libvirt deployment.
+  (schulthess@puzzle.ch)
+- docker checks: finish and refactor (lmeyer@redhat.com)
+- oc_secret: allow use of force for secret type (jarrpa@redhat.com)
+- add docker storage, docker driver checks (jvallejo@redhat.com)
+- Add dependency and use same storageclass name as upstream
+  (hekumar@redhat.com)
+- Add documentation (hekumar@redhat.com)
+- Install default storageclass in AWS & GCE envs (hekumar@redhat.com)
+
 * Fri Jun 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.98-1
 - 
 
