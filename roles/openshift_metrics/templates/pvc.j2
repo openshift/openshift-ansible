@@ -25,3 +25,8 @@ spec:
   resources:
     requests:
       storage: {{size}}
+{% if storage_type is defined and storage_type %}
+  selector:
+    matchLabels:
+      storage-type: {{ storage_type }}
+{% endif %}
