@@ -38,7 +38,7 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
     with pytest.raises(OpenShiftCheckException) as excinfo:
         check.run(tmp=None, task_vars=task_vars)
 
-    for word in 'determine available disk'.split() + extra_words:
+    for word in 'determine disk availability'.split() + extra_words:
         assert word in str(excinfo.value)
 
 
