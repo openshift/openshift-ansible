@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.80
+Version:        3.5.81
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.81-1
+- Remove supported/implemented barrier for registry object storage providers.
+  (abutcher@redhat.com)
+- Disable excluder only on nodes that are not masters (jchaloup@redhat.com)
+
 * Thu Jun 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.5.80-1
 - skip installation of base package in openshift_ca when scalling up master
   (jchaloup@redhat.com)
