@@ -15,6 +15,56 @@
       {%- endif -%}
       {% endfor -%}
 
+- name: Check etcd system container package
+  command: >
+    atomic containers list --no-trunc -a -f container=etcd -f backend=ostree
+  register: etcd_result
+
+- name: Unmask etcd service
+  systemd:
+    name: etcd
+    state: stopped
+    enabled: yes
+    masked: no
+    daemon_reload: yes
+  register: task_result
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+  when: "'etcd' in etcd_result.stdout"
+
+- name: Disable etcd_container
+  systemd:
+    name: etcd_container
+    state: stopped
+    enabled: no
+    masked: yes
+    daemon_reload: yes
+  register: task_result
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+
+- name: Check for previous etcd data store
+  stat:
+    path: "{{ etcd_data_dir }}/member/"
+  register: src_datastore
+
+- name: Check for etcd system container data store
+  stat:
+    path: "{{ r_etcd_common_system_container_host_dir }}/etcd.etcd/member"
+  register: dest_datastore
+
+- name: Ensure that etcd system container data dirs exist
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ r_etcd_common_system_container_host_dir }}/etc"
+    - "{{ r_etcd_common_system_container_host_dir }}/etcd.etcd"
+
+- name: Copy etcd data store
+  command: >
+    cp -a {{ etcd_data_dir }}/member
+    {{ r_etcd_common_system_container_host_dir }}/etcd.etcd/member
+  when:
+    - src_datastore.stat.exists
+    - not dest_datastore.stat.exists
+
 - name: Install or Update Etcd system container package
   oc_atomic_container:
     name: etcd
@@ -35,3 +85,5 @@
       - ETCD_PEER_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
       - ETCD_PEER_CERT_FILE={{ etcd_system_container_conf_dir }}/peer.crt
       - ETCD_PEER_KEY_FILE={{ etcd_system_container_conf_dir }}/peer.key
+      - ETCD_TRUSTED_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
+      - ETCD_PEER_TRUSTED_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
