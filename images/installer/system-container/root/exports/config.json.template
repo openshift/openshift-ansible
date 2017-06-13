@@ -171,6 +171,16 @@
             ]
         },
         {
+            "destination": "/etc/resolv.conf",
+            "type": "bind",
+            "source": "/etc/resolv.conf",
+            "options": [
+                "ro",
+                "rbind",
+                "rprivate"
+            ]
+        },
+        {
             "destination": "/sys/fs/cgroup",
             "type": "cgroup",
             "source": "cgroup",
