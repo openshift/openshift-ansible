@@ -12,7 +12,12 @@ from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,
 from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.plugins.filter.core import to_bool as ansible_bool
-from six import string_types
+
+# ansible.compat.six goes away with Ansible 2.4
+try:
+    from ansible.compat.six import string_types, u
+except ImportError:
+    from ansible.module_utils.six import string_types, u
 
 import yaml
 
