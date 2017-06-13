@@ -74,3 +74,13 @@
   - name: Warn if pluginOrderOverride is in use in master-config.yaml
     debug: msg="WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/enterprise/latest/architecture/additional_concepts/admission_controllers.html for more information."
     when: not grep_plugin_order_override | skipped and grep_plugin_order_override.rc == 0
+
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_masters_to_config
+  tags:
+  - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"

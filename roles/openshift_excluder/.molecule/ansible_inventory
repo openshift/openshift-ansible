@@ -1,0 +1,9 @@
+[all]
+openshift_excluder_disable ansible_connection=docker
+openshift_excluder_enable ansible_connection=docker
+
+[openshift_excluder_disable]
+openshift_excluder_disable
+
+[openshift_excluder_enable]
+openshift_excluder_enable
