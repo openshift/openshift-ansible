@@ -10,8 +10,8 @@ Whenever a
 [Pull Request is opened](../CONTRIBUTING.md#submitting-contributions), some
 automated test jobs must be successfully run before the PR can be merged.
 
-Some of these jobs are automatically triggered, e.g., Travis and Coveralls.
-Other jobs need to be manually triggered by a member of the
+Some of these jobs are automatically triggered, e.g., Travis, PAPR, and
+Coveralls. Other jobs need to be manually triggered by a member of the
 [Team OpenShift Ansible Contributors](https://github.com/orgs/openshift/teams/team-openshift-ansible-contributors).
 
 ## Triggering tests
@@ -48,9 +48,9 @@ simplifying the workflow towards a single infrastructure in the future.
 There are a set of tests that run on Fedora infrastructure. They are started
 automatically with every pull request.
 
-They are implemented using the [`redhat-ci` framework](https://github.com/jlebon/redhat-ci).
+They are implemented using the [`PAPR` framework](https://github.com/projectatomic/papr).
 
-To re-run tests, write a comment containing `bot, retest this please`.
+To re-run tests, write a comment containing only `bot, retest this please`.
 
 ## Triggering merge
 
