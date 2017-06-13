@@ -15,6 +15,7 @@ packages:
   - gcc
   - python-pip
   - python-devel
+  - libffi-devel
   - openssl-devel
   - redhat-rpm-config
 
