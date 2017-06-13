@@ -3,22 +3,19 @@ import pytest
 from openshift_checks.disk_availability import DiskAvailability, OpenShiftCheckException
 
 
-@pytest.mark.parametrize('group_names,is_containerized,is_active', [
-    (['masters'], False, True),
-    # ensure check is skipped on containerized installs
-    (['masters'], True, False),
-    (['nodes'], False, True),
-    (['etcd'], False, True),
-    (['masters', 'nodes'], False, True),
-    (['masters', 'etcd'], False, True),
-    ([], False, False),
-    (['lb'], False, False),
-    (['nfs'], False, False),
+@pytest.mark.parametrize('group_names,is_active', [
+    (['masters'], True),
+    (['nodes'], True),
+    (['etcd'], True),
+    (['masters', 'nodes'], True),
+    (['masters', 'etcd'], True),
+    ([], False),
+    (['lb'], False),
+    (['nfs'], False),
 ])
-def test_is_active(group_names, is_containerized, is_active):
+def test_is_active(group_names, is_active):
     task_vars = dict(
         group_names=group_names,
-        openshift=dict(common=dict(is_containerized=is_containerized)),
     )
     assert DiskAvailability.is_active(task_vars=task_vars) == is_active
 

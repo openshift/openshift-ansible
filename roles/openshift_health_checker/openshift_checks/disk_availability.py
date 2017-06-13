@@ -4,10 +4,9 @@ import os.path
 import tempfile
 
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
-from openshift_checks.mixins import NotContainerizedMixin
 
 
-class DiskAvailability(NotContainerizedMixin, OpenShiftCheck):
+class DiskAvailability(OpenShiftCheck):
     """Check that recommended disk space is available before a first-time install."""
 
     name = "disk_availability"
