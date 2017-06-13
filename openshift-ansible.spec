@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.97
+Version:        3.4.98
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.4.98-1
+- Disable excluder on nodes_to_upgrade instead of nodes_to_config
+  (jchaloup@redhat.com)
+- skip installation of base package in openshift_ca when scalling up master
+  (jchaloup@redhat.com)
+- backport #4321 verify upgrade targets separately for each group
+  (jchaloup@redhat.com)
+- replace repoquery command with module (jchaloup@redhat.com)
+- backport openshift_excluder from master (jchaloup@redhat.com)
+- backport repoquery module from master (jchaloup@redhat.com)
+- backport #4038 'Upgrade Refactor' to 1.4 (jchaloup@redhat.com)
+- Refactor initialize groups tasks (backport for 1.4) (rteague@redhat.com)
+
 * Thu Jun 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.4.97-1
 - Backport fixes to accomodate etcd v3 backup (sdodson@redhat.com)
 
