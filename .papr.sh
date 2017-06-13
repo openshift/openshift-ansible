@@ -1,6 +1,8 @@
 #!/bin/bash
 set -xeuo pipefail
 
+echo "Targeting OpenShift Origin $OPENSHIFT_IMAGE_TAG"
+
 pip install -r requirements.txt
 
 # ping the nodes to check they're responding and register their ostree versions
