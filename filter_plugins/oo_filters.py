@@ -715,7 +715,7 @@ def oo_openshift_env(hostvars):
     return facts
 
 
-# pylint: disable=too-many-branches, too-many-nested-blocks
+# pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements
 def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
     """ Generate list of persistent volumes based on oo_openshift_env
         storage options set in host variables.
@@ -747,10 +747,15 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
                         volume = params['volume']['name']
                         path = directory + '/' + volume
                         size = params['volume']['size']
+                        if 'labels' in params:
+                            labels = params['labels']
+                        else:
+                            labels = dict()
                         access_modes = params['access']['modes']
                         persistent_volume = dict(
                             name="{0}-volume".format(volume),
                             capacity=size,
+                            labels=labels,
                             access_modes=access_modes,
                             storage=dict(
                                 nfs=dict(
@@ -760,12 +765,17 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
                     elif kind == 'openstack':
                         volume = params['volume']['name']
                         size = params['volume']['size']
+                        if 'labels' in params:
+                            labels = params['labels']
+                        else:
+                            labels = dict()
                         access_modes = params['access']['modes']
                         filesystem = params['openstack']['filesystem']
                         volume_id = params['openstack']['volumeID']
                         persistent_volume = dict(
                             name="{0}-volume".format(volume),
                             capacity=size,
+                            labels=labels,
                             access_modes=access_modes,
                             storage=dict(
                                 cinder=dict(
@@ -775,6 +785,10 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
                     elif kind == 'glusterfs':
                         volume = params['volume']['name']
                         size = params['volume']['size']
+                        if 'labels' in params:
+                            labels = params['labels']
+                        else:
+                            labels = dict()
                         access_modes = params['access']['modes']
                         endpoints = params['glusterfs']['endpoints']
                         path = params['glusterfs']['path']
@@ -782,6 +796,7 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
                         persistent_volume = dict(
                             name="{0}-volume".format(volume),
                             capacity=size,
+                            labels=labels,
                             access_modes=access_modes,
                             storage=dict(
                                 glusterfs=dict(
