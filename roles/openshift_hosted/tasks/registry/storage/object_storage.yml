@@ -1,20 +1,4 @@
 ---
-- name: Assert supported openshift.hosted.registry.storage.provider
-  assert:
-    that:
-    - openshift.hosted.registry.storage.provider in ['azure_blob', 's3', 'swift']
-    msg: >
-      Object Storage Provider: "{{ openshift.hosted.registry.storage.provider }}"
-      is not currently supported
-
-- name: Assert implemented openshift.hosted.registry.storage.provider
-  assert:
-    that:
-    - openshift.hosted.registry.storage.provider not in ['azure_blob', 'swift']
-    msg: >
-      Support for provider: "{{ openshift.hosted.registry.storage.provider }}"
-      not implemented yet
-
 - include: s3.yml
   when: openshift.hosted.registry.storage.provider == 's3'
 
