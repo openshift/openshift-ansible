@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.99
+Version:        3.6.100
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.100-1
+- Change default key for gce (hekumar@redhat.com)
+- set etcd working directory for embedded etcd (jchaloup@redhat.com)
+- Add daemon-reload handler to openshift_node and notify when /etc/systemd
+  files have been updated. (abutcher@redhat.com)
+- Use volume.beta.kubernetes.io annotation for storage-classes
+  (per.carlson@vegvesen.no)
+- Correct master-config update during upgrade (rteague@redhat.com)
+
 * Mon Jun 12 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.99-1
 - Replace repoquery with module (jchaloup@redhat.com)
 - Consider previous value of 'changed' when updating (rhcarvalho@gmail.com)
