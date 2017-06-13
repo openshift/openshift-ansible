@@ -11,7 +11,9 @@
   package:
     name: "{{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
-  when: not openshift.common.is_containerized | bool
+  when:
+  - not openshift.common.is_containerized | bool
+  - not r_openshift_ca_skip_installation | bool
   register: install_result
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true

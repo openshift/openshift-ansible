@@ -134,6 +134,7 @@
                                                 }}"
   roles:
   - role: openshift_master
+    r_openshift_ca_skip_installation: "{{ 'true' if scaleup_master | default(false) | bool else 'false' }}"
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))

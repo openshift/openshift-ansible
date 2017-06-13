@@ -51,7 +51,7 @@
     changed_when: false
 
 - name: Configure docker hosts
-  hosts: oo_masters_to-config:oo_nodes_to_config
+  hosts: oo_masters_to_config:oo_nodes_to_config
   vars:
     docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
     docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
@@ -60,8 +60,30 @@
   - openshift_facts
   - openshift_docker
 
+- name: Disable excluders
+  hosts: oo_masters_to_config
+  tags:
+  - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
 - include: ../openshift-master/config.yml
+  vars:
+    scaleup_master: true
 
 - include: ../openshift-loadbalancer/config.yml
 
 - include: ../openshift-node/config.yml
+
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_masters_to_config
+  tags:
+  - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
