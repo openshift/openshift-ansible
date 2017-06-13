@@ -22,7 +22,7 @@
 
 - name: Updating DNS domain to include env_id (if not empty)
   set_fact:
-    full_dns_domain: "{{ (env_id|trim == '') | ternary(dns_domain, env_id + '.' + dns_domain) }}"
+    full_dns_domain: "{{ (env_id|trim == '') | ternary(public_dns_domain, env_id + '.' + public_dns_domain) }}"
   delegate_to: localhost
 
 - name: Set the APP domain for OpenShift use

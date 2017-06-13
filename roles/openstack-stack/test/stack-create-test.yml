@@ -3,8 +3,8 @@
   roles:
   - role: openstack-stack
     stack_name: test-stack
-    dns_domain: "{{ openstack_dns_domain }}"
-    dns_nameservers: "{{ openstack_nameservers }}"
+    dns_domain: "{{ public_dns_domain }}"
+    dns_nameservers: "{{ public_dns_nameservers }}"
     subnet_prefix: "{{ openstack_subnet_prefix }}"
     ssh_public_key: "{{ openstack_ssh_public_key }}"
     openstack_image: "{{ openstack_default_image_name }}"
