@@ -38,7 +38,7 @@ spec:
           name: "kibana"
           image: {{ image }}
           imagePullPolicy: Always
-{% if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") %}
+{% if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") or (kibana_memory_request is defined and kibana_memory_request is not none and kibana_memory_request != "") or (kibana_cpu_request is defined and kibana_cpu_request is not none and kibana_cpu_request != "") %}
           resources:
             limits:
 {% if kibana_cpu_limit is not none and kibana_cpu_limit != "" %}
@@ -46,6 +46,13 @@ spec:
 {% endif %}
 {% if kibana_memory_limit is not none and kibana_memory_limit != "" %}
               memory: "{{ kibana_memory_limit }}"
+{% endif %}
+            requests:
+{% if kibana_cpu_request is not none and kibana_cpu_request != "" %}
+              cpu: "{{ kibana_cpu_request }}"
+{% endif %}
+{% if kibana_memory_request is not none and kibana_memory_request != "" %}
+              memory: "{{ kibana_memory_request }}"
 {% endif %}
 {% endif %}
           env:

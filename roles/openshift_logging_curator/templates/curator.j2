@@ -45,6 +45,11 @@ spec:
 {% if curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "" %}
               memory: "{{curator_memory_limit}}"
 {% endif %}
+            requests:
+              cpu: "{{curator_cpu_request}}"
+{% if curator_memory_request is defined and curator_memory_request is not none and curator_memory_request != "" %}
+              memory: "{{curator_memory_request}}"
+{% endif %}
           env:
             -
               name: "K8S_HOST_URL"

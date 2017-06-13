@@ -10,6 +10,8 @@ openshift_logging_kibana_namespace: logging
 openshift_logging_kibana_nodeselector: ""
 openshift_logging_kibana_cpu_limit: null
 openshift_logging_kibana_memory_limit: 736Mi
+openshift_logging_kibana_cpu_request: null
+openshift_logging_kibana_memory_request: 736Mi
 
 openshift_logging_kibana_hostname: "kibana.router.default.svc.cluster.local"
 
@@ -27,6 +29,8 @@ openshift_logging_kibana_ops_deployment: false
 openshift_logging_kibana_proxy_debug: false
 openshift_logging_kibana_proxy_cpu_limit: null
 openshift_logging_kibana_proxy_memory_limit: 96Mi
+openshift_logging_kibana_proxy_cpu_request: null
+openshift_logging_kibana_proxy_memory_request: 96Mi
 
 #The absolute path on the control node to the cert file to use
 #for the public facing kibana certs

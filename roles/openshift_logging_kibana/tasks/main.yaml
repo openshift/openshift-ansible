@@ -232,8 +232,12 @@
     es_port: "{{ openshift_logging_kibana_es_port }}"
     kibana_cpu_limit: "{{ openshift_logging_kibana_cpu_limit }}"
     kibana_memory_limit: "{{ openshift_logging_kibana_memory_limit }}"
+    kibana_cpu_request: "{{ openshift_logging_kibana_cpu_request }}"
+    kibana_memory_request: "{{ openshift_logging_kibana_memory_request }}"
     kibana_proxy_cpu_limit: "{{ openshift_logging_kibana_proxy_cpu_limit }}"
     kibana_proxy_memory_limit: "{{ openshift_logging_kibana_proxy_memory_limit }}"
+    kibana_proxy_cpu_request: "{{ openshift_logging_kibana_proxy_cpu_request }}"
+    kibana_proxy_memory_request: "{{ openshift_logging_kibana_proxy_memory_request }}"
     replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
     kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
 

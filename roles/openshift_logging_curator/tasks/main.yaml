@@ -91,6 +91,8 @@
     es_port: "{{ openshift_logging_curator_es_port }}"
     curator_cpu_limit: "{{ openshift_logging_curator_cpu_limit }}"
     curator_memory_limit: "{{ openshift_logging_curator_memory_limit }}"
+    curator_cpu_request: "{{ openshift_logging_curator_cpu_request }}"
+    curator_memory_request: "{{ openshift_logging_curator_memory_request }}"
     replicas: "{{ openshift_logging_curator_replicas | default (1) }}"
     curator_node_selector: "{{openshift_logging_curator_nodeselector | default({})}}"
   check_mode: no
