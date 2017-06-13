@@ -4,7 +4,7 @@ set -xeuo pipefail
 pip install -r requirements.txt
 
 # ping the nodes to check they're responding and register their ostree versions
-ansible -vvv -i .redhat-ci.inventory nodes -a 'rpm-ostree status'
+ansible -vvv -i .papr.inventory nodes -a 'rpm-ostree status'
 
 upload_journals() {
   mkdir journals
@@ -16,7 +16,7 @@ upload_journals() {
 trap upload_journals ERR
 
 # run the actual installer
-ansible-playbook -vvv -i .redhat-ci.inventory playbooks/byo/config.yml
+ansible-playbook -vvv -i .papr.inventory playbooks/byo/config.yml
 
 # run a small subset of origin conformance tests to sanity
 # check the cluster NB: we run it on the master since we may
