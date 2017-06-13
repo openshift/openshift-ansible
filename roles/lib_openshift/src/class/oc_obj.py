@@ -33,7 +33,12 @@ class OCObject(OpenShiftCLI):
 
     def delete(self):
         '''delete the object'''
-        return self._delete(self.kind, name=self.name, selector=self.selector)
+        results = self._delete(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
+                '\"{}\" not found'.format(self.name) in results['stderr']):
+            results['returncode'] = 0
+
+        return results
 
     def create(self, files=None, content=None):
         '''
@@ -117,7 +122,8 @@ class OCObject(OpenShiftCLI):
         if state == 'absent':
             # verify its not in our results
             if (params['name'] is not None or params['selector'] is not None) and \
-               (len(api_rval['results']) == 0 or len(api_rval['results'][0].get('items', [])) == 0):
+               (len(api_rval['results']) == 0 or \
+               ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
                 return {'changed': False, 'state': state}
 
             if check_mode:
