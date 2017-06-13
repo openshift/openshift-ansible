@@ -1,5 +1,6 @@
 # pylint: disable=missing-docstring
 import os.path
+import tempfile
 
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
 from openshift_checks.mixins import NotContainerizedMixin
@@ -18,6 +19,19 @@ class DiskAvailability(NotContainerizedMixin, OpenShiftCheck):
             'masters': 40 * 10**9,
             'nodes': 15 * 10**9,
             'etcd': 20 * 10**9,
+        },
+        # Used to copy client binaries into,
+        # see roles/openshift_cli/library/openshift_container_binary_sync.py.
+        '/usr/local/bin': {
+            'masters': 1 * 10**9,
+            'nodes': 1 * 10**9,
+            'etcd': 1 * 10**9,
+        },
+        # Used as temporary storage in several cases.
+        tempfile.gettempdir(): {
+            'masters': 1 * 10**9,
+            'nodes': 1 * 10**9,
+            'etcd': 1 * 10**9,
         },
     }
 

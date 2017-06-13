@@ -81,7 +81,7 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
         [{
             # not enough space on / ...
             'mount': '/',
-            'size_available': 0,
+            'size_available': 2 * 10**9,
         }, {
             # ... but enough on /var
             'mount': '/var',
