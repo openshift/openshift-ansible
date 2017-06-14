@@ -1,0 +1,21 @@
+---
+- hosts: all
+  roles:
+    - role: hostnames
+
+# - debug: 
+#
+# - hosts: dns
+#   roles:
+#     - role: dns-server
+#       named_config_views:
+#       - name: private
+#         acl_entry:
+#         - 192.168.124.40/32
+#         - 192.168.124.40/32
+#         zone:
+#         - dns_domain: example.com
+#       - name: public
+#         zone:
+#         - dns_domain: example.com
+#     - role: dns
