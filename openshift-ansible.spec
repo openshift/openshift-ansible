@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.100
+Version:        3.4.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jun 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.101-1
+- 
+
 * Wed Jun 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.100-1
 - Disable negative caching, set cache TTL to 1s (skuznets@redhat.com)
 
