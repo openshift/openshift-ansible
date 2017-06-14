@@ -122,7 +122,8 @@
 
 - include_role:
     name: etcd_common
-    tasks_from: etcdctl.yml
+  vars:
+    r_etcd_common_action: drop_etcdctl
   when: openshift_etcd_etcdctl_profile | default(true) | bool
 
 - name: Set fact etcd_service_status_changed

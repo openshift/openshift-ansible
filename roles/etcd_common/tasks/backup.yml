@@ -1,15 +1,11 @@
 ---
-# INPUT r_etcd_backup_sufix_name
-# INPUT r_etcd_backup_tag
-# OUTPUT r_etcd_upgrade_backup_complete
 - set_fact:
-    # ORIGIN etcd_data_dir etcd_common.defaults
-    l_etcd_backup_dir: "{{ etcd_data_dir }}/openshift-backup-{{ r_etcd_backup_tag | default('') }}{{ r_etcd_backup_sufix_name }}"
+    l_etcd_backup_dir: "{{ etcd_data_dir }}/openshift-backup-{{ r_etcd_common_backup_tag }}{{ r_etcd_common_backup_sufix_name }}"
 
 # TODO: replace shell module with command and update later checks
 - name: Check available disk space for etcd backup
   shell: df --output=avail -k {{ etcd_data_dir }} | tail -n 1
-  register: avail_disk
+  register: l_avail_disk
   # AUDIT:changed_when: `false` because we are only inspecting
   # state, not manipulating anything
   changed_when: false
@@ -17,8 +13,8 @@
 # TODO: replace shell module with command and update later checks
 - name: Check current etcd disk usage
   shell: du --exclude='*openshift-backup*' -k {{ etcd_data_dir }} | tail -n 1 | cut -f1
-  register: etcd_disk_usage
-  when: r_etcd_upgrade_embedded_etcd | bool
+  register: l_etcd_disk_usage
+  when: r_etcd_common_embedded_etcd | bool
   # AUDIT:changed_when: `false` because we are only inspecting
   # state, not manipulating anything
   changed_when: false
@@ -26,9 +22,9 @@
 - name: Abort if insufficient disk space for etcd backup
   fail:
     msg: >
-      {{ etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
-      {{ avail_disk.stdout }} Kb available.
-  when: (r_etcd_upgrade_embedded_etcd | bool) and (etcd_disk_usage.stdout|int > avail_disk.stdout|int)
+      {{ l_etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+      {{ l_avail_disk.stdout }} Kb available.
+  when: (r_etcd_common_embedded_etcd | bool) and (l_etcd_disk_usage.stdout|int > l_avail_disk.stdout|int)
 
 # For non containerized and non embedded we should have the correct version of
 # etcd installed already. So don't do anything.
@@ -37,17 +33,22 @@
 #
 # For embedded non containerized we need to ensure we have the latest version
 # etcd on the host.
+- name: Detecting Atomic Host Operating System
+  stat:
+    path: /run/ostree-booted
+  register: l_ostree_booted
+
 - name: Install latest etcd for embedded
   package:
     name: etcd
     state: latest
   when:
-  - r_etcd_upgrade_embedded_etcd | bool
+  - r_etcd_common_embedded_etcd | bool
   - not l_ostree_booted.stat.exists | bool
 
 - name: Generate etcd backup
   command: >
-    {{ etcdctl_command }} backup --data-dir={{ etcd_data_dir }}
+    {{ r_etcd_common_etcdctl_command }} backup --data-dir={{ etcd_data_dir }}
     --backup-dir={{ l_etcd_backup_dir }}
 
 # According to the docs change you can simply copy snap/db
@@ -55,16 +56,16 @@
 - name: Check for v3 data store
   stat:
     path: "{{ etcd_data_dir }}/member/snap/db"
-  register: v3_db
+  register: l_v3_db
 
 - name: Copy etcd v3 data store
   command: >
     cp -a {{ etcd_data_dir }}/member/snap/db
     {{ l_etcd_backup_dir }}/member/snap/
-  when: v3_db.stat.exists
+  when: l_v3_db.stat.exists
 
 - set_fact:
-    r_etcd_upgrade_backup_complete: True
+    r_etcd_common_backup_complete: True
 
 - name: Display location of etcd backup
   debug:
