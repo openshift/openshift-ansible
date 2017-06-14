@@ -1,0 +1,15 @@
+---
+- name: remove Hawkular Agent (HOSA) components
+  command: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_hawkular_agent_namespace }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    delete --ignore-not-found --selector=metrics-infra=agent
+    all,sa,secrets,templates,routes,pvc,rolebindings,clusterrolebindings
+  register: delete_metrics
+  changed_when: delete_metrics.stdout != 'No resources found'
+
+- name: remove rolebindings
+  command: >
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_hawkular_agent_namespace }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    delete --ignore-not-found
+    clusterrolebinding/hawkular-openshift-agent-rb
+  changed_when: delete_metrics.stdout != 'No resources found'

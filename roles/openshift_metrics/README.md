@@ -68,6 +68,9 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_metrics_resolution`: How often metrics should be gathered.
 
+- `openshift_metrics_install_hawkular_agent`: Install the Hawkular OpenShift Agent (HOSA). HOSA can be used
+  to collect custom metrics from your pods. This component is currently in tech-preview and is not installed by default.
+
 ## Additional variables to control resource limits
 Each metrics component (hawkular, cassandra, heapster) can specify a cpu and memory limits and requests by setting
 the corresponding role variable:

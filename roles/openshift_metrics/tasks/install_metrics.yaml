@@ -16,11 +16,19 @@
   include: install_heapster.yaml
   when: openshift_metrics_heapster_standalone | bool
 
-- find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
+- name: Install Hawkular OpenShift Agent (HOSA)
+  include: install_hosa.yaml
+  when: openshift_metrics_install_hawkular_agent | default(false) | bool
+
+- find:
+    paths: "{{ mktemp.stdout }}/templates"
+    patterns: "^(?!metrics-hawkular-openshift-agent).*.yaml"
+    use_regex: true
   register: object_def_files
   changed_when: no
 
-- slurp: src={{item.path}}
+- slurp:
+    src: "{{item.path}}"
   register: object_defs
   with_items: "{{object_def_files.files}}"
   changed_when: no
@@ -33,6 +41,31 @@
     file_name: "{{ item.source }}"
     file_content: "{{ item.content | b64decode | from_yaml }}"
   with_items: "{{ object_defs.results }}"
+
+- find:
+    paths: "{{ mktemp.stdout }}/templates"
+    patterns: "^metrics-hawkular-openshift-agent.*.yaml"
+    use_regex: true
+  register: hawkular_agent_object_def_files
+  when: openshift_metrics_install_hawkular_agent | bool
+  changed_when: no
+
+- slurp:
+    src: "{{item.path}}"
+  register: hawkular_agent_object_defs
+  with_items: "{{ hawkular_agent_object_def_files.files }}"
+  when: openshift_metrics_install_hawkular_agent | bool
+  changed_when: no
+
+- name: Create Hawkular Agent objects
+  include: oc_apply.yaml
+  vars:
+    kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+    namespace: "{{ openshift_metrics_hawkular_agent_namespace }}"
+    file_name: "{{ item.source }}"
+    file_content: "{{ item.content | b64decode | from_yaml }}"
+  with_items: "{{ hawkular_agent_object_defs.results }}"
+  when: openshift_metrics_install_hawkular_agent | bool
 
 - include: update_master_config.yaml
 

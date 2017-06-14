@@ -73,6 +73,8 @@
         {{ hawkular_secrets['hawkular-metrics.key'] }}
       tls.truststore.crt: >
         {{ hawkular_secrets['hawkular-cassandra.crt'] }}
+      ca.crt: >
+        {{ hawkular_secrets['ca.crt'] }}
   when: name not in metrics_secrets.stdout_lines
   changed_when: no
 

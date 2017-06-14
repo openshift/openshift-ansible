@@ -31,6 +31,14 @@ openshift_metrics_heapster_requests_memory: 0.9375G
 openshift_metrics_heapster_requests_cpu: null
 openshift_metrics_heapster_nodeselector: ""
 
+openshift_metrics_install_hawkular_agent: False
+openshift_metrics_hawkular_agent_limits_memory: null
+openshift_metrics_hawkular_agent_limits_cpu: null
+openshift_metrics_hawkular_agent_requests_memory: null
+openshift_metrics_hawkular_agent_requests_cpu: null
+openshift_metrics_hawkular_agent_nodeselector: ""
+openshift_metrics_hawkular_agent_namespace: "default"
+
 openshift_metrics_hawkular_hostname: "hawkular-metrics.{{openshift_master_default_subdomain}}"
 
 openshift_metrics_duration: 7
