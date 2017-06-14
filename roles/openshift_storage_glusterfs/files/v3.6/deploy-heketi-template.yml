@@ -116,13 +116,14 @@ parameters:
   description: Set the namespace where the GlusterFS pods reside
   value: default
 - name: IMAGE_NAME
-  displayName: heketi container name
+  displayName: heketi container image name
   required: True
 - name: IMAGE_VERSION
-  displayName: heketi container versiona
+  displayName: heketi container image version
   required: True
 - name: CLUSTER_NAME
   displayName: GlusterFS cluster name
+  description: A unique name to identify this heketi service, useful for running multiple heketi instances
   value: glusterfs
 - name: TOPOLOGY_PATH
   displayName: heketi topology file location
