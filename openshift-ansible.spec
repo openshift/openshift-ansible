@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.90
+Version:        3.3.91
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.3.91-1
+- Skip service restarts within ca redeployment playbook when expired
+  certificates are detected. (abutcher@redhat.com)
+
 * Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.3.90-1
 - Disable excluder only on nodes that are not masters (jchaloup@redhat.com)
 - Disable excluder on nodes_to_upgrade instead of nodes_to_config
