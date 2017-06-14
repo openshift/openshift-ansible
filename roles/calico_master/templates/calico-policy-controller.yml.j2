@@ -74,7 +74,7 @@ spec:
       serviceAccountName: calico
       containers:
         - name: calico-policy-controller
-          image: quay.io/calico/kube-policy-controller:v0.6.0
+          image: {{ calico_url_policy_controller }}
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS

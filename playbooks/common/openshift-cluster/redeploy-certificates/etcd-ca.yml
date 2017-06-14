@@ -1,0 +1,158 @@
+---
+- name: Check cert expirys
+  hosts: oo_etcd_to_config:oo_masters_to_config
+  vars:
+    openshift_certificate_expiry_show_all: yes
+  roles:
+  # Sets 'check_results' per host which contains health status for
+  # etcd, master and node certificates.  We will use 'check_results'
+  # to determine if any certificates were expired prior to running
+  # this playbook. Service restarts will be skipped if any
+  # certificates were previously expired.
+  - role: openshift_certificate_expiry
+
+- name: Backup existing etcd CA certificate directories
+  hosts: oo_etcd_to_config
+  roles:
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  tasks:
+  - name: Determine if CA certificate directory exists
+    stat:
+      path: "{{ etcd_ca_dir }}"
+    register: etcd_ca_certs_dir_stat
+  - name: Backup generated etcd certificates
+    command: >
+      tar -czf {{ etcd_conf_dir }}/etcd-ca-certificate-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ etcd_ca_dir }}
+    args:
+      warn: no
+    when: etcd_ca_certs_dir_stat.stat.exists | bool
+  - name: Remove CA certificate directory
+    file:
+      path: "{{ etcd_ca_dir }}"
+      state: absent
+    when: etcd_ca_certs_dir_stat.stat.exists | bool
+
+- name: Generate new etcd CA
+  hosts: oo_first_etcd
+  roles:
+  - role: openshift_etcd_ca
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+
+- name: Create temp directory for syncing certs
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - name: Create local temp directory for syncing certs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_etcd_mktemp
+    changed_when: false
+
+- name: Distribute etcd CA to etcd hosts
+  hosts: oo_etcd_to_config
+  vars:
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+  roles:
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  tasks:
+  - name: Create a tarball of the etcd ca certs
+    command: >
+      tar -czvf {{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz
+        -C {{ etcd_ca_dir }} .
+    args:
+      creates: "{{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz"
+      warn: no
+    delegate_to: "{{ etcd_ca_host }}"
+    run_once: true
+  - name: Retrieve etcd ca cert tarball
+    fetch:
+      src: "{{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz"
+      dest: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+    delegate_to: "{{ etcd_ca_host }}"
+    run_once: true
+  - name: Ensure ca directory exists
+    file:
+      path: "{{ etcd_ca_dir }}"
+      state: directory
+  - name: Unarchive etcd ca cert tarballs
+    unarchive:
+      src: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/{{ etcd_ca_name }}.tgz"
+      dest: "{{ etcd_ca_dir }}"
+  - name: Read current etcd CA
+    slurp:
+      src: "{{ etcd_conf_dir }}/ca.crt"
+    register: g_current_etcd_ca_output
+  - name: Read new etcd CA
+    slurp:
+      src: "{{ etcd_ca_dir }}/ca.crt"
+    register: g_new_etcd_ca_output
+  - copy:
+      content: "{{ (g_new_etcd_ca_output.content|b64decode) + (g_current_etcd_ca_output.content|b64decode) }}"
+      dest: "{{ item }}/ca.crt"
+    with_items:
+    - "{{ etcd_conf_dir }}"
+    - "{{ etcd_ca_dir }}"
+
+- include: ../../openshift-etcd/restart.yml
+  # Do not restart etcd when etcd certificates were previously expired.
+  when: ('expired' not in (hostvars
+                           | oo_select_keys(groups['etcd'])
+                           | oo_collect('check_results.check_results.etcd')
+                           | oo_collect('health')))
+
+- name: Retrieve etcd CA certificate
+  hosts: oo_first_etcd
+  roles:
+  - role: etcd_common
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  tasks:
+  - name: Retrieve etcd CA certificate
+    fetch:
+      src: "{{ etcd_conf_dir }}/ca.crt"
+      dest: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/"
+      flat: yes
+      fail_on_missing: yes
+      validate_checksum: yes
+
+- name: Distribute etcd CA to masters
+  hosts: oo_masters_to_config
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  tasks:
+  - name: Deploy etcd CA
+    copy:
+      src: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/ca.crt"
+      dest: "{{ openshift.common.config_base }}/master/master.etcd-ca.crt"
+    when: groups.oo_etcd_to_config | default([]) | length > 0
+
+- name: Delete temporary directory on localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - file:
+      name: "{{ g_etcd_mktemp.stdout }}"
+      state: absent
+    changed_when: false
+
+- include: ../../openshift-master/restart.yml
+  # Do not restart masters when master certificates were previously expired.
+  when: ('expired' not in hostvars
+                       | oo_select_keys(groups['oo_masters_to_config'])
+                       | oo_collect('check_results.check_results.ocp_certs')
+                       | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
+        and
+        ('expired' not in hostvars
+                          | oo_select_keys(groups['oo_masters_to_config'])
+                          | oo_collect('check_results.check_results.ocp_certs')
+                          | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))

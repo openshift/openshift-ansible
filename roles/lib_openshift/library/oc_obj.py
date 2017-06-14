@@ -1090,10 +1090,6 @@ class OpenShiftCLI(object):
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
 
-        rval = {}
-        results = ''
-        err = None
-
         if self.verbose:
             print(' '.join(cmds))
 
@@ -1103,34 +1099,26 @@ class OpenShiftCLI(object):
             returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
-                "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if returncode == 0:
-            if output:
-                if output_type == 'json':
-                    try:
-                        rval['results'] = json.loads(stdout)
-                    except ValueError as verr:
-                        if "No JSON object could be decoded" in verr.args:
-                            err = verr.args
-                elif output_type == 'raw':
-                    rval['results'] = stdout
+        if output_type == 'json':
+            rval['results'] = {}
+            if output and stdout:
+                try:
+                    rval['results'] = json.loads(stdout)
+                except ValueError as verr:
+                    if "No JSON object could be decoded" in verr.args:
+                        rval['err'] = verr.args
+        elif output_type == 'raw':
+            rval['results'] = stdout if output else ''
 
-            if self.verbose:
-                print("STDOUT: {0}".format(stdout))
-                print("STDERR: {0}".format(stderr))
+        if self.verbose:
+            print("STDOUT: {0}".format(stdout))
+            print("STDERR: {0}".format(stderr))
 
-            if err:
-                rval.update({"err": err,
-                             "stderr": stderr,
-                             "stdout": stdout,
-                             "cmd": cmds})
-
-        else:
+        if 'err' in rval or returncode != 0:
             rval.update({"stderr": stderr,
-                         "stdout": stdout,
-                         "results": {}})
+                         "stdout": stdout})
 
         return rval
 
@@ -1473,7 +1461,12 @@ class OCObject(OpenShiftCLI):
 
     def delete(self):
         '''delete the object'''
-        return self._delete(self.kind, name=self.name, selector=self.selector)
+        results = self._delete(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
+                '\"{}\" not found'.format(self.name) in results['stderr']):
+            results['returncode'] = 0
+
+        return results
 
     def create(self, files=None, content=None):
         '''
@@ -1557,7 +1550,8 @@ class OCObject(OpenShiftCLI):
         if state == 'absent':
             # verify its not in our results
             if (params['name'] is not None or params['selector'] is not None) and \
-               (len(api_rval['results']) == 0 or len(api_rval['results'][0].get('items', [])) == 0):
+               (len(api_rval['results']) == 0 or \
+               ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
                 return {'changed': False, 'state': state}
 
             if check_mode:
