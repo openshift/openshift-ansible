@@ -1,7 +1,17 @@
 ---
+# Default action when calling this role
+r_etcd_common_action: noop
+r_etcd_common_backup_tag: ''
+r_etcd_common_backup_sufix_name: ''
+
 # runc, docker, host
 r_etcd_common_etcd_runtime: "docker"
 r_etcd_common_embedded_etcd: false
+
+# etcd run on a host => use etcdctl command directly
+# etcd run as a docker container => use docker exec
+# etcd run as a runc container => use runc exec
+r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'host' or r_etcd_common_embedded_etcd | bool else 'docker exec etcd_container etcdctl' if r_etcd_common_etcd_runtime == 'docker' else 'runc exec etcd etcdctl' }}"
 
 # etcd server vars
 etcd_conf_dir: '/etc/etcd'

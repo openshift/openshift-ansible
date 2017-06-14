@@ -16,7 +16,8 @@
   tasks:
   - include_role:
       name: etcd_common
-      tasks_from: etcdctl.yml
+    vars:
+      r_etcd_common_action: drop_etcdctl
 
 - name: Perform etcd upgrade
   include: ./upgrade.yml

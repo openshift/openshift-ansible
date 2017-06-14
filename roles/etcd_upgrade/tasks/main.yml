@@ -2,9 +2,9 @@
 # INPUT r_etcd_upgrade_action
 - name: Fail if invalid etcd_upgrade_action provided
   fail:
-    msg: "etcd_upgrade role can only be called with 'upgrade' or 'backup'"
+    msg: "etcd_upgrade role can only be called with 'upgrade'"
   when:
-  - r_etcd_upgrade_action not in ['upgrade', 'backup']
+  - r_etcd_upgrade_action not in ['upgrade']
 
 - name: Detecting Atomic Host Operating System
   stat:

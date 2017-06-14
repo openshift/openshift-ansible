@@ -1,0 +1,9 @@
+---
+- name: Fail if invalid r_etcd_common_action provided
+  fail:
+    msg: "etcd_common role can only be called with 'noop' or 'backup' or 'drop_etcdctl'"
+  when: r_etcd_common_action not in ['noop', 'backup', 'drop_etcdctl']
+
+- name: Include main action task file
+  include: "{{ r_etcd_common_action }}.yml"
+  when: r_etcd_common_action != "noop"

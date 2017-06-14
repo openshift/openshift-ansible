@@ -3,12 +3,12 @@
   hosts: oo_etcd_hosts_to_backup
   roles:
   - role: openshift_facts
-  - role: etcd_upgrade
-    r_etcd_upgrade_action: backup
-    r_etcd_backup_tag: etcd_backup_tag
+  - role: etcd_common
+    r_etcd_common_action: backup
+    r_etcd_common_backup_tag: etcd_backup_tag
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-    r_etcd_upgrade_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    r_etcd_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
 
 - name: Gate on etcd backup
   hosts: localhost
@@ -18,7 +18,7 @@
   - set_fact:
       etcd_backup_completed: "{{ hostvars
                                  | oo_select_keys(groups.oo_etcd_hosts_to_backup)
-                                 | oo_collect('inventory_hostname', {'r_etcd_upgrade_backup_complete': true}) }}"
+                                 | oo_collect('inventory_hostname', {'r_etcd_common_backup_complete': true}) }}"
   - set_fact:
       etcd_backup_failed: "{{ groups.oo_etcd_hosts_to_backup | difference(etcd_backup_completed) }}"
   - fail:
