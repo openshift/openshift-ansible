@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.100
+Version:        3.6.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,30 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.6.101-1
+- Update mounts in system container installer (smilner@redhat.com)
+- Set ansible retry file location (smilner@redhat.com)
+- installer: add bind mount for /etc/resolv.conf (gscrivan@redhat.com)
+- Making pylint happy (ewolinet@redhat.com)
+- Fix possible access to undefined variable (rhcarvalho@gmail.com)
+- certificates: copy the certificates for the etcd system container
+  (gscrivan@redhat.com)
+- Separate etcd and OpenShift CA redeploy playbooks. (abutcher@redhat.com)
+- lib/base: allow for results parsing on non-zero return code
+  (jarrpa@redhat.com)
+- etcd: system container defines ETCD_(PEER_)?TRUSTED_CA_FILE
+  (gscrivan@redhat.com)
+- etcd: unmask system container service before installing it
+  (gscrivan@redhat.com)
+- etcd: copy previous database when migrating to system container
+  (gscrivan@redhat.com)
+- etcd: define data dir location for the system container (gscrivan@redhat.com)
+- oc_obj: set _delete() rc to 0 if err is 'not found' (jarrpa@redhat.com)
+- oc_obj: only check 'items' if exists in delete (jarrpa@redhat.com)
+- Removed hardocded Calico Policy Controller URL (vincent.schwarzer@yahoo.de)
+- Allowing openshift_metrics to specify PV selectors and allow way to define
+  selectors when creating pv (ewolinet@redhat.com)
+
 * Tue Jun 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.100-1
 - Change default key for gce (hekumar@redhat.com)
 - set etcd working directory for embedded etcd (jchaloup@redhat.com)
