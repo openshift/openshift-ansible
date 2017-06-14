@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.57
+Version:        3.2.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.2.58-1
+- Skip service restarts within ca redeployment playbook when expired
+  certificates are detected. (abutcher@redhat.com)
+
 * Mon Jun 12 2017 Scott Dodson <sdodson@redhat.com> 3.2.57-1
 - Backport fixes to accomodate etcd v3 backup (sdodson@redhat.com)
 - Skip router/registry cert redeploy when
