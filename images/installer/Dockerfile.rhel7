@@ -13,7 +13,8 @@ LABEL name="openshift3/ose-ansible" \
       com.redhat.component="aos3-installation-docker" \
       version="v3.4.1" \
       release="1" \
-      architecture="x86_64"
+      architecture="x86_64" \
+      "atomic.run"="once"
 
 # Playbooks, roles and their dependencies are installed from packages.
 # Unlike in Dockerfile, we don't invoke the 'assemble' script here
