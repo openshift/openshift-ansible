@@ -14,6 +14,20 @@
 #     # F-a-f, never check on this. True 'background' task.
 #     poll: 0
 
+- name: Configure Masters for CFME Bulk Image Imports
+  hosts: oo_masters_to_config
+  serial: 1
+  tasks:
+  - name: Run master cfme tuning playbook
+    include_role:
+      name: openshift_cfme
+      tasks_from: tune_masters
+
+  - name: hold up
+    pause:
+      prompt: You just reconfigured that max param bro
+
+
 - name: Setup CFME
   hosts: oo_first_master
   vars:

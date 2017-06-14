@@ -23,22 +23,6 @@
     state: present
 
 ######################################################################
-# Service settings
-
-- name: Ensure bulk image import limit is tuned
-  yedit:
-    src: /etc/origin/master/master-config.yaml
-    key: 'imagePolicyConfig.maxImagesBulkImportedPerRepository'
-    value: "{{ openshift_cfme_maxImagesBulkImportedPerRepository | int() }}"
-    state: present
-    backup: True
-  register: master_config_updated
-  notify:
-    - restart master
-
-- meta: flush_handlers
-
-######################################################################
 # NFS
 
 - name: Ensure the /exports/ directory exists
