@@ -35,7 +35,7 @@
   mount:
     state: mounted
     fstype: glusterfs
-    src: "{{ groups.oo_glusterfs_to_config[0] }}:/{{ openshift.hosted.registry.storage.glusterfs.path }}"
+    src: "{% if 'glusterfs_registry' in groups %}{{ groups.glusterfs_registry[0] }}{% else %}{{ groups.glusterfs[0] }}{% endif %}:/{{ openshift.hosted.registry.storage.glusterfs.path }}"
     name: "{{ mktemp.stdout }}"
 
 - name: Set registry volume permissions
