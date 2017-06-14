@@ -12,24 +12,24 @@ objects:
 - kind: DaemonSet
   apiVersion: extensions/v1beta1
   metadata:
-    name: glusterfs
+    name: glusterfs-${CLUSTER_NAME}
     labels:
-      glusterfs: daemonset
+      glusterfs: ${CLUSTER_NAME}-daemonset
     annotations:
       description: GlusterFS DaemonSet
       tags: glusterfs
   spec:
     selector:
       matchLabels:
-        glusterfs-node: pod
+        glusterfs: ${CLUSTER_NAME}-pod
     template:
       metadata:
-        name: glusterfs
+        name: glusterfs-${CLUSTER_NAME}
         labels:
+          glusterfs: ${CLUSTER_NAME}-pod
           glusterfs-node: pod
       spec:
-        nodeSelector:
-          storagenode: glusterfs
+        nodeSelector: "${{NODE_LABELS}}"
         hostNetwork: true
         containers:
         - name: glusterfs
@@ -63,26 +63,26 @@ objects:
             privileged: true
           readinessProbe:
             timeoutSeconds: 3
-            initialDelaySeconds: 100
+            initialDelaySeconds: 40
             exec:
               command:
               - "/bin/bash"
               - "-c"
               - systemctl status glusterd.service
-            periodSeconds: 10
+            periodSeconds: 25
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 15
           livenessProbe:
             timeoutSeconds: 3
-            initialDelaySeconds: 100
+            initialDelaySeconds: 40
             exec:
               command:
               - "/bin/bash"
               - "-c"
               - systemctl status glusterd.service
-            periodSeconds: 10
+            periodSeconds: 25
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 15
           resources: {}
           terminationMessagePath: "/dev/termination-log"
         volumes:
@@ -120,9 +120,16 @@ objects:
         dnsPolicy: ClusterFirst
         securityContext: {}
 parameters:
+- name: NODE_LABELS
+  displayName: Daemonset Node Labels
+  description: Labels which define the daemonset node selector. Must contain at least one label of the format \'glusterfs=<CLUSTER_NAME>-host\'
+  value: '{ "glusterfs": "storage-host" }'
 - name: IMAGE_NAME
   displayName: GlusterFS container name
   required: True
 - name: IMAGE_VERSION
   displayName: GlusterFS container versiona
   required: True
+- name: CLUSTER_NAME
+  displayName: GlusterFS cluster name
+  value: storage

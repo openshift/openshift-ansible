@@ -24,7 +24,7 @@ glusterfs
 
 [OSEv3:vars]
 ansible_ssh_user=root
-deployment_type=origin
+openshift_deployment_type=origin
 # Specify that we want to use GlusterFS storage for a hosted registry
 openshift_hosted_registry_storage_kind=glusterfs
 

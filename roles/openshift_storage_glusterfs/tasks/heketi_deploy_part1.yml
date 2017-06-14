@@ -6,11 +6,21 @@
   with_items:
   - "deploy-heketi-template.yml"
 
-- name: Create deploy-heketi resources
+- name: Create heketi topology secret
+  oc_secret:
+    namespace: "{{ glusterfs_namespace }}"
+    state: present
+    name: "heketi-{{ glusterfs_name }}-topology-secret"
+    force: True
+    files:
+    - name: topology.json
+      path: "{{ mktemp.stdout }}/topology.json"
+
+- name: Create deploy-heketi template
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: template
-    name: deploy-heketi
+    name: "deploy-heketi"
     state: present
     files:
     - "{{ mktemp.stdout }}/deploy-heketi-template.yml"
@@ -25,17 +35,20 @@
       IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
+      HEKETI_KUBE_NAMESPACE: "{{ glusterfs_namespace }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
+      TOPOLOGY_PATH: "{{ mktemp.stdout }}"
 
 - name: Wait for deploy-heketi pod
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: pod
     state: list
-    selector: "glusterfs=deploy-heketi-pod,deploy-heketi=support"
+    selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
   register: heketi_pod
   until:
   - "heketi_pod.results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
   - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
-  retries: "{{ (glusterfs_timeout / 10) | int }}"
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
