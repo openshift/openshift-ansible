@@ -1,5 +1,6 @@
 ---
 - hosts: localhost
+  gather_facts: True
   pre_tasks:
   - include: pre_tasks.yml
   roles:
