@@ -1,0 +1,42 @@
+---
+
+# This YAML file is used by PAPR. It details the test
+# environment to provision and the test procedure. For more
+# information on PAPR, see:
+#
+#   https://github.com/projectatomic/papr
+#
+# The PAPR YAML specification detailing allowed fields can
+# be found at:
+#
+#   https://github.com/projectatomic/papr/blob/master/sample.papr.yml
+
+cluster:
+  hosts:
+    - name: ocp-master
+      distro: fedora/25/atomic
+    - name: ocp-node1
+      distro: fedora/25/atomic
+    - name: ocp-node2
+      distro: fedora/25/atomic
+  container:
+    image: fedora:25
+
+packages:
+  - gcc
+  - python-pip
+  - python-devel
+  - libffi-devel
+  - openssl-devel
+  - redhat-rpm-config
+
+context: 'fedora/25/atomic'
+
+env:
+  OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.1
+
+tests:
+  - ./.papr.sh
+
+artifacts:
+  - journals/
