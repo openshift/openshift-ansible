@@ -29,7 +29,7 @@ objects:
 - kind: Route
   apiVersion: v1
   metadata:
-    name: deploy-heketi-${CLUSTER_NAME}
+    name: ${HEKETI_ROUTE}
     labels:
       glusterfs: deploy-heketi-${CLUSTER_NAME}-route
       deploy-heketi: support
@@ -115,6 +115,10 @@ parameters:
   displayName: Namespace
   description: Set the namespace where the GlusterFS pods reside
   value: default
+- name: HEKETI_ROUTE
+  displayName: heketi route name
+  description: Set the hostname for the route URL
+  value: "heketi-glusterfs"
 - name: IMAGE_NAME
   displayName: heketi container image name
   required: True
