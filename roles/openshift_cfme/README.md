@@ -109,6 +109,17 @@ Variables you may override have defaults defined in
 [defaults/main.yml](defaults/main.yml).
 
 
+# Important Notes
+
+This is a **tech preview** status role presently. Use it with the same
+caution you would give any other pre-release software.
+
+**Most importantly** follow this one rule: don't re-run the entrypoint
+playbook multiple times in a row without cleaning up after previous
+runs if some of the CFME steps have ran. This is a known
+flake. Cleanup instructions are provided at the bottom of this README.
+
+
 # Usage
 
 This section describes the basic usage of this role. All parameters
@@ -121,17 +132,21 @@ will use their [default values](defaults/main.yml).
 
 **Optional:** The ManageIQ pod is fairly large (about 1.7 GB) so to
 save some spin-up time post-deployment, you can begin pre-pulling the
-docker image now to each of your nodes now:
+docker image to each of your nodes now:
 
 ```
-root@node0x # docker pull docker.io/manageiq/manageiq-pods:app-latest
+root@node0x # docker pull docker.io/manageiq/manageiq-pods:app-latest-fine
 ```
 
 ## Getting Started
 
-1) The entry point playbook to install CFME is located in
+1) The *entry point playbook* to install CFME is located in
 [the BYO playbooks](../../playbooks/byo/openshift-cfme/config.yml)
 directory
+
+2) Update your existing `hosts` inventory file and ensure the
+parameter `openshift_cfme_install_app` is set to `True` under the
+`[OSEv3:vars]` block.
 
 2) Using your existing `hosts` inventory file, run `ansible-playbook`
 with the entry point playbook:
@@ -156,6 +171,43 @@ This will take several minutes (*possibly 10 or more*, depending on
 your network connection). However, you can get some insight into the
 deployment process during initialization.
 
+### oc describe pod manageiq-0
+
+*Some useful information about the output you will see if you run the
+`oc describe pod manageiq-0` command*
+
+**Readiness probe**s - These will take a while to become
+`Healthy`. The initial health probes won't even happen for at least 8
+minutes depending on how long it takes you to pull down the large
+images. ManageIQ is a large application so it may take a considerable
+amount of time for it to deploy and be marked as `Healthy`.
+
+If you go to the node you know the application is running on (check
+for `Successfully assigned manageiq-0 to <HOST|IP>` in the `describe`
+output) you can run a `docker pull` command to monitor the progress of
+the image pull:
+
+```
+[root@cfme-node ~]# docker pull docker.io/manageiq/manageiq-pods:app-latest-fine
+Trying to pull repository docker.io/manageiq/manageiq-pods ...
+sha256:6c055ca9d3c65cd694d6c0e28986b5239ba56bbdf0488cccdaa283d545258f8a: Pulling from docker.io/manageiq/manageiq-pods
+Digest: sha256:6c055ca9d3c65cd694d6c0e28986b5239ba56bbdf0488cccdaa283d545258f8a
+Status: Image is up to date for docker.io/manageiq/manageiq-pods:app-latest-fine
+```
+
+The example above demonstrates the case where the image has been
+successfully pulled already.
+
+If the image isn't completely pulled already then you will see
+multiple progress bars detailing each image layer download status.
+
+
+### rsh
+
+*Useful inspection/progress monitoring techniques with the `oc rsh`
+command.*
+
+
 On your master node, switch to the `cfme` project (or whatever you
 named it if you overrode the `openshift_cfme_project` variable) and
 check on the pod states:
@@ -174,7 +226,18 @@ postgresql-1-12slb   1/1       Running   0          14m
 Note how the `manageiq-0` pod says `0/1` under the **READY**
 column. After some time (depending on your network connection) you'll
 be able to `rsh` into the pod to find out more of what's happening in
-real time:
+real time. First, the easy-mode command, run this once `rsh` is
+available and then watch until it says `Started Initialize Appliance
+Database`:
+
+```
+[root@cfme-master01 ~]# oc rsh manageiq-0 journalctl -f -u appliance-initialize.service
+```
+
+For the full explanation of what this means, and more interactive
+inspection techniques, keep reading on.
+
+To obtain a shell on our `manageiq` pod we use this command:
 
 ```
 [root@cfme-master01 ~]# oc rsh manageiq-0 bash -l
@@ -258,8 +321,8 @@ apache     1944  0.0  0.0 250472  5916 ?        S    15:02   0:00 /usr/sbin/http
 apache     1945  0.0  0.0 250360  5764 ?        S    15:02   0:00 /usr/sbin/httpd -DFOREGROUND
 ```
 
-Furthermore, you can expand your search process by just looking for
-processes with `MIQ` in their name:
+Furthermore, you can find other related processes by just looking for
+ones with `MIQ` in their name:
 
 ```
 [root@manageiq-0 vmdb]# ps aux | grep miq
@@ -335,9 +398,7 @@ Delete the user:
 
 * `oc delete user cfme`
 
-**NOTE:** The `oc delete project cfme` command will return quickly,
-but continue to operate in the background. Continue running `oc get
-pods` after you've completed the other tasks to monitor the pod
-termination progress. Likewise, run `oc get project` after the pods
-have disappeared to ensure that the `cfme` project has been terminated
-as well.
+**NOTE:** The `oc delete project cfme` command will return quickly
+however it will continue to operate in the background. Continue
+running `oc get project` after you've completed the other steps to
+monitor the pods and final project termination progress.
