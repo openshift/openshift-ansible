@@ -75,6 +75,9 @@ spec:
               name: "INSTANCE_RAM"
               value: "{{openshift_logging_elasticsearch_memory_limit}}"
             -
+              name: "HEAP_DUMP_LOCATION" 
+              value: "/elasticsearch/persistent/heapdump.hprof"
+            -
               name: "NODE_QUORUM"
               value: "{{es_node_quorum | int}}"
             -
