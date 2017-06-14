@@ -12,7 +12,12 @@ from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,
 from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.plugins.filter.core import to_bool as ansible_bool
-from six import string_types
+
+# ansible.compat.six goes away with Ansible 2.4
+try:
+    from ansible.compat.six import string_types, u
+except ImportError:
+    from ansible.module_utils.six import string_types, u
 
 import yaml
 
@@ -486,10 +491,11 @@ class FilterModule(object):
             idp_list.append(idp_inst)
 
         IdentityProviderBase.validate_idp_list(idp_list, openshift_version, deployment_type)
-        return yaml.dump([idp.to_dict() for idp in idp_list],
-                         allow_unicode=True,
-                         default_flow_style=False,
-                         Dumper=AnsibleDumper)
+        return u(yaml.dump([idp.to_dict() for idp in idp_list],
+                           allow_unicode=True,
+                           default_flow_style=False,
+                           width=float("inf"),
+                           Dumper=AnsibleDumper))
 
     @staticmethod
     def validate_pcs_cluster(data, masters=None):
