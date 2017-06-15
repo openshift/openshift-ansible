@@ -40,8 +40,11 @@ class DockerHostMixin(object):
 
         # NOTE: we would use the "package" module but it's actually an action plugin
         # and it's not clear how to invoke one of those. This is about the same anyway:
-        pkg_manager = get_var(task_vars, "ansible_pkg_mgr", default="yum")
-        result = self.module_executor(pkg_manager, {"name": self.dependencies, "state": "present"}, task_vars)
+        result = self.execute_module(
+            get_var(task_vars, "ansible_pkg_mgr", default="yum"),
+            {"name": self.dependencies, "state": "present"},
+            task_vars=task_vars,
+        )
         msg = result.get("msg", "")
         if result.get("failed"):
             if "No package matching" in msg:

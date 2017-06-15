@@ -1,6 +1,22 @@
-# pylint: disable=missing-docstring
+"""Check that required Docker images are available."""
+
 from openshift_checks import OpenShiftCheck, get_var
 from openshift_checks.mixins import DockerHostMixin
+
+
+NODE_IMAGE_SUFFIXES = ["haproxy-router", "docker-registry", "deployer", "pod"]
+DEPLOYMENT_IMAGE_INFO = {
+    "origin": {
+        "namespace": "openshift",
+        "name": "origin",
+        "registry_console_image": "cockpit/kubernetes",
+    },
+    "openshift-enterprise": {
+        "namespace": "openshift3",
+        "name": "ose",
+        "registry_console_image": "registry.access.redhat.com/openshift3/registry-console",
+    },
+}
 
 
 class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
@@ -13,25 +29,13 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     name = "docker_image_availability"
     tags = ["preflight"]
-
     dependencies = ["skopeo", "python-docker-py"]
-
-    deployment_image_info = {
-        "origin": {
-            "namespace": "openshift",
-            "name": "origin",
-        },
-        "openshift-enterprise": {
-            "namespace": "openshift3",
-            "name": "ose",
-        },
-    }
 
     @classmethod
     def is_active(cls, task_vars):
         """Skip hosts with unsupported deployment types."""
         deployment_type = get_var(task_vars, "openshift_deployment_type")
-        has_valid_deployment_type = deployment_type in cls.deployment_image_info
+        has_valid_deployment_type = deployment_type in DEPLOYMENT_IMAGE_INFO
 
         return super(DockerImageAvailability, cls).is_active(task_vars) and has_valid_deployment_type
 
@@ -70,51 +74,55 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         return {"changed": changed}
 
-    def required_images(self, task_vars):
+    @staticmethod
+    def required_images(task_vars):
+        """
+        Determine which images we expect to need for this host.
+        Returns: a set of required images like 'openshift/origin:v3.6'
+
+        The thorny issue of determining the image names from the variables is under consideration
+        via https://github.com/openshift/openshift-ansible/issues/4415
+
+        For now we operate as follows:
+        * For containerized components (master, node, ...) we look at the deployment type and
+          use openshift/origin or openshift3/ose as the base for those component images. The
+          version is openshift_image_tag as determined by the openshift_version role.
+        * For OpenShift-managed infrastructure (router, registry...) we use oreg_url if
+          it is defined; otherwise we again use the base that depends on the deployment type.
+        Registry is not included in constructed images. It may be in oreg_url or etcd image.
+        """
+        required = set()
         deployment_type = get_var(task_vars, "openshift_deployment_type")
-        image_info = self.deployment_image_info[deployment_type]
+        host_groups = get_var(task_vars, "group_names")
+        image_tag = get_var(task_vars, "openshift_image_tag")
+        image_info = DEPLOYMENT_IMAGE_INFO[deployment_type]
+        if not image_info:
+            return required
 
-        openshift_release = get_var(task_vars, "openshift_release", default="latest")
-        openshift_image_tag = get_var(task_vars, "openshift_image_tag")
-        is_containerized = get_var(task_vars, "openshift", "common", "is_containerized")
+        # template for images that run on top of OpenShift
+        image_url = "{}/{}-{}:{}".format(image_info["namespace"], image_info["name"], "${component}", "${version}")
+        image_url = get_var(task_vars, "oreg_url", default="") or image_url
+        if 'nodes' in host_groups:
+            for suffix in NODE_IMAGE_SUFFIXES:
+                required.add(image_url.replace("${component}", suffix).replace("${version}", image_tag))
+            # The registry-console is for some reason not prefixed with ose- like the other components.
+            # Nor is it versioned the same, so just look for latest.
+            # Also a completely different name is used for Origin.
+            required.add(image_info["registry_console_image"])
 
-        images = set(self.required_docker_images(
-            image_info["namespace"],
-            image_info["name"],
-            ["registry-console"] if "enterprise" in deployment_type else [],  # include enterprise-only image names
-            openshift_release,
-            is_containerized,
-        ))
+        # images for containerized components
+        if get_var(task_vars, "openshift", "common", "is_containerized"):
+            components = set()
+            if 'nodes' in host_groups:
+                components.update(["node", "openvswitch"])
+            if 'masters' in host_groups:  # name is "origin" or "ose"
+                components.add(image_info["name"])
+            for component in components:
+                required.add("{}/{}:{}".format(image_info["namespace"], component, image_tag))
+            if 'etcd' in host_groups:  # special case, note it is the same for origin/enterprise
+                required.add("registry.access.redhat.com/rhel7/etcd")  # and no image tag
 
-        # append images with qualified image tags to our list of required images.
-        # these are images with a (v0.0.0.0) tag, rather than a standard release
-        # format tag (v0.0). We want to check this set in both containerized and
-        # non-containerized installations.
-        images.update(
-            self.required_qualified_docker_images(
-                image_info["namespace"],
-                image_info["name"],
-                openshift_image_tag,
-            ),
-        )
-
-        return images
-
-    @staticmethod
-    def required_docker_images(namespace, name, additional_image_names, version, is_containerized):
-        if is_containerized:
-            return ["{}/{}:{}".format(namespace, name, version)] if name else []
-
-        # include additional non-containerized images specific to the current deployment type
-        return ["{}/{}:{}".format(namespace, img_name, version) for img_name in additional_image_names]
-
-    @staticmethod
-    def required_qualified_docker_images(namespace, name, version):
-        # pylint: disable=invalid-name
-        return [
-            "{}/{}-{}:{}".format(namespace, name, suffix, version)
-            for suffix in ["haproxy-router", "docker-registry", "deployer", "pod"]
-        ]
+        return required
 
     def local_images(self, images, task_vars):
         """Filter a list of images and return those available locally."""
@@ -124,7 +132,8 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         ]
 
     def is_image_local(self, image, task_vars):
-        result = self.module_executor("docker_image_facts", {"name": image}, task_vars)
+        """Check if image is already in local docker index."""
+        result = self.execute_module("docker_image_facts", {"name": image}, task_vars=task_vars)
         if result.get("failed", False):
             return False
 
@@ -132,6 +141,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     @staticmethod
     def known_docker_registries(task_vars):
+        """Build a list of docker registries available according to inventory vars."""
         docker_facts = get_var(task_vars, "openshift", "docker")
         regs = set(docker_facts["additional_registries"])
 
@@ -147,17 +157,21 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         """Inspect existing images using Skopeo and return all images successfully inspected."""
         return [
             image for image in images
-            if any(self.is_available_skopeo_image(image, registry, task_vars) for registry in registries)
+            if self.is_available_skopeo_image(image, registries, task_vars)
         ]
 
-    def is_available_skopeo_image(self, image, registry, task_vars):
-        """Uses Skopeo to determine if required image exists in a given registry."""
+    def is_available_skopeo_image(self, image, registries, task_vars):
+        """Use Skopeo to determine if required image exists in known registry(s)."""
 
-        cmd_str = "skopeo inspect docker://{registry}/{image}".format(
-            registry=registry,
-            image=image,
-        )
+        # if image does already includes a registry, just use that
+        if image.count("/") > 1:
+            registry, image = image.split("/", 1)
+            registries = [registry]
 
-        args = {"_raw_params": cmd_str}
-        result = self.module_executor("command", args, task_vars)
-        return not result.get("failed", False) and result.get("rc", 0) == 0
+        for registry in registries:
+            args = {"_raw_params": "skopeo inspect docker://{}/{}".format(registry, image)}
+            result = self.execute_module("command", args, task_vars=task_vars)
+            if result.get("rc", 0) == 0 and not result.get("failed"):
+                return True
+
+        return False

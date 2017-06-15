@@ -77,7 +77,7 @@ non_atomic_task_vars = {"openshift": {"common": {"is_atomic": False}}}
     ),
 ])
 def test_check_storage_driver(docker_info, failed, expect_msg):
-    def execute_module(module_name, args, tmp=None, task_vars=None):
+    def execute_module(module_name, module_args, tmp=None, task_vars=None):
         if module_name == "yum":
             return {}
         if module_name != "docker_info":
@@ -187,7 +187,7 @@ def test_dm_usage(task_vars, driver_status, vg_free, success, expect_msg):
     )
 ])
 def test_vg_free(pool, command_returns, raises, returns):
-    def execute_module(module_name, args, tmp=None, task_vars=None):
+    def execute_module(module_name, module_args, tmp=None, task_vars=None):
         if module_name != "command":
             raise ValueError("not expecting module " + module_name)
         return command_returns
