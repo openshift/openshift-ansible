@@ -158,21 +158,22 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             comp = self.comp(name)
             self.add_facts_for(comp, "pvcs", name, dict())
 
-    def facts_for_deploymentconfigs(self, namespace):
-        ''' Gathers facts for DeploymentConfigs in logging namespace '''
-        self.default_keys_for("deploymentconfigs")
-        dclist = self.oc_command("get", "deploymentconfigs", namespace=namespace, add_options=["-l", LOGGING_INFRA_KEY])
-        if len(dclist["items"]) == 0:
+    def facts_for_deployments(self, namespace):
+        ''' Gathers facts for Deployments in logging namespace '''
+        self.default_keys_for("deployments")
+        deploymentlist = self.oc_command("get", "deployments", namespace=namespace,
+                                         add_options=["-l", LOGGING_INFRA_KEY])
+        if len(deploymentlist["items"]) == 0:
             return
-        dcs = dclist["items"]
-        for dc_item in dcs:
-            name = dc_item["metadata"]["name"]
+        deployments = deploymentlist["items"]
+        for deployment_item in deployments:
+            name = deployment_item["metadata"]["name"]
             comp = self.comp(name)
             if comp is not None:
-                spec = dc_item["spec"]["template"]["spec"]
+                spec = deployment_item["spec"]["template"]["spec"]
                 facts = dict(
-                    selector=dc_item["spec"]["selector"],
-                    replicas=dc_item["spec"]["replicas"],
+                    selector=deployment_item["spec"]["selector"],
+                    replicas=deployment_item["spec"]["replicas"],
                     serviceAccount=spec["serviceAccount"],
                     containers=dict(),
                     volumes=dict()
@@ -187,7 +188,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
                         image=container["image"],
                         resources=container["resources"],
                     )
-                self.add_facts_for(comp, "deploymentconfigs", name, facts)
+                self.add_facts_for(comp, "deployments", name, facts)
 
     def facts_for_services(self, namespace):
         ''' Gathers facts for services in logging namespace '''
@@ -301,7 +302,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
         ''' Builds the logging facts and returns them '''
         self.facts_for_routes(self.namespace)
         self.facts_for_daemonsets(self.namespace)
-        self.facts_for_deploymentconfigs(self.namespace)
+        self.facts_for_deployments(self.namespace)
         self.facts_for_services(self.namespace)
         self.facts_for_configmaps(self.namespace)
         self.facts_for_sccs()

@@ -156,11 +156,11 @@
       targetPort: "mux-forward"
   when: not openshift_logging_mux_allow_external | bool
 
-# create Mux DC
-- name: Generating mux deploymentconfig
+# create Mux Deployment
+- name: Generating mux deployment
   template:
     src: mux.j2
-    dest: "{{mktemp.stdout}}/templates/logging-mux-dc.yaml"
+    dest: "{{mktemp.stdout}}/templates/logging-mux-deployment.yaml"
   vars:
     component: mux
     logging_component: mux
@@ -177,14 +177,14 @@
   check_mode: no
   changed_when: no
 
-- name: Set logging-mux DC
+- name: Set logging-mux deployment
   oc_obj:
     state: present
     name: logging-mux
     namespace: "{{ openshift_logging_mux_namespace }}"
-    kind: dc
+    kind: deployment
     files:
-    - "{{ tempdir }}/templates/logging-mux-dc.yaml"
+    - "{{ tempdir }}/templates/logging-mux-deployment.yaml"
     delete_after: true
 
 - name: Add mux namespaces

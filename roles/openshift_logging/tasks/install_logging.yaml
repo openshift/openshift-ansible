@@ -51,11 +51,11 @@
 ## Elasticsearch
 
 - set_fact: es_indices={{ es_indices | default([]) + [item | int - 1] }}
-  with_sequence: count={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
-  when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
+  with_sequence: count={{ openshift_logging_facts.elasticsearch.deployments.keys() | count }}
+  when: openshift_logging_facts.elasticsearch.deployments.keys() | count > 0
 
 - set_fact: es_indices=[]
-  when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count == 0
+  when: openshift_logging_facts.elasticsearch.deployments.keys() | count == 0
 
 - set_fact: openshift_logging_es_pvc_prefix="logging-es"
   when: openshift_logging_es_pvc_prefix == ""
@@ -75,18 +75,18 @@
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
   with_together:
-  - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs }}"
+  - "{{ openshift_logging_facts.elasticsearch.deployments }}"
   - "{{ openshift_logging_facts.elasticsearch.pvcs }}"
   - "{{ es_indices }}"
   when:
   - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
-# Create any new DC that may be required
+# Create any new deployment that may be required
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch.deployments | count - 1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs')  else 'emptydir' }}"
@@ -94,16 +94,16 @@
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
-  with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
+  with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deployments.keys() | count }}
 
 - set_fact: es_ops_indices={{ es_ops_indices | default([]) + [item | int - 1] }}
-  with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
+  with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deployments.keys() | count }}
   when:
   - openshift_logging_use_ops | bool
-  - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
+  - openshift_logging_facts.elasticsearch_ops.deployments.keys() | count > 0
 
 - set_fact: es_ops_indices=[]
-  when: openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count == 0
+  when: openshift_logging_facts.elasticsearch_ops.deployments.keys() | count == 0
 
 
 - include_role:
@@ -121,19 +121,19 @@
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
   with_together:
-  - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs }}"
+  - "{{ openshift_logging_facts.elasticsearch_ops.deployments }}"
   - "{{ openshift_logging_facts.elasticsearch_ops.pvcs }}"
   - "{{ es_ops_indices }}"
   when:
   - openshift_logging_use_ops | bool
   - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
-# Create any new DC that may be required
+# Create any new deployment that may be required
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count - 1 }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch_ops.deployments | count - 1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
 
@@ -142,7 +142,7 @@
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
-  with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
+  with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deployments.keys() | count }}
   when:
   - openshift_logging_use_ops | bool
 

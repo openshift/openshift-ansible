@@ -217,11 +217,11 @@
     - path: server-tls.json
       data: "{{ key_pairs | entry_from_named_pair('server_tls') | b64decode }}"
 
-# create Kibana DC
-- name: Generate Kibana DC template
+# create Kibana Deployment
+- name: Generate Kibana deployment template
   template:
     src: kibana.j2
-    dest: "{{ tempdir }}/templates/kibana-dc.yaml"
+    dest: "{{ tempdir }}/templates/kibana-deployment.yaml"
   vars:
     component: "{{ kibana_component }}"
     logging_component: kibana
@@ -237,14 +237,14 @@
     replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
     kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
 
-- name: Set Kibana DC
+- name: Set Kibana deployment
   oc_obj:
     state: present
     name: "{{ kibana_name }}"
     namespace: "{{ openshift_logging_namespace }}"
-    kind: dc
+    kind: deployment
     files:
-    - "{{ tempdir }}/templates/kibana-dc.yaml"
+    - "{{ tempdir }}/templates/kibana-deployment.yaml"
     delete_after: true
 
 # update master configs?

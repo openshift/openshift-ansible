@@ -11,7 +11,7 @@ def main():
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             state=dict(default='present', type='str', choices=['present', 'list']),
             debug=dict(default=False, type='bool'),
-            kind=dict(default='dc', choices=['dc', 'rc'], type='str'),
+            kind=dict(default='dc', choices=['dc', 'rc', 'deployment', 'rs'], type='str'),
             namespace=dict(default='default', type='str'),
             replicas=dict(default=None, type='int'),
             name=dict(default=None, type='str'),
