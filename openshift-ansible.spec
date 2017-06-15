@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.109
+Version:        3.6.110
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,34 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.110-1
+- papr: add documentation to YAML and simplify context (jlebon@redhat.com)
+- docs: better documentation for PAPR (jlebon@redhat.com)
+- papr: install libffi-devel (jlebon@redhat.com)
+- pre-install checks: add more during byo install (lmeyer@redhat.com)
+- move etcd backup to etcd_common role (jchaloup@redhat.com)
+- Support installing HOSA via ansible (mwringe@redhat.com)
+- GlusterFS: Remove requirement for heketi-cli (jarrpa@redhat.com)
+- GlusterFS: Fix bugs in wipe (jarrpa@redhat.com)
+- GlusterFS: Skip heketi-cli install on Atomic (jarrpa@redhat.com)
+- GlusterFS: Create a StorageClass if specified (jarrpa@redhat.com)
+- GlusterFS: Use proper secrets (jarrpa@redhat.com)
+- GlusterFS: Allow cleaner separation of multiple clusters (jarrpa@redhat.com)
+- GlusterFS: Minor corrections and cleanups (jarrpa@redhat.com)
+- GlusterFS: Improve documentation (jarrpa@redhat.com)
+- GlusterFS: Allow configuration of kube namespace for heketi
+  (jarrpa@redhat.com)
+- GlusterFS: Adjust when clauses for registry config (jarrpa@redhat.com)
+- GlusterFS: Allow failure reporting when deleting deploy-heketi
+  (jarrpa@redhat.com)
+- GlusterFS: Tweak pod probe parameters (jarrpa@redhat.com)
+- GlusterFS: Allow for configuration of node selector (jarrpa@redhat.com)
+- GlusterFS: Label on Openshift node name (jarrpa@redhat.com)
+- GlusterFS: Make sure timeout is an int (jarrpa@redhat.com)
+- GlusterFS: Use groups variables (jarrpa@redhat.com)
+- papr: rename redhat-ci related files to papr (jlebon@redhat.com)
+- singletonize some role tasks that repeat a lot (lmeyer@redhat.com)
+
 * Wed Jun 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.109-1
 - 
 
