@@ -786,6 +786,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Enable API service auditing, available as of 3.2
 #openshift_master_audit_config={"enabled": true}
+#
+# In case you want more advanced setup for the auditlog you can
+# use this line.
+# The directory in "auditFilePath" will be created if it's not
+# exist
+#openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/log/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}}
 
 # Validity of the auto-generated OpenShift certificates in days.
 # See also openshift_hosted_registry_cert_expire_days above.
