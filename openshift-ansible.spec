@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.110
+Version:        3.6.111
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.111-1
+- doc: Info for system container installer options (smilner@redhat.com)
+- Add ANSIBLE_CONFIG to system container installer (smilner@redhat.com)
+- Add missing file. Remove debugging prompt. (tbielawa@redhat.com)
+- Update readme one last time (tbielawa@redhat.com)
+- Reconfigure masters in serial to avoid HA meltdowns (tbielawa@redhat.com)
+- First POC of a CFME turnkey solution in openshift-anisble
+  (tbielawa@redhat.com)
+- Reverted most of this pr 4356 except:   adding
+  openshift_logging_fluentd_buffer_queue_limit: 1024
+  openshift_logging_fluentd_buffer_size_limit: 1m
+  openshift_logging_mux_buffer_queue_limit: 1024
+  openshift_logging_mux_buffer_size_limit: 1m   and setting the matched
+  environment variables. (nhosoi@redhat.com)
+- Adding the defaults for openshift_logging_fluentd_{cpu,memory}_limit to
+  roles/openshift_logging_fluentd/defaults/main.yml. (nhosoi@redhat.com)
+- Adding environment variables FLUENTD_CPU_LIMIT, FLUENTD_MEMORY_LIMIT,
+  MUX_CPU_LIMIT, MUX_MEMORY_LIMIT. (nhosoi@redhat.com)
+- Introducing fluentd/mux buffer_queue_limit, buffer_size_limit, cpu_limit, and
+  memory_limit. (nhosoi@redhat.com)
+
 * Thu Jun 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.110-1
 - papr: add documentation to YAML and simplify context (jlebon@redhat.com)
 - docs: better documentation for PAPR (jlebon@redhat.com)
