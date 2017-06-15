@@ -23,11 +23,6 @@
       name: openshift_cfme
       tasks_from: tune_masters
 
-  - name: hold up
-    pause:
-      prompt: You just reconfigured that max param bro
-
-
 - name: Setup CFME
   hosts: oo_first_master
   vars:
