@@ -11,3 +11,21 @@ These files are needed to run the installer using an [Atomic System container](h
 * service.template - Template file for the systemd service.
 
 * tmpfiles.template - Template file for systemd-tmpfiles.
+
+## Options
+
+These options may be set via the ``atomic`` ``--set`` flag. For defaults see ``root/exports/manifest.json``
+
+* OPTS - Additional options to pass to ansible when running the installer
+
+* VAR_LIB_OPENSHIFT_INSTALLER - Full path of the installer code to mount into the container
+
+* VAR_LOG_OPENSHIFT_LOG - Full path of the log file to mount into the container
+
+* PLAYBOOK_FILE - Full path of the playbook inside the container
+
+* HOME_ROOT - Full path on host to mount as the root home directory inside the container (for .ssh/, etc..)
+
+* ANSIBLE_CONFIG - Full path for the ansible configuration file to use inside the container
+
+* INVENTORY_FILE - Full path for the inventory to use from the host
