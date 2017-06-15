@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.82
+Version:        3.5.83
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.83-1
+- Disable negative caching, set cache TTL to 1s (skuznets@redhat.com)
+- Import the ansible encoding utils (tbielawa@redhat.com)
+- Prevent line wrap in yaml dump of IDP, fixes #3912 (rikkuness@gmail.com)
+
 * Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.5.82-1
 - Skip service restarts within ca redeployment playbook when expired
   certificates are detected. (abutcher@redhat.com)
