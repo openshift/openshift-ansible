@@ -103,6 +103,14 @@ spec:
           value: "true"
         - name: MUX_ALLOW_EXTERNAL
           value: "{{ openshift_logging_mux_allow_external | default('false') }}"
+        - name: "BUFFER_QUEUE_LIMIT"
+          value: "{{ openshift_logging_mux_buffer_queue_limit }}"
+        - name: "BUFFER_SIZE_LIMIT"
+          value: "{{ openshift_logging_mux_buffer_size_limit }}"
+        - name: "MUX_CPU_LIMIT"
+          value: "{{ openshift_logging_mux_cpu_limit }}"
+        - name: "MUX_MEMORY_LIMIT"
+          value: "{{ openshift_logging_mux_memory_limit }}"
       volumes:
       - name: config
         configMap:

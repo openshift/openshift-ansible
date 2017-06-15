@@ -55,6 +55,9 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_fluentd_use_journal`: NOTE: Fluentd will attempt to detect whether or not Docker is using the journald log driver when using the default of empty.
 - `openshift_logging_fluentd_journal_read_from_head`: If empty, Fluentd will use its internal default, which is false.
 - `openshift_logging_fluentd_hosts`: List of nodes that should be labeled for Fluentd to be deployed to. Defaults to ['--all'].
+- `openshift_logging_fluentd_buffer_queue_limit`: Buffer queue limit for Fluentd. Defaults to 1024.
+- `openshift_logging_fluentd_buffer_size_limit`: Buffer chunk limit for Fluentd. Defaults to 1m.
+
 
 - `openshift_logging_es_host`: The name of the ES service Fluentd should send logs to. Defaults to 'logging-es'.
 - `openshift_logging_es_port`: The port for the ES service Fluentd should sent its logs to. Defaults to '9200'.
@@ -155,3 +158,5 @@ Elasticsearch OPS too, if using an OPS cluster:
 - `openshift_logging_mux_namespaces`: Default `[]` - additional namespaces to
   create for _external_ mux clients to associate with their logs - users will
   need to set this
+- `openshift_logging_mux_buffer_queue_limit`: Default `[1024]` - Buffer queue limit for Mux.
+- `openshift_logging_mux_buffer_size_limit`: Default `[1m]` - Buffer chunk limit for Mux.

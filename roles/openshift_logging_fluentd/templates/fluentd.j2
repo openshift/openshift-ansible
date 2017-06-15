@@ -93,6 +93,14 @@ spec:
           value: "{{ openshift_logging_fluentd_journal_source | default('') }}"
         - name: "JOURNAL_READ_FROM_HEAD"
           value: "{{ openshift_logging_fluentd_journal_read_from_head | lower }}"
+        - name: "BUFFER_QUEUE_LIMIT"
+          value: "{{ openshift_logging_fluentd_buffer_queue_limit }}"
+        - name: "BUFFER_SIZE_LIMIT"
+          value: "{{ openshift_logging_fluentd_buffer_size_limit }}"
+        - name: "FLUENTD_CPU_LIMIT"
+          value: "{{ openshift_logging_fluentd_cpu_limit }}"
+        - name: "FLUENTD_MEMORY_LIMIT"
+          value: "{{ openshift_logging_fluentd_memory_limit }}"
       volumes:
       - name: runlogjournal
         hostPath:
