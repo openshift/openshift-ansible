@@ -21,7 +21,8 @@
             "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
             "TERM=xterm",
             "OPTS=$OPTS",
-            "PLAYBOOK_FILE=$PLAYBOOK_FILE"
+            "PLAYBOOK_FILE=$PLAYBOOK_FILE",
+            "ANSIBLE_CONFIG=$ANSIBLE_CONFIG"
         ],
         "cwd": "/opt/app-root/src/",
         "rlimits": [
