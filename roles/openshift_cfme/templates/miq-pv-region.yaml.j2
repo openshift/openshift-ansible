@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: miq-pv02
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs: 
+    path: /exports/miq-pv02
+    server: {{ openshift_cfme_nfs_server }}
+  persistentVolumeReclaimPolicy: Retain

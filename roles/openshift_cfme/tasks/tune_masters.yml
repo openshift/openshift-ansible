@@ -1,0 +1,12 @@
+---
+- name: Ensure bulk image import limit is tuned
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    key: 'imagePolicyConfig.maxImagesBulkImportedPerRepository'
+    value: "{{ openshift_cfme_maxImagesBulkImportedPerRepository | int() }}"
+    state: present
+    backup: True
+  notify:
+    - restart master
+
+- meta: flush_handlers

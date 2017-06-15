@@ -1,0 +1,36 @@
+---
+# Check for existance and then conditionally:
+# - evaluate templates
+# - PVs
+#
+# These tasks idempotently create required CFME PV objects. Do not
+# call this file directly. This file is intended to be ran as an
+# include that has a 'with_items' attached to it. Hence the use below
+# of variables like "{{ item.pv_label }}"
+
+- name: "Check if the {{ item.pv_label }} template has been created already"
+  oc_obj:
+    namespace: "{{ openshift_cfme_project }}"
+    state: list
+    kind: pv
+    name: "{{ item.pv_name }}"
+  register: miq_pv_check
+
+# Skip all of this if the PV already exists
+- block:
+    - name: "Ensure the {{ item.pv_label }} template is evaluated"
+      template:
+        src: "{{ item.pv_template }}.j2"
+        dest: "{{ template_dir }}/{{ item.pv_template }}"
+
+    - name: "Ensure {{ item.pv_label }} is created"
+      oc_obj:
+        namespace: "{{ openshift_cfme_project }}"
+        kind: pv
+        name: "{{ item.pv_name }}"
+        state: present
+        delete_after: True
+        files:
+          - "{{ template_dir }}/{{ item.pv_template }}"
+  when:
+    - not miq_pv_check.results.results.0

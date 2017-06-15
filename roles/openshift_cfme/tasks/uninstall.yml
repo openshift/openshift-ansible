@@ -1,0 +1,43 @@
+---
+- include_role:
+    name: lib_openshift
+
+- name: Uninstall CFME - ManageIQ
+  debug:
+    msg: Uninstalling Cloudforms Management Engine - ManageIQ
+
+- name: Ensure the CFME project is removed
+  oc_project:
+    state: absent
+    name: "{{ openshift_cfme_project }}"
+
+- name: Ensure the CFME template is removed
+  oc_obj:
+    namespace: "{{ openshift_cfme_project }}"
+    state: absent
+    kind: template
+    name: manageiq
+
+- name: Ensure the CFME PVs are removed
+  oc_obj:
+    state: absent
+    all_namespaces: True
+    kind: pv
+    name: "{{ item }}"
+  with_items: "{{ openshift_cfme_pv_exports }}"
+
+- name: Ensure the CFME user is removed
+  oc_user:
+    state: absent
+    username: "{{ openshift_cfme_user }}"
+
+- name: Ensure the CFME NFS Exports are removed
+  file:
+    path: /etc/exports.d/openshift_cfme.exports
+    state: absent
+  register: nfs_exports_removed
+
+- name: Ensure the NFS export table is refreshed if exports were removed
+  command: exportfs -ar
+  when:
+    - nfs_exports_removed.changed

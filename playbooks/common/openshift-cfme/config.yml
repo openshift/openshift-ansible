@@ -1,0 +1,44 @@
+---
+# TODO: Make this work. The 'name' variable below is undefined
+# presently because it's part of the cfme role. This play can't run
+# until that's re-worked.
+#
+# - name: Pre-Pull manageiq-pods docker images
+#   hosts: nodes
+#   tasks:
+#   - name: Ensure the latest manageiq-pods docker image is pulling
+#     docker_image:
+#       name: "{{ openshift_cfme_container_image }}"
+#     # Fire-and-forget method, never timeout
+#     async: 99999999999
+#     # F-a-f, never check on this. True 'background' task.
+#     poll: 0
+
+- name: Configure Masters for CFME Bulk Image Imports
+  hosts: oo_masters_to_config
+  serial: 1
+  tasks:
+  - name: Run master cfme tuning playbook
+    include_role:
+      name: openshift_cfme
+      tasks_from: tune_masters
+
+- name: Setup CFME
+  hosts: oo_first_master
+  vars:
+    r_openshift_cfme_miq_template_content: "{{ lookup('file', 'roles/openshift_cfme/files/miq-template.yaml') | from_yaml}}"
+  pre_tasks:
+  - name: Create a temporary place to evaluate the PV templates
+    command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: r_openshift_cfme_mktemp
+    changed_when: false
+  - name: Ensure the server template was read from disk
+    debug:
+      msg="{{ r_openshift_cfme_miq_template_content | from_yaml }}"
+
+  tasks:
+  - name: Run the CFME Setup Role
+    include_role:
+      name: openshift_cfme
+    vars:
+      template_dir: "{{ hostvars[groups.masters.0].r_openshift_cfme_mktemp.stdout }}"

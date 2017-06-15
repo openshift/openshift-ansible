@@ -1,0 +1,6 @@
+---
+# - include: ../openshift-cluster/initialize_groups.yml
+#   tags:
+#     - always
+
+- include: ../../common/openshift-cfme/uninstall.yml

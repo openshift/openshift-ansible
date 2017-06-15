@@ -90,9 +90,9 @@ options:
     required: false
     default: str
     aliases: []
-  all_namespace:
+  all_namespaces:
     description:
-    - The namespace where the object lives.
+    - Search in all namespaces for the object.
     required: false
     default: false
     aliases: []

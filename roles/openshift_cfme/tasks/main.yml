@@ -1,0 +1,148 @@
+---
+######################################################################
+# Users, projects, and privileges
+
+- name: Ensure the CFME user exists
+  oc_user:
+    state: present
+    username: "{{ openshift_cfme_user }}"
+
+- name: Ensure the CFME namespace exists with CFME user as admin
+  oc_project:
+    state: present
+    name: "{{ openshift_cfme_project }}"
+    display_name: "{{ openshift_cfme_project_description }}"
+    admin: "{{ openshift_cfme_user }}"
+
+- name: Ensure the CFME namespace service account is privileged
+  oc_adm_policy_user:
+    namespace: "{{ openshift_cfme_project }}"
+    user: "{{ openshift_cfme_service_account }}"
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+
+######################################################################
+# NFS
+
+- name: Ensure the /exports/ directory exists
+  file:
+    path: /exports/
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Ensure the miq-pv0X export directories exist
+  file:
+    path: "/exports/{{ item }}"
+    state: directory
+    mode: 0775
+    owner: root
+    group: root
+  with_items: "{{ openshift_cfme_pv_exports }}"
+
+- name: Ensure the NFS exports for CFME PVs exist
+  copy:
+    src: openshift_cfme.exports
+    dest: /etc/exports.d/openshift_cfme.exports
+  register: nfs_exports_updated
+
+- name: Ensure the NFS export table is refreshed if exports were added
+  command: exportfs -ar
+  when:
+    - nfs_exports_updated.changed
+
+
+######################################################################
+# Create the required CFME PVs. Check out these online docs if you
+# need a refresher on includes looping with items:
+# * http://docs.ansible.com/ansible/playbooks_loops.html#loops-and-includes-in-2-0
+# * http://stackoverflow.com/a/35128533
+#
+# TODO: Handle the case where a PV template is updated in
+# openshift-ansible and the change needs to be landed on the managed
+# cluster.
+
+- include: create_pvs.yml
+  with_items: "{{ openshift_cfme_pv_data }}"
+
+######################################################################
+# CFME App Template
+#
+# Note, this is different from the create_pvs.yml tasks in that the
+# application template does not require any jinja2 evaluation.
+#
+# TODO: Handle the case where the server template is updated in
+# openshift-ansible and the change needs to be landed on the managed
+# cluster.
+
+- name: Check if the CFME Server template has been created already
+  oc_obj:
+    namespace: "{{ openshift_cfme_project }}"
+    state: list
+    kind: template
+    name: manageiq
+  register: miq_server_check
+
+- name: Copy over CFME Server template
+  copy:
+    src: miq-template.yaml
+    dest: "{{ template_dir }}/miq-template.yaml"
+
+- name: Ensure the server template was read from disk
+  debug:
+    var=r_openshift_cfme_miq_template_content
+
+- name: Ensure CFME Server Template exists
+  oc_obj:
+    namespace: "{{ openshift_cfme_project }}"
+    kind: template
+    name: "manageiq"
+    state: present
+    content: "{{ r_openshift_cfme_miq_template_content }}"
+
+######################################################################
+# Let's do this
+
+- name: Ensure the CFME Server is created
+  oc_process:
+    namespace: "{{ openshift_cfme_project }}"
+    template_name: manageiq
+    create: True
+  register: cfme_new_app_process
+  run_once: True
+  when:
+    # User said to install CFME in their inventory
+    - openshift_cfme_install_app | bool
+    # # The server app doesn't exist already
+    # - not miq_server_check.results.results.0
+
+- debug:
+    var: cfme_new_app_process
+
+######################################################################
+# Various cleanup steps
+
+# TODO: Not sure what to do about this right now. Might be able to
+# just delete it?  This currently warns about "Unable to find
+# '<TEMP_DIR>' in expected paths."
+- name: Ensure the temporary PV/App templates are erased
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_fileglob:
+    - "{{ template_dir }}/*.yaml"
+
+- name: Ensure the temporary PV/app template directory is erased
+  file:
+    path: "{{ template_dir }}"
+    state: absent
+
+######################################################################
+
+- name: Status update
+  debug:
+    msg: >
+      CFME has been deployed. Note that there will be a delay before
+      it is fully initialized.
