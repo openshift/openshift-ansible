@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.112
+Version:        3.6.113
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.113-1
+- Make rollout status check best-effort, add poll (skuznets@redhat.com)
+- Verify the rollout status of the hosted router and registry
+  (skuznets@redhat.com)
+- fix es routes for new logging roles (rmeggins@redhat.com)
+
 * Thu Jun 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.112-1
 - Add the the other featured audit-config paramters as example (al-
   git001@none.at)
