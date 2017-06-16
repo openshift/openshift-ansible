@@ -1,5 +1,4 @@
 ---
-
 # Assign hostnames
 - hosts: cluster_hosts
   become: true
@@ -57,4 +56,3 @@
       dest: /etc/sysconfig/network
       regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
       line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
-

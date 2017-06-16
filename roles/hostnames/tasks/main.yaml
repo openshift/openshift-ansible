@@ -15,8 +15,8 @@
   register: cloud_cfg
 
 - name: Prevent cloud-init updates of hostname/fqdn (if applicable)
-  lineinfile: 
-    dest: /etc/cloud/cloud.cfg 
+  lineinfile:
+    dest: /etc/cloud/cloud.cfg
     state: present
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"

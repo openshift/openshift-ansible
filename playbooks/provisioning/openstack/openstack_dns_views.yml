@@ -1,8 +1,7 @@
 ---
-
 - name: "Generate ACL list for DNS server"
   set_fact:
-    acl_list: "{{ acl_list | default([]) + [ (hostvars[item]['openstack']['private_v4'] + '/32') ] }}" 
+    acl_list: "{{ acl_list | default([]) + [ (hostvars[item]['openstack']['private_v4'] + '/32') ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
 
 - name: "Generate the private view"
@@ -22,6 +21,5 @@
       forwarder: "{{ public_dns_nameservers }}"
 
 - name: "Generate the final named_config_views"
-  set_fact: 
+  set_fact:
     named_config_views: "{{ private_named_view + public_named_view }}"
-

@@ -1,5 +1,4 @@
 ---
-
 - fail:
     msg: 'Missing required private DNS server(s)'
   when:
@@ -35,4 +34,3 @@
     public_dns_server: "{{ hostvars[groups['dns'][0]].openstack.public_v4 }}"
   when:
   - public_dns_server is undefined
-

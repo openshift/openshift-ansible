@@ -11,7 +11,7 @@
 - name: "Determine if Subscription Manager should be used"
   set_fact:
     rhsm_register: false
-  when: 
+  when:
     - rhsm_satellite is undefined or rhsm_satellite is none or rhsm_satellite|trim == ''
     - rhsm_username is undefined or rhsm_username is none or rhsm_username|trim == ''
     - rhsm_password is undefined or rhsm_password is none or rhsm_password|trim == ''
@@ -21,7 +21,7 @@
 
 - name: "Validate Subscription Manager organization is set"
   fail: msg="Cannot register to a Satellite server without a value for the Organization via 'rhsm_org'"
-  when: 
+  when:
     - rhsm_org is undefined or rhsm_org is none or rhsm_org|trim == ''
     - rhsm_satellite is defined
     - rhsm_satellite is not none

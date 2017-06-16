@@ -14,4 +14,3 @@
     infra_flavor: "{{ openstack_default_flavor }}"
     dns_flavor: "{{ openstack_default_flavor }}"
     external_network: "{{ openstack_external_network_name }}"
-

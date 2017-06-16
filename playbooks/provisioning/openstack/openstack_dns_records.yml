@@ -1,5 +1,4 @@
 ---
-
 - name: "Generate list of private A records"
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'], 'ip': hostvars[item]['openstack']['private_v4'] } ] }}"
@@ -42,7 +41,7 @@
   set_fact:
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_app_domain, 'ip': hostvars[item]['openstack']['public_v4'] } ] }}"
   with_items: "{{ groups['infra_hosts'] }}"
-    
+
 - name: "Set the public DNS server details to use the external value (if provided)"
   set_fact:
     nsupdate_server_public: "{{ external_nsupdate_keys['public']['server'] }}"
@@ -72,6 +71,5 @@
       entries: "{{ public_records }}"
 
 - name: "Generate the final dns_records_add"
-  set_fact: 
+  set_fact:
     dns_records_add: "{{ private_named_records + public_named_records }}"
-

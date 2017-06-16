@@ -1,3 +1,4 @@
+---
 env_id: "openshift"
 public_dns_domain: "example.com"
 public_dns_nameservers: []
