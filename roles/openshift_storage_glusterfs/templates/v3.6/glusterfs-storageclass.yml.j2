@@ -6,6 +6,6 @@ metadata:
 provisioner: kubernetes.io/glusterfs
 parameters:
   resturl: "http://{% if glusterfs_heketi_is_native %}{{ glusterfs_heketi_route }}{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %}"
-  restuser: "user"
+  restuser: "admin"
   secretNamespace: "{{ glusterfs_namespace }}"
-  secretName: "heketi-{{ glusterfs_name }}-user-secret"
+  secretName: "heketi-{{ glusterfs_name }}-secret"

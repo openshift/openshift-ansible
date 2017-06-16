@@ -149,16 +149,18 @@
   - glusterfs_heketi_is_native
   - glusterfs_heketi_is_missing
 
-- name: Create heketi user secret
+- name: Create heketi secret
   oc_secret:
     namespace: "{{ glusterfs_namespace }}"
     state: present
-    name: "heketi-{{ glusterfs_name }}-user-secret"
+    name: "heketi-{{ glusterfs_name }}-secret"
     type: "kubernetes.io/glusterfs"
     force: True
     contents:
     - path: key
-      data: "{{ glusterfs_heketi_user_key }}"
+      data: "{{ glusterfs_heketi_admin_key }}"
+  when:
+  - glusterfs_storageclass
 
 - name: Get heketi route
   oc_obj:
