@@ -17,7 +17,7 @@ def test_is_active(group_names, is_active):
     task_vars = dict(
         group_names=group_names,
     )
-    assert MemoryAvailability.is_active(task_vars=task_vars) == is_active
+    assert MemoryAvailability(None, task_vars).is_active() == is_active
 
 
 @pytest.mark.parametrize('group_names,configured_min,ansible_memtotal_mb', [
@@ -59,8 +59,7 @@ def test_succeeds_with_recommended_memory(group_names, configured_min, ansible_m
         ansible_memtotal_mb=ansible_memtotal_mb,
     )
 
-    check = MemoryAvailability(execute_module=fake_execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = MemoryAvailability(fake_execute_module, task_vars).run()
 
     assert not result.get('failed', False)
 
@@ -117,8 +116,7 @@ def test_fails_with_insufficient_memory(group_names, configured_min, ansible_mem
         ansible_memtotal_mb=ansible_memtotal_mb,
     )
 
-    check = MemoryAvailability(execute_module=fake_execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = MemoryAvailability(fake_execute_module, task_vars).run()
 
     assert result.get('failed', False)
     for word in 'below recommended'.split() + extra_words:

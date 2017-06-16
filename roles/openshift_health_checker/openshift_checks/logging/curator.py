@@ -1,6 +1,5 @@
 """Check for an aggregated logging Curator deployment"""
 
-from openshift_checks import get_var
 from openshift_checks.logging.logging import LoggingCheck
 
 
@@ -12,13 +11,11 @@ class Curator(LoggingCheck):
 
     logging_namespace = None
 
-    def run(self, tmp, task_vars):
-        self.logging_namespace = get_var(task_vars, "openshift_logging_namespace", default="logging")
+    def run(self):
+        self.logging_namespace = self.get_var("openshift_logging_namespace", default="logging")
         curator_pods, error = super(Curator, self).get_pods_for_component(
-            self.execute_module,
             self.logging_namespace,
             "curator",
-            task_vars
         )
         if error:
             return {"failed": True, "changed": False, "msg": error}

@@ -21,7 +21,7 @@ def test_is_active(group_names, version, is_active):
             common=dict(short_version=version),
         ),
     )
-    assert EtcdTraffic.is_active(task_vars=task_vars) == is_active
+    assert EtcdTraffic(task_vars=task_vars).is_active() == is_active
 
 
 @pytest.mark.parametrize('group_names,matched,failed,extra_words', [
@@ -30,7 +30,7 @@ def test_is_active(group_names, version, is_active):
     (["etcd"], False, False, []),
 ])
 def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words):
-    def execute_module(module_name, args, task_vars):
+    def execute_module(module_name, *_):
         return {
             "matched": matched,
             "failed": failed,
@@ -43,8 +43,7 @@ def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words)
         )
     )
 
-    check = EtcdTraffic(execute_module=execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = EtcdTraffic(execute_module, task_vars).run()
 
     for word in extra_words:
         assert word in result.get("msg", "")
@@ -63,7 +62,7 @@ def test_systemd_unit_matches_deployment_type(is_containerized, expected_unit_va
         )
     )
 
-    def execute_module(module_name, args, task_vars):
+    def execute_module(module_name, args, *_):
         assert module_name == "search_journalctl"
         matchers = args["log_matchers"]
 
@@ -72,9 +71,4 @@ def test_systemd_unit_matches_deployment_type(is_containerized, expected_unit_va
 
         return {"failed": False}
 
-    check = EtcdTraffic(execute_module=execute_module)
-    check.run(tmp=None, task_vars=task_vars)
-
-
-def fake_execute_module(*args):
-    raise AssertionError('this function should not be called')
+    EtcdTraffic(execute_module, task_vars).run()

@@ -17,7 +17,7 @@ def test_is_active(group_names, is_active):
     task_vars = dict(
         group_names=group_names,
     )
-    assert DiskAvailability.is_active(task_vars=task_vars) == is_active
+    assert DiskAvailability(None, task_vars).is_active() == is_active
 
 
 @pytest.mark.parametrize('ansible_mounts,extra_words', [
@@ -30,10 +30,9 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
         group_names=['masters'],
         ansible_mounts=ansible_mounts,
     )
-    check = DiskAvailability(execute_module=fake_execute_module)
 
     with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
+        DiskAvailability(fake_execute_module, task_vars).run()
 
     for word in 'determine disk availability'.split() + extra_words:
         assert word in str(excinfo.value)
@@ -93,8 +92,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
         ansible_mounts=ansible_mounts,
     )
 
-    check = DiskAvailability(execute_module=fake_execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = DiskAvailability(fake_execute_module, task_vars).run()
 
     assert not result.get('failed', False)
 
@@ -168,8 +166,7 @@ def test_fails_with_insufficient_disk_space(group_names, configured_min, ansible
         ansible_mounts=ansible_mounts,
     )
 
-    check = DiskAvailability(execute_module=fake_execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = DiskAvailability(fake_execute_module, task_vars).run()
 
     assert result['failed']
     for word in 'below recommended'.split() + extra_words:

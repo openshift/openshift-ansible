@@ -8,7 +8,7 @@ from openshift_checks.package_version import PackageVersion, OpenShiftCheckExcep
     ('0.0.0', ["no recommended version of Docker"]),
 ])
 def test_openshift_version_not_supported(openshift_release, extra_words):
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(*_):
         return {}
 
     task_vars = dict(
@@ -18,16 +18,16 @@ def test_openshift_version_not_supported(openshift_release, extra_words):
         openshift_deployment_type='origin',
     )
 
-    check = PackageVersion(execute_module=execute_module)
+    check = PackageVersion(execute_module, task_vars)
     with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
+        check.run()
 
     for word in extra_words:
         assert word in str(excinfo.value)
 
 
 def test_invalid_openshift_release_format():
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(*_):
         return {}
 
     task_vars = dict(
@@ -36,9 +36,9 @@ def test_invalid_openshift_release_format():
         openshift_deployment_type='origin',
     )
 
-    check = PackageVersion(execute_module=execute_module)
+    check = PackageVersion(execute_module, task_vars)
     with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
+        check.run()
     assert "invalid version" in str(excinfo.value)
 
 
@@ -57,7 +57,7 @@ def test_package_version(openshift_release):
     )
     return_value = object()
 
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None, *_):
         assert module_name == 'aos_version'
         assert "package_list" in module_args
 
@@ -67,8 +67,8 @@ def test_package_version(openshift_release):
 
         return return_value
 
-    check = PackageVersion(execute_module=execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    check = PackageVersion(execute_module, task_vars)
+    result = check.run()
     assert result is return_value
 
 
@@ -89,7 +89,7 @@ def test_docker_package_version(deployment_type, openshift_release, expected_doc
     )
     return_value = object()
 
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(module_name=None, module_args=None, *_):
         assert module_name == 'aos_version'
         assert "package_list" in module_args
 
@@ -99,8 +99,8 @@ def test_docker_package_version(deployment_type, openshift_release, expected_doc
 
         return return_value
 
-    check = PackageVersion(execute_module=execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    check = PackageVersion(execute_module, task_vars)
+    result = check.run()
     assert result is return_value
 
 
@@ -121,4 +121,4 @@ def test_package_version_skip_when_not_master_nor_node(group_names, is_container
         group_names=group_names,
         openshift=dict(common=dict(is_containerized=is_containerized)),
     )
-    assert PackageVersion.is_active(task_vars=task_vars) == is_active
+    assert PackageVersion(None, task_vars).is_active() == is_active

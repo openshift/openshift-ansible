@@ -3,7 +3,7 @@
 import os.path
 import tempfile
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 
 
 class DiskAvailability(OpenShiftCheck):
@@ -35,22 +35,21 @@ class DiskAvailability(OpenShiftCheck):
         },
     }
 
-    @classmethod
-    def is_active(cls, task_vars):
+    def is_active(self):
         """Skip hosts that do not have recommended disk space requirements."""
-        group_names = get_var(task_vars, "group_names", default=[])
+        group_names = self.get_var("group_names", default=[])
         active_groups = set()
-        for recommendation in cls.recommended_disk_space_bytes.values():
+        for recommendation in self.recommended_disk_space_bytes.values():
             active_groups.update(recommendation.keys())
         has_disk_space_recommendation = bool(active_groups.intersection(group_names))
-        return super(DiskAvailability, cls).is_active(task_vars) and has_disk_space_recommendation
+        return super(DiskAvailability, self).is_active() and has_disk_space_recommendation
 
-    def run(self, tmp, task_vars):
-        group_names = get_var(task_vars, "group_names")
-        ansible_mounts = get_var(task_vars, "ansible_mounts")
+    def run(self):
+        group_names = self.get_var("group_names")
+        ansible_mounts = self.get_var("ansible_mounts")
         ansible_mounts = {mount['mount']: mount for mount in ansible_mounts}
 
-        user_config = get_var(task_vars, "openshift_check_min_host_disk_gb", default={})
+        user_config = self.get_var("openshift_check_min_host_disk_gb", default={})
         try:
             # For backwards-compatibility, if openshift_check_min_host_disk_gb
             # is a number, then it overrides the required config for '/var'.

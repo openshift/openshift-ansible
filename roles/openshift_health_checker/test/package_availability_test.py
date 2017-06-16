@@ -14,7 +14,7 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
         ansible_pkg_mgr=pkg_mgr,
         openshift=dict(common=dict(is_containerized=is_containerized)),
     )
-    assert PackageAvailability.is_active(task_vars=task_vars) == is_active
+    assert PackageAvailability(None, task_vars).is_active() == is_active
 
 
 @pytest.mark.parametrize('task_vars,must_have_packages,must_not_have_packages', [
@@ -51,13 +51,12 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
 def test_package_availability(task_vars, must_have_packages, must_not_have_packages):
     return_value = object()
 
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(module_name=None, module_args=None, *_):
         assert module_name == 'check_yum_update'
         assert 'packages' in module_args
         assert set(module_args['packages']).issuperset(must_have_packages)
         assert not set(module_args['packages']).intersection(must_not_have_packages)
         return return_value
 
-    check = PackageAvailability(execute_module=execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = PackageAvailability(execute_module, task_vars).run()
     assert result is return_value

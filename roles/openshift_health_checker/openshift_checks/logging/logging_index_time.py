@@ -7,7 +7,7 @@ import time
 
 from uuid import uuid4
 
-from openshift_checks import get_var, OpenShiftCheckException
+from openshift_checks import OpenShiftCheckException
 from openshift_checks.logging.logging import LoggingCheck
 
 
@@ -21,11 +21,11 @@ class LoggingIndexTime(LoggingCheck):
 
     logging_namespace = "logging"
 
-    def run(self, tmp, task_vars):
+    def run(self):
         """Add log entry by making unique request to Kibana. Check for unique entry in the ElasticSearch pod logs."""
         try:
             log_index_timeout = int(
-                get_var(task_vars, "openshift_check_logging_index_timeout_seconds", default=ES_CMD_TIMEOUT_SECONDS)
+                self.get_var("openshift_check_logging_index_timeout_seconds", default=ES_CMD_TIMEOUT_SECONDS)
             )
         except ValueError:
             return {
@@ -37,11 +37,9 @@ class LoggingIndexTime(LoggingCheck):
         running_component_pods = dict()
 
         # get all component pods
-        self.logging_namespace = get_var(task_vars, "openshift_logging_namespace", default=self.logging_namespace)
+        self.logging_namespace = self.get_var("openshift_logging_namespace", default=self.logging_namespace)
         for component, name in (['kibana', 'Kibana'], ['es', 'Elasticsearch']):
-            pods, error = self.get_pods_for_component(
-                self.execute_module, self.logging_namespace, component, task_vars,
-            )
+            pods, error = self.get_pods_for_component(self.logging_namespace, component)
 
             if error:
                 msg = 'Unable to retrieve pods for the {} logging component: {}'
@@ -56,29 +54,29 @@ class LoggingIndexTime(LoggingCheck):
 
             running_component_pods[component] = running_pods
 
-        uuid = self.curl_kibana_with_uuid(running_component_pods["kibana"][0], task_vars)
-        self.wait_until_cmd_or_err(running_component_pods["es"][0], uuid, log_index_timeout, task_vars)
+        uuid = self.curl_kibana_with_uuid(running_component_pods["kibana"][0])
+        self.wait_until_cmd_or_err(running_component_pods["es"][0], uuid, log_index_timeout)
         return {}
 
-    def wait_until_cmd_or_err(self, es_pod, uuid, timeout_secs, task_vars):
+    def wait_until_cmd_or_err(self, es_pod, uuid, timeout_secs):
         """Retry an Elasticsearch query every second until query success, or a defined
         length of time has passed."""
         deadline = time.time() + timeout_secs
         interval = 1
-        while not self.query_es_from_es(es_pod, uuid, task_vars):
+        while not self.query_es_from_es(es_pod, uuid):
             if time.time() + interval > deadline:
                 msg = "expecting match in Elasticsearch for message with uuid {}, but no matches were found after {}s."
                 raise OpenShiftCheckException(msg.format(uuid, timeout_secs))
             time.sleep(interval)
 
-    def curl_kibana_with_uuid(self, kibana_pod, task_vars):
+    def curl_kibana_with_uuid(self, kibana_pod):
         """curl Kibana with a unique uuid."""
         uuid = self.generate_uuid()
         pod_name = kibana_pod["metadata"]["name"]
         exec_cmd = "exec {pod_name} -c kibana -- curl --max-time 30 -s http://localhost:5601/{uuid}"
         exec_cmd = exec_cmd.format(pod_name=pod_name, uuid=uuid)
 
-        error_str = self.exec_oc(self.execute_module, self.logging_namespace, exec_cmd, [], task_vars)
+        error_str = self.exec_oc(self.logging_namespace, exec_cmd, [])
 
         try:
             error_code = json.loads(error_str)["statusCode"]
@@ -97,7 +95,7 @@ class LoggingIndexTime(LoggingCheck):
 
         return uuid
 
-    def query_es_from_es(self, es_pod, uuid, task_vars):
+    def query_es_from_es(self, es_pod, uuid):
         """curl the Elasticsearch pod and look for a unique uuid in its logs."""
         pod_name = es_pod["metadata"]["name"]
         exec_cmd = (
@@ -108,7 +106,7 @@ class LoggingIndexTime(LoggingCheck):
             "https://logging-es:9200/project.{namespace}*/_count?q=message:{uuid}"
         )
         exec_cmd = exec_cmd.format(pod_name=pod_name, namespace=self.logging_namespace, uuid=uuid)
-        result = self.exec_oc(self.execute_module, self.logging_namespace, exec_cmd, [], task_vars)
+        result = self.exec_oc(self.logging_namespace, exec_cmd, [])
 
         try:
             count = json.loads(result)["count"]

@@ -2,7 +2,7 @@
 import json
 import os.path
 import re
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 from openshift_checks.mixins import DockerHostMixin
 
 
@@ -42,8 +42,8 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         ),
     ]
 
-    def run(self, tmp, task_vars):
-        msg, failed, changed = self.ensure_dependencies(task_vars)
+    def run(self):
+        msg, failed, changed = self.ensure_dependencies()
         if failed:
             return {
                 "failed": True,
@@ -52,7 +52,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
             }
 
         # attempt to get the docker info hash from the API
-        docker_info = self.execute_module("docker_info", {}, task_vars=task_vars)
+        docker_info = self.execute_module("docker_info", {})
         if docker_info.get("failed"):
             return {"failed": True, "changed": changed,
                     "msg": "Failed to query Docker API. Is docker running on this host?"}
@@ -76,15 +76,15 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         result = {}
 
         if driver == "devicemapper":
-            result = self.check_devicemapper_support(driver_status, task_vars)
+            result = self.check_devicemapper_support(driver_status)
 
         if driver in ['overlay', 'overlay2']:
-            result = self.check_overlay_support(docker_info, driver_status, task_vars)
+            result = self.check_overlay_support(docker_info, driver_status)
 
         result['changed'] = result.get('changed', False) or changed
         return result
 
-    def check_devicemapper_support(self, driver_status, task_vars):
+    def check_devicemapper_support(self, driver_status):
         """Check if dm storage driver is supported as configured. Return: result dict."""
         if driver_status.get("Data loop file"):
             msg = (
@@ -94,10 +94,10 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "See http://red.ht/2rNperO for further information."
             )
             return {"failed": True, "msg": msg}
-        result = self.check_dm_usage(driver_status, task_vars)
+        result = self.check_dm_usage(driver_status)
         return result
 
-    def check_dm_usage(self, driver_status, task_vars):
+    def check_dm_usage(self, driver_status):
         """Check usage thresholds for Docker dm storage driver. Return: result dict.
         Backing assumptions: We expect devicemapper to be backed by an auto-expanding thin pool
         implemented as an LV in an LVM2 VG. This is how docker-storage-setup currently configures
@@ -109,7 +109,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         could run out of space first; so we check both.
         """
         vals = dict(
-            vg_free=self.get_vg_free(driver_status.get("Pool Name"), task_vars),
+            vg_free=self.get_vg_free(driver_status.get("Pool Name")),
             data_used=driver_status.get("Data Space Used"),
             data_total=driver_status.get("Data Space Total"),
             metadata_used=driver_status.get("Metadata Space Used"),
@@ -130,7 +130,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         # determine the threshold percentages which usage should not exceed
         for name, default in [("data", self.max_thinpool_data_usage_percent),
                               ("metadata", self.max_thinpool_meta_usage_percent)]:
-            percent = get_var(task_vars, "max_thinpool_" + name + "_usage_percent", default=default)
+            percent = self.get_var("max_thinpool_" + name + "_usage_percent", default=default)
             try:
                 vals[name + "_threshold"] = float(percent)
             except ValueError:
@@ -157,7 +157,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         vals["msg"] = "\n".join(messages or ["Thinpool usage is within thresholds."])
         return vals
 
-    def get_vg_free(self, pool, task_vars):
+    def get_vg_free(self, pool):
         """Determine which VG to examine according to the pool name. Return: size vgs reports.
         Pool name is the only indicator currently available from the Docker API driver info.
         We assume a name that looks like "vg--name-docker--pool";
@@ -174,7 +174,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         vgs_cmd = "/sbin/vgs --noheadings -o vg_free --units g --select vg_name=" + vg_name
         # should return free space like "  12.00g" if the VG exists; empty if it does not
 
-        ret = self.execute_module("command", {"_raw_params": vgs_cmd}, task_vars=task_vars)
+        ret = self.execute_module("command", {"_raw_params": vgs_cmd})
         if ret.get("failed") or ret.get("rc", 0) != 0:
             raise OpenShiftCheckException(
                 "Is LVM installed? Failed to run /sbin/vgs "
@@ -213,7 +213,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
 
         return float(number) * multiplier
 
-    def check_overlay_support(self, docker_info, driver_status, task_vars):
+    def check_overlay_support(self, docker_info, driver_status):
         """Check if overlay storage driver is supported for this host. Return: result dict."""
         # check for xfs as backing store
         backing_fs = driver_status.get("Backing Filesystem", "[NONE]")
@@ -239,13 +239,13 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
             # NOTE: we could check for --selinux-enabled here but docker won't even start with
             # that option until it's supported in the kernel so we don't need to.
 
-        return self.check_overlay_usage(docker_info, task_vars)
+        return self.check_overlay_usage(docker_info)
 
-    def check_overlay_usage(self, docker_info, task_vars):
+    def check_overlay_usage(self, docker_info):
         """Check disk usage on OverlayFS backing store volume. Return: result dict."""
         path = docker_info.get("DockerRootDir", "/var/lib/docker") + "/" + docker_info["Driver"]
 
-        threshold = get_var(task_vars, "max_overlay_usage_percent", default=self.max_overlay_usage_percent)
+        threshold = self.get_var("max_overlay_usage_percent", default=self.max_overlay_usage_percent)
         try:
             threshold = float(threshold)
         except ValueError:
@@ -254,7 +254,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "msg": "Specified 'max_overlay_usage_percent' is not a percentage: {}".format(threshold),
             }
 
-        mount = self.find_ansible_mount(path, get_var(task_vars, "ansible_mounts"))
+        mount = self.find_ansible_mount(path, self.get_var("ansible_mounts"))
         try:
             free_bytes = mount['size_available']
             total_bytes = mount['size_total']

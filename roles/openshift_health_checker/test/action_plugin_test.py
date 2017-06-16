@@ -15,14 +15,13 @@ def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, ru
         name = _name
         tags = _tags or []
 
-        def __init__(self, execute_module=None):
+        def __init__(self, execute_module=None, task_vars=None, tmp=None):
             pass
 
-        @classmethod
-        def is_active(cls, task_vars):
+        def is_active(self):
             return is_active
 
-        def run(self, tmp, task_vars):
+        def run(self):
             if run_exception is not None:
                 raise run_exception
             return run_return
@@ -124,7 +123,7 @@ def test_action_plugin_skip_disabled_checks(plugin, task_vars, monkeypatch):
 def test_action_plugin_run_check_ok(plugin, task_vars, monkeypatch):
     check_return_value = {'ok': 'test'}
     check_class = fake_check(run_return=check_return_value)
-    monkeypatch.setattr(plugin, 'load_known_checks', lambda: {'fake_check': check_class()})
+    monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {'fake_check': check_class()})
     monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
 
     result = plugin.run(tmp=None, task_vars=task_vars)
@@ -138,7 +137,7 @@ def test_action_plugin_run_check_ok(plugin, task_vars, monkeypatch):
 def test_action_plugin_run_check_changed(plugin, task_vars, monkeypatch):
     check_return_value = {'ok': 'test', 'changed': True}
     check_class = fake_check(run_return=check_return_value)
-    monkeypatch.setattr(plugin, 'load_known_checks', lambda: {'fake_check': check_class()})
+    monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {'fake_check': check_class()})
     monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
 
     result = plugin.run(tmp=None, task_vars=task_vars)
@@ -152,7 +151,7 @@ def test_action_plugin_run_check_changed(plugin, task_vars, monkeypatch):
 def test_action_plugin_run_check_fail(plugin, task_vars, monkeypatch):
     check_return_value = {'failed': True}
     check_class = fake_check(run_return=check_return_value)
-    monkeypatch.setattr(plugin, 'load_known_checks', lambda: {'fake_check': check_class()})
+    monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {'fake_check': check_class()})
     monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
 
     result = plugin.run(tmp=None, task_vars=task_vars)
@@ -167,7 +166,7 @@ def test_action_plugin_run_check_exception(plugin, task_vars, monkeypatch):
     exception_msg = 'fake check has an exception'
     run_exception = OpenShiftCheckException(exception_msg)
     check_class = fake_check(run_exception=run_exception)
-    monkeypatch.setattr(plugin, 'load_known_checks', lambda: {'fake_check': check_class()})
+    monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {'fake_check': check_class()})
     monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
 
     result = plugin.run(tmp=None, task_vars=task_vars)
@@ -179,7 +178,7 @@ def test_action_plugin_run_check_exception(plugin, task_vars, monkeypatch):
 
 
 def test_action_plugin_resolve_checks_exception(plugin, task_vars, monkeypatch):
-    monkeypatch.setattr(plugin, 'load_known_checks', lambda: {})
+    monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {})
 
     result = plugin.run(tmp=None, task_vars=task_vars)
 

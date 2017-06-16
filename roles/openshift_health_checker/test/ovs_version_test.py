@@ -4,7 +4,7 @@ from openshift_checks.ovs_version import OvsVersion, OpenShiftCheckException
 
 
 def test_openshift_version_not_supported():
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(*_):
         return {}
 
     openshift_release = '111.7.0'
@@ -16,15 +16,14 @@ def test_openshift_version_not_supported():
         openshift_deployment_type='origin',
     )
 
-    check = OvsVersion(execute_module=execute_module)
     with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
+        OvsVersion(execute_module, task_vars).run()
 
     assert "no recommended version of Open vSwitch" in str(excinfo.value)
 
 
 def test_invalid_openshift_release_format():
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(*_):
         return {}
 
     task_vars = dict(
@@ -33,9 +32,8 @@ def test_invalid_openshift_release_format():
         openshift_deployment_type='origin',
     )
 
-    check = OvsVersion(execute_module=execute_module)
     with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run(tmp=None, task_vars=task_vars)
+        OvsVersion(execute_module, task_vars).run()
     assert "invalid version" in str(excinfo.value)
 
 
@@ -54,7 +52,7 @@ def test_ovs_package_version(openshift_release, expected_ovs_version):
     )
     return_value = object()
 
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
+    def execute_module(module_name=None, module_args=None, *_):
         assert module_name == 'rpm_version'
         assert "package_list" in module_args
 
@@ -64,8 +62,7 @@ def test_ovs_package_version(openshift_release, expected_ovs_version):
 
         return return_value
 
-    check = OvsVersion(execute_module=execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    result = OvsVersion(execute_module, task_vars).run()
     assert result is return_value
 
 
@@ -86,4 +83,4 @@ def test_ovs_version_skip_when_not_master_nor_node(group_names, is_containerized
         group_names=group_names,
         openshift=dict(common=dict(is_containerized=is_containerized)),
     )
-    assert OvsVersion.is_active(task_vars=task_vars) == is_active
+    assert OvsVersion(None, task_vars).is_active() == is_active

@@ -103,7 +103,7 @@ fluentd_node3_unlabeled = {
     ),
 ])
 def test_get_fluentd_pods(pods, nodes, expect_error):
-    check = canned_fluentd(lambda cmd, args, task_vars: json.dumps(dict(items=nodes)))
+    check = canned_fluentd(exec_oc=lambda cmd, args: json.dumps(dict(items=nodes)))
 
-    error = check.check_fluentd(pods, {})
+    error = check.check_fluentd(pods)
     assert_error(error, expect_error)

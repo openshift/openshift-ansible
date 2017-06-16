@@ -1,6 +1,6 @@
 """Check that scans journalctl for messages caused as a symptom of increased etcd traffic."""
 
-from openshift_checks import OpenShiftCheck, get_var
+from openshift_checks import OpenShiftCheck
 
 
 class EtcdTraffic(OpenShiftCheck):
@@ -9,19 +9,18 @@ class EtcdTraffic(OpenShiftCheck):
     name = "etcd_traffic"
     tags = ["health", "etcd"]
 
-    @classmethod
-    def is_active(cls, task_vars):
+    def is_active(self):
         """Skip hosts that do not have etcd in their group names."""
-        group_names = get_var(task_vars, "group_names", default=[])
+        group_names = self.get_var("group_names", default=[])
         valid_group_names = "etcd" in group_names
 
-        version = get_var(task_vars, "openshift", "common", "short_version")
+        version = self.get_var("openshift", "common", "short_version")
         valid_version = version in ("3.4", "3.5", "1.4", "1.5")
 
-        return super(EtcdTraffic, cls).is_active(task_vars) and valid_group_names and valid_version
+        return super(EtcdTraffic, self).is_active() and valid_group_names and valid_version
 
-    def run(self, tmp, task_vars):
-        is_containerized = get_var(task_vars, "openshift", "common", "is_containerized")
+    def run(self):
+        is_containerized = self.get_var("openshift", "common", "is_containerized")
         unit = "etcd_container" if is_containerized else "etcd"
 
         log_matchers = [{
@@ -30,9 +29,7 @@ class EtcdTraffic(OpenShiftCheck):
             "unit": unit
         }]
 
-        match = self.execute_module("search_journalctl", {
-            "log_matchers": log_matchers,
-        }, task_vars)
+        match = self.execute_module("search_journalctl", {"log_matchers": log_matchers})
 
         if match.get("matched"):
             msg = ("Higher than normal etcd traffic detected.\n"
