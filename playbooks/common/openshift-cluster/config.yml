@@ -54,3 +54,10 @@
   - role: openshift_excluder
     r_openshift_excluder_action: enable
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
+- name: install ansible-service-broker
+  hosts: oo_first_master
+  roles:
+  - role: ansible_service_broker
+    when: install_ansible_service_broker | bool
+    ignore_errors: true
