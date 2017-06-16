@@ -30,32 +30,18 @@ def test_OpenShiftCheck_init():
 
     # initialization requires at least one argument (apart from self)
     with pytest.raises(TypeError) as excinfo:
-        TestCheck()
+        TestCheck().execute_module("foo")
     assert 'execute_module' in str(excinfo.value)
-    assert 'module_executor' in str(excinfo.value)
 
     execute_module = object()
 
     # initialize with positional argument
     check = TestCheck(execute_module)
-    # new recommended name
     assert check.execute_module == execute_module
-    # deprecated attribute name
-    assert check.module_executor == execute_module
 
-    # initialize with keyword argument, recommended name
+    # initialize with keyword argument
     check = TestCheck(execute_module=execute_module)
-    # new recommended name
     assert check.execute_module == execute_module
-    # deprecated attribute name
-    assert check.module_executor == execute_module
-
-    # initialize with keyword argument, deprecated name
-    check = TestCheck(module_executor=execute_module)
-    # new recommended name
-    assert check.execute_module == execute_module
-    # deprecated attribute name
-    assert check.module_executor == execute_module
 
 
 def test_subclasses():

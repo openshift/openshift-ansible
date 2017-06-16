@@ -46,7 +46,7 @@ class EtcdImageDataSize(OpenShiftCheck):
                 },
             }
 
-            etcdkeysize = self.module_executor("etcdkeysize", args, task_vars)
+            etcdkeysize = self.execute_module("etcdkeysize", args, task_vars)
 
             if etcdkeysize.get("rc", 0) != 0 or etcdkeysize.get("failed"):
                 msg = 'Failed to retrieve stats for etcd host "{host}": {reason}'

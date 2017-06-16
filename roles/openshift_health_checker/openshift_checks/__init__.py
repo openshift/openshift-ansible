@@ -21,13 +21,12 @@ class OpenShiftCheckException(Exception):
 class OpenShiftCheck(object):
     """A base class for defining checks for an OpenShift cluster environment."""
 
-    def __init__(self, execute_module=None, module_executor=None):
-        if execute_module is module_executor is None:
-            raise TypeError(
-                "__init__() takes either execute_module (recommended) "
-                "or module_executor (deprecated), none given")
-        self.execute_module = execute_module or module_executor
-        self.module_executor = self.execute_module
+    def __init__(self, execute_module=None):
+        def placeholder(*_):
+            """Fail tests more helpfully when execute_module not provided."""
+            raise TypeError(self.__class__.__name__ +
+                            " invoked execute_module without providing the method at initialization.")
+        self.execute_module = execute_module or placeholder
 
     @abstractproperty
     def name(self):
