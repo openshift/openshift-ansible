@@ -50,26 +50,6 @@ objects:
   spec:
     dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-app
 - apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: ${DATABASE_SERVICE_NAME}
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: ${DATABASE_VOLUME_CAPACITY}
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: ${NAME}
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: ${APPLICATION_VOLUME_CAPACITY}
-- apiVersion: v1
   kind: "DeploymentConfig"
   metadata:
     name: ${NAME}
@@ -83,10 +63,8 @@ objects:
         name: ${NAME}
       spec:
         volumes:
-          -
+          - emptyDir: {}
             name: "cfme-app-volume"
-            persistentVolumeClaim:
-              claimName: ${NAME}
         containers:
         - image: cloudforms/cfme-openshift-app:${APPLICATION_IMG_TAG}
           imagePullPolicy: IfNotPresent
@@ -304,10 +282,8 @@ objects:
           name: "${DATABASE_SERVICE_NAME}"
       spec:
         volumes:
-          -
+          - emptyDir: {}
             name: "cfme-pgdb-volume"
-            persistentVolumeClaim:
-              claimName: ${DATABASE_SERVICE_NAME}
         containers:
           -
             name: "postgresql"
