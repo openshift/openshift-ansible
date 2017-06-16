@@ -1,4 +1,4 @@
-# pylint: disable=missing-docstring
+"""Check that recommended memory is available."""
 from openshift_checks import OpenShiftCheck, get_var
 
 MIB = 2**20

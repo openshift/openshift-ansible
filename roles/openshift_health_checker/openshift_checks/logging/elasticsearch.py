@@ -1,6 +1,4 @@
-"""
-Module for performing checks on an Elasticsearch logging deployment
-"""
+"""Check for an aggregated logging Elasticsearch deployment"""
 
 import json
 import re
@@ -10,7 +8,7 @@ from openshift_checks.logging.logging import LoggingCheck
 
 
 class Elasticsearch(LoggingCheck):
-    """Module that checks an integrated logging Elasticsearch deployment"""
+    """Check for an aggregated logging Elasticsearch deployment"""
 
     name = "elasticsearch"
     tags = ["health", "logging"]
@@ -41,7 +39,7 @@ class Elasticsearch(LoggingCheck):
         return {"failed": False, "changed": False, "msg": 'No problems found with Elasticsearch deployment.'}
 
     def _not_running_elasticsearch_pods(self, es_pods):
-        """Returns: list of running pods, list of errors about non-running pods"""
+        """Returns: list of pods that are not running, list of errors about non-running pods"""
         not_running = super(Elasticsearch, self).not_running_pods(es_pods)
         if not_running:
             return not_running, [(

@@ -9,7 +9,7 @@ from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
 
 
 class LoggingCheck(OpenShiftCheck):
-    """Base class for logging component checks"""
+    """Base class for OpenShift aggregated logging component checks"""
 
     name = "logging"
     logging_namespace = "logging"

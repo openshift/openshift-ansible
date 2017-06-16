@@ -1,6 +1,6 @@
-'''
-Ansible callback plugin.
-'''
+"""
+Ansible callback plugin to give a nicely formatted summary of failures.
+"""
 
 # Reason: In several locations below we disable pylint protected-access
 #         for Ansible objects that do not give us any public way
@@ -16,11 +16,11 @@ from ansible.utils.color import stringc
 
 
 class CallbackModule(CallbackBase):
-    '''
+    """
     This callback plugin stores task results and summarizes failures.
     The file name is prefixed with `zz_` to make this plugin be loaded last by
     Ansible, thus making its output the last thing that users see.
-    '''
+    """
 
     CALLBACK_VERSION = 2.0
     CALLBACK_TYPE = 'aggregate'
@@ -48,7 +48,7 @@ class CallbackModule(CallbackBase):
             self._print_failure_details(self.__failures)
 
     def _print_failure_details(self, failures):
-        '''Print a summary of failed tasks or checks.'''
+        """Print a summary of failed tasks or checks."""
         self._display.display(u'\nFailure summary:\n')
 
         width = len(str(len(failures)))
@@ -69,7 +69,9 @@ class CallbackModule(CallbackBase):
         playbook_context = None
         # re: result attrs see top comment  # pylint: disable=protected-access
         for failure in failures:
-            # get context from check task result since callback plugins cannot access task vars
+            # Get context from check task result since callback plugins cannot access task vars.
+            # NOTE: thus context is not known unless checks run. Failures prior to checks running
+            # don't have playbook_context in the results. But we only use it now when checks fail.
             playbook_context = playbook_context or failure['result']._result.get('playbook_context')
             failed_checks.update(
                 name
@@ -81,8 +83,11 @@ class CallbackModule(CallbackBase):
 
     def _print_check_failure_summary(self, failed_checks, context):
         checks = ','.join(sorted(failed_checks))
-        # NOTE: context is not set if all failures occurred prior to checks task
-        summary = (
+        # The purpose of specifying context is to vary the output depending on what the user was
+        # expecting to happen (based on which playbook they ran). The only use currently is to
+        # vary the message depending on whether the user was deliberately running checks or was
+        # trying to install/upgrade and checks are just included. Other use cases may arise.
+        summary = (  # default to explaining what checks are in the first place
             '\n'
             'The execution of "{playbook}"\n'
             'includes checks designed to fail early if the requirements\n'
@@ -94,27 +99,26 @@ class CallbackModule(CallbackBase):
             'Some checks may be configurable by variables if your requirements\n'
             'are different from the defaults; consult check documentation.\n'
             'Variables can be set in the inventory or passed on the\n'
-            'command line using the -e flag to ansible-playbook.\n'
+            'command line using the -e flag to ansible-playbook.\n\n'
         ).format(playbook=self._playbook_file, checks=checks)
         if context in ['pre-install', 'health']:
-            summary = (
+            summary = (  # user was expecting to run checks, less explanation needed
                 '\n'
                 'You may choose to configure or disable failing checks by\n'
                 'setting Ansible variables. To disable those above:\n\n'
                 '    openshift_disable_check={checks}\n\n'
                 'Consult check documentation for configurable variables.\n'
                 'Variables can be set in the inventory or passed on the\n'
-                'command line using the -e flag to ansible-playbook.\n'
+                'command line using the -e flag to ansible-playbook.\n\n'
             ).format(checks=checks)
-        # other expected contexts: install, upgrade
         self._display.display(summary)
 
 
 # re: result attrs see top comment  # pylint: disable=protected-access
 def _format_failure(failure):
-    '''Return a list of pretty-formatted text entries describing a failure, including
+    """Return a list of pretty-formatted text entries describing a failure, including
     relevant information about it. Expect that the list of text entries will be joined
-    by a newline separator when output to the user.'''
+    by a newline separator when output to the user."""
     result = failure['result']
     host = result._host.get_name()
     play = _get_play(result._task)
@@ -135,7 +139,7 @@ def _format_failure(failure):
 
 
 def _format_failed_checks(checks):
-    '''Return pretty-formatted text describing checks that failed.'''
+    """Return pretty-formatted text describing checks that failed."""
     failed_check_msgs = []
     for check, body in checks.items():
         if body.get('failed', False):   # only show the failed checks
@@ -150,7 +154,7 @@ def _format_failed_checks(checks):
 # This is inspired by ansible.playbook.base.Base.dump_me.
 # re: play/task/block attrs see top comment  # pylint: disable=protected-access
 def _get_play(obj):
-    '''Given a task or block, recursively tries to find its parent play.'''
+    """Given a task or block, recursively try to find its parent play."""
     if hasattr(obj, '_play'):
         return obj._play
     if getattr(obj, '_parent'):

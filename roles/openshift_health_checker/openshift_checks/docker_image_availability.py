@@ -22,14 +22,16 @@ DEPLOYMENT_IMAGE_INFO = {
 class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     """Check that required Docker images are available.
 
-    This check attempts to ensure that required docker images are
-    either present locally, or able to be pulled down from available
-    registries defined in a host machine.
+    Determine docker images that an install would require and check that they
+    are either present in the host's docker index, or available for the host to pull
+    with known registries as defined in our inventory file (or defaults).
     """
 
     name = "docker_image_availability"
     tags = ["preflight"]
-    dependencies = ["skopeo", "python-docker-py"]
+    # we use python-docker-py to check local docker for images, and skopeo
+    # to look for images available remotely without waiting to pull them.
+    dependencies = ["python-docker-py", "skopeo"]
 
     @classmethod
     def is_active(cls, task_vars):
@@ -154,17 +156,18 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         return list(regs)
 
-    def available_images(self, images, registries, task_vars):
-        """Inspect existing images using Skopeo and return all images successfully inspected."""
+    def available_images(self, images, default_registries, task_vars):
+        """Search remotely for images. Returns: list of images found."""
         return [
             image for image in images
-            if self.is_available_skopeo_image(image, registries, task_vars)
+            if self.is_available_skopeo_image(image, default_registries, task_vars)
         ]
 
-    def is_available_skopeo_image(self, image, registries, task_vars):
+    def is_available_skopeo_image(self, image, default_registries, task_vars):
         """Use Skopeo to determine if required image exists in known registry(s)."""
+        registries = default_registries
 
-        # if image does already includes a registry, just use that
+        # if image already includes a registry, only use that
         if image.count("/") > 1:
             registry, image = image.split("/", 1)
             registries = [registry]
