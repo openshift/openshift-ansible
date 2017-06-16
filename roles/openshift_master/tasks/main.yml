@@ -128,6 +128,9 @@
   when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
+- set_fact:
+    openshift_push_via_dns: "{{ openshift_use_dnsmasq | default(true) and openshift.common.version_gte_3_6 and r_openshift_master_clean_install }}"
+
 - name: Install the systemd units
   include: systemd_units.yml
 
