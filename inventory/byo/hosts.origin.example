@@ -798,7 +798,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # use this line.
 # The directory in "auditFilePath" will be created if it's not
 # exist
-#openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/log/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}}
+#openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/log/oscp-audit/oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}}
 
 # Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
 # by deployment_type=origin
