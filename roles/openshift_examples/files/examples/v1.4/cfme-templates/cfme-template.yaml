@@ -48,7 +48,7 @@ objects:
     annotations:
       description: "Keeps track of changes in the CloudForms app image"
   spec:
-    dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-app
+    dockerImageRepository: registry.access.redhat.com/cloudforms42/cfme-openshift-app
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
@@ -188,7 +188,7 @@ objects:
     annotations:
       description: "Keeps track of changes in the CloudForms memcached image"
   spec:
-    dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-memcached
+    dockerImageRepository: registry.access.redhat.com/cloudforms42/cfme-openshift-memcached
 - apiVersion: v1
   kind: "DeploymentConfig"
   metadata:
@@ -272,7 +272,7 @@ objects:
     annotations:
       description: "Keeps track of changes in the CloudForms postgresql image"
   spec:
-    dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-postgresql
+    dockerImageRepository: registry.access.redhat.com/cloudforms42/cfme-openshift-postgresql
 - apiVersion: v1
   kind: "DeploymentConfig"
   metadata:
