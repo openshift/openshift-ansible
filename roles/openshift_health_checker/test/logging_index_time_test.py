@@ -10,7 +10,7 @@ SAMPLE_UUID = "unique-test-uuid"
 
 def canned_loggingindextime(exec_oc=None):
     """Create a check object with a canned exec_oc method"""
-    check = LoggingIndexTime("dummy")  # fails if a module is actually invoked
+    check = LoggingIndexTime()  # fails if a module is actually invoked
     if exec_oc:
         check.exec_oc = exec_oc
     return check
@@ -64,7 +64,7 @@ not_running_kibana_pod = {
     )
 ])
 def test_check_running_pods(pods, expect_pods):
-    check = canned_loggingindextime(None)
+    check = canned_loggingindextime()
     pods = check.running_pods(pods)
     assert pods == expect_pods
 
@@ -81,11 +81,8 @@ def test_check_running_pods(pods, expect_pods):
     ),
 ], ids=lambda argval: argval[0])
 def test_wait_until_cmd_or_err_succeeds(name, json_response, uuid, timeout, extra_words):
-    def exec_oc(execute_module, ns, exec_cmd, args, task_vars):
-        return json.dumps(json_response)
-
-    check = canned_loggingindextime(exec_oc)
-    check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout, None)
+    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
+    check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout)
 
 
 @pytest.mark.parametrize('name, json_response, uuid, timeout, extra_words', [
@@ -116,12 +113,9 @@ def test_wait_until_cmd_or_err_succeeds(name, json_response, uuid, timeout, extr
     )
 ], ids=lambda argval: argval[0])
 def test_wait_until_cmd_or_err(name, json_response, uuid, timeout, extra_words):
-    def exec_oc(execute_module, ns, exec_cmd, args, task_vars):
-        return json.dumps(json_response)
-
-    check = canned_loggingindextime(exec_oc)
+    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
     with pytest.raises(OpenShiftCheckException) as error:
-        check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout, None)
+        check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout)
 
     for word in extra_words:
         assert word in str(error)
@@ -138,13 +132,10 @@ def test_wait_until_cmd_or_err(name, json_response, uuid, timeout, extra_words):
     ),
 ], ids=lambda argval: argval[0])
 def test_curl_kibana_with_uuid(name, json_response, uuid, extra_words):
-    def exec_oc(execute_module, ns, exec_cmd, args, task_vars):
-        return json.dumps(json_response)
-
-    check = canned_loggingindextime(exec_oc)
+    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
     check.generate_uuid = lambda: uuid
 
-    result = check.curl_kibana_with_uuid(plain_running_kibana_pod, None)
+    result = check.curl_kibana_with_uuid(plain_running_kibana_pod)
 
     for word in extra_words:
         assert word in result
@@ -169,14 +160,11 @@ def test_curl_kibana_with_uuid(name, json_response, uuid, extra_words):
     ),
 ], ids=lambda argval: argval[0])
 def test_failed_curl_kibana_with_uuid(name, json_response, uuid, extra_words):
-    def exec_oc(execute_module, ns, exec_cmd, args, task_vars):
-        return json.dumps(json_response)
-
-    check = canned_loggingindextime(exec_oc)
+    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
     check.generate_uuid = lambda: uuid
 
     with pytest.raises(OpenShiftCheckException) as error:
-        check.curl_kibana_with_uuid(plain_running_kibana_pod, None)
+        check.curl_kibana_with_uuid(plain_running_kibana_pod)
 
     for word in extra_words:
         assert word in str(error)

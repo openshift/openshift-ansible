@@ -1,7 +1,7 @@
 import pytest
 
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException
-from openshift_checks import load_checks, get_var
+from openshift_checks import load_checks
 
 
 # Fixtures
@@ -28,8 +28,8 @@ def test_OpenShiftCheck_init():
         name = "test_check"
         run = NotImplemented
 
-    # initialization requires at least one argument (apart from self)
-    with pytest.raises(TypeError) as excinfo:
+    # execute_module required at init if it will be used
+    with pytest.raises(RuntimeError) as excinfo:
         TestCheck().execute_module("foo")
     assert 'execute_module' in str(excinfo.value)
 
@@ -37,11 +37,14 @@ def test_OpenShiftCheck_init():
 
     # initialize with positional argument
     check = TestCheck(execute_module)
-    assert check.execute_module == execute_module
+    assert check._execute_module == execute_module
 
     # initialize with keyword argument
     check = TestCheck(execute_module=execute_module)
-    assert check.execute_module == execute_module
+    assert check._execute_module == execute_module
+
+    assert check.task_vars == {}
+    assert check.tmp is None
 
 
 def test_subclasses():
@@ -67,19 +70,27 @@ def test_load_checks():
     assert modules
 
 
+def dummy_check(task_vars):
+    class TestCheck(OpenShiftCheck):
+        name = "dummy"
+        run = NotImplemented
+
+    return TestCheck(task_vars=task_vars)
+
+
 @pytest.mark.parametrize("keys,expected", [
     (("foo",), 42),
     (("bar", "baz"), "openshift"),
 ])
 def test_get_var_ok(task_vars, keys, expected):
-    assert get_var(task_vars, *keys) == expected
+    assert dummy_check(task_vars).get_var(*keys) == expected
 
 
 def test_get_var_error(task_vars, missing_keys):
     with pytest.raises(OpenShiftCheckException):
-        get_var(task_vars, *missing_keys)
+        dummy_check(task_vars).get_var(*missing_keys)
 
 
 def test_get_var_default(task_vars, missing_keys):
     default = object()
-    assert get_var(task_vars, *missing_keys, default=default) == default
+    assert dummy_check(task_vars).get_var(*missing_keys, default=default) == default

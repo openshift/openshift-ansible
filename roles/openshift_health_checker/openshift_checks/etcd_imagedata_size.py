@@ -2,7 +2,7 @@
 Ansible module for determining if the size of OpenShift image data exceeds a specified limit in an etcd cluster.
 """
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 
 
 class EtcdImageDataSize(OpenShiftCheck):
@@ -11,24 +11,25 @@ class EtcdImageDataSize(OpenShiftCheck):
     name = "etcd_imagedata_size"
     tags = ["etcd"]
 
-    def run(self, tmp, task_vars):
-        etcd_mountpath = self._get_etcd_mountpath(get_var(task_vars, "ansible_mounts"))
+    def run(self):
+        etcd_mountpath = self._get_etcd_mountpath(self.get_var("ansible_mounts"))
         etcd_avail_diskspace = etcd_mountpath["size_available"]
         etcd_total_diskspace = etcd_mountpath["size_total"]
 
-        etcd_imagedata_size_limit = get_var(task_vars,
-                                            "etcd_max_image_data_size_bytes",
-                                            default=int(0.5 * float(etcd_total_diskspace - etcd_avail_diskspace)))
+        etcd_imagedata_size_limit = self.get_var(
+            "etcd_max_image_data_size_bytes",
+            default=int(0.5 * float(etcd_total_diskspace - etcd_avail_diskspace))
+        )
 
-        etcd_is_ssl = get_var(task_vars, "openshift", "master", "etcd_use_ssl", default=False)
-        etcd_port = get_var(task_vars, "openshift", "master", "etcd_port", default=2379)
-        etcd_hosts = get_var(task_vars, "openshift", "master", "etcd_hosts")
+        etcd_is_ssl = self.get_var("openshift", "master", "etcd_use_ssl", default=False)
+        etcd_port = self.get_var("openshift", "master", "etcd_port", default=2379)
+        etcd_hosts = self.get_var("openshift", "master", "etcd_hosts")
 
-        config_base = get_var(task_vars, "openshift", "common", "config_base")
+        config_base = self.get_var("openshift", "common", "config_base")
 
-        cert = task_vars.get("etcd_client_cert", config_base + "/master/master.etcd-client.crt")
-        key = task_vars.get("etcd_client_key", config_base + "/master/master.etcd-client.key")
-        ca_cert = task_vars.get("etcd_client_ca_cert", config_base + "/master/master.etcd-ca.crt")
+        cert = self.get_var("etcd_client_cert", default=config_base + "/master/master.etcd-client.crt")
+        key = self.get_var("etcd_client_key", default=config_base + "/master/master.etcd-client.key")
+        ca_cert = self.get_var("etcd_client_ca_cert", default=config_base + "/master/master.etcd-ca.crt")
 
         for etcd_host in list(etcd_hosts):
             args = {
@@ -46,7 +47,7 @@ class EtcdImageDataSize(OpenShiftCheck):
                 },
             }
 
-            etcdkeysize = self.execute_module("etcdkeysize", args, task_vars)
+            etcdkeysize = self.execute_module("etcdkeysize", args)
 
             if etcdkeysize.get("rc", 0) != 0 or etcdkeysize.get("failed"):
                 msg = 'Failed to retrieve stats for etcd host "{host}": {reason}'

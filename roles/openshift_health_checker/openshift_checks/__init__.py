@@ -19,14 +19,21 @@ class OpenShiftCheckException(Exception):
 
 @six.add_metaclass(ABCMeta)
 class OpenShiftCheck(object):
-    """A base class for defining checks for an OpenShift cluster environment."""
+    """
+    A base class for defining checks for an OpenShift cluster environment.
 
-    def __init__(self, execute_module=None):
-        def placeholder(*_):
-            """Fail tests more helpfully when execute_module not provided."""
-            raise TypeError(self.__class__.__name__ +
-                            " invoked execute_module without providing the method at initialization.")
-        self.execute_module = execute_module or placeholder
+    Expect optional params: method execute_module, dict task_vars, and string tmp.
+    execute_module is expected to have a signature compatible with _execute_module
+    from ansible plugins/action/__init__.py, e.g.:
+    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None, *args):
+    This is stored so that it can be invoked in subclasses via check.execute_module("name", args)
+    which provides the check's stored task_vars and tmp.
+    """
+
+    def __init__(self, execute_module=None, task_vars=None, tmp=None):
+        self._execute_module = execute_module
+        self.task_vars = task_vars or {}
+        self.tmp = tmp
 
     @abstractproperty
     def name(self):
@@ -42,13 +49,13 @@ class OpenShiftCheck(object):
         """
         return []
 
-    @classmethod
-    def is_active(cls, task_vars):  # pylint: disable=unused-argument
+    @staticmethod
+    def is_active():
         """Returns true if this check applies to the ansible-playbook run."""
         return True
 
     @abstractmethod
-    def run(self, tmp, task_vars):
+    def run(self):
         """Executes a check, normally implemented as a module."""
         return {}
 
@@ -60,6 +67,43 @@ class OpenShiftCheck(object):
             yield subclass
             for subclass in subclass.subclasses():
                 yield subclass
+
+    def execute_module(self, module_name=None, module_args=None):
+        """Invoke an Ansible module from a check.
+
+        Invoke stored _execute_module, normally copied from the action
+        plugin, with its params and the task_vars and tmp given at
+        check initialization. No positional parameters beyond these
+        are specified. If it's necessary to specify any of the other
+        parameters to _execute_module then that should just be invoked
+        directly (with awareness of changes in method signature per
+        Ansible version).
+
+        So e.g. check.execute_module("foo", dict(arg1=...))
+        Return: result hash from module execution.
+        """
+        if self._execute_module is None:
+            raise NotImplementedError(
+                self.__class__.__name__ +
+                " invoked execute_module without providing the method at initialization."
+            )
+        return self._execute_module(module_name, module_args, self.tmp, self.task_vars)
+
+    def get_var(self, *keys, **kwargs):
+        """Get deeply nested values from task_vars.
+
+        Ansible task_vars structures are Python dicts, often mapping strings to
+        other dicts. This helper makes it easier to get a nested value, raising
+        OpenShiftCheckException when a key is not found or returning a default value
+        provided as a keyword argument.
+        """
+        try:
+            value = reduce(operator.getitem, keys, self.task_vars)
+        except (KeyError, TypeError):
+            if "default" in kwargs:
+                return kwargs["default"]
+            raise OpenShiftCheckException("'{}' is undefined".format(".".join(map(str, keys))))
+        return value
 
 
 LOADER_EXCLUDES = (
@@ -85,20 +129,3 @@ def load_checks(path=None, subpkg=""):
             modules.append(import_module(__package__ + subpkg + "." + name[:-3]))
 
     return modules
-
-
-def get_var(task_vars, *keys, **kwargs):
-    """Helper function to get deeply nested values from task_vars.
-
-    Ansible task_vars structures are Python dicts, often mapping strings to
-    other dicts. This helper makes it easier to get a nested value, raising
-    OpenShiftCheckException when a key is not found or returning a default value
-    provided as a keyword argument.
-    """
-    try:
-        value = reduce(operator.getitem, keys, task_vars)
-    except (KeyError, TypeError):
-        if "default" in kwargs:
-            return kwargs["default"]
-        raise OpenShiftCheckException("'{}' is undefined".format(".".join(map(str, keys))))
-    return value

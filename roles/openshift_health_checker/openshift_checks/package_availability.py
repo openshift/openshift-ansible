@@ -1,6 +1,6 @@
 """Check that required RPM packages are available."""
 
-from openshift_checks import OpenShiftCheck, get_var
+from openshift_checks import OpenShiftCheck
 from openshift_checks.mixins import NotContainerizedMixin
 
 
@@ -10,14 +10,13 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
     name = "package_availability"
     tags = ["preflight"]
 
-    @classmethod
-    def is_active(cls, task_vars):
+    def is_active(self):
         """Run only when yum is the package manager as the code is specific to it."""
-        return super(PackageAvailability, cls).is_active(task_vars) and task_vars["ansible_pkg_mgr"] == "yum"
+        return super(PackageAvailability, self).is_active() and self.get_var("ansible_pkg_mgr") == "yum"
 
-    def run(self, tmp, task_vars):
-        rpm_prefix = get_var(task_vars, "openshift", "common", "service_type")
-        group_names = get_var(task_vars, "group_names", default=[])
+    def run(self):
+        rpm_prefix = self.get_var("openshift", "common", "service_type")
+        group_names = self.get_var("group_names", default=[])
 
         packages = set()
 
@@ -27,7 +26,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             packages.update(self.node_packages(rpm_prefix))
 
         args = {"packages": sorted(set(packages))}
-        return self.execute_module("check_yum_update", args, tmp=tmp, task_vars=task_vars)
+        return self.execute_module("check_yum_update", args)
 
     @staticmethod
     def master_packages(rpm_prefix):
