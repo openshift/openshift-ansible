@@ -9,6 +9,7 @@ etc.). The result is an environment ready for openshift-ansible.
 
 * [Ansible 2.3](https://pypi.python.org/pypi/ansible)
 * [shade](https://pypi.python.org/pypi/shade)
+* python-dns
 
 
 ## What does it do
@@ -66,7 +67,7 @@ The `openstack_num_masters`, `openstack_num_infra` and
 `openstack_num_nodes` values specify the number of Master, Infra and
 App nodes to create.
 
-The `openstack_flat_secgroup`, controls Neutron security groups creation for Heat
+The `openstack_flat_secgrp`, controls Neutron security groups creation for Heat
 stacks. Set it to true, if you experience issues with sec group rules
 quotas. It trades security for number of rules, by sharing the same set
 of firewall rules for master, node, etcd and infra nodes.
