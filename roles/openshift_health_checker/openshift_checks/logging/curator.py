@@ -15,7 +15,7 @@ class Curator(LoggingCheck):
     def run(self, tmp, task_vars):
         self.logging_namespace = get_var(task_vars, "openshift_logging_namespace", default="logging")
         curator_pods, error = super(Curator, self).get_pods_for_component(
-            self.module_executor,
+            self.execute_module,
             self.logging_namespace,
             "curator",
             task_vars
