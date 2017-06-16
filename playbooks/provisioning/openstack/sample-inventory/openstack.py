@@ -54,7 +54,7 @@ from distutils.version import StrictVersion
 
 try:
     import json
-except:
+except ImportError:
     import simplejson as json
 
 import os_client_config
@@ -147,10 +147,10 @@ def get_host_groups_from_cloud(inventory):
         if 'interface_ip' not in server:
             continue
         try:
-          if server["metadata"][os.environ['OS_INV_FILTER_KEY']] == os.environ['OS_INV_FILTER_VALUE']:
+            if server["metadata"][os.environ['OS_INV_FILTER_KEY']] == os.environ['OS_INV_FILTER_VALUE']:
+                firstpass[server['name']].append(server)
+        except Exception:
             firstpass[server['name']].append(server)
-        except:
-          firstpass[server['name']].append(server)
     for name, servers in firstpass.items():
         if len(servers) == 1 and use_hostnames:
             append_hostvars(hostvars, groups, name, servers[0])
@@ -243,7 +243,7 @@ def main():
             output = to_json(inventory.get_host(args.host))
         print(output)
     except shade.OpenStackCloudException as e:
-        sys.stderr.write('%s\n' % e.message)
+        sys.stderr.write('%s\n' % str(e))
         sys.exit(1)
     sys.exit(0)
 
