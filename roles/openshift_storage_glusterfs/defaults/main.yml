@@ -13,8 +13,8 @@ openshift_storage_glusterfs_heketi_is_missing: True
 openshift_storage_glusterfs_heketi_deploy_is_missing: True
 openshift_storage_glusterfs_heketi_image: "{{ 'rhgs3/rhgs-volmanager-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'heketi/heketi' | quote }}"
 openshift_storage_glusterfs_heketi_version: 'latest'
-openshift_storage_glusterfs_heketi_admin_key: "{{ 32 | oo_generate_secret }}"
-openshift_storage_glusterfs_heketi_user_key: "{{ 32 | oo_generate_secret }}"
+openshift_storage_glusterfs_heketi_admin_key: "{{ omit }}"
+openshift_storage_glusterfs_heketi_user_key: "{{ omit }}"
 openshift_storage_glusterfs_heketi_topology_load: True
 openshift_storage_glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_wipe }}"
 openshift_storage_glusterfs_heketi_url: "{{ omit }}"
@@ -34,8 +34,8 @@ openshift_storage_glusterfs_registry_heketi_is_missing: "{{ openshift_storage_gl
 openshift_storage_glusterfs_registry_heketi_deploy_is_missing: "{{ openshift_storage_glusterfs_heketi_deploy_is_missing }}"
 openshift_storage_glusterfs_registry_heketi_image: "{{ openshift_storage_glusterfs_heketi_image }}"
 openshift_storage_glusterfs_registry_heketi_version: "{{ openshift_storage_glusterfs_heketi_version }}"
-openshift_storage_glusterfs_registry_heketi_admin_key: "{{ 32 | oo_generate_secret }}"
-openshift_storage_glusterfs_registry_heketi_user_key: "{{ 32 | oo_generate_secret }}"
+openshift_storage_glusterfs_registry_heketi_admin_key: "{{ omit }}"
+openshift_storage_glusterfs_registry_heketi_user_key: "{{ omit }}"
 openshift_storage_glusterfs_registry_heketi_topology_load: "{{ openshift_storage_glusterfs_heketi_topology_load }}"
 openshift_storage_glusterfs_registry_heketi_wipe: "{{ openshift_storage_glusterfs_heketi_wipe }}"
 openshift_storage_glusterfs_registry_heketi_url: "{{ openshift_storage_glusterfs_heketi_url | default(omit) }}"

@@ -123,6 +123,23 @@
   when:
   - glusterfs_heketi_topology_load
 
+- name: Generate heketi admin key
+  set_fact:
+    glusterfs_heketi_admin_key: "{{ 32 | oo_generate_secret }}"
+  when:
+  - glusterfs_heketi_is_native
+  - glusterfs_heketi_admin_key is undefined
+
+- name: Generate heketi user key
+  set_fact:
+    glusterfs_heketi_user_key: "{{ 32 | oo_generate_secret }}"
+  until: "glusterfs_heketi_user_key != glusterfs_heketi_admin_key"
+  delay: 1
+  retries: 10
+  when:
+  - glusterfs_heketi_is_native
+  - glusterfs_heketi_user_key is undefined
+
 - include: heketi_deploy_part1.yml
   when:
   - glusterfs_heketi_is_native
