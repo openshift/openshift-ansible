@@ -103,7 +103,7 @@
         - atomic-openshift-sdn-ovs
         - cockpit-bridge
         - cockpit-docker
-        - cockpit-shell
+        - cockpit-system
         - cockpit-ws
         - kubernetes-client
         - openshift
@@ -346,7 +346,7 @@
     - atomic-openshift-master
     - cockpit-bridge
     - cockpit-docker
-    - cockpit-shell
+    - cockpit-system
     - cockpit-ws
     - corosync
     - kubernetes-client

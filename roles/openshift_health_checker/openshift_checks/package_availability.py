@@ -36,7 +36,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             "bash-completion",
             "cockpit-bridge",
             "cockpit-docker",
-            "cockpit-shell",
+            "cockpit-system",
             "cockpit-ws",
             "etcd",
             "httpd-tools",
