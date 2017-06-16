@@ -1,4 +1,3 @@
-# pylint: disable=missing-docstring
 """
 Ansible module for determining information about the docker host.
 
@@ -13,6 +12,7 @@ from ansible.module_utils.docker_common import AnsibleDockerClient
 
 
 def main():
+    """Entrypoint for running an Ansible module."""
     client = AnsibleDockerClient()
 
     client.module.exit_json(

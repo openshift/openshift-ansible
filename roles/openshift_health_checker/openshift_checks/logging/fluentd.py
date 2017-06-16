@@ -1,6 +1,4 @@
-"""
-Module for performing checks on an Fluentd logging deployment
-"""
+"""Check for an aggregated logging Fluentd deployment"""
 
 import json
 
@@ -9,7 +7,8 @@ from openshift_checks.logging.logging import LoggingCheck
 
 
 class Fluentd(LoggingCheck):
-    """Module that checks an integrated logging Fluentd deployment"""
+    """Check for an aggregated logging Fluentd deployment"""
+
     name = "fluentd"
     tags = ["health", "logging"]
 

@@ -1,4 +1,5 @@
-# pylint: disable=missing-docstring
+"""Check that required RPM packages are available."""
+
 from openshift_checks import OpenShiftCheck, get_var
 from openshift_checks.mixins import NotContainerizedMixin
 
@@ -11,6 +12,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
 
     @classmethod
     def is_active(cls, task_vars):
+        """Run only when yum is the package manager as the code is specific to it."""
         return super(PackageAvailability, cls).is_active(task_vars) and task_vars["ansible_pkg_mgr"] == "yum"
 
     def run(self, tmp, task_vars):
@@ -29,6 +31,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
 
     @staticmethod
     def master_packages(rpm_prefix):
+        """Return a list of RPMs that we expect a master install to have available."""
         return [
             "{rpm_prefix}".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-clients".format(rpm_prefix=rpm_prefix),
@@ -44,6 +47,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
 
     @staticmethod
     def node_packages(rpm_prefix):
+        """Return a list of RPMs that we expect a node install to have available."""
         return [
             "{rpm_prefix}".format(rpm_prefix=rpm_prefix),
             "{rpm_prefix}-node".format(rpm_prefix=rpm_prefix),

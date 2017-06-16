@@ -1,4 +1,4 @@
-# pylint: disable=missing-docstring
+"""Check that available RPM packages match the required versions."""
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
 from openshift_checks.mixins import NotContainerizedMixin
 
@@ -107,6 +107,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         raise OpenShiftCheckException(msg.format(openshift_version))
 
     def get_openshift_version(self, task_vars):
+        """Return received image tag as a normalized X.Y minor version string."""
         openshift_version = get_var(task_vars, "openshift_image_tag")
         if openshift_version and openshift_version[0] == 'v':
             openshift_version = openshift_version[1:]
@@ -114,6 +115,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         return self.parse_version(openshift_version)
 
     def parse_version(self, version):
+        """Return a normalized X.Y minor version string."""
         components = version.split(".")
         if not components or len(components) < 2:
             msg = "An invalid version of OpenShift was found for this host: {}"
