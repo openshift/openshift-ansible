@@ -119,5 +119,3 @@
     master_config_hook: "v3_5/master_config_upgrade.yml"
 
 - include: ../post_control_plane.yml
-
-- include: storage_upgrade.yml

@@ -115,5 +115,3 @@
 - include: ../upgrade_nodes.yml
 
 - include: ../post_control_plane.yml
-
-- include: storage_upgrade.yml
