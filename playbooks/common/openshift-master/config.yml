@@ -20,6 +20,15 @@
     - node
     - .config_managed
 
+  - name: Check for existing configuration
+    stat:
+      path: /etc/origin/master/master-config.yaml
+    register: master_config_stat
+
+  - name: Set clean install fact
+    set_fact:
+      l_clean_install: "{{ not master_config_stat.stat.exists }}"
+
   - set_fact:
       openshift_master_pod_eviction_timeout: "{{ lookup('oo_option', 'openshift_master_pod_eviction_timeout') | default(none, true) }}"
     when: openshift_master_pod_eviction_timeout is not defined
@@ -122,6 +131,7 @@
     etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
     etcd_cert_prefix: "master.etcd-"
+    r_openshift_master_clean_install: hostvars[groups.oo_first_master.0].l_clean_install
   - role: nuage_master
     when: openshift.common.use_nuage | bool
   - role: calico_master

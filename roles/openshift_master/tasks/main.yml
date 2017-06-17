@@ -164,6 +164,26 @@
     - restart master api
     - restart master controllers
 
+- name: Configure master to use etcd3 storage backend on 3.6 clean installs
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+  with_items:
+    - key: kubernetesMasterConfig.apiServerArguments.storage-backend
+      value:
+        - etcd3
+    - key: kubernetesMasterConfig.apiServerArguments.storage-media-type
+      value:
+        - application/vnd.kubernetes.protobuf
+  when:
+    - r_openshift_master_clean_install
+    - openshift.common.version_gte_3_6
+  notify:
+    - restart master
+    - restart master api
+    - restart master controllers
+
 - include: set_loopback_context.yml
   when: openshift.common.version_gte_3_2_or_1_2
 
