@@ -1,0 +1,25 @@
+---
+- name: Fail if invalid r_etcd_migrate_action provided
+  fail:
+    msg: "etcd_migrate role can only be called with 'check' or 'migrate' or 'configure'"
+  when: r_etcd_migrate_action not in ['check', 'migrate', 'configure']
+
+- name: Include main action task file
+  include: "{{ r_etcd_migrate_action }}.yml"
+
+# 2. migrate v2 datadir into v3:
+#   ETCDCTL_API=3 ./etcdctl migrate  --data-dir=${data_dir} --no-ttl
+#   backup the etcd datadir first
+#   Provide a way for an operator to specify transformer
+
+# 3. re-configure OpenShift master at /etc/origin/master/master-config.yml
+#   set storage-backend to “etcd3”
+# 4. we could leave the master restart to current logic (there is already the code ready (single vs. HA master))
+
+# Run
+# etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt --endpoint https://172.16.186.45:2379 cluster-health
+# to check the cluster health (from the etcdctl.sh aliases file)
+
+# Another assumption:
+# - in order to migrate all etcd v2 data into v3, we need to shut down the cluster (let's verify that on Wednesday meeting)
+# -

@@ -1,0 +1,53 @@
+---
+# Should this be run in a serial manner?
+- set_fact:
+    l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
+
+- name: Disable etcd members
+  service:
+    name: "{{ l_etcd_service }}"
+    state: stopped
+
+# Should we skip all TTL keys? https://bugzilla.redhat.com/show_bug.cgi?id=1389773
+- name: Migrate etcd data
+  command: >
+    etcdctl migrate --data-dir={{ etcd_data_dir }}
+  environment:
+    ETCDCTL_API: 3
+  register: l_etcdctl_migrate
+
+# TODO(jchaloup): If any of the members fails, we need to restore all members to v2 from the pre-migrate backup
+- name: Check the etcd v2 data are correctly migrated
+  fail:
+    msg: "Failed to migrate a member"
+  when: "'finished transforming keys' not in l_etcdctl_migrate.stdout"
+
+# TODO(jchaloup): start the etcd on a different port so noone can access it
+# Once the validation is done
+- name: Enable etcd member
+  service:
+    name: "{{ l_etcd_service }}"
+    state: started
+
+- name: Re-introduce leases (as a replacement for key TTLs)
+  command: >
+    oadm migrate etcd-ttl \
+    --cert {{ etcd_peer_cert_file }} \
+    --key {{ etcd_peer_key_file }} \
+    --cacert {{ etcd_peer_ca_file }} \
+    --etcd-address 'https://{{ etcd_peer }}:2379' \
+    --ttl-keys-prefix {{ item }} \
+    --lease-duration 1h
+  environment:
+    ETCDCTL_API: 3
+  with_items:
+  - "/kubernetes.io/events"
+  - "/kubernetes.io/masterleases"
+
+- set_fact:
+    r_etcd_migrate_success: true
+
+- name: Enable etcd member
+  service:
+    name: "{{ l_etcd_service }}"
+    state: started
