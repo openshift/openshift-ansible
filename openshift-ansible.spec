@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.114
+Version:        3.6.116
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Jun 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.116-1
+- PAPR: define openshift_image_tag via command line (rhcarvalho@gmail.com)
+- Ensure only one ES pod per PV (peter.portante@redhat.com)
+- etcd v3 for clean installs (sdodson@redhat.com)
+- Rename cockpit-shell -> cockpit-system (rhcarvalho@gmail.com)
+- Update image repo name, images have been moved from 'cloudforms' to
+  'cloudforms42' for CF 4.2. (simaishi@redhat.com)
+- Update image repo name, images have been moved from 'cloudforms' to
+  'cloudforms45' for CF 4.5. (simaishi@redhat.com)
+- CloudForms 4.5 templates (simaishi@redhat.com)
+
 * Fri Jun 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.114-1
 - 
 
