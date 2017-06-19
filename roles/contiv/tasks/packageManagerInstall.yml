@@ -4,9 +4,10 @@
     did_install: false
 
 - include: pkgMgrInstallers/centos-install.yml
-  when: ansible_distribution == "CentOS" and not is_atomic
+  when: (ansible_os_family == "RedHat") and
+        not is_atomic
 
 - name: Package Manager | Set fact saying we did CentOS package install
   set_fact:
     did_install: true
-  when: ansible_distribution == "CentOS"
+  when: (ansible_os_family == "RedHat")

@@ -1,12 +1,12 @@
 ---
 # The version of Contiv binaries to use
-contiv_version: 1.0.0-beta.3-02-21-2017.20-52-42.UTC
+contiv_version: 1.0.1
 
 # The version of cni binaries
 cni_version: v0.4.0
 
-contiv_default_subnet: "20.1.1.1/24"
-contiv_default_gw: "20.1.1.254"
+contiv_default_subnet: "10.128.0.0/16"
+contiv_default_gw: "10.128.254.254"
 # TCP port that Netmaster listens for network connections
 netmaster_port: 9999
 
@@ -69,6 +69,9 @@ netplugin_fwd_mode: bridge
 # Contiv fabric mode aci|default
 contiv_fabric_mode: default
 
+# Global VLAN range
+contiv_vlan_range: "2900-3000"
+
 # Encapsulation type vlan|vxlan to use for instantiating container networks
 contiv_encap_mode: vlan
 
@@ -78,8 +81,8 @@ netplugin_driver: ovs
 # Create a default Contiv network for use by pods
 contiv_default_network: true
 
-# VLAN/ VXLAN tag value to be used for the default network
-contiv_default_network_tag: 1
+# Statically configured tag for default network (if needed)
+contiv_default_network_tag: ""
 
 #SRFIXME (use the openshift variables)
 https_proxy: ""
@@ -95,6 +98,9 @@ apic_leaf_nodes: ""
 apic_phys_dom: ""
 apic_contracts_unrestricted_mode: no
 apic_epg_bridge_domain: not_specified
+apic_configure_default_policy: false
+apic_default_external_contract: "uni/tn-common/brc-default"
+apic_default_app_profile: "contiv-infra-app-profile"
 is_atomic: False
 kube_cert_dir: "/data/src/github.com/openshift/origin/openshift.local.config/master"
 master_name: "{{ groups['masters'][0] }}"
@@ -104,3 +110,12 @@ kube_ca_cert: "{{ kube_cert_dir }}/ca.crt"
 kube_key: "{{ kube_cert_dir }}/admin.key"
 kube_cert: "{{ kube_cert_dir }}/admin.crt"
 kube_master_api_port: 8443
+
+# contivh1 default subnet and gateway
+#contiv_h1_subnet_default: "132.1.1.0/24"
+#contiv_h1_gw_default: "132.1.1.1"
+contiv_h1_subnet_default: "10.129.0.0/16"
+contiv_h1_gw_default: "10.129.0.1"
+
+# contiv default private subnet for ext access
+contiv_private_ext_subnet: "10.130.0.0/16"

@@ -23,7 +23,36 @@
   notify: Save iptables rules
 
 - name: Netplugin IPtables | Open vxlan port with iptables
-  command: /sbin/iptables -I INPUT 1 -p udp --dport 8472 -j ACCEPT -m comment --comment "vxlan"
+  command: /sbin/iptables -I INPUT 1 -p udp --dport 8472 -j ACCEPT -m comment --comment "netplugin vxlan 8472"
+  when: iptablesrules.stdout.find("netplugin vxlan 8472") == -1
+  notify: Save iptables rules
 
 - name: Netplugin IPtables | Open vxlan port with iptables
-  command: /sbin/iptables -I INPUT 1 -p udp --dport 4789 -j ACCEPT -m comment --comment "vxlan"
+  command: /sbin/iptables -I INPUT 1 -p udp --dport 4789 -j ACCEPT -m comment --comment "netplugin vxlan 4789"
+  when: iptablesrules.stdout.find("netplugin vxlan 4789") == -1
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Allow from contivh0
+  command: /sbin/iptables -I FORWARD 1 -i contivh0 -j ACCEPT -m comment --comment "contivh0 FORWARD input"
+  when: iptablesrules.stdout.find("contivh0 FORWARD input") == -1
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Allow to contivh0
+  command: /sbin/iptables -I FORWARD 1 -o contivh0 -j ACCEPT -m comment --comment "contivh0 FORWARD output"
+  when: iptablesrules.stdout.find("contivh0 FORWARD output") == -1
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Allow from contivh1
+  command: /sbin/iptables -I FORWARD 1 -i contivh1 -j ACCEPT -m comment --comment "contivh1 FORWARD input"
+  when: iptablesrules.stdout.find("contivh1 FORWARD input") == -1
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Allow to contivh1
+  command: /sbin/iptables -I FORWARD 1 -o contivh1 -j ACCEPT -m comment --comment "contivh1 FORWARD output"
+  when: iptablesrules.stdout.find("contivh1 FORWARD output") == -1
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Allow dns
+  command: /sbin/iptables -I INPUT 1 -p udp --dport 53 -j ACCEPT -m comment --comment "contiv dns"
+  when: iptablesrules.stdout.find("contiv dns") == -1
+  notify: Save iptables rules
