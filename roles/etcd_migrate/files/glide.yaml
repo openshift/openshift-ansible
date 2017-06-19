@@ -1,0 +1,71 @@
+package: github.com/ingvagabund/openshift-ansible/roles/openshift_etcd_migrate/files
+import:
+- package: github.com/coreos/etcd
+  subpackages:
+  - auth/authpb
+  - clientv3
+  - etcdserver/api/v3rpc/rpctypes
+  - etcdserver/etcdserverpb
+  - mvcc/mvccpb
+  - pkg/tlsutil
+  - pkg/transport
+- package: github.com/golang/glog
+- package: github.com/golang/protobuf
+  subpackages:
+  - jsonpb
+  - proto
+- package: golang.org/x/net
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - idna
+  - internal/timeseries
+  - lex/httplex
+  - trace
+- package: github.com/grpc-ecosystem/go-grpc-prometheus
+- package: github.com/grpc-ecosystem/grpc-gateway
+  subpackages:
+  - runtime
+  - runtime/internal
+  - utilities
+- package: google.golang.org/grpc
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
+- package: github.com/coreos/pkg
+  subpackages:
+  - capnslog
+  - dlopen
+- package: github.com/coreos/go-systemd
+  subpackages:
+  - daemon
+  - journal
+  - util
+- package: github.com/ghodss/yaml
+- package: github.com/prometheus/client_golang
+  subpackages:
+  - prometheus
+- package: github.com/beorn7/perks
+  subpackages:
+  - quantile
+- package: github.com/prometheus/client_model
+  subpackages:
+  - go
+- package: github.com/prometheus/common
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- package: github.com/prometheus/procfs
+- package: gopkg.in/yaml.v2
+- package: github.com/matttproud/golang_protobuf_extensions
+  subpackages:
+  - pbutil
+

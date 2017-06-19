@@ -1,0 +1,26 @@
+---
+# validate the etcd3 migration is successfull
+# For now check both v2 and v3 have the same keys and each key has the same value in v2 and v3 db
+- name: Upload v2->v3 data validation script to etcd member
+  copy:
+    src: validate
+    dest: /usr/bin/validateetcdmigration
+    mode: 0755
+
+- name: Validate v2->v3 data migration
+  # TODO(jchaloup): Update the script so multiple keys are checked at the same time
+  command: >
+    /usr/bin/validateetcdmigration --cert {{ etcd_peer_cert_file }} --key {{ etcd_peer_key_file }} --cacert {{ etcd_peer_ca_file }} --etcd-address https://{{ etcd_peer }}:{{ etcd_client_port }}
+  register: l_validation
+  failed_when: false
+
+- debug:
+    msg: "l_validation: {{ l_validation | to_nice_json }}"
+
+- debug:
+    msg: "Validation failed: {{ l_validation | to_nice_json }}"
+  when: l_validation.rc != 0
+
+- set_fact:
+    r_etcd_migrate_success: false
+  when: l_validation.rc != 0

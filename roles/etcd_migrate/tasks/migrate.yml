@@ -53,3 +53,7 @@
 
 - set_fact:
     r_etcd_migrate_success: true
+
+- name: Validate all the data in v2 are in v3 as well
+  include: validate.yml
+
