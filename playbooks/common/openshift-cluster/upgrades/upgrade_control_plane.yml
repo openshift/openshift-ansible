@@ -11,7 +11,7 @@
   - name: Upgrade job storage
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      migrate storage --confirm
+      migrate storage --include=jobs --confirm
 
 # If facts cache were for some reason deleted, this fact may not be set, and if not set
 # it will always default to true. This causes problems for the etcd data dir fact detection
@@ -149,7 +149,7 @@
   - name: Upgrade job storage
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      migrate storage --confirm
+      migrate storage --include=jobs --confirm
 
 ##############################################################################
 # Gate on master update complete
