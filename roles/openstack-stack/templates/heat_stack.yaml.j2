@@ -61,18 +61,13 @@ outputs:
         - dns
         - name
 
-  dns_floating_ip:
-    description: Floating IP of the DNS
-    value:
-      get_attr:
-        - dns
-        - addresses
-        - str_replace:
-            template: openshift-ansible-cluster_id-net
-            params:
-              cluster_id: {{ stack_name }}
-        - 1
-        - addr
+  dns_floating_ips:
+    description: Floating IPs of the DNS
+    value: { get_attr: [ dns, floating_ip ] }
+
+  dns_private_ips:
+    description: Private IPs of the DNS
+    value: { get_attr: [ dns, private_ip ] }
 
 resources:
 
@@ -111,9 +106,9 @@ resources:
               params:
                 subnet_24_prefix: {{ subnet_prefix }}
       dns_nameservers:
-      {% for nameserver in dns_nameservers %}
+{% for nameserver in dns_nameservers %}
         - {{ nameserver }}
-      {% endfor %}
+{% endfor %}
 
   router:
     type: OS::Neutron::Router
