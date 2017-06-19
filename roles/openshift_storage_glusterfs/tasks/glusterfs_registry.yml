@@ -19,12 +19,13 @@
     glusterfs_heketi_topology_load: "{{ openshift_storage_glusterfs_registry_heketi_topology_load }}"
     glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_registry_heketi_wipe }}"
     glusterfs_heketi_url: "{{ openshift_storage_glusterfs_registry_heketi_url }}"
-    glusterfs_nodes: "{{ groups.glusterfs_registry }}"
+    glusterfs_heketi_port: "{{ openshift_storage_glusterfs_registry_heketi_port }}"
+    glusterfs_nodes: "{{ groups.glusterfs_registry | default(groups.glusterfs) }}"
 
 - include: glusterfs_common.yml
   when:
-  - groups.glusterfs_registry | default([]) | count > 0
-  - "'glusterfs' not in groups or groups.glusterfs_registry != groups.glusterfs"
+  - glusterfs_nodes | default([]) | count > 0
+  - "'glusterfs' not in groups or glusterfs_nodes != groups.glusterfs"
 
 - name: Delete pre-existing GlusterFS registry resources
   oc_obj:

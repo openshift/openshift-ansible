@@ -90,7 +90,8 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_admin_key     | auto-generated          | String to use as secret key for performing heketi commands as admin
 | openshift_storage_glusterfs_heketi_user_key      | auto-generated          | String to use as secret key for performing heketi commands as user that can only view or modify volumes
 | openshift_storage_glusterfs_heketi_topology_load | True                    | Load the GlusterFS topology information into heketi
-| openshift_storage_glusterfs_heketi_url           | Undefined               | URL for the heketi REST API, dynamically determined in native mode
+| openshift_storage_glusterfs_heketi_url           | Undefined               | When heketi is native, this sets the hostname portion of the final heketi route URL. When heketi is external, this is the full URL to the heketi service.
+| openshift_storage_glusterfs_heketi_port          | 8080                    | TCP port for external heketi service **NOTE:** This has no effect in native mode
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 
 Each role variable also has a corresponding variable to optionally configure a

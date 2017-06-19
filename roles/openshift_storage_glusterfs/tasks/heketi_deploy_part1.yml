@@ -33,6 +33,7 @@
     params:
       IMAGE_NAME: "{{ glusterfs_heketi_image }}"
       IMAGE_VERSION: "{{ glusterfs_heketi_version }}"
+      HEKETI_ROUTE: "{{ glusterfs_heketi_url | default(['heketi-',glusterfs_name]|join) }}"
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
       HEKETI_KUBE_NAMESPACE: "{{ glusterfs_namespace }}"
