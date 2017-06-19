@@ -13,6 +13,13 @@
     changed_when: false
     when: openshift_upgrade_nodes_label is defined
 
+  - name: Fail if no nodes match openshift_upgrade_nodes_label
+    fail:
+      msg: "openshift_upgrade_nodes_label was specified but no nodes matched"
+    when:
+    - openshift_upgrade_nodes_label is defined
+    - "'No resources found' in matching_nodes.stderr"
+
   - set_fact:
       nodes_to_upgrade: "{{ matching_nodes.stdout.split(' ') }}"
     when: openshift_upgrade_nodes_label is defined
