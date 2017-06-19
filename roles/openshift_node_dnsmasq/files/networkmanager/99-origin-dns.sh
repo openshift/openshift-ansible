@@ -52,6 +52,7 @@ no-resolv
 domain-needed
 server=/cluster.local/172.30.0.1
 server=/30.172.in-addr.arpa/172.30.0.1
+enable-dbus
 EOF
       # New config file, must restart
       NEEDS_RESTART=1
@@ -89,13 +90,17 @@ EOF
       systemctl restart dnsmasq
     fi
 
-    # Only if dnsmasq is running properly make it our only nameserver
+    # Only if dnsmasq is running properly make it our only nameserver, copy
+    # original resolv.conf to /etc/origin/node/resolv.conf for node service to
+    # bypass dnsmasq
     if `systemctl -q is-active dnsmasq.service`; then
-      sed -e '/^nameserver.*$/d' /etc/resolv.conf > ${NEW_RESOLV_CONF}
-      echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
       if ! grep -q '99-origin-dns.sh' ${NEW_RESOLV_CONF}; then
           echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> ${NEW_RESOLV_CONF}
+          cp /etc/resolv.conf /etc/origin/node/resolv.conf
       fi
+      sed -e '/^nameserver.*$/d' /etc/resolv.conf > ${NEW_RESOLV_CONF}
+      echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
+
       if ! grep -q 'search.*cluster.local' ${NEW_RESOLV_CONF}; then
         sed -i '/^search/ s/$/ cluster.local/' ${NEW_RESOLV_CONF}
       fi

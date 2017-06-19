@@ -12,3 +12,4 @@ os_firewall_allow:
 - service: Calico BGP Port
   port: 179/tcp
   when: openshift.common.use_calico | bool
+r_openshift_node_dns_port: "{{ openshift_node_dns_port | default(8054) }}"

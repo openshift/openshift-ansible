@@ -46,3 +46,7 @@
     msg: |-
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
       Please set it to a version string like "3.4".
+
+- include: unsupported.yml
+  when:
+    - not openshift_enable_unsupported_configurations | default(false) | bool

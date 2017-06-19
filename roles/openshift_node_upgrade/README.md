@@ -88,6 +88,7 @@ Including an example of how to use your role (for instance, with variables passe
   roles:
   - openshift_facts
   - docker
+  - openshift_node_dnsmasq
   - openshift_node_upgrade
 
   post_tasks:
