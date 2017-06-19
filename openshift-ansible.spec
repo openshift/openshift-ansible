@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.116
+Version:        3.6.117
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jun 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.117-1
+- Run storage upgrade pre and post master upgrade (rteague@redhat.com)
+- Introduce etcd migrate role (jchaloup@redhat.com)
+- Add support for rhel, aci, vxlan (srampal@cisco.com)
+
 * Sun Jun 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.116-1
 - PAPR: define openshift_image_tag via command line (rhcarvalho@gmail.com)
 - Ensure only one ES pod per PV (peter.portante@redhat.com)
