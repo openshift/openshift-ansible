@@ -155,8 +155,9 @@ openshift_release=v3.6
 # modify image streams to point at that registry by setting the following to true
 #openshift_examples_modify_imagestreams=true
 
-# Additional yum repos to install
+# OpenShift repository configuration
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
+#openshift_repos_enable_testing=false
 
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
