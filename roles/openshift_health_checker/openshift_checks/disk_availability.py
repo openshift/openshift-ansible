@@ -66,7 +66,11 @@ class DiskAvailability(NotContainerizedMixin, OpenShiftCheck):
             # If it is not a number, then it should be a nested dict.
             pass
 
-
+        # TODO: as suggested in
+        # https://github.com/openshift/openshift-ansible/pull/4436#discussion_r122180021,
+        # maybe we could support checking disk availability in paths that are
+        # not part of the official recommendation but present in the user
+        # configuration.
         for path, recommendation in self.recommended_disk_space_bytes.items():
             free_bytes = self.free_bytes(path, ansible_mounts)
             recommended_bytes = max(recommendation.get(name, 0) for name in group_names)
