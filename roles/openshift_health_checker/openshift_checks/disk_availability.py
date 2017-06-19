@@ -1,4 +1,5 @@
-# pylint: disable=missing-docstring
+"""Check that there is enough disk space in predefined paths."""
+
 import os.path
 import tempfile
 
