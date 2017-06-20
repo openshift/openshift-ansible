@@ -25,6 +25,7 @@
   local_action: command mktemp -d
   register: local_tmp
   changed_when: False
+  become: false
 
 - name: Copy the admin client config(s)
   command: >
