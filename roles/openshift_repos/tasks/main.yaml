@@ -48,3 +48,22 @@
         and openshift_deployment_type == 'origin'
         and not openshift.common.is_containerized | bool
         and openshift_enable_origin_repo | default(true) | bool
+
+# Singleton block
+- when:
+  - r_osr_first_run | default(true)
+  - not openshift.common.is_containerized | bool
+  block:
+  - name: Ensure clean repo cache in the event repos have been changed manually
+    debug:
+      msg: "First run of openshift_repos"
+    changed_when: true
+    notify: refresh cache
+
+  - name: Set fact r_osr_first_run false
+    set_fact:
+      r_osr_first_run: false
+
+# Force running ALL handlers now, because we expect repo cache to be cleared
+# if changes have been made.
+- meta: flush_handlers
