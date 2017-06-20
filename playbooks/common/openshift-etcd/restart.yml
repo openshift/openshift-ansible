@@ -5,5 +5,5 @@
   tasks:
     - name: restart etcd
       service:
-        name: "{{ 'etcd' if not openshift.common.is_containerized | bool else 'etcd_container' }}"
+        name: "{{ 'etcd_container' if openshift.common.etcd_runtime == 'docker' else 'etcd' }}"
         state: restarted
