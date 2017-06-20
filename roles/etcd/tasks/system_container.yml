@@ -24,12 +24,12 @@
   systemd:
     name: etcd
     state: stopped
-    enabled: yes
+    enabled: no
     masked: no
     daemon_reload: yes
   register: task_result
   failed_when: task_result|failed and 'could not' not in task_result.msg|lower
-  when: "'etcd' in etcd_result.stdout"
+  when: "'etcd' not in etcd_result.stdout"
 
 - name: Disable etcd_container
   systemd:
