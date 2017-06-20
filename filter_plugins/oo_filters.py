@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # vim: expandtab:tabstop=4:shiftwidth=4
-# pylint: disable=no-name-in-module, import-error, wrong-import-order, ungrouped-imports
+# pylint: disable=no-name-in-module, import-error, wrong-import-order, ungrouped-imports, too-many-lines
 """
 Custom filters for use in openshift-ansible
 """
@@ -129,34 +129,57 @@ def oo_merge_hostvars(hostvars, variables, inventory_hostname):
     return merged_hostvars
 
 
-def oo_collect(data, attribute=None, filters=None):
+def oo_collect(data_list, attribute=None, filters=None):
     """ This takes a list of dict and collects all attributes specified into a
         list. If filter is specified then we will include all items that
         match _ALL_ of filters.  If a dict entry is missing the key in a
         filter it will be excluded from the match.
-        Ex: data = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
-                     {'a':2, 'z': 'z'},        # True, return
-                     {'a':3, 'z': 'z'},        # True, return
-                     {'a':4, 'z': 'b'},        # FAILED, obj['z'] != obj['z']
-                   ]
+        Ex: data_list = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
+                          {'a':2, 'z': 'z'},        # True, return
+                          {'a':3, 'z': 'z'},        # True, return
+                          {'a':4, 'z': 'b'},        # FAILED, obj['z'] != obj['z']
+                        ]
             attribute = 'a'
             filters   = {'z': 'z'}
             returns [1, 2, 3]
+
+        This also deals with lists of lists with dict as elements.
+        Ex: data_list = [
+                          [ {'a':1, 'b':5, 'z': 'z'}, # True, return
+                            {'a':2, 'b':6, 'z': 'z'}  # True, return
+                          ],
+                          [ {'a':3, 'z': 'z'},        # True, return
+                            {'a':4, 'z': 'b'}         # FAILED, obj['z'] != obj['z']
+                          ],
+                          {'a':5, 'z': 'z'},          # True, return
+                        ]
+            attribute = 'a'
+            filters   = {'z': 'z'}
+            returns [1, 2, 3, 5]
     """
-    if not isinstance(data, list):
-        raise errors.AnsibleFilterError("|failed expects to filter on a List")
+    if not isinstance(data_list, list):
+        raise errors.AnsibleFilterError("oo_collect expects to filter on a List")
 
     if not attribute:
-        raise errors.AnsibleFilterError("|failed expects attribute to be set")
+        raise errors.AnsibleFilterError("oo_collect expects attribute to be set")
+
+    data = []
+    retval = []
+
+    for item in data_list:
+        if isinstance(item, list):
+            retval.extend(oo_collect(item, attribute, filters))
+        else:
+            data.append(item)
 
     if filters is not None:
         if not isinstance(filters, dict):
-            raise errors.AnsibleFilterError("|failed expects filter to be a"
-                                            " dict")
-        retval = [get_attr(d, attribute) for d in data if (
-            all([d.get(key, None) == filters[key] for key in filters]))]
+            raise errors.AnsibleFilterError(
+                "oo_collect expects filter to be a dict")
+        retval.extend([get_attr(d, attribute) for d in data if (
+            all([d.get(key, None) == filters[key] for key in filters]))])
     else:
-        retval = [get_attr(d, attribute) for d in data]
+        retval.extend([get_attr(d, attribute) for d in data])
 
     retval = [val for val in retval if val is not None]
 
