@@ -12,20 +12,21 @@ class LoggingCheck(OpenShiftCheck):
     """Base class for logging component checks"""
 
     name = "logging"
+    logging_namespace = "logging"
 
     @classmethod
     def is_active(cls, task_vars):
-        return super(LoggingCheck, cls).is_active(task_vars) and cls.is_first_master(task_vars)
+        logging_deployed = get_var(task_vars, "openshift_hosted_logging_deploy", default=False)
+        return super(LoggingCheck, cls).is_active(task_vars) and cls.is_first_master(task_vars) and logging_deployed
 
     @staticmethod
     def is_first_master(task_vars):
-        """Run only on first master and only when logging is configured. Returns: bool"""
-        logging_deployed = get_var(task_vars, "openshift_hosted_logging_deploy", default=True)
+        """Run only on first master. Returns: bool"""
         # Note: It would be nice to use membership in oo_first_master group, however for now it
         # seems best to avoid requiring that setup and just check this is the first master.
         hostname = get_var(task_vars, "ansible_ssh_host") or [None]
         masters = get_var(task_vars, "groups", "masters", default=None) or [None]
-        return logging_deployed and masters[0] == hostname
+        return masters and masters[0] == hostname
 
     def run(self, tmp, task_vars):
         pass
@@ -45,7 +46,7 @@ class LoggingCheck(OpenShiftCheck):
                 raise ValueError()
         except ValueError:
             # successful run but non-parsing data generally means there were no pods in the namespace
-            return None, 'There are no pods in the {} namespace. Is logging deployed?'.format(namespace)
+            return None, 'No pods were found for the "{}" logging component.'.format(logging_component)
 
         return pods['items'], None
 
