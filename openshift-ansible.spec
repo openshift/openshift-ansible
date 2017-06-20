@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.83
+Version:        3.5.84
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.84-1
+- Localhost TMP Dir Fix (vincent.schwarzer@yahoo.de)
+- Guard check for container install based on openshift dictionary key
+  (ayoung@redhat.com)
+- Switching commands for modules during upgrade of router and registry.
+  (kwoodson@redhat.com)
+- Use local openshift.master.loopback_url when generating initial master
+  loopback kubeconfigs. (abutcher@redhat.com)
+- oo_filters: Disable pylint too-many-lines test (jarrpa@redhat.com)
+- oo_collect: Allow list elements to be lists of dict (jarrpa@redhat.com)
+- oo_collect: Update comments to show source of failure (jarrpa@redhat.com)
+
 * Thu Jun 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.83-1
 - Disable negative caching, set cache TTL to 1s (skuznets@redhat.com)
 - Import the ansible encoding utils (tbielawa@redhat.com)
