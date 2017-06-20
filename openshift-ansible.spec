@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.120
+Version:        3.6.121
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.121-1
+- Updating default from null to "" (ewolinet@redhat.com)
+
 * Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.120-1
 - Update atomic-openshift-master.j2 (sdodson@redhat.com)
 - Enable push to registry via dns only on clean 3.6 installs
