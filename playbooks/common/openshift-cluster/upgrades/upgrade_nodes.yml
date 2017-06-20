@@ -34,6 +34,7 @@
   - openshift_facts
   - docker
   - openshift_node_upgrade
+  - openshift_node_dnsmasq
   - role: openshift_excluder
     r_openshift_excluder_action: enable
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"

@@ -96,6 +96,9 @@ EOF
       if ! grep -q '99-origin-dns.sh' ${NEW_RESOLV_CONF}; then
           echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> ${NEW_RESOLV_CONF}
       fi
+      if ! grep -q 'search.*cluster.local' ${NEW_RESOLV_CONF}; then
+        sed -i '/^search/ s/$/ cluster.local/' ${NEW_RESOLV_CONF}
+      fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
   fi
