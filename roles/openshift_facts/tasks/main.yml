@@ -9,10 +9,10 @@
     l_is_atomic: "{{ ostree_booted.stat.exists }}"
 - set_fact:
     l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
-    l_is_openvswitch_system_container: "{{ (use_openvswitch_system_container | default(openshift_use_system_containers) | bool) }}"
-    l_is_node_system_container: "{{ (use_node_system_container | default(openshift_use_system_containers) | bool) }}"
-    l_is_master_system_container: "{{ (use_master_system_container | default(openshift_use_system_containers) | bool) }}"
-    l_is_etcd_system_container: "{{ (use_etcd_system_container | default(openshift_use_system_containers) | bool) }}"
+    l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers) | bool) }}"
+    l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers) | bool) }}"
+    l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers) | bool) }}"
+    l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers) | bool) }}"
 - set_fact:
     l_any_system_container: "{{ l_is_etcd_system_container or l_is_openvswitch_system_container or l_is_node_system_container or l_is_master_system_container }}"
 - set_fact:
