@@ -1,0 +1,9 @@
+---
+- include: std_include.yml
+
+- name: OpenShift Prometheus
+  hosts: oo_first_master
+  roles:
+  - openshift_prometheus
+  vars:
+    openshift_prometheus_state: present

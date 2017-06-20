@@ -1024,6 +1024,18 @@ def oo_contains_rule(source, apiGroups, resources, verbs):
     return False
 
 
+def oo_selector_to_string_list(user_dict):
+    """Convert a dict of selectors to a key=value list of strings
+
+Given input of {'region': 'infra', 'zone': 'primary'} returns a list
+of items as ['region=infra', 'zone=primary']
+    """
+    selectors = []
+    for key in user_dict:
+        selectors.append("{}={}".format(key, user_dict[key]))
+    return selectors
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -1065,5 +1077,6 @@ class FilterModule(object):
             "oo_openshift_loadbalancer_backends": oo_openshift_loadbalancer_backends,
             "to_padded_yaml": to_padded_yaml,
             "oo_random_word": oo_random_word,
-            "oo_contains_rule": oo_contains_rule
+            "oo_contains_rule": oo_contains_rule,
+            "oo_selector_to_string_list": oo_selector_to_string_list
         }

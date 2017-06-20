@@ -1,0 +1,44 @@
+---
+# Tasks to statically provision NFS volumes
+# Include if not using dynamic volume provisioning
+- name: Ensure the /exports/ directory exists
+  file:
+    path: /exports/
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Ensure the prom-pv0X export directories exist
+  file:
+    path: "/exports/{{ item }}"
+    state: directory
+    mode: 0777
+    owner: nfsnobody
+    group: nfsnobody
+  with_items: "{{ openshift_prometheus_pv_exports }}"
+
+- name: Ensure the NFS exports for Prometheus PVs exist
+  copy:
+    src: openshift_prometheus.exports
+    dest: /etc/exports.d/openshift_prometheus.exports
+  register: nfs_exports_updated
+
+- name: Ensure the NFS export table is refreshed if exports were added
+  command: exportfs -ar
+  when:
+    - nfs_exports_updated.changed
+
+
+######################################################################
+# Create the required Prometheus PVs. Check out these online docs if you
+# need a refresher on includes looping with items:
+# * http://docs.ansible.com/ansible/playbooks_loops.html#loops-and-includes-in-2-0
+# * http://stackoverflow.com/a/35128533
+#
+# TODO: Handle the case where a PV template is updated in
+# openshift-ansible and the change needs to be landed on the managed
+# cluster.
+
+- include: create_pvs.yaml
+  with_items: "{{ openshift_prometheus_pv_data }}"
