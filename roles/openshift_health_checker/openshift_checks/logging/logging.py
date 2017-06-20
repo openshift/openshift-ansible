@@ -45,7 +45,7 @@ class LoggingCheck(OpenShiftCheck):
                 raise ValueError()
         except ValueError:
             # successful run but non-parsing data generally means there were no pods in the namespace
-            return None, 'There are no pods in the {} namespace. Is logging deployed?'.format(namespace)
+            return None, 'No pods were found for the "{}" logging component.'.format(logging_component)
 
         return pods['items'], None
 

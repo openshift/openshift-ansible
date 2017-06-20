@@ -118,7 +118,7 @@ def test_is_active(groups, logging_deployed, is_active):
     (
         'No resources found.',
         None,
-        'There are no pods in the logging namespace',
+        'No pods were found for the "es"',
     ),
     (
         json.dumps({'items': [plain_kibana_pod, plain_es_pod, plain_curator_pod, fluentd_pod_node1]}),
