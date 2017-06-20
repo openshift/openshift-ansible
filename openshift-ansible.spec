@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.117
+Version:        3.6.119
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.119-1
+- Temporarilly only migrate jobs as we were before (sdodson@redhat.com)
+- Disable TLS verification in skopeo inspect (rhcarvalho@gmail.com)
+- Preserve etcd3 storage if it's already in use (sdodson@redhat.com)
+- GlusterFS: Generate better secret keys (jarrpa@redhat.com)
+- GlusterFS: Fix error when groups.glusterfs_registry is undefined.
+  (jarrpa@redhat.com)
+- GlusterFS: Use proper identity in heketi secret (jarrpa@redhat.com)
+- GlusterFS: Allow configuration of heketi port (jarrpa@redhat.com)
+- GlusterFS: Fix variable typo (jarrpa@redhat.com)
+- GlusterFS: Minor template fixes (jarrpa@redhat.com)
+- registry: mount GlusterFS storage volume from correct host
+  (jarrpa@redhat.com)
+
 * Mon Jun 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.117-1
 - Run storage upgrade pre and post master upgrade (rteague@redhat.com)
 - Introduce etcd migrate role (jchaloup@redhat.com)
