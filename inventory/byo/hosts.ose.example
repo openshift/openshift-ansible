@@ -811,6 +811,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Controls validity for etcd CA, peer, server and client certificates.
 #
 #etcd_ca_default_days=1825
+#
+# ServiceAccountConfig:LimitSecretRefences rejects pods that reference secrets their service accounts do not reference
+# openshift_master_saconfig_limitsecretreferences=false
 
 # Upgrade Control
 #

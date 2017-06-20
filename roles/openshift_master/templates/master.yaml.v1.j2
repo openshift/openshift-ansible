@@ -235,7 +235,7 @@ projectConfig:
 routingConfig:
   subdomain:  "{{ openshift_master_default_subdomain | default("") }}"
 serviceAccountConfig:
-  limitSecretReferences: false
+  limitSecretReferences: {{ openshift_master_saconfig_limitsecretreferences | default(false) }}
   managedNames:
   - default
   - builder
