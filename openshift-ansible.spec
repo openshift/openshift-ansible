@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.119
+Version:        3.6.120
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.120-1
+- Update atomic-openshift-master.j2 (sdodson@redhat.com)
+- Enable push to registry via dns only on clean 3.6 installs
+  (sdodson@redhat.com)
+- Disable actually pushing to the registry via dns for now (sdodson@redhat.com)
+- Add openshift_node_dnsmasq role to upgrade (sdodson@redhat.com)
+- Push to the registry via dns (sdodson@redhat.com)
+
 * Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.119-1
 - Temporarilly only migrate jobs as we were before (sdodson@redhat.com)
 - Disable TLS verification in skopeo inspect (rhcarvalho@gmail.com)
