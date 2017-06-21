@@ -84,115 +84,119 @@
   - openshift_version is not defined
   - openshift_protect_installed_version | bool
 
-- name: Set openshift_version for rpm installation
-  include: set_version_rpm.yml
-  when: not is_containerized | bool
+# The rest of these tasks should only execute on
+# masters and nodes as we can verify they have subscriptions
+- when:
+  - inventory_hostname in groups['oo_masters_to_config'] or inventory_hostname in groups['oo_nodes_to_config']
+  block:
+  - name: Set openshift_version for rpm installation
+    include: set_version_rpm.yml
+    when: not is_containerized | bool
 
-- name: Set openshift_version for containerized installation
-  include: set_version_containerized.yml
-  when: is_containerized | bool
+  - name: Set openshift_version for containerized installation
+    include: set_version_containerized.yml
+    when: is_containerized | bool
 
-- block:
-  - name: Get available {{ openshift.common.service_type}} version
-    repoquery:
-      name: "{{ openshift.common.service_type}}"
-      ignore_excluders: true
-    register: rpm_results
-  - fail:
-      msg: "Package {{ openshift.common.service_type}} not found"
-    when: not rpm_results.results.package_found
-  - set_fact:
-      openshift_rpm_version: "{{ rpm_results.results.versions.available_versions.0 | default('0.0', True) }}"
-  - name: Fail if rpm version and docker image version are different
-    fail:
-      msg: "OCP rpm version {{ openshift_rpm_version }} is different from OCP image version {{ openshift_version }}"
-    # Both versions have the same string representation
+  - block:
+    - name: Get available {{ openshift.common.service_type}} version
+      repoquery:
+        name: "{{ openshift.common.service_type}}"
+        ignore_excluders: true
+      register: rpm_results
+    - fail:
+        msg: "Package {{ openshift.common.service_type}} not found"
+      when: not rpm_results.results.package_found
+    - set_fact:
+        openshift_rpm_version: "{{ rpm_results.results.versions.available_versions.0 | default('0.0', True) }}"
+    - name: Fail if rpm version and docker image version are different
+      fail:
+        msg: "OCP rpm version {{ openshift_rpm_version }} is different from OCP image version {{ openshift_version }}"
+      # Both versions have the same string representation
+      when:
+      - openshift_rpm_version != openshift_version
+      # if openshift_pkg_version or openshift_image_tag is defined, user gives a permission the rpm and docker image versions can differ
+      - openshift_pkg_version is not defined
+      - openshift_image_tag is not defined
     when:
-    - openshift_rpm_version != openshift_version
-    # if openshift_pkg_version or openshift_image_tag is defined, user gives a permission the rpm and docker image versions can differ
-    - openshift_pkg_version is not defined
-    - openshift_image_tag is not defined
-  when:
-  - is_containerized | bool
-  - not is_atomic | bool
+    - is_containerized | bool
+    - not is_atomic | bool
 
-# Warn if the user has provided an openshift_image_tag but is not doing a containerized install
-# NOTE: This will need to be modified/removed for future container + rpm installations work.
-- name: Warn if openshift_image_tag is defined when not doing a containerized install
-  debug:
-    msg: >
-      openshift_image_tag is used for containerized installs. If you are trying to
-      specify an image for a non-container install see oreg_url or oreg_url_master or oreg_url_node.
-  when:
-  - not is_containerized | bool
-  - openshift_image_tag is defined
+  # Warn if the user has provided an openshift_image_tag but is not doing a containerized install
+  # NOTE: This will need to be modified/removed for future container + rpm installations work.
+  - name: Warn if openshift_image_tag is defined when not doing a containerized install
+    debug:
+      msg: >
+        openshift_image_tag is used for containerized installs. If you are trying to
+        specify an image for a non-container install see oreg_url or oreg_url_master or oreg_url_node.
+    when:
+    - not is_containerized | bool
+    - openshift_image_tag is defined
 
+  # At this point we know openshift_version is set appropriately. Now we set
+  # openshift_image_tag and openshift_pkg_version, so all roles can always assume
+  # each of this variables *will* be set correctly and can use them per their
+  # intended purpose.
 
-# At this point we know openshift_version is set appropriately. Now we set
-# openshift_image_tag and openshift_pkg_version, so all roles can always assume
-# each of this variables *will* be set correctly and can use them per their
-# intended purpose.
+  - block:
+    - debug:
+        msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
 
-- block:
-  - debug:
-      msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
+    - set_fact:
+        openshift_image_tag: v{{ openshift_version }}
 
-  - set_fact:
-      openshift_image_tag: v{{ openshift_version }}
+    when: openshift_image_tag is not defined
 
-  when: openshift_image_tag is not defined
+  - block:
+    - debug:
+        msg: "openshift_pkg_version was not defined. Falling back to -{{ openshift_version }}"
 
-- block:
-  - debug:
-      msg: "openshift_pkg_version was not defined. Falling back to -{{ openshift_version }}"
+    - set_fact:
+        openshift_pkg_version: -{{ openshift_version }}
 
-  - set_fact:
-      openshift_pkg_version: -{{ openshift_version }}
+    when: openshift_pkg_version is not defined
 
-  when: openshift_pkg_version is not defined
+  - fail:
+      msg: openshift_version role was unable to set openshift_version
+    name: Abort if openshift_version was not set
+    when: openshift_version is not defined
 
-- fail:
-    msg: openshift_version role was unable to set openshift_version
-  name: Abort if openshift_version was not set
-  when: openshift_version is not defined
+  - fail:
+      msg: openshift_version role was unable to set openshift_image_tag
+    name: Abort if openshift_image_tag was not set
+    when: openshift_image_tag is not defined
 
-- fail:
-    msg: openshift_version role was unable to set openshift_image_tag
-  name: Abort if openshift_image_tag was not set
-  when: openshift_image_tag is not defined
+  - fail:
+      msg: openshift_version role was unable to set openshift_pkg_version
+    name: Abort if openshift_pkg_version was not set
+    when: openshift_pkg_version is not defined
 
-- fail:
-    msg: openshift_version role was unable to set openshift_pkg_version
-  name: Abort if openshift_pkg_version was not set
-  when: openshift_pkg_version is not defined
+  - fail:
+      msg: "No OpenShift version available; please ensure your systems are fully registered and have access to appropriate yum repositories."
+    name: Abort if openshift_pkg_version was not set
+    when:
+    - not is_containerized | bool
+    - openshift_version == '0.0'
 
-- fail:
-    msg: "No OpenShift version available; please ensure your systems are fully registered and have access to appropriate yum repositories."
-  name: Abort if openshift_pkg_version was not set
-  when:
-  - not is_containerized | bool
-  - openshift_version == '0.0'
+  # We can't map an openshift_release to full rpm version like we can with containers; make sure
+  # the rpm version we looked up matches the release requested and error out if not.
+  - name: For an RPM install, abort when the release requested does not match the available version.
+    when:
+    - not is_containerized | bool
+    - openshift_release is defined
+    assert:
+      that:
+      - openshift_version.startswith(openshift_release) | bool
+      msg: |-
+        You requested openshift_release {{ openshift_release }}, which is not matched by
+        the latest OpenShift RPM we detected as {{ openshift.common.service_type }}-{{ openshift_version }}
+        on host {{ inventory_hostname }}.
+        We will only install the latest RPMs, so please ensure you are getting the release
+        you expect. You may need to adjust your Ansible inventory, modify the repositories
+        available on the host, or run the appropriate OpenShift upgrade playbook.
 
-# We can't map an openshift_release to full rpm version like we can with containers; make sure
-# the rpm version we looked up matches the release requested and error out if not.
-- name: For an RPM install, abort when the release requested does not match the available version.
-  when:
-  - not is_containerized | bool
-  - openshift_release is defined
-  assert:
-    that:
-    - openshift_version.startswith(openshift_release) | bool
-    msg: |-
-      You requested openshift_release {{ openshift_release }}, which is not matched by
-      the latest OpenShift RPM we detected as {{ openshift.common.service_type }}-{{ openshift_version }}
-      on host {{ inventory_hostname }}.
-      We will only install the latest RPMs, so please ensure you are getting the release
-      you expect. You may need to adjust your Ansible inventory, modify the repositories
-      available on the host, or run the appropriate OpenShift upgrade playbook.
+  # The end result of these three variables is quite important so make sure they are displayed and logged:
+  - debug: var=openshift_release
 
-# The end result of these three variables is quite important so make sure they are displayed and logged:
-- debug: var=openshift_release
+  - debug: var=openshift_image_tag
 
-- debug: var=openshift_image_tag
-
-- debug: var=openshift_pkg_version
+  - debug: var=openshift_pkg_version
