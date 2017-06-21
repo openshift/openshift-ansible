@@ -317,6 +317,7 @@
 
   - name: restart NetworkManager
     service: name=NetworkManager state=restarted
+    when: openshift_use_dnsmasq | default(true) | bool
 
 - hosts: masters
   become: yes
