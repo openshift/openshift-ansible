@@ -620,6 +620,8 @@ resources:
     type: OS::Heat::ResourceGroup
     properties:
       count: {{ num_nodes }}
+      removal_policies:
+      - resource_list: {{ node_removal_policies }}
       resource_def:
         type: server.yaml
         properties:
