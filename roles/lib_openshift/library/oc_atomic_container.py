@@ -65,8 +65,11 @@ options:
 
 # -*- -*- -*- Begin included fragment: ansible/oc_atomic_container.py -*- -*- -*-
 
-# pylint: disable=wrong-import-position,too-many-branches,invalid-name
+# pylint: disable=wrong-import-position,too-many-branches,invalid-name,no-name-in-module, import-error
 import json
+
+from distutils.version import StrictVersion
+
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -191,9 +194,15 @@ def main():
         )
 
     # Verify that the platform supports atomic command
-    rc, _, err = module.run_command('atomic -v', check_rc=False)
+    rc, version_out, err = module.run_command('atomic -v', check_rc=False)
     if rc != 0:
         module.fail_json(msg="Error in running atomic command", err=err)
+    # This module requires atomic version 1.17.2 or later
+    atomic_version = StrictVersion(version_out.replace('\n', ''))
+    if atomic_version < StrictVersion('1.17.2'):
+        module.fail_json(
+            msg="atomic version 1.17.2+ is required",
+            err=str(atomic_version))
 
     try:
         core(module)
