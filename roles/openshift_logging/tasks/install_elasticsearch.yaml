@@ -3,7 +3,7 @@
   set_fact: openshift_logging_current_es_size={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | length }}
 
 - set_fact: openshift_logging_es_pvc_prefix="logging-es"
-  when: "not openshift_logging_es_pvc_prefix or openshift_logging_es_pvc_prefix == ''"
+  when: not openshift_logging_es_pvc_prefix or openshift_logging_es_pvc_prefix == ''
 
 - set_fact: es_indices={{ es_indices | default([]) + [item | int - 1] }}
   with_sequence: count={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
@@ -71,7 +71,7 @@
   check_mode: no
 
 - set_fact: openshift_logging_es_ops_pvc_prefix="logging-es-ops"
-  when: "not openshift_logging_es_ops_pvc_prefix or openshift_logging_es_ops_pvc_prefix == ''"
+  when: not openshift_logging_es_ops_pvc_prefix or openshift_logging_es_ops_pvc_prefix == ''
 
 - set_fact: es_ops_indices={{ es_ops_indices | default([]) + [item | int - 1] }}
   with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}

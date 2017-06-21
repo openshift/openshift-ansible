@@ -16,7 +16,7 @@
     when: not openshift.common.is_atomic | bool
   - fail:
       msg: Incompatible versions of yum and subscription-manager found. You may need to update yum and yum-utils.
-    when: "not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout"
+    when: not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout
 
 - name: Determine openshift_version to configure on first master
   hosts: oo_first_master
