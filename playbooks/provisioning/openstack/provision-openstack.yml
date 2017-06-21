@@ -1,6 +1,7 @@
 ---
 - hosts: localhost
   gather_facts: True
+  become: False
   pre_tasks:
   - include: pre_tasks.yml
   roles:
@@ -31,12 +32,13 @@
 - name: Refresh Server inventory
   hosts: localhost
   connection: local
+  become: False
   gather_facts: False
   tasks:
   - meta: refresh_inventory
 
 - hosts: cluster_hosts
-  gather_facts: false
+  gather_facts: True
   tasks:
   - name: Debug hostvar
     debug:

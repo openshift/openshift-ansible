@@ -1,5 +1,7 @@
 ---
 - hosts: localhost
+  gather_facts: True
+  become: False
   roles:
   - role: openstack-stack
     stack_name: test-stack

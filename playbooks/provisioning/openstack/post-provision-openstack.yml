@@ -1,6 +1,7 @@
 ---
 # Assign hostnames
 - hosts: cluster_hosts
+  gather_facts: False
   become: true
   pre_tasks:
   - include: pre_tasks.yml
@@ -9,6 +10,7 @@
 
 # Subscribe DNS Host to allow for configuration below
 - hosts: dns
+  gather_facts: False
   become: true
   roles:
   - role: subscription-manager
@@ -17,11 +19,14 @@
 
 # Determine which DNS server(s) to use for our generated records
 - hosts: localhost
+  gather_facts: False
+  become: False
   roles:
   - dns-server-detect
 
 # Build the DNS Server Views and Configure DNS Server(s)
 - hosts: dns
+  gather_facts: False
   become: true
   pre_tasks:
   - include: pre_tasks.yml
@@ -32,6 +37,8 @@
 
 # Build and process DNS Records
 - hosts: localhost
+  gather_facts: False
+  become: False
   pre_tasks:
   - include: pre_tasks.yml
   - name: "Generate dns records"
@@ -41,6 +48,7 @@
 
 # OpenShift Pre-Requisites
 - hosts: OSEv3
+  gather_facts: False
   become: true
   tasks:
   - name: "Edit /etc/resolv.conf on masters/nodes"
