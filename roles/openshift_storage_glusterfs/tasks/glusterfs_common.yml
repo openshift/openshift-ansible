@@ -26,7 +26,7 @@
   - kind: "sa"
     name: "heketi-{{ glusterfs_name }}-service-account"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-user-secret"
+    name: "heketi-{{ glusterfs_name }}-admin-secret"
   failed_when: False
   when: glusterfs_heketi_wipe
 
@@ -170,7 +170,7 @@
   oc_secret:
     namespace: "{{ glusterfs_namespace }}"
     state: present
-    name: "heketi-{{ glusterfs_name }}-secret"
+    name: "heketi-{{ glusterfs_name }}-admin-secret"
     type: "kubernetes.io/glusterfs"
     force: True
     contents:
