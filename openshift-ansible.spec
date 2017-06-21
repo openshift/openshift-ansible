@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.103
+Version:        3.4.104
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.104-1
+- Use local openshift.master.loopback_url when generating initial master
+  loopback kubeconfigs. (abutcher@redhat.com)
+- oo_collect: Allow list elements to be lists of dict (abutcher@redhat.com)
+
 * Fri Jun 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.103-1
 - 
 
