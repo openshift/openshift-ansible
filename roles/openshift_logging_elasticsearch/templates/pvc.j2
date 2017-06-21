@@ -25,3 +25,6 @@ spec:
   resources:
     requests:
       storage: {{size}}
+{% if storage_class_name is defined %}
+  storageClassName: {{ storage_class_name }}
+{% endif %}
