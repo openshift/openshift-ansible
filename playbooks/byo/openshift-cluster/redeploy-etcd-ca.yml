@@ -7,4 +7,4 @@
   tags:
   - always
 
-- include: ../../common/openshift-cluster/redeploy-certificates/openshift-ca.yml
+- include: ../../common/openshift-cluster/redeploy-certificates/etcd-ca.yml
