@@ -72,6 +72,17 @@ stacks. Set it to true, if you experience issues with sec group rules
 quotas. It trades security for number of rules, by sharing the same set
 of firewall rules for master, node, etcd and infra nodes.
 
+#### Security notes
+
+Configure required `*_ingress_cidr` variables to restrict public access
+to provisioned servers from your laptop (a /32 notation should be used)
+or your trusted network. The most important is the `node_ingress_cidr`
+that restricts public access to the deployed DNS server and cluster
+nodes' ephemeral ports range.
+
+Note, the command ``curl https://api.ipify.org`` helps fiding an external
+IP address of your box (the ansible admin node).
+
 ### Update the DNS names in `inventory/hosts`
 
 The different server groups are currently grouped by the domain name,
