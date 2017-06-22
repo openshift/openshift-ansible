@@ -1,2 +1,2 @@
 ---
-use_system_containers: false
+openshift_use_system_containers: false

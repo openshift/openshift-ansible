@@ -42,6 +42,17 @@ openshift_release=v3.6
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
 #openshift_pkg_version=-3.6.0
 
+# This enables all the system containers except for docker:
+#openshift_use_system_containers=False
+#
+# But you can choose separately each component that must be a
+# system container:
+#
+#openshift_use_openvswitch_system_container=False
+#openshift_use_node_system_container=False
+#openshift_use_master_system_container=False
+#openshift_use_etcd_system_container=False
+
 # Install the openshift examples
 #openshift_install_examples=true
 
