@@ -58,6 +58,9 @@ spec:
               name: "cluster"
           env:
             -
+              name: "DC_NAME"
+              value: "{{deploy_name}}"
+            -
               name: "NAMESPACE"
               valueFrom:
                 fieldRef:
