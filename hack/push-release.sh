@@ -1,55 +1,41 @@
 #!/bin/bash
 
-# This script pushes all of the built images to a registry.
+# This script pushes a built image to a registry.
 #
-# Set OS_PUSH_BASE_REGISTRY to prefix the destination images
+# Set OS_PUSH_BASE_REGISTRY to prefix the destination images e.g.
+# OS_PUSH_BASE_REGISTRY="docker.io/"
 #
+# Set OS_PUSH_TAG with a comma-separated list for pushing same image
+# to multiple tags e.g.
+# OS_PUSH_TAG="latest,v3.6"
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
-STARTTIME=$(date +%s)
-OS_ROOT=$(dirname "${BASH_SOURCE}")/..
+starttime=$(date +%s)
 
-PREFIX="${PREFIX:-openshift/origin-ansible}"
+# image name without repo or tag.
+image="${PREFIX:-openshift/origin-ansible}"
 
-# Go to the top of the tree.
-cd "${OS_ROOT}"
+# existing local tag on the image we want to push
+source_tag="${OS_TAG:-latest}"
 
-# Allow a release to be repushed with a tag
-tag="${OS_PUSH_TAG:-}"
-if [[ -n "${tag}" ]]; then
-  tag=":${tag}"
-else
-  tag=":latest"
-fi
+# Enable retagging a build with one or more tags for push
+IFS=',' read -r -a push_tags <<< "${OS_PUSH_TAG:-latest}"
+registry="${OS_PUSH_BASE_REGISTRY:-}"
 
-# Source tag
-source_tag="${OS_TAG:-}"
-if [[ -z "${source_tag}" ]]; then
-  source_tag="latest"
-fi
-
-images=(
-  ${PREFIX}
-)
-
+# force push if available
 PUSH_OPTS=""
 if docker push --help | grep -q force; then
   PUSH_OPTS="--force"
 fi
 
-if [[ "${OS_PUSH_BASE_REGISTRY-}" != "" || "${tag}" != "" ]]; then
-  set -e
-  for image in "${images[@]}"; do
-    docker tag "${image}:${source_tag}" "${OS_PUSH_BASE_REGISTRY-}${image}${tag}"
-  done
-  set +e
-fi
-
-for image in "${images[@]}"; do
-  docker push ${PUSH_OPTS} "${OS_PUSH_BASE_REGISTRY-}${image}${tag}"
+set -x
+for tag in "${push_tags[@]}"; do
+  docker tag "${image}:${source_tag}" "${registry}${image}:${tag}"
+  docker push ${PUSH_OPTS} "${registry}${image}:${tag}"
 done
+set +x
 
-ret=$?; ENDTIME=$(date +%s); echo "$0 took $(($ENDTIME - $STARTTIME)) seconds"; exit "$ret"
+endtime=$(date +%s); echo "$0 took $(($endtime - $starttime)) seconds"; exit 0
