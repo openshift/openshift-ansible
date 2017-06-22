@@ -17,6 +17,7 @@ objects:
       service.alpha.openshift.io/dependencies: '[{"name":"${DATABASE_SERVICE_NAME}","namespace":"","kind":"Service"},{"name":"${MEMCACHED_SERVICE_NAME}","namespace":"","kind":"Service"}]'
     name: ${NAME}
   spec:
+    clusterIP: None
     ports:
     - name: http
       port: 80
@@ -48,11 +49,27 @@ objects:
     annotations:
       description: "Keeps track of changes in the CloudForms app image"
   spec:
-    dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-app
+    dockerImageRepository: "${APPLICATION_IMG_NAME}"
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: cfme-openshift-postgresql
+    annotations:
+      description: "Keeps track of changes in the CloudForms postgresql image"
+  spec:
+    dockerImageRepository: "${POSTGRESQL_IMG_NAME}"
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: cfme-openshift-memcached
+    annotations:
+      description: "Keeps track of changes in the CloudForms memcached image"
+  spec:
+    dockerImageRepository: "${MEMCACHED_IMG_NAME}"
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    name: ${DATABASE_SERVICE_NAME}
+    name: "${NAME}-${DATABASE_SERVICE_NAME}"
   spec:
     accessModes:
       - ReadWriteOnce
@@ -62,45 +79,41 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    name: ${NAME}
+    name: "${NAME}-region"
   spec:
     accessModes:
       - ReadWriteOnce
     resources:
       requests:
-        storage: ${APPLICATION_VOLUME_CAPACITY}
-- apiVersion: v1
-  kind: "DeploymentConfig"
+        storage: ${APPLICATION_REGION_VOLUME_CAPACITY}
+- apiVersion: apps/v1beta1
+  kind: "StatefulSet"
   metadata:
     name: ${NAME}
     annotations:
       description: "Defines how to deploy the CloudForms appliance"
   spec:
+    serviceName: "${NAME}"
+    replicas: 1
     template:
       metadata:
         labels:
           name: ${NAME}
         name: ${NAME}
       spec:
-        volumes:
-          -
-            name: "cfme-app-volume"
-            persistentVolumeClaim:
-              claimName: ${NAME}
         containers:
-        - image: cloudforms/cfme-openshift-app:${APPLICATION_IMG_TAG}
-          imagePullPolicy: IfNotPresent
-          name: cloudforms
+        - name: cloudforms
+          image: "${APPLICATION_IMG_NAME}:${APPLICATION_IMG_TAG}"
           livenessProbe:
-            httpGet:
-              path: /
-              port: 80
+            tcpSocket:
+              port: 443
             initialDelaySeconds: 480
             timeoutSeconds: 3
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 443
+              scheme: HTTPS
             initialDelaySeconds: 200
             timeoutSeconds: 3
           ports:
@@ -112,8 +125,11 @@ objects:
             privileged: true
           volumeMounts:
               -
-                name: "cfme-app-volume"
+                name: "${NAME}-server"
                 mountPath: "/persistent"
+              -
+                name: "${NAME}-region"
+                mountPath: "/persistent-region"
           env:
             -
               name: "APPLICATION_INIT_DELAY"
@@ -144,29 +160,32 @@ objects:
               value: "${POSTGRESQL_SHARED_BUFFERS}"
           resources:
             requests:
-              memory: "${MEMORY_APPLICATION_MIN}"
+              memory: "${APPLICATION_MEM_REQ}"
+              cpu: "${APPLICATION_CPU_REQ}"
+            limits:
+              memory: "${APPLICATION_MEM_LIMIT}"
           lifecycle:
             preStop:
               exec:
                 command:
                   - /opt/rh/cfme-container-scripts/sync-pv-data
-    replicas: 1
-    selector:
-      name: ${NAME}
-    triggers:
-      - type: "ConfigChange"
-      - type: "ImageChange"
-        imageChangeParams:
-          automatic: true
-          containerNames:
-            - "cloudforms"
-          from:
-            kind: "ImageStreamTag"
-            name: "cfme-openshift-app:${APPLICATION_IMG_TAG}"
-    strategy:
-      type: "Recreate"
-      recreateParams:
-        timeoutSeconds: 1200
+        volumes:
+         -
+           name: "${NAME}-region"
+           persistentVolumeClaim:
+             claimName: ${NAME}-region
+    volumeClaimTemplates:
+      - metadata:
+          name: "${NAME}-server"
+          annotations:
+            # Uncomment this if using dynamic volume provisioning.
+            # https://docs.openshift.org/latest/install_config/persistent_storage/dynamically_provisioning_pvs.html
+            # volume.alpha.kubernetes.io/storage-class: anything
+        spec:
+          accessModes: [ ReadWriteOnce ]
+          resources:
+            requests:
+              storage: "${APPLICATION_VOLUME_CAPACITY}"
 - apiVersion: v1
   kind: "Service"
   metadata:
@@ -181,14 +200,6 @@ objects:
         targetPort: 11211
     selector:
       name: "${MEMCACHED_SERVICE_NAME}"
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    name: cfme-openshift-memcached
-    annotations:
-      description: "Keeps track of changes in the CloudForms memcached image"
-  spec:
-    dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-memcached
 - apiVersion: v1
   kind: "DeploymentConfig"
   metadata:
@@ -223,7 +234,7 @@ objects:
         containers:
           -
             name: "memcached"
-            image: "cloudforms/cfme-openshift-memcached:${MEMCACHED_IMG_TAG}"
+            image: "${MEMCACHED_IMG_NAME}:${MEMCACHED_IMG_TAG}"
             ports:
               -
                 containerPort: 11211
@@ -249,8 +260,11 @@ objects:
                 name: "MEMCACHED_SLAB_PAGE_SIZE"
                 value: "${MEMCACHED_SLAB_PAGE_SIZE}"
             resources:
+              requests:
+                memory: "${MEMCACHED_MEM_REQ}"
+                cpu: "${MEMCACHED_CPU_REQ}"
               limits:
-                memory: "${MEMORY_MEMCACHED_LIMIT}"
+                memory: "${MEMCACHED_MEM_LIMIT}"
 - apiVersion: v1
   kind: "Service"
   metadata:
@@ -265,14 +279,6 @@ objects:
         targetPort: 5432
     selector:
       name: "${DATABASE_SERVICE_NAME}"
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    name: cfme-openshift-postgresql
-    annotations:
-      description: "Keeps track of changes in the CloudForms postgresql image"
-  spec:
-    dockerImageRepository: registry.access.redhat.com/cloudforms/cfme-openshift-postgresql
 - apiVersion: v1
   kind: "DeploymentConfig"
   metadata:
@@ -307,11 +313,11 @@ objects:
           -
             name: "cfme-pgdb-volume"
             persistentVolumeClaim:
-              claimName: ${DATABASE_SERVICE_NAME}
+              claimName: "${NAME}-${DATABASE_SERVICE_NAME}"
         containers:
           -
             name: "postgresql"
-            image: "cloudforms/cfme-openshift-postgresql:${POSTGRESQL_IMG_TAG}"
+            image: "${POSTGRESQL_IMG_NAME}:${POSTGRESQL_IMG_TAG}"
             ports:
               -
                 containerPort: 5432
@@ -350,8 +356,11 @@ objects:
                 name: "POSTGRESQL_SHARED_BUFFERS"
                 value: "${POSTGRESQL_SHARED_BUFFERS}"
             resources:
+              requests:
+                memory: "${POSTGRESQL_MEM_REQ}"
+                cpu: "${POSTGRESQL_CPU_REQ}"
               limits:
-                memory: "${MEMORY_POSTGRESQL_LIMIT}"
+                memory: "${POSTGRESQL_MEM_LIMIT}"
 
 parameters:
   -
@@ -420,35 +429,86 @@ parameters:
     name: "POSTGRESQL_SHARED_BUFFERS"
     displayName: "PostgreSQL Shared Buffer Amount"
     description: "Amount of memory dedicated for PostgreSQL shared memory buffers."
-    value: "64MB"
+    value: "256MB"
   -
-    name: "MEMORY_APPLICATION_MIN"
-    displayName: "Application Memory Minimum"
+    name: "APPLICATION_CPU_REQ"
+    displayName: "Application Min CPU Requested"
+    required: true
+    description: "Minimum amount of CPU time the Application container will need (expressed in millicores)."
+    value: "1000m"
+  -
+    name: "POSTGRESQL_CPU_REQ"
+    displayName: "PostgreSQL Min CPU Requested"
+    required: true
+    description: "Minimum amount of CPU time the PostgreSQL container will need (expressed in millicores)."
+    value: "500m"
+  -
+    name: "MEMCACHED_CPU_REQ"
+    displayName: "Memcached Min CPU Requested"
+    required: true
+    description: "Minimum amount of CPU time the Memcached container will need (expressed in millicores)."
+    value: "200m"
+  -
+    name: "APPLICATION_MEM_REQ"
+    displayName: "Application Min RAM Requested"
     required: true
     description: "Minimum amount of memory the Application container will need."
-    value: "4096Mi"
+    value: "6144Mi"
   -
-    name: "MEMORY_POSTGRESQL_LIMIT"
-    displayName: "PostgreSQL Memory Limit"
+    name: "POSTGRESQL_MEM_REQ"
+    displayName: "PostgreSQL Min RAM Requested"
     required: true
-    description: "Maximum amount of memory the PostgreSQL container can use."
-    value: "2048Mi"
+    description: "Minimum amount of memory the PostgreSQL container will need."
+    value: "1024Mi"
   -
-    name: "MEMORY_MEMCACHED_LIMIT"
-    displayName: "Memcached Memory Limit"
+    name: "MEMCACHED_MEM_REQ"
+    displayName: "Memcached Min RAM Requested"
     required: true
-    description: "Maximum amount of memory the Memcached container can use."
+    description: "Minimum amount of memory the Memcached container will need."
+    value: "64Mi"
+  -
+    name: "APPLICATION_MEM_LIMIT"
+    displayName: "Application Max RAM Limit"
+    required: true
+    description: "Maximum amount of memory the Application container can consume."
+    value: "16384Mi"
+  -
+    name: "POSTGRESQL_MEM_LIMIT"
+    displayName: "PostgreSQL Max RAM Limit"
+    required: true
+    description: "Maximum amount of memory the PostgreSQL container can consume."
+    value: "8192Mi"
+  -
+    name: "MEMCACHED_MEM_LIMIT"
+    displayName: "Memcached Max RAM Limit"
+    required: true
+    description: "Maximum amount of memory the Memcached container can consume."
     value: "256Mi"
+  -
+    name: "POSTGRESQL_IMG_NAME"
+    displayName: "PostgreSQL Image Name"
+    description: "This is the PostgreSQL image name requested to deploy."
+    value: "registry.access.redhat.com/cloudforms45/cfme-openshift-postgresql"
   -
     name: "POSTGRESQL_IMG_TAG"
     displayName: "PostgreSQL Image Tag"
     description: "This is the PostgreSQL image tag/version requested to deploy."
     value: "latest"
   -
+    name: "MEMCACHED_IMG_NAME"
+    displayName: "Memcached Image Name"
+    description: "This is the Memcached image name requested to deploy."
+    value: "registry.access.redhat.com/cloudforms45/cfme-openshift-memcached"
+  -
     name: "MEMCACHED_IMG_TAG"
     displayName: "Memcached Image Tag"
     description: "This is the Memcached image tag/version requested to deploy."
     value: "latest"
+  -
+    name: "APPLICATION_IMG_NAME"
+    displayName: "Application Image Name"
+    description: "This is the Application image name requested to deploy."
+    value: "registry.access.redhat.com/cloudforms45/cfme-openshift-app"
   -
     name: "APPLICATION_IMG_TAG"
     displayName: "Application Image Tag"
@@ -464,16 +524,22 @@ parameters:
     displayName: "Application Init Delay"
     required: true
     description: "Delay in seconds before we attempt to initialize the application."
-    value: "30"
+    value: "15"
   -
     name: "APPLICATION_VOLUME_CAPACITY"
     displayName: "Application Volume Capacity"
     required: true
     description: "Volume space available for application data."
-    value: "1Gi"
+    value: "5Gi"
+  -
+    name: "APPLICATION_REGION_VOLUME_CAPACITY"
+    displayName: "Application Region Volume Capacity"
+    required: true
+    description: "Volume space available for region application data."
+    value: "5Gi"
   -
     name: "DATABASE_VOLUME_CAPACITY"
     displayName: "Database Volume Capacity"
     required: true
     description: "Volume space available for database."
-    value: "1Gi"
+    value: "15Gi"
