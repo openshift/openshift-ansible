@@ -24,22 +24,29 @@
   systemd:
     name: etcd
     state: stopped
-    enabled: yes
+    enabled: no
     masked: no
     daemon_reload: yes
   register: task_result
   failed_when: task_result|failed and 'could not' not in task_result.msg|lower
-  when: "'etcd' in etcd_result.stdout"
+  when: "'etcd' not in etcd_result.stdout"
 
 - name: Disable etcd_container
   systemd:
     name: etcd_container
     state: stopped
     enabled: no
-    masked: yes
     daemon_reload: yes
   register: task_result
   failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+
+- name: Remove etcd_container.service
+  file:
+    path: /etc/systemd/system/etcd_container.service
+    state: absent
+
+- name: Systemd reload configuration
+  systemd: name=etcd_container daemon_reload=yes
 
 - name: Check for previous etcd data store
   stat:
