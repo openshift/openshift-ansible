@@ -37,7 +37,7 @@
     kind: template
     namespace: "kube-service-catalog"
     files:
-    - "{{ mktemp.stdout }}/kubeservicecatalog_roles_bindings.yml"
+      - "{{ mktemp.stdout }}/kubeservicecatalog_roles_bindings.yml"
     delete_after: yes
 
 - oc_process:
@@ -54,7 +54,7 @@
     kind: template
     namespace: kube-system
     files:
-    - "{{ mktemp.stdout }}/kubesystem_roles_bindings.yml"
+      - "{{ mktemp.stdout }}/kubesystem_roles_bindings.yml"
     delete_after: yes
 
 - oc_process:
@@ -107,7 +107,7 @@
     kind: daemonset
     name: apiserver
     files:
-    - "{{ mktemp.stdout }}/service_catalog_api_server.yml"
+      - "{{ mktemp.stdout }}/service_catalog_api_server.yml"
     delete_after: yes
 
 - template:
@@ -121,7 +121,7 @@
     kind: service
     name: apiserver
     files:
-    - "{{ mktemp.stdout }}/service_catalog_api_service.yml"
+      - "{{ mktemp.stdout }}/service_catalog_api_service.yml"
     delete_after: yes
 
 - template:
@@ -135,7 +135,7 @@
     kind: route
     name: apiserver
     files:
-    - "{{ mktemp.stdout }}/service_catalog_api_route.yml"
+      - "{{ mktemp.stdout }}/service_catalog_api_route.yml"
     delete_after: yes
 
 ## controller manager
@@ -144,7 +144,6 @@
     dest: "{{ mktemp.stdout }}/controller_manager.yml"
   vars:
     image: ""
-    node_selector: ""
     cpu_limit: none
     memory_limit: none
     node_selector: {"openshift-infra": "apiserver"}
@@ -156,7 +155,7 @@
     kind: daemonset
     name: controller-manager
     files:
-    - "{{ mktemp.stdout }}/controller_manager.yml"
+      - "{{ mktemp.stdout }}/controller_manager.yml"
     delete_after: yes
 
 - template:
@@ -170,7 +169,7 @@
     kind: service
     name: controller-manager
     files:
-    - "{{ mktemp.stdout }}/controller_manager_service.yml"
+      - "{{ mktemp.stdout }}/controller_manager_service.yml"
     delete_after: yes
 
 - name: Delete temp directory

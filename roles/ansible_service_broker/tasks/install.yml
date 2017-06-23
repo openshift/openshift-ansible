@@ -149,18 +149,18 @@
                     - "--listen-client-urls=http://0.0.0.0:2379"
                     - "--advertise-client-urls=http://0.0.0.0:2379"
                   ports:
-                  - containerPort: 2379
-                    protocol: TCP
+                    - containerPort: 2379
+                      protocol: TCP
                   env:
-                  - name: ETCDCTL_API
-                    value: "3"
+                    - name: ETCDCTL_API
+                      value: "3"
                   volumeMounts:
-                  - mountPath: /data
-                    name: etcd
+                    - mountPath: /data
+                      name: etcd
               volumes:
-              - name: etcd
-                persistentVolumeClaim:
-                  claimName: etcd
+                - name: etcd
+                  persistentVolumeClaim:
+                    claimName: etcd
 
 - name: create ansible-service-broker deployment
   oc_obj:
@@ -202,16 +202,16 @@
                     - containerPort: 1338
                       protocol: TCP
                   env:
-                  - name: BROKER_CONFIG
-                    value: /etc/ansible-service-broker/config.yaml
+                    - name: BROKER_CONFIG
+                      value: /etc/ansible-service-broker/config.yaml
                   terminationMessagePath: /tmp/termination-log
               volumes:
-              - name: config-volume
-                configMap:
-                  name: broker-config
-                  items:
-                  - key: broker-config
-                    path: config.yaml
+                - name: config-volume
+                  configMap:
+                    name: broker-config
+                    items:
+                      - key: broker-config
+                        path: config.yaml
 
 
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
