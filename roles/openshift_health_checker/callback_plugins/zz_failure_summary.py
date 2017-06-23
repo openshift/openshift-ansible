@@ -1,161 +1,214 @@
-"""
-Ansible callback plugin to give a nicely formatted summary of failures.
+"""Ansible callback plugin to print a nicely formatted summary of failures.
+
+The file / module name is prefixed with `zz_` to make this plugin be loaded last
+by Ansible, thus making its output the last thing that users see.
 """
 
-# Reason: In several locations below we disable pylint protected-access
-#         for Ansible objects that do not give us any public way
-#         to access the full details we need to report check failures.
-# Status: disabled permanently or until Ansible object has a public API.
-# This does leave the code more likely to be broken by future Ansible changes.
-
-from pprint import pformat
+from collections import defaultdict
 
 from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
 from ansible.utils.color import stringc
 
 
+FAILED_NO_MSG = u'Failed without returning a message.'
+
+
 class CallbackModule(CallbackBase):
-    """
-    This callback plugin stores task results and summarizes failures.
-    The file name is prefixed with `zz_` to make this plugin be loaded last by
-    Ansible, thus making its output the last thing that users see.
-    """
+    """This callback plugin stores task results and summarizes failures."""
 
     CALLBACK_VERSION = 2.0
     CALLBACK_TYPE = 'aggregate'
     CALLBACK_NAME = 'failure_summary'
     CALLBACK_NEEDS_WHITELIST = False
-    _playbook_file = None
 
     def __init__(self):
         super(CallbackModule, self).__init__()
         self.__failures = []
+        self.__playbook_file = ''
 
     def v2_playbook_on_start(self, playbook):
         super(CallbackModule, self).v2_playbook_on_start(playbook)
-        # re: playbook attrs see top comment  # pylint: disable=protected-access
-        self._playbook_file = playbook._file_name
+        # pylint: disable=protected-access; Ansible gives us no public API to
+        # get the file name of the current playbook from a callback plugin.
+        self.__playbook_file = playbook._file_name
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         super(CallbackModule, self).v2_runner_on_failed(result, ignore_errors)
         if not ignore_errors:
-            self.__failures.append(dict(result=result, ignore_errors=ignore_errors))
+            self.__failures.append(result)
 
     def v2_playbook_on_stats(self, stats):
         super(CallbackModule, self).v2_playbook_on_stats(stats)
         if self.__failures:
-            self._print_failure_details(self.__failures)
-
-    def _print_failure_details(self, failures):
-        """Print a summary of failed tasks or checks."""
-        self._display.display(u'\nFailure summary:\n')
-
-        width = len(str(len(failures)))
-        initial_indent_format = u'  {{:>{width}}}. '.format(width=width)
-        initial_indent_len = len(initial_indent_format.format(0))
-        subsequent_indent = u' ' * initial_indent_len
-        subsequent_extra_indent = u' ' * (initial_indent_len + 10)
-
-        for i, failure in enumerate(failures, 1):
-            entries = _format_failure(failure)
-            self._display.display(u'\n{}{}'.format(initial_indent_format.format(i), entries[0]))
-            for entry in entries[1:]:
-                entry = entry.replace(u'\n', u'\n' + subsequent_extra_indent)
-                indented = u'{}{}'.format(subsequent_indent, entry)
-                self._display.display(indented)
-
-        failed_checks = set()
-        playbook_context = None
-        # re: result attrs see top comment  # pylint: disable=protected-access
-        for failure in failures:
-            # Get context from check task result since callback plugins cannot access task vars.
-            # NOTE: thus context is not known unless checks run. Failures prior to checks running
-            # don't have playbook_context in the results. But we only use it now when checks fail.
-            playbook_context = playbook_context or failure['result']._result.get('playbook_context')
-            failed_checks.update(
-                name
-                for name, result in failure['result']._result.get('checks', {}).items()
-                if result.get('failed')
-            )
-        if failed_checks:
-            self._print_check_failure_summary(failed_checks, playbook_context)
-
-    def _print_check_failure_summary(self, failed_checks, context):
-        checks = ','.join(sorted(failed_checks))
-        # The purpose of specifying context is to vary the output depending on what the user was
-        # expecting to happen (based on which playbook they ran). The only use currently is to
-        # vary the message depending on whether the user was deliberately running checks or was
-        # trying to install/upgrade and checks are just included. Other use cases may arise.
-        summary = (  # default to explaining what checks are in the first place
-            '\n'
-            'The execution of "{playbook}"\n'
-            'includes checks designed to fail early if the requirements\n'
-            'of the playbook are not met. One or more of these checks\n'
-            'failed. To disregard these results, you may choose to\n'
-            'disable failing checks by setting an Ansible variable:\n\n'
-            '   openshift_disable_check={checks}\n\n'
-            'Failing check names are shown in the failure details above.\n'
-            'Some checks may be configurable by variables if your requirements\n'
-            'are different from the defaults; consult check documentation.\n'
-            'Variables can be set in the inventory or passed on the\n'
-            'command line using the -e flag to ansible-playbook.\n\n'
-        ).format(playbook=self._playbook_file, checks=checks)
-        if context in ['pre-install', 'health', 'adhoc']:
-            summary = (  # user was expecting to run checks, less explanation needed
-                '\n'
-                'You may choose to configure or disable failing checks by\n'
-                'setting Ansible variables. To disable those above:\n\n'
-                '    openshift_disable_check={checks}\n\n'
-                'Consult check documentation for configurable variables.\n'
-                'Variables can be set in the inventory or passed on the\n'
-                'command line using the -e flag to ansible-playbook.\n\n'
-            ).format(checks=checks)
-        self._display.display(summary)
+            self._display.display(failure_summary(self.__failures, self.__playbook_file))
 
 
-# re: result attrs see top comment  # pylint: disable=protected-access
-def _format_failure(failure):
+def failure_summary(failures, playbook):
+    """Return a summary of failed tasks, including details on health checks."""
+    if not failures:
+        return u''
+
+    # NOTE: because we don't have access to task_vars from callback plugins, we
+    # store the playbook context in the task result when the
+    # openshift_health_check action plugin is used, and we use this context to
+    # customize the error message.
+    # pylint: disable=protected-access; Ansible gives us no sufficient public
+    # API on TaskResult objects.
+    context = next((
+        context for context in
+        (failure._result.get('playbook_context') for failure in failures)
+        if context
+    ), None)
+
+    failures = [failure_to_dict(failure) for failure in failures]
+    failures = deduplicate_failures(failures)
+
+    summary = [u'', u'', u'Failure summary:', u'']
+
+    width = len(str(len(failures)))
+    initial_indent_format = u'  {{:>{width}}}. '.format(width=width)
+    initial_indent_len = len(initial_indent_format.format(0))
+    subsequent_indent = u' ' * initial_indent_len
+    subsequent_extra_indent = u' ' * (initial_indent_len + 10)
+
+    for i, failure in enumerate(failures, 1):
+        entries = format_failure(failure)
+        summary.append(u'\n{}{}'.format(initial_indent_format.format(i), entries[0]))
+        for entry in entries[1:]:
+            entry = entry.replace(u'\n', u'\n' + subsequent_extra_indent)
+            indented = u'{}{}'.format(subsequent_indent, entry)
+            summary.append(indented)
+
+    failed_checks = set()
+    for failure in failures:
+        failed_checks.update(name for name, message in failure['checks'])
+    if failed_checks:
+        summary.append(check_failure_footer(failed_checks, context, playbook))
+
+    return u'\n'.join(summary)
+
+
+def failure_to_dict(failed_task_result):
+    """Extract information out of a failed TaskResult into a dict.
+
+    The intent is to transform a TaskResult object into something easier to
+    manipulate. TaskResult is ansible.executor.task_result.TaskResult.
+    """
+    # pylint: disable=protected-access; Ansible gives us no sufficient public
+    # API on TaskResult objects.
+    _result = failed_task_result._result
+    return {
+        'host': failed_task_result._host.get_name(),
+        'play': play_name(failed_task_result._task),
+        'task': failed_task_result.task_name,
+        'msg': _result.get('msg', FAILED_NO_MSG),
+        'checks': tuple(
+            (name, result.get('msg', FAILED_NO_MSG))
+            for name, result in sorted(_result.get('checks', {}).items())
+            if result.get('failed')
+        ),
+    }
+
+
+def play_name(obj):
+    """Given a task or block, return the name of its parent play.
+
+    This is loosely inspired by ansible.playbook.base.Base.dump_me.
+    """
+    # pylint: disable=protected-access; Ansible gives us no sufficient public
+    # API to implement this.
+    if not obj:
+        return ''
+    if hasattr(obj, '_play'):
+        return obj._play.get_name()
+    return play_name(getattr(obj, '_parent'))
+
+
+def deduplicate_failures(failures):
+    """Group together similar failures from different hosts.
+
+    Returns a new list of failures such that identical failures from different
+    hosts are grouped together in a single entry. The relative order of failures
+    is preserved.
+    """
+    groups = defaultdict(list)
+    for failure in failures:
+        group_key = tuple(sorted((key, value) for key, value in failure.items() if key != 'host'))
+        groups[group_key].append(failure)
+    result = []
+    for failure in failures:
+        group_key = tuple(sorted((key, value) for key, value in failure.items() if key != 'host'))
+        if group_key not in groups:
+            continue
+        failure['host'] = tuple(sorted(g_failure['host'] for g_failure in groups.pop(group_key)))
+        result.append(failure)
+    return result
+
+
+def format_failure(failure):
     """Return a list of pretty-formatted text entries describing a failure, including
     relevant information about it. Expect that the list of text entries will be joined
     by a newline separator when output to the user."""
-    result = failure['result']
-    host = result._host.get_name()
-    play = _get_play(result._task)
-    if play:
-        play = play.get_name()
-    task = result._task.get_name()
-    msg = result._result.get('msg', u'???')
+    host = u', '.join(failure['host'])
+    play = failure['play']
+    task = failure['task']
+    msg = failure['msg']
+    checks = failure['checks']
     fields = (
-        (u'Host', host),
+        (u'Hosts', host),
         (u'Play', play),
         (u'Task', task),
         (u'Message', stringc(msg, C.COLOR_ERROR)),
     )
-    if 'checks' in result._result:
-        fields += ((u'Details', _format_failed_checks(result._result['checks'])),)
+    if checks:
+        fields += ((u'Details', format_failed_checks(checks)),)
     row_format = '{:10}{}'
     return [row_format.format(header + u':', body) for header, body in fields]
 
 
-def _format_failed_checks(checks):
+def format_failed_checks(checks):
     """Return pretty-formatted text describing checks that failed."""
-    failed_check_msgs = []
-    for check, body in checks.items():
-        if body.get('failed', False):   # only show the failed checks
-            msg = body.get('msg', u"Failed without returning a message")
-            failed_check_msgs.append('check "%s":\n%s' % (check, msg))
-    if failed_check_msgs:
-        return stringc("\n\n".join(failed_check_msgs), C.COLOR_ERROR)
-    else:    # something failed but no checks will admit to it, so dump everything
-        return stringc(pformat(checks), C.COLOR_ERROR)
+    messages = []
+    for name, message in checks:
+        messages.append(u'check "{}":\n{}'.format(name, message))
+    return stringc(u'\n\n'.join(messages), C.COLOR_ERROR)
 
 
-# This is inspired by ansible.playbook.base.Base.dump_me.
-# re: play/task/block attrs see top comment  # pylint: disable=protected-access
-def _get_play(obj):
-    """Given a task or block, recursively try to find its parent play."""
-    if hasattr(obj, '_play'):
-        return obj._play
-    if getattr(obj, '_parent'):
-        return _get_play(obj._parent)
+def check_failure_footer(failed_checks, context, playbook):
+    """Return a textual explanation about checks depending on context.
+
+    The purpose of specifying context is to vary the output depending on what
+    the user was expecting to happen (based on which playbook they ran). The
+    only use currently is to vary the message depending on whether the user was
+    deliberately running checks or was trying to install/upgrade and checks are
+    just included. Other use cases may arise.
+    """
+    checks = ','.join(sorted(failed_checks))
+    summary = [u'']
+    if context in ['pre-install', 'health', 'adhoc']:
+        # User was expecting to run checks, less explanation needed.
+        summary.extend([
+            u'You may configure or disable checks by setting Ansible '
+            u'variables. To disable those above, set:',
+            u'    openshift_disable_check={checks}'.format(checks=checks),
+            u'Consult check documentation for configurable variables.',
+        ])
+    else:
+        # User may not be familiar with the checks, explain what checks are in
+        # the first place.
+        summary.extend([
+            u'The execution of "{playbook}" includes checks designed to fail '
+            u'early if the requirements of the playbook are not met. One or '
+            u'more of these checks failed. To disregard these results,'
+            u'explicitly disable checks by setting an Ansible variable:'.format(playbook=playbook),
+            u'   openshift_disable_check={checks}'.format(checks=checks),
+            u'Failing check names are shown in the failure details above. '
+            u'Some checks may be configurable by variables if your requirements '
+            u'are different from the defaults; consult check documentation.',
+        ])
+    summary.append(
+        u'Variables can be set in the inventory or passed on the command line '
+        u'using the -e flag to ansible-playbook.'
+    )
+    return u'\n'.join(summary)
