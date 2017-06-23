@@ -23,7 +23,10 @@ VALID_CERTIFICATE_PARAMS = [
     {
         'short_name': 'combined',
         'cn': 'combined.example.com',
-        'serial': 6,
+        # Verify that HUGE serials parse correctly.
+        # Frobs PARSING_HEX_SERIAL in _parse_cert
+        # See https://bugzilla.redhat.com/show_bug.cgi?id=1464240
+        'serial': 14449739080294792594019643629255165375,
         'uses': b'clientAuth, serverAuth',
         'dns': ['etcd'],
         'ip': ['10.0.0.2', '192.168.0.2']
