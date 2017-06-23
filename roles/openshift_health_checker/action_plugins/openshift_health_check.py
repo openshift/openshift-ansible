@@ -13,6 +13,7 @@ except ImportError:
     display = Display()
 
 from ansible.plugins.action import ActionBase
+from ansible.module_utils.six import string_types
 
 # Augment sys.path so that we can import checks from a directory relative to
 # this callback plugin.
@@ -39,7 +40,8 @@ class ActionModule(ActionBase):
         try:
             known_checks = self.load_known_checks(tmp, task_vars)
             args = self._task.args
-            resolved_checks = resolve_checks(args.get("checks", []), known_checks.values())
+            requested_checks = normalize(args.get('checks', []))
+            resolved_checks = resolve_checks(requested_checks, known_checks.values())
         except OpenShiftCheckException as e:
             result["failed"] = True
             result["msg"] = str(e)
@@ -47,10 +49,7 @@ class ActionModule(ActionBase):
 
         result["checks"] = check_results = {}
 
-        user_disabled_checks = [
-            check.strip()
-            for check in task_vars.get("openshift_disable_check", "").split(",")
-        ]
+        user_disabled_checks = normalize(task_vars.get('openshift_disable_check', []))
 
         for check_name in resolved_checks:
             display.banner("CHECK [{} : {}]".format(check_name, task_vars["ansible_host"]))
@@ -134,3 +133,14 @@ def resolve_checks(names, all_checks):
         resolved.update(tag_to_checks[tag])
 
     return resolved
+
+
+def normalize(checks):
+    """Return a clean list of check names.
+
+    The input may be a comma-separated string or a sequence. Leading and
+    trailing whitespace characters are removed. Empty items are discarded.
+    """
+    if isinstance(checks, string_types):
+        checks = checks.split(',')
+    return [name.strip() for name in checks if name.strip()]
