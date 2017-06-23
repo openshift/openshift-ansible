@@ -11,4 +11,4 @@ osm_default_node_selector: 'region=primary'
 
 # For POCs or demo environments that are using smaller instances than
 # the official recommended values for RAM and DISK, uncomment the line below.
-# openshift_disable_check: disk_availability,memory_availability
+#openshift_disable_check: disk_availability,memory_availability
