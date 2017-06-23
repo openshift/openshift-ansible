@@ -536,6 +536,7 @@ def set_node_schedulability(facts):
                 facts['node']['schedulable'] = True
     return facts
 
+
 # pylint: disable=too-many-branches
 def set_selectors(facts):
     """ Set selectors facts if not already present in facts dict
