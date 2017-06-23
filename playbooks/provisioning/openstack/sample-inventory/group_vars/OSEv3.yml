@@ -8,3 +8,7 @@ openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 openshift_node_labels: "{{ openstack.metadata.node_labels }}"
 
 osm_default_node_selector: 'region=primary'
+
+# For POCs or demo environments that are using smaller instances than
+# the official recommended values for RAM and DISK, uncomment the line below. 
+# openshift_disable_check: disk_availability,memory_availability
