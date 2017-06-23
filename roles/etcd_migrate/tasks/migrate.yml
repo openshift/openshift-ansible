@@ -3,10 +3,13 @@
 - set_fact:
     l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
 
+# embedded etcd is run as part of the master
 - name: Disable etcd members
   service:
     name: "{{ l_etcd_service }}"
     state: stopped
+  when:
+  - not r_etcd_common_embedded_etcd | bool
 
 # Should we skip all TTL keys? https://bugzilla.redhat.com/show_bug.cgi?id=1389773
 - name: Migrate etcd data
@@ -26,30 +29,60 @@
   debug:
     msg: "Etcd migration finished with: {{ l_etcdctl_migrate.stdout }}"
 
-- name: Enable etcd member
-  service:
-    name: "{{ l_etcd_service }}"
-    state: started
+# For non-embedded etcd, just start the service as it was previously disabled due to offline migration.
+# Then, re-attach the leases
+- block:
+  - name: Enable etcd member (for non-embedded etcd)
+    service:
+      name: "{{ l_etcd_service }}"
+      state: started
+  - name: Re-introduce leases (as a replacement for key TTLs) for non-embedded etcd
+    command: >
+      oadm migrate etcd-ttl \
+      --cert {{ etcd_peer_cert_file }} \
+      --key {{ etcd_peer_key_file }} \
+      --cacert {{ etcd_peer_ca_file }} \
+      --etcd-address 'https://{{ etcd_peer }}:{{ etcd_client_port }}' \
+      --ttl-keys-prefix {{ item }} \
+      --lease-duration 1h
+    environment:
+      ETCDCTL_API: 3
+      PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
+    with_items:
+    - "/kubernetes.io/events"
+    - "/kubernetes.io/masterleases"
+    delegate_to: "{{ groups.oo_first_master[0] }}"
+    run_once: true
+  when:
+  - not r_etcd_common_embedded_etcd | bool
 
-# NOTE: /usr/local/bin may be removed from the PATH by ansible hence why
-#       it's added to the environment in this task.
-- name: Re-introduce leases (as a replacement for key TTLs)
-  command: >
-    oadm migrate etcd-ttl \
-    --cert {{ etcd_peer_cert_file }} \
-    --key {{ etcd_peer_key_file }} \
-    --cacert {{ etcd_peer_ca_file }} \
-    --etcd-address 'https://{{ etcd_peer }}:{{ etcd_client_port }}' \
-    --ttl-keys-prefix {{ item }} \
-    --lease-duration 1h
-  environment:
-    ETCDCTL_API: 3
-    PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
-  with_items:
-  - "/kubernetes.io/events"
-  - "/kubernetes.io/masterleases"
-  delegate_to: "{{ groups.oo_first_master[0] }}"
-  run_once: true
+# For embeddded etcd, start the etcd daemon locally (to re-attach leases).
+# Then, stop the etcd daemon (so the embedded etcd can start again later)
+- block:
+  - name: Enable etcd member (for embedded etcd)
+    service:
+      name: etcd
+      state: started
+  - name: Re-introduce leases (as a replacement for key TTLs) for embedded etcd
+    command: >
+      oadm migrate etcd-ttl \
+      --etcd-address 'http://localhost:2379' \
+      --ttl-keys-prefix {{ item }} \
+      --lease-duration 1h
+    environment:
+      ETCDCTL_API: 3
+      PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
+    with_items:
+    - "/kubernetes.io/events"
+    - "/kubernetes.io/masterleases"
+  # as for embeddded etcd, the etcd daemon was started locally (to re-attach leases)
+  # disable it
+  - name: Disable etcd member (for embedded etcd)
+    service:
+      name: etcd
+      state: stopped
+  when:
+  - r_etcd_common_embedded_etcd | bool
 
 - set_fact:
     r_etcd_migrate_success: true
