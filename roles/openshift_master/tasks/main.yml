@@ -29,6 +29,9 @@
     state: present
   when: not openshift.common.is_containerized | bool
 
+- name: Configure tuned profiles
+  include: ../../tuned/tasks/main.yml
+
 - name: Create openshift.common.data_dir
   file:
     path: "{{ openshift.common.data_dir }}"
