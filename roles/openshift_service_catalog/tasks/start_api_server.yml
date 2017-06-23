@@ -1,0 +1,22 @@
+---
+# Label nodes and wait for apiserver and controller to be running (at least one)
+- name: Label {{ openshift.node.nodename }} for APIServer and controller deployment
+  oc_label:
+    name: "{{ openshift.node.nodename }}"
+    kind: node
+    state: add
+    labels: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) | oo_dict_to_list_of_dict }}"
+
+# wait to see that the apiserver is available
+- name: wait for api server to be ready
+  command: >
+    curl -k https://apiserver.kube-service-catalog.svc/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: api_health
+  until: api_health.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false

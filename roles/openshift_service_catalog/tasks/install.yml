@@ -98,7 +98,7 @@
     cpu_requests: none
     memory_request: none
     cors_allowed_origin: localhost
-    node_selector: {"openshift-infra": "apiserver"}
+    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
 
 - name: Set Service Catalog API Server daemonset
   oc_obj:
@@ -146,7 +146,7 @@
     image: ""
     cpu_limit: none
     memory_limit: none
-    node_selector: {"openshift-infra": "apiserver"}
+    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
 
 - name: Set Controller Manager deployment
   oc_obj:
@@ -171,6 +171,8 @@
     files:
       - "{{ mktemp.stdout }}/controller_manager_service.yml"
     delete_after: yes
+
+- include: start_api_server.yml
 
 - name: Delete temp directory
   file:
