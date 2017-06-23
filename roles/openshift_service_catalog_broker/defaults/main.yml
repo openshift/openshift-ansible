@@ -1,6 +1,0 @@
----
-openshift_service_catalog_broker_remove: false
-openshift_service_catalog_broker_replicas: 1
-
-openshift_service_catalog_broker_namespace: openshift-ansible-service-broker
-openshift_service_catalog_broker_nodeselector: {}
