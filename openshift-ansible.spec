@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.122.0
+Version:        3.6.123
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,32 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.123-1
+- releases: enable build/push with multiple tags (lmeyer@redhat.com)
+- Update template examples for 3.6 (rteague@redhat.com)
+- Reverting v prefix introduced by stagecut (smunilla@redhat.com)
+- Fixed readme doc. (kwoodson@redhat.com)
+- Adding version field for stagecut (smunilla@redhat.com)
+- Remove package_update from install playbook (rhcarvalho@gmail.com)
+- Restart NetworkManager only if dnsmasq was used
+  (bliemli@users.noreply.github.com)
+- remove extra close brace in example inventory (gpei@redhat.com)
+- Adding option for serviceAccountConfig.limitSecretReferences
+  (kwoodson@redhat.com)
+- doc: Add system_container examples to inventory (smilner@redhat.com)
+- system_containers: Add openshift_ to other system_container vars
+  (smilner@redhat.com)
+- system_containers: Add openshift_ to use_system_containers var
+  (smilner@redhat.com)
+- detect etcd service name based on etcd runtime when restarting
+  (jchaloup@redhat.com)
+- set proper etcd_data_dir for system container (jchaloup@redhat.com)
+- etcd, system_container: do not mask etcd_container (gscrivan@redhat.com)
+- etcd, system_container: do not enable system etcd (gscrivan@redhat.com)
+- oc_atomic_container: Require 1.17.2 (smilner@redhat.com)
+- Verify matched openshift_upgrade_nodes_label (rteague@redhat.com)
+- bug 1457642. Use same SG index to avoid seeding timeout (jcantril@redhat.com)
+
 * Wed Jun 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.122-1
 - 
 
