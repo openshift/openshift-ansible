@@ -157,3 +157,12 @@
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_glusterfs_hosts | union(g_glusterfs_registry_hosts | default([])) }}"
     changed_when: no
+
+  - name: Evaluate oo_etcd_to_migrate
+    add_host:
+      name: "{{ item }}"
+      groups: oo_etcd_to_migrate
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config | default([]) | length != 0 else groups.oo_first_master }}"
+    changed_when: no
