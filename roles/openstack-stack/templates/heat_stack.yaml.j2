@@ -621,7 +621,7 @@ resources:
     properties:
       count: {{ num_nodes }}
       removal_policies:
-      - resource_list: {{ node_removal_policies }}
+      - resource_list: {{ nodes_to_remove }}
       resource_def:
         type: server.yaml
         properties:

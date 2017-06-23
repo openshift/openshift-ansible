@@ -12,7 +12,8 @@ openstack_num_masters: 1
 openstack_num_infra: 1
 openstack_num_nodes: 2
 
-openstack_node_removal_policies: []
+# # Numerical index of nodes to remove
+# openstack_nodes_to_remove: []
 
 docker_volume_size: "15"
 

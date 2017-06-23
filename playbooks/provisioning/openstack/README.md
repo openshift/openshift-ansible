@@ -67,8 +67,8 @@ The `openstack_num_masters`, `openstack_num_infra` and
 `openstack_num_nodes` values specify the number of Master, Infra and
 App nodes to create.
 
-The `openstack_node_removal_policies` allows you to specify which App nodes to
-remove.
+The `openstack_nodes_to_remove` allows you to specify the numerical indexes
+of App nodes that should be removed; for example, ['0', '2'],
 
 The `openstack_flat_secgrp`, controls Neutron security groups creation for Heat
 stacks. Set it to true, if you experience issues with sec group rules
