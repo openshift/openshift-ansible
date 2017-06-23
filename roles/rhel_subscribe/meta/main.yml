@@ -1,3 +1,2 @@
 ---
-dependencies:
-  - role: openshift_facts
+dependencies: []
