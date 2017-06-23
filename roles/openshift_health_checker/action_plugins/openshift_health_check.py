@@ -28,23 +28,30 @@ class ActionModule(ActionBase):
         result = super(ActionModule, self).run(tmp, task_vars)
         task_vars = task_vars or {}
 
-        # vars are not supportably available in the callback plugin,
-        # so record any it will need in the result.
+        # callback plugins cannot read Ansible vars, but we would like
+        # zz_failure_summary to have access to certain values. We do so by
+        # storing the information we need in the result.
         result['playbook_context'] = task_vars.get('r_openshift_health_checker_playbook_context')
-
-        if "openshift" not in task_vars:
-            result["failed"] = True
-            result["msg"] = "'openshift' is undefined, did 'openshift_facts' run?"
-            return result
 
         try:
             known_checks = self.load_known_checks(tmp, task_vars)
             args = self._task.args
             requested_checks = normalize(args.get('checks', []))
+
+            if not requested_checks:
+                result['failed'] = True
+                result['msg'] = list_known_checks(known_checks)
+                return result
+
             resolved_checks = resolve_checks(requested_checks, known_checks.values())
         except OpenShiftCheckException as e:
             result["failed"] = True
             result["msg"] = str(e)
+            return result
+
+        if "openshift" not in task_vars:
+            result["failed"] = True
+            result["msg"] = "'openshift' is undefined, did 'openshift_facts' run?"
             return result
 
         result["checks"] = check_results = {}
@@ -94,6 +101,33 @@ class ActionModule(ActionBase):
                         other_cls.__module__, other_cls.__name__))
             known_checks[check_name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
         return known_checks
+
+
+def list_known_checks(known_checks):
+    """Return text listing the existing checks and tags."""
+    # TODO: we could include a description of each check by taking it from a
+    # check class attribute (e.g., __doc__) when building the message below.
+    msg = (
+        'This playbook is meant to run health checks, but no checks were '
+        'requested. Set the `openshift_checks` variable to a comma-separated '
+        'list of check names or a YAML list. Available checks:\n  {}'
+    ).format('\n  '.join(sorted(known_checks)))
+
+    tag_checks = defaultdict(list)
+    for cls in known_checks.values():
+        for tag in cls.tags:
+            tag_checks[tag].append(cls.name)
+    tags = [
+        '@{} = {}'.format(tag, ','.join(sorted(checks)))
+        for tag, checks in tag_checks.items()
+    ]
+
+    msg += (
+        '\n\nTags can be used as a shortcut to select multiple '
+        'checks. Available tags and the checks they select:\n  {}'
+    ).format('\n  '.join(sorted(tags)))
+
+    return msg
 
 
 def resolve_checks(names, all_checks):

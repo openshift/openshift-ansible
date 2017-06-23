@@ -80,7 +80,8 @@ def skipped(result):
     None,
     {},
 ])
-def test_action_plugin_missing_openshift_facts(plugin, task_vars):
+def test_action_plugin_missing_openshift_facts(plugin, task_vars, monkeypatch):
+    monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
     result = plugin.run(tmp=None, task_vars=task_vars)
 
     assert failed(result, msg_has=['openshift_facts'])
