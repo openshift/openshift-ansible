@@ -24,7 +24,7 @@
 - name: set ansible-service-broker image facts using set prefix and tag
   set_fact:
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
-    ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}ansible-service-broker:{{ ansible_service_broker_etcd_image_tag }}"
+    ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
 
 - include: validate_facts.yml
 
@@ -144,7 +144,7 @@
                   terminationMessagePath: /tmp/termination-log
                   workingDir: /etcd
                   args:
-                    - ./etcd
+                    - /usr/local/bin/etcd
                     - --data-dir=/data
                     - "--listen-client-urls=http://0.0.0.0:2379"
                     - "--advertise-client-urls=http://0.0.0.0:2379"
@@ -201,9 +201,9 @@
                   ports:
                     - containerPort: 1338
                       protocol: TCP
-                  args:
-                    - -c
-                    - /etc/ansible-service-broker/config.yaml
+                  env:
+                  - name: BROKER_CONFIG
+                    value: /etc/ansible-service-broker/config.yaml
                   terminationMessagePath: /tmp/termination-log
               volumes:
               - name: config-volume
