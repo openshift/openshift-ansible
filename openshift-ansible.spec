@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.123
+Version:        3.6.124
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.124-1
+- Fix parsing certs with very large serial numbers (tbielawa@redhat.com)
+- images, syscontainer: change default value for ANSIBLE_CONFIG
+  (gscrivan@redhat.com)
+- Sync 3.5 cfme templates over to 3.6 (sdodson@redhat.com)
+
 * Fri Jun 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.123-1
 - releases: enable build/push with multiple tags (lmeyer@redhat.com)
 - Update template examples for 3.6 (rteague@redhat.com)
