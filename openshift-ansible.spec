@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.99
+Version:        3.3.100
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 23 2017 Scott Dodson <sdodson@redhat.com> 3.3.100-1
+- Fix parsing certs with very large serial numbers (tbielawa@redhat.com)
+
 * Fri Jun 23 2017 Scott Dodson <sdodson@redhat.com> 3.3.99-1
 - Use oo_version_gte_3_6+ for future versions and treat 1.x origin as legacy.
   Add tests. (abutcher@redhat.com)
