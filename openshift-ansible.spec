@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.84
+Version:        3.5.85
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 23 2017 Scott Dodson <sdodson@redhat.com> 3.5.85-1
+- Sync CFME templates to v1.5 (sdodson@redhat.com)
+- Use oo_version_gte_3_6+ for future versions and treat 1.x origin as legacy.
+  Add tests. (abutcher@redhat.com)
+- Add oo_version_gte_X_X_or_Y_Y version comparison filters.
+  (abutcher@redhat.com)
+- Update all masters with metricsPublicURL #4488 (per.carlson@vegvesen.no)
+- Verify matched openshift_upgrade_nodes_label (rteague@redhat.com)
+- Separate etcd and OpenShift CA redeploy playbooks. (abutcher@redhat.com)
+
 * Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.84-1
 - Localhost TMP Dir Fix (vincent.schwarzer@yahoo.de)
 - Guard check for container install based on openshift dictionary key
