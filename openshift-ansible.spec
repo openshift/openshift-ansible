@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.104
+Version:        3.4.105
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 23 2017 Scott Dodson <sdodson@redhat.com> 3.4.105-1
+- Use oo_version_gte_3_6+ for future versions and treat 1.x origin as legacy.
+  Add tests. (abutcher@redhat.com)
+- Add oo_version_gte_X_X_or_Y_Y version comparison filters.
+  (abutcher@redhat.com)
+- Fix conditional syntax (rteague@redhat.com)
+- Backport (partial) refresh cache #4044 (rteague@redhat.com)
+- Verify matched openshift_upgrade_nodes_label (rteague@redhat.com)
+- Separate etcd and OpenShift CA redeploy playbooks. (abutcher@redhat.com)
+
 * Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.104-1
 - Use local openshift.master.loopback_url when generating initial master
   loopback kubeconfigs. (abutcher@redhat.com)
