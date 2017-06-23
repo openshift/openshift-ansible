@@ -104,6 +104,7 @@ platforms missing the Python OpenSSL library.
         self.extensions = []
 
         PARSING_ALT_NAMES = False
+        PARSING_HEX_SERIAL = False
         for line in self.cert_string.split('\n'):
             l = line.strip()
             if PARSING_ALT_NAMES:
@@ -114,10 +115,26 @@ platforms missing the Python OpenSSL library.
                 PARSING_ALT_NAMES = False
                 continue
 
+            if PARSING_HEX_SERIAL:
+                # Hex serials arrive colon-delimited
+                serial_raw = l.replace(':', '')
+                # Convert to decimal
+                self.serial = int('0x' + serial_raw, base=16)
+                PARSING_HEX_SERIAL = False
+                continue
+
             # parse out the bits that we can
             if l.startswith('Serial Number:'):
-                # Serial Number: 11 (0xb)
-                # => 11
+                # Decimal format:
+                #   Serial Number: 11 (0xb)
+                #   => 11
+                # Hex Format (large serials):
+                #   Serial Number:
+                #       0a:de:eb:24:04:75:ab:56:39:14:e9:5a:22:e2:85:bf
+                #   => 14449739080294792594019643629255165375
+                if l.endswith(':'):
+                    PARSING_HEX_SERIAL = True
+                    continue
                 self.serial = int(l.split()[-2])
 
             elif l.startswith('Not After :'):
