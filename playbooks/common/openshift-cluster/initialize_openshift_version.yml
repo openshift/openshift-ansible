@@ -1,4 +1,17 @@
 ---
+- name: Set openshift_release and docker_version default values if not set
+  hosts: oo_all_hosts
+  gather_facts: no
+  tasks:
+  - set_fact:
+      openshift_release: "v3.4"
+    when:
+    - openshift_release is not defined
+  - set_fact:
+      docker_version: "1.12*"
+    when:
+    - docker_version is not defined
+
 # NOTE: requires openshift_facts be run
 - hosts: l_oo_all_hosts
   gather_facts: no
