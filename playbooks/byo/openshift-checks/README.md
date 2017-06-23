@@ -26,7 +26,8 @@ callback plugin summarizes execution errors at the end of a playbook run.
 3. Certificate expiry playbooks ([certificate_expiry](certificate_expiry)) -
    check that certificates in use are valid and not expiring soon.
 
-4. Adhoc playbook ([adhoc.yml](adhoc.yml)) - use it to run adhoc checks.
+4. Adhoc playbook ([adhoc.yml](adhoc.yml)) - use it to run adhoc checks or to
+   list existing checks.
    See the [next section](#the-adhoc-playbook) for a usage example.
 
 ## Running
@@ -88,6 +89,13 @@ $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml 
 
 It is valid to specify multiple check tags and individual check names together
 in a comma-separated list.
+
+To list all of the available checks and tags, run the adhoc playbook without
+setting the `openshift_checks` variable:
+
+```console
+$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml
+```
 
 ## Running in a container
 
