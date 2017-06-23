@@ -8,6 +8,6 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs: 
-    path: /exports/miq-pv03
+    path: {{ openshift_cfme_nfs_directory }}/miq-pv03
     server: {{ openshift_cfme_nfs_server }}
   persistentVolumeReclaimPolicy: Retain
