@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.58
+Version:        3.2.59
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 23 2017 Scott Dodson <sdodson@redhat.com> 3.2.59-1
+- Use oo_version_gte_3_6+ for future versions and treat 1.x origin as legacy.
+  Add tests. (abutcher@redhat.com)
+- Add oo_version_gte_X_X_or_Y_Y version comparison filters.
+  (abutcher@redhat.com)
+- Separate etcd and OpenShift CA redeploy playbooks. (abutcher@redhat.com)
+- Use local openshift.master.loopback_url when generating initial master
+  loopback kubeconfigs. (abutcher@redhat.com)
+- oo_collect: Allow list elements to be lists of dict (abutcher@redhat.com)
+
 * Tue Jun 13 2017 Scott Dodson <sdodson@redhat.com> 3.2.58-1
 - Skip service restarts within ca redeployment playbook when expired
   certificates are detected. (abutcher@redhat.com)
