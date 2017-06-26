@@ -21,13 +21,11 @@ class Kibana(LoggingCheck):
     name = "kibana"
     tags = ["health", "logging"]
 
-    logging_namespace = None
-
     def run(self):
         """Check various things and gather errors. Returns: result as hash"""
 
         self.logging_namespace = self.get_var("openshift_logging_namespace", default="logging")
-        kibana_pods, error = super(Kibana, self).get_pods_for_component(
+        kibana_pods, error = self.get_pods_for_component(
             self.logging_namespace,
             "kibana",
         )
@@ -40,7 +38,6 @@ class Kibana(LoggingCheck):
 
         if check_error:
             msg = ("The following Kibana deployment issue was found:"
-                   "\n-------\n"
                    "{}".format(check_error))
             return {"failed": True, "changed": False, "msg": msg}
 
@@ -118,7 +115,11 @@ class Kibana(LoggingCheck):
         """
 
         # Get logging url
-        get_route = self._exec_oc("get route logging-kibana -o json", [])
+        get_route = self.exec_oc(
+            self.logging_namespace,
+            "get route logging-kibana -o json",
+            [],
+        )
         if not get_route:
             return None, 'no_route_exists'
 
@@ -217,10 +218,3 @@ class Kibana(LoggingCheck):
             ).format(error=error)
             return error
         return None
-
-    def _exec_oc(self, cmd_str, extra_args):
-        return super(Kibana, self).exec_oc(
-            self.logging_namespace,
-            cmd_str,
-            extra_args,
-        )

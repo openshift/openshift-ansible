@@ -11,14 +11,6 @@ except ImportError:
 from openshift_checks.logging.kibana import Kibana
 
 
-def canned_kibana(exec_oc=None):
-    """Create a Kibana check object with canned exec_oc method"""
-    check = Kibana()  # fails if a module is actually invoked
-    if exec_oc:
-        check._exec_oc = exec_oc
-    return check
-
-
 def assert_error(error, expect_error):
     if expect_error:
         assert error
@@ -68,7 +60,7 @@ not_running_kibana_pod = {
     ),
 ])
 def test_check_kibana(pods, expect_error):
-    check = canned_kibana()
+    check = Kibana()
     error = check.check_kibana(pods)
     assert_error(error, expect_error)
 
@@ -137,7 +129,8 @@ def test_check_kibana(pods, expect_error):
     ),
 ])
 def test_get_kibana_url(route, expect_url, expect_error):
-    check = canned_kibana(exec_oc=lambda cmd, args: json.dumps(route) if route else "")
+    check = Kibana()
+    check.exec_oc = lambda ns, cmd, args: json.dumps(route) if route else ""
 
     url, error = check._get_kibana_url()
     if expect_url:
@@ -210,7 +203,7 @@ def test_verify_url_external_failure(lib_result, expect, monkeypatch):
         raise lib_result
     monkeypatch.setattr(urllib2, 'urlopen', urlopen)
 
-    check = canned_kibana()
+    check = Kibana()
     check._get_kibana_url = lambda: ('url', None)
     check._verify_url_internal = lambda url: None
 
