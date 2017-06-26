@@ -11,7 +11,7 @@ PartOf={{ openshift.docker.service_name }}.service
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
 Environment=GOTRACEBACK=crash
 ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type}}-master-controllers
-ExecStart=/usr/bin/docker run --rm --privileged --net=host --name {{ openshift.common.service_type }}-master-controllers --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers -v {{ openshift.common.data_dir }}:{{ openshift.common.data_dir }} -v /var/run/docker.sock:/var/run/docker.sock -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} {{ openshift.master.master_image }}:${IMAGE_VERSION} start master controllers --config=${CONFIG_FILE} $OPTIONS
+ExecStart=/usr/bin/docker run --rm --privileged --net=host --name {{ openshift.common.service_type }}-master-controllers --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers -v {{ openshift.common.data_dir }}:{{ openshift.common.data_dir }} -v /var/run/docker.sock:/var/run/docker.sock -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} -v /etc/pki:/etc/pki:ro {{ openshift.master.master_image }}:${IMAGE_VERSION} start master controllers --config=${CONFIG_FILE} $OPTIONS
 ExecStartPost=/usr/bin/sleep 10
 ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-master-controllers
 LimitNOFILE=131072
