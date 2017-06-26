@@ -1,4 +1,9 @@
 ---
+# openshift_health_checker depends on openshift_version which now requires group eval.
+- include: ../openshift-cluster/evaluate_groups.yml
+  tags:
+  - always
+
 - name: Run OpenShift health checks
   hosts: OSEv3
   roles:
