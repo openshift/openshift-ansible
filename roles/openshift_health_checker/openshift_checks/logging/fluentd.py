@@ -11,8 +11,6 @@ class Fluentd(LoggingCheck):
     name = "fluentd"
     tags = ["health", "logging"]
 
-    logging_namespace = None
-
     def run(self):
         """Check various things and gather errors. Returns: result as hash"""
 
@@ -27,7 +25,6 @@ class Fluentd(LoggingCheck):
 
         if check_error:
             msg = ("The following Fluentd deployment issue was found:"
-                   "\n-------\n"
                    "{}".format(check_error))
             return {"failed": True, "changed": False, "msg": msg}
 
@@ -147,7 +144,11 @@ class Fluentd(LoggingCheck):
 
     def get_nodes_by_name(self):
         """Retrieve all the node definitions. Returns: dict(name: node), error string"""
-        nodes_json = self._exec_oc("get nodes -o json", [])
+        nodes_json = self.exec_oc(
+            self.logging_namespace,
+            "get nodes -o json",
+            []
+        )
         try:
             nodes = json.loads(nodes_json)
         except ValueError:  # no valid json - should not happen
@@ -158,10 +159,3 @@ class Fluentd(LoggingCheck):
             node['metadata']['name']: node
             for node in nodes['items']
         }, None
-
-    def _exec_oc(self, cmd_str, extra_args):
-        return super(Fluentd, self).exec_oc(
-            self.logging_namespace,
-            cmd_str,
-            extra_args,
-        )
