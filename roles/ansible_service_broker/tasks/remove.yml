@@ -1,0 +1,65 @@
+---
+
+- name: remove openshift-ansible-service-broker project
+  oc_project:
+    name: openshift-ansible-service-broker
+    state: absent
+
+- name: remove ansible-service-broker serviceaccount
+  oc_serviceaccount:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove ansible-service-broker service
+  oc_service:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove etcd service
+  oc_service:
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove route for ansible-service-broker service
+  oc_route:
+    name: asb-1338
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove persistent volume claim for etcd
+  oc_pvc:
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove etcd deployment
+  oc_obj:
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    state: absent
+    kind: Deployment
+
+- name: remove ansible-service-broker deployment
+  oc_obj:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    state: absent
+    kind: Deployment
+
+# TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
+- name: remove config map for ansible-service-broker
+  oc_obj:
+    name: broker-config
+    namespace: openshift-ansible-service-broker
+    state: absent
+    kind: ConfigMap
+
+# TODO: Is this going to work?
+- name: remove broker object from the catalog
+  oc_obj:
+    name: ansible-service-broker
+    state: absent
+    kind: Broker

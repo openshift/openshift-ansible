@@ -1,0 +1,80 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    app: apiserver
+  name: apiserver
+spec:
+  selector:
+    matchLabels:
+      app: apiserver
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: apiserver
+    spec:
+      serviceAccountName: service-catalog-apiserver
+      nodeSelector:
+{% for key, value in node_selector.iteritems() %}
+          {{key}}: "{{value}}"
+{% endfor %}
+      containers:
+      - args:
+        - --storage-type
+        - etcd
+        - --secure-port
+        - "6443"
+        - --etcd-servers
+# TODO: come back and get openshift.common.hostname to work
+        - https://{{ openshift.common.ip }}:{{ openshift.master.etcd_port }}
+        - --etcd-cafile
+        - /etc/origin/master/master.etcd-ca.crt
+        - --etcd-certfile
+        - /etc/origin/master/master.etcd-client.crt
+        - --etcd-keyfile
+        - /etc/origin/master/master.etcd-client.key
+        - -v
+        - "10"
+        - --cors-allowed-origins
+        - {{ cors_allowed_origin }}
+        - --admission-control
+        - "KubernetesNamespaceLifecycle"
+        image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
+        command: ["/usr/bin/apiserver"]
+        imagePullPolicy: Always
+        name: apiserver
+        ports:
+        - containerPort: 6443
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /var/run/kubernetes-service-catalog
+          name: apiserver-ssl
+          readOnly: true
+        - mountPath: /etc/origin/master
+          name: etcd-host-cert
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: apiserver-ssl
+        secret:
+          defaultMode: 420
+          secretName: apiserver-ssl
+          items:
+          - key: tls.crt
+            path: apiserver.crt
+          - key: tls.key
+            path: apiserver.key
+      - hostPath:
+          path: /etc/origin/master
+        name: etcd-host-cert
+      - emptyDir: {}
+        name: data-dir

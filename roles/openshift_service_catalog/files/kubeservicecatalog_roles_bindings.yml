@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: service-catalog
+objects:
+
+- kind: ClusterRole
+  apiVersion: v1
+  metadata:
+    name: servicecatalog-serviceclass-viewer
+  rules:
+  - apiGroups:
+    - servicecatalog.k8s.io
+    resources:
+    - serviceclasses
+    verbs:
+    - list
+    - watch
+    - get
+
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: servicecatalog-serviceclass-viewer-binding
+  roleRef:
+    name: servicecatalog-serviceclass-viewer
+  groupNames:
+  - system:authenticated
+
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: service-catalog-controller
+
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: service-catalog-apiserver
+
+- kind: ClusterRole
+  apiVersion: v1
+  metadata:
+    name: sar-creator
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - subjectaccessreviews.authorization.k8s.io
+    verbs:
+    - create
+
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: service-catalog-sar-creator-binding
+  roleRef:
+    name: sar-creator
+  userNames:
+    - system:serviceaccount:kube-service-catalog:service-catalog-apiserver
+
+- kind: ClusterRole
+  apiVersion: v1
+  metadata:
+    name: namespace-viewer
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - namespaces
+    verbs:
+    - list
+    - watch
+    - get
+
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: service-catalog-namespace-viewer-binding
+  roleRef:
+    name: namespace-viewer
+  userNames:
+    - system:serviceaccount:kube-service-catalog:service-catalog-apiserver
+
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: service-catalog-controller-namespace-viewer-binding
+  roleRef:
+    name: namespace-viewer
+  userNames:
+    - system:serviceaccount:kube-service-catalog:service-catalog-controller
+
+- kind: ClusterRole
+  apiVersion: v1
+  metadata:
+    name: service-catalog-controller
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - secrets
+    - podpresets
+    verbs:
+    - create
+    - update
+    - delete
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - servicecatalog.k8s.io
+    resources:
+    - brokers/status
+    - instances/status
+    - bindings/status
+    verbs:
+    - update
+
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: service-catalog-controller-binding
+  roleRef:
+    name: service-catalog-controller
+  userNames:
+    - system:serviceaccount:kube-service-catalog:service-catalog-controller
+
+- kind: Role
+  apiVersion: v1
+  metadata:
+    name: endpoint-accessor
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - endpoints
+    verbs:
+    - list
+    - watch
+    - get
+    - create
+    - update
+
+- kind: RoleBinding
+  apiVersion: v1
+  metadata:
+    name: endpoint-accessor-binding
+  roleRef:
+    name: endpoint-accessor
+    namespace: kube-service-catalog
+  userNames:
+    - system:serviceaccount:kube-service-catalog:service-catalog-controller
+
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: system:auth-delegator-binding
+  roleRef:
+    name: system:auth-delegator
+  userNames:
+    - system:serviceaccount:kube-service-catalog:service-catalog-apiserver
