@@ -24,6 +24,7 @@
     num_nodes: "{{ openstack_num_nodes }}"
     num_infra: "{{ openstack_num_infra }}"
     num_dns: "{{ openstack_num_dns | default(1) }}"
+    nodes_to_remove: "{{ openstack_nodes_to_remove | default([]) |  to_yaml }}"
     master_volume_size: "{{ docker_volume_size }}"
     app_volume_size: "{{ docker_volume_size }}"
     infra_volume_size: "{{ docker_volume_size }}"
