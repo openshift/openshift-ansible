@@ -194,7 +194,7 @@ def main():
         )
 
     # Verify that the platform supports atomic command
-    rc, version_out, err = module.run_command('atomic -v', check_rc=False)
+    rc, version_out, err = module.run_command('rpm -q --queryformat "%{VERSION}\n" atomic', check_rc=False)
     if rc != 0:
         module.fail_json(msg="Error in running atomic command", err=err)
     # This module requires atomic version 1.17.2 or later
