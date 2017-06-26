@@ -21,7 +21,10 @@ storage:
     regionendpoint: {{ openshift_hosted_registry_storage_s3_regionendpoint }}
 {%   endif %}
     bucket: {{ openshift_hosted_registry_storage_s3_bucket }}
-    encrypt: false
+    encrypt: {{ openshift_hosted_registry_storage_s3_encrypt | default(false) }}
+{% if openshift_hosted_registry_storage_s3_kmskeyid %}
+    keyid: {{ openshift_hosted_registry_storage_s3_kmskeyid }}
+{% endif %}
     secure: true
     v4auth: true
     rootdirectory: {{ openshift_hosted_registry_storage_s3_rootdirectory | default('/registry') }}

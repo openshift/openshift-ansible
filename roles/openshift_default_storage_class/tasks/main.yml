@@ -14,6 +14,5 @@
           annotations:
             storageclass.beta.kubernetes.io/is-default-class: "true"
         provisioner: "{{ openshift_storageclass_provisioner }}"
-        parameters:
-          type: "{{ openshift_storageclass_type }}"
+        parameters: "{{ openshift_storageclass_parameters }}"
   run_once: true

@@ -464,6 +464,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # S3 bucket must already exist.
 #openshift_hosted_registry_storage_kind=object
 #openshift_hosted_registry_storage_provider=s3
+#openshift_hosted_registry_storage_s3_encrypt=false
+#openshift_hosted_registry_storage_s3_kmskeyid=aws_kms_key_id
 #openshift_hosted_registry_storage_s3_accesskey=aws_access_key_id
 #openshift_hosted_registry_storage_s3_secretkey=aws_secret_access_key
 #openshift_hosted_registry_storage_s3_bucket=bucket_name
@@ -548,6 +550,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure the prefix and version for the component images
 #openshift_hosted_metrics_deployer_prefix=registry.example.com:8888/openshift3/
 #openshift_hosted_metrics_deployer_version=3.6.0
+#
+# StorageClass
+# openshift_storageclass_name=gp2
+# openshift_storageclass_parameters={'type': 'gp2', 'encrypted': false}
+#
 
 # Logging deployment
 #
