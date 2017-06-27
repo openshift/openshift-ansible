@@ -1,0 +1,8 @@
+---
+- include: evaluate_groups.yml
+
+- name: Service Catalog
+  hosts: oo_first_master
+  roles:
+  - openshift_service_catalog
+  - ansible_service_broker

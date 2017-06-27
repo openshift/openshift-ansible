@@ -1,0 +1,3 @@
+---
+openshift_service_catalog_remove: false
+openshift_service_catalog_nodeselector: {"openshift-infra": "apiserver"}

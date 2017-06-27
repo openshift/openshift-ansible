@@ -36,6 +36,7 @@
     access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
     pv_selector: "{{ openshift_metrics_cassandra_pv_selector }}"
+    storage_class_name: "{{ openshift_metrics_cassanda_pvc_storage_class_name | default('', true) }}"
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when:
   - openshift_metrics_cassandra_storage_type != 'emptydir'
@@ -50,8 +51,6 @@
     obj_name: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ item }}"
     labels:
       metrics-infra: hawkular-cassandra
-    annotations:
-      volume.beta.kubernetes.io/storage-class: dynamic
     access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
     size: "{{ openshift_metrics_cassandra_pvc_size }}"
     pv_selector: "{{ openshift_metrics_cassandra_pv_selector }}"

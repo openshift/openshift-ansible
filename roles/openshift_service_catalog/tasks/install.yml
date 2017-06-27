@@ -1,0 +1,181 @@
+---
+# do any asserts here
+
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-service-catalog-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+
+- include: wire_aggregator.yml
+
+- name: Set default image variables based on deployment_type
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+
+- name: Set service_catalog image facts
+  set_fact:
+    openshift_service_catalog_image_prefix: "{{ openshift_service_catalog_image_prefix | default(__openshift_service_catalog_image_prefix) }}"
+    openshift_service_catalog_image_version: "{{ openshift_service_catalog_image_version | default(__openshift_service_catalog_image_version) }}"
+
+- name: Set Service Catalog namespace
+  oc_project:
+    state: present
+    name: "kube-service-catalog"
+#    node_selector: "{{ openshift_service_catalog_nodeselector | default(null) }}"
+
+- include: generate_certs.yml
+
+- copy:
+    src: kubeservicecatalog_roles_bindings.yml
+    dest: "{{ mktemp.stdout }}/kubeservicecatalog_roles_bindings.yml"
+
+- oc_obj:
+    name: service-catalog
+    kind: template
+    namespace: "kube-service-catalog"
+    files:
+      - "{{ mktemp.stdout }}/kubeservicecatalog_roles_bindings.yml"
+    delete_after: yes
+
+- oc_process:
+    create: True
+    template_name: service-catalog
+    namespace: "kube-service-catalog"
+
+- copy:
+    src: kubesystem_roles_bindings.yml
+    dest: "{{ mktemp.stdout }}/kubesystem_roles_bindings.yml"
+
+- oc_obj:
+    name: kube-system-service-catalog
+    kind: template
+    namespace: kube-system
+    files:
+      - "{{ mktemp.stdout }}/kubesystem_roles_bindings.yml"
+    delete_after: yes
+
+- oc_process:
+    create: True
+    template_name: kube-system-service-catalog
+    namespace: kube-system
+
+- shell: >
+    oc get policybindings/kube-system:default -n kube-system || echo "not found"
+  register: get_kube_system
+  changed_when: no
+
+- command: >
+    oc create policybinding kube-system -n kube-system
+  when: "'not found' in get_kube_system.stdout"
+
+- oc_adm_policy_user:
+    namespace: kube-service-catalog
+    resource_kind: scc
+    resource_name: hostmount-anyuid
+    state: present
+    user: "system:serviceaccount:kube-service-catalog:service-catalog-apiserver"
+
+- name: Set SA cluster-role
+  oc_adm_policy_user:
+    state: present
+    namespace: "kube-service-catalog"
+    resource_kind: cluster-role
+    resource_name: admin
+    user: "system:serviceaccount:kube-service-catalog:default"
+
+## api server
+- template:
+    src: api_server.j2
+    dest: "{{ mktemp.stdout }}/service_catalog_api_server.yml"
+  vars:
+    image: ""
+    namespace: ""
+    cpu_limit: none
+    memory_limit: none
+    cpu_requests: none
+    memory_request: none
+    cors_allowed_origin: localhost
+    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
+
+- name: Set Service Catalog API Server daemonset
+  oc_obj:
+    state: present
+    namespace: "kube-service-catalog"
+    kind: daemonset
+    name: apiserver
+    files:
+      - "{{ mktemp.stdout }}/service_catalog_api_server.yml"
+    delete_after: yes
+
+- template:
+    src: api_server_service.j2
+    dest: "{{ mktemp.stdout }}/service_catalog_api_service.yml"
+
+- name: Set Service Catalog API Server service
+  oc_obj:
+    state: present
+    namespace: "kube-service-catalog"
+    kind: service
+    name: apiserver
+    files:
+      - "{{ mktemp.stdout }}/service_catalog_api_service.yml"
+    delete_after: yes
+
+- template:
+    src: api_server_route.j2
+    dest: "{{ mktemp.stdout }}/service_catalog_api_route.yml"
+
+- name: Set Service Catalog API Server route
+  oc_obj:
+    state: present
+    namespace: "kube-service-catalog"
+    kind: route
+    name: apiserver
+    files:
+      - "{{ mktemp.stdout }}/service_catalog_api_route.yml"
+    delete_after: yes
+
+## controller manager
+- template:
+    src: controller_manager.j2
+    dest: "{{ mktemp.stdout }}/controller_manager.yml"
+  vars:
+    image: ""
+    cpu_limit: none
+    memory_limit: none
+    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
+
+- name: Set Controller Manager deployment
+  oc_obj:
+    state: present
+    namespace: "kube-service-catalog"
+    kind: daemonset
+    name: controller-manager
+    files:
+      - "{{ mktemp.stdout }}/controller_manager.yml"
+    delete_after: yes
+
+- template:
+    src: controller_manager_service.j2
+    dest: "{{ mktemp.stdout }}/controller_manager_service.yml"
+
+- name: Set Controller Manager service
+  oc_obj:
+    state: present
+    namespace: "kube-service-catalog"
+    kind: service
+    name: controller-manager
+    files:
+      - "{{ mktemp.stdout }}/controller_manager_service.yml"
+    delete_after: yes
+
+- include: start_api_server.yml
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

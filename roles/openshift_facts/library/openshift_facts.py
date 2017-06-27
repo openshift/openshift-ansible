@@ -537,6 +537,7 @@ def set_node_schedulability(facts):
     return facts
 
 
+# pylint: disable=too-many-branches
 def set_selectors(facts):
     """ Set selectors facts if not already present in facts dict
         Args:
@@ -570,6 +571,10 @@ def set_selectors(facts):
         facts['hosted']['logging'] = {}
     if 'selector' not in facts['hosted']['logging'] or facts['hosted']['logging']['selector'] in [None, 'None']:
         facts['hosted']['logging']['selector'] = None
+    if 'etcd' not in facts['hosted']:
+        facts['hosted']['etcd'] = {}
+    if 'selector' not in facts['hosted']['etcd'] or facts['hosted']['etcd']['selector'] in [None, 'None']:
+        facts['hosted']['etcd']['selector'] = None
 
     return facts
 
@@ -2144,6 +2149,25 @@ class OpenShiftFacts(object):
                         volume=dict(
                             name='logging-es',
                             size='10Gi'
+                        ),
+                        nfs=dict(
+                            directory='/exports',
+                            options='*(rw,root_squash)'
+                        ),
+                        host=None,
+                        access=dict(
+                            modes=['ReadWriteOnce']
+                        ),
+                        create_pv=True,
+                        create_pvc=False
+                    )
+                ),
+                etcd=dict(
+                    storage=dict(
+                        kind=None,
+                        volume=dict(
+                            name='etcd',
+                            size='1Gi'
                         ),
                         nfs=dict(
                             directory='/exports',

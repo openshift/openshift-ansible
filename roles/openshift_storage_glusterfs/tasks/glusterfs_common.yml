@@ -26,7 +26,7 @@
   - kind: "sa"
     name: "heketi-{{ glusterfs_name }}-service-account"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-user-secret"
+    name: "heketi-{{ glusterfs_name }}-admin-secret"
   failed_when: False
   when: glusterfs_heketi_wipe
 
@@ -66,6 +66,7 @@
 
 - name: Add heketi service account to privileged SCC
   oc_adm_policy_user:
+    namespace: "{{ glusterfs_namespace }}"
     user: "system:serviceaccount:{{ glusterfs_namespace }}:heketi-{{ glusterfs_name }}-service-account"
     resource_kind: scc
     resource_name: privileged
@@ -74,6 +75,7 @@
 
 - name: Allow heketi service account to view/edit pods
   oc_adm_policy_user:
+    namespace: "{{ glusterfs_namespace }}"
     user: "system:serviceaccount:{{ glusterfs_namespace }}:heketi-{{ glusterfs_name }}-service-account"
     resource_kind: role
     resource_name: edit
@@ -148,7 +150,7 @@
 
 - name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}oc rsh {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {% endif %}heketi-cli -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin --secret '{{ glusterfs_heketi_admin_key }}'"
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {% endif %}heketi-cli -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin --secret '{{ glusterfs_heketi_admin_key }}'"
 
 - name: Verify heketi service
   command: "{{ glusterfs_heketi_client }} cluster list"
@@ -170,7 +172,7 @@
   oc_secret:
     namespace: "{{ glusterfs_namespace }}"
     state: present
-    name: "heketi-{{ glusterfs_name }}-secret"
+    name: "heketi-{{ glusterfs_name }}-admin-secret"
     type: "kubernetes.io/glusterfs"
     force: True
     contents:
