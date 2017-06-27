@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.3.101
+Version:        3.3.102
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -249,6 +249,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.3.102-1
+- Generate loopback kubeconfig separately to preserve OpenShift CA certificate.
+  (abutcher@redhat.com)
+- Remove debug task (tbielawa@redhat.com)
+- New role (tbielawa@redhat.com)
+
 * Fri Jun 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.3.101-1
 - 
 
