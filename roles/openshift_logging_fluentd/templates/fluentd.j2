@@ -98,9 +98,15 @@ spec:
         - name: "BUFFER_SIZE_LIMIT"
           value: "{{ openshift_logging_fluentd_buffer_size_limit }}"
         - name: "FLUENTD_CPU_LIMIT"
-          value: "{{ openshift_logging_fluentd_cpu_limit }}"
+          valueFrom:
+            resourceFieldRef:
+              containerName: "{{ daemonset_container_name }}"
+              resource: limits.cpu
         - name: "FLUENTD_MEMORY_LIMIT"
-          value: "{{ openshift_logging_fluentd_memory_limit }}"
+          valueFrom:
+            resourceFieldRef:
+              containerName: "{{ daemonset_container_name }}"
+              resource: limits.memory
       volumes:
       - name: runlogjournal
         hostPath:

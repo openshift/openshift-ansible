@@ -108,9 +108,15 @@ spec:
         - name: "BUFFER_SIZE_LIMIT"
           value: "{{ openshift_logging_mux_buffer_size_limit }}"
         - name: "MUX_CPU_LIMIT"
-          value: "{{ openshift_logging_mux_cpu_limit }}"
+          valueFrom:
+            resourceFieldRef:
+              containerName: "mux"
+              resource: limits.cpu
         - name: "MUX_MEMORY_LIMIT"
-          value: "{{ openshift_logging_mux_memory_limit }}"
+          valueFrom:
+            resourceFieldRef:
+              containerName: "mux"
+              resource: limits.memory
       volumes:
       - name: config
         configMap:
