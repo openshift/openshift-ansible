@@ -115,25 +115,46 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
-- name: Generate the loopback master client config
-  command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
-      {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
-      --certificate-authority {{ named_ca_certificate }}
-      {% endfor %}
-      --certificate-authority={{ openshift_ca_cert }}
-      --client-dir={{ openshift_ca_config_dir }}
-      --groups=system:masters,system:openshift-master
-      --master={{ hostvars[openshift_ca_host].openshift.master.loopback_api_url }}
-      --public-master={{ hostvars[openshift_ca_host].openshift.master.loopback_api_url }}
-      --signer-cert={{ openshift_ca_cert }}
-      --signer-key={{ openshift_ca_key }}
-      --signer-serial={{ openshift_ca_serial }}
-      --user=system:openshift-master
-      --basename=openshift-master
-      {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
-      --expire-days={{ openshift_master_cert_expire_days }}
-      {% endif %}
+# create-api-client-config generates a ca.crt file which will
+# overwrite the OpenShift CA certificate.  Generate the loopback
+# kubeconfig in a temporary directory and then copy files into the
+# master config dir to avoid overwriting ca.crt.
+- block:
+  - name: Create temp directory for loopback master client config
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: openshift_ca_loopback_tmpdir
+  - name: Generate the loopback master client config
+    command: >
+      {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
+        --certificate-authority={{ openshift_ca_cert }}
+        {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
+        --certificate-authority {{ named_ca_certificate }}
+        {% endfor %}
+        --client-dir={{ openshift_ca_loopback_tmpdir.stdout }}
+        --groups=system:masters,system:openshift-master
+        --master={{ hostvars[openshift_ca_host].openshift.master.loopback_api_url }}
+        --public-master={{ hostvars[openshift_ca_host].openshift.master.loopback_api_url }}
+        --signer-cert={{ openshift_ca_cert }}
+        --signer-key={{ openshift_ca_key }}
+        --signer-serial={{ openshift_ca_serial }}
+        --user=system:openshift-master
+        --basename=openshift-master
+        {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
+        --expire-days={{ openshift_master_cert_expire_days }}
+        {% endif %}
+  - name: Copy generated loopback master client config to master config dir
+    copy:
+      src: "{{ openshift_ca_loopback_tmpdir.stdout }}/{{ item }}"
+      dest: "{{ openshift_ca_config_dir }}"
+      remote_src: true
+    with_items:
+    - openshift-master.crt
+    - openshift-master.key
+    - openshift-master.kubeconfig
+  - name: Delete temp directory
+    file:
+      name: "{{ openshift_ca_loopback_tmpdir.stdout }}"
+      state: absent
   when: loopback_context_string not in loopback_config.stdout
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
