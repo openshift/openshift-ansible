@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.123.1001
+Version:        3.6.123.1002
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1002-1
+- Fix typo in fluentd_secureforward_contents variable
+  (Andreas.Dembach@dg-i.net)
+- Reverting quotation change in ansible_service_broker install for etcd
+  (ewolinet@redhat.com)
+
 * Mon Jun 26 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1001-1
 - oc_atomic_container: use rpm to check the version. (gscrivan@redhat.com)
 - Fix .spec for stagecut (jupierce@redhat.com)
