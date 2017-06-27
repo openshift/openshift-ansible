@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.107
+Version:        3.4.108
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jun 26 2017 Scott Dodson <sdodson@redhat.com> 3.4.108-1
+- Ensure that host pki tree is mounted in containerized components
+  (sdodson@redhat.com)
+- Add mtu setting to /etc/sysconfig/docker-network (sdodson@redhat.com)
+
 * Fri Jun 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.107-1
 - 
 
