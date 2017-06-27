@@ -8,6 +8,7 @@ etc.). The result is an environment ready for openshift-ansible.
 ## Dependencies
 
 * [Ansible 2.3](https://pypi.python.org/pypi/ansible)
+* [jinja](http://jinja.pocoo.org/docs/2.9/)
 * [shade](https://pypi.python.org/pypi/shade)
 * python-dns
 
