@@ -100,7 +100,7 @@
 - copy:
     src: secure-forward.conf
     dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_securefoward_contents is undefined
+  when: fluentd_secureforward_contents is undefined
 
   changed_when: no
 
