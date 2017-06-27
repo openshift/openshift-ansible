@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.88
+Version:        3.5.89
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.89-1
+- Generate loopback kubeconfig separately to preserve OpenShift CA certificate.
+  (abutcher@redhat.com)
+
 * Mon Jun 26 2017 Scott Dodson <sdodson@redhat.com> 3.5.88-1
 - Ensure that host pki tree is mounted in containerized components
   (sdodson@redhat.com)
