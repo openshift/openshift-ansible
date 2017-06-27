@@ -146,8 +146,8 @@
                   args:
                     - /usr/local/bin/etcd
                     - --data-dir=/data
-                    - --listen-client-urls="http://0.0.0.0:2379"
-                    - --advertise-client-urls="http://0.0.0.0:2379"
+                    - "--listen-client-urls=http://0.0.0.0:2379"
+                    - "--advertise-client-urls=http://0.0.0.0:2379"
                   ports:
                     - containerPort: 2379
                       protocol: TCP
