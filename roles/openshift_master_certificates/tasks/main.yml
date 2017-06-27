@@ -71,10 +71,10 @@
 - name: Generate the loopback master client config
   command: >
     {{ hostvars[openshift_ca_host].openshift.common.admin_binary }} create-api-client-config
+      --certificate-authority={{ openshift_ca_cert }}
       {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}
       {% endfor %}
-      --certificate-authority={{ openshift_ca_cert }}
       --client-dir={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}
       --groups=system:masters,system:openshift-master
       --master={{ hostvars[item].openshift.master.loopback_api_url }}
