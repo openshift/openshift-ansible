@@ -28,7 +28,7 @@
 - name: Generate role binding for the hawkular-openshift-agent service account
   template:
     src: rolebinding.j2
-    dest: "{{ mktemp.stdout }}/templates/metrics-hawkular-agent-rolebinding.yaml"
+    dest: "{{ mktemp.stdout }}/templates/metrics-hawkular-openshift-agent-rolebinding.yaml"
   vars:
     cluster: True
     obj_name: hawkular-openshift-agent-rb
