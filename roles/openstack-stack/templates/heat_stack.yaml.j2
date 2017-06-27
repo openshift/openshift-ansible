@@ -674,6 +674,12 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
+# TODO(bogdando) filter only required node rules into infra-secgrp
+{% if openstack_flat_secgrp|bool %}
+            - { get_resource: flat-secgrp }
+{% else %}
+            - { get_resource: node-secgrp }
+{% endif %}
             - { get_resource: infra-secgrp }
             - { get_resource: common-secgrp }
           floating_network: {{ external_network }}
