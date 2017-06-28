@@ -8,7 +8,7 @@
       path: /tmp/openshift_storageclass
       data:
         kind: StorageClass
-        apiVersion: storage.k8s.io/v1beta1
+        apiVersion: storage.k8s.io/v1
         metadata:
           name: "{{ openshift_storageclass_name }}"
           annotations:

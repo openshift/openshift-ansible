@@ -31,7 +31,8 @@ Example Playbook
   openshift_storageclass_provisioner: kubernetes.io/aws-ebs
   openshift_storageclass_parameters:
     type: gp2
-    encripted: true
+    encrypted: "true" # needs to be a string "true"
+    kmsKeyId: aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 
 
 
