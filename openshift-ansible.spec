@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.90
+Version:        3.5.91
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jun 28 2017 Scott Dodson <sdodson@redhat.com> 3.5.91-1
+- Update example inventory files to mention certificate validity parameters.
+  (vsemushi@redhat.com)
+- openshift_hosted: add openshift_hosted_registry_cert_expire_days parameter.
+  (vsemushi@redhat.com)
+- oc_adm_ca_server_cert.py: re-generate. (vsemushi@redhat.com)
+- oc_adm_ca_server_cert: add expire_days parameter. (vsemushi@redhat.com)
+- openshift_ca: add openshift_ca_cert_expire_days and
+  openshift_master_cert_expire_days parameters. (vsemushi@redhat.com)
+- redeploy-certificates/registry.yml: add
+  openshift_hosted_registry_cert_expire_days parameter. (vsemushi@redhat.com)
+- openshift_master_certificates: add openshift_master_cert_expire_days
+  parameter. (vsemushi@redhat.com)
+- openshift_node_certificates: add openshift_node_cert_expire_days parameter.
+  (vsemushi@redhat.com)
+- evalute groups when running etcd upgrade from byo/openshift-
+  cluster/upgrades/upgrade_etcd.yml (jchaloup@redhat.com)
+
 * Tue Jun 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.90-1
 - 
 
