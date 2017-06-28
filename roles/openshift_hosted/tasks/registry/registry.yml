@@ -135,7 +135,7 @@
 
 - name: Determine the latest version of the OpenShift registry deployment
   command: |
-    oc get deploymentconfig {{ openshift_hosted_registry_name }} \
+    {{ openshift.common.client_binary }} get deploymentconfig {{ openshift_hosted_registry_name }} \
            --namespace {{ openshift_hosted_registry_namespace }} \
            --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
            -o jsonpath='{ .status.latestVersion }'
@@ -143,7 +143,7 @@
 
 - name: Sanity-check that the OpenShift registry rolled out correctly
   command: |
-    oc get replicationcontroller {{ openshift_hosted_registry_name }}-{{ openshift_hosted_registry_latest_version.stdout }} \
+    {{ openshift.common.client_binary }} get replicationcontroller {{ openshift_hosted_registry_name }}-{{ openshift_hosted_registry_latest_version.stdout }} \
            --namespace {{ openshift_hosted_registry_namespace }} \
            --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
            -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'

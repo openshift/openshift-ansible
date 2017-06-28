@@ -280,6 +280,45 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1002-1
+- Fix typo in fluentd_secureforward_contents variable
+  (Andreas.Dembach@dg-i.net)
+- Reverting quotation change in ansible_service_broker install for etcd
+  (ewolinet@redhat.com)
+
+* Mon Jun 26 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1001-1
+- oc_atomic_container: use rpm to check the version. (gscrivan@redhat.com)
+- Fix .spec for stagecut (jupierce@redhat.com)
+- Picking change from sdodson (ewolinet@redhat.com)
+- openshift_version: skip nfs and lb hosts (smilner@redhat.com)
+- openshift_checks: eval groups before including role (lmeyer@redhat.com)
+- Adding volume fact for etcd for openshift ansible service broker
+  (ewolinet@redhat.com)
+- Updating to label node and wait for apiservice to be healthy and started
+  (ewolinet@redhat.com)
+- Also configure default registry on HA masters (sdodson@redhat.com)
+- Fix parsing certs with very large serial numbers (tbielawa@redhat.com)
+- fix yamllint issues (fabian@fabianism.us)
+- openshift_logging: use empty default for storage labels (fsimonce@redhat.com)
+- Set clean install and etcd storage on first master to fix scaleup
+  (sdodson@redhat.com)
+- images, syscontainer: change default value for ANSIBLE_CONFIG
+  (gscrivan@redhat.com)
+- Cleanup/updates for env variables and etcd image (fabian@fabianism.us)
+- Sync 3.5 cfme templates over to 3.6 (sdodson@redhat.com)
+- Moving checks down after required initialization happens.
+  (kwoodson@redhat.com)
+- add play and role to install ansible-service-broker (fabian@fabianism.us)
+- Creation of service_catalog and placeholder broker roles
+  (ewolinet@redhat.com)
+- GlusterFS: Use proper namespace for heketi command and service account
+  (jarrpa@redhat.com)
+- Fixing quote issue. (kwoodson@redhat.com)
+- GlusterFS: Fix heketi secret name (jarrpa@redhat.com)
+- Fix for dynamic pvs when using storageclasses. (kwoodson@redhat.com)
+- Ensure that host pki tree is mounted in containerized components
+  (sdodson@redhat.com)
+
 * Fri Jun 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.123-1
 - releases: enable build/push with multiple tags (lmeyer@redhat.com)
 - Update template examples for 3.6 (rteague@redhat.com)
