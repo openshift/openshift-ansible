@@ -1,4 +1,6 @@
 ---
 - include: ../initialize_groups.yml
 
+- include: ../../../common/openshift-cluster/evaluate_groups.yml
+
 - include: ../../../common/openshift-cluster/upgrades/etcd/main.yml
