@@ -105,6 +105,7 @@ class CAServerCert(OpenShiftCLI):
                                      'signer_cert':   {'value': params['signer_cert'], 'include': True},
                                      'signer_key':    {'value': params['signer_key'], 'include': True},
                                      'signer_serial': {'value': params['signer_serial'], 'include': True},
+                                     'expire_days':   {'value': params['expire_days'], 'include': True},
                                      'backup':        {'value': params['backup'], 'include': False},
                                     })
 
