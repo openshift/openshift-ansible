@@ -6,7 +6,7 @@
 # Run the migration only if the data are v2
 - name: Check if there are any v3 data
   command: >
-    etcdctl --cert {{ etcd_peer_cert_file }} --key {{ etcd_peer_key_file }} --cacert {{ etcd_peer_ca_file }} --endpoints 'https://{{ etcd_peer }}:2379' get "" --from-key --keys-only -w json --limit 1
+    etcdctl --cert {{ etcd_peer_cert_file }} --key {{ etcd_peer_key_file }} --cacert {{ etcd_peer_ca_file }} --endpoints 'https://{{ etcd_peer }}:{{ etcd_client_port }}' get "" --from-key --keys-only -w json --limit 1
   environment:
     ETCDCTL_API: 3
   register: l_etcdctl_output

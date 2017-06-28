@@ -1,0 +1,120 @@
+---
+- include: ../openshift-cluster/evaluate_groups.yml
+  tags:
+  - always
+
+- name: Run pre-checks
+  hosts: oo_etcd_to_migrate
+  tags:
+  - always
+  roles:
+  - role: etcd_migrate
+    r_etcd_migrate_action: check
+    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    etcd_peer: "{{ ansible_default_ipv4.address }}"
+
+- include: ../openshift-cluster/initialize_facts.yml
+  tags:
+  - always
+
+- name: Backup v2 data
+  hosts: oo_etcd_to_migrate
+  gather_facts: no
+  tags:
+  - always
+  roles:
+  - role: openshift_facts
+  - role: etcd_common
+    r_etcd_common_action: backup
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    r_etcd_common_backup_tag: pre-migration
+    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+
+- name: Gate on etcd backup
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_etcd_to_migrate)
+                                 | oo_collect('inventory_hostname', {'r_etcd_common_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_backup_completed) }}"
+  - fail:
+      msg: "Migration cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when:
+    - etcd_backup_failed | length > 0
+
+- name: Prepare masters for etcd data migration
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      master_services:
+      - "{{ openshift.common.service_type + '-master' }}"
+  - set_fact:
+      master_services:
+      - "{{ openshift.common.service_type + '-master-controllers' }}"
+      - "{{ openshift.common.service_type + '-master-api' }}"
+    when:
+    - (openshift_master_cluster_method is defined and openshift_master_cluster_method == "native") or openshift.common.is_master_system_container | bool
+  - debug:
+      msg: "master service name: {{ master_services }}"
+  - name: Stop masters
+    service:
+      name: "{{ item }}"
+      state: stopped
+    with_items: "{{ master_services }}"
+
+- name: Migrate etcd data from v2 to v3
+  hosts: oo_etcd_to_migrate
+  gather_facts: no
+  tags:
+  - always
+  roles:
+  - role: etcd_migrate
+    r_etcd_migrate_action: migrate
+    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    etcd_peer: "{{ ansible_default_ipv4.address }}"
+
+- name: Gate on etcd migration
+  hosts: oo_masters_to_config
+  gather_facts: no
+  tasks:
+  - set_fact:
+      etcd_migration_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_etcd_to_migrate)
+                                 | oo_collect('inventory_hostname', {'r_etcd_migrate_success': true}) }}"
+  - set_fact:
+      etcd_migration_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_migration_completed) }}"
+
+- name: Configure masters if etcd data migration is succesfull
+  hosts: oo_masters_to_config
+  roles:
+  - role: etcd_migrate
+    r_etcd_migrate_action: configure
+    when: etcd_migration_failed | length == 0
+  tasks:
+  - debug:
+      msg: "Skipping master re-configuration since migration failed."
+    when:
+    - etcd_migration_failed | length > 0
+
+- name: Start masters after etcd data migration
+  hosts: oo_masters_to_config
+  tasks:
+  - name: Start master services
+    service:
+      name: "{{ item }}"
+      state: started
+    register: service_status
+    # Sometimes the master-api, resp. master-controllers fails to start for the first time
+    until: service_status.state is defined and service_status.state == "started"
+    retries: 5
+    delay: 10
+    with_items: "{{ master_services[::-1] }}"
+  - fail:
+      msg: "Migration failed. The following hosts were not properly migrated: {{ etcd_migration_failed | join(',') }}"
+    when:
+    - etcd_migration_failed | length > 0

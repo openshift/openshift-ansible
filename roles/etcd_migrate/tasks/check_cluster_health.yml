@@ -1,7 +1,7 @@
 ---
 - name: Check cluster health
   command: >
-    etcdctl --cert-file /etc/etcd/peer.crt --key-file /etc/etcd/peer.key --ca-file /etc/etcd/ca.crt --endpoint https://{{ etcd_peer }}:2379 cluster-health
+    etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} --endpoint https://{{ etcd_peer }}:{{ etcd_client_port }} cluster-health
   register: etcd_cluster_health
   changed_when: false
   failed_when: false
