@@ -36,6 +36,7 @@
       state: started
       delay: 10
       port: "{{ openshift.master.api_port }}"
+      timeout: 600
     when: inventory_hostname in groups.oo_masters_to_config
 
   - name: restart node
