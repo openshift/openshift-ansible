@@ -42,12 +42,14 @@
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+  pre_tasks:
+  - set_fact:
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+      when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
   - role: openshift_node
@@ -59,7 +61,9 @@
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
     openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+  pre_tasks:
+  - set_fact:
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
