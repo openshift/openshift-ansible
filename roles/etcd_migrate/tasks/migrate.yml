@@ -44,7 +44,7 @@
     --lease-duration 1h
   environment:
     ETCDCTL_API: 3
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
   with_items:
   - "/kubernetes.io/events"
   - "/kubernetes.io/masterleases"
