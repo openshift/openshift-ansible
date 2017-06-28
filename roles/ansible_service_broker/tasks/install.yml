@@ -14,6 +14,7 @@
 
     ansible_service_broker_etcd_image_prefix: "{{ ansible_service_broker_etcd_image_prefix | default(__ansible_service_broker_etcd_image_prefix) }}"
     ansible_service_broker_etcd_image_tag: "{{ ansible_service_broker_etcd_image_tag | default(__ansible_service_broker_etcd_image_tag) }}"
+    ansible_service_broker_etcd_image_etcd_path: "{{ ansible_service_broker_etcd_image_etcd_path | default(__ansible_service_broker_etcd_image_etcd_path) }}"
 
     ansible_service_broker_registry_type: "{{ ansible_service_broker_registry_type | default(__ansible_service_broker_registry_type) }}"
     ansible_service_broker_registry_url: "{{ ansible_service_broker_registry_url | default(__ansible_service_broker_registry_url) }}"
@@ -144,7 +145,7 @@
                   terminationMessagePath: /tmp/termination-log
                   workingDir: /etcd
                   args:
-                    - /usr/local/bin/etcd
+                    - '{{ ansible_service_broker_etcd_image_etcd_path }}'
                     - --data-dir=/data
                     - "--listen-client-urls=http://0.0.0.0:2379"
                     - "--advertise-client-urls=http://0.0.0.0:2379"
