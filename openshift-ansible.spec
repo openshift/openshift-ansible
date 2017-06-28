@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.123.1002
+Version:        3.6.123.1003
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1003-1
+- Generate loopback kubeconfig separately to preserve OpenShift CA certificate.
+  (abutcher@redhat.com)
+- registry: look for the oc executable in /usr/local/bin and ~/bin
+  (gscrivan@redhat.com)
+- router: look for the oc executable in /usr/local/bin and ~/bin
+  (gscrivan@redhat.com)
+- Retry docker startup once (sdodson@redhat.com)
+
 * Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1002-1
 - Fix typo in fluentd_secureforward_contents variable
   (Andreas.Dembach@dg-i.net)
