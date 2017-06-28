@@ -68,7 +68,7 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+      when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
             openshift_generate_no_proxy_hosts | default(True) | bool }}"
   roles:
   - role: openshift_node
