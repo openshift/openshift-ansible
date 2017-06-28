@@ -134,9 +134,6 @@
         --signer-serial={{ openshift_ca_serial }}
         --user=system:openshift-master
         --basename=openshift-master
-        {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
-        --expire-days={{ openshift_master_cert_expire_days }}
-        {% endif %}
   - name: Copy generated loopback master client config to master config dir
     copy:
       src: "{{ openshift_ca_loopback_tmpdir.stdout }}/{{ item }}"
