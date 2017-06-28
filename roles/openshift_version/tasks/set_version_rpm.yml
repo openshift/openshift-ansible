@@ -12,6 +12,9 @@
     repoquery:
       name: "{{ openshift.common.service_type}}"
       ignore_excluders: true
+    environment:
+      http_proxy: "{{ openshift_http_proxy | default('')}}"
+      https_proxy: "{{ openshift_https_proxy|default('') }}"
     register: rpm_results
 
   - fail:

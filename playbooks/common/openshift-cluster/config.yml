@@ -17,6 +17,9 @@
       - package_version
       - docker_image_availability
       - docker_storage
+    environment:
+      http_proxy: "{{ openshift_http_proxy | default('')}}"
+      https_proxy: "{{ openshift_https_proxy|default('') }}"
 
 - include: initialize_oo_option_facts.yml
   tags:

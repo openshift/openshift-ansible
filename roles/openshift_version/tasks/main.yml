@@ -103,6 +103,9 @@
         name: "{{ openshift.common.service_type}}"
         ignore_excluders: true
       register: rpm_results
+      environment:
+        http_proxy: "{{ openshift_http_proxy | default('')}}"
+        https_proxy: "{{ openshift_https_proxy|default('') }}"
     - fail:
         msg: "Package {{ openshift.common.service_type}} not found"
       when: not rpm_results.results.package_found
