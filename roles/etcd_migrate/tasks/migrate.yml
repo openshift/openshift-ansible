@@ -31,6 +31,8 @@
     name: "{{ l_etcd_service }}"
     state: started
 
+# NOTE: /usr/local/bin may be removed from the PATH by ansible hence why
+#       it's added to the environment in this task.
 - name: Re-introduce leases (as a replacement for key TTLs)
   command: >
     oadm migrate etcd-ttl \
@@ -42,6 +44,7 @@
     --lease-duration 1h
   environment:
     ETCDCTL_API: 3
+    PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
   with_items:
   - "/kubernetes.io/events"
   - "/kubernetes.io/masterleases"
