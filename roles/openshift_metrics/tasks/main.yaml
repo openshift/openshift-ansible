@@ -41,3 +41,4 @@
   tags: metrics_cleanup
   changed_when: False
   check_mode: no
+  become: false

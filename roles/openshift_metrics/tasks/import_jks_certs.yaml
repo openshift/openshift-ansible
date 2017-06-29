@@ -50,6 +50,7 @@
       CASSANDRA_TRUSTSTORE_PASSWD: "{{cassandra_truststore_password.content}}"
       JGROUPS_PASSWD: "{{jgroups_keystore_password.content}}"
     changed_when: False
+    become: false
 
   - copy:
       dest: "{{mktemp.stdout}}/"

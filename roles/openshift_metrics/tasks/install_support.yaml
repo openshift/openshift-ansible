@@ -4,6 +4,7 @@
   register: keytool_check
   failed_when: no
   changed_when: no
+  become: false
 
 - fail: msg="'keytool' is unavailable. Please install java-1.8.0-openjdk-headless on the control node"
   when: keytool_check.rc  == 1
