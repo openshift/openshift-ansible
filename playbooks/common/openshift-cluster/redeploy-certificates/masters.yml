@@ -51,3 +51,13 @@
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
     openshift_certificates_redeploy: true
+  - role: lib_utils
+  post_tasks:
+  - yedit:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      key: servingInfo.namedCertificates
+      value: "{{ openshift.master.named_certificates | default([]) | oo_named_certificates_list }}"
+    when:
+    - ('named_certificates' in openshift.master)
+    - openshift.master.named_certificates | default([]) | length > 0
+    - openshift_master_overwrite_named_certificates | default(false) | bool
