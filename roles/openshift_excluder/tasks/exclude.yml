@@ -20,3 +20,7 @@
   when:
   - r_openshift_excluder_enable_openshift_excluder | bool
   - openshift_excluder_stat.stat.exists
+  register: enable_openshift_excluder
+  until: enable_openshift_excluder|success
+  retries: 10
+  delay: 5
