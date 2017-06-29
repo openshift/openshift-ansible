@@ -57,3 +57,5 @@ openshift_logging_fluentd_es_copy: false
 #fluentd_config_contents:
 #fluentd_throttle_contents:
 #fluentd_secureforward_contents:
+
+openshift_logging_fluentd_file_buffer_limit: 1Gi
