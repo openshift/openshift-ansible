@@ -912,17 +912,17 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('1.1.1')
                 version_gte_3_2_or_1_2 = version >= LooseVersion('1.2.0')
                 version_gte_3_3_or_1_3 = version >= LooseVersion('1.3.0')
-                version_gte_3_4_or_1_4 = version >= LooseVersion('1.4.0')
-                version_gte_3_5_or_1_5 = version >= LooseVersion('1.5.0')
-                version_gte_3_6 = version >= LooseVersion('3.6.0')
+                version_gte_3_4_or_1_4 = version >= LooseVersion('1.4')
+                version_gte_3_5_or_1_5 = version >= LooseVersion('1.5')
+                version_gte_3_6 = version >= LooseVersion('3.6')
             else:
                 version_gte_3_1_or_1_1 = version >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('3.1.1')
                 version_gte_3_2_or_1_2 = version >= LooseVersion('3.1.1.901')
                 version_gte_3_3_or_1_3 = version >= LooseVersion('3.3.0')
-                version_gte_3_4_or_1_4 = version >= LooseVersion('3.4.0')
-                version_gte_3_5_or_1_5 = version >= LooseVersion('3.5.0')
-                version_gte_3_6 = version >= LooseVersion('3.6.0')
+                version_gte_3_4_or_1_4 = version >= LooseVersion('3.4')
+                version_gte_3_5_or_1_5 = version >= LooseVersion('3.5')
+                version_gte_3_6 = version >= LooseVersion('3.6')
         else:
             # 'Latest' version is set to True, 'Next' versions set to False
             version_gte_3_1_or_1_1 = True
