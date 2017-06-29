@@ -39,14 +39,18 @@
   - meta: refresh_inventory
 
 - hosts: cluster_hosts
+  name: Wait for the the nodes to come up
+  become: False
+  gather_facts: False
+  tasks:
+    - wait_for_connection:
+
+- hosts: cluster_hosts
   gather_facts: True
   tasks:
   - name: Debug hostvar
     debug:
       msg: "{{ hostvars[inventory_hostname] }}"
       verbosity: 2
-  - name: waiting for server to come back
-    local_action: wait_for host={{ hostvars[inventory_hostname]['ansible_ssh_host'] }} port=22 delay=30 timeout=300
-    become: false
 
 - include: post-provision-openstack.yml
