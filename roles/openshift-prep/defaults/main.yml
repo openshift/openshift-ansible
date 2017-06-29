@@ -1,0 +1,11 @@
+---
+# Defines either to install required packages and update all
+manage_packages: true
+required_packages:
+  - wget
+  - git
+  - net-tools
+  - bind-utils
+  - bridge-utils
+  - bash-completion
+  - vim-enhanced

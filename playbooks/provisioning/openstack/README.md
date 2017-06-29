@@ -76,6 +76,10 @@ stacks. Set it to true, if you experience issues with sec group rules
 quotas. It trades security for number of rules, by sharing the same set
 of firewall rules for master, node, etcd and infra nodes.
 
+The `required_packages` variable also provides a list of the additional
+prerequisite packages to be installed before to deploy an OpenShift cluster.
+Those are ignored though, if the `manage_packages: False`.
+
 #### Security notes
 
 Configure required `*_ingress_cidr` variables to restrict public access
@@ -86,6 +90,12 @@ nodes' ephemeral ports range.
 
 Note, the command ``curl https://api.ipify.org`` helps fiding an external
 IP address of your box (the ansible admin node).
+
+There is also the `manage_packages` variable (defaults to True) you
+may want to turn off in order to speed up the provisioning tasks. This may
+be the case for development environments. When turned off, the servers will
+be provisioned omitting the ``yum update`` command. This brings security
+implications though, and is not recommended for production deployments.
 
 ### Update the DNS names in `inventory/hosts`
 
