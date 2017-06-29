@@ -47,3 +47,26 @@ openshift_logging_mux_ops_ca: /etc/fluent/keys/ca
 #mux_config_contents:
 #mux_throttle_contents:
 #mux_secureforward_contents:
+
+# Default value of mux BUFFER_TYPE
+openshift_logging_mux_buffer_type: "file"
+
+# One of ['emptydir', 'pvc', 'hostmount']
+openshift_logging_mux_file_buffer_storage_type: "emptydir"
+
+# mount path: shared by hostmount and pvc
+openshift_logging_mux_file_buffer_mount_path: /var/log/mux/filebufferstorage
+
+# pvc options
+# the name of the PVC we will bind to -- create it if it does not exist
+openshift_logging_mux_file_buffer_pvc_name: "logging-mux-pvc"
+
+# required if the PVC does not already exist
+openshift_logging_mux_file_buffer_pvc_size: 4Gi
+openshift_logging_mux_file_buffer_pvc_dynamic: false
+openshift_logging_mux_file_buffer_pvc_pv_selector: {}
+openshift_logging_mux_file_buffer_pvc_access_modes: ['ReadWriteOnce']
+openshift_logging_mux_file_buffer_storage_group: '65534'
+
+openshift_logging_mux_file_buffer_pvc_prefix: "logging-mux"
+openshift_logging_mux_file_buffer_limit:  2Gi

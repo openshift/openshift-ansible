@@ -177,6 +177,34 @@
   check_mode: no
   changed_when: no
 
+# storageclasses are used by default but if static then disable
+# storageclasses with the storageClassName set to "" in pvc.j2
+- name: Creating Mux storage template
+  template:
+    src: pvc.j2
+    dest: "{{ tempdir }}/templates/logging-mux-pvc.yml"
+  vars:
+    obj_name: "{{ openshift_logging_mux_file_buffer_pvc_name }}"
+    size: "{{ openshift_logging_mux_file_buffer_pvc_size }}"
+    access_modes: "{{ openshift_logging_mux_file_buffer_pvc_access_modes | list }}"
+    pv_selector: "{{ openshift_logging_mux_file_buffer_pvc_pv_selector }}"
+    is_dynamic: "{{ openshift_logging_mux_file_buffer_pvc_dynamic }}"
+    storage_class_name: "{{ openshift_logging_mux_file_buffer_pvc_storage_class_name | default('', true) }}"
+  when:
+  - openshift_logging_mux_file_buffer_storage_type == "pvc"
+
+- name: Set Mux storage
+  oc_obj:
+    state: present
+    kind: pvc
+    name: "{{ openshift_logging_mux_file_buffer_pvc_name }}"
+    namespace: "{{ openshift_logging_mux_namespace }}"
+    files:
+    - "{{ tempdir }}/templates/logging-mux-pvc.yml"
+    delete_after: false
+  when:
+  - openshift_logging_mux_file_buffer_storage_type == "pvc"
+
 - name: Set logging-mux DC
   oc_obj:
     state: present

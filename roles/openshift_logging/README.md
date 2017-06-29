@@ -57,6 +57,8 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_fluentd_hosts`: List of nodes that should be labeled for Fluentd to be deployed to. Defaults to ['--all'].
 - `openshift_logging_fluentd_buffer_queue_limit`: Buffer queue limit for Fluentd. Defaults to 1024.
 - `openshift_logging_fluentd_buffer_size_limit`: Buffer chunk limit for Fluentd. Defaults to 1m.
+- `openshift_logging_fluentd_buffer_type`: Fluentd will set the buffer type.  Defaults to 'file'.
+- `openshift_logging_fluentd_file_buffer_limit`: Fluentd will set the value to the file buffer limit.  Defaults to '1Gi' per output.
 
 
 - `openshift_logging_es_host`: The name of the ES service Fluentd should send logs to. Defaults to 'logging-es'.
@@ -160,3 +162,21 @@ Elasticsearch OPS too, if using an OPS cluster:
   need to set this
 - `openshift_logging_mux_buffer_queue_limit`: Default `[1024]` - Buffer queue limit for Mux.
 - `openshift_logging_mux_buffer_size_limit`: Default `[1m]` - Buffer chunk limit for Mux.
+- `openshift_logging_mux_buffer_type`: Mux will set the buffer type.  Defaults to 'file'.
+- `openshift_logging_mux_file_buffer_limit`: Default `[2Gi]` per output - Mux will
+  set the value to the file buffer limit.
+- `openshift_logging_mux_file_buffer_storage_type`: Default `[emptydir]` - Storage
+  type for the file buffer.  One of [`emptydir`, `pvc`, `hostmount`]
+- `openshift_logging_mux_file_buffer_mount_path`: Default `[/mux/filebufferstorage]`
+  - Mount path for the file buffer; Shared by `pvc` and `hostmount`.
+
+- `openshift_logging_mux_file_buffer_pvc_size`: The requested size for the file buffer
+  PVC, when not provided the role will not generate any PVCs. Defaults to `4Gi`.
+- `openshift_logging_mux_file_buffer_pvc_dynamic`: Whether or not to add the dynamic
+  PVC annotation for any generated PVCs. Defaults to 'False'.
+- `openshift_logging_mux_file_buffer_pvc_pv_selector`: A key/value map added to a PVC
+  in order to select specific PVs.  Defaults to 'None'.
+- `openshift_logging_mux_file_buffer_pvc_prefix`: The prefix for the generated PVCs.
+  Defaults to 'logging-mux'.
+- `openshift_logging_mux_file_buffer_storage_group`: The storage group used for Mux.
+  Defaults to '65534'.
