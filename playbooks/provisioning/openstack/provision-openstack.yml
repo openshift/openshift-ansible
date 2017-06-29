@@ -43,7 +43,7 @@
   become: False
   gather_facts: False
   tasks:
-    - wait_for_connection:
+  - wait_for_connection:
 
 - hosts: cluster_hosts
   gather_facts: True
