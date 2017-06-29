@@ -4,6 +4,7 @@
   register: htpasswd_check
   failed_when: no
   changed_when: no
+  become: false
 
 - fail: msg="'htpasswd' is unavailable. Please install httpd-tools on the control node"
   when: htpasswd_check.rc  == 1
@@ -13,6 +14,7 @@
   register: keytool_check
   failed_when: no
   changed_when: no
+  become: false
 
 - fail: msg="'keytool' is unavailable. Please install java-1.8.0-openjdk-headless on the control node"
   when: keytool_check.rc  == 1

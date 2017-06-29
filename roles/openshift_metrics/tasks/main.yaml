@@ -1,6 +1,7 @@
 ---
 - local_action: shell python -c 'import passlib' 2>/dev/null || echo not installed
   register: passlib_result
+  become: false
 
 - name: Check that python-passlib is available on the control host
   assert:
@@ -52,3 +53,4 @@
   tags: metrics_cleanup
   changed_when: False
   check_mode: no
+  become: false
