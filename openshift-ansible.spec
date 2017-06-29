@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.123.1003
+Version:        3.6.128
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.128-1
+- parameterize etcd binary path (fabian@fabianism.us)
+- attach leases via the first master only and only once (jchaloup@redhat.com)
+- evalute groups when running etcd upgrade from byo/openshift-
+  cluster/upgrades/upgrade_etcd.yml (jchaloup@redhat.com)
+- Bug 1465168 - mux doesn't recognize ansible boolean parameters correctly
+  (rmeggins@redhat.com)
+
 * Tue Jun 27 2017 Scott Dodson <sdodson@redhat.com> 3.6.123.1003-1
 - Generate loopback kubeconfig separately to preserve OpenShift CA certificate.
   (abutcher@redhat.com)
