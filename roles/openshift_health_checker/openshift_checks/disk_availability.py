@@ -12,7 +12,7 @@ class DiskAvailability(NotContainerizedMixin, OpenShiftCheck):
     # Values taken from the official installation documentation:
     # https://docs.openshift.org/latest/install_config/install/prerequisites.html#system-requirements
     recommended_disk_space_bytes = {
-        "masters": 40 * 10**9,
+        "masters": 25 * 10**9,
         "nodes": 15 * 10**9,
         "etcd": 20 * 10**9,
     }
