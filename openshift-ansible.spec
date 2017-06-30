@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.110
+Version:        3.4.111
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jun 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.111-1
+- Guard check for container install based on openshift dictionary key
+  (ayoung@redhat.com)
+- Correct version comparisons to ensure proper evaluation (rteague@redhat.com)
+
 * Wed Jun 28 2017 Scott Dodson <sdodson@redhat.com> 3.4.110-1
 - Remove --expire-days usage in openshift_ca. (abutcher@redhat.com)
 - evalute groups when running etcd upgrade from byo/openshift-
