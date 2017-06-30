@@ -1,2 +1,1 @@
 ---
-r_openshift_node_dns_port: "{{ openshift_node_dns_port | default(8054) }}"

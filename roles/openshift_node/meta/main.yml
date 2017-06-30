@@ -45,5 +45,4 @@ dependencies:
     port: "{{ openshift_node_port_range | default('') }}/udp"
   when: openshift_node_port_range is defined
 - role: openshift_node_dnsmasq
-  r_openshift_node_dnsmasq_port: "{{ r_openshift_node_dns_port }}"
   when: openshift.common.use_dnsmasq | bool

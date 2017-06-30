@@ -14,7 +14,7 @@ Type=notify
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
 Environment=GOTRACEBACK=crash
 ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
-ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1#{{ r_openshift_node_dns_port}},/{{ openshift.common.dns_domain }}/127.0.0.1#{{ r_openshift_node_dns_port}}
+ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
 ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
 ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
 ExecStart=/usr/bin/openshift start node --config=${CONFIG_FILE} $OPTIONS
