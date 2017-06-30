@@ -143,7 +143,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "so the available storage in the VG cannot be determined.".format(pool)
             )
         vg_name = match.groups()[0].replace("--", "-")
-        vgs_cmd = "/sbin/vgs --noheadings -o vg_free --select vg_name=" + vg_name
+        vgs_cmd = "/sbin/vgs --noheadings -o vg_free --units g --select vg_name=" + vg_name
         # should return free space like "  12.00g" if the VG exists; empty if it does not
 
         ret = self.execute_module("command", {"_raw_params": vgs_cmd}, task_vars=task_vars)
