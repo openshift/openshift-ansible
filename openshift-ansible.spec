@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.128
+Version:        3.6.129
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jun 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.129-1
+- Fix generate role binding destination for the HOSA service account
+  (steveteuber@users.noreply.github.com)
+- Correct version comparisons to ensure proper evaluation (rteague@redhat.com)
+- Adding become: false to local_action tasks (ewolinet@redhat.com)
+- upgrade: fix name for the etcd system container (gscrivan@redhat.com)
+- fix backup and working directory for etcd run as a system container
+  (jchaloup@redhat.com)
+- etcd_migrate: Add /var/usrlocal/bin to path for oadm (smilner@redhat.com)
+- etcd_migrate: Add /usr/local/bin to path for oadm (smilner@redhat.com)
+- Sync environment variables FLUENTD/MUX_CPU_LIMIT FLUENTD/MUX_MEMORY_LIMIT
+  with the resource limit values. (nhosoi@redhat.com)
+- Update master configuration for named certificates during master cert
+  redeploy. (abutcher@redhat.com)
+- Get rid of openshift_facts dep in rhel_subscribe (sdodson@redhat.com)
+- logging: write ES heap dump to persistent storage (jwozniak@redhat.com)
+
 * Thu Jun 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.128-1
 - parameterize etcd binary path (fabian@fabianism.us)
 - attach leases via the first master only and only once (jchaloup@redhat.com)
