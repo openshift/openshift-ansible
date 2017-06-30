@@ -23,7 +23,11 @@
       "kind": "Secret",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}"
+        "name": "${NAME}",
+        "annotations": {
+          "template.openshift.io/expose-username": "{.data['application-user']}",
+          "template.openshift.io/expose-password": "{.data['application-password']}"
+        }
       },
       "stringData" : {
         "database-user" : "${DATABASE_USER}",
@@ -60,7 +64,10 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}"
+        "name": "${NAME}",
+        "annotations": {
+          "template.openshift.io/expose-uri": "http://{.spec.host}{.spec.path}"
+        }
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
@@ -526,7 +533,7 @@
     {
       "name": "GITHUB_WEBHOOK_SECRET",
       "displayName": "GitHub Webhook Secret",
-      "description": "A secret string used to configure the GitHub webhook.",
+      "description": "Github trigger secret.  A difficult to guess string encoded as part of the webhook URL.  Not encrypted.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{40}"
     },
