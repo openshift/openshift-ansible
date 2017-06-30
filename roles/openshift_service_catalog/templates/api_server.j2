@@ -31,7 +31,7 @@ spec:
         - --etcd-servers
         - {{ etcd_servers }}
         - --etcd-cafile
-        - /etc/origin/master/master.etcd-ca.crt
+        - {{ etcd_cafile }}
         - --etcd-certfile
         - /etc/origin/master/master.etcd-client.crt
         - --etcd-keyfile
