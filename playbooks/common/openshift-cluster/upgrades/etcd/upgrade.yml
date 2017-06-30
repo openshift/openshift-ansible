@@ -36,7 +36,7 @@
       - not openshift.common.is_etcd_system_container | bool
 
     - name: Record containerized etcd version (runc)
-      command: runc exec etcd_container rpm -qa --qf '%{version}' etcd\*
+      command: runc exec etcd rpm -qa --qf '%{version}' etcd\*
       register: etcd_container_version_runc
       failed_when: false
       # AUDIT:changed_when: `false` because we are only inspecting
