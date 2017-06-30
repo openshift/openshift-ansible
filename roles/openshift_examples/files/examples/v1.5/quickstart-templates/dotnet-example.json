@@ -4,7 +4,7 @@
     "metadata": {
         "name": "dotnet-example",
         "annotations": {
-            "openshift.io/display-name": ".NET Core",
+            "openshift.io/display-name": ".NET Core Example",
             "description": "An example .NET Core application.",
             "tags": "quickstart,dotnet,.net",
             "iconClass": "icon-dotnet",
