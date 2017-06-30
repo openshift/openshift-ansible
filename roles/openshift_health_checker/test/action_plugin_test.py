@@ -59,7 +59,7 @@ def failed(result, msg_has=None):
     if msg_has is not None:
         assert 'msg' in result
         for term in msg_has:
-            assert term in result['msg']
+            assert term.lower() in result['msg'].lower()
     return result.get('failed', False)
 
 
@@ -174,6 +174,16 @@ def test_action_plugin_run_check_exception(plugin, task_vars, monkeypatch):
 
     assert failed(result['checks']['fake_check'], msg_has=exception_msg)
     assert failed(result, msg_has=['failed'])
+    assert not changed(result)
+    assert not skipped(result)
+
+
+def test_action_plugin_resolve_checks_exception(plugin, task_vars, monkeypatch):
+    monkeypatch.setattr(plugin, 'load_known_checks', lambda: {})
+
+    result = plugin.run(tmp=None, task_vars=task_vars)
+
+    assert failed(result, msg_has=['unknown', 'name'])
     assert not changed(result)
     assert not skipped(result)
 
