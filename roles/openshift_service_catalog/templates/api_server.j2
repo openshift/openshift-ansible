@@ -29,10 +29,9 @@ spec:
         - --secure-port
         - "6443"
         - --etcd-servers
-# TODO: come back and get openshift.common.hostname to work
-        - https://{{ openshift.common.ip }}:{{ openshift.master.etcd_port }}
+        - {{ etcd_servers }}
         - --etcd-cafile
-        - /etc/origin/master/master.etcd-ca.crt
+        - {{ etcd_cafile }}
         - --etcd-certfile
         - /etc/origin/master/master.etcd-client.crt
         - --etcd-keyfile
