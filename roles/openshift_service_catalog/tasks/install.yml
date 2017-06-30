@@ -98,6 +98,7 @@
     cpu_requests: none
     memory_request: none
     cors_allowed_origin: localhost
+    etcd_servers: "{{ openshift.master.etcd_urls | join(',') }}"
     node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
 
 - name: Set Service Catalog API Server daemonset
