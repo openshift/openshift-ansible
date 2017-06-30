@@ -2,33 +2,12 @@
 - hosts: localhost
   gather_facts: True
   become: False
+  vars_files:
+    - stack_params.yaml
   pre_tasks:
-  - include: pre_tasks.yml
+    - include: pre_tasks.yml
   roles:
-  - role: openstack-stack
-    stack_name: "{{ env_id }}.{{ public_dns_domain }}"
-    dns_domain: "{{ public_dns_domain }}"
-    dns_nameservers: "{{ public_dns_nameservers }}"
-    subnet_prefix: "{{ openstack_subnet_prefix }}"
-    ssh_public_key: "{{ openstack_ssh_public_key }}"
-    openstack_image: "{{ openstack_default_image_name }}"
-    lb_flavor: "{{ openstack_default_flavor | default('m1.small') }}"
-    etcd_flavor: "{{ openstack_default_flavor | default('m1.small') }}"
-    master_flavor: "{{ openstack_default_flavor | default('m1.medium') }}"
-    node_flavor: "{{ openstack_default_flavor | default('m1.medium') }}"
-    infra_flavor: "{{ openstack_default_flavor | default('m1.medium') }}"
-    dns_flavor: "{{ openstack_default_flavor | default('m1.small') }}"
-    external_network: "{{ openstack_external_network_name }}"
-    num_etcd: "{{ openstack_num_etcd | default(0) }}"
-    num_masters: "{{ openstack_num_masters }}"
-    num_nodes: "{{ openstack_num_nodes }}"
-    num_infra: "{{ openstack_num_infra }}"
-    num_dns: "{{ openstack_num_dns | default(1) }}"
-    nodes_to_remove: "{{ openstack_nodes_to_remove | default([]) |  to_yaml }}"
-    master_volume_size: "{{ docker_volume_size }}"
-    app_volume_size: "{{ docker_volume_size }}"
-    infra_volume_size: "{{ docker_volume_size }}"
-
+    - role: openstack-stack
 
 - name: Refresh Server inventory
   hosts: localhost
@@ -36,21 +15,21 @@
   become: False
   gather_facts: False
   tasks:
-  - meta: refresh_inventory
+    - meta: refresh_inventory
 
 - hosts: cluster_hosts
   name: Wait for the the nodes to come up
   become: False
   gather_facts: False
   tasks:
-  - wait_for_connection:
+    - wait_for_connection:
 
 - hosts: cluster_hosts
   gather_facts: True
   tasks:
-  - name: Debug hostvar
-    debug:
-      msg: "{{ hostvars[inventory_hostname] }}"
-      verbosity: 2
+    - name: Debug hostvar
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+        verbosity: 2
 
 - include: post-provision-openstack.yml

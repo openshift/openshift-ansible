@@ -5,13 +5,19 @@ OpenStack resources (servers, networking, volumes, security groups,
 etc.). The result is an environment ready for openshift-ansible.
 
 
-## Dependencies
+## Dependencies for localhost (ansible control/admin node)
 
 * [Ansible 2.3](https://pypi.python.org/pypi/ansible)
 * [jinja2](http://jinja.pocoo.org/docs/2.9/)
 * [shade](https://pypi.python.org/pypi/shade)
-* python-dns
+* python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
+* Become (sudo) is not required.
 
+## Dependencies for OpenStack hosted cluster nodes (servers)
+
+There are no additional dependencies for the cluster nodes. Required
+configuration steps are done by Heat given a specific user data config
+that normally should not be changed.
 
 ## What does it do
 
@@ -42,12 +48,27 @@ etc.). The result is an environment ready for openshift-ansible.
 Pay special attention to the values in the first paragraph -- these
 will depend on your OpenStack environment.
 
-The `env_id` and `openstack_dns_domain` will form the DNS domain all
+The `env_id` and `public_dns_domain` will form the cluster's DNS domain all
 your servers will be under. With the default values, this will be
-`openshift.example.com`.
+`openshift.example.com`. For workloads, the default subdomain is 'apps'.
+That sudomain can be set as well by the `openshift_app_domain` variable in
+the inventory.
 
-`openstack_nameservers` is a list of DNS servers accessible from all
-the created Nova servers. These will be serve as your DNS forwarders.
+The `public_dns_nameservers` is a list of DNS servers accessible from all
+the created Nova servers. These will be serving as your DNS forwarders for
+external FQDNs that do not belong to the cluster's DNS domain and its subdomains.
+
+The `openshift_use_dnsmasq` controls either dnsmasq is deployed or not.
+By default, dnsmasq is deployed and comes as the hosts' /etc/resolv.conf file
+first nameserver entry that points to the local host instance of the dnsmasq
+daemon that in turn proxies DNS requests to the authoritative DNS server.
+When Network Manager is enabled for provisioned cluster nodes, which is
+normally the case, you should not change the defaults and always deploy dnsmasq.
+
+Note that the authoritative DNS server is configured on post provsision
+steps, and the Neutron subnet for the Heat stack is updated to point to that
+server in the end. So the provisioned servers will start using it natively
+as a default nameserver that comes from the NetworkManager and cloud-init.
 
 `openstack_ssh_key` is a Nova keypair -- you can see your keypairs with
 `openstack keypair list`.
@@ -136,8 +157,8 @@ Once it succeeds, you can install openshift by running:
     ansible-playbook --become --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/openshift-node/network_manager.yml
     ansible-playbook --become --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
 
-Note, the `network_manager.yml` is only required if you're deploying OpenShift
-origin.
+Note, the `network_manager.yml` step is mandatory and is required for persisting
+the hosts' DNS configs.
 
 ## License
 

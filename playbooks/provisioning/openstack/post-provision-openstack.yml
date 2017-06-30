@@ -1,6 +1,6 @@
 ---
-# Assign hostnames
-- hosts: cluster_hosts
+- name: Assign hostnames
+  hosts: cluster_hosts
   gather_facts: False
   become: true
   pre_tasks:
@@ -8,8 +8,8 @@
   roles:
   - role: hostnames
 
-# Subscribe DNS Host to allow for configuration below
-- hosts: dns
+- name: Subscribe DNS Host to allow for configuration below
+  hosts: dns
   gather_facts: False
   become: true
   roles:
@@ -17,15 +17,15 @@
     when: hostvars.localhost.rhsm_register
     tags: 'subscription-manager'
 
-# Determine which DNS server(s) to use for our generated records
-- hosts: localhost
+- name: Determine which DNS server(s) to use for our generated records
+  hosts: localhost
   gather_facts: False
   become: False
   roles:
   - dns-server-detect
 
-# Build the DNS Server Views and Configure DNS Server(s)
-- hosts: dns
+- name: Build the DNS Server Views and Configure DNS Server(s)
+  hosts: dns
   gather_facts: False
   become: true
   pre_tasks:
@@ -35,8 +35,8 @@
   roles:
   - role: dns-server
 
-# Build and process DNS Records
-- hosts: localhost
+- name: Build and process DNS Records
+  hosts: localhost
   gather_facts: False
   become: False
   pre_tasks:
@@ -46,18 +46,22 @@
   roles:
   - role: dns
 
-# OpenShift Pre-Requisites
-- hosts: OSEv3
+- name: Switch the stack subnet to the configured private DNS server
+  hosts: localhost
+  gather_facts: False
+  become: False
+  vars_files:
+  - stack_params.yaml
+  tasks:
+  - include_role:
+      name: openstack-stack
+      tasks_from: subnet_update_dns_servers
+
+- name: OpenShift Pre-Requisites
+  hosts: OSEv3
   gather_facts: False
   become: true
   tasks:
-  - name: "Edit /etc/resolv.conf on masters/nodes"
-    lineinfile:
-      state: present
-      dest: /etc/resolv.conf
-      regexp: "nameserver {{ hostvars['localhost'].private_dns_server }}"
-      line: "nameserver {{ hostvars['localhost'].private_dns_server }}"
-      insertafter: search*
   - name: "Include DNS configuration to ensure proper name resolution"
     lineinfile:
       state: present
