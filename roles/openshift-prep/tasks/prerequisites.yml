@@ -6,19 +6,14 @@
   yum:
     name: "{{ item }}"
     state: latest
-  with_items:
-    - wget
-    - git
-    - net-tools
-    - bind-utils
-    - bridge-utils
-    - bash-completion
-    - vim-enhanced
+  with_items: "{{ required_packages }}"
+  when: manage_packages|bool
 
 - name: "Update all packages (this can take a very long time)"
   yum:
-    name: "*"
+    name: '*'
     state: latest
+  when: manage_packages|bool
 
 - name: "Verify hostname"
   shell: hostnamectl status | awk "/Static hostname/"'{ print $3 }'
