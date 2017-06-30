@@ -372,6 +372,31 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
+                "name": "redhat-sso71-openshift",
+                 "annotations": {
+                    "description": "Red Hat SSO 7.1"
+                }
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/redhat-sso-7/sso71-openshift",
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat SSO 7.1",
+                            "iconClass": "icon-jboss",
+                            "tags": "sso,keycloak,redhat",
+                            "supports":"sso:7.1,xpaas:1.0",
+                            "version": "1.0"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
                 "name": "redhat-openjdk18-openshift"
             },
             "spec": {
