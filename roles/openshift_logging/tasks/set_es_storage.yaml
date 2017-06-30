@@ -75,6 +75,6 @@
     es_cpu_limit: "{{ es_cpu_limit }}"
     es_memory_limit: "{{ es_memory_limit }}"
     es_node_selector: "{{ es_node_selector }}"
-    es_storage: "{{ openshift_logging_facts | es_storage( es_name, es_storage_claim ) }}"
+    es_storage: "{{ openshift_logging_facts | es_storage( es_name, es_storage_claim, es_fact_root ) }}"
   check_mode: no
   changed_when: no

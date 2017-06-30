@@ -24,6 +24,7 @@
     es_pv_selector: "{{ openshift_logging_es_pv_selector }}"
     es_cpu_limit: "{{ openshift_logging_es_cpu_limit }}"
     es_memory_limit: "{{ openshift_logging_es_memory_limit }}"
+    es_fact_root: 'elasticsearch'
   with_together:
   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() }}"
   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() }}"
@@ -47,6 +48,7 @@
     es_pv_selector: "{{ openshift_logging_es_pv_selector }}"
     es_cpu_limit: "{{ openshift_logging_es_cpu_limit }}"
     es_memory_limit: "{{ openshift_logging_es_memory_limit }}"
+    es_fact_root: 'elasticsearch'
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs | count }}
 
 # --------- Tasks for Operation clusters ---------
@@ -88,6 +90,7 @@
     es_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
     es_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
     es_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
+    es_fact_root: 'elasticsearch_ops'
   with_together:
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() }}"
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() }}"
@@ -113,6 +116,7 @@
     es_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
     es_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
     es_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
+    es_fact_root: 'elasticsearch_ops'
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count }}
   when:
   - openshift_logging_use_ops | bool
