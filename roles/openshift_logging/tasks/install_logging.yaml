@@ -65,6 +65,7 @@
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_deployment_name: "{{ item.0 }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix ~ '-' ~ item.2 if item.1 is none else item.1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
@@ -86,6 +87,7 @@
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
@@ -112,6 +114,7 @@
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_deployment_name: "{{ item.0 }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_ops_pvc_prefix ~ '-' ~ item.2 if item.1 is none else item.1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
@@ -141,6 +144,7 @@
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_ops_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
