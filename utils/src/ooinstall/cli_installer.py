@@ -35,6 +35,16 @@ UPGRADE_MAPPINGS = {
         'minor_version': '3.5',
         'minor_playbook': 'v3_5/upgrade.yml',
     },
+    '1.4': {
+        'minor_version': '1.4',
+        'minor_playbook': 'v3_4/upgrade.yml',
+        'major_playbook': 'v3_5/upgrade.yml',
+        'major_version': '1.5',
+    },
+    '1.5': {
+        'minor_version': '1.5',
+        'minor_playbook': 'v3_5/upgrade.yml',
+    },
 }
 
 
@@ -994,6 +1004,8 @@ def upgrade(ctx, latest_minor, next_major):
         oo_cfg.settings['variant_version'] = new_version
         if oo_cfg.settings['variant'] == 'enterprise':
             oo_cfg.settings['variant'] = 'openshift-enterprise'
+        else:
+            oo_cfg.settings['variant'] = 'origin'
 
     if latest_minor:
         if 'minor_playbook' not in mapping:
