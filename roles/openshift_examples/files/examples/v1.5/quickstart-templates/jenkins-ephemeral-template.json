@@ -22,7 +22,10 @@
       "apiVersion": "v1",
       "metadata": {
         "name": "${JENKINS_SERVICE_NAME}",
-        "creationTimestamp": null
+        "creationTimestamp": null,
+        "annotations": {
+          "template.openshift.io/expose-uri": "http://{.spec.host}{.spec.path}"
+        }
       },
       "spec": {
         "to": {
@@ -108,6 +111,10 @@
                   {
                     "name": "OPENSHIFT_ENABLE_REDIRECT_PROMPT",
                     "value": "true"
+                  },
+                  {
+                    "name": "OPENSHIFT_JENKINS_JVM_ARCH",
+                    "value": "${JVM_ARCH}"
                   },
                   {
                     "name": "KUBERNETES_MASTER",
@@ -253,6 +260,12 @@
       "displayName": "Enable OAuth in Jenkins",
       "description": "Whether to enable OAuth OpenShift integration. If false, the static account 'admin' will be initialized with the password 'password'.",
       "value": "true"
+    },
+    {
+      "name": "JVM_ARCH",
+      "displayName": "Jenkins JVM Architecture",
+      "description": "Whether Jenkins runs with a 32 bit (i386) or 64 bit (x86_64) JVM.",
+      "value": "i386"
     },
     {
       "name": "MEMORY_LIMIT",
