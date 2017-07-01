@@ -56,6 +56,11 @@
     openshift_hosted_registry_force:
     - False
 
+- name: Update registry environment variables when pushing via dns
+  set_fact:
+    openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'OPENSHIFT_DEFAULT_REGISTRY':'docker-registry.default.svc:5000'}) }}"
+  when: openshift_push_via_dns | default(false) | bool
+
 - name: Create the registry service account
   oc_serviceaccount:
     name: "{{ openshift_hosted_registry_serviceaccount }}"
