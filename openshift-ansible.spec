@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.129
+Version:        3.6.131
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,45 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Jul 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.131-1
+- Fix upgrade (sdodson@redhat.com)
+- Prevent the script to use default route ip as upstream nameserver.
+  (steveteuber@users.noreply.github.com)
+- Use default ports for dnsmasq and node dns (sdodson@redhat.com)
+- Run dns on the node and use that for dnsmasq (sdodson@redhat.com)
+- Using ca-bundle.crt to connect to local etcd if master.etcd-ca.crt DNE
+  (ewolinet@redhat.com)
+- Set OPENSHIFT_DEFAULT_REGISTRY in registry dc. (abutcher@redhat.com)
+- Updating to use openshift.master.etcd_hosts for etcd servers for apiserver
+  (ewolinet@redhat.com)
+- Update v1.4 image streams and templates (sdodson@redhat.com)
+- xPaaS v1.4.0 for v3.4 (sdodson@redhat.com)
+- Sync latest image streams and templates for v1.5 (sdodson@redhat.com)
+- xPaaS v1.4.0 for v3.5 (sdodson@redhat.com)
+- Update latest image streams for v3.6 (sdodson@redhat.com)
+- Bump xPaas v1.4.0 for v3.6 (sdodson@redhat.com)
+- docker_image_availability: fix containerized etcd (lmeyer@redhat.com)
+- evalute etcd backup directory name only once (jchaloup@redhat.com)
+- run etcd_container with type:spc_t label (jchaloup@redhat.com)
+- Fixing ops storage options being passed to openshift_logging_elasticsearch
+  role fixing default ops pv selector (ewolinet@redhat.com)
+- Adding labels for elasticsearch and kibana services (ewolinet@redhat.com)
+- Add a retry to the docker restart handler (sdodson@redhat.com)
+- docker_storage check: make vgs return sane output (lmeyer@redhat.com)
+- Capture exceptions when resolving available checks (rhcarvalho@gmail.com)
+- PAPR: customize disk space requirements (rhcarvalho@gmail.com)
+- Enable disk check on containerized installs (rhcarvalho@gmail.com)
+- Add module docstring (rhcarvalho@gmail.com)
+- Add suggestion to check disk space in any path (rhcarvalho@gmail.com)
+- Require at least 1GB in /usr/bin/local and tempdir (rhcarvalho@gmail.com)
+- Refactor DiskAvailability for arbitrary paths (rhcarvalho@gmail.com)
+- Adding some more sections to additional considerations, being less rigid on
+  large roles for composing -- can also be a playbook (ewolinet@redhat.com)
+- Updating snippet contents, formatting and providing urls
+  (ewolinet@redhat.com)
+- Update snippets and add bullet point on role dependency (ewolinet@redhat.com)
+- Creating initial proposal doc for review (ewolinet@redhat.com)
+
 * Fri Jun 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.129-1
 - Fix generate role binding destination for the HOSA service account
   (steveteuber@users.noreply.github.com)
