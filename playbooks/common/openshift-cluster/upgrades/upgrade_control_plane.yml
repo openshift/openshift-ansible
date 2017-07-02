@@ -295,8 +295,8 @@
   - lib_openshift
   - openshift_facts
   - docker
-  - openshift_node_upgrade
   - openshift_node_dnsmasq
+  - openshift_node_upgrade
 
   post_tasks:
   - name: Set node schedulability

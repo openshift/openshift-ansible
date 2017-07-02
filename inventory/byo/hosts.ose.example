@@ -10,6 +10,10 @@ nfs
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
+# Enable unsupported configurations, things that will yield a partially
+# functioning cluster but would not be supported for production use
+#openshift_enable_unsupported_configurations=false
+
 # SSH user, this user should allow ssh based auth without requiring a
 # password. If using ssh key based auth, then the key should be managed by an
 # ssh agent.

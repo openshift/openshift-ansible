@@ -133,6 +133,17 @@
   - ansible_selinux is defined
   - ansible_selinux.status == 'enabled'
 
+- name: Apply 3.6 dns config changes
+  yedit:
+    src: /etc/origin/node/node-config.yaml
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+  with_items:
+  - key: "dnsBindAddress"
+    value: "127.0.0.1:53"
+  - key: "dnsRecursiveResolvConf"
+    value: "/etc/origin/node/resolv.conf"
+
 # Restart all services
 - include: restart.yml
 
