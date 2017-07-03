@@ -86,6 +86,12 @@
     resource_name: admin
     user: "system:serviceaccount:kube-service-catalog:default"
 
+- name: Checking for master.etcd-ca.crt
+  stat:
+    path: /etc/origin/master/master.etcd-ca.crt
+  register: etcd_ca_crt
+  check_mode: no
+
 ## api server
 - template:
     src: api_server.j2
@@ -98,6 +104,8 @@
     cpu_requests: none
     memory_request: none
     cors_allowed_origin: localhost
+    etcd_servers: "{{ openshift.master.etcd_urls | join(',') }}"
+    etcd_cafile: "{{ '/etc/origin/master/master.etcd-ca.crt' if etcd_ca_crt.stat.exists else '/etc/origin/master/ca-bundle.crt' }}"
     node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
 
 - name: Set Service Catalog API Server daemonset

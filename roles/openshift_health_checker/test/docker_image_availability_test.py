@@ -259,3 +259,17 @@ def test_required_images(deployment_type, is_containerized, groups, oreg_url, ex
     )
 
     assert expected == DockerImageAvailability("DUMMY").required_images(task_vars)
+
+
+def test_containerized_etcd():
+    task_vars = dict(
+        openshift=dict(
+            common=dict(
+                is_containerized=True,
+            ),
+        ),
+        openshift_deployment_type="origin",
+        group_names=['etcd'],
+    )
+    expected = set(['registry.access.redhat.com/rhel7/etcd'])
+    assert expected == DockerImageAvailability("DUMMY").required_images(task_vars)

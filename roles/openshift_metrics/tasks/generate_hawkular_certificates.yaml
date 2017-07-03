@@ -17,14 +17,17 @@
   local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
+  become: false
 
 - local_action: slurp src="{{ local_tmp.stdout }}/hawkular-metrics.pwd"
   register: hawkular_metrics_pwd
   no_log: true
+  become: false
 
 - name: generate htpasswd file for hawkular metrics
   local_action: htpasswd path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
   no_log: true
+  become: false
 
 - name: copy local generated passwords to target
   copy:

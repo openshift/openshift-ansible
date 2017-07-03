@@ -1,0 +1,12 @@
+---
+# This task list checks for unsupported configurations. Values here should yield
+# a partially functioning cluster but would not be supported for production use.
+
+- name: Ensure that openshift_use_dnsmasq is true
+  when:
+  - not openshift_use_dnsmasq | default(true) | bool
+  fail:
+    msg: |-
+      Starting in 3.6 openshift_use_dnsmasq must be true or critical features
+      will not function. This also means that NetworkManager must be installed
+      enabled and responsible for management of the primary interface.

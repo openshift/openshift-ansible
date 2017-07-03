@@ -26,6 +26,20 @@
 - hosts: nodes
   become: yes
   tasks:
+  - name: Remove dnsmasq dispatcher
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /etc/dnsmasq.d/origin-dns.conf
+    - /etc/dnsmasq.d/origin-upstream-dns.conf
+    - /etc/dnsmasq.d/openshift-ansible.conf
+    - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
+    when: openshift_use_dnsmasq | default(true) | bool
+  - service:
+      name: NetworkManager
+      state: restarted
+    when: openshift_use_dnsmasq | default(true) | bool
   - name: Stop services
     service: name={{ item }} state=stopped
     with_items:
@@ -279,9 +293,6 @@
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /etc/atomic-enterprise
-    - /etc/dnsmasq.d/origin-dns.conf
-    - /etc/dnsmasq.d/origin-upstream-dns.conf
-    - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
     - /etc/openshift
     - /etc/openshift-sdn
     - /etc/sysconfig/atomic-enterprise-node
@@ -307,17 +318,13 @@
 
   - name: restart container-engine
     service: name=container-engine state=restarted
-    ignore_errors: true
+    failed_when: false
     register: container_engine
 
   - name: restart docker
     service: name=docker state=restarted
-    ignore_errors: true
+    failed_when: false
     when: not (container_engine | changed)
-
-  - name: restart NetworkManager
-    service: name=NetworkManager state=restarted
-    when: openshift_use_dnsmasq | default(true) | bool
 
 - hosts: masters
   become: yes

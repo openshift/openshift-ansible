@@ -173,9 +173,8 @@
     selector:
       component: "{{ es_component }}"
       provider: openshift
-    # pending #4091
-    #labels:
-    #- logging-infra: 'support'
+    labels:
+      logging-infra: 'support'
     ports:
     - port: 9300
 
@@ -187,9 +186,8 @@
     selector:
       component: "{{ es_component }}"
       provider: openshift
-    # pending #4091
-    #labels:
-    #- logging-infra: 'support'
+    labels:
+      logging-infra: 'support'
     ports:
     - port: 9200
       targetPort: "restapi"

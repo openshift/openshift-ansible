@@ -14,6 +14,17 @@
   package: name=dnsmasq state=installed
   when: not openshift.common.is_atomic | bool
 
+# this file is copied to /etc/dnsmasq.d/ when the node starts and is removed
+# when the node stops. A dbus-message is sent to dnsmasq to add the same entries
+# so that dnsmasq doesn't need to be restarted. Once we can use dnsmasq 2.77 or
+# newer we can use --server-file option to update the servers dynamically and
+# reload them by sending dnsmasq a SIGHUP. We write the file in case someone else
+# triggers a restart of dnsmasq but not a node restart.
+- name: Install node-dnsmasq.conf
+  template:
+    src: node-dnsmasq.conf.j2
+    dest: /etc/origin/node/node-dnsmasq.conf
+
 - name: Install dnsmasq configuration
   template:
     src: origin-dns.conf.j2

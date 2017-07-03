@@ -3,15 +3,12 @@ openshift_storageclass_defaults:
   aws:
     name: gp2
     provisioner: kubernetes.io/aws-ebs
-    parameters:
-      type: gp2
-      encrypted: "false"
+    type: gp2
   gce:
     name: standard
     provisioner: kubernetes.io/gce-pd
-    parameters:
-      type: pd-standard
+    type: pd-standard
 
 openshift_storageclass_name: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['name'] }}"
 openshift_storageclass_provisioner: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['provisioner'] }}"
-openshift_storageclass_parameters: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['parameters'] }}"
+openshift_storageclass_type: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['type'] }}"

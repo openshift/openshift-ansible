@@ -34,7 +34,7 @@
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
-    src: "{{ openshift.common.service_type }}-node.service.j2"
+    src: "node.service.j2"
   register: install_node_result
   when: not openshift.common.is_containerized | bool
   notify:

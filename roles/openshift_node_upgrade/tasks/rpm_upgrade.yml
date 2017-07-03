@@ -16,7 +16,7 @@
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
-    src: "{{ openshift.common.service_type }}-node.service.j2"
+    src: "node.service.j2"
   register: l_node_unit
 
 # NOTE: This is needed to make sure we are using the correct set

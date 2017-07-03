@@ -89,9 +89,8 @@
     selector:
       component: "{{ kibana_component }}"
       provider: openshift
-    # pending #4091
-    #labels:
-    #- logging-infra: 'support'
+    labels:
+      logging-infra: 'support'
     ports:
     - port: 443
       targetPort: "oaproxy"

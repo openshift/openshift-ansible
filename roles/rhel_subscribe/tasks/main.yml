@@ -21,6 +21,11 @@
     msg: Either rhsub_pass or the rhel_subscription_pass env variable are required for this role.
   when: rhel_subscription_pass is not defined
 
+- name: Detecting Atomic Host Operating System
+  stat:
+    path: /run/ostree-booted
+  register: ostree_booted
+
 - name: Satellite preparation
   command: "rpm -Uvh http://{{ rhel_subscription_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
   args:
@@ -57,5 +62,6 @@
   when: openshift_pool_id.stdout != ''
 
 - include: enterprise.yml
-  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and
-        not openshift.common.is_atomic | bool
+  when:
+  - deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ]
+  - not ostree_booted.stat.exists | bool
