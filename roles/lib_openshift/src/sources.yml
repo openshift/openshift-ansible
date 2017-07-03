@@ -263,6 +263,17 @@ oc_service.py:
 - class/oc_service.py
 - ansible/oc_service.py
 
+oc_storageclass.py:
+- doc/generated
+- doc/license
+- lib/import.py
+- doc/storageclass
+- ../../lib_utils/src/class/yedit.py
+- lib/base.py
+- lib/storageclass.py
+- class/oc_storageclass.py
+- ansible/oc_storageclass.py
+
 oc_user.py:
 - doc/generated
 - doc/license
