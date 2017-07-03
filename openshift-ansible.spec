@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.131
+Version:        3.6.132
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.132-1
+- 
+
 * Sun Jul 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.131-1
 - Fix upgrade (sdodson@redhat.com)
 - Prevent the script to use default route ip as upstream nameserver.
