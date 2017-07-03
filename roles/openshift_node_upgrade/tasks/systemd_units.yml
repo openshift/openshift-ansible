@@ -18,21 +18,6 @@
 
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
-
-- name: Pre-pull node image
-  command: >
-    docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool
-
-- name: Pre-pull openvswitch image
-  command: >
-    docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
-
 - name: Install Node dependencies docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
