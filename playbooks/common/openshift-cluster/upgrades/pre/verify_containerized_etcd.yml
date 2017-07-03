@@ -1,0 +1,22 @@
+- name: Verify containerized etcd runs with spc_t selinux label
+  hosts: oo_etcd_hosts_to_upgrade
+  tasks:
+  - block:
+    - name: Inspect running etcd_container
+      command: >
+        docker inspect etcd_container
+      register: l_docker_inspect_result
+
+    - fail:
+        msg: "Unable to inspect etcd_container"
+      when:
+      - l_docker_inspect_result.rc > 0
+
+    - set_fact:
+        l_process_label: "{{ (l_docker_inspect_result.stdout | from_json)[0].ProcessLabel }}"
+
+    - fail:
+        msg: "The 'etcd_container' is missing spc_t label. Available process label: {{ l_process_label }}"
+      when: "'spc_t' not in l_process_label"
+    when:
+    - openshift.common.is_containerized | bool
