@@ -1618,14 +1618,7 @@ def sort_unique(alist):
         Returns:
             list: a sorted de-duped list
     """
-
-    alist.sort()
-    out = list()
-    for i in alist:
-        if i not in out:
-            out.append(i)
-
-    return out
+    return sorted(list(set(alist)))
 
 
 def safe_get_bool(fact):
@@ -1649,20 +1642,36 @@ def set_proxy_facts(facts):
     """
     if 'common' in facts:
         common = facts['common']
+
+        # No openshift_no_proxy settings detected, empty list for now
+        if 'no_proxy' not in common:
+            common['no_proxy'] = []
+
+        # _no_proxy settings set. It is just a simple string, not a
+        # list or anything
+        elif 'no_proxy' in common and isinstance(common['no_proxy'], string_types):
+            # no_proxy is now a list of all the comma-separated items
+            # in the _no_proxy value
+            common['no_proxy'] = common['no_proxy'].split(",")
+
+        # at this point common['no_proxy'] is a LIST datastructure. It
+        # may be empty, or it may contain some hostnames or ranges.
+
+        # We always add local dns domain and ourselves no matter what
+        common['no_proxy'].append('.' + common['dns_domain'])
+        common['no_proxy'].append(common['hostname'])
+
+        # You are also setting system proxy vars, openshift_http_proxy/openshift_https_proxy
         if 'http_proxy' in common or 'https_proxy' in common:
-            if 'no_proxy' in common and isinstance(common['no_proxy'], string_types):
-                common['no_proxy'] = common['no_proxy'].split(",")
-            elif 'no_proxy' not in common:
-                common['no_proxy'] = []
+            # You want to generate no_proxy hosts and it's a boolean value
             if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
+                # And you want to set up no_proxy for internal hostnames
                 if 'no_proxy_internal_hostnames' in common:
+                    # Split the internal_hostnames string by a comma
+                    # and add that list to the overall no_proxy list
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
-            # We always add local dns domain and ourselves no matter what
-            common['no_proxy'].append('.' + common['dns_domain'])
-            common['no_proxy'].append('.svc')
-            common['no_proxy'].append(common['hostname'])
-            common['no_proxy'] = ','.join(sort_unique(common['no_proxy']))
-        facts['common'] = common
+
+        common['no_proxy'] = ','.join(sort_unique(common['no_proxy']))
     return facts
 
 
