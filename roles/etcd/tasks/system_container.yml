@@ -1,4 +1,7 @@
 ---
+- set_fact:
+    l_etcd_src_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' }}"
+
 - name: Pull etcd system container
   command: atomic pull --storage=ostree {{ openshift.etcd.etcd_image }}
   register: pull_result
@@ -50,7 +53,7 @@
 
 - name: Check for previous etcd data store
   stat:
-    path: "{{ etcd_data_dir }}/member/"
+    path: "{{ l_etcd_src_data_dir }}/member/"
   register: src_datastore
 
 - name: Check for etcd system container data store
@@ -66,7 +69,7 @@
 
 - name: Copy etcd data store
   command: >
-    cp -a {{ etcd_data_dir }}/member
+    cp -a {{ l_etcd_src_data_dir }}/member
     {{ r_etcd_common_system_container_host_dir }}/etcd.etcd/member
   when:
     - src_datastore.stat.exists
