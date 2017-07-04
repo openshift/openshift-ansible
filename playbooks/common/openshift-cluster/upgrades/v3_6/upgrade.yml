@@ -6,6 +6,10 @@
   tags:
   - pre_upgrade
 
+- include: ../pre/verify_containerized_etcd.yml
+  tags:
+  - pre_upgrade
+
 - name: Configure the upgrade target for the common upgrade tasks
   hosts: oo_all_hosts
   tags:
