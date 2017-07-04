@@ -6,6 +6,10 @@ osnl_nfs_export_options: "*(rw,sync,all_squash)"
 # mounted as <osnl_mount_dir>/test1g0001 etc.
 osnl_mount_dir: /exports/openshift
 
+# Mode for the NFS-exported directories. Defaults to secure mode which may require additional configs depending on the environment.
+# See https://docs.openshift.com/container-platform/3.5/install_config/persistent_storage/persistent_storage_nfs.html#nfs-volume-security
+r_openshift_storage_nfs_lvm_export_dir_mode: 0700
+
 # Volume Group to use.
 osnl_volume_group: openshiftvg
 
