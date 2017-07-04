@@ -34,4 +34,4 @@
       msg: >
         openshift_release is {{ openshift_release }} which is not a
         valid release for a {{ openshift_upgrade_target }} upgrade
-    when: openshift_release is defined and not openshift_release | version_compare(openshift_upgrade_target ,'=')
+    when: openshift_release is defined and openshift_release | version_compare(openshift_upgrade_target ,'<')
