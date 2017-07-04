@@ -36,9 +36,9 @@
 - name: Re-introduce leases (as a replacement for key TTLs)
   command: >
     oadm migrate etcd-ttl \
-    --cert {{ etcd_peer_cert_file }} \
-    --key {{ etcd_peer_key_file }} \
-    --cacert {{ etcd_peer_ca_file }} \
+    --cert {{ r_etcd_common_master_peer_cert_file }} \
+    --key {{ r_etcd_common_master_peer_key_file }} \
+    --cacert {{ r_etcd_common_master_peer_ca_file }} \
     --etcd-address 'https://{{ etcd_peer }}:{{ etcd_client_port }}' \
     --ttl-keys-prefix {{ item }} \
     --lease-duration 1h
