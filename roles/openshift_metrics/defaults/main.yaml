@@ -23,6 +23,7 @@ openshift_metrics_cassandra_requests_memory: 1G
 openshift_metrics_cassandra_requests_cpu: null
 openshift_metrics_cassandra_nodeselector: ""
 openshift_metrics_cassandra_storage_group: 65534
+openshift_metrics_cassandra_log_pvc_size: 1Gi
 
 openshift_metrics_heapster_standalone: False
 openshift_metrics_heapster_limits_memory: 3.75G
@@ -38,6 +39,7 @@ openshift_metrics_hawkular_agent_requests_memory: null
 openshift_metrics_hawkular_agent_requests_cpu: null
 openshift_metrics_hawkular_agent_nodeselector: ""
 openshift_metrics_hawkular_agent_namespace: "default"
+openshift_metrics_hawkular_log_pvc_size: 1Gi
 
 openshift_metrics_hawkular_hostname: "hawkular-metrics.{{openshift_master_default_subdomain}}"
 

@@ -57,3 +57,18 @@
   with_sequence: count={{ openshift_metrics_cassandra_replicas }}
   when: openshift_metrics_cassandra_storage_type == 'dynamic'
   changed_when: false
+
+
+- name: generate hawkular-cassandra persistent volume claims for logs
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cassandra-logs-pvc{{ item }}.yaml"
+  vars:
+    obj_name: "{{ openshift_metrics_cassandra_pvc_prefix }}-logs-{{ item }}"
+    labels:
+      metrics-infra: hawkular-cassandra
+    access_modes:
+    - ReadWriteOnce
+    size: "{{ openshift_metrics_cassandra_log_pvc_size }}"
+  with_sequence: count={{ openshift_metrics_cassandra_replicas }}
+  changed_when: false
