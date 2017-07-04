@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.132
+Version:        3.6.133
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.133-1
+- etcd, syscontainer: fix copy of existing datastore (gscrivan@redhat.com)
+- pre-pull images before stopping docker (jchaloup@redhat.com)
+- Always convert no_proxy from string into a list (sdodson@redhat.com)
+- fix 1466680. Fix logging deploying to the specified namespace
+  (jcantril@redhat.com)
+- logging_es: temporarily disable readiness probe (jwozniak@redhat.com)
+- Fixes to storage migration (sdodson@redhat.com)
+
 * Mon Jul 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.132-1
 - 
 
