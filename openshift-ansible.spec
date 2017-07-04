@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.93
+Version:        3.5.94
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.94-1
+- Sync latest image streams and templates for v1.5 (sdodson@redhat.com)
+- xPaaS v1.4.0 for v3.5 (sdodson@redhat.com)
+- fix 1466695. Honor hostmount in elasticsearch ops dc (jcantril@redhat.com)
+- fix 1466626. Add missing kibana index mapping for 'empty'
+  (jcantril@redhat.com)
+- Add origin version upgrade mappings (sdodson@redhat.com)
+
 * Fri Jun 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.93-1
 - Correct version comparisons to ensure proper evaluation (rteague@redhat.com)
 
