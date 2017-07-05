@@ -128,8 +128,17 @@
   when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
-- set_fact:
-    openshift_push_via_dns: "{{ openshift_use_dnsmasq | default(true) and openshift.common.version_gte_3_6 and r_openshift_master_clean_install }}"
+- block:
+    # This is an ugly hack to verify settings are in a file without modifying them with lineinfile.
+    # The template file will stomp any other settings made.
+  - name: check whether our docker-registry setting exists in the env file
+    command: "awk '/^OPENSHIFT_DEFAULT_REGISTRY=\'docker-registry.default.svc:5000\'/' /etc/sysconfig/{{ openshift.common.service_type }}-master"
+    ignore_errors: true
+    changed_when: false
+    register: already_set
+
+  - set_fact:
+      openshift_push_via_dns: "{{ (openshift_use_dnsmasq | default(true) and openshift.common.version_gte_3_6) or (already_set.stdout | match('docker-registry.default.svc:5000')) }}"
 
 - name: Install the systemd units
   include: systemd_units.yml
