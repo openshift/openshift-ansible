@@ -44,6 +44,10 @@ etcd_ca_serial: "{{ etcd_ca_dir }}/serial"
 etcd_ca_crl_number: "{{ etcd_ca_dir }}/crlnumber"
 etcd_ca_default_days: 1825
 
+r_etcd_common_master_peer_cert_file: /etc/origin/master/master.etcd-client.crt
+r_etcd_common_master_peer_key_file: /etc/origin/master/master.etcd-client.key
+r_etcd_common_master_peer_ca_file: /etc/origin/master/master.etcd-ca.crt
+
 # etcd server & certificate vars
 etcd_hostname: "{{ inventory_hostname }}"
 etcd_ip: "{{ ansible_default_ipv4.address }}"
