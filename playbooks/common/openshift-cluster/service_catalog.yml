@@ -6,3 +6,11 @@
   roles:
   - openshift_service_catalog
   - ansible_service_broker
+
+- name: Update Master configs
+  hosts: oo_masters:!oo_first_master
+  tasks:
+  - block:
+    - include_role:
+        name: openshift_service_catalog
+        tasks_from: wire_aggregator

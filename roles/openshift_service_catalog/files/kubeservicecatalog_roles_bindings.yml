@@ -115,6 +115,22 @@ objects:
     - bindings/status
     verbs:
     - update
+  - apiGroups:
+    - servicecatalog.k8s.io
+    resources:
+    - brokers
+    - instances
+    - bindings
+    verbs:
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - patch
+    - create
 
 - kind: ClusterRoleBinding
   apiVersion: v1
