@@ -3,6 +3,20 @@
   tags:
   - always
 
+- name: Check masters for embedded etcd
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tags:
+  - always
+  tasks:
+  - fail:
+      msg: "Migration of clustered embedded etcd instances is not supported. Currently there are {{ groups.oo_masters_to_config | length }} masters."
+    when:
+    - groups.oo_masters_to_config | length != 1
+    - groups.oo_etcd_to_config | default([]) | length == 0
+
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
   tags:

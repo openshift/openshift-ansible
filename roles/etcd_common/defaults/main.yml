@@ -14,7 +14,7 @@ r_etcd_common_embedded_etcd: false
 r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'host' or r_etcd_common_embedded_etcd | bool else 'docker exec etcd_container etcdctl' if r_etcd_common_etcd_runtime == 'docker' else 'runc exec etcd etcdctl' }}"
 
 # etcd server vars
-etcd_conf_dir: '/etc/etcd'
+etcd_conf_dir: "{{ '/etc/origin/master' if r_etcd_common_embedded_etcd | bool else '/etc/etcd' }}"
 r_etcd_common_system_container_host_dir: /var/lib/etcd/etcd.etcd
 etcd_system_container_conf_dir: /var/lib/etcd/etc
 etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
@@ -22,8 +22,8 @@ etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
 etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
 etcd_key_file: "{{ etcd_conf_dir }}/server.key"
 etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
-etcd_peer_cert_file: "{{ etcd_conf_dir }}/peer.crt"
-etcd_peer_key_file: "{{ etcd_conf_dir }}/peer.key"
+etcd_peer_cert_file: "{{ etcd_conf_dir + '/admin.crt' if r_etcd_common_embedded_etcd | bool else etcd_conf_dir + '/peer.crt' }}"
+etcd_peer_key_file: "{{ etcd_conf_dir + '/admin.key' if r_etcd_common_embedded_etcd | bool else etcd_conf_dir + '/peer.key' }}"
 
 # etcd ca vars
 etcd_ca_dir: "{{ etcd_conf_dir}}/ca"
@@ -55,7 +55,7 @@ etcd_is_thirdparty: False
 etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' if openshift.common.etcd_runtime != 'runc' else '/var/lib/etcd/etcd.etcd/' }}"
 
 # etcd ports and protocols
-etcd_client_port: 2379
-etcd_peer_port: 2380
+etcd_client_port: "{{ '4001' if r_etcd_common_embedded_etcd | bool else '2379' }}"
+etcd_peer_port: "{{ '7001' if r_etcd_common_embedded_etcd | bool else '2380' }}"
 etcd_url_scheme: http
 etcd_peer_url_scheme: http
