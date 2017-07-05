@@ -1657,7 +1657,9 @@ def set_proxy_facts(facts):
         # at this point common['no_proxy'] is a LIST datastructure. It
         # may be empty, or it may contain some hostnames or ranges.
 
-        # We always add local dns domain and ourselves no matter what
+        # We always add local dns domain, the service domain, and
+        # ourselves, no matter what
+        common['no_proxy'].append('.svc')
         common['no_proxy'].append('.' + common['dns_domain'])
         common['no_proxy'].append(common['hostname'])
 
