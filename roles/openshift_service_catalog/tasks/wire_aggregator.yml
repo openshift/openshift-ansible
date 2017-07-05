@@ -1,16 +1,82 @@
 ---
+- name: Make temp cert dir
+  command: mktemp -d /tmp/openshift-service-catalog-ansible-XXXXXX
+  register: certtemp
+  changed_when: False
+
+- name: Check for First Master Aggregator Signer cert
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: first_proxy_ca_crt
+  changed_when: false
+  delegate_to: "{{ first_master }}"
+
+- name: Check for First Master Aggregator Signer key
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: first_proxy_ca_key
+  changed_when: false
+  delegate_to: "{{ first_master }}"
+
+
 # TODO: this currently has a bug where hostnames are required
-- name: Creating Aggregator signer certs
+- name: Creating First Master Aggregator signer certs
   command: >
     oc adm ca create-signer-cert
     --cert=/etc/origin/master/front-proxy-ca.crt
     --key=/etc/origin/master/front-proxy-ca.key
     --serial=/etc/origin/master/ca.serial.txt
+  delegate_to: "{{ first_master }}"
+  when:
+  - not first_proxy_ca_crt.stat.exists
+  - not first_proxy_ca_key.stat.exists
+
+- name: Check for Aggregator Signer cert
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: proxy_ca_crt
+  changed_when: false
+
+- name: Check for Aggregator Signer key
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: proxy_ca_key
+  changed_when: false
+
+- name: Copy Aggregator Signer certs from first master
+  fetch:
+    src: "/etc/origin/master/{{ item }}"
+    dest: "{{ certtemp.stdout }}/{{ item }}"
+  with_items:
+  - front-proxy-ca.crt
+  - front-proxy-ca.key
+  delegate_to: "{{ first_master }}"
+  when:
+  - not proxy_ca_key.stat.exists
+  - not proxy_ca_crt.stat.exists
+
+- name: Copy Aggregator Signer certs to host
+  copy:
+    src: "{{ certtemp.stdout }}/{{ item }}"
+    dest: "/etc/origin/master/{{ item }}"
+  with_items:
+  - front-proxy-ca.crt
+  - front-proxy-ca.key
+  when:
+  - not proxy_ca_key.stat.exists
+  - not proxy_ca_crt.stat.exists
+
 #  oc_adm_ca_server_cert:
 #    cert: /etc/origin/master/front-proxy-ca.crt
 #    key: /etc/origin/master/front-proxy-ca.key
 
-- name: Create api-client config for Aggregator
+- name: Check for first master api-client config
+  stat:
+    path: /etc/origin/master/aggregator-front-proxy.kubeconfig
+  register: first_front_proxy_kubeconfig
+  delegate_to: "{{ first_master }}"
+
+- name: Create first master api-client config for Aggregator
   command: >
     oc adm create-api-client-config
     --certificate-authority=/etc/origin/master/front-proxy-ca.crt
@@ -19,6 +85,37 @@
     --user aggregator-front-proxy
     --client-dir=/etc/origin/master
     --signer-serial=/etc/origin/master/ca.serial.txt
+  delegate_to: "{{ first_master }}"
+  when:
+  - not first_front_proxy_kubeconfig.stat.exists
+
+- name: Check for api-client config
+  stat:
+    path: /etc/origin/master/aggregator-front-proxy.kubeconfig
+  register: front_proxy_kubeconfig
+
+- name: Copy api-client config from first master
+  fetch:
+    src: "/etc/origin/master/{{ item }}"
+    dest: "{{ certtemp.stdout }}/{{ item }}"
+  delegate_to: "{{ first_master }}"
+  with_items:
+  - aggregator-front-proxy.crt
+  - aggregator-front-proxy.key
+  - aggregator-front-proxy.kubeconfig
+  when:
+  - not front_proxy_kubeconfig.stat.exists
+
+- name: Copy api-client config to host
+  copy:
+    src: "{{ certtemp.stdout }}/{{ item }}"
+    dest: "/etc/origin/master/{{ item }}"
+  with_items:
+  - aggregator-front-proxy.crt
+  - aggregator-front-proxy.key
+  - aggregator-front-proxy.kubeconfig
+  when:
+  - not front_proxy_kubeconfig.stat.exists
 
 - name: Update master config
   yedit:
@@ -84,3 +181,9 @@
   changed_when: false
   when:
   - yedit_output.changed
+
+- name: Delete temp directory
+  file:
+    name: "{{ certtemp.stdout }}"
+    state: absent
+  changed_when: False
