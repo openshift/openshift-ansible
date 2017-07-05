@@ -250,8 +250,10 @@
               color: true
             openshift: {}
             broker:
-              devbroker: false
-              launchapbonbind: "{{ ansible_service_broker_launch_apb_on_bind }}"
+              dev_broker: "{{ ansible_service_broker_dev_broker }}"
+              launch_apb_on_bind: "{{ ansible_service_broker_launch_apb_on_bind }}"
+              recovery: "{{ ansible_service_broker_recovery }}"
+              output_request: "{{ ansible_service_broker_output_request }}"
 
 - name: Create the Broker resource in the catalog
   oc_obj:
