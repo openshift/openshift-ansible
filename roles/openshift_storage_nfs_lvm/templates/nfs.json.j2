@@ -9,13 +9,13 @@
   },
   "spec": {
     "capacity": {
-      "storage": "{{ osnl_volume_size }}Gi"
+      "storage": "{{ r_openshift_storage_nfs_lvm_volume_size }}Gi"
     },
     "accessModes": [ "ReadWriteOnce", "ReadWriteMany" ],
-    "persistentVolumeReclaimPolicy": "{{ osnl_volume_reclaim_policy }}",
+    "persistentVolumeReclaimPolicy": "{{ r_openshift_storage_nfs_lvm_volume_reclaim_policy }}",
     "nfs": {
       "server": "{{ inventory_hostname }}",
-      "path": "{{ osnl_mount_dir }}/{{ item }}"
+      "path": "{{ r_openshift_storage_nfs_lvm_mount_dir }}/{{ item }}"
     }
   }
 }

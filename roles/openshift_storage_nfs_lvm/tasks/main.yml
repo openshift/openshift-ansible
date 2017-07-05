@@ -5,25 +5,25 @@
   when: openshift.common.is_atomic | bool
 
 - name: Create lvm volumes
-  lvol: vg={{osnl_volume_group}} lv={{ item }} size={{osnl_volume_size}}G
-  with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
+  lvol: vg={{r_openshift_storage_nfs_lvm_volume_group}} lv={{ item }} size={{r_openshift_storage_nfs_lvm_volume_size}}G
+  with_sequence: start={{r_openshift_storage_nfs_lvm_volume_num_start}} count={{r_openshift_storage_nfs_lvm_volume_count}} format={{r_openshift_storage_nfs_lvm_volume_prefix}}{{r_openshift_storage_nfs_lvm_volume_size}}g%04d
 
 - name: create filesystem
-  filesystem: fstype=xfs dev=/dev/{{osnl_volume_group}}/{{ item }}
-  with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
+  filesystem: fstype=xfs dev=/dev/{{r_openshift_storage_nfs_lvm_volume_group}}/{{ item }}
+  with_sequence: start={{r_openshift_storage_nfs_lvm_volume_num_start}} count={{r_openshift_storage_nfs_lvm_volume_count}} format={{r_openshift_storage_nfs_lvm_volume_prefix}}{{r_openshift_storage_nfs_lvm_volume_size}}g%04d
 
 - name: mount volumes
-  mount: name={{osnl_mount_dir}}/{{ item }} src=/dev/{{osnl_volume_group}}/{{ item }} state=mounted fstype=xfs passno=0
-  with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
+  mount: name={{r_openshift_storage_nfs_lvm_mount_dir}}/{{ item }} src=/dev/{{r_openshift_storage_nfs_lvm_volume_group}}/{{ item }} state=mounted fstype=xfs passno=0
+  with_sequence: start={{r_openshift_storage_nfs_lvm_volume_num_start}} count={{r_openshift_storage_nfs_lvm_volume_count}} format={{r_openshift_storage_nfs_lvm_volume_prefix}}{{r_openshift_storage_nfs_lvm_volume_size}}g%04d
 
 - name: Make mounts owned by nfsnobody
-  file: path={{osnl_mount_dir}}/{{ item }} owner=nfsnobody group=nfsnobody mode=0700
-  with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
+  file: path={{r_openshift_storage_nfs_lvm_mount_dir}}/{{ item }} owner=nfsnobody group=nfsnobody mode={{r_openshift_storage_nfs_lvm_export_dir_mode}}
+  with_sequence: start={{r_openshift_storage_nfs_lvm_volume_num_start}} count={{r_openshift_storage_nfs_lvm_volume_count}} format={{r_openshift_storage_nfs_lvm_volume_prefix}}{{r_openshift_storage_nfs_lvm_volume_size}}g%04d
 
 - include: nfs.yml
 
 - name: Create volume json file
   template: src=../templates/nfs.json.j2 dest=/root/persistent-volume.{{ item }}.json
-  with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
+  with_sequence: start={{r_openshift_storage_nfs_lvm_volume_num_start}} count={{r_openshift_storage_nfs_lvm_volume_count}} format={{r_openshift_storage_nfs_lvm_volume_prefix}}{{r_openshift_storage_nfs_lvm_volume_size}}g%04d
 
 # TODO - Get the json files to a master, and load them.
