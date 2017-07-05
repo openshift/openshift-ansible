@@ -20,7 +20,7 @@ class LoggingCheck(OpenShiftCheck):
     @staticmethod
     def is_first_master(task_vars):
         """Run only on first master and only when logging is configured. Returns: bool"""
-        logging_deployed = get_var(task_vars, "openshift_hosted_logging_deploy", default=True)
+        logging_deployed = get_var(task_vars, "openshift_hosted_logging_deploy", default=False)
         # Note: It would be nice to use membership in oo_first_master group, however for now it
         # seems best to avoid requiring that setup and just check this is the first master.
         hostname = get_var(task_vars, "ansible_ssh_host") or [None]
