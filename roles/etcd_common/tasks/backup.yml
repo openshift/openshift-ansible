@@ -61,6 +61,21 @@
   - r_etcd_common_embedded_etcd | bool
   - not l_ostree_booted.stat.exists | bool
 
+- name: Check selinux label of '{{ l_etcd_data_dir }}'
+  command: >
+    stat -c '%C' {{ l_etcd_data_dir }}
+  register: l_etcd_selinux_labels
+
+- debug:
+    msg: "{{ l_etcd_selinux_labels }}"
+
+- name: Make sure the '{{ l_etcd_data_dir }}' has the proper label
+  command: >
+    chcon -t svirt_sandbox_file_t  "{{ l_etcd_data_dir }}"
+  when:
+  - l_etcd_selinux_labels.rc == 0
+  - "'svirt_sandbox_file_t' not in l_etcd_selinux_labels.stdout"
+
 - name: Generate etcd backup
   command: >
     {{ r_etcd_common_etcdctl_command }} backup --data-dir={{ l_etcd_incontainer_data_dir }}
