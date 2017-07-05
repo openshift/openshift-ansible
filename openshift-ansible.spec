@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.134
+Version:        3.6.135
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.135-1
+- Update the tag for enterprise service catalog (sdodson@redhat.com)
+- Fix missing service domain .svc in NO_PROXY settings (tbielawa@redhat.com)
+- drop etcdctl before the etcd_container service (jchaloup@redhat.com)
+- Fix prefix for OCP service-catalog prefix (sdodson@redhat.com)
+- Fully qualify ocp ansible_service_broker_image_prefix (sdodson@redhat.com)
+
 * Wed Jul 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.134-1
 - 
 
