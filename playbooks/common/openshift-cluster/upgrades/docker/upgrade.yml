@@ -32,7 +32,13 @@
 - debug: var=docker_image_count.stdout
   when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
-- service: name=docker state=stopped
+- service:
+    name: docker
+    state: stopped
+  register: l_pb_docker_upgrade_stop_result
+  until: not l_pb_docker_upgrade_stop_result | failed
+  retries: 3
+  delay: 30
 
 - name: Upgrade Docker
   package: name=docker{{ '-' + docker_version }} state=present
