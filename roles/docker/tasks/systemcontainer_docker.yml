@@ -12,6 +12,12 @@
       traditional docker package install. Otherwise, comment out openshift_docker_options
       in your inventory file.
 
+- name: Ensure container-selinux is installed
+  package:
+    name: container-selinux
+    state: present
+  when: not openshift.common.is_atomic | bool
+
 # Used to pull and install the system container
 - name: Ensure atomic is installed
   package:
