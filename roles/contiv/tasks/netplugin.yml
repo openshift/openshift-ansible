@@ -108,6 +108,10 @@
     name: "{{ openshift.docker.service_name }}"
     state: restarted
   when: docker_updated|changed
+  register: l_docker_restart_docker_in_contiv_result
+  until: not l_docker_restart_docker_in_contiv_result | failed
+  retries: 3
+  delay: 30
 
 - name: Netplugin | Enable Netplugin
   service:
