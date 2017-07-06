@@ -1,6 +1,10 @@
 ---
 - name: Restart docker
   service: name=docker state=restarted
+  register: l_docker_restart_docker_in_upgrade_result
+  until: not l_docker_restart_docker_in_upgrade_result | failed
+  retries: 3
+  delay: 30
 
 - name: Update docker facts
   openshift_facts:
