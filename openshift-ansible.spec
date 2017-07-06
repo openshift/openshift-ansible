@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.126.10
+Version:        3.6.126.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 06 2017 Scott Dodson <sdodson@redhat.com> 3.6.126.11-1
+- Wrap docker stop in retries (sdodson@redhat.com)
+
 * Thu Jul 06 2017 Scott Dodson <sdodson@redhat.com> 3.6.126.10-1
 - Add retries to node restart handlers (sdodson@redhat.com)
 
