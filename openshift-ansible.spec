@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.135
+Version:        3.6.136
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.136-1
+- Synching certs and aggregator configs from first master to all other masters
+  (ewolinet@redhat.com)
+- Addressing servicecatalog doesnt have enough permissions and multimaster
+  config for service-catalog (ewolinet@redhat.com)
+- add back mux_client config that was removed (rmeggins@redhat.com)
+- use master etcd certificates when delegating oadm migrate etcd-ttl
+  (jchaloup@redhat.com)
+
 * Wed Jul 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.135-1
 - Update the tag for enterprise service catalog (sdodson@redhat.com)
 - Fix missing service domain .svc in NO_PROXY settings (tbielawa@redhat.com)
