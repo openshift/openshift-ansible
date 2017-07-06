@@ -3,6 +3,7 @@
 
 - name: Update Master configs
   hosts: oo_masters
+  serial: 1
   tasks:
   - block:
     - include_role:
