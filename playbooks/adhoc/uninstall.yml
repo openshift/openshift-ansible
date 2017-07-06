@@ -314,6 +314,10 @@
     service: name=docker state=restarted
     ignore_errors: true
     when: not (container_engine | changed)
+    register: l_docker_restart_docker_in_pb_result
+    until: not l_docker_restart_docker_in_pb_result | failed
+    retries: 3
+    delay: 30
 
   - name: restart NetworkManager
     service: name=NetworkManager state=restarted
