@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.94
+Version:        3.5.95
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.95-1
+- pre-pull images before stopping docker (jchaloup@redhat.com)
+- singletonize some role tasks that repeat a lot (lmeyer@redhat.com)
+- Add teams attribute to github identity provider (dms@redhat.com)
+- 1.5 backport of fluentd configmap typo (ewolinet@redhat.com)
+
 * Tue Jul 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.94-1
 - Sync latest image streams and templates for v1.5 (sdodson@redhat.com)
 - xPaaS v1.4.0 for v3.5 (sdodson@redhat.com)
