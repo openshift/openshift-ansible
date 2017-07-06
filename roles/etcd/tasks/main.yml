@@ -10,6 +10,9 @@
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
 
+- include: etcdctl.yml
+  when: openshift_etcd_etcdctl_profile | default(true) | bool
+
 - name: Pull etcd container
   command: docker pull {{ openshift.etcd.etcd_image }}
   register: pull_result
@@ -131,9 +134,6 @@
     state: started
     enabled: yes
   register: start_result
-
-- include: etcdctl.yml
-  when: openshift_etcd_etcdctl_profile | default(true) | bool
 
 - name: Set fact etcd_service_status_changed
   set_fact:
