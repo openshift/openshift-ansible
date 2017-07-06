@@ -37,7 +37,7 @@
         cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
 
   # End Block
-  when: openshift_hosted_router_create_certificate | bool
+  when: ( openshift_hosted_router_create_certificate | bool ) and openshift_hosted_router_certificate == {}
 
 - name: Get the certificate contents for router
   copy:
