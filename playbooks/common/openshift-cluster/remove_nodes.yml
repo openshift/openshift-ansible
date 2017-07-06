@@ -1,0 +1,35 @@
+---
+- include: evaluate_groups.yml
+- include: initialize_nodes_to_remove.yml
+- include: initialize_facts.yml
+
+- name: Drain and remove nodes {{ openshift_nodes_to_remove }}
+  hosts: oo_nodes_to_remove
+
+  pre_tasks:
+  - name: Load lib_openshift modules
+    include_role:
+      name: lib_openshift
+
+  - name: Mark node unschedulable
+    oc_adm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: False
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    retries: 10
+    delay: 5
+    register: node_unschedulable
+    until: node_unschedulable|succeeded
+
+  - name: Drain node before removal
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data --ignore-daemonsets
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+
+  - name: Remove node
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} delete node {{ openshift.node.nodename | lower }}
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+
+  roles:
+  - lib_openshift

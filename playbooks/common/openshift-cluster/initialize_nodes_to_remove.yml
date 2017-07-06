@@ -1,0 +1,19 @@
+---
+- name: Filter list of nodes to be removed
+  hosts: oo_first_master
+
+  roles:
+  - lib_openshift
+
+  tasks:
+  # Build up the oo_nodes_to_remove group
+  - name: Evaluate oo_nodes_to_remove  {{ openshift_nodes_to_remove }}
+    add_host:
+      name: "{{ item }}"
+      groups: oo_nodes_to_remove
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: " {{ groups['oo_nodes_to_config'] }}"
+    when:
+    - item in openshift_nodes_to_remove
+    changed_when: false
