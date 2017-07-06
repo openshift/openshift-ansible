@@ -12,6 +12,11 @@
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=jobs --confirm
+    register: l_pb_upgrade_control_plane_pre_upgrade_storage
+    when: openshift_master_upgrade_pre_storage_migration | default(true)
+    failed_when:
+    - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
+    - openshift_upgrade_pre_storage_migration_fatal= | default(true)
 
 # If facts cache were for some reason deleted, this fact may not be set, and if not set
 # it will always default to true. This causes problems for the etcd data dir fact detection
@@ -150,6 +155,11 @@
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=jobs --confirm
+    register: l_pb_upgrade_control_plane_post_upgrade_storage
+    when: openshift_master_upgrade_post_storage_migration | default(true)
+    failed_when:
+    - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
+    - openshift_upgrade_post_storage_migration_fatal= | default(true)
 
 ##############################################################################
 # Gate on master update complete
