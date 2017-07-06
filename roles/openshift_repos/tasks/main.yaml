@@ -8,7 +8,8 @@
     that: openshift_deployment_type in known_openshift_deployment_types
     msg: "openshift_deployment_type must be one of {{ known_openshift_deployment_types }}"
 
-- block:
+- when: not ostree_booted.stat.exists
+  block:
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
 
@@ -43,5 +44,8 @@
     - ansible_distribution != "Fedora"
     - openshift_deployment_type == 'origin'
     - openshift_enable_origin_repo | default(true) | bool
+    - r_openshift_repos_has_run is not defined
 
-  when: not ostree_booted.stat.exists
+  - name: Record that openshift_repos already ran
+    set_fact:
+      r_openshift_repos_has_run: True
