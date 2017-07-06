@@ -72,7 +72,6 @@ openshift_logging_fluentd_nodeselector: "{{ openshift_hosted_logging_fluentd_nod
 openshift_logging_fluentd_cpu_limit: 100m
 openshift_logging_fluentd_memory_limit: 512Mi
 openshift_logging_fluentd_es_copy: false
-openshift_logging_fluentd_use_journal: "{{ openshift_hosted_logging_use_journal if openshift_hosted_logging_use_journal is defined else (docker_log_driver == 'journald') | ternary(True, False) if docker_log_driver is defined else (openshift.docker.log_driver == 'journald') | ternary(True, False) if openshift.docker.log_driver is defined else openshift.docker.options | search('--log-driver=journald') if openshift.docker.options is defined else default(omit) }}"
 openshift_logging_fluentd_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
 openshift_logging_fluentd_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
 openshift_logging_fluentd_hosts: ['--all']

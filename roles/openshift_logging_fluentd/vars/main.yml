@@ -2,4 +2,3 @@
 __latest_fluentd_version: "3_5"
 __allowed_fluentd_versions: ["3_5", "3_6"]
 __allowed_fluentd_types: ["hosted", "secure-aggregator", "secure-host"]
-__fluentd_use_journal: "{{ (docker_log_driver == 'journald') | ternary(True, False) if docker_log_driver is defined else (openshift.docker.log_driver == 'journald') | ternary(True, False) if openshift.docker.log_driver is defined else openshift.docker.options | search('--log-driver=journald') if openshift.docker.options is defined else default(omit) }}"

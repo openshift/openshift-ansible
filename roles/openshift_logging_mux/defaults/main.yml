@@ -24,7 +24,6 @@ openshift_logging_mux_ops_host: "{{ openshift_logging_mux_app_host }}"
 openshift_logging_mux_ops_port: "{{ openshift_logging_mux_app_port }}"
 
 ### Used by "hosted" and "secure-aggregator" deployments
-openshift_logging_mux_use_journal: "{{ openshift_hosted_logging_use_journal | default('') }}"
 openshift_logging_mux_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
 openshift_logging_mux_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
 

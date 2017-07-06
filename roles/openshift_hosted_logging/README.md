@@ -22,7 +22,7 @@
 - openshift_hosted_logging_kibana_nodeselector: Specify the nodeSelector that Kibana should be use (label=value)
 - openshift_hosted_logging_curator_nodeselector: Specify the nodeSelector that Curator should be use (label=value)
 - openshift_hosted_logging_enable_ops_cluster: If "true", configure a second ES cluster and Kibana for ops logs.
-- openshift_hosted_logging_use_journal: If this is unset or empty, logging will try to figure out from docker which log driver it is using (json-file or journald).  You can set this param to "true" or "false" to force logging to use journal or not (but make sure you are sure which one docker is using).
+- openshift_hosted_logging_use_journal: *DEPRECATED - DO NOT USE*
 - openshift_hosted_logging_journal_source: By default, if this param is unset or empty, logging will use `/var/log/journal` if it exists, or `/run/log/journal` if not.  You can use this param to force logging to use a different location.
 - openshift_hosted_logging_journal_read_from_head: Set to `true` to have fluentd read from the beginning of the journal, to get historical log data.  Default is `false`.  *WARNING* Using `true` may take several minutes or even hours, depending on the size of the journal, until any new records show up in Elasticsearch, and will cause fluentd to consume a lot of CPU and RAM resources.
 
