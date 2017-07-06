@@ -14,7 +14,8 @@
     name: etcd_common
   vars:
     r_etcd_common_action: drop_etcdctl
-  when: openshift_etcd_etcdctl_profile | default(true) | bool
+  when:
+  - openshift_etcd_etcdctl_profile | default(true) | bool
 
 - block:
   - name: Pull etcd container
