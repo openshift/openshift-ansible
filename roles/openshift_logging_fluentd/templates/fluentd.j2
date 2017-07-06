@@ -92,8 +92,6 @@ spec:
           value: "{{ openshift_logging_fluentd_ops_ca }}"
         - name: "ES_COPY"
           value: "false"
-        - name: "USE_JOURNAL"
-          value: "{{ openshift_logging_fluentd_use_journal | lower }}"
         - name: "JOURNAL_SOURCE"
           value: "{{ openshift_logging_fluentd_journal_source | default('') }}"
         - name: "JOURNAL_READ_FROM_HEAD"

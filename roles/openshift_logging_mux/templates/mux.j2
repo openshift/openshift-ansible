@@ -89,8 +89,6 @@ spec:
           value: "{{openshift_logging_mux_ops_client_key}}"
         - name: "OPS_CA"
           value: "{{openshift_logging_mux_ops_ca}}"
-        - name: "USE_JOURNAL"
-          value: "false"
         - name: "JOURNAL_SOURCE"
           value: "{{openshift_logging_mux_journal_source | default('')}}"
         - name: "JOURNAL_READ_FROM_HEAD"

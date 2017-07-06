@@ -52,7 +52,7 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_fluentd_cpu_limit`: The CPU limit for Fluentd pods. Defaults to '100m'.
 - `openshift_logging_fluentd_memory_limit`: The memory limit for Fluentd pods. Defaults to '512Mi'.
 - `openshift_logging_fluentd_es_copy`: Whether or not to use the ES_COPY feature for Fluentd (DEPRECATED). Defaults to 'False'.
-- `openshift_logging_fluentd_use_journal`: NOTE: Fluentd will attempt to detect whether or not Docker is using the journald log driver when using the default of empty.
+- `openshift_logging_fluentd_use_journal`: *DEPRECATED - DO NOT USE* Fluentd will automatically detect whether or not Docker is using the journald log driver.
 - `openshift_logging_fluentd_journal_read_from_head`: If empty, Fluentd will use its internal default, which is false.
 - `openshift_logging_fluentd_hosts`: List of nodes that should be labeled for Fluentd to be deployed to. Defaults to ['--all'].
 - `openshift_logging_fluentd_buffer_queue_limit`: Buffer queue limit for Fluentd. Defaults to 1024.
