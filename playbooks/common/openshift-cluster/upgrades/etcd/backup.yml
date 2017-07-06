@@ -55,6 +55,21 @@
     - embedded_etcd | bool
     - not openshift.common.is_atomic | bool
 
+  - name: Check selinux label of '{{ openshift.etcd.etcd_data_dir }}'
+    command: >
+      stat -c '%C' {{ openshift.etcd.etcd_data_dir }}
+    register: l_etcd_selinux_labels
+
+  - debug:
+      msg: "{{ l_etcd_selinux_labels }}"
+
+  - name: Make sure the '{{ openshift.etcd.etcd_data_dir }}' has the proper label
+    command: >
+      chcon -t svirt_sandbox_file_t  "{{ openshift.etcd.etcd_data_dir }}"
+    when:
+    - l_etcd_selinux_labels.rc == 0
+    - "'svirt_sandbox_file_t' not in l_etcd_selinux_labels.stdout"
+
   - name: Generate etcd backup
     command: >
       {{ etcdctl_command }} backup --data-dir={{ openshift.etcd.etcd_data_dir }}
