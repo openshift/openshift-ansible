@@ -164,16 +164,16 @@ masterClients:
   externalKubernetesClientConnectionOverrides:
     acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
     contentType: application/vnd.kubernetes.protobuf
-    burst: 400
-    qps: 200
+    burst: {{ openshift_master_external_ratelimit_burst | default(400) }}
+    qps: {{ openshift_master_external_ratelimit_qps | default(200) }}
 {% endif %}
   externalKubernetesKubeConfig: ""
 {% if openshift.common.version_gte_3_3_or_1_3 | bool %}
   openshiftLoopbackClientConnectionOverrides:
     acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
     contentType: application/vnd.kubernetes.protobuf
-    burst: 600
-    qps: 300
+    burst: {{ openshift_master_loopback_ratelimit_burst | default(600) }}
+    qps: {{ openshift_master_loopback_ratelimit_qps | default(300) }}
 {% endif %}
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}

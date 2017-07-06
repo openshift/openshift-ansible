@@ -84,6 +84,13 @@ openshift_release=v3.6
 # See: https://godoc.org/github.com/openshift/origin/pkg/cmd/server/api#ImagePolicyConfig
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
 
+# Configure master API rate limits for external clients
+#openshift_master_external_ratelimit_qps=200
+#openshift_master_external_ratelimit_burst=400
+# Configure master API rate limits for loopback clients
+#openshift_master_loopback_ratelimit_qps=300
+#openshift_master_loopback_ratelimit_burst=600
+
 # Docker Configuration
 # Add additional, insecure, and blocked registries to global docker configuration
 # For enterprise deployment types we ensure that registry.access.redhat.com is
