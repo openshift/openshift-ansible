@@ -17,6 +17,7 @@ spec:
       labels:
         app: controller-manager
     spec:
+      serviceAccountName: service-catalog-controller
       nodeSelector:
 {% for key, value in node_selector.iteritems() %}
         {{key}}: "{{value}}"

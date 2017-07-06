@@ -48,13 +48,13 @@
     namespace: openshift-ansible-service-broker
     state: present
     labels:
-      app: ansible-service-broker
+      app: openshift-ansible-service-broker
       service: asb
     ports:
       - name: port-1338
         port: 1338
     selector:
-      app: ansible-service-broker
+      app: openshift-ansible-service-broker
       service: asb
 
 - name: create etcd service
@@ -66,7 +66,7 @@
       - name: etcd-advertise
         port: 2379
     selector:
-      app: ansible-service-broker
+      app: openshift-ansible-service-broker
       service: etcd
 
 - name: create route for ansible-service-broker service
@@ -118,12 +118,12 @@
           name: etcd
           namespace: openshift-ansible-service-broker
           labels:
-            app: ansible-service-broker
+            app: openshift-ansible-service-broker
             service: etcd
         spec:
           selector:
             matchLabels:
-              app: ansible-service-broker
+              app: openshift-ansible-service-broker
               service: etcd
           strategy:
             type: RollingUpdate
@@ -134,7 +134,7 @@
           template:
             metadata:
               labels:
-                app: ansible-service-broker
+                app: openshift-ansible-service-broker
                 service: etcd
             spec:
               restartPolicy: Always
@@ -266,4 +266,4 @@
         metadata:
           name: ansible-service-broker
         spec:
-          url: http://{{ ansible_service_broker_route }}
+          url: http://asb.openshift-ansible-service-broker.svc:1338
