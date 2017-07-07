@@ -2,12 +2,16 @@ FROM openshift3/playbook2image
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
+# override env vars from base image
+ENV SUMMARY="OpenShift's installation and configuration tool" \
+    DESCRIPTION="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster"
+
 LABEL name="openshift3/ose-ansible" \
-      summary="OpenShift's installation and configuration tool" \
-      description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      summary="$SUMMARY" \
+      description="$DESCRIPTION" \
       url="https://github.com/openshift/openshift-ansible" \
       io.k8s.display-name="openshift-ansible" \
-      io.k8s.description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      io.k8s.description="$DESCRIPTION" \
       io.openshift.expose-services="" \
       io.openshift.tags="openshift,install,upgrade,ansible" \
       com.redhat.component="aos3-installation-docker" \
