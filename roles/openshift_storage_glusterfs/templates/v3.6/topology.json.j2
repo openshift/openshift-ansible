@@ -17,7 +17,7 @@
           "node": {
             "hostnames": {
               "manage": [
-                "{{ hostvars[node].glusterfs_hostname | default(hostvars[node].openshift.common.hostname) }}"
+                "{{ hostvars[node].glusterfs_hostname | default(hostvars[node].openshift.node.nodename) }}"
               ],
               "storage": [
                 "{{ hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip) }}"
