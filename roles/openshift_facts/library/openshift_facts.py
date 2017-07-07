@@ -1654,14 +1654,15 @@ def set_proxy_facts(facts):
             # in the _no_proxy value
             common['no_proxy'] = common['no_proxy'].split(",")
 
-        # at this point common['no_proxy'] is a LIST datastructure. It
-        # may be empty, or it may contain some hostnames or ranges.
+            # at this point common['no_proxy'] is a LIST datastructure. It
+            # may be empty, or it may contain some hostnames or ranges.
 
-        # We always add local dns domain, the service domain, and
-        # ourselves, no matter what
-        common['no_proxy'].append('.svc')
-        common['no_proxy'].append('.' + common['dns_domain'])
-        common['no_proxy'].append(common['hostname'])
+            # We always add local dns domain, the service domain, and
+            # ourselves, no matter what (if you are setting any
+            # NO_PROXY values)
+            common['no_proxy'].append('.svc')
+            common['no_proxy'].append('.' + common['dns_domain'])
+            common['no_proxy'].append(common['hostname'])
 
         # You are also setting system proxy vars, openshift_http_proxy/openshift_https_proxy
         if 'http_proxy' in common or 'https_proxy' in common:
