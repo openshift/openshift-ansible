@@ -67,7 +67,7 @@ objects:
           - name: HEKETI_ADMIN_KEY
             value: ${HEKETI_ADMIN_KEY}
           - name: HEKETI_EXECUTOR
-            value: kubernetes
+            value: ${HEKETI_EXECUTOR}
           - name: HEKETI_FSTAB
             value: /var/lib/heketi/fstab
           - name: HEKETI_SNAPSHOT_LIMIT
@@ -81,6 +81,8 @@ objects:
           volumeMounts:
           - name: db
             mountPath: /var/lib/heketi
+          - name: config
+            mountPath: /etc/heketi
           readinessProbe:
             timeoutSeconds: 3
             initialDelaySeconds: 3
@@ -98,6 +100,9 @@ objects:
           glusterfs:
             endpoints: heketi-db-${CLUSTER_NAME}-endpoints
             path: heketidbstorage
+        - name: config
+          secret:
+            secretName: heketi-${CLUSTER_NAME}-config-secret
 parameters:
 - name: HEKETI_USER_KEY
   displayName: Heketi User Secret
@@ -105,6 +110,10 @@ parameters:
 - name: HEKETI_ADMIN_KEY
   displayName: Heketi Administrator Secret
   description: Set secret for administration of the Heketi service as user _admin_
+- name: HEKETI_EXECUTOR
+  displayName: heketi executor type
+  description: Set the executor type, kubernetes or ssh
+  value: kubernetes
 - name: HEKETI_KUBE_NAMESPACE
   displayName: Namespace
   description: Set the namespace where the GlusterFS pods reside

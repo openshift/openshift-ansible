@@ -20,6 +20,11 @@
     glusterfs_heketi_wipe: "{{ openshift_storage_glusterfs_registry_heketi_wipe }}"
     glusterfs_heketi_url: "{{ openshift_storage_glusterfs_registry_heketi_url }}"
     glusterfs_heketi_port: "{{ openshift_storage_glusterfs_registry_heketi_port }}"
+    glusterfs_heketi_executor: "{{ openshift_storage_glusterfs_registry_heketi_executor }}"
+    glusterfs_heketi_ssh_port: "{{ openshift_storage_glusterfs_registry_heketi_ssh_port }}"
+    glusterfs_heketi_ssh_user: "{{ openshift_storage_glusterfs_registry_heketi_ssh_user }}"
+    glusterfs_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_registry_heketi_ssh_sudo }}"
+    glusterfs_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_registry_heketi_ssh_keyfile }}"
     glusterfs_nodes: "{{ groups.glusterfs_registry | default(groups.glusterfs) }}"
 
 - include: glusterfs_common.yml

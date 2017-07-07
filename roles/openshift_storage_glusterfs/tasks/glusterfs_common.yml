@@ -19,6 +19,8 @@
     name: "heketi-storage-endpoints"
   - kind: "secret"
     name: "heketi-{{ glusterfs_name }}-topology-secret"
+  - kind: "secret"
+    name: "heketi-{{ glusterfs_name }}-config-secret"
   - kind: "template,route,service,dc"
     name: "heketi-{{ glusterfs_name }}"
   - kind: "svc"
@@ -125,6 +127,13 @@
   when:
   - glusterfs_heketi_topology_load
 
+- name: Generate heketi config file
+  template:
+    src: "{{ openshift.common.examples_content_version }}/heketi.json.j2"
+    dest: "{{ mktemp.stdout }}/heketi.json"
+  when:
+  - glusterfs_heketi_is_native
+
 - name: Generate heketi admin key
   set_fact:
     glusterfs_heketi_admin_key: "{{ 32 | oo_generate_secret }}"
@@ -141,6 +150,20 @@
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_user_key is undefined
+
+- name: Create heketi config secret
+  oc_secret:
+    namespace: "{{ glusterfs_namespace }}"
+    state: present
+    name: "heketi-{{ glusterfs_name }}-config-secret"
+    force: True
+    files:
+    - name: heketi.json
+      path: "{{ mktemp.stdout }}/heketi.json"
+    - name: private_key
+      path: "{{ glusterfs_heketi_ssh_keyfile }}"
+  when:
+  - glusterfs_heketi_is_native
 
 - include: heketi_deploy_part1.yml
   when:
