@@ -250,10 +250,10 @@
               color: true
             openshift: {}
             broker:
-              dev_broker: "{{ ansible_service_broker_dev_broker }}"
-              launch_apb_on_bind: "{{ ansible_service_broker_launch_apb_on_bind }}"
-              recovery: "{{ ansible_service_broker_recovery }}"
-              output_request: "{{ ansible_service_broker_output_request }}"
+              dev_broker: {{ ansible_service_broker_dev_broker | bool | lower }}
+              launch_apb_on_bind: {{ ansible_service_broker_launch_apb_on_bind | bool | lower }}
+              recovery: {{ ansible_service_broker_recovery | bool | lower }}
+              output_request: {{ ansible_service_broker_output_request | bool | lower }}
 
 - name: Create the Broker resource in the catalog
   oc_obj:
