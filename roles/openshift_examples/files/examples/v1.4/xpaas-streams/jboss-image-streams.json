@@ -118,6 +118,62 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
+                "name": "jboss-webserver31-tomcat7-openshift",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat JBoss Web Server 3.1 Tomcat 7"
+                }
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/webserver31-tomcat7-openshift",
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "JBoss Web Server 3.1 Tomcat 7 S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,tomcat,tomcat7,java,jboss,xpaas",
+                            "supports": "tomcat7:3.1,tomcat:7,java:8,xpaas:1.4",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "tomcat-websocket-chat",
+                            "version": "1.0",
+                            "openshift.io/display-name": "Red Hat JBoss Web Server 3.1 Tomcat 7"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-webserver31-tomcat8-openshift",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat JBoss Web Server 3.1 Tomcat 8"
+                }
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-webserver-3/webserver31-tomcat8-openshift",
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "JBoss Web Server 3.1 Tomcat 8 S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,tomcat,tomcat8,java,jboss,xpaas",
+                            "supports": "tomcat8:3.1,tomcat:8,java:8,xpaas:1.4",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "tomcat-websocket-chat",
+                            "version": "1.0",
+                            "openshift.io/display-name": "Red Hat JBoss Web Server 3.1 Tomcat 8"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
                 "name": "jboss-eap64-openshift",
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
@@ -329,6 +385,31 @@
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
+                "name": "jboss-decisionserver64-openshift"
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-decisionserver-6/decisionserver64-openshift",
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat JBoss BRMS 6.4 decision server S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,decisionserver,java,xpaas",
+                            "supports":"decisionserver:6.4,java:8,xpaas:1.4",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "decisionserver/hellorules",
+                            "sampleRef": "1.3",
+                            "version": "1.0"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
                 "name": "jboss-processserver63-openshift",
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss BPM Suite 6.3 intelligent process server"
@@ -362,6 +443,31 @@
                             "sampleContextDir": "processserver/library",
                             "sampleRef": "1.3",
                             "version": "1.4"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-processserver64-openshift"
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-processserver-6/processserver64-openshift",
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat JBoss BPM Suite 6.4 intelligent process server S2I images.",
+                            "iconClass": "icon-jboss",
+                            "tags": "builder,processserver,java,xpaas",
+                            "supports":"processserver:6.4,java:8,xpaas:1.4",
+                            "sampleRepo": "https://github.com/jboss-openshift/openshift-quickstarts.git",
+                            "sampleContextDir": "processserver/library",
+                            "sampleRef": "1.3",
+                            "version": "1.0"
                         }
                     }
                 ]
@@ -564,6 +670,32 @@
                             "tags": "messaging,amq,jboss,xpaas",
                             "supports":"amq:6.2,messaging,xpaas:1.4",
                             "version": "1.4"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "jboss-amq-63",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat JBoss A-MQ 6.3"
+                }
+            },
+            "spec": {
+                "dockerImageRepository": "registry.access.redhat.com/jboss-amq-6/amq63-openshift",
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "JBoss A-MQ 6.3 broker image.",
+                            "iconClass": "icon-jboss",
+                            "tags": "messaging,amq,jboss,xpaas",
+                            "supports": "amq:6.3,messaging,xpaas:1.0",
+                            "version": "1.0",
+                            "openshift.io/display-name": "Red Hat JBoss A-MQ 6.3"
                         }
                     }
                 ]
