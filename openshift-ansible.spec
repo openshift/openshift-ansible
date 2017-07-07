@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.136
+Version:        3.6.137
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.137-1
+- Install container-selinux with container-engine (smilner@redhat.com)
+- Bug 1466152 - Json-file log driver: Neither
+  "openshift_logging_fluentd_use_journal=false" nor omitted collects the log
+  entries (rmeggins@redhat.com)
+- Adding serial: 1 to play to ensure we run one at a time (ewolinet@redhat.com)
+- Fix yamllint (sdodson@redhat.com)
+- Workaround seboolean module with setsebool command. (abutcher@redhat.com)
+- Removed quotes and added env variable to be specific. (kwoodson@redhat.com)
+- [BZ 1467786] Fix for OPENSHIFT_DEFAULT_REGISTRY setting.
+  (kwoodson@redhat.com)
+- set the proper label of /var/lib/etcd directory (jchaloup@redhat.com)
+
 * Thu Jul 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.136-1
 - Synching certs and aggregator configs from first master to all other masters
   (ewolinet@redhat.com)
