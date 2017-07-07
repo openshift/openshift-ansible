@@ -92,7 +92,7 @@
 
     - name: Use Fedora Registry for image when distribution is Fedora
       set_fact:
-        l_docker_image_prepend: "registry.fedoraproject.org"
+        l_docker_image_prepend: "registry.fedoraproject.org/f25"
       when: ansible_distribution == 'Fedora'
 
     # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
