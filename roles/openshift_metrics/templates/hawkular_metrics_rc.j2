@@ -55,6 +55,7 @@ spec:
         - "-Dcom.datastax.driver.FORCE_NIO=true"
         - "-DKUBERNETES_MASTER_URL={{openshift_metrics_master_url}}"
         - "-DUSER_WRITE_ACCESS={{openshift_metrics_hawkular_user_write_access}}"
+        - "-Dhawkular.metrics.jmx-reporting-enabled"
         env:
         - name: POD_NAMESPACE
           valueFrom:
