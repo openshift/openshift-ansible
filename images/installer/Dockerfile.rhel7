@@ -20,7 +20,7 @@ LABEL name="openshift3/ose-ansible" \
 # because all content and dependencies (like 'oc') is already
 # installed via yum.
 USER root
-RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto" && \
+RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto skopeo openssl java-1.8.0-openjdk-headless httpd-tools" && \
     yum repolist > /dev/null && \
     yum-config-manager --enable rhel-7-server-ose-3.4-rpms && \
     yum-config-manager --enable rhel-7-server-rh-common-rpms && \
