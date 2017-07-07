@@ -2,5 +2,8 @@
 
 ansible_service_broker_remove: false
 ansible_service_broker_log_level: info
+ansible_service_broker_output_request: false
+ansible_service_broker_recovery: true
 # Recommended you do not enable this for now
+ansible_service_broker_dev_broker: false
 ansible_service_broker_launch_apb_on_bind: false
