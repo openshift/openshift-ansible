@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.137
+Version:        3.6.138
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jul 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.138-1
+- Wait for etcd to become healthy before migrating TTL (tbielawa@redhat.com)
+- Use openshift.node.nodename as glusterfs_hostname. (abutcher@redhat.com)
+- container-engine: Update Fedora registry url (smilner@redhat.com)
+- updating configmap map definition to fix asb not starting up correctly
+  (ewolinet@redhat.com)
+- xPaas v1.4.1 for 3.4 (sdodson@redhat.com)
+- xPaas v1.4.1 for 3.5 (sdodson@redhat.com)
+- xPaaS 1.4.1 for 3.6 (sdodson@redhat.com)
+- Only add entries to NO_PROXY settings if a NO_PROXY value is set
+  (tbielawa@redhat.com)
+- fixing configuation values. (shurley@redhat.com)
+
 * Fri Jul 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.137-1
 - Install container-selinux with container-engine (smilner@redhat.com)
 - Bug 1466152 - Json-file log driver: Neither
