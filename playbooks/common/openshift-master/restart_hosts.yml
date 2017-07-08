@@ -37,3 +37,4 @@
     state: started
     delay: 10
     port: "{{ openshift.master.api_port }}"
+    timeout: 600
