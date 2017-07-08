@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.138
+Version:        3.6.139
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jul 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.139-1
+- increase implicit 300s default timeout to explicit 600s (jchaloup@redhat.com)
+
 * Sat Jul 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.138-1
 - Wait for etcd to become healthy before migrating TTL (tbielawa@redhat.com)
 - Use openshift.node.nodename as glusterfs_hostname. (abutcher@redhat.com)
