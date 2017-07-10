@@ -8,7 +8,6 @@
   until: not r_docker_restart_docker_result | failed
   retries: 3
   delay: 30
-
   when: not docker_service_status_changed | default(false) | bool
 
 - name: restart udev
