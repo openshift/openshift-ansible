@@ -229,6 +229,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # If you will have more than one cluster per account then you must configure a
 # unique cluster id per cluster and you must label your nodes to match
 #openshift_cloudprovider_aws_cluster_id=cluster_id
+# If you're sure that you have only one cluster in your account you must set
+# openshift_cloudprovider_aws_single_cluster=true to override this check.
+#openshift_cloudprovider_aws_single_cluster=false
 #
 # Openstack
 #openshift_cloudprovider_kind=openstack
