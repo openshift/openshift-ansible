@@ -226,6 +226,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Note: IAM profiles may be used instead of storing API credentials on disk.
 #openshift_cloudprovider_aws_access_key=aws_access_key_id
 #openshift_cloudprovider_aws_secret_key=aws_secret_access_key
+# If you will have more than one cluster per account then you must configure a
+# unique cluster id per cluster and you must label your nodes to match
+#openshift_cloudprovider_aws_cluster_id=cluster_id
 #
 # Openstack
 #openshift_cloudprovider_kind=openstack

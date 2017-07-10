@@ -15,3 +15,19 @@
     section: Global
     option: Zone
     value: "{{ openshift.provider.zone }}"
+
+# 3.6 and newer use KubernetesClusterID
+- name: Configure AWS KubernetesClusterID
+  ini_file:
+    dest: "{{ openshift.common.config_base }}/cloudprovider/aws.conf"
+    section: Global
+    option: KubernetesClusterID
+    value: "{{ openshift_cloudprovider_aws_cluster_id }}"
+
+# 3.5 and older use KubernetesClusterTag
+- name: Configure AWS KubernetesClusterTag
+  ini_file:
+    dest: "{{ openshift.common.config_base }}/cloudprovider/aws.conf"
+    section: Global
+    option: KubernetesClusterTag
+    value: "{{ openshift_cloudprovider_aws_cluster_id }}"
