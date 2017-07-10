@@ -4,15 +4,24 @@
     msg: "Must provide all or none for the following etcd params: calico_etcd_cert_dir, calico_etcd_ca_cert_file, calico_etcd_cert_file, calico_etcd_key_file, calico_etcd_endpoints"
   when: (calico_etcd_cert_dir is defined or calico_etcd_ca_cert_file is defined or calico_etcd_cert_file is defined or calico_etcd_key_file is defined or calico_etcd_endpoints is defined) and not (calico_etcd_cert_dir is defined and calico_etcd_ca_cert_file is defined and calico_etcd_cert_file is defined and calico_etcd_key_file is defined and calico_etcd_endpoints is defined)
 
-- name: Calico Node | Generate certs if not provided
-  include: gen_certs.yml
-  when: item is not defined
-  with_items:
-    - calico_etcd_ca_cert_file
-    - calico_etcd_cert_file
-    - calico_etcd_key_file
-    - calico_etcd_endpoints
-    - calico_etcd_cert_dir
+- name: Calico Node | Generate OpenShift-etcd certs
+  include: ../../../roles/etcd_client_certificates/tasks/main.yml
+  when: calico_etcd_ca_cert_file is not defined or calico_etcd_cert_file is not defined or calico_etcd_key_file is not defined or calico_etcd_endpoints is not defined or calico_etcd_cert_dir is not defined
+  vars:
+    etcd_cert_prefix: calico.etcd-
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/calico"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-calico-{{ openshift.common.hostname }}"
+
+- name: Calico Node | Set etcd cert location facts
+  when: calico_etcd_ca_cert_file is not defined or calico_etcd_cert_file is not defined or calico_etcd_key_file is not defined or calico_etcd_endpoints is not defined or calico_etcd_cert_dir is not defined
+  set_fact:
+    calico_etcd_ca_cert_file: "/etc/origin/calico/calico.etcd-ca.crt"
+    calico_etcd_cert_file: "/etc/origin/calico/calico.etcd-client.crt"
+    calico_etcd_key_file: "/etc/origin/calico/calico.etcd-client.key"
+    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls | join(',') }}"
+    calico_etcd_cert_dir: "/etc/origin/calico/"
 
 - name: Calico Node | Error if no certs set.
   fail:
