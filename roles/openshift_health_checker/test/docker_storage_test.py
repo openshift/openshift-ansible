@@ -65,8 +65,8 @@ non_atomic_task_vars = {"openshift": {"common": {"is_atomic": False}}}
         dict(info={
             "Driver": "overlay",
         }),
-        True,
-        ["unsupported Docker storage driver"],
+        False,
+        [],
     ),
     (
         dict(info={
