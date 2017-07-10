@@ -74,7 +74,7 @@
       ldap_ca: "{{ openshift_master_ldap_ca | default(lookup('file', openshift_master_ldap_ca_file) if openshift_master_ldap_ca_file is defined else None) }}"
       openid_ca: "{{ openshift_master_openid_ca | default(lookup('file', openshift_master_openid_ca_file) if openshift_master_openid_ca_file is defined else None) }}"
       request_header_ca: "{{ openshift_master_request_header_ca | default(lookup('file', openshift_master_request_header_ca_file) if openshift_master_request_header_ca_file is defined else None) }}"
-      registry_url: "{{ oreg_url | default(None) }}"
+      registry_url: "{{ oreg_url_master | default(oreg_url) | default(None) }}"
       oauth_grant_method: "{{ openshift_master_oauth_grant_method | default(None) }}"
       sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"

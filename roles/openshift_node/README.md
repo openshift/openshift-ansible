@@ -19,6 +19,7 @@ From this role:
 |------------------------------------------|-----------------------|--------------------------------------------------------|
 | openshift_node_debug_level               | openshift_debug_level | Verbosity of the debug logs for node |
 | oreg_url                                 | UNDEF (Optional)      | Default docker registry to use                         |
+| oreg_url_node                            | UNDEF (Optional)      | Default docker registry for nodes to use               |
 
 From openshift_common:
 

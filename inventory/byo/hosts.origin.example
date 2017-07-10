@@ -111,6 +111,10 @@ openshift_release=v1.5
 
 
 # Alternate image format string, useful if you've got your own registry mirror
+# Configure this setting just on node or master
+#oreg_url_master=example.com/openshift3/ose-${component}:${version}
+#oreg_url_node=example.com/openshift3/ose-${component}:${version}
+# For setting the configuration globally
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.access.redhat.com we can
 # modify image streams to point at that registry by setting the following to true
