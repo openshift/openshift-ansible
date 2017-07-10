@@ -1,4 +1,6 @@
 ---
+- include: ../openshift-cluster/evaluate_groups.yml
+
 - name: Install and configure NetworkManager
   hosts: oo_all_hosts
   become: yes
