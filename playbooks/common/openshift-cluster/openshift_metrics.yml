@@ -14,4 +14,3 @@
     include_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
-
