@@ -80,7 +80,7 @@ plain_curator_pod = {
     ("Permission denied", "Unexpected error using `oc`"),
 ])
 def test_oc_failure(problem, expect):
-    def execute_module(module_name, args, task_vars):
+    def execute_module(module_name, args, tmp, task_vars):
         if module_name == "ocutil":
             return dict(failed=True, result=problem)
         return dict(changed=False)

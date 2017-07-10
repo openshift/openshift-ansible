@@ -62,7 +62,7 @@ class Kibana(LoggingCheck):
             # TODO(lmeyer): give users option to validate certs
             status_code=302,
         )
-        result = self.execute_module('uri', args, task_vars)
+        result = self.execute_module('uri', args, None, task_vars)
         if result.get('failed'):
             return result['msg']
         return None
