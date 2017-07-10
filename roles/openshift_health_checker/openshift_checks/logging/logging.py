@@ -78,7 +78,7 @@ class LoggingCheck(OpenShiftCheck):
             "extra_args": list(extra_args) if extra_args else [],
         }
 
-        result = execute_module("ocutil", args, task_vars)
+        result = execute_module("ocutil", args, None, task_vars)
         if result.get("failed"):
             msg = (
                 'Unexpected error using `oc` to validate the logging stack components.\n'

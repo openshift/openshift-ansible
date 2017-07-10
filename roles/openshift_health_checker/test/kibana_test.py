@@ -169,7 +169,7 @@ def test_get_kibana_url(route, expect_url, expect_error):
     ),
 ])
 def test_verify_url_internal_failure(exec_result, expect):
-    check = Kibana(execute_module=lambda module_name, args, task_vars: dict(failed=True, msg=exec_result))
+    check = Kibana(execute_module=lambda module_name, args, tmp, task_vars: dict(failed=True, msg=exec_result))
     check._get_kibana_url = lambda task_vars: ('url', None)
 
     error = check._check_kibana_route({})
