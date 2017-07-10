@@ -40,6 +40,11 @@
     state: stopped
     daemon_reload: yes
   ignore_errors: True
+  register: r_docker_systemcontainer_docker_stop_result
+  until: not r_docker_systemcontainer_docker_stop_result | failed
+  retries: 3
+  delay: 30
+
 
 # Set http_proxy, https_proxy, and no_proxy in /etc/atomic.conf
 # regexp: the line starts with or without #, followed by the string
@@ -154,9 +159,12 @@
     enabled: yes
     state: started
     daemon_reload: yes
-  register: start_result
+  register: r_docker_systemcontainer_docker_start_result
+  until: not r_docker_systemcontainer_docker_start_result | failed
+  retries: 3
+  delay: 30
 
 - set_fact:
-    docker_service_status_changed: start_result | changed
+    docker_service_status_changed: r_docker_systemcontainer_docker_start_result | changed
 
 - meta: flush_handlers
