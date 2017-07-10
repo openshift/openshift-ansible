@@ -47,6 +47,7 @@
   fetch:
     src: "/etc/origin/master/{{ item }}"
     dest: "{{ certtemp.stdout }}/{{ item }}"
+    flat: yes
   with_items:
   - front-proxy-ca.crt
   - front-proxy-ca.key
@@ -98,6 +99,7 @@
   fetch:
     src: "/etc/origin/master/{{ item }}"
     dest: "{{ certtemp.stdout }}/{{ item }}"
+    flat: yes
   delegate_to: "{{ first_master }}"
   with_items:
   - aggregator-front-proxy.crt
