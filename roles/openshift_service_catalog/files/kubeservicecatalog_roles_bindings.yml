@@ -131,6 +131,12 @@ objects:
     verbs:
     - patch
     - create
+  - apiGroups:
+    - servicecatalog.k8s.io
+    resources:
+    - serviceclasses
+    verbs:
+    - create
 
 - kind: ClusterRoleBinding
   apiVersion: v1
