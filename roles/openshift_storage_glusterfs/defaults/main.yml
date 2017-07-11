@@ -8,7 +8,7 @@ openshift_storage_glusterfs_storageclass: True
 openshift_storage_glusterfs_image: "{{ 'rhgs3/rhgs-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-centos' | quote }}"
 openshift_storage_glusterfs_version: 'latest'
 openshift_storage_glusterfs_wipe: False
-openshift_storage_glusterfs_heketi_is_native: True
+openshift_storage_glusterfs_heketi_is_native: "{{ openshift_storage_glusterfs_is_native }}"
 openshift_storage_glusterfs_heketi_is_missing: True
 openshift_storage_glusterfs_heketi_deploy_is_missing: True
 openshift_storage_glusterfs_heketi_image: "{{ 'rhgs3/rhgs-volmanager-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'heketi/heketi' | quote }}"
@@ -34,7 +34,7 @@ openshift_storage_glusterfs_registry_storageclass: False
 openshift_storage_glusterfs_registry_image: "{{ openshift_storage_glusterfs_image }}"
 openshift_storage_glusterfs_registry_version: "{{ openshift_storage_glusterfs_version }}"
 openshift_storage_glusterfs_registry_wipe: "{{ openshift_storage_glusterfs_wipe }}"
-openshift_storage_glusterfs_registry_heketi_is_native: "{{ openshift_storage_glusterfs_heketi_is_native }}"
+openshift_storage_glusterfs_registry_heketi_is_native: "{{ openshift_storage_glusterfs_registry_is_native }}"
 openshift_storage_glusterfs_registry_heketi_is_missing: "{{ openshift_storage_glusterfs_heketi_is_missing }}"
 openshift_storage_glusterfs_registry_heketi_deploy_is_missing: "{{ openshift_storage_glusterfs_heketi_deploy_is_missing }}"
 openshift_storage_glusterfs_registry_heketi_image: "{{ openshift_storage_glusterfs_heketi_image }}"
@@ -44,9 +44,9 @@ openshift_storage_glusterfs_registry_heketi_user_key: "{{ omit }}"
 openshift_storage_glusterfs_registry_heketi_topology_load: "{{ openshift_storage_glusterfs_heketi_topology_load }}"
 openshift_storage_glusterfs_registry_heketi_wipe: "{{ openshift_storage_glusterfs_heketi_wipe }}"
 openshift_storage_glusterfs_registry_heketi_url: "{{ openshift_storage_glusterfs_heketi_url | default(omit) }}"
-openshift_storage_glusterfs_registry_heketi_port: 8080
-openshift_storage_glusterfs_registry_heketi_executor: 'kubernetes'
-openshift_storage_glusterfs_registry_heketi_ssh_port: 22
-openshift_storage_glusterfs_registry_heketi_ssh_user: 'root'
-openshift_storage_glusterfs_registry_heketi_ssh_sudo: False
-openshift_storage_glusterfs_registry_heketi_ssh_keyfile: '/dev/null'
+openshift_storage_glusterfs_registry_heketi_port: "{{ openshift_storage_glusterfs_heketi_port }}"
+openshift_storage_glusterfs_registry_heketi_executor: "{{ openshift_storage_glusterfs_heketi_executor }}"
+openshift_storage_glusterfs_registry_heketi_ssh_port: "{{ openshift_storage_glusterfs_heketi_ssh_port }}"
+openshift_storage_glusterfs_registry_heketi_ssh_user: "{{ openshift_storage_glusterfs_heketi_ssh_user }}"
+openshift_storage_glusterfs_registry_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_heketi_ssh_sudo }}"
+openshift_storage_glusterfs_registry_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_heketi_ssh_keyfile }}"
