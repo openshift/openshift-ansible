@@ -42,6 +42,14 @@
     namespace: openshift-ansible-service-broker
     state: present
 
+- name: Set SA cluster-role
+  oc_adm_policy_user:
+    state: present
+    namespace: "openshift-ansible-service-broker"
+    resource_kind: cluster-role
+    resource_name: cluster-admin
+    user: "system:serviceaccount:openshift-ansible-service-broker:asb"
+
 - name: create ansible-service-broker service
   oc_service:
     name: asb
