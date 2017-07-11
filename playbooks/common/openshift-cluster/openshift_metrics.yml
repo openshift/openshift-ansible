@@ -5,3 +5,12 @@
   hosts: oo_first_master
   roles:
   - openshift_metrics
+
+- name: OpenShift Metrics
+  hosts: oo_masters:!oo_first_master
+  serial: 1
+  tasks:
+  - name: Setup the non-first masters configs
+    include_role:
+      name: openshift_metrics
+      tasks_from: update_master_config.yaml
