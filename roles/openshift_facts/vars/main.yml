@@ -1,5 +1,0 @@
----
-required_system_containers_packages:
-  - atomic
-  - ostree
-  - runc
