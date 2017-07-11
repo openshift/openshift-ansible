@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.95
+Version:        3.5.96
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.96-1
+- Update image repo name, images have been moved from 'cloudforms' to
+  'cloudforms42' for CF 4.2. (simaishi@redhat.com)
+- CloudForms 4.5 templates (simaishi@redhat.com)
+- Backport #4234 into 1.5 Branch (manuel.hutter@vshn.ch)
+- set the proper label of /var/lib/etcd directory (jchaloup@redhat.com)
+- drop etcdctl before the etcd_container service (jchaloup@redhat.com)
+
 * Thu Jul 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.95-1
 - pre-pull images before stopping docker (jchaloup@redhat.com)
 - singletonize some role tasks that repeat a lot (lmeyer@redhat.com)
