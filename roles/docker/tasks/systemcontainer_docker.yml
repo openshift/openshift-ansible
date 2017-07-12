@@ -171,6 +171,6 @@
   delay: 30
 
 - set_fact:
-    docker_service_status_changed: r_docker_systemcontainer_docker_start_result | changed
+    docker_service_status_changed: "{{ r_docker_systemcontainer_docker_start_result | changed }}"
 
 - meta: flush_handlers
