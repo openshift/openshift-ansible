@@ -208,7 +208,7 @@
 
   - name: Reconcile Security Context Constraints
     command: >
-      {{ openshift.common.client_binary }} adm policy reconcile-sccs --confirm --additive-only=true -o name
+      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-sccs --confirm --additive-only=true -o name
     register: reconcile_scc_result
     changed_when:
     - reconcile_scc_result.stdout != ''
