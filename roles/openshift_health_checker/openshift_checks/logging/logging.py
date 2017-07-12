@@ -54,12 +54,12 @@ class LoggingCheck(OpenShiftCheck):
         """Returns: list of pods not in a ready and running state"""
         return [
             pod for pod in pods
-            if any(
+            if not pod.get("status", {}).get("containerStatuses") or any(
                 container['ready'] is False
                 for container in pod['status']['containerStatuses']
             ) or not any(
                 condition['type'] == 'Ready' and condition['status'] == 'True'
-                for condition in pod['status']['conditions']
+                for condition in pod['status'].get('conditions', [])
             )
         ]
 
@@ -78,7 +78,7 @@ class LoggingCheck(OpenShiftCheck):
             "extra_args": list(extra_args) if extra_args else [],
         }
 
-        result = execute_module("ocutil", args, task_vars)
+        result = execute_module("ocutil", args, None, task_vars)
         if result.get("failed"):
             msg = (
                 'Unexpected error using `oc` to validate the logging stack components.\n'

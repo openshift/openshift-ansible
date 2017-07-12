@@ -39,7 +39,8 @@ class CallbackModule(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         super(CallbackModule, self).v2_runner_on_failed(result, ignore_errors)
-        self.__failures.append(dict(result=result, ignore_errors=ignore_errors))
+        if not ignore_errors:
+            self.__failures.append(dict(result=result, ignore_errors=ignore_errors))
 
     def v2_playbook_on_stats(self, stats):
         super(CallbackModule, self).v2_playbook_on_stats(stats)

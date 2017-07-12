@@ -50,6 +50,16 @@ plain_kibana_pod = {
     }
 }
 
+plain_kibana_pod_no_containerstatus = {
+    "metadata": {
+        "labels": {"component": "kibana", "deploymentconfig": "logging-kibana"},
+        "name": "logging-kibana-1",
+    },
+    "status": {
+        "conditions": [{"status": "True", "type": "Ready"}],
+    }
+}
+
 fluentd_pod_node1 = {
     "metadata": {
         "labels": {"component": "fluentd", "deploymentconfig": "logging-fluentd"},
@@ -80,7 +90,7 @@ plain_curator_pod = {
     ("Permission denied", "Unexpected error using `oc`"),
 ])
 def test_oc_failure(problem, expect):
-    def execute_module(module_name, args, task_vars):
+    def execute_module(module_name, args, tmp, task_vars):
         if module_name == "ocutil":
             return dict(failed=True, result=problem)
         return dict(changed=False)
@@ -135,3 +145,23 @@ def test_get_pods_for_component(pod_output, expect_pods, expect_error):
         {}
     )
     assert_error(error, expect_error)
+
+
+@pytest.mark.parametrize('name, pods, expected_pods', [
+    (
+        'test single pod found, scheduled, but no containerStatuses field',
+        [plain_kibana_pod_no_containerstatus],
+        [plain_kibana_pod_no_containerstatus],
+    ),
+    (
+        'set of pods has at least one pod with containerStatuses (scheduled); should still fail',
+        [plain_kibana_pod_no_containerstatus, plain_kibana_pod],
+        [plain_kibana_pod_no_containerstatus],
+    ),
+
+], ids=lambda argvals: argvals[0])
+def test_get_not_running_pods_no_container_status(name, pods, expected_pods):
+    check = canned_loggingcheck(lambda exec_module, namespace, cmd, args, task_vars: '')
+    result = check.not_running_pods(pods)
+
+    assert result == expected_pods

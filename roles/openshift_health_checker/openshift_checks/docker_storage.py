@@ -17,7 +17,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
     tags = ["pre-install", "health", "preflight"]
 
     dependencies = ["python-docker-py"]
-    storage_drivers = ["devicemapper", "overlay2"]
+    storage_drivers = ["devicemapper", "overlay", "overlay2"]
     max_thinpool_data_usage_percent = 90.0
     max_thinpool_meta_usage_percent = 90.0
 

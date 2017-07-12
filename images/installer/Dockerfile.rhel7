@@ -2,16 +2,20 @@ FROM openshift3/playbook2image
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
+# override env vars from base image
+ENV SUMMARY="OpenShift's installation and configuration tool" \
+    DESCRIPTION="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster"
+
 LABEL name="openshift3/ose-ansible" \
-      summary="OpenShift's installation and configuration tool" \
-      description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      summary="$SUMMARY" \
+      description="$DESCRIPTION" \
       url="https://github.com/openshift/openshift-ansible" \
       io.k8s.display-name="openshift-ansible" \
-      io.k8s.description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
+      io.k8s.description="$DESCRIPTION" \
       io.openshift.expose-services="" \
       io.openshift.tags="openshift,install,upgrade,ansible" \
       com.redhat.component="aos3-installation-docker" \
-      version="v3.4.1" \
+      version="v3.6.0" \
       release="1" \
       architecture="x86_64"
 
@@ -20,12 +24,17 @@ LABEL name="openshift3/ose-ansible" \
 # because all content and dependencies (like 'oc') is already
 # installed via yum.
 USER root
-RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto" && \
+RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto skopeo openssl java-1.8.0-openjdk-headless httpd-tools" && \
     yum repolist > /dev/null && \
-    yum-config-manager --enable rhel-7-server-ose-3.4-rpms && \
+    yum-config-manager --enable rhel-7-server-ose-3.6-rpms && \
     yum-config-manager --enable rhel-7-server-rh-common-rpms && \
     yum install -y $INSTALL_PKGS && \
     yum clean all
+
+# The symlinks below are a (hopefully temporary) hack to work around the fact that this
+# image is based on python s2i which uses the python27 SCL instead of system python,
+# and so the system python modules we need would otherwise not be in the path.
+RUN ln -s /usr/lib/python2.7/site-packages/{boto,passlib} /opt/app-root/lib64/python2.7/
 
 USER ${USER_UID}
 
@@ -36,6 +45,7 @@ USER ${USER_UID}
 # $APP_HOME by the 'assemble' script, we set the WORK_DIR env var to the
 # location of openshift-ansible.
 ENV PLAYBOOK_FILE=playbooks/byo/openshift_facts.yml \
+    ANSIBLE_CONFIG=/usr/share/atomic-openshift-utils/ansible.cfg \
     WORK_DIR=/usr/share/ansible/openshift-ansible \
     OPTS="-v"
 
