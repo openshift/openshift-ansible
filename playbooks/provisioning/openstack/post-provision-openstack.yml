@@ -14,7 +14,7 @@
   become: true
   roles:
   - role: subscription-manager
-    when: hostvars.localhost.rhsm_register
+    when: hostvars.localhost.rhsm_register|default(False)
     tags: 'subscription-manager'
 
 - name: Determine which DNS server(s) to use for our generated records

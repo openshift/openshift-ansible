@@ -160,7 +160,7 @@ resources:
           protocol: icmp
           remote_ip_prefix: {{ ssh_ingress_cidr }}
 
-{% if openstack_flat_secgrp|bool %}
+{% if openstack_flat_secgrp|default(False)|bool %}
   flat-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -481,7 +481,7 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
-            - { get_resource: {% if openstack_flat_secgrp|bool %}flat-secgrp{% else %}etcd-secgrp{% endif %} }
+            - { get_resource: {% if openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}etcd-secgrp{% endif %} }
             - { get_resource: common-secgrp }
           floating_network: {{ external_network }}
           net_name:
@@ -563,7 +563,7 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
-{% if openstack_flat_secgrp|bool %}
+{% if openstack_flat_secgrp|default(False)|bool %}
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: master-secgrp }
@@ -617,7 +617,7 @@ resources:
           net:         { get_resource: net }
           subnet:      { get_resource: subnet }
           secgrp:
-            - { get_resource: {% if openstack_flat_secgrp|bool %}flat-secgrp{% else %}node-secgrp{% endif %} }
+            - { get_resource: {% if openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}node-secgrp{% endif %} }
             - { get_resource: common-secgrp }
           floating_network: {{ external_network }}
           net_name:
@@ -662,7 +662,7 @@ resources:
           subnet:      { get_resource: subnet }
           secgrp:
 # TODO(bogdando) filter only required node rules into infra-secgrp
-{% if openstack_flat_secgrp|bool %}
+{% if openstack_flat_secgrp|default(False)|bool %}
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: node-secgrp }
@@ -718,4 +718,3 @@ resources:
           volume_size: {{ dns_volume_size }}
     depends_on:
       - interface
-
