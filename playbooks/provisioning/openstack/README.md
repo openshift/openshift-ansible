@@ -4,10 +4,10 @@ This repository contains playbooks and Heat templates to provision
 OpenStack resources (servers, networking, volumes, security groups,
 etc.). The result is an environment ready for openshift-ansible.
 
-
 ## Dependencies for localhost (ansible control/admin node)
 
 * [Ansible 2.3](https://pypi.python.org/pypi/ansible)
+* [Ansible-galaxy](https://pypi.python.org/pypi/ansible-galaxy-local-deps)
 * [jinja2](http://jinja.pocoo.org/docs/2.9/)
 * [shade](https://pypi.python.org/pypi/shade)
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
@@ -18,6 +18,23 @@ etc.). The result is an environment ready for openshift-ansible.
 There are no additional dependencies for the cluster nodes. Required
 configuration steps are done by Heat given a specific user data config
 that normally should not be changed.
+
+## Required galaxy modules
+
+In order to pull in external dependencies for DNS configuration steps,
+the following commads need to be executed:
+
+    ansible-galaxy install \
+      -r openshift-ansible-contrib/playbooks/provisioning/openstack/galaxy-requirements.yaml \
+      -p openshift-ansible-contrib/roles
+
+Alternatively you can install directly from github:
+
+    ansible-galaxy install git+https://github.com/redhat-cop/infra-ansible,master \
+      -p openshift-ansible-contrib/roles
+
+Note, this assumes we're in the directory that contains the clonned
+openshift-ansible-contrib repo in its root path.
 
 ## What does it do
 
