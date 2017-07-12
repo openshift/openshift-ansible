@@ -1,6 +1,6 @@
 # Containerized openshift-ansible to run playbooks
 
-The [Dockerfile](images/installer/Dockerfile) in this repository uses the [playbook2image](https://github.com/openshift/playbook2image) source-to-image base image to containerize `openshift-ansible`. The resulting image can run any of the provided playbooks. See [BUILD.md](BUILD.md) for image build instructions.
+The [Dockerfile](images/installer/Dockerfile) in this repository can be used to build a containerized `openshift-ansible`. The resulting image can run any of the provided playbooks. See [BUILD.md](BUILD.md) for image build instructions.
 
 The image is designed to **run as a non-root user**. The container's UID is mapped to the username `default` at runtime. Therefore, the container's environment reflects that user's settings, and the configuration should match that. For example `$HOME` is `/opt/app-root/src`, so ssh keys are expected to be under `/opt/app-root/src/.ssh`. If you ran a container as `root` you would have to adjust the container's configuration accordingly, e.g. by placing ssh keys under `/root/.ssh` instead. Nevertheless, the expectation is that containers will be run as non-root; for example, this container image can be run inside OpenShift under the default `restricted` [security context constraint](https://docs.openshift.org/latest/architecture/additional_concepts/authorization.html#security-context-constraints).
 
@@ -13,8 +13,6 @@ The released container images for openshift-ansible follow the naming scheme det
 This provides consistency with other images used by the platform and it's also a requirement for some use cases like using the image from [`oc cluster up`](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md).
 
 ## Usage
-
-The `playbook2image` base image provides several options to control the behaviour of the containers. For more details on these options see the [playbook2image](https://github.com/openshift/playbook2image) documentation.
 
 At the very least, when running a container you must specify:
 
@@ -51,8 +49,6 @@ Here is a detailed explanation of the options used in the command above:
 * `-e OPTS="-v"` and `-t` make the output look nicer: the `default.yaml` playbook does not generate results and runs quietly unless we add the `-v` option to the `ansible-playbook` invocation, and a TTY is allocated via `-t` so that Ansible adds color to the output.
 
 Further usage examples are available in the [examples directory](examples/) with samples of how to use the image from within OpenShift.
-
-Additional usage information for images built from `playbook2image` like this one can be found in the [playbook2image examples](https://github.com/openshift/playbook2image/tree/master/examples).
 
 ## Running openshift-ansible as a System Container
 
