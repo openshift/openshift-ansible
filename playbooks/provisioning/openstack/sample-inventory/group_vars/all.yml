@@ -4,7 +4,7 @@ public_dns_domain: "example.com"
 public_dns_nameservers: []
 
 openstack_ssh_public_key: "openshift"
-openstack_default_image_name: "rhel73"
+openstack_default_image_name: "centos7"
 openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "public"
 
@@ -20,6 +20,8 @@ docker_volume_size: "15"
 openstack_subnet_prefix: "192.168.99"
 
 # # Red Hat subscription
+rhsm_register: False
+
 # # Using Red Hat Satellite:
 #rhsm_register: True
 #rhsm_satellite: 'sat-6.example.com'

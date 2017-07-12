@@ -1,6 +1,8 @@
 ---
-openshift_deployment_type: openshift-enterprise
-openshift_release: v3.5
+openshift_deployment_type: origin
+openshift_release: 1.5.1
+#openshift_deployment_type: openshift-enterprise
+#openshift_release: v3.5
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 
 # NOTE(shadower): do not remove this line, otherwise the default node labels
@@ -8,6 +10,11 @@ openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 openshift_node_labels: "{{ openstack.metadata.node_labels }}"
 
 osm_default_node_selector: 'region=primary'
+
+# NOTE(shadower): the hostname check seems to always fail because the
+# host's floating IP address doesn't match the address received from
+# inside the host.
+openshift_override_hostname_check: true
 
 # For POCs or demo environments that are using smaller instances than
 # the official recommended values for RAM and DISK, uncomment the line below.
