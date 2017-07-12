@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.141
+Version:        3.6.142
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.142-1
+- add scheduled pods check (jvallejo@redhat.com)
+- Only store failures that were not ignored. (rhcarvalho@gmail.com)
+- Add overlay to supported Docker storage drivers (rhcarvalho@gmail.com)
+- ansible.cfg: improve ssh ControlPath (lmeyer@redhat.com)
+- openshift_checks: fix execute_module params (lmeyer@redhat.com)
+- OCP build: override python-directed envvars (lmeyer@redhat.com)
+- OCP build: fix bug 1465724 (lmeyer@redhat.com)
+- OCP build: sync packages needed (lmeyer@redhat.com)
+- Adding create permissions for serviceclasses.servicecatalog.k8s.io to
+  service-catalog-controller role (ewolinet@redhat.com)
+- Fix calico when certs are auto-generated (djosborne10@gmail.com)
+- Removing trailing newline. (kwoodson@redhat.com)
+- Error upgrading control_plane when user is not system:admin
+  (jkaur@redhat.com)
+- [Bz 1468113] Configure the rest of the masters with the correct URL.
+  (kwoodson@redhat.com)
+
 * Tue Jul 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.141-1
 - Add evaluate_groups.yml to network_manager playbook (rteague@redhat.com)
 - updating fetch tasks to be flat paths (ewolinet@redhat.com)
