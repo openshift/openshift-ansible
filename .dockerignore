@@ -1,8 +1,12 @@
 .*
 bin
 docs
+hack
+inventory
 test
 utils
 **/*.md
 *.spec
+*.ini
+*.txt
 setup*
