@@ -40,7 +40,7 @@ Alternatively you can install directly from github:
       -p openshift-ansible-contrib/roles
 
 Notes:
-* This assumes we're in the directory that contains the clonned 
+* This assumes we're in the directory that contains the clonned
 openshift-ansible-contrib repo in its root path.
 * When trying to install a different version, the previous one must be removed first
 (`infra-ansible` directory from [roles](https://github.com/openshift/openshift-ansible-contrib/tree/master/roles)).
@@ -177,16 +177,30 @@ variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
     origin_release: 1.5.1
     openshift_deployment_type: "{{ deployment_type }}"
 
-### Configure static inventory
+### Configure static inventory and access via a bastion node
 
 Example inventory variables:
 
+    openstack_use_bastion: true
+    bastion_ingress_cidr: "{{openstack_subnet_prefix}}.0/24"
     openstack_private_ssh_key: ~/.ssh/openshift
     openstack_inventory: static
     openstack_inventory_path: ../../../../inventory
+    openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.openshift.example.com
 
+The `openstack_subnet_prefix` is the openstack private network for your cluster.
+And the `bastion_ingress_cidr` defines accepted range for SSH connections to nodes
+additionally to the `ssh_ingress_cidr`` (see the security notes above).
 
-In this guide, the latter points to the current directory, where you run ansible commands
+The SSH config will be stored on the ansible control node by the
+gitven path. Ansible uses it automatically. To access the cluster nodes with
+that ssh config, use the `-F` prefix, f.e.:
+
+    ssh -F /tmp/ssh.config.openshift.ansible.openshift.example.com master-0.openshift.example.com echo OK
+
+Note, relative paths will not work for the `openstack_ssh_config_path`, but it
+works for the `openstack_private_ssh_key` and `openstack_inventory_path`. In this
+guide, the latter points to the current directory, where you run ansible commands
 from.
 
 To verify nodes connectivity, use the command:
@@ -194,7 +208,7 @@ To verify nodes connectivity, use the command:
     ansible -v -i inventory/hosts -m ping all
 
 If something is broken, double-check the inventory variables, paths and the
-generated `<openstack_inventory_path>/hosts` file.
+generated `<openstack_inventory_path>/hosts` and `openstack_ssh_config_path` files.
 
 The `inventory: dynamic` can be used instead to access cluster nodes directly via
 floating IPs. In this mode you can not use a bastion node and should specify
@@ -213,6 +227,15 @@ this is how you stat the provisioning process from your ansible control node:
 Note, here you start with an empty inventory. The static inventory will be populated
 with data so you can omit providing additional arguments for future ansible commands.
 
+If bastion enabled, the generates SSH config must be applied for ansible.
+Otherwise, it is auto included by the previous step. In order to execute it
+as a separate playbook, use the following command:
+
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-provision-openstack.yml
+
+The first infra node then becomes a bastion node as well and proxies access
+for future ansible commands. The post-provision step also configures Satellite,
+if requested, and DNS server, and ensures other OpenShift requirements to be met.
 
 ### Install OpenShift
 

@@ -23,11 +23,9 @@
         q2: "[] | [?metadata.clusterid=='{{stack_name}}'] | [?public_v4!='']"
       when:
         - refresh_inventory|bool
-        - use_bastion|bool
 
     - name: Add cluster nodes w/o floating IPs to inventory
-      with_items: "{{ registered_nodes }}"
-      when: not item in registered_nodes_floating
+      with_items: "{{ registered_nodes|difference(registered_nodes_floating) }}"
       add_host:
         name: '{{ item.name }}'
         groups: '{{ item.metadata.group }}'
@@ -40,11 +38,10 @@
 
     - name: Add cluster nodes with floating IPs to inventory
       with_items: "{{ registered_nodes_floating }}"
-      when: item in registered_nodes_floating
       add_host:
         name: '{{ item.name }}'
         groups: '{{ item.metadata.group }}'
-        ansible_host: "{% if use_bastion|bool %}{{ item.name }}{% else %}{{ item.private_v4 }}{% endif %}"
+        ansible_host: "{% if use_bastion|bool %}{{ item.name }}{% else %}{{ item.public_v4 }}{% endif %}"
         ansible_fqdn: '{{ item.name }}'
         ansible_user: '{{ ssh_user }}'
         ansible_private_key_file: '{{ private_ssh_key }}'

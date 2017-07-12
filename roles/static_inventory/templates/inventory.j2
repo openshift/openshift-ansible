@@ -14,9 +14,8 @@
 %} ansible_user={{ hostvars[host]['ansible_user'] }}{% endif %}
 {% if 'ansible_private_key_file' in hostvars[host]
 %} ansible_private_key_file={{ hostvars[host]['ansible_private_key_file'] }}{% endif %}
-{% if 'ansible_ssh_extra_args' in hostvars[host]
-%} ansible_ssh_extra_args={{ hostvars[host]['ansible_ssh_extra_args']|quote }}{% endif %}
- openshift_hostname={{ host }}
+{% if use_bastion|bool and 'ansible_ssh_extra_args' in hostvars[host]
+%} ansible_ssh_extra_args={{ hostvars[host]['ansible_ssh_extra_args']|quote }}{% endif %} openshift_hostname={{ host }}
 
 {% endif %}
 {% endfor %}
