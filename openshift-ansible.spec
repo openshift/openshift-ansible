@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.114
+Version:        3.4.115
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.115-1
+- cfme 4.5 (sdodson@redhat.com)
+- Update image repo name, images have been moved from 'cloudforms' to
+  'cloudforms42' for CF 4.2. (simaishi@redhat.com)
+- Update image repo name, images have been moved from 'cloudforms' to
+  'cloudforms45' for CF 4.5. (simaishi@redhat.com)
+- CloudForms 4.5 templates (simaishi@redhat.com)
+- drop etcdctl before the etcd_container service (jchaloup@redhat.com)
+
 * Fri Jul 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.114-1
 - 
 
