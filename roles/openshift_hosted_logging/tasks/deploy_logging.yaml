@@ -25,7 +25,7 @@
 
 - name: "Create logging project"
   command: >
-    {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging
+    {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig new-project logging --node-selector=''
   when: logging_project_result.stdout == ""
 
 - name: "Changing projects"
