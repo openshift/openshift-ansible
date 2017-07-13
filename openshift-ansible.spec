@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.97
+Version:        3.5.98
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.98-1
+- 
+
 * Wed Jul 12 2017 Scott Dodson <sdodson@redhat.com> 3.5.97-1
 - Adds null nodeselector when creating logging project (erikmjacobs@gmail.com)
 - Upgrading control_plane fails when user is not system:admin
