@@ -85,6 +85,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
 | openshift_storage_glusterfs_heketi_is_native     | True                    | heketi should be containerized
+| openshift_storage_glusterfs_heketi_cli           | 'heketi-cli'            | Command/Path to invoke the heketi-cli tool **NOTE:** Change this only for **non-native heketi** if heketi-cli is not in the global `$PATH` of the machine running openshift-ansible
 | openshift_storage_glusterfs_heketi_image         | 'heketi/heketi'         | Container image to use for heketi pods, enterprise default is 'rhgs3/rhgs-volmanager-rhel7'
 | openshift_storage_glusterfs_heketi_version       | 'latest'                | Container image version to use for heketi pods
 | openshift_storage_glusterfs_heketi_admin_key     | auto-generated          | String to use as secret key for performing heketi commands as admin
