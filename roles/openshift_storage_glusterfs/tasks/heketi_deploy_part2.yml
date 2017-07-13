@@ -106,6 +106,7 @@
       HEKETI_ROUTE: "{{ glusterfs_heketi_url | default(['heketi-',glusterfs_name]|join) }}"
       HEKETI_USER_KEY: "{{ glusterfs_heketi_user_key }}"
       HEKETI_ADMIN_KEY: "{{ glusterfs_heketi_admin_key }}"
+      HEKETI_EXECUTOR: "{{ glusterfs_heketi_executor }}"
       HEKETI_KUBE_NAMESPACE: "{{ glusterfs_namespace }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
 

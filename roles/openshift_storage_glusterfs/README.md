@@ -92,6 +92,11 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_topology_load | True                    | Load the GlusterFS topology information into heketi
 | openshift_storage_glusterfs_heketi_url           | Undefined               | When heketi is native, this sets the hostname portion of the final heketi route URL. When heketi is external, this is the full URL to the heketi service.
 | openshift_storage_glusterfs_heketi_port          | 8080                    | TCP port for external heketi service **NOTE:** This has no effect in native mode
+| openshift_storage_glusterfs_heketi_executor      | 'kubernetes'            | Selects how a native heketi service will manage GlusterFS nodes: 'kubernetes' for native nodes, 'ssh' for external nodes
+| openshift_storage_glusterfs_heketi_ssh_port      | 22                      | SSH port for external GlusterFS nodes via native heketi
+| openshift_storage_glusterfs_heketi_ssh_user      | 'root'                  | SSH user for external GlusterFS nodes via native heketi
+| openshift_storage_glusterfs_heketi_ssh_sudo      | False                   | Whether to sudo (if non-root user) for SSH to external GlusterFS nodes via native heketi
+| openshift_storage_glusterfs_heketi_ssh_keyfile   | '/dev/null'             | Path to a private key file for use with SSH connections to external GlusterFS nodes via native heketi **NOTE:** This must be an absolute path
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 
 Each role variable also has a corresponding variable to optionally configure a
