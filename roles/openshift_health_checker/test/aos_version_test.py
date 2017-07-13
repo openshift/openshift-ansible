@@ -18,7 +18,17 @@ expected_pkgs = {
 }
 
 
-@pytest.mark.parametrize('pkgs, expect_not_found', [
+@pytest.mark.parametrize('pkgs', [
+    # all found
+    [Package('spam', '3.2.1'), Package('eggs', '3.2.1')],
+    # found with more specific version
+    [Package('spam', '3.2.1'), Package('eggs', '3.2.1.5')],
+])
+def test_check_precise_version_found(pkgs):
+    aos_version._check_precise_version_found(pkgs, expected_pkgs)
+
+
+@pytest.mark.parametrize('pkgs,expect_not_found', [
     (
         [],
         {
@@ -55,14 +65,6 @@ expected_pkgs = {
         },  # not the right version
     ),
     (
-        [Package('spam', '3.2.1'), Package('eggs', '3.2.1')],
-        {},  # all found
-    ),
-    (
-        [Package('spam', '3.2.1'), Package('eggs', '3.2.1.5')],
-        {},  # found with more specific version
-    ),
-    (
         [Package('eggs', '1.2.3'), Package('eggs', '3.2.1.5')],
         {
             "spam": {
@@ -73,25 +75,22 @@ expected_pkgs = {
         },  # eggs found with multiple versions
     ),
 ])
-def test_check_pkgs_for_precise_version(pkgs, expect_not_found):
-    if expect_not_found:
-        with pytest.raises(aos_version.PreciseVersionNotFound) as e:
-            aos_version._check_precise_version_found(pkgs, expected_pkgs)
-
-        assert list(expect_not_found.values()) == e.value.problem_pkgs
-    else:
+def test_check_precise_version_found_fail(pkgs, expect_not_found):
+    with pytest.raises(aos_version.PreciseVersionNotFound) as e:
         aos_version._check_precise_version_found(pkgs, expected_pkgs)
+    assert list(expect_not_found.values()) == e.value.problem_pkgs
 
 
-@pytest.mark.parametrize('pkgs, expect_higher', [
-    (
-        [],
-        [],
-    ),
-    (
-        [Package('spam', '3.2.1.9')],
-        [],  # more precise but not strictly higher
-    ),
+@pytest.mark.parametrize('pkgs', [
+    [],
+    # more precise but not strictly higher
+    [Package('spam', '3.2.1.9')],
+])
+def test_check_higher_version_found(pkgs):
+    aos_version._check_higher_version_found(pkgs, expected_pkgs)
+
+
+@pytest.mark.parametrize('pkgs,expect_higher', [
     (
         [Package('spam', '3.3')],
         ['spam-3.3'],  # lower precision, but higher
@@ -109,28 +108,22 @@ def test_check_pkgs_for_precise_version(pkgs, expect_not_found):
         ['eggs-3.4'],  # multiple versions, two are higher
     ),
 ])
-def test_check_pkgs_for_greater_version(pkgs, expect_higher):
-    if expect_higher:
-        with pytest.raises(aos_version.FoundHigherVersion) as e:
-            aos_version._check_higher_version_found(pkgs, expected_pkgs)
-        assert set(expect_higher) == set(e.value.problem_pkgs)
-    else:
+def test_check_higher_version_found_fail(pkgs, expect_higher):
+    with pytest.raises(aos_version.FoundHigherVersion) as e:
         aos_version._check_higher_version_found(pkgs, expected_pkgs)
+    assert set(expect_higher) == set(e.value.problem_pkgs)
 
 
-@pytest.mark.parametrize('pkgs, expect_to_flag_pkgs', [
-    (
-        [],
-        [],
-    ),
-    (
-        [Package('spam', '3.2.1')],
-        [],
-    ),
-    (
-        [Package('spam', '3.2.1'), Package('eggs', '3.2.2')],
-        [],
-    ),
+@pytest.mark.parametrize('pkgs', [
+    [],
+    [Package('spam', '3.2.1')],
+    [Package('spam', '3.2.1'), Package('eggs', '3.2.2')],
+])
+def test_check_multi_minor_release(pkgs):
+    aos_version._check_multi_minor_release(pkgs, expected_pkgs)
+
+
+@pytest.mark.parametrize('pkgs,expect_to_flag_pkgs', [
     (
         [Package('spam', '3.2.1'), Package('spam', '3.3.2')],
         ['spam'],
@@ -140,10 +133,7 @@ def test_check_pkgs_for_greater_version(pkgs, expect_higher):
         ['eggs'],
     ),
 ])
-def test_check_pkgs_for_multi_release(pkgs, expect_to_flag_pkgs):
-    if expect_to_flag_pkgs:
-        with pytest.raises(aos_version.FoundMultiRelease) as e:
-            aos_version._check_multi_minor_release(pkgs, expected_pkgs)
-        assert set(expect_to_flag_pkgs) == set(e.value.problem_pkgs)
-    else:
+def test_check_multi_minor_release_fail(pkgs, expect_to_flag_pkgs):
+    with pytest.raises(aos_version.FoundMultiRelease) as e:
         aos_version._check_multi_minor_release(pkgs, expected_pkgs)
+    assert set(expect_to_flag_pkgs) == set(e.value.problem_pkgs)
