@@ -119,6 +119,11 @@
   when:
   - not front_proxy_kubeconfig.stat.exists
 
+- name: copy tech preview extension file for service console UI
+  copy:
+    src: openshift-ansible-catalog-console.js
+    dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
 - name: Update master config
   yedit:
     state: present
@@ -138,6 +143,10 @@
       value: [X-Remote-Group]
     - key: authConfig.requestHeader.extraHeaderPrefixes
       value: [X-Remote-Extra-]
+    - key: assetConfig.extensionScripts
+      value: [/etc/origin/master/openshift-ansible-catalog-console.js]
+    - key: kubernetesMasterConfig.apiServerArguments.runtime-config
+      value: [apis/settings.k8s.io/v1alpha1=true]
   register: yedit_output
 
 #restart master serially here
