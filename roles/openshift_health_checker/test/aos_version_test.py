@@ -18,14 +18,40 @@ expected_pkgs = {
 }
 
 
-@pytest.mark.parametrize('pkgs', [
-    # all found
-    [Package('spam', '3.2.1'), Package('eggs', '3.2.1')],
-    # found with more specific version
-    [Package('spam', '3.2.1'), Package('eggs', '3.2.1.5')],
+@pytest.mark.parametrize('pkgs,expected_pkgs_dict', [
+    (
+        # all found
+        [Package('spam', '3.2.1'), Package('eggs', '3.2.1')],
+        expected_pkgs,
+    ),
+    (
+        # found with more specific version
+        [Package('spam', '3.2.1'), Package('eggs', '3.2.1.5')],
+        expected_pkgs,
+    ),
+    (
+        [Package('ovs', '2.6'), Package('ovs', '2.4')],
+        {
+            "ovs": {
+                "name": "ovs",
+                "version": ["2.6", "2.7"],
+                "check_multi": False,
+            }
+        },
+    ),
+    (
+        [Package('ovs', '2.7')],
+        {
+            "ovs": {
+                "name": "ovs",
+                "version": ["2.6", "2.7"],
+                "check_multi": False,
+            }
+        },
+    ),
 ])
-def test_check_precise_version_found(pkgs):
-    aos_version._check_precise_version_found(pkgs, expected_pkgs)
+def test_check_precise_version_found(pkgs, expected_pkgs_dict):
+    aos_version._check_precise_version_found(pkgs, expected_pkgs_dict)
 
 
 @pytest.mark.parametrize('pkgs,expect_not_found', [
@@ -81,36 +107,67 @@ def test_check_precise_version_found_fail(pkgs, expect_not_found):
     assert list(expect_not_found.values()) == e.value.problem_pkgs
 
 
-@pytest.mark.parametrize('pkgs', [
-    [],
-    # more precise but not strictly higher
-    [Package('spam', '3.2.1.9')],
+@pytest.mark.parametrize('pkgs,expected_pkgs_dict', [
+    (
+        [],
+        expected_pkgs,
+    ),
+    (
+        # more precise but not strictly higher
+        [Package('spam', '3.2.1.9')],
+        expected_pkgs,
+    ),
+    (
+        [Package('ovs', '2.7')],
+        {
+            "ovs": {
+                "name": "ovs",
+                "version": ["2.6", "2.7"],
+                "check_multi": False,
+            }
+        },
+    ),
 ])
-def test_check_higher_version_found(pkgs):
-    aos_version._check_higher_version_found(pkgs, expected_pkgs)
+def test_check_higher_version_found(pkgs, expected_pkgs_dict):
+    aos_version._check_higher_version_found(pkgs, expected_pkgs_dict)
 
 
-@pytest.mark.parametrize('pkgs,expect_higher', [
+@pytest.mark.parametrize('pkgs,expected_pkgs_dict,expect_higher', [
     (
         [Package('spam', '3.3')],
+        expected_pkgs,
         ['spam-3.3'],  # lower precision, but higher
     ),
     (
         [Package('spam', '3.2.1'), Package('eggs', '3.3.2')],
+        expected_pkgs,
         ['eggs-3.3.2'],  # one too high
     ),
     (
         [Package('eggs', '1.2.3'), Package('eggs', '3.2.1.5'), Package('eggs', '3.4')],
+        expected_pkgs,
         ['eggs-3.4'],  # multiple versions, one is higher
     ),
     (
         [Package('eggs', '3.2.1'), Package('eggs', '3.4'), Package('eggs', '3.3')],
+        expected_pkgs,
         ['eggs-3.4'],  # multiple versions, two are higher
     ),
+    (
+        [Package('ovs', '2.8')],
+        {
+            "ovs": {
+                "name": "ovs",
+                "version": ["2.6", "2.7"],
+                "check_multi": False,
+            }
+        },
+        ['ovs-2.8'],
+    ),
 ])
-def test_check_higher_version_found_fail(pkgs, expect_higher):
+def test_check_higher_version_found_fail(pkgs, expected_pkgs_dict, expect_higher):
     with pytest.raises(aos_version.FoundHigherVersion) as e:
-        aos_version._check_higher_version_found(pkgs, expected_pkgs)
+        aos_version._check_higher_version_found(pkgs, expected_pkgs_dict)
     assert set(expect_higher) == set(e.value.problem_pkgs)
 
 
