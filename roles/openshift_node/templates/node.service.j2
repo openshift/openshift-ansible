@@ -25,6 +25,7 @@ SyslogIdentifier={{ openshift.common.service_type }}-node
 Restart=always
 RestartSec=5s
 OOMScoreAdjust=-999
+KillMode=process
 
 [Install]
 WantedBy=multi-user.target
