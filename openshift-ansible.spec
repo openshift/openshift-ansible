@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.143
+Version:        3.6.144
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.144-1
+- Created js file for enabling tech preview for console, updated master-config
+  for pod presets and console tech preview (ewolinet@redhat.com)
+- GlusterFS: Add updated example hosts files (jarrpa@redhat.com)
+- GlusterFS: Fix SSH-based heketi configuration (jarrpa@redhat.com)
+
 * Wed Jul 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.143-1
 - 
 
