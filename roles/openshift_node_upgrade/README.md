@@ -82,7 +82,7 @@ Including an example of how to use your role (for instance, with variables passe
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --timeout=600s --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
 
   roles:
