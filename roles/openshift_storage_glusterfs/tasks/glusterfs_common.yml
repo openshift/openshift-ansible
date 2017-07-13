@@ -1,4 +1,16 @@
 ---
+- name: Make sure heketi-client is installed
+  package: name=heketi-client state=present
+  when:
+  - not openshift.common.is_atomic | bool
+  - not glusterfs_heketi_is_native | bool
+
+- name: Verify heketi-cli is installed
+  shell: "command -v heketi-cli >/dev/null 2>&1 || { echo >&2 'ERROR: Make sure heketi-cli is available, then re-run the installer'; exit 1; }"
+  changed_when: False
+  when:
+  - not glusterfs_heketi_is_native | bool
+
 - name: Verify target namespace exists
   oc_project:
     state: present
