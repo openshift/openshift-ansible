@@ -29,11 +29,18 @@
     msg: "Cannot upgrade Docker to >= 1.10, please upgrade or remove Docker manually, or use the Docker upgrade playbook if OpenShift is already installed."
   when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.10', '<') and docker_version is defined and docker_version | version_compare('1.10', '>=')
 
-# Make sure Docker is installed, but does not update a running version.
-# Docker upgrades are handled by a separate playbook.
-- name: Install Docker
-  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
-  when: not openshift.common.is_atomic | bool
+- when: not openshift.common.is_atomic | bool
+  block:
+  - name: Install Docker
+    package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
+
+  - name: Install oci-umount and runc
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - oci-umount
+    - runc
 
 - block:
   # Extend the default Docker service unit file when using iptables-services
