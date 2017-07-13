@@ -47,6 +47,21 @@
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
       Please set it to a version string like "3.4".
 
+- name: Abort if a cluster ID is not specified
+  when:
+    - openshift_cloudprovider_kind | default('') == 'aws'
+    - openshift_cloudprovider_aws_cluster_id | default('') == ''
+    - not openshift_cloudprovider_aws_single_cluster | default(false,true) | bool
+  fail:
+    msg: |-
+      When configuring the AWS cloud provider you must either set
+      openshift_cloudprovider_aws_cluster_id to a unique value per cluster and
+      that your instances are labeled with "kubernetes.io/cluster/xxxx=openshift_cloudprovider_aws_cluster_id"
+      where xxxx is a unique string and openshift_cloudprovider_aws_cluster_id
+      is the value of the aforementioned variable. If you've only got one cluster
+      per AWS account you must set openshift_cloudprovider_aws_single_cluster=true
+      to override this check.
+
 - include: unsupported.yml
   when:
     - not openshift_enable_unsupported_configurations | default(false) | bool
