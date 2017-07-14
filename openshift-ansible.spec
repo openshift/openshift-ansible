@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.144
+Version:        3.6.148
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.148-1
+- Adding in permissions to edit and admin cluster roles (ewolinet@redhat.com)
+- making kube-service-catalog project network global when using redhat
+  /openshift-ovs-multitenant plugin (ewolinet@redhat.com)
+- set KillMode to process in node service file (jchaloup@redhat.com)
+- Upgrade fails when "Drain Node for Kubelet upgrade" (jkaur@redhat.com)
+- openvswitch, syscontainer: specify the Docker service name
+  (gscrivan@redhat.com)
+
 * Thu Jul 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.144-1
 - Created js file for enabling tech preview for console, updated master-config
   for pod presets and console tech preview (ewolinet@redhat.com)
