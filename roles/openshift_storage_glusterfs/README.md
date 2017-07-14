@@ -76,7 +76,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | Name                                             | Default value           | Description                             |
 |--------------------------------------------------|-------------------------|-----------------------------------------|
 | openshift_storage_glusterfs_timeout              | 300                     | Seconds to wait for pods to become ready
-| openshift_storage_glusterfs_namespace            | 'default'               | Namespace in which to create GlusterFS resources
+| openshift_storage_glusterfs_namespace            | 'glusterfs'             | Namespace in which to create GlusterFS resources
 | openshift_storage_glusterfs_is_native            | True                    | GlusterFS should be containerized
 | openshift_storage_glusterfs_name                 | 'storage'               | A name to identify the GlusterFS cluster, which will be used in resource names
 | openshift_storage_glusterfs_nodeselector         | 'glusterfs=storage-host'| Selector to determine which nodes will host GlusterFS pods in native mode. **NOTE:** The label value is taken from the cluster name
@@ -109,7 +109,7 @@ are an exception:
 
 | Name                                                  | Default value         | Description                             |
 |-------------------------------------------------------|-----------------------|-----------------------------------------|
-| openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
+| openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'glusterfs'
 | openshift_storage_glusterfs_registry_name             | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
 | openshift_storage_glusterfs_registry_storageclass     | False                 | It is recommended to not create a StorageClass for GlusterFS clusters serving registry storage, so as to avoid performance penalties
 | openshift_storage_glusterfs_registry_heketi_admin_key | auto-generated        | Separate from the above
