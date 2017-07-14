@@ -11,6 +11,10 @@
   become: yes
   lineinfile: dest={{ vrs_config }} regexp=^ACTIVE_CONTROLLER line='ACTIVE_CONTROLLER={{ vsc_active_ip }}'
 
+- name: Set the K8S/OSE Cluster service CIDR
+  become: yes
+  lineinfile: dest={{ vrs_config }} regexp=^K8S_SERVICE_IPV4_SUBNET line='K8S_SERVICE_IPV4_SUBNET={{ k8s_cluster_service_cidr }}'
+
 - name: Set the Standby Controller
   become: yes
   lineinfile: dest={{ vrs_config }} regexp=^STANDBY_CONTROLLER line='STANDBY_CONTROLLER={{ vsc_standby_ip }}'

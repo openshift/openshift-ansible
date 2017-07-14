@@ -15,3 +15,9 @@
   when: "'nuage-underlay-overlay' not in iptablesrules.stdout"
   notify:
     - save iptable rules
+
+- name: Allow docker daemon traffic from underlay to overlay
+  command: /sbin/iptables -t nat -A POSTROUTING ! -s {{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }} -o svc-pat-tap -j MASQUERADE -m comment --comment "nuage-docker-underlay-overlay"
+  when: "'nuage-docker-underlay-overlay' not in iptablesrules.stdout"
+  notify:
+    - save iptable rules
