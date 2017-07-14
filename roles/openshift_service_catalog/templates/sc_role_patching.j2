@@ -1,0 +1,26 @@
+{{ original_content }}
+- apiGroups:
+  - "servicecatalog.k8s.io"
+  attributeRestrictions: null
+  resources:
+  - instances
+  - bindings
+  verbs:
+  - create
+  - update
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "settings.k8s.io"
+  attributeRestrictions: null
+  resources:
+  - podpresets
+  verbs:
+  - create
+  - update
+  - delete
+  - get
+  - list
+  - watch
