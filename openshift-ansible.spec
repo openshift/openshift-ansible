@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.126.17
+Version:        3.6.126.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 14 2017 Scott Dodson <sdodson@redhat.com> 3.6.126.18-1
+- Add drain retries after 60 second delay (sdodson@redhat.com)
+- Revert "Add a 600 timout on node draining operations" (sdodson@redhat.com)
+- Add a 600 timout on node draining operations (sdodson@redhat.com)
+- Ensure proper fact evaluation (sdodson@redhat.com)
+
 * Mon Jul 10 2017 Scott Dodson <sdodson@redhat.com> 3.6.126.17-1
 - Wrap additional service changes in retries (sdodson@redhat.com)
 
