@@ -1,0 +1,105 @@
+---
+# TODO: Much of this file is shared with container engine tasks
+
+- name: Ensure container-selinux is installed
+  package:
+    name: container-selinux
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+# Used to pull and install the system container
+- name: Ensure atomic is installed
+  package:
+    name: atomic
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+# At the time of writing the atomic command requires runc for it's own use. This
+# task is here in the even that the atomic package ever removes the dependency.
+- name: Ensure runc is installed
+  package:
+    name: runc
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+- block:
+
+    - name: Add http_proxy to /etc/atomic.conf
+      lineinfile:
+        dest: /etc/atomic.conf
+        regexp: "^#?http_proxy[:=]{1}"
+        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
+      when:
+        - openshift.common.http_proxy is defined
+        - openshift.common.http_proxy != ''
+
+    - name: Add https_proxy to /etc/atomic.conf
+      lineinfile:
+        dest: /etc/atomic.conf
+        regexp: "^#?https_proxy[:=]{1}"
+        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
+      when:
+        - openshift.common.https_proxy is defined
+        - openshift.common.https_proxy != ''
+
+    - name: Add no_proxy to /etc/atomic.conf
+      lineinfile:
+        dest: /etc/atomic.conf
+        regexp: "^#?no_proxy[:=]{1}"
+        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
+      when:
+        - openshift.common.no_proxy is defined
+        - openshift.common.no_proxy != ''
+
+
+- block:
+
+    - name: Set to default prepend
+      set_fact:
+        l_crio_image_prepend: "gscrivano"
+
+    - name: Use Red Hat Registry for image when distribution is Red Hat
+      set_fact:
+        l_crio_image_prepend: "registry.access.redhat.com/openshift3"
+      when: ansible_distribution == 'RedHat'
+
+    - name: Use Fedora Registry for image when distribution is Fedora
+      set_fact:
+        l_crio_image_prepend: "registry.fedoraproject.org/f25"
+      when: ansible_distribution == 'Fedora'
+
+    # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
+    - name: Use a testing registry if requested
+      set_fact:
+        l_crio_image_prepend: "{{ openshift_docker_systemcontainer_image_registry_override }}"
+      when:
+        - openshift_docker_systemcontainer_image_registry_override is defined
+        - openshift_docker_systemcontainer_image_registry_override != ""
+
+    - name: Set the full image name
+      set_fact:
+        l_crio_image: "{{ l_crio_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+
+# NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
+- name: Pre-pull CRI-O System Container image
+  command: "atomic pull --storage ostree {{ l_crio_image }}"
+  changed_when: false
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+
+
+- name: Install CRI-O System Container
+  oc_atomic_container:
+    name: "cri-o"
+    image: "{{ l_crio_image }}"
+    state: latest
+
+- name: Start the CRI-O service
+  systemd:
+    name: "cri-o"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- meta: flush_handlers
