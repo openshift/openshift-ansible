@@ -10,3 +10,5 @@
     name: openvswitch
     image: "{{ openshift.common.system_images_registry }}/{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}"
     state: latest
+    values:
+      - "DOCKER_SERVICE={{ openshift.docker.service_name }}.service"
