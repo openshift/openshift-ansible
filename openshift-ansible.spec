@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.116
+Version:        3.4.117
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.117-1
+- 
+
 * Wed Jul 12 2017 Scott Dodson <sdodson@redhat.com> 3.4.116-1
 - Do not force custom ca cert deployment. (abutcher@redhat.com)
 - Uprading control_plane fails when user is not system:admin (jkaur@redhat.com)
