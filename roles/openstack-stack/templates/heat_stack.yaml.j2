@@ -432,7 +432,7 @@ resources:
           port_range_min: 53
           port_range_max: 53
           remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
-{% if num_masters is greaterthan 1 %}
+{% if num_masters > 1 %}
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -444,7 +444,7 @@ resources:
         port_range_min: {{ openshift_master_api_port | default(8443) }}
         port_range_max: {{ openshift_master_api_port | default(8443) }}
         remote_ip_prefix: {{ lb_ingress_cidr }}
-  {% if openshift_master_console_port is defined and openshift_master_console_port is not equalto openshift_master_api_port %}
+  {% if openshift_master_console_port is defined and openshift_master_console_port != openshift_master_api_port %}
       - direction: ingress
         protocol: tcp
         port_range_min: {{ openshift_master_console_port | default(8443) }}
@@ -493,7 +493,7 @@ resources:
     depends_on:
       - interface
 
-{% if num_masters is greaterthan 1 %}
+{% if num_masters > 1 %}
   loadbalancer:
     type: OS::Heat::ResourceGroup
     properties:
@@ -568,7 +568,7 @@ resources:
 {% else %}
             - { get_resource: master-secgrp }
             - { get_resource: node-secgrp }
-{% if num_etcd is equalto 0 %}
+{% if num_etcd == 0 %}
             - { get_resource: etcd-secgrp }
 {% endif %}
 {% endif %}
