@@ -87,7 +87,7 @@ class OCStorageClassTest(unittest.TestCase):
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
-            mock.call(['oc', 'get', 'sc', 'testsc', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'storageclass', 'testsc', '-o', 'json'], None),
             mock.call(['oc', 'create', '-f', mock.ANY], None),
-            mock.call(['oc', 'get', 'sc', 'testsc', '-o', 'json'], None),
+            mock.call(['oc', 'get', 'storageclass', 'testsc', '-o', 'json'], None),
         ])
