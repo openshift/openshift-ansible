@@ -26,7 +26,7 @@ openshift_logging_kibana_ops_deployment: false
 # Proxy settings
 openshift_logging_kibana_proxy_debug: false
 openshift_logging_kibana_proxy_cpu_limit: null
-openshift_logging_kibana_proxy_memory_limit: 96Mi
+openshift_logging_kibana_proxy_memory_limit: 256Mi
 
 #The absolute path on the control node to the cert file to use
 #for the public facing kibana certs
