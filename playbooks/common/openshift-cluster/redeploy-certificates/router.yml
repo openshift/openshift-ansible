@@ -114,8 +114,9 @@
         tls.crt="{{ mktemp.stdout }}/openshift-hosted-router-certificate.pem"
         tls.key="{{ mktemp.stdout }}/openshift-hosted-router-certificate.key"
         --type=kubernetes.io/tls
+        --config={{ mktemp.stdout }}/admin.kubeconfig
         --confirm
-        -o json | {{ openshift.common.client_binary }} replace -f -
+        -o json | {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig replace -f -
 
     - name: Remove temporary router certificate and key files
       file:
