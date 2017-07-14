@@ -59,12 +59,14 @@
 
 - name: OpenShift Pre-Requisites
   hosts: OSEv3
-  gather_facts: False
+  gather_facts: true
   become: true
-  tasks:
+  pre_tasks:
   - name: "Include DNS configuration to ensure proper name resolution"
     lineinfile:
       state: present
       dest: /etc/sysconfig/network
       regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
       line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+  roles:
+  - node-network-manager
