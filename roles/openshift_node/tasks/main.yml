@@ -118,6 +118,7 @@
     name: openvswitch.service
     enabled: yes
     state: started
+    daemon_reload: yes
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
   register: ovs_start_result
   until: not ovs_start_result | failed
@@ -220,6 +221,7 @@
     name: "{{ openshift.common.service_type }}-node"
     enabled: yes
     state: started
+    daemon_reload: yes
   register: node_start_result
   until: not node_start_result | failed
   retries: 1
