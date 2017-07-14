@@ -66,6 +66,7 @@
         --signer-cert={{ openshift.common.config_base }}/master/ca.crt
         --signer-key={{ openshift.common.config_base }}/master/ca.key
         --signer-serial={{ openshift.common.config_base }}/master/ca.serial.txt
+        --config={{ mktemp.stdout }}/admin.kubeconfig
         --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc,docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
         --cert={{ openshift.common.config_base }}/master/registry.crt
         --key={{ openshift.common.config_base }}/master/registry.key
