@@ -4,7 +4,7 @@
 # pylint: disable=too-many-instance-attributes
 class OCStorageClass(OpenShiftCLI):
     ''' Class to wrap the oc command line tools '''
-    kind = 'sc'
+    kind = 'storageclass'
 
     # pylint allows 5
     # pylint: disable=too-many-arguments
@@ -46,15 +46,22 @@ class OCStorageClass(OpenShiftCLI):
         '''update the object'''
         # parameters are currently unable to be updated.  need to delete and recreate
         self.delete()
+        # pause here and attempt to wait for delete.  
+        # Better option would be to poll 
+        time.sleep(5)
         return self.create()
 
     def needs_update(self):
         ''' verify an update is needed '''
         # check if params have updated
-        if self.storage_class.get_parameters() == self.config.parameters:
-            return False
+        if self.storage_class.get_parameters() != self.config.parameters:
+            return True
 
-        return True
+        for anno_key, anno_value in self.storage_class.get_annotations().items():
+            if 'is-default-class' in anno_key and anno_value != self.config.default_storage_class:
+                return True
+
+        return False
 
     @staticmethod
     # pylint: disable=too-many-return-statements,too-many-branches
@@ -67,7 +74,7 @@ class OCStorageClass(OpenShiftCLI):
                                      parameters=params['parameters'],
                                      annotations=params['annotations'],
                                      api_version="storage.k8s.io/{}".format(params['api_version']),
-                                     default_sc=params['default_storage_class'],
+                                     default_storage_class=params.get('default_storage_class', 'false'),
                                      kubeconfig=params['kubeconfig'],
                                     )
 

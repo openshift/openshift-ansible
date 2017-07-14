@@ -79,7 +79,7 @@ EXAMPLES = '''
       encrypted: 'true'
       kmsKeyId: '<full kms key arn>'
     provisioner: aws-ebs
-    default_sc: False
+    default_storage_class: False
   register: sc_out
   notify:
   - restart openshift master services

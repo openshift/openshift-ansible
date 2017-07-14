@@ -11,7 +11,7 @@ class StorageClassConfig(object):
                  provisioner=None,
                  parameters=None,
                  annotations=None,
-                 default_sc="false",
+                 default_storage_class="false",
                  api_version='v1',
                  kubeconfig='/etc/origin/master/admin.kubeconfig'):
         ''' constructor for handling storageclass options '''
@@ -20,7 +20,7 @@ class StorageClassConfig(object):
         self.annotations = annotations
         self.provisioner = provisioner
         self.api_version = api_version
-        self.default_sc = default_sc
+        self.default_storage_class = str(default_storage_class).lower()
         self.kubeconfig = kubeconfig
         self.data = {}
 
@@ -34,7 +34,10 @@ class StorageClassConfig(object):
         self.data['metadata']['name'] = self.name
 
         self.data['metadata']['annotations'] = {}
-        self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = self.default_sc
+        if self.annotations is not None:
+            self.data['metadata']['annotations'] = self.annotations
+
+        self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = self.default_storage_class
 
         if self.provisioner is None:
             self.data['provisioner'] = 'kubernetes.io/aws-ebs'
