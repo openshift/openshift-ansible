@@ -84,6 +84,11 @@ Including an example of how to use your role (for instance, with variables passe
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
+    register: l_docker_upgrade_drain_result
+    until: not l_docker_upgrade_drain_result | failed
+    retries: 3
+    delay: 60
+
 
   roles:
   - openshift_facts
