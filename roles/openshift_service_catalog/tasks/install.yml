@@ -66,6 +66,40 @@
     template_name: kube-system-service-catalog
     namespace: kube-system
 
+- oc_obj:
+    name: edit
+    kind: clusterrole
+    state: list
+  register: edit_yaml
+
+- name: Generate apply template for clusterrole/edit
+  template:
+    src: sc_role_patching.j2
+    dest: "{{ mktemp.stdout }}/edit_sc_patch.yml"
+  vars:
+    original_content: "{{ edit_yaml.results.results[0] | to_yaml }}"
+
+- name: update edit role for service catalog and pod preset access
+  command: >
+    oc apply -f {{ mktemp.stdout }}/edit_sc_patch.yml
+
+- oc_obj:
+    name: admin
+    kind: clusterrole
+    state: list
+  register: admin_yaml
+
+- name: Generate apply template for clusterrole/admin
+  template:
+    src: sc_role_patching.j2
+    dest: "{{ mktemp.stdout }}/admin_sc_patch.yml"
+  vars:
+    original_content: "{{ admin_yaml.results.results[0] | to_yaml }}"
+
+- name: update admin role for service catalog and pod preset access
+  command: >
+    oc apply -f {{ mktemp.stdout }}/admin_sc_patch.yml
+
 - shell: >
     oc get policybindings/kube-system:default -n kube-system || echo "not found"
   register: get_kube_system
