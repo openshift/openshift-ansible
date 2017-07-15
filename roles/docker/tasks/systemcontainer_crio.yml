@@ -1,5 +1,7 @@
 ---
 # TODO: Much of this file is shared with container engine tasks
+- set_fact:
+    l_insecure_registries: "{{ '\"{}\"'.format('\", \"'.join(openshift.docker.insecure_registries)) }}"
 
 - name: Ensure container-selinux is installed
   package:
@@ -93,6 +95,31 @@
     name: "cri-o"
     image: "{{ l_crio_image }}"
     state: latest
+
+- name: run CRI-O with overlay2
+  replace:
+    regexp: 'storage_driver = ""'
+    replace: 'storage_driver = "overlay2"'
+    name: /etc/crio/crio.conf
+    backup: yes
+
+- name: Add overlay2 storage opts for CRI-O
+  lineinfile:
+    dest: /etc/crio/crio.conf
+    line: '"overlay2.override_kernel_check=1"'
+    insertafter: 'storage_option = \['
+    regexp: 'overlay2\.override_kernel_check=1'
+    state: present
+  when: ansible_distribution in ['RedHat', 'CentOS']
+
+- name: Configure insecure registries for CRI-O
+  lineinfile:
+    dest: /etc/crio/crio.conf
+    line: "{{ l_insecure_registries }}"
+    insertafter: 'insecure_registries = \['
+    regexp: "{{ l_insecure_registries }}"
+    state: present
+  when: openshift_docker_insecure_registries is defined
 
 - name: Start the CRI-O service
   systemd:
