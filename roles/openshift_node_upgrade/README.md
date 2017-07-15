@@ -86,7 +86,7 @@ Including an example of how to use your role (for instance, with variables passe
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_docker_upgrade_drain_result
     until: not l_docker_upgrade_drain_result | failed
-    retries: 3
+    retries: 60
     delay: 60
 
 

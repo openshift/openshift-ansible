@@ -57,7 +57,7 @@
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result
     until: not l_docker_upgrade_drain_result | failed
-    retries: 3
+    retries: 60
     delay: 60
 
   - include: upgrade.yml
