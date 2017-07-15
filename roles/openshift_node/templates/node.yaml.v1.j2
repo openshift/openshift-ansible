@@ -16,6 +16,21 @@ imageConfig:
   latest: false
 kind: NodeConfig
 kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
+{% if use_crio | default(False) %}
+  container-runtime:
+  - remote
+  container-runtime-endpoint:
+  - /var/run/crio.sock
+  enable-cri:
+  - 'true'
+  image-service-endpoint:
+  - /var/run/crio.sock
+  node-labels:
+  - router=true
+  - registry=true
+  runtime-request-timeout:
+  - 10m
+{% endif %}
 {% if openshift.common.version_gte_3_3_or_1_3 | bool %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
