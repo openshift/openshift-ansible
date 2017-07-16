@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.149
+Version:        3.6.150
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Jul 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.150-1
+- 
+
 * Sat Jul 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.149-1
 - Config was missed before replace. (jkaur@redhat.com)
 - Redeploy-certificates will fail for registry and router if user is not
