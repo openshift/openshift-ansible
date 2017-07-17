@@ -167,8 +167,6 @@ Elasticsearch OPS too, if using an OPS cluster:
   set the value to the file buffer limit.
 - `openshift_logging_mux_file_buffer_storage_type`: Default `[emptydir]` - Storage
   type for the file buffer.  One of [`emptydir`, `pvc`, `hostmount`]
-- `openshift_logging_mux_file_buffer_mount_path`: Default `[/mux/filebufferstorage]`
-  - Mount path for the file buffer; Shared by `pvc` and `hostmount`.
 
 - `openshift_logging_mux_file_buffer_pvc_size`: The requested size for the file buffer
   PVC, when not provided the role will not generate any PVCs. Defaults to `4Gi`.

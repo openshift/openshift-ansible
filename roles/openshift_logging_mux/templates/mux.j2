@@ -67,13 +67,7 @@ spec:
           mountPath: /etc/fluent/muxkeys
           readOnly: true
         - name: filebufferstorage
-{% if openshift_logging_mux_file_buffer_storage_type == 'pvc' %}
-          mountPath: {{ openshift_logging_mux_file_buffer_mount_path }}
-{% elif openshift_logging_mux_file_buffer_storage_type == 'hostmount' %}
-          mountPath: {{ openshift_logging_mux_file_buffer_mount_path }}
-{% else %}
           mountPath: /var/log/mux/filebufferstorage
-{% endif %}
         env:
         - name: "K8S_HOST_URL"
           value: "{{openshift_logging_mux_master_url}}"
@@ -126,13 +120,7 @@ spec:
         - name: "BUFFER_TYPE"
           value: "{{ openshift_logging_mux_buffer_type | lower }}"
         - name: "FILE_BUFFER_PATH"
-{% if openshift_logging_mux_file_buffer_storage_type == 'pvc' %}
-          value: "{{ openshift_logging_mux_file_buffer_mount_path }}"
-{% elif openshift_logging_mux_file_buffer_storage_type == 'hostmount' %}
-          value: "{{ openshift_logging_mux_file_buffer_mount_path }}"
-{% else %}
           value: "/var/log/mux/filebufferstorage"
-{% endif %}
         - name: "FILE_BUFFER_LIMIT"
           value: "{{ openshift_logging_mux_file_buffer_limit | default('2Gi') }}"
       volumes:
@@ -157,7 +145,7 @@ spec:
           claimName: {{ openshift_logging_mux_file_buffer_pvc_name }}
 {% elif openshift_logging_mux_file_buffer_storage_type == 'hostmount' %}
         hostPath:
-          path: {{ openshift_logging_mux_file_buffer_mount_path }}
+          path: "/var/log/mux/filebufferstorage"
 {% else %}
         emptydir: {}
 {% endif %}

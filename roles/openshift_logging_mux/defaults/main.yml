@@ -54,9 +54,6 @@ openshift_logging_mux_buffer_type: "file"
 # One of ['emptydir', 'pvc', 'hostmount']
 openshift_logging_mux_file_buffer_storage_type: "emptydir"
 
-# mount path: shared by hostmount and pvc
-openshift_logging_mux_file_buffer_mount_path: /var/log/mux/filebufferstorage
-
 # pvc options
 # the name of the PVC we will bind to -- create it if it does not exist
 openshift_logging_mux_file_buffer_pvc_name: "logging-mux-pvc"
