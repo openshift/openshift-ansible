@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.99
+Version:        3.5.100
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 17 2017 Scott Dodson <sdodson@redhat.com> 3.5.100-1
+- Update sync script (sdodson@redhat.com)
+- xPaas v1.4.1 for 3.4 (sdodson@redhat.com)
+- xPaaS v1.4.0 for v3.4 (sdodson@redhat.com)
+- xPaas v1.4.1 for 3.5 (sdodson@redhat.com)
+
 * Fri Jul 14 2017 Scott Dodson <sdodson@redhat.com> 3.5.99-1
 - config was missed before oc replace (jkaur@redhat.com)
 - Import fails when user is not system:admin (jkaur@redhat.com)
