@@ -137,6 +137,12 @@ objects:
     - serviceclasses
     verbs:
     - create
+  - apiGroups:
+    - settings.k8s.io
+    resources:
+    - podpresets
+    verbs:
+    - create
 
 - kind: ClusterRoleBinding
   apiVersion: v1
