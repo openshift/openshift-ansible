@@ -1008,19 +1008,21 @@ def oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS
     """
     return ''.join(random.choice(source) for i in range(length))
 
+
 def oo_contains_rule(source, apiGroups, resources, verbs):
     '''Return true if the specified rule is contained within the provided source'''
 
-    rules=source['rules']
+    rules = source['rules']
 
     if rules:
         for rule in rules:
-            if rule['apiGroups'].sort() == apiGroups.sort():
-                if rule['resources'].sort() == resources.sort():
-                    if rule['verbs'].sort() == verbs.sort():
+            if set(rule['apiGroups']) == set(apiGroups):
+                if set(rule['resources']) == set(resources):
+                    if set(rule['verbs']) == set(verbs):
                         return True
 
     return False
+
 
 class FilterModule(object):
     """ Custom ansible filter mapping """
