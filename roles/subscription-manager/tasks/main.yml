@@ -52,6 +52,10 @@
   when:
     - not registered
     - rhsm_authentication is defined
+  register: cleaningsubs_result
+  until: cleaningsubs_result.rc == 0
+  retries: 10
+  delay: 1
 
 - name: "Install Satellite certificate"
   command: "rpm -Uvh --force http://{{ rhsm_satellite }}/pub/katello-ca-consumer-latest.noarch.rpm"
@@ -69,6 +73,10 @@
     - rhsm_satellite is defined
     - rhsm_satellite is not none
     - rhsm_satellite|trim != ''
+  register: register_key_result
+  until: register_key_result.rc == 0
+  retries: 10
+  delay: 1
 
 # This can apply to either Hosted or Satellite
 - name: "Register using username and password"
@@ -78,6 +86,10 @@
     - not registered
     - rhsm_authentication == "password"
     - rhsm_org is not defined or rhsm_org is none or rhsm_org|trim == ''
+  register: register_userpw_result
+  until: register_userpw_result.rc == 0
+  retries: 10
+  delay: 1
 
 # This can apply to either Hosted or Satellite
 - name: "Register using username, password and organization"
@@ -89,12 +101,20 @@
     - rhsm_org is defined
     - rhsm_org is not none
     - rhsm_org|trim != ''
+  register: register_userpworg_result
+  until: register_userpworg_result.rc == 0
+  retries: 10
+  delay: 1
 
 - name: "Auto-attach to Subscription Manager Pool"
   command: "/usr/bin/subscription-manager attach --auto"
   when:
     - not registered
     - rhsm_pool is undefined or rhsm_pool is none or rhsm_pool|trim == ''
+  register: autoattach_result
+  until: autoattach_result.rc == 0
+  retries: 10
+  delay: 1
 
 - name: "Attach to a specific pool"
   command: "/usr/bin/subscription-manager attach --pool={{ rhsm_pool }}"
@@ -103,6 +123,10 @@
     - rhsm_pool is not none
     - rhsm_pool|trim != ''
     - not registered
+  register: attachpool_result
+  until: attachpool_result.rc == 0
+  retries: 10
+  delay: 1
 
 - name: "Disable all repositories"
   command: "/usr/bin/subscription-manager repos --disable=*"
@@ -120,3 +144,7 @@
     - rhsm_repos is defined
     - rhsm_repos is not none
     - rhsm_repos|trim != ''
+  register: enablerepos_result
+  until: enablerepos_result.rc == 0
+  retries: 10
+  delay: 1
