@@ -1456,7 +1456,8 @@ class StorageClassConfig(object):
         if self.annotations is not None:
             self.data['metadata']['annotations'] = self.annotations
 
-        self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = self.default_storage_class
+        self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = \
+                self.default_storage_class
 
         if self.provisioner is None:
             self.data['provisioner'] = 'kubernetes.io/aws-ebs'
@@ -1542,8 +1543,8 @@ class OCStorageClass(OpenShiftCLI):
         '''update the object'''
         # parameters are currently unable to be updated.  need to delete and recreate
         self.delete()
-        # pause here and attempt to wait for delete.  
-        # Better option would be to poll 
+        # pause here and attempt to wait for delete.
+        # Better option would be to poll
         import time
         time.sleep(5)
         return self.create()
