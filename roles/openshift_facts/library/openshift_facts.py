@@ -1652,6 +1652,7 @@ def set_proxy_facts(facts):
         )
 
         if not proxy_settings_defined:
+            common['no_proxy'] = ''
             return facts
 
         # As of 3.6 if ANY of the proxy parameters are defined in the
