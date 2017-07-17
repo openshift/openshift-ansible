@@ -80,7 +80,7 @@
 
     - name: Set the full image name
       set_fact:
-        l_crio_image: "{{ l_crio_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+        l_crio_image: "{{ l_crio_image_prepend }}/cri-o:latest"
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
 - name: Pre-pull CRI-O System Container image
