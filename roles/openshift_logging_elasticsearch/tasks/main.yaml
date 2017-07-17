@@ -102,11 +102,19 @@
     delete_after: true
 
 # configmap
+- assert:
+    that:
+    - "{{ openshift_logging_es_log_appenders | length > 0 }}"
+    msg: "The openshift_logging_es_log_appenders '{{ openshift_logging_es_log_appenders }}' has an unrecognized option and only supports the following as a list: {{ __es_log_appenders | join(', ') }}"
+
 - template:
     src: elasticsearch-logging.yml.j2
     dest: "{{ tempdir }}/elasticsearch-logging.yml"
+  vars:
+    root_logger: "{{openshift_logging_es_log_appenders | join(', ')}}"
   when: es_logging_contents is undefined
   changed_when: no
+  check_mode: no
 
 - template:
     src: elasticsearch.yml.j2
