@@ -1,0 +1,8 @@
+---
+# Either to checkpoint the dynamic inventory into a static one
+refresh_inventory: True
+inventory: static
+inventory_path: ~/openstack-inventory
+
+# SSH key to access nodes
+private_ssh_key: ~/.ssh/openshift

@@ -1,0 +1,6 @@
+---
+- name: Generate in-memory inventory
+  include: openstack.yml
+
+- name: Checkpoint in-memory data into a static inventory
+  include: checkpoint.yml
