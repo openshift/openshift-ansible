@@ -1008,6 +1008,19 @@ def oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS
     """
     return ''.join(random.choice(source) for i in range(length))
 
+def oo_contains_rule(source, apiGroups, resources, verbs):
+    '''Return true if the specified rule is contained within the provided source'''
+
+    rules=source['rules']
+
+    if rules:
+        for rule in rules:
+            if rule['apiGroups'].sort() == apiGroups.sort():
+                if rule['resources'].sort() == resources.sort():
+                    if rule['verbs'].sort() == verbs.sort():
+                        return True
+
+    return False
 
 class FilterModule(object):
     """ Custom ansible filter mapping """
@@ -1049,5 +1062,6 @@ class FilterModule(object):
             "oo_openshift_loadbalancer_frontends": oo_openshift_loadbalancer_frontends,
             "oo_openshift_loadbalancer_backends": oo_openshift_loadbalancer_backends,
             "to_padded_yaml": to_padded_yaml,
-            "oo_random_word": oo_random_word
+            "oo_random_word": oo_random_word,
+            "oo_contains_rule": oo_contains_rule
         }
