@@ -747,6 +747,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
 # variables for docker and master services.
+#
+# Hosts in the openshift_no_proxy list will NOT use any globally
+# configured HTTP(S)_PROXYs. openshift_no_proxy accepts domains
+# (.example.com), and hosts (example.com), and IP addresses.
 #openshift_http_proxy=http://USER:PASSWORD@IPADDR:PORT
 #openshift_https_proxy=https://USER:PASSWORD@IPADDR:PORT
 #openshift_no_proxy='.hosts.example.com,some-host.com'
@@ -754,7 +758,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Most environments don't require a proxy between openshift masters, nodes, and
 # etcd hosts. So automatically add those hostnames to the openshift_no_proxy list.
 # If all of your hosts share a common domain you may wish to disable this and
-# specify that domain above.
+# specify that domain above instead.
+#
+# For example, having hosts with FQDNs: m1.ex.com, n1.ex.com, and
+# n2.ex.com, one would simply add '.ex.com' to the openshift_no_proxy
+# variable (above) and set this value to False
 #openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects

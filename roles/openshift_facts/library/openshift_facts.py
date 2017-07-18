@@ -1643,38 +1643,75 @@ def set_proxy_facts(facts):
     if 'common' in facts:
         common = facts['common']
 
-        # No openshift_no_proxy settings detected, empty list for now
-        if 'no_proxy' not in common:
-            common['no_proxy'] = []
+        ######################################################################
+        # We can exit early now if we don't need to set any proxy facts
+        proxy_params = ['no_proxy', 'https_proxy', 'http_proxy']
+        # If any of the known Proxy Params (pp) are defined
+        proxy_settings_defined = any(
+            [True for pp in proxy_params if pp in common]
+        )
 
-        # _no_proxy settings set. It is just a simple string, not a
-        # list or anything
-        elif 'no_proxy' in common and isinstance(common['no_proxy'], string_types):
-            # no_proxy is now a list of all the comma-separated items
-            # in the _no_proxy value
-            common['no_proxy'] = common['no_proxy'].split(",")
+        if not proxy_settings_defined:
+            common['no_proxy'] = ''
+            return facts
 
-            # at this point common['no_proxy'] is a LIST datastructure. It
-            # may be empty, or it may contain some hostnames or ranges.
+        # As of 3.6 if ANY of the proxy parameters are defined in the
+        # inventory then we MUST add certain domains to the NO_PROXY
+        # environment variable.
 
-            # We always add local dns domain, the service domain, and
-            # ourselves, no matter what (if you are setting any
-            # NO_PROXY values)
-            common['no_proxy'].append('.svc')
-            common['no_proxy'].append('.' + common['dns_domain'])
-            common['no_proxy'].append(common['hostname'])
+        ######################################################################
 
-        # You are also setting system proxy vars, openshift_http_proxy/openshift_https_proxy
-        if 'http_proxy' in common or 'https_proxy' in common:
-            # You want to generate no_proxy hosts and it's a boolean value
-            if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
-                # And you want to set up no_proxy for internal hostnames
-                if 'no_proxy_internal_hostnames' in common:
-                    # Split the internal_hostnames string by a comma
-                    # and add that list to the overall no_proxy list
-                    common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
+        # Spot to build up some data we may insert later
+        raw_no_proxy_list = []
 
-        common['no_proxy'] = ','.join(sort_unique(common['no_proxy']))
+        # Automatic 3.6 NO_PROXY additions if a proxy is in use
+        svc_cluster_name = ['.svc', '.' + common['dns_domain'], common['hostname']]
+
+        # auto_hosts: Added to NO_PROXY list if any proxy params are
+        # set in the inventory. This a list of the FQDNs of all
+        # cluster hosts:
+        auto_hosts = common['no_proxy_internal_hostnames'].split(',')
+
+        # custom_no_proxy_hosts: If you define openshift_no_proxy in
+        # inventory we automatically add those hosts to the list:
+        if 'no_proxy' in common:
+            custom_no_proxy_hosts = common['no_proxy'].split(',')
+        else:
+            custom_no_proxy_hosts = []
+
+        # This should exist no matter what. Defaults to true.
+        if 'generate_no_proxy_hosts' in common:
+            generate_no_proxy_hosts = safe_get_bool(common['generate_no_proxy_hosts'])
+
+        ######################################################################
+
+        # You set a proxy var. Now we are obliged to add some things
+        raw_no_proxy_list = svc_cluster_name + custom_no_proxy_hosts
+
+        # You did not turn openshift_generate_no_proxy_hosts to False
+        if generate_no_proxy_hosts:
+            raw_no_proxy_list.extend(auto_hosts)
+
+        ######################################################################
+
+        # Was anything actually added? There should be something by now.
+        processed_no_proxy_list = sort_unique(raw_no_proxy_list)
+        if processed_no_proxy_list != list():
+            common['no_proxy'] = ','.join(processed_no_proxy_list)
+        else:
+            # Somehow we got an empty list. This should have been
+            # skipped by now in the 'return' earlier. If
+            # common['no_proxy'] is DEFINED it will cause unexpected
+            # behavior and bad templating. Ensure it does not
+            # exist. Even an empty list or string will have undesired
+            # side-effects.
+            del common['no_proxy']
+
+        ######################################################################
+        # In case you were wondering, because 'common' is a reference
+        # to the object facts['common'], there is no need to re-assign
+        # it.
+
     return facts
 
 
