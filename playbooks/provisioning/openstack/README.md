@@ -12,6 +12,7 @@ etc.). The result is an environment ready for openshift-ansible.
 * [shade](https://pypi.python.org/pypi/shade)
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
 * Become (sudo) is not required.
+* `rhel-7-server-openstack-10-rpms` repository (in order to be able to install `python-openstackclient`)
 
 ## Dependencies for OpenStack hosted cluster nodes (servers)
 
