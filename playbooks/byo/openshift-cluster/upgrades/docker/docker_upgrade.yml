@@ -43,7 +43,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.admin_binary }} drain {{ openshift.node.nodename }} --force --delete-local-data --ignore-daemonsets
+      {{ openshift.common.admin_binary }} drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
 
