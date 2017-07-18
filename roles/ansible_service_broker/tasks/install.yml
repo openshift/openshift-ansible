@@ -254,6 +254,7 @@
               launch_apb_on_bind: {{ ansible_service_broker_launch_apb_on_bind | bool | lower }}
               recovery: {{ ansible_service_broker_recovery | bool | lower }}
               output_request: {{ ansible_service_broker_output_request | bool | lower }}
+              bootstrap_on_startup: {{ ansible_service_broker_bootstrap_on_startup | bool | lower }}
 
 - name: Create the Broker resource in the catalog
   oc_obj:
