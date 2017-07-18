@@ -17,10 +17,20 @@
           "node": {
             "hostnames": {
               "manage": [
-                "{{ hostvars[node].glusterfs_hostname | default(hostvars[node].openshift.node.nodename) }}"
+{%- if 'glusterfs_hostname' in hostvars[node] -%}
+                "{{ hostvars[node].glusterfs_hostname }}"
+{%- elif 'openshift' in hostvars[node] -%}
+                "{{ hostvars[node].openshift.node.nodename }}"
+{%- else -%}
+                "{{ node }}"
+{%- endif -%}
               ],
               "storage": [
-                "{{ hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip) }}"
+{%- if 'glusterfs_ip' in hostvars[node] -%}
+                "{{ hostvars[node].glusterfs_ip }}"
+{%- else -%}
+                "{{ hostvars[node].openshift.common.ip }}"
+{%- endif -%}
               ]
             },
             "zone": {{ hostvars[node].glusterfs_zone | default(1) }}

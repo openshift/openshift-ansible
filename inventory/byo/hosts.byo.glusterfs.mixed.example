@@ -28,7 +28,7 @@ openshift_deployment_type=origin
 # Specify that we want to use an external GlusterFS cluster and a native
 # heketi service
 openshift_storage_glusterfs_is_native=False
-openshift_storage_glusterfs_heketi_is_native=False
+openshift_storage_glusterfs_heketi_is_native=True
 # Specify that heketi will use SSH to communicate to the GlusterFS nodes and
 # the private key file it will use for authentication
 openshift_storage_glusterfs_heketi_executor=ssh
@@ -54,6 +54,6 @@ node2   node=True openshift_schedulable=True
 # must be bare (e.g. have no data, not be marked as LVM PVs), and will be
 # formatted.
 [glusterfs]
-node0  glusterfs_devices='[ "/dev/vdb" ]'
-node1  glusterfs_devices='[ "/dev/vdb", "/dev/vdc" ]'
-node2  glusterfs_devices='[ "/dev/vdd" ]'
+node0.local  glusterfs_ip='172.0.0.10' glusterfs_devices='[ "/dev/vdb" ]'
+node1.local  glusterfs_ip='172.0.0.11' glusterfs_devices='[ "/dev/vdb", "/dev/vdc" ]'
+node2.local  glusterfs_ip='172.0.0.11' glusterfs_devices='[ "/dev/vdd" ]'
