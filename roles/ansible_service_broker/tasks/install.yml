@@ -47,7 +47,7 @@
     state: present
     namespace: "openshift-ansible-service-broker"
     resource_kind: cluster-role
-    resource_name: cluster-admin
+    resource_name: admin
     user: "system:serviceaccount:openshift-ansible-service-broker:asb"
 
 - name: create ansible-service-broker service
