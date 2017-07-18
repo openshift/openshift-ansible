@@ -22,7 +22,7 @@ storage:
 {%   endif %}
     bucket: {{ openshift_hosted_registry_storage_s3_bucket }}
     encrypt: {{ openshift_hosted_registry_storage_s3_encrypt | default(false) }}
-{% if openshift_hosted_registry_storage_s3_kmskeyid %}
+{% if openshift_hosted_registry_storage_s3_kmskeyid is defined %}
     keyid: {{ openshift_hosted_registry_storage_s3_kmskeyid }}
 {% endif %}
     secure: true
