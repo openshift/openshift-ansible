@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.152
+Version:        3.6.153
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.153-1
+- Updating to compare sets instead of sorted lists (ewolinet@redhat.com)
+- Adding ability to create podpreset for service-catalog-controller for
+  bz1471881 (ewolinet@redhat.com)
+- Updating to use oc replace and conditionally update edit and admin roles
+  (ewolinet@redhat.com)
+- Other playbooks maybe expecting this to be at least an empty string. I think
+  they default it to an empty list if its not found. (tbielawa@redhat.com)
+- Fix NO_PROXY environment variable setting (tbielawa@redhat.com)
+- Changing the passing of data for sc creation. (kwoodson@redhat.com)
+- Fixed variable name. (kwoodson@redhat.com)
+- Adding disk encryption to storageclasses and to openshift registry
+  (kwoodson@redhat.com)
+
 * Mon Jul 17 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.152-1
 - 
 
