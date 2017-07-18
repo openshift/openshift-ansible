@@ -12,14 +12,14 @@ generation for Elasticsearch (it uses JKS) as well as openssl to sign certificat
 As part of the installation, it is recommended that you add the Fluentd node selector label
 to the list of persisted [node labels](https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
 
-###Required vars:
+### Required vars:
 
 - `openshift_logging_install_logging`: When `True` the `openshift_logging` role will install Aggregated Logging.
 - `openshift_logging_upgrade_logging`:  When `True` the `openshift_logging` role will upgrade Aggregated Logging.
 
 When both `openshift_logging_install_logging` and `openshift_logging_upgrade_logging` are `False` the `openshift_logging` role will uninstall Aggregated Logging.
 
-###Optional vars:
+### Optional vars:
 
 - `openshift_logging_image_prefix`: The prefix for the logging images to use. Defaults to 'docker.io/openshift/origin-'.
 - `openshift_logging_image_version`: The image version for the logging images to use. Defaults to 'latest'.
@@ -66,8 +66,8 @@ When both `openshift_logging_install_logging` and `openshift_logging_upgrade_log
 - `openshift_logging_es_client_key`: The location of the client key Fluentd uses for openshift_logging_es_host. Defaults to '/etc/fluent/keys/key'.
 
 - `openshift_logging_es_cluster_size`: The number of ES cluster members. Defaults to '1'.
-- `openshift_logging_es_cpu_limit`:  The amount of CPU limit for the ES cluster.  Unused if not set
-- `openshift_logging_es_memory_limit`: The amount of RAM that should be assigned to ES. Defaults to '8Gi'.
+- `openshift_logging_es_cpu_limit`:  The amount of CPU limit for the ES cluster. Defaults to no limitation, unused if not set and lower bound is 1 core.
+- `openshift_logging_es_memory_limit`: The amount of RAM that should be assigned to ES. Defaults to '8Gi' and lower bound is '1Gi'.
 - `openshift_logging_es_log_appenders`: The list of rootLogger appenders for ES logs which can be: 'file', 'console'. Defaults to 'file'.
 - `openshift_logging_es_pv_selector`: A key/value map added to a PVC in order to select specific PVs.  Defaults to 'None'.
 - `openshift_logging_es_pvc_dynamic`: Whether or not to add the dynamic PVC annotation for any generated PVCs. Defaults to 'False'.
