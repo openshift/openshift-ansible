@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.100
+Version:        3.5.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.101-1
+- drain present in below files which is pending the fix : (jkaur@redhat.com)
+
 * Mon Jul 17 2017 Scott Dodson <sdodson@redhat.com> 3.5.100-1
 - Update sync script (sdodson@redhat.com)
 - xPaas v1.4.1 for 3.4 (sdodson@redhat.com)
