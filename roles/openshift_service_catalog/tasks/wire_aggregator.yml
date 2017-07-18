@@ -147,6 +147,12 @@
       value: [/etc/origin/master/openshift-ansible-catalog-console.js]
     - key: kubernetesMasterConfig.apiServerArguments.runtime-config
       value: [apis/settings.k8s.io/v1alpha1=true]
+    - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
+      value: DefaultAdmissionConfig
+    - key: admissionConfig.pluginConfig.PodPreset.configuration.apiVersion
+      value: v1
+    - key: admissionConfig.pluginConfig.PodPreset.configuration.disable
+      value: false
   register: yedit_output
 
 #restart master serially here
