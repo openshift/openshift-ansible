@@ -23,7 +23,7 @@
   oc_project:
     state: present
     name: "kube-service-catalog"
-#    node_selector: "{{ openshift_service_catalog_nodeselector | default(null) }}"
+    node_selector: ""
 
 - name: Make kube-service-catalog project network global
   command: >
