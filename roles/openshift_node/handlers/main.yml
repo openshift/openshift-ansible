@@ -4,8 +4,13 @@
     name: openvswitch
     state: restarted
   when: (not skip_node_svc_handlers | default(False) | bool) and not (ovs_service_status_changed | default(false) | bool) and openshift.common.use_openshift_sdn | bool
+  register: l_openshift_node_stop_openvswitch_result
+  until: not l_openshift_node_stop_openvswitch_result | failed
+  retries: 3
+  delay: 30
   notify:
   - restart openvswitch pause
+
 
 - name: restart openvswitch pause
   pause: seconds=15
@@ -15,7 +20,13 @@
   systemd:
     name: "{{ openshift.common.service_type }}-node"
     state: restarted
-  when: (not skip_node_svc_handlers | default(False) | bool) and not (node_service_status_changed | default(false) | bool)
+  register: l_openshift_node_restart_node_result
+  until: not l_openshift_node_restart_node_result | failed
+  retries: 3
+  delay: 30
+  when:
+  - (not skip_node_svc_handlers | default(False) | bool)
+  - not (node_service_status_changed | default(false) | bool)
 
 - name: reload sysctl.conf
   command: /sbin/sysctl -p

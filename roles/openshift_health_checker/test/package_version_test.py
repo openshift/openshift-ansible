@@ -72,36 +72,6 @@ def test_package_version(openshift_release):
     assert result is return_value
 
 
-@pytest.mark.parametrize('deployment_type,openshift_release,expected_ovs_version', [
-    ("openshift-enterprise", "3.5", "2.6"),
-    ("origin", "3.6", "2.6"),
-    ("openshift-enterprise", "3.4", "2.4"),
-    ("origin", "3.3", "2.4"),
-])
-def test_ovs_package_version(deployment_type, openshift_release, expected_ovs_version):
-    task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
-        openshift_release=openshift_release,
-        openshift_image_tag='v' + openshift_release,
-        openshift_deployment_type=deployment_type,
-    )
-    return_value = object()
-
-    def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None):
-        assert module_name == 'aos_version'
-        assert "package_list" in module_args
-
-        for pkg in module_args["package_list"]:
-            if pkg["name"] == "openvswitch":
-                assert pkg["version"] == expected_ovs_version
-
-        return return_value
-
-    check = PackageVersion(execute_module=execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
-    assert result is return_value
-
-
 @pytest.mark.parametrize('deployment_type,openshift_release,expected_docker_version', [
     ("origin", "3.5", "1.12"),
     ("openshift-enterprise", "3.4", "1.12"),

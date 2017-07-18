@@ -28,6 +28,10 @@
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
+    register: l_upgrade_nodes_drain_result
+    until: not l_upgrade_nodes_drain_result | failed
+    retries: 60
+    delay: 60
 
   roles:
   - lib_openshift

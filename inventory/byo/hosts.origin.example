@@ -468,6 +468,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # S3 bucket must already exist.
 #openshift_hosted_registry_storage_kind=object
 #openshift_hosted_registry_storage_provider=s3
+#openshift_hosted_registry_storage_s3_encrypt=false
+#openshift_hosted_registry_storage_s3_kmskeyid=aws_kms_key_id
 #openshift_hosted_registry_storage_s3_accesskey=aws_access_key_id
 #openshift_hosted_registry_storage_s3_secretkey=aws_secret_access_key
 #openshift_hosted_registry_storage_s3_bucket=bucket_name
@@ -552,6 +554,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure the prefix and version for the component images
 #openshift_hosted_metrics_deployer_prefix=docker.io/openshift/origin-
 #openshift_hosted_metrics_deployer_version=3.6.0
+#
+# StorageClass
+# openshift_storageclass_name=gp2
+# openshift_storageclass_parameters={'type': 'gp2', 'encrypted': false}
+#
 
 # Logging deployment
 #
@@ -714,7 +721,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_dns_ip=172.30.0.1
 
 # Configure node kubelet arguments. pods-per-core is valid in OpenShift Origin 1.3 or OpenShift Container Platform 3.3 and later.
-#openshift_node_kubelet_args={'pods-per-core': ['10'], 'max-pods': ['250'], 'image-gc-high-threshold': ['90'], 'image-gc-low-threshold': ['80']}
+#openshift_node_kubelet_args={'pods-per-core': ['10'], 'max-pods': ['250'], 'image-gc-high-threshold': ['85'], 'image-gc-low-threshold': ['80']}
 
 # Configure logrotate scripts
 # See: https://github.com/nickhammond/ansible-logrotate
@@ -740,6 +747,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
 # variables for docker and master services.
+#
+# Hosts in the openshift_no_proxy list will NOT use any globally
+# configured HTTP(S)_PROXYs. openshift_no_proxy accepts domains
+# (.example.com), and hosts (example.com), and IP addresses.
 #openshift_http_proxy=http://USER:PASSWORD@IPADDR:PORT
 #openshift_https_proxy=https://USER:PASSWORD@IPADDR:PORT
 #openshift_no_proxy='.hosts.example.com,some-host.com'
@@ -747,7 +758,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Most environments don't require a proxy between openshift masters, nodes, and
 # etcd hosts. So automatically add those hostnames to the openshift_no_proxy list.
 # If all of your hosts share a common domain you may wish to disable this and
-# specify that domain above.
+# specify that domain above instead.
+#
+# For example, having hosts with FQDNs: m1.ex.com, n1.ex.com, and
+# n2.ex.com, one would simply add '.ex.com' to the openshift_no_proxy
+# variable (above) and set this value to False
 #openshift_generate_no_proxy_hosts=True
 #
 # These options configure the BuildDefaults admission controller which injects
