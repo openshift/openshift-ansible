@@ -14,6 +14,12 @@ etc.). The result is an environment ready for openshift-ansible.
 * Become (sudo) is not required.
 * `rhel-7-server-openstack-10-rpms` repository (in order to be able to install `python-openstackclient`)
 
+### Optional Dependencies forlocalhost
+**Note**: When using rhel images, `rhel-7-server-openstack-10-rpms` repository is required in order to install these packages.
+
+* `python-openstackclient`
+* `python-heatclient`
+
 ## Dependencies for OpenStack hosted cluster nodes (servers)
 
 There are no additional dependencies for the cluster nodes. Required
