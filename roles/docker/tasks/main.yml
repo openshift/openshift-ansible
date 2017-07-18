@@ -7,7 +7,7 @@
 
 - set_fact:
     l_use_system_container: "{{ openshift.docker.use_system_container | default(False) }}"
-    l_use_crio: "{{ use_crio | default(False) }}"
+    l_use_crio: "{{ openshift.docker.use_crio | default(False) }}"
 
 - name: Use Package Docker if Requested
   include: package_docker.yml
@@ -22,5 +22,4 @@
 - name: Add CRI-O usage Requested
   include: rpm_crio.yml
   when:
-  - l_use_system_container
   - l_use_crio
