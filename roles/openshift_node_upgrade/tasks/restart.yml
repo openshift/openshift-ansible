@@ -19,7 +19,7 @@
     state: started
   register: docker_start_result
   until: not docker_start_result | failed
-  retries: 1
+  retries: 3
   delay: 30
 
 - name: Update docker facts

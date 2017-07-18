@@ -118,8 +118,12 @@
     name: openvswitch.service
     enabled: yes
     state: started
+    daemon_reload: yes
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
   register: ovs_start_result
+  until: not ovs_start_result | failed
+  retries: 3
+  delay: 30
 
 - set_fact:
     ovs_service_status_changed: "{{ ovs_start_result | changed }}"
@@ -212,15 +216,27 @@
     state: started
   when: openshift.common.is_containerized | bool
 
+
 - name: Start and enable node
   systemd:
     name: "{{ openshift.common.service_type }}-node"
     enabled: yes
     state: started
+    daemon_reload: yes
   register: node_start_result
   until: not node_start_result | failed
   retries: 1
   delay: 30
+  ignore_errors: true
+
+- name: Dump logs from node service if it failed
+  command: journalctl --no-pager -n 100 {{ openshift.common.service_type }}-node
+  when: node_start_result | failed
+
+- name: Abort if node failed to start
+  fail:
+    msg: Node failed to start please inspect the logs and try again
+  when: node_start_result | failed
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"
