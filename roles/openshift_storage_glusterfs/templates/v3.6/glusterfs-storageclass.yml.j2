@@ -7,5 +7,7 @@ provisioner: kubernetes.io/glusterfs
 parameters:
   resturl: "http://{% if glusterfs_heketi_is_native %}{{ glusterfs_heketi_route }}{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %}"
   restuser: "admin"
+{% if glusterfs_heketi_admin_key is defined %}
   secretNamespace: "{{ glusterfs_namespace }}"
   secretName: "heketi-{{ glusterfs_name }}-admin-secret"
+{%- endif -%}
