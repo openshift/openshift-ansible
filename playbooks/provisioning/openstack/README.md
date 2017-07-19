@@ -181,7 +181,7 @@ file, this is how you stat the provisioning process:
 
 Once it succeeds, you can install openshift by running:
 
-    ansible-playbook --become --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
+    ansible-playbook --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
 
 
 ## License
