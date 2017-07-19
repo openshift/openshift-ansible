@@ -1,14 +1,24 @@
 ---
-os_firewall_allow:
+r_openshift_node_os_firewall_deny: []
+r_openshift_node_os_firewall_allow:
 - service: Kubernetes kubelet
   port: 10250/tcp
+  cond: true
 - service: http
   port: 80/tcp
+  cond: true
 - service: https
   port: 443/tcp
+  cond: true
 - service: OpenShift OVS sdn
   port: 4789/udp
   when: openshift.common.use_openshift_sdn | default(true) | bool
 - service: Calico BGP Port
   port: 179/tcp
-  when: openshift.common.use_calico | bool
+  cond: "{{ openshift.common.use_calico | bool }}"
+- service: Kubernetes service NodePort TCP
+  port: "{{ openshift_node_port_range | default('') }}/tcp"
+  cond: "{{ openshift_node_port_range is defined }}"
+- service: Kubernetes service NodePort UDP
+  port: "{{ openshift_node_port_range | default('') }}/udp"
+  cond: "{{ openshift_node_port_range is defined }}"

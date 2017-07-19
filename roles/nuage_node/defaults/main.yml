@@ -1,0 +1,11 @@
+---
+nuage_mon_rest_server_port: '9443'
+
+r_nuage_node_os_firewall_deny: []
+r_nuage_node_os_firewall_allow:
+- service: vxlan
+  port: 4789/udp
+  cond: true
+- service: nuage-monitor
+  port: "{{ nuage_mon_rest_server_port }}/tcp"
+  cond: true

@@ -1,4 +1,8 @@
 ---
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
 - name: Retrieve list of openshift nodes matching router selector
   oc_obj:
     state: list

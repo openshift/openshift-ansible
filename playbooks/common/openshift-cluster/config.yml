@@ -26,6 +26,21 @@
   tags:
   - always
 
+- name: Setup firewall
+  hosts: oo_all_hosts
+  tags:
+  - always
+  tasks:
+  # This should move to intialize_facts
+  - name: set os_firewall_enabled
+    set_fact:
+      os_firewall_enabled: true
+      os_firewall_use_firewalld: false
+
+  - name: Set proper firewall settings
+    include_role:
+      name: os_firewall
+
 - name: Disable excluders
   hosts: oo_masters_to_config:oo_nodes_to_config
   tags:

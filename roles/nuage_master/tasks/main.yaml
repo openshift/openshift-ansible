@@ -1,4 +1,8 @@
 ---
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
 - name: Create directory /usr/share/nuage-openshift-monitor
   become: yes
   file: path=/usr/share/nuage-openshift-monitor state=directory

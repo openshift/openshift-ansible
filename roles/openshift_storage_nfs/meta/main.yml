@@ -10,9 +10,6 @@ galaxy_info:
     versions:
     - 7
 dependencies:
-- role: os_firewall
-  os_firewall_allow:
-  - service: nfs
-    port: "2049/tcp"
+- role: lib_os_firewall
 - role: openshift_hosted_facts
 - role: openshift_repos

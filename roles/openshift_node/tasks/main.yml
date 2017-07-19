@@ -6,6 +6,38 @@
     - (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
     - not openshift_docker_use_crio | default(false)
 
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
+- name: Set node facts
+  openshift_facts:
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+    # Reset node labels to an empty dictionary.
+    - role: node
+      local_facts:
+        labels: {}
+    - role: node
+      local_facts:
+        annotations: "{{ openshift_node_annotations | default(none) }}"
+        debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
+        iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
+        kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
+        labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
+        registry_url: "{{ oreg_url_node | default(oreg_url) | default(None) }}"
+        schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
+        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+        storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
+        set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
+        node_image: "{{ osn_image | default(None) }}"
+        ovs_image: "{{ osn_ovs_image | default(None) }}"
+        proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
+        local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
+        dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
+        env_vars: "{{ openshift_node_env_vars | default(None) }}"
+
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
 - name: Check for swap usage
   command: grep "^[^#].*swap" /etc/fstab

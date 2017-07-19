@@ -10,16 +10,6 @@ galaxy_info:
     versions:
     - 7
 dependencies:
+- role: lib_os_firewall
 - role: openshift_facts
-- role: os_firewall
-  os_firewall_allow:
-  - service: haproxy stats
-    port: "9000/tcp"
-  - service: haproxy balance
-    port: "{{ openshift_master_api_port | default(8443) }}/tcp"
-- role: os_firewall
-  os_firewall_allow:
-  - service: nuage mon
-    port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
-  when: openshift_use_nuage | default(false) | bool
 - role: openshift_repos

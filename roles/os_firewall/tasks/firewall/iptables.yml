@@ -33,19 +33,3 @@
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail
   pause: seconds=10
   when: result | changed
-
-- name: Add iptables allow rules
-  os_firewall_manage_iptables:
-    name: "{{ item.service }}"
-    action: add
-    protocol: "{{ item.port.split('/')[1] }}"
-    port: "{{ item.port.split('/')[0] }}"
-  with_items: "{{ os_firewall_allow }}"
-
-- name: Remove iptables rules
-  os_firewall_manage_iptables:
-    name: "{{ item.service }}"
-    action: remove
-    protocol: "{{ item.port.split('/')[1] }}"
-    port: "{{ item.port.split('/')[0] }}"
-  with_items: "{{ os_firewall_deny }}"

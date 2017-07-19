@@ -26,12 +26,15 @@ openshift_hosted_routers:
   - 443:443
   certificate: "{{ openshift_hosted_router_certificate | default({}) }}"
 
-
 openshift_hosted_router_certificate: {}
 openshift_hosted_registry_cert_expire_days: 730
 openshift_hosted_router_create_certificate: True
 
-os_firewall_allow:
+r_openshift_hosted_router_os_firewall_deny: []
+r_openshift_hosted_router_os_firewall_allow: []
+
+r_openshift_hosted_registry_os_firewall_deny: []
+r_openshift_hosted_registry_os_firewall_allow:
 - service: Docker Registry Port
   port: 5000/tcp
-  when: openshift.common.use_calico | bool
+  cond: "{{ r_openshift_hosted_use_calico }}"

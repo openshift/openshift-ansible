@@ -6,6 +6,10 @@
     etcd_hostname: "{{ etcd_hostname }}"
     etcd_ip: "{{ etcd_ip }}"
 
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
 - name: Install etcd
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool

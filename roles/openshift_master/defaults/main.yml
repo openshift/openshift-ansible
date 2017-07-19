@@ -2,3 +2,21 @@
 openshift_node_ips: []
 r_openshift_master_clean_install: false
 r_openshift_master_etcd3_storage: false
+r_openshift_master_os_firewall_enable: true
+r_openshift_master_os_firewall_deny: []
+r_openshift_master_os_firewall_allow:
+- service: api server https
+  port: "{{ openshift.master.api_port }}/tcp"
+  cond: true
+- service: api controllers https
+  port: "{{ openshift.master.controllers_port }}/tcp"
+  cond: true
+- service: skydns tcp
+  port: "{{ openshift.master.dns_port }}/tcp"
+  cond: true
+- service: skydns udp
+  port: "{{ openshift.master.dns_port }}/udp"
+  cond: true
+- service: etcd embedded
+  port: 4001/tcp
+  cond: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"

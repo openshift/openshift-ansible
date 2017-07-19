@@ -7,4 +7,15 @@ etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_
 etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
 etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
 
+etcd_client_port: 2379
+etcd_peer_port: 2380
+
 etcd_systemd_dir: "/etc/systemd/system/{{ etcd_service }}.service.d"
+r_etcd_os_firewall_deny: []
+r_etcd_os_firewall_allow:
+- service: etcd
+  port: "{{etcd_client_port}}/tcp"
+  cond: true
+- service: etcd peering
+  port: "{{ etcd_peer_port }}/tcp"
+  cond: true

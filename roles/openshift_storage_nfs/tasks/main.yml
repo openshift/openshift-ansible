@@ -1,4 +1,8 @@
 ---
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
 - name: Install nfs-utils
   package: name=nfs-utils state=present
 
