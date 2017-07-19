@@ -2,9 +2,8 @@
 # Install default storage classes in GCE & AWS
 - name: Ensure storageclass object
   oc_storageclass:
-    kind: storageclass
     name: "{{ openshift_storageclass_name }}"
-    default_storage_class: "true"
+    default_storage_class: "{{ openshift_storageclass_default | default('true') | string}}"
     parameters:
       type: "{{ openshift_storageclass_parameters.type | default('gp2') }}"
       encrypted: "{{ openshift_storageclass_parameters.encrypted | default('false') | string }}"
