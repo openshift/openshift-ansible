@@ -117,7 +117,7 @@ signature_policy = ""
 
 # insecure_registries is used to skip TLS verification when pulling images.
 insecure_registries = [
-{{ l_insecure_crio_registries }}
+{{ l_insecure_crio_registries|default("") }}
 ]
 
 # The "crio.network" table contains settings pertaining to the
