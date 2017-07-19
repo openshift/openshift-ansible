@@ -25,6 +25,26 @@
     state: present
   when: not openshift.common.is_atomic | bool
 
+
+- name: Check that overlay is in the kernel
+  shell: lsmod | grep overlay
+  register: l_has_overlay_in_kernel
+  ignore_errors: yes
+
+
+- when: l_has_overlay_in_kernel.rc != 0
+  block:
+
+    - name: Add overlay to modprobe.d
+      template:
+        dest: /etc/modules-load.d/overlay.conf
+        src: overlay.conf.j2
+        backup: yes
+
+    - name: Manually modprobe overlay into the kernel
+      command: modprobe overlay
+
+
 - block:
 
     - name: Add http_proxy to /etc/atomic.conf
