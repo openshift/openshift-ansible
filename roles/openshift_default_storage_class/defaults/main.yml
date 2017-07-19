@@ -12,6 +12,7 @@ openshift_storageclass_defaults:
     provisioner: kubernetes.io/gce-pd
     type: pd-standard
 
+openshift_storageclass_default: "true"
 openshift_storageclass_name: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['name'] }}"
 openshift_storageclass_provisioner: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['provisioner'] }}"
 openshift_storageclass_parameters: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['parameters'] }}"

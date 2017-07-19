@@ -26,6 +26,8 @@
       logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
       logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
+  - role: openshift_default_storage_class
+    when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
   - role: openshift_hosted
   - role: openshift_metrics
     when: openshift_hosted_metrics_deploy | default(false) | bool
@@ -45,8 +47,6 @@
 
   - role: cockpit-ui
     when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
-  - role: openshift_default_storage_class
-    when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
 
 - name: Update master-config for publicLoggingURL
   hosts: oo_masters_to_config:!oo_first_master
