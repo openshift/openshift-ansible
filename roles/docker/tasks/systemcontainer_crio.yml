@@ -2,6 +2,7 @@
 # TODO: Much of this file is shared with container engine tasks
 - set_fact:
     l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(openshift.docker.insecure_registries)) }}"
+  when: openshift.docker.insecure_registries
 
 - name: Ensure container-selinux is installed
   package:
