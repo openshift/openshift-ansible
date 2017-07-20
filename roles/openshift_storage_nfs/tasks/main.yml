@@ -30,7 +30,7 @@
     - "{{ openshift.hosted.metrics }}"
     - "{{ openshift.hosted.logging }}"
     - "{{ openshift.hosted.loggingops }}"
-
+    - "{{ openshift.hosted.etcd }}"
 
 - name: Configure exports
   template:
