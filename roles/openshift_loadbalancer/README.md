@@ -25,6 +25,7 @@ From this role:
 | openshift_loadbalancer_default_maxconn | 20000         | Maximum per-process number of concurrent connections. |
 | openshift_loadbalancer_frontends       | none          | List of frontends. See example below.                 |
 | openshift_loadbalancer_backends        | none          | List of backends. See example below.                  |
+| openshift_image_tag                    | none          | Image tag for containerized haproxy image.            |
 
 Dependencies
 ------------
@@ -64,6 +65,7 @@ Example Playbook
       - name: master3
         address: "192.168.122.223:8443"
 	opts: check
+    openshift_image_tag: v3.6.153
 ```
 
 License
