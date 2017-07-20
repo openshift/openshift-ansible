@@ -117,6 +117,9 @@ spec:
              name: "OAP_DEBUG"
              value: "{{ openshift_logging_kibana_proxy_debug }}"
             -
+             name: "OAP_USER_TOKEN_MEMCACHED_HOSTNAME"
+             value: "{{ memcached_hostname }}"
+            -
              name: "OAP_OAUTH_SECRET_FILE"
              value: "/secret/oauth-secret"
             -
