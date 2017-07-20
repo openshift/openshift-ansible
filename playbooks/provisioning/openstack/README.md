@@ -93,8 +93,9 @@ steps, and the Neutron subnet for the Heat stack is updated to point to that
 server in the end. So the provisioned servers will start using it natively
 as a default nameserver that comes from the NetworkManager and cloud-init.
 
-`openstack_ssh_key` is a Nova keypair -- you can see your keypairs with
-`openstack keypair list`.
+`openstack_ssh_key` is a Nova keypair - you can see your keypairs with
+`openstack keypair list`. This guide assumes that its corresponding private
+key is `~/.ssh/openshift`, stored on the ansible admin (control) node.
 
 `openstack_default_image_name` is the name of the Glance image the
 servers will use. You can
@@ -126,6 +127,14 @@ of firewall rules for master, node, etcd and infra nodes.
 The `required_packages` variable also provides a list of the additional
 prerequisite packages to be installed before to deploy an OpenShift cluster.
 Those are ignored though, if the `manage_packages: False`.
+
+The `openstack_inventory` controls either a static inventory will be created after the
+cluster nodes provisioned on OpenStack cloud. Note, the fully dynamic inventory
+is yet to be supported, so the static inventory will be created anyway.
+
+The `openstack_inventory_path` points the directory to host the generated static inventory.
+It should point to the copied example inventory directory, otherwise ti creates
+a new one for you.
 
 #### Security notes
 
@@ -164,21 +173,48 @@ variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
     origin_release: 1.5.1
     openshift_deployment_type: "{{ deployment_type }}"
 
+### Configure static inventory
+
+Example inventory variables:
+
+    openstack_private_ssh_key: ~/.ssh/openshift
+    openstack_inventory: static
+    openstack_inventory_path: ../../../../inventory
+
+
+In this guide, the latter points to the current directory, where you run ansible commands
+from.
+
+To verify nodes connectivity, use the command:
+
+    ansible -v -i inventory/hosts -m ping all
+
+If something is broken, double-check the inventory variables, paths and the
+generated `<openstack_inventory_path>/hosts` file.
+
+The `inventory: dynamic` can be used instead to access cluster nodes directly via
+floating IPs. In this mode you can not use a bastion node and should specify
+the dynamic inventory file in your ansible commands , like `-i openstack.py`.
+
 ## Deployment
 
 ### Run the playbook
 
 Assuming your OpenStack (Keystone) credentials are in the `keystonerc`
-file, this is how you stat the provisioning process:
+this is how you stat the provisioning process from your ansible control node:
 
     . keystonerc
-    ansible-playbook -i inventory --timeout 30  --private-key ~/.ssh/openshift openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
+
+Note, here you start with an empty inventory. The static inventory will be populated
+with data so you can omit providing additional arguments for future ansible commands.
+
 
 ### Install OpenShift
 
 Once it succeeds, you can install openshift by running:
 
-    ansible-playbook --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
+    ansible-playbook openshift-ansible/playbooks/byo/config.yml
 
 
 ## License

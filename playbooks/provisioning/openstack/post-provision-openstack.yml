@@ -1,72 +1,90 @@
 ---
+- hosts: cluster_hosts
+  name: Wait for the the nodes to come up
+  become: False
+  gather_facts: False
+  tasks:
+    - wait_for_connection:
+
+- hosts: cluster_hosts
+  gather_facts: True
+  tasks:
+    - name: Debug hostvar
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+        verbosity: 2
+
+- name: OpenShift Pre-Requisites (part 1)
+  include: pre-install.yml
+
 - name: Assign hostnames
   hosts: cluster_hosts
   gather_facts: False
   become: true
   pre_tasks:
-  - include: pre_tasks.yml
+    - include: pre_tasks.yml
   roles:
-  - role: hostnames
+    - role: hostnames
 
 - name: Subscribe DNS Host to allow for configuration below
   hosts: dns
   gather_facts: False
   become: true
   roles:
-  - role: subscription-manager
-    when: hostvars.localhost.rhsm_register|default(False)
-    tags: 'subscription-manager'
+    - role: subscription-manager
+      when: hostvars.localhost.rhsm_register|default(False)
+      tags: 'subscription-manager'
 
 - name: Determine which DNS server(s) to use for our generated records
   hosts: localhost
   gather_facts: False
   become: False
   roles:
-  - dns-server-detect
+    - dns-server-detect
 
 - name: Build the DNS Server Views and Configure DNS Server(s)
   hosts: dns
   gather_facts: False
   become: true
   pre_tasks:
-  - include: pre_tasks.yml
-  - name: "Generate dns-server views"
-    include: openstack_dns_views.yml
+    - include: pre_tasks.yml
+    - name: "Generate dns-server views"
+      include: openstack_dns_views.yml
   roles:
-  - role: infra-ansible/roles/dns-server
+    - role: infra-ansible/roles/dns-server
 
 - name: Build and process DNS Records
   hosts: localhost
-  gather_facts: False
+  gather_facts: True
   become: False
   pre_tasks:
-  - include: pre_tasks.yml
-  - name: "Generate dns records"
-    include: openstack_dns_records.yml
+    - include: pre_tasks.yml
+    - name: "Generate dns records"
+      include: openstack_dns_records.yml
   roles:
-  - role: infra-ansible/roles/dns
+    - role: infra-ansible/roles/dns
 
 - name: Switch the stack subnet to the configured private DNS server
   hosts: localhost
   gather_facts: False
   become: False
   vars_files:
-  - stack_params.yaml
+    - stack_params.yaml
   tasks:
-  - include_role:
-      name: openstack-stack
-      tasks_from: subnet_update_dns_servers
+    - include_role:
+        name: openstack-stack
+        tasks_from: subnet_update_dns_servers
 
-- name: OpenShift Pre-Requisites
+- name: OpenShift Pre-Requisites (part 2)
   hosts: OSEv3
   gather_facts: true
   become: true
   pre_tasks:
-  - name: "Include DNS configuration to ensure proper name resolution"
-    lineinfile:
-      state: present
-      dest: /etc/sysconfig/network
-      regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
-      line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+    - name: "Include DNS configuration to ensure proper name resolution"
+      lineinfile:
+        state: present
+        dest: /etc/sysconfig/network
+        regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+        line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
   roles:
-  - node-network-manager
+    - node-network-manager

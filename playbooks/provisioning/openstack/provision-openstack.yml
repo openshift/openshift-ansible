@@ -8,6 +8,10 @@
     - include: pre_tasks.yml
   roles:
     - role: openstack-stack
+    - role: static_inventory
+      when: openstack_inventory|default('static') == 'static'
+      inventory_path: "{{ openstack_inventory_path|default(inventory_dir) }}"
+      private_ssh_key: "{{ openstack_private_ssh_key|default('~/.ssh/id_rsa') }}"
 
 - name: Refresh Server inventory
   hosts: localhost
@@ -16,20 +20,5 @@
   gather_facts: False
   tasks:
     - meta: refresh_inventory
-
-- hosts: cluster_hosts
-  name: Wait for the the nodes to come up
-  become: False
-  gather_facts: False
-  tasks:
-    - wait_for_connection:
-
-- hosts: cluster_hosts
-  gather_facts: True
-  tasks:
-    - name: Debug hostvar
-      debug:
-        msg: "{{ hostvars[inventory_hostname] }}"
-        verbosity: 2
 
 - include: post-provision-openstack.yml
