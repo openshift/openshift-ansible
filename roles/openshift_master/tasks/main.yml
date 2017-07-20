@@ -140,6 +140,12 @@
     - set_fact:
         openshift_push_via_dns: "{{ (openshift_use_dnsmasq | default(true) and openshift.common.version_gte_3_6) or (already_set.stdout | match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
 
+- name: Set fact of all etcd host IPs
+  openshift_facts:
+    role: common
+    local_facts:
+      no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
+
 - name: Install the systemd units
   include: systemd_units.yml
 
