@@ -137,6 +137,12 @@ objects:
     - serviceclasses
     verbs:
     - create
+    - delete
+    - update
+    - patch
+    - get
+    - list
+    - watch
   - apiGroups:
     - settings.k8s.io
     resources:
