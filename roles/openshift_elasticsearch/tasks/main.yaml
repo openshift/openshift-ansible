@@ -1,0 +1,105 @@
+---
+
+- include: determine_version.yaml
+
+- name: Gather OpenShift Logging Facts
+  openshift_elasticsearch_facts:
+    oc_bin: "{{client_binary}}"
+    openshift_namespace: "{{openshift_elasticsearch_namespace}}"
+    elasticsearch_clustername: "{{ openshift_elasticsearch_clustername }}"
+    admin_kubeconfig: "{{ kubeconfig }}"
+
+- name: Validate Elasticsearch cluster size
+  fail: msg="The openshift_elasticsearch_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
+  when: openshift_elasticsearch_facts.node_topology.clientdata | length > es_node_topology.clientdata | length
+
+- name: Set Elasticsearch project
+  oc_project:
+    state: present
+    name: "{{ openshift_elasticsearch_namespace }}"
+    kubeconfig: '{{ kubeconfig }}'
+
+# Set up service accounts and roles
+- include: "{{ role_path }}/tasks/service_accounts.yaml"
+
+# Services
+- name: create Elasticsearch 9200 service
+  oc_service:
+    namespace: "{{ openshift_elasticsearch_namespace }}"
+    name: "{{ openshift_elasticsearch_clustername  }}"
+    ports:
+    - name: 9200-tcp
+      port: 9200
+      protocol: TCP
+      targetPort: restapi
+    selector:
+      cluster-name: "{{ openshift_elasticsearch_clustername }}"
+      elasticsearch-http: "true"
+    session_affinity: ClientIP
+    service_type: ClusterIP
+    kubeconfig: '{{ kubeconfig }}'
+
+- name: create Elasticsearch 9300 service
+  oc_service:
+    namespace: "{{ openshift_elasticsearch_namespace }}"
+    name: "{{ openshift_elasticsearch_clustername  }}-cluster"
+    ports:
+    - name: 9300-tcp
+      port: 9300
+      protocol: TCP
+    selector:
+      cluster-name: "{{ openshift_elasticsearch_clustername }}"
+      es-node-role: "master"
+    clusterip: None
+    kubeconfig: '{{ kubeconfig }}'
+
+# Set variables common for all DCs
+- set_fact:
+    logging_component: "{{ openshift_elasticsearch_clustername }}"
+
+# Deploy masters
+- include: "{{ role_path }}/tasks/provision_node.yaml"
+  vars:
+    replicas: "{{ es_node_topology.masters.replicas }}"
+    es_role: master
+    node_master: "true"
+    node_data: "false"
+    node_client: "false"
+    es_http_service: "false"
+    openshift_elasticsearch_deployment_name: "{{ openshift_elasticsearch_clustername }}-master"
+    generated_certs_dir: "{{ certs_dir }}"
+    limits: "{{ es_node_topology.masters.limits }}"
+    es_node_selector: "{{ es_node_topology.masters.nodeSelector | default({}) }}"
+    node_storage_type: emptydir
+    image: "{{ openshift_elasticsearch_image }}:{{ openshift_elasticsearch_image_version }}"
+
+# Deploy client-data nodes
+- include: "{{ role_path }}/tasks/provision_node.yaml"
+  vars:
+    es_cluster_name: "{{ openshift_elasticsearch_clustername }}"
+    es_role: clientdata
+    es_http_service: "true"
+    node_master: "false"
+    node_data: "true"
+    node_client: "false"
+    openshift_elasticsearch_deployment_name: "{{ openshift_elasticsearch_clustername }}-clientdata-{{ item.0 }}"
+    generated_certs_dir: "{{ certs_dir }}"
+    limits: "{{ item.1.limits }}"
+    es_node_selector: "{{ item.1.nodeSelector | default({}) }}"
+    node_storage_type: "{{ item.1.node_storage_type | default(emptydir) }}"
+    openshift_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item.0 | int }}"
+    hostmount_path: "{{ item.1.hostmount_path |default ({})}}"
+    image: "{{ openshift_elasticsearch_image }}:{{ openshift_elasticsearch_image_version }}"
+  with_indexed_items: "{{ es_node_topology.clientdata }}"
+
+# Deploy Elasticsearch init pod
+# TODO: fix to change to use job?
+- include: "{{ role_path }}/tasks/provision_init_node.yaml"
+  vars:
+    es_svc_name: "{{ openshift_elasticsearch_clustername }}"
+    es_role: elasticsearch-init
+    es_deploy_name: "{{ openshift_elasticsearch_clustername }}-es-init"
+    generated_certs_dir: "{{ certs_dir }}"
+    image: "{{ openshift_elasticsearch_init_image }}:{{ openshift_elasticsearch_init_image_version }}"
+
+- debug: var=openshift_elasticsearch_facts

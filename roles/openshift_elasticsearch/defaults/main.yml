@@ -1,0 +1,68 @@
+---
+### Default images
+openshift_elasticsearch_image: "{{ openshift_hosted_deployer_prefix | default('docker.io/openshift/origin-') }}elasticsearch"
+openshift_elasticsearch_image_version: "{{ openshift_hosted_deployer_version | default('latest') }}"
+openshift_elasticsearch_image_pull_secret: "{{ openshift_hosted_image_pull_secret | default('') }}"
+
+openshift_elasticsearch_init_image: "{{ openshift_hosted_deployer_prefix | default('docker.io/openshift/origin-') }}elasticsearch-init"
+openshift_elasticsearch_init_image_version: "{{ openshift_hosted_deployer_version | default('latest') }}"
+
+
+openshift_master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"
+
+### Elasticsearch cluster topology
+openshift_elasticsearch_namespace: logging
+openshift_elasticsearch_sa_name: elasticsearch-sa
+openshift_elasticsearch_secure: true
+openshift_elasticsearch_clustername: "elastic1"
+openshift_elasticsearch_cluster_size: 1
+## TODO: replace with computable cluster size
+openshift_elasticsearch_recover_after_time: 5m
+
+es_node_topology:
+  masters:
+    replicas: 2
+    limits:
+      cpu: 200m
+    requests:
+      memory: 512Mi
+  clientdata:
+  -
+    nodeSelector:
+      kubernetes.io/hostname: asherkho-ocp-rhel1.os1.phx2.redhat.com
+    node_storage_type: hostmount
+    hostmount_path:
+    - /mnt/data1
+    - /mnt/data2
+    limits:
+      memory: 2048Mi
+      cpu: 200m
+  -
+    node_storage_type: emptydir
+    hostmount_path:
+    - /mnt/data
+    limits:
+      memory: 2048Mi
+      cpu: 200m
+
+### Elasticsearch storage layout
+
+# required if the PVC does not already exist
+openshift_elasticsearch_pvc_size: "20Gi"
+openshift_elasticsearch_pvc_dynamic: false
+openshift_elasticsearch_pvc_pv_selector: false
+openshift_elasticsearch_pvc_access_modes: ['ReadWriteOnce']
+openshift_elasticsearch_storage_group: '65534'
+openshift_logging_es_pvc_prefix: 'es-data-pvc'
+
+openshift_es_pvc_prefix: "{{ openshift_hosted_elasticsearch_pvc_prefix | default('logging-es') }}"
+
+openshift_logging_elasticsearch_ops_allow_cluster_reader: false
+
+# following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
+#es_contents:
+#es_config_contents:
+
+
+openshift_logging_es_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
+openshift_elasticsearch_integration: false

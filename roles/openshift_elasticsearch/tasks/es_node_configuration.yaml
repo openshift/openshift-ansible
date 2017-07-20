@@ -1,0 +1,71 @@
+---
+# configmap
+- template:
+    src: jvm.options.j2
+    dest: "{{ tempdir }}/jvm.options"
+  when: jvm_options_contents is undefined
+  changed_when: no
+
+- template:
+    src: log4j2.properties.j2
+    dest: "{{ tempdir }}/log4j2.properties"
+  when: es_log4j_contents is undefined
+  changed_when: no
+
+- template:
+    src: elasticsearch.yml.j2
+    dest: "{{ tempdir }}/elasticsearch.yml"
+  vars:
+    allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
+  when: es_config_contents is undefined
+  changed_when: no
+
+- copy:
+    content: "{{ jvm_options_contents }}"
+    dest: "{{ tempdir }}/jvm.options"
+  when: jvm_options_contents is defined
+  changed_when: no
+
+- copy:
+    content: "{{ es_config_contents }}"
+    dest: "{{ tempdir }}/elasticsearch.yml"
+  when: es_config_contents is defined
+  changed_when: no
+
+- name: Set ES configmap
+  oc_configmap:
+    state: present
+    name: "{{ node_configmap }}"
+    namespace: "{{ openshift_elasticsearch_namespace }}"
+    from_file:
+      elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
+      jvm.options: "{{ tempdir }}/jvm.options"
+      log4j2.properties: "{{ tempdir  }}/log4j2.properties"
+    kubeconfig: '{{ kubeconfig }}'
+#  when:
+
+# secret
+- name: Set ES secret
+  oc_secret:
+    state: present
+    name: "{{ openshift_elasticsearch_clustername }}-certs"
+    namespace: "{{ openshift_elasticsearch_namespace }}"
+    files:
+    - name: key
+      path: "{{ generated_certs_dir }}/{{ openshift_elasticsearch_clustername }}.jks"
+    - name: truststore
+      path: "{{ generated_certs_dir }}/truststore.jks"
+    - name: searchguard.key
+      path: "{{ generated_certs_dir }}/{{ openshift_elasticsearch_clustername }}-cluster.jks"
+    - name: searchguard.truststore
+      path: "{{ generated_certs_dir }}/truststore.jks"
+    - name: admin-key
+      path: "{{ generated_certs_dir }}/system.admin.key"
+    - name: admin-cert
+      path: "{{ generated_certs_dir }}/system.admin.crt"
+    - name: admin-ca
+      path: "{{ generated_certs_dir }}/ca.crt"
+    - name: admin.jks
+      path: "{{ generated_certs_dir }}/system.admin.jks"
+    kubeconfig: '{{ kubeconfig }}'
+  when: openshift_elasticsearch_secure

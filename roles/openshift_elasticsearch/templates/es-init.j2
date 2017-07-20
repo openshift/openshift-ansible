@@ -1,0 +1,84 @@
+apiVersion: "v1"
+kind: "DeploymentConfig"
+metadata:
+  name: "{{deploy_name}}"
+  labels:
+    provider: openshift
+    component: "{{component}}"
+    deployment: "{{deploy_name}}"
+    cluster-name: "{{ es_svc_name }}"
+    logging-infra: "{{logging_component}}"
+    es-node-role: "{{ es_role }}"
+spec:
+  replicas: {{replicas|default(0)}}
+  selector:
+    provider: openshift
+    component: "{{component}}"
+    deployment: "{{deploy_name}}"
+    logging-infra: "{{logging_component}}"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: "{{deploy_name}}"
+      labels:
+        logging-infra: "{{logging_component}}"
+        provider: openshift
+        component: "{{component}}"
+        deployment: "{{deploy_name}}"
+        cluster-name: "{{ es_svc_name }}"
+        es-node-role: "{{ es_role }}"
+    spec:
+      terminationGracePeriod: 600
+      serviceAccountName: {{ openshift_elasticsearch_sa_name }}
+      containers:
+        -
+          name: "elasticsearch-init"
+          image: {{image}}
+          imagePullPolicy: Always
+          resources:
+{% if limits is defined %}
+            limits:
+{% for key, value in limits.iteritems() %}
+              {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+{% if requests is defined %}
+            requests:
+{% for key, value in requests.iteritems() %}
+              {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+#          livenessProbe:
+#            tcpSocket:
+#              port: 9300
+#            initialDelaySeconds: 480
+#            periodSeconds: 5
+          env:
+            -
+              name: "NAMESPACE"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            -
+              name: "ES_API_SERVICE"
+              value: "{{ es_svc_name }}"
+            -
+              name: "INSTANCE_RAM"
+{% if limits is defined and limits.memory is defined %}
+              value: "{{ limits.memory }}"
+{% else %}
+              value: "512m"
+{% endif %}
+          volumeMounts:
+{% if openshift_elasticsearch_secure %}
+            - name: elasticsearch
+              mountPath: /etc/elasticsearch/secret
+              readOnly: true
+{% endif %}
+      volumes:
+{% if openshift_elasticsearch_secure %}
+        - name: elasticsearch
+          secret:
+            secretName: {{ es_svc_name }}-certs
+{% endif %}
