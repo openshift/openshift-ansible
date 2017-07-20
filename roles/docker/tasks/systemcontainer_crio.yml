@@ -44,6 +44,12 @@
     - name: Manually modprobe overlay into the kernel
       command: modprobe overlay
 
+    - name: Enable and start systemd-modules-load
+      service:
+        name: systemd-modules-load
+        enabled: yes
+        state: restarted
+
 
 - block:
 
