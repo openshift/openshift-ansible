@@ -33,35 +33,6 @@ To build a container image of `openshift-ansible` using standalone **Docker**:
         cd openshift-ansible
         docker build -f images/installer/Dockerfile -t openshift-ansible .
 
-### Building on OpenShift
-
-To build an openshift-ansible image using an **OpenShift** [build and image stream](https://docs.openshift.org/latest/architecture/core_concepts/builds_and_image_streams.html) the straightforward command would be:
-
-        oc new-build registry.centos.org/openshift/playbook2image~https://github.com/openshift/openshift-ansible
-
-However: because the `Dockerfile` for this repository is not in the top level directory, and because we can't change the build context to the `images/installer` path as it would cause the build to fail, the `oc new-app` command above will create a build configuration using the *source to image* strategy, which is the default approach of the [playbook2image](https://github.com/openshift/playbook2image) base image. This does build an image successfully, but unfortunately the resulting image will be missing some customizations that are handled by the [Dockerfile](images/installer/Dockerfile) in this repo.
-
-At the time of this writing there is no straightforward option to [set the dockerfilePath](https://docs.openshift.org/latest/dev_guide/builds/build_strategies.html#dockerfile-path) of a `docker` build strategy with `oc new-build`. The alternatives to achieve this are:
-
-- Use the simple `oc new-build` command above to generate the BuildConfig and ImageStream objects, and then manually edit the generated build configuration to change its strategy to `dockerStrategy` and set `dockerfilePath` to `images/installer/Dockerfile`.
-
-- Download and pass the `Dockerfile` to `oc new-build` with the `-D` option:
-
-```
-curl -s https://raw.githubusercontent.com/openshift/openshift-ansible/master/images/installer/Dockerfile |
-     oc new-build -D - \
-        --docker-image=registry.centos.org/openshift/playbook2image \
-	    https://github.com/openshift/openshift-ansible
-```
-
-Once a build is started, the progress of the build can be monitored with:
-
-        oc logs -f bc/openshift-ansible
-
-Once built, the image will be visible in the Image Stream created by `oc new-app`:
-
-        oc describe imagestream openshift-ansible
-
 ## Build the Atomic System Container
 
 A system container runs using runC instead of Docker and it is managed
