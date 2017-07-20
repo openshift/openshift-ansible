@@ -13,6 +13,12 @@ etc.). The result is an environment ready for openshift-ansible.
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
 * Become (sudo) is not required.
 
+### Optional Dependencies for localhost
+**Note**: When using rhel images, `rhel-7-server-openstack-10-rpms` repository is required in order to install these packages.
+
+* `python-openstackclient`
+* `python-heatclient`
+
 ## Dependencies for OpenStack hosted cluster nodes (servers)
 
 There are no additional dependencies for the cluster nodes. Required
