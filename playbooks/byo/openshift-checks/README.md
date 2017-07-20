@@ -39,7 +39,9 @@ against your inventory file. Here is the step-by-step:
     $ cd openshift-ansible
     ```
 
-2. Run the appropriate playbook:
+2. Install the [dependencies](../../../README.md#setup)
+
+3. Run the appropriate playbook:
 
     ```console
     $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/pre-install.yml
@@ -57,9 +59,8 @@ against your inventory file. Here is the step-by-step:
     $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/certificate_expiry/default.yaml -v
     ```
 
-## Running via Docker image
+## Running in a container
 
 This repository is built into a Docker image including Ansible so that it can
-be run anywhere Docker is available. Instructions for doing so may be found
-[in the README](../../README_CONTAINER_IMAGE.md).
-
+be run anywhere Docker is available, without the need to manually install dependencies.
+Instructions for doing so may be found [in the README](../../../README_CONTAINER_IMAGE.md).
