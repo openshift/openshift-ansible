@@ -610,7 +610,9 @@ resources:
           type:        node
           subtype:     app
           node_labels:
-            region: primary
+{% for k, v in openshift_cluster_node_labels.app.iteritems() %}
+            {{ k|e }}: {{ v|e }}
+{% endfor %}
           image:       {{ openstack_image }}
           flavor:      {{ node_flavor }}
           key_name:    {{ ssh_public_key }}
@@ -654,7 +656,9 @@ resources:
           type:        node
           subtype:     infra
           node_labels:
-            region: infra
+{% for k, v in openshift_cluster_node_labels.infra.iteritems() %}
+            {{ k|e }}: {{ v|e }}
+{% endfor %}
           image:       {{ openstack_image }}
           flavor:      {{ infra_flavor }}
           key_name:    {{ ssh_public_key }}

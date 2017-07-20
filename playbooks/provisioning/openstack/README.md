@@ -112,6 +112,9 @@ The `openstack_num_masters`, `openstack_num_infra` and
 `openstack_num_nodes` values specify the number of Master, Infra and
 App nodes to create.
 
+The `openshift_cluster_node_labels` defines custom labels for your openshift
+cluster node groups, like app or infra nodes. For example: `{'region': 'infra'}`.
+
 The `openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 
@@ -140,18 +143,6 @@ may want to turn off in order to speed up the provisioning tasks. This may
 be the case for development environments. When turned off, the servers will
 be provisioned omitting the ``yum update`` command. This brings security
 implications though, and is not recommended for production deployments.
-
-### Update the DNS names in `inventory/hosts`
-
-The different server groups are currently grouped by the domain name,
-so if you end up using a different domain than
-`openshift.example.com`, you will need to update the `inventory/hosts`
-file.
-
-For example, if your final domain is `my.cloud.com`, you can run this
-command to fix update the `hosts` file:
-
-    sed -i 's/openshift.example.com/my.cloud.com/' inventory/hosts
 
 ### Configure the OpenShift parameters
 
@@ -193,6 +184,4 @@ Once it succeeds, you can install openshift by running:
 ## License
 
 As the rest of the openshift-ansible-contrib repository, the code here is
-licensed under Apache 2. However, the openstack.py file under
-`sample-inventory` is GPLv3+. See the INVENTORY-LICENSE.txt file for the full
-text of the license.
+licensed under Apache 2.
