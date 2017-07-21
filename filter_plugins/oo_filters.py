@@ -194,10 +194,10 @@ def oo_select_keys_from_list(data, keys):
     """
 
     if not isinstance(data, list):
-        raise errors.AnsibleFilterError("|failed expects to filter on a list")
+        raise errors.AnsibleFilterError("|oo_select_keys_from_list failed expects to filter on a list")
 
     if not isinstance(keys, list):
-        raise errors.AnsibleFilterError("|failed expects first param is a list")
+        raise errors.AnsibleFilterError("|oo_select_keys_from_list failed expects first param is a list")
 
     # Gather up the values for the list of keys passed in
     retval = [oo_select_keys(item, keys) for item in data]
@@ -213,10 +213,10 @@ def oo_select_keys(data, keys):
     """
 
     if not isinstance(data, Mapping):
-        raise errors.AnsibleFilterError("|failed expects to filter on a dict or object")
+        raise errors.AnsibleFilterError("|oo_select_keys failed expects to filter on a dict or object")
 
     if not isinstance(keys, list):
-        raise errors.AnsibleFilterError("|failed expects first param is a list")
+        raise errors.AnsibleFilterError("|oo_select_keys failed expects first param is a list")
 
     # Gather up the values for the list of keys passed in
     retval = [data[key] for key in keys if key in data]
