@@ -30,7 +30,7 @@ class Kibana(LoggingCheck):
             "kibana",
         )
         if error:
-            return {"failed": True, "changed": False, "msg": error}
+            return {"failed": True, "msg": error}
         check_error = self.check_kibana(kibana_pods)
 
         if not check_error:
@@ -39,10 +39,10 @@ class Kibana(LoggingCheck):
         if check_error:
             msg = ("The following Kibana deployment issue was found:"
                    "{}".format(check_error))
-            return {"failed": True, "changed": False, "msg": msg}
+            return {"failed": True, "msg": msg}
 
         # TODO(lmeyer): run it all again for the ops cluster
-        return {"failed": False, "changed": False, "msg": 'No problems found with Kibana deployment.'}
+        return {"failed": False, "msg": 'No problems found with Kibana deployment.'}
 
     def _verify_url_internal(self, url):
         """

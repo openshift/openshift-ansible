@@ -21,16 +21,16 @@ class Elasticsearch(LoggingCheck):
             "es",
         )
         if error:
-            return {"failed": True, "changed": False, "msg": error}
+            return {"failed": True, "msg": error}
         check_error = self.check_elasticsearch(es_pods)
 
         if check_error:
             msg = ("The following Elasticsearch deployment issue was found:"
                    "{}".format(check_error))
-            return {"failed": True, "changed": False, "msg": msg}
+            return {"failed": True, "msg": msg}
 
         # TODO(lmeyer): run it all again for the ops cluster
-        return {"failed": False, "changed": False, "msg": 'No problems found with Elasticsearch deployment.'}
+        return {"failed": False, "msg": 'No problems found with Elasticsearch deployment.'}
 
     def _not_running_elasticsearch_pods(self, es_pods):
         """Returns: list of pods that are not running, list of errors about non-running pods"""

@@ -56,7 +56,7 @@ class EtcdImageDataSize(OpenShiftCheck):
                     reason = etcdkeysize["module_stderr"]
 
                 msg = msg.format(host=etcd_host, reason=reason)
-                return {"failed": True, "changed": False, "msg": msg}
+                return {"failed": True, "msg": msg}
 
             if etcdkeysize["size_limit_exceeded"]:
                 limit = self._to_gigabytes(etcd_imagedata_size_limit)
@@ -65,7 +65,7 @@ class EtcdImageDataSize(OpenShiftCheck):
                        "Use the `oadm prune images` command to cleanup unused Docker images.")
                 return {"failed": True, "msg": msg.format(host=etcd_host, limit=limit)}
 
-        return {"changed": False}
+        return {}
 
     @staticmethod
     def _get_etcd_mountpath(ansible_mounts):

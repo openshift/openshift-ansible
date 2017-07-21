@@ -41,11 +41,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         return super(DockerImageAvailability, self).is_active() and has_valid_deployment_type
 
     def run(self):
-        msg, failed, changed = self.ensure_dependencies()
+        msg, failed = self.ensure_dependencies()
         if failed:
             return {
                 "failed": True,
-                "changed": changed,
                 "msg": "Some dependencies are required in order to check Docker image availability.\n" + msg
             }
 
@@ -54,11 +53,11 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         # exit early if all images were found locally
         if not missing_images:
-            return {"changed": changed}
+            return {}
 
         registries = self.known_docker_registries()
         if not registries:
-            return {"failed": True, "msg": "Unable to retrieve any docker registries.", "changed": changed}
+            return {"failed": True, "msg": "Unable to retrieve any docker registries."}
 
         available_images = self.available_images(missing_images, registries)
         unavailable_images = set(missing_images) - set(available_images)
@@ -70,10 +69,9 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                     "One or more required Docker images are not available:\n    {}\n"
                     "Configured registries: {}"
                 ).format(",\n    ".join(sorted(unavailable_images)), ", ".join(registries)),
-                "changed": changed,
             }
 
-        return {"changed": changed}
+        return {}
 
     def required_images(self):
         """

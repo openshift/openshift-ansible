@@ -40,7 +40,7 @@ class EtcdVolume(OpenShiftCheck):
             )
             return {"failed": True, "msg": msg}
 
-        return {"changed": False}
+        return {}
 
     def _etcd_mount_info(self):
         ansible_mounts = self.get_var("ansible_mounts")
