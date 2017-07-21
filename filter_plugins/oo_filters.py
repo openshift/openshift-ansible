@@ -13,6 +13,7 @@ import json
 import yaml
 import random
 
+from base64 import b64encode
 from ansible import errors
 from collections import Mapping
 from distutils.util import strtobool
@@ -672,8 +673,7 @@ def oo_generate_secret(num_bytes):
     if not isinstance(num_bytes, int):
         raise errors.AnsibleFilterError("|failed expects num_bytes is int")
 
-    secret = os.urandom(num_bytes)
-    return secret.encode('base-64').strip()
+    return b64encode(os.urandom(num_bytes)).decode('utf-8')
 
 
 def to_padded_yaml(data, level=0, indent=2, **kw):
