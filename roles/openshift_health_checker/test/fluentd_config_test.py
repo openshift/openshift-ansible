@@ -198,12 +198,9 @@ def test_check_logging_config_master(name, pods, logging_driver, extra_words):
         ),
     )
 
-    def get_pods(namespace, logging_component):
-        return pods, None
-
     check = FluentdConfig(execute_module, task_vars)
     check.execute_module = execute_module
-    check.get_pods_for_component = get_pods
+    check.get_pods_for_component = lambda _: pods
     error = check.check_logging_config()
 
     assert error is None
@@ -283,12 +280,9 @@ def test_check_logging_config_master_failed(name, pods, logging_driver, words):
         ),
     )
 
-    def get_pods(namespace, logging_component):
-        return pods, None
-
     check = FluentdConfig(execute_module, task_vars)
     check.execute_module = execute_module
-    check.get_pods_for_component = get_pods
+    check.get_pods_for_component = lambda _: pods
     error = check.check_logging_config()
 
     assert error is not None
@@ -343,11 +337,8 @@ def test_check_logging_config_master_fails_on_unscheduled_deployment(name, pods,
         ),
     )
 
-    def get_pods(namespace, logging_component):
-        return pods, None
-
     check = FluentdConfig(execute_module, task_vars)
-    check.get_pods_for_component = get_pods
+    check.get_pods_for_component = lambda _: pods
 
     with pytest.raises(OpenShiftCheckException) as error:
         check.check_logging_config()
