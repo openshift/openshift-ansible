@@ -11,7 +11,7 @@ openshift_logging_kibana_nodeselector: ""
 openshift_logging_kibana_cpu_limit: null
 openshift_logging_kibana_memory_limit: 736Mi
 
-openshift_logging_kibana_hostname: "kibana.router.default.svc.cluster.local"
+openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 
 openshift_logging_kibana_es_host: "logging-es"
 openshift_logging_kibana_es_port: 9200
