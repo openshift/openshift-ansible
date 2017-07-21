@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.153
+Version:        3.6.161
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,51 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.161-1
+- Added parameters inside of gce defaults.  Pass all params to the module.
+  (kwoodson@redhat.com)
+- Updating verbs for serviceclasses objects (ewolinet@redhat.com)
+- Hopefully finally fix the no_proxy settings (tbielawa@redhat.com)
+- Add etcd exports to openshift_storage_nfs (abutcher@redhat.com)
+- Removing parameter kind and allowing default to be passed.
+  (kwoodson@redhat.com)
+- GlusterFS: Create in custom namespace by default (jarrpa@redhat.com)
+- hosted registry: Use proper node name in GlusterFS storage setup
+  (jarrpa@redhat.com)
+- GlusterFS: Make heketi-cli command configurable (jarrpa@redhat.com)
+- GlusterFS: Reintroduce heketi-cli check for non-native heketi
+  (jarrpa@redhat.com)
+- GlusterFS: Bug fixes for external GlusterFS nodes (jarrpa@redhat.com)
+- GlusterFS: Improve and extend example inventory files (jarrpa@redhat.com)
+- Changing cluster role to admin (rhallise@redhat.com)
+- Add an SA policy to the ansible-service-broker (rhallise@redhat.com)
+- 1471973- default to bootstrapping the broker on startup (fabian@fabianism.us)
+- openshift_checks/docker_storage: overlay/2 support (lmeyer@redhat.com)
+- Remove openshift_use_dnsmasq from aws and libvirt playbooks
+  (sdodson@redhat.com)
+- Setting node selector to be empty string (ewolinet@redhat.com)
+- Add drain retries after 60 second delay (sdodson@redhat.com)
+- Dump some logs (sdodson@redhat.com)
+- daemon_reload on node and ovs start (sdodson@redhat.com)
+- Ensure proper fact evaluation (sdodson@redhat.com)
+- Wrap additional service changes in retries (sdodson@redhat.com)
+- Wrap docker stop in retries (sdodson@redhat.com)
+- Add retries to node restart handlers (sdodson@redhat.com)
+- Test docker restart with retries 3 delay 30 (smilner@redhat.com)
+- Adding podpreset config into master-config (ewolinet@redhat.com)
+- Update image-gc-high-threshold value (decarr@redhat.com)
+- Adding a check for variable definition. (kwoodson@redhat.com)
+- docker: fix docker_selinux_enabled (lmeyer@redhat.com)
+- Fixed spacing and lint errors. (kwoodson@redhat.com)
+- Switch CI to ansible-2.3.1.0 (sdodson@redhat.com)
+- Allow OVS 2.7 in latest OpenShift releases (rhcarvalho@gmail.com)
+- Make aos_version module handle multiple versions (rhcarvalho@gmail.com)
+- Split positive and negative unit tests (rhcarvalho@gmail.com)
+- Fixed tests and added sleep for update. (kwoodson@redhat.com)
+- Fixing needs_update comparison.  Added a small pause for race conditions.
+  Fixed doc.  Fix kind to storageclass (kwoodson@redhat.com)
+- Adding storageclass support to lib_openshift. (kwoodson@redhat.com)
+
 * Tue Jul 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.153-1
 - Updating to compare sets instead of sorted lists (ewolinet@redhat.com)
 - Adding ability to create podpreset for service-catalog-controller for
