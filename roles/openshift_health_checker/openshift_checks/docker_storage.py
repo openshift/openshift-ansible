@@ -43,21 +43,20 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
     ]
 
     def run(self):
-        msg, failed, changed = self.ensure_dependencies()
+        msg, failed = self.ensure_dependencies()
         if failed:
             return {
                 "failed": True,
-                "changed": changed,
                 "msg": "Some dependencies are required in order to query docker storage on host:\n" + msg
             }
 
         # attempt to get the docker info hash from the API
         docker_info = self.execute_module("docker_info", {})
         if docker_info.get("failed"):
-            return {"failed": True, "changed": changed,
+            return {"failed": True,
                     "msg": "Failed to query Docker API. Is docker running on this host?"}
         if not docker_info.get("info"):  # this would be very strange
-            return {"failed": True, "changed": changed,
+            return {"failed": True,
                     "msg": "Docker API query missing info:\n{}".format(json.dumps(docker_info))}
         docker_info = docker_info["info"]
 
@@ -68,7 +67,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "Detected unsupported Docker storage driver '{driver}'.\n"
                 "Supported storage drivers are: {drivers}"
             ).format(driver=driver, drivers=', '.join(self.storage_drivers))
-            return {"failed": True, "changed": changed, "msg": msg}
+            return {"failed": True, "msg": msg}
 
         # driver status info is a list of tuples; convert to dict and validate based on driver
         driver_status = {item[0]: item[1] for item in docker_info.get("DriverStatus", [])}
@@ -81,7 +80,6 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         if driver in ['overlay', 'overlay2']:
             result = self.check_overlay_support(docker_info, driver_status)
 
-        result['changed'] = result.get('changed', False) or changed
         return result
 
     def check_devicemapper_support(self, driver_status):

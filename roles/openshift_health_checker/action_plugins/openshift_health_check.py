@@ -68,13 +68,15 @@ class ActionModule(ActionBase):
                         msg=str(e),
                     )
 
+            if check.changed:
+                r["changed"] = True
             check_results[check_name] = r
 
-            if r.get("failed", False):
-                result["failed"] = True
-                result["msg"] = "One or more checks failed"
+        result["changed"] = any(r.get("changed") for r in check_results.values())
+        if any(r.get("failed") for r in check_results.values()):
+            result["failed"] = True
+            result["msg"] = "One or more checks failed"
 
-        result["changed"] = any(r.get("changed", False) for r in check_results.values())
         return result
 
     def load_known_checks(self, tmp, task_vars):

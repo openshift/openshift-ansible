@@ -18,16 +18,16 @@ class Curator(LoggingCheck):
             "curator",
         )
         if error:
-            return {"failed": True, "changed": False, "msg": error}
+            return {"failed": True, "msg": error}
         check_error = self.check_curator(curator_pods)
 
         if check_error:
             msg = ("The following Curator deployment issue was found:"
                    "{}".format(check_error))
-            return {"failed": True, "changed": False, "msg": msg}
+            return {"failed": True, "msg": msg}
 
         # TODO(lmeyer): run it all again for the ops cluster
-        return {"failed": False, "changed": False, "msg": 'No problems found with Curator deployment.'}
+        return {"failed": False, "msg": 'No problems found with Curator deployment.'}
 
     def check_curator(self, pods):
         """Check to see if curator is up and working. Returns: error string"""

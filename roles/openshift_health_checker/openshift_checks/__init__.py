@@ -34,6 +34,8 @@ class OpenShiftCheck(object):
         self._execute_module = execute_module
         self.task_vars = task_vars or {}
         self.tmp = tmp
+        # set True when the check makes a change to the host so it can be reported to the user:
+        self.changed = False
 
     @abstractproperty
     def name(self):

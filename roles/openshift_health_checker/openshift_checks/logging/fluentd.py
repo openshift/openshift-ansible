@@ -20,16 +20,16 @@ class Fluentd(LoggingCheck):
             "fluentd",
         )
         if error:
-            return {"failed": True, "changed": False, "msg": error}
+            return {"failed": True, "msg": error}
         check_error = self.check_fluentd(fluentd_pods)
 
         if check_error:
             msg = ("The following Fluentd deployment issue was found:"
                    "{}".format(check_error))
-            return {"failed": True, "changed": False, "msg": msg}
+            return {"failed": True, "msg": msg}
 
         # TODO(lmeyer): run it all again for the ops cluster
-        return {"failed": False, "changed": False, "msg": 'No problems found with Fluentd deployment.'}
+        return {"failed": False, "msg": 'No problems found with Fluentd deployment.'}
 
     @staticmethod
     def _filter_fluentd_labeled_nodes(nodes_by_name, node_selector):
