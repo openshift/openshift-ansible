@@ -30,7 +30,7 @@
   fail:
     msg: "openshift-ansible requires Python 2 for {{ ansible_distribution }}"
   when:
-  - ansible_distribution == 'Fedora'
+  - ansible_distribution != 'Fedora'
   - ansible_python['version']['major'] != 2
   - r_openshift_facts_ran is not defined
 
