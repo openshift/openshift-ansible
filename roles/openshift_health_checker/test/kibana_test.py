@@ -8,15 +8,7 @@ except ImportError:
     from urllib.error import HTTPError, URLError
     import urllib.request as urllib2
 
-from openshift_checks.logging.kibana import Kibana
-
-
-def assert_error(error, expect_error):
-    if expect_error:
-        assert error
-        assert expect_error in error
-    else:
-        assert not error
+from openshift_checks.logging.kibana import Kibana, OpenShiftCheckException
 
 
 plain_kibana_pod = {
@@ -41,39 +33,45 @@ not_running_kibana_pod = {
 }
 
 
+def test_check_kibana():
+    # should run without exception:
+    Kibana().check_kibana([plain_kibana_pod])
+
+
 @pytest.mark.parametrize('pods, expect_error', [
     (
         [],
-        "There are no Kibana pods deployed",
-    ),
-    (
-        [plain_kibana_pod],
-        None,
+        "MissingComponentPods",
     ),
     (
         [not_running_kibana_pod],
-        "No Kibana pod is in a running state",
+        "NoRunningPods",
     ),
     (
         [plain_kibana_pod, not_running_kibana_pod],
-        "The following Kibana pods are not currently in a running state",
+        "PodNotRunning",
     ),
 ])
-def test_check_kibana(pods, expect_error):
-    check = Kibana()
-    error = check.check_kibana(pods)
-    assert_error(error, expect_error)
+def test_check_kibana_error(pods, expect_error):
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        Kibana().check_kibana(pods)
+    assert expect_error == excinfo.value.name
 
 
-@pytest.mark.parametrize('route, expect_url, expect_error', [
+@pytest.mark.parametrize('comment, route, expect_error', [
     (
+        "No route returned",
         None,
-        None,
-        'no_route_exists',
+        "no_route_exists",
     ),
 
-    # test route with no ingress
     (
+        "broken route response",
+        {"status": {}},
+        "get_route_failed",
+    ),
+    (
+        "route with no ingress",
         {
             "metadata": {
                 "labels": {"component": "kibana", "deploymentconfig": "logging-kibana"},
@@ -86,12 +84,11 @@ def test_check_kibana(pods, expect_error):
                 "host": "hostname",
             }
         },
-        None,
-        'route_not_accepted',
+        "route_not_accepted",
     ),
 
-    # test route with no host
     (
+        "route with no host",
         {
             "metadata": {
                 "labels": {"component": "kibana", "deploymentconfig": "logging-kibana"},
@@ -104,12 +101,21 @@ def test_check_kibana(pods, expect_error):
             },
             "spec": {},
         },
-        None,
-        'route_missing_host',
+        "route_missing_host",
     ),
+])
+def test_get_kibana_url_error(comment, route, expect_error):
+    check = Kibana()
+    check.exec_oc = lambda *_: json.dumps(route) if route else ""
 
-    # test route that looks fine
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check._get_kibana_url()
+    assert excinfo.value.name == expect_error
+
+
+@pytest.mark.parametrize('comment, route, expect_url', [
     (
+        "test route that looks fine",
         {
             "metadata": {
                 "labels": {"component": "kibana", "deploymentconfig": "logging-kibana"},
@@ -125,62 +131,57 @@ def test_check_kibana(pods, expect_error):
             },
         },
         "https://hostname/",
-        None,
     ),
 ])
-def test_get_kibana_url(route, expect_url, expect_error):
+def test_get_kibana_url(comment, route, expect_url):
     check = Kibana()
-    check.exec_oc = lambda ns, cmd, args: json.dumps(route) if route else ""
-
-    url, error = check._get_kibana_url()
-    if expect_url:
-        assert url == expect_url
-    else:
-        assert not url
-    if expect_error:
-        assert error == expect_error
-    else:
-        assert not error
+    check.exec_oc = lambda *_: json.dumps(route)
+    assert expect_url == check._get_kibana_url()
 
 
 @pytest.mark.parametrize('exec_result, expect', [
     (
         'urlopen error [Errno 111] Connection refused',
-        'at least one router routing to it?',
+        'FailedToConnectInternal',
     ),
     (
         'urlopen error [Errno -2] Name or service not known',
-        'DNS configured for the Kibana hostname?',
+        'FailedToResolveInternal',
     ),
     (
         'Status code was not [302]: HTTP Error 500: Server error',
-        'did not return the correct status code',
+        'WrongReturnCodeInternal',
     ),
     (
         'bork bork bork',
-        'bork bork bork',  # should pass through
+        'MiscRouteErrorInternal',
     ),
 ])
 def test_verify_url_internal_failure(exec_result, expect):
     check = Kibana(execute_module=lambda *_: dict(failed=True, msg=exec_result))
-    check._get_kibana_url = lambda: ('url', None)
+    check._get_kibana_url = lambda: 'url'
 
-    error = check._check_kibana_route()
-    assert_error(error, expect)
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.check_kibana_route()
+    assert expect == excinfo.value.name
 
 
 @pytest.mark.parametrize('lib_result, expect', [
     (
-        HTTPError('url', 500, "it broke", hdrs=None, fp=None),
-        'it broke',
+        HTTPError('url', 500, 'it broke', hdrs=None, fp=None),
+        'MiscRouteError',
     ),
     (
-        URLError('it broke'),
-        'it broke',
+        URLError('urlopen error [Errno 111] Connection refused'),
+        'FailedToConnect',
+    ),
+    (
+        URLError('urlopen error [Errno -2] Name or service not known'),
+        'FailedToResolve',
     ),
     (
         302,
-        'returned the wrong error code',
+        'WrongReturnCode',
     ),
     (
         200,
@@ -204,8 +205,40 @@ def test_verify_url_external_failure(lib_result, expect, monkeypatch):
     monkeypatch.setattr(urllib2, 'urlopen', urlopen)
 
     check = Kibana()
-    check._get_kibana_url = lambda: ('url', None)
+    check._get_kibana_url = lambda: 'url'
     check._verify_url_internal = lambda url: None
 
-    error = check._check_kibana_route()
-    assert_error(error, expect)
+    if not expect:
+        check.check_kibana_route()
+        return
+
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.check_kibana_route()
+    assert expect == excinfo.value.name
+
+
+def test_verify_url_external_skip():
+    check = Kibana(lambda *_: {}, dict(openshift_check_efk_kibana_external="false"))
+    check._get_kibana_url = lambda: 'url'
+    check.check_kibana_route()
+
+
+# this is kind of silly but it adds coverage for the run() method...
+def test_run():
+    pods = ["foo"]
+    ran = dict(check_kibana=False, check_route=False)
+
+    def check_kibana(pod_list):
+        ran["check_kibana"] = True
+        assert pod_list == pods
+
+    def check_kibana_route():
+        ran["check_route"] = True
+
+    check = Kibana()
+    check.get_pods_for_component = lambda *_: pods
+    check.check_kibana = check_kibana
+    check.check_kibana_route = check_kibana_route
+
+    check.run()
+    assert ran["check_kibana"] and ran["check_route"]

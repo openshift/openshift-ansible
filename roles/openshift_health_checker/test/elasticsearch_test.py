@@ -1,17 +1,26 @@
 import pytest
 import json
 
-from openshift_checks.logging.elasticsearch import Elasticsearch
+from openshift_checks.logging.elasticsearch import Elasticsearch, OpenShiftCheckExceptionList
+
 
 task_vars_config_base = dict(openshift=dict(common=dict(config_base='/etc/origin')))
 
 
-def assert_error(error, expect_error):
-    if expect_error:
-        assert error
-        assert expect_error in error
-    else:
-        assert not error
+def canned_elasticsearch(task_vars=None, exec_oc=None):
+    """Create an Elasticsearch check object with stubbed exec_oc method"""
+    check = Elasticsearch(None, task_vars or {})
+    if exec_oc:
+        check.exec_oc = exec_oc
+    return check
+
+
+def assert_error_in_list(expect_err, errorlist):
+    assert any(err.name == expect_err for err in errorlist), "{} in {}".format(str(expect_err), str(errorlist))
+
+
+def pods_by_name(pods):
+    return {pod['metadata']['name']: pod for pod in pods}
 
 
 plain_es_pod = {
@@ -19,6 +28,7 @@ plain_es_pod = {
         "labels": {"component": "es", "deploymentconfig": "logging-es"},
         "name": "logging-es",
     },
+    "spec": {},
     "status": {
         "conditions": [{"status": "True", "type": "Ready"}],
         "containerStatuses": [{"ready": True}],
@@ -32,6 +42,7 @@ split_es_pod = {
         "labels": {"component": "es", "deploymentconfig": "logging-es-2"},
         "name": "logging-es-2",
     },
+    "spec": {},
     "status": {
         "conditions": [{"status": "True", "type": "Ready"}],
         "containerStatuses": [{"ready": True}],
@@ -40,12 +51,28 @@ split_es_pod = {
     "_test_master_name_str": "name logging-es-2",
 }
 
+unready_es_pod = {
+    "metadata": {
+        "labels": {"component": "es", "deploymentconfig": "logging-es-3"},
+        "name": "logging-es-3",
+    },
+    "spec": {},
+    "status": {
+        "conditions": [{"status": "False", "type": "Ready"}],
+        "containerStatuses": [{"ready": False}],
+        "podIP": "10.10.10.10",
+    },
+    "_test_master_name_str": "BAD_NAME_RESPONSE",
+}
+
 
 def test_check_elasticsearch():
-    assert 'No logging Elasticsearch pods' in Elasticsearch().check_elasticsearch([])
+    with pytest.raises(OpenShiftCheckExceptionList) as excinfo:
+        canned_elasticsearch().check_elasticsearch([])
+    assert_error_in_list('NoRunningPods', excinfo.value)
 
     # canned oc responses to match so all the checks pass
-    def _exec_oc(ns, cmd, args):
+    def exec_oc(cmd, args):
         if '_cat/master' in cmd:
             return 'name logging-es'
         elif '/_nodes' in cmd:
@@ -57,35 +84,41 @@ def test_check_elasticsearch():
         else:
             raise Exception(cmd)
 
-    check = Elasticsearch(None, {})
-    check.exec_oc = _exec_oc
-    assert not check.check_elasticsearch([plain_es_pod])
+    check = canned_elasticsearch({}, exec_oc)
+    check.get_pods_for_component = lambda *_: [plain_es_pod]
+    assert {} == check.run()
 
 
-def pods_by_name(pods):
-    return {pod['metadata']['name']: pod for pod in pods}
+def test_check_running_es_pods():
+    pods, errors = Elasticsearch().running_elasticsearch_pods([plain_es_pod, unready_es_pod])
+    assert plain_es_pod in pods
+    assert_error_in_list('PodNotRunning', errors)
+
+
+def test_check_elasticsearch_masters():
+    pods = [plain_es_pod]
+    check = canned_elasticsearch(task_vars_config_base, lambda *_: plain_es_pod['_test_master_name_str'])
+    assert not check.check_elasticsearch_masters(pods_by_name(pods))
 
 
 @pytest.mark.parametrize('pods, expect_error', [
     (
         [],
-        'No logging Elasticsearch masters',
+        'NoMasterFound',
     ),
     (
-        [plain_es_pod],
-        None,
+        [unready_es_pod],
+        'NoMasterName',
     ),
     (
         [plain_es_pod, split_es_pod],
-        'Found multiple Elasticsearch masters',
+        'SplitBrainMasters',
     ),
 ])
-def test_check_elasticsearch_masters(pods, expect_error):
+def test_check_elasticsearch_masters_error(pods, expect_error):
     test_pods = list(pods)
-    check = Elasticsearch(None, task_vars_config_base)
-    check.execute_module = lambda cmd, args: {'result': test_pods.pop(0)['_test_master_name_str']}
-    errors = check._check_elasticsearch_masters(pods_by_name(pods))
-    assert_error(''.join(errors), expect_error)
+    check = canned_elasticsearch(task_vars_config_base, lambda *_: test_pods.pop(0)['_test_master_name_str'])
+    assert_error_in_list(expect_error, check.check_elasticsearch_masters(pods_by_name(pods)))
 
 
 es_node_list = {
@@ -95,83 +128,76 @@ es_node_list = {
         }}}
 
 
+def test_check_elasticsearch_node_list():
+    check = canned_elasticsearch(task_vars_config_base, lambda *_: json.dumps(es_node_list))
+    assert not check.check_elasticsearch_node_list(pods_by_name([plain_es_pod]))
+
+
 @pytest.mark.parametrize('pods, node_list, expect_error', [
     (
         [],
         {},
-        'No logging Elasticsearch masters',
-    ),
-    (
-        [plain_es_pod],
-        es_node_list,
-        None,
+        'MissingComponentPods',
     ),
     (
         [plain_es_pod],
         {},  # empty list of nodes triggers KeyError
-        "Failed to query",
+        'MissingNodeList',
     ),
     (
         [split_es_pod],
         es_node_list,
-        'does not correspond to any known ES pod',
+        'EsPodNodeMismatch',
     ),
 ])
-def test_check_elasticsearch_node_list(pods, node_list, expect_error):
-    check = Elasticsearch(None, task_vars_config_base)
-    check.execute_module = lambda cmd, args: {'result': json.dumps(node_list)}
+def test_check_elasticsearch_node_list_errors(pods, node_list, expect_error):
+    check = canned_elasticsearch(task_vars_config_base, lambda cmd, args: json.dumps(node_list))
+    assert_error_in_list(expect_error, check.check_elasticsearch_node_list(pods_by_name(pods)))
 
-    errors = check._check_elasticsearch_node_list(pods_by_name(pods))
-    assert_error(''.join(errors), expect_error)
+
+def test_check_elasticsearch_cluster_health():
+    test_health_data = [{"status": "green"}]
+    check = canned_elasticsearch(exec_oc=lambda *_: json.dumps(test_health_data.pop(0)))
+    assert not check.check_es_cluster_health(pods_by_name([plain_es_pod]))
 
 
 @pytest.mark.parametrize('pods, health_data, expect_error', [
     (
         [plain_es_pod],
-        [{"status": "green"}],
-        None,
-    ),
-    (
-        [plain_es_pod],
         [{"no-status": "should bomb"}],
-        'Could not retrieve cluster health status',
+        'BadEsResponse',
     ),
     (
         [plain_es_pod, split_es_pod],
         [{"status": "green"}, {"status": "red"}],
-        'Elasticsearch cluster health status is RED',
+        'EsClusterHealthRed',
     ),
 ])
-def test_check_elasticsearch_cluster_health(pods, health_data, expect_error):
+def test_check_elasticsearch_cluster_health_errors(pods, health_data, expect_error):
     test_health_data = list(health_data)
-    check = Elasticsearch(None, task_vars_config_base)
-    check.execute_module = lambda cmd, args: {'result': json.dumps(test_health_data.pop(0))}
+    check = canned_elasticsearch(exec_oc=lambda *_: json.dumps(test_health_data.pop(0)))
+    assert_error_in_list(expect_error, check.check_es_cluster_health(pods_by_name(pods)))
 
-    errors = check._check_es_cluster_health(pods_by_name(pods))
-    assert_error(''.join(errors), expect_error)
+
+def test_check_elasticsearch_diskspace():
+    check = canned_elasticsearch(exec_oc=lambda *_: 'IUse% Use%\n 3%  4%\n')
+    assert not check.check_elasticsearch_diskspace(pods_by_name([plain_es_pod]))
 
 
 @pytest.mark.parametrize('disk_data, expect_error', [
     (
         'df: /elasticsearch/persistent: No such file or directory\n',
-        'Could not retrieve storage usage',
-    ),
-    (
-        'IUse% Use%\n 3%  4%\n',
-        None,
+        'BadDfResponse',
     ),
     (
         'IUse% Use%\n 95%  40%\n',
-        'Inode percent usage on the storage volume',
+        'InodeUsageTooHigh',
     ),
     (
         'IUse% Use%\n 3%  94%\n',
-        'Disk percent usage on the storage volume',
+        'DiskUsageTooHigh',
     ),
 ])
-def test_check_elasticsearch_diskspace(disk_data, expect_error):
-    check = Elasticsearch(None, task_vars_config_base)
-    check.execute_module = lambda cmd, args: {'result': disk_data}
-
-    errors = check._check_elasticsearch_diskspace(pods_by_name([plain_es_pod]))
-    assert_error(''.join(errors), expect_error)
+def test_check_elasticsearch_diskspace_errors(disk_data, expect_error):
+    check = canned_elasticsearch(exec_oc=lambda *_: disk_data)
+    assert_error_in_list(expect_error, check.check_elasticsearch_diskspace(pods_by_name([plain_es_pod])))
