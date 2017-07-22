@@ -47,11 +47,10 @@ assetConfig:
 {% if openshift.master.audit_config | default(none) is not none and openshift.common.version_gte_3_2_or_1_2 | bool %}
 auditConfig:{{ openshift.master.audit_config | to_padded_yaml(level=1) }}
 {% endif %}
-{% if openshift_master_ha | bool %}
-controllerLeaseTTL: {{ openshift.master.controller_lease_ttl | default('30') }}
-{% endif %}
 {% if openshift.common.version_gte_3_3_or_1_3 | bool %}
 controllerConfig:
+  election:
+    lockName: openshift-master-controllers
   serviceServingCert:
     signer:
       certFile: service-signer.crt
