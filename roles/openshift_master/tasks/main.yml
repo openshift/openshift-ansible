@@ -12,16 +12,16 @@
 # HA Variable Validation
 - fail:
     msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
-  when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ["native", "pacemaker"]))
+  when: openshift.master.ha | bool and ((openshift.master.cluster_method is not defined) or (openshift.master.cluster_method is defined and openshift.master.cluster_method not in ["native", "pacemaker"]))
 - fail:
     msg: "'native' high availability is not supported for the requested OpenShift version"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
+  when: openshift.master.ha | bool and openshift.master.cluster_method == "native" and not openshift.common.version_gte_3_1_or_1_1 | bool
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
+  when: openshift.master.ha | bool and openshift.master.cluster_method == "pacemaker" and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
 - fail:
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
-  when: openshift_master_ha | bool and openshift_master_cluster_method == "pacemaker" and openshift.common.is_containerized | bool
+  when: openshift.master.ha | bool and openshift.master.cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
 - name: Install Master package
   package:
@@ -57,7 +57,6 @@
   args:
     creates: "{{ openshift_master_policy }}"
   notify:
-    - restart master
     - restart master api
     - restart master controllers
 
@@ -67,7 +66,6 @@
     dest: "{{ openshift_master_scheduler_conf }}"
     backup: true
   notify:
-    - restart master
     - restart master api
     - restart master controllers
 
@@ -162,7 +160,6 @@
     mode: 0600
   when: openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined
   notify:
-    - restart master
     - restart master api
 
 - set_fact:
@@ -178,66 +175,18 @@
     group: root
     mode: 0600
   notify:
-    - restart master
     - restart master api
     - restart master controllers
 
 - include: set_loopback_context.yml
   when: openshift.common.version_gte_3_2_or_1_2
 
-# TODO: Master startup can fail when ec2 transparently reallocates the block
-# storage, causing etcd writes to temporarily fail. Retry failures blindly just
-# once to allow time for this transient condition to to resolve and for systemd
-# to restart the master (which will eventually succeed).
-#
-# https://github.com/coreos/etcd/issues/3864
-# https://github.com/openshift/origin/issues/6065
-# https://github.com/openshift/origin/issues/6447
-- name: Start and enable master
-  systemd:
-    daemon_reload: yes
-    name: "{{ openshift.common.service_type }}-master"
-    enabled: yes
-    state: started
-  when: not openshift_master_ha | bool
-  register: start_result
-  until: not start_result | failed
-  retries: 1
-  delay: 60
-  notify: Verify API Server
-
-- name: Dump logs from master service if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master
-  when: start_result | failed
-
-- name: Stop and disable non-HA master when running HA
-  systemd:
-    name: "{{ openshift.common.service_type }}-master"
-    enabled: no
-    state: stopped
-  when: openshift_master_ha | bool
-  register: task_result
-  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
-
-- set_fact:
-    master_service_status_changed: "{{ start_result | changed }}"
-  when: not openshift_master_ha | bool
-
-- name: Mask master service
-  systemd:
-    name: "{{ openshift.common.service_type }}-master"
-    masked: yes
-  when: >
-    openshift_master_ha | bool and
-    openshift.master.cluster_method == 'native' and
-    not openshift.common.is_containerized | bool
-
 - name: Start and enable master api on first master
   systemd:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  when: openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
   register: start_result
   until: not start_result | failed
   retries: 1
@@ -249,18 +198,18 @@
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  when: openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
 
 - pause:
     seconds: 15
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master api all masters
   systemd:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
+  when: openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
   until: not start_result | failed
   retries: 1
@@ -272,7 +221,7 @@
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
+  when: openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
@@ -293,14 +242,14 @@
   delay: 1
   run_once: true
   changed_when: false
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
+  when: openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
 - name: Start and enable master controller on first master
   systemd:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
+  when: openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
   register: start_result
   until: not start_result | failed
   retries: 1
@@ -313,14 +262,14 @@
 - name: Wait for master controller service to start on first master
   pause:
     seconds: 15
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.cluster_method == 'native'
 
 - name: Start and enable master controller on all masters
   systemd:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
+  when: openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
   until: not start_result | failed
   retries: 1
@@ -332,11 +281,11 @@
 
 - set_fact:
     master_controllers_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
+  when: openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
   package: name=pcs state=present
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+  when: openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
   register: install_result
 
@@ -345,7 +294,7 @@
     name: pcsd
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+  when: openshift.master.cluster_method == 'pacemaker'
     and not openshift.common.is_containerized | bool
 
 - name: Set the cluster user password

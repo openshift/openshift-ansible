@@ -156,24 +156,16 @@
   register: yedit_output
 
 #restart master serially here
-- name: restart master
-  systemd: name={{ openshift.common.service_type }}-master state=restarted
-  when:
-  - yedit_output.changed
-  - openshift.master.ha is not defined or not openshift.master.ha | bool
-
 - name: restart master api
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
   when:
   - yedit_output.changed
-  - openshift.master.ha is defined and openshift.master.ha | bool
   - openshift.master.cluster_method == 'native'
 
 - name: restart master controllers
   systemd: name={{ openshift.common.service_type }}-master-controllers state=restarted
   when:
   - yedit_output.changed
-  - openshift.master.ha is defined and openshift.master.ha | bool
   - openshift.master.cluster_method == 'native'
 
 - name: Verify API Server

@@ -1,9 +1,4 @@
 ---
-- name: restart master
-  systemd: name={{ openshift.common.service_type }}-master state=restarted
-  when: (openshift.master.ha is not defined or not openshift.master.ha | bool) and (not (master_service_status_changed | default(false) | bool))
-  notify: Verify API Server
-
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
