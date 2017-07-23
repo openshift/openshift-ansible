@@ -1,0 +1,106 @@
+---
+# allow passing in a tempdir
+- name: Create temp directory for Elasticsearch services and routes
+  command: mktemp -d /tmp/openshift-logging-ansible-svcs-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: set temp dir
+  set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+# services
+- name: Create {{ openshift_logging_elasticsearch_clustername }}-cluster port 9300 service
+  oc_service:
+    state: present
+    name: "{{ openshift_logging_elasticsearch_clustername }}-cluster"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    selector:
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+      es-node-role: "master"
+    labels:
+      logging-infra: 'support'
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+    clusterip: None
+    ports:
+      - port: 9300
+
+- name: Set {{ openshift_logging_elasticsearch_clustername }} port 9200 service
+  oc_service:
+    state: present
+    name: "{{ openshift_logging_elasticsearch_clustername }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    selector:
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+      elasticsearch-http: "true"
+    labels:
+      logging-infra: 'support'
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+    ports:
+      - port: 9200
+        targetPort: "restapi"
+
+- name: Set {{ openshift_logging_elasticsearch_clustername }}-prometheus service
+  oc_service:
+    state: present
+    name: "{{ openshift_logging_elasticsearch_clustername }}-prometheus"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    labels:
+      cluster-name: '{{ openshift_logging_elasticsearch_clustername }}'
+      logging-infra: 'support'
+    ports:
+      - name: proxy
+        port: 443
+        targetPort: 4443
+    selector:
+      component: "{{ openshift_logging_elasticsearch_clustername }}-prometheus"
+      provider: openshift
+
+- oc_edit:
+    kind: service
+    name: "{{ openshift_logging_elasticsearch_clustername }}-prometheus"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    separator: '#'
+    content:
+      metadata#annotations#service.alpha.openshift.io/serving-cert-secret-name: "prometheus-tls"
+      metadata#annotations#prometheus.io/scrape: "true"
+      metadata#annotations#prometheus.io/scheme: "https"
+      metadata#annotations#prometheus.io/path: "_prometheus/metrics"
+
+- name: Generating Elasticsearch route template for the cluster {{ openshift_logging_elasticsearch_clustername }}
+  template:
+    src: route_reencrypt.j2
+    dest: "{{mktemp.stdout}}/{{ openshift_logging_elasticsearch_clustername }}-route.yaml"
+  vars:
+    obj_name: "{{ openshift_logging_elasticsearch_clustername }}"
+    route_host: "{{ openshift_logging_es_hostname }}"
+    service_name: "{{ openshift_logging_elasticsearch_clustername }}"
+    tls_key: "{{ es_key | default('') | b64decode }}"
+    tls_cert: "{{ es_cert | default('') | b64decode }}"
+    tls_ca_cert: "{{ es_ca | b64decode }}"
+    tls_dest_ca_cert: "{{ key_pairs | entry_from_named_pair('ca_file') | b64decode }}"
+    edge_term_policy: "{{ openshift_logging_es_edge_term_policy | default('') }}"
+    labels:
+      component: support
+      logging-infra: support
+      provider: openshift
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+  changed_when: no
+  when: openshift_logging_es_allow_external | bool
+
+# This currently has an issue if the host name changes
+- name: Setting Elasticsearch route for the cluster {{ openshift_logging_elasticsearch_clustername }}
+  oc_obj:
+    state: present
+    name: "{{ openshift_logging_elasticsearch_clustername }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    kind: route
+    files:
+      - "{{ tempdir }}/{{ openshift_logging_elasticsearch_clustername }}-route.yaml"
+  when: openshift_logging_es_allow_external | bool
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False

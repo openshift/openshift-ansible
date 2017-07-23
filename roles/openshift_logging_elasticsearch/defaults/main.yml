@@ -1,19 +1,43 @@
 ---
+
 ### Common settings
 openshift_logging_elasticsearch_image_prefix: "{{ openshift_logging_image_prefix | default(__openshift_logging_image_prefix) }}"
 openshift_logging_elasticsearch_image_version: "{{ openshift_logging_image_version | default('latest') }}"
 openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_image_pull_secret | default('') }}"
 openshift_logging_elasticsearch_namespace: logging
-
+openshift_logging_elasticsearch_sa_name: aggregated-logging-elasticsearch
+kubeconfig: /etc/origin/master/openshift-master.kubeconfig
 openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector | default('') }}"
 openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_cpu_limit | default('1000m') }}"
 openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit | default('1Gi') }}"
 openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_recover_after_time | default('5m') }}"
+openshift_logging_elasticsearch_clusterreader: true
 
 openshift_logging_elasticsearch_replica_count: 1
 
 # ES deployment type
 openshift_logging_elasticsearch_deployment_type: "data-master"
+openshift_logging_elasticsearch_node_topology:
+  masters:
+    replicas: 1
+    limits:
+      cpu: 200m
+    requests:
+      memory: 512Mi
+      cpu: 100m
+  clientdata:
+  -
+    node_storage_type: emptydir
+    hostmount_path:
+    - /mnt/data1
+    - /mnt/data2
+    limits:
+      memory: 512Mi
+      cpu: 200m
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
 
 # ES deployment name
 openshift_logging_elasticsearch_deployment_name: ""
@@ -29,7 +53,7 @@ openshift_logging_elasticsearch_hostmount_path: ""
 openshift_logging_elasticsearch_pvc_name: ""
 
 # required if the PVC does not already exist
-openshift_logging_elasticsearch_pvc_size: ""
+openshift_logging_elasticsearch_pvc_size: "10Gi"
 openshift_logging_elasticsearch_pvc_dynamic: false
 openshift_logging_elasticsearch_pvc_pv_selector: {}
 openshift_logging_elasticsearch_pvc_access_modes: ['ReadWriteOnce']

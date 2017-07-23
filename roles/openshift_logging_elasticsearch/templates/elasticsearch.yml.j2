@@ -14,7 +14,7 @@ index:
     flush_threshold_period: 5m
 
 node:
-  name: ${DC_NAME}
+  name: ${NODE_NAME}
   master: ${IS_MASTER}
   data: ${HAS_DATA}
   max_local_storage_nodes: 1
@@ -65,7 +65,7 @@ path:
 searchguard:
   authcz.admin_dn:
   - CN=system.admin,OU=OpenShift,O=Logging
-  config_index_name: ".searchguard.${DC_NAME}"
+  config_index_name: ".searchguard.${NODE_NAME}"
   ssl:
     transport:
       enabled: true
