@@ -6,7 +6,10 @@ metadata:
     provider: openshift
     component: "{{component}}"
     deployment: "{{deploy_name}}"
+    cluster-name: "{{ es_cluster_name }}"
     logging-infra: "{{logging_component}}"
+    es-node-role: "{{ es_role }}"
+    elasticsearch-http: "{{ es_http_service }}"
 spec:
   replicas: {{es_replicas|default(1)}}
   selector:
@@ -24,9 +27,12 @@ spec:
         provider: openshift
         component: "{{component}}"
         deployment: "{{deploy_name}}"
+        cluster-name: "{{ es_cluster_name }}"
+        es-node-role: "{{ es_role }}"
+        elasticsearch-http: "{{ es_http_service }}"
     spec:
       terminationGracePeriod: 600
-      serviceAccountName: aggregated-logging-elasticsearch
+      serviceAccountName: {{ openshift_elasticsearch_sa_name }}
       securityContext:
         supplementalGroups:
         - {{openshift_logging_elasticsearch_storage_group}}
@@ -42,13 +48,35 @@ spec:
           image: {{image}}
           imagePullPolicy: Always
           resources:
+{% if limits is defined %}
             limits:
-              memory: "{{es_memory_limit}}"
-{% if es_cpu_limit is defined and es_cpu_limit is not none %}
-              cpu: "{{es_cpu_limit}}"
+{% for key, value in limits.iteritems() %}
+              {{key}}: "{{value}}"
+{% endfor %}
 {% endif %}
+{% if requests is defined %}
             requests:
-              memory: "512Mi"
+{% for key, value in requests.iteritems() %}
+              {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+          livenessProbe:
+            tcpSocket:
+              port: 9300
+            initialDelaySeconds: 480
+            periodSeconds: 5
+          readinessProbe:
+{% if es_role == "master" or not elasticsearch5_deploy %}
+            tcpSocket:
+              port: 9300
+{% else %}
+            exec:
+              command:
+              - "/usr/share/elasticsearch/probe/readiness.sh"
+              initialDelaySeconds: 10
+              timeoutSeconds: 30
+              periodSeconds: 5
+{% endif %}
           ports:
             -
               containerPort: 9200
@@ -66,60 +94,92 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             -
-              name: "KUBERNETES_TRUST_CERT"
-              value: "true"
+              name: "NODE_NAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             -
               name: "SERVICE_DNS"
-              value: "logging-{{es_cluster_name}}-cluster"
+              value: "{{es_cluster_name}}-cluster"
             -
               name: "CLUSTER_NAME"
-              value: "logging-{{es_cluster_name}}"
+              value: "{{es_cluster_name}}"
             -
               name: "INSTANCE_RAM"
-              value: "{{openshift_logging_elasticsearch_memory_limit}}"
+{% if limits is defined and limits.memory is defined %}
+              value: "{{ limits.memory }}"
+{% else %}
+              value: "512m"
+{% endif %}
             -
               name: "HEAP_DUMP_LOCATION"
               value: "/elasticsearch/persistent/heapdump.hprof"
             -
-              name: "NODE_QUORUM"
-              value: "{{es_node_quorum | int}}"
+              name: "MASTERS_QUORUM"
+              value: "{{es_masters_quorum | int}}"
+            -
+              name: "RECOVER_AFTER_NODES"
+              value: "{{es_recover_after_nodes}}"
+            -
+              name: "RECOVER_EXPECTED_DATA_NODES"
+              value: "{{es_recover_expected_data_nodes}}"
             -
               name: "RECOVER_EXPECTED_NODES"
               value: "{{es_recover_expected_nodes}}"
             -
               name: "RECOVER_AFTER_TIME"
-              value: "{{openshift_logging_elasticsearch_recover_after_time}}"
+              value: "{{openshift_elasticsearch_recover_after_time}}"
             -
-              name: "IS_MASTER"
-              value: "{% if deploy_type in ['data-master', 'master'] %}true{% else %}false{% endif %}"
-
+              name: IS_MASTER
+              value: "{{ node_master }}"
             -
-              name: "HAS_DATA"
-              value: "{% if deploy_type in ['data-master', 'data-client'] %}true{% else %}false{% endif %}"
-
+              name: HAS_DATA
+              value: "{{ node_data }}"
           volumeMounts:
+{% if openshift_elasticsearch_secure %}
             - name: elasticsearch
               mountPath: /etc/elasticsearch/secret
               readOnly: true
+{% endif %}
             - name: elasticsearch-config
               mountPath: /usr/share/java/elasticsearch/config
               readOnly: true
+{% if storage_type == 'hostmount' and elasticsearch5_deploy %}
+{% for item in hostmount_path %}
+            - name: elasticsearch-storage-{{ loop.index0 }}
+              mountPath: /elasticsearch/persistent/{{ loop.index0 }}
+{% endfor %}
+{% else %}
             - name: elasticsearch-storage
               mountPath: /elasticsearch/persistent
+{% endif %}
       volumes:
+{% if openshift_elasticsearch_secure %}
         - name: elasticsearch
           secret:
+{%if elasticsearch5_deploy %}
+            secretName: {{ es_cluster_name }}-certs
+{% else %}
             secretName: logging-elasticsearch
+{% endif %}
+{% endif %}
         - name: elasticsearch-config
           configMap:
-            name: logging-elasticsearch
+            name: {{ es_configmap }}
+{% if storage_type == 'pvc' %}
         - name: elasticsearch-storage
-{% if openshift_logging_elasticsearch_storage_type == 'pvc' %}
           persistentVolumeClaim:
-            claimName: {{ openshift_logging_elasticsearch_pvc_name }}
-{% elif openshift_logging_elasticsearch_storage_type == 'hostmount' %}
+            claimName: {{ openshift_elasticsearch_pvc_name }}
+{% elif storage_type == 'hostmount' and elasticsearch5_deploy %}
+{% for item in hostmount_path %}
+        - name: elasticsearch-storage-{{ loop.index0 }}
+          hostPath:
+            path: {{ item }}
+{% endfor %}
+{% elif storage_type == 'hostmount' and not elasticsearch5_deploy %}
           hostPath:
             path: {{ openshift_logging_elasticsearch_hostmount_path }}
 {% else %}
+        - name: elasticsearch-storage
           emptydir: {}
 {% endif %}

@@ -10,3 +10,5 @@ es_min_masters_default: "{{ (openshift_logging_elasticsearch_replica_count | int
 es_min_masters: "{{ (openshift_logging_elasticsearch_replica_count == 1) | ternary(1, es_min_masters_default) }}"
 es_recover_after_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
 es_recover_expected_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
+es_masters_quorum: "{{ es_node_topology.masters.replicas |int /2 + 1 }}"
+openshift_elasticsearch_recover_after_time: 5m
