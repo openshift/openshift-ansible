@@ -5,4 +5,5 @@
     name: "{{ openshift_storageclass_name }}"
     default_storage_class: "{{ openshift_storageclass_default | default('true') | string}}"
     parameters: "{{ openshift_storageclass_parameters }}"
+    provisioner: "{{ openshift_storageclass_provisioner }}"
   run_once: true
