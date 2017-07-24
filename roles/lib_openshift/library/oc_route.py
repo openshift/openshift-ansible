@@ -1663,20 +1663,6 @@ class OCRoute(OpenShiftCLI):
         skip = []
         return not Utils.check_def_equal(self.config.data, self.route.yaml_dict, skip_keys=skip, debug=self.verbose)
 
-    @staticmethod
-    def get_cert_data(path, content):
-        '''get the data for a particular value'''
-        if not path and not content:
-            return None
-
-        rval = None
-        if path and os.path.exists(path) and os.access(path, os.R_OK):
-            rval = open(path).read()
-        elif content:
-            rval = content
-
-        return rval
-
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
@@ -1703,18 +1689,6 @@ class OCRoute(OpenShiftCLI):
                  'key': {'path': params['key_path'],
                          'content': params['key_content'],
                          'value': None, }, }
-
-        if params['tls_termination'] and params['tls_termination'].lower() != 'passthrough':  # E501
-
-            for key, option in files.items():
-                if key == 'destcacert' and params['tls_termination'] != 'reencrypt':
-                    continue
-
-                option['value'] = OCRoute.get_cert_data(option['path'], option['content'])  # E501
-
-                if not option['value']:
-                    return {'failed': True,
-                            'msg': 'Verify that you pass a value for %s' % key}
 
         rconfig = RouteConfig(params['name'],
                               params['namespace'],
