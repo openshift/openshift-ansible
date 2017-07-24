@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.168
+Version:        3.6.169
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.169-1
+- Pass the provisioner to the module. (kwoodson@redhat.com)
+- 1472467- add ose- prefix to ansible service broker name (fabian@fabianism.us)
+
 * Mon Jul 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.168-1
 - drain still pending in below files without fix : (jkaur@redhat.com)
 - GlusterFS: Create registry storage svc and ep in registry namespace
