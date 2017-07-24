@@ -127,6 +127,9 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
+    openshift_no_proxy_etcd_host_ips: "{{ hostvars | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                | oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                }}"
   roles:
   - role: openshift_master
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
