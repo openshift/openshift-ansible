@@ -14,7 +14,7 @@ def main():
             name=dict(default=None, type='str'),
             annotations=dict(default=None, type='dict'),
             parameters=dict(default=None, type='dict'),
-            provisioner=dict(default='aws-ebs', type='str', choices=['aws-ebs', 'gce-pd', 'glusterfs', 'cinder']),
+            provisioner=dict(required=True, type='str', choices=['aws-ebs', 'gce-pd', 'glusterfs', 'cinder']),
             api_version=dict(default='v1', type='str'),
             default_storage_class=dict(default="false", type='str'),
         ),
