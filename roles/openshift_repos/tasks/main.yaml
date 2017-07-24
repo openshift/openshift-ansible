@@ -33,7 +33,7 @@
     # "centos-release-openshift-origin" package which configures the repository.
     # This task matches the file names provided by the package so that they are
     # not installed twice in different files and remains idempotent.
-    - name: Configure origin gpg keys if needed
+    - name: Configure origin repositories and gpg keys if needed
       copy:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
@@ -48,6 +48,10 @@
       - ansible_distribution != "Fedora"
       - openshift_deployment_type == 'origin'
       - openshift_enable_origin_repo | default(true) | bool
+
+    - name: Enable centos-openshift-origin-testing repository
+      command: yum-config-manager --enable centos-openshift-origin-testing
+      when: openshift_repos_enable_testing | bool
 
     - name: Ensure clean repo cache in the event repos have been changed manually
       debug:
