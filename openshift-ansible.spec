@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.152.0
+Version:        3.6.152.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,92 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 24 2017 Scott Dodson <sdodson@redhat.com> 3.6.152.1-1
+- Allow storage migrations to be optional and/or non fatal (sdodson@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.169-1].
+  (smunilla@redhat.com)
+- Pass the provisioner to the module. (kwoodson@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.168-1].
+  (smunilla@redhat.com)
+- drain still pending in below files without fix : (jkaur@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.167-1].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.166-1].
+  (smunilla@redhat.com)
+- 1472467- add ose- prefix to ansible service broker name (fabian@fabianism.us)
+- Updating openshift_logging_kibana default for kibana hostname
+  (ewolinet@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.165-1].
+  (smunilla@redhat.com)
+- GlusterFS: Create registry storage svc and ep in registry namespace
+  (jarrpa@redhat.com)
+- GlusterFS: Pass all booleans through bool filter. (jarrpa@redhat.com)
+- GlusterFS: Fix bug in detecting whether to open firewall ports.
+  (jarrpa@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.163-1].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.162-1].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.161-1].
+  (smunilla@redhat.com)
+- Added parameters inside of gce defaults.  Pass all params to the module.
+  (kwoodson@redhat.com)
+- Updating verbs for serviceclasses objects (ewolinet@redhat.com)
+- Hopefully finally fix the no_proxy settings (tbielawa@redhat.com)
+- Add etcd exports to openshift_storage_nfs (abutcher@redhat.com)
+- Removing parameter kind and allowing default to be passed.
+  (kwoodson@redhat.com)
+- GlusterFS: Create in custom namespace by default (jarrpa@redhat.com)
+- hosted registry: Use proper node name in GlusterFS storage setup
+  (jarrpa@redhat.com)
+- GlusterFS: Make heketi-cli command configurable (jarrpa@redhat.com)
+- GlusterFS: Reintroduce heketi-cli check for non-native heketi
+  (jarrpa@redhat.com)
+- GlusterFS: Bug fixes for external GlusterFS nodes (jarrpa@redhat.com)
+- GlusterFS: Improve and extend example inventory files (jarrpa@redhat.com)
+- Changing cluster role to admin (rhallise@redhat.com)
+- Add an SA policy to the ansible-service-broker (rhallise@redhat.com)
+- 1471973- default to bootstrapping the broker on startup (fabian@fabianism.us)
+- openshift_checks/docker_storage: overlay/2 support (lmeyer@redhat.com)
+- Remove openshift_use_dnsmasq from aws and libvirt playbooks
+  (sdodson@redhat.com)
+- Setting node selector to be empty string (ewolinet@redhat.com)
+- Add drain retries after 60 second delay (sdodson@redhat.com)
+- Dump some logs (sdodson@redhat.com)
+- daemon_reload on node and ovs start (sdodson@redhat.com)
+- Ensure proper fact evaluation (sdodson@redhat.com)
+- Wrap additional service changes in retries (sdodson@redhat.com)
+- Wrap docker stop in retries (sdodson@redhat.com)
+- Add retries to node restart handlers (sdodson@redhat.com)
+- Test docker restart with retries 3 delay 30 (smilner@redhat.com)
+- Adding podpreset config into master-config (ewolinet@redhat.com)
+- Update image-gc-high-threshold value (decarr@redhat.com)
+- Adding a check for variable definition. (kwoodson@redhat.com)
+- docker: fix docker_selinux_enabled (lmeyer@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.153-1].
+  (smunilla@redhat.com)
+- Updating to compare sets instead of sorted lists (ewolinet@redhat.com)
+- Adding ability to create podpreset for service-catalog-controller for
+  bz1471881 (ewolinet@redhat.com)
+- Updating to use oc replace and conditionally update edit and admin roles
+  (ewolinet@redhat.com)
+- Other playbooks maybe expecting this to be at least an empty string. I think
+  they default it to an empty list if its not found. (tbielawa@redhat.com)
+- Fixed spacing and lint errors. (kwoodson@redhat.com)
+- Switch CI to ansible-2.3.1.0 (sdodson@redhat.com)
+- Fix NO_PROXY environment variable setting (tbielawa@redhat.com)
+- Allow OVS 2.7 in latest OpenShift releases (rhcarvalho@gmail.com)
+- Make aos_version module handle multiple versions (rhcarvalho@gmail.com)
+- Split positive and negative unit tests (rhcarvalho@gmail.com)
+- Fixed tests and added sleep for update. (kwoodson@redhat.com)
+- Fixing needs_update comparison.  Added a small pause for race conditions.
+  Fixed doc.  Fix kind to storageclass (kwoodson@redhat.com)
+- Adding storageclass support to lib_openshift. (kwoodson@redhat.com)
+- Changing the passing of data for sc creation. (kwoodson@redhat.com)
+- Fixed variable name. (kwoodson@redhat.com)
+- Adding disk encryption to storageclasses and to openshift registry
+  (kwoodson@redhat.com)
+
 * Mon Jul 17 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.152.0-1
 - 
 
