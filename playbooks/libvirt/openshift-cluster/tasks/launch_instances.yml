@@ -49,8 +49,12 @@
     - '{{ instances }}'
     - [ user-data, meta-data ]
 
+- name: Check for genisoimage
+  command: which genisoimage
+  register: which_genisoimage
+
 - name: Create the cloud-init config drive
-  command: 'genisoimage -output {{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso -volid cidata -joliet -rock user-data meta-data'
+  command: '{{ 'genisoimage' if which_genisoimage.rc == 0 else 'mkisofs'}} -output {{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso -volid cidata -joliet -rock user-data meta-data'
   args:
     chdir: '{{ libvirt_storage_pool_path }}/{{ item }}_configdrive/'
     creates: '{{ libvirt_storage_pool_path }}/{{ item }}_cloud-init.iso'

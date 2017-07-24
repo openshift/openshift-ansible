@@ -15,7 +15,7 @@ Install dependencies
 3.	Install [ebtables](http://ebtables.netfilter.org/)
 4.	Install [qemu and qemu-system-x86](http://wiki.qemu.org/Main_Page)
 5.	Install [libvirt-python and libvirt](http://libvirt.org/)
-6.	Install [genisoimage](http://cdrkit.org/)
+6.	Install [genisoimage](http://cdrkit.org/) or [mkisofs](http://cdrtools.sourceforge.net/private/cdrecord.html)
 7.	Enable and start the libvirt daemon, e.g:
 	-	`systemctl enable libvirtd`
 	-	`systemctl start libvirtd`
@@ -23,6 +23,7 @@ Install dependencies
 9.	Check that your `$HOME` is accessible to the qemu user²
 10.	Configure dns resolution on the host³
 11.	Install libselinux-python
+12.	Ensure you have an SSH private and public keypair at `~/.ssh/id_rsa` and `~/.ssh/id_rsa.pub`⁴
 
 #### ¹ Depending on your distribution, libvirt access may be denied by default or may require a password at each access.
 
@@ -102,6 +103,11 @@ dns=dnsmasq
 sudo vi /etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf
 server=/example.com/192.168.55.1
 ```
+
+#### ⁴ Private and public keypair in ~/.ssh/id_rsa and ~/.ssh/id_rsa.pub
+
+This playbook uses SSH keys to communicate with the libvirt-driven virtual machines.  At this time the names of those keys are fixed and cannot be changed.
+
 
 Test The Setup
 --------------
