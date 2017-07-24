@@ -5,7 +5,7 @@
   register: docker_excluder_stat
 
 - name: Enable docker excluder
-  command: "{{ r_openshift_excluder_service_type }}-docker-excluder exclude"
+  command: "/sbin/{{ r_openshift_excluder_service_type }}-docker-excluder exclude"
   when:
   - r_openshift_excluder_enable_docker_excluder | bool
   - docker_excluder_stat.stat.exists
@@ -16,7 +16,7 @@
   register: openshift_excluder_stat
 
 - name: Enable openshift excluder
-  command: "{{ r_openshift_excluder_service_type }}-excluder exclude"
+  command: "/sbin/{{ r_openshift_excluder_service_type }}-excluder exclude"
   when:
   - r_openshift_excluder_enable_openshift_excluder | bool
   - openshift_excluder_stat.stat.exists
