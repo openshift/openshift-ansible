@@ -15,7 +15,7 @@ Install dependencies
 3.	Install [ebtables](http://ebtables.netfilter.org/)
 4.	Install [qemu and qemu-system-x86](http://wiki.qemu.org/Main_Page)
 5.	Install [libvirt-python and libvirt](http://libvirt.org/)
-6.	Install [genisoimage](http://cdrkit.org/)
+6.	Install [genisoimage](http://cdrkit.org/) or [mkisofs](http://cdrtools.sourceforge.net/private/cdrecord.html)
 7.	Enable and start the libvirt daemon, e.g:
 	-	`systemctl enable libvirtd`
 	-	`systemctl start libvirtd`
