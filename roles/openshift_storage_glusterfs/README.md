@@ -64,7 +64,7 @@ their configuration as GlusterFS nodes:
 |--------------------|---------------------------|-----------------------------------------|
 | glusterfs_cluster  | 1                         | The ID of the cluster this node should belong to. This is useful when a single heketi service is expected to manage multiple distinct clusters. **NOTE:** For natively-hosted clusters, all pods will be in the same OpenShift namespace
 | glusterfs_hostname | openshift.node.nodename   | A hostname (or IP address) that will be used for internal GlusterFS communication
-| glusterfs_ip       | openshift.common.ip       | An IP address that will be used by pods to communicate with the GlusterFS node
+| glusterfs_ip       | openshift.common.ip       | An IP address that will be used by pods to communicate with the GlusterFS node. **NOTE:** Required for external GlusterFS nodes
 | glusterfs_zone     | 1                         | A zone number for the node. Zones are used within the cluster for determining how to distribute the bricks of GlusterFS volumes. heketi will try to spread each volumes' bricks as evenly as possible across all zones
 
 Role Variables
@@ -76,7 +76,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | Name                                             | Default value           | Description                             |
 |--------------------------------------------------|-------------------------|-----------------------------------------|
 | openshift_storage_glusterfs_timeout              | 300                     | Seconds to wait for pods to become ready
-| openshift_storage_glusterfs_namespace            | 'default'               | Namespace in which to create GlusterFS resources
+| openshift_storage_glusterfs_namespace            | 'glusterfs'             | Namespace in which to create GlusterFS resources
 | openshift_storage_glusterfs_is_native            | True                    | GlusterFS should be containerized
 | openshift_storage_glusterfs_name                 | 'storage'               | A name to identify the GlusterFS cluster, which will be used in resource names
 | openshift_storage_glusterfs_nodeselector         | 'glusterfs=storage-host'| Selector to determine which nodes will host GlusterFS pods in native mode. **NOTE:** The label value is taken from the cluster name
@@ -85,6 +85,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
 | openshift_storage_glusterfs_heketi_is_native     | True                    | heketi should be containerized
+| openshift_storage_glusterfs_heketi_cli           | 'heketi-cli'            | Command/Path to invoke the heketi-cli tool **NOTE:** Change this only for **non-native heketi** if heketi-cli is not in the global `$PATH` of the machine running openshift-ansible
 | openshift_storage_glusterfs_heketi_image         | 'heketi/heketi'         | Container image to use for heketi pods, enterprise default is 'rhgs3/rhgs-volmanager-rhel7'
 | openshift_storage_glusterfs_heketi_version       | 'latest'                | Container image version to use for heketi pods
 | openshift_storage_glusterfs_heketi_admin_key     | auto-generated          | String to use as secret key for performing heketi commands as admin
@@ -108,7 +109,7 @@ are an exception:
 
 | Name                                                  | Default value         | Description                             |
 |-------------------------------------------------------|-----------------------|-----------------------------------------|
-| openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'default'
+| openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'glusterfs'
 | openshift_storage_glusterfs_registry_name             | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
 | openshift_storage_glusterfs_registry_storageclass     | False                 | It is recommended to not create a StorageClass for GlusterFS clusters serving registry storage, so as to avoid performance penalties
 | openshift_storage_glusterfs_registry_heketi_admin_key | auto-generated        | Separate from the above

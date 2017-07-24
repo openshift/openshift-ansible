@@ -109,6 +109,11 @@ openshift_release=v3.6
 # Default value: "--log-driver=journald"
 #openshift_docker_options="-l warn --ipv6=false"
 
+# Specify whether to run Docker daemon with SELinux enabled in containers. Default is True.
+# Uncomment below to disable; for example if your kernel does not support the
+# Docker overlay/overlay2 storage drivers with SELinux enabled.
+#openshift_docker_selinux_enabled=False
+
 # Specify exact version of Docker to configure or upgrade to.
 # Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
 # docker_version="1.12.1"
