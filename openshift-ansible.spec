@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.167
+Version:        3.6.168
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.168-1
+- drain still pending in below files without fix : (jkaur@redhat.com)
+- GlusterFS: Create registry storage svc and ep in registry namespace
+  (jarrpa@redhat.com)
+- GlusterFS: Pass all booleans through bool filter. (jarrpa@redhat.com)
+- GlusterFS: Fix bug in detecting whether to open firewall ports.
+  (jarrpa@redhat.com)
+
 * Sat Jul 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.167-1
 - 
 
