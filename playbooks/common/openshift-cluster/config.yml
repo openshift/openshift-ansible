@@ -1,4 +1,8 @@
 ---
+- include: std_include.yml
+  tags:
+  - always
+
 # TODO: refactor this into its own include
 # and pass a variable for ctx
 - name: Verify Requirements

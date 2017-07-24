@@ -1,5 +1,5 @@
 ---
-- include: evaluate_groups.yml
+- include: std_include.yml
 
 - name: OpenShift Aggregated Logging
   hosts: oo_first_master
