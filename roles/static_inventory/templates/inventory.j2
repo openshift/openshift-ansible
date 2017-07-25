@@ -12,6 +12,7 @@
 %} public_v4={{ hostvars[host]['public_v4'] }}{% endif %}
 {% if 'ansible_private_key_file' in hostvars[host]
 %} ansible_private_key_file={{ hostvars[host]['ansible_private_key_file'] }}{% endif %}
+ openshift_hostname={{ host }}
 
 {% endif %}
 {% endfor %}
