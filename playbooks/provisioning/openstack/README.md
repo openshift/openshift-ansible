@@ -39,8 +39,12 @@ Alternatively you can install directly from github:
     ansible-galaxy install git+https://github.com/redhat-cop/infra-ansible,master \
       -p openshift-ansible-contrib/roles
 
-Note, this assumes we're in the directory that contains the clonned
+Notes:
+* This assumes we're in the directory that contains the clonned 
 openshift-ansible-contrib repo in its root path.
+* When trying to install a different version, the previous one must be removed first
+(`infra-ansible` directory from [roles](https://github.com/openshift/openshift-ansible-contrib/tree/master/roles)).
+Otherwise, even if there are differences between the two versions, installation of the newer version is skipped.
 
 ## What does it do
 
