@@ -59,3 +59,6 @@ openshift_metrics_cassandra_pvc_access: "{{ openshift_hosted_metrics_storage_acc
 openshift_metrics_hawkular_user_write_access: False
 
 openshift_metrics_heapster_allowed_users: system:master-proxy
+
+openshift_metrics_cassandra_disable_prometheus_endpoint: ""
+openshift_metrics_hawkular_disable_prometheus_endpoint: ""
