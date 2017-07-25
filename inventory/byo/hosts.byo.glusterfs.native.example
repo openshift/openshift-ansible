@@ -24,15 +24,15 @@ ansible_ssh_user=root
 openshift_deployment_type=origin
 
 [masters]
-master  node=True storage=True master=True
+master
 
 [nodes]
-master  node=True storage=True master=True openshift_schedulable=False
+master  openshift_schedulable=False
 # A hosted registry, by default, will only be deployed on nodes labeled
 # "region=infra".
-node0   node=True openshift_schedulable=True
-node1   node=True openshift_schedulable=True
-node2   node=True openshift_schedulable=True
+node0   openshift_schedulable=True
+node1   openshift_schedulable=True
+node2   openshift_schedulable=True
 
 # Specify the glusterfs group, which contains the nodes that will host
 # GlusterFS storage pods. At a minimum, each node must have a
