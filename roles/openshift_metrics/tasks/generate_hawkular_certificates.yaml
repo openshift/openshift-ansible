@@ -46,7 +46,6 @@
 
 - name: generate htpasswd file for hawkular metrics
   local_action: htpasswd path="{{ local_tmp.stdout }}/hawkular-metrics.htpasswd" name=hawkular password="{{ hawkular_metrics_pwd.content | b64decode }}"
-  no_log: true
   become: false
 
 - copy:
