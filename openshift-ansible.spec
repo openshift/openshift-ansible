@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.169
+Version:        3.6.170
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.170-1
+- Removed kubernetes.io string from default. (kwoodson@redhat.com)
+
 * Mon Jul 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.169-1
 - Pass the provisioner to the module. (kwoodson@redhat.com)
 - 1472467- add ose- prefix to ansible service broker name (fabian@fabianism.us)
