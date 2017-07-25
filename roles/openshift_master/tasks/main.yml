@@ -228,31 +228,12 @@
     openshift.master.cluster_method == 'native' and
     not openshift.common.is_containerized | bool
 
-- name: Start and enable master api on first master
+- name: Start and enable master api
   systemd:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
-  register: start_result
-  until: not start_result | failed
-  retries: 1
-  delay: 60
-
-- set_fact:
-    master_api_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
-
-- pause:
-    seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
-
-- name: Start and enable master api all masters
-  systemd:
-    name: "{{ openshift.common.service_type }}-master-api"
-    enabled: yes
-    state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
   until: not start_result | failed
   retries: 1
@@ -260,7 +241,7 @@
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
@@ -283,28 +264,12 @@
   changed_when: false
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
-- name: Start and enable master controller on first master
+- name: Start and enable master controllers
   systemd:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
-  register: start_result
-  until: not start_result | failed
-  retries: 1
-  delay: 60
-
-- name: Wait for master controller service to start on first master
-  pause:
-    seconds: 15
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
-
-- name: Start and enable master controller on all masters
-  systemd:
-    name: "{{ openshift.common.service_type }}-master-controllers"
-    enabled: yes
-    state: started
-  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
   until: not start_result | failed
   retries: 1
