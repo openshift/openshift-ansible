@@ -1,4 +1,13 @@
 ---
+- name: Gather facts
+  hosts: oo_etcd_to_config:oo_new_etcd_to_config
+  roles:
+  - openshift_etcd_facts
+  post_tasks:
+  - set_fact:
+      etcd_hostname: "{{ etcd_hostname }}"
+      etcd_ip: "{{ etcd_ip }}"
+
 - name: Configure etcd
   hosts: oo_new_etcd_to_config
   serial: 1
@@ -8,11 +17,11 @@
   pre_tasks:
   - name: Add new etcd members to cluster
     command: >
-      /usr/bin/etcdctl  --cert-file {{ etcd_peer_cert_file }}
-                        --key-file {{ etcd_peer_key_file }}
-                        --ca-file {{ etcd_peer_ca_file }}
-                        -C {{ etcd_peer_url_scheme }}://{{ etcd_ca_host }}:{{ etcd_client_port }}
-                        member add {{ inventory_hostname }} {{ etcd_peer_url_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:{{ etcd_peer_port }}
+      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+                       --key-file {{ etcd_peer_key_file }}
+                       --ca-file {{ etcd_peer_ca_file }}
+                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
+                       member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}
     delegate_to: "{{ etcd_ca_host }}"
     register: etcd_add_check
   roles:
@@ -23,7 +32,6 @@
     etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
     etcd_initial_cluster_state: "existing"
     initial_etcd_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') }}"
-    etcd_hostname: "{{ inventory_hostname }}"
     etcd_ca_setup: False
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   - role: nickhammond.logrotate
