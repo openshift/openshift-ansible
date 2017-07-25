@@ -15,18 +15,19 @@ Role Variables
 
 From this role:
 
-| Name                                | Default value         |                                                  |
-|-------------------------------------|-----------------------|--------------------------------------------------|
-| openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for master |
-| openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when master starts up |
-| oreg_url                            | UNDEF                 | Default docker registry to use |
-| oreg_url_master                     | UNDEF                 | Default docker registry for masters to use |
-| openshift_master_api_port           | UNDEF                 | |
-| openshift_master_console_port       | UNDEF                 | |
-| openshift_master_api_url            | UNDEF                 | |
-| openshift_master_console_url        | UNDEF                 | |
-| openshift_master_public_api_url     | UNDEF                 | |
-| openshift_master_public_console_url | UNDEF                 | |
+| Name                                             | Default value         |                                                                               |
+|--------------------------------------------------|-----------------------|-------------------------------------------------------------------------------|
+| openshift_master_debug_level                     | openshift_debug_level | Verbosity of the debug logs for master                                        |
+| openshift_node_ips                               | []                    | List of the openshift node ip addresses to pre-register when master starts up |
+| oreg_url                                         | UNDEF                 | Default docker registry to use                                                |
+| oreg_url_master                                  | UNDEF                 | Default docker registry to use, specifically on the master                    |
+| openshift_master_api_port                        | UNDEF                 |                                                                               |
+| openshift_master_console_port                    | UNDEF                 |                                                                               |
+| openshift_master_api_url                         | UNDEF                 |                                                                               |
+| openshift_master_console_url                     | UNDEF                 |                                                                               |
+| openshift_master_public_api_url                  | UNDEF                 |                                                                               |
+| openshift_master_public_console_url              | UNDEF                 |                                                                               |
+| openshift_master_saconfig_limitsecretrefereces   | UNDEF                 |                                                                               |
 
 From openshift_common:
 

@@ -754,6 +754,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_ca_cert_expire_days=1825
 #openshift_node_cert_expire_days=730
 #openshift_master_cert_expire_days=730
+#
+# ServiceAccountConfig:LimitSecretRefences rejects pods that reference secrets their service accounts do not reference
+# openshift_master_saconfig_limitsecretreferences=false
 
 # host group for masters
 [masters]
