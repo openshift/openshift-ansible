@@ -24,6 +24,7 @@ WorkingDirectory=/var/lib/origin/
 SyslogIdentifier={{ openshift.common.service_type }}-node
 Restart=always
 RestartSec=5s
+TimeoutStartSec=300
 OOMScoreAdjust=-999
 
 [Install]
