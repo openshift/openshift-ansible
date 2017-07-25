@@ -20,4 +20,4 @@ dependencies:
 - role: openshift_node_certificates
 - role: openshift_cloud_provider
 - role: openshift_node_dnsmasq
-  when: openshift.common.use_dnsmasq | bool
+  when: r_openshift_node_use_dnsmasq | bool

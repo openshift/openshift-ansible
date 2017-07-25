@@ -30,12 +30,11 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-  tasks:
-  - include: refresh_node_facts.yml
-  - include_role:
-      name: openshift_node
-    vars:
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  pre_tasks:
+  - include: pre_install_node.yml
+  roles:
+  - role: openshift_node
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Configure nodes
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -48,12 +47,11 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-  tasks:
-  - include: refresh_node_facts.yml
-  - include_role:
-      name: openshift_node
-    vars:
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  pre_tasks:
+  - include: pre_install_node.yml
+  roles:
+  - role: openshift_node
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Additional node config
   hosts: oo_nodes_to_config

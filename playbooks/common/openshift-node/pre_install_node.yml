@@ -1,0 +1,54 @@
+---
+# Set role variables that are optional and not defined
+- include: set_optional_node_facts_role_variables.yml
+
+- include_role:
+    name: openshift_node_facts
+
+# set required role variables and variables that are always defined
+# TODO(jchaloup): check all variables set in openshift_facts to see which are always set
+# and which are set only under certain circumstances. If a variable is always set, we can use it anytime.
+# If not, the variable needs to be checked if it exists
+# If possible, I would like to maximize a set of variables I can set right away and minimize
+# the set that is if-defined dependent.
+
+# set optional role variables
+- include: set_optional_node_role_variables.yml
+
+- set_fact:
+    r_openshift_node_deployment_type: "{{ deployment_type  }}"
+    r_openshift_node_service_type: "{{ openshift.common.service_type }}"
+    r_openshift_node_image_tag: "{{ openshift_image_tag }}"
+    r_openshift_node_config_base: "{{ openshift.common.config_base }}"
+    r_openshift_node_portal_net: "{{ openshift.common.portal_net }}"
+    r_openshift_node_dns_domain: "{{ openshift.common.dns_domain }}"
+    r_openshift_node_iptables_sync_period: "{{ openshift.node.iptables_sync_period }}"
+    r_openshift_node_registry_url: "{{ openshift.node.registry_url }}"
+    r_openshift_node_hostname: "{{ openshift.common.hostname }}"
+    r_openshift_node_sdn_mtu: "{{ openshift.node.sdn_mtu }}"
+    r_openshift_node_nodename: "{{ openshift.node.nodename }}"
+    r_openshift_node_data_dir: "{{ openshift.common.data_dir }}"
+    r_openshift_node_proxy_mode: "{{ openshift.node.proxy_mode }}"
+    r_openshift_node_local_quota_per_fsgroup: "{{ openshift.node.local_quota_per_fsgroup }}"
+    r_openshift_node_image: "{{ openshift.node.node_image }}"
+    r_openshift_node_system_image: "{{ openshift.node.node_system_image }}"
+    r_openshift_node_ovs_image: "{{ openshift.node.ovs_image }}"
+    r_openshift_node_ovs_system_image: "{{ openshift.node.ovs_system_image }}"
+    r_openshift_node_master_api_url: "{{ openshift_node_master_api_url }}"
+    r_openshift_node_master_sdn_cluster_network_cidr: "{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+    r_openshift_node_storage_plugin_deps: "{{ openshift.node.storage_plugin_deps }}"
+    r_openshift_node_pkg_version: "{{ openshift_pkg_version  }}"
+    r_openshift_node_set_node_ip: "{{ openshift.node.set_node_ip }}"
+
+    r_openshift_node_is_containerized: "{{ openshift.common.is_containerized }}"
+    r_openshift_node_is_atomic: "{{ openshift.common.is_atomic }}"
+    r_openshift_node_is_node_system_container: "{{ openshift.common.is_node_system_container }}"
+    r_openshift_node_is_openvswitch_system_container: "{{ openshift.common.is_openvswitch_system_container }}"
+    r_openshift_node_use_openshift_sdn: "{{ openshift.common.use_openshift_sdn }}"
+    r_openshift_node_use_calico: "{{ openshift.common.use_calico }}"
+    r_openshift_node_use_dnsmasq: "{{ openshift.common.use_dnsmasq }}"
+    r_openshift_node_use_nuage: "{{ openshift.common.use_nuage }}"
+    r_openshift_node_use_contiv: "{{ openshift.common.use_contiv }}"
+    r_openshift_node_version_gte_3_3_or_1_3: "{{ openshift.common.version_gte_3_3_or_1_3 }}"
+    r_openshift_node_version_gte_3_6: "{{ openshift.common.version_gte_3_6 }}"
+    r_openshift_node_docker_service_name: "{{ openshift.docker.service_name  }}"

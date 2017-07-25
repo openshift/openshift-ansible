@@ -1,7 +1,7 @@
 ---
 - name: Install NFS storage plugin dependencies
   package: name=nfs-utils state=present
-  when: not openshift.common.is_atomic | bool
+  when: not r_openshift_node_is_atomic | bool
 
 - name: Check for existence of nfs sebooleans
   command: getsebool {{ item }}
