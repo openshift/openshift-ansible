@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.101
+Version:        3.5.102
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.102-1
+- Removing nolog from htpasswd invocation so not to supress errors
+  (ewolinet@redhat.com)
+- [Backport] limitSecretReferences to 3.5 (kwoodson@redhat.com)
+- Fix python version validation. (abutcher@redhat.com)
+- Workaround seboolean module with setsebool command. (abutcher@redhat.com)
+- Fix additional master cert & client config creation. (abutcher@redhat.com)
+- Refactor secret generation for python3. (abutcher@redhat.com)
+- Refactor system fact gathering to avoid dictionary size change during
+  iteration. (abutcher@redhat.com)
+- Remove set operations from openshift_master_certificates iteration.
+  (abutcher@redhat.com)
+
 * Tue Jul 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.101-1
 - drain present in below files which is pending the fix : (jkaur@redhat.com)
 
