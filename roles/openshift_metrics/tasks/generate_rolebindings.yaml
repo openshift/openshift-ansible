@@ -13,3 +13,27 @@
     - kind: ServiceAccount
       name: hawkular
   changed_when: no
+
+- name: generate hawkular-metrics cluster role binding for the hawkular service account
+  template:
+    src: rolebinding.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cluster-rolebinding.yaml"
+  vars:
+    cluster: True
+    obj_name: hawkular-namespace-watcher
+    labels:
+      metrics-infra: hawkular
+    roleRef:
+      kind: ClusterRole
+      name: hawkular-metrics
+    subjects:
+    - kind: ServiceAccount
+      name: hawkular
+      namespace: "{{openshift_metrics_project}}"
+  changed_when: no
+
+- name: generate the hawkular cluster role
+  template:
+    src: hawkular_metrics_role.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-cluster-role.yaml"
+  changed_when: no
