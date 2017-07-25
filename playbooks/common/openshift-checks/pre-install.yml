@@ -1,8 +1,5 @@
 ---
-# openshift_health_checker depends on openshift_version which now requires group eval.
 - include: ../openshift-cluster/evaluate_groups.yml
-  tags:
-  - always
 
 - hosts: OSEv3
   name: run OpenShift pre-install checks
@@ -11,6 +8,6 @@
   vars:
   - r_openshift_health_checker_playbook_context: "pre-install"
   post_tasks:
-  - action: openshift_health_check  # https://github.com/ansible/ansible/issues/20513
+  - action: openshift_health_check
     args:
       checks: ['@preflight']
