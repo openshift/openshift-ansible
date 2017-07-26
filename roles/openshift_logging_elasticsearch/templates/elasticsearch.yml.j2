@@ -24,7 +24,8 @@ network:
 
 cloud:
   kubernetes:
-    service: ${SERVICE_DNS}
+    pod_label: ${POD_LABEL}
+    pod_port: 9300
     namespace: ${NAMESPACE}
 
 discovery:
