@@ -99,7 +99,6 @@ objects:
     - ""
     resources:
     - secrets
-    - podpresets
     verbs:
     - create
     - update
@@ -149,6 +148,11 @@ objects:
     - podpresets
     verbs:
     - create
+    - update
+    - delete
+    - get
+    - list
+    - watch
 
 - kind: ClusterRoleBinding
   apiVersion: v1
