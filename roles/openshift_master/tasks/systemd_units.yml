@@ -23,7 +23,7 @@
   when: openshift.common.is_containerized | bool and not openshift.common.is_master_system_container | bool
 
 # workaround for missing systemd unit files
-- name: Create the systemd unit files
+- name: "Create the {{ openshift.common.service_type }} systemd unit file"
   template:
     src: "master_docker/master.docker.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
@@ -32,7 +32,7 @@
   - not openshift.common.is_master_system_container | bool
   register: create_master_unit_file
 
-- name: Install Master service file
+- name: "Install {{ openshift.common.service_type }} systemd unit file"
   copy:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: "{{ openshift.common.service_type }}-master.service"
@@ -44,7 +44,7 @@
 - command: systemctl daemon-reload
   when: create_master_unit_file | changed
 
-- name: Create the ha systemd unit files
+- name: Create the ha systemd unit files for api and controller services
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
