@@ -224,8 +224,8 @@ def test_min_required_space_changes_with_upgrade_context(name, group_names, cont
         ansible_mounts=ansible_mounts,
     )
 
-    check = DiskAvailability(execute_module=fake_execute_module)
-    result = check.run(tmp=None, task_vars=task_vars)
+    check = DiskAvailability(fake_execute_module, task_vars)
+    result = check.run()
 
     assert result.get("failed", False) == failed
     for word in extra_words:

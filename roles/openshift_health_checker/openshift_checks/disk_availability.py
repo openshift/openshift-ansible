@@ -44,7 +44,6 @@ class DiskAvailability(OpenShiftCheck):
         },
     }
 
-    @classmethod
     def is_active(self):
         """Skip hosts that do not have recommended disk space requirements."""
         group_names = self.get_var("group_names", default=[])
