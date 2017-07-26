@@ -206,7 +206,7 @@
     storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
   when:
   - openshift_logging_elasticsearch_storage_type == "pvc"
-  - not openshift_logging_elasticsearch_pvc_dynamic
+  - not openshift_logging_elasticsearch_pvc_dynamic | bool
 
 # Storageclasses are used by default if configured
 - name: Creating ES storage template - dynamic
@@ -220,7 +220,7 @@
     pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
   when:
   - openshift_logging_elasticsearch_storage_type == "pvc"
-  - openshift_logging_elasticsearch_pvc_dynamic
+  - openshift_logging_elasticsearch_pvc_dynamic | bool
 
 - name: Set ES storage
   oc_obj:
