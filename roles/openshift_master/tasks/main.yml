@@ -200,6 +200,10 @@
   delay: 60
   notify: Verify API Server
 
+- name: Dump logs from master service if it failed
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master
+  when: start_result | failed
+
 - name: Stop and disable non-HA master when running HA
   systemd:
     name: "{{ openshift.common.service_type }}-master"
@@ -233,6 +237,10 @@
   retries: 1
   delay: 60
 
+- name: Dump logs from master-api if it failed
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-api
+  when: start_result | failed
+
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
   when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
@@ -251,6 +259,10 @@
   until: not start_result | failed
   retries: 1
   delay: 60
+
+- name: Dump logs from master-api if it failed
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-api
+  when: start_result | failed
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
@@ -288,6 +300,10 @@
   retries: 1
   delay: 60
 
+- name: Dump logs from master-controllers if it failed
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-controllers
+  when: start_result | failed
+
 - name: Wait for master controller service to start on first master
   pause:
     seconds: 15
@@ -303,6 +319,10 @@
   until: not start_result | failed
   retries: 1
   delay: 60
+
+- name: Dump logs from master-controllers if it failed
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-controllers
+  when: start_result | failed
 
 - set_fact:
     master_controllers_service_status_changed: "{{ start_result | changed }}"
