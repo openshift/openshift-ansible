@@ -3,7 +3,7 @@ Ansible module for determining if an installed version of Open vSwitch is incomp
 currently installed version of OpenShift.
 """
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 from openshift_checks.mixins import NotContainerizedMixin
 
 
@@ -27,27 +27,26 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
         "1": "3",
     }
 
-    @classmethod
-    def is_active(cls, task_vars):
+    def is_active(self):
         """Skip hosts that do not have package requirements."""
-        group_names = get_var(task_vars, "group_names", default=[])
+        group_names = self.get_var("group_names", default=[])
         master_or_node = 'masters' in group_names or 'nodes' in group_names
-        return super(OvsVersion, cls).is_active(task_vars) and master_or_node
+        return super(OvsVersion, self).is_active() and master_or_node
 
-    def run(self, tmp, task_vars):
+    def run(self):
         args = {
             "package_list": [
                 {
                     "name": "openvswitch",
-                    "version": self.get_required_ovs_version(task_vars),
+                    "version": self.get_required_ovs_version(),
                 },
             ],
         }
-        return self.execute_module("rpm_version", args, task_vars=task_vars)
+        return self.execute_module("rpm_version", args)
 
-    def get_required_ovs_version(self, task_vars):
+    def get_required_ovs_version(self):
         """Return the correct Open vSwitch version for the current OpenShift version"""
-        openshift_version = self._get_openshift_version(task_vars)
+        openshift_version = self._get_openshift_version()
 
         if float(openshift_version) < 3.5:
             return self.openshift_to_ovs_version["3.4"]
@@ -59,8 +58,8 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
         msg = "There is no recommended version of Open vSwitch for the current version of OpenShift: {}"
         raise OpenShiftCheckException(msg.format(openshift_version))
 
-    def _get_openshift_version(self, task_vars):
-        openshift_version = get_var(task_vars, "openshift_image_tag")
+    def _get_openshift_version(self):
+        openshift_version = self.get_var("openshift_image_tag")
         if openshift_version and openshift_version[0] == 'v':
             openshift_version = openshift_version[1:]
 

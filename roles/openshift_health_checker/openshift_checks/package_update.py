@@ -1,14 +1,14 @@
-# pylint: disable=missing-docstring
+"""Check that a yum update would not run into conflicts with available packages."""
 from openshift_checks import OpenShiftCheck
 from openshift_checks.mixins import NotContainerizedMixin
 
 
 class PackageUpdate(NotContainerizedMixin, OpenShiftCheck):
-    """Check that there are no conflicts in RPM packages."""
+    """Check that a yum update would not run into conflicts with available packages."""
 
     name = "package_update"
     tags = ["preflight"]
 
-    def run(self, tmp, task_vars):
+    def run(self):
         args = {"packages": []}
-        return self.execute_module("check_yum_update", args, tmp=tmp, task_vars=task_vars)
+        return self.execute_module("check_yum_update", args)

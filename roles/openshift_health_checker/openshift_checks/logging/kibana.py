@@ -12,7 +12,6 @@ except ImportError:
     from urllib.error import HTTPError, URLError
     import urllib.request as urllib2
 
-from openshift_checks import get_var
 from openshift_checks.logging.logging import LoggingCheck
 
 
@@ -24,22 +23,20 @@ class Kibana(LoggingCheck):
 
     logging_namespace = None
 
-    def run(self, tmp, task_vars):
+    def run(self):
         """Check various things and gather errors. Returns: result as hash"""
 
-        self.logging_namespace = get_var(task_vars, "openshift_logging_namespace", default="logging")
+        self.logging_namespace = self.get_var("openshift_logging_namespace", default="logging")
         kibana_pods, error = super(Kibana, self).get_pods_for_component(
-            self.execute_module,
             self.logging_namespace,
             "kibana",
-            task_vars,
         )
         if error:
             return {"failed": True, "changed": False, "msg": error}
         check_error = self.check_kibana(kibana_pods)
 
         if not check_error:
-            check_error = self._check_kibana_route(task_vars)
+            check_error = self._check_kibana_route()
 
         if check_error:
             msg = ("The following Kibana deployment issue was found:"
@@ -50,7 +47,7 @@ class Kibana(LoggingCheck):
         # TODO(lmeyer): run it all again for the ops cluster
         return {"failed": False, "changed": False, "msg": 'No problems found with Kibana deployment.'}
 
-    def _verify_url_internal(self, url, task_vars):
+    def _verify_url_internal(self, url):
         """
         Try to reach a URL from the host.
         Returns: success (bool), reason (for failure)
@@ -62,7 +59,7 @@ class Kibana(LoggingCheck):
             # TODO(lmeyer): give users option to validate certs
             status_code=302,
         )
-        result = self.execute_module('uri', args, None, task_vars)
+        result = self.execute_module('uri', args)
         if result.get('failed'):
             return result['msg']
         return None
@@ -114,14 +111,14 @@ class Kibana(LoggingCheck):
 
         return None
 
-    def _get_kibana_url(self, task_vars):
+    def _get_kibana_url(self):
         """
         Get kibana route or report error.
         Returns: url (or empty), reason for failure
         """
 
         # Get logging url
-        get_route = self._exec_oc("get route logging-kibana -o json", [], task_vars)
+        get_route = self._exec_oc("get route logging-kibana -o json", [])
         if not get_route:
             return None, 'no_route_exists'
 
@@ -139,7 +136,7 @@ class Kibana(LoggingCheck):
 
         return 'https://{}/'.format(host), None
 
-    def _check_kibana_route(self, task_vars):
+    def _check_kibana_route(self):
         """
         Check to see if kibana route is up and working.
         Returns: error string
@@ -160,12 +157,12 @@ class Kibana(LoggingCheck):
             ),
         )
 
-        kibana_url, error = self._get_kibana_url(task_vars)
+        kibana_url, error = self._get_kibana_url()
         if not kibana_url:
             return known_errors.get(error, error)
 
         # first, check that kibana is reachable from the master.
-        error = self._verify_url_internal(kibana_url, task_vars)
+        error = self._verify_url_internal(kibana_url)
         if error:
             if 'urlopen error [Errno 111] Connection refused' in error:
                 error = (
@@ -190,7 +187,7 @@ class Kibana(LoggingCheck):
 
         # in production we would like the kibana route to work from outside the
         # cluster too; but that may not be the case, so allow disabling just this part.
-        if not get_var(task_vars, "openshift_check_efk_kibana_external", default=True):
+        if not self.get_var("openshift_check_efk_kibana_external", default=True):
             return None
         error = self._verify_url_external(kibana_url)
         if error:
@@ -221,9 +218,9 @@ class Kibana(LoggingCheck):
             return error
         return None
 
-    def _exec_oc(self, cmd_str, extra_args, task_vars):
-        return super(Kibana, self).exec_oc(self.execute_module,
-                                           self.logging_namespace,
-                                           cmd_str,
-                                           extra_args,
-                                           task_vars)
+    def _exec_oc(self, cmd_str, extra_args):
+        return super(Kibana, self).exec_oc(
+            self.logging_namespace,
+            cmd_str,
+            extra_args,
+        )

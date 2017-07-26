@@ -37,7 +37,7 @@ class ActionModule(ActionBase):
             return result
 
         try:
-            known_checks = self.load_known_checks()
+            known_checks = self.load_known_checks(tmp, task_vars)
             args = self._task.args
             resolved_checks = resolve_checks(args.get("checks", []), known_checks.values())
         except OpenShiftCheckException as e:
@@ -56,13 +56,13 @@ class ActionModule(ActionBase):
             display.banner("CHECK [{} : {}]".format(check_name, task_vars["ansible_host"]))
             check = known_checks[check_name]
 
-            if not check.is_active(task_vars):
+            if not check.is_active():
                 r = dict(skipped=True, skipped_reason="Not active for this host")
             elif check_name in user_disabled_checks:
                 r = dict(skipped=True, skipped_reason="Disabled by user request")
             else:
                 try:
-                    r = check.run(tmp, task_vars)
+                    r = check.run()
                 except OpenShiftCheckException as e:
                     r = dict(
                         failed=True,
@@ -78,7 +78,7 @@ class ActionModule(ActionBase):
         result["changed"] = any(r.get("changed", False) for r in check_results.values())
         return result
 
-    def load_known_checks(self):
+    def load_known_checks(self, tmp, task_vars):
         load_checks()
 
         known_checks = {}
@@ -91,7 +91,7 @@ class ActionModule(ActionBase):
                         check_name,
                         cls.__module__, cls.__name__,
                         other_cls.__module__, other_cls.__name__))
-            known_checks[check_name] = cls(execute_module=self._execute_module)
+            known_checks[check_name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
         return known_checks
 
 
