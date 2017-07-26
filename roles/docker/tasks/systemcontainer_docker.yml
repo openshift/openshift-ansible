@@ -12,31 +12,36 @@
       traditional docker package install. Otherwise, comment out openshift_docker_options
       in your inventory file.
 
-- name: Ensure container-selinux is installed
-  package:
-    name: container-selinux
-    state: present
-  when: not openshift.common.is_atomic | bool
+- when: not openshift.common.is_atomic | bool
+  block:
+    - name: Ensure container-selinux is installed
+      package:
+        name: container-selinux
+        state: present
 
-# Used to pull and install the system container
-- name: Ensure atomic is installed
-  package:
-    name: atomic
-    state: present
-  when: not openshift.common.is_atomic | bool
+    # Used to pull and install the system container
+    - name: Ensure atomic is installed
+      package:
+        name: atomic
+        state: present
 
-# At the time of writing the atomic command requires runc for it's own use. This
-# task is here in the even that the atomic package ever removes the dependency.
-- name: Ensure runc is installed
-  package:
-    name: runc
-    state: present
-  when: not openshift.common.is_atomic | bool
+    # At the time of writing the atomic command requires runc for it's own use. This
+    # task is here in the even that the atomic package ever removes the dependency.
+    - name: Ensure runc is installed
+      package:
+        name: runc
+        state: present
 
-# Make sure Docker is installed so we are able to use the client
-- name: Install Docker so we can use the client
-  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
-  when: not openshift.common.is_atomic | bool
+    - name: Ensure oci-umount is installed
+      package:
+        name: oci-umount
+        state: present
+
+    # Make sure Docker is installed so we are able to use the client
+    - name: Install Docker so we can use the client
+      package:
+        name: docker{{ '-' + docker_version if docker_version is defined else '' }}
+        state: present
 
 # Make sure docker is disabled. Errors are ignored.
 - name: Disable Docker
