@@ -6,7 +6,7 @@
 
 - name: "Add wildcard records to the private A records for infrahosts"
   set_fact:
-    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_app_domain, 'ip': hostvars[item]['openstack']['private_v4'] } ] }}"
+    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_app_domain, 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['infra_hosts'] }}"
 
 - name: "Set the private DNS server to use the external value (if provided)"
