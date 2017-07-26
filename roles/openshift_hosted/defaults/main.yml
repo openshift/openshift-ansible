@@ -29,7 +29,7 @@ openshift_hosted_routers:
 
 openshift_hosted_router_certificate: {}
 openshift_hosted_registry_cert_expire_days: 730
-openshift_hosted_router_create_certificate: False
+openshift_hosted_router_create_certificate: True
 
 os_firewall_allow:
 - service: Docker Registry Port
