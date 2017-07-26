@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.170
+Version:        3.6.171
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.171-1
+- Set TimeoutStartSec=300 (sdodson@redhat.com)
+- Revert "set KillMode to process in node service file" (sdodson@redhat.com)
+- Removing nolog from htpasswd invocation so not to supress errors
+  (ewolinet@redhat.com)
+- Remove unsupported parameters from example inventory files.
+  (jarrpa@redhat.com)
+
 * Tue Jul 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.170-1
 - Removed kubernetes.io string from default. (kwoodson@redhat.com)
 
