@@ -1,25 +1,4 @@
 ---
-- name: Gather and set facts for node hosts
-  hosts: oo_nodes_to_config
-  vars:
-    t_oo_option_node_debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') }}"
-  pre_tasks:
-  - set_fact:
-      openshift_node_debug_level: "{{ t_oo_option_node_debug_level }}"
-    when: openshift_node_debug_level is not defined and t_oo_option_node_debug_level != ""
-  roles:
-  - openshift_facts
-  tasks:
-  # Since the master is generating the node certificates before they are
-  # configured, we need to make sure to set the node properties beforehand if
-  # we do not want the defaults
-  - openshift_facts:
-      role: node
-      local_facts:
-        labels: "{{ openshift_node_labels | default(None) }}"
-        annotations: "{{ openshift_node_annotations | default(None) }}"
-        schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-
 - name: Evaluate node groups
   hosts: localhost
   become: no
@@ -32,7 +11,11 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
-    when: hostvars[item].openshift is defined and hostvars[item].openshift.common is defined and hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
+    when:
+    - hostvars[item].openshift is defined
+    - hostvars[item].openshift.common is defined
+    - hostvars[item].openshift.common.is_containerized | bool
+    - (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
     changed_when: False
 
 - name: Configure containerized nodes
