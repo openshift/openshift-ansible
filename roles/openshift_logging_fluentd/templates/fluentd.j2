@@ -112,6 +112,12 @@ spec:
               resource: limits.memory
         - name: "USE_MUX_CLIENT"
           value: "{{ openshift_logging_use_mux_client | default('false') | lower }}"
+        - name: "BUFFER_TYPE"
+          value: "{{ openshift_logging_fluentd_buffer_type | lower }}"
+        - name: "FILE_BUFFER_PATH"
+          value: "/var/log/fluentd/filebufferstorage"
+        - name: "FILE_BUFFER_LIMIT"
+          value: "{{ openshift_logging_fluentd_file_buffer_limit | default('1Gi') }}"
       volumes:
       - name: runlogjournal
         hostPath:
