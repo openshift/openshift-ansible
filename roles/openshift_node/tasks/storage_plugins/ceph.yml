@@ -1,4 +1,7 @@
 ---
 - name: Install Ceph storage plugin dependencies
-  package: name=ceph-common state=present
-  when: not openshift.common.is_atomic | bool
+  package:
+    name: ceph-common
+    state: present
+  when:
+  - not openshift.common.is_atomic | bool

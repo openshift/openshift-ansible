@@ -1,11 +1,14 @@
 ---
 - name: Install NFS storage plugin dependencies
-  package: name=nfs-utils state=present
-  when: not openshift.common.is_atomic | bool
+  package:
+    name: nfs-utils
+    state: present
+  when:
+  - not openshift.common.is_atomic | bool
 
 - name: Check for existence of nfs sebooleans
   command: getsebool {{ item }}
-  register: nfs_getsebool_status
+  register: l_nfs_getsebool_status
   when:
   - ansible_selinux
   - ansible_selinux.status == "enabled"
@@ -30,7 +33,7 @@
   # should learn to deal with aliases)
   - item.item in item.stdout  # Boolean does not have an alias.
   - ansible_python_version | version_compare('3', '<')
-  with_items: "{{ nfs_getsebool_status.results }}"
+  with_items: "{{ l_nfs_getsebool_status.results }}"
 
 # Workaround for https://github.com/openshift/openshift-ansible/issues/4438
 # Use command module rather than seboolean module to set NFS booleans.
@@ -51,4 +54,4 @@
   - item.item in item.stdout  # Boolean does not have an alias.
   - ('--> off' in item.stdout)  # Boolean is currently off.
   - ansible_python_version | version_compare('3', '>=')
-  with_items: "{{ nfs_getsebool_status.results }}"
+  with_items: "{{ l_nfs_getsebool_status.results }}"

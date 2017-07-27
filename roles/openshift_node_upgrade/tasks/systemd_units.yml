@@ -18,20 +18,21 @@
 
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
-- include: config/install-node-deps-docker-service-file.yml
-  when: openshift.common.is_containerized | bool
-
-- include: config/install-node-docker-service-file.yml
-  when: openshift.common.is_containerized | bool
-
-- include: config/install-ovs-service-env-file.yml
-  when: openshift.common.is_containerized | bool
+- block:
+  - include: config/install-node-deps-docker-service-file.yml
+  - include: config/install-node-docker-service-file.yml
+  - include: config/install-ovs-service-env-file.yml
+  when:
+  - openshift.common.is_containerized | bool
 
 - include: config/workaround-bz1331590-ovs-oom-fix.yml
-  when: openshift.common.use_openshift_sdn | default(true) | bool
+  when:
+  - openshift.common.use_openshift_sdn | default(true) | bool
 
 - include: config/install-ovs-docker-service-file.yml
-  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | default(true) | bool
+  when:
+  - openshift.common.is_containerized | bool
+  - openshift.common.use_openshift_sdn | default(true) | bool
 
 - include: config/configure-node-settings.yml
 - include: config/configure-proxy-settings.yml

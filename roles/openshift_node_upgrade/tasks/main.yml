@@ -29,20 +29,22 @@
   - "{{ openshift.common.service_type }}-master-api"
   - etcd_container
   failed_when: false
-  when: openshift.common.is_containerized | bool
+  when:
+  - openshift.common.is_containerized | bool
 
 - name: Pre-pull node image
   command: >
     docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool
+  register: l_pull_result
+  changed_when: "'Downloaded newer image' in l_pull_result.stdout"
+  when:
+  - openshift.common.is_containerized | bool
 
 - name: Pre-pull openvswitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  register: l_pull_result
+  changed_when: "'Downloaded newer image' in l_pull_result.stdout"
   when:
   - openshift.common.is_containerized | bool
   - openshift.common.use_openshift_sdn | default(true) | bool
@@ -56,13 +58,15 @@
   - l_docker_upgrade | bool
 
 - include: "{{ node_config_hook }}"
-  when: node_config_hook is defined
+  when:
+  - node_config_hook is defined
 
 - include: rpm_upgrade.yml
   vars:
     component: "node"
     openshift_version: "{{ openshift_pkg_version | default('') }}"
-  when: not openshift.common.is_containerized | bool
+  when:
+  - not openshift.common.is_containerized | bool
 
 - name: Remove obsolete docker-sdn-ovs.conf
   file:
@@ -72,7 +76,8 @@
      or (deployment_type == 'origin' and openshift_release | version_compare('1.4', '>='))
 
 - include: containerized_node_upgrade.yml
-  when: openshift.common.is_containerized | bool
+  when:
+  - openshift.common.is_containerized | bool
 
 - name: Ensure containerized services stopped before Docker restart
   service:
@@ -86,7 +91,8 @@
   - "{{ openshift.common.service_type }}-master-controllers"
   - "{{ openshift.common.service_type }}-node"
   failed_when: false
-  when: openshift.common.is_containerized | bool
+  when:
+  - openshift.common.is_containerized | bool
 
 - name: Stop rpm based services
   service:
@@ -96,20 +102,23 @@
   - "{{ openshift.common.service_type }}-node"
   - openvswitch
   failed_when: false
-  when: not openshift.common.is_containerized | bool
+  when:
+  - not openshift.common.is_containerized | bool
 
 - name: Upgrade openvswitch
   package:
     name: openvswitch
     state: latest
-  when: not openshift.common.is_containerized | bool
+  when:
+  - not openshift.common.is_containerized | bool
 
 - name: Update oreg value
   yedit:
     src: "{{ openshift.common.config_base }}/node/node-config.yaml"
     key: 'imageConfig.format'
     value: "{{ oreg_url | default(oreg_url_node) }}"
-  when: oreg_url is defined or oreg_url_node is defined
+  when:
+  - oreg_url is defined or oreg_url_node is defined
 
 - include: disable_swap.yml
 
@@ -140,7 +149,9 @@
     name: "{{ openshift.common.hostname | lower }}"
   register: node_output
   delegate_to: "{{ groups.oo_first_master.0 }}"
-  until: node_output.results.returncode == 0 and node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  until:
+  - node_output.results.returncode == 0
+  - node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
   # Give the node two minutes to come back online.
   retries: 24
   delay: 5
