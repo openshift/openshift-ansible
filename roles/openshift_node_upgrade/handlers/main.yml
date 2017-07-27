@@ -29,3 +29,8 @@
   when:
   - (not skip_node_svc_handlers | default(False) | bool)
   - not (node_service_status_changed | default(false) | bool)
+
+# TODO(jchaloup): once it is verified the systemd module works as expected
+# switch to it: http://docs.ansible.com/ansible/latest/systemd_module.html
+- name: reload systemd units
+  command: systemctl daemon-reload

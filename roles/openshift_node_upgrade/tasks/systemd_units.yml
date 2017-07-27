@@ -22,23 +22,27 @@
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
     src: openshift.docker.node.dep.service
-  register: install_node_dep_result
   when: openshift.common.is_containerized | bool
+  notify:
+  - reload systemd units
+  - restart node
 
 - name: Install Node docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: openshift.docker.node.service
-  register: install_node_result
   when: openshift.common.is_containerized | bool
+  notify:
+  - reload systemd units
+  - restart node
 
 - name: Create the openvswitch service env file
   template:
     src: openvswitch.sysconfig.j2
     dest: /etc/sysconfig/openvswitch
   when: openshift.common.is_containerized | bool
-  register: install_ovs_sysconfig
   notify:
+  - reload systemd units
   - restart openvswitch
 
 # May be a temporary workaround.
@@ -52,8 +56,8 @@
     dest: "/etc/systemd/system/openvswitch.service.d/01-avoid-oom.conf"
     src: openvswitch-avoid-oom.conf
   when: openshift.common.use_openshift_sdn | default(true) | bool
-  register: install_oom_fix_result
   notify:
+  - reload systemd units
   - restart openvswitch
 
 - name: Install OpenvSwitch docker service file
@@ -62,6 +66,7 @@
     src: openvswitch.docker.service
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | default(true) | bool
   notify:
+  - reload systemd units
   - restart openvswitch
 
 - name: Configure Node settings
@@ -94,11 +99,5 @@
   - regex: '^NO_PROXY='
     line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
   when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
-  notify:
-  - restart node
-
-- name: Reload systemd units
-  command: systemctl daemon-reload
-  when: (openshift.common.is_containerized | bool and (install_node_result | changed or install_ovs_sysconfig | changed or install_node_dep_result | changed)) or install_oom_fix_result | changed
   notify:
   - restart node
