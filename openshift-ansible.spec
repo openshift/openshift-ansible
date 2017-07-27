@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.153
+Version:        3.7.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,109 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 27 2017 Scott Dodson <sdodson@redhat.com> 3.7.1-1
+- Fix incorrect delegate_to in control plane upgrade (sdodson@redhat.com)
+- Follow the new naming conventions. (zhang.wanmin@zte.com.cn)
+- Simplify generation of /etc/origin/node/resolv.conf (sdodson@redhat.com)
+- Add glusterfs hosts to oo_all_hosts so that hosts set initial facts.
+  (abutcher@redhat.com)
+- Sync all openshift.common.use_openshift_sdn uses in yaml files
+  (jchaloup@redhat.com)
+- Fixing podpresets perms for service-catalog-controller (ewolinet@redhat.com)
+- Fixing route spec caCertificate to be correctly capitalized
+  (ewolinet@redhat.com)
+- Set TimeoutStartSec=300 (sdodson@redhat.com)
+- Revert "set KillMode to process in node service file" (sdodson@redhat.com)
+- openshift_checks: refactor to internalize task_vars (lmeyer@redhat.com)
+- openshift_checks: get rid of deprecated module_executor (lmeyer@redhat.com)
+- openshift_checks: improve comments/names (lmeyer@redhat.com)
+- add default value for router path in the cert (efreiber@redhat.com)
+- Router wildcard certificate created by default (efreiber@redhat.com)
+- Remove unsupported parameters from example inventory files.
+  (jarrpa@redhat.com)
+- Fix lint errors (sdodson@redhat.com)
+- Metrics: grant hawkular namespace listener role (mwringe@redhat.com)
+- Removing nolog from htpasswd invocation so not to supress errors
+  (ewolinet@redhat.com)
+- Removed kubernetes.io string from default. (kwoodson@redhat.com)
+- Allow storage migrations to be optional and/or non fatal (sdodson@redhat.com)
+- libvirt: fall back to mkisofs if genisoimage isn't available
+  (dcbw@redhat.com)
+- libvirt: add documentation about SSH keypair requirements (dcbw@redhat.com)
+- Updating how storage type is determined, adding bool filter in
+  openshift_logging_elasticsearch (ewolinet@redhat.com)
+- Pass the provisioner to the module. (kwoodson@redhat.com)
+- Use absolute path when unexcluding (Sergi Jimenez)
+- Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1474246 (Sergi Jimenez)
+- Support enabling the centos-openshift-origin-testing repository
+  (dms@redhat.com)
+- 1472467- add ose- prefix to ansible service broker name (fabian@fabianism.us)
+- Updating openshift_logging_kibana default for kibana hostname
+  (ewolinet@redhat.com)
+- GlusterFS: Create registry storage svc and ep in registry namespace
+  (jarrpa@redhat.com)
+- Default an empty list for etcd_to_config if not there (tbielawa@redhat.com)
+- If proxy in effect, add etcd host IP addresses to NO_PROXY list on masters
+  (tbielawa@redhat.com)
+- GlusterFS: Pass all booleans through bool filter. (jarrpa@redhat.com)
+- GlusterFS: Fix bug in detecting whether to open firewall ports.
+  (jarrpa@redhat.com)
+- Pass first master's openshift_image_tag to openshift_loadbalancer for
+  containerized haproxy installation. (abutcher@redhat.com)
+- verify sane log times in logging stack (jvallejo@redhat.com)
+- Fix log dumping on service failure (sdodson@redhat.com)
+- Updating verbs for serviceclasses objects (ewolinet@redhat.com)
+- Fix broken link to Docker image instructions (rhcarvalho@gmail.com)
+- Added parameters inside of gce defaults.  Pass all params to the module.
+  (kwoodson@redhat.com)
+- add etcd increased-traffic check (jvallejo@redhat.com)
+- Add etcd exports to openshift_storage_nfs (abutcher@redhat.com)
+- Hopefully finally fix the no_proxy settings (tbielawa@redhat.com)
+- openshift_checks/docker_storage: overlay/2 support (lmeyer@redhat.com)
+- Removing parameter kind and allowing default to be passed.
+  (kwoodson@redhat.com)
+- Remove openshift_use_dnsmasq from aws and libvirt playbooks
+  (sdodson@redhat.com)
+- 1471973- default to bootstrapping the broker on startup (fabian@fabianism.us)
+- image builds: remove dependency on playbook2image (jvallejo@redhat.com)
+- Setting node selector to be empty string (ewolinet@redhat.com)
+- Add drain retries after 60 second delay (sdodson@redhat.com)
+- Dump some logs (sdodson@redhat.com)
+- daemon_reload on node and ovs start (sdodson@redhat.com)
+- Ensure proper fact evaluation (sdodson@redhat.com)
+- Wrap additional service changes in retries (sdodson@redhat.com)
+- Wrap docker stop in retries (sdodson@redhat.com)
+- Add retries to node restart handlers (sdodson@redhat.com)
+- Test docker restart with retries 3 delay 30 (smilner@redhat.com)
+- Adding podpreset config into master-config (ewolinet@redhat.com)
+- Update image-gc-high-threshold value (decarr@redhat.com)
+- Adding a check for variable definition. (kwoodson@redhat.com)
+- docker: fix docker_selinux_enabled (lmeyer@redhat.com)
+- Changing cluster role to admin (rhallise@redhat.com)
+- drain still pending in below files without fix : (jkaur@redhat.com)
+- Fixed spacing and lint errors. (kwoodson@redhat.com)
+- Switch CI to ansible-2.3.1.0 (sdodson@redhat.com)
+- Allow OVS 2.7 in latest OpenShift releases (rhcarvalho@gmail.com)
+- Make aos_version module handle multiple versions (rhcarvalho@gmail.com)
+- Split positive and negative unit tests (rhcarvalho@gmail.com)
+- GlusterFS: Create in custom namespace by default (jarrpa@redhat.com)
+- hosted registry: Use proper node name in GlusterFS storage setup
+  (jarrpa@redhat.com)
+- GlusterFS: Make heketi-cli command configurable (jarrpa@redhat.com)
+- GlusterFS: Reintroduce heketi-cli check for non-native heketi
+  (jarrpa@redhat.com)
+- GlusterFS: Bug fixes for external GlusterFS nodes (jarrpa@redhat.com)
+- GlusterFS: Improve and extend example inventory files (jarrpa@redhat.com)
+- Fixed tests and added sleep for update. (kwoodson@redhat.com)
+- Fixing needs_update comparison.  Added a small pause for race conditions.
+  Fixed doc.  Fix kind to storageclass (kwoodson@redhat.com)
+- Adding storageclass support to lib_openshift. (kwoodson@redhat.com)
+- Add an SA policy to the ansible-service-broker (rhallise@redhat.com)
+- Import templates will fail if user is not system:admin (jkaur@redhat.com)
+- Additional optimization parameters for ansible.cfg (sejug@redhat.com)
+- Fix etcd conditional check failure (admin@webresource.nl)
+- Remove invalid when: from vars: (rteague@redhat.com)
+
 * Tue Jul 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.153-1
 - Updating to compare sets instead of sorted lists (ewolinet@redhat.com)
 - Adding ability to create podpreset for service-catalog-controller for
