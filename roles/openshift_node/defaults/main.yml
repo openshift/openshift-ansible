@@ -8,7 +8,7 @@ os_firewall_allow:
   port: 443/tcp
 - service: OpenShift OVS sdn
   port: 4789/udp
-  when: openshift.common.use_openshift_sdn | bool
+  when: openshift.common.use_openshift_sdn | default(true) | bool
 - service: Calico BGP Port
   port: 179/tcp
   when: openshift.common.use_calico | bool

@@ -30,7 +30,7 @@ dependencies:
   os_firewall_allow:
   - service: OpenShift OVS sdn
     port: 4789/udp
-  when: openshift.common.use_openshift_sdn | bool
+  when: openshift.common.use_openshift_sdn | default(true) | bool
 - role: os_firewall
   os_firewall_allow:
   - service: Calico BGP Port
