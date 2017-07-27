@@ -5,9 +5,11 @@ openshift_release: 1.5.1
 #openshift_release: v3.5
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 
-# NOTE(shadower): do not remove this line, otherwise the default node labels
-# won't be set up.
-openshift_node_labels: "{{ openstack.metadata.node_labels }}"
+#openshift_cluster_node_labels:
+#  app:
+#    region: primary
+#  infra:
+#    region: infra
 
 osm_default_node_selector: 'region=primary'
 

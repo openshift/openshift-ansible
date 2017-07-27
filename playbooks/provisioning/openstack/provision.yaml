@@ -2,5 +2,3 @@
 - include: "prerequisites.yml"
 
 - include: "provision-openstack.yml"
-
-- include: "pre-install.yml"

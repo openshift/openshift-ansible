@@ -13,6 +13,12 @@ etc.). The result is an environment ready for openshift-ansible.
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
 * Become (sudo) is not required.
 
+### Optional Dependencies for localhost
+**Note**: When using rhel images, `rhel-7-server-openstack-10-rpms` repository is required in order to install these packages.
+
+* `python-openstackclient`
+* `python-heatclient`
+
 ## Dependencies for OpenStack hosted cluster nodes (servers)
 
 There are no additional dependencies for the cluster nodes. Required
@@ -33,8 +39,12 @@ Alternatively you can install directly from github:
     ansible-galaxy install git+https://github.com/redhat-cop/infra-ansible,master \
       -p openshift-ansible-contrib/roles
 
-Note, this assumes we're in the directory that contains the clonned
+Notes:
+* This assumes we're in the directory that contains the clonned
 openshift-ansible-contrib repo in its root path.
+* When trying to install a different version, the previous one must be removed first
+(`infra-ansible` directory from [roles](https://github.com/openshift/openshift-ansible-contrib/tree/master/roles)).
+Otherwise, even if there are differences between the two versions, installation of the newer version is skipped.
 
 ## What does it do
 
@@ -87,8 +97,9 @@ steps, and the Neutron subnet for the Heat stack is updated to point to that
 server in the end. So the provisioned servers will start using it natively
 as a default nameserver that comes from the NetworkManager and cloud-init.
 
-`openstack_ssh_key` is a Nova keypair -- you can see your keypairs with
-`openstack keypair list`.
+`openstack_ssh_key` is a Nova keypair - you can see your keypairs with
+`openstack keypair list`. This guide assumes that its corresponding private
+key is `~/.ssh/openshift`, stored on the ansible admin (control) node.
 
 `openstack_default_image_name` is the name of the Glance image the
 servers will use. You can
@@ -106,6 +117,9 @@ The `openstack_num_masters`, `openstack_num_infra` and
 `openstack_num_nodes` values specify the number of Master, Infra and
 App nodes to create.
 
+The `openshift_cluster_node_labels` defines custom labels for your openshift
+cluster node groups, like app or infra nodes. For example: `{'region': 'infra'}`.
+
 The `openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 
@@ -117,6 +131,14 @@ of firewall rules for master, node, etcd and infra nodes.
 The `required_packages` variable also provides a list of the additional
 prerequisite packages to be installed before to deploy an OpenShift cluster.
 Those are ignored though, if the `manage_packages: False`.
+
+The `openstack_inventory` controls either a static inventory will be created after the
+cluster nodes provisioned on OpenStack cloud. Note, the fully dynamic inventory
+is yet to be supported, so the static inventory will be created anyway.
+
+The `openstack_inventory_path` points the directory to host the generated static inventory.
+It should point to the copied example inventory directory, otherwise ti creates
+a new one for you.
 
 #### Security notes
 
@@ -134,18 +156,6 @@ may want to turn off in order to speed up the provisioning tasks. This may
 be the case for development environments. When turned off, the servers will
 be provisioned omitting the ``yum update`` command. This brings security
 implications though, and is not recommended for production deployments.
-
-### Update the DNS names in `inventory/hosts`
-
-The different server groups are currently grouped by the domain name,
-so if you end up using a different domain than
-`openshift.example.com`, you will need to update the `inventory/hosts`
-file.
-
-For example, if your final domain is `my.cloud.com`, you can run this
-command to fix update the `hosts` file:
-
-    sed -i 's/openshift.example.com/my.cloud.com/' inventory/hosts
 
 ### Configure the OpenShift parameters
 
@@ -167,26 +177,74 @@ variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
     origin_release: 1.5.1
     openshift_deployment_type: "{{ deployment_type }}"
 
+### Configure static inventory and access via a bastion node
+
+Example inventory variables:
+
+    openstack_use_bastion: true
+    bastion_ingress_cidr: "{{openstack_subnet_prefix}}.0/24"
+    openstack_private_ssh_key: ~/.ssh/openshift
+    openstack_inventory: static
+    openstack_inventory_path: ../../../../inventory
+    openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.openshift.example.com
+
+The `openstack_subnet_prefix` is the openstack private network for your cluster.
+And the `bastion_ingress_cidr` defines accepted range for SSH connections to nodes
+additionally to the `ssh_ingress_cidr`` (see the security notes above).
+
+The SSH config will be stored on the ansible control node by the
+gitven path. Ansible uses it automatically. To access the cluster nodes with
+that ssh config, use the `-F` prefix, f.e.:
+
+    ssh -F /tmp/ssh.config.openshift.ansible.openshift.example.com master-0.openshift.example.com echo OK
+
+Note, relative paths will not work for the `openstack_ssh_config_path`, but it
+works for the `openstack_private_ssh_key` and `openstack_inventory_path`. In this
+guide, the latter points to the current directory, where you run ansible commands
+from.
+
+To verify nodes connectivity, use the command:
+
+    ansible -v -i inventory/hosts -m ping all
+
+If something is broken, double-check the inventory variables, paths and the
+generated `<openstack_inventory_path>/hosts` and `openstack_ssh_config_path` files.
+
+The `inventory: dynamic` can be used instead to access cluster nodes directly via
+floating IPs. In this mode you can not use a bastion node and should specify
+the dynamic inventory file in your ansible commands , like `-i openstack.py`.
+
 ## Deployment
 
 ### Run the playbook
 
 Assuming your OpenStack (Keystone) credentials are in the `keystonerc`
-file, this is how you stat the provisioning process:
+this is how you stat the provisioning process from your ansible control node:
 
     . keystonerc
-    ansible-playbook -i inventory --timeout 30  --private-key ~/.ssh/openshift openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
+
+Note, here you start with an empty inventory. The static inventory will be populated
+with data so you can omit providing additional arguments for future ansible commands.
+
+If bastion enabled, the generates SSH config must be applied for ansible.
+Otherwise, it is auto included by the previous step. In order to execute it
+as a separate playbook, use the following command:
+
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-provision-openstack.yml
+
+The first infra node then becomes a bastion node as well and proxies access
+for future ansible commands. The post-provision step also configures Satellite,
+if requested, and DNS server, and ensures other OpenShift requirements to be met.
 
 ### Install OpenShift
 
 Once it succeeds, you can install openshift by running:
 
-    ansible-playbook --user openshift --private-key ~/.ssh/openshift -i inventory/ openshift-ansible/playbooks/byo/config.yml
+    ansible-playbook openshift-ansible/playbooks/byo/config.yml
 
 
 ## License
 
 As the rest of the openshift-ansible-contrib repository, the code here is
-licensed under Apache 2. However, the openstack.py file under
-`sample-inventory` is GPLv3+. See the INVENTORY-LICENSE.txt file for the full
-text of the license.
+licensed under Apache 2.

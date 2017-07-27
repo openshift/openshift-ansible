@@ -60,3 +60,21 @@ ansible_user: openshift
 
 # # Use a single security group for a cluster (default: false)
 #openstack_flat_secgrp: false
+
+# # Openstack inventory type and cluster nodes access pattern
+# # Defaults to 'static'.
+# # Use 'dynamic' to access cluster nodes directly, via floating IPs
+# # and given a dynamic inventory script, like openstack.py
+#openstack_inventory: static
+# # The path to checkpoint the static inventory from the in-memory one
+#openstack_inventory_path: ../../../../inventory
+
+# # Use bastion node to access cluster nodes (Defaults to False).
+# # Requires a static inventory.
+#openstack_use_bastion: False
+#bastion_ingress_cidr: "{{openstack_subnet_prefix}}.0/24"
+#
+# # The Nova key-pair's private SSH key to access inventory nodes
+#openstack_private_ssh_key: ~/.ssh/openshift
+# # The path for the SSH config to access all nodes
+#openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.{{ env_id }}.{{ public_dns_domain }}
