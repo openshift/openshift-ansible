@@ -172,7 +172,7 @@
     ops_port: "{{ openshift_logging_mux_ops_port }}"
     mux_cpu_limit: "{{ openshift_logging_mux_cpu_limit }}"
     mux_memory_limit: "{{ openshift_logging_mux_memory_limit }}"
-    replicas: "{{ openshift_logging_mux_replicas | default(1) }}"
+    mux_replicas: "{{ openshift_logging_mux_replicas | default(1) }}"
     mux_node_selector: "{{ openshift_logging_mux_nodeselector | default({}) }}"
   check_mode: no
   changed_when: no

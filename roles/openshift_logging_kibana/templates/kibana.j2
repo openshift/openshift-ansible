@@ -7,7 +7,7 @@ metadata:
     component: "{{ component }}"
     logging-infra: "{{ logging_component }}"
 spec:
-  replicas: {{ replicas | default(1) }}
+  replicas: {{ kibana_replicas | default(1) }}
   selector:
     provider: openshift
     component: "{{ component }}"
