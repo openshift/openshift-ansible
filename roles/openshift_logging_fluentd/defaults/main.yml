@@ -48,7 +48,6 @@ openshift_logging_fluentd_aggregating_strict: "no"
 openshift_logging_fluentd_aggregating_cert_path: none
 openshift_logging_fluentd_aggregating_key_path: none
 openshift_logging_fluentd_aggregating_passphrase: none
-openshift_logging_use_mux_client: False
 
 ### Deprecating in 3.6
 openshift_logging_fluentd_es_copy: false
