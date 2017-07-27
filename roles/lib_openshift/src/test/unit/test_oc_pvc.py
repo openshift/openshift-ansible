@@ -30,6 +30,8 @@ class OCPVCTest(unittest.TestCase):
               'name': 'mypvc',
               'namespace': 'test',
               'volume_capacity': '1G',
+              'selector': {'foo': 'bar', 'abc': 'a123'},
+              'storage_class_name': 'mystorage',
               'access_modes': 'ReadWriteMany'}
 
     @mock.patch('oc_pvc.Utils.create_tmpfile_copy')
@@ -65,6 +67,13 @@ class OCPVCTest(unittest.TestCase):
                            "storage": "1Gi"
                        }
                    },
+                   "selector": {
+                       "matchLabels": {
+                           "foo": "bar",
+                           "abc": "a123"
+                       }
+                   },
+                   "storageClassName": "myStorage",
                    "volumeName": "pv-aws-ow5vl"
                },
                "status": {
@@ -93,6 +102,8 @@ class OCPVCTest(unittest.TestCase):
 
         self.assertTrue(results['changed'])
         self.assertEqual(results['results']['results'][0]['metadata']['name'], 'mypvc')
+        self.assertEqual(results['results']['results'][0]['spec']['storageClassName'], 'myStorage')
+        self.assertEqual(results['results']['results'][0]['spec']['selector']['matchLabels']['foo'], 'bar')
 
     @mock.patch('oc_pvc.Utils.create_tmpfile_copy')
     @mock.patch('oc_pvc.OCPVC._run')

@@ -110,6 +110,18 @@ options:
     - ReadOnlyMany
     - ReadWriteMany
     aliases: []
+  storage_class_name:
+    description:
+    - The storage class name for the PVC
+    required: false
+    default: None
+    aliases: []
+  selector:
+    description:
+    - A hash of key/values for the matchLabels
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
@@ -1420,7 +1432,9 @@ class PersistentVolumeClaimConfig(object):
                  namespace,
                  kubeconfig,
                  access_modes=None,
-                 vol_capacity='1G'):
+                 vol_capacity='1G',
+                 selector=None,
+                 storage_class_name=None):
         ''' constructor for handling pvc options '''
         self.kubeconfig = kubeconfig
         self.name = sname
@@ -1428,6 +1442,8 @@ class PersistentVolumeClaimConfig(object):
         self.access_modes = access_modes
         self.vol_capacity = vol_capacity
         self.data = {}
+        self.selector = selector
+        self.storage_class_name = storage_class_name
 
         self.create_dict()
 
@@ -1445,12 +1461,16 @@ class PersistentVolumeClaimConfig(object):
         self.data['spec']['accessModes'] = ['ReadWriteOnce']
         if self.access_modes:
             self.data['spec']['accessModes'] = self.access_modes
+        if self.selector:
+            self.data['spec']['selector'] = {'matchLabels': self.selector}
 
         # storage capacity
         self.data['spec']['resources'] = {}
         self.data['spec']['resources']['requests'] = {}
         self.data['spec']['resources']['requests']['storage'] = self.vol_capacity
 
+        if self.storage_class_name:
+            self.data['spec']['storageClassName'] = self.storage_class_name
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class PersistentVolumeClaim(Yedit):
@@ -1460,13 +1480,29 @@ class PersistentVolumeClaim(Yedit):
     volume_name_path = "spec.volumeName"
     bound_path = "status.phase"
     kind = 'PersistentVolumeClaim'
+    selector_path = "spec.selector.matchLabels"
+    storage_class_name_path = "spec.storageClassName"
 
     def __init__(self, content):
-        '''RoleBinding constructor'''
+        '''PersistentVolumeClaim constructor'''
         super(PersistentVolumeClaim, self).__init__(content=content)
         self._access_modes = None
         self._volume_capacity = None
         self._volume_name = None
+        self._selector = None
+        self._storage_class_name = None
+
+    @property
+    def storage_class_name(self):
+        ''' storage_class_name property '''
+        if self._storage_class_name is None:
+            self._storage_class_name = self.get_storage_class_name()
+        return self._storage_class_name
+
+    @storage_class_name.setter
+    def storage_class_name(self, data):
+        ''' storage_class_name property setter'''
+        self._storage_class_name = data
 
     @property
     def volume_name(self):
@@ -1479,6 +1515,24 @@ class PersistentVolumeClaim(Yedit):
     def volume_name(self, data):
         ''' volume_name property setter'''
         self._volume_name = data
+
+    @property
+    def selector(self):
+        ''' selector property '''
+        if self._selector is None:
+            self._selector = self.get_selector()
+            if not isinstance(self._selector, dict):
+                self._selector = dict(self._selector)
+
+        return self._selector
+
+    @selector.setter
+    def selector(self, data):
+        ''' selector property setter'''
+        if not isinstance(data, dict):
+            data = dict(data)
+
+        self._selector = data
 
     @property
     def access_modes(self):
@@ -1509,6 +1563,14 @@ class PersistentVolumeClaim(Yedit):
     def volume_capacity(self, data):
         ''' volume_capacity property setter'''
         self._volume_capacity = data
+
+    def get_storage_class_name(self):
+        '''get storage_class_name'''
+        return self.get(PersistentVolumeClaim.storage_class_name_path) or []
+
+    def get_selector(self):
+        '''get selector'''
+        return self.get(PersistentVolumeClaim.selector_path) or []
 
     def get_access_modes(self):
         '''get access_modes'''
@@ -1663,6 +1725,8 @@ class OCPVC(OpenShiftCLI):
                                               params['kubeconfig'],
                                               params['access_modes'],
                                               params['volume_capacity'],
+                                              params['selector'],
+                                              params['storage_class_name'],
                                              )
         oc_pvc = OCPVC(pconfig, verbose=params['debug'])
 
@@ -1763,9 +1827,9 @@ def main():
             name=dict(default=None, required=True, type='str'),
             namespace=dict(default=None, required=True, type='str'),
             volume_capacity=dict(default='1G', type='str'),
-            access_modes=dict(default='ReadWriteOnce',
-                              choices=['ReadWriteOnce', 'ReadOnlyMany', 'ReadWriteMany'],
-                              type='str'),
+            storage_class_name=dict(default=None, required=False, type='str'),
+            selector=dict(default=None, required=False, type='dict'),
+            access_modes=dict(default=['ReadWriteOnce'], type='list'),
         ),
         supports_check_mode=True,
     )
