@@ -257,7 +257,7 @@
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
-    replicas: 1
+    es_replicas: 1
 
 - name: Set ES dc
   oc_obj:
