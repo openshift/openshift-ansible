@@ -59,6 +59,18 @@ options:
     - ReadOnlyMany
     - ReadWriteMany
     aliases: []
+  storage_class_name:
+    description:
+    - The storage class name for the PVC
+    required: false
+    default: None
+    aliases: []
+  selector:
+    description:
+    - A hash of key/values for the matchLabels
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
