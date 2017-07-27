@@ -8,7 +8,7 @@ metadata:
     deployment: "{{deploy_name}}"
     logging-infra: "{{logging_component}}"
 spec:
-  replicas: {{replicas|default(1)}}
+  replicas: {{es_replicas|default(1)}}
   selector:
     provider: openshift
     component: "{{component}}"
@@ -78,7 +78,7 @@ spec:
               name: "INSTANCE_RAM"
               value: "{{openshift_logging_elasticsearch_memory_limit}}"
             -
-              name: "HEAP_DUMP_LOCATION" 
+              name: "HEAP_DUMP_LOCATION"
               value: "/elasticsearch/persistent/heapdump.hprof"
             -
               name: "NODE_QUORUM"
