@@ -34,37 +34,7 @@
         dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
         env_vars: "{{ openshift_node_env_vars | default(None) }}"
 
-# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-- name: Check for swap usage
-  command: grep "^[^#].*swap" /etc/fstab
-  # grep: match any lines which don't begin with '#' and contain 'swap'
-  changed_when: false
-  failed_when: false
-  register: swap_result
-
-# Disable Swap Block
-- block:
-
-    - name: Disable swap
-      command: swapoff --all
-
-    - name: Remove swap entries from /etc/fstab
-      replace:
-        dest: /etc/fstab
-        regexp: '(^[^#].*swap.*)'
-        replace: '# \1'
-        backup: yes
-
-    - name: Add notice about disabling swap
-      lineinfile:
-        dest: /etc/fstab
-        line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
-        state: present
-
-  when:
-    - swap_result.stdout_lines | length > 0
-    - openshift_disable_swap | default(true) | bool
-# End Disable Swap Block
+- include: disable_swap.yml
 
 # We have to add tuned-profiles in the same transaction otherwise we run into depsolving
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
