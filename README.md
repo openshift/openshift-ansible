@@ -39,7 +39,8 @@ Follow this release pattern and you can't go wrong:
 | ------------- | ----------------- |
 | 1.3           | 3.3               |
 | 1.4           | 3.4               |
-| 1.*X*         | 3.*X*             |
+| 1.5           | 3.5               |
+| 3.*X*         | 3.*X*             |
 
 If you're running from the openshift-ansible **master branch** we can
 only guarantee compatibility with the newest origin releases **in
