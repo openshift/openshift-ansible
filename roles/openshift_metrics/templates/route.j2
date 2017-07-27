@@ -17,7 +17,7 @@ spec:
   tls:
     termination: {{ tls.termination }}
 {% if tls.ca_certificate is defined and tls.ca_certificate | length > 0 %}
-    CACertificate: |
+    caCertificate: |
 {{ tls.ca_certificate|indent(6, true) }}
 {% endif %}
 {% if tls.key is defined and tls.key | length > 0 %}
