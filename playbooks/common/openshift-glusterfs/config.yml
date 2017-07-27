@@ -1,4 +1,10 @@
 ---
+- name: Gather facts for glusterfs hosts
+  hosts: oo_glusterfs_to_config
+  roles:
+  - role: openshift_facts
+    when: groups.oo_glusterfs_to_config | default([]) | count > 0
+
 - name: Open firewall ports for GlusterFS nodes
   hosts: glusterfs
   vars:
