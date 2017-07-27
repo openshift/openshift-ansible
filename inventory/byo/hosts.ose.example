@@ -878,6 +878,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=49
 # where as this would not
 # openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=50
+#
+# Multiple data migrations take place and if they fail they will fail the upgrade
+# You may wish to disable these or make them non fatal
+#
+# openshift_upgrade_pre_storage_migration_enabled=true
+# openshift_upgrade_pre_storage_migration_fatal==true
+# openshift_upgrade_post_storage_migration_enabled=true
+# openshift_upgrade_post_storage_migration_fatal==false
 
 # host group for masters
 [masters]
