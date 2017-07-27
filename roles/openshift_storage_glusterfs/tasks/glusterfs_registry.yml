@@ -41,7 +41,7 @@
     state: absent
   with_items:
   - kind: "svc"
-    name: "glusterfs-{{ glusterfs_name }}-endpoints"
+    name: "glusterfs-{{ glusterfs_name | default }}-endpoints"
   failed_when: False
 
 - name: Generate GlusterFS registry endpoints

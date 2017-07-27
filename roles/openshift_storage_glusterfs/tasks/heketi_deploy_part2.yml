@@ -51,7 +51,7 @@
   - kind: "svc"
     name: "heketi-storage-endpoints"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-topology-secret"
+    name: "heketi-{{ glusterfs_name | default }}-topology-secret"
 
 - name: Generate heketi endpoints
   template:

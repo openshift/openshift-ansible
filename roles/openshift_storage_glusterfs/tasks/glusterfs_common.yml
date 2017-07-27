@@ -30,17 +30,17 @@
   - kind: "svc"
     name: "heketi-storage-endpoints"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-topology-secret"
+    name: "heketi-{{ glusterfs_name | default }}-topology-secret"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-config-secret"
+    name: "heketi-{{ glusterfs_name | default }}-config-secret"
   - kind: "template,route,service,dc"
-    name: "heketi-{{ glusterfs_name }}"
+    name: "heketi-{{ glusterfs_name | default }}"
   - kind: "svc"
-    name: "heketi-db-{{ glusterfs_name }}-endpoints"
+    name: "heketi-db-{{ glusterfs_name | default }}-endpoints"
   - kind: "sa"
-    name: "heketi-{{ glusterfs_name }}-service-account"
+    name: "heketi-{{ glusterfs_name | default }}-service-account"
   - kind: "secret"
-    name: "heketi-{{ glusterfs_name }}-admin-secret"
+    name: "heketi-{{ glusterfs_name | default }}-admin-secret"
   failed_when: False
   when: glusterfs_heketi_wipe
 
