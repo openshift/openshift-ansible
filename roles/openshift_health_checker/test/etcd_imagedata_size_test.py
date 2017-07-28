@@ -1,7 +1,8 @@
 import pytest
 
 from collections import namedtuple
-from openshift_checks.etcd_imagedata_size import EtcdImageDataSize, OpenShiftCheckException
+from openshift_checks.etcd_imagedata_size import EtcdImageDataSize
+from openshift_checks import OpenShiftCheckException
 from etcdkeysize import check_etcd_key_size
 
 
@@ -56,7 +57,7 @@ def test_cannot_determine_available_mountpath(ansible_mounts, extra_words):
     with pytest.raises(OpenShiftCheckException) as excinfo:
         check.run()
 
-    for word in 'determine valid etcd mountpath'.split() + extra_words:
+    for word in ['Unable to determine mount point'] + extra_words:
         assert word in str(excinfo.value)
 
 
