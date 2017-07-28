@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.102
+Version:        3.5.103
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.103-1
+- 
+
 * Tue Jul 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.102-1
 - Removing nolog from htpasswd invocation so not to supress errors
   (ewolinet@redhat.com)
