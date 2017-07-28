@@ -1959,28 +1959,28 @@ class PolicyGroup(OpenShiftCLI):
         self.verbose = verbose
         self._rolebinding = None
         self._scc = None
-        self._cluster_policy_bindings = None
-        self._policy_bindings = None
+        self._cluster_role_bindings = None
+        self._role_bindings = None
 
     @property
-    def policybindings(self):
-        if self._policy_bindings is None:
-            results = self._get('clusterpolicybindings', None)
+    def rolebindings(self):
+        if self._role_bindings is None:
+            results = self._get('rolebindings', None)
             if results['returncode'] != 0:
-                raise OpenShiftCLIError('Could not retrieve policybindings')
-            self._policy_bindings = results['results'][0]['items'][0]
+                raise OpenShiftCLIError('Could not retrieve rolebindings')
+            self._role_bindings = results['results'][0]['items']
 
-        return self._policy_bindings
+        return self._role_bindings
 
     @property
-    def clusterpolicybindings(self):
-        if self._cluster_policy_bindings is None:
-            results = self._get('clusterpolicybindings', None)
+    def clusterrolebindings(self):
+        if self._cluster_role_bindings is None:
+            results = self._get('clusterrolebindings', None)
             if results['returncode'] != 0:
-                raise OpenShiftCLIError('Could not retrieve clusterpolicybindings')
-            self._cluster_policy_bindings = results['results'][0]['items'][0]
+                raise OpenShiftCLIError('Could not retrieve clusterrolebindings')
+            self._cluster_role_bindings = results['results'][0]['items']
 
-        return self._cluster_policy_bindings
+        return self._cluster_role_bindings
 
     @property
     def role_binding(self):
@@ -2023,18 +2023,17 @@ class PolicyGroup(OpenShiftCLI):
         ''' return whether role_binding exists '''
         bindings = None
         if self.config.config_options['resource_kind']['value'] == 'cluster-role':
-            bindings = self.clusterpolicybindings
+            bindings = self.clusterrolebindings
         else:
-            bindings = self.policybindings
+            bindings = self.rolebindings
 
         if bindings is None:
             return False
 
-        for binding in bindings['roleBindings']:
-            _rb = binding['roleBinding']
-            if _rb['roleRef']['name'] == self.config.config_options['name']['value'] and \
-                    _rb['groupNames'] is not None and \
-                    self.config.config_options['group']['value'] in _rb['groupNames']:
+        for binding in bindings:
+            if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
+                    binding['groupNames'] is not None and \
+                    self.config.config_options['group']['value'] in binding['groupNames']:
                 self.role_binding = binding
                 return True
 

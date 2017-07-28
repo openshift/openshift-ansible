@@ -56,7 +56,7 @@ class OCClusterRole(OpenShiftCLI):
             self.clusterrole = ClusterRole(content=result['results'][0])
             result['results'] = self.clusterrole.yaml_dict
 
-        elif 'clusterrole "{}" not found'.format(self.name) in result['stderr']:
+        elif '"{}" not found'.format(self.name) in result['stderr']:
             result['returncode'] = 0
             self.clusterrole = None
 
