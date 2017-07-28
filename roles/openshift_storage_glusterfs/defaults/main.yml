@@ -1,6 +1,6 @@
 ---
 openshift_storage_glusterfs_timeout: 300
-openshift_storage_glusterfs_namespace: 'glusterfs'
+openshift_storage_glusterfs_namespace: "{{ 'glusterfs' | quote if glusterfs_is_native or glusterfs_heketi_is_native else 'default' | quote }}"
 openshift_storage_glusterfs_is_native: True
 openshift_storage_glusterfs_name: 'storage'
 openshift_storage_glusterfs_nodeselector: "glusterfs={{ openshift_storage_glusterfs_name }}-host"
