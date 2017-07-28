@@ -16,9 +16,9 @@ def main():
             name=dict(default=None, required=True, type='str'),
             namespace=dict(default=None, required=True, type='str'),
             volume_capacity=dict(default='1G', type='str'),
-            access_modes=dict(default='ReadWriteOnce',
-                              choices=['ReadWriteOnce', 'ReadOnlyMany', 'ReadWriteMany'],
-                              type='str'),
+            storage_class_name=dict(default=None, required=False, type='str'),
+            selector=dict(default=None, required=False, type='dict'),
+            access_modes=dict(default=['ReadWriteOnce'], type='list'),
         ),
         supports_check_mode=True,
     )
