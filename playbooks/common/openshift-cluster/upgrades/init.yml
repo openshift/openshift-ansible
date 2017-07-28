@@ -23,5 +23,3 @@
     set_fact:
       os_firewall_use_firewalld: false
     when: "'Active: active' in service_iptables_status.stdout"
-
-- include: ./pre/verify_health_checks.yml
