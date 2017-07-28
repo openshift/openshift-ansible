@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.170.0
+Version:        3.6.170.1
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jul 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.170.1-1
+- Block etcdv3 migration for supported configurations (sdodson@redhat.com)
+- Shut down masters before taking an etcd backup (sdodson@redhat.com)
+- Fix incorrect delegate_to in control plane upgrade (sdodson@redhat.com)
+- Allow storage migrations to be optional and/or non fatal (sdodson@redhat.com)
+- Add glusterfs hosts to oo_all_hosts so that hosts set initial facts.
+  (abutcher@redhat.com)
+- Simplify generation of /etc/origin/node/resolv.conf (sdodson@redhat.com)
+- backport BZ#1422541 fix to release-3.6 (weshi@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.6.172-1].
+  (smunilla@redhat.com)
+- Fixing podpresets perms for service-catalog-controller (ewolinet@redhat.com)
+- Fix log dumping on service failure (sdodson@redhat.com)
+- Fix etcd conditional check failure (admin@webresource.nl)
+- Automatic commit of package [openshift-ansible] release [3.6.171-1].
+  (smunilla@redhat.com)
+- Fixing route spec caCertificate to be correctly capitalized
+  (ewolinet@redhat.com)
+- Metrics: grant hawkular namespace listener role (mwringe@redhat.com)
+
 * Tue Jul 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.170.0-1
 - Set TimeoutStartSec=300 (sdodson@redhat.com)
 - Revert "set KillMode to process in node service file" (sdodson@redhat.com)
