@@ -132,34 +132,36 @@
     edits: "{{ openshift_hosted_registry_edits }}"
     force: "{{ True|bool in openshift_hosted_registry_force }}"
 
-- name: Ensure OpenShift registry correctly rolls out (best-effort today)
-  command: |
-    oc rollout status deploymentconfig {{ openshift_hosted_registry_name }} \
-                      --namespace {{ openshift_hosted_registry_namespace }} \
-                      --config {{ openshift.common.config_base }}/master/admin.kubeconfig
-  async: 600
-  poll: 15
-  failed_when: false
+- when: openshift_hosted_registry_wait
+  block:
+  - name: Ensure OpenShift registry correctly rolls out (best-effort today)
+    command: |
+      oc rollout status deploymentconfig {{ openshift_hosted_registry_name }} \
+                        --namespace {{ openshift_hosted_registry_namespace }} \
+                        --config {{ openshift.common.config_base }}/master/admin.kubeconfig
+    async: 600
+    poll: 15
+    failed_when: false
 
-- name: Determine the latest version of the OpenShift registry deployment
-  command: |
-    {{ openshift.common.client_binary }} get deploymentconfig {{ openshift_hosted_registry_name }} \
-           --namespace {{ openshift_hosted_registry_namespace }} \
-           --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
-           -o jsonpath='{ .status.latestVersion }'
-  register: openshift_hosted_registry_latest_version
+  - name: Determine the latest version of the OpenShift registry deployment
+    command: |
+      {{ openshift.common.client_binary }} get deploymentconfig {{ openshift_hosted_registry_name }} \
+             --namespace {{ openshift_hosted_registry_namespace }} \
+             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
+             -o jsonpath='{ .status.latestVersion }'
+    register: openshift_hosted_registry_latest_version
 
-- name: Sanity-check that the OpenShift registry rolled out correctly
-  command: |
-    {{ openshift.common.client_binary }} get replicationcontroller {{ openshift_hosted_registry_name }}-{{ openshift_hosted_registry_latest_version.stdout }} \
-           --namespace {{ openshift_hosted_registry_namespace }} \
-           --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
-           -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
-  register: openshift_hosted_registry_rc_phase
-  until: "'Running' not in openshift_hosted_registry_rc_phase.stdout"
-  delay: 15
-  retries: 40
-  failed_when: "'Failed' in openshift_hosted_registry_rc_phase.stdout"
+  - name: Sanity-check that the OpenShift registry rolled out correctly
+    command: |
+      {{ openshift.common.client_binary }} get replicationcontroller {{ openshift_hosted_registry_name }}-{{ openshift_hosted_registry_latest_version.stdout }} \
+             --namespace {{ openshift_hosted_registry_namespace }} \
+             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
+             -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
+    register: openshift_hosted_registry_rc_phase
+    until: "'Running' not in openshift_hosted_registry_rc_phase.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Failed' in openshift_hosted_registry_rc_phase.stdout"
 
 - include: storage/glusterfs.yml
   when:
