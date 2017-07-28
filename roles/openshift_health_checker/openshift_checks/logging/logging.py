@@ -11,6 +11,9 @@ from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 class LoggingCheck(OpenShiftCheck):
     """Base class for OpenShift aggregated logging component checks"""
 
+    # FIXME: this should not be listed as a check, since it is not meant to be
+    # run by itself.
+
     name = "logging"
     logging_namespace = "logging"
 
@@ -27,7 +30,7 @@ class LoggingCheck(OpenShiftCheck):
         return masters[0] == hostname
 
     def run(self):
-        pass
+        return {}
 
     def get_pods_for_component(self, namespace, logging_component):
         """Get all pods for a given component. Returns: list of pods for component, error string"""
