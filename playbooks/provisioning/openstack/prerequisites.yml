@@ -20,6 +20,16 @@
       that: 'shade_result.rc == 0'
       msg: "Python module shade is not installed"
 
+  # Check jmespath
+  - name: Try to import python module shade
+    command: python -c "import jmespath"
+    ignore_errors: yes
+    register: jmespath_result
+  - name: Check if jmespath is installed
+    assert:
+      that: 'jmespath_result.rc == 0'
+      msg: "Python module jmespath is not installed"
+
   # Check python-dns
   - name: Try to import python DNS module
     command: python -c "import dns"

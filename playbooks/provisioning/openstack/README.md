@@ -10,6 +10,7 @@ etc.). The result is an environment ready for openshift-ansible.
 * [Ansible-galaxy](https://pypi.python.org/pypi/ansible-galaxy-local-deps)
 * [jinja2](http://jinja.pocoo.org/docs/2.9/)
 * [shade](https://pypi.python.org/pypi/shade)
+* python-jmespath / [jmespath](https://pypi.python.org/pypi/jmespath)
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
 * Become (sudo) is not required.
 
