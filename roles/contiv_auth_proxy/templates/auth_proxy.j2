@@ -14,7 +14,7 @@ start)
       -p 10000:{{ auth_proxy_port }} \
       --net=host --name=auth-proxy \
       -e NO_NETMASTER_STARTUP_CHECK=1 \
-      -v /var/contiv:/var/contiv \
+      -v /var/contiv:/var/contiv:z \
       {{ auth_proxy_image }} \
       --tls-key-file={{ auth_proxy_key }} \
       --tls-certificate={{ auth_proxy_cert }} \
