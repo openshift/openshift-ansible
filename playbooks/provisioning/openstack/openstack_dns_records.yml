@@ -4,6 +4,11 @@
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'], 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
 
+- name: "Add wildcard records to the private A records for infrahosts"
+  set_fact:
+    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_app_domain, 'ip': hostvars[item]['private_v4'] } ] }}"
+  with_items: "{{ groups['infra_hosts'] }}"
+
 - name: "Set the private DNS server to use the external value (if provided)"
   set_fact:
     nsupdate_server_private: "{{ external_nsupdate_keys['private']['server'] }}"
