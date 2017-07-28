@@ -18,7 +18,7 @@ class LoggingCheck(OpenShiftCheck):
     logging_namespace = "logging"
 
     def is_active(self):
-        logging_deployed = self.get_var("openshift_hosted_logging_deploy", default=False)
+        logging_deployed = self.get_var("openshift_hosted_logging_deploy", convert=bool, default=False)
         return logging_deployed and super(LoggingCheck, self).is_active() and self.is_first_master()
 
     def is_first_master(self):
