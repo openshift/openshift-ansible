@@ -11,7 +11,9 @@
 
 - name: Use Package Docker if Requested
   include: package_docker.yml
-  when: not l_use_system_container
+  when:
+  - not l_use_system_container
+  - not l_use_crio
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
