@@ -1427,7 +1427,7 @@ class StorageClassConfig(object):
     # pylint: disable=too-many-arguments
     def __init__(self,
                  name,
-                 provisioner=None,
+                 provisioner,
                  parameters=None,
                  annotations=None,
                  default_storage_class="false",
@@ -1459,10 +1459,7 @@ class StorageClassConfig(object):
         self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = \
                 self.default_storage_class
 
-        if self.provisioner is None:
-            self.data['provisioner'] = 'kubernetes.io/aws-ebs'
-        else:
-            self.data['provisioner'] = self.provisioner
+        self.data['provisioner'] = self.provisioner
 
         self.data['parameters'] = {}
         if self.parameters is not None:
@@ -1668,7 +1665,7 @@ def main():
             name=dict(default=None, type='str'),
             annotations=dict(default=None, type='dict'),
             parameters=dict(default=None, type='dict'),
-            provisioner=dict(default='aws-ebs', type='str', choices=['aws-ebs', 'gce-pd', 'glusterfs', 'cinder']),
+            provisioner=dict(required=True, type='str', choices=['aws-ebs', 'gce-pd', 'glusterfs', 'cinder']),
             api_version=dict(default='v1', type='str'),
             default_storage_class=dict(default="false", type='str'),
         ),
