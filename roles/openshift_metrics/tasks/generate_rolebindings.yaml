@@ -37,3 +37,12 @@
     src: hawkular_metrics_role.j2
     dest: "{{ mktemp.stdout }}/templates/hawkular-cluster-role.yaml"
   changed_when: no
+
+- name: Set hawkular cluster roles
+  oc_obj:
+    name: hawkular-metrics
+    namespace: "{{ openshift_metrics_hawkular_agent_namespace }}"
+    kind: clusterrole
+    files:
+    - "{{ mktemp.stdout }}/templates/hawkular-cluster-role.yaml"
+    delete_after: true
