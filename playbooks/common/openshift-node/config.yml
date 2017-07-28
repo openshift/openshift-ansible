@@ -47,7 +47,8 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-
+  pre_tasks:
+  - include: set_node_facts.yml
   roles:
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
@@ -63,6 +64,8 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
+  pre_tasks:
+  - include: set_node_facts.yml
   roles:
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
