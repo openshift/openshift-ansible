@@ -1,6 +1,6 @@
 ---
 # The version of Contiv binaries to use
-contiv_version: 1.0.1
+contiv_version: 1.1.1
 
 # The version of cni binaries
 cni_version: v0.4.0
