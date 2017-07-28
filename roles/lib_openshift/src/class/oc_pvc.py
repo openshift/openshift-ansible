@@ -85,6 +85,8 @@ class OCPVC(OpenShiftCLI):
                                               params['kubeconfig'],
                                               params['access_modes'],
                                               params['volume_capacity'],
+                                              params['selector'],
+                                              params['storage_class_name'],
                                              )
         oc_pvc = OCPVC(pconfig, verbose=params['debug'])
 
