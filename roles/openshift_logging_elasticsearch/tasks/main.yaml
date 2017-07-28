@@ -1,48 +1,34 @@
 ---
 - include: determine_version.yaml
 
+- name: Set proper image facts
+  set_fact:
+    openshift_logging_elasticsearch_image_prefix: '{{ openshift_logging_elasticsearch5_image_prefix }}'
+    openshift_logging_elasticsearch_image_version: '{{ openshift_logging_elasticsearch5_image_version }}'
+    openshift_logging_elasticsearch_image_pull_secret: '{{ openshift_logging_elasticsearch5_image_pull_secret }}'
+    openshift_logging_elasticsearch_image_name: '{{ openshift_logging_elasticsearch5_image_name }}'
+  when: elasticsearch5_deploy | bool
+
 # service account
 - include: "{{ role_path }}/tasks/service_accounts.yaml"
   vars:
-    openshift_elasticsearch_namespace: '{{ openshift_logging_elasticsearch_namespace }}'
-    openshift_elasticsearch_integration: true
+    openshift_logging_elasticsearch_integration: true
 
 - include: elasticsearch2_cluster.yaml
   vars:
-    openshift_elasticsearch_image: "t0ffel/elasticsearch-sg"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     generated_certs_dir: "{{ openshift.common.config_base }}/logging"
-  when: not elasticsearch5_deploy | default(false) |bool
+  when: not elasticsearch5_deploy | bool
 
 
 - include: elasticsearch5_cluster.yaml
   vars:
-    openshift_elasticsearch_image: "t0ffel/elasticsearch-sg"
-    openshift_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
-    openshift_elasticsearch_clustername: "logging-es" 
+    openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_elasticsearch_clustername: "logging-es" 
     certs_dir: "{{ openshift.common.config_base }}/logging"
-    kubeconfig: "{{ kubeconfig| default(/etc/origin/master/openshift-master.kubeconfig) }}"
-    openshift_elasticsearch_secure: true
-    es_node_topology:
-      masters:
-        replicas: 1
-        limits:
-          cpu: 200m
-        requests:
-          memory: 512Mi
-          cpu: 100m
-      clientdata:
-      -
-        node_storage_type: emptydir
-        hostmount_path:
-        - /mnt/data1
-        - /mnt/data2
-        limits:
-          memory: 512Mi
-          cpu: 200m
-        requests:
-          cpu: 100m
-          memory: 256Mi
+    #    kubeconfig: "{{ kubeconfig }}"
+    openshift_logging_elasticsearch_secure: true
+    client_binary: '{{ openshift.common.client_binary |default("oc") }}'
   when: elasticsearch5_deploy | default(false) |bool
 
 

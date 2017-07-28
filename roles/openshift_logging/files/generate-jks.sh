@@ -159,17 +159,30 @@ fi
 dir=$1
 SCRATCH_DIR=$dir
 PROJECT=${2:-logging}
+TRANSPORT_CERT=${3:-elasticsearch}
+API_CERT=${4:-logging-es}
+ES_CLUSTER_NAME=${5:-logging-es}
+ES5_DEPLOY=${6:-}
+
+if [ -z "${ES5_DEPLOY}" ]; then
+  TRANSPORT_HOSTNAMES="$(join , logging-es{,-ops})"
+  API_HOSTNAMES=$(join , logging-es{,-ops}{,-cluster}{,.${PROJECT}.svc.cluster.local})
+else
+  TRANSPORT_HOSTNAMES="$(join , ${ES_CLUSTER_NAME}{,-cluster})"
+  API_HOSTNAMES=$(join , ${ES_CLUSTER_NAME}{,.${PROJECT}.svc.cluster.local})
+fi
+
 
 if [[ ! -f $dir/system.admin.jks || -z "$(keytool -list -keystore $dir/system.admin.jks -storepass kspass | grep sig-ca)" ]]; then
   generate_JKS_client_cert "system.admin"
 fi
 
-if [[ ! -f $dir/elasticsearch.jks || -z "$(keytool -list -keystore $dir/elasticsearch.jks -storepass kspass | grep sig-ca)" ]]; then
-  generate_JKS_chain true elasticsearch "$(join , logging-es{,-ops})"
+if [[ ! -f $dir/${TRANSPORT_CERT}.jks || -z "$(keytool -list -keystore $dir/${TRANSPORT_CERT}.jks -storepass kspass | grep sig-ca)" ]]; then
+  generate_JKS_chain true $TRANSPORT_CERT "${TRANSPORT_HOSTNAMES}"
 fi
 
-if [[ ! -f $dir/logging-es.jks || -z "$(keytool -list -keystore $dir/logging-es.jks -storepass kspass | grep sig-ca)" ]]; then
-  generate_JKS_chain false logging-es "$(join , logging-es{,-ops}{,-cluster}{,.${PROJECT}.svc.cluster.local})"
+if [[ ! -f $dir/${API_CERT}.jks || -z "$(keytool -list -keystore $dir/${API_CERT}.jks -storepass kspass | grep sig-ca)" ]]; then
+  generate_JKS_chain false ${API_CERT} "${API_HOSTNAMES}"
 fi
 
 [ ! -f $dir/truststore.jks ] && createTruststore

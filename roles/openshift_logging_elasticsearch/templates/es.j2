@@ -4,7 +4,7 @@ metadata:
   name: "{{deploy_name}}"
   labels:
     provider: openshift
-    component: "{{component}}"
+    component: "{{es_component}}"
     deployment: "{{deploy_name}}"
     cluster-name: "{{ es_cluster_name }}"
     logging-infra: "{{logging_component}}"
@@ -14,7 +14,7 @@ spec:
   replicas: {{es_replicas|default(1)}}
   selector:
     provider: openshift
-    component: "{{component}}"
+    component: "{{es_component}}"
     deployment: "{{deploy_name}}"
     logging-infra: "{{logging_component}}"
   strategy:
@@ -25,14 +25,14 @@ spec:
       labels:
         logging-infra: "{{logging_component}}"
         provider: openshift
-        component: "{{component}}"
+        component: "{{es_component}}"
         deployment: "{{deploy_name}}"
         cluster-name: "{{ es_cluster_name }}"
         es-node-role: "{{ es_role }}"
         elasticsearch-http: "{{ es_http_service }}"
     spec:
       terminationGracePeriod: 600
-      serviceAccountName: {{ openshift_elasticsearch_sa_name }}
+      serviceAccountName: {{ openshift_logging_elasticsearch_sa_name }}
       securityContext:
         supplementalGroups:
         - {{openshift_logging_elasticsearch_storage_group}}
@@ -72,7 +72,7 @@ spec:
 {% else %}
             exec:
               command:
-              - "/usr/share/elasticsearch/probe/readiness.sh"
+              - "/usr/share/java/elasticsearch/probe/readiness.sh"
               initialDelaySeconds: 10
               timeoutSeconds: 30
               periodSeconds: 5
@@ -128,7 +128,7 @@ spec:
               value: "{{es_recover_expected_nodes}}"
             -
               name: "RECOVER_AFTER_TIME"
-              value: "{{openshift_elasticsearch_recover_after_time}}"
+              value: "{{openshift_logging_elasticsearch_recover_after_time}}"
             -
               name: IS_MASTER
               value: "{{ node_master }}"
@@ -136,7 +136,7 @@ spec:
               name: HAS_DATA
               value: "{{ node_data }}"
           volumeMounts:
-{% if openshift_elasticsearch_secure %}
+{% if openshift_logging_elasticsearch_secure %}
             - name: elasticsearch
               mountPath: /etc/elasticsearch/secret
               readOnly: true
@@ -154,7 +154,7 @@ spec:
               mountPath: /elasticsearch/persistent
 {% endif %}
       volumes:
-{% if openshift_elasticsearch_secure %}
+{% if openshift_logging_elasticsearch_secure %}
         - name: elasticsearch
           secret:
 {%if elasticsearch5_deploy %}
@@ -169,7 +169,7 @@ spec:
 {% if storage_type == 'pvc' %}
         - name: elasticsearch-storage
           persistentVolumeClaim:
-            claimName: {{ openshift_elasticsearch_pvc_name }}
+            claimName: {{ openshift_logging_elasticsearch_pvc_name }}
 {% elif storage_type == 'hostmount' and elasticsearch5_deploy %}
 {% for item in hostmount_path %}
         - name: elasticsearch-storage-{{ loop.index0 }}

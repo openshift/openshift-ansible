@@ -54,7 +54,18 @@
     name: openshift_logging_elasticsearch
   vars:
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_elasticsearch_clustername: "logging-es"
     generated_certs_dir: "{{ openshift.common.config_base }}/logging"
+
+- include_role:
+    name: openshift_logging_elasticsearch
+  vars:
+    openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_elasticsearch_clustername: "logging-es-ops"
+    generated_certs_dir: "{{ openshift.common.config_base }}/logging"
+  when:
+  - openshift_logging_use_ops | bool
+  - elasticsearch5_deploy | bool
 
 ## Kibana
 - include_role:

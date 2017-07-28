@@ -1,0 +1,129 @@
+---
+- fail:
+    msg: "Invalid node role '{{ es_role }}' provide, one of {{ __allowed_es5_types }} is allowed"
+  when: not es_role in __allowed_es5_types
+
+- include: determine_version.yaml
+
+# allow passing in a tempdir
+- name: Create temp directory for doing work in for role {{ es_role }}
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: set temp dir
+  set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+- name: set legacy component
+  set_fact:
+    es_component: "{{ openshift_logging_elasticsearch_clustername  | regex_replace('^logging-','') }}"
+
+# This may not be necessary in this role
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/templates"
+    mode: 0755
+  changed_when: False
+
+# we want to make sure we have all the necessary components here
+
+- name: Creating ES storage template
+  template:
+    src: pvc.j2
+    dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
+  vars:
+    obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+    size: "{{ openshift_logging_elasticsearch_pvc_size }}"
+    access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
+    pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+  when:
+  - node_storage_type == "pvc"
+  - not openshift_logging_elasticsearch_pvc_dynamic
+
+- name: Creating ES storage template
+  template:
+    src: pvc.j2
+    dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
+  vars:
+    obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+    size: "{{ openshift_logging_elasticsearch_pvc_size }}"
+    access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
+    pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+    annotations:
+      volume.alpha.kubernetes.io/storage-class: "dynamic"
+  when:
+  - node_storage_type == "pvc"
+  - openshift_logging_elasticsearch_pvc_dynamic
+
+- name: Set ES data node storage
+  oc_obj:
+    state: present
+    kind: pvc
+    name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+    - "{{ tempdir }}/templates/logging-es-pvc.yml"
+    delete_after: true
+    kubeconfig: '{{ kubeconfig }}'
+  when:
+  - node_storage_type == "pvc"
+
+- name: Set deployment name
+  set_fact:
+    es_deploy_name: "{{ openshift_logging_elasticsearch_deployment_name }}"
+
+# Setup all configmaps and secrets
+- include: "{{ role_path }}/tasks/elasticsearch5_node_configuration.yaml"
+  vars:
+    node_configmap: "{{ es_deploy_name }}"
+    storage_type: "{{ node_storage_type }}"
+
+# DC
+- name: Set ES dc templates for role {{ es_role }}
+  template:
+    src: es.j2
+    dest: "{{ tempdir }}/templates/logging-es-dc.yml"
+  vars:
+    es_configmap: "{{ es_deploy_name }}"
+    es_cluster_name: "{{ openshift_logging_elasticsearch_clustername }}"
+    # TODO: add ability to add arbitrary label to ES deployments,
+    # remove mandatory logging_component
+    # TODO: component below needs to be changed
+    component: "{{ openshift_logging_elasticsearch_clustername }}"
+    es_component: "{{ es_component }}"
+    deploy_name: "{{ es_deploy_name }}"
+    storage_type: "{{ node_storage_type | default(emptydir) }}"
+  changed_when: false
+
+- name: Set ES dc for role {{ es_role }}
+  oc_obj:
+    state: present
+    name: "{{ es_deploy_name }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    kind: dc
+    files:
+    - "{{ tempdir }}/templates/logging-es-dc.yml"
+    delete_after: true
+    kubeconfig: '{{ kubeconfig }}'
+
+# scale up
+- name: Start Elasticsearch for role {{ es_role }}
+  oc_scale:
+    kind: dc
+    name: "{{ es_deploy_name }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    replicas: "{{ replicas | default(1) }}"
+    kubeconfig: '{{ kubeconfig }}'
+
+- name: Update sysctl
+  include: update_node_sysctl.yaml
+
+## Placeholder for migration when necessary ##
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False

@@ -42,7 +42,7 @@
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
-  with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
+  with_sequence: count={{ (openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count ) | abs}}
 
 - set_fact: es_ops_indices={{ es_ops_indices | default([]) + [item | int - 1] }}
   with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
