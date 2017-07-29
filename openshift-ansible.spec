@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.172.0.1
+Version:        3.6.172.0.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jul 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.172.0.2-1
+- Updating metrics role to create serviceaccounts and roles immediately
+  (ewolinet@redhat.com)
+- Impl fluentd file buffer (nhosoi@redhat.com)
+- GlusterFS: Use default namespace when not native. (jarrpa@redhat.com)
+- Import templates will fail if user is not system:admin (jkaur@redhat.com)
+- add selector and storage class name to oc_pvc module (jcantril@redhat.com)
+
 * Fri Jul 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.172.0.1-1
 - 
 
