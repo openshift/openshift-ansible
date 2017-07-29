@@ -66,6 +66,8 @@ spec:
         - name: muxcerts
           mountPath: /etc/fluent/muxkeys
           readOnly: true
+        - name: filebufferstorage
+          mountPath: /var/lib/fluentd
         env:
         - name: "K8S_HOST_URL"
           value: "{{openshift_logging_mux_master_url}}"
@@ -115,6 +117,8 @@ spec:
             resourceFieldRef:
               containerName: "mux"
               resource: limits.memory
+        - name: "FILE_BUFFER_LIMIT"
+          value: "{{ openshift_logging_mux_file_buffer_limit | default('2Gi') }}"
       volumes:
       - name: config
         configMap:
@@ -131,3 +135,13 @@ spec:
       - name: muxcerts
         secret:
           secretName: logging-mux
+      - name: filebufferstorage
+{% if openshift_logging_mux_file_buffer_storage_type == 'pvc' %}
+        persistentVolumeClaim:
+          claimName: {{ openshift_logging_mux_file_buffer_pvc_name }}
+{% elif openshift_logging_mux_file_buffer_storage_type == 'hostmount' %}
+        hostPath:
+          path: "/var/log/fluentd"
+{% else %}
+        emptydir: {}
+{% endif %}
