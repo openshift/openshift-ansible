@@ -1,0 +1,30 @@
+---
+# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
+- name: Check for swap usage
+  command: grep "^[^#].*swap" /etc/fstab
+  # grep: match any lines which don't begin with '#' and contain 'swap'
+  changed_when: false
+  failed_when: false
+  register: l_swap_result
+
+# Disable Swap Block
+- block:
+  - name: Disable swap
+    command: swapoff --all
+
+  - name: Remove swap entries from /etc/fstab
+    replace:
+      dest: /etc/fstab
+      regexp: '(^[^#].*swap.*)'
+      replace: '# \1'
+      backup: yes
+
+  - name: Add notice about disabling swap
+    lineinfile:
+      dest: /etc/fstab
+      line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
+      state: present
+  when:
+  - l_swap_result.stdout_lines | length > 0
+  - openshift_disable_swap | default(true) | bool
+# End Disable Swap Block

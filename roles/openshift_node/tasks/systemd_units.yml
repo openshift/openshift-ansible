@@ -3,14 +3,15 @@
 # playbooks.
 
 - include: config/install-node-deps-docker-service-file.yml
-  when: openshift.common.is_containerized | bool
+  when:
+  - openshift.common.is_containerized | bool
 
 - block:
   - name: Pre-pull node image
     command: >
       docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
-    register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"
+    register: l_pull_result
+    changed_when: "'Downloaded newer image' in l_pull_result.stdout"
 
   - include: config/install-node-docker-service-file.yml
   when:
@@ -21,13 +22,15 @@
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: "node.service.j2"
-  when: not openshift.common.is_containerized | bool
+  when:
+  - not openshift.common.is_containerized | bool
   notify:
   - reload systemd units
   - restart node
 
 - include: config/install-ovs-service-env-file.yml
-  when: openshift.common.is_containerized | bool
+  when:
+  - openshift.common.is_containerized | bool
 
 - name: Install Node system container
   include: node_system_container.yml
@@ -43,14 +46,15 @@
   - openshift.common.is_openvswitch_system_container | bool
 
 - include: config/workaround-bz1331590-ovs-oom-fix.yml
-  when: openshift.common.use_openshift_sdn | default(true) | bool
+  when:
+  - openshift.common.use_openshift_sdn | default(true) | bool
 
 - block:
   - name: Pre-pull openvswitch image
     command: >
       docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-    register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"
+    register: l_pull_result
+    changed_when: "'Downloaded newer image' in l_pull_result.stdout"
 
   - include: config/install-ovs-docker-service-file.yml
   when:
