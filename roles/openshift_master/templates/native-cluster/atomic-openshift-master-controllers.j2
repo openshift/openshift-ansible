@@ -7,7 +7,7 @@ OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000
 IMAGE_VERSION={{ openshift_image_tag }}
 {% endif %}
 
-{% if openshift_cloudprovider_kind | default('') == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_access_key is defined %}
+{% if openshift_cloudprovider_kind | default('') == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined %}
 AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key }}
 AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}
 {% endif %}
