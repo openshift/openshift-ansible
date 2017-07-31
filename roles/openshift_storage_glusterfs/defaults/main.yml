@@ -1,6 +1,5 @@
 ---
 openshift_storage_glusterfs_timeout: 300
-openshift_storage_glusterfs_namespace: "{{ 'glusterfs' | quote if glusterfs_is_native or glusterfs_heketi_is_native else 'default' | quote }}"
 openshift_storage_glusterfs_is_native: True
 openshift_storage_glusterfs_name: 'storage'
 openshift_storage_glusterfs_nodeselector: "glusterfs={{ openshift_storage_glusterfs_name }}-host"
@@ -25,6 +24,7 @@ openshift_storage_glusterfs_heketi_ssh_port: 22
 openshift_storage_glusterfs_heketi_ssh_user: 'root'
 openshift_storage_glusterfs_heketi_ssh_sudo: False
 openshift_storage_glusterfs_heketi_ssh_keyfile: '/dev/null'
+openshift_storage_glusterfs_namespace: "{{ 'glusterfs' | quote if openshift_storage_glusterfs_is_native or openshift_storage_glusterfs_heketi_is_native else 'default' | quote }}"
 
 openshift_storage_glusterfs_registry_timeout: "{{ openshift_storage_glusterfs_timeout }}"
 openshift_storage_glusterfs_registry_namespace: "{{ openshift.hosted.registry.namespace | default(openshift_storage_glusterfs_namespace) }}"
