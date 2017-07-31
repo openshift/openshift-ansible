@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        Unexpected
+Version:        Unexpected.0.0.0.0
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> Unexpected.0.0.0.0-1
+- 
+
 * Mon Jul 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> Unexpected-1
 - GlusterFS: Fix variable names in defaults. (jarrpa@redhat.com)
 - Fixes for auth_proxy, vxlan mode (srampal@cisco.com)
