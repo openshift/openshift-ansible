@@ -562,7 +562,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # StorageClass
 # openshift_storageclass_name=gp2
-# openshift_storageclass_parameters={'type': 'gp2', 'encrypted': false}
+# openshift_storageclass_parameters={'type': 'gp2', 'encrypted': 'false'}
 #
 
 # Logging deployment
