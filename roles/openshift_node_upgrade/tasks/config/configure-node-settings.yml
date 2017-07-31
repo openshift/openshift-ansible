@@ -1,0 +1,16 @@
+---
+- name: Configure Node settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+  - regex: '^OPTIONS='
+    line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
+  - regex: '^CONFIG_FILE='
+    line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
+  - regex: '^IMAGE_VERSION='
+    line: "IMAGE_VERSION={{ openshift_image_tag }}"
+  notify:
+  - restart node

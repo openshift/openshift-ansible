@@ -18,86 +18,20 @@
 
 # This file is included both in the openshift_master role and in the upgrade
 # playbooks.
-- name: Install Node dependencies docker service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node-dep.service"
-    src: openshift.docker.node.dep.service
+- include: config/install-node-deps-docker-service-file.yml
   when: openshift.common.is_containerized | bool
-  notify:
-  - reload systemd units
-  - restart node
 
-- name: Install Node docker service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
-    src: openshift.docker.node.service
+- include: config/install-node-docker-service-file.yml
   when: openshift.common.is_containerized | bool
-  notify:
-  - reload systemd units
-  - restart node
 
-- name: Create the openvswitch service env file
-  template:
-    src: openvswitch.sysconfig.j2
-    dest: /etc/sysconfig/openvswitch
+- include: config/install-ovs-service-env-file.yml
   when: openshift.common.is_containerized | bool
-  notify:
-  - reload systemd units
-  - restart openvswitch
 
-# May be a temporary workaround.
-# https://bugzilla.redhat.com/show_bug.cgi?id=1331590
-- name: Create OpenvSwitch service.d directory
-  file: path=/etc/systemd/system/openvswitch.service.d/ state=directory
+- include: config/workaround-bz1331590-ovs-oom-fix.yml
   when: openshift.common.use_openshift_sdn | default(true) | bool
 
-- name: Install OpenvSwitch service OOM fix
-  template:
-    dest: "/etc/systemd/system/openvswitch.service.d/01-avoid-oom.conf"
-    src: openvswitch-avoid-oom.conf
-  when: openshift.common.use_openshift_sdn | default(true) | bool
-  notify:
-  - reload systemd units
-  - restart openvswitch
-
-- name: Install OpenvSwitch docker service file
-  template:
-    dest: "/etc/systemd/system/openvswitch.service"
-    src: openvswitch.docker.service
+- include: config/install-ovs-docker-service-file.yml
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | default(true) | bool
-  notify:
-  - reload systemd units
-  - restart openvswitch
 
-- name: Configure Node settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    create: true
-  with_items:
-  - regex: '^OPTIONS='
-    line: "OPTIONS=--loglevel={{ openshift.node.debug_level | default(2) }}"
-  - regex: '^CONFIG_FILE='
-    line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
-  - regex: '^IMAGE_VERSION='
-    line: "IMAGE_VERSION={{ openshift_image_tag }}"
-  notify:
-  - restart node
-
-- name: Configure Proxy Settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    create: true
-  with_items:
-  - regex: '^HTTP_PROXY='
-    line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
-  - regex: '^HTTPS_PROXY='
-    line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
-  - regex: '^NO_PROXY='
-    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
-  when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
-  notify:
-  - restart node
+- include: config/configure-node-settings.yml
+- include: config/configure-proxy-settings.yml
