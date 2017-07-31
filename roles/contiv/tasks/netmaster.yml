@@ -41,6 +41,18 @@
     mode: 0644
   notify: restart netmaster
 
+- name: Netmaster | Ensure contiv_config_dir exists
+  file:
+    path: "{{ contiv_config_dir }}"
+    recurse: yes
+    state: directory
+
+- name: Netmaster | Setup contiv.json config for the cni plugin
+  template:
+    src: contiv.cfg.master.j2
+    dest: "{{ contiv_config_dir }}/contiv.json"
+  notify: restart netmaster
+
 - name: Netmaster | Copy systemd units for netmaster
   template:
     src: netmaster.service

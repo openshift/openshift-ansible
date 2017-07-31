@@ -27,4 +27,4 @@ dependencies:
   etcd_peer_url_scheme: http
   when: contiv_role == "netmaster"
 - role: contiv_auth_proxy
-  when: (contiv_role == "netmaster") and (contiv_enable_auth_proxy == true)
+  when: contiv_role == "netmaster"
