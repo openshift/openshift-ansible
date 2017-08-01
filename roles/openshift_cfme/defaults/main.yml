@@ -35,4 +35,9 @@ openshift_cfme_nfs_server: "{{ groups.nfs.0 }}"
 # --template=manageiq). If False everything UP TO 'new-app' is ran.
 openshift_cfme_install_app: False
 # Docker image to pull
-openshift_cfme_container_image: "docker.io/manageiq/manageiq-pods:app-latest-fine"
+openshift_cfme_application_img_name: "{{ 'registry.access.redhat.com/cloudforms45/cfme-openshift-app' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods:app-latest-fine' }}"
+openshift_cfme_postgresql_img_name: "{{ 'registry.access.redhat.com/cloudforms45/cfme-openshift-postgresql' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods:app-latest-fine' }}"
+openshift_cfme_memcached_img_name: "{{ 'registry.access.redhat.com/cloudforms45/cfme-openshift-memcached' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods:app-latest-fine' }}"
+openshift_cfme_application_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'app-latest-fine' }}"
+openshift_cfme_memcached_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'memcached-latest-fine' }}"
+openshift_cfme_postgresql_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'postgresql-latest-fine' }}"
