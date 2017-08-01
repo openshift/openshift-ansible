@@ -284,12 +284,6 @@ Atomic OpenShift Utilities includes
 - Fixing storageclass doc variable. (kwoodson@redhat.com)
 
 * Mon Jul 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.0-1
-- 
-
-* Mon Jul 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> Unexpected.0.0.0.0-1
-- 
-
-* Mon Jul 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> Unexpected-1
 - GlusterFS: Fix variable names in defaults. (jarrpa@redhat.com)
 - Fixes for auth_proxy, vxlan mode (srampal@cisco.com)
 
