@@ -66,6 +66,13 @@
     - openshift.common.use_openshift_sdn | default(true) | bool
     - not openshift.common.is_containerized | bool
 
+- name: Restart cri-o
+  systemd:
+    name: cri-o
+    enabled: yes
+    state: restarted
+  when: openshift_docker_use_crio | default(false)
+
 - name: Install conntrack-tools package
   package:
     name: "conntrack-tools"
