@@ -24,6 +24,9 @@
                        member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}
     delegate_to: "{{ etcd_ca_host }}"
     register: etcd_add_check
+    retries: 3
+    delay: 10
+    until: etcd_add_check.rc == 0
   roles:
   - role: openshift_etcd
     when: etcd_add_check.rc == 0
@@ -36,3 +39,13 @@
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   - role: nickhammond.logrotate
     when: etcd_add_check.rc == 0
+  post_tasks:
+  - name: Verify cluster is stable
+    command: >
+      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+                       --key-file {{ etcd_peer_key_file }}
+                       --ca-file {{ etcd_peer_ca_file }}
+                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
+                       cluster-health
+    retries: 1
+    delay: 30

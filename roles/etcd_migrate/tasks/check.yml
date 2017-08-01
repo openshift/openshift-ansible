@@ -1,8 +1,4 @@
 ---
-- fail:
-    msg: "Currently etcd v3 migration is unsupported while we test it more thoroughly"
-  when: not openshift_enable_unsupported_configurations | default(false) | bool
-
 # Check the cluster is healthy
 - include: check_cluster_health.yml
 

@@ -17,6 +17,7 @@
   tags:
   - always
 
+# TODO: This will be different for release-3.6 branch
 - name: Prepare masters for etcd data migration
   hosts: oo_masters_to_config
   tasks:
@@ -67,8 +68,21 @@
     when:
     - etcd_backup_failed | length > 0
 
-- name: Migrate etcd data from v2 to v3
+- name: Stop etcd
   hosts: oo_etcd_to_migrate
+  gather_facts: no
+  tags:
+  - always
+  pre_tasks:
+  - set_fact:
+      l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
+  - name: Disable etcd members
+    service:
+      name: "{{ l_etcd_service }}"
+      state: stopped
+
+- name: Migrate data on first etcd
+  hosts: oo_etcd_to_migrate[0]
   gather_facts: no
   tags:
   - always
@@ -77,6 +91,36 @@
     r_etcd_migrate_action: migrate
     r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     etcd_peer: "{{ ansible_default_ipv4.address }}"
+    etcd_url_scheme: "https"
+    etcd_peer_url_scheme: "https"
+
+- name: Clean data stores on remaining etcd hosts
+  hosts: oo_etcd_to_migrate[1:]
+  gather_facts: no
+  tags:
+  - always
+  roles:
+  - role: etcd_migrate
+    r_etcd_migrate_action: clean_data
+    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+    etcd_peer: "{{ ansible_default_ipv4.address }}"
+    etcd_url_scheme: "https"
+    etcd_peer_url_scheme: "https"
+  post_tasks:
+  - name: Add etcd hosts
+    delegate_to: localhost
+    add_host:
+      name: "{{ item }}"
+      groups: oo_new_etcd_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_etcd_to_migrate[1:] | default([]) }}"
+    changed_when: no
+  - name: Set success
+    set_fact:
+      r_etcd_migrate_success: true
+
+- include: ./scaleup.yml
 
 - name: Gate on etcd migration
   hosts: oo_masters_to_config
@@ -89,6 +133,16 @@
   - set_fact:
       etcd_migration_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_migration_completed) }}"
 
+- name: Add TTLs on the first master
+  hosts: oo_first_master[0]
+  roles:
+  - role: etcd_migrate
+    r_etcd_migrate_action: add_ttls
+    etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].ansible_default_ipv4.address }}"
+    etcd_url_scheme: "https"
+    etcd_peer_url_scheme: "https"
+    when: etcd_migration_failed | length == 0
+
 - name: Configure masters if etcd data migration is succesfull
   hosts: oo_masters_to_config
   roles:
@@ -100,10 +154,6 @@
       msg: "Skipping master re-configuration since migration failed."
     when:
     - etcd_migration_failed | length > 0
-
-- name: Start masters after etcd data migration
-  hosts: oo_masters_to_config
-  tasks:
   - name: Start master services
     service:
       name: "{{ item }}"
