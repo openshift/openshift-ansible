@@ -2,9 +2,9 @@
 # TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when: >
-    (not ansible_selinux or ansible_selinux.status != 'enabled') and
-    deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+  when:
+    - (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+    - not openshift_docker_use_crio | default(false)
 
 - name: Set node facts
   openshift_facts:
