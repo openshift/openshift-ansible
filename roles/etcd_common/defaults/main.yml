@@ -63,3 +63,13 @@ etcd_client_port: 2379
 etcd_peer_port: 2380
 etcd_url_scheme: http
 etcd_peer_url_scheme: http
+
+etcd_initial_cluster_state: new
+etcd_initial_cluster_token: etcd-cluster-1
+
+etcd_initial_advertise_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}"
+etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}"
+etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
+etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
+
+etcd_systemd_dir: "/etc/systemd/system/{{ etcd_service }}.service.d"
