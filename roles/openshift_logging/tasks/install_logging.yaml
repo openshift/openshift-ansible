@@ -270,4 +270,12 @@
     openshift_logging_fluentd_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_fluentd_namespace: "{{ openshift_logging_namespace }}"
 
+
+## EventRouter
+- include_role:
+    name: openshift_logging_eventrouter
+  when:
+    openshift_logging_install_eventrouter | default(false) | bool
+
+
 - include: update_master_config.yaml
