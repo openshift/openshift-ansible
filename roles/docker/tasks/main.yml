@@ -13,13 +13,11 @@
   include: package_docker.yml
   when:
   - not l_use_system_container
-  - not l_use_crio
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
   when:
   - l_use_system_container
-  - not l_use_crio
 
 - name: Add CRI-O usage Requested
   include: rpm_crio.yml
