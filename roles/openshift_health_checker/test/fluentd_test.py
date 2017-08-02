@@ -4,14 +4,6 @@ import json
 from openshift_checks.logging.fluentd import Fluentd
 
 
-def canned_fluentd(exec_oc=None):
-    """Create a Fluentd check object with canned exec_oc method"""
-    check = Fluentd("dummy")  # fails if a module is actually invoked
-    if exec_oc:
-        check._exec_oc = exec_oc
-    return check
-
-
 def assert_error(error, expect_error):
     if expect_error:
         assert error
@@ -103,7 +95,7 @@ fluentd_node3_unlabeled = {
     ),
 ])
 def test_get_fluentd_pods(pods, nodes, expect_error):
-    check = canned_fluentd(exec_oc=lambda cmd, args: json.dumps(dict(items=nodes)))
-
+    check = Fluentd()
+    check.exec_oc = lambda ns, cmd, args: json.dumps(dict(items=nodes))
     error = check.check_fluentd(pods)
     assert_error(error, expect_error)

@@ -9,11 +9,11 @@ class Curator(LoggingCheck):
     name = "curator"
     tags = ["health", "logging"]
 
-    logging_namespace = None
-
     def run(self):
+        """Check various things and gather errors. Returns: result as hash"""
+
         self.logging_namespace = self.get_var("openshift_logging_namespace", default="logging")
-        curator_pods, error = super(Curator, self).get_pods_for_component(
+        curator_pods, error = self.get_pods_for_component(
             self.logging_namespace,
             "curator",
         )
@@ -23,7 +23,6 @@ class Curator(LoggingCheck):
 
         if check_error:
             msg = ("The following Curator deployment issue was found:"
-                   "\n-------\n"
                    "{}".format(check_error))
             return {"failed": True, "changed": False, "msg": msg}
 
@@ -39,7 +38,7 @@ class Curator(LoggingCheck):
                 "Is Curator correctly deployed?"
             )
 
-        not_running = super(Curator, self).not_running_pods(pods)
+        not_running = self.not_running_pods(pods)
         if len(not_running) == len(pods):
             return (
                 "The Curator pod is not currently in a running state,\n"

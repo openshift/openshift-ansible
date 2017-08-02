@@ -12,13 +12,11 @@ class Elasticsearch(LoggingCheck):
     name = "elasticsearch"
     tags = ["health", "logging"]
 
-    logging_namespace = None
-
     def run(self):
         """Check various things and gather errors. Returns: result as hash"""
 
         self.logging_namespace = self.get_var("openshift_logging_namespace", default="logging")
-        es_pods, error = super(Elasticsearch, self).get_pods_for_component(
+        es_pods, error = self.get_pods_for_component(
             self.logging_namespace,
             "es",
         )
@@ -28,7 +26,6 @@ class Elasticsearch(LoggingCheck):
 
         if check_error:
             msg = ("The following Elasticsearch deployment issue was found:"
-                   "\n-------\n"
                    "{}".format(check_error))
             return {"failed": True, "changed": False, "msg": msg}
 
@@ -37,7 +34,7 @@ class Elasticsearch(LoggingCheck):
 
     def _not_running_elasticsearch_pods(self, es_pods):
         """Returns: list of pods that are not running, list of errors about non-running pods"""
-        not_running = super(Elasticsearch, self).not_running_pods(es_pods)
+        not_running = self.not_running_pods(es_pods)
         if not_running:
             return not_running, [(
                 'The following Elasticsearch pods are not running:\n'
@@ -78,7 +75,7 @@ class Elasticsearch(LoggingCheck):
         for pod_name in pods_by_name.keys():
             # Compare what each ES node reports as master and compare for split brain
             get_master_cmd = self._build_es_curl_cmd(pod_name, "https://localhost:9200/_cat/master")
-            master_name_str = self._exec_oc(get_master_cmd, [])
+            master_name_str = self.exec_oc(self.logging_namespace, get_master_cmd, [])
             master_names = (master_name_str or '').split(' ')
             if len(master_names) > 1:
                 es_master_names.add(master_names[1])
@@ -111,7 +108,7 @@ class Elasticsearch(LoggingCheck):
 
         # get ES cluster nodes
         node_cmd = self._build_es_curl_cmd(list(pods_by_name.keys())[0], 'https://localhost:9200/_nodes')
-        cluster_node_data = self._exec_oc(node_cmd, [])
+        cluster_node_data = self.exec_oc(self.logging_namespace, node_cmd, [])
         try:
             cluster_nodes = json.loads(cluster_node_data)['nodes']
         except (ValueError, KeyError):
@@ -138,7 +135,7 @@ class Elasticsearch(LoggingCheck):
         error_msgs = []
         for pod_name in pods_by_name.keys():
             cluster_health_cmd = self._build_es_curl_cmd(pod_name, 'https://localhost:9200/_cluster/health?pretty=true')
-            cluster_health_data = self._exec_oc(cluster_health_cmd, [])
+            cluster_health_data = self.exec_oc(self.logging_namespace, cluster_health_cmd, [])
             try:
                 health_res = json.loads(cluster_health_data)
                 if not health_res or not health_res.get('status'):
@@ -165,7 +162,7 @@ class Elasticsearch(LoggingCheck):
         error_msgs = []
         for pod_name in pods_by_name.keys():
             df_cmd = 'exec {} -- df --output=ipcent,pcent /elasticsearch/persistent'.format(pod_name)
-            disk_output = self._exec_oc(df_cmd, [])
+            disk_output = self.exec_oc(self.logging_namespace, df_cmd, [])
             lines = disk_output.splitlines()
             # expecting one header looking like 'IUse% Use%' and one body line
             body_re = r'\s*(\d+)%?\s+(\d+)%?\s*$'
@@ -201,10 +198,3 @@ class Elasticsearch(LoggingCheck):
                     ))
 
         return error_msgs
-
-    def _exec_oc(self, cmd_str, extra_args):
-        return super(Elasticsearch, self).exec_oc(
-            self.logging_namespace,
-            cmd_str,
-            extra_args,
-        )

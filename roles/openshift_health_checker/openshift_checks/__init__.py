@@ -105,6 +105,29 @@ class OpenShiftCheck(object):
             raise OpenShiftCheckException("'{}' is undefined".format(".".join(map(str, keys))))
         return value
 
+    @staticmethod
+    def get_major_minor_version(openshift_image_tag):
+        """Parse and return the deployed version of OpenShift as a tuple."""
+        if openshift_image_tag and openshift_image_tag[0] == 'v':
+            openshift_image_tag = openshift_image_tag[1:]
+
+        # map major release versions across releases
+        # to a common major version
+        openshift_major_release_version = {
+            "1": "3",
+        }
+
+        components = openshift_image_tag.split(".")
+        if not components or len(components) < 2:
+            msg = "An invalid version of OpenShift was found for this host: {}"
+            raise OpenShiftCheckException(msg.format(openshift_image_tag))
+
+        if components[0] in openshift_major_release_version:
+            components[0] = openshift_major_release_version[components[0]]
+
+        components = tuple(int(x) for x in components[:2])
+        return components
+
 
 LOADER_EXCLUDES = (
     "__init__.py",
