@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.2
+Version:        3.6.173.0.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.3-1
+- GlusterFS: Copy SSH private key to master node. (jarrpa@redhat.com)
+- Fixing SA and clusterrole namespaces (ewolinet@redhat.com)
+- Remove invalid when: from vars: (rteague@redhat.com)
+- Refactor openshift_facts BIOS vendor discovery (rteague@redhat.com)
+- Resolve deprecation warnings in Contiv roles (rteague@redhat.com)
+
 * Tue Aug 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.2-1
 - Use enterprise images for CFME enterprise deployments (sdodson@redhat.com)
 - Switch logging and metrics OCP image tag from 3.6.0 to v3.6
