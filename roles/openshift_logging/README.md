@@ -135,16 +135,23 @@ Elasticsearch OPS too, if using an OPS cluster:
   secure_forward forwarder for the node agent Fluentd daemonsets running in the
   cluster.  This can be used to reduce the number of connections to the
   OpenShift API server, by using `mux` and configuring each node Fluentd to
-  send raw logs to mux and turn off the k8s metadata plugin.
+  send raw logs to mux and turn off the k8s metadata plugin.  This requires the
+  use of `openshift_logging_mux_client_mode` (see below).
 - `openshift_logging_mux_allow_external`: Default `False`.  If this is `True`,
   the `mux` service will be deployed, and it will be configured to allow
   Fluentd clients running outside of the cluster to send logs using
   secure_forward.  This allows OpenShift logging to be used as a central
   logging service for clients other than OpenShift, or other OpenShift
   clusters.
-- `openshift_logging_use_mux_client`: Default `False`.  If this is `True`, the
-  node agent Fluentd services will be configured to send logs to the mux
-  service rather than directly to Elasticsearch.
+- `openshift_logging_mux_client_mode`: Values - `minimal`, `maximal`.
+  Default is unset.  Setting this value will cause the Fluentd node agent to
+  send logs to mux rather than directly to Elasticsearch.  The value
+  `maximal` means that Fluentd will do as much processing as possible at the
+  node before sending the records to mux.  This is the current recommended
+  way to use mux due to current scaling issues.
+  The value `minimal` means that Fluentd will do *no* processing at all, and
+  send the raw logs to mux for processing.  We do not currently recommend using
+  this mode, and ansible will warn you about this.
 - `openshift_logging_mux_hostname`: Default is "mux." +
   `openshift_master_default_subdomain`.  This is the hostname *external*_
   clients will use to connect to mux, and will be used in the TLS server cert

@@ -64,7 +64,7 @@ spec:
           readOnly: true
         - name: filebufferstorage
           mountPath: /var/lib/fluentd
-{% if openshift_logging_use_mux_client | bool %}
+{% if openshift_logging_mux_client_mode is defined %}
         - name: muxcerts
           mountPath: /etc/fluent/muxkeys
           readOnly: true
@@ -112,10 +112,12 @@ spec:
             resourceFieldRef:
               containerName: "{{ daemonset_container_name }}"
               resource: limits.memory
-        - name: "USE_MUX_CLIENT"
-          value: "{{ openshift_logging_use_mux_client | default('false') | lower }}"
         - name: "FILE_BUFFER_LIMIT"
           value: "{{ openshift_logging_fluentd_file_buffer_limit | default('1Gi') }}"
+{% if openshift_logging_mux_client_mode is defined %}
+        - name: "MUX_CLIENT_MODE"
+          value: "{{ openshift_logging_mux_client_mode }}"
+{% endif %}
       volumes:
       - name: runlogjournal
         hostPath:
@@ -144,7 +146,7 @@ spec:
       - name: dockerdaemoncfg
         hostPath:
           path: /etc/docker
-{% if openshift_logging_use_mux_client | bool %}
+{% if openshift_logging_mux_client_mode is defined %}
       - name: muxcerts
         secret:
           secretName: logging-mux

@@ -23,6 +23,14 @@
     msg: openshift_hosted_logging_use_journal is deprecated.  Fluentd will automatically detect which logging driver is being used.
   when: openshift_hosted_logging_use_journal is defined
 
+- fail:
+    msg: Invalid openshift_logging_mux_client_mode [{{ openshift_logging_mux_client_mode }}], one of {{ __allowed_mux_client_modes }} allowed
+  when: openshift_logging_mux_client_mode is defined and not openshift_logging_mux_client_mode in __allowed_mux_client_modes
+
+- debug:
+    msg: WARNING Use of openshift_logging_mux_client_mode=minimal is not recommended due to current scaling issues
+  when: openshift_logging_mux_client_mode is defined and openshift_logging_mux_client_mode == 'minimal'
+
 - include: determine_version.yaml
 
 # allow passing in a tempdir

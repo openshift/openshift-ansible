@@ -28,6 +28,7 @@ openshift_logging_mux_journal_source: "{{ openshift_hosted_logging_journal_sourc
 openshift_logging_mux_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
 
 openshift_logging_mux_allow_external: False
+openshift_logging_use_mux: "{{ openshift_logging_mux_allow_external | default(False) }}"
 openshift_logging_mux_hostname: "{{ 'mux.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
 openshift_logging_mux_port: 24284
 # the namespace to use for undefined projects should come first, followed by any
