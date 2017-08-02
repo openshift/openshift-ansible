@@ -3,58 +3,53 @@ import pytest
 from openshift_checks.package_version import PackageVersion, OpenShiftCheckException
 
 
-@pytest.mark.parametrize('openshift_release, extra_words', [
-    ('111.7.0', ["no recommended version of Open vSwitch"]),
-    ('0.0.0', ["no recommended version of Docker"]),
-])
-def test_openshift_version_not_supported(openshift_release, extra_words):
-    def execute_module(*_):
-        return {}
-
-    task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
+def task_vars_for(openshift_release, deployment_type):
+    return dict(
+        openshift=dict(common=dict(service_type=deployment_type)),
         openshift_release=openshift_release,
         openshift_image_tag='v' + openshift_release,
-        openshift_deployment_type='origin',
+        openshift_deployment_type=deployment_type,
     )
 
-    check = PackageVersion(execute_module, task_vars)
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run()
 
-    for word in extra_words:
-        assert word in str(excinfo.value)
+def test_openshift_version_not_supported():
+    check = PackageVersion(None, task_vars_for("1.2.3", 'origin'))
+    check.get_openshift_version_tuple = lambda: (3, 4, 1)  # won't be in the dict
+
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.get_required_ovs_version()
+    assert "no recommended version of Open vSwitch" in str(excinfo.value)
+
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.get_required_docker_version()
+    assert "no recommended version of Docker" in str(excinfo.value)
 
 
 def test_invalid_openshift_release_format():
-    def execute_module(*_):
-        return {}
-
     task_vars = dict(
         openshift=dict(common=dict(service_type='origin')),
         openshift_image_tag='v0',
         openshift_deployment_type='origin',
     )
 
-    check = PackageVersion(execute_module, task_vars)
+    check = PackageVersion(lambda *_: {}, task_vars)
     with pytest.raises(OpenShiftCheckException) as excinfo:
         check.run()
     assert "invalid version" in str(excinfo.value)
 
 
 @pytest.mark.parametrize('openshift_release', [
-    "3.5",
+    "111.7.0",
+    "3.7",
     "3.6",
+    "3.5.1.2.3",
+    "3.5",
     "3.4",
     "3.3",
+    "2.1.0",
 ])
 def test_package_version(openshift_release):
-    task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
-        openshift_release=openshift_release,
-        openshift_image_tag='v' + openshift_release,
-        openshift_deployment_type='origin',
-    )
+
     return_value = object()
 
     def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None, *_):
@@ -67,26 +62,21 @@ def test_package_version(openshift_release):
 
         return return_value
 
-    check = PackageVersion(execute_module, task_vars)
+    check = PackageVersion(execute_module, task_vars_for(openshift_release, 'origin'))
     result = check.run()
     assert result is return_value
 
 
 @pytest.mark.parametrize('deployment_type,openshift_release,expected_docker_version', [
     ("origin", "3.5", "1.12"),
+    ("origin", "1.3", "1.10"),
+    ("origin", "1.1", "1.8"),
     ("openshift-enterprise", "3.4", "1.12"),
-    ("origin", "3.3", "1.10"),
     ("openshift-enterprise", "3.2", "1.10"),
-    ("origin", "3.1", "1.8"),
     ("openshift-enterprise", "3.1", "1.8"),
 ])
 def test_docker_package_version(deployment_type, openshift_release, expected_docker_version):
-    task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
-        openshift_release=openshift_release,
-        openshift_image_tag='v' + openshift_release,
-        openshift_deployment_type=deployment_type,
-    )
+
     return_value = object()
 
     def execute_module(module_name=None, module_args=None, *_):
@@ -99,7 +89,7 @@ def test_docker_package_version(deployment_type, openshift_release, expected_doc
 
         return return_value
 
-    check = PackageVersion(execute_module, task_vars)
+    check = PackageVersion(execute_module, task_vars_for(openshift_release, deployment_type))
     result = check.run()
     assert result is return_value
 
