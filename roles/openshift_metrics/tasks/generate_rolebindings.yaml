@@ -41,7 +41,7 @@
 - name: Set hawkular cluster roles
   oc_obj:
     name: hawkular-metrics
-    namespace: "{{ openshift_metrics_hawkular_agent_namespace }}"
+    namespace: "{{ openshift_metrics_project }}"
     kind: clusterrole
     files:
     - "{{ mktemp.stdout }}/templates/hawkular-cluster-role.yaml"
