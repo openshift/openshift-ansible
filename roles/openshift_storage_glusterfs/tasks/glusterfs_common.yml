@@ -163,6 +163,11 @@
   - glusterfs_heketi_is_native
   - glusterfs_heketi_user_key is undefined
 
+- name: Copy heketi private key
+  copy:
+    src: "{{ glusterfs_heketi_ssh_keyfile }}"
+    dest: "{{ mktemp.stdout }}/private_key"
+
 - name: Create heketi config secret
   oc_secret:
     namespace: "{{ glusterfs_namespace }}"
@@ -173,7 +178,7 @@
     - name: heketi.json
       path: "{{ mktemp.stdout }}/heketi.json"
     - name: private_key
-      path: "{{ glusterfs_heketi_ssh_keyfile }}"
+      path: "{{ mktemp.stdout }}/private_key"
   when:
   - glusterfs_heketi_is_native
 
