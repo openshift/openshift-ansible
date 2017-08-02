@@ -1,0 +1,188 @@
+apiVersion: "v1"
+kind: "DeploymentConfig"
+metadata:
+  name: "{{deploy_name}}"
+  labels:
+    provider: openshift
+    component: "{{component}}"
+    deployment: "{{deploy_name}}"
+    cluster-name: "{{ es_cluster_name }}"
+    logging-infra: "{{logging_component}}"
+    es-node-role: "{{ es_role }}"
+    elasticsearch-http: "{{ es_http_service }}"
+spec:
+  replicas: {{replicas|default(0)}}
+  selector:
+    provider: openshift
+    component: "{{component}}"
+    deployment: "{{deploy_name}}"
+    logging-infra: "{{logging_component}}"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: "{{deploy_name}}"
+      labels:
+        logging-infra: "{{logging_component}}"
+        provider: openshift
+        component: "{{component}}"
+        deployment: "{{deploy_name}}"
+        cluster-name: "{{ es_cluster_name }}"
+        es-node-role: "{{ es_role }}"
+        elasticsearch-http: "{{ es_http_service }}"
+#      annotations:
+#        pod.beta.kubernetes.io/init-containers: '[
+#          {
+#          "name": "sysctl",
+#            "image": "centos",
+#            "command": ["sysctl", "-w", "vm.max_map_count=262144"],
+#            "serviceAccountName": "{{ openshift_elasticsearch_sa_name }}",
+#            "serviceAccount": "{{ openshift_elasticsearch_sa_name }}",
+#            "securityContext": {
+#              "privileged": true
+#            }
+#          }
+#        ]'
+    spec:
+      terminationGracePeriod: 600
+      serviceAccountName: {{ openshift_elasticsearch_sa_name }}
+      securityContext:
+        supplementalGroups:
+        - {{openshift_elasticsearch_storage_group}}
+{% if es_node_selector is iterable and es_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in es_node_selector.iteritems() %}
+        {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+      containers:
+        -
+          name: "elasticsearch"
+          image: {{image}}
+          imagePullPolicy: Always
+          resources:
+{% if limits is defined %}
+            limits:
+{% for key, value in limits.iteritems() %}
+              {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+{% if requests is defined %}
+            requests:
+{% for key, value in requests.iteritems() %}
+              {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+          livenessProbe:
+            tcpSocket:
+              port: 9300
+            initialDelaySeconds: 480
+            periodSeconds: 5
+          readinessProbe:
+{% if es_role == "master" %}
+            tcpSocket:
+              port: 9300
+{% else %}
+            exec:
+              command:
+              - "/usr/share/elasticsearch/probe/readiness.sh"
+              initialDelaySeconds: 10
+              timeoutSeconds: 30
+              periodSeconds: 5
+{% endif %}
+          ports:
+            -
+              containerPort: 9200
+              name: "restapi"
+            -
+              containerPort: 9300
+              name: "cluster"
+          env:
+            -
+              name: "NAMESPACE"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            -
+              name: "NODE_NAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            -
+              name: "SERVICE_DNS"
+              value: "{{es_cluster_name}}-cluster"
+            -
+              name: "CLUSTER_NAME"
+              value: "{{es_cluster_name}}"
+            -
+              name: "INSTANCE_RAM"
+{% if limits is defined and limits.memory is defined %}
+              value: "{{ limits.memory }}"
+{% else %}
+              value: "512m"
+{% endif %}
+            -
+              name: "MASTERS_QUORUM"
+              value: "{{es_masters_quorum | int}}"
+            -
+              name: "RECOVER_AFTER_NODES"
+              value: "{{es_recover_after_nodes}}"
+            -
+              name: "RECOVER_EXPECTED_DATA_NODES"
+              value: "{{es_recover_expected_data_nodes}}"
+            -
+              name: "RECOVER_EXPECTED_NODES"
+              value: "{{es_recover_expected_nodes}}"
+            -
+              name: "RECOVER_AFTER_TIME"
+              value: "{{openshift_elasticsearch_recover_after_time}}"
+            -
+              name: IS_MASTER
+              value: "{{ node_master }}"
+            -
+              name: HAS_DATA
+              value: "{{ node_data }}"
+            -
+              name: NODE_INGEST
+              value: "false"
+          volumeMounts:
+{% if openshift_elasticsearch_secure %}
+            - name: elasticsearch
+              mountPath: /etc/elasticsearch/secret
+              readOnly: true
+{% endif %}
+            - name: elasticsearch-config
+              mountPath: /usr/share/java/elasticsearch/config
+              readOnly: true
+{% if storage_type == 'hostmount' %}
+{% for item in hostmount_path %}
+            - name: elasticsearch-storage-{{ loop.index0 }}
+              mountPath: /elasticsearch/persistent/{{ loop.index0 }}
+{% endfor %}
+{% else %}
+            - name: elasticsearch-storage
+              mountPath: /elasticsearch/persistent
+{% endif %}
+      volumes:
+{% if openshift_elasticsearch_secure %}
+        - name: elasticsearch
+          secret:
+            secretName: {{ es_cluster_name }}-certs
+{% endif %}
+        - name: elasticsearch-config
+          configMap:
+            name: {{ es_configmap }}
+{% if storage_type == 'pvc' %}
+        - name: elasticsearch-storage
+          persistentVolumeClaim:
+            claimName: {{ openshift_elasticsearch_pvc_name }}
+{% elif storage_type == 'hostmount' %}
+{% for item in hostmount_path %}
+        - name: elasticsearch-storage-{{ loop.index0 }}
+          hostPath:
+            path: {{ item }}
+{% endfor %}
+{% else %}
+        - name: elasticsearch-storage
+          emptydir: {}
+{% endif %}

@@ -1,0 +1,68 @@
+---
+- fail:
+    msg: "Invalid node role '{{ es_role }}' provide, one of {{ __allowed_es_roles }} is allowed"
+  when: not es_role in __allowed_es_roles
+
+- include: determine_version.yaml
+
+# allow passing in a tempdir
+- name: Create temp directory for doing work in for role {{ es_role }}
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+# This may not be necessary in this role
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/templates"
+    mode: 0755
+  changed_when: False
+
+# Setup all configmaps and secrets
+- include: "{{ role_path }}/tasks/es_node_configuration.yaml"
+  vars:
+    node_configmap: "{{ es_deploy_name }}"
+    storage_type: "emptydir"
+
+# DC
+- name: Set ES dc templates for role {{ es_role }}
+  template:
+    src: es-init.j2
+    dest: "{{ tempdir }}/templates/logging-es-dc.yml"
+  vars:
+    es_svc_name: "{{ es_svc_name }}"
+    component: "{{ es_svc_name }}"
+    deploy_name: "{{ es_deploy_name }}"
+  changed_when: false
+
+- name: Set ES dc for role {{ es_role }}
+  oc_obj:
+    state: present
+    name: "{{ es_deploy_name }}"
+    namespace: "{{ openshift_elasticsearch_namespace }}"
+    kind: dc
+    files:
+    - "{{ tempdir }}/templates/logging-es-dc.yml"
+    delete_after: true
+    kubeconfig: '{{ kubeconfig }}'
+
+# scale up
+- name: Start Elasticsearch
+  oc_scale:
+    kind: dc
+    name: "{{ es_deploy_name }}"
+    namespace: "{{ openshift_elasticsearch_namespace }}"
+    replicas: "{{ replicas | default(1) }}"
+    kubeconfig: '{{ kubeconfig }}'
+
+## Placeholder for migration when necessary ##
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False
