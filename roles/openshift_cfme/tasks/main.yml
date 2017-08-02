@@ -110,6 +110,13 @@
     namespace: "{{ openshift_cfme_project }}"
     template_name: manageiq
     create: True
+    params:
+      APPLICATION_IMG_NAME: "{{ openshift_cfme_application_img_name }}"
+      POSTGRESQL_IMG_NAME: "{{ openshift_cfme_postgresql_img_name }}"
+      MEMCACHED_IMG_NAME: "{{ openshift_cfme_memcached_img_name }}"
+      APPLICATION_IMG_TAG: "{{ openshift_cfme_application_img_tag }}"
+      POSTGRESQL_IMG_TAG: "{{ openshift_cfme_postgresql_img_tag }}"
+      MEMCACHED_IMG_TAG: "{{ openshift_cfme_memcached_img_tag }}"
   register: cfme_new_app_process
   run_once: True
   when:
