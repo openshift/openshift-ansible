@@ -2162,14 +2162,10 @@ class OpenShiftFacts(object):
         product_version = self.system_facts['ansible_product_version']
         virt_type = self.system_facts['ansible_virtualization_type']
         virt_role = self.system_facts['ansible_virtualization_role']
+        bios_vendor = self.system_facts['ansible_system_vendor']
         provider = None
         metadata = None
 
-        # TODO: this is not exposed through module_utils/facts.py in ansible,
-        # need to create PR for ansible to expose it
-        bios_vendor = get_file_content(  # noqa: F405
-            '/sys/devices/virtual/dmi/id/bios_vendor'
-        )
         if bios_vendor == 'Google':
             provider = 'gce'
             metadata_url = ('http://metadata.google.internal/'
