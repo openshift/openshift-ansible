@@ -52,9 +52,8 @@
   become: true
   pre_tasks:
     - include: pre_tasks.yml
-    - name: "Generate dns-server views"
-      include: openstack_dns_views.yml
   roles:
+    - role: dns-views
     - role: infra-ansible/roles/dns-server
 
 - name: Build and process DNS Records
@@ -63,9 +62,8 @@
   become: False
   pre_tasks:
     - include: pre_tasks.yml
-    - name: "Generate dns records"
-      include: openstack_dns_records.yml
   roles:
+    - role: dns-records
     - role: infra-ansible/roles/dns
 
 - name: Switch the stack subnet to the configured private DNS server
