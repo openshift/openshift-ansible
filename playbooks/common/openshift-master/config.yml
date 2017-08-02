@@ -5,6 +5,19 @@
     t_oo_option_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') }}"
 
   pre_tasks:
+  # Per https://bugzilla.redhat.com/show_bug.cgi?id=1469336
+  #
+  # When scaling up a cluster upgraded from OCP <= 3.5, ensure that
+  # OPENSHIFT_DEFAULT_REGISTRY is present as defined on the existing
+  # masters, or absent if such is the case.
+  - name: Detect if this host is a new master in a scale up
+    set_fact:
+      g_openshift_master_is_scaleup: "{{ openshift.common.hostname in ( groups['new_masters'] | default([]) ) }}"
+
+  - name: Scaleup Detection
+    debug:
+      var: g_openshift_master_is_scaleup
+
   - name: Check for RPM generated config marker file .config_managed
     stat:
       path: /etc/origin/.config_managed
@@ -69,7 +82,7 @@
         ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
 
-- name: Inspect state of first master session secrets and config
+- name: Inspect state of first master config settings
   hosts: oo_first_master
   roles:
   - role: openshift_facts
@@ -97,6 +110,42 @@
   - name: Set etcd3 fact
     set_fact:
       l_etcd3_enabled: "{{ etcd3_grep.rc == 0 | bool }}"
+
+  - name: Check if atomic-openshift-master sysconfig exists yet
+    stat:
+      path: /etc/sysconfig/atomic-openshift-master
+    register: l_aom_exists
+
+  - name: Preserve OPENSHIFT_DEFAULT_REGISTRY master parameter if present
+    command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master
+    register: l_default_registry_defined
+    when: l_aom_exists.stat.exists | bool
+
+  - name: Check if atomic-openshift-master-api sysconfig exists yet
+    stat:
+      path: /etc/sysconfig/atomic-openshift-master-api
+    register: l_aom_api_exists
+
+  - name: Preserve OPENSHIFT_DEFAULT_REGISTRY master-api parameter if present
+    command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master-api
+    register: l_default_registry_defined_api
+    when: l_aom_api_exists.stat.exists | bool
+
+  - name: Check if atomic-openshift-master-controllers sysconfig exists yet
+    stat:
+      path: /etc/sysconfig/atomic-openshift-master-controllers
+    register: l_aom_controllers_exists
+
+  - name: Preserve OPENSHIFT_DEFAULT_REGISTRY master-controllers parameter if present
+    command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master-controllers
+    register: l_default_registry_defined_controllers
+    when: l_aom_controllers_exists.stat.exists | bool
+
+  - name: Update facts with OPENSHIFT_DEFAULT_REGISTRY value
+    set_fact:
+      l_default_registry_value: "{{ l_default_registry_defined.stdout | default('') }}"
+      l_default_registry_value_api: "{{ l_default_registry_defined_api.stdout | default('') }}"
+      l_default_registry_value_controllers: "{{ l_default_registry_defined_controllers.stdout | default('') }}"
 
 - name: Generate master session secrets
   hosts: oo_first_master
@@ -145,6 +194,10 @@
     etcd_cert_prefix: "master.etcd-"
     r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
     r_openshift_master_etcd3_storage: "{{ hostvars[groups.oo_first_master.0].l_etcd3_enabled }}"
+    openshift_master_is_scaleup_host: "{{ g_openshift_master_is_scaleup | default(false) }}"
+    openshift_master_default_registry_value: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value }}"
+    openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
+    openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
   - role: nuage_master
     when: openshift.common.use_nuage | bool
   - role: calico_master
