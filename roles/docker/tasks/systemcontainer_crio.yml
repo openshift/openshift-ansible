@@ -125,6 +125,16 @@
     src: crio.conf.j2
     backup: yes
 
+- name: Ensure CNI configuration directory exists
+  file:
+    path: /etc/cni/net.d/
+    state: directory
+
+- name: Configure the CNI network
+  template:
+    dest: /etc/cni/net.d/openshift-sdn.conf
+    src: 80-openshift-sdn.conf.j2
+
 - name: Start the CRI-O service
   systemd:
     name: "cri-o"
