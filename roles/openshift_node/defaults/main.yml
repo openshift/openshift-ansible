@@ -24,10 +24,10 @@ r_openshift_node_system_images_registry: "{{ omit }}"
 r_openshift_node_use_openshift_sdn: true
 r_openshift_node_debug_level: 2
 r_openshift_node_env_vars: {}
-r_openshift_node_image: "{{ omit }}" 
-r_openshift_node_system_image
-r_openshift_node_ovs_image
-r_openshift_node_ovs_system_image
+r_openshift_node_image: "{{ omit }}"
+r_openshift_node_system_image: "{{ omit }}"
+r_openshift_node_ovs_image: "{{ omit }}"
+r_openshift_node_ovs_system_image: "{{ omit }}"
 r_openshift_node_storage_plugin_deps
 
 
