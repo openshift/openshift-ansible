@@ -5,6 +5,7 @@ by Ansible, thus making its output the last thing that users see.
 """
 
 from collections import defaultdict
+import traceback
 
 from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
@@ -40,8 +41,16 @@ class CallbackModule(CallbackBase):
 
     def v2_playbook_on_stats(self, stats):
         super(CallbackModule, self).v2_playbook_on_stats(stats)
-        if self.__failures:
-            self._display.display(failure_summary(self.__failures, self.__playbook_file))
+        # pylint: disable=broad-except; capturing exceptions broadly is
+        # intentional, to isolate arbitrary failures in this callback plugin.
+        try:
+            if self.__failures:
+                self._display.display(failure_summary(self.__failures, self.__playbook_file))
+        except Exception:
+            msg = stringc(
+                u'An error happened while generating a summary of failures:\n'
+                u'{}'.format(traceback.format_exc()), C.COLOR_WARN)
+            self._display.v(msg)
 
 
 def failure_summary(failures, playbook):
