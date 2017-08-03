@@ -31,11 +31,7 @@
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
   tasks:
-  - include: refresh_node_facts.yml
-  - include_role:
-      name: openshift_node
-    vars:
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  - include: install_node.yml
 
 - name: Configure nodes
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -49,11 +45,7 @@
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
   tasks:
-  - include: refresh_node_facts.yml
-  - include_role:
-      name: openshift_node
-    vars:
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  - include: install_node.yml
 
 - name: Additional node config
   hosts: oo_nodes_to_config
