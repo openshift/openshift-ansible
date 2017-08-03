@@ -1,4 +1,10 @@
 ---
+- name: Fail if r_openshift_node_image_tag is not defined
+  fail:
+    msg: r_openshift_node_image_tag must be specified for this role
+  when:
+  - r_openshift_node_image_tag is not defined
+
 # TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
@@ -12,7 +18,7 @@
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - name: Install Node package
   package:
-    name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift.common.service_type }}-node{{ r_openshift_node_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ r_openshift_node_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when: not openshift.common.is_containerized | bool
 
@@ -30,7 +36,7 @@
 
 - name: Install sdn-ovs package
   package:
-    name: "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift.common.service_type }}-sdn-ovs{{ r_openshift_node_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when:
     - openshift.common.use_openshift_sdn | default(true) | bool
@@ -75,14 +81,14 @@
     ovs_service_status_changed: "{{ ovs_start_result | changed }}"
 
 - file:
-    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
+    dest: "{{ r_openshift_node_kubelet_args.config }}"
     state: directory
-  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
+  when: r_openshift_node_kubelet_args is defined and 'config' in r_openshift_node_kubelet_args
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
   template:
-    dest: "{{ openshift.common.config_base }}/node/node-config.yaml"
+    dest: "{{ r_openshift_node_config_base }}/node/node-config.yaml"
     src: node.yaml.v1.j2
     backup: true
     owner: root
@@ -99,11 +105,11 @@
     create: true
   with_items:
     - regex: '^AWS_ACCESS_KEY_ID='
-      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
+      line: "AWS_ACCESS_KEY_ID={{ r_openshift_node_cloudprovider_aws_access_key | default('') }}"
     - regex: '^AWS_SECRET_ACCESS_KEY='
-      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
+      line: "AWS_SECRET_ACCESS_KEY={{ r_openshift_node_cloudprovider_aws_secret_key | default('') }}"
   no_log: True
-  when: openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined
+  when: r_openshift_node_cloudprovider_kind is defined and r_openshift_node_cloudprovider_kind == 'aws' and r_openshift_node_cloudprovider_aws_access_key is defined and r_openshift_node_cloudprovider_aws_secret_key is defined
   notify:
     - restart node
 
@@ -141,8 +147,8 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --tlsv1.2 --cacert {{ openshift.common.config_base }}/node/ca.crt
-    {{ openshift_node_master_api_url }}/healthz/ready
+    curl --silent --tlsv1.2 --cacert {{ r_openshift_node_config_base }}/node/ca.crt
+    {{ r_openshift_node_master_api_url }}/healthz/ready
   args:
     # Disables the following warning:
     # Consider using get_url or uri module rather than running curl

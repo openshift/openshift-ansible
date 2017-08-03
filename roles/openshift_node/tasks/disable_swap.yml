@@ -26,5 +26,5 @@
         state: present
   when:
     - l_swap_result.stdout_lines | length > 0
-    - openshift_disable_swap | default(true) | bool
+    - r_openshift_node_disable_swap | bool
 # End Disable Swap Block

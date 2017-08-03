@@ -15,7 +15,7 @@ imageConfig:
   format: {{ openshift.node.registry_url }}
   latest: false
 kind: NodeConfig
-kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
+kubeletArguments: {{ r_openshift_node_kubelet_args | to_padded_yaml(level=1) }}
 {% if openshift.common.version_gte_3_3_or_1_3 | bool %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json

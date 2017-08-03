@@ -7,11 +7,12 @@
     create: true
   with_items:
   - regex: '^HTTP_PROXY='
-    line: "HTTP_PROXY={{ openshift.common.http_proxy | default('') }}"
+    line: "HTTP_PROXY={{  r_openshift_node_http_proxy }}"
   - regex: '^HTTPS_PROXY='
-    line: "HTTPS_PROXY={{ openshift.common.https_proxy | default('') }}"
+    line: "HTTPS_PROXY={{ r_openshift_node_https_proxy }}"
   - regex: '^NO_PROXY='
-    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
-  when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
+    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ r_openshift_node_master_sdn_cluster_network_cidr }}"
+  when:
+  - r_openshift_node_http_proxy != ''
   notify:
   - restart node

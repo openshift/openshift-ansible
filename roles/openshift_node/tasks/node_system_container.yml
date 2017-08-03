@@ -1,12 +1,12 @@
 ---
 - name: Pre-pull node system container image
   command: >
-    atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
+    atomic pull --storage=ostree {{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ r_openshift_node_image_tag }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
 - name: Install or Update node system container
   oc_atomic_container:
     name: "{{ openshift.common.service_type }}-node"
-    image: "{{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}"
+    image: "{{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ r_openshift_node_image_tag }}"
     state: latest
