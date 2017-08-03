@@ -3,7 +3,7 @@
   stat: path=/run/ostree-booted
   register: s
   changed_when: false
-  check_mode: no
+  always_run: yes
 
 - name: Init the is_atomic fact
   set_fact:
@@ -17,7 +17,7 @@
 - name: Determine if CoreOS
   raw: "grep '^NAME=' /etc/os-release | sed s'/NAME=//'"
   register: distro
-  check_mode: no
+  always_run: yes
 
 - name: Init the is_coreos fact
   set_fact:
@@ -61,7 +61,7 @@
   stat: path=/usr/bin/rpm
   register: s
   changed_when: false
-  check_mode: no
+  always_run: yes
 
 - name: Init the has_rpm fact
   set_fact:
