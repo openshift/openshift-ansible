@@ -15,8 +15,8 @@ r_openshift_node_master_api_url: "{{ ommit }}"
 r_openshift_node_config_base: "{{ omit }}"
 r_openshift_node_http_proxy: ''
 r_openshift_node_https_proxy: ''
-r_openshift_node_is_node_system_container
-r_openshift_node_is_openvswitch_system_container
+r_openshift_node_is_node_system_container: false
+r_openshift_node_is_openvswitch_system_container: false
 r_openshift_node_no_proxy
 r_openshift_node_portal_net
 r_openshift_node_service_type

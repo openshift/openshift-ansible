@@ -20,7 +20,7 @@
   package:
     name: "{{ openshift.common.service_type }}-node{{ r_openshift_node_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ r_openshift_node_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
-  when: not openshift.common.is_containerized | bool
+  when: not r_openshift_node_is_containerized | bool
 
 - name: Check for tuned package
   command: rpm -q tuned
@@ -40,13 +40,13 @@
     state: present
   when:
     - openshift.common.use_openshift_sdn | default(true) | bool
-    - not openshift.common.is_containerized | bool
+    - not r_openshift_node_is_containerized | bool
 
 - name: Install conntrack-tools package
   package:
     name: "conntrack-tools"
     state: present
-  when: not openshift.common.is_containerized | bool
+  when: not r_openshift_node_is_containerized | bool
 
 - name: Install the systemd units
   include: systemd_units.yml
@@ -70,7 +70,7 @@
     state: started
     daemon_reload: yes
   when:
-    - openshift.common.is_containerized | bool
+    - r_openshift_node_is_containerized | bool
     - openshift.common.use_openshift_sdn | default(true) | bool
   register: ovs_start_result
   until: not ovs_start_result | failed
@@ -158,7 +158,7 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: openshift.common.is_containerized | bool
+  when: r_openshift_node_is_containerized | bool
 
 - name: Start and enable node dep
   systemd:
@@ -166,7 +166,7 @@
     name: "{{ openshift.common.service_type }}-node-dep"
     enabled: yes
     state: started
-  when: openshift.common.is_containerized | bool
+  when: r_openshift_node_is_containerized | bool
 
 
 - name: Start and enable node

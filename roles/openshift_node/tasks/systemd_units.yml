@@ -3,7 +3,7 @@
 # playbooks.
 
 - include: config/install-node-deps-docker-service-file.yml
-  when: openshift.common.is_containerized | bool
+  when: r_openshift_node_is_containerized | bool
 
 - block:
   - name: Pre-pull node image
@@ -14,33 +14,33 @@
 
   - include: config/install-node-docker-service-file.yml
   when:
-  - openshift.common.is_containerized | bool
-  - not openshift.common.is_node_system_container | bool
+  - r_openshift_node_is_containerized | bool
+  - not r_openshift_node_is_node_system_container | bool
 
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: "node.service.j2"
-  when: not openshift.common.is_containerized | bool
+  when: not r_openshift_node_is_containerized | bool
   notify:
   - reload systemd units
   - restart node
 
 - include: config/install-ovs-service-env-file.yml
-  when: openshift.common.is_containerized | bool
+  when: r_openshift_node_is_containerized | bool
 
 - name: Install Node system container
   include: node_system_container.yml
   when:
-  - openshift.common.is_containerized | bool
-  - openshift.common.is_node_system_container | bool
+  - r_openshift_node_is_containerized | bool
+  - r_openshift_node_is_node_system_container | bool
 
 - name: Install OpenvSwitch system containers
   include: openvswitch_system_container.yml
   when:
   - openshift.common.use_openshift_sdn | default(true) | bool
-  - openshift.common.is_containerized | bool
-  - openshift.common.is_openvswitch_system_container | bool
+  - r_openshift_node_is_containerized | bool
+  - r_openshift_node_is_openvswitch_system_container | bool
 
 - include: config/workaround-bz1331590-ovs-oom-fix.yml
   when: openshift.common.use_openshift_sdn | default(true) | bool
@@ -54,9 +54,9 @@
 
   - include: config/install-ovs-docker-service-file.yml
   when:
-  - openshift.common.is_containerized | bool
+  - r_openshift_node_is_containerized | bool
   - openshift.common.use_openshift_sdn | default(true) | bool
-  - not openshift.common.is_openvswitch_system_container | bool
+  - not r_openshift_node_is_openvswitch_system_container | bool
 
 - include: config/configure-node-settings.yml
 - include: config/configure-proxy-settings.yml
