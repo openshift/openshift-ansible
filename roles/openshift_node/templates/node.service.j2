@@ -11,7 +11,7 @@ After=dnsmasq.service
 
 [Service]
 Type=notify
-EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
+EnvironmentFile=/etc/sysconfig/{{ r_openshift_node_service_type }}-node
 Environment=GOTRACEBACK=crash
 ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
 ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
@@ -21,7 +21,7 @@ ExecStart=/usr/bin/openshift start node --config=${CONFIG_FILE} $OPTIONS
 LimitNOFILE=65536
 LimitCORE=infinity
 WorkingDirectory=/var/lib/origin/
-SyslogIdentifier={{ openshift.common.service_type }}-node
+SyslogIdentifier={{ r_openshift_node_service_type }}-node
 Restart=always
 RestartSec=5s
 TimeoutStartSec=300

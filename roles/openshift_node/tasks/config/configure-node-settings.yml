@@ -1,7 +1,7 @@
 ---
 - name: Configure Node settings
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    dest: /etc/sysconfig/{{ r_openshift_node_service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
     create: true

@@ -1,7 +1,7 @@
 ---
 - name: Configure Proxy Settings
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    dest: /etc/sysconfig/{{ r_openshift_node_service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
     create: true
@@ -11,7 +11,7 @@
   - regex: '^HTTPS_PROXY='
     line: "HTTPS_PROXY={{ r_openshift_node_https_proxy }}"
   - regex: '^NO_PROXY='
-    line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ r_openshift_node_master_sdn_cluster_network_cidr }}"
+    line: "NO_PROXY={{ r_openshift_node_no_proxy }},{{ r_openshift_node_portal_net }},{{ r_openshift_node_master_sdn_cluster_network_cidr }}"
   when:
   - r_openshift_node_http_proxy != ''
   notify:

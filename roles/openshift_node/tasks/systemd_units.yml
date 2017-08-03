@@ -19,7 +19,7 @@
 
 - name: Install Node service file
   template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    dest: "/etc/systemd/system/{{ r_openshift_node_service_type }}-node.service"
     src: "node.service.j2"
   when: not r_openshift_node_is_containerized | bool
   notify:

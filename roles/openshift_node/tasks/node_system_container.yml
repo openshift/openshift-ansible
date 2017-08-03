@@ -7,6 +7,6 @@
 
 - name: Install or Update node system container
   oc_atomic_container:
-    name: "{{ openshift.common.service_type }}-node"
+    name: "{{ r_openshift_node_service_type }}-node"
     image: "{{ openshift.common.system_images_registry }}/{{ openshift.node.node_system_image }}:{{ r_openshift_node_image_tag }}"
     state: latest

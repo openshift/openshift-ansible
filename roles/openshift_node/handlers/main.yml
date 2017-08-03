@@ -18,7 +18,7 @@
 
 - name: restart node
   systemd:
-    name: "{{ openshift.common.service_type }}-node"
+    name: "{{ r_openshift_node_service_type }}-node"
     state: restarted
   register: l_openshift_node_restart_node_result
   until: not l_openshift_node_restart_node_result | failed
