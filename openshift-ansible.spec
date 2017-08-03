@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.4
+Version:        3.6.173.0.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.5-1
+- Revert "Refactor openshift_facts BIOS vendor discovery" (sdodson@redhat.com)
+- Revert "Remove invalid when: from vars:" (sdodson@redhat.com)
+- Revert "Resolve deprecation warnings in Contiv roles" (sdodson@redhat.com)
+- GlusterFS: Check for namespace if deploying a StorageClass
+  (jarrpa@redhat.com)
+
 * Wed Aug 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.4-1
 - 
 
