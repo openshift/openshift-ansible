@@ -38,12 +38,12 @@
 - name: Install OpenvSwitch system containers
   include: openvswitch_system_container.yml
   when:
-  - openshift.common.use_openshift_sdn | default(true) | bool
+  - r_openshift_node_use_openshift_sdn | bool
   - r_openshift_node_is_containerized | bool
   - r_openshift_node_is_openvswitch_system_container | bool
 
 - include: config/workaround-bz1331590-ovs-oom-fix.yml
-  when: openshift.common.use_openshift_sdn | default(true) | bool
+  when: r_openshift_node_use_openshift_sdn | bool
 
 - block:
   - name: Pre-pull openvswitch image
@@ -55,7 +55,7 @@
   - include: config/install-ovs-docker-service-file.yml
   when:
   - r_openshift_node_is_containerized | bool
-  - openshift.common.use_openshift_sdn | default(true) | bool
+  - r_openshift_node_use_openshift_sdn | bool
   - not r_openshift_node_is_openvswitch_system_container | bool
 
 - include: config/configure-node-settings.yml

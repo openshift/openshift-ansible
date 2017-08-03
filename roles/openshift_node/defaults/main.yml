@@ -21,7 +21,7 @@ r_openshift_node_no_proxy: []
 r_openshift_node_portal_net: "{{ omit }}"
 r_openshift_node_service_type: origin
 r_openshift_node_system_images_registry: "{{ omit }}"
-r_openshift_node_use_openshift_sdn
+r_openshift_node_use_openshift_sdn: true
 r_openshift_node_debug_level
 r_openshift_node_env_vars
 r_openshift_node_image
@@ -40,7 +40,7 @@ os_firewall_allow:
   port: 443/tcp
 - service: OpenShift OVS sdn
   port: 4789/udp
-  when: openshift.common.use_openshift_sdn | default(true) | bool
+  when: r_openshift_node_use_openshift_sdn | bool
 - service: Calico BGP Port
   port: 179/tcp
   when: openshift.common.use_calico | bool

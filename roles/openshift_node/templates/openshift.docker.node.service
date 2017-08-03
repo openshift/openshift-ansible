@@ -4,7 +4,7 @@ After={{ openshift.r_openshift_node_docker_service_name }}.service
 After=openvswitch.service
 PartOf={{ openshift.r_openshift_node_docker_service_name }}.service
 Requires={{ openshift.r_openshift_node_docker_service_name }}.service
-{% if openshift.common.use_openshift_sdn %}
+{% if r_openshift_node_use_openshift_sdn %}
 Wants=openvswitch.service
 After=ovsdb-server.service
 After=ovs-vswitchd.service
