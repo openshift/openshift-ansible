@@ -7,15 +7,14 @@ Ansible's default operation mode is to fail fast, on the first error. However,
 when performing checks, it is useful to gather as much information about
 problems as possible in a single run.
 
-Thus, the playbooks run a battery of checks against the inventory hosts and have
-Ansible gather intermediate errors, giving a more complete diagnostic of the
-state of each host. If any check failed, the playbook run will be marked as
-failed.
+Thus, the playbooks run a battery of checks against the inventory hosts and
+gather intermediate errors, giving a more complete diagnostic of the state of
+each host. If any check failed, the playbook run will be marked as failed.
 
 To facilitate understanding the problems that were encountered, a custom
 callback plugin summarizes execution errors at the end of a playbook run.
 
-# Available playbooks
+## Available playbooks
 
 1. Pre-install playbook ([pre-install.yml](pre-install.yml)) - verifies system
    requirements and look for common problems that can prevent a successful
