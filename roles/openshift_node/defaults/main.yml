@@ -28,7 +28,7 @@ r_openshift_node_image: "{{ omit }}"
 r_openshift_node_system_image: "{{ omit }}"
 r_openshift_node_ovs_image: "{{ omit }}"
 r_openshift_node_ovs_system_image: "{{ omit }}"
-r_openshift_node_storage_plugin_deps
+r_openshift_node_storage_plugin_deps: []
 
 
 os_firewall_allow:

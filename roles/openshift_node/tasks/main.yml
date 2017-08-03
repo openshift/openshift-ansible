@@ -130,15 +130,15 @@
 
 - name: GlusterFS storage plugin configuration
   include: storage_plugins/glusterfs.yml
-  when: "'glusterfs' in openshift.node.storage_plugin_deps"
+  when: "'glusterfs' in r_openshift_node_storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
   include: storage_plugins/ceph.yml
-  when: "'ceph' in openshift.node.storage_plugin_deps"
+  when: "'ceph' in r_openshift_node_storage_plugin_deps"
 
 - name: iSCSI storage plugin configuration
   include: storage_plugins/iscsi.yml
-  when: "'iscsi' in openshift.node.storage_plugin_deps"
+  when: "'iscsi' in r_openshift_node_storage_plugin_deps"
 
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for
