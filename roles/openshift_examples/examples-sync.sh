@@ -6,13 +6,16 @@
 # This script should be run from openshift-ansible/roles/openshift_examples
 
 XPAAS_VERSION=ose-v1.4.1
-ORIGIN_VERSION=${1:-v3.6}
+ORIGIN_VERSION=${1:-v3.7}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
 TEMP=`mktemp -d`
 pushd $TEMP
 
+if [ ! -d "${EXAMPLES_BASE}" ]; then
+  mkdir -p ${EXAMPLES_BASE}
+fi
 wget https://github.com/openshift/origin/archive/master.zip -O origin-master.zip
 wget https://github.com/jboss-fuse/application-templates/archive/GA.zip -O fis-GA.zip
 wget https://github.com/jboss-openshift/application-templates/archive/${XPAAS_VERSION}.zip -O application-templates-master.zip
