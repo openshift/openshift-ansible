@@ -1,0 +1,6 @@
+---
+# Set role variables that are optional and not defined
+- include: set_optional_node_facts_role_variables.yml
+
+- include_role:
+    name: openshift_node_facts
