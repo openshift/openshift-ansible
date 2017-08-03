@@ -1,10 +1,14 @@
 ---
+elasticsearch5_deploy: false
+openshift_logging_elasticsearch_secure: true
+
 ### Common settings
 openshift_logging_elasticsearch_image_prefix: "{{ openshift_hosted_logging_deployer_prefix | default('docker.io/openshift/origin-') }}"
 openshift_logging_elasticsearch_image_version: "{{ openshift_hosted_logging_deployer_version | default('latest') }}"
 openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_image_pull_secret | default('') }}"
 openshift_logging_elasticsearch_namespace: logging
-
+openshift_logging_elasticsearch_sa_name: aggregated-logging-elasticsearch
+kubeconfig: /etc/origin/master/openshift-master.kubeconfig
 openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector | default('') }}"
 openshift_logging_elasticsearch_cpu_limit: 1000m
 openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit | default('1Gi') }}"
@@ -55,3 +59,35 @@ openshift_logging_es_port: 9200
 openshift_logging_es_ca: /etc/fluent/keys/ca
 openshift_logging_es_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_client_key: /etc/fluent/keys/key
+
+
+# Elasticsearch 5 specific settings
+openshift_logging_elasticsearch_clustername: "logging-es"
+openshift_logging_elasticsearch_cluster_size: 1
+## TODO: replace with computable cluster size
+openshift_logging_elasticsearch_recover_after_time: 5m
+
+openshift_logging_elasticsearch_node_topology:
+  masters:
+    replicas: 1
+    limits:
+      cpu: 200m
+    requests:
+      memory: 512Mi
+  clientdata:
+  -
+  #    nodeSelector:
+  #    kubernetes.io/hostname: asherkho-ocp-rhel1.os1.phx2.redhat.com
+    node_storage_type: emptydir
+    hostmount_path:
+    - /mnt/data1
+    - /mnt/data2
+    limits:
+      memory: 2048Mi
+      cpu: 200m
+
+openshift_logging_elasticsearch_integration: false
+openshift_logging_elasticsearch5_image_prefix: "openshift/origin-"
+openshift_logging_elasticsearch5_image_version: "{{ openshift_hosted_logging_deployer_version | default('latest') }}"
+openshift_logging_elasticsearch5_image_pull_secret: "{{ openshift_hosted_logging_image_pull_secret | default('') }}"
+openshift_logging_elasticsearch5_image_name: "logging-elasticsearch"

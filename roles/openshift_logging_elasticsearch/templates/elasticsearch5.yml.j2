@@ -1,0 +1,81 @@
+cluster:
+  name: ${CLUSTER_NAME}
+
+script:
+  inline: true
+  stored: true
+
+node:
+  master: ${IS_MASTER}
+  data: ${HAS_DATA}
+  name: ${NODE_NAME}
+  ingest: false
+
+network:
+  host: 0.0.0.0
+
+http:
+  enabled: true
+  compression: true
+
+cloud:
+  kubernetes:
+    service: ${SERVICE_DNS}
+    namespace: ${NAMESPACE}
+
+discovery:
+  zen.hosts_provider: kubernetes
+  zen.ping.unicast.hosts: ${SERVICE_DNS}
+  zen.minimum_master_nodes: ${MASTERS_QUORUM}
+
+plugin.mandatory: discovery-kubernetes
+
+gateway:
+  expected_master_nodes: ${MASTERS_QUORUM}
+  recover_after_nodes: ${RECOVER_AFTER_NODES}
+  expected_nodes: ${RECOVER_EXPECTED_NODES}
+  expected_data_nodes: ${RECOVER_EXPECTED_DATA_NODES}
+  recover_after_time: ${RECOVER_AFTER_TIME}
+# add recover_after_master - masters quorum.
+
+
+path:
+  data:
+{% if storage_type == 'hostmount' %}
+{% for item in hostmount_path %}
+  - /elasticsearch/persistent/{{ loop.index0 }}
+{% endfor %}
+{% else %}
+  - /elasticsearch/persistent/
+{% endif %}
+  logs: /elasticsearch/${CLUSTER_NAME}/logs
+#  work: /elasticsearch/${CLUSTER_NAME}/work
+  scripts: /elasticsearch/${CLUSTER_NAME}/scripts
+
+{% if openshift_logging_elasticsearch_secure %}
+searchguard:
+  authcz.admin_dn:
+  - CN=system.admin,OU=OpenShift,O=Logging
+  config_index_name: ".searchguard"
+  ssl:
+    transport:
+      enabled: true
+      enforce_hostname_verification: false
+      keystore_type: JKS
+      keystore_filepath: /etc/elasticsearch/secret/searchguard.key
+      keystore_alias: {{ openshift_logging_elasticsearch_clustername }}-cluster
+      keystore_password: kspass
+      truststore_type: JKS
+      truststore_filepath: /etc/elasticsearch/secret/searchguard.truststore
+      truststore_password: tspass
+    http:
+      enabled: true
+      keystore_type: JKS
+      keystore_filepath: /etc/elasticsearch/secret/key
+      keystore_alias: {{ openshift_logging_elasticsearch_clustername }}
+      keystore_password: kspass
+      clientauth_mode: OPTIONAL
+      truststore_type: JKS
+      truststore_filepath: /etc/elasticsearch/secret/truststore
+      truststore_password: tspass
+{% endif %}

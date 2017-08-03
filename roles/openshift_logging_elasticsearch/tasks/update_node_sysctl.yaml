@@ -1,0 +1,6 @@
+---
+- name: Set sysctl vm.max_map_count to 262144
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+    reload: yes

@@ -1,0 +1,90 @@
+---
+- name: Gather OpenShift Logging Facts
+  openshift_logging_elasticsearch_facts:
+    oc_bin: "{{client_binary}}"
+    openshift_namespace: "{{openshift_logging_elasticsearch_namespace}}"
+    elasticsearch_clustername: "{{ openshift_logging_elasticsearch_clustername }}"
+    #    admin_kubeconfig: "{{ kubeconfig }}"
+
+- name: Validate Elasticsearch cluster size
+  fail: msg="The openshift_logging_elasticsearch_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
+  when: openshift_logging_elasticsearch_facts.node_topology.clientdata | length > openshift_logging_elasticsearch_node_topology.clientdata | length
+
+- name: Set Elasticsearch project
+  oc_project:
+    state: present
+    name: "{{ openshift_logging_elasticsearch_namespace }}"
+    kubeconfig: '{{ kubeconfig }}'
+
+# Services
+- name: create Elasticsearch 9200 service
+  oc_service:
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    name: "{{ openshift_logging_elasticsearch_clustername  }}"
+    ports:
+    - name: 9200-tcp
+      port: 9200
+      protocol: TCP
+      targetPort: restapi
+    selector:
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+      elasticsearch-http: "true"
+    session_affinity: ClientIP
+    service_type: ClusterIP
+    kubeconfig: '{{ kubeconfig }}'
+
+- name: create Elasticsearch 9300 service
+  oc_service:
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    name: "{{ openshift_logging_elasticsearch_clustername  }}-cluster"
+    ports:
+    - name: 9300-tcp
+      port: 9300
+      protocol: TCP
+    selector:
+      cluster-name: "{{ openshift_logging_elasticsearch_clustername }}"
+      es-node-role: "master"
+    clusterip: None
+    kubeconfig: '{{ kubeconfig }}'
+
+# Set variables common for all DCs
+- name: Setting legacy logging_component for the label
+  set_fact:
+    logging_component: "{{ openshift_logging_elasticsearch_clustername }}"
+
+# Deploy masters
+- include: "{{ role_path }}/tasks/elasticsearch5_node_provision.yaml"
+  vars:
+    replicas: "{{ openshift_logging_elasticsearch_node_topology.masters.replicas }}"
+    es_role: master
+    node_master: "true"
+    node_data: "false"
+    node_client: "false"
+    es_http_service: "false"
+    openshift_logging_elasticsearch_deployment_name: "{{ openshift_logging_elasticsearch_clustername }}-master"
+    generated_certs_dir: "{{ certs_dir }}"
+    limits: "{{ openshift_logging_elasticsearch_node_topology.masters.limits }}"
+    es_node_selector: "{{ openshift_logging_elasticsearch_node_topology.masters.nodeSelector | default({}) }}"
+    node_storage_type: emptydir
+    image: "{{ openshift_logging_elasticsearch_image_prefix }}{{ openshift_logging_elasticsearch_image_name }}:{{ openshift_logging_elasticsearch_image_version }}"
+
+# Deploy client-data nodes
+- include: "{{ role_path }}/tasks/elasticsearch5_node_provision.yaml"
+  vars:
+    es_cluster_name: "{{ openshift_logging_elasticsearch_clustername }}"
+    es_role: clientdata
+    es_http_service: "true"
+    node_master: "false"
+    node_data: "true"
+    node_client: "false"
+    openshift_logging_elasticsearch_deployment_name: "{{ openshift_logging_elasticsearch_clustername }}-clientdata-{{ item.0 }}"
+    generated_certs_dir: "{{ certs_dir }}"
+    limits: "{{ item.1.limits }}"
+    es_node_selector: "{{ item.1.nodeSelector | default({}) }}"
+    node_storage_type: "{{ item.1.node_storage_type | default(emptydir) }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item.0 | int }}"
+    hostmount_path: "{{ item.1.hostmount_path |default ({})}}"
+    image: "{{ openshift_logging_elasticsearch_image_prefix }}{{ openshift_logging_elasticsearch_image_name }}:{{ openshift_logging_elasticsearch_image_version }}"
+  with_indexed_items: "{{ openshift_logging_elasticsearch_node_topology.clientdata }}"
+
+- debug: var=openshift_logging_elasticsearch_facts

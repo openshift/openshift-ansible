@@ -1,12 +1,22 @@
 ---
+- set_fact:
+    openshift_logging_transport_cert: elasticsearch
+    openshift_logging_api_cert: logging-es
+  when: not elasticsearch5_deploy
+
+- set_fact:
+    openshift_logging_transport_cert: "{{ openshift_logging_elasticsearch_clustername }}-cluster"
+    openshift_logging_api_cert: "{{ openshift_logging_elasticsearch_clustername }}"
+  when: elasticsearch5_deploy
+
 # check if pod generated files exist -- if they all do don't run the pod
 - name: Checking for elasticsearch.jks
-  stat: path="{{generated_certs_dir}}/elasticsearch.jks"
+  stat: path="{{generated_certs_dir}}/{{ openshift_logging_transport_cert }}.jks"
   register: elasticsearch_jks
   check_mode: no
 
 - name: Checking for logging-es.jks
-  stat: path="{{generated_certs_dir}}/logging-es.jks"
+  stat: path="{{generated_certs_dir}}/{{ openshift_logging_api_cert }}.jks"
   register: logging_es_jks
   check_mode: no
 
@@ -21,12 +31,12 @@
   check_mode: no
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
-  local_action: file path="{{local_tmp.stdout}}/elasticsearch.jks" state=touch mode="u=rw,g=r,o=r"
+  local_action: file path="{{local_tmp.stdout}}/{{ openshift_logging_transport_cert }}.jks" state=touch mode="u=rw,g=r,o=r"
   when: elasticsearch_jks.stat.exists
   changed_when: False
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
-  local_action: file path="{{local_tmp.stdout}}/logging-es.jks" state=touch mode="u=rw,g=r,o=r"
+  local_action: file path="{{local_tmp.stdout}}/{{ openshift_logging_api_cert }}.jks" state=touch mode="u=rw,g=r,o=r"
   when: logging_es_jks.stat.exists
   changed_when: False
 
@@ -59,20 +69,20 @@
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Run JKS generation script
-  local_action: script generate-jks.sh {{local_tmp.stdout}} {{openshift_logging_namespace}}
+  local_action: script generate-jks.sh {{local_tmp.stdout}} {{openshift_logging_namespace}} {{ openshift_logging_transport_cert }} {{openshift_logging_api_cert }} {{ openshift_logging_elasticsearch_clustername }} {{ elasticsearch5_deploy }}
   check_mode: no
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Pushing locally generated JKS certs to remote host...
   copy:
-    src: "{{local_tmp.stdout}}/elasticsearch.jks"
-    dest: "{{generated_certs_dir}}/elasticsearch.jks"
+    src: "{{local_tmp.stdout}}/{{ openshift_logging_transport_cert }}.jks"
+    dest: "{{generated_certs_dir}}/{{ openshift_logging_transport_cert }}.jks"
   when: not elasticsearch_jks.stat.exists
 
 - name: Pushing locally generated JKS certs to remote host...
   copy:
-    src: "{{local_tmp.stdout}}/logging-es.jks"
-    dest: "{{generated_certs_dir}}/logging-es.jks"
+    src: "{{local_tmp.stdout}}/{{ openshift_logging_api_cert }}.jks"
+    dest: "{{generated_certs_dir}}/{{ openshift_logging_api_cert }}.jks"
   when: not logging_es_jks.stat.exists
 
 - name: Pushing locally generated JKS certs to remote host...
