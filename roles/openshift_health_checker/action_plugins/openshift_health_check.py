@@ -4,6 +4,7 @@ Ansible action plugin to execute health checks in OpenShift clusters.
 # pylint: disable=wrong-import-position,missing-docstring,invalid-name
 import sys
 import os
+import traceback
 from collections import defaultdict
 
 try:
@@ -58,26 +59,12 @@ class ActionModule(ActionBase):
 
         user_disabled_checks = normalize(task_vars.get('openshift_disable_check', []))
 
-        for check_name in resolved_checks:
-            display.banner("CHECK [{} : {}]".format(check_name, task_vars["ansible_host"]))
-            check = known_checks[check_name]
-
-            if not check.is_active():
-                r = dict(skipped=True, skipped_reason="Not active for this host")
-            elif check_name in user_disabled_checks:
-                r = dict(skipped=True, skipped_reason="Disabled by user request")
-            else:
-                try:
-                    r = check.run()
-                except OpenShiftCheckException as e:
-                    r = dict(
-                        failed=True,
-                        msg=str(e),
-                    )
-
+        for name in resolved_checks:
+            display.banner("CHECK [{} : {}]".format(name, task_vars["ansible_host"]))
+            check = known_checks[name]
+            check_results[name] = run_check(name, check, user_disabled_checks)
             if check.changed:
-                r["changed"] = True
-            check_results[check_name] = r
+                check_results[name]["changed"] = True
 
         result["changed"] = any(r.get("changed") for r in check_results.values())
         if any(r.get("failed") for r in check_results.values()):
@@ -192,3 +179,27 @@ def normalize(checks):
     if isinstance(checks, string_types):
         checks = checks.split(',')
     return [name.strip() for name in checks if name.strip()]
+
+
+def run_check(name, check, user_disabled_checks):
+    """Run a single check if enabled and return a result dict."""
+    if name in user_disabled_checks:
+        return dict(skipped=True, skipped_reason="Disabled by user request")
+
+    # pylint: disable=broad-except; capturing exceptions broadly is intentional,
+    # to isolate arbitrary failures in one check from others.
+    try:
+        is_active = check.is_active()
+    except Exception as exc:
+        reason = "Could not determine if check should be run, exception: {}".format(exc)
+        return dict(skipped=True, skipped_reason=reason, exception=traceback.format_exc())
+
+    if not is_active:
+        return dict(skipped=True, skipped_reason="Not active for this host")
+
+    try:
+        return check.run()
+    except OpenShiftCheckException as exc:
+        return dict(failed=True, msg=str(exc))
+    except Exception as exc:
+        return dict(failed=True, msg=str(exc), exception=traceback.format_exc())
