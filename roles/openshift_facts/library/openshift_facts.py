@@ -960,27 +960,6 @@ def set_version_facts_if_unset(facts):
     return facts
 
 
-def set_manageiq_facts_if_unset(facts):
-    """ Set manageiq facts. This currently includes common.use_manageiq.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-        Raises:
-            OpenShiftFactsInternalError:
-    """
-    if 'common' not in facts:
-        if 'version_gte_3_1_or_1_1' not in facts['common']:
-            raise OpenShiftFactsInternalError(
-                "Invalid invocation: The required facts are not set"
-            )
-    if 'use_manageiq' not in facts['common']:
-        facts['common']['use_manageiq'] = facts['common']['version_gte_3_1_or_1_1']
-
-    return facts
-
-
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -2004,7 +1983,6 @@ class OpenShiftFacts(object):
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_dnsmasq_facts_if_unset(facts)
-        facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_proxy_facts(facts)
