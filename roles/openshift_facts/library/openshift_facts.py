@@ -934,7 +934,7 @@ def set_version_facts_if_unset(facts):
             version_gte_3_4_or_1_4 = True
             version_gte_3_5_or_1_5 = True
             version_gte_3_6 = True
-            version_gte_3_7 = True
+            version_gte_3_7 = False
         facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
