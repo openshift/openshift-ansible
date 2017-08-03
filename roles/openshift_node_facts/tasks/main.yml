@@ -1,8 +1,14 @@
 ---
+- name: Fail if r_openshift_node_facts_debug_level is not defined
+  fail:
+    msg: r_openshift_node_facts_debug_level must be specified for this role
+  when:
+  - r_openshift_node_facts_debug_level is not defined
+
 - set_fact:
     openshift_node_debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') }}"
   when:
-  - openshift_node_debug_level is not defined
+  - r_openshift_node_facts_debug_level is not defined
   - lookup('oo_option', 'openshift_node_debug_level') != ""
 
 - name: Set node facts
@@ -16,19 +22,20 @@
       labels: {}
   - role: node
     local_facts:
-      annotations: "{{ openshift_node_annotations | default(none) }}"
-      debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
-      iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
-      kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
-      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
-      registry_url: "{{ oreg_url_node | default(oreg_url) | default(None) }}"
-      schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-      storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
-      set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
-      node_image: "{{ osn_image | default(None) }}"
-      ovs_image: "{{ osn_ovs_image | default(None) }}"
-      proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
-      local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
-      dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
-      env_vars: "{{ openshift_node_env_vars | default(None) }}"
+      annotations: "{{ r_openshift_node_facts_annotations }}"
+      debug_level: "{{ r_openshift_node_facts_debug_level }}"
+      iptables_sync_period: "{{ r_openshift_node_facts_iptables_sync_period }}"
+      kubelet_args: "{{ r_openshift_node_facts_kubelet_args }}"
+      labels: "{{ r_openshift_node_facts_labels }}"
+      registry_url: "{{ r_openshift_node_facts_oreg_url }}"
+      schedulable: "{{ r_openshift_node_facts_schedulable }}"
+      sdn_mtu: "{{ r_openshift_node_facts_sdn_mtu }}"
+      storage_plugin_deps: "{{ r_openshift_node_facts_osn_storage_plugin_deps }}"
+      set_node_ip: "{{ r_openshift_node_facts_set_node_ip }}"
+      node_image: "{{ r_openshift_node_facts_osn_image }}"
+      ovs_image: "{{ r_openshift_node_facts_osn_ovs_image }}"
+      proxy_mode: "{{ r_openshift_node_facts_proxy_mode }}"
+      local_quota_per_fsgroup: "{{ r_openshift_node_facts_local_quota_per_fsgroup }}"
+      # get_dns_ip is defined in filter_plugins/openshift_ndde.py
+      dns_ip: "{{ r_openshift_node_facts_dns_ip | get_dns_ip(hostvars[inventory_hostname])}}"
+      env_vars: "{{ r_openshift_node_facts_env_vars }}"
