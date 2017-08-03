@@ -20,7 +20,7 @@ r_openshift_node_is_openvswitch_system_container: false
 r_openshift_node_no_proxy: []
 r_openshift_node_portal_net: "{{ omit }}"
 r_openshift_node_service_type: origin
-r_openshift_node_system_images_registry
+r_openshift_node_system_images_registry: "{{ omit }}"
 r_openshift_node_use_openshift_sdn
 r_openshift_node_debug_level
 r_openshift_node_env_vars
