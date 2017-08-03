@@ -35,14 +35,14 @@ dependencies:
   os_firewall_allow:
   - service: Calico BGP Port
     port: 179/tcp
-  when: openshift.common.use_calico | bool
+  when: r_openshift_node_use_calico | bool
 
 - role: os_firewall
   os_firewall_allow:
   - service: Kubernetes service NodePort TCP
-    port: "{{ openshift_node_port_range | default('') }}/tcp"
+    port: "{{ r_openshift_node_port_range | default('') }}/tcp"
   - service: Kubernetes service NodePort UDP
-    port: "{{ openshift_node_port_range | default('') }}/udp"
-  when: openshift_node_port_range is defined
+    port: "{{ r_openshift_node_port_range | default('') }}/udp"
+  when: r_openshift_node_port_range is defined
 - role: openshift_node_dnsmasq
-  when: openshift.common.use_dnsmasq | bool
+  when: r_openshift_node_use_dnsmasq | bool

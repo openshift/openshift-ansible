@@ -1,17 +1,17 @@
 ---
 r_openshift_node_is_containerized: false
-r_openshift_node_deployment_type: ''
+r_openshift_node_is_atomic: false
+r_openshift_node_deployment_type: "{{ omit }}"
 r_openshift_node_disable_swap: true
 r_openshift_node_image_tag: "{{ omit }}"
 r_openshift_node_pkg_version: ''
-# openshift.common.is_atomic
 r_openshift_node_docker_service_name: docker
 r_openshift_node_cloudprovider_aws_access_key: ''
 r_openshift_node_cloudprovider_aws_secret_key: ''
-r_openshift_node_cloudprovider_kind: aws
+r_openshift_node_cloudprovider_kind: ''
 r_openshift_node_master_sdn_cluster_network_cidr: "{{ omit }}"
 r_openshift_node_kubelet_args: None
-r_openshift_node_master_api_url: "{{ ommit }}"
+r_openshift_node_master_api_url: "{{ omit }}"
 r_openshift_node_config_base: "{{ omit }}"
 r_openshift_node_http_proxy: ''
 r_openshift_node_https_proxy: ''
@@ -30,6 +30,45 @@ r_openshift_node_ovs_image: "{{ omit }}"
 r_openshift_node_ovs_system_image: "{{ omit }}"
 r_openshift_node_storage_plugin_deps: []
 
+r_openshift_node_version_gte_3_6: true
+r_openshift_node_version_gte_3_3_or_1_3: true
+# optional=false
+r_openshift_node_dns_domain: "{{ omit }}"
+# optional=true
+r_openshift_node_dns_ip: "{{ omit }}"
+r_openshift_node_use_nuage: false
+r_openshift_node_use_contiv: false
+r_openshift_node_use_calico: false
+r_openshift_node_use_dnsmasq: false
+# optional=false
+r_openshift_node_iptables_sync_period: "{{ omit }}"
+# optional=false
+r_openshift_node_registry_url: "{{ omit }}"
+# optional=false
+r_openshift_node_hostname: "{{ omit }}"
+# needs=r_openshift_node_use_openshift_sdn|r_openshift_node_use_nuage|r_openshift_node_use_contiv|r_openshift_node_sdn_network_plugin_name=='cni'
+r_openshift_node_sdn_network_plugin_name: "{{ omit }}"
+# optional=false
+r_openshift_node_sdn_mtu: "{{ omit }}"
+# needs=r_openshift_node_ip
+r_openshift_node_set_node_ip: true
+r_openshift_node_ip: "{{ omit }}"
+# optional=false
+r_openshift_node_nodename: "{{ omit }}"
+# optional=true
+r_openshift_node_min_tls_version: "{{ omit }}"
+# optional=true
+r_openshift_node_cipher_suites: "{{ omit }}"
+# optional=false
+r_openshift_node_data_dir: "{{ omit }}"
+# optional=false
+r_openshift_node_proxy_mode: "{{ omit }}"
+# optional=false
+r_openshift_node_local_quota_per_fsgroup: "{{ omit }}"
+# optional=false
+r_openshift_node_docker_gte_1_10: false
+# optional=true
+r_openshift_node_port_range: "{{ omit }}"
 
 os_firewall_allow:
 - service: Kubernetes kubelet
@@ -43,4 +82,4 @@ os_firewall_allow:
   when: r_openshift_node_use_openshift_sdn | bool
 - service: Calico BGP Port
   port: 179/tcp
-  when: openshift.common.use_calico | bool
+  when: r_openshift_node_use_calico | bool

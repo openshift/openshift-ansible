@@ -1,7 +1,7 @@
 [Unit]
-After={{ openshift.r_openshift_node_docker_service_name }}.service
-Requires={{ openshift.r_openshift_node_docker_service_name }}.service
-PartOf={{ openshift.r_openshift_node_docker_service_name }}.service
+After={{ r_openshift_node_docker_service_name }}.service
+Requires={{ r_openshift_node_docker_service_name }}.service
+PartOf={{ r_openshift_node_docker_service_name }}.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/openvswitch
@@ -14,4 +14,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy={{ openshift.r_openshift_node_docker_service_name }}.service
+WantedBy={{ r_openshift_node_docker_service_name }}.service
