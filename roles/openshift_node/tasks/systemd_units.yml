@@ -8,7 +8,7 @@
 - block:
   - name: Pre-pull node image
     command: >
-      docker pull {{ openshift.node.node_image }}:{{ r_openshift_node_image_tag }}
+      docker pull {{ r_openshift_node_image }}:{{ r_openshift_node_image_tag }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
 
