@@ -1,29 +1,33 @@
 """
 Ansible action plugin to execute health checks in OpenShift clusters.
 """
-# pylint: disable=wrong-import-position,missing-docstring,invalid-name
 import sys
 import os
 import traceback
 from collections import defaultdict
 
+from ansible.plugins.action import ActionBase
+from ansible.module_utils.six import string_types
+
 try:
     from __main__ import display
 except ImportError:
+    # pylint: disable=ungrouped-imports; this is the standard way how to import
+    # the default display object in Ansible action plugins.
     from ansible.utils.display import Display
     display = Display()
-
-from ansible.plugins.action import ActionBase
-from ansible.module_utils.six import string_types
 
 # Augment sys.path so that we can import checks from a directory relative to
 # this callback plugin.
 sys.path.insert(1, os.path.dirname(os.path.dirname(__file__)))
 
+# pylint: disable=wrong-import-position; the import statement must come after
+# the manipulation of sys.path.
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException, load_checks  # noqa: E402
 
 
 class ActionModule(ActionBase):
+    """Action plugin to execute health checks."""
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
@@ -45,9 +49,9 @@ class ActionModule(ActionBase):
                 return result
 
             resolved_checks = resolve_checks(requested_checks, known_checks.values())
-        except OpenShiftCheckException as e:
+        except OpenShiftCheckException as exc:
             result["failed"] = True
-            result["msg"] = str(e)
+            result["msg"] = str(exc)
             return result
 
         if "openshift" not in task_vars:
@@ -74,19 +78,21 @@ class ActionModule(ActionBase):
         return result
 
     def load_known_checks(self, tmp, task_vars):
+        """Find all existing checks and return a mapping of names to instances."""
         load_checks()
 
         known_checks = {}
         for cls in OpenShiftCheck.subclasses():
-            check_name = cls.name
-            if check_name in known_checks:
-                other_cls = known_checks[check_name].__class__
-                raise OpenShiftCheckException(
-                    "non-unique check name '{}' in: '{}.{}' and '{}.{}'".format(
-                        check_name,
-                        cls.__module__, cls.__name__,
-                        other_cls.__module__, other_cls.__name__))
-            known_checks[check_name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
+            name = cls.name
+            if name in known_checks:
+                other_cls = known_checks[name].__class__
+                msg = "non-unique check name '{}' in: '{}' and '{}'".format(
+                    name,
+                    full_class_name(cls),
+                    full_class_name(other_cls),
+                )
+                raise OpenShiftCheckException(msg)
+            known_checks[name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
         return known_checks
 
 
@@ -203,3 +209,8 @@ def run_check(name, check, user_disabled_checks):
         return dict(failed=True, msg=str(exc))
     except Exception as exc:
         return dict(failed=True, msg=str(exc), exception=traceback.format_exc())
+
+
+def full_class_name(cls):
+    """Return the name of a class prefixed with its module name."""
+    return '{}.{}'.format(cls.__module__, cls.__name__)
