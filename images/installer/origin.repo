@@ -1,0 +1,5 @@
+[Openshift-origin]
+name=openshift-origin
+baseurl=https://cbs.centos.org/repos/paas7-openshift-origin36-candidate/x86_64/os/
+gpgcheck=0
+enabled=1

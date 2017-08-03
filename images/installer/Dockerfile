@@ -4,8 +4,10 @@ MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
 USER root
 
+ADD images/installer/origin.repo /etc/yum.repos.d/
+
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless httpd-tools openssh-clients" \
+RUN INSTALL_PKGS="origin-clients python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless httpd-tools openssh-clients" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && EPEL_PKGS="ansible python-passlib python2-boto" \
  && yum install -y epel-release \
