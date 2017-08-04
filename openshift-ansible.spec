@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.6.173.0.5
-Release:        2
+Release:        3%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 04 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.5-3
+- Fix dist tag
+
 * Fri Aug 04 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.5-2
 - GlusterFS: Don't use /dev/null for empty file. (jarrpa@redhat.com)
 
