@@ -63,10 +63,6 @@ Otherwise, even if there are differences between the two versions, installation 
 
     cp -r openshift-ansible-contrib/playbooks/provisioning/openstack/sample-inventory inventory
 
-### Copy clouds.yaml
-
-    cp openshift-ansible-contrib/playbooks/provisioning/openstack/sample-inventory/clouds.yaml clouds.yaml
-
 ### Copy ansible config
 
     cp openshift-ansible-contrib/playbooks/provisioning/openstack/sample-inventory/ansible.cfg ansible.cfg
