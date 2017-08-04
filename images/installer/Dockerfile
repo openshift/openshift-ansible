@@ -4,13 +4,16 @@ MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
 USER root
 
+# Add origin repo for including the oc client
+COPY images/installer/origin-extra-root /
+
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless httpd-tools openssh-clients" \
+RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless python2-passlib httpd-tools openssh-clients origin-clients" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
- && EPEL_PKGS="ansible python-passlib python2-boto" \
+ && EPEL_PKGS="ansible python2-boto" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
- && rpm -q $INSTALL_PKGS $EPEL_PKGS \
+ && rpm -V $INSTALL_PKGS $EPEL_PKGS \
  && yum clean all
 
 LABEL name="openshift/origin-ansible" \
