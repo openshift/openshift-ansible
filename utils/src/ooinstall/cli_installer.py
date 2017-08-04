@@ -797,7 +797,7 @@ def run_config_playbook(oo_cfg, hosts_to_run_on, unattended, verbose, gen_invent
 
     click.echo('Ready to run installation process.')
     message = """
-If changes are needed please edit the config file above and re-run.
+If changes are needed please edit the installer.cfg.yml config file above and re-run.
 """
     if not unattended:
         confirm_continue(message)
