@@ -4,6 +4,7 @@
 
 """For details on this module see DOCUMENTATION (below)"""
 
+import base64
 import datetime
 import io
 import os
@@ -227,32 +228,6 @@ object"""
         return self.subjects
 
 
-# We only need this for one thing, we don't care if it doesn't have
-# that many public methods
-#
-# pylint: disable=too-few-public-methods
-class FakeSecHead(object):
-    """etcd does not begin their config file with an opening [section] as
-required by the Python ConfigParser module. We hack around it by
-slipping one in ourselves prior to parsing.
-
-Source: Alex Martelli - http://stackoverflow.com/a/2819788/6490583
-    """
-    def __init__(self, fp):
-        self.fp = fp
-        self.sechead = '[ETCD]\n'
-
-    def readline(self):
-        """Make this look like a file-type object"""
-        if self.sechead:
-            try:
-                return self.sechead
-            finally:
-                self.sechead = None
-        else:
-            return self.fp.readline()
-
-
 ######################################################################
 def filter_paths(path_list):
     """`path_list` - A list of file paths to check. Only files which exist
@@ -272,7 +247,7 @@ Params:
 
 - `cert_string` (string) - a certificate loaded into a string object
 - `now` (datetime) - a datetime object of the time to calculate the certificate 'time_remaining' against
-- `base64decode` (bool) - run .decode('base64') on the input?
+- `base64decode` (bool) - run base64.b64decode() on the input
 - `ans_module` (AnsibleModule) - The AnsibleModule object for this module (so we can raise errors)
 
 Returns:
@@ -280,7 +255,7 @@ A tuple of the form:
     (cert_subject, cert_expiry_date, time_remaining, cert_serial_number)
     """
     if base64decode:
-        _cert_string = cert_string.decode('base-64')
+        _cert_string = base64.b64decode(cert_string).decode('utf-8')
     else:
         _cert_string = cert_string
 
@@ -310,6 +285,9 @@ A tuple of the form:
     # Read all possible names from the cert
     cert_subjects = []
     for name, value in cert_loaded.get_subject().get_components():
+        if isinstance(name, bytes) or isinstance(value, bytes):
+            name = name.decode('utf-8')
+            value = value.decode('utf-8')
         cert_subjects.append('{}:{}'.format(name, value))
 
     # To read SANs from a cert we must read the subjectAltName
@@ -532,7 +510,7 @@ an OpenShift Container Platform cluster
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
         # datetime objects so we can manipulate them later
-        for _, v in cert_meta.items():
+        for v in cert_meta.values():
             with io.open(v, 'r', encoding='utf-8') as fp:
                 cert = fp.read()
                 (cert_subject,
@@ -648,12 +626,14 @@ an OpenShift Container Platform cluster
     etcd_cert_params.append('dne')
     try:
         with io.open('/etc/etcd/etcd.conf', 'r', encoding='utf-8') as fp:
+            # Add dummy header section.
+            config = io.StringIO()
+            config.write(u'[ETCD]\n')
+            config.write(fp.read().replace('%', '%%'))
+            config.seek(0, os.SEEK_SET)
+
             etcd_config = configparser.ConfigParser()
-            # Reason: This check is disabled because the issue was introduced
-            # during a period where the pylint checks weren't enabled for this file
-            # Status: temporarily disabled pending future refactoring
-            # pylint: disable=deprecated-method
-            etcd_config.readfp(FakeSecHead(fp))
+            etcd_config.readfp(config)
 
         for param in etcd_cert_params:
             try:
