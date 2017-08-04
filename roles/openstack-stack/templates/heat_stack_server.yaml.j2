@@ -156,6 +156,7 @@ resources:
       floating_network: { get_param: floating_network }
       port_id: { get_resource: port }
 
+{% if not ephemeral_volumes|default(false)|bool %}
   cinder_volume:
     type: OS::Cinder::Volume
     properties:
@@ -168,3 +169,4 @@ resources:
       volume_id: { get_resource: cinder_volume }
       instance_uuid: { get_resource: server }
       mountpoint: /dev/sdb
+{% endif %}

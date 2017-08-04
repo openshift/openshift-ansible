@@ -135,6 +135,7 @@ resources:
         - subnet: { get_param: subnet }
       security_groups: { get_param: secgrp }
 
+{% if not ephemeral_volumes|default(false)|bool %}
   cinder_volume:
     type: OS::Cinder::Volume
     properties:
@@ -147,3 +148,4 @@ resources:
       volume_id: { get_resource: cinder_volume }
       instance_uuid: { get_resource: server_nofloating }
       mountpoint: /dev/sdb
+{% endif %}
