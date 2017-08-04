@@ -165,7 +165,8 @@
 
 - name: Copy heketi private key
   copy:
-    src: "{{ glusterfs_heketi_ssh_keyfile }}"
+    src: "{{ glusterfs_heketi_ssh_keyfile | default(omit)  }}"
+    content: "{{ '' if glusterfs_heketi_ssh_keyfile is undefined else omit }}"
     dest: "{{ mktemp.stdout }}/private_key"
 
 - name: Create heketi config secret
