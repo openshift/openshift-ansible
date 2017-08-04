@@ -1,62 +1,62 @@
 allowDisabledDocker: false
 apiVersion: v1
-{% if openshift.common.version_gte_3_6 %}
+{% if r_openshift_node_version_gte_3_6 %}
 dnsBindAddress: 127.0.0.1:53
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
 {% endif %}
-dnsDomain: {{ openshift.common.dns_domain }}
-{% if 'dns_ip' in openshift.node %}
-dnsIP: {{ openshift.node.dns_ip }}
+dnsDomain: {{ r_openshift_node_dns_domain }}
+{% if r_openshift_node_dns_ip is defined %}
+dnsIP: {{ r_openshift_node_dns_ip }}
 {% endif %}
 dockerConfig:
   execHandlerName: ""
-iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"
+iptablesSyncPeriod: "{{ r_openshift_node_iptables_sync_period }}"
 imageConfig:
-  format: {{ openshift.node.registry_url }}
+  format: {{ r_openshift_node_registry_url }}
   latest: false
 kind: NodeConfig
-kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
-{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
+kubeletArguments: {{ r_openshift_node_kubelet_args | to_padded_yaml(level=1) }}
+{% if r_openshift_node_version_gte_3_3_or_1_3 | bool %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
   contentType: application/vnd.kubernetes.protobuf
   burst: 200
   qps: 100
 {% endif %}
-masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
-{% if openshift.common.use_openshift_sdn | bool %}
-networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+masterKubeConfig: system:node:{{ r_openshift_node_hostname }}.kubeconfig
+{% if r_openshift_node_use_openshift_sdn | bool %}
+networkPluginName: {{ r_openshift_node_sdn_network_plugin_name }}
 {% endif %}
 # networkConfig struct introduced in origin 1.0.6 and OSE 3.0.2 which
 # deprecates networkPluginName above. The two should match.
 networkConfig:
-   mtu: {{ openshift.node.sdn_mtu }}
-{% if openshift.common.use_openshift_sdn | bool or openshift.common.use_nuage | bool or openshift.common.use_contiv | bool or openshift.common.sdn_network_plugin_name == 'cni' %}
-   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+   mtu: {{ r_openshift_node_sdn_mtu }}
+{% if r_openshift_node_use_openshift_sdn | bool or r_openshift_node_use_nuage | bool or r_openshift_node_use_contiv | bool or r_openshift_node_sdn_network_plugin_name == 'cni' %}
+   networkPluginName: {{ r_openshift_node_sdn_network_plugin_name }}
 {% endif %}
-{% if openshift.node.set_node_ip | bool %}
-nodeIP: {{ openshift.common.ip }}
+{% if r_openshift_node_set_node_ip | bool %}
+nodeIP: {{ r_openshift_node_ip }}
 {% endif %}
-nodeName: {{ openshift.node.nodename }}
+nodeName: {{ r_openshift_node_nodename }}
 podManifestConfig:
 servingInfo:
   bindAddress: 0.0.0.0:10250
   certFile: server.crt
   clientCA: ca.crt
   keyFile: server.key
-{% if openshift_node_min_tls_version is defined %}
-  minTLSVersion: {{ openshift_node_min_tls_version }}
+{% if r_openshift_node_min_tls_version is defined %}
+  minTLSVersion: {{ r_openshift_node_min_tls_version }}
 {% endif %}
-{% if openshift_node_cipher_suites is defined %}
+{% if r_openshift_node_cipher_suites is defined %}
   cipherSuites:
-{% for cipher_suite in openshift_node_cipher_suites %}
+{% for cipher_suite in r_openshift_node_cipher_suites %}
   - {{ cipher_suite }}
 {% endfor %}
 {% endif %}
-volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
+volumeDirectory: {{ r_openshift_node_data_dir }}/openshift.local.volumes
 proxyArguments:
   proxy-mode:
-     - {{ openshift.node.proxy_mode }}
+     - {{ r_openshift_node_proxy_mode }}
 volumeConfig:
   localQuota:
-    perFSGroup: {{ openshift.node.local_quota_per_fsgroup }}
+    perFSGroup: {{ r_openshift_node_local_quota_per_fsgroup }}

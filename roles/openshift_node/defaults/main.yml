@@ -1,4 +1,105 @@
 ---
+#: required=true, description="Deployment type", choices=['origin', 'atomic-openshift']
+r_openshift_node_deployment_type: "{{ omit }}"
+#: description="Set to deploy containerized node"
+r_openshift_node_is_containerized: false
+#: description="Set to deploy a node over AH"
+r_openshift_node_is_atomic: false
+#: description="Set to disable a swap to preserve quality of service guarantees"
+r_openshift_node_disable_swap: true
+#: required=true, description="Node image tag to pull for containerized deployment"
+r_openshift_node_image_tag: "{{ omit }}"
+#: description="Node image name to pull for containerized deployment"
+r_openshift_node_image: "{{ omit }}"
+#: description="Node system image to pull for system containers deployment"
+r_openshift_node_system_image: "{{ omit }}"
+#: description="OVS image to pull for containerized deployment"
+r_openshift_node_ovs_image: "{{ omit }}"
+#: description="OVS system image to pull for containerized deployment"
+r_openshift_node_ovs_system_image: "{{ omit }}"
+#: description="Node package version to install for package based deployment"
+r_openshift_node_pkg_version: ''
+#: description="Default docker service name, e.g. docker, container-engine"
+r_openshift_node_docker_service_name: docker
+#: description="AWS access key"
+r_openshift_node_cloudprovider_aws_access_key: ''
+#: description="AWS secret key"
+r_openshift_node_cloudprovider_aws_secret_key: ''
+#: description="Cloud provider kind, e.g. aws"
+r_openshift_node_cloudprovider_kind: ''
+#: description="SDN Cluster network CIDR set by the master component"
+r_openshift_node_master_sdn_cluster_network_cidr: "{{ omit }}"
+#: description="Optionall Kubelet arguments"
+r_openshift_node_kubelet_args: None
+#: description="Master API URL to query"
+r_openshift_node_master_api_url: "{{ omit }}"
+#: description="Node configuration base directory, e.g. /etc/origin"
+r_openshift_node_config_base: "{{ omit }}"
+#: description="HTTP proxy URL address"
+r_openshift_node_http_proxy: ''
+#: description="HTTPS proxy URL address"
+r_openshift_node_https_proxy: ''
+#: description="Set to deploy node system container"
+r_openshift_node_is_node_system_container: false
+#: description="Set to deploy OVS system container"
+r_openshift_node_is_openvswitch_system_container: false
+#: description="No Proxy"
+r_openshift_node_no_proxy: []
+#: description="Portal net"
+r_openshift_node_portal_net: "{{ omit }}"
+#: description="System service type"
+r_openshift_node_service_type: origin
+#: description="System image registry to pull images from"
+r_openshift_node_system_images_registry: "{{ omit }}"
+#: description="Set to use OpenShift SDN"
+r_openshift_node_use_openshift_sdn: true
+#: description="Set the default node debug level"
+r_openshift_node_debug_level: 2
+#: description="Set node environment variables"
+r_openshift_node_env_vars: {}
+#: description="List if additional storage plugins to deploy"
+r_openshift_node_storage_plugin_deps: []
+
+r_openshift_node_version_gte_3_6: true
+r_openshift_node_version_gte_3_3_or_1_3: true
+#: required=true
+r_openshift_node_dns_domain: "{{ omit }}"
+#: required=false
+r_openshift_node_dns_ip: "{{ omit }}"
+r_openshift_node_use_nuage: false
+r_openshift_node_use_contiv: false
+r_openshift_node_use_calico: false
+r_openshift_node_use_dnsmasq: false
+#: required=true
+r_openshift_node_iptables_sync_period: "{{ omit }}"
+#: required=true
+r_openshift_node_registry_url: "{{ omit }}"
+#: required=true
+r_openshift_node_hostname: "{{ omit }}"
+#: needs=r_openshift_node_use_openshift_sdn|r_openshift_node_use_nuage|r_openshift_node_use_contiv|r_openshift_node_sdn_network_plugin_name=='cni'
+r_openshift_node_sdn_network_plugin_name: "{{ omit }}"
+#: required=true
+r_openshift_node_sdn_mtu: "{{ omit }}"
+#: needs=r_openshift_node_ip
+r_openshift_node_set_node_ip: true
+r_openshift_node_ip: "{{ omit }}"
+#: required=true
+r_openshift_node_nodename: "{{ omit }}"
+#: required=false
+r_openshift_node_min_tls_version: "{{ omit }}"
+#: required=false
+r_openshift_node_cipher_suites: "{{ omit }}"
+#: required=true
+r_openshift_node_data_dir: "{{ omit }}"
+#: required=true
+r_openshift_node_proxy_mode: "{{ omit }}"
+#: required=true
+r_openshift_node_local_quota_per_fsgroup: "{{ omit }}"
+#: required=true
+r_openshift_node_docker_gte_1_10: false
+#: required=false
+r_openshift_node_port_range: "{{ omit }}"
+
 os_firewall_allow:
 - service: Kubernetes kubelet
   port: 10250/tcp
@@ -8,7 +109,7 @@ os_firewall_allow:
   port: 443/tcp
 - service: OpenShift OVS sdn
   port: 4789/udp
-  when: openshift.common.use_openshift_sdn | default(true) | bool
+  when: r_openshift_node_use_openshift_sdn | bool
 - service: Calico BGP Port
   port: 179/tcp
-  when: openshift.common.use_calico | bool
+  when: r_openshift_node_use_calico | bool
