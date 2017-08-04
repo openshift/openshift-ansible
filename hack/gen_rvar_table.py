@@ -87,6 +87,15 @@ required_when_template_task_str = """
   {% endfor %}
 """
 
+choices_template_task_str = """
+- name: Fail if invalid {{ role_variable_name }} provided
+  fail:
+    msg: "{{ role_variable_name }} can only be set to a single value from {{ role_variable_choices }}"
+  when:
+  - {{ role_variable_name }} is defined
+  - {{ role_variable_name }} not in {{ role_variable_choices }}
+"""
+
 def generate_check_tasks(rvar_table):
     checks = []
     for item in rvar_table:
@@ -96,7 +105,6 @@ def generate_check_tasks(rvar_table):
             }
             # cause the PyYAML will reorder the keys
             checks.append(jinja2.Environment().from_string(required_template_task_str).render(template_vars))
-            continue
         if item["required_when"]:
             for conditions in item["required_when"]:
                 template_vars = {
@@ -105,7 +113,16 @@ def generate_check_tasks(rvar_table):
                 }
                 # cause the PyYAML will reorder the keys
                 checks.append(jinja2.Environment().from_string(required_when_template_task_str).render(template_vars))
-    print("\n".join(checks))
+        if item["choices"]:
+            template_vars = {
+                "role_variable_name": item["name"],
+                "role_name": "openshift_node",
+                "role_variable_choices": item["choices"],
+            }
+            # cause the PyYAML will reorder the keys
+            checks.append(jinja2.Environment().from_string(choices_template_task_str).render(template_vars))
+
+    print("---" + "\n".join(checks))
 
 
 def get_delims(line, skip_list=False):
@@ -142,6 +159,7 @@ def parse_annotations(line):
         "description": "",
         "default": "",
         "required_when": [],
+        "choices": [],
     }
 
     pair_start = 0
