@@ -24,23 +24,51 @@ class BinarySyncError(Exception):
         self.msg = msg
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,too-many-instance-attributes
 class BinarySyncer(object):
     """
     Syncs the openshift, oc, oadm, and kubectl binaries/symlinks out of
     a container onto the host system.
     """
 
-    def __init__(self, module, image, tag):
+    def __init__(self, module, image, tag, backend):
         self.module = module
         self.changed = False
         self.output = []
         self.bin_dir = '/usr/local/bin'
         self.image = image
         self.tag = tag
+        self.backend = backend
         self.temp_dir = None  # TBD
 
     def sync(self):
+        if self.backend == 'atomic':
+            return self._sync_atomic()
+
+        return self._sync_docker()
+
+    def _sync_atomic(self):
+        self.temp_dir = tempfile.mkdtemp()
+        temp_dir_mount = tempfile.mkdtemp()
+        try:
+            image_spec = '%s:%s' % (self.image, self.tag)
+            rc, stdout, stderr = self.module.run_command(['atomic', 'mount',
+                                                          '--storage', "ostree",
+                                                          image_spec, temp_dir_mount])
+            if rc:
+                raise BinarySyncError("Error mounting image. stdout=%s, stderr=%s" %
+                                      (stdout, stderr))
+            for i in ["openshift", "oc"]:
+                src_file = os.path.join(temp_dir_mount, "usr/bin", i)
+                shutil.copy(src_file, self.temp_dir)
+
+            self._sync_binaries()
+        finally:
+            self.module.run_command(['atomic', 'umount', temp_dir_mount])
+            shutil.rmtree(temp_dir_mount)
+            shutil.rmtree(self.temp_dir)
+
+    def _sync_docker(self):
         container_name = "openshift-cli-%s" % random.randint(1, 100000)
         rc, stdout, stderr = self.module.run_command(['docker', 'create', '--name',
                                                       container_name, '%s:%s' % (self.image, self.tag)])
@@ -64,20 +92,23 @@ class BinarySyncer(object):
                 raise BinarySyncError("Error copying file from docker container: stdout=%s, stderr=%s" %
                                       (stdout, stderr))
 
-            self._sync_binary('openshift')
-
-            # In older versions, oc was a symlink to openshift:
-            if os.path.islink(os.path.join(self.temp_dir, 'oc')):
-                self._sync_symlink('oc', 'openshift')
-            else:
-                self._sync_binary('oc')
-
-            # Ensure correct symlinks created:
-            self._sync_symlink('kubectl', 'openshift')
-            self._sync_symlink('oadm', 'openshift')
+            self._sync_binaries()
         finally:
             shutil.rmtree(self.temp_dir)
             self.module.run_command(['docker', 'rm', container_name])
+
+    def _sync_binaries(self):
+        self._sync_binary('openshift')
+
+        # In older versions, oc was a symlink to openshift:
+        if os.path.islink(os.path.join(self.temp_dir, 'oc')):
+            self._sync_symlink('oc', 'openshift')
+        else:
+            self._sync_binary('oc')
+
+        # Ensure correct symlinks created:
+        self._sync_symlink('kubectl', 'openshift')
+        self._sync_symlink('oadm', 'openshift')
 
     def _sync_symlink(self, binary_name, link_to):
         """ Ensure the given binary name exists and links to the expected binary. """
@@ -112,14 +143,19 @@ def main():
         argument_spec=dict(
             image=dict(required=True),
             tag=dict(required=True),
+            backend=dict(required=True),
         ),
         supports_check_mode=True
     )
 
     image = module.params['image']
     tag = module.params['tag']
+    backend = module.params['backend']
 
-    binary_syncer = BinarySyncer(module, image, tag)
+    if backend not in ["docker", "atomic"]:
+        module.fail_json(msg="unknown backend")
+
+    binary_syncer = BinarySyncer(module, image, tag, backend)
 
     try:
         binary_syncer.sync()

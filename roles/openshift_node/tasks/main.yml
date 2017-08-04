@@ -2,9 +2,9 @@
 # TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when: >
-    (not ansible_selinux or ansible_selinux.status != 'enabled') and
-    deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+  when:
+    - (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+    - not openshift_docker_use_crio | default(false)
 
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
 - name: Check for swap usage
@@ -65,6 +65,13 @@
   when:
     - openshift.common.use_openshift_sdn | default(true) | bool
     - not openshift.common.is_containerized | bool
+
+- name: Restart cri-o
+  systemd:
+    name: crio
+    enabled: yes
+    state: restarted
+  when: openshift_docker_use_crio | default(false)
 
 - name: Install conntrack-tools package
   package:

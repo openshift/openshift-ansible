@@ -1,0 +1,78 @@
+---
+# TODO: Much of this file is shared with container engine tasks
+- set_fact:
+    l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(openshift.docker.insecure_registries)) }}"
+  when: openshift.docker.insecure_registries
+
+- name: Ensure container-selinux is installed
+  package:
+    name: container-selinux
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+- name: Ensure runc is installed
+  package:
+    name: runc
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+
+- name: Check that overlay is in the kernel
+  shell: lsmod | grep overlay
+  register: l_has_overlay_in_kernel
+  ignore_errors: yes
+
+
+- when: l_has_overlay_in_kernel.rc != 0
+  block:
+
+    - name: Add overlay to modprobe.d
+      template:
+        dest: /etc/modules-load.d/overlay.conf
+        src: overlay.conf.j2
+        backup: yes
+
+    - name: Manually modprobe overlay into the kernel
+      command: modprobe overlay
+
+    - name: Enable and start systemd-modules-load
+      service:
+        name: systemd-modules-load
+        enabled: yes
+        state: restarted
+
+
+- name: Install CRI-O Package
+  package:
+    name: cri-o
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+
+- name: Create the CRI-O configuration
+  template:
+    dest: /etc/crio/crio.conf
+    src: crio.conf.j2
+    backup: yes
+
+- name: Ensure /etc/cni/net.d/ exists
+  file:
+    path: /etc/cni/net.d/
+    state: directory
+    mode: 0755
+
+- name: Configure the CNI network
+  template:
+    dest: /etc/cni/net.d/80-openshift-sdn.conf
+    src: 80-openshift-sdn.conf.j2
+    backup: yes
+
+- name: Start the CRI-O service
+  systemd:
+    name: "crio"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- meta: flush_handlers
