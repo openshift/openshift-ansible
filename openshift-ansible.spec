@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.6.173.0.5
-Release:        1%{?dist}
+Release:        2
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 04 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.5-2
+- GlusterFS: Don't use /dev/null for empty file. (jarrpa@redhat.com)
+
 * Thu Aug 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.5-1
 - Revert "Refactor openshift_facts BIOS vendor discovery" (sdodson@redhat.com)
 - Revert "Remove invalid when: from vars:" (sdodson@redhat.com)
