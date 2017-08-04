@@ -1,4 +1,15 @@
 ---
+- set_fact:
+    l_use_crio: "{{ openshift_docker_use_crio | default(false) }}"
+
+- set_fact:
+    l_service_name: "cri-o"
+  when: l_use_crio
+
+- set_fact:
+    l_service_name: "{{ openshift.docker.service_name }}"
+  when: not l_use_crio
+
 - name: Pre-pull OpenVSwitch system container image
   command: >
     atomic pull --storage=ostree {{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}
@@ -11,4 +22,4 @@
     image: "{{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.node.ovs_system_image }}:{{ openshift_image_tag }}"
     state: latest
     values:
-      - "DOCKER_SERVICE={{ openshift.docker.service_name }}.service"
+      - "DOCKER_SERVICE={{ l_service_name }}"

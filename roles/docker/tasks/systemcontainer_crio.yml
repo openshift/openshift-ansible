@@ -1,0 +1,146 @@
+---
+# TODO: Much of this file is shared with container engine tasks
+- set_fact:
+    l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(openshift.docker.insecure_registries)) }}"
+  when: openshift.docker.insecure_registries
+
+- name: Ensure container-selinux is installed
+  package:
+    name: container-selinux
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+# Used to pull and install the system container
+- name: Ensure atomic is installed
+  package:
+    name: atomic
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+# At the time of writing the atomic command requires runc for it's own use. This
+# task is here in the even that the atomic package ever removes the dependency.
+- name: Ensure runc is installed
+  package:
+    name: runc
+    state: present
+  when: not openshift.common.is_atomic | bool
+
+
+- name: Check that overlay is in the kernel
+  shell: lsmod | grep overlay
+  register: l_has_overlay_in_kernel
+  ignore_errors: yes
+
+
+- when: l_has_overlay_in_kernel.rc != 0
+  block:
+
+    - name: Add overlay to modprobe.d
+      template:
+        dest: /etc/modules-load.d/overlay.conf
+        src: overlay.conf.j2
+        backup: yes
+
+    - name: Manually modprobe overlay into the kernel
+      command: modprobe overlay
+
+    - name: Enable and start systemd-modules-load
+      service:
+        name: systemd-modules-load
+        enabled: yes
+        state: restarted
+
+
+- block:
+
+    - name: Add http_proxy to /etc/atomic.conf
+      lineinfile:
+        dest: /etc/atomic.conf
+        regexp: "^#?http_proxy[:=]{1}"
+        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
+      when:
+        - openshift.common.http_proxy is defined
+        - openshift.common.http_proxy != ''
+
+    - name: Add https_proxy to /etc/atomic.conf
+      lineinfile:
+        dest: /etc/atomic.conf
+        regexp: "^#?https_proxy[:=]{1}"
+        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
+      when:
+        - openshift.common.https_proxy is defined
+        - openshift.common.https_proxy != ''
+
+    - name: Add no_proxy to /etc/atomic.conf
+      lineinfile:
+        dest: /etc/atomic.conf
+        regexp: "^#?no_proxy[:=]{1}"
+        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
+      when:
+        - openshift.common.no_proxy is defined
+        - openshift.common.no_proxy != ''
+
+
+- block:
+
+    - name: Set to default prepend
+      set_fact:
+        l_crio_image_prepend: "docker.io/gscrivano"
+        l_crio_image_name: "crio-o-fedora"
+
+    - name: Use Centos based image when distribution is Red Hat or CentOS
+      set_fact:
+        l_crio_image_name: "cri-o-centos"
+      when: ansible_distribution in ['RedHat', 'CentOS']
+
+    # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
+    - name: Use a testing registry if requested
+      set_fact:
+        l_crio_image_prepend: "{{ openshift_crio_systemcontainer_image_registry_override }}"
+      when:
+        - openshift_crio_systemcontainer_image_registry_override is defined
+        - openshift_crio_systemcontainer_image_registry_override != ""
+
+    - name: Set the full image name
+      set_fact:
+        l_crio_image: "{{ l_crio_image_prepend }}/{{ l_crio_image_name }}:latest"
+
+# NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
+- name: Pre-pull CRI-O System Container image
+  command: "atomic pull --storage ostree {{ l_crio_image }}"
+  changed_when: false
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+
+
+- name: Install CRI-O System Container
+  oc_atomic_container:
+    name: "cri-o"
+    image: "{{ l_crio_image }}"
+    state: latest
+
+- name: Create the CRI-O configuration
+  template:
+    dest: /etc/crio/crio.conf
+    src: crio.conf.j2
+    backup: yes
+
+- name: Ensure CNI configuration directory exists
+  file:
+    path: /etc/cni/net.d/
+    state: directory
+
+- name: Configure the CNI network
+  template:
+    dest: /etc/cni/net.d/openshift-sdn.conf
+    src: 80-openshift-sdn.conf.j2
+
+- name: Start the CRI-O service
+  systemd:
+    name: "cri-o"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- meta: flush_handlers
