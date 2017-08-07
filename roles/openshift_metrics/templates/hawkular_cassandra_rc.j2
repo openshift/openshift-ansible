@@ -56,6 +56,8 @@ spec:
           value: "/cassandra_data"
         - name: JVM_OPTS
           value: "-Dcassandra.commitlog.ignorereplayerrors=true"
+        - name: DISABLE_PROMETHEUS_ENDPOINT
+          value: "{{ openshift_metrics_cassandra_disable_prometheus_endpoint }}"
         - name: TRUSTSTORE_NODES_AUTHORITIES
           value: "/hawkular-cassandra-certs/tls.peer.truststore.crt"
         - name: TRUSTSTORE_CLIENT_AUTHORITIES
