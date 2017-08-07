@@ -45,4 +45,4 @@
       with_dict: "{{ l_host_vars | default({}) }}"
 
 - include: ../../../playbooks/byo/openshift-cluster/initialize_groups.yml
-- include: ../../../playbooks/common/openshift-cluster/evaluate_groups.yml
+- include: ../../../playbooks/common/openshift-cluster/std_include.yml
