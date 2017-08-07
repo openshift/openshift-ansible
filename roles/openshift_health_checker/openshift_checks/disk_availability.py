@@ -35,6 +35,15 @@ class DiskAvailability(OpenShiftCheck):
         },
     }
 
+    # recommended disk space for each location under an upgrade context
+    recommended_disk_upgrade_bytes = {
+        '/var': {
+            'masters': 10 * 10**9,
+            'nodes': 5 * 10 ** 9,
+            'etcd': 5 * 10 ** 9,
+        },
+    }
+
     def is_active(self):
         """Skip hosts that do not have recommended disk space requirements."""
         group_names = self.get_var("group_names", default=[])
@@ -80,9 +89,34 @@ class DiskAvailability(OpenShiftCheck):
             config_bytes = max(config.get(name, 0) for name in group_names) * 10**9
             recommended_bytes = config_bytes or recommended_bytes
 
+            # if an "upgrade" context is set, update the minimum disk requirement
+            # as this signifies an in-place upgrade - the node might have the
+            # required total disk space, but some of that space may already be
+            # in use by the existing OpenShift deployment.
+            context = self.get_var("r_openshift_health_checker_playbook_context", default="")
+            if context == "upgrade":
+                recommended_upgrade_paths = self.recommended_disk_upgrade_bytes.get(path, {})
+                if recommended_upgrade_paths:
+                    recommended_bytes = config_bytes or max(recommended_upgrade_paths.get(name, 0)
+                                                            for name in group_names)
+
             if free_bytes < recommended_bytes:
                 free_gb = float(free_bytes) / 10**9
                 recommended_gb = float(recommended_bytes) / 10**9
+                msg = (
+                    'Available disk space in "{}" ({:.1f} GB) '
+                    'is below minimum recommended ({:.1f} GB)'
+                ).format(path, free_gb, recommended_gb)
+
+                # warn if check failed under an "upgrade" context
+                # due to limits imposed by the user config
+                if config_bytes and context == "upgrade":
+                    msg += ('\n\nMake sure to account for decreased disk space during an upgrade\n'
+                            'due to an existing OpenShift deployment. Please check the value of\n'
+                            '  openshift_check_min_host_disk_gb={}\n'
+                            'in your Ansible inventory, and lower the recommended disk space availability\n'
+                            'if necessary for this upgrade.').format(config_bytes)
+
                 return {
                     'failed': True,
                     'msg': (
