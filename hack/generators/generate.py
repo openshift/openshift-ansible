@@ -28,7 +28,7 @@ import json
 
 def set_options():
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument(
         "--json", dest="json", default="",
