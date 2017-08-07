@@ -1,0 +1,11 @@
+{
+  "actions": [{
+    "action": "role_var_checks",
+    "target": "tasks/pre_checks.yml",
+    "source": "defaults/main.yml"
+  },{
+    "action": "role_var_table",
+    "source": "defaults/main.yml",
+    "target": "README.md"
+    }]
+}

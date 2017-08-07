@@ -1,9 +1,5 @@
 ---
-- name: Fail if r_openshift_node_image_tag is not defined
-  fail:
-    msg: r_openshift_node_image_tag must be specified for this role
-  when:
-  - r_openshift_node_image_tag is not defined
+- include: pre_checks.yml
 
 # TODO: allow for overriding default ports where possible
 - fail:

@@ -1,0 +1,61 @@
+---
+# This file is automatically generate. Do not edit it manually.
+- set_fact:
+    r_openshift_node_http_proxy: "{{ openshift.common.http_proxy }}"
+  when: openshift.common.http_proxy is defined
+
+- set_fact:
+    r_openshift_node_debug_level: "{{ openshift.node.debug_level }}"
+  when: openshift.node.debug_level is defined
+
+- set_fact:
+    r_openshift_node_cipher_suites: "{{ openshift_node_cipher_suites }}"
+  when: openshift_node_cipher_suites is defined
+
+- set_fact:
+    r_openshift_node_min_tls_version: "{{ openshift_node_min_tls_version }}"
+  when: openshift_node_min_tls_version is defined
+
+- set_fact:
+    r_openshift_node_ip: "{{ openshift.common.ip }}"
+  when: openshift.common.ip is defined
+
+- set_fact:
+    r_openshift_node_cloudprovider_kind: "{{ openshift_cloudprovider_kind }}"
+  when: openshift_cloudprovider_kind is defined
+
+- set_fact:
+    r_openshift_node_dns_ip: "{{ openshift.node.dns_ip }}"
+  when: openshift.node.dns_ip is defined
+
+- set_fact:
+    r_openshift_node_cloudprovider_aws_access_key: "{{ openshift_cloudprovider_aws_access_key }}"
+  when: openshift_cloudprovider_aws_access_key is defined
+
+- set_fact:
+    r_openshift_node_kubelet_args: "{{ openshift_node_kubelet_args }}"
+  when: openshift_node_kubelet_args is defined
+
+- set_fact:
+    r_openshift_node_cloudprovider_aws_secret_key: "{{ openshift_cloudprovider_aws_secret_key }}"
+  when: openshift_cloudprovider_aws_secret_key is defined
+
+- set_fact:
+    r_openshift_node_https_proxy: "{{ openshift.common.https_proxy }}"
+  when: openshift.common.https_proxy is defined
+
+- set_fact:
+    r_openshift_node_disable_swap: "{{ openshift_disable_swap }}"
+  when: openshift_disable_swap is defined
+
+- set_fact:
+    r_openshift_node_system_images_registry: "{{ openshift.common.system_images_registry }}"
+  when: openshift.common.system_images_registry is defined
+
+- set_fact:
+    r_openshift_node_no_proxy: "{{ openshift.common.no_proxy }}"
+  when: openshift.common.no_proxy is defined
+
+- set_fact:
+    r_openshift_node_sdn_network_plugin_name: "{{ openshift.common.sdn_network_plugin_name }}"
+  when: openshift.common.sdn_network_plugin_name is defined
