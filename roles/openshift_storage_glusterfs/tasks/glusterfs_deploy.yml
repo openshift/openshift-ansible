@@ -13,7 +13,7 @@
   - kind: template
     name: glusterfs
   - kind: daemonset
-    name: "glusterfs-{{ glusterfs_name }}"
+    name: "glusterfs-{{ glusterfs_name | default }}"
   when: glusterfs_wipe
 
 - name: Unlabel any existing GlusterFS nodes
