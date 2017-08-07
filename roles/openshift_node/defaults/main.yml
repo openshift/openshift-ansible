@@ -53,7 +53,7 @@ r_openshift_node_cloudprovider_aws_secret_key: ''
 #: description="Cloud provider kind, e.g. aws"
 r_openshift_node_cloudprovider_kind: ''
 #: description="Optionall Kubelet arguments"
-r_openshift_node_kubelet_args: None
+r_openshift_node_kubelet_args: "{{ None }}"
 #: description="HTTP proxy URL address"
 r_openshift_node_http_proxy: ''
 #: description="HTTPS proxy URL address", required_when=["r_openshift_node_http_proxy != ''"]

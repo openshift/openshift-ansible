@@ -59,3 +59,7 @@
 - set_fact:
     r_openshift_node_sdn_network_plugin_name: "{{ openshift.common.sdn_network_plugin_name }}"
   when: openshift.common.sdn_network_plugin_name is defined
+
+- set_fact:
+    r_openshift_node_env_vars: "{{ openshift.node.env_vars }}"
+  when: openshift.node.env_vars is defined

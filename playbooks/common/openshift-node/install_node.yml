@@ -1,23 +1,9 @@
 ---
+# set optional role variables
+- include: set_optional_node_facts_role_variables.yml
+
 - include_role:
     name: openshift_node_facts
-  vars:
-    r_openshift_node_facts_annotations: "{{ openshift_node_annotations | default(omit) }}"
-    r_openshift_node_facts_debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
-    r_openshift_node_facts_iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(omit) }}"
-    r_openshift_node_facts_kubelet_args: "{{ openshift_node_kubelet_args | default(omit) }}"
-    r_openshift_node_facts_labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
-    r_openshift_node_facts_oreg_url: "{{ oreg_url_node | default(oreg_url) | default(omit) }}"
-    r_openshift_node_facts_schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(omit) }}"
-    r_openshift_node_facts_sdn_mtu: "{{ openshift_node_sdn_mtu | default(omit) }}"
-    r_openshift_node_facts_osn_storage_plugin_deps: "{{ osn_storage_plugin_deps | default(omit) }}"
-    r_openshift_node_facts_set_node_ip: "{{ openshift_set_node_ip | default(omit) }}"
-    r_openshift_node_facts_osn_image: "{{ osn_image | default(omit) }}"
-    r_openshift_node_facts_osn_ovs_image: "{{ osn_ovs_image | default(omit) }}"
-    r_openshift_node_facts_proxy_mode: "{{ openshift_node_proxy_mode | default(omit) }}"
-    r_openshift_node_facts_local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(omit) }}"
-    r_openshift_node_facts_dns_ip: "{{ openshift_dns_ip | default(omit) }}"
-    r_openshift_node_facts_env_vars: "{{ openshift_node_env_vars | default(omit) }}"
 
 # set required role variables and variables that are always defined
 # TODO(jchaloup): check all variables set in openshift_facts to see which are always set
@@ -55,7 +41,6 @@
     r_openshift_node_master_sdn_cluster_network_cidr: "{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
     r_openshift_node_storage_plugin_deps: "{{ openshift.node.storage_plugin_deps }}"
     r_openshift_node_pkg_version: "{{ openshift_pkg_version  }}"
-    r_openshift_node_env_vars: "{{ openshift.node.env_vars }}"
     r_openshift_node_set_node_ip: "{{ openshift.node.set_node_ip }}"
 
     r_openshift_node_is_containerized: "{{ openshift.common.is_containerized }}"

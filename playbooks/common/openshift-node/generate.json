@@ -1,6 +1,27 @@
 {
   "actions": [{
     "action": "set_fact",
+    "target": "set_optional_node_facts_role_variables.yml",
+    "mapping": {
+      "r_openshift_node_facts_annotations": "openshift_node_annotations",
+      "r_openshift_node_facts_debug_level": "openshift_node_debug_level | default(openshift.common.debug_level)",
+      "r_openshift_node_facts_iptables_sync_period": "openshift_node_iptables_sync_period",
+      "r_openshift_node_facts_kubelet_args": "openshift_node_kubelet_args",
+      "r_openshift_node_facts_labels": "lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true)",
+      "r_openshift_node_facts_oreg_url": "oreg_url_node | default(oreg_url)",
+      "r_openshift_node_facts_schedulable": "openshift_schedulable | default(openshift_scheduleable)",
+      "r_openshift_node_facts_sdn_mtu": "openshift_node_sdn_mtu",
+      "r_openshift_node_facts_osn_storage_plugin_deps": "osn_storage_plugin_deps",
+      "r_openshift_node_facts_set_node_ip": "openshift_set_node_ip",
+      "r_openshift_node_facts_osn_image": "osn_image",
+      "r_openshift_node_facts_osn_ovs_image": "osn_ovs_image",
+      "r_openshift_node_facts_proxy_mode": "openshift_node_proxy_mode",
+      "r_openshift_node_facts_local_quota_per_fsgroup": "openshift_node_local_quota_per_fsgroup",
+      "r_openshift_node_facts_dns_ip": "openshift_dns_ip",
+      "r_openshift_node_facts_env_vars": "openshift_node_env_vars"
+    }
+  },{
+    "action": "set_fact",
     "target": "set_optional_node_role_variables.yml",
     "mapping": {
       "r_openshift_node_dns_ip": "openshift.node.dns_ip",
@@ -17,7 +38,8 @@
       "r_openshift_node_debug_level": "openshift.node.debug_level",
       "r_openshift_node_https_proxy": "openshift.common.https_proxy",
       "r_openshift_node_http_proxy": "openshift.common.http_proxy",
-      "r_openshift_node_system_images_registry": "openshift.common.system_images_registry"
+      "r_openshift_node_system_images_registry": "openshift.common.system_images_registry",
+      "r_openshift_node_env_vars": "openshift.node.env_vars"
     }
   }]
 }

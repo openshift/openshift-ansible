@@ -1,17 +1,20 @@
-r_openshift_node_facts_debug_level: "{{ omit }}"
-r_openshift_node_facts_annotations: None
-r_openshift_node_facts_debug_level: "{{ omit }}"
-r_openshift_node_facts_iptables_sync_period: None
-r_openshift_node_facts_kubelet_args: None
-r_openshift_node_facts_labels: None
-r_openshift_node_facts_oreg_url: None
-r_openshift_node_facts_schedulable: None
-r_openshift_node_facts_sdn_mtu: None
-r_openshift_node_facts_osn_storage_plugin_deps: None
-r_openshift_node_facts_set_node_ip: None
-r_openshift_node_facts_osn_image: None
-r_openshift_node_facts_osn_ovs_image: None
+#: name=r_openshift_node_facts_debug_level, description="Node debug lovel"
+#: description="Node annotations"
+r_openshift_node_facts_annotations: "{{ None }}"
+r_openshift_node_facts_iptables_sync_period: "{{ None }}"
+r_openshift_node_facts_kubelet_args: "{{ None }}"
+#: description="Node labels"
+r_openshift_node_facts_labels: "{{ None }}"
+r_openshift_node_facts_oreg_url: "{{ None }}"
+#: description="If set pods can be scheduled on the node"
+r_openshift_node_facts_schedulable: "{{ None }}"
+r_openshift_node_facts_sdn_mtu: "{{ None }}"
+#: description="Store plugins to install on the node"
+r_openshift_node_facts_osn_storage_plugin_deps: "{{ None }}"
+r_openshift_node_facts_set_node_ip: "{{ None }}"
+r_openshift_node_facts_osn_image: "{{ None }}"
+r_openshift_node_facts_osn_ovs_image: "{{ None }}"
 r_openshift_node_facts_proxy_mode: iptables
-r_openshift_node_facts_local_quota_per_fsgroup: None
-r_openshift_node_facts_dns_ip: None
-r_openshift_node_facts_env_vars: None
+r_openshift_node_facts_local_quota_per_fsgroup: "{{ None }}"
+r_openshift_node_facts_dns_ip: "{{ None }}"
+r_openshift_node_facts_env_vars: "{{ None }}"
