@@ -1,38 +1,39 @@
 #!/usr/bin/env python
 from __future__ import print_function
+
+import argparse
 import re
 import jinja2
-import optparse
 import logging
 import json
 
 
 def setOptions():
 
-    parser = optparse.OptionParser("%prog ")
+    parser = argparse.ArgumentParser()
 
-    parser.add_option(
-        "", "", "--json", dest="json", default="",
+    parser.add_argument(
+        "--json", dest="json", default="",
         help="Configuration generator file, e.g. generate.json"
     )
 
-    parser.add_option(
-        "", "", "--target", dest="target", default="",
+    parser.add_argument(
+        "--target", dest="target", default="",
         help="File to generate to"
     )
 
-    parser.add_option(
-        "", "", "--defaults", dest="defaults", default="",
+    parser.add_argument(
+        "--defaults", dest="defaults", default="",
         help="Location of the defaults/main.yml file"
     )
 
-    parser.add_option(
-        "", "", "--table", dest="table", default=False, action="store_true",
+    parser.add_argument(
+        "--table", dest="table", default=False, action="store_true",
         help="Generate role variable table"
     )
 
-    parser.add_option(
-        "", "", "--checks", dest="checks", default=False, action="store_true",
+    parser.add_argument(
+        "--checks", dest="checks", default=False, action="store_true",
         help="Generate a list of check tasks"
     )
 
@@ -289,7 +290,7 @@ def updateREADME(readme, table):
 
 if __name__ == "__main__":
 
-    options, args = setOptions().parse_args()
+    options = setOptions().parse_args()
     checkOptions(options)
 
     if options.json != "":
