@@ -8,7 +8,7 @@ import logging
 import json
 
 
-def setOptions():
+def set_options():
 
     parser = argparse.ArgumentParser()
 
@@ -40,15 +40,15 @@ def setOptions():
     return parser
 
 
-def checkOptions(options):
+def check_options(options):
 
     if options.json == "" and options.defaults == "":
         logging.error("at least on of --json|--defaults needs to be set")
-        exit(1)
+        raise SystemExit(1)
 
     if options.defaults != "" and (not options.table and not options.checks):
         logging.error("at least one of --table|--checks needs to be set")
-        exit(1)
+        raise SystemExit(1)
 
 
 def generate_set_fact_tasks(mapping):
@@ -270,14 +270,14 @@ def writeTasks(tasks, target=""):
             # TODO(jchaloup): check the 'target' key before the tasks are generated
             if "target" not in action:
                 logging.error("unable to find 'target' key in generate.json")
-                exit(1)
+                raise SystemExit(1)
             with open(action["target"], "w") as f:
                 f.write(file_content)
         else:
             print(file_content)
 
 
-def updateREADME(readme, table):
+def update_README(readme, table):
     with open(readme, "r") as f:
         original_content = f.read()
 
@@ -290,8 +290,8 @@ def updateREADME(readme, table):
 
 if __name__ == "__main__":
 
-    options = setOptions().parse_args()
-    checkOptions(options)
+    options = set_options().parse_args()
+    check_options(options)
 
     if options.json != "":
 
@@ -310,7 +310,7 @@ if __name__ == "__main__":
                 writeTasks(tasks, options.defaults)
             elif action["action"] == "role_var_table":
                 rvar_table = generate_rvar_table(action["source"])
-                updateREADME(action["target"], print_rvar_table(rvar_table))
+                update_README(action["target"], print_rvar_table(rvar_table))
 
     elif options.defaults:
         rvar_table = generate_rvar_table(options.defaults)
