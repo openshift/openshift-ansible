@@ -20,6 +20,7 @@ From this role:
 | openshift_master_debug_level        | openshift_debug_level | Verbosity of the debug logs for master |
 | openshift_node_ips                  | []                    | List of the openshift node ip addresses to pre-register when master starts up |
 | oreg_url                            | UNDEF                 | Default docker registry to use |
+| oreg_url_master                     | UNDEF                 | Default docker registry to use, specifically on the master |
 | openshift_master_api_port           | UNDEF                 | |
 | openshift_master_console_port       | UNDEF                 | |
 | openshift_master_api_url            | UNDEF                 | |
