@@ -1,8 +1,7 @@
 #!/bin/sh
 export PATH=$PATH:$(pwd)/hack/generators
-pwd
-for file in $(find . -name generate.json); do
-  pushd $(dirname $file)
+for genfile in $(find . -name generate.json); do
+  pushd $(dirname $genfile)
   generate.py --json generate.json
   popd
 done
