@@ -13,8 +13,30 @@ from ansible.module_utils.six.moves import reduce  # pylint: disable=import-erro
 
 
 class OpenShiftCheckException(Exception):
-    """Raised when a check cannot proceed."""
-    pass
+    """Raised when a check encounters a failure condition."""
+
+    def __init__(self, name, msg=None):
+        # msg is for the message the user will see when this is raised.
+        # name is for test code to identify the error without looking at msg text.
+        if msg is None:  # for parameter backward compatibility
+            msg = name
+            name = self.__class__.__name__
+        self.name = name
+        super(OpenShiftCheckException, self).__init__(msg)
+
+
+class OpenShiftCheckExceptionList(OpenShiftCheckException):
+    """A container for multiple logging errors that may be detected in one check."""
+    def __init__(self, errors):
+        self.errors = errors
+        super(OpenShiftCheckExceptionList, self).__init__(
+            'OpenShiftCheckExceptionList',
+            '\n'.join(str(msg) for msg in errors)
+        )
+
+    # make iterable
+    def __getitem__(self, index):
+        return self.errors[index]
 
 
 @six.add_metaclass(ABCMeta)
@@ -34,6 +56,9 @@ class OpenShiftCheck(object):
         self._execute_module = execute_module
         self.task_vars = task_vars or {}
         self.tmp = tmp
+
+        # set to True when the check changes the host, for accurate total "changed" count
+        self.changed = False
 
     @abstractproperty
     def name(self):

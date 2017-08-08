@@ -1,18 +1,14 @@
 import pytest
 import json
 
-from openshift_checks.logging.logging import LoggingCheck, OpenShiftCheckException
+from openshift_checks.logging.logging import LoggingCheck, MissingComponentPods, CouldNotUseOc
 
 task_vars_config_base = dict(openshift=dict(common=dict(config_base='/etc/origin')))
 
 
-logging_namespace = "logging"
-
-
-def canned_loggingcheck(exec_oc=None):
+def canned_loggingcheck(exec_oc=None, execute_module=None):
     """Create a LoggingCheck object with canned exec_oc method"""
-    check = LoggingCheck()  # fails if a module is actually invoked
-    check.logging_namespace = 'logging'
+    check = LoggingCheck(execute_module)
     if exec_oc:
         check.exec_oc = exec_oc
     return check
@@ -97,8 +93,8 @@ def test_oc_failure(problem, expect):
 
     check = LoggingCheck(execute_module, task_vars_config_base)
 
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.exec_oc(logging_namespace, 'get foo', [])
+    with pytest.raises(CouldNotUseOc) as excinfo:
+        check.exec_oc('get foo', [])
     assert expect in str(excinfo)
 
 
@@ -124,25 +120,32 @@ def test_is_active(groups, logging_deployed, is_active):
     assert LoggingCheck(None, task_vars).is_active() == is_active
 
 
-@pytest.mark.parametrize('pod_output, expect_pods, expect_error', [
+@pytest.mark.parametrize('pod_output, expect_pods', [
     (
-        'No resources found.',
-        None,
-        'No pods were found for the "es"',
-    ),
-    (
-        json.dumps({'items': [plain_kibana_pod, plain_es_pod, plain_curator_pod, fluentd_pod_node1]}),
+        json.dumps({'items': [plain_es_pod]}),
         [plain_es_pod],
-        None,
     ),
 ])
-def test_get_pods_for_component(pod_output, expect_pods, expect_error):
-    check = canned_loggingcheck(lambda namespace, cmd, args: pod_output)
-    pods, error = check.get_pods_for_component(
-        logging_namespace,
-        "es",
-    )
-    assert_error(error, expect_error)
+def test_get_pods_for_component(pod_output, expect_pods):
+    check = canned_loggingcheck(lambda *_: pod_output)
+    pods = check.get_pods_for_component("es")
+    assert pods == expect_pods
+
+
+@pytest.mark.parametrize('exec_oc_output, expect_error', [
+    (
+        'No resources found.',
+        MissingComponentPods,
+    ),
+    (
+        '{"items": null}',
+        MissingComponentPods,
+    ),
+])
+def test_get_pods_for_component_fail(exec_oc_output, expect_error):
+    check = canned_loggingcheck(lambda *_: exec_oc_output)
+    with pytest.raises(expect_error):
+        check.get_pods_for_component("es")
 
 
 @pytest.mark.parametrize('name, pods, expected_pods', [
@@ -159,7 +162,7 @@ def test_get_pods_for_component(pod_output, expect_pods, expect_error):
 
 ], ids=lambda argvals: argvals[0])
 def test_get_not_running_pods_no_container_status(name, pods, expected_pods):
-    check = canned_loggingcheck(lambda exec_module, namespace, cmd, args, task_vars: '')
+    check = canned_loggingcheck(lambda *_: '')
     result = check.not_running_pods(pods)
 
     assert result == expected_pods

@@ -69,7 +69,29 @@ def test_check_running_pods(pods, expect_pods):
     assert pods == expect_pods
 
 
-@pytest.mark.parametrize('name, json_response, uuid, timeout, extra_words', [
+def test_bad_config_param():
+    with pytest.raises(OpenShiftCheckException) as error:
+        LoggingIndexTime(task_vars=dict(openshift_check_logging_index_timeout_seconds="foo")).run()
+    assert 'InvalidTimeout' == error.value.name
+
+
+def test_no_running_pods():
+    check = LoggingIndexTime()
+    check.get_pods_for_component = lambda *_: [not_running_kibana_pod]
+    with pytest.raises(OpenShiftCheckException) as error:
+        check.run()
+    assert 'kibanaNoRunningPods' == error.value.name
+
+
+def test_with_running_pods():
+    check = LoggingIndexTime()
+    check.get_pods_for_component = lambda *_: [plain_running_kibana_pod, plain_running_elasticsearch_pod]
+    check.curl_kibana_with_uuid = lambda *_: SAMPLE_UUID
+    check.wait_until_cmd_or_err = lambda *_: None
+    assert not check.run().get("failed")
+
+
+@pytest.mark.parametrize('name, json_response, uuid, timeout', [
     (
         'valid count in response',
         {
@@ -77,94 +99,72 @@ def test_check_running_pods(pods, expect_pods):
         },
         SAMPLE_UUID,
         0.001,
-        [],
     ),
 ], ids=lambda argval: argval[0])
-def test_wait_until_cmd_or_err_succeeds(name, json_response, uuid, timeout, extra_words):
+def test_wait_until_cmd_or_err_succeeds(name, json_response, uuid, timeout):
     check = canned_loggingindextime(lambda *_: json.dumps(json_response))
     check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout)
 
 
-@pytest.mark.parametrize('name, json_response, uuid, timeout, extra_words', [
+@pytest.mark.parametrize('name, json_response, timeout, expect_error', [
     (
         'invalid json response',
         {
             "invalid_field": 1,
         },
-        SAMPLE_UUID,
         0.001,
-        ["invalid response", "Elasticsearch"],
+        'esInvalidResponse',
     ),
     (
         'empty response',
         {},
-        SAMPLE_UUID,
         0.001,
-        ["invalid response", "Elasticsearch"],
+        'esInvalidResponse',
     ),
     (
         'valid response but invalid match count',
         {
             "count": 0,
         },
-        SAMPLE_UUID,
         0.005,
-        ["expecting match", SAMPLE_UUID, "0.005s"],
+        'NoMatchFound',
     )
 ], ids=lambda argval: argval[0])
-def test_wait_until_cmd_or_err(name, json_response, uuid, timeout, extra_words):
+def test_wait_until_cmd_or_err(name, json_response, timeout, expect_error):
     check = canned_loggingindextime(lambda *_: json.dumps(json_response))
     with pytest.raises(OpenShiftCheckException) as error:
-        check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout)
+        check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, SAMPLE_UUID, timeout)
 
-    for word in extra_words:
-        assert word in str(error)
-
-
-@pytest.mark.parametrize('name, json_response, uuid, extra_words', [
-    (
-        'correct response code, found unique id is returned',
-        {
-            "statusCode": 404,
-        },
-        "sample unique id",
-        ["sample unique id"],
-    ),
-], ids=lambda argval: argval[0])
-def test_curl_kibana_with_uuid(name, json_response, uuid, extra_words):
-    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
-    check.generate_uuid = lambda: uuid
-
-    result = check.curl_kibana_with_uuid(plain_running_kibana_pod)
-
-    for word in extra_words:
-        assert word in result
+    assert expect_error == error.value.name
 
 
-@pytest.mark.parametrize('name, json_response, uuid, extra_words', [
+def test_curl_kibana_with_uuid():
+    check = canned_loggingindextime(lambda *_: json.dumps({"statusCode": 404}))
+    check.generate_uuid = lambda: SAMPLE_UUID
+    assert SAMPLE_UUID == check.curl_kibana_with_uuid(plain_running_kibana_pod)
+
+
+@pytest.mark.parametrize('name, json_response, expect_error', [
     (
         'invalid json response',
         {
             "invalid_field": "invalid",
         },
-        SAMPLE_UUID,
-        ["invalid response returned", 'Missing "statusCode" key'],
+        'kibanaInvalidResponse',
     ),
     (
         'wrong error code in response',
         {
             "statusCode": 500,
         },
-        SAMPLE_UUID,
-        ["Expecting error code", "500"],
+        'kibanaInvalidReturnCode',
     ),
 ], ids=lambda argval: argval[0])
-def test_failed_curl_kibana_with_uuid(name, json_response, uuid, extra_words):
+def test_failed_curl_kibana_with_uuid(name, json_response, expect_error):
     check = canned_loggingindextime(lambda *_: json.dumps(json_response))
-    check.generate_uuid = lambda: uuid
+    check.generate_uuid = lambda: SAMPLE_UUID
 
     with pytest.raises(OpenShiftCheckException) as error:
         check.curl_kibana_with_uuid(plain_running_kibana_pod)
 
-    for word in extra_words:
-        assert word in str(error)
+    assert expect_error == error.value.name

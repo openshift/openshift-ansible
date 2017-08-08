@@ -1,15 +1,11 @@
 import pytest
 import json
 
-from openshift_checks.logging.fluentd import Fluentd
+from openshift_checks.logging.fluentd import Fluentd, OpenShiftCheckExceptionList, OpenShiftCheckException
 
 
-def assert_error(error, expect_error):
-    if expect_error:
-        assert error
-        assert expect_error in error
-    else:
-        assert not error
+def assert_error_in_list(expect_err, errorlist):
+    assert any(err.name == expect_err for err in errorlist), "{} in {}".format(str(expect_err), str(errorlist))
 
 
 fluentd_pod_node1 = {
@@ -57,45 +53,60 @@ fluentd_node3_unlabeled = {
 }
 
 
+def test_get_fluentd_pods():
+    check = Fluentd()
+    check.exec_oc = lambda *_: json.dumps(dict(items=[fluentd_node1]))
+    check.get_pods_for_component = lambda *_: [fluentd_pod_node1]
+    assert not check.run()
+
+
 @pytest.mark.parametrize('pods, nodes, expect_error', [
     (
         [],
         [],
-        'No nodes appear to be defined',
+        'NoNodesDefined',
     ),
     (
         [],
         [fluentd_node3_unlabeled],
-        'There are no nodes with the fluentd label',
+        'NoNodesLabeled',
     ),
     (
         [],
         [fluentd_node1, fluentd_node3_unlabeled],
-        'Fluentd will not aggregate logs from these nodes.',
+        'NodesUnlabeled',
     ),
     (
         [],
         [fluentd_node2],
-        "nodes are supposed to have a Fluentd pod but do not",
+        'MissingFluentdPod',
     ),
     (
         [fluentd_pod_node1, fluentd_pod_node1],
         [fluentd_node1],
-        'more Fluentd pods running than nodes labeled',
+        'TooManyFluentdPods',
     ),
     (
         [fluentd_pod_node2_down],
         [fluentd_node2],
-        "Fluentd pods are supposed to be running",
-    ),
-    (
-        [fluentd_pod_node1],
-        [fluentd_node1],
-        None,
+        'FluentdNotRunning',
     ),
 ])
-def test_get_fluentd_pods(pods, nodes, expect_error):
+def test_get_fluentd_pods_errors(pods, nodes, expect_error):
     check = Fluentd()
-    check.exec_oc = lambda ns, cmd, args: json.dumps(dict(items=nodes))
-    error = check.check_fluentd(pods)
-    assert_error(error, expect_error)
+    check.exec_oc = lambda *_: json.dumps(dict(items=nodes))
+
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.check_fluentd(pods)
+    if isinstance(excinfo.value, OpenShiftCheckExceptionList):
+        assert_error_in_list(expect_error, excinfo.value)
+    else:
+        assert expect_error == excinfo.value.name
+
+
+def test_bad_oc_node_list():
+    check = Fluentd()
+    check.exec_oc = lambda *_: "this isn't even json"
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.get_nodes_by_name()
+    assert 'BadOcNodeList' == excinfo.value.name
