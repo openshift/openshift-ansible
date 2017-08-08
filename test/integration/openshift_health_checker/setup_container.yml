@@ -45,7 +45,7 @@
       with_dict: "{{ l_host_vars | default({}) }}"
 
 - hosts: all
-  tasks: 
+  tasks:
 
     # run before openshift_version to prevent it breaking
     - include: preflight/playbooks/tasks/enable_repo.yml
@@ -60,4 +60,3 @@
     # put it back like it was for the tests
     - include: preflight/playbooks/tasks/enable_repo.yml
       vars: { repo_name: "ose-3.2", enabled: False }
-
