@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: Only one Fluentd nodeselector key pair should be provided
-  when: "{{ openshift_logging_fluentd_nodeselector.keys() | count }} > 1"
+  when: openshift_logging_fluentd_nodeselector.keys() | count > 1
 
 - fail:
     msg: Application logs destination is required
