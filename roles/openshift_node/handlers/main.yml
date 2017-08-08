@@ -27,11 +27,13 @@
   when:
   - (not skip_node_svc_handlers | default(False) | bool)
   - not (node_service_status_changed | default(false) | bool)
+  failed_when: false
   notify: node failed
 
 - name: node failed
   command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-node
   when: l_openshift_node_restart_node_result | failed
+  failed_when: l_openshift_node_restart_node_result | failed
 
 - name: reload sysctl.conf
   command: /sbin/sysctl -p

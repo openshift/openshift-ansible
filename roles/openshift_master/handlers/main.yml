@@ -1,12 +1,18 @@
 ---
+- name: master failed
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master -u {{ openshift.common.service_type }}-master-api -u {{ openshift.common.service_type }}-master-controllers
+  when: api_available_output.stdout != 'ok'
+  failed_when: api_available_output.stdout != 'ok'
+
 - name: restart master api
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
-  when: (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  when: (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
   notify: Verify API Server
+  failed_when: false
 
 - name: restart master controllers
   systemd: name={{ openshift.common.service_type }}-master-controllers state=restarted
-  when: (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  when: (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
@@ -28,3 +34,5 @@
   retries: 120
   delay: 1
   changed_when: false
+  failed_when: false
+  notify: master failed
