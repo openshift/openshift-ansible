@@ -185,7 +185,7 @@
 ###############################################################################
 
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
-  hosts: oo_masters_to_config
+  hosts: oo_first_master
   roles:
   - { role: openshift_cli }
   vars:
@@ -204,7 +204,6 @@
     changed_when:
     - reconcile_cluster_role_result.stdout != ''
     - reconcile_cluster_role_result.rc == 0
-    run_once: true
 
   - name: Reconcile Cluster Role Bindings
     command: >
@@ -220,12 +219,10 @@
     changed_when:
     - reconcile_bindings_result.stdout != ''
     - reconcile_bindings_result.rc == 0
-    run_once: true
 
   - name: Reconcile Jenkins Pipeline Role Bindings
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm -o name
-    run_once: true
     register: reconcile_jenkins_role_binding_result
     changed_when:
     - reconcile_jenkins_role_binding_result.stdout != ''
@@ -239,13 +236,11 @@
     changed_when:
     - reconcile_scc_result.stdout != ''
     - reconcile_scc_result.rc == 0
-    run_once: true
 
   - name: Migrate storage post policy reconciliation
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=* --confirm
-    run_once: true
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when: openshift_upgrade_post_storage_migration_enabled | default(true,true) | bool
     failed_when:
@@ -266,10 +261,10 @@
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
+                                 | oo_select_keys(groups.oo_first_master)
                                  | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
   - set_fact:
-      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
+      reconcile_failed: "{{ groups.oo_first_master | difference(reconcile_completed) }}"
   - fail:
       msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
     when: reconcile_failed | length > 0
