@@ -4,6 +4,7 @@ Ansible module for rpm-based systems determining existing package version inform
 """
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.six import string_types
 
 IMPORT_EXCEPTION = None
 try:
@@ -82,11 +83,16 @@ def _check_pkg_versions(found_pkgs_dict, expected_pkgs_dict):
             continue
 
         found_versions = [_parse_version(version) for version in found_pkgs_dict[pkg_name]]
-        expected_version = _parse_version(pkg["version"])
-        if expected_version not in found_versions:
+
+        if isinstance(pkg["version"], string_types):
+            expected_versions = [_parse_version(pkg["version"])]
+        else:
+            expected_versions = [_parse_version(version) for version in pkg["version"]]
+
+        if not set(expected_versions) & set(found_versions):
             invalid_pkg_versions[pkg_name] = {
                 "found_versions": found_versions,
-                "required_version": expected_version,
+                "required_versions": expected_versions,
             }
 
     if not_found_pkgs:
@@ -106,7 +112,7 @@ def _check_pkg_versions(found_pkgs_dict, expected_pkgs_dict):
                 "The following packages were found to be installed with an incorrect version: {}".format('\n'.join([
                     "    \n{}\n    Required version: {}\n    Found versions: {}".format(
                         pkg_name,
-                        pkg["required_version"],
+                        ', '.join(pkg["required_versions"]),
                         ', '.join([version for version in pkg["found_versions"]]))
                     for pkg_name, pkg in invalid_pkg_versions.items()
                 ]))
