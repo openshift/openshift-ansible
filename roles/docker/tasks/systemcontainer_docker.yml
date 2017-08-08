@@ -84,20 +84,25 @@
         - openshift.common.no_proxy is defined
         - openshift.common.no_proxy != ''
 
+# Note: Red Hat registry is hardcoded to "v3.6" for the time being
+# https://github.com/openshift/openshift-ansible/pull/5031#issuecomment-321185417
 - block:
 
     - name: Set to default prepend
       set_fact:
         l_docker_image_prepend: "gscrivano"
+        l_docker_image_tag: "latest"
 
     - name: Use Red Hat Registry for image when distribution is Red Hat
       set_fact:
         l_docker_image_prepend: "registry.access.redhat.com/openshift3"
+        l_docker_image_tag: "v3.6"
       when: ansible_distribution == 'RedHat'
 
     - name: Use Fedora Registry for image when distribution is Fedora
       set_fact:
         l_docker_image_prepend: "registry.fedoraproject.org/f25"
+        l_docker_image_tag: "latest"
       when: ansible_distribution == 'Fedora'
 
     # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
@@ -110,7 +115,7 @@
 
     - name: Set the full image name
       set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:{{ l_docker_image_tag }}"
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
 - name: Pre-pull Container Engine System Container image
