@@ -19,5 +19,4 @@ openshift_master_valid_grant_methods:
 - prompt
 - deny
 
-l_is_ha: "{{ openshift.master.ha is defined and openshift.master.ha | bool }}"
 openshift_master_is_scaleup_host: False
