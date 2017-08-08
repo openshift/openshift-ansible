@@ -1,0 +1,5 @@
+---
+
+- name: Disable master service
+  systemd: name={{ openshift.common.service_type }}-master state=stopped enabled=no masked=yes
+  ignore_errors: true
