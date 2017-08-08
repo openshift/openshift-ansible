@@ -157,8 +157,6 @@ openshift_logging_storage_access_modes: "{{ openshift_hosted_logging_storage_acc
 # mux - secure_forward listener service
 openshift_logging_mux_allow_external: False
 openshift_logging_use_mux: "{{ openshift_logging_mux_allow_external | default(False) }}"
-# this tells the fluentd node agent to use mux instead of sending directly to Elasticsearch
-openshift_logging_use_mux_client: False
 openshift_logging_mux_hostname: "{{ 'mux.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
 openshift_logging_mux_port: 24284
 openshift_logging_mux_cpu_limit: 500m
