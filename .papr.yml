@@ -33,7 +33,7 @@ packages:
 context: 'fedora/25/atomic'
 
 env:
-  OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.1
+  OPENSHIFT_IMAGE_TAG: v3.6.0
 
 tests:
   - ./.papr.sh

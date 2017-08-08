@@ -5,16 +5,10 @@
     image: preflight-aos-package-checks
     l_host_vars:
       deployment_type: openshift-enterprise
-      openshift_release: 3.3
+      openshift_release: 3.2
 
 - name: Failure when AOS version doesn't match openshift_release
   hosts: all
-  pre_tasks:
-
-    # run before roles to prevent openshift_version breaking
-    - include: tasks/enable_repo.yml
-      vars: { repo_name: "ose-3.3" }
-
   roles:
     - openshift_health_checker
 
@@ -23,10 +17,10 @@
 
         # put the repo back to disabled
         - include: tasks/enable_repo.yml
-          vars: { repo_name: "ose-3.3", repo_enabled: 0 }
+          vars: { repo_name: "ose-3.2", repo_enabled: 0 }
         # test with wrong repo enabled
         - include: tasks/enable_repo.yml
-          vars: { repo_name: "ose-3.2" }
+          vars: { repo_name: "ose-3.3" }
         - action: openshift_health_check
           args:
             checks: [ 'package_version' ]

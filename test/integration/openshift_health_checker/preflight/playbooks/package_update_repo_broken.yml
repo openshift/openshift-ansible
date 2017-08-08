@@ -8,12 +8,6 @@
 
 - name: Fails when a repo definition is completely broken
   hosts: all
-  pre_tasks:
-
-    # run before roles to prevent openshift_version breaking
-    - include: tasks/enable_repo.yml
-      vars: { repo_name: "ose-3.2" }
-
   roles:
     - openshift_health_checker
 
