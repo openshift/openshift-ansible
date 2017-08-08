@@ -14,8 +14,8 @@ class EtcdTraffic(OpenShiftCheck):
         group_names = self.get_var("group_names", default=[])
         valid_group_names = "etcd" in group_names
 
-        version = self.get_var("openshift", "common", "short_version")
-        valid_version = version in ("3.4", "3.5", "1.4", "1.5")
+        version = self.get_major_minor_version(self.get_var("openshift_image_tag"))
+        valid_version = version in ((3, 4), (3, 5))
 
         return super(EtcdTraffic, self).is_active() and valid_group_names and valid_version
 
