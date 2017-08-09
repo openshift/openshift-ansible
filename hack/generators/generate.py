@@ -204,7 +204,7 @@ def parse_annotations(line):
 
 def print_rvar_table(rvar_table):
     table_lines = []
-    keys = ("name", "description", "default", "required")
+    keys = ("name", "description", "default", "required", "choices")
 
     sizes = {}
     for key in keys:
@@ -212,7 +212,10 @@ def print_rvar_table(rvar_table):
 
     for item in rvar_table:
         for key in keys:
-            sizes[key] = max(sizes[key], len(item[key]))
+            if type(item[key]) == type([]):
+                sizes[key] = max(sizes[key], len(",".join(item[key])))
+            else:
+                sizes[key] = max(sizes[key], len(item[key]))
 
     headers = []
     delimiters = []
@@ -231,7 +234,10 @@ def print_rvar_table(rvar_table):
         item = ki_items[key]
         data = []
         for key in keys:
-            data.append(" " + item[key].ljust(sizes[key] + 1))
+            if type(item[key]) == type([]):
+                data.append(" " + ",".join(item[key]).ljust(sizes[key] + 1))
+            else:
+                data.append(" " + item[key].ljust(sizes[key] + 1))
         table_lines.append("|{}|".format("|".join(data)))
     return "\n".join(table_lines)
 
