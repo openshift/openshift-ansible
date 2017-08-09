@@ -32,8 +32,11 @@
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 - name: Install Docker
-  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
   when: not openshift.common.is_atomic | bool
+  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
+  register: l_result
+  retries: 4
+  until: l_result.rc is defined and l_result.rc == 0
 
 - block:
   # Extend the default Docker service unit file when using iptables-services

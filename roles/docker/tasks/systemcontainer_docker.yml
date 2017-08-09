@@ -13,10 +13,12 @@
       in your inventory file.
 
 - name: Ensure container-selinux is installed
+  when: not openshift.common.is_atomic | bool
   package:
     name: container-selinux
     state: present
-  when: not openshift.common.is_atomic | bool
+  register: l_result
+  until: l_result.rc is defined and l_result.rc == 0
 
 # Used to pull and install the system container
 - name: Ensure atomic is installed

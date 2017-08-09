@@ -1,5 +1,6 @@
 ---
 - name: Install cockpit-ws
+  when: not openshift.common.is_containerized | bool
   package: name={{ item }} state=present
   with_items:
     - cockpit-ws
@@ -7,7 +8,9 @@
     - cockpit-bridge
     - cockpit-docker
     - "{{ cockpit_plugins }}"
-  when: not openshift.common.is_containerized | bool
+  register: l_result
+  retries: 4
+  until: l_result.rc | default(-1) == 0 or l_result.results is defined and 'No package matching' in l_result.results.0
 
 - name: Enable cockpit-ws
   systemd:
