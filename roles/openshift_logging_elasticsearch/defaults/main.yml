@@ -37,6 +37,9 @@ openshift_logging_elasticsearch_storage_group: '65534'
 
 openshift_logging_es_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
 
+# config the es plugin to write kibana index based on the index mode
+openshift_logging_elasticsearch_kibana_index_mode: 'unique'
+
 # this is used to determine if this is an operations deployment or a non-ops deployment
 # simply used for naming purposes
 openshift_logging_elasticsearch_ops_deployment: false
