@@ -5,39 +5,39 @@ Util functions for performing checks on an Elasticsearch, Fluentd, and Kibana st
 import json
 import os
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 
 
 class LoggingCheck(OpenShiftCheck):
-    """Base class for logging component checks"""
+    """Base class for OpenShift aggregated logging component checks"""
+
+    # FIXME: this should not be listed as a check, since it is not meant to be
+    # run by itself.
 
     name = "logging"
+    logging_namespace = "logging"
 
-    @classmethod
-    def is_active(cls, task_vars):
-        return super(LoggingCheck, cls).is_active(task_vars) and cls.is_first_master(task_vars)
+    def is_active(self):
+        logging_deployed = self.get_var("openshift_hosted_logging_deploy", default=False)
+        return logging_deployed and super(LoggingCheck, self).is_active() and self.is_first_master()
 
-    @staticmethod
-    def is_first_master(task_vars):
-        """Run only on first master and only when logging is configured. Returns: bool"""
-        logging_deployed = get_var(task_vars, "openshift_hosted_logging_deploy", default=True)
+    def is_first_master(self):
+        """Determine if running on first master. Returns: bool"""
         # Note: It would be nice to use membership in oo_first_master group, however for now it
         # seems best to avoid requiring that setup and just check this is the first master.
-        hostname = get_var(task_vars, "ansible_ssh_host") or [None]
-        masters = get_var(task_vars, "groups", "masters", default=None) or [None]
-        return logging_deployed and masters[0] == hostname
+        hostname = self.get_var("ansible_ssh_host") or [None]
+        masters = self.get_var("groups", "masters", default=None) or [None]
+        return masters[0] == hostname
 
-    def run(self, tmp, task_vars):
-        pass
+    def run(self):
+        return {}
 
-    def get_pods_for_component(self, execute_module, namespace, logging_component, task_vars):
+    def get_pods_for_component(self, namespace, logging_component):
         """Get all pods for a given component. Returns: list of pods for component, error string"""
         pod_output = self.exec_oc(
-            execute_module,
             namespace,
             "get pods -l component={} -o json".format(logging_component),
             [],
-            task_vars
         )
         try:
             pods = json.loads(pod_output)
@@ -45,7 +45,7 @@ class LoggingCheck(OpenShiftCheck):
                 raise ValueError()
         except ValueError:
             # successful run but non-parsing data generally means there were no pods in the namespace
-            return None, 'There are no pods in the {} namespace. Is logging deployed?'.format(namespace)
+            return None, 'No pods were found for the "{}" logging component.'.format(logging_component)
 
         return pods['items'], None
 
@@ -63,14 +63,13 @@ class LoggingCheck(OpenShiftCheck):
             )
         ]
 
-    @staticmethod
-    def exec_oc(execute_module=None, namespace="logging", cmd_str="", extra_args=None, task_vars=None):
+    def exec_oc(self, namespace="logging", cmd_str="", extra_args=None):
         """
         Execute an 'oc' command in the remote host.
         Returns: output of command and namespace,
         or raises OpenShiftCheckException on error
         """
-        config_base = get_var(task_vars, "openshift", "common", "config_base")
+        config_base = self.get_var("openshift", "common", "config_base")
         args = {
             "namespace": namespace,
             "config_file": os.path.join(config_base, "master", "admin.kubeconfig"),
@@ -78,7 +77,7 @@ class LoggingCheck(OpenShiftCheck):
             "extra_args": list(extra_args) if extra_args else [],
         }
 
-        result = execute_module("ocutil", args, None, task_vars)
+        result = self.execute_module("ocutil", args)
         if result.get("failed"):
             msg = (
                 'Unexpected error using `oc` to validate the logging stack components.\n'

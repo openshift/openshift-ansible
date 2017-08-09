@@ -1,5 +1,8 @@
-# pylint: disable=missing-docstring
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException, get_var
+"""Check that available RPM packages match the required versions."""
+
+import re
+
+from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 from openshift_checks.mixins import NotContainerizedMixin
 
 
@@ -9,48 +12,49 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
     name = "package_version"
     tags = ["preflight"]
 
+    # NOTE: versions outside those specified are mapped to least/greatest
     openshift_to_ovs_version = {
-        "3.6": ["2.6", "2.7"],
-        "3.5": ["2.6", "2.7"],
-        "3.4": "2.4",
+        (3, 4): "2.4",
+        (3, 5): ["2.6", "2.7"],
+        (3, 6): ["2.6", "2.7"],
     }
 
     openshift_to_docker_version = {
-        "3.1": "1.8",
-        "3.2": "1.10",
-        "3.3": "1.10",
-        "3.4": "1.12",
+        (3, 1): "1.8",
+        (3, 2): "1.10",
+        (3, 3): "1.10",
+        (3, 4): "1.12",
+        (3, 5): "1.12",
+        (3, 6): "1.12",
     }
 
-    # map major release versions across releases
-    # to a common major version
-    openshift_major_release_version = {
-        "1": "3",
+    # map major OpenShift release versions across releases to a common major version
+    map_major_release_version = {
+        1: 3,
     }
 
-    @classmethod
-    def is_active(cls, task_vars):
+    def is_active(self):
         """Skip hosts that do not have package requirements."""
-        group_names = get_var(task_vars, "group_names", default=[])
+        group_names = self.get_var("group_names", default=[])
         master_or_node = 'masters' in group_names or 'nodes' in group_names
-        return super(PackageVersion, cls).is_active(task_vars) and master_or_node
+        return super(PackageVersion, self).is_active() and master_or_node
 
-    def run(self, tmp, task_vars):
-        rpm_prefix = get_var(task_vars, "openshift", "common", "service_type")
-        openshift_release = get_var(task_vars, "openshift_release", default='')
-        deployment_type = get_var(task_vars, "openshift_deployment_type")
+    def run(self):
+        rpm_prefix = self.get_var("openshift", "common", "service_type")
+        openshift_release = self.get_var("openshift_release", default='')
+        deployment_type = self.get_var("openshift_deployment_type")
         check_multi_minor_release = deployment_type in ['openshift-enterprise']
 
         args = {
             "package_list": [
                 {
                     "name": "openvswitch",
-                    "version": self.get_required_ovs_version(task_vars),
+                    "version": self.get_required_ovs_version(),
                     "check_multi": False,
                 },
                 {
                     "name": "docker",
-                    "version": self.get_required_docker_version(task_vars),
+                    "version": self.get_required_docker_version(),
                     "check_multi": False,
                 },
                 {
@@ -71,55 +75,52 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
             ],
         }
 
-        return self.execute_module("aos_version", args, tmp=tmp, task_vars=task_vars)
+        return self.execute_module("aos_version", args)
 
-    def get_required_ovs_version(self, task_vars):
-        """Return the correct Open vSwitch version for the current OpenShift version.
-        If the current OpenShift version is >= 3.5, ensure Open vSwitch version 2.6,
-        Else ensure Open vSwitch version 2.4"""
-        openshift_version = self.get_openshift_version(task_vars)
+    def get_required_ovs_version(self):
+        """Return the correct Open vSwitch version(s) for the current OpenShift version."""
+        openshift_version = self.get_openshift_version_tuple()
 
-        if float(openshift_version) < 3.5:
-            return self.openshift_to_ovs_version["3.4"]
+        earliest = min(self.openshift_to_ovs_version)
+        latest = max(self.openshift_to_ovs_version)
+        if openshift_version < earliest:
+            return self.openshift_to_ovs_version[earliest]
+        if openshift_version > latest:
+            return self.openshift_to_ovs_version[latest]
 
-        ovs_version = self.openshift_to_ovs_version.get(str(openshift_version))
-        if ovs_version:
-            return ovs_version
+        ovs_version = self.openshift_to_ovs_version.get(openshift_version)
+        if not ovs_version:
+            msg = "There is no recommended version of Open vSwitch for the current version of OpenShift: {}"
+            raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
 
-        msg = "There is no recommended version of Open vSwitch for the current version of OpenShift: {}"
-        raise OpenShiftCheckException(msg.format(openshift_version))
+        return ovs_version
 
-    def get_required_docker_version(self, task_vars):
-        """Return the correct Docker version for the current OpenShift version.
-        If the OpenShift version is 3.1, ensure Docker version 1.8.
-        If the OpenShift version is 3.2 or 3.3, ensure Docker version 1.10.
-        If the current OpenShift version is >= 3.4, ensure Docker version 1.12."""
-        openshift_version = self.get_openshift_version(task_vars)
+    def get_required_docker_version(self):
+        """Return the correct Docker version(s) for the current OpenShift version."""
+        openshift_version = self.get_openshift_version_tuple()
 
-        if float(openshift_version) >= 3.4:
-            return self.openshift_to_docker_version["3.4"]
+        earliest = min(self.openshift_to_docker_version)
+        latest = max(self.openshift_to_docker_version)
+        if openshift_version < earliest:
+            return self.openshift_to_docker_version[earliest]
+        if openshift_version > latest:
+            return self.openshift_to_docker_version[latest]
 
-        docker_version = self.openshift_to_docker_version.get(str(openshift_version))
-        if docker_version:
-            return docker_version
+        docker_version = self.openshift_to_docker_version.get(openshift_version)
+        if not docker_version:
+            msg = "There is no recommended version of Docker for the current version of OpenShift: {}"
+            raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
 
-        msg = "There is no recommended version of Docker for the current version of OpenShift: {}"
-        raise OpenShiftCheckException(msg.format(openshift_version))
+        return docker_version
 
-    def get_openshift_version(self, task_vars):
-        openshift_version = get_var(task_vars, "openshift_image_tag")
-        if openshift_version and openshift_version[0] == 'v':
-            openshift_version = openshift_version[1:]
+    def get_openshift_version_tuple(self):
+        """Return received image tag as a normalized (X, Y) minor version tuple."""
+        version = self.get_var("openshift_image_tag")
+        comps = [int(component) for component in re.findall(r'\d+', version)]
 
-        return self.parse_version(openshift_version)
-
-    def parse_version(self, version):
-        components = version.split(".")
-        if not components or len(components) < 2:
+        if len(comps) < 2:
             msg = "An invalid version of OpenShift was found for this host: {}"
             raise OpenShiftCheckException(msg.format(version))
 
-        if components[0] in self.openshift_major_release_version:
-            components[0] = self.openshift_major_release_version[components[0]]
-
-        return '.'.join(components[:2])
+        comps[0] = self.map_major_release_version.get(comps[0], comps[0])
+        return tuple(comps[0:2])

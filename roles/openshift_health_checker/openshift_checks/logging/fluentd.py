@@ -1,37 +1,30 @@
-"""
-Module for performing checks on an Fluentd logging deployment
-"""
+"""Check for an aggregated logging Fluentd deployment"""
 
 import json
 
-from openshift_checks import get_var
 from openshift_checks.logging.logging import LoggingCheck
 
 
 class Fluentd(LoggingCheck):
-    """Module that checks an integrated logging Fluentd deployment"""
+    """Check for an aggregated logging Fluentd deployment"""
+
     name = "fluentd"
     tags = ["health", "logging"]
 
-    logging_namespace = None
-
-    def run(self, tmp, task_vars):
+    def run(self):
         """Check various things and gather errors. Returns: result as hash"""
 
-        self.logging_namespace = get_var(task_vars, "openshift_logging_namespace", default="logging")
+        self.logging_namespace = self.get_var("openshift_logging_namespace", default="logging")
         fluentd_pods, error = super(Fluentd, self).get_pods_for_component(
-            self.execute_module,
             self.logging_namespace,
             "fluentd",
-            task_vars,
         )
         if error:
             return {"failed": True, "changed": False, "msg": error}
-        check_error = self.check_fluentd(fluentd_pods, task_vars)
+        check_error = self.check_fluentd(fluentd_pods)
 
         if check_error:
             msg = ("The following Fluentd deployment issue was found:"
-                   "\n-------\n"
                    "{}".format(check_error))
             return {"failed": True, "changed": False, "msg": msg}
 
@@ -53,10 +46,9 @@ class Fluentd(LoggingCheck):
             ).format(label=node_selector)
         return fluentd_nodes, None
 
-    @staticmethod
-    def _check_node_labeling(nodes_by_name, fluentd_nodes, node_selector, task_vars):
+    def _check_node_labeling(self, nodes_by_name, fluentd_nodes, node_selector):
         """Note if nodes are not labeled as expected. Returns: error string"""
-        intended_nodes = get_var(task_vars, 'openshift_logging_fluentd_hosts', default=['--all'])
+        intended_nodes = self.get_var('openshift_logging_fluentd_hosts', default=['--all'])
         if not intended_nodes or '--all' in intended_nodes:
             intended_nodes = nodes_by_name.keys()
         nodes_missing_labels = set(intended_nodes) - set(fluentd_nodes.keys())
@@ -114,13 +106,15 @@ class Fluentd(LoggingCheck):
             ))
         return None
 
-    def check_fluentd(self, pods, task_vars):
+    def check_fluentd(self, pods):
         """Verify fluentd is running everywhere. Returns: error string"""
 
-        node_selector = get_var(task_vars, 'openshift_logging_fluentd_nodeselector',
-                                default='logging-infra-fluentd=true')
+        node_selector = self.get_var(
+            'openshift_logging_fluentd_nodeselector',
+            default='logging-infra-fluentd=true'
+        )
 
-        nodes_by_name, error = self.get_nodes_by_name(task_vars)
+        nodes_by_name, error = self.get_nodes_by_name()
 
         if error:
             return error
@@ -129,7 +123,7 @@ class Fluentd(LoggingCheck):
             return error
 
         error_msgs = []
-        error = self._check_node_labeling(nodes_by_name, fluentd_nodes, node_selector, task_vars)
+        error = self._check_node_labeling(nodes_by_name, fluentd_nodes, node_selector)
         if error:
             error_msgs.append(error)
         error = self._check_nodes_have_fluentd(pods, fluentd_nodes)
@@ -148,9 +142,13 @@ class Fluentd(LoggingCheck):
 
         return '\n'.join(error_msgs)
 
-    def get_nodes_by_name(self, task_vars):
+    def get_nodes_by_name(self):
         """Retrieve all the node definitions. Returns: dict(name: node), error string"""
-        nodes_json = self._exec_oc("get nodes -o json", [], task_vars)
+        nodes_json = self.exec_oc(
+            self.logging_namespace,
+            "get nodes -o json",
+            []
+        )
         try:
             nodes = json.loads(nodes_json)
         except ValueError:  # no valid json - should not happen
@@ -161,10 +159,3 @@ class Fluentd(LoggingCheck):
             node['metadata']['name']: node
             for node in nodes['items']
         }, None
-
-    def _exec_oc(self, cmd_str, extra_args, task_vars):
-        return super(Fluentd, self).exec_oc(self.execute_module,
-                                            self.logging_namespace,
-                                            cmd_str,
-                                            extra_args,
-                                            task_vars)

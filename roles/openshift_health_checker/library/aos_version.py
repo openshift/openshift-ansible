@@ -1,5 +1,5 @@
 #!/usr/bin/python
-'''
+"""
 Ansible module for yum-based systems determining if multiple releases
 of an OpenShift package are available, and if the release requested
 (if any) is available down to the given precision.
@@ -16,7 +16,7 @@ of release availability already. Without duplicating all that, we would
 like the user to have a helpful error message if we detect things will
 not work out right. Note that if openshift_release is not specified in
 the inventory, the version comparison checks just pass.
-'''
+"""
 
 from ansible.module_utils.basic import AnsibleModule
 # NOTE: because of the dependency on yum (Python 2-only), this module does not
@@ -32,7 +32,7 @@ except ImportError as err:
 
 
 class AosVersionException(Exception):
-    '''Base exception class for package version problems'''
+    """Base exception class for package version problems"""
     def __init__(self, message, problem_pkgs=None):
         Exception.__init__(self, message)
         self.problem_pkgs = problem_pkgs

@@ -13,6 +13,7 @@ except ImportError:
     display = Display()
 
 from ansible.plugins.action import ActionBase
+from ansible.module_utils.six import string_types
 
 # Augment sys.path so that we can import checks from a directory relative to
 # this callback plugin.
@@ -37,9 +38,10 @@ class ActionModule(ActionBase):
             return result
 
         try:
-            known_checks = self.load_known_checks()
+            known_checks = self.load_known_checks(tmp, task_vars)
             args = self._task.args
-            resolved_checks = resolve_checks(args.get("checks", []), known_checks.values())
+            requested_checks = normalize(args.get('checks', []))
+            resolved_checks = resolve_checks(requested_checks, known_checks.values())
         except OpenShiftCheckException as e:
             result["failed"] = True
             result["msg"] = str(e)
@@ -47,22 +49,19 @@ class ActionModule(ActionBase):
 
         result["checks"] = check_results = {}
 
-        user_disabled_checks = [
-            check.strip()
-            for check in task_vars.get("openshift_disable_check", "").split(",")
-        ]
+        user_disabled_checks = normalize(task_vars.get('openshift_disable_check', []))
 
         for check_name in resolved_checks:
             display.banner("CHECK [{} : {}]".format(check_name, task_vars["ansible_host"]))
             check = known_checks[check_name]
 
-            if not check.is_active(task_vars):
+            if not check.is_active():
                 r = dict(skipped=True, skipped_reason="Not active for this host")
             elif check_name in user_disabled_checks:
                 r = dict(skipped=True, skipped_reason="Disabled by user request")
             else:
                 try:
-                    r = check.run(tmp, task_vars)
+                    r = check.run()
                 except OpenShiftCheckException as e:
                     r = dict(
                         failed=True,
@@ -78,7 +77,7 @@ class ActionModule(ActionBase):
         result["changed"] = any(r.get("changed", False) for r in check_results.values())
         return result
 
-    def load_known_checks(self):
+    def load_known_checks(self, tmp, task_vars):
         load_checks()
 
         known_checks = {}
@@ -91,7 +90,7 @@ class ActionModule(ActionBase):
                         check_name,
                         cls.__module__, cls.__name__,
                         other_cls.__module__, other_cls.__name__))
-            known_checks[check_name] = cls(execute_module=self._execute_module)
+            known_checks[check_name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
         return known_checks
 
 
@@ -134,3 +133,14 @@ def resolve_checks(names, all_checks):
         resolved.update(tag_to_checks[tag])
 
     return resolved
+
+
+def normalize(checks):
+    """Return a clean list of check names.
+
+    The input may be a comma-separated string or a sequence. Leading and
+    trailing whitespace characters are removed. Empty items are discarded.
+    """
+    if isinstance(checks, string_types):
+        checks = checks.split(',')
+    return [name.strip() for name in checks if name.strip()]

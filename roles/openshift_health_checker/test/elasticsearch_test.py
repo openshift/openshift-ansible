@@ -6,14 +6,6 @@ from openshift_checks.logging.elasticsearch import Elasticsearch
 task_vars_config_base = dict(openshift=dict(common=dict(config_base='/etc/origin')))
 
 
-def canned_elasticsearch(exec_oc=None):
-    """Create an Elasticsearch check object with canned exec_oc method"""
-    check = Elasticsearch("dummy")  # fails if a module is actually invoked
-    if exec_oc:
-        check._exec_oc = exec_oc
-    return check
-
-
 def assert_error(error, expect_error):
     if expect_error:
         assert error
@@ -50,10 +42,10 @@ split_es_pod = {
 
 
 def test_check_elasticsearch():
-    assert 'No logging Elasticsearch pods' in canned_elasticsearch().check_elasticsearch([], {})
+    assert 'No logging Elasticsearch pods' in Elasticsearch().check_elasticsearch([])
 
     # canned oc responses to match so all the checks pass
-    def _exec_oc(cmd, args, task_vars):
+    def _exec_oc(ns, cmd, args):
         if '_cat/master' in cmd:
             return 'name logging-es'
         elif '/_nodes' in cmd:
@@ -65,7 +57,9 @@ def test_check_elasticsearch():
         else:
             raise Exception(cmd)
 
-    assert not canned_elasticsearch(_exec_oc).check_elasticsearch([plain_es_pod], {})
+    check = Elasticsearch(None, {})
+    check.exec_oc = _exec_oc
+    assert not check.check_elasticsearch([plain_es_pod])
 
 
 def pods_by_name(pods):
@@ -88,9 +82,9 @@ def pods_by_name(pods):
 ])
 def test_check_elasticsearch_masters(pods, expect_error):
     test_pods = list(pods)
-    check = canned_elasticsearch(lambda cmd, args, task_vars: test_pods.pop(0)['_test_master_name_str'])
-
-    errors = check._check_elasticsearch_masters(pods_by_name(pods), task_vars_config_base)
+    check = Elasticsearch(None, task_vars_config_base)
+    check.execute_module = lambda cmd, args: {'result': test_pods.pop(0)['_test_master_name_str']}
+    errors = check._check_elasticsearch_masters(pods_by_name(pods))
     assert_error(''.join(errors), expect_error)
 
 
@@ -124,9 +118,10 @@ es_node_list = {
     ),
 ])
 def test_check_elasticsearch_node_list(pods, node_list, expect_error):
-    check = canned_elasticsearch(lambda cmd, args, task_vars: json.dumps(node_list))
+    check = Elasticsearch(None, task_vars_config_base)
+    check.execute_module = lambda cmd, args: {'result': json.dumps(node_list)}
 
-    errors = check._check_elasticsearch_node_list(pods_by_name(pods), task_vars_config_base)
+    errors = check._check_elasticsearch_node_list(pods_by_name(pods))
     assert_error(''.join(errors), expect_error)
 
 
@@ -149,9 +144,10 @@ def test_check_elasticsearch_node_list(pods, node_list, expect_error):
 ])
 def test_check_elasticsearch_cluster_health(pods, health_data, expect_error):
     test_health_data = list(health_data)
-    check = canned_elasticsearch(lambda cmd, args, task_vars: json.dumps(test_health_data.pop(0)))
+    check = Elasticsearch(None, task_vars_config_base)
+    check.execute_module = lambda cmd, args: {'result': json.dumps(test_health_data.pop(0))}
 
-    errors = check._check_es_cluster_health(pods_by_name(pods), task_vars_config_base)
+    errors = check._check_es_cluster_health(pods_by_name(pods))
     assert_error(''.join(errors), expect_error)
 
 
@@ -174,7 +170,8 @@ def test_check_elasticsearch_cluster_health(pods, health_data, expect_error):
     ),
 ])
 def test_check_elasticsearch_diskspace(disk_data, expect_error):
-    check = canned_elasticsearch(lambda cmd, args, task_vars: disk_data)
+    check = Elasticsearch(None, task_vars_config_base)
+    check.execute_module = lambda cmd, args: {'result': disk_data}
 
-    errors = check._check_elasticsearch_diskspace(pods_by_name([plain_es_pod]), task_vars_config_base)
+    errors = check._check_elasticsearch_diskspace(pods_by_name([plain_es_pod]))
     assert_error(''.join(errors), expect_error)
