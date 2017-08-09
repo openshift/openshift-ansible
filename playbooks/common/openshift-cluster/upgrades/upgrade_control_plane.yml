@@ -91,6 +91,9 @@
 
   - include_vars: ../../../../roles/openshift_master/vars/main.yml
 
+  - name: Remove any legacy systemd units
+    include: ../../../../roles/openshift_master/tasks/clean_systemd_units.yml
+
   - name: Update systemd units
     include: ../../../../roles/openshift_master/tasks/systemd_units.yml
 

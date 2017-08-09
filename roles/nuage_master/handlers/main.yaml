@@ -3,10 +3,6 @@
   become: yes
   systemd: name=nuage-openshift-monitor state=restarted
 
-- name: restart master
-  systemd: name={{ openshift.common.service_type }}-master state=restarted
-  when: (not openshift_master_ha | bool) and (not master_service_status_changed | default(false))
-
 - name: restart master api
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
   when: >

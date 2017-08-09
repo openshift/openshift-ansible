@@ -1,9 +1,4 @@
 ---
-- name: Restart master
-  service:
-    name: "{{ openshift.common.service_type }}-master"
-    state: restarted
-  when: not openshift_master_ha | bool
 - name: Restart master API
   service:
     name: "{{ openshift.common.service_type }}-master-api"

@@ -31,7 +31,6 @@
   with_items:
     - etcd_container
     - openvswitch
-    - "{{ openshift.common.service_type }}-master"
     - "{{ openshift.common.service_type }}-master-api"
     - "{{ openshift.common.service_type }}-master-controllers"
     - "{{ openshift.common.service_type }}-node"

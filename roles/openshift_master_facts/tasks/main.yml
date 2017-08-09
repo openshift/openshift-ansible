@@ -32,7 +32,7 @@
   openshift_facts:
     role: master
     local_facts:
-      cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
+      cluster_method: "{{ openshift_master_cluster_method | default('native') }}"
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
       cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
       debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level) }}"

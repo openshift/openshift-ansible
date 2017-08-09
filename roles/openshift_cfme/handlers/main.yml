@@ -6,19 +6,14 @@
 # See: https://github.com/openshift/openshift-ansible/pull/4041#discussion_r118770782
 ######################################################################
 
-- name: restart master
-  systemd: name={{ openshift.common.service_type }}-master state=restarted
-  when: (openshift.master.ha is not defined or not openshift.master.ha | bool) and (not (master_service_status_changed | default(false) | bool))
-  notify: Verify API Server
-
 - name: restart master api
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
-  when: (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  when: (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
   notify: Verify API Server
 
 - name: restart master controllers
   systemd: name={{ openshift.common.service_type }}-master-controllers state=restarted
-  when: (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  when: (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
