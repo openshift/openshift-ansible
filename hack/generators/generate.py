@@ -277,6 +277,9 @@ def generate_rvar_table(defaults_file):
             else:
                 annotations = empty_annotation()
 
+            if default == '"{{ None }}"':
+                default = "None"
+
             annotations["name"] = parts[0]
             annotations["default"] = default
             rvar_table.append(annotations)
