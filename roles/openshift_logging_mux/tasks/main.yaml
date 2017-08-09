@@ -165,7 +165,7 @@
     component: mux
     logging_component: mux
     deploy_name: "logging-{{ component }}"
-    image: "{{ openshift_logging_image_prefix }}logging-fluentd:{{ openshift_logging_image_version }}"
+    image: "{{ openshift_logging_mux_image_prefix }}logging-fluentd:{{ openshift_logging_mux_image_version }}"
     es_host: "{{ openshift_logging_mux_app_host }}"
     es_port: "{{ openshift_logging_mux_app_port }}"
     ops_host: "{{ openshift_logging_mux_ops_host }}"
