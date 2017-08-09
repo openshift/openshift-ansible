@@ -45,7 +45,6 @@
   become: yes
   template: src=nuage-openshift-monitor.j2 dest=/usr/share/nuage-openshift-monitor/nuage-openshift-monitor.yaml owner=root mode=0644
   notify:
-    - restart master
     - restart master api
     - restart master controllers
     - restart nuage-openshift-monitor

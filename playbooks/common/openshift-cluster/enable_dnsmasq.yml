@@ -37,7 +37,7 @@
       dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
       yaml_key: dnsConfig.bindAddress
       yaml_value: "{{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}"
-    notify: restart master
+    notify: restart master api
   - meta: flush_handlers
 
 - name: Configure nodes for dnsmasq
