@@ -7,7 +7,7 @@
       action: add
       protocol: "{{ item.port.split('/')[1] }}"
       port: "{{ item.port.split('/')[0] }}"
-    when: item.cond
+    when: item.cond | default(True)
     with_items: "{{ r_openshift_hosted_registry_os_firewall_allow }}"
 
   - name: Remove iptables rules
@@ -16,7 +16,7 @@
       action: remove
       protocol: "{{ item.port.split('/')[1] }}"
       port: "{{ item.port.split('/')[0] }}"
-    when: item.cond
+    when: item.cond | default(True)
     with_items: "{{ r_openshift_hosted_registry_os_firewall_deny }}"
 
 - when: os_firewall_enabled | bool and os_firewall_use_firewalld | bool
@@ -27,7 +27,7 @@
       permanent: true
       immediate: true
       state: enabled
-    when: item.cond
+    when: item.cond | default(True)
     with_items: "{{ r_openshift_hosted_registry_os_firewall_allow }}"
 
   - name: Remove firewalld allow rules
@@ -36,5 +36,5 @@
       permanent: true
       immediate: true
       state: disabled
-    when: item.cond
+    when: item.cond | default(True)
     with_items: "{{ r_openshift_hosted_registry_os_firewall_deny }}"
