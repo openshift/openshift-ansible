@@ -1,6 +1,7 @@
 ---
-# Namespace for the CFME project
-openshift_cfme_project: cfme
+# Namespace for the CFME project (Note: changed post-3.6 to use
+# reserved 'openshift-' namespace prefix)
+openshift_cfme_project: openshift-cfme
 # Namespace/project description
 openshift_cfme_project_description: ManageIQ - CloudForms Management Engine
 # Basic user assigned the `admin` role for the project
