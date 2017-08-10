@@ -3,7 +3,10 @@ Ansible action plugin to execute health checks in OpenShift clusters.
 """
 import sys
 import os
+import base64
 import traceback
+import errno
+import json
 from collections import defaultdict
 
 from ansible.plugins.action import ActionBase
@@ -38,8 +41,13 @@ class ActionModule(ActionBase):
         # storing the information we need in the result.
         result['playbook_context'] = task_vars.get('r_openshift_health_checker_playbook_context')
 
+        # if the user wants to write check results to files, they provide this directory:
+        output_dir = task_vars.get("openshift_checks_output_dir")
+        if output_dir:
+            output_dir = os.path.join(output_dir, task_vars["ansible_host"])
+
         try:
-            known_checks = self.load_known_checks(tmp, task_vars)
+            known_checks = self.load_known_checks(tmp, task_vars, output_dir)
             args = self._task.args
             requested_checks = normalize(args.get('checks', []))
 
@@ -65,21 +73,20 @@ class ActionModule(ActionBase):
 
         for name in resolved_checks:
             display.banner("CHECK [{} : {}]".format(name, task_vars["ansible_host"]))
-            check = known_checks[name]
-            check_results[name] = run_check(name, check, user_disabled_checks)
-            if check.changed:
-                check_results[name]["changed"] = True
+            check_results[name] = run_check(name, known_checks[name], user_disabled_checks, output_dir)
 
         result["changed"] = any(r.get("changed") for r in check_results.values())
         if any(r.get("failed") for r in check_results.values()):
             result["failed"] = True
             result["msg"] = "One or more checks failed"
+        write_result_to_output_dir(output_dir, result)
 
         return result
 
-    def load_known_checks(self, tmp, task_vars):
+    def load_known_checks(self, tmp, task_vars, output_dir=None):
         """Find all existing checks and return a mapping of names to instances."""
         load_checks()
+        want_full_results = bool(output_dir)
 
         known_checks = {}
         for cls in OpenShiftCheck.subclasses():
@@ -90,7 +97,12 @@ class ActionModule(ActionBase):
                     "duplicate check name '{}' in: '{}' and '{}'"
                     "".format(name, full_class_name(cls), full_class_name(other_cls))
                 )
-            known_checks[name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
+            known_checks[name] = cls(
+                execute_module=self._execute_module,
+                tmp=tmp,
+                task_vars=task_vars,
+                want_full_results=want_full_results
+            )
         return known_checks
 
 
@@ -185,8 +197,10 @@ def normalize(checks):
     return [name.strip() for name in checks if name.strip()]
 
 
-def run_check(name, check, user_disabled_checks):
+def run_check(name, check, user_disabled_checks, output_dir=None):
     """Run a single check if enabled and return a result dict."""
+
+    # determine if we're going to run the check (not inactive or disabled)
     if name in user_disabled_checks or '*' in user_disabled_checks:
         return dict(skipped=True, skipped_reason="Disabled by user request")
 
@@ -201,12 +215,134 @@ def run_check(name, check, user_disabled_checks):
     if not is_active:
         return dict(skipped=True, skipped_reason="Not active for this host")
 
+    # run the check
+    result = {}
     try:
-        return check.run()
+        result = check.run()
     except OpenShiftCheckException as exc:
-        return dict(failed=True, msg=str(exc))
+        check.register_failure(exc)
     except Exception as exc:
-        return dict(failed=True, msg=str(exc), exception=traceback.format_exc())
+        check.register_failure("\n".join([str(exc), traceback.format_exc()]))
+
+    # process the check state; compose the result hash, write files as needed
+    if check.changed:
+        result["changed"] = True
+    if check.failures or result.get("failed"):
+        if "msg" in result:  # failure result has msg; combine with any registered failures
+            check.register_failure(result.get("msg"))
+        result["failures"] = [(fail.name, str(fail)) for fail in check.failures]
+        result["failed"] = True
+        result["msg"] = "\n".join(str(fail) for fail in check.failures)
+        write_to_output_file(output_dir, name + ".failures.json", result["failures"])
+    if check.logs:
+        write_to_output_file(output_dir, name + ".log.json", check.logs)
+    if check.files_to_save:
+        write_files_to_save(output_dir, check)
+
+    return result
+
+
+def prepare_output_dir(dirname):
+    """Create the directory, including parents. Return bool for success/failure."""
+    try:
+        os.makedirs(dirname)
+        return True
+    except OSError as exc:
+        # trying to create existing dir leads to error;
+        # that error is fine, but for any other, assume the dir is not there
+        return exc.errno == errno.EEXIST
+
+
+def copy_remote_file_to_dir(check, file_to_save, output_dir, fname):
+    """Copy file from remote host to local file in output_dir, if given."""
+    if not output_dir or not prepare_output_dir(output_dir):
+        return
+    local_file = os.path.join(output_dir, fname)
+
+    # pylint: disable=broad-except; do not need to do anything about failure to write dir/file
+    # and do not want exceptions to break anything.
+    try:
+        # NOTE: it would have been nice to copy the file directly without loading it into
+        # memory, but there does not seem to be a good way to do this via ansible.
+        result = check.execute_module("slurp", dict(src=file_to_save), register=False)
+        if result.get("failed"):
+            display.warning("Could not retrieve file {}: {}".format(file_to_save, result.get("msg")))
+            return
+
+        content = result["content"]
+        if result.get("encoding") == "base64":
+            content = base64.b64decode(content)
+        with open(local_file, "wb") as outfile:
+            outfile.write(content)
+    except Exception as exc:
+        display.warning("Failed writing remote {} to local {}: {}".format(file_to_save, local_file, exc))
+        return
+
+
+def _no_fail(obj):
+    # pylint: disable=broad-except; do not want serialization to fail for any reason
+    try:
+        return str(obj)
+    except Exception:
+        return "[not serializable]"
+
+
+def write_to_output_file(output_dir, filename, data):
+    """If output_dir provided, write data to file. Serialize as JSON if data is not a string."""
+
+    if not output_dir or not prepare_output_dir(output_dir):
+        return
+    filename = os.path.join(output_dir, filename)
+    try:
+        with open(filename, 'w') as outfile:
+            if isinstance(data, string_types):
+                outfile.write(data)
+            else:
+                json.dump(data, outfile, sort_keys=True, indent=4, default=_no_fail)
+    # pylint: disable=broad-except; do not want serialization/write to break for any reason
+    except Exception as exc:
+        display.warning("Could not write output file {}: {}".format(filename, exc))
+
+
+def write_result_to_output_dir(output_dir, result):
+    """If output_dir provided, write the result as json to result.json.
+
+    Success/failure of the write is recorded as "output_files" in the result hash afterward.
+    Otherwise this is much like write_to_output_file.
+    """
+
+    if not output_dir:
+        return
+    if not prepare_output_dir(output_dir):
+        result["output_files"] = "Error creating output directory " + output_dir
+        return
+
+    filename = os.path.join(output_dir, "result.json")
+    try:
+        with open(filename, 'w') as outfile:
+            json.dump(result, outfile, sort_keys=True, indent=4, default=_no_fail)
+        result["output_files"] = "Check results for this host written to " + filename
+    # pylint: disable=broad-except; do not want serialization/write to break for any reason
+    except Exception as exc:
+        result["output_files"] = "Error writing check results to {}:\n{}".format(filename, exc)
+
+
+def write_files_to_save(output_dir, check):
+    """Write files to check subdir in output dir."""
+    if not output_dir:
+        return
+    output_dir = os.path.join(output_dir, check.name)
+    seen_file = defaultdict(lambda: 0)
+    for file_to_save in check.files_to_save:
+        fname = file_to_save.filename
+        while seen_file[fname]:  # just to be sure we never re-write a file, append numbers as needed
+            seen_file[fname] += 1
+            fname = "{}.{}".format(fname, seen_file[fname])
+        seen_file[fname] += 1
+        if file_to_save.remote_filename:
+            copy_remote_file_to_dir(check, file_to_save.remote_filename, output_dir, fname)
+        else:
+            write_to_output_file(output_dir, fname, file_to_save.contents)
 
 
 def full_class_name(cls):

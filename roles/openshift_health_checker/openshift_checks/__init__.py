@@ -2,9 +2,11 @@
 Health checks for OpenShift clusters.
 """
 
+import json
 import operator
 import os
 import time
+import collections
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from importlib import import_module
@@ -28,7 +30,7 @@ class OpenShiftCheckException(Exception):
 
 
 class OpenShiftCheckExceptionList(OpenShiftCheckException):
-    """A container for multiple logging errors that may be detected in one check."""
+    """A container for multiple errors that may be detected in one check."""
     def __init__(self, errors):
         self.errors = errors
         super(OpenShiftCheckExceptionList, self).__init__(
@@ -41,29 +43,53 @@ class OpenShiftCheckExceptionList(OpenShiftCheckException):
         return self.errors[index]
 
 
+FileToSave = collections.namedtuple("FileToSave", "filename contents remote_filename")
+
+
+# pylint: disable=too-many-instance-attributes; all represent significantly different state.
+# Arguably they could be separated into two hashes, one for storing parameters, and one for
+# storing result state; but that smells more like clutter than clarity.
 @six.add_metaclass(ABCMeta)
 class OpenShiftCheck(object):
-    """
-    A base class for defining checks for an OpenShift cluster environment.
+    """A base class for defining checks for an OpenShift cluster environment.
 
-    Expect optional params: method execute_module, dict task_vars, and string tmp.
+    Optional init params: method execute_module, dict task_vars, and string tmp
     execute_module is expected to have a signature compatible with _execute_module
     from ansible plugins/action/__init__.py, e.g.:
     def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None, *args):
     This is stored so that it can be invoked in subclasses via check.execute_module("name", args)
     which provides the check's stored task_vars and tmp.
+
+    Optional init param: want_full_results
+    If the check can gather logs, tarballs, etc., do so when True; but no need to spend
+    the time if they're not wanted (won't be written to output directory).
     """
 
-    def __init__(self, execute_module=None, task_vars=None, tmp=None):
+    def __init__(self, execute_module=None, task_vars=None, tmp=None, want_full_results=False):
+        # store a method for executing ansible modules from the check
         self._execute_module = execute_module
+        # the task variables and tmpdir passed into the health checker task
         self.task_vars = task_vars or {}
         self.tmp = tmp
+        # a boolean for disabling the gathering of results (files, computations) that won't
+        # actually be recorded/used
+        self.want_full_results = want_full_results
+
         # mainly for testing purposes; see execute_module_with_retries
         self._module_retries = 3
         self._module_retry_interval = 5  # seconds
 
+        # state to be recorded for inspection after the check runs:
+        #
         # set to True when the check changes the host, for accurate total "changed" count
         self.changed = False
+        # list of OpenShiftCheckException for check to report (alternative to returning a failed result)
+        self.failures = []
+        # list of FileToSave - files the check specifies to be written locally if so configured
+        self.files_to_save = []
+        # log messages for the check - tuples of (description, msg) where msg is serializable.
+        # These are intended to be a sequential record of what the check observed and determined.
+        self.logs = []
 
     @abstractproperty
     def name(self):
@@ -86,7 +112,13 @@ class OpenShiftCheck(object):
 
     @abstractmethod
     def run(self):
-        """Executes a check, normally implemented as a module."""
+        """Executes a check against a host and returns a result hash similar to Ansible modules.
+
+        Actually the direction ahead is to record state in the attributes and
+        not bother building a result hash. Instead, return an empty hash and let
+        the action plugin fill it in. Or raise an OpenShiftCheckException.
+        Returning a hash may become deprecated if it does not prove necessary.
+        """
         return {}
 
     @classmethod
@@ -98,7 +130,43 @@ class OpenShiftCheck(object):
             for subclass in subclass.subclasses():
                 yield subclass
 
-    def execute_module(self, module_name=None, module_args=None):
+    def register_failure(self, error):
+        """Record in the check that a failure occurred.
+
+        Recorded failures are merged into the result hash for now. They are also saved to output directory
+        (if provided) <check>.failures.json and registered as a log entry for context <check>.log.json.
+        """
+        # It should be an exception; make it one if not
+        if not isinstance(error, OpenShiftCheckException):
+            error = OpenShiftCheckException(str(error))
+        self.failures.append(error)
+        # duplicate it in the logs so it can be seen in the context of any
+        # information that led to the failure
+        self.register_log("failure: " + error.name, str(error))
+
+    def register_log(self, context, msg):
+        """Record an entry for the check log.
+
+        Notes are intended to serve as context of the whole sequence of what the check observed.
+        They are be saved as an ordered list in a local check log file.
+        They are not to included in the result or in the ansible log; it's just for the record.
+        """
+        self.logs.append([context, msg])
+
+    def register_file(self, filename, contents=None, remote_filename=""):
+        """Record a file that a check makes available to be saved individually to output directory.
+
+        Either file contents should be passed in, or a file to be copied from the remote host
+        should be specified. Contents that are not a string are to be serialized as JSON.
+
+        NOTE: When copying a file from remote host, it is slurped into memory as base64, meaning
+        you should avoid using this on huge files (more than say 10M).
+        """
+        if contents is None and not remote_filename:
+            raise OpenShiftCheckException("File data/source not specified; this is a bug in the check.")
+        self.files_to_save.append(FileToSave(filename, contents, remote_filename))
+
+    def execute_module(self, module_name=None, module_args=None, save_as_name=None, register=True):
         """Invoke an Ansible module from a check.
 
         Invoke stored _execute_module, normally copied from the action
@@ -110,6 +178,12 @@ class OpenShiftCheck(object):
         Ansible version).
 
         So e.g. check.execute_module("foo", dict(arg1=...))
+
+        save_as_name specifies a file name for saving the result to an output directory,
+        if needed, and is intended to uniquely identify the result of invoking execute_module.
+        If not provided, the module name will be used.
+        If register is set False, then the result won't be registered in logs or files to save.
+
         Return: result hash from module execution.
         """
         if self._execute_module is None:
@@ -117,7 +191,20 @@ class OpenShiftCheck(object):
                 self.__class__.__name__ +
                 " invoked execute_module without providing the method at initialization."
             )
-        return self._execute_module(module_name, module_args, self.tmp, self.task_vars)
+        result = self._execute_module(module_name, module_args, self.tmp, self.task_vars)
+        if result.get("changed"):
+            self.changed = True
+        for output in ["result", "stdout"]:
+            # output is often JSON; attempt to decode
+            try:
+                result[output + "_json"] = json.loads(result[output])
+            except (KeyError, ValueError):
+                pass
+
+        if register:
+            self.register_log("execute_module: " + module_name, result)
+            self.register_file(save_as_name or module_name + ".json", result)
+        return result
 
     def execute_module_with_retries(self, module_name, module_args):
         """Run execute_module and retry on failure."""
@@ -188,8 +275,12 @@ class OpenShiftCheck(object):
                 'There is a bug in this check. While trying to convert variable \n'
                 '  "{var}={value}"\n'
                 'the given converter cannot be used or failed unexpectedly:\n'
-                '{error}'.format(var=".".join(keys), value=value, error=error)
-            )
+                '{type}: {error}'.format(
+                    var=".".join(keys),
+                    value=value,
+                    type=error.__class__.__name__,
+                    error=error
+                ))
 
     @staticmethod
     def get_major_minor_version(openshift_image_tag):
@@ -231,7 +322,9 @@ class OpenShiftCheck(object):
             mount_point = os.path.dirname(mount_point)
 
         try:
-            return mount_for_path[mount_point]
+            mount = mount_for_path[mount_point]
+            self.register_log("mount point for " + path, mount)
+            return mount
         except KeyError:
             known_mounts = ', '.join('"{}"'.format(mount) for mount in sorted(mount_for_path))
             raise OpenShiftCheckException(
@@ -259,7 +352,7 @@ def load_checks(path=None, subpkg=""):
             modules = modules + load_checks(os.path.join(path, name), subpkg + "." + name)
             continue
 
-        if name.endswith(".py") and not name.startswith(".") and name not in LOADER_EXCLUDES:
+        if name.endswith(".py") and name not in LOADER_EXCLUDES:
             modules.append(import_module(__package__ + subpkg + "." + name[:-3]))
 
     return modules

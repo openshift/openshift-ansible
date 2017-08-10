@@ -78,7 +78,7 @@ class LoggingCheck(OpenShiftCheck):
         """Returns the namespace in which logging is configured to deploy."""
         return self.get_var("openshift_logging_namespace", default="logging")
 
-    def exec_oc(self, cmd_str="", extra_args=None):
+    def exec_oc(self, cmd_str="", extra_args=None, save_as_name=None):
         """
         Execute an 'oc' command in the remote host.
         Returns: output of command and namespace,
@@ -92,7 +92,7 @@ class LoggingCheck(OpenShiftCheck):
             "extra_args": list(extra_args) if extra_args else [],
         }
 
-        result = self.execute_module("ocutil", args)
+        result = self.execute_module("ocutil", args, save_as_name=save_as_name)
         if result.get("failed"):
             if result['result'] == '[Errno 2] No such file or directory':
                 raise CouldNotUseOc(

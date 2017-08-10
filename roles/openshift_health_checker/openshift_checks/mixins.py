@@ -49,5 +49,4 @@ class DockerHostMixin(object):
                 "    {deps}\n{msg}"
             ).format(deps=',\n    '.join(self.dependencies), msg=msg)
         failed = result.get("failed", False) or result.get("rc", 0) != 0
-        self.changed = result.get("changed", False)
         return msg, failed
