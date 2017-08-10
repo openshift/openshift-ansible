@@ -1657,6 +1657,9 @@ class OCProject(OpenShiftCLI):
                 # Create it here
                 api_rval = oadm_project.create()
 
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
                 # return the created object
                 api_rval = oadm_project.get()
 
