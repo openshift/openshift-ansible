@@ -70,7 +70,7 @@
   with_items: "{{ master_api_proxy.stdout_lines | default([]) }}"
 
 - name: Restore Master API AWS Options
-  when: bool and openshift.master.cluster_method == "native"
+  when: openshift.master.cluster_method == "native"
       and master_api_aws.rc == 0 and
       not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
   lineinfile:
