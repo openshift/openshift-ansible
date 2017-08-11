@@ -5,7 +5,6 @@
     yaml_key: assetConfig.metricsPublicURL
     yaml_value: "https://{{ openshift_metrics_hawkular_hostname}}/hawkular/metrics"
   notify:
-  - restart master
   - restart master api
   - restart master controllers
   tags:
