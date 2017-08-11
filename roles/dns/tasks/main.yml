@@ -1,7 +1,10 @@
 ---
 - name: Install Bind
-  package: name=bind state=present
   when: not openshift.common.is_containerized | bool
+  package: name=bind state=present
+  register: l_result
+  retries: 4
+  until: l_result.rc | default(-1) == 0
 
 - name: Create docker build dir
   file: path=/tmp/dockerbuild state=directory
