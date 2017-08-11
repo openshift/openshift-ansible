@@ -1,6 +1,5 @@
 """Check Docker storage driver and usage."""
 import json
-import os.path
 import re
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 from openshift_checks.mixins import DockerHostMixin
@@ -252,7 +251,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "msg": "Specified 'max_overlay_usage_percent' is not a percentage: {}".format(threshold),
             }
 
-        mount = self.find_ansible_mount(path, self.get_var("ansible_mounts"))
+        mount = self.find_ansible_mount(path)
         try:
             free_bytes = mount['size_available']
             total_bytes = mount['size_total']
@@ -275,22 +274,3 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
             }
 
         return {}
-
-    # TODO(lmeyer): migrate to base class
-    @staticmethod
-    def find_ansible_mount(path, ansible_mounts):
-        """Return the mount point for path from ansible_mounts."""
-
-        mount_for_path = {mount['mount']: mount for mount in ansible_mounts}
-        mount_point = path
-        while mount_point not in mount_for_path:
-            if mount_point in ["/", ""]:  # "/" not in ansible_mounts???
-                break
-            mount_point = os.path.dirname(mount_point)
-
-        try:
-            return mount_for_path[mount_point]
-        except KeyError:
-            known_mounts = ', '.join('"{}"'.format(mount) for mount in sorted(mount_for_path)) or 'none'
-            msg = 'Unable to determine mount point for path "{}". Known mount points: {}.'
-            raise OpenShiftCheckException(msg.format(path, known_mounts))

@@ -1,6 +1,7 @@
 import pytest
 
-from openshift_checks.etcd_volume import EtcdVolume, OpenShiftCheckException
+from openshift_checks.etcd_volume import EtcdVolume
+from openshift_checks import OpenShiftCheckException
 
 
 @pytest.mark.parametrize('ansible_mounts,extra_words', [
@@ -15,7 +16,7 @@ def test_cannot_determine_available_disk(ansible_mounts, extra_words):
     with pytest.raises(OpenShiftCheckException) as excinfo:
         EtcdVolume(fake_execute_module, task_vars).run()
 
-    for word in 'Unable to find etcd storage mount point'.split() + extra_words:
+    for word in ['Unable to determine mount point'] + extra_words:
         assert word in str(excinfo.value)
 
 

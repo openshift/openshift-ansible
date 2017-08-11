@@ -1,6 +1,5 @@
 """Check that there is enough disk space in predefined paths."""
 
-import os.path
 import tempfile
 
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException
@@ -55,9 +54,6 @@ class DiskAvailability(OpenShiftCheck):
 
     def run(self):
         group_names = self.get_var("group_names")
-        ansible_mounts = self.get_var("ansible_mounts")
-        ansible_mounts = {mount['mount']: mount for mount in ansible_mounts}
-
         user_config = self.get_var("openshift_check_min_host_disk_gb", default={})
         try:
             # For backwards-compatibility, if openshift_check_min_host_disk_gb
@@ -80,7 +76,7 @@ class DiskAvailability(OpenShiftCheck):
         # not part of the official recommendation but present in the user
         # configuration.
         for path, recommendation in self.recommended_disk_space_bytes.items():
-            free_bytes = self.free_bytes(path, ansible_mounts)
+            free_bytes = self.free_bytes(path)
             recommended_bytes = max(recommendation.get(name, 0) for name in group_names)
 
             config = user_config.get(path, {})
@@ -127,22 +123,17 @@ class DiskAvailability(OpenShiftCheck):
 
         return {}
 
-    @staticmethod
-    def free_bytes(path, ansible_mounts):
+    def free_bytes(self, path):
         """Return the size available in path based on ansible_mounts."""
-        mount_point = path
-        # arbitry value to prevent an infinite loop, in the unlike case that '/'
-        # is not in ansible_mounts.
-        max_depth = 32
-        while mount_point not in ansible_mounts and max_depth > 0:
-            mount_point = os.path.dirname(mount_point)
-            max_depth -= 1
-
+        mount = self.find_ansible_mount(path)
         try:
-            free_bytes = ansible_mounts[mount_point]['size_available']
+            return mount['size_available']
         except KeyError:
-            known_mounts = ', '.join('"{}"'.format(mount) for mount in sorted(ansible_mounts)) or 'none'
-            msg = 'Unable to determine disk availability for "{}". Known mount points: {}.'
-            raise OpenShiftCheckException(msg.format(path, known_mounts))
-
-        return free_bytes
+            raise OpenShiftCheckException(
+                'Unable to retrieve disk availability for "{path}".\n'
+                'Ansible facts included a matching mount point for this path:\n'
+                '  {mount}\n'
+                'however it is missing the size_available field.\n'
+                'To investigate, you can inspect the output of `ansible -m setup <host>`'
+                ''.format(path=path, mount=mount)
+            )

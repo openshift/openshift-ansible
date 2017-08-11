@@ -197,6 +197,31 @@ class OpenShiftCheck(object):
         components = tuple(int(x) for x in components[:2])
         return components
 
+    def find_ansible_mount(self, path):
+        """Return the mount point for path from ansible_mounts."""
+
+        # reorganize list of mounts into dict by path
+        mount_for_path = {
+            mount['mount']: mount
+            for mount
+            in self.get_var('ansible_mounts')
+        }
+
+        # NOTE: including base cases '/' and '' to ensure the loop ends
+        mount_targets = set(mount_for_path.keys()) | {'/', ''}
+        mount_point = path
+        while mount_point not in mount_targets:
+            mount_point = os.path.dirname(mount_point)
+
+        try:
+            return mount_for_path[mount_point]
+        except KeyError:
+            known_mounts = ', '.join('"{}"'.format(mount) for mount in sorted(mount_for_path))
+            raise OpenShiftCheckException(
+                'Unable to determine mount point for path "{}".\n'
+                'Known mount points: {}.'.format(path, known_mounts or 'none')
+            )
+
 
 LOADER_EXCLUDES = (
     "__init__.py",
