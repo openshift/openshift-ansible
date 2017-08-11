@@ -1,5 +1,4 @@
 ---
-- include: evaluate_groups.yml
 
 - name: Update Master configs
   hosts: oo_masters
