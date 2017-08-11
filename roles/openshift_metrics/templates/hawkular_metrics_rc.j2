@@ -69,6 +69,8 @@ spec:
               fieldPath: metadata.namespace
         - name: MASTER_URL
           value: "{{ openshift_metrics_master_url }}"
+        - name: TRUSTSTORE_AUTHORITIES
+          value: "/hawkular-metrics-certs/tls.truststore.crt"
         - name: OPENSHIFT_KUBE_PING_NAMESPACE
           valueFrom:
             fieldRef:
