@@ -22,7 +22,7 @@
 - name: Install or Update HA controller master system container
   oc_atomic_container:
     name: "{{ openshift.common.service_type }}-master-controllers"
-    image: "{{{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{ openshift.master.master_system_image }}:{{ openshift_image_tag }}"
+    image: "{{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.master.master_system_image }}:{{ openshift_image_tag }}"
     state: latest
     values:
       - COMMAND=controllers
