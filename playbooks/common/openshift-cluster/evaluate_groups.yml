@@ -8,7 +8,7 @@
   - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
     fail:
       msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
-    when: "{{ g_etcd_hosts is not defined and g_new_etcd_hosts is not defined}}"
+    when: g_etcd_hosts is not defined and g_new_etcd_hosts is not defined
 
   - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
     fail:

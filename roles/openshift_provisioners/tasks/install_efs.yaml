@@ -67,4 +67,4 @@
   register: efs_output
   failed_when: efs_output.rc == 1 and 'exists' not in efs_output.stderr
   check_mode: no
-  when: efs_anyuid.stdout.find("system:serviceaccount:{{openshift_provisioners_project}}:provisioners-efs") == -1
+  when: efs_anyuid.stdout.find("system:serviceaccount:" + openshift_provisioners_project + ":provisioners-efs") == -1
