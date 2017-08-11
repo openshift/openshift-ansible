@@ -1,4 +1,7 @@
 ---
+r_openshift_master_firewall_enabled: True
+r_openshift_master_use_firewalld: False
+
 openshift_node_ips: []
 r_openshift_master_clean_install: false
 r_openshift_master_etcd3_storage: false

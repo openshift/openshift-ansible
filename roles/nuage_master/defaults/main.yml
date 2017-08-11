@@ -1,4 +1,7 @@
 ---
+r_nuage_master_firewall_enabled: True
+r_nuage_master_use_firewalld: False
+
 nuage_mon_rest_server_port: '9443'
 
 r_nuage_master_os_firewall_deny: []

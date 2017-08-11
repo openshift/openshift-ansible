@@ -1,4 +1,10 @@
 ---
+r_openshift_hosted_router_firewall_enabled: True
+r_openshift_hosted_router_use_firewalld: False
+
+r_openshift_hosted_registry_firewall_enabled: True
+r_openshift_hosted_registry_use_firewalld: False
+
 registry_volume_claim: 'registry-claim'
 
 openshift_hosted_router_edits:

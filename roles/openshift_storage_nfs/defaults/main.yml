@@ -1,4 +1,7 @@
 ---
+r_openshift_storage_nfs_firewall_enabled: True
+r_openshift_storage_nfs_use_firewalld: False
+
 r_openshift_storage_nfs_os_firewall_deny: []
 r_openshift_storage_nfs_os_firewall_allow:
 - service: nfs

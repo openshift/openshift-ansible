@@ -14,3 +14,7 @@
 - include: initialize_openshift_version.yml
   tags:
   - always
+
+- include: initialize_firewall.yml
+  tags:
+  - always

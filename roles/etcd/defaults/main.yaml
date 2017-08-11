@@ -1,4 +1,7 @@
 ---
+r_etcd_firewall_enabled: True
+r_etcd_use_firewalld: False
+
 etcd_initial_cluster_state: new
 etcd_initial_cluster_token: etcd-cluster-1
 

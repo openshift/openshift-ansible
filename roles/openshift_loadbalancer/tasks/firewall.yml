@@ -1,5 +1,5 @@
 ---
-- when: os_firewall_enabled | bool and not os_firewall_use_firewalld | bool
+- when: r_openshift_loadbalancer_firewall_enabled | bool and not r_openshift_loadbalancer_use_firewalld | bool
   block:
   - name: Add iptables allow rules
     os_firewall_manage_iptables:
@@ -19,7 +19,7 @@
     when: item.cond | default(True)
     with_items: "{{ r_openshift_loadbalancer_os_firewall_deny }}"
 
-- when: os_firewall_enabled | bool and os_firewall_use_firewalld | bool
+- when: r_openshift_loadbalancer_firewall_enabled | bool and r_openshift_loadbalancer_use_firewalld | bool
   block:
   - name: Add firewalld allow rules
     firewalld:
