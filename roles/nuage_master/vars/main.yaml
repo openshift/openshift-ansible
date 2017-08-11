@@ -23,4 +23,6 @@ nuage_master_crt_dir: /usr/share/nuage-openshift-monitor
 nuage_service_account: system:serviceaccount:default:nuage
 
 nuage_tasks:
-  - policy add-cluster-role-to-user cluster-reader {{ nuage_service_account }}
+- resource_kind: cluster-role
+  resource_name: cluster-reader
+  user: "{{ nuage_service_account }}"
