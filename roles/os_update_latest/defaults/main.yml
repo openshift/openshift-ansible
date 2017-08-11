@@ -1,0 +1,3 @@
+---
+oul_package_names: "*"
+oul_exclude: 'atomic-openshift* tuned-profiles-atomic-openshift*'
