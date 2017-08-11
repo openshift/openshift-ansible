@@ -221,27 +221,43 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         ''' run command '''
 
         has_errors = False
+        playbooks = set()
+        included_playbooks = set()
 
         for yaml_file in find_files(
                 os.path.join(os.getcwd(), 'playbooks', 'byo'),
                 None, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
-                for line in contents:
-                    # initialize_groups.yml is used to identify entry point playbooks
-                    if re.search(r'initialize_groups\.yml', line):
-                        print('-' * 60)
-                        print('Syntax checking playbook: %s' % yaml_file)
-                        try:
-                            subprocess.check_output(
-                                ['ansible-playbook', '-i localhost,',
-                                 '--syntax-check', yaml_file]
-                            )
-                        except subprocess.CalledProcessError as cpe:
-                            print('{}Execution failed: {}{}'.format(
-                                self.FAIL, cpe, self.ENDC))
-                            has_errors = True
-                        # Break for loop, no need to continue looping lines
-                        break
+                for task in yaml.safe_load(contents):
+                    if not isinstance(task, dict):
+                        # Skip yaml files which do not contain plays or includes
+                        continue
+                    if 'include' in task:
+                        # Add the playbook and capture included playbooks
+                        playbooks.add(yaml_file)
+                        included_file_name = task['include'].split()[0]
+                        included_file = os.path.normpath(
+                            os.path.join(os.path.dirname(yaml_file),
+                                         included_file_name))
+                        included_playbooks.add(included_file)
+                    elif 'hosts' in task:
+                        playbooks.add(yaml_file)
+        # Evaluate the difference between all playbooks and included playbooks
+        entrypoint_playbooks = sorted(playbooks.difference(included_playbooks))
+        print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
+        # Syntax each entry point playbook
+        for playbook in entrypoint_playbooks:
+            print('-' * 60)
+            print('Syntax checking playbook: {}'.format(playbook))
+            try:
+                subprocess.check_output(
+                    ['ansible-playbook', '-i localhost,',
+                     '--syntax-check', playbook]
+                )
+            except subprocess.CalledProcessError as cpe:
+                print('{}Execution failed: {}{}'.format(
+                    self.FAIL, cpe, self.ENDC))
+                has_errors = True
         if has_errors:
             raise SystemExit(1)
 
