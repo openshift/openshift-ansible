@@ -1,4 +1,8 @@
 ---
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
 - name: Install cockpit-ws
   package: name={{ item }} state=present
   with_items:

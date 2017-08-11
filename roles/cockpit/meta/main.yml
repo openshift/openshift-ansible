@@ -12,7 +12,4 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: os_firewall
-  os_firewall_allow:
-  - service: cockpit-ws
-    port: 9090/tcp
+- role: lib_os_firewall

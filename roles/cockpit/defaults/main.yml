@@ -1,0 +1,8 @@
+---
+r_cockpit_firewall_enabled: True
+r_cockpit_use_firewalld: False
+
+r_cockpit_os_firewall_deny: []
+r_cockpit_os_firewall_allow:
+- service: cockpit-ws
+  port: 9090/tcp

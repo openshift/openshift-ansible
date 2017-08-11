@@ -14,36 +14,11 @@ galaxy_info:
 dependencies:
 - role: openshift_node_facts
 - role: lib_openshift
+- role: lib_os_firewall
 - role: openshift_common
 - role: openshift_clock
 - role: openshift_docker
 - role: openshift_node_certificates
 - role: openshift_cloud_provider
-- role: os_firewall
-  os_firewall_allow:
-  - service: Kubernetes kubelet
-    port: 10250/tcp
-  - service: http
-    port: 80/tcp
-  - service: https
-    port: 443/tcp
-- role: os_firewall
-  os_firewall_allow:
-  - service: OpenShift OVS sdn
-    port: 4789/udp
-  when: openshift.common.use_openshift_sdn | default(true) | bool
-- role: os_firewall
-  os_firewall_allow:
-  - service: Calico BGP Port
-    port: 179/tcp
-  when: openshift.common.use_calico | bool
-
-- role: os_firewall
-  os_firewall_allow:
-  - service: Kubernetes service NodePort TCP
-    port: "{{ openshift_node_port_range | default('') }}/tcp"
-  - service: Kubernetes service NodePort UDP
-    port: "{{ openshift_node_port_range | default('') }}/udp"
-  when: openshift_node_port_range is defined
 - role: openshift_node_dnsmasq
   when: openshift.common.use_dnsmasq | bool

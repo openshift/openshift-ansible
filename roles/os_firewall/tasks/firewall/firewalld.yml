@@ -49,19 +49,3 @@
   until: pkaction.rc == 0
   retries: 6
   delay: 10
-
-- name: Add firewalld allow rules
-  firewalld:
-    port: "{{ item.port }}"
-    permanent: true
-    immediate: true
-    state: enabled
-  with_items: "{{ os_firewall_allow }}"
-
-- name: Remove firewalld allow rules
-  firewalld:
-    port: "{{ item.port }}"
-    permanent: true
-    immediate: true
-    state: disabled
-  with_items: "{{ os_firewall_deny }}"

@@ -15,9 +15,4 @@ galaxy_info:
 dependencies:
 - role: nuage_common
 - role: nuage_ca
-- role: os_firewall
-  os_firewall_allow:
-  - service: vxlan
-    port: 4789/udp
-  - service: nuage-monitor
-    port: "{{ nuage_mon_rest_server_port }}/tcp"
+- role: lib_os_firewall

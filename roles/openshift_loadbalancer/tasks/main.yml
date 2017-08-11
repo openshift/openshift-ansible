@@ -1,4 +1,8 @@
 ---
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
 - name: Install haproxy
   package: name=haproxy state=present
   when: not openshift.common.is_containerized | bool

@@ -1,4 +1,7 @@
 ---
+r_openshift_loadbalancer_firewall_enabled: True
+r_openshift_loadbalancer_use_firewalld: False
+
 haproxy_frontends:
 - name: main
   binds:
@@ -12,3 +15,13 @@ haproxy_backends:
   - name: web01
     address: 127.0.0.1:9000
     opts: check
+
+r_openshift_loadbalancer_os_firewall_deny: []
+r_openshift_loadbalancer_os_firewall_allow:
+- service: haproxy stats
+  port: "9000/tcp"
+- service: haproxy balance
+  port: "{{ openshift_master_api_port | default(8443) }}/tcp"
+- service: nuage mon
+  port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
+  cond: "{{ openshift_use_nuage | default(false) | bool }}"

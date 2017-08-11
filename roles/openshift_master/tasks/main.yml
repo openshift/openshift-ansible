@@ -23,6 +23,10 @@
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
   when: openshift.master.ha | bool and openshift.master.cluster_method == "pacemaker" and openshift.common.is_containerized | bool
 
+- name: Open up firewall ports
+  include: firewall.yml
+  static: yes
+
 - name: Install Master package
   package:
     name: "{{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"

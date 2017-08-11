@@ -1,6 +1,10 @@
 ---
-- block:
+- name: setup firewall
+  include: firewall.yml
+  static: yes
 
+- when: openshift.hosted.registry.replicas | default(none) is none
+  block:
   - name: Retrieve list of openshift nodes matching registry selector
     oc_obj:
       state: list
@@ -28,7 +32,6 @@
       l_default_replicas: "{{ l_node_count if openshift.hosted.registry.storage.kind | default(none) is not none else 1 }}"
     when: l_node_count | int > 0
 
-  when: openshift.hosted.registry.replicas | default(none) is none
 
 - name: set openshift_hosted facts
   set_fact:

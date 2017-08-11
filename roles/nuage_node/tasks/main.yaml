@@ -54,3 +54,7 @@
     - restart node
 
 - include: iptables.yml
+
+- name: setup firewall
+  include: firewall.yml
+  static: yes
