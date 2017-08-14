@@ -26,6 +26,9 @@
     debug:
       var: g_openshift_master_is_scaleup
 
+  # TODO: This 'ca host detection' logic shouldn't be in this
+  # file. The logic needs to be called in several places. This needs
+  # to be moved somewhere that allows that.
   - name: Check for existance of ca.serial.txt on master
     stat:
       path: /etc/origin/master/ca.serial.txt

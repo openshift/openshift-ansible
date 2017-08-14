@@ -21,10 +21,16 @@
     --key={{generated_certs_dir}}/ca.key --cert={{generated_certs_dir}}/ca.crt
     --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test
   check_mode: no
+  register: l_logging_cert_created
   when:
     - not ca_key_file.stat.exists
     - not ca_cert_file.stat.exists
     - not ca_serial_file.stat.exists
+
+- name: TODO: Call certificate sync handler
+  debug:
+    msg: We just created a cert for logging, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+  when: not l_logging_cert_created.skipped
 
 - name: Checking for signing.conf
   stat: path="{{generated_certs_dir}}/signing.conf"

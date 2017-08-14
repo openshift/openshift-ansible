@@ -24,6 +24,13 @@
     signer_cert: "{{ generated_certs_dir }}/ca.crt"
     signer_key: "{{ generated_certs_dir }}/ca.key"
     signer_serial: "{{ generated_certs_dir }}/apiserver.serial.txt"
+  register: l_service_catalog_cert_created
+
+- name: TODO: Call certificate sync handler
+  debug:
+    msg: We just created a cert for the service catalog, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+  when: not l_service_catalog_cert_created.skipped
+
 
 - name: Create apiserver-ssl secret
   oc_secret:

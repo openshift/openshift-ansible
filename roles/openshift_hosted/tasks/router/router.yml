@@ -41,6 +41,12 @@
       cert: "{{ ('/etc/origin/master/' ~ (item.certificate.certfile | basename)) if 'certfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.crt') }}"
       key: "{{ ('/etc/origin/master/' ~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.key') }}"
     with_items: "{{ openshift_hosted_routers }}"
+    register: l_router_cert_created
+
+  - name: TODO: Call certificate sync handler
+    debug:
+      msg: We just created a cert for a router, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+    when: not l_router_cert_created.skipped
 
   - name: set the openshift_hosted_router_certificate
     set_fact:
@@ -48,6 +54,7 @@
         certfile: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
         keyfile: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
         cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
+
 
   # End Block
   when: ( openshift_hosted_router_create_certificate | bool ) and openshift_hosted_router_certificate == {}

@@ -1,0 +1,21 @@
+---
+# new in 2.3: http://docs.ansible.com/ansible/latest/tempfile_module.html
+- name: Create local dir for saving serial file
+  debug:
+    msg: task to create local temp dir
+
+# http://docs.ansible.com/ansible/latest/fetch_module.html
+- name: Fetch serial file from canonical CA master
+  debug:
+    msg: task to grab /etc/origin/master/ca.serial.txt from CA host
+
+# http://docs.ansible.com/ansible/latest/copy_module.html#copy
+- name: Copy ca.serial.txt to other masters
+  debug:
+    msg: task to copy /tmp/tmp.xxxxxx/ca.serial.txt to other masters
+
+
+# http://docs.ansible.com/ansible/latest/file_module.html
+- name: Erase local dir for saving serial file
+  debug:
+    msg: task to erase local temp dir

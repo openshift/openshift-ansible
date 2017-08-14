@@ -95,8 +95,14 @@
   with_items: "{{ hostvars
                   | oo_select_keys(groups['oo_nodes_to_config'])
                   | oo_collect(attribute='inventory_hostname', filters={'node_certs_missing':True}) }}"
+  register: l_node_cert_created
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
+
+- name: TODO: Call certificate sync handler
+  debug:
+    msg: We just created a cert for a node, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+  when: not l_node_cert_created.skipped
 
 - name: Create local temp directory for syncing certs
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
