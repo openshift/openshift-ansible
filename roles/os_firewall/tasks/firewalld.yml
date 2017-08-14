@@ -1,4 +1,9 @@
 ---
+- name: Fail - Firewalld is not supported on Atomic Host
+  fail:
+    msg: "Firewalld is not supported on Atomic Host"
+  when: r_os_firewall_is_atomic | bool
+
 - name: Install firewalld packages
   package:
     name: firewalld
@@ -31,7 +36,8 @@
   register: result
 
 - name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
-  pause: seconds=10
+  pause:
+    seconds: 10
   when: result | changed
 
 - name: Restart polkitd

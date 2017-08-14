@@ -15,11 +15,13 @@
   when: task_result | changed
 
 - name: Install iptables packages
-  package: name={{ item }} state=present
+  package:
+    name: "{{ item }}"
+    state: present
   with_items:
     - iptables
     - iptables-services
-  when: not openshift.common.is_atomic | bool
+  when: not r_os_firewall_is_atomic | bool
 
 - name: Start and enable iptables service
   systemd:
@@ -34,5 +36,6 @@
   with_items: "{{ ansible_play_hosts }}"
 
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail
-  pause: seconds=10
+  pause:
+    seconds: 10
   when: result | changed
