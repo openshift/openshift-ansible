@@ -26,6 +26,17 @@
     debug:
       var: g_openshift_master_is_scaleup
 
+  - name: Check for existance of ca.serial.txt on master
+    stat:
+      path: /etc/origin/master/ca.serial.txt
+    register: l_ca_serial_exists
+
+  - name: Read value of CA serial number if it exists
+    slurp:
+      src: /etc/origin/master/ca.serial.txt
+    when: l_ca_serial_exists.stat.exists
+    register: l_ca_serial_number
+
   - name: Check for RPM generated config marker file .config_managed
     stat:
       path: /etc/origin/.config_managed
@@ -69,6 +80,10 @@
   - set_fact:
       openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
     when: openshift_hosted_metrics_resolution is not defined
+  - set_fact:
+      openshift_master_ca_serial_number: "{{ l_ca_serial_number | b64decode | int(base=16) }}"
+    when: l_ca_serial_number is defined
+
   roles:
   - openshift_facts
   post_tasks:
@@ -78,6 +93,7 @@
         api_port: "{{ openshift_master_api_port | default(None) }}"
         api_url: "{{ openshift_master_api_url | default(None) }}"
         api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
+        ca_serial_number: "{{ openshift_master_ca_serial_number | default(0) }}"
         controllers_port: "{{ openshift_master_controllers_port | default(None) }}"
         public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
         cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
@@ -190,6 +206,8 @@
   roles:
   - role: os_firewall
   - role: openshift_master
+    # todo: sort the list of hosts and select the one which has the
+    # highest openshift.master.ca_serial_number value
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
