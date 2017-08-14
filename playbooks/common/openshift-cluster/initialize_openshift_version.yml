@@ -1,24 +1,5 @@
 ---
 # NOTE: requires openshift_facts be run
-- name: Verify compatible yum/subscription-manager combination
-  hosts: oo_all_hosts
-  gather_facts: no
-  tasks:
-  # See:
-  #   https://bugzilla.redhat.com/show_bug.cgi?id=1395047
-  #   https://bugzilla.redhat.com/show_bug.cgi?id=1282961
-  #   https://github.com/openshift/openshift-ansible/issues/1138
-  #   Consider the repoquery module for this work
-  - name: Check for bad combinations of yum and subscription-manager
-    command: >
-      {{ repoquery_cmd }} --installed --qf '%{version}' "yum"
-    register: yum_ver_test
-    changed_when: false
-    when: not openshift.common.is_atomic | bool
-  - fail:
-      msg: Incompatible versions of yum and subscription-manager found. You may need to update yum and yum-utils.
-    when: not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout
-
 - name: Determine openshift_version to configure on first master
   hosts: oo_first_master
   roles:
