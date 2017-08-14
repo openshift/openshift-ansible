@@ -3,9 +3,9 @@ manage_iq_tasks:
 - resource_kind: role
   resource_name: admin
   user: management-admin
-- resource_kind: role
+- resource_kind: cluster-role
   resource_name: management-infra-admin
-  user: management-admin
+  user: system:serviceaccount:management-infra:management-admin
 - resource_kind: cluster-role
   resource_name: cluster-reader
   user: system:serviceaccount:management-infra:management-admin
