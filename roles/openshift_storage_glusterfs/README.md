@@ -55,7 +55,7 @@ defined:
 
 | Name              | Default value | Description                             |
 |-------------------|---------------|-----------------------------------------|
-| glusterfs_devices | None          | A list of block devices that will be completely managed as part of a GlusterFS cluster. There must be at least one device listed. Each device must be bare, e.g. no partitions or LVM PVs. **Example:** '[ "/dev/sdb" ]'
+| glusterfs_devices | None          | A list of block devices that will be completely managed as part of a GlusterFS cluster. There must be at least one device listed. Each device must be bare, e.g. no partitions or LVM PVs. **Example:** '[ "/dev/sdb" ]' **NOTE:** You MUST set this as a host variable on each node host. For some reason, if you set this as a group variable it gets interpreted as a string rather than an array. See https://github.com/openshift/openshift-ansible/issues/5071
 
 In addition, each host may specify the following variables to further control
 their configuration as GlusterFS nodes:
