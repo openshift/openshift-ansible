@@ -19,3 +19,5 @@ private_ssh_key: ~/.ssh/openshift
 
 # The patch to store the generated config to access bastion/hosts
 ssh_config_path: /tmp/ssh.config.ansible
+
+openstack_private_network: private

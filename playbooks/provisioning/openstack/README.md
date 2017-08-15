@@ -110,6 +110,10 @@ providing external connectivity. It is often called `public`,
 `external` or `ext-net`. You can see your networks with `openstack
 network list`.
 
+`openstack_private_network_name` is the name of the private Neutron network
+providing admin/control access for ansible. It can be merged with other
+cluster networks, there are no special requirements for networking.
+
 The `openstack_num_masters`, `openstack_num_infra` and
 `openstack_num_nodes` values specify the number of Master, Infra and
 App nodes to create.

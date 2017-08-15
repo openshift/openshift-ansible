@@ -29,12 +29,20 @@
       add_host:
         name: '{{ item.name }}'
         groups: '{{ item.metadata.group }}'
-        ansible_host: "{% if use_bastion|bool %}{{ item.name }}{% else %}{{ item.private_v4 }}{% endif %}"
+        ansible_host: >-
+          {% if use_bastion|bool -%}
+          {{ item.name }}
+          {%- else -%}
+          {%- set node = registered_nodes | json_query("[?name=='" + item.name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
+          {%- endif %}
         ansible_fqdn: '{{ item.name }}'
         ansible_user: '{{ ssh_user }}'
         ansible_private_key_file: '{{ private_ssh_key }}'
         ansible_ssh_extra_args: '-F {{ ssh_config_path }}'
-        private_v4: '{{ item.private_v4 }}'
+        private_v4: >-
+          {% set node = registered_nodes | json_query("[?name=='" + item.name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
 
     - name: Add cluster nodes with floating IPs to inventory
       with_items: "{{ registered_nodes_floating }}"
@@ -46,7 +54,9 @@
         ansible_user: '{{ ssh_user }}'
         ansible_private_key_file: '{{ private_ssh_key }}'
         ansible_ssh_extra_args: '-F {{ ssh_config_path }}'
-        private_v4: '{{ item.private_v4 }}'
+        private_v4: >-
+          {% set node = registered_nodes | json_query("[?name=='" + item.name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
         public_v4: '{{ item.public_v4 }}'
 
     - name: Add bastion node to inventory
@@ -58,7 +68,9 @@
         ansible_user: '{{ ssh_user }}'
         ansible_private_key_file: '{{ private_ssh_key }}'
         ansible_ssh_extra_args: '-F {{ ssh_config_path }}'
-        private_v4: '{{ registered_bastion_nodes[0].private_v4 }}'
+        private_v4: >-
+          {% set node = registered_nodes | json_query("[?name=='" + registered_bastion_nodes[0].name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
         public_v4: '{{ registered_bastion_nodes[0].public_v4 }}'
       when:
         - registered_bastion_nodes is defined

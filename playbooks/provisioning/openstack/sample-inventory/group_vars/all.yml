@@ -7,6 +7,7 @@ openstack_ssh_public_key: "openshift"
 openstack_default_image_name: "centos7"
 openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "public"
+#openstack_private_network_name:  "openshift-ansible-{{ stack_name }}-net"
 
 openstack_num_masters: 1
 openstack_num_infra: 1
