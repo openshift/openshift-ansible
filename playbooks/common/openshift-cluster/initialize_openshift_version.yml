@@ -19,6 +19,19 @@
       msg: Incompatible versions of yum and subscription-manager found. You may need to update yum and yum-utils.
     when: not openshift.common.is_atomic | bool and 'Plugin \"search-disabled-repos\" requires API 2.7. Supported API is 2.6.' in yum_ver_test.stdout
 
+- name: Set openshift_release and docker_version default values if not set
+  hosts: oo_all_hosts
+  gather_facts: no
+  tasks:
+  - set_fact:
+      openshift_release: "v3.6"
+    when:
+    - openshift_release is not defined
+  - set_fact:
+      docker_version: "1.12*"
+    when:
+    - docker_version is not defined
+
 - name: Determine openshift_version to configure on first master
   hosts: oo_first_master
   roles:
