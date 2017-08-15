@@ -105,8 +105,12 @@ corresponding variable (e.g. `openstack_lb_image_name` for load balancer) and
 set its value to another available image name. `openstack_default_image_name`
 must stay defined as it is used as a default value for the rest of the roles.
 
-`openstack_default_flavor` is the Nova flavor the servers will use.
+`openstack_default_flavor` is the default Nova flavor the servers will use.
 You can see your flavors with `openstack flavor list`.
+In order to set a different flavor for a role, uncomment the line with the
+corresponding variable (e.g. `openstack_lb_flavor` for load balancer) and
+set its value to another available flavor. `openstack_default_flavor` must
+stay defined as it is used as a default value for the rest of the roles.
 
 `openstack_external_network_name` is the name of the Neutron network
 providing external connectivity. It is often called `public`,
