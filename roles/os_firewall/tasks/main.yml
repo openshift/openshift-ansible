@@ -1,12 +1,19 @@
 ---
-- name: Assert - Do not use firewalld on Atomic Host
-  assert:
-    that: not os_firewall_use_firewalld | bool
-    msg: "Firewalld is not supported on Atomic Host"
-  when: openshift.common.is_atomic | bool
+- name: Detecting Atomic Host Operating System
+  stat:
+    path: /run/ostree-booted
+  register: r_os_firewall_ostree_booted
 
-- include: firewall/firewalld.yml
-  when: os_firewall_enabled | bool and os_firewall_use_firewalld | bool
+- name: Set fact r_os_firewall_is_atomic
+  set_fact:
+    r_os_firewall_is_atomic: "{{ r_os_firewall_ostree_booted.stat.exists }}"
 
-- include: firewall/iptables.yml
-  when: os_firewall_enabled | bool and not os_firewall_use_firewalld | bool
+- include: firewalld.yml
+  when:
+  - os_firewall_enabled | bool
+  - os_firewall_use_firewalld | bool
+
+- include: iptables.yml
+  when:
+  - os_firewall_enabled | bool
+  - not os_firewall_use_firewalld | bool
