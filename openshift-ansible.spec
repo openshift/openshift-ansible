@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.115
+Version:        3.5.116
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.116-1
+- It can happen the openshift_version is set to an empty string. Which results
+  in openshift_pkg_version set to "-". Thus, failing installation of base and
+  excluder packages. For more info see
+  https://bugzilla.redhat.com/show_bug.cgi?id=1474871 (jchaloup@redhat.com)
+
 * Thu Aug 10 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.115-1
 - 
 
