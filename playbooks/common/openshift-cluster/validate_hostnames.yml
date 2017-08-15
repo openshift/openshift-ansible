@@ -1,17 +1,22 @@
 ---
-- name: Gather and set facts for node hosts
+- name: Validate node hostnames
   hosts: oo_nodes_to_config
-  roles:
-  - openshift_facts
   tasks:
-  - shell:
+  - name: Query DNS for IP address of {{ openshift.common.hostname }}
+    shell:
       getent ahostsv4 {{ openshift.common.hostname }} | head -n 1 | awk '{ print $1 }'
     register: lookupip
     changed_when: false
     failed_when: false
   - name: Warn user about bad openshift_hostname values
     pause:
-      prompt: "The hostname \"{{ openshift.common.hostname }}\" for \"{{ ansible_nodename }}\" doesn't resolve to an ip address owned by this host. Please set openshift_hostname variable to a hostname that when resolved on the host in question resolves to an IP address matching an interface on this host. This host will fail liveness checks for pods utilizing hostPorts, press ENTER to continue or CTRL-C to abort."
+      prompt:
+        The hostname {{ openshift.common.hostname }} for {{ ansible_nodename }}
+        doesn't resolve to an IP address owned by this host. Please set
+        openshift_hostname variable to a hostname that when resolved on the host
+        in question resolves to an IP address matching an interface on this
+        host. This host will fail liveness checks for pods utilizing hostPorts,
+        press ENTER to continue or CTRL-C to abort.
       seconds: "{{ 10 if openshift_override_hostname_check | default(false) | bool else omit }}"
     when:
     - lookupip.stdout != '127.0.0.1'
