@@ -1,0 +1,6 @@
+---
+- name: Syncronize ca.serial.txt
+  debug:
+    # Probably will require some vars like masters_to_sync (which will
+    # be a new variable)
+    msg: Task that syncs the ca.serial.txt from openshift_ca_host to other masters
