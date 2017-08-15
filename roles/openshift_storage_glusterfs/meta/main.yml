@@ -12,3 +12,4 @@ galaxy_info:
 dependencies:
 - role: openshift_hosted_facts
 - role: lib_openshift
+- role: lib_os_firewall
