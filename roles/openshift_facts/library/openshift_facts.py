@@ -1647,6 +1647,13 @@ def set_proxy_facts(facts):
                 common['no_proxy'] = common['no_proxy'].split(",")
             elif 'no_proxy' not in common:
                 common['no_proxy'] = []
+
+            # See https://bugzilla.redhat.com/show_bug.cgi?id=1466783
+            # masters behind a proxy need to connect to etcd via IP
+            if 'no_proxy_etcd_host_ips' in common:
+                if isinstance(common['no_proxy_etcd_host_ips'], string_types):
+                    common['no_proxy'].extend(common['no_proxy_etcd_host_ips'].split(','))
+
             if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
