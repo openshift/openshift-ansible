@@ -53,6 +53,8 @@ openshift.searchguard:
 
 openshift.operations.allow_cluster_reader: {{allow_cluster_reader | default (false)}}
 
+openshift.kibana.index.mode: {{es_kibana_index_mode | default('unique')}}
+
 path:
   data: /elasticsearch/persistent/${CLUSTER_NAME}/data
   logs: /elasticsearch/${CLUSTER_NAME}/logs
