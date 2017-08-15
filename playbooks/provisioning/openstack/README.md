@@ -98,9 +98,12 @@ as a default nameserver that comes from the NetworkManager and cloud-init.
 `openstack keypair list`. This guide assumes that its corresponding private
 key is `~/.ssh/openshift`, stored on the ansible admin (control) node.
 
-`openstack_default_image_name` is the name of the Glance image the
-servers will use. You can
-see your images with `openstack image list`.
+`openstack_default_image_name` is the default name of the Glance image the
+servers will use. You can see your images with `openstack image list`.
+In order to set a different image for a role, uncomment the line with the
+corresponding variable (e.g. `openstack_lb_image_name` for load balancer) and
+set its value to another available image name. `openstack_default_image_name`
+must stay defined as it is used as a default value for the rest of the roles.
 
 `openstack_default_flavor` is the Nova flavor the servers will use.
 You can see your flavors with `openstack flavor list`.

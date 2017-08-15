@@ -4,10 +4,20 @@ public_dns_domain: "example.com"
 public_dns_nameservers: []
 
 openstack_ssh_public_key: "openshift"
-openstack_default_image_name: "centos7"
 openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "public"
 #openstack_private_network_name:  "openshift-ansible-{{ stack_name }}-net"
+
+# # Used Images
+# # - set specific images for roles by uncommenting corresponding lines
+# # - note: do not remove openstack_default_image_name definition
+#openstack_master_image_name: "centos7"
+#openstack_infra_image_name: "centos7"
+#openstack_node_image_name: "centos7"
+#openstack_lb_image_name: "centos7"
+#openstack_etcd_image_name: "centos7"
+#openstack_dns_image_name: "centos7"
+openstack_default_image_name: "centos7"
 
 openstack_num_masters: 1
 openstack_num_infra: 1
