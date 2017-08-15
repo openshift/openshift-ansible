@@ -38,7 +38,10 @@
 - name: Use openshift.common.version fact as version to configure if already installed
   set_fact:
     openshift_version: "{{ openshift.common.version }}"
-  when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version | bool
+  when:
+  - openshift.common.version is defined
+  - openshift_version is not defined or openshift_version == ""
+  - openshift_protect_installed_version | bool
 
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml
