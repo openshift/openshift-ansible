@@ -99,7 +99,7 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
-- name: TODO: Call certificate sync handler
+- name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for a node, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
   when: not l_node_cert_created.skipped
