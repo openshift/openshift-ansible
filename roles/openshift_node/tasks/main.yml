@@ -70,25 +70,15 @@
     - openshift_disable_swap | default(true) | bool
 # End Disable Swap Block
 
-# We have to add tuned-profiles in the same transaction otherwise we run into depsolving
-# problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - name: Install Node package
   package:
-    name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when: not openshift.common.is_containerized | bool
 
-- name: Check for tuned package
-  command: rpm -q tuned
-  args:
-    warn: no
-  register: tuned_installed
-  changed_when: false
-  failed_when: false
-
-- name: Set atomic-guest tuned profile
-  command: "tuned-adm profile atomic-guest"
-  when: tuned_installed.rc == 0 and openshift.common.is_atomic | bool
+- name: setup tuned
+  include: tuned.yml
+  static: yes
 
 - name: Install sdn-ovs package
   package:
