@@ -19,3 +19,7 @@
   - set_fact:
       openshift_master_ca_serial_number: "{{ l_ca_serial_number | b64decode | int(base=16) }}"
     when: l_ca_serial_number is defined
+
+
+  # todo: sort the list of hosts and select the one which has the
+  # highest openshift.master.ca_serial_number value

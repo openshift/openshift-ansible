@@ -79,7 +79,6 @@
         api_port: "{{ openshift_master_api_port | default(None) }}"
         api_url: "{{ openshift_master_api_url | default(None) }}"
         api_use_ssl: "{{ openshift_master_api_use_ssl | default(None) }}"
-        ca_serial_number: "{{ openshift_master_ca_serial_number | default(0) }}"
         controllers_port: "{{ openshift_master_controllers_port | default(None) }}"
         public_api_url: "{{ openshift_master_public_api_url | default(None) }}"
         cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
@@ -192,8 +191,7 @@
   roles:
   - role: os_firewall
   - role: openshift_master
-    # todo: sort the list of hosts and select the one which has the
-    # highest openshift.master.ca_serial_number value
+    # TODO: Use the value from openshift_ca_facts to set `openshift_ca_host`
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
