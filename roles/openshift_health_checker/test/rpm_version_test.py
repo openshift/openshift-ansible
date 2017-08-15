@@ -49,7 +49,7 @@ def test_check_pkg_found(pkgs, expect_not_found):
         },
         {
             "eggs": {
-                "required_version": "3.2",
+                "required_versions": ["3.2"],
                 "found_versions": ["3.3"],
             }
         },  # not the right version
@@ -61,11 +61,11 @@ def test_check_pkg_found(pkgs, expect_not_found):
         },
         {
             "eggs": {
-                "required_version": "3.2",
+                "required_versions": ["3.2"],
                 "found_versions": ["3.3", "1.2"],
             },
             "spam": {
-                "required_version": "3.2",
+                "required_versions": ["3.2"],
                 "found_versions": ["3.1", "3.3"],
             }
         },  # not the right version

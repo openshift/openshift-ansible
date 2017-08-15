@@ -16,8 +16,8 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
     tags = ["health"]
 
     openshift_to_ovs_version = {
-        "3.6": "2.6",
-        "3.5": "2.6",
+        "3.6": ["2.6", "2.7"],
+        "3.5": ["2.6", "2.7"],
         "3.4": "2.4",
     }
 
