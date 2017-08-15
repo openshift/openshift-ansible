@@ -29,7 +29,13 @@
       --serial="{{ remote_cert_create_tmpdir.stdout }}/"service-signer.serial.txt
     args:
       chdir: "{{ remote_cert_create_tmpdir.stdout }}/"
+    register: l_service_signer_cert_created
     when: not (hostvars[groups.oo_first_master.0].service_signer_cert_stat.stat.exists | bool)
+
+  - name: TODO - Call certificate sync handler
+    debug:
+      msg: We just created a cert for a node, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+    when: not l_service_signer_cert_created.skipped
 
   - name: Retrieve service signer certificate
     fetch:

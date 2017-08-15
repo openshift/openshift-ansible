@@ -1,5 +1,9 @@
 ---
 # new in 2.3: http://docs.ansible.com/ansible/latest/tempfile_module.html
+
+# Note: We need to keep an eye on how many times we're doing this. We
+# don't want to be repeating this over and over unless there's no
+# other way around it.
 - name: Create local dir for saving serial file
   debug:
     msg: task to create local temp dir

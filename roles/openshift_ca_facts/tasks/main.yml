@@ -1,0 +1,21 @@
+---
+- name: Determine canonical OpenShift CA host
+  hosts: oo_masters_to_config
+  tasks:
+  # TODO: This 'ca host detection' logic shouldn't be in this
+  # file. The logic needs to be called in several places. This needs
+  # to be moved somewhere that allows that.
+  - name: Check for existance of ca.serial.txt on master
+    stat:
+      path: /etc/origin/master/ca.serial.txt
+    register: l_ca_serial_exists
+
+  - name: Read value of CA serial number if it exists
+    slurp:
+      src: /etc/origin/master/ca.serial.txt
+    when: l_ca_serial_exists.stat.exists
+    register: l_ca_serial_number
+
+  - set_fact:
+      openshift_master_ca_serial_number: "{{ l_ca_serial_number | b64decode | int(base=16) }}"
+    when: l_ca_serial_number is defined
