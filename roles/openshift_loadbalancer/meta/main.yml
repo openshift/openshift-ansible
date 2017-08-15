@@ -12,4 +12,3 @@ galaxy_info:
 dependencies:
 - role: lib_os_firewall
 - role: openshift_facts
-- role: openshift_repos

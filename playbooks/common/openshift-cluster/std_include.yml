@@ -11,6 +11,10 @@
   tags:
   - node
 
+- include: initialize_openshift_repos.yml
+  tags:
+  - always
+
 - include: initialize_openshift_version.yml
   tags:
   - always
