@@ -81,7 +81,7 @@
     openshift_version: "{{ openshift.common.version }}"
   when:
   - openshift.common.version is defined
-  - openshift_version is not defined
+  - openshift_version is not defined or openshift_version == ""
   - openshift_protect_installed_version | bool
 
 # The rest of these tasks should only execute on
