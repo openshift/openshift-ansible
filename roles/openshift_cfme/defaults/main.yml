@@ -27,9 +27,6 @@ openshift_cfme_pv_data:
 
 # Tuning parameter to use more than 5 images at once from an ImageStream
 openshift_cfme_maxImagesBulkImportedPerRepository: 100
-# Hostname/IP of the NFS server. Currently defaults to first master
-openshift_cfme_nfs_server: "{{ groups.nfs.0 }}"
-openshift_cfme_nfs_directory: "/exports"
 # TODO: Refactor '_install_app' variable. This is just for testing but
 # maybe in the future it should control the entire yes/no for CFME.
 #
