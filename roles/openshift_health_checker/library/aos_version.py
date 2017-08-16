@@ -24,11 +24,19 @@ from ansible.module_utils.basic import AnsibleModule
 # Python 3, we use six for cross compatibility in this module alone:
 from ansible.module_utils.six import string_types
 
-IMPORT_EXCEPTION = None
+YUM_IMPORT_EXCEPTION = None
+DNF_IMPORT_EXCEPTION = None
+PKG_MGR = None
 try:
     import yum  # pylint: disable=import-error
+    PKG_MGR = "yum"
 except ImportError as err:
-    IMPORT_EXCEPTION = err
+    YUM_IMPORT_EXCEPTION = err
+try:
+    import dnf  # pylint: disable=import-error
+    PKG_MGR = "dnf"
+except ImportError as err:
+    DNF_IMPORT_EXCEPTION = err
 
 
 class AosVersionException(Exception):
@@ -47,8 +55,11 @@ def main():
         supports_check_mode=True
     )
 
-    if IMPORT_EXCEPTION:
-        module.fail_json(msg="aos_version module could not import yum: %s" % IMPORT_EXCEPTION)
+    if YUM_IMPORT_EXCEPTION and DNF_IMPORT_EXCEPTION:
+        module.fail_json(
+            msg="aos_version module could not import yum or dnf: %s %s" %
+            (YUM_IMPORT_EXCEPTION, DNF_IMPORT_EXCEPTION)
+        )
 
     # determine the packages we will look for
     package_list = module.params['package_list']
@@ -83,9 +94,6 @@ def _to_dict(pkg_list):
 
 
 def _retrieve_available_packages(expected_pkgs):
-    # search for package versions available for openshift pkgs
-    yb = yum.YumBase()  # pylint: disable=invalid-name
-
     # The openshift excluder prevents unintended updates to openshift
     # packages by setting yum excludes on those packages. See:
     # https://wiki.centos.org/SpecialInterestGroup/PaaS/OpenShift-Origin-Control-Updates
@@ -94,17 +102,34 @@ def _retrieve_available_packages(expected_pkgs):
     # attempt to determine what packages are available via yum they may
     # be excluded. So, for our purposes here, disable excludes to see
     # what will really be available during an install or upgrade.
-    yb.conf.disable_excludes = ['all']
 
-    try:
-        pkgs = yb.pkgSack.returnPackages(patterns=expected_pkgs)
-    except yum.Errors.PackageSackError as excinfo:
-        # you only hit this if *none* of the packages are available
-        raise AosVersionException('\n'.join([
-            'Unable to find any OpenShift packages.',
-            'Check your subscription and repo settings.',
-            str(excinfo),
-        ]))
+    if PKG_MGR == "yum":
+        # search for package versions available for openshift pkgs
+        yb = yum.YumBase()  # pylint: disable=invalid-name
+
+        yb.conf.disable_excludes = ['all']
+
+        try:
+            pkgs = yb.pkgSack.returnPackages(patterns=expected_pkgs)
+        except yum.Errors.PackageSackError as excinfo:
+            # you only hit this if *none* of the packages are available
+            raise AosVersionException('\n'.join([
+                'Unable to find any OpenShift packages.',
+                'Check your subscription and repo settings.',
+                str(excinfo),
+            ]))
+    elif PKG_MGR == "dnf":
+        dbase = dnf.Base()  # pyling: disable=invalid-name
+
+        dbase.conf.disable_excludes = ['all']
+        dbase.read_all_repos()
+        dbase.fill_sack(load_system_repo=False, load_available_repos=True)
+
+        dquery = dbase.sack.query()
+        aquery = dquery.available()
+
+        pkgs = list(aquery.filter(name=expected_pkgs))
+
     return pkgs
 
 
