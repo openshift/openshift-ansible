@@ -134,6 +134,7 @@ resources:
       user_data:
         get_file: user-data
       user_data_format: RAW
+      user_data_update_policy: IGNORE
       metadata:
         group: { get_param: group }
         environment: { get_param: cluster_env }
