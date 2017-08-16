@@ -1,12 +1,21 @@
 ---
 - name: restart master api
-  systemd: name={{ openshift.common.service_type }}-master-api state=restarted
-  when: (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
-  notify: Verify API Server
+  systemd:
+    name: "{{ openshift.common.service_type }}-master-api"
+    state: restarted
+  when:
+  - not (master_api_service_status_changed | default(false) | bool)
+  - openshift.master.cluster_method == 'native'
+  notify:
+  - Verify API Server
 
 - name: restart master controllers
-  systemd: name={{ openshift.common.service_type }}-master-controllers state=restarted
-  when: (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  systemd:
+    name: "{{ openshift.common.service_type }}-master-controllers"
+    state: restarted
+  when:
+  - not (master_controllers_service_status_changed | default(false) | bool)
+  - openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
@@ -23,8 +32,8 @@
     # Disables the following warning:
     # Consider using get_url or uri module rather than running curl
     warn: no
-  register: api_available_output
-  until: api_available_output.stdout == 'ok'
+  register: l_api_available_output
+  until: l_api_available_output.stdout == 'ok'
   retries: 120
   delay: 1
   changed_when: false
