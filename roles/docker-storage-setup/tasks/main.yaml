@@ -6,12 +6,3 @@
     owner: root
     group: root
     mode: 0644
-
-- name: stop docker
-  service: name=docker state=stopped
-
-- name: run docker-storage-setup
-  command: docker-storage-setup
-
-- name: start docker
-  service: name=docker state=started
