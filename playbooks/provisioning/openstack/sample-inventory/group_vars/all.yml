@@ -3,6 +3,15 @@ env_id: "openshift"
 public_dns_domain: "example.com"
 public_dns_nameservers: []
 
+# # Used Hostnames
+# # - set custom hostnames for roles by uncommenting corresponding lines
+#openstack_master_hostname: "master"
+#openstack_infra_hostname: "infra-node"
+#openstack_node_hostname: "app-node"
+#openstack_lb_hostname: "lb"
+#openstack_etcd_hostname: "etcd"
+#openstack_dns_hostname: "dns"
+
 openstack_ssh_public_key: "openshift"
 openstack_external_network_name: "public"
 #openstack_private_network_name:  "openshift-ansible-{{ stack_name }}-net"

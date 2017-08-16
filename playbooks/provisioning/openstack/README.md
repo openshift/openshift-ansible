@@ -78,6 +78,10 @@ your servers will be under. With the default values, this will be
 That sudomain can be set as well by the `openshift_app_domain` variable in
 the inventory.
 
+The `openstack_<role name>_hostname` is a set of variables used for customising
+hostnames of servers with a given role. When such a variable stays commented,
+default hostname (usually the role name) is used.
+
 The `public_dns_nameservers` is a list of DNS servers accessible from all
 the created Nova servers. These will be serving as your DNS forwarders for
 external FQDNs that do not belong to the cluster's DNS domain and its subdomains.

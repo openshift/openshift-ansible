@@ -483,7 +483,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: etcd
+                k8s_type: {{ etcd_hostname }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -526,7 +526,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: lb
+                k8s_type: {{ lb_hostname }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -571,7 +571,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: master
+                k8s_type: {{ master_hostname }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -624,11 +624,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: subtype-k8s_type-%index%.cluster_id
+              template: sub_type_k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: node
-                subtype: app
+                sub_type_k8s_type: {{ node_hostname }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -672,11 +671,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: subtypek8s_type-%index%.cluster_id
+              template: sub_type_k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: node
-                subtype: infra
+                sub_type_k8s_type: {{ infra_hostname }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -730,7 +728,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: dns
+                k8s_type: {{ dns_hostname }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
