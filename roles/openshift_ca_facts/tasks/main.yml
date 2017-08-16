@@ -1,25 +1,47 @@
 ---
-- name: Determine canonical OpenShift CA host
-  hosts: oo_masters_to_config
-  tasks:
-  # TODO: This 'ca host detection' logic shouldn't be in this
-  # file. The logic needs to be called in several places. This needs
-  # to be moved somewhere that allows that.
-  - name: Check for existance of ca.serial.txt on master
-    stat:
-      path: /etc/origin/master/ca.serial.txt
-    register: l_ca_serial_exists
+- name: Check for existance of ca.serial.txt on master
+  stat:
+    path: /etc/origin/master/ca.serial.txt
+  register: l_ca_serial_exists
 
-  - name: Read value of CA serial number if it exists
-    slurp:
-      src: /etc/origin/master/ca.serial.txt
-    when: l_ca_serial_exists.stat.exists
-    register: l_ca_serial_number
+- name: Read value of CA serial number if it exists
+  slurp:
+    src: /etc/origin/master/ca.serial.txt
+  when:
+    - l_ca_serial_exists.stat.exists
+  register: l_ca_serial_number
 
-  - set_fact:
-      openshift_master_ca_serial_number: "{{ l_ca_serial_number | b64decode | int(base=16) }}"
-    when: l_ca_serial_number is defined
+######################################################################
+- name: what is the serial
+  debug:
+    msg: "{{ l_ca_serial_number }}"
+  when:
+    - l_ca_serial_exists.stat.exists
+
+- name: what is the serial
+  debug:
+    msg: "{{ l_ca_serial_number.content | b64decode}}"
+  when:
+    - l_ca_serial_exists.stat.exists
+
+######################################################################
+- name: Record the value of the ca serial number
+  set_fact:
+    ca_serial_number: "{{ l_ca_serial_number.content | b64decode | int(base=16) }}"
+  when:
+    - l_ca_serial_number is defined
+
+# The ca.serial.txt file does not exist on this master
+- name: Record the value of the ca serial number
+  set_fact:
+    ca_serial_number: "{{ None }}"
+  when:
+    - not l_ca_serial_number is defined
+
+######################################################################
+- debug:
+    var: ca_serial_number
 
 
-  # todo: sort the list of hosts and select the one which has the
-  # highest openshift.master.ca_serial_number value
+# todo: sort the list of hosts and select the one which has the
+# highest openshift.master.ca_serial_number value

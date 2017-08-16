@@ -32,7 +32,7 @@
   - not first_proxy_ca_crt.stat.exists
   - not first_proxy_ca_key.stat.exists
 
-- name: TODO: Call certificate sync handler
+- name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for the master aggregator, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
   when: not l_master_aggregator_cert_created.skipped
