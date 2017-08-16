@@ -16,15 +16,8 @@
   debug:
     msg: "{{ l_ca_serial_number }}"
   when:
-    - l_ca_serial_exists.stat.exists
+    - l_ca_serial_number is defined
 
-- name: what is the serial
-  debug:
-    msg: "{{ l_ca_serial_number.content | b64decode}}"
-  when:
-    - l_ca_serial_exists.stat.exists
-
-######################################################################
 - name: Record the value of the ca serial number
   set_fact:
     ca_serial_number: "{{ l_ca_serial_number.content | b64decode | int(base=16) }}"
@@ -32,7 +25,7 @@
     - l_ca_serial_number is defined
 
 # The ca.serial.txt file does not exist on this master
-- name: Record the value of the ca serial number
+- name: Record the empty value of the ca serial number
   set_fact:
     ca_serial_number: "{{ None }}"
   when:
@@ -42,6 +35,21 @@
 - debug:
     var: ca_serial_number
 
+- fail:
+    msg: done
+
+# ######################################################################
+# - name: what is the serial
+#   debug:
+#     msg: "{{ l_ca_serial_number }}"
+#   when:
+#     - l_ca_serial_exists.stat.exists
+
+# - name: what is the serial
+#   debug:
+#     msg: "{{ l_ca_serial_number.content | b64decode}}"
+#   when:
+#     - l_ca_serial_exists.stat.exists
 
 # todo: sort the list of hosts and select the one which has the
 # highest openshift.master.ca_serial_number value
