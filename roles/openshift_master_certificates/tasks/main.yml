@@ -51,6 +51,9 @@
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
+    {% for ca_certificate in openshift.master.additional_ca_certificates | default([]) %}
+    --certificate-authority {{ ca_certificate }}
+    {% endfor %}
     {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
     --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
@@ -77,6 +80,9 @@
       --certificate-authority={{ openshift_ca_cert }}
       {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}
+      {% endfor %}
+      {% for ca_certificate in openshift.master.additional_ca_certificates | default([]) %}
+      --certificate-authority {{ ca_certificate }}
       {% endfor %}
       --client-dir={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}
       --groups=system:masters,system:openshift-master

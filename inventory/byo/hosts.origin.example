@@ -705,6 +705,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Detected names may be overridden by specifying the "names" key
 #openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"], "cafile": "/path/to/custom-ca1.crt"}]
+#
+# Provide additional certificate CAs which will be added to the OpenShift CA bundle.
+#openshift_master_additional_ca_certificates=["/path/to/custom-ca1.crt"]
 
 # Session options
 #openshift_master_session_name=ssn
