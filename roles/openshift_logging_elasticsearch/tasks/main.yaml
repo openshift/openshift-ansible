@@ -12,11 +12,27 @@
     openshift_logging_elasticsearch_proxy_image_prefix: "{{ openshift_logging_elasticsearch_proxy_image_prefix | default(__openshift_logging_elasticsearch_proxy_image_prefix) }}"
     openshift_logging_elasticsearch_proxy_image_version: "{{ openshift_logging_elasticsearch_proxy_image_version | default(__openshift_logging_elasticsearch_proxy_image_version) }}"
 
-- name: Gather OpenShift Logging Facts
+- name: Gather OpenShift Elasticsearch cluster facts
   openshift_logging_elasticsearch_facts:
     oc_bin: '{{ openshift.common.client_binary |default("oc") }}'
     openshift_namespace: "{{openshift_logging_elasticsearch_namespace}}"
     elasticsearch_clustername: "{{ openshift_logging_elasticsearch_clustername }}"
+
+- name: Reconcile OpenShift Elasticsearch node topology
+  openshift_logging_elasticsearch_topology:
+    existing_topology: '{{ openshift_logging_elasticsearch_facts.existing_node_topology }}'
+    desired_topology: '{{ openshift_logging_elasticsearch_node_topology }}'
+    elasticsearch_clustername: '{{ openshift_logging_elasticsearch_clustername }}'
+    elasticsearch_cluster_size: '{{ openshift_logging_elasticsearch_cluster_size }}'
+    elasticsearch_cpu_limit: '{{ openshift_logging_elasticsearch_cpu_limit }}'
+    elasticsearch_memory_limit: '{{ openshift_logging_elasticsearch_memory_limit }}'
+    elasticsearch_pv_selector: '{{ openshift_logging_elasticsearch_pv_selector }}'
+    elasticsearch_pvc_dynamic: '{{ openshift_logging_elasticsearch_pvc_dynamic }}'
+    elasticsearch_pvc_size: '{{ openshift_logging_elasticsearch_pvc_size }}'
+    elasticsearch_pvc_prefix: '{{ openshift_logging_elasticsearch_pvc_prefix }}'
+    elasticsearch_storage_group: '{{ openshift_logging_elasticsearch_storage_group }}'
+    elasticsearch_nodeselector: '{{ openshift_logging_elasticsearch_nodeselector }}'
+    elasticsearch_storage_type: '{{ openshift_logging_elasticsearch_storage_type }}'
 
 # service account
 - include: "{{ role_path }}/tasks/service_accounts.yaml"
@@ -68,7 +84,7 @@
 # Deploy masters
 - include: "{{ role_path }}/tasks/node_provision.yaml"
   vars:
-    replicas: "{{ openshift_logging_elasticsearch_node_topology.masters.replicas }}"
+    replicas: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.replicas }}"
     es_role: master
     node_master: "true"
     node_data: "false"
@@ -76,8 +92,9 @@
     es_http_service: "false"
     openshift_logging_elasticsearch_deployment_name: "{{ openshift_logging_elasticsearch_clustername }}-master"
     generated_certs_dir: "{{ certs_dir }}"
-    limits: "{{ openshift_logging_elasticsearch_node_topology.masters.limits }}"
-    es_node_selector: "{{ openshift_logging_elasticsearch_node_topology.masters.nodeSelector | default({}) }}"
+    limits: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.limits }}"
+    requests: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.requests }}"
+    es_node_selector: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.nodeSelector | default({}) }}"
     node_storage_type: emptydir
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
@@ -95,11 +112,11 @@
     openshift_logging_elasticsearch_deployment_name: "{{ openshift_logging_elasticsearch_clustername }}-clientdata-{{ item.0 }}"
     generated_certs_dir: "{{ certs_dir }}"
     limits: "{{ item.1.limits }}"
+    requests: "{{ item.1.requests }}"
     es_node_selector: "{{ item.1.nodeSelector | default({}) }}"
     node_storage_type: "{{ item.1.node_storage_type | default(emptydir) }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ item.0 | int }}"
     hostmount_path: "{{ item.1.hostmount_path |default ({})}}"
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
-  with_indexed_items: "{{ openshift_logging_elasticsearch_node_topology.clientdata }}"
-
+  with_indexed_items: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdata }}"

@@ -135,7 +135,6 @@
     files:
       - "{{ tempdir }}/templates/logging-es-dc.yml"
     delete_after: true
-    kubeconfig: '{{ kubeconfig }}'
 
 # scale up
 - name: Start Elasticsearch for role {{ es_role }}
@@ -144,7 +143,6 @@
     name: "{{ es_deploy_name }}"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     replicas: "{{ replicas | default(1) }}"
-    kubeconfig: '{{ kubeconfig }}'
 
 ## Placeholder for migration when necessary ##
 

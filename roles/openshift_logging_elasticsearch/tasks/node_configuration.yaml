@@ -39,4 +39,3 @@
     from_file:
       elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
       logging.yml: "{{ tempdir }}/elasticsearch-logging.yml"
-

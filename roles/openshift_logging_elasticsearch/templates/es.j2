@@ -154,21 +154,6 @@ spec:
               name: "HEAP_DUMP_LOCATION"
               value: "/elasticsearch/persistent/heapdump.hprof"
             -
-              name: "MASTERS_QUORUM"
-              value: "{{es_masters_quorum | int}}"
-            -
-              name: "RECOVER_AFTER_NODES"
-              value: "{{es_recover_after_nodes}}"
-            -
-              name: "RECOVER_EXPECTED_DATA_NODES"
-              value: "{{es_recover_expected_data_nodes}}"
-            -
-              name: "RECOVER_EXPECTED_NODES"
-              value: "{{es_recover_expected_nodes}}"
-            -
-              name: "RECOVER_AFTER_TIME"
-              value: "{{openshift_elasticsearch_recover_after_time}}"
-            -
               name: "READINESS_PROBE_TIMEOUT"
               value: "30"
             -

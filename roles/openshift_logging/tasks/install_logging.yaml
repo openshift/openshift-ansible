@@ -49,6 +49,8 @@
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
 
 ## Elasticsearch
+- set_fact:
+    elasticsearch_storage_type: "{{ openshift_logging_elasticsearch_storage_type | default('pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir') }}"
 
 - include_role:
     name: openshift_logging_elasticsearch
@@ -60,17 +62,29 @@
     generated_certs_dir: "{{ openshift.common.config_base }}/logging"
     openshift_logging_elasticsearch_transport_cert_name: "elasticsearch"
     openshift_logging_elasticsearch_api_cert_name: "logging-es"
-
+    openshift_logging_elasticsearch_node_topology: "{{ openshift_logging_es_node_topology }}"
+    openshift_logging_elasticsearch_node_topology_defined: "{{ openshift_logging_es_node_topology_defined }}"
+    # Check if this parameter is still needed
+    openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_recover_after_time }}"
+    # Var-styled definition, they are only used if openshift_logging_elasticsearch_node_topology_defined is false
+    openshift_logging_elasticsearch_cluster_size: "{{ openshift_logging_es_cluster_size }}"
+    openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector }}"
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
-    openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
+    openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
+
+    openshift_logging_elasticsearch_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_prefix: "{{ openshift_logging_es_pvc_prefix }}"
+    openshift_logging_elasticsearch_storage_group: "{{ openshift_logging_es_storage_group }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_cpu_limit }}"
-    openshift_logging_es_key: "{{ openshift_logging_es_key }}"
-    openshift_logging_es_cert: "{{ openshift_logging_es_cert }}"
-    openshift_logging_es_ca_ext: "{{ openshift_logging_es_ca_ext }}"
-    openshift_logging_es_hostname: "{{ openshift_logging_es_hostname }}"
-    openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_edge_term_policy | default('') }}"
-    openshift_logging_es_allow_external: "{{ openshift_logging_es_allow_external }}"
+    # External routes to Elasticsearch
+    openshift_logging_elasticsearch_key: "{{ openshift_logging_es_key }}"
+    openshift_logging_elasticsearch_cert: "{{ openshift_logging_es_cert }}"
+    openshift_logging_elasticsearch_ca_ext: "{{ openshift_logging_es_ca_ext }}"
+    openshift_logging_elasticsearch_hostname: "{{ openshift_logging_es_hostname }}"
+    openshift_logging_elasticsearch_edge_term_policy: "{{ openshift_logging_es_edge_term_policy | default('') }}"
+    openshift_logging_elasticsearch_allow_external: "{{ openshift_logging_es_allow_external }}"
 
 # Elasticsearch Ops cluster
 - include_role:
@@ -83,20 +97,29 @@
     generated_certs_dir: "{{ openshift.common.config_base }}/logging"
     openshift_logging_elasticsearch_transport_cert_name: "elasticsearch"
     openshift_logging_elasticsearch_api_cert_name: "logging-es"
+    openshift_logging_elasticsearch_node_topology: "{{ openshift_logging_es_ops_node_topology }}"
+    openshift_logging_elasticsearch_node_topology_defined: "{{ openshift_logging_es_ops_node_topology_defined }}"
+    # Check if this parameter is still needed
+    openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_ops_recover_after_time }}"
+    # Var-styled definition, they are only used if openshift_logging_elasticsearch_node_topology_defined is false
+    openshift_logging_elasticsearch_cluster_size: "{{ openshift_logging_es_ops_cluster_size }}"
+    openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_ops_nodeselector }}"
+
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_ops_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_ops_pvc_dynamic }}"
-    openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
+    openshift_logging_elasticsearch_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_prefix: "{{ openshift_logging_es_ops_pvc_prefix }}"
+    openshift_logging_elasticsearch_storage_group: "{{ openshift_logging_es_ops_storage_group }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
-    openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_ops_nodeselector }}"
-    openshift_logging_es_key: "{{ openshift_logging_es_ops_key }}"
-    openshift_logging_es_cert: "{{ openshift_logging_es_ops_cert }}"
-    openshift_logging_es_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
-    openshift_logging_es_hostname: "{{ openshift_logging_es_ops_hostname }}"
-    openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
-    openshift_logging_es_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
-
+    # External routes to Elasticsearch
+    openshift_logging_elasticsearch_key: "{{ openshift_logging_es_ops_key }}"
+    openshift_logging_elasticsearch_cert: "{{ openshift_logging_es_ops_cert }}"
+    openshift_logging_elasticsearch_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
+    openshift_logging_elasticsearch_hostname: "{{ openshift_logging_es_ops_hostname }}"
+    openshift_logging_elasticsearch_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
+    openshift_logging_elasticsearch_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
   when: openshift_logging_use_ops |bool
 
 ## Kibana

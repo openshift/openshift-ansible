@@ -24,19 +24,20 @@ network:
 
 cloud:
   kubernetes:
-    pod_label: ${POD_LABEL}
-    pod_port: 9300
+    service: ${SERVICE_DNS}
     namespace: ${NAMESPACE}
 
 discovery:
   type: kubernetes
   zen.ping.multicast.enabled: false
-  zen.minimum_master_nodes: ${NODE_QUORUM}
+  zen.minimum_master_nodes: {{es_masters_quorum | int}}
 
 gateway:
-  recover_after_nodes: ${NODE_QUORUM}
-  expected_nodes: ${RECOVER_EXPECTED_NODES}
-  recover_after_time: ${RECOVER_AFTER_TIME}
+  recover_after_nodes: {{ es_recover_after_nodes }}
+  expected_master_nodes: {{ es_masters_quorum | int }}
+  expected_nodes: {{ es_recover_expected_nodes }}
+  expected_data_nodes: {{ es_recover_expected_data_nodes }}
+  recover_after_time: "{{ openshift_elasticsearch_recover_after_time }}"
 
 io.fabric8.elasticsearch.authentication.users: ["system.logging.kibana", "system.logging.fluentd", "system.logging.curator", "system.admin"]
 io.fabric8.elasticsearch.kibana.mapping.app: /usr/share/elasticsearch/index_patterns/com.redhat.viaq-openshift.index-pattern.json

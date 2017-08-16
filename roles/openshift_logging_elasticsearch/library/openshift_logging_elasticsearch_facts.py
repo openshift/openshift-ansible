@@ -9,7 +9,6 @@ options:
 author: Red Hat, Inc
 '''
 
-import copy
 import json
 
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -36,10 +35,10 @@ LOGGING_INFRA_KEY = "logging-infra"
 CLUSTER_NAME_LABEL = "cluster-name"
 ES_ROLE_LABEL = "es-node-role"
 # selectors for filtering resources
-DS_FLUENTD_SELECTOR = LOGGING_INFRA_KEY + "=" + "fluentd"
 LOGGING_SELECTOR = LOGGING_INFRA_KEY + "=" + "support"
 ROUTE_SELECTOR = "component=support, logging-infra=support, provider=openshift"
 COMPONENTS = ["elasticsearch"]
+SA_PREFIX = "system:serviceaccount:"
 
 
 class OCBaseCommand(object):
@@ -94,6 +93,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
     name = "facts"
 
     def __init__(self, logger, binary, kubeconfig, namespace, cluster_name):
+        # pylint: disable=too-many-arguments
         ''' The init method for OpenshiftLoggingFacts '''
         super(OpenshiftLoggingFacts, self).__init__(binary, kubeconfig, namespace)
         self.logger = logger
@@ -105,14 +105,23 @@ class OpenshiftLoggingFacts(OCBaseCommand):
         for comp in COMPONENTS:
             self.add_facts_for(comp, kind)
 
-    def add_facts_for(self, comp, kind, name=None, facts=None):
+    def add_facts_for(self, kind, name=None, facts=None):
         ''' Add facts for the provided kind '''
+#        if comp not in self.facts:
+#            self.facts[comp] = dict()
+        if kind not in self.facts:
+            self.facts[kind] = dict()
+        if name:
+            self.facts[kind][name] = facts
+
+    def append_facts_for(self, comp, kind, facts=None):
+        ''' Append facts for the provided kind to the list'''
         if comp not in self.facts:
             self.facts[comp] = dict()
         if kind not in self.facts[comp]:
-            self.facts[comp][kind] = dict()
-        if name:
-            self.facts[comp][kind][name] = facts
+            self.facts[comp][kind] = list()
+        if facts:
+            self.facts[comp][kind].append(facts)
 
     def facts_for_routes(self, namespace):
         ''' Gathers facts for Routes in logging namespace '''
@@ -122,32 +131,8 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return None
         for route in route_list["items"]:
             name = route["metadata"]["name"]
-            comp = self.comp(name)
-            if comp is not None:
-                self.add_facts_for(comp, "routes", name, dict(host=route["spec"]["host"]))
+            self.add_facts_for("routes", name, dict(host=route["spec"]["host"]))
         self.facts["agl_namespace"] = namespace
-
-    def facts_for_daemonsets(self, namespace):
-        ''' Gathers facts for Daemonsets in logging namespace '''
-        self.default_keys_for("daemonsets")
-        ds_list = self.oc_command("get", "daemonsets", namespace=namespace,
-                                  add_options=["-l", LOGGING_INFRA_KEY + "=fluentd"])
-        if len(ds_list["items"]) == 0:
-            return
-        for ds_item in ds_list["items"]:
-            name = ds_item["metadata"]["name"]
-            comp = self.comp(name)
-            spec = ds_item["spec"]["template"]["spec"]
-            container = spec["containers"][0]
-            result = dict(
-                selector=ds_item["spec"]["selector"],
-                image=container["image"],
-                resources=container["resources"],
-                nodeSelector=spec["nodeSelector"],
-                serviceAccount=spec["serviceAccount"],
-                terminationGracePeriodSeconds=spec["terminationGracePeriodSeconds"]
-            )
-            self.add_facts_for(comp, "daemonsets", name, result)
 
     def facts_for_pvcs(self, namespace):
         ''' Gathers facts for PVCS in logging namespace'''
@@ -157,44 +142,60 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return
         for pvc in pvclist["items"]:
             name = pvc["metadata"]["name"]
-            comp = self.comp(name)
-            self.add_facts_for(comp, "pvcs", name, dict())
+            self.add_facts_for("pvcs", name, dict())
 
-    def facts_for_deploymentconfigs(self, namespace, es_role):
+    def facts_for_ex_node_topology(self, namespace, es_role):
         ''' Gathers facts for DeploymentConfigs in logging namespace '''
-        self.default_keys_for("deploymentconfigs")
+        if es_role == "masterclientdata":
+            # masterclientdata role exists only for older deployments,
+            # so cluster_name will be either "logging-es" or "logging-es-ops"
+            selector = "component=" + self.cluster_name[8:] + "," +\
+                CLUSTER_NAME_LABEL + "!=" + self.cluster_name
+        else:
+            selector = CLUSTER_NAME_LABEL + "=" + self.cluster_name +\
+                "," + ES_ROLE_LABEL + "=" + es_role
         dclist = self.oc_command("get", "deploymentconfigs",
                                  namespace=namespace,
-                                 add_options=["-l",
-                                              CLUSTER_NAME_LABEL + "=" +\
-                                              self.cluster_name, "-l",
-                                              ES_ROLE_LABEL + "=" +\
-                                              es_role])
+                                 add_options=["-l", selector])
         if len(dclist["items"]) == 0:
-            self.add_facts_for("node_topology", es_role)
+            self.add_facts_for("existing_node_topology", es_role)
             return
         dcs = dclist["items"]
         for dc_item in dcs:
-            name = dc_item["metadata"]["name"]
             spec = dc_item["spec"]["template"]["spec"]
+            cont_spec = spec["containers"][0]
+            resources = cont_spec.get("resources", dict())
+            # Detect storage type
+            claim_name = ""
+            hostmount_path = []
+            for volume in spec["volumes"]:
+                if volume["name"].startswith("elasticsearch-storage"):
+                    if "persistentVolumeClaim" in volume:
+                        claim_name = volume["persistentVolumeClaim"]["claimName"]
+                        storage_type = "pvc"
+                    elif "hostPath" in volume:
+                        storage_type = "hostmount"
+                        hostmount_path.append(volume["hostPath"]["path"])
+                    else:
+                        storage_type = "emptydir"
             facts = dict(
+                name=dc_item["metadata"]["name"],
                 selector=dc_item["spec"]["selector"],
                 replicas=dc_item["spec"]["replicas"],
                 serviceAccount=spec["serviceAccount"],
-                containers=dict(),
-                volumes=dict()
+                limits=resources.get("limits", dict()),
+                requests=resources.get("requests", dict()),
+                storage_group=spec["securityContext"]["supplementalGroups"][0],
+                nodeSelector=spec.get("nodeSelector", dict()),
+                image=cont_spec["image"],
+                claim_name=claim_name,
+                hostmount_path=hostmount_path,
+                node_storage_type=storage_type
             )
-            if "volumes" in spec:
-                for vol in spec["volumes"]:
-                    clone = copy.deepcopy(vol)
-                    clone.pop("name", None)
-                    facts["volumes"][vol["name"]] = clone
-            for container in spec["containers"]:
-                facts["containers"][container["name"]] = dict(
-                    image=container["image"],
-                    resources=container["resources"],
-                )
-            self.add_facts_for("node_topology", es_role, name, facts)
+            if es_role == "master":
+                self.add_facts_for("existing_node_topology", es_role, facts)
+            else:
+                self.append_facts_for("existing_node_topology", es_role, facts)
 
     def facts_for_services(self, namespace):
         ''' Gathers facts for services in logging namespace '''
@@ -204,37 +205,17 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return
         for service in servicelist["items"]:
             name = service["metadata"]["name"]
-            comp = self.comp(name)
-            if comp is not None:
-                self.add_facts_for(comp, "services", name, dict())
+            self.add_facts_for("services", name, dict())
 
     def facts_for_configmaps(self, namespace):
         ''' Gathers facts for configmaps in logging namespace '''
         self.default_keys_for("configmaps")
-        cm_name = self.cluster_name + "-configuration"
         a_list = self.oc_command("get", "configmaps", namespace=namespace)
         if len(a_list["items"]) == 0:
             return
         for item in a_list["items"]:
             name = item["metadata"]["name"]
-            comp = self.comp(name)
-            if comp is not None:
-                self.add_facts_for(comp, "configmaps", name, item["data"])
-
-    def facts_for_oauthclients(self, namespace):
-        ''' Gathers facts for oauthclients used with logging '''
-        self.default_keys_for("oauthclients")
-        a_list = self.oc_command("get", "oauthclients", namespace=namespace, add_options=["-l", LOGGING_SELECTOR])
-        if len(a_list["items"]) == 0:
-            return
-        for item in a_list["items"]:
-            name = item["metadata"]["name"]
-            comp = self.comp(name)
-            if comp is not None:
-                result = dict(
-                    redirectURIs=item["redirectURIs"]
-                )
-                self.add_facts_for(comp, "oauthclients", name, result)
+            self.add_facts_for("configmaps", name, item["data"])
 
     def facts_for_secrets(self, namespace):
         ''' Gathers facts for secrets in the logging namespace '''
@@ -244,23 +225,21 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return
         for item in a_list["items"]:
             name = item["metadata"]["name"]
-            comp = self.comp(name)
-            if comp is not None and item["type"] == "Opaque":
+            if item["type"] == "Opaque":
                 result = dict(
                     keys=item["data"].keys()
                 )
-                self.add_facts_for(comp, "secrets", name, result)
+                self.add_facts_for("secrets", name, result)
 
     def facts_for_sccs(self):
         ''' Gathers facts for SCCs used with logging '''
         self.default_keys_for("sccs")
-        scc = self.oc_command("get", "scc", name="privileged")
-        if len(scc["users"]) == 0:
+        scc = self.oc_command("get", "scc", name="hostaccess")
+        if len(scc.get("users", [])) == 0:
             return
         for item in scc["users"]:
-            comp = self.comp(item)
-            if comp is not None:
-                self.add_facts_for(comp, "sccs", "privileged", dict())
+            if item.startswith(SA_PREFIX + self.namespace):
+                self.add_facts_for("sccs", "hostaccess", [item])
 
     def facts_for_clusterrolebindings(self, namespace):
         ''' Gathers ClusterRoleBindings used with logging '''
@@ -269,9 +248,8 @@ class OpenshiftLoggingFacts(OCBaseCommand):
         if "subjects" not in role or len(role["subjects"]) == 0:
             return
         for item in role["subjects"]:
-            comp = self.comp(item["name"])
-            if comp is not None and namespace == item["namespace"]:
-                self.add_facts_for(comp, "clusterrolebindings", "cluster-readers", dict())
+            if namespace == item.get("namespace"):
+                self.add_facts_for("clusterrolebindings", "cluster-readers", dict())
 
 # this needs to end up nested under the service account...
     def facts_for_rolebindings(self, namespace):
@@ -281,40 +259,26 @@ class OpenshiftLoggingFacts(OCBaseCommand):
         if "subjects" not in role or len(role["subjects"]) == 0:
             return
         for item in role["subjects"]:
-            comp = self.comp(item["name"])
-            if comp is not None and namespace == item["namespace"]:
-                self.add_facts_for(comp, "rolebindings", "logging-elasticsearch-view-role", dict())
+            if namespace == item.get("namespace"):
+                self.add_facts_for("rolebindings", "logging-elasticsearch-view-role", dict())
 
     # pylint: disable=no-self-use, too-many-return-statements
     def comp(self, name):
         ''' Does a comparison to evaluate the logging component '''
-        if name.startswith("logging-curator-ops"):
-            return "curator_ops"
-        elif name.startswith("logging-kibana-ops") or name.startswith("kibana-ops"):
-            return "kibana_ops"
-        elif name.startswith("logging-es-ops") or name.startswith("logging-elasticsearch-ops"):
-            return "elasticsearch_ops"
-        elif name.startswith("logging-curator"):
-            return "curator"
-        elif name.startswith("logging-kibana") or name.startswith("kibana"):
-            return "kibana"
-        elif name.startswith(self.cluster_name):
+        if name.startswith(self.cluster_name):
             return "elasticsearch"
-        elif name.startswith("logging-fluentd") or name.endswith("aggregated-logging-fluentd"):
-            return "fluentd"
         else:
             return None
 
     def build_facts(self):
         ''' Builds the logging facts and returns them '''
-        self.facts_for_deploymentconfigs(self.namespace, "master")
-        self.facts_for_deploymentconfigs(self.namespace, "clientdata")
+        self.facts_for_ex_node_topology(self.namespace, "master")
+        self.facts_for_ex_node_topology(self.namespace, "clientdata")
+        self.facts_for_ex_node_topology(self.namespace, "masterclientdata")
 
-        self.facts_for_daemonsets(self.namespace)
         self.facts_for_services(self.namespace)
         self.facts_for_configmaps(self.namespace)
         self.facts_for_sccs()
-        self.facts_for_oauthclients(self.namespace)
         self.facts_for_clusterrolebindings(self.namespace)
         self.facts_for_rolebindings(self.namespace)
         self.facts_for_secrets(self.namespace)
@@ -335,7 +299,8 @@ def main():
         supports_check_mode=False
     )
     try:
-        cmd = OpenshiftLoggingFacts(module, module.params['oc_bin'], module.params['admin_kubeconfig'],
+        cmd = OpenshiftLoggingFacts(module, module.params['oc_bin'],
+                                    module.params['admin_kubeconfig'],
                                     module.params['openshift_namespace'],
                                     module.params['elasticsearch_clustername'])
         module.exit_json(
