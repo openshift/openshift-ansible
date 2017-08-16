@@ -1,6 +1,13 @@
 ---
 # Tasks to statically provision NFS volumes
 # Include if not using dynamic volume provisioning
+
+- name: Set openshift_cfme_nfs_server fact
+  when: openshift_cfme_nfs_server is not defined
+  set_fact:
+    # Hostname/IP of the NFS server. Currently defaults to first master
+    openshift_cfme_nfs_server: "{{ oo_nfs_to_config.0 }}"
+
 - name: Ensure the /exports/ directory exists
   file:
     path: /exports/
