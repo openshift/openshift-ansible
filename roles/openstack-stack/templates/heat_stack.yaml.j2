@@ -439,7 +439,7 @@ resources:
           port_range_min: 53
           port_range_max: 53
           remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
-{% if num_masters > 1 %}
+{% if num_masters > 1 or ui_ssh_tunnel|bool %}
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -450,14 +450,21 @@ resources:
         protocol: tcp
         port_range_min: {{ openshift_master_api_port | default(8443) }}
         port_range_max: {{ openshift_master_api_port | default(8443) }}
-        remote_ip_prefix: {{ lb_ingress_cidr }}
-  {% if openshift_master_console_port is defined and openshift_master_console_port != openshift_master_api_port %}
+        remote_ip_prefix: {{ lb_ingress_cidr | default(bastion_ingress_cidr) }}
+{% if ui_ssh_tunnel|bool %}
+      - direction: ingress
+        protocol: tcp
+        port_range_min: {{ openshift_master_api_port | default(8443) }}
+        port_range_max: {{ openshift_master_api_port | default(8443) }}
+        remote_ip_prefix: {{ ssh_ingress_cidr }}
+{% endif %}
+{% if openshift_master_console_port is defined and openshift_master_console_port != openshift_master_api_port %}
       - direction: ingress
         protocol: tcp
         port_range_min: {{ openshift_master_console_port | default(8443) }}
         port_range_max: {{ openshift_master_console_port | default(8443) }}
-        remote_ip_prefix: {{ lb_ingress_cidr }}
-  {% endif %}
+        remote_ip_prefix: {{ lb_ingress_cidr | default(bastion_ingress_cidr) }}
+{% endif %}
 {% endif %}
 
   etcd:
@@ -695,6 +702,9 @@ resources:
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: node-secgrp }
+{% endif %}
+{% if ui_ssh_tunnel|bool and num_masters < 2 %}
+            - { get_resource: lb-secgrp }
 {% endif %}
             - { get_resource: infra-secgrp }
             - { get_resource: common-secgrp }

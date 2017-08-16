@@ -251,6 +251,24 @@ Once it succeeds, you can install openshift by running:
 
     ansible-playbook openshift-ansible/playbooks/byo/config.yml
 
+### Access UI
+
+OpenShift UI may be accessed via the 1st master node FQDN, port 8443.
+
+When using a bastion, you may want to make an SSH tunnel from your control node
+to access UI on the `https://localhost:8443`, with this inventory variable:
+
+   openshift_ui_ssh_tunnel: True
+
+Note, this requires sudo rights on the ansible control node and an absolute path
+for the `openstack_private_ssh_key`. You should also update the control node's
+`/etc/hosts`:
+
+    127.0.0.1 master-0.openshift.example.com
+
+In order to access UI, the ssh-tunnel service will be created and started on the
+control node. Make sure to remove these changes and the service manually, when not
+needed anymore.
 
 ## License
 

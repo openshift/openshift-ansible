@@ -20,4 +20,10 @@ private_ssh_key: ~/.ssh/openshift
 # The patch to store the generated config to access bastion/hosts
 ssh_config_path: /tmp/ssh.config.ansible
 
+# The IP:port to make an SSH tunnel to access UI on the 1st master
+# via bastion node (requires sudo on the ansible control node)
+ui_ssh_tunnel: False
+ui_port: "{{ openshift_master_api_port | default(8443) }}"
+target_ip: "{{ hostvars[groups['masters.' + stack_name|quote][0]].private_v4 }}"
+
 openstack_private_network: private

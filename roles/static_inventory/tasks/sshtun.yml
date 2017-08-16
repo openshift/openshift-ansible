@@ -1,0 +1,15 @@
+---
+- name: Create ssh tunnel systemd service
+  template:
+    src: ssh-tunnel.service.j2
+    dest: /etc/systemd/system/ssh-tunnel.service
+    mode: 0644
+
+- name: reload the systemctl daemon after file update
+  command: systemctl daemon-reload
+
+- name: Enable ssh tunnel service
+  service:
+    name: ssh-tunnel
+    enabled: true
+    state: restarted

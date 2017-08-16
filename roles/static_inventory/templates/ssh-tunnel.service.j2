@@ -1,0 +1,20 @@
+[Unit]
+Description=Set up ssh tunneling for OpenShift cluster UI
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/ssh -NT -o \
+   ServerAliveInterval=60 -o \
+   UserKnownHostsFile=/dev/null -o \
+   StrictHostKeyChecking=no -o \
+   ExitOnForwardFailure=no -i \
+   {{ private_ssh_key }} {{ ssh_user }}@{{ hostvars['bastion'].ansible_host }} \
+   -L 0.0.0.0:{{ ui_port }}:{{ target_ip }}:{{ ui_port }}
+
+
+# Restart every >2 seconds to avoid StartLimitInterval failure
+RestartSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

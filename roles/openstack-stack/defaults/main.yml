@@ -13,3 +13,4 @@ num_infra: 1
 nodes_to_remove: []
 etcd_volume_size: 2
 use_bastion: False
+ui_ssh_tunnel: False
