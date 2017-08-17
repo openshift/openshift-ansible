@@ -1,6 +1,4 @@
 ---
-- include: evaluate_groups.yml
-
 - name: OpenShift Metrics
   hosts: oo_first_master
   roles:
