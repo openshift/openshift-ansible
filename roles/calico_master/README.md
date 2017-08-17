@@ -29,7 +29,6 @@ Additional parameters that can be defined in the inventory are:
 
 | Environment | Description | Schema | Default |   
 |---------|----------------------|---------|---------|
-|CALICO_IPV4POOL_CIDR|	The IPv4 Pool to create if none exists at start up. It is invalid to define this variable and NO_DEFAULT_POOLS.	|IPv4 CIDR	| 192.168.0.0/16 |
 | CALICO_IPV4POOL_IPIP | IPIP Mode to use for the IPv4 POOL created at start up.	| off, always, cross-subnet	| always |
 | CALICO_LOG_DIR | Directory on the host machine where Calico Logs are written.| String	| /var/log/calico |
 
