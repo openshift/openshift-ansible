@@ -135,6 +135,16 @@ cluster node groups, like app or infra nodes. For example: `{'region': 'infra'}`
 The `openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 
+The `docker_volume_size` is the default Docker volume size the servers will use.
+In order to set a different volume size for a role,
+uncomment the line with the corresponding variable (e. g. `docker_master_volume_size`
+for master) and change its value. `docker_volume_size` must stay defined as it is
+used as a default value for some of the servers (master, infra, app node).
+The rest of the roles (etcd, load balancer, dns) have their defaults hard-coded.
+
+**Note**: If the `ephemeral_volumes` is set to `true`, the `*_volume_size` variables
+will be ignored and the deployment will not create any cinder volumes.
+
 The `openstack_flat_secgrp`, controls Neutron security groups creation for Heat
 stacks. Set it to true, if you experience issues with sec group rules
 quotas. It trades security for number of rules, by sharing the same set

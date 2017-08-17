@@ -1,5 +1,4 @@
 ---
-dns_volume_size: 1
 ssh_ingress_cidr: 0.0.0.0/0
 node_ingress_cidr: 0.0.0.0/0
 master_ingress_cidr: 0.0.0.0/0
@@ -12,5 +11,7 @@ num_dns: 1
 num_infra: 1
 nodes_to_remove: []
 etcd_volume_size: 2
+dns_volume_size: 1
+lb_volume_size: 5
 use_bastion: False
 ui_ssh_tunnel: False
