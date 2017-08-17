@@ -6,7 +6,7 @@
   become: yes
   tasks:
   - name: install NetworkManager
-    package:
+    openshift_package:
       name: 'NetworkManager'
       state: present
 

@@ -97,7 +97,7 @@
   when: not openshift.common.is_containerized | bool
 
 - name: Upgrade openvswitch
-  package:
+  openshift_package:
     name: openvswitch
     state: latest
   when: not openshift.common.is_containerized | bool

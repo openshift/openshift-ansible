@@ -4,7 +4,7 @@
   static: yes
 
 - name: Install nfs-utils
-  package: name=nfs-utils state=present
+  openshift_package: name=nfs-utils state=present
 
 - name: Configure NFS
   lineinfile:

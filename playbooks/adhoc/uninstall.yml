@@ -102,7 +102,7 @@
   - block:
     - block:
       - name: Remove packages
-        package: name={{ item }} state=absent
+        openshift_package: name={{ item }} state=absent
         with_items:
         - atomic-enterprise
         - atomic-enterprise-node
@@ -135,7 +135,7 @@
         - tuned-profiles-origin-node
 
       - name: Remove flannel package
-        package: name=flannel state=absent
+        openshift_package: name=flannel state=absent
         when: openshift_use_flannel | default(false) | bool
       when: not is_atomic | bool
 
@@ -344,7 +344,7 @@
     - atomic-openshift-master
 
   - name: Remove packages
-    package: name={{ item }} state=absent
+    openshift_package: name={{ item }} state=absent
     when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - atomic-enterprise
@@ -485,7 +485,7 @@
     failed_when: false
 
   - name: Remove packages
-    package: name={{ item }} state=absent
+    openshift_package: name={{ item }} state=absent
     when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - etcd
@@ -543,7 +543,7 @@
     - firewalld
 
   - name: Remove packages
-    package: name={{ item }} state=absent
+    openshift_package: name={{ item }} state=absent
     when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - haproxy

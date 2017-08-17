@@ -6,7 +6,7 @@
     is_atomic: "{{ openshift.common.is_atomic | default(False) | bool }}"
 
 - name: Install the base package for versioning
-  package:
+  openshift_package:
     name: "{{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when: not is_containerized | bool

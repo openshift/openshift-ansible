@@ -1,6 +1,6 @@
 ---
 - name: Make sure heketi-client is installed
-  package: name=heketi-client state=present
+  openshift_package: name=heketi-client state=present
   when:
   - not openshift.common.is_atomic | bool
   - not glusterfs_heketi_is_native | bool

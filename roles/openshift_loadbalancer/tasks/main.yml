@@ -4,7 +4,7 @@
   static: yes
 
 - name: Install haproxy
-  package: name=haproxy state=present
+  openshift_package: name=haproxy state=present
   when: not openshift.common.is_containerized | bool
 
 - name: Pull haproxy image

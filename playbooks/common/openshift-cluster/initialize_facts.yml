@@ -88,7 +88,7 @@
     - not l_is_atomic | bool
     block:
     - name: Ensure openshift-ansible installer package deps are installed
-      package:
+      openshift_package:
         name: "{{ item }}"
         state: present
       with_items:
@@ -98,7 +98,7 @@
       - yum-utils
 
     - name: Ensure various deps for running system containers are installed
-      package:
+      openshift_package:
         name: "{{ item }}"
         state: present
       with_items:

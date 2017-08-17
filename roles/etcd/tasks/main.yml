@@ -11,7 +11,7 @@
   static: yes
 
 - name: Install etcd
-  package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
+  openshift_package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
 
 - include_role:

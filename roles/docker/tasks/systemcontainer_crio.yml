@@ -14,14 +14,14 @@
   when: openshift.docker.additional_registries
 
 - name: Ensure container-selinux is installed
-  package:
+  openshift_package:
     name: container-selinux
     state: present
   when: not openshift.common.is_atomic | bool
 
 # Used to pull and install the system container
 - name: Ensure atomic is installed
-  package:
+  openshift_package:
     name: atomic
     state: present
   when: not openshift.common.is_atomic | bool
@@ -29,7 +29,7 @@
 # At the time of writing the atomic command requires runc for it's own use. This
 # task is here in the even that the atomic package ever removes the dependency.
 - name: Ensure runc is installed
-  package:
+  openshift_package:
     name: runc
     state: present
   when: not openshift.common.is_atomic | bool

@@ -5,7 +5,7 @@
   register: chrony_installed
 
 - name: Install ntp package
-  package: name=ntp state=present
+  openshift_package: name=ntp state=present
   when:
     - openshift_clock_enabled | bool
     - chrony_installed.rc != 0

@@ -4,7 +4,7 @@
   static: yes
 
 - name: Install cockpit-ws
-  package: name={{ item }} state=present
+  openshift_package: name={{ item }} state=present
   with_items:
     - cockpit-ws
     - cockpit-system
