@@ -1,5 +1,7 @@
 ---
-- include: ../openshift-cluster/evaluate_groups.yml
+- include: ../openshift-cluster/std_include.yml
+  tags:
+  - always
 
 - name: Run OpenShift health checks
   hosts: OSEv3

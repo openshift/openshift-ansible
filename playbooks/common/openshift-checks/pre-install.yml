@@ -1,5 +1,7 @@
 ---
-- include: ../openshift-cluster/evaluate_groups.yml
+- include: ../openshift-cluster/std_include.yml
+  tags:
+  - always
 
 - hosts: OSEv3
   name: run OpenShift pre-install checks
