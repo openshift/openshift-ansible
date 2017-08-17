@@ -102,6 +102,11 @@ class BinarySyncer(object):
         dest_path = os.path.join(self.bin_dir, binary_name)
         incoming_checksum = self.module.run_command(['sha256sum', src_path])[1]
         if not os.path.exists(dest_path) or self.module.run_command(['sha256sum', dest_path])[1] != incoming_checksum:
+
+            # See: https://github.com/openshift/openshift-ansible/issues/4965
+            if os.path.islink(dest_path):
+                os.unlink(dest_path)
+                self.output.append('Removed old symlink {} before copying binary.'.format(dest_path))
             shutil.move(src_path, dest_path)
             self.output.append("Moved %s to %s." % (src_path, dest_path))
             self.changed = True
