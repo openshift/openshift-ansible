@@ -29,7 +29,9 @@ spec:
       serviceAccountName: aggregated-logging-elasticsearch
       securityContext:
         supplementalGroups:
-        - {{openshift_logging_elasticsearch_storage_group}}
+{% for group in es_storage_groups %}
+        - {{group}}
+{% endfor %}
 {% if es_node_selector is iterable and es_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in es_node_selector.iteritems() %}

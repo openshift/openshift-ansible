@@ -281,6 +281,7 @@
     es_cpu_limit: "{{ openshift_logging_elasticsearch_cpu_limit }}"
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
+    es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
 
