@@ -36,6 +36,8 @@ spec:
           limits:
             cpu: {{ openshift_logging_fluentd_cpu_limit }}
             memory: {{ openshift_logging_fluentd_memory_limit }}
+          requests:
+            memory: {{ openshift_logging_fluentd_memory_limit }}
         volumeMounts:
         - name: runlogjournal
           mountPath: /run/log/journal
