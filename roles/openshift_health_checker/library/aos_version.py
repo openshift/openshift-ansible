@@ -135,7 +135,6 @@ def _retrieve_available_packages(expected_pkgs):
             raise AosVersionException('\n'.join([
                 'Unable to find any OpenShift packages.',
                 'Check your subscription and repo settings.',
-                str(excinfo),
             ]))
 
     return pkgs
