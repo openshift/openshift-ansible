@@ -798,9 +798,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_builddefaults_nodeselectors={'nodelabel1':'nodelabelvalue1'}
 #openshift_builddefaults_annotations={'annotationkey1':'annotationvalue1'}
 #openshift_builddefaults_resources_requests_cpu=100m
-#openshift_builddefaults_resources_requests_memory=256m
+#openshift_builddefaults_resources_requests_memory=256Mi
 #openshift_builddefaults_resources_limits_cpu=1000m
-#openshift_builddefaults_resources_limits_memory=512m
+#openshift_builddefaults_resources_limits_memory=512Mi
 
 # Or you may optionally define your own build defaults configuration serialized as json
 #openshift_builddefaults_json='{"BuildDefaults":{"configuration":{"apiVersion":"v1","env":[{"name":"HTTP_PROXY","value":"http://proxy.example.com.redhat.com:3128"},{"name":"NO_PROXY","value":"ose3-master.example.com"}],"gitHTTPProxy":"http://proxy.example.com:3128","gitNoProxy":"ose3-master.example.com","kind":"BuildDefaultsConfig"}}}'
