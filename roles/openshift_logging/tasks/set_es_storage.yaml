@@ -70,7 +70,7 @@
     deploy_name: "{{ es_name }}"
     logging_component: elasticsearch
     deploy_name_prefix: "logging-{{ es_component }}"
-    image: "{{openshift_logging_image_prefix}}logging-elasticsearch:{{openshift_logging_image_version}}"
+    image: "{{openshift_logging_elasticsearch_image_prefix}}logging-elasticsearch:{{openshift_logging_elasticsearch_image_version}}"
     es_cluster_name: "{{component}}"
     es_cpu_limit: "{{ es_cpu_limit }}"
     es_memory_limit: "{{ es_memory_limit }}"

@@ -26,8 +26,8 @@
     component: kibana
     logging_component: kibana
     deploy_name: "logging-{{component}}"
-    image: "{{openshift_logging_image_prefix}}logging-kibana:{{openshift_logging_image_version}}"
-    proxy_image: "{{openshift_logging_image_prefix}}logging-auth-proxy:{{openshift_logging_image_version}}"
+    image: "{{openshift_logging_kibana_image_prefix}}logging-kibana:{{openshift_logging_kibana_image_version}}"
+    proxy_image: "{{openshift_logging_kibana_proxy_image_prefix}}logging-auth-proxy:{{openshift_logging_kibana_proxy_image_version}}"
     es_host: logging-es
     es_port: "{{openshift_logging_es_port}}"
     kibana_cpu_limit: "{{openshift_logging_kibana_cpu_limit }}"
@@ -45,8 +45,8 @@
     component: kibana-ops
     logging_component: kibana
     deploy_name: "logging-{{component}}"
-    image: "{{openshift_logging_image_prefix}}logging-kibana:{{openshift_logging_image_version}}"
-    proxy_image: "{{openshift_logging_image_prefix}}logging-auth-proxy:{{openshift_logging_image_version}}"
+    image: "{{openshift_logging_kibana_image_prefix}}logging-kibana:{{openshift_logging_kibana_image_version}}"
+    proxy_image: "{{openshift_logging_kibana_proxy_image_prefix}}logging-auth-proxy:{{openshift_logging_kibana_proxy_image_version}}"
     es_host: logging-es-ops
     es_port: "{{openshift_logging_es_ops_port}}"
     kibana_cpu_limit: "{{openshift_logging_kibana_ops_cpu_limit }}"
