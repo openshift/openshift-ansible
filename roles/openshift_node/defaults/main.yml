@@ -21,3 +21,8 @@ r_openshift_node_os_firewall_allow:
 - service: Kubernetes service NodePort UDP
   port: "{{ openshift_node_port_range | default('') }}/udp"
   cond: "{{ openshift_node_port_range is defined }}"
+
+oreg_url: ''
+oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_replace: False

@@ -170,6 +170,14 @@ openshift_release=v3.6
 # modify image streams to point at that registry by setting the following to true
 #openshift_examples_modify_imagestreams=true
 
+# If oreg_url points to a registry requiring authentication, provide the following:
+#oreg_auth_user=some_user
+#oreg_auth_password='my-pass'
+# NOTE: oreg_url must be defined by the user for oreg_auth_* to have any affect.
+# oreg_auth_pass should be generated from running docker login.
+# To update registry auth credentials, uncomment the following:
+#oreg_auth_credentials_replace: True
+
 # OpenShift repository configuration
 #openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
 #openshift_repos_enable_testing=false

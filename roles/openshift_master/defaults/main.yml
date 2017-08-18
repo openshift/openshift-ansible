@@ -19,3 +19,8 @@ r_openshift_master_os_firewall_allow:
 - service: etcd embedded
   port: 4001/tcp
   cond: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+
+oreg_url: ''
+oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_replace: False
