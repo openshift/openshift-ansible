@@ -13,3 +13,8 @@ os_firewall_allow:
 - service: OpenShift OVS sdn
   port: 4789/udp
   when: openshift.node.use_openshift_sdn | bool
+
+oreg_url: ''
+oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_replace: False
