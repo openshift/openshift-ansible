@@ -1,10 +1,6 @@
 ---
-- include: ../openshift-cluster/std_include.yml
-  tags:
-  - always
-
 - name: Run OpenShift health checks
-  hosts: OSEv3
+  hosts: oo_all_hosts
   roles:
   - openshift_health_checker
   vars:
