@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.1
-Release:        1%{?dist}
+Version:        3.7.0
+Release:        0.100.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,185 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.100.0
+- Change memory requests and limits units (mak@redhat.com)
+- Display "origin 3.6" as in previous installer 3.5 (brunovern.a@gmail.com)
+- Use sdn_cluster_network_cidr as default calico pool (djosborne10@gmail.com)
+- fix missing console appending in logging (jcantril@redhat.com)
+- Enable version 3.6 for OSE (bacek@bacek.com)
+- Adding std_include to the metrics playbook. (kwoodson@redhat.com)
+- Don't include noop (rteague@redhat.com)
+- Remove openshift_repos dependencies (rteague@redhat.com)
+- polish openshift-master role (jchaloup@redhat.com)
+- etc_traffic check: factor away short_version (lmeyer@redhat.com)
+- openshift-checks: have playbooks invoke std_include (lmeyer@redhat.com)
+- bug: container_binary_sync no longer moves upon symlinks (smilner@redhat.com)
+- Remove orphan files (rteague@redhat.com)
+- Additional os_firewall role refactoring (rteague@redhat.com)
+- Standardize usage of std_include in byo (rteague@redhat.com)
+- Cleanup validate_hostnames (rteague@redhat.com)
+- Use openshift.node.dns_ip as listening address (sdodson@redhat.com)
+- Remove obsolete yum check (rteague@redhat.com)
+- Clean up Calico readme (djosborne10@gmail.com)
+- Change vsd user nodes parameter name (rohan.s.parulekar@nuagenetworks.net)
+- Removing dependencies for openshift_repos and setting them up early in the
+  cluster build. (kwoodson@redhat.com)
+- Default values for CFME container images are invalid (jkaur@redhat.com)
+- Fix duplicate evaluate_groups.yml call during install (rteague@redhat.com)
+- Minor update to correct firewall play name (rteague@redhat.com)
+- Moving firewall rules under the role to work with refactor.
+  (kwoodson@redhat.com)
+- Fix Restore Master AWS Options (michael.fraenkel@gmail.com)
+- Update etcd scaleup entrypoint includes and use etcd_{hostname,ip} facts for
+  new member registration. (abutcher@redhat.com)
+- openshift_checks: allow OVS 2.7 on OCP 3.5 and 3.6 (miciah.masters@gmail.com)
+- Refactor group initialization (rteague@redhat.com)
+- Updated README to reflect refactor.  Moved firewall initialize into separate
+  file. (kwoodson@redhat.com)
+- system_container.yml: fix braces (lmeyer@redhat.com)
+- Error check project creation. (kwoodson@redhat.com)
+- Update README.md (sdodson@redhat.com)
+- Fix syntax for when statement (rhcarvalho@gmail.com)
+- configure kibana index mode (jcantril@redhat.com)
+- Change default CFME namespace to use reserved openshift- prefix
+  (tbielawa@redhat.com)
+- Start iptables on each master in serial (denverjanke@gmail.com)
+- Remove additional 'restart master' handler references. (abutcher@redhat.com)
+- Adding a default condition and removing unneeded defaults.
+  (kwoodson@redhat.com)
+- adding check to a yaml dump to work properly with new ruamel lib
+  (ihorvath@redhat.com)
+- Bump calico to v2.4.1 (djosborne10@gmail.com)
+- openshift_checks: refactor find_ansible_mount (lmeyer@redhat.com)
+- More complete discovery of entry point playbooks (rteague@redhat.com)
+- Add missing byo v3_7 playbooks (sdodson@redhat.com)
+- Add v3_7 upgrades (sdodson@redhat.com)
+- Remove remaining references to openshift-master.service (ccoleman@redhat.com)
+- Disable old openshift-master.service on upgrade (ccoleman@redhat.com)
+- Use the new election mode (client based) instead of direct etcd access
+  (ccoleman@redhat.com)
+- Remove the origin-master.service and associated files (ccoleman@redhat.com)
+- Make native clustering the default everywhere (ccoleman@redhat.com)
+- Warn when user has no etcd group member nodes (ccoleman@redhat.com)
+- First attempt at refactor of os_firewall (kwoodson@redhat.com)
+- Refactor of openshift_version. (kwoodson@redhat.com)
+- Fix lint errors (sdodson@redhat.com)
+- integration tests: keep openshift_version happy (lmeyer@redhat.com)
+- New pattern involves startup and initializing through the std_include.yml
+  (kwoodson@redhat.com)
+- adding readme for openshift_manageiq (efreiber@redhat.com)
+- papr: Update to use v3.6.0 images (smilner@redhat.com)
+- Removing tasks from module openshift_facts. (kwoodson@redhat.com)
+- Updating PVC generation to only be done if the pvc does not already exist to
+  avoid idempotent issues (ewolinet@redhat.com)
+- Origin image build: add oc client (lmeyer@redhat.com)
+- Add v3.7 hosted templates (sdodson@redhat.com)
+- GlusterFS: Don't use /dev/null for empty file. (jarrpa@redhat.com)
+- Quick Installer should specify which config file to edit. (jkaur@redhat.com)
+- cri-o: configure the CNI network (gscrivan@redhat.com)
+- nfs only run if cloud_provider not defined (sdw35@cornell.edu)
+- Default gte_3_7 to false (sdodson@redhat.com)
+- Add v3.7 content (sdodson@redhat.com)
+- Update version checks to tolerate 3.7 (skuznets@redhat.com)
+- cri-o: Restart cri-o after openshift sdn installation (smilner@redhat.com)
+- cri-o: Continue node without SELinux check (smilner@redhat.com)
+- examples: use the correct variable name (gscrivan@redhat.com)
+- cri-o: allow to override CRI-O image indipendently from Docker
+  (gscrivan@redhat.com)
+- docker: introduce use_crio_only (gscrivan@redhat.com)
+- docker: skip Docker setup when using CRI-O (gscrivan@redhat.com)
+- openvswitch: system container depends on the cri-o service
+  (gscrivan@redhat.com)
+- cli_image: do not require Docker when using CRI-O (gscrivan@redhat.com)
+- cri-o: skip Set precise containerized version check (gscrivan@redhat.com)
+- cri-o: skip Docker version test (gscrivan@redhat.com)
+- cri-o: use only images from Docker Hub (gscrivan@redhat.com)
+- cri-o: Enable systemd-modules-load if required (smilner@redhat.com)
+- openshift_node: fix typo for experimental-cri (smilner@redhat.com)
+- cri-o: Fix node template to use full variable (smilner@redhat.com)
+- cri-o: Ensure overlay is available (smilner@redhat.com)
+- cri-o: Default insecure registries to "" (smilner@redhat.com)
+- crio: use a template for the configuration (gscrivan@redhat.com)
+- openshift_docker_facts: Add use_crio (smilner@redhat.com)
+- cri-o: Minor fixes for tasks (smilner@redhat.com)
+- cri-o: Hardcode image name to cri-o (smilner@redhat.com)
+- cri-o: Add cri-o as a Wants in node units (smilner@redhat.com)
+- cri-o: configure storage and insecure registries (gscrivan@redhat.com)
+- node.yaml: configure node to use cri-o when openshift.common.use_crio
+  (gscrivan@redhat.com)
+- inventory: Add use_crio example (smilner@redhat.com)
+- cri-o: Allow cri-o usage. (smilner@redhat.com)
+- adding pods/logs to manageiq role (efreiber@redhat.com)
+- openshift_checks: refactor logging checks (lmeyer@redhat.com)
+- GlusterFS: Copy SSH private key to master node. (jarrpa@redhat.com)
+- openshift_checks: add property to track 'changed' (lmeyer@redhat.com)
+- Fixing SA and clusterrole namespaces (ewolinet@redhat.com)
+- package_version check: tolerate release version 3.7 (lmeyer@redhat.com)
+- Missing space (kp@tigera.io)
+- add pre-flight checks to ugrade path (jvallejo@redhat.com)
+- add fluentd logging driver config check (jvallejo@redhat.com)
+- Paren wrap integration print(). (abutcher@redhat.com)
+- Update openshift_cert_expiry for py3 support. (abutcher@redhat.com)
+- Use enterprise images for CFME enterprise deployments (sdodson@redhat.com)
+- use mux_client_mode instead of use_mux_client (rmeggins@redhat.com)
+- openshift_checks: enable variable conversion (lmeyer@redhat.com)
+- GlusterFS: Check for namespace if deploying a StorageClass
+  (jarrpa@redhat.com)
+- Switch logging and metrics OCP image tag from 3.6.0 to v3.6
+  (sdodson@redhat.com)
+- Fixing storageclass doc variable. (kwoodson@redhat.com)
+- GlusterFS: Fix variable names in defaults. (jarrpa@redhat.com)
+- Fix aws_secret_key check (carlpett@users.noreply.github.com)
+- Impl fluentd file buffer (nhosoi@redhat.com)
+- Use existing OPENSHIFT_DEFAULT_REGISTRY setting during masters scaleup
+  (tbielawa@redhat.com)
+- GlusterFS: Default glusterfs_name in loop items. (jarrpa@redhat.com)
+- Remove cluster in favor of rolebindings. (kwoodson@redhat.com)
+- Updating metrics role to create serviceaccounts and roles immediately
+  (ewolinet@redhat.com)
+- GlusterFS: Use default namespace when not native. (jarrpa@redhat.com)
+- Set the openshift_version from the openshift.common.version in case it is
+  empty (jchaloup@redhat.com)
+- Revert "Add health checks to upgrade playbook" (rhcarvalho@gmail.com)
+- move common tasks to a single file included by both systemd_units.yml
+  (jchaloup@redhat.com)
+- Fixes for auth_proxy, vxlan mode (srampal@cisco.com)
+- Tolerate non existence of /etc/sysconfig/atomic-openshift-master
+  (sdodson@redhat.com)
+- Block etcdv3 migration for supported configurations (sdodson@redhat.com)
+- Shut down masters before taking an etcd backup (sdodson@redhat.com)
+- Move node facts to new openshift_node_facts role. (abutcher@redhat.com)
+- Add glusterfs_registry hosts to oo_all_hosts. (jarrpa@redhat.com)
+- Updating template parameter replica to be more unique to avoid var scope
+  creeping (ewolinet@redhat.com)
+- Add 3.7 releaser (sdodson@redhat.com)
+- add selector and storage class name to oc_pvc module (jcantril@redhat.com)
+- backport 'Add systemctl daemon-reload handler to openshift_node' #4403 to
+  openshift_node_upgrade (jchaloup@redhat.com)
+- Normalize list of checks passed to action plugin (rhcarvalho@gmail.com)
+- Clean up unnecessary quotes (rhcarvalho@gmail.com)
+- Make LoggingCheck.run return the correct type (rhcarvalho@gmail.com)
+- Clean up openshift-checks playbooks (rhcarvalho@gmail.com)
+- fixes after rebasing with #4485 (jvallejo@redhat.com)
+- add pre-flight checks to ugrade path (jvallejo@redhat.com)
+- Refactor openshift_facts BIOS vendor discovery (rteague@redhat.com)
+- Normalize logging entry. (kwoodson@redhat.com)
+- Nuage changes to support IPTables kube-proxy in OpenShift
+  (siva_teja.areti@nokia.com)
+- Remove default provisioner. (kwoodson@redhat.com)
+- Fix for : https://bugzilla.redhat.com/show_bug.cgi?id=1467423
+  (jkaur@redhat.com)
+- allow to specify docker registry for system containers (jchaloup@redhat.com)
+- Fail within scaleup playbooks when new_{nodes,masters} host groups are empty.
+  (abutcher@redhat.com)
+- Add rate limit configurability (sdodson@redhat.com)
+- Resolve deprecation warnings in Contiv roles (rteague@redhat.com)
+- add etcd scaleup playbook (jawed.khelil@amadeus.com)
+- Spacing and moving deleget_to to bottom. (kwoodson@redhat.com)
+- Updated to use modules instead of command for user permissions.
+  (kwoodson@redhat.com)
+- fix BZ1422541 on master branch (weshi@redhat.com)
+
 * Thu Jul 27 2017 Scott Dodson <sdodson@redhat.com> 3.7.1-1
 - Fix incorrect delegate_to in control plane upgrade (sdodson@redhat.com)
 - Follow the new naming conventions. (zhang.wanmin@zte.com.cn)
