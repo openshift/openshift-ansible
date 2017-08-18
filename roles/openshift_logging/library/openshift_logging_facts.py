@@ -171,12 +171,17 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             if comp is not None:
                 spec = dc_item["spec"]["template"]["spec"]
                 facts = dict(
+                    name=name,
                     selector=dc_item["spec"]["selector"],
                     replicas=dc_item["spec"]["replicas"],
                     serviceAccount=spec["serviceAccount"],
                     containers=dict(),
                     volumes=dict()
                 )
+                if "nodeSelector" in spec:
+                    facts["nodeSelector"] = spec["nodeSelector"]
+                if "supplementalGroups" in spec["securityContext"]:
+                    facts["storageGroups"] = spec["securityContext"]["supplementalGroups"]
                 if "volumes" in spec:
                     for vol in spec["volumes"]:
                         clone = copy.deepcopy(vol)
