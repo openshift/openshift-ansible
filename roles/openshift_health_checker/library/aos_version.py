@@ -130,6 +130,14 @@ def _retrieve_available_packages(expected_pkgs):
 
         pkgs = list(aquery.filter(name=expected_pkgs))
 
+        if not pkgs:
+            # pkgs list is empty, raise because no expected packages found
+            raise AosVersionException('\n'.join([
+                'Unable to find any OpenShift packages.',
+                'Check your subscription and repo settings.',
+                str(excinfo),
+            ]))
+
     return pkgs
 
 
