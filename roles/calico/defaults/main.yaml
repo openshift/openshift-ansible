@@ -1,5 +1,5 @@
 ---
-kubeconfig: "{{openshift.common.config_base}}/node/{{ 'system:node:' +  openshift.common.hostname }}.kubeconfig"
+kubeconfig: "{{  openshift.common.config_base }}/node/{{ 'system:node:' +  openshift.common.hostname }}.kubeconfig"
 
 cni_conf_dir: "/etc/cni/net.d/"
 cni_bin_dir: "/opt/cni/bin/"

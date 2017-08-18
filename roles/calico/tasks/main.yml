@@ -38,7 +38,7 @@
     path: "{{ item }}"
   with_items:
     - "{{ calico_etcd_ca_cert_file }}"
-    - "{{ calico_etcd_cert_file}}"
+    - "{{ calico_etcd_cert_file }}"
     - "{{ calico_etcd_key_file }}"
 
 - name: Calico Node | Configure Calico service unit file
