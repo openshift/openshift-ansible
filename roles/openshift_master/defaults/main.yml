@@ -2,3 +2,8 @@
 openshift_node_ips: []
 r_openshift_master_clean_install: false
 r_openshift_master_etcd3_storage: false
+
+oreg_url: ''
+oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_replace: False
