@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.5
-Release:        5%{?dist}
+Version:        3.6.173.0.6
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,46 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.6-1
+- Use openshift.node.dns_ip as listening address (sdodson@redhat.com)
+- Fail within scaleup playbooks when new_{nodes,masters} host groups are empty.
+  (abutcher@redhat.com)
+- Use absolute path when unexcluding (Sergi Jimenez)
+- Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1474246 (Sergi Jimenez)
+- Enable version 3.6 for OSE (bacek@bacek.com)
+- openshift_checks: allow OVS 2.7 on OCP 3.5 and 3.6 (miciah.masters@gmail.com)
+- bug: container_binary_sync no longer moves upon symlinks (smilner@redhat.com)
+- Default an empty list for etcd_to_config if not there (tbielawa@redhat.com)
+- If proxy in effect, add etcd host IP addresses to NO_PROXY list on masters
+  (tbielawa@redhat.com)
+- Default values for CFME container images are invalid (jkaur@redhat.com)
+- Router wildcard certificate created by default (efreiber@redhat.com)
+- add default value for router path in the cert (efreiber@redhat.com)
+- adding pods/logs to manageiq role (efreiber@redhat.com)
+- system_container.yml: fix braces (lmeyer@redhat.com)
+- container-engine: Hardcode v3.6 tag on RHEL (smilner@redhat.com)
+- Master image pull fails (jkaur@redhat.com)
+- Updating how storage type is determined, adding bool filter in
+  openshift_logging_elasticsearch (ewolinetz@localhost.localdomain)
+- Set the openshift_version from the openshift.common.version in case it is
+  empty (jchaloup@redhat.com)
+- Origin image build: add oc client (lmeyer@redhat.com)
+- package_version check: tolerate release version 3.7 (lmeyer@redhat.com)
+- Misc cleanup and input normalization (rhcarvalho@gmail.com)
+- Revert "Revert ansible-2.4 work on release-3.6 branch" (sdodson@redhat.com)
+- add fluentd logging driver config check (jvallejo@redhat.com)
+- use mux_client_mode instead of use_mux_client (rmeggins@redhat.com)
+- fix missing console appending in logging (jcantril@redhat.com)
+- openshift_checks: refactor to internalize task_vars (lmeyer@redhat.com)
+- openshift_checks: get rid of deprecated module_executor (lmeyer@redhat.com)
+- openshift_checks: improve comments/names (lmeyer@redhat.com)
+- verify sane log times in logging stack (jvallejo@redhat.com)
+- image builds: remove dependency on playbook2image (jvallejo@redhat.com)
+- Fix broken link to Docker image instructions (rhcarvalho@gmail.com)
+- add etcd increased-traffic check (jvallejo@redhat.com)
+- Pass first master's openshift_image_tag to openshift_loadbalancer for
+  containerized haproxy installation. (abutcher@redhat.com)
+
 * Mon Aug 07 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.5-5
 - 
 
