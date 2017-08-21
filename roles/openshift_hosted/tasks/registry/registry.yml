@@ -43,9 +43,6 @@
     openshift_hosted_registry_images: "{{ openshift.hosted.registry.registryurl | default('openshift3/ose-${component}:${version}')}}"
     openshift_hosted_registry_volumes: []
     openshift_hosted_registry_env_vars: {}
-    openshift_hosted_registry_routecertificates: "{{ ('routecertificates' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routecertificates, {}) }}"
-    openshift_hosted_registry_routehost: "{{ ('routehost' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routehost, False) }}"
-    openshift_hosted_registry_routetermination: "{{ ('routetermination' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routetermination, 'passthrough') }}"
     openshift_hosted_registry_edits:
     # These edits are being specified only to prevent 'changed' on rerun
     - key: spec.strategy.rollingParams
