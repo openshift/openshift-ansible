@@ -86,12 +86,10 @@ class ActionModule(ActionBase):
             name = cls.name
             if name in known_checks:
                 other_cls = known_checks[name].__class__
-                msg = "non-unique check name '{}' in: '{}' and '{}'".format(
-                    name,
-                    full_class_name(cls),
-                    full_class_name(other_cls),
+                raise OpenShiftCheckException(
+                    "duplicate check name '{}' in: '{}' and '{}'"
+                    "".format(name, full_class_name(cls), full_class_name(other_cls))
                 )
-                raise OpenShiftCheckException(msg)
             known_checks[name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
         return known_checks
 

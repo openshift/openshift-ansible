@@ -95,7 +95,7 @@ def test_action_plugin_cannot_load_checks_with_the_same_name(plugin, task_vars, 
 
     result = plugin.run(tmp=None, task_vars=task_vars)
 
-    assert failed(result, msg_has=['unique', 'duplicate_name', 'FakeCheck'])
+    assert failed(result, msg_has=['duplicate', 'duplicate_name', 'FakeCheck'])
 
 
 def test_action_plugin_skip_non_active_checks(plugin, task_vars, monkeypatch):
