@@ -58,9 +58,9 @@ r_openshift_storage_glusterfs_os_firewall_deny: []
 r_openshift_storage_glusterfs_os_firewall_allow:
 - service: glusterfs_sshd
   port: "2222/tcp"
-- service: glusterfs_daemon
-  port: "24007/tcp"
 - service: glusterfs_management
+  port: "24007/tcp"
+- service: glusterfs_rdma
   port: "24008/tcp"
 - service: glusterfs_bricks
   port: "49152-49251/tcp"
