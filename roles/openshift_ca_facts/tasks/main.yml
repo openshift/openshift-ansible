@@ -8,7 +8,7 @@
   slurp:
     src: /etc/origin/master/ca.serial.txt
   when:
-    - l_ca_serial_exists.stat.exists
+  - l_ca_serial_exists.stat.exists | bool
   register: l_ca_serial_number
 
 ######################################################################
@@ -16,20 +16,20 @@
   debug:
     msg: "{{ l_ca_serial_number }}"
   when:
-    - l_ca_serial_number is defined
+  - l_ca_serial_exists.stat.exists | bool
 
 - name: Record the value of the ca serial number
   set_fact:
     ca_serial_number: "{{ l_ca_serial_number.content | b64decode | int(base=16) }}"
   when:
-    - l_ca_serial_number is defined
+  - l_ca_serial_exists.stat.exists | bool
 
 # The ca.serial.txt file does not exist on this master
 - name: Record the empty value of the ca serial number
   set_fact:
     ca_serial_number: "{{ None }}"
   when:
-    - not l_ca_serial_number is defined
+  - not l_ca_serial_exists.stat.exists | bool
 
 ######################################################################
 - debug:
