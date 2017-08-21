@@ -113,21 +113,27 @@ def list_known_checks(known_checks):
         'list of check names or a YAML list. Available checks:\n  {}'
     ).format('\n  '.join(sorted(known_checks)))
 
+    tags = describe_tags(known_checks.values())
+
+    msg += (
+        '\n\nTags can be used as a shortcut to select multiple '
+        'checks. Available tags and the checks they select:\n  {}'
+    ).format('\n  '.join(tags))
+
+    return msg
+
+
+def describe_tags(check_classes):
+    """Return a sorted list of strings describing tags and the checks they include."""
     tag_checks = defaultdict(list)
-    for cls in known_checks.values():
+    for cls in check_classes:
         for tag in cls.tags:
             tag_checks[tag].append(cls.name)
     tags = [
         '@{} = {}'.format(tag, ','.join(sorted(checks)))
         for tag, checks in tag_checks.items()
     ]
-
-    msg += (
-        '\n\nTags can be used as a shortcut to select multiple '
-        'checks. Available tags and the checks they select:\n  {}'
-    ).format('\n  '.join(sorted(tags)))
-
-    return msg
+    return sorted(tags)
 
 
 def resolve_checks(names, all_checks):
@@ -157,6 +163,12 @@ def resolve_checks(names, all_checks):
         if unknown_tag_names:
             msg.append('Unknown tag names: {}.'.format(', '.join(sorted(unknown_tag_names))))
         msg.append('Make sure there is no typo in the playbook and no files are missing.')
+        # TODO: implement a "Did you mean ...?" when the input is similar to a
+        # valid check or tag.
+        msg.append('Known checks:')
+        msg.append('  {}'.format('\n  '.join(sorted(known_check_names))))
+        msg.append('Known tags:')
+        msg.append('  {}'.format('\n  '.join(describe_tags(all_checks))))
         raise OpenShiftCheckException('\n'.join(msg))
 
     tag_to_checks = defaultdict(set)
