@@ -196,7 +196,6 @@ Note, that in order to deploy OpenShift origin, you should update the following
 variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
 
     deployment_type: origin
-    origin_release: 1.5.1
     openshift_deployment_type: "{{ deployment_type }}"
 
 ### Configure static inventory and access via a bastion node
