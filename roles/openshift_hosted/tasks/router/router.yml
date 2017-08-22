@@ -50,7 +50,7 @@
     src: "{{ item }}"
   with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
                   oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
-  when: not openshift_hosted_router_create_certificate | bool
+  when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {}
 
 - name: Create the router service account(s)
   oc_serviceaccount:
