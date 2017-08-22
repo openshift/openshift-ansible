@@ -26,8 +26,8 @@ From this role:
 | openshift_hosted_registry_registryurl | 'openshift3/ose-${component}:${version}' | The image to base the OpenShift registry on.                                                                             |
 | openshift_hosted_registry_replicas    | Number of nodes matching selector        | The number of replicas to configure.                                                                                     |
 | openshift_hosted_registry_selector    | region=infra                             | Node selector used when creating registry. The OpenShift registry will only be deployed to nodes matching this selector. |
-| openshift_hosted_registry_cert_expire_days | `730` (2 years)                     | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later.                             |
-
+| openshift_hosted_registry_cert_expire_days | `730` (2 years)                     | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later.                             | 
+| openshift_hosted_registry_routecertificates | None                               | Dictionary containing "certfile", "keyfile" and "cafile" keys with values containing paths to local certificate file     |     
 If you specify `openshift_hosted_registry_kind=glusterfs`, the following
 variables also control configuration behavior:
 
