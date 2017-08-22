@@ -15,4 +15,3 @@ galaxy_info:
 dependencies:
 - role: openshift_master_facts
 - role: openshift_ca
-- role: openshift_ca_facts

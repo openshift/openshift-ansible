@@ -191,8 +191,6 @@
   roles:
   - role: os_firewall
   - role: openshift_master
-    # TODO: Use the value from openshift_ca_facts to set `openshift_ca_host`
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                      | oo_collect('openshift.common.hostname')

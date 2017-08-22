@@ -1,9 +1,13 @@
 ---
+- name: Determine openshift_ca_host
+  hosts: oo_masters_to_config
+  roles:
+  - role: openshift_ca_facts
+
 - name: Redeploy master certificates
   hosts: oo_masters_to_config
   any_errors_fatal: true
   vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
   pre_tasks:
   - stat:

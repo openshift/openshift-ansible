@@ -35,23 +35,13 @@
 - debug:
     var: ca_serial_number
 
-# ######################################################################
-# - name: what is the serial
-#   debug:
-#     msg: "{{ l_ca_serial_number }}"
-#   when:
-#     - l_ca_serial_exists.stat.exists
-
-# - name: what is the serial
-#   debug:
-#     msg: "{{ l_ca_serial_number.content | b64decode}}"
-#   when:
-#     - l_ca_serial_exists.stat.exists
-
 # sort the list of hosts and select the one which has the highest
 # ca_serial_number value
-- debug:
-    msg: "{{ (hostvars | oo_select_keys(ansible_play_hosts) | sort(attribute='ca_serial_number', reverse=True) | map(attribute='inventory_hostname') | list).0 }}"
-  run_once: true
+- name: Record which master is the openshift_ca_host
+  set_fact:
+    openshift_ca_host: "{{ (hostvars | oo_select_keys(ansible_play_hosts)
+                            | sort(attribute='ca_serial_number', reverse=True)
+                            | map(attribute='inventory_hostname')
+                            | list).0 }}"
 
-- fail:
+- debug: var=openshift_ca_host

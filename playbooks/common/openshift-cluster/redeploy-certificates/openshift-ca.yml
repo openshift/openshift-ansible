@@ -119,7 +119,6 @@
     # will be created. We'll replace the existing CA with the CA
     # created in the temporary directory.
     openshift_ca_config_dir: "{{ g_new_openshift_ca_mktemp.stdout }}"
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_hostnames: "{{ hostvars
                                     | oo_select_keys(groups['oo_masters_to_config'] | default([]))
                                     | oo_collect('openshift.common.all_hostnames')
@@ -138,8 +137,6 @@
 
 - name: Retrieve OpenShift CA
   hosts: oo_first_master
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   tasks:
   - name: Retrieve CA certificate, key, bundle and serial
     fetch:
@@ -159,8 +156,6 @@
 
 - name: Distribute OpenShift CA to masters
   hosts: oo_masters_to_config
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   tasks:
   - name: Deploy CA certificate, key, bundle and serial
     copy:
@@ -222,8 +217,6 @@
 
 - name: Distribute OpenShift CA certificate to nodes
   hosts: oo_nodes_to_config
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   tasks:
   - copy:
       src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/ca-bundle.crt"

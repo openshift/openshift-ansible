@@ -42,7 +42,6 @@
   roles:
   - role: os_firewall
   - role: openshift_node
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Configure nodes
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
@@ -58,7 +57,6 @@
   roles:
   - role: os_firewall
   - role: openshift_node
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Additional node config
   hosts: oo_nodes_to_config
