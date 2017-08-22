@@ -13,6 +13,11 @@ every role needs to have a well-defined API so a role caller communicates
 only througth accepted set of role variables, thus making a role closed,
 independent of surrounding system, more flexible and practically modular
 
+* [Role dependency orchestration](proposals/role_dependency_orchestration.md):
+minimize role dependencies in favor of role modularity and re-usability
+by replacing a role invocation with a sequence of role invocations and its
+dependencies, orchestrating dependencies on a play level
+
 * TODO: **Action based roles**:
 some roles may provide a set of actions that share common resources (e.g.
 configuration files, templates, handlers), creating a role for each action
