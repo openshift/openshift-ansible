@@ -19,7 +19,7 @@ def main():
             show_duplicates=dict(default=False, required=False, type='bool'),
             match_version=dict(default=None, required=False, type='str'),
             ignore_excluders=dict(default=False, required=False, type='bool'),
-            retries=dict(default=3, required=False, type='int'),
+            retries=dict(default=4, required=False, type='int'),
             retry_interval=dict(default=5, required=False, type='int'),
         ),
         supports_check_mode=False,
