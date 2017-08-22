@@ -35,7 +35,7 @@
 - name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for the master aggregator, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
-  when: not l_master_aggregator_cert_created.skipped
+  when: not l_master_aggregator_cert_created.skipped | default(false) | bool
 
 - name: Check for Aggregator Signer cert
   stat:

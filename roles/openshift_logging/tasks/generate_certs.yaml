@@ -30,7 +30,7 @@
 - name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for logging, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
-  when: not l_logging_cert_created.skipped
+  when: not l_logging_cert_created.skipped | default(false) | bool
 
 - name: Checking for signing.conf
   stat: path="{{generated_certs_dir}}/signing.conf"

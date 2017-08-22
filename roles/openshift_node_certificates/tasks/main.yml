@@ -102,7 +102,7 @@
 - name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for a node, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
-  when: not l_node_cert_created.skipped
+  when: not l_node_cert_created.skipped | default(false) | bool
 
 - name: Create local temp directory for syncing certs
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX

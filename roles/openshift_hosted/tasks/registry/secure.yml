@@ -46,7 +46,7 @@
   register: l_registry_self_cert_created
   when: docker_registry_self_signed
 
-- name: TODO: Call certificate sync handler
+- name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for a master, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
   when: not l_registry_self_cert_created.skipped | default(false) | bool

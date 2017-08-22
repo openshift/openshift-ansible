@@ -29,8 +29,7 @@
 - name: TODO - Call certificate sync handler
   debug:
     msg: We just created a cert for the service catalog, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
-  when: not l_service_catalog_cert_created.skipped
-
+  when: not l_service_catalog_cert_created.skipped | default(false) | bool
 
 - name: Create apiserver-ssl secret
   oc_secret:

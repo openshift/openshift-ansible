@@ -46,7 +46,7 @@
   - name: TODO - Call certificate sync handler
     debug:
       msg: We just created a cert for a router, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
-    when: not l_router_cert_created.skipped
+    when: not l_router_cert_created.skipped | default(false) | bool
 
   - name: set the openshift_hosted_router_certificate
     set_fact:
