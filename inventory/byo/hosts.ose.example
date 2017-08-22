@@ -98,9 +98,9 @@ openshift_release=v3.7
 # Add additional, insecure, and blocked registries to global docker configuration
 # For enterprise deployment types we ensure that registry.access.redhat.com is
 # included if you do not include it
-#openshift_docker_additional_registries=registry.example.com
-#openshift_docker_insecure_registries=registry.example.com
-#openshift_docker_blocked_registries=registry.hacker.com
+#openshift_docker_additional_registries=['registry.example.com']
+#openshift_docker_insecure_registries=['registry.example.com']
+#openshift_docker_blocked_registries=['registry.hacker.com']
 # Disable pushing to dockerhub
 #openshift_docker_disable_push_dockerhub=True
 # Use Docker inside a System Container. Note that this is a tech preview and should

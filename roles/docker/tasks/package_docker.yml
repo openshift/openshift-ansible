@@ -53,21 +53,29 @@
 - stat: path=/etc/sysconfig/docker
   register: docker_check
 
+- debug: msg="additional_registries {{ l2_docker_additional_registries }}"
+- debug: msg="blocked_registries {{ l2_docker_blocked_registries }}"
+- debug: msg="insecure_registries {{ l2_docker_insecure_registries }}"
+
 - name: Set registry params
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
     line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
-  when: item.reg_fact_val != '' and docker_check.stat.isreg is defined and docker_check.stat.isreg
+  when:
+  - item.reg_fact_val != ''
+  - item.reg_fact_val != []
+  - docker_check.stat.isreg is defined
+  - docker_check.stat.isreg
   with_items:
   - reg_conf_var: ADD_REGISTRY
-    reg_fact_val: "{{ docker_additional_registries | default(None, true)}}"
+    reg_fact_val: "{{ l2_docker_additional_registries }}"
     reg_flag: --add-registry
   - reg_conf_var: BLOCK_REGISTRY
-    reg_fact_val: "{{ docker_blocked_registries| default(None, true) }}"
+    reg_fact_val: "{{ l2_docker_blocked_registries }}"
     reg_flag: --block-registry
   - reg_conf_var: INSECURE_REGISTRY
-    reg_fact_val: "{{ docker_insecure_registries| default(None, true) }}"
+    reg_fact_val: "{{ l2_docker_insecure_registries }}"
     reg_flag: --insecure-registry
   notify:
   - restart docker
@@ -95,11 +103,12 @@
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='\
-      {% if ansible_selinux.status | default(None) == 'enabled' and docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %}\
-      {% if docker_log_driver is defined  %} --log-driver {{ docker_log_driver }}{% endif %}\
-      {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
-      {% if docker_options is defined %} {{ docker_options }}{% endif %}\
-      {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %}'"
+      {% if ansible_selinux.status | default(None) == 'enabled' and openshift_docker_selinux_enabled | bool %} --selinux-enabled {% endif %}\
+      {% if openshift_docker_log_driver  %} --log-driver {{ openshift_docker_log_driver }}{% endif %}\
+      {% if l2_docker_log_options %} {{ l2_docker_log_options | oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
+      {% if openshift_docker_hosted_registry_insecure and openshift_docker_hosted_registry_network %} --insecure-registry={{ openshift_docker_hosted_registry_network }} {% endif %}\
+      {% if openshift_docker_options %} {{ openshift_docker_options }}{% endif %}\
+      {% if openshift_docker_disable_push_dockerhub %} --confirm-def-push={{ openshift_docker_disable_push_dockerhub | bool }}{% endif %}'"
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
   - restart docker

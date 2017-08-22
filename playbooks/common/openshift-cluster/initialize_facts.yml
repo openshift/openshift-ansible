@@ -147,6 +147,12 @@
         generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
         no_proxy_internal_hostnames: "{{ openshift_no_proxy_internal_hostnames | default(None) }}"
 
+  - name: Initialize openshift.node.sdn_mtu
+    openshift_facts:
+      role: node
+      local_facts:
+        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+
   - name: initialize_facts set_fact repoquery command
     set_fact:
       repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
@@ -154,3 +160,11 @@
   - name: initialize_facts set_fact on openshift_docker_hosted_registry_network
     set_fact:
       openshift_docker_hosted_registry_network: "{{ '' if 'oo_first_master' not in groups else hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    when: openshift_docker_hosted_registry_network is not defined
+
+  - name: initialize_facts set_fact openshift_docker_service_name = container-engine
+    set_fact:
+      openshift_docker_service_name: 'container-engine'
+    when:
+    - openshift_docker_use_system_container is defined
+    - openshift_docker_use_system_container | bool

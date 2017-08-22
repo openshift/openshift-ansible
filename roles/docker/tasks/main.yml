@@ -5,24 +5,17 @@
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
 
-- set_fact:
-    l_use_system_container: "{{ openshift.docker.use_system_container | default(False) }}"
-    l_use_crio: "{{ openshift_use_crio | default(False) }}"
-    l_use_crio_only: "{{ openshift_use_crio_only | default(False) }}"
-
 - name: Use Package Docker if Requested
   include: package_docker.yml
   when:
-  - not l_use_system_container
-  - not l_use_crio_only
+  - not openshift_docker_use_system_container
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
   when:
-  - l_use_system_container
-  - not l_use_crio_only
+  - openshift_docker_use_system_container
 
 - name: Add CRI-O usage Requested
   include: systemcontainer_crio.yml
   when:
-  - l_use_crio
+  - openshift_use_crio

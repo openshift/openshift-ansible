@@ -30,7 +30,7 @@ Example Playbook
       roles:
       - role: docker
         docker_udev_workaround: "true"
-        docker_use_system_container: False
+        openshift_docker_use_system_container: False
 
 License
 -------

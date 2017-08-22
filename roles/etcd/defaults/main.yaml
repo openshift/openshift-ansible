@@ -20,3 +20,5 @@ r_etcd_os_firewall_allow:
   port: "{{etcd_client_port}}/tcp"
 - service: etcd peering
   port: "{{ etcd_peer_port }}/tcp"
+
+openshift_docker_service_name: docker

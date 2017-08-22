@@ -7,6 +7,11 @@
     r_openshift_excluder_action: disable
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
+- name: Setup Docker on Nodes
+  hosts: oo_nodes_to_config
+  roles:
+  - role: docker
+
 - name: Evaluate node groups
   hosts: localhost
   become: no
@@ -32,7 +37,6 @@
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
     openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))
@@ -49,7 +53,6 @@
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
     openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))

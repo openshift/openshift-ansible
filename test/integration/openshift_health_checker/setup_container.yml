@@ -53,6 +53,8 @@
 
 - include: ../../../playbooks/byo/openshift-cluster/initialize_groups.yml
 - include: ../../../playbooks/common/openshift-cluster/std_include.yml
+  vars:
+    skip_docker_role: True
 
 - hosts: all
   tasks:

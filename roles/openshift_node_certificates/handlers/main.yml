@@ -6,7 +6,7 @@
 
 - name: restart docker after updating ca trust
   systemd:
-    name: "{{ openshift.docker.service_name }}"
+    name: "{{ openshift_docker_service_name }}"
     state: restarted
   when: not openshift_certificates_redeploy | default(false) | bool
   register: l_docker_restart_docker_in_cert_result
