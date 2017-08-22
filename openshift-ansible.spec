@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.117
+Version:        3.5.118
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 22 2017 Scott Dodson <sdodson@redhat.com> 3.5.118-1
+- Fail within scaleup playbooks when new_{nodes,masters} host groups are empty.
+  (abutcher@redhat.com)
+
 * Thu Aug 17 2017 Scott Dodson <sdodson@redhat.com> 3.5.117-1
 - Use absolute path when unexcluding (Sergi Jimenez)
 - Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1474246 (Sergi Jimenez)
