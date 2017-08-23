@@ -162,6 +162,19 @@ The `openstack_inventory_path` points the directory to host the generated static
 It should point to the copied example inventory directory, otherwise ti creates
 a new one for you.
 
+#### Multi-master configuration
+
+Please refer to the official documentation for the
+[multi-master setup](https://docs.openshift.com/container-platform/3.6/install_config/install/advanced_install.html#multiple-masters)
+and define the corresponding [inventory
+variables](https://docs.openshift.com/container-platform/3.6/install_config/install/advanced_install.html#configuring-cluster-variables)
+in `inventory/group_vars/OSEv3.yml`. For example, given a load balancer node
+under the ansible group named `ext_lb`:
+
+    openshift_master_cluster_method: native
+    openshift_master_cluster_hostname: "{{ groups.ext_lb.0 }}"
+    openshift_master_cluster_public_hostname: "{{ groups.ext_lb.0 }}"
+
 #### Security notes
 
 Configure required `*_ingress_cidr` variables to restrict public access
