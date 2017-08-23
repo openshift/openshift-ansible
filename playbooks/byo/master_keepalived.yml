@@ -1,0 +1,128 @@
+### Playbook to provision keepalived on master nodes for native HA
+#
+# To configure create group keepalived in inventory file with next labels:
+# keepalived_name: <name of vip>
+# keepalived_vip: <virtual ip>
+# keepalived_nic: <interface to listen on>
+# keepalived_router_id: <id>
+# keepalived_pass: <password>
+#
+# E.g.
+#
+# [keepalived]
+# gls-master-1b1b8.example.com keepalived_nic=eth0 keepalived_router_id=42 keepalived_vip=192.168.55.3 keepalived_name=VIP_0 keepalived_pass=sea8soKe
+# gls-master-f4ac1.example.com keepalived_nic=eth0 keepalived_router_id=43 keepalived_vip=192.168.55.4 keepalived_name=VIP_1 keepalived_pass=Ya1mohxo
+# gls-master-cc3cf.example.com keepalived_nic=eth0 keepalived_router_id=44 keepalived_vip=192.168.55.5 keepalived_name=VIP_2 keepalived_pass=lae4ShuV
+#
+# And add round-robin DNS entry on all VIPs:
+# $ host master.example.com
+# master.example.com has address 192.168.55.5
+# master.example.com has address 192.168.55.3
+# master.example.com has address 192.168.55.4
+#
+# This playbook will generate 3 different virtual routers for 3 different VIPs
+# to enable load balancing based on round-robin DNS
+# 
+# Excerpt from /etc/keepalived/keepalived.conf
+#
+# vrrp_instance VIP_1 {
+#   interface eth0
+#   state BACKUP
+#   virtual_router_id 43
+#   priority 50
+#   authentication {
+#     auth_type PASS
+#     auth_pass Ya1mohxo
+#   }
+#   virtual_ipaddress {
+#     192.168.55.4 dev eth0
+#   }
+# 
+# 
+# }
+# vrrp_instance VIP_0 {
+#   interface eth0
+#   state BACKUP
+#   virtual_router_id 42
+#   priority 50
+#   authentication {
+#     auth_type PASS
+#     auth_pass sea8soKe
+#   }
+#   virtual_ipaddress {
+#     192.168.55.3 dev eth0
+#   }
+# 
+# 
+# }
+# vrrp_instance VIP_2 {
+#   interface eth0
+#   state MASTER
+#   virtual_router_id 44
+#   priority 100
+#   authentication {
+#     auth_type PASS
+#     auth_pass lae4ShuV
+#   }
+#   virtual_ipaddress {
+#     192.168.55.5 dev eth0
+#   }
+# }
+# 
+
+
+---
+- name: Generate vars
+  hosts: keepalived
+  gather_facts: False
+  tasks:
+    - name: Populate
+      set_fact:
+        keepalived_instances: >
+            {{ keepalived_instances | default({}) | combine({
+                  hostvars[item].keepalived_name: {
+                    'interface': hostvars[inventory_hostname].keepalived_nic,
+                    'virtual_router_id': hostvars[item].keepalived_router_id,
+                    'state': ((inventory_hostname == item) | ternary('MASTER','BACKUP')),
+                    'priority': ((inventory_hostname == item) | ternary('100','50')),
+                    'authentication_password': hostvars[item].keepalived_pass,
+                    'vips': [
+                      hostvars[item].keepalived_vip + ' dev ' + hostvars[inventory_hostname].keepalived_nic
+                    ]
+                  }
+             }) }}
+        
+      with_items: "{{ groups.keepalived }}"
+    
+- name: Enable IPTables
+  hosts: keepalived
+  tasks:
+    - iptables:
+        action: insert
+        chain: INPUT
+        in_interface: "{{ hostvars[inventory_hostname].keepalived_nic }}"
+        destination: 224.0.0.0/8
+        protocol: vrrp
+        jump: ACCEPT
+      become: yes
+    - iptables:
+        action: insert
+        chain: OUTPUT
+        out_interface: "{{ hostvars[inventory_hostname].keepalived_nic }}"
+        destination: 224.0.0.0/8
+        protocol: vrrp
+        jump: ACCEPT
+      become: yes
+
+- name: Install KeepAliveD
+  hosts: keepalived
+  vars:
+    keepalived_instances: "{{ hostvars[inventory_hostname].keepalived_instances }}"
+    
+  tasks:
+    - debug:
+        msg: "{{ keepalived_instances }}"
+
+  roles:
+    - role: ansible_keepalived
+
