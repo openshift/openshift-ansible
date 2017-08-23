@@ -229,7 +229,7 @@
       dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
     vars:
       obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-      size: "{{ openshift_logging_elasticsearch_pvc_size }}"
+      size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
       access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
       pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
       storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
@@ -243,7 +243,7 @@
       dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
     vars:
       obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-      size: "{{ openshift_logging_elasticsearch_pvc_size }}"
+      size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
       access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
       pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
     when:
