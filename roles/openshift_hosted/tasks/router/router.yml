@@ -18,6 +18,15 @@
     openshift_hosted_router_selector: "{{ openshift.hosted.router.selector | default(None) }}"
     openshift_hosted_router_image: "{{ openshift.hosted.router.registryurl }}"
 
+- name: Get the certificate contents for router
+  copy:
+    backup: True
+    dest: "/etc/origin/master/{{ item | basename }}"
+    src: "{{ item }}"
+  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
+                  oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+  when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {}
+
 # This is for when we desire a cluster signed cert
 # The certificate is generated and placed in master_config_dir/
 - block:
@@ -42,15 +51,6 @@
 
   # End Block
   when: ( openshift_hosted_router_create_certificate | bool ) and openshift_hosted_router_certificate == {}
-
-- name: Get the certificate contents for router
-  copy:
-    backup: True
-    dest: "/etc/origin/master/{{ item | basename }}"
-    src: "{{ item }}"
-  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
-                  oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
-  when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {}
 
 - name: Create the router service account(s)
   oc_serviceaccount:
