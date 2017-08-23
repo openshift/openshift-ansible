@@ -1,0 +1,47 @@
+---
+# Get bootstrap config token
+# bootstrap should be created on first master
+# need to fetch it and shove it into cloud data
+- name: create the node scale groups
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+  - name: get provisioning vars
+    include_vars: vars.yml
+
+  - name: fetch master instances
+    ec2_remote_facts:
+      region: "{{ provision.region }}"
+      filters:
+        "tag:clusterid": "{{ provision.clusterid }}"
+        "tag:host-type": master
+        instance-state-name: running
+    register: instancesout
+    retries: 20
+    delay: 3
+    until: instancesout.instances|length > 0
+
+  - name: slurp down the bootstrap.kubeconfig
+    slurp:
+      src: /etc/origin/master/bootstrap.kubeconfig
+    delegate_to: "{{ instancesout.instances[0].public_ip_address }}"
+    remote_user: root
+    register: bootstrap
+
+  - name: set_fact on localhost for kubeconfig
+    set_fact:
+      local_bootstrap: "{{ bootstrap }}"
+      launch_config_name:
+        infra: "infra-{{ ansible_date_time.epoch }}"
+        compute: "compute-{{ ansible_date_time.epoch }}"
+
+  - name: include build node group
+    include: build_node_group.yml
+    vars:
+      openshift_build_node_type: infra
+
+  - name: include build node group
+    include: build_node_group.yml
+    vars:
+      openshift_build_node_type: compute
