@@ -1,8 +1,8 @@
 ---
 - name: Fail if invalid r_etcd_migrate_action provided
   fail:
-    msg: "etcd_migrate role can only be called with 'check' or 'migrate' or 'configure'"
-  when: r_etcd_migrate_action not in ['check', 'migrate', 'configure']
+    msg: "etcd_migrate role can only be called with 'check', 'migrate', 'configure', 'add_ttls', or 'clean_data'"
+  when: r_etcd_migrate_action not in ['check', 'migrate', 'configure', 'add_ttls', 'clean_data']
 
 - name: Include main action task file
   include: "{{ r_etcd_migrate_action }}.yml"

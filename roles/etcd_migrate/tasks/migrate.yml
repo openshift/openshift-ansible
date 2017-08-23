@@ -3,62 +3,45 @@
 - set_fact:
     l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
 
-- name: Disable etcd members
-  service:
-    name: "{{ l_etcd_service }}"
-    state: stopped
-
-# Should we skip all TTL keys? https://bugzilla.redhat.com/show_bug.cgi?id=1389773
 - name: Migrate etcd data
   command: >
     etcdctl migrate --data-dir={{ etcd_data_dir }}
   environment:
     ETCDCTL_API: 3
   register: l_etcdctl_migrate
-
 # TODO(jchaloup): If any of the members fails, we need to restore all members to v2 from the pre-migrate backup
 - name: Check the etcd v2 data are correctly migrated
   fail:
     msg: "Failed to migrate a member"
   when: "'finished transforming keys' not in l_etcdctl_migrate.stdout and 'no v2 keys to migrate' not in l_etcdctl_migrate.stdout"
-
 - name: Migration message
   debug:
     msg: "Etcd migration finished with: {{ l_etcdctl_migrate.stdout }}"
-
-- name: Enable etcd member
-  service:
+- name: Set ETCD_FORCE_NEW_CLUSTER=true on first etcd host
+  lineinfile:
+    line: "ETCD_FORCE_NEW_CLUSTER=true"
+    dest: /etc/etcd/etcd.conf
+- name: Start etcd
+  systemd:
     name: "{{ l_etcd_service }}"
     state: started
+- name: Unset ETCD_FORCE_NEW_CLUSTER=true on first etcd host
+  lineinfile:
+    line: "ETCD_FORCE_NEW_CLUSTER=true"
+    dest: /etc/etcd/etcd.conf
+    state: absent
+- name: Restart first etcd host
+  systemd:
+    name: "{{ l_etcd_service }}"
+    state: restarted
 
-- name: Wait for cluster to become healthy after migration
+- name: Wait for cluster to become healthy after bringing up first member
   command: >
     etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} --endpoint https://{{ etcd_peer }}:{{ etcd_client_port }} cluster-health
   register: l_etcd_migrate_health
   until: l_etcd_migrate_health.rc == 0
   retries: 3
   delay: 30
-  run_once: true
-
-# NOTE: /usr/local/bin may be removed from the PATH by ansible hence why
-#       it's added to the environment in this task.
-- name: Re-introduce leases (as a replacement for key TTLs)
-  command: >
-    oadm migrate etcd-ttl \
-    --cert {{ r_etcd_common_master_peer_cert_file }} \
-    --key {{ r_etcd_common_master_peer_key_file }} \
-    --cacert {{ r_etcd_common_master_peer_ca_file }} \
-    --etcd-address 'https://{{ etcd_peer }}:{{ etcd_client_port }}' \
-    --ttl-keys-prefix {{ item }} \
-    --lease-duration 1h
-  environment:
-    ETCDCTL_API: 3
-    PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
-  with_items:
-  - "/kubernetes.io/events"
-  - "/kubernetes.io/masterleases"
-  delegate_to: "{{ groups.oo_first_master[0] }}"
-  run_once: true
 
 - set_fact:
     r_etcd_migrate_success: true
