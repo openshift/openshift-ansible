@@ -8,12 +8,6 @@ openshift_master_cluster_method: native
 openshift_master_cluster_hostname: "{{ groups.lb.0|default(groups.masters.0) }}"
 openshift_master_cluster_public_hostname: "{{ groups.lb.0|default(groups.masters.0) }}"
 
-#openshift_cluster_node_labels:
-#  app:
-#    region: primary
-#  infra:
-#    region: infra
-
 osm_default_node_selector: 'region=primary'
 
 # NOTE(shadower): the hostname check seems to always fail because the

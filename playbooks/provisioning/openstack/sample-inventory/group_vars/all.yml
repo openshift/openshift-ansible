@@ -122,3 +122,12 @@ ansible_user: openshift
 # If you want to use the VM storage instead of Cinder volumes, set this to `true`.
 # NOTE: this is for testing only! Your data will be gone once the VM disappears!
 # ephemeral_volumes: false
+
+# # OpenShift node labels
+# # - in order to customise node labels for app and/or infra group, set the
+# #   openshift_cluster_node_labels variable
+#openshift_cluster_node_labels:
+#  app:
+#    region: primary
+#  infra:
+#    region: infra

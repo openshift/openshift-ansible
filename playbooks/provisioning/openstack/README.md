@@ -130,7 +130,15 @@ The `openstack_num_masters`, `openstack_num_infra` and
 App nodes to create.
 
 The `openshift_cluster_node_labels` defines custom labels for your openshift
-cluster node groups, like app or infra nodes. For example: `{'region': 'infra'}`.
+cluster node groups. It currently supports app and infra node groups.
+The default value of this variable sets `region: primary` to app nodes and
+`region: infra` to infra nodes.
+An example of setting a customised label:
+```
+openshift_cluster_node_labels:
+  app:
+    mylabel: myvalue
+```
 
 The `openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
