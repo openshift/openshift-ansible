@@ -491,10 +491,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
 #
 # By default metrics are not automatically deployed, set this to enable them
-# openshift_hosted_metrics_deploy=true
+#openshift_metrics_install_metrics=true
 #
 # Storage Options
-# If openshift_hosted_metrics_storage_kind is unset then metrics will be stored
+# If openshift_metrics_storage_kind is unset then metrics will be stored
 # in an EmptyDir volume and will be deleted when the cassandra pod terminates.
 # Storage options A & B currently support only one cassandra pod which is
 # generally enough for up to 1000 pods. Additional volumes can be created
@@ -504,29 +504,29 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # An NFS volume will be created with path "nfs_directory/volume_name"
 # on the host within the [nfs] host group.  For example, the volume
 # path using these options would be "/exports/metrics"
-#openshift_hosted_metrics_storage_kind=nfs
-#openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_metrics_storage_nfs_directory=/exports
-#openshift_hosted_metrics_storage_nfs_options='*(rw,root_squash)'
-#openshift_hosted_metrics_storage_volume_name=metrics
-#openshift_hosted_metrics_storage_volume_size=10Gi
-#openshift_hosted_metrics_storage_labels={'storage': 'metrics'}
+#openshift_metrics_storage_kind=nfs
+#openshift_metrics_storage_access_modes=['ReadWriteOnce']
+#openshift_metrics_storage_nfs_directory=/exports
+#openshift_metrics_storage_nfs_options='*(rw,root_squash)'
+#openshift_metrics_storage_volume_name=metrics
+#openshift_metrics_storage_volume_size=10Gi
+#openshift_metrics_storage_labels={'storage': 'metrics'}
 #
 # Option B - External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
 # the storage_host. For example, the remote volume path using these
 # options would be "nfs.example.com:/exports/metrics"
-#openshift_hosted_metrics_storage_kind=nfs
-#openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_metrics_storage_host=nfs.example.com
-#openshift_hosted_metrics_storage_nfs_directory=/exports
-#openshift_hosted_metrics_storage_volume_name=metrics
-#openshift_hosted_metrics_storage_volume_size=10Gi
-#openshift_hosted_metrics_storage_labels={'storage': 'metrics'}
+#openshift_metrics_storage_kind=nfs
+#openshift_metrics_storage_access_modes=['ReadWriteOnce']
+#openshift_metrics_storage_host=nfs.example.com
+#openshift_metrics_storage_nfs_directory=/exports
+#openshift_metrics_storage_volume_name=metrics
+#openshift_metrics_storage_volume_size=10Gi
+#openshift_metrics_storage_labels={'storage': 'metrics'}
 #
 # Option C - Dynamic -- If openshift supports dynamic volume provisioning for
 # your cloud platform use this.
-#openshift_hosted_metrics_storage_kind=dynamic
+#openshift_metrics_storage_kind=dynamic
 #
 # Other Metrics Options -- Common items you may wish to reconfigure, for the complete
 # list of options please see roles/openshift_metrics/README.md
@@ -535,10 +535,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Defaults to https://hawkular-metrics.{{openshift_master_default_subdomain}}/hawkular/metrics
 # Currently, you may only alter the hostname portion of the url, alterting the
 # `/hawkular/metrics` path will break installation of metrics.
-#openshift_hosted_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
+#openshift_metrics_hawkular_hostname=https://hawkular-metrics.example.com/hawkular/metrics
 # Configure the prefix and version for the component images
-#openshift_hosted_metrics_deployer_prefix=docker.io/openshift/origin-
-#openshift_hosted_metrics_deployer_version=v3.7.0
+#openshift_metrics_image_prefix=docker.io/openshift/origin-
+#openshift_metrics_image_version=v3.7.0
 #
 # StorageClass
 # openshift_storageclass_name=gp2
@@ -548,36 +548,36 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Logging deployment
 #
 # Currently logging deployment is disabled by default, enable it by setting this
-#openshift_hosted_logging_deploy=true
+#openshift_logging_install_logging=true
 #
 # Logging storage config
 # Option A - NFS Host Group
 # An NFS volume will be created with path "nfs_directory/volume_name"
 # on the host within the [nfs] host group.  For example, the volume
 # path using these options would be "/exports/logging"
-#openshift_hosted_logging_storage_kind=nfs
-#openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_logging_storage_nfs_directory=/exports
-#openshift_hosted_logging_storage_nfs_options='*(rw,root_squash)'
-#openshift_hosted_logging_storage_volume_name=logging
-#openshift_hosted_logging_storage_volume_size=10Gi
-#openshift_hosted_logging_storage_labels={'storage': 'logging'}
+#openshift_logging_storage_kind=nfs
+#openshift_logging_storage_access_modes=['ReadWriteOnce']
+#openshift_logging_storage_nfs_directory=/exports
+#openshift_logging_storage_nfs_options='*(rw,root_squash)'
+#openshift_logging_storage_volume_name=logging
+#openshift_logging_storage_volume_size=10Gi
+#openshift_logging_storage_labels={'storage': 'logging'}
 #
 # Option B - External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
 # the storage_host. For example, the remote volume path using these
 # options would be "nfs.example.com:/exports/logging"
-#openshift_hosted_logging_storage_kind=nfs
-#openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
-#openshift_hosted_logging_storage_host=nfs.example.com
-#openshift_hosted_logging_storage_nfs_directory=/exports
-#openshift_hosted_logging_storage_volume_name=logging
-#openshift_hosted_logging_storage_volume_size=10Gi
-#openshift_hosted_logging_storage_labels={'storage': 'logging'}
+#openshift_logging_storage_kind=nfs
+#openshift_logging_storage_access_modes=['ReadWriteOnce']
+#openshift_logging_storage_host=nfs.example.com
+#openshift_logging_storage_nfs_directory=/exports
+#openshift_logging_storage_volume_name=logging
+#openshift_logging_storage_volume_size=10Gi
+#openshift_logging_storage_labels={'storage': 'logging'}
 #
 # Option C - Dynamic -- If openshift supports dynamic volume provisioning for
 # your cloud platform use this.
-#openshift_hosted_logging_storage_kind=dynamic
+#openshift_logging_storage_kind=dynamic
 #
 # Option D - none -- Logging will use emptydir volumes which are destroyed when
 # pods are deleted
@@ -587,13 +587,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Configure loggingPublicURL in the master config for aggregate logging, defaults
 # to kibana.{{ openshift_master_default_subdomain }}
-#openshift_hosted_logging_hostname=logging.apps.example.com
+#openshift_logging_kibana_hostname=logging.apps.example.com
 # Configure the number of elastic search nodes, unless you're using dynamic provisioning
 # this value must be 1
-#openshift_hosted_logging_elasticsearch_cluster_size=1
+#openshift_logging_es_cluster_size=1
 # Configure the prefix and version for the component images
-#openshift_hosted_logging_deployer_prefix=docker.io/openshift/origin-
-#openshift_hosted_logging_deployer_version=v3.7.0
+#openshift_logging_image_prefix=docker.io/openshift/origin-
+#openshift_logging_image_version=v3.7.0
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'

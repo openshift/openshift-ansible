@@ -493,10 +493,10 @@ def set_selectors(facts):
         facts['hosted']['metrics'] = {}
     if 'selector' not in facts['hosted']['metrics'] or facts['hosted']['metrics']['selector'] in [None, 'None']:
         facts['hosted']['metrics']['selector'] = None
-    if 'logging' not in facts['hosted']:
-        facts['hosted']['logging'] = {}
-    if 'selector' not in facts['hosted']['logging'] or facts['hosted']['logging']['selector'] in [None, 'None']:
-        facts['hosted']['logging']['selector'] = None
+    if 'logging' not in facts:
+        facts['logging'] = {}
+    if 'selector' not in facts['logging'] or facts['logging']['selector'] in [None, 'None']:
+        facts['logging']['selector'] = None
     if 'etcd' not in facts['hosted']:
         facts['hosted']['etcd'] = {}
     if 'selector' not in facts['hosted']['etcd'] or facts['hosted']['etcd']['selector'] in [None, 'None']:
@@ -1785,7 +1785,10 @@ class OpenShiftFacts(object):
                    'etcd',
                    'hosted',
                    'master',
-                   'node']
+                   'node',
+                   'logging',
+                   'loggingops',
+                   'metrics']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
@@ -1966,66 +1969,6 @@ class OpenShiftFacts(object):
 
         if 'hosted' in roles or self.role == 'hosted':
             defaults['hosted'] = dict(
-                metrics=dict(
-                    deploy=False,
-                    duration=7,
-                    resolution='10s',
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='metrics',
-                            size='10Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'
-                        ),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteOnce']
-                        ),
-                        create_pv=True,
-                        create_pvc=False
-                    )
-                ),
-                loggingops=dict(
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='logging-es-ops',
-                            size='10Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'
-                        ),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteOnce']
-                        ),
-                        create_pv=True,
-                        create_pvc=False
-                    )
-                ),
-                logging=dict(
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='logging-es',
-                            size='10Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'
-                        ),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteOnce']
-                        ),
-                        create_pv=True,
-                        create_pvc=False
-                    )
-                ),
                 etcd=dict(
                     storage=dict(
                         kind=None,
@@ -2070,6 +2013,69 @@ class OpenShiftFacts(object):
                     )
                 ),
                 router=dict()
+            )
+
+            defaults['logging'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='logging-es',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
+            )
+
+            defaults['loggingops'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='logging-es-ops',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
+            )
+
+            defaults['metrics'] = dict(
+                deploy=False,
+                duration=7,
+                resolution='10s',
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='metrics',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
             )
 
         return defaults

@@ -19,31 +19,15 @@
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
       openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
-  - set_fact:
-      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
-      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
-      logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default(openshift.master.public_api_url) }}"
-      logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
-      logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
+
   roles:
   - role: openshift_default_storage_class
     when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
   - role: openshift_hosted
   - role: openshift_metrics
-    when: openshift_hosted_metrics_deploy | default(false) | bool
+    when: openshift_metrics_install_metrics | default(false) | bool
   - role: openshift_logging
-    when: openshift_hosted_logging_deploy | default(false) | bool
-    openshift_hosted_logging_hostname: "{{ logging_hostname }}"
-    openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
-    openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
-    openshift_hosted_logging_elasticsearch_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
-    openshift_hosted_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_hosted_logging_elasticsearch_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
-    openshift_hosted_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_hosted_logging_elasticsearch_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
-    openshift_hosted_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift_hosted_loggingops_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs' ] else ''  }}"
-    openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es-ops' if openshift_hosted_loggingops_storage_kind | default(none) =='dynamic' else '' }}"
+    when: openshift_logging_install_logging | default(false) | bool
 
   - role: cockpit-ui
     when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
@@ -57,8 +41,6 @@
   - hosted
   pre_tasks:
   - set_fact:
-      openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
-  - set_fact:
       openshift_metrics_hawkular_hostname: "{{ g_metrics_hostname | default('hawkular-metrics.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   tasks:
 
@@ -66,10 +48,10 @@
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
-    when: openshift_hosted_logging_deploy | default(false) | bool
+    when: openshift_logging_install_logging | default(false) | bool
 
   - block:
     - include_role:
         name: openshift_metrics
         tasks_from: update_master_config
-    when: openshift_hosted_metrics_deploy | default(false) | bool
+    when: openshift_metrics_install_metrics | default(false) | bool
