@@ -4,6 +4,7 @@ Health checks for OpenShift clusters.
 
 import operator
 import os
+import time
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from importlib import import_module
@@ -57,6 +58,9 @@ class OpenShiftCheck(object):
         self._execute_module = execute_module
         self.task_vars = task_vars or {}
         self.tmp = tmp
+        # mainly for testing purposes; see execute_module_with_retries
+        self._module_retries = 3
+        self._module_retry_interval = 5  # seconds
 
         # set to True when the check changes the host, for accurate total "changed" count
         self.changed = False
@@ -114,6 +118,19 @@ class OpenShiftCheck(object):
                 " invoked execute_module without providing the method at initialization."
             )
         return self._execute_module(module_name, module_args, self.tmp, self.task_vars)
+
+    def execute_module_with_retries(self, module_name, module_args):
+        """Run execute_module and retry on failure."""
+        result = {}
+        tries = 0
+        while True:
+            res = self.execute_module(module_name, module_args)
+            if tries > self._module_retries or not res.get("failed"):
+                result.update(res)
+                return result
+            result["last_failed"] = res
+            tries += 1
+            time.sleep(self._module_retry_interval)
 
     def get_var(self, *keys, **kwargs):
         """Get deeply nested values from task_vars.

@@ -69,7 +69,7 @@ def test_all_images_available_remotely(available_locally):
             return {'images': [], 'failed': available_locally}
         return {'changed': False}
 
-    result = DockerImageAvailability(execute_module, task_vars=dict(
+    check = DockerImageAvailability(execute_module, task_vars=dict(
         openshift=dict(
             common=dict(
                 service_type='origin',
@@ -81,7 +81,9 @@ def test_all_images_available_remotely(available_locally):
         openshift_deployment_type='origin',
         openshift_image_tag='v3.4',
         group_names=['nodes', 'masters'],
-    )).run()
+    ))
+    check._module_retry_interval = 0
+    result = check.run()
 
     assert not result.get('failed', False)
 
@@ -97,7 +99,7 @@ def test_all_images_unavailable():
             'changed': False,
         }
 
-    actual = DockerImageAvailability(execute_module, task_vars=dict(
+    check = DockerImageAvailability(execute_module, task_vars=dict(
         openshift=dict(
             common=dict(
                 service_type='origin',
@@ -109,7 +111,9 @@ def test_all_images_unavailable():
         openshift_deployment_type="openshift-enterprise",
         openshift_image_tag='latest',
         group_names=['nodes', 'masters'],
-    )).run()
+    ))
+    check._module_retry_interval = 0
+    actual = check.run()
 
     assert actual['failed']
     assert "required Docker images are not available" in actual['msg']
@@ -136,7 +140,7 @@ def test_skopeo_update_failure(message, extra_words):
 
         return {'changed': False}
 
-    actual = DockerImageAvailability(execute_module, task_vars=dict(
+    check = DockerImageAvailability(execute_module, task_vars=dict(
         openshift=dict(
             common=dict(
                 service_type='origin',
@@ -148,7 +152,9 @@ def test_skopeo_update_failure(message, extra_words):
         openshift_deployment_type="openshift-enterprise",
         openshift_image_tag='',
         group_names=['nodes', 'masters'],
-    )).run()
+    ))
+    check._module_retry_interval = 0
+    actual = check.run()
 
     assert actual["failed"]
     for word in extra_words:
