@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.129
+Version:        3.4.130
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.130-1
+- 
+
 * Tue Aug 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.129-1
 - 
 
