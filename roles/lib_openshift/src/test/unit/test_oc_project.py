@@ -95,10 +95,10 @@ class OCProjectTest(unittest.TestCase):
         results = OCProject.run_ansible(params, False)
 
         # Assert
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
-        self.assertEqual(results['results']['results']['metadata']['name'], 'operations')
-        self.assertEqual(results['state'], 'present')
+        assert results['changed']
+        assert results['results']['returncode'] == 0
+        assert results['results']['results']['metadata']['name'] == 'operations'
+        assert results['state'] == 'present'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([

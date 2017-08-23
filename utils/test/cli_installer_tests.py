@@ -489,24 +489,23 @@ class UnattendedCliTests(OOCliFixture):
         self.assert_result(result, 0)
 
         load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, "hosts"),
-            load_facts_args[0])
-        self.assertEquals(os.path.join(self.work_dir,
-            "playbooks/byo/openshift_facts.yml"), load_facts_args[1])
+        assert os.path.join(self.work_dir, "hosts") == load_facts_args[0]
+        assert os.path.join(self.work_dir, "playbooks/byo/openshift_facts.yml") == load_facts_args[1]
         env_vars = load_facts_args[2]
-        self.assertEquals(os.path.join(self.work_dir,
-            '.ansible/callback_facts.yaml'),
-            env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
+        assert os.path.join(self.work_dir,
+            '.ansible/callback_facts.yaml') == env_vars['OO_INSTALL_CALLBACK_FACTS_YAML']
+        assert '/tmp/ansible.log' == env_vars['ANSIBLE_LOG_PATH']
         # If user running test has rpm installed, this might be set to default:
-        self.assertTrue('ANSIBLE_CONFIG' not in env_vars or
-            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG)
+        assert (
+            'ANSIBLE_CONFIG' not in env_vars or
+            env_vars['ANSIBLE_CONFIG'] == cli.DEFAULT_ANSIBLE_CONFIG
+        )
 
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(3, len(hosts))
-        self.assertEquals(3, len(hosts_to_run_on))
+        assert 3 == len(hosts)
+        assert 3 == len(hosts_to_run_on)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -525,24 +524,22 @@ class UnattendedCliTests(OOCliFixture):
         # Check the inventory file looks as we would expect:
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('root',
-            inventory.get('OSEv3:vars', 'ansible_ssh_user'))
-        self.assertEquals('openshift-enterprise',
-            inventory.get('OSEv3:vars', 'deployment_type'))
+        assert 'root' == inventory.get('OSEv3:vars', 'ansible_ssh_user')
+        assert 'openshift-enterprise' == inventory.get('OSEv3:vars', 'deployment_type')
 
         # Check the masters:
-        self.assertEquals(1, len(inventory.items('masters')))
-        self.assertEquals(3, len(inventory.items('nodes')))
+        assert 1 == len(inventory.items('masters'))
+        assert 3 == len(inventory.items('nodes'))
 
         for item in inventory.items('masters'):
             # ansible host lines do NOT parse nicely:
             master_line = item[0]
             if item[1] is not None:
                 master_line = "%s=%s" % (master_line, item[1])
-            self.assertTrue('openshift_ip' in master_line)
-            self.assertTrue('openshift_public_ip' in master_line)
-            self.assertTrue('openshift_hostname' in master_line)
-            self.assertTrue('openshift_public_hostname' in master_line)
+            assert 'openshift_ip' in master_line
+            assert 'openshift_public_ip' in master_line
+            assert 'openshift_hostname' in master_line
+            assert 'openshift_public_hostname' in master_line
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -560,16 +557,15 @@ class UnattendedCliTests(OOCliFixture):
 
         written_config = read_yaml(config_file)
 
-        self.assertEquals('openshift-enterprise', written_config['variant'])
+        assert 'openshift-enterprise' == written_config['variant']
         # We didn't specify a version so the latest should have been assumed,
         # and written to disk:
-        self.assertEquals('3.3', written_config['variant_version'])
+        assert '3.3' == written_config['variant_version']
 
         # Make sure the correct value was passed to ansible:
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('openshift-enterprise',
-            inventory.get('OSEv3:vars', 'deployment_type'))
+        assert 'openshift-enterprise' == inventory.get('OSEv3:vars', 'deployment_type')
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
@@ -589,15 +585,14 @@ class UnattendedCliTests(OOCliFixture):
 
         written_config = read_yaml(config_file)
 
-        self.assertEquals('openshift-enterprise', written_config['variant'])
+        assert 'openshift-enterprise' == written_config['variant']
         # Make sure our older version was preserved:
         # and written to disk:
-        self.assertEquals('3.3', written_config['variant_version'])
+        assert '3.3' == written_config['variant_version']
 
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
-        self.assertEquals('openshift-enterprise',
-            inventory.get('OSEv3:vars', 'deployment_type'))
+        assert 'openshift-enterprise' == inventory.get('OSEv3:vars', 'deployment_type')
 
     # unattended with bad config file and no installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -612,9 +607,8 @@ class UnattendedCliTests(OOCliFixture):
         self.cli_args.extend(["-c", config_file, "install"])
         result = self.runner.invoke(cli.cli, self.cli_args)
 
-        self.assertEquals(1, result.exit_code)
-        self.assertTrue("You must specify either an ip or hostname"
-            in result.output)
+        assert 1 == result.exit_code
+        assert "You must specify either an ip or hostname" in result.output
 
     #unattended with three masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -633,8 +627,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(6, len(hosts))
-        self.assertEquals(6, len(hosts_to_run_on))
+        assert 6 == len(hosts)
+        assert 6 == len(hosts_to_run_on)
 
     #unattended with two masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -651,7 +645,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # This is an invalid config:
         self.assert_result(result, 1)
-        self.assertTrue("A minimum of 3 masters are required" in result.output)
+        assert "A minimum of 3 masters are required" in result.output
 
     #unattended with three masters, one node, but no load balancer specified:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -668,7 +662,7 @@ class UnattendedCliTests(OOCliFixture):
 
         # This is not a valid input:
         self.assert_result(result, 1)
-        self.assertTrue('No master load balancer specified in config' in result.output)
+        assert 'No master load balancer specified in config' in result.output
 
     #unattended with three masters, one node, and one of the masters reused as load balancer:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -703,8 +697,8 @@ class UnattendedCliTests(OOCliFixture):
         # Make sure we ran on the expected masters and nodes:
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(6, len(hosts))
-        self.assertEquals(6, len(hosts_to_run_on))
+        assert 6 == len(hosts)
+        assert 6 == len(hosts_to_run_on)
 
 class AttendedCliTests(OOCliFixture):
 
@@ -778,7 +772,7 @@ class AttendedCliTests(OOCliFixture):
 
         # This is testing the install workflow so we want to make sure we
         # exit with the appropriate hint.
-        self.assertTrue('scaleup' in result.output)
+        assert 'scaleup' in result.output
         self.assert_result(result, 1)
 
 
@@ -869,8 +863,8 @@ class AttendedCliTests(OOCliFixture):
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.4',
                                              'openshift_schedulable=True')
 
-        self.assertTrue(inventory.has_section('etcd'))
-        self.assertEquals(3, len(inventory.items('etcd')))
+        assert inventory.has_section('etcd')
+        assert 3 == len(inventory.items('etcd'))
 
     #interactive multimaster: identical masters and nodes
     @patch('ooinstall.openshift_ansible.run_main_playbook')
@@ -919,7 +913,7 @@ class AttendedCliTests(OOCliFixture):
             full_line = "%s=%s" % (a, b)
             tokens = full_line.split()
             if tokens[0] == host:
-                self.assertTrue(variable in tokens[1:], "Unable to find %s in line: %s" % (variable, full_line))
+                assert variable in tokens[1:], "Unable to find %s in line: %s" % (variable, full_line)
                 return
         self.fail("unable to find host %s in inventory" % host)
 
@@ -932,9 +926,7 @@ class AttendedCliTests(OOCliFixture):
             full_line = "%s=%s" % (a, b)
             tokens = full_line.split()
             if tokens[0] == host:
-                self.assertFalse(("%s=" % variable) in full_line,
-                                 msg='%s host variable was set: %s' %
-                                 (variable, full_line))
+                assert variable + "=" not in full_line
                 return
         self.fail("unable to find host %s in inventory" % host)
 
@@ -1014,7 +1006,7 @@ class AttendedCliTests(OOCliFixture):
         self._verify_load_facts(load_facts_mock)
 
         # Make sure run playbook wasn't called:
-        self.assertEquals(0, len(run_playbook_mock.mock_calls))
+        assert 0 == len(run_playbook_mock.mock_calls)
 
         written_config = read_yaml(self.config_file)
         self._verify_config_hosts(written_config, 4)

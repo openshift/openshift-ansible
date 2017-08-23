@@ -8,6 +8,8 @@ import sys
 import unittest
 import mock
 
+import pytest
+
 # Removing invalid variable names for tests so that I can
 # keep them brief
 # pylint: disable=invalid-name,no-name-in-module
@@ -125,13 +127,13 @@ class OCEnvTest(unittest.TestCase):
         results = OCEnv.run_ansible(params, False)
 
         # Assert
-        self.assertFalse(results['changed'])
+        assert not results['changed']
         for env_var in results['results']:
             if env_var == {'name': 'DEFAULT_CERTIFICATE_DIR', 'value': '/etc/pki/tls/private'}:
                 break
         else:
             self.fail('Did not find environment variables in results.')
-        self.assertEqual(results['state'], 'list')
+        assert results['state'] == 'list'
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
@@ -311,13 +313,13 @@ class OCEnvTest(unittest.TestCase):
         results = OCEnv.run_ansible(params, False)
 
         # Assert
-        self.assertTrue(results['changed'])
+        assert results['changed']
         for env_var in results['results']:
             if env_var == {'name': 'SOMEKEY', 'value': 'SOMEVALUE'}:
                 break
         else:
             self.fail('Did not find environment variables in results.')
-        self.assertEqual(results['state'], 'present')
+        assert results['state'] == 'present'
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
@@ -431,15 +433,15 @@ class OCEnvTest(unittest.TestCase):
         results = OCEnv.run_ansible(params, False)
 
         # Assert
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['state'], 'absent')
+        assert results['changed']
+        assert results['state'] == 'absent'
 
         # Making sure our mocks were called as we expected
         mock_cmd.assert_has_calls([
             mock.call(['oc', 'get', 'dc', 'router', '-o', 'json', '-n', 'default'], None),
         ])
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback(self, mock_env_get, mock_path_exists):
@@ -449,9 +451,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda _: False
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path(self, mock_env_get, mock_path_exists):
@@ -463,9 +465,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local(self, mock_env_get, mock_path_exists):
@@ -477,9 +479,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home(self, mock_env_get, mock_path_exists):
@@ -491,9 +493,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
@@ -503,9 +505,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: None
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
@@ -517,9 +519,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
@@ -531,9 +533,9 @@ class OCEnvTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
@@ -545,4 +547,4 @@ class OCEnvTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin

@@ -8,6 +8,8 @@ import sys
 import unittest
 import mock
 
+import pytest
+
 # Removing invalid variable names for tests so that I can
 # keep them brief
 # pylint: disable=invalid-name,no-name-in-module
@@ -117,9 +119,9 @@ class OCRouteTest(unittest.TestCase):
         results = OCRoute.run_ansible(params, False)
 
         # Assert
-        self.assertFalse(results['changed'])
-        self.assertEqual(results['state'], 'list')
-        self.assertEqual(results['results'][0]['metadata']['name'], 'test')
+        assert not results['changed']
+        assert results['state'] == 'list'
+        assert results['results'][0]['metadata']['name'] == 'test'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -247,9 +249,9 @@ metadata:
         results = OCRoute.run_ansible(params, False)
 
         # Assert
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['state'], 'present')
-        self.assertEqual(results['results']['results'][0]['metadata']['name'], 'test')
+        assert results['changed']
+        assert results['state'] == 'present'
+        assert results['results']['results'][0]['metadata']['name'] == 'test'
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([
@@ -258,7 +260,7 @@ metadata:
             mock.call(['oc', 'get', 'route', 'test', '-o', 'json', '-n', 'default'], None),
         ])
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback(self, mock_env_get, mock_path_exists):
@@ -268,9 +270,9 @@ metadata:
 
         mock_path_exists.side_effect = lambda _: False
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path(self, mock_env_get, mock_path_exists):
@@ -282,9 +284,9 @@ metadata:
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local(self, mock_env_get, mock_path_exists):
@@ -296,9 +298,9 @@ metadata:
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home(self, mock_env_get, mock_path_exists):
@@ -310,9 +312,9 @@ metadata:
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
@@ -322,9 +324,9 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: None
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
@@ -336,9 +338,9 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
@@ -350,9 +352,9 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
@@ -364,4 +366,4 @@ metadata:
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin

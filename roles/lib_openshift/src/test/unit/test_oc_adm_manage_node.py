@@ -8,6 +8,8 @@ import sys
 import unittest
 import mock
 
+import pytest
+
 # Removing invalid variable names for tests so that I can
 # keep them brief
 # pylint: disable=invalid-name,no-name-in-module
@@ -103,9 +105,9 @@ class ManageNodeTest(unittest.TestCase):
         results = ManageNode.run_ansible(params, False)
 
         # returned a single node
-        self.assertTrue(len(results['results']['nodes']) == 1)
+        assert len(results['results']['nodes']) == 1
         # returned 2 pods
-        self.assertTrue(len(results['results']['nodes']['ip-172-31-49-140.ec2.internal']) == 2)
+        assert len(results['results']['nodes']['ip-172-31-49-140.ec2.internal']) == 2
 
     @mock.patch('oc_adm_manage_node.Utils.create_tmpfile_copy')
     @mock.patch('oc_adm_manage_node.ManageNode.openshift_cmd')
@@ -164,11 +166,11 @@ class ManageNodeTest(unittest.TestCase):
 
         results = ManageNode.run_ansible(params, False)
 
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['nodes'][0]['name'], 'ip-172-31-49-140.ec2.internal')
-        self.assertEqual(results['results']['nodes'][0]['schedulable'], False)
+        assert results['changed']
+        assert results['results']['nodes'][0]['name'] == 'ip-172-31-49-140.ec2.internal'
+        assert results['results']['nodes'][0]['schedulable'] == False
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback(self, mock_env_get, mock_path_exists):
@@ -178,9 +180,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda _: False
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
@@ -192,9 +194,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path(self, mock_env_get, mock_path_exists):
@@ -206,9 +208,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local(self, mock_env_get, mock_path_exists):
@@ -220,9 +222,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY3, 'py2 test only')
+    @pytest.mark.skipif(six.PY3, reason='py2 test only')
     @mock.patch('os.path.exists')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home(self, mock_env_get, mock_path_exists):
@@ -234,9 +236,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_path_exists.side_effect = lambda f: f == oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
@@ -246,9 +248,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: None
 
-        self.assertEqual(locate_oc_binary(), 'oc')
+        assert locate_oc_binary() == 'oc'
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
@@ -260,9 +262,9 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin
 
-    @unittest.skipIf(six.PY2, 'py3 test only')
+    @pytest.mark.skipif(six.PY2, reason='py3 test only')
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
@@ -274,4 +276,4 @@ class ManageNodeTest(unittest.TestCase):
 
         mock_shutil_which.side_effect = lambda _f, path=None: oc_bin
 
-        self.assertEqual(locate_oc_binary(), oc_bin)
+        assert locate_oc_binary() == oc_bin

@@ -76,34 +76,29 @@ class OOCliFixture(OOInstallFixture):
     def _verify_load_facts(self, load_facts_mock):
         """ Check that we ran load facts with expected inputs. """
         load_facts_args = load_facts_mock.call_args[0]
-        self.assertEquals(os.path.join(self.work_dir, "hosts"),
-                          load_facts_args[0])
-        self.assertEquals(os.path.join(self.work_dir,
-                                       "playbooks/byo/openshift_facts.yml"),
-                          load_facts_args[1])
+        assert os.path.join(self.work_dir, "hosts") == load_facts_args[0]
+        assert os.path.join(self.work_dir, "playbooks/byo/openshift_facts.yml") == load_facts_args[1]
         env_vars = load_facts_args[2]
-        self.assertEquals(os.path.join(self.work_dir,
-                                       '.ansible/callback_facts.yaml'),
-                          env_vars['OO_INSTALL_CALLBACK_FACTS_YAML'])
-        self.assertEqual('/tmp/ansible.log', env_vars['ANSIBLE_LOG_PATH'])
+        assert os.path.join(self.work_dir, '.ansible/callback_facts.yaml') == env_vars['OO_INSTALL_CALLBACK_FACTS_YAML']
+        assert '/tmp/ansible.log' == env_vars['ANSIBLE_LOG_PATH']
 
     def _verify_run_playbook(self, run_playbook_mock, exp_hosts_len, exp_hosts_to_run_on_len):
         """ Check that we ran playbook with expected inputs. """
         hosts = run_playbook_mock.call_args[0][1]
         hosts_to_run_on = run_playbook_mock.call_args[0][2]
-        self.assertEquals(exp_hosts_len, len(hosts))
-        self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+        assert exp_hosts_len == len(hosts)
+        assert exp_hosts_to_run_on_len == len(hosts_to_run_on)
 
     def _verify_config_hosts(self, written_config, host_count):
-        self.assertEquals(host_count, len(written_config['deployment']['hosts']))
+        assert host_count == len(written_config['deployment']['hosts'])
         for host in written_config['deployment']['hosts']:
-            self.assertTrue('hostname' in host)
-            self.assertTrue('public_hostname' in host)
+            assert 'hostname' in host
+            assert 'public_hostname' in host
             if 'preconfigured' not in host:
                 if 'roles' in host:
-                    self.assertTrue('node' in host['roles'] or 'storage' in host['roles'])
-                self.assertTrue('ip' in host)
-                self.assertTrue('public_ip' in host)
+                    assert 'node' in host['roles'] or 'storage' in host['roles']
+                assert 'ip' in host
+                assert 'public_ip' in host
 
     #pylint: disable=too-many-arguments
     def _verify_get_hosts_to_run_on(self, mock_facts, load_facts_mock,
@@ -139,7 +134,7 @@ class OOCliFixture(OOInstallFixture):
 
         if "If you want to force reinstall" in result.output:
             # verify we exited on seeing installed hosts
-            self.assertEqual(result.exit_code, 1)
+            assert result.exit_code == 1
         else:
             self.assert_result(result, 0)
             self._verify_load_facts(load_facts_mock)
@@ -148,8 +143,8 @@ class OOCliFixture(OOInstallFixture):
             # Make sure we ran on the expected masters and nodes:
             hosts = run_playbook_mock.call_args[0][1]
             hosts_to_run_on = run_playbook_mock.call_args[0][2]
-            self.assertEquals(exp_hosts_len, len(hosts))
-            self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
+            assert exp_hosts_len == len(hosts)
+            assert exp_hosts_to_run_on_len == len(hosts_to_run_on)
 
 
 #pylint: disable=too-many-arguments,too-many-branches,too-many-statements
