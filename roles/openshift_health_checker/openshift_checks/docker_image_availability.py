@@ -171,10 +171,8 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             registries = [registry]
 
         for registry in registries:
-            args = {
-                "_raw_params": self.skopeo_img_check_command + " docker://{}/{}".format(registry, image)
-            }
-            result = self.execute_module("command", args)
+            args = {"_raw_params": self.skopeo_img_check_command + " docker://{}/{}".format(registry, image)}
+            result = self.execute_module_with_retries("command", args)
             if result.get("rc", 0) == 0 and not result.get("failed"):
                 return True
 
