@@ -7,7 +7,7 @@ import unittest
 
 sys.path = [os.path.abspath(os.path.dirname(__file__) + "/../../library/")] + sys.path
 
-# pylint: disable=import-error
+# pylint: disable=wrong-import-position
 from modify_yaml import set_key  # noqa: E402
 
 

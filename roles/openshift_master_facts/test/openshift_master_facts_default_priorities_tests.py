@@ -1,3 +1,6 @@
+# pylint: disable=redefined-outer-name
+# Redefined names are fixtures names.
+
 import pytest
 
 

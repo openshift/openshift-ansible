@@ -7,6 +7,7 @@ import pytest
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), os.pardir, "lookup_plugins"))
 
+# pylint: disable=wrong-import-position
 from openshift_master_facts_default_predicates import LookupModule  # noqa: E402
 
 

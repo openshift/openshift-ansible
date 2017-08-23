@@ -12,7 +12,6 @@ import yaml
 
 # Always prefer setuptools over distutils
 from setuptools import setup, Command
-from setuptools_lint.setuptools_command import PylintCommand
 from six import string_types
 from six.moves import reload_module
 from yamllint.config import YamlLintConfig
@@ -115,37 +114,6 @@ class OpenShiftAnsibleYamlLint(Command):
         if has_errors or has_warnings:
             print('yammlint issues found')
             raise SystemExit(1)
-
-
-class OpenShiftAnsiblePylint(PylintCommand):
-    ''' Class to override the default behavior of PylintCommand '''
-
-    # Reason: This method needs to be an instance method to conform to the
-    # overridden method's signature
-    # Status: permanently disabled
-    # pylint: disable=no-self-use
-    def find_all_modules(self):
-        ''' find all python files to test '''
-        exclude_dirs = ['.tox', 'utils', 'test', 'tests', 'git']
-        modules = []
-        for match in find_files(os.getcwd(), exclude_dirs, None, r'\.py$'):
-            package = os.path.basename(match).replace('.py', '')
-            modules.append(('openshift_ansible', package, match))
-        return modules
-
-    def get_finalized_command(self, cmd):
-        ''' override get_finalized_command to ensure we use our
-        find_all_modules method '''
-        if cmd == 'build_py':
-            return self
-
-    # Reason: This method needs to be an instance method to conform to the
-    # overridden method's signature
-    # Status: permanently disabled
-    # pylint: disable=no-self-use
-    def with_project_on_sys_path(self, func, func_args, func_kwargs):
-        ''' override behavior, since we don't need to build '''
-        return func(*func_args, **func_kwargs)
 
 
 class OpenShiftAnsibleGenerateValidation(Command):
@@ -302,7 +270,6 @@ setup(
         'build_ext': UnsupportedCommand,
         'egg_info': UnsupportedCommand,
         'sdist': UnsupportedCommand,
-        'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
         'generate_validation': OpenShiftAnsibleGenerateValidation,
         'ansible_syntax': OpenShiftAnsibleSyntaxCheck,
