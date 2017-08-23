@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.7
-Release:        2%{?dist}
+Version:        3.6.173.0.8
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.8-1
+- 
+
 * Tue Aug 22 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.7-2
 - Updating default tag for enterprise installation for ASB
   (ewolinet@redhat.com)
