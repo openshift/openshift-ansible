@@ -1,0 +1,26 @@
+# Copyright 2017, Major Hayden <major@mhtx.net>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+module keepalived_ping 1.0;
+
+require {
+    type ping_exec_t;
+    type keepalived_t;
+    class process setcap;
+    class file { execute execute_no_trans getattr open read };
+}
+
+#============= keepalived_t ==============
+allow keepalived_t ping_exec_t:file { execute execute_no_trans getattr open read };
+allow keepalived_t self:process setcap;

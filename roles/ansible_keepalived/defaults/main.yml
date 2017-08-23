@@ -1,0 +1,50 @@
+---
+# Copyright 2015, Jean-Philippe Evrard <jean-philippe@evrard.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# keepalived_ubuntu_src should be either "uca", "ppa" or "native":
+# "ppa" will ensure that keepalived ppa source is installed (recommended)
+# "uca" will ensure that the Ubuntu Cloud Archive is installed (good enough)
+# "native" will not ensure any external repository is set
+#  and use what's available (not recommended, unless you defined one of the
+#  above on your hosts)
+# Please see vars/ for information about these repositories
+# TODO(evrardjp), 2017-11:to remove the conditional
+# Remove the deprecation conditional and provide a good unconditional
+# default:
+#keepalived_ubuntu_src: "uca"
+keepalived_ubuntu_src: "{{ (keepalived_uca_enable is defined and (keepalived_uca_enable | bool)) | ternary('uca','ppa') }}"
+
+# If using UCA, you may want to point with your local mirror of UCA.
+keepalived_uca_apt_repo_url: "http://ubuntu-cloud.archive.canonical.com/ubuntu"
+
+# If running keepalived with SELinux, you could need to compile your
+# rules. Please override this list with path to files to compile.
+keepalived_selinux_compile_rules:
+  - keepalived_ping
+
+# TODO(evrardjp), 2017-11:
+# Remove the deprecation conditional and provide a good unconditional
+# default:
+#keepalived_package_state: "latest"
+keepalived_package_state: "{{ ( (keepalived_use_latest_stable | default(true)) | bool) | ternary('latest','present') }}"
+
+#This is the expiration time of your package manager cache.
+#When expired, this role will require to update the package manger cache.
+#This variable will be removed when the ansible upstream bugs will be fixed.
+cache_timeout: 600
+
+keepalived_instances: []
+keepalived_sync_groups: {}
+keepalived_bind_on_non_local: False
