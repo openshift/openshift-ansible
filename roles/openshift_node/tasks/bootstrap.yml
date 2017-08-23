@@ -1,0 +1,55 @@
+---
+- name: install needed rpm(s)
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ openshift_node_ami_prep_packages }}"
+
+- name: create the directory for node
+  file:
+    state: directory
+    path: "/etc/systemd/system/{{ openshift_service_type }}-node.service.d"
+
+- name: laydown systemd override
+  copy:
+    dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service.d/override.conf"
+    content: |
+      [Unit]
+      After=cloud-init.service
+
+- name: update the sysconfig to have KUBECONFIG
+  lineinfile:
+    dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
+    line: "KUBECONFIG=/root/csr_kubeconfig"
+    regexp: "^KUBECONFIG=.*"
+
+- name: update the ExecStart to have bootstrap
+  lineinfile:
+    dest: "/usr/lib/systemd/system/{{ openshift_service_type }}-node.service"
+    line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
+    regexp: "^ExecStart=.*"
+
+- name: "systemctl enable {{ openshift_service_type }}-node"
+  systemd:
+    name: "{{ item }}"
+    enabled: no
+  with_items:
+  - "{{ openshift_service_type }}-node.service"
+  - "{{ openshift_service_type }}-master.service"
+
+- name: Check for RPM generated config marker file .config_managed
+  stat:
+    path: /etc/origin/.config_managed
+  register: rpmgenerated_config
+
+- name: Remove RPM generated config files if present
+  file:
+    path: "/etc/origin/{{ item }}"
+    state: absent
+  when:
+  - rpmgenerated_config.stat.exists
+  - openshift_deployment_type in ['openshift-enterprise', 'atomic-enterprise']
+  with_items:
+  - master
+  - node
+  - .config_managed

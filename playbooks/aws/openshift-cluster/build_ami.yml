@@ -60,24 +60,39 @@
       timeout: 300
       search_regex: OpenSSH
 
-  - name: add host to group
+  - name: add host to nodes
     add_host:
+      groups: nodes
       name: "{{ amibase.tagged_instances.0.public_dns_name }}"
-      groups: amibase
 
-- hosts: amibase
+  - name: set the user to perform installation
+    set_fact:
+      ansible_ssh_user: root
+
+- name: normalize groups
+  include: ../../byo/openshift-cluster/initialize_groups.yml
+
+- name: run the std_include
+  include: ../../common/openshift-cluster/evaluate_groups.yml
+
+- name: run the std_include
+  include: ../../common/openshift-cluster/initialize_facts.yml
+
+- name: run the std_include
+  include: ../../common/openshift-cluster/initialize_openshift_repos.yml
+
+- hosts: nodes
   remote_user: root
   tasks:
-  - name: included required variables
+  - name: get the necessary vars for ami building
     include_vars: vars.yml
+
+  - set_fact:
+      openshift_node_bootstrap: True
 
   - name: run openshift image preparation
     include_role:
-      name: openshift_ami_prep
-    vars:
-      r_openshift_ami_prep_yum_repositories: "{{ provision.build.yum_repositories }}"
-      r_openshift_ami_prep_node: atomic-openshift-node
-      r_openshift_ami_prep_master: atomic-openshift-master
+      name: openshift_node
 
 - hosts: localhost
   connection: local
@@ -90,6 +105,7 @@
       state: present
       description: "This was provisioned {{ ansible_date_time.iso8601 }}"
       name: "{{ provision.build.ami_name }}{{ lookup('pipe', 'date +%Y%m%d%H%M')}}"
+      tags: "{{ provision.build.openshift_ami_tags }}"
       wait: yes
     register: amioutput
 

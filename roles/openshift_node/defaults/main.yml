@@ -1,6 +1,64 @@
 ---
 r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+
+openshift_service_type: "{{ openshift.common.service_type }}"
+
+openshift_image_tag: ''
+
+openshift_node_ami_prep_packages:
+- "{{ openshift_service_type }}-master"
+- "{{ openshift_service_type }}-node"
+- "{{ openshift_service_type }}-docker-excluder"
+- "{{ openshift_service_type }}-sdn-ovs"
+- ansible
+- openvswitch
+- docker
+- etcd
+#- pcs
+- haproxy
+- dnsmasq
+- ntp
+- logrotate
+- httpd-tools
+- bind
+- firewalld
+- libselinux-python
+- conntrack-tools
+- openssl
+- cloud-init
+- iproute
+- python-dbus
+- PyYAML
+- yum-utils
+- python2-boto
+- python2-boto3
+- cloud-utils-growpart
+# gluster
+- glusterfs-fuse
+- heketi-client
+# nfs
+- nfs-utils
+- flannel
+- bash-completion
+# cockpit
+- cockpit-ws
+- cockpit-system
+- cockpit-bridge
+- cockpit-docker
+# iscsi
+- iscsi-initiator-utils
+# ceph
+- ceph-common
+# systemcontainer
+# - runc
+# - container-selinux
+# - atomic
+#
+openshift_deployment_type: origin
+
+openshift_node_bootstrap: False
+
 r_openshift_node_os_firewall_deny: []
 r_openshift_node_os_firewall_allow:
 - service: Kubernetes kubelet

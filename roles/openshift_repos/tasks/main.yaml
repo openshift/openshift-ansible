@@ -6,23 +6,24 @@
 
 - when: not ostree_booted.stat.exists
   block:
+  # TODO: This needs to be removed and placed into a role
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
 
   - name: Create any additional repos that are defined
-    template:
-      src: yum_repo.j2
-      dest: /etc/yum.repos.d/openshift_additional.repo
-    when:
-    - openshift_additional_repos | length > 0
-    notify: refresh cache
-
-  - name: Remove the additional repos if no longer defined
-    file:
-      dest: /etc/yum.repos.d/openshift_additional.repo
-      state: absent
-    when:
-    - openshift_additional_repos | length == 0
+    yum_repository:
+      description: "{{ item.description | default(item.name) }}"
+      name: "{{ item.name | default(item.id) }}"
+      baseurl: "{{ item.baseurl }}"
+      gpgkey: "{{ item.gpgkey | default(omit)}}"
+      gpgcheck: "{{ item.gpgcheck | default(1) }}"
+      sslverify: "{{ item.sslverify | default(1) }}"
+      sslclientkey: "{{ item.sslclientkey | default(omit) }}"
+      sslclientcert: "{{ item.sslclientcert | default(omit) }}"
+      file: "{{ item.name }}"
+      enabled: "{{ item.enabled | default('no')}}"
+    with_items: "{{ openshift_additional_repos }}"
+    when: openshift_additional_repos | length > 0
     notify: refresh cache
 
   # Singleton block

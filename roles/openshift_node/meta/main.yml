@@ -19,6 +19,7 @@ dependencies:
 - role: openshift_clock
 - role: openshift_docker
 - role: openshift_node_certificates
+  when: not openshift_node_bootstrap
 - role: openshift_cloud_provider
 - role: openshift_node_dnsmasq
   when: openshift.common.use_dnsmasq | bool
