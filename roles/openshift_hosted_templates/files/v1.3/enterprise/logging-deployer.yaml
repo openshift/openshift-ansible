@@ -204,7 +204,7 @@ items:
   -
     description: 'Specify version for logging components; e.g. for "registry.access.redhat.com/openshift3/logging-deployer:3.3.1", set version "3.3.1"'
     name: IMAGE_VERSION
-    value: "3.3.1"
+    value: "v3.3"
   -
     description: "(Deprecated) Specify the name of an existing pull secret to be used for pulling component images from an authenticated registry."
     name: IMAGE_PULL_SECRET
