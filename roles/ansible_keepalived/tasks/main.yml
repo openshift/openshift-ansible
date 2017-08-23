@@ -1,0 +1,180 @@
+---
+# Copyright 2015, Jean-Philippe Evrard <jean-philippe@evrard.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+  tags:
+    - always
+
+- include: keepalived_install.yml
+  tags:
+    - keepalived-install
+
+- include: keepalived_selinux.yml
+  when:
+    - ansible_selinux.status is defined
+    - ansible_selinux.status == "enabled"
+  tags:
+    - keepalived-config
+
+- name: Allow consuming apps to bind on non local addresses
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: 1
+    sysctl_set: yes
+    state: present
+  when: keepalived_bind_on_non_local | bool
+  tags:
+    - keepalived-install
+
+- name: configure keepalived
+  template:
+    src: keepalived.conf.j2
+    dest: "{{ keepalived_config_file_path }}"
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the tracking scripts
+  copy:
+    src: "{{ item.value.src_check_script }}"
+    dest: "{{ item.value.check_script }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_scripts | default('{}') }}"
+  when: item.value.src_check_script is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the general notification scripts
+  copy:
+    src: "{{ item.value.src_notify_script }}"
+    dest: "{{ item.value.notify_script }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_sync_groups }}"
+  when: item.value.src_notify_script is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for switching to master
+  copy:
+    src: "{{ item.value.src_notify_master }}"
+    dest: "{{ item.value.notify_master }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_sync_groups }}"
+  when: item.value.src_notify_master is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for switching to backup
+  copy:
+    src: "{{ item.value.src_notify_backup }}"
+    dest: "{{ item.value.notify_backup }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_sync_groups }}"
+  when: item.value.src_notify_backup is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for failures
+  copy:
+    src: "{{ item.value.src_notify_fault }}"
+    dest: "{{ item.value.notify_fault }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_sync_groups }}"
+  when: item.value.src_notify_fault is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the general notification scripts (instances)
+  copy:
+    src: "{{ item.value.src_notify_script }}"
+    dest: "{{ item.value.notify_script }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_instances }}"
+  when: item.value.src_notify_script is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for switching to master (instances)
+  copy:
+    src: "{{ item.value.src_notify_master }}"
+    dest: "{{ item.value.notify_master }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_instances }}"
+  when: item.value.src_notify_master is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for switching to backup (instances)
+  copy:
+    src: "{{ item.value.src_notify_backup }}"
+    dest: "{{ item.value.notify_backup }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_instances }}"
+  when: item.value.src_notify_backup is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for stopping vrrp (instances)
+  copy:
+    src: "{{ item.value.src_notify_stop }}"
+    dest: "{{ item.value.notify_stop }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_instances }}"
+  when: item.value.src_notify_stop is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Dropping the notification scripts for failures (instances)
+  copy:
+    src: "{{ item.value.src_notify_fault }}"
+    dest: "{{ item.value.notify_fault }}"
+    mode: "0755"
+  with_dict: "{{ keepalived_instances }}"
+  when: item.value.src_notify_fault is defined
+  tags:
+    - keepalived-config
+  notify:
+    - restart keepalived
+
+- name: Ensuring keepalived is enabled
+  service:
+    name: "{{ keepalived_service_name }}"
+    enabled: "yes"

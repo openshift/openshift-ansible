@@ -1,0 +1,83 @@
+---
+# Copyright 2015, Jean-Philippe Evrard <jean-philippe@evrard.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Add the keepalived through ppa
+  apt_key:
+    id: "{{ keepalived_ppa_keyid }}"
+    keyserver: "{{ keepalived_ppa_keyserver }}"
+    state: present
+  when:
+    - ansible_pkg_mgr == 'apt'
+    - keepalived_ubuntu_src == "ppa"
+  tags:
+    - keepalived-apt-keys
+
+- name: Add Ubuntu Cloud Archive keyring
+  apt:
+    pkg: ubuntu-cloud-keyring
+    state: "{{ keepalived_package_state }}"
+  when:
+    - ansible_pkg_mgr == 'apt'
+    - keepalived_ubuntu_src == "uca"
+  tags:
+    - keepalived-apt-keys
+
+- name: Add the keepalived apt repository
+  apt_repository:
+    repo: "{{ (keepalived_ubuntu_src == 'ppa') | ternary(keepalived_ppa_repo, keepalived_uca_repo) }}"
+    update_cache: True
+    state: present
+  when:
+    - ansible_pkg_mgr == 'apt'
+    - keepalived_ubuntu_src != "native"
+  tags:
+    - keepalived-repo
+
+- name: Check if keepalived is already installed
+  package:
+    name: "{{ keepalived_package_name }}"
+    state: present
+  register: check_if_present
+  check_mode: yes
+
+- name: Prevent keepalived from starting on install
+  copy:
+    dest: "{{ prevent_start_file }}"
+    content: "{{ prevent_start_file_content }}"
+  when:
+    - ansible_os_family | lower == 'debian'
+    - check_if_present | changed
+  tags:
+    - keepalived-prevent-start
+
+- name: install keepalived
+  package:
+    name: "{{ keepalived_package_name }}"
+    state: "{{ keepalived_package_state }}"
+    update_cache: "{{ (ansible_pkg_mgr == 'apt') | ternary('yes', omit) }}"
+    cache_valid_time: "{{ (ansible_pkg_mgr == 'apt') | ternary(cache_timeout, omit) }}"
+  tags:
+    - keepalived-apt-packages
+
+- name: Revert keepalived start prevention
+  file:
+    dest: "{{ prevent_start_file }}"
+    state: absent
+  when:
+    - ansible_os_family | lower == 'debian'
+    - check_if_present | changed
+  tags:
+    - keepalived-config
+    - keepalived-prevent-start

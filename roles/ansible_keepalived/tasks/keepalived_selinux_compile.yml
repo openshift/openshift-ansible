@@ -1,0 +1,51 @@
+---
+# Copyright 2017, Major Hayden <major@mhtx.net>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Create directory for compiling SELinux role
+  file:
+    path: "/tmp/ansible-keepalived-selinux-{{ selinux_policy_name }}"
+    state: directory
+    mode: '0755'
+  when:
+    - selinux_policy_name not in selinux_modules.stdout
+
+- name: Deploy SELinux policy source file
+  copy:
+    src: "{{ selinux_policy_name }}.te"
+    dest: "/tmp/ansible-keepalived-selinux-{{ selinux_policy_name }}/{{ selinux_policy_name }}.te"
+    owner: root
+    group: root
+    mode: "0755"
+  when:
+    - selinux_policy_name not in selinux_modules.stdout
+
+- name: Compile and load SELinux module
+  command: "{{ item }}"
+  args:
+    creates: "/etc/selinux/targeted/active/modules/400/{{ selinux_policy_name }}/cil"
+    chdir: "/tmp/ansible-keepalived-selinux-{{ selinux_policy_name }}"
+  with_items:
+    - checkmodule -M -m -o {{ selinux_policy_name }}.mod {{ selinux_policy_name }}.te
+    - semodule_package -o {{ selinux_policy_name }}.pp -m {{ selinux_policy_name }}.mod
+    - semodule -i {{ selinux_policy_name }}.pp
+  when:
+    - selinux_policy_name not in selinux_modules.stdout
+
+- name: Remove temporary directory
+  file:
+    path: "/tmp/ansible-keepalived-selinux-{{ selinux_policy_name }}"
+    state: absent
+  when:
+    - selinux_policy_name not in selinux_modules.stdout
