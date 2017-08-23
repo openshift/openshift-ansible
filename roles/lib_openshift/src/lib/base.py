@@ -464,13 +464,12 @@ class Utils(object):
     @staticmethod
     def openshift_installed():
         ''' check if openshift is installed '''
-        import yum
+        import rpm
 
-        yum_base = yum.YumBase()
-        if yum_base.rpmdb.searchNevra(name='atomic-openshift'):
-            return True
+        transaction_set = rpm.TransactionSet()
+        rpmquery = transaction_set.dbMatch("name", "atomic-openshift")
 
-        return False
+        return rpmquery.count() > 0
 
     # Disabling too-many-branches.  This is a yaml dictionary comparison function
     # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
