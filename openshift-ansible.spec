@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.128
+Version:        3.4.129
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.129-1
+- 
+
 * Thu Aug 17 2017 Scott Dodson <sdodson@redhat.com> 3.4.128-1
 - Use absolute path when unexcluding (Sergi Jimenez)
 - Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1474246 (Sergi Jimenez)
