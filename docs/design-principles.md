@@ -18,7 +18,7 @@ minimize role dependencies in favor of role modularity and re-usability
 by replacing a role invocation with a sequence of role invocations and its
 dependencies, orchestrating dependencies on a play level
 
-* TODO: **Action based roles**:
+* [Action based roles](proposals/action_based_roles.md):
 some roles may provide a set of actions that share common resources (e.g.
 configuration files, templates, handlers), creating a role for each action
 would result in a duplication of resources which we are trying to avoid
