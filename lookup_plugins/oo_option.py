@@ -25,7 +25,7 @@ try:
 except ImportError:
     # ansible-1.9.x
     class LookupBase(object):
-        def __init__(self, basedir=None, runner=None, **kwargs):
+        def __init__(self, basedir=None, runner=None, **_):
             self.runner = runner
             self.basedir = self.runner.basedir
 
@@ -40,23 +40,11 @@ except ImportError:
 class LookupModule(LookupBase):
     ''' oo_option lookup plugin main class '''
 
-    # Reason: disable unused-argument because Ansible is calling us with many
-    #     parameters we are not interested in.
-    #     The lookup plugins of Ansible have this kwargs “catch-all” parameter
-    #     which is not used
-    # Status: permanently disabled unless Ansible API evolves
-    # pylint: disable=unused-argument
-    def __init__(self, basedir=None, **kwargs):
+    def __init__(self, basedir=None, **_):
         ''' Constructor '''
         self.basedir = basedir
 
-    # Reason: disable unused-argument because Ansible is calling us with many
-    #     parameters we are not interested in.
-    #     The lookup plugins of Ansible have this kwargs “catch-all” parameter
-    #     which is not used
-    # Status: permanently disabled unless Ansible API evolves
-    # pylint: disable=unused-argument
-    def run(self, terms, variables, **kwargs):
+    def run(self, terms, variables, **_):
         ''' Main execution path '''
 
         ret = []
