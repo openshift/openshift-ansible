@@ -37,6 +37,9 @@
     hostnames:
     - "{{ docker_registry_service.results.clusterip }}"
     - "{{ docker_registry_route.results[0].spec.host }}"
+    - "{{ openshift_hosted_registry_name }}.default.svc"
+    - "{{ openshift_hosted_registry_name }}.default.svc.{{ openshift.common.dns_domain }}"
+    - "{{ openshift_hosted_registry_routehost }}"
     cert: "{{ docker_registry_cert_path }}"
     key: "{{ docker_registry_key_path }}"
     expire_days: "{{ openshift_hosted_registry_cert_expire_days if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool else omit }}"
