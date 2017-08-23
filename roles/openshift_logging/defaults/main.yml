@@ -8,6 +8,7 @@ openshift_logging_labels: {}
 openshift_logging_label_key: ""
 openshift_logging_label_value: ""
 openshift_logging_install_logging: True
+openshift_logging_purge_logging: False
 openshift_logging_image_pull_secret: "{{ openshift_hosted_logging_image_pull_secret | default('') }}"
 
 openshift_logging_curator_default_days: 30

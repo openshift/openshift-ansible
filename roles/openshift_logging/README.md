@@ -15,12 +15,11 @@ to the list of persisted [node labels](https://docs.openshift.org/latest/install
 ###Required vars:
 
 - `openshift_logging_install_logging`: When `True` the `openshift_logging` role will install Aggregated Logging.
-- `openshift_logging_upgrade_logging`:  When `True` the `openshift_logging` role will upgrade Aggregated Logging.
 
-When both `openshift_logging_install_logging` and `openshift_logging_upgrade_logging` are `False` the `openshift_logging` role will uninstall Aggregated Logging.
+When `openshift_logging_install_logging` is set to `False` the `openshift_logging` role will uninstall Aggregated Logging.
 
 ###Optional vars:
-
+- `openshift_logging_purge_logging`: When `openshift_logging_install_logging` is set to 'False' to trigger uninstalation and `openshift_logging_purge_logging` is set to 'True', it will completely and irreversibly remove all logging persistent data including PVC. Defaults to 'False'.
 - `openshift_logging_image_prefix`: The prefix for the logging images to use. Defaults to 'docker.io/openshift/origin-'.
 - `openshift_logging_image_version`: The image version for the logging images to use. Defaults to 'latest'.
 - `openshift_logging_use_ops`: If 'True', set up a second ES and Kibana cluster for infrastructure logs. Defaults to 'False'.
