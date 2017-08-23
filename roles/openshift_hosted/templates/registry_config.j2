@@ -60,7 +60,7 @@ storage:
   gcs:
     bucket: {{ openshift_hosted_registry_storage_gcs_bucket }}
 {%   if openshift_hosted_registry_storage_gcs_keyfile is defined %}
-    keyfile: {{ openshift_hosted_registry_storage_gcs_keyfile }}
+    keyfile: /etc/registry/gcs.json
 {%   endif -%}
 {%   if openshift_hosted_registry_storage_gcs_rootdirectory is defined %}
     rootdirectory: {{ openshift_hosted_registry_storage_gcs_rootdirectory }}
