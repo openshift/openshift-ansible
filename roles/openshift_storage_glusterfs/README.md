@@ -55,7 +55,7 @@ defined:
 
 | Name              | Default value | Description                             |
 |-------------------|---------------|-----------------------------------------|
-| glusterfs_devices | None          | A list of block devices that will be completely managed as part of a GlusterFS cluster. There must be at least one device listed. Each device must be bare, e.g. no partitions or LVM PVs. **Example:** '[ "/dev/sdb" ]'
+| glusterfs_devices | None          | A list of block devices that will be completely managed as part of a GlusterFS cluster. There must be at least one device listed. Each device must be bare, e.g. no partitions or LVM PVs. **Example:** `glusterfs_devices=[ "/dev/sdb" ]`
 
 In addition, each host may specify the following variables to further control
 their configuration as GlusterFS nodes:
