@@ -53,22 +53,22 @@
 - stat: path=/etc/sysconfig/docker
   register: docker_check
 
-- name: Set registry params
+- name: Comment old registry params in /etc/sysconfig/docker
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
-    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
-  when: item.reg_fact_val != '' and docker_check.stat.isreg is defined and docker_check.stat.isreg
+    line: "#{{ item.reg_conf_var }}=''# Moved to {{ containers_registries_conf_path }}"
   with_items:
   - reg_conf_var: ADD_REGISTRY
-    reg_fact_val: "{{ docker_additional_registries | default(None, true)}}"
-    reg_flag: --add-registry
   - reg_conf_var: BLOCK_REGISTRY
-    reg_fact_val: "{{ docker_blocked_registries| default(None, true) }}"
-    reg_flag: --block-registry
   - reg_conf_var: INSECURE_REGISTRY
-    reg_fact_val: "{{ docker_insecure_registries| default(None, true) }}"
-    reg_flag: --insecure-registry
+  notify:
+  - restart docker
+
+- name: Place additional/blocked/insecure registies in /etc/containers/registries.conf
+  template:
+    dest: "{{ containers_registries_conf_path }}"
+    src: registries.conf
   notify:
   - restart docker
 
