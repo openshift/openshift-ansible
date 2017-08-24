@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.105.0%{?dist}
+Release:        0.106.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.106.0
+- Add dotnet 2.0 to v3.6 (sdodson@redhat.com)
+- Add dotnet 2.0 to v3.7 (sdodson@redhat.com)
+- Update v3.6 content (sdodson@redhat.com)
+- Update all image streams and templates (sdodson@redhat.com)
+- Passing memory and cpu limit for ops ES install (ewolinet@redhat.com)
+- If IP4_NAMESERVERS are unset then pull the value from /etc/resolv.conf
+  (sdodson@redhat.com)
+- New tuned profile hierarchy. (jmencak@redhat.com)
+- GlusterFS: add minor README note for #5071 (jarrpa@redhat.com)
+- Update cfme templates to auto-generate postgresql password
+  https://bugzilla.redhat.com/show_bug.cgi?id=1461973 (simaishi@redhat.com)
+
 * Wed Aug 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.105.0
 - Fix generated content (sdodson@redhat.com)
 - Switch to migrating one host and forming a new cluster (sdodson@redhat.com)
