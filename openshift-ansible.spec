@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.6.173.0.13
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 24 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.13-2
+- Add dotnet 2.0 to v3.6 (sdodson@redhat.com)
+- Update v3.6 content (sdodson@redhat.com)
+- Backport to 3.6 - Bug 1468987: kibana_proxy OOM (jwozniak@redhat.com)
+- Passing memory and cpu limit for ops ES install (ewolinet@redhat.com)
+
 * Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.13-1
 - If IP4_NAMESERVERS are unset then pull the value from /etc/resolv.conf
   (sdodson@redhat.com)
