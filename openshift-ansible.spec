@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.13
-Release:        2%{?dist}
+Version:        3.6.173.0.14
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.14-1
+- 
+
 * Thu Aug 24 2017 Scott Dodson <sdodson@redhat.com> 3.6.173.0.13-2
 - Add dotnet 2.0 to v3.6 (sdodson@redhat.com)
 - Update v3.6 content (sdodson@redhat.com)
