@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 	"testing"
@@ -25,8 +27,22 @@ func (p PlaybookTest) Run(t *testing.T) {
 	// A PlaybookTest is intended to be run in parallel with other tests.
 	t.Parallel()
 
-	cmd := exec.Command("ansible-playbook", "-i", "/dev/null", p.Path)
+	// we need to run ansible-playbook with the repository base dir as cwd
+	_, thisFile, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("could not determine base directory")
+	}
+	repoBase := path.Join(path.Dir(thisFile), "../../..")
+
+	// determine the playbook path relative to repoBase
+	playbook, err := filepath.Abs(p.Path)
+	failOnError(err, t)
+	playbook, err = filepath.Rel(repoBase, playbook)
+	failOnError(err, t)
+	cmd := exec.Command("ansible-playbook", "-i", "/dev/null", playbook)
+	cmd.Dir = repoBase
 	cmd.Env = append(os.Environ(), "ANSIBLE_FORCE_COLOR=1")
+
 	b, err := cmd.CombinedOutput()
 
 	// Check exit code.
@@ -92,8 +108,13 @@ func (p PlaybookTest) logCmdAndOutput(t *testing.T, cmd *exec.Cmd, output []byte
 	}
 	output = bytes.Join(lines, []byte("\n"))
 	dir, err := filepath.Abs(cmd.Dir)
-	if err != nil {
-		panic(err)
-	}
+	failOnError(err, t)
 	t.Logf("\n$ (cd %s && %s)\n%s", dir, strings.Join(cmd.Args, " "), output)
+}
+
+// failOnError fatals the test if there is an error. Reduces clutter from if err != nil.
+func failOnError(err error, t *testing.T) {
+	if err != nil {
+		t.Fatal(err)
+	}
 }
