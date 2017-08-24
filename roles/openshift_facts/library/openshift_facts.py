@@ -193,7 +193,9 @@ def hostname_valid(hostname):
     """
     if (not hostname or
             hostname.startswith('localhost') or
-            hostname.endswith('localdomain')):
+            hostname.endswith('localdomain') or
+            # OpenShift will not allow a node with more than 63 chars in name.
+            len(hostname) > 63):
         return False
 
     return True

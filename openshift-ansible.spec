@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.104.0%{?dist}
+Release:        0.105.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.105.0
+- Fix generated content (sdodson@redhat.com)
+- Switch to migrating one host and forming a new cluster (sdodson@redhat.com)
+- First attempt at provisioning. (kwoodson@redhat.com)
+- First attempt at creating the cert signer. (kwoodson@redhat.com)
+- remove out of scope variable from exception message
+  (maxamillion@fedoraproject.org)
+- raise AosVersionException if no expected packages found by dnf query
+  (maxamillion@fedoraproject.org)
+- Fix missing space in calico ansible roles (djosborne10@gmail.com)
+- Allow GCS object storage to be configured (ccoleman@redhat.com)
+- add dnf support to roles/openshift_health_checker/library/aos_version.py
+  (maxamillion@fedoraproject.org)
+- Add hostname/nodename length check (mgugino@redhat.com)
+- Refactor openshift_hosted's docker-registry route setup (dms@redhat.com)
+- bug 1468987: kibana_proxy OOM (jwozniak@redhat.com)
+
 * Sun Aug 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.104.0
 - Ensure that openshift_node_facts has been called for dns_ip
   (sdodson@redhat.com)

@@ -2,7 +2,7 @@
 - include: s3.yml
   when: openshift.hosted.registry.storage.provider == 's3'
 
-- name: Ensure the resgistry secret exists
+- name: Ensure the registry secret exists
   oc_secret:
     name: "{{ registry_config_secret_name }}"
     state: present
@@ -10,6 +10,19 @@
     - path: /tmp/config.yml
       data: "{{ lookup('template', 'registry_config.j2') }}"
   register: registry_config_out
+  when: openshift_hosted_registry_storage_gcs_keyfile is not defined
+
+- name: Ensure the registry secret exists for GCS
+  oc_secret:
+    name: "{{ registry_config_secret_name }}"
+    state: present
+    contents:
+    - path: /tmp/config.yml
+      data: "{{ lookup('template', 'registry_config.j2') }}"
+    - path: /tmp/gcs.json
+      data: "{{ lookup('file', openshift_hosted_registry_storage_gcs_keyfile) | string }}"
+  register: registry_config_out
+  when: openshift_hosted_registry_storage_gcs_keyfile is defined
 
 - name: Add secrets to registry service account
   oc_serviceaccount_secret:

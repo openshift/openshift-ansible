@@ -218,6 +218,20 @@
   - restart master api
   - restart master controllers
 
+- name: modify controller args
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    edits:
+    - key: kubernetesMasterConfig.controllerArguments.cluster-signing-cert-file
+      value:
+      - /etc/origin/master/ca.crt
+    - key: kubernetesMasterConfig.controllerArguments.cluster-signing-key-file
+      value:
+      - /etc/origin/master/ca.key
+  notify:
+  - restart master controllers
+  when: openshift_master_bootstrap_enabled | default(False)
+
 - include: set_loopback_context.yml
   when:
   - openshift.common.version_gte_3_2_or_1_2
@@ -366,3 +380,7 @@
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
   when:
   - l_install_result | changed
+
+- name: node bootstrap settings
+  include: bootstrap.yml
+  when: openshift_master_bootstrap_enabled | default(False)
