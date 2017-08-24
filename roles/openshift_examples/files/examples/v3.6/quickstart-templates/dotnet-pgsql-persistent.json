@@ -455,7 +455,7 @@
             "displayName": ".NET builder",
             "required": true,
             "description": "The image stream tag which is used to build the code.",
-            "value": "dotnet:1.1"
+            "value": "dotnet:2.0"
         },
         {
             "name": "NAMESPACE",
@@ -475,7 +475,7 @@
             "name": "SOURCE_REPOSITORY_REF",
             "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "rel/1.1-example"
+            "value": "rel/2.0-example"
         },
         {
             "name": "CONTEXT_DIR",
@@ -485,7 +485,7 @@
         {
             "name": "DOTNET_STARTUP_PROJECT",
             "displayName": "Startup Project",
-            "description": "Set this to the folder containing your startup project.",
+            "description": "Set this to a project file (e.g. csproj) or a folder containing a single project file.",
             "value": "samples/MusicStore"
         },
         {
