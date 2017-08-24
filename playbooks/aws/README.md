@@ -1,9 +1,5 @@
 # AWS playbooks
 
-Parts of this playbook directory are meant to be driven by [`bin/cluster`](../../bin),
-which is community supported and use is considered **deprecated**.
-
-
 ## Provisioning
 
 With recent desire for provisioning from customers and developers alike, the AWS

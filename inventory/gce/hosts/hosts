@@ -1,1 +1,0 @@
-localhost ansible_connection=local ansible_become=no ansible_python_interpreter='/usr/bin/env python2'

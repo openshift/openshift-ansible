@@ -28,12 +28,6 @@ These are plugins used in playbooks and roles:
 
 ```
 .
-├── bin                 [DEPRECATED] Contains the `bin/cluster` script, a
-│                       wrapper around the Ansible playbooks that ensures proper
-│                       configuration, and facilitates installing, updating,
-│                       destroying and configuring OpenShift clusters.
-│                       Note: this tool is kept in the repository for legacy
-│                       reasons and will be removed at some point.
 └── utils               Contains the `atomic-openshift-installer` command, an
                         interactive CLI utility to install OpenShift across a
                         set of hosts.
