@@ -25,8 +25,6 @@
   hosts: cluster_hosts
   gather_facts: False
   become: true
-  pre_tasks:
-    - include: pre_tasks.yml
   roles:
     - role: hostnames
 
@@ -50,8 +48,6 @@
   hosts: dns
   gather_facts: False
   become: true
-  pre_tasks:
-    - include: pre_tasks.yml
   roles:
     - role: dns-views
     - role: infra-ansible/roles/dns-server
@@ -60,8 +56,6 @@
   hosts: localhost
   gather_facts: True
   become: False
-  pre_tasks:
-    - include: pre_tasks.yml
   roles:
     - role: dns-records
     - role: infra-ansible/roles/dns

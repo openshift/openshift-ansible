@@ -12,3 +12,8 @@
     - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
     - { role: docker, tags: 'docker' }
     - { role: openshift-prep, tags: 'openshift-prep' }
+
+- hosts: localhost:cluster_hosts
+  become: False
+  tasks:
+    - include: pre_tasks.yml
