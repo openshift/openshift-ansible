@@ -5,13 +5,13 @@
 Each role consists of a set of tasks and variables read/set in some of the tasks.
 Some of the tasks can store their results into registered variables,
 e.g. store stdout of a docker pull command.
-Some of the tasks may be run only under certain conditions that are generated
+Some of the tasks may be run only under certain conditions that are known
 outside of a role, e.g. pull images only if a deployment is containerized.
 Some of the tasks are run only if a certain variable is defined,
 e.g. add additional Kubelet arguments into the `node-config.yml`
 if `kubelet_additional_args` inventory variable is defined.
 
-Some roles work with a lot of variables that from a point of view of a role are uninvited citizens.
+Some roles work with a lot of variables that from a point of view of a role make its maintenance more expensive.
 Some of the variables are set inside a role, some of them are set outside of a role.
 The variables outside of a role are hard to track, hard to determine their value or
 a condition under which they are defined. These unknown facts make a role harder
@@ -19,7 +19,7 @@ to maintain, harder to be closed with respect to variables and to become practic
 
 ## Proposal
 
-Make a role that conforms to the following conditions:
+Make sure roles conform to the following conditions:
 * none of the variables read/set inside a role are global
 * all variables inside a role are `r_` (`r` standing for a role) and/or `__` (for private) prefixed
 * all values are propagated to a role through `r_` prefixed variables only
@@ -69,10 +69,14 @@ The file is to be structured in the following way:
 
 #: description="Set to deploy containerized node"
 r_openshift_node_is_containerized: "{{ __openshift_node_is_containerized }}"
-__openshift_node_is_containerized: false
-
 #: description="Set to deploy a node over AH"
 r_openshift_node_is_atomic: "{{ __openshift_node_is_atomic }}"
+```
+
+`vars/main.yml`:
+```yaml
+# default values for role variables
+__openshift_node_is_containerized: false
 __openshift_node_is_atomic: false
 ```
 
@@ -187,6 +191,55 @@ All variables set inside a role has to be prefixed with `__` string.
 The only exception are role variables that are read outside of a role after
 the role finishes.
 
+If a local variable inside a role is read right after it is set (e.g. register variable),
+it can be prefixed just with `__` string. E.g.:
+
+```yaml
+- name: pull node image
+  command: >
+    docker pull {{ r_openshift_node_image_name }}:{{ r_openshift_node_image_tag }}
+  register: __docker_pull_result
+
+- name: check if the a docker image was pulled
+  debug:
+    msg: "Unable to pull a docker image"
+  fail: __docker_pull_result.rc > 0
+```
+
+After the register variable is set, it is considered valid only within a file it was set.
+If a different role reads the same local variable (e.g. `__docker_pull_result`),
+it is the role responsibility to set it before it is read.
+So one can avoid a situation where one role sets a variable and another role
+reads it without initializing.
+
+If a local variable is read among at least two role files (e.g. task files, template files),
+it needs to be fully prefixed, i.e. `__<role>_<var>`. E.g.
+
+`tasks/main.yml`
+```yaml
+- name: "Set template var"
+  set_fact:
+    __<role>_storage_plugins:
+      - nfs
+      - glusterfs
+      - zfs
+...
+- name: create a configuration file
+  template:
+    src: config.yml.j2
+    dest: config.yml
+```
+
+`templates/config.yml.j2`
+```yaml
+...
+storagePlugins:
+{% for plugin in __<role>_storage_plugins -%}
+- {{ plugin }}
+{% endfor %}
+...
+```
+
 ### Role invocation
 
 Based on a role caller some role variables are always defined,
@@ -223,6 +276,33 @@ The `j` denotes a number of role variables that are set to non-role variables
 that does not have to be defined.
 The `n` denotes the total number of all role variables that are set.
 
+### Outstanding questions
+
+The pattern
+
+```yaml
+- include_role:
+    name: <role>
+  vars:
+    r_<role>_<value>: "{{ inventory_<var> [| default(<default>)] }}"
+```
+
+obscures role's variables. To investigate a role's behavior, one has to look
+inside plays to figure out what's actually being passed into roles.
+
+One should use inventory/group_vars to override the default role variables instead
+of setting the role variables with non-role variables withing plays so:
+
+1) we don't rely on a specific play to setup the role 'just right' in order for the role to do it's work
+2) roles are as independent of the play calling it as possible (plays for the most part should just 'call the role')
+3) we can provide a pattern where users can easily modify the behavior of roles and plays in case the plays are not user-modifiable
+
+Possible resolution:
+
+* drop the concept or `r_<role>_<variable>` role variables in favour of `<role>_<variable>` pattern.
+* make sure a role uses only `<role>_` and `__<role>_` prefixed variables
+* consolidate all relevant roles into action-based roles as discussed in https://github.com/openshift/openshift-ansible/pull/5172 so we minimize a need for setting role variables to values from a different role
+
 ### Example
 
 **Before applying the proposal**:
@@ -246,16 +326,20 @@ The `n` denotes the total number of all role variables that are set.
 
 **After:**
 
-`openshift_node/defaults/main.yml`:
+`openshift_node/vars/main.yml`:
 ```yaml
 __omit_str: "__{{ omit.split('__')[1] }}__"
+# default values for role variables
+__openshift_node_image_name: openshift-node
+__openshift_node_image_tag: v3.6.2
+```
 
+`openshift_node/defaults/main.yml`:
+```yaml
 # description="OpenShift node image name"
 r_openshift_node_image_name: "{{ __openshift_node_image_name }}"
-__openshift_node_image_name: openshift-node
 # description="OpenShift node image tag"
 r_openshift_node_image_tag: "{{ __openshift_node_image_tag }}"
-__openshift_node_image_tag: v3.6.2
 ...
 ```
 
