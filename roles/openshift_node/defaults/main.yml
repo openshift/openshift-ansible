@@ -1,4 +1,88 @@
 ---
+# The variables should be decomposed into the following groups (in the order)
+# - unconditionally used variables, i.e. required variable and variables used in conditions
+#   e.g. r_openshift_node_service_type, r_openshift_node_deployment_type, r_openshift_node_is_containerized
+# - variables used only when defined, e.g. {{ var if var is defined else '' }}
+# - conditionally used variables, i.e. variables that need to be defined only under certain condition(s)
+
+# List of required undefined variables:
+#: name=r_openshift_node_deployment_type, required=true, description="Deployment type", choices=['origin', 'openshift-enterprise']
+#: name=r_openshift_node_service_type, required=true, description="System service type"
+#: name=r_openshift_node_image_tag, required=true, description="Node image tag to pull for containerized deployment"
+#: name=r_openshift_node_config_base, required=true, description="Node configuration base directory, e.g. /etc/origin"
+#: name=r_openshift_node_dns_domain, required=true
+#: name=r_openshift_node_iptables_sync_period, required=true
+#: name=r_openshift_node_registry_url, required=true
+#: name=r_openshift_node_hostname, required=true
+#: name=r_openshift_node_sdn_mtu, required=true
+#: name=r_openshift_node_nodename, required=true
+#: name=r_openshift_node_data_dir, required=true
+#: name=r_openshift_node_proxy_mode, required=true
+#: name=r_openshift_node_local_quota_per_fsgroup, required=true
+#: name=r_openshift_node_image, description="Node image name to pull for containerized deployment"
+#: name=r_openshift_node_system_image, description="Node system image to pull for system containers deployment"
+#: name=r_openshift_node_ovs_image, description="OVS image to pull for containerized deployment"
+#: name=r_openshift_node_ovs_system_image, description="OVS system image to pull for containerized deployment"
+#: name=r_openshift_node_master_api_url, description="Master API URL to query", required=true
+
+# List of optional undefined variables
+#: name=r_openshift_node_system_images_registry, description="System image registry to pull images from", required_when=["r_openshift_node_is_containerized | bool", "r_openshift_node_is_node_system_container | bool"], required_when=["r_openshift_node_is_containerized | bool", "r_openshift_node_is_openvswitch_system_container | bool", "r_openshift_node_use_openshift_sdn | bool"]
+#: name=r_openshift_node_master_sdn_cluster_network_cidr, description="SDN Cluster network CIDR set by the master component", required_when=["r_openshift_node_http_proxy != ''"]
+#: name=r_openshift_node_portal_net, required_when=["r_openshift_node_http_proxy != ''"], description="Portal net"
+#: name=r_openshift_node_dns_ip
+#: name=r_openshift_node_sdn_network_plugin_name, required_when="r_openshift_node_use_openshift_sdn | bool or r_openshift_node_use_nuage | bool or r_openshift_node_use_contiv | bool"
+#: name=r_openshift_node_ip, required_when="r_openshift_node_set_node_ip | bool"
+#: name=r_openshift_node_min_tls_version
+#: name=r_openshift_node_cipher_suites
+#: name=r_openshift_node_port_range
+
+#: description="Set to deploy containerized node"
+r_openshift_node_is_containerized: false
+#: description="Set to deploy a node over AH"
+r_openshift_node_is_atomic: false
+#: description="Set to disable a swap to preserve quality of service guarantees"
+r_openshift_node_disable_swap: true
+#: description="Node package version to install for package based deployment"
+r_openshift_node_pkg_version: ''
+#: description="Default docker service name, e.g. docker, container-engine"
+r_openshift_node_docker_service_name: docker
+#: description="AWS access key"
+r_openshift_node_cloudprovider_aws_access_key: ''
+#: description="AWS secret key"
+r_openshift_node_cloudprovider_aws_secret_key: ''
+#: description="Cloud provider kind, e.g. aws"
+r_openshift_node_cloudprovider_kind: ''
+#: description="Optionall Kubelet arguments"
+r_openshift_node_kubelet_args: "{{ None }}"
+#: description="HTTP proxy URL address"
+r_openshift_node_http_proxy: ''
+#: description="HTTPS proxy URL address", required_when=["r_openshift_node_http_proxy != ''"]
+r_openshift_node_https_proxy: ''
+#: description="Set to deploy node system container"
+r_openshift_node_is_node_system_container: false
+#: description="Set to deploy OVS system container"
+r_openshift_node_is_openvswitch_system_container: false
+#: description="No Proxy", required_when=["r_openshift_node_http_proxy != ''"]
+r_openshift_node_no_proxy: []
+#: description="Set to use OpenShift SDN"
+r_openshift_node_use_openshift_sdn: true
+#: description="Set the default node debug level"
+r_openshift_node_debug_level: 2
+#: description="Set node environment variables"
+r_openshift_node_env_vars: {}
+#: description="List if additional storage plugins to deploy"
+r_openshift_node_storage_plugin_deps: []
+
+r_openshift_node_version_gte_3_6: true
+r_openshift_node_version_gte_3_3_or_1_3: true
+
+r_openshift_node_use_nuage: false
+r_openshift_node_use_contiv: false
+r_openshift_node_use_calico: false
+r_openshift_node_use_dnsmasq: false
+r_openshift_node_set_node_ip: true
+r_openshift_node_docker_gte_1_10: false
+
 r_openshift_node_firewall_enabled: True
 r_openshift_node_use_firewalld: False
 r_openshift_node_os_firewall_deny: []
@@ -11,13 +95,13 @@ r_openshift_node_os_firewall_allow:
   port: 443/tcp
 - service: OpenShift OVS sdn
   port: 4789/udp
-  cond: openshift.common.use_openshift_sdn | default(true) | bool
+  cond: "{{ r_openshift_node_use_openshift_sdn | bool }}"
 - service: Calico BGP Port
   port: 179/tcp
-  cond: "{{ openshift.common.use_calico | bool }}"
+  cond: "{{ r_openshift_node_use_calico | bool }}"
 - service: Kubernetes service NodePort TCP
-  port: "{{ openshift_node_port_range | default('') }}/tcp"
-  cond: "{{ openshift_node_port_range is defined }}"
+  port: "{{ r_openshift_node_port_range | default('') }}/tcp"
+  cond: "{{ r_openshift_node_port_range is defined }}"
 - service: Kubernetes service NodePort UDP
-  port: "{{ openshift_node_port_range | default('') }}/udp"
-  cond: "{{ openshift_node_port_range is defined }}"
+  port: "{{ r_openshift_node_port_range | default('') }}/udp"
+  cond: "{{ r_openshift_node_port_range is defined }}"

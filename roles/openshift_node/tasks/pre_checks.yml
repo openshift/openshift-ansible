@@ -1,0 +1,151 @@
+---
+# This file is automatically generate. Do not edit it manually.
+- name: "Fail if r_openshift_node_deployment_type is not defined"
+  fail:
+    msg: "r_openshift_node_deployment_type must be specified for this role"
+  when:
+  - r_openshift_node_deployment_type is not defined
+
+- name: Fail if invalid r_openshift_node_deployment_type provided
+  fail:
+    msg: "r_openshift_node_deployment_type can only be set to a single value from ['origin', 'openshift-enterprise']"
+  when:
+  - r_openshift_node_deployment_type is defined
+  - r_openshift_node_deployment_type not in ['origin', 'openshift-enterprise']
+
+- name: "Fail if r_openshift_node_service_type is not defined"
+  fail:
+    msg: "r_openshift_node_service_type must be specified for this role"
+  when:
+  - r_openshift_node_service_type is not defined
+
+- name: "Fail if r_openshift_node_image_tag is not defined"
+  fail:
+    msg: "r_openshift_node_image_tag must be specified for this role"
+  when:
+  - r_openshift_node_image_tag is not defined
+
+- name: "Fail if r_openshift_node_config_base is not defined"
+  fail:
+    msg: "r_openshift_node_config_base must be specified for this role"
+  when:
+  - r_openshift_node_config_base is not defined
+
+- name: "Fail if r_openshift_node_dns_domain is not defined"
+  fail:
+    msg: "r_openshift_node_dns_domain must be specified for this role"
+  when:
+  - r_openshift_node_dns_domain is not defined
+
+- name: "Fail if r_openshift_node_iptables_sync_period is not defined"
+  fail:
+    msg: "r_openshift_node_iptables_sync_period must be specified for this role"
+  when:
+  - r_openshift_node_iptables_sync_period is not defined
+
+- name: "Fail if r_openshift_node_registry_url is not defined"
+  fail:
+    msg: "r_openshift_node_registry_url must be specified for this role"
+  when:
+  - r_openshift_node_registry_url is not defined
+
+- name: "Fail if r_openshift_node_hostname is not defined"
+  fail:
+    msg: "r_openshift_node_hostname must be specified for this role"
+  when:
+  - r_openshift_node_hostname is not defined
+
+- name: "Fail if r_openshift_node_sdn_mtu is not defined"
+  fail:
+    msg: "r_openshift_node_sdn_mtu must be specified for this role"
+  when:
+  - r_openshift_node_sdn_mtu is not defined
+
+- name: "Fail if r_openshift_node_nodename is not defined"
+  fail:
+    msg: "r_openshift_node_nodename must be specified for this role"
+  when:
+  - r_openshift_node_nodename is not defined
+
+- name: "Fail if r_openshift_node_data_dir is not defined"
+  fail:
+    msg: "r_openshift_node_data_dir must be specified for this role"
+  when:
+  - r_openshift_node_data_dir is not defined
+
+- name: "Fail if r_openshift_node_proxy_mode is not defined"
+  fail:
+    msg: "r_openshift_node_proxy_mode must be specified for this role"
+  when:
+  - r_openshift_node_proxy_mode is not defined
+
+- name: "Fail if r_openshift_node_local_quota_per_fsgroup is not defined"
+  fail:
+    msg: "r_openshift_node_local_quota_per_fsgroup must be specified for this role"
+  when:
+  - r_openshift_node_local_quota_per_fsgroup is not defined
+
+- name: "Fail if r_openshift_node_master_api_url is not defined"
+  fail:
+    msg: "r_openshift_node_master_api_url must be specified for this role"
+  when:
+  - r_openshift_node_master_api_url is not defined
+
+- name: "Fail if r_openshift_node_system_images_registry is not defined"
+  fail:
+    msg: "r_openshift_node_system_images_registry must be specified for this role"
+  when:
+  - r_openshift_node_system_images_registry is not defined
+  - r_openshift_node_is_containerized | bool
+  - r_openshift_node_is_node_system_container | bool
+
+- name: "Fail if r_openshift_node_system_images_registry is not defined"
+  fail:
+    msg: "r_openshift_node_system_images_registry must be specified for this role"
+  when:
+  - r_openshift_node_system_images_registry is not defined
+  - r_openshift_node_is_containerized | bool
+  - r_openshift_node_is_openvswitch_system_container | bool
+  - r_openshift_node_use_openshift_sdn | bool
+
+- name: "Fail if r_openshift_node_master_sdn_cluster_network_cidr is not defined"
+  fail:
+    msg: "r_openshift_node_master_sdn_cluster_network_cidr must be specified for this role"
+  when:
+  - r_openshift_node_master_sdn_cluster_network_cidr is not defined
+  - r_openshift_node_http_proxy != ''
+
+- name: "Fail if r_openshift_node_portal_net is not defined"
+  fail:
+    msg: "r_openshift_node_portal_net must be specified for this role"
+  when:
+  - r_openshift_node_portal_net is not defined
+  - r_openshift_node_http_proxy != ''
+
+- name: "Fail if r_openshift_node_sdn_network_plugin_name is not defined"
+  fail:
+    msg: "r_openshift_node_sdn_network_plugin_name must be specified for this role"
+  when:
+  - r_openshift_node_sdn_network_plugin_name is not defined
+  - r_openshift_node_use_openshift_sdn | bool or r_openshift_node_use_nuage | bool or r_openshift_node_use_contiv | bool
+
+- name: "Fail if r_openshift_node_ip is not defined"
+  fail:
+    msg: "r_openshift_node_ip must be specified for this role"
+  when:
+  - r_openshift_node_ip is not defined
+  - r_openshift_node_set_node_ip | bool
+
+- name: "Fail if r_openshift_node_https_proxy is not defined"
+  fail:
+    msg: "r_openshift_node_https_proxy must be specified for this role"
+  when:
+  - r_openshift_node_https_proxy is not defined
+  - r_openshift_node_http_proxy != ''
+
+- name: "Fail if r_openshift_node_no_proxy is not defined"
+  fail:
+    msg: "r_openshift_node_no_proxy must be specified for this role"
+  when:
+  - r_openshift_node_no_proxy is not defined
+  - r_openshift_node_http_proxy != ''
