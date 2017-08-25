@@ -439,7 +439,7 @@ resources:
           port_range_min: 53
           port_range_max: 53
           remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
-{% if num_masters > 1 or ui_ssh_tunnel|bool %}
+{% if num_masters|int > 1 or ui_ssh_tunnel|bool %}
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -513,7 +513,7 @@ resources:
     depends_on:
       - interface
 
-{% if num_masters > 1 %}
+{% if num_masters|int > 1 %}
   loadbalancer:
     type: OS::Heat::ResourceGroup
     properties:
@@ -592,7 +592,7 @@ resources:
 {% else %}
             - { get_resource: master-secgrp }
             - { get_resource: node-secgrp }
-{% if num_etcd == 0 %}
+{% if num_etcd|int == 0 %}
             - { get_resource: etcd-secgrp }
 {% endif %}
 {% endif %}
@@ -701,7 +701,7 @@ resources:
 {% else %}
             - { get_resource: node-secgrp }
 {% endif %}
-{% if ui_ssh_tunnel|bool and num_masters < 2 %}
+{% if ui_ssh_tunnel|bool and num_masters|int < 2 %}
             - { get_resource: lb-secgrp }
 {% endif %}
             - { get_resource: infra-secgrp }
