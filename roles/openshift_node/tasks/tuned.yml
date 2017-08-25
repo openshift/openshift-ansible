@@ -1,0 +1,41 @@
+---
+- name: Check for tuned package
+  command: rpm -q tuned
+  args:
+    warn: no
+  register: tuned_installed
+  changed_when: false
+  failed_when: false
+
+- name: Tuned service setup
+  block:
+  - name: Set tuned OpenShift variables
+    set_fact:
+      openshift_tuned_guest_profile: "{{ 'atomic-guest' if openshift.common.is_atomic else 'virtual-guest' }}"
+      tuned_etc_directory: '/etc/tuned'
+      tuned_templates_source: '../templates/tuned'
+
+  - name: Ensure directory structure exists
+    file:
+      state: directory
+      dest: '{{ tuned_etc_directory }}/{{ item.path }}'
+    with_filetree: '{{ tuned_templates_source }}'
+    when: item.state == 'directory'
+
+  - name: Ensure files are populated from templates
+    template:
+      src: '{{ item.src }}'
+      dest: '{{ tuned_etc_directory }}/{{ item.path }}'
+    with_filetree: '{{ tuned_templates_source }}'
+    when: item.state == 'file'
+
+  - name: Make tuned use the recommended tuned profile on restart
+    file: path=/etc/tuned/active_profile state=absent
+
+  - name: Restart tuned service
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: tuned
+
+  when: tuned_installed.rc == 0 | bool
