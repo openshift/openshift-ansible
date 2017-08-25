@@ -112,15 +112,6 @@
   when:
     - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['instances', 'bindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
-- shell: >
-    oc get policybindings/kube-system:default -n kube-system || echo "not found"
-  register: get_kube_system
-  changed_when: no
-
-- command: >
-    oc create policybinding kube-system -n kube-system
-  when: "'not found' in get_kube_system.stdout"
-
 - oc_adm_policy_user:
     namespace: kube-service-catalog
     resource_kind: scc

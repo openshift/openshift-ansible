@@ -1,0 +1,47 @@
+---
+# Fact setting
+- name: Set default image variables based on deployment type
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+
+- name: set ansible_service_broker facts
+  set_fact:
+    template_service_broker_image: "{{ template_service_broker_image | default(__template_service_broker_image) }}"
+
+- oc_project:
+    name: openshift-template-service-broker
+    state: present
+
+- command: mktemp -d /tmp/tsb-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+  become: no
+
+- copy:
+    src: "{{ __tsb_files_location }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+    - "{{ __tsb_template_file }}"
+    - "{{ __tsb_rbac_file }}"
+
+- name: Apply template file
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" --param API_SERVER_CONFIG="{{ lookup('file', __tsb_files_location ~ '/' ~ __tsb_config_file) }}" | kubectl apply -f -
+
+# reconcile with rbac
+- name: Reconcile with RBAC file
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | oc auth reconcile -f -
+
+- name: copy tech preview extension file for service console UI
+  copy:
+    src: openshift-ansible-catalog-console.js
+    dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
+- file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False
+  become: no
