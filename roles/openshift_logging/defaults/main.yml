@@ -84,7 +84,7 @@ openshift_logging_es_ca: /etc/fluent/keys/ca
 openshift_logging_es_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_client_key: /etc/fluent/keys/key
 openshift_logging_es_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
-openshift_logging_es_cpu_limit: null
+openshift_logging_es_cpu_limit: 1000m
 # the logging appenders for the root loggers to write ES logs. Valid values: 'file', 'console'
 openshift_logging_es_log_appenders: ['file']
 openshift_logging_es_memory_limit: "{{ openshift_hosted_logging_elasticsearch_instance_ram | default('8Gi') }}"
@@ -125,7 +125,7 @@ openshift_logging_es_ops_ca: /etc/fluent/keys/ca
 openshift_logging_es_ops_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_ops_client_key: /etc/fluent/keys/key
 openshift_logging_es_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
-openshift_logging_es_ops_cpu_limit: null
+openshift_logging_es_ops_cpu_limit: 1000m
 openshift_logging_es_ops_memory_limit: "{{ openshift_hosted_logging_elasticsearch_ops_instance_ram | default('8Gi') }}"
 openshift_logging_es_ops_pv_selector: "{{ openshift_hosted_loggingops_storage_labels | default('') }}"
 openshift_logging_es_ops_pvc_dynamic: "{{ openshift_hosted_logging_elasticsearch_ops_pvc_dynamic | default(False) }}"
