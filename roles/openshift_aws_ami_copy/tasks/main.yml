@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: "{{ item }} needs to be defined"
-  when: "{{ item }} is not defined"
+  when: item is not defined
   with_items:
   - r_openshift_aws_ami_copy_src_ami
   - r_openshift_aws_ami_copy_name
