@@ -33,6 +33,11 @@
 
 - include: certificates.yml
 
+- name: Add additional Docker mounts for Nuage for atomic hosts
+  become: yes
+  lineinfile: dest="{{ openshift_atomic_node_config_file }}" line="{{ nuage_atomic_docker_additional_mounts }}"
+  when: openshift.common.is_atomic | bool
+
 - name: Restart node services
   command: /bin/true
   notify:
