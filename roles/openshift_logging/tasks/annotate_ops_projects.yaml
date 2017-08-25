@@ -1,0 +1,17 @@
+---
+- oc_obj:
+    state: list
+    kind: project
+    name: "{{ item }}"
+  with_items: "{{ __default_logging_ops_projects }}"
+  register: __logging_ops_projects
+
+- name: Annotate Operations Projects
+  oc_edit:
+    kind: ns
+    name: "{{ item.item }}"
+    separator: '#'
+    content:
+      metadata#annotations#openshift.io/logging.ui.hostname: "{{ openshift_logging_kibana_ops_hostname }}"
+  with_items: "{{ __logging_ops_projects.results }}"
+  when: "{{ item.results.stderr is not defined }}"
