@@ -54,6 +54,7 @@ outputs:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
 
+{% if num_dns|int > 0 %}
   dns_name:
     description: Name of the DNS
     value:
@@ -68,6 +69,7 @@ outputs:
   dns_private_ips:
     description: Private IPs of the DNS
     value: { get_attr: [ dns, private_ip ] }
+{% endif %}
 
 resources:
 
@@ -405,6 +407,7 @@ resources:
           port_range_min: 443
           port_range_max: 443
 
+{% if num_dns|int > 0 %}
   dns-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -439,6 +442,8 @@ resources:
           port_range_min: 53
           port_range_max: 53
           remote_ip_prefix: "{{ openstack_subnet_prefix }}.0/24"
+{% endif %}
+
 {% if num_masters|int > 1 or ui_ssh_tunnel|bool %}
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -716,6 +721,7 @@ resources:
     depends_on:
       - interface
 
+{% if num_dns|int > 0 %}
   dns:
     type: OS::Heat::ResourceGroup
     properties:
@@ -755,3 +761,4 @@ resources:
           volume_size: {{ dns_volume_size }}
     depends_on:
       - interface
+{% endif %}

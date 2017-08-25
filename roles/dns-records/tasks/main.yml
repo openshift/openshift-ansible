@@ -14,6 +14,7 @@
     nsupdate_server_private: "{{ external_nsupdate_keys['private']['server'] }}"
     nsupdate_key_secret_private: "{{ external_nsupdate_keys['private']['key_secret'] }}"
     nsupdate_key_algorithm_private: "{{ external_nsupdate_keys['private']['key_algorithm'] }}"
+    nsupdate_private_key_name: "{{ external_nsupdate_keys['private']['key_name']|default('private-' + full_dns_domain) }}"
   when:
     - external_nsupdate_keys is defined
     - external_nsupdate_keys['private'] is defined
@@ -32,7 +33,7 @@
       - view: "private"
         zone: "{{ full_dns_domain }}"
         server: "{{ nsupdate_server_private }}"
-        key_name: "{{ ( 'private-' + full_dns_domain ) }}"
+        key_name: "{{ nsupdate_private_key_name|default('private-' + full_dns_domain) }}"
         key_secret: "{{ nsupdate_key_secret_private }}"
         key_algorithm: "{{ nsupdate_key_algorithm_private | lower }}"
         entries: "{{ private_records }}"
@@ -54,6 +55,7 @@
     nsupdate_server_public: "{{ external_nsupdate_keys['public']['server'] }}"
     nsupdate_key_secret_public: "{{ external_nsupdate_keys['public']['key_secret'] }}"
     nsupdate_key_algorithm_public: "{{ external_nsupdate_keys['public']['key_algorithm'] }}"
+    nsupdate_public_key_name: "{{ external_nsupdate_keys['public']['key_name']|default('public-' + full_dns_domain) }}"
   when:
     - external_nsupdate_keys is defined
     - external_nsupdate_keys['public'] is defined
@@ -72,7 +74,7 @@
       - view: "public"
         zone: "{{ full_dns_domain }}"
         server: "{{ nsupdate_server_public }}"
-        key_name: "{{ ( 'public-' + full_dns_domain ) }}"
+        key_name: "{{ nsupdate_public_key_name|default('public-' + full_dns_domain) }}"
         key_secret: "{{ nsupdate_key_secret_public }}"
         key_algorithm: "{{ nsupdate_key_algorithm_public | lower }}"
         entries: "{{ public_records }}"
