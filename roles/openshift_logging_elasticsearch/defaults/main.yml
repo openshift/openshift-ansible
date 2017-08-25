@@ -1,7 +1,7 @@
 ---
 ### Common settings
-openshift_logging_elasticsearch_image_prefix: "{{ openshift_hosted_logging_deployer_prefix | default('docker.io/openshift/origin-') }}"
-openshift_logging_elasticsearch_image_version: "{{ openshift_hosted_logging_deployer_version | default('latest') }}"
+openshift_logging_elasticsearch_image_prefix: "{{ openshift_logging_image_prefix | default(__openshift_logging_image_prefix) }}"
+openshift_logging_elasticsearch_image_version: "{{ openshift_logging_image_version | default('latest') }}"
 openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_image_pull_secret | default('') }}"
 openshift_logging_elasticsearch_namespace: logging
 
