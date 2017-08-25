@@ -15,5 +15,5 @@ dependencies:
 - role: openshift_etcd_facts
 - role: openshift_clock
 - role: openshift_docker
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 - role: etcd

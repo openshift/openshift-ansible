@@ -9,44 +9,48 @@
 # be used by default. Users must indicate what they want.
 - fail:
     msg: "Must specify openshift_release or openshift_image_tag in inventory to install origin. (suggestion: add openshift_release=\"1.2\" to inventory)"
-  when: "{{ is_containerized | bool and openshift.common.deployment_type == 'origin' and openshift_release is not defined and openshift_image_tag is not defined }}"
+  when:
+  - is_containerized | bool
+  - openshift.common.deployment_type == 'origin'
+  - openshift_release is not defined
+  - openshift_image_tag is not defined
 
 # Normalize some values that we need in a certain format that might be confusing:
 - set_fact:
     openshift_release: "{{ openshift_release[1:] }}"
-  when: "{{ openshift_release is defined and openshift_release[0] == 'v' }}"
+  when: openshift_release is defined and openshift_release[0] == 'v'
 
 - set_fact:
     openshift_release: "{{ openshift_release | string }}"
-  when: "{{ openshift_release is defined }}"
+  when: openshift_release is defined
 
 - set_fact:
     openshift_image_tag: "{{ 'v' + openshift_image_tag }}"
-  when: "{{ openshift_image_tag is defined and openshift_image_tag[0] != 'v' }}"
+  when: openshift_image_tag is defined and openshift_image_tag[0] != 'v'
 
 - set_fact:
     openshift_pkg_version: "{{ '-' + openshift_pkg_version }}"
-  when: "{{ openshift_pkg_version is defined and openshift_pkg_version[0] != '-' }}"
+  when: openshift_pkg_version is defined and openshift_pkg_version[0] != '-'
 
 # Make sure we copy this to a fact if given a var:
 - set_fact:
     openshift_version: "{{ openshift_version | string }}"
-  when: "{{ openshift_version is defined }}"
+  when: openshift_version is defined
 
 # Protect the installed version by default unless explicitly told not to, or given an
 # openshift_version already.
 - name: Use openshift.common.version fact as version to configure if already installed
   set_fact:
     openshift_version: "{{ openshift.common.version }}"
-  when: "{{ openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version | bool }}"
+  when: openshift.common.version is defined and openshift_version is not defined and openshift_protect_installed_version | bool
 
 - name: Set openshift_version for rpm installation
   include: set_version_rpm.yml
-  when: "{{ not is_containerized | bool }}"
+  when: not is_containerized | bool
 
 - name: Set openshift_version for containerized installation
   include: set_version_containerized.yml
-  when: "{{ is_containerized | bool }}"
+  when: is_containerized | bool
 
 # At this point we know openshift_version is set appropriately. Now we set
 # openshift_image_tag and openshift_pkg_version, so all roles can always assume
@@ -55,29 +59,29 @@
 
 - set_fact:
     openshift_image_tag: v{{ openshift_version }}
-  when: "{{ openshift_image_tag is not defined }}"
+  when: openshift_image_tag is not defined
 
 - set_fact:
     openshift_pkg_version: -{{ openshift_version }}
-  when: "{{ openshift_pkg_version is not defined }}"
+  when: openshift_pkg_version is not defined
 
 - fail:
     msg: openshift_version role was unable to set openshift_version
-  when: "{{ openshift_version is not defined }}"
+  when: openshift_version is not defined
 
 - fail:
     msg: openshift_version role was unable to set openshift_image_tag
-  when: "{{ openshift_image_tag is not defined }}"
+  when: openshift_image_tag is not defined
 
 - fail:
     msg: openshift_version role was unable to set openshift_pkg_version
-  when: "{{ openshift_pkg_version is not defined }}"
+  when: openshift_pkg_version is not defined
 
 # We can't map an openshift_release to full rpm version like we can with containers, make sure
 # the rpm version we looked up matches the release requested and error out if not.
 - fail:
     msg: "Detected OpenShift version {{ openshift_version }} does not match requested openshift_release {{ openshift_release }}. You may need to adjust your yum repositories, inventory, or run the appropriate OpenShift upgrade playbook."
-  when: "{{ not is_containerized | bool and openshift_release is defined and not openshift_version.startswith(openshift_release) | bool }}"
+  when: not is_containerized | bool and openshift_release is defined and not openshift_version.startswith(openshift_release) | bool
 
 # The end result of these three variables is quite important so make sure they are displayed and logged:
 - debug: var=openshift_release

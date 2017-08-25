@@ -6,7 +6,7 @@
     --selector={{ openshift.hosted.registry.selector | default('') }}
   register: registry_nodes_json
   changed_when: false
-  when: "{{ openshift.hosted.registry.replicas | default(none) is none }}"
+  when: openshift.hosted.registry.replicas | default(none) is none
 
 - set_fact:
     l_node_count: "{{ (registry_nodes_json.stdout | default('{\"items\":[]}') | from_json)['items'] | length }}"
@@ -16,12 +16,12 @@
 # If no registry nodes defined, the default should be 0.
 - set_fact:
     l_default_replicas: 0
-  when: "{{ l_node_count | int == 0 }}"
+  when: l_node_count | int == 0
 
 # If registry nodes are defined and the registry storage kind is defined, default should be the number of registry nodes, otherwise just 1:
 - set_fact:
     l_default_replicas: "{{ l_node_count if openshift.hosted.registry.storage.kind | default(none) is not none else 1 }}"
-  when: "{{ l_node_count | int > 0 }}"
+  when: l_node_count | int > 0
 
 - set_fact:
     replicas: "{{ openshift.hosted.registry.replicas | default(l_default_replicas) }}"
@@ -47,12 +47,12 @@
   register: openshift_hosted_registry_results
   changed_when: "'service exists' not in openshift_hosted_registry_results.stdout"
   failed_when: "openshift_hosted_registry_results.rc != 0 and 'service exists' not in openshift_hosted_registry_results.stdout and 'deployment_config' not in openshift_hosted_registry_results.stderr and 'service' not in openshift_hosted_registry_results.stderr"
-  when: "{{ replicas | int > 0 }}"
+  when: replicas | int > 0
 
 - include: storage/object_storage.yml
   static: no
-  when: "{{ replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) == 'object' }}"
+  when: replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) == 'object'
 
 - include: storage/persistent_volume.yml
   static: no
-  when: "{{ replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack'] }}"
+  when: replicas | int > 0 and openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack']

@@ -11,7 +11,7 @@
       CA certificate {{ openshift_ca_cert }} doesn't exist on CA host
       {{ openshift_ca_host }}. Apply 'openshift_ca' role to
       {{ openshift_ca_host }}.
-  when: "{{ not g_ca_cert_stat_result.stat.exists | bool }}"
+  when: not g_ca_cert_stat_result.stat.exists | bool
   run_once: true
 
 - name: Check status of node certificates
@@ -25,7 +25,7 @@
   - server.key
   - server.crt
   register: g_node_cert_stat_result
-  when: "{{ not openshift_certificates_redeploy | default(false) | bool }}"
+  when: not openshift_certificates_redeploy | default(false) | bool
 
 - set_fact:
     node_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
@@ -39,7 +39,7 @@
     path: "{{ openshift_generated_configs_dir }}"
     state: directory
     mode: 0700
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
 - find:
@@ -96,7 +96,7 @@
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: node_cert_mktemp
   changed_when: False
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
   delegate_to: localhost
   become: no
 
@@ -110,7 +110,7 @@
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Retrieve the node config tarballs from the master
@@ -120,23 +120,23 @@
     flat: yes
     fail_on_missing: yes
     validate_checksum: yes
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Ensure certificate directory exists
   file:
     path: "{{ openshift_node_cert_dir }}"
     state: directory
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
 
 - name: Unarchive the tarball on the node
   unarchive:
     src: "{{ node_cert_mktemp.stdout }}/{{ openshift_node_cert_subdir }}.tgz"
     dest: "{{ openshift_node_cert_dir }}"
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
 
 - file: name={{ node_cert_mktemp.stdout }} state=absent
   changed_when: False
-  when: "{{ node_certs_missing | bool }}"
+  when: node_certs_missing | bool
   delegate_to: localhost
   become: no

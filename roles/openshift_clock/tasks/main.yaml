@@ -7,8 +7,8 @@
 
 - name: Install ntp package
   action: "{{ ansible_pkg_mgr }} name=ntp state=present"
-  when: "{{ openshift.clock.enabled | bool and not openshift.clock.chrony_installed | bool }}"
+  when: openshift.clock.enabled | bool and not openshift.clock.chrony_installed | bool
 
 - name: Start and enable ntpd/chronyd
   shell: timedatectl set-ntp true
-  when: "{{ openshift.clock.enabled | bool }}"
+  when: openshift.clock.enabled | bool

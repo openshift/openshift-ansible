@@ -41,10 +41,10 @@
     # 2.0.2)
     - openshift_facts
     - role: rhel_subscribe
-      when: "{{ deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise'] and
+      when: deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise'] and
             ansible_distribution == "RedHat" and
             lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
-              default('no', True) | lower in ['no', 'false'] }}"
+              default('no', True) | lower in ['no', 'false']
 
     - { role: dns,
         dns_forwarders: "{{ openstack_network_dns }}",

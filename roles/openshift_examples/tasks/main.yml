@@ -48,13 +48,13 @@
 - name: Modify registry paths if registry_url is not registry.access.redhat.com
   shell: >
     find {{ examples_base }} -type f | xargs -n 1 sed -i 's|registry.access.redhat.com|{{ registry_host | quote }}|g'
-  when: "{{ registry_host != '' and openshift_examples_modify_imagestreams | default(False) | bool }}"
+  when: registry_host != '' and openshift_examples_modify_imagestreams | default(False) | bool
 
 # RHEL and Centos image streams are mutually exclusive
 - name: Import RHEL streams
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ item }}
-  when: "{{ openshift_examples_load_rhel | bool }}"
+  when: openshift_examples_load_rhel | bool
   with_items:
     - "{{ rhel_image_streams }}"
   register: oex_import_rhel_streams
@@ -64,7 +64,7 @@
 - name: Import Centos Image streams
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ centos_image_streams }}
-  when: "{{ openshift_examples_load_centos | bool }}"
+  when: openshift_examples_load_centos | bool
   register: oex_import_centos_streams
   failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
   changed_when: false
@@ -72,7 +72,7 @@
 - name: Import db templates
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ db_templates_base }}
-  when: "{{ openshift_examples_load_db_templates | bool }}"
+  when: openshift_examples_load_db_templates | bool
   register: oex_import_db_templates
   failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
   changed_when: false
@@ -80,7 +80,7 @@
 - name: Import quickstart-templates
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ quickstarts_base }}
-  when: "{{ openshift_examples_load_quickstarts | bool }}"
+  when: openshift_examples_load_quickstarts | bool
   register: oex_import_quickstarts
   failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
   changed_when: false
@@ -88,7 +88,7 @@
 - name: Import origin infrastructure-templates
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_origin_base }}
-  when: "{{ openshift_examples_load_centos | bool }}"
+  when: openshift_examples_load_centos | bool
   register: oex_import_infrastructure
   failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
   changed_when: false
@@ -96,7 +96,7 @@
 - name: Import enterprise infrastructure-templates
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ infrastructure_enterprise_base }}
-  when: "{{ openshift_examples_load_rhel | bool }}"
+  when: openshift_examples_load_rhel | bool
   register: oex_import_infrastructure
   failed_when: "'already exists' not in oex_import_infrastructure.stderr and oex_import_infrastructure.rc != 0"
   changed_when: false
@@ -119,7 +119,7 @@
 - name: Import xPaas image streams
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ xpaas_image_streams }}
-  when: "{{ openshift_examples_load_xpaas | bool }}"
+  when: openshift_examples_load_xpaas | bool
   register: oex_import_xpaas_streams
   failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
   changed_when: false
@@ -127,7 +127,7 @@
 - name: Import xPaas templates
   command: >
     {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} -n openshift -f {{ xpaas_templates_base }}
-  when: "{{ openshift_examples_load_xpaas | bool }}"
+  when: openshift_examples_load_xpaas | bool
   register: oex_import_xpaas_templates
   failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
   changed_when: false

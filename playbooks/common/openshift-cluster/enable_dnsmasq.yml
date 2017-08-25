@@ -7,7 +7,7 @@
   - openshift_facts
   post_tasks:
   - fail: msg="This playbook requires a master version of at least Origin 1.1 or OSE 3.1"
-    when: "{{ not openshift.common.version_gte_3_1_1_or_1_1_1 | bool }}"
+    when: not openshift.common.version_gte_3_1_1_or_1_1_1 | bool
 
 - name: Reconfigure masters to listen on our new dns_port
   hosts: oo_masters_to_config

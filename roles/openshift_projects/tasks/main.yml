@@ -25,7 +25,7 @@
     {% if item.item.value.default_node_selector | default(none) != none %}
     {{ '--node-selector=' ~ item.item.value.default_node_selector }}
     {% endif %}
-  when: "{{ item.rc == 1 }}"
+  when: item.rc == 1
   with_items:
   - "{{ project_test.results }}"
 
@@ -34,8 +34,8 @@
     {{ openshift.common.client_binary }}
     --config={{ mktemp.stdout }}/admin.kubeconfig patch namespace {{ item.item.key }}
     -p '{"metadata": {"annotations": {"openshift.io/node-selector": "{{ item.item.value.default_node_selector }}"}}}'
-  when: "{{ item.rc == 0 and item.item.value.default_node_selector | default(none) != none
-            and item.item.value.default_node_selector | default(none) != (item.stdout | from_json).metadata.annotations['openshift.io/node-selector'] | default(none) }}"
+  when: item.rc == 0 and item.item.value.default_node_selector | default(none) != none
+            and item.item.value.default_node_selector | default(none) != (item.stdout | from_json).metadata.annotations['openshift.io/node-selector'] | default(none)
   with_items:
   - "{{ project_test.results }}"
   register: annotate_project

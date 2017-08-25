@@ -11,7 +11,7 @@
     - etcd_container
     - openvswitch
   failed_when: false
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
@@ -22,15 +22,15 @@
 - name: Remove all containers and images
   script: nuke_images.sh docker
   register: nuke_images_result
-  when: "{{ docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool }}"
+  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
   register: docker_image_count
-  when: "{{ docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool }}"
+  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
 - debug: var=docker_image_count.stdout
-  when: "{{ docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool }}"
+  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
 - service: name=docker state=stopped
 
@@ -53,7 +53,7 @@
     - "{{ openshift.common.service_type }}-master-controllers"
     - "{{ openshift.common.service_type }}-node"
   failed_when: false
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Wait for master API to come back online
   become: no
@@ -63,4 +63,4 @@
       state=started
       delay=10
       port="{{ openshift.master.api_port }}"
-  when: "{{ inventory_hostname in groups.oo_masters_to_config }}"
+  when: inventory_hostname in groups.oo_masters_to_config

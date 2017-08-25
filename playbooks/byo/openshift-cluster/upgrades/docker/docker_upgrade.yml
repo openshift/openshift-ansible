@@ -9,10 +9,10 @@
 
   - fail:
       msg: Cannot upgrade Docker on Atomic operating systems.
-    when: "{{ openshift.common.is_atomic | bool }}"
+    when: openshift.common.is_atomic | bool
 
   - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade_check.yml
-    when: "{{ docker_upgrade is not defined or docker_upgrade | bool }}"
+    when: docker_upgrade is not defined or docker_upgrade | bool
 
 
 # If a node fails, halt everything, the admin will need to clean up and we
@@ -27,20 +27,32 @@
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=false
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: "{{ l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config }}"
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
+    - inventory_hostname in groups.oo_nodes_to_config
 
   - name: Evacuate Node for Kubelet upgrade
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --evacuate --force
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: "{{ l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config }}"
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
+    - inventory_hostname in groups.oo_nodes_to_config
 
   - include: ../../../../common/openshift-cluster/upgrades/docker/upgrade.yml
-    when: "{{ l_docker_upgrade is defined and l_docker_upgrade | bool }}"
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
 
   - name: Set node schedulability
     command: >
       {{ openshift.common.admin_binary }} manage-node {{ openshift.common.hostname | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: "{{ openshift.node.schedulable | bool and l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_config and openshift.node.schedulable | bool }}"
-
+    when:
+    - openshift.node.schedulable | bool
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
+    - inventory_hostname in groups.oo_nodes_to_config
+    - openshift.node.schedulable | bool

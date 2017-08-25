@@ -26,5 +26,5 @@
 
 - name: reload systemd config files
   command: systemctl daemon-reload
-  when: "{{ udevw_override_conf | changed }}"
+  when: udevw_override_conf | changed
 

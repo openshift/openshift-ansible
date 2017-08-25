@@ -1,7 +1,7 @@
 ---
 - name: Install firewalld packages
   action: "{{ ansible_pkg_mgr }} name=firewalld state=present"
-  when: "{{ not openshift.common.is_containerized | bool }}"
+  when: not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Check if iptables-services is installed
@@ -18,7 +18,7 @@
   with_items:
   - iptables
   - ip6tables
-  when: "{{ pkg_check.rc == 0 }}"
+  when: pkg_check.rc == 0
   register: task_result
 
 - name: Wait 10 seconds after disabling iptables
@@ -28,7 +28,7 @@
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: "{{ install_result | changed }}"
+  when: install_result | changed
 
 - name: Determine if firewalld service masked
   command: >
@@ -51,7 +51,7 @@
 
 - name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
   pause: seconds=10
-  when: "{{ result | changed }}"
+  when: result | changed
 
 - name: Mask iptables services
   command: systemctl mask "{{ item }}"
@@ -60,7 +60,7 @@
   with_items:
   - iptables
   - ip6tables
-  when: "{{ pkg_check.rc == 0 }}"
+  when: pkg_check.rc == 0
   ignore_errors: yes
 
 # TODO: Ansible 1.9 will eliminate the need for separate firewalld tasks for

@@ -22,4 +22,4 @@
     volume dc/docker-registry
     --add --overwrite -t persistentVolumeClaim --claim-name={{ registry_volume_claim }}
     --name=registry-storage
-  when: "{{ not volume_attached | bool }}"
+  when: not volume_attached | bool

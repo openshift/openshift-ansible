@@ -38,7 +38,7 @@
 - name: Check openshift_master_default_subdomain
   fail:
     msg: "Default subdomain should be defined"
-  when: "{{ openshift.master.default_subdomain is not defined }}"
+  when: openshift.master.default_subdomain is not defined
 
 - name: Create Heapster and Hawkular/Cassandra Services
   shell: >

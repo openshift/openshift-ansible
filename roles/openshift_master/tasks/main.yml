@@ -7,32 +7,32 @@
 - fail:
     msg: >
       Invalid OAuth grant method: {{ openshift_master_oauth_grant_method }}
-  when: "{{ openshift_master_oauth_grant_method is defined and openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods }}"
+  when: openshift_master_oauth_grant_method is defined and openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
 # HA Variable Validation
 - fail:
     msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
-  when: "{{ openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ['native', 'pacemaker'])) }}"
+  when: openshift_master_ha | bool and ((openshift_master_cluster_method is not defined) or (openshift_master_cluster_method is defined and openshift_master_cluster_method not in ['native', 'pacemaker']))
 - fail:
     msg: "'native' high availability is not supported for the requested OpenShift version"
-  when: "{{ openshift_master_ha | bool and openshift_master_cluster_method == 'native' and not openshift.common.version_gte_3_1_or_1_1 | bool }}"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == 'native' and not openshift.common.version_gte_3_1_or_1_1 | bool
 - fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when: "{{ openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker' and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password) }}"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker' and (openshift_master_cluster_password is not defined or not openshift_master_cluster_password)
 - fail:
     msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
-  when: "{{ openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker' and openshift.common.is_containerized | bool }}"
+  when: openshift_master_ha | bool and openshift_master_cluster_method == 'pacemaker' and openshift.common.is_containerized | bool
 
 - name: Install Master package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
-  when: "{{ not openshift.common.is_containerized | bool }}"
+  when: not openshift.common.is_containerized | bool
 
 - name: Pull master image
   command: >
     docker pull {{ openshift.master.master_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Create openshift.common.data_dir
   file:
@@ -41,11 +41,11 @@
     mode: 0755
     owner: root
     group: root
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: "{{ openshift.common.is_containerized | bool and install_result | changed }}"
+  when: openshift.common.is_containerized | bool and install_result | changed
 
 - name: Re-gather package dependent master facts
   openshift_facts:
@@ -78,14 +78,14 @@
 
 - name: Install httpd-tools if needed
   action: "{{ ansible_pkg_mgr }} name=httpd-tools state=present"
-  when: "{{ (item.kind == 'HTPasswdPasswordIdentityProvider') and not openshift.common.is_atomic | bool }}"
+  when: (item.kind == 'HTPasswdPasswordIdentityProvider') and not openshift.common.is_atomic | bool
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Ensure htpasswd directory exists
   file:
     path: "{{ item.filename | dirname }}"
     state: directory
-  when: "{{ item.kind == 'HTPasswdPasswordIdentityProvider' }}"
+  when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the htpasswd file if needed
@@ -93,7 +93,7 @@
     dest: "{{ item.filename }}"
     src: htpasswd.j2
     backup: yes
-  when: "{{ item.kind == 'HTPasswdPasswordIdentityProvider' and openshift.master.manage_htpasswd | bool }}"
+  when: item.kind == 'HTPasswdPasswordIdentityProvider' and openshift.master.manage_htpasswd | bool
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Ensure htpasswd file exists
@@ -102,7 +102,7 @@
     force: no
     content: ""
     mode: 0600
-  when: "{{ item.kind == 'HTPasswdPasswordIdentityProvider' }}"
+  when: item.kind == 'HTPasswdPasswordIdentityProvider'
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the ldap ca file if needed
@@ -111,7 +111,7 @@
     content: "{{ openshift.master.ldap_ca }}"
     mode: 0600
     backup: yes
-  when: "{{ openshift.master.ldap_ca is defined and item.kind == 'LDAPPasswordIdentityProvider' }}"
+  when: openshift.master.ldap_ca is defined and item.kind == 'LDAPPasswordIdentityProvider'
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the openid ca file if needed
@@ -120,7 +120,7 @@
     content: "{{ openshift.master.openid_ca }}"
     mode: 0600
     backup: yes
-  when: "{{ openshift.master.openid_ca is defined and item.kind == 'OpenIDIdentityProvider' and item.ca | default('') != '' }}"
+  when: openshift.master.openid_ca is defined and item.kind == 'OpenIDIdentityProvider' and item.ca | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Create the request header ca file if needed
@@ -129,7 +129,7 @@
     content: "{{ openshift.master.request_header_ca }}"
     mode: 0600
     backup: yes
-  when: "{{ openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != '' }}"
+  when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
 - name: Install the systemd units
@@ -142,7 +142,7 @@
     owner: root
     group: root
     mode: 0600
-  when: "{{ openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined }}"
+  when: openshift.master.session_auth_secrets is defined and openshift.master.session_encryption_secrets is defined
   notify:
   - restart master
   - restart master api
@@ -165,11 +165,11 @@
   - restart master controllers
 
 - include: set_loopback_context.yml
-  when: "{{ openshift.common.version_gte_3_2_or_1_2 }}"
+  when: openshift.common.version_gte_3_2_or_1_2
 
 - name: Start and enable master
   service: name={{ openshift.common.service_type }}-master enabled=yes state=started
-  when: "{{ not openshift_master_ha | bool }}"
+  when: not openshift_master_ha | bool
   register: start_result
   notify: Verify API Server
 
@@ -184,39 +184,39 @@
     name: "{{ openshift.common.service_type }}-master"
     enabled: no
     state: stopped
-  when: "{{ openshift_master_ha | bool and master_svc_show.rc == 0 and 'LoadState=not-found' not in master_svc_show.stdout }}"
+  when: openshift_master_ha | bool and master_svc_show.rc == 0 and 'LoadState=not-found' not in master_svc_show.stdout
 
 - set_fact:
     master_service_status_changed: "{{ start_result | changed }}"
-  when: "{{ not openshift_master_ha | bool }}"
+  when: not openshift_master_ha | bool
 
 - name: Mask master service
   command: systemctl mask {{ openshift.common.service_type }}-master
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and not openshift.common.is_containerized | bool
 
 - name: Start and enable master api on first master
   service:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0] }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
   register: start_result
 
 - pause:
     seconds: 15
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master api all masters
   service:
     name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0] }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
 
 - set_fact:
     master_api_service_status_changed: "{{ start_result | changed }}"
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
@@ -237,43 +237,43 @@
   delay: 1
   run_once: true
   changed_when: false
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and master_api_service_status_changed | bool
 
 - name: Start and enable master controller on first master
   service:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0] }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname == openshift_master_hosts[0]
   register: start_result
 
 - pause:
     seconds: 15
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Start and enable master controller on all masters
   service:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0] }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native' and inventory_hostname != openshift_master_hosts[0]
   register: start_result
 
 - set_fact:
     master_controllers_service_status_changed: "{{ start_result | changed }}"
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'native' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
   action: "{{ ansible_pkg_mgr }} name=pcs state=present"
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
-            and not openshift.common.is_containerized | bool }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+            and not openshift.common.is_containerized | bool
   register: install_result
 
 - name: Start and enable cluster service
   service: name=pcsd enabled=yes state=started
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
-            and not openshift.common.is_containerized | bool }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker'
+            and not openshift.common.is_containerized | bool
 
 - name: Set the cluster user password
   shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
-  when: "{{ install_result | changed }}"
+  when: install_result | changed

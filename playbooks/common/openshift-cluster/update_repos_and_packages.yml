@@ -11,9 +11,9 @@
   # 2.0.2)
   - openshift_facts
   - role: rhel_subscribe
-    when: "{{ deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise'] and
-          ansible_distribution == 'RedHat' and
-          lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) |
-            default('no', True) | lower in ['no', 'false'] }}"
+    when:
+    - deployment_type in ['enterprise', 'atomic-enterprise', 'openshift-enterprise']
+    - ansible_distribution == 'RedHat'
+    - lookup('oo_option', 'rhel_skip_subscription') | default(rhsub_skip, True) | default('no', True) | lower in ['no', 'false']
   - openshift_repos
   - os_update_latest

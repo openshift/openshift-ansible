@@ -6,7 +6,7 @@
   pre_tasks:
   - set_fact:
       openshift_node_debug_level: "{{ t_oo_option_node_debug_level }}"
-    when: "{{ openshift_node_debug_level is not defined and t_oo_option_node_debug_level != '' }}"
+    when: openshift_node_debug_level is not defined and t_oo_option_node_debug_level != ''
   roles:
   - openshift_facts
   tasks:
@@ -43,7 +43,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
-    when: "{{ hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config) }}"
+    when: hostvars[item].openshift.common.is_containerized | bool and (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
 
 - name: Configure node instances
   hosts: oo_containerized_master_nodes
@@ -57,8 +57,8 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
-            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+    when: (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+            openshift_generate_no_proxy_hosts | default(True) | bool
   roles:
   - role: openshift_clock
   - role: openshift_docker
@@ -67,7 +67,7 @@
   - role: openshift_cloud_provider
   - role: openshift_common
   - role: openshift_node_dnsmasq
-    when: "{{ openshift.common.use_dnsmasq }}"
+    when: openshift.common.use_dnsmasq
   - role: os_firewall
     os_firewall_allow:
     - service: Kubernetes kubelet
@@ -95,8 +95,8 @@
                                                     | union(groups['oo_etcd_to_config'] | default([])))
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
-    when: "{{ (openshift_http_proxy is defined or openshift_https_proxy is defined) and
-            openshift_generate_no_proxy_hosts | default(True) | bool }}"
+    when: (openshift_http_proxy is defined or openshift_https_proxy is defined) and
+            openshift_generate_no_proxy_hosts | default(True) | bool
   roles:
   - role: openshift_clock
   - role: openshift_docker
@@ -105,7 +105,7 @@
   - role: openshift_cloud_provider
   - role: openshift_common
   - role: openshift_node_dnsmasq
-    when: "{{ openshift.common.use_dnsmasq }}"
+    when: openshift.common.use_dnsmasq
   - role: os_firewall
     os_firewall_allow:
     - service: Kubernetes kubelet
@@ -133,9 +133,9 @@
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
-    when: "{{ openshift.common.use_flannel | bool }}"
+    when: openshift.common.use_flannel | bool
   - role: nuage_node
-    when: "{{ openshift.common.use_nuage | bool }}"
+    when: openshift.common.use_nuage | bool
   - role: nickhammond.logrotate
   tasks:
   - name: Create group for deployment type
@@ -182,6 +182,6 @@
     retries: 120
     delay: 1
     changed_when: false
-    when: "{{ openshift.common.is_containerized | bool }}"
+    when: openshift.common.is_containerized | bool
   roles:
   - openshift_manage_node

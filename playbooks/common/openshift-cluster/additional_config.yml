@@ -7,14 +7,18 @@
     omc_cluster_hosts: "{{ groups.oo_masters | join(' ')}}"
   roles:
   - role: openshift_master_cluster
-    when: "{{ openshift_master_ha | bool and openshift.master.cluster_method == 'pacemaker' }}"
+    when:
+    - openshift_master_ha | bool
+    - openshift.master.cluster_method == 'pacemaker'
   - role: openshift_examples
     registry_url: "{{ openshift.master.registry_url }}"
-    when: "{{ openshift.common.install_examples | bool }}"
+    when: openshift.common.install_examples | bool
   - role: openshift_manageiq
-    when: "{{ openshift.common.use_manageiq | bool }}"
+    when: openshift.common.use_manageiq | bool
   - role: cockpit
-    when: "{{ not openshift.common.is_atomic and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
-              (osm_use_cockpit | default(true) | bool ) }}"
+    when:
+    - not openshift.common.is_atomic
+    - deployment_type in ['atomic-enterprise','openshift-enterprise']
+    - osm_use_cockpit | default(true) | bool
   - role: flannel_register
-    when: "{{ openshift.common.use_flannel | bool }}"
+    when: openshift.common.use_flannel | bool

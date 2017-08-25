@@ -1,10 +1,10 @@
 ---
 - fail:
     msg: "The Openstack integration requires OpenShift Enterprise 3.2 or Origin 1.2."
-  when: "{{ not openshift.common.version_gte_3_2_or_1_2 | bool }}"
+  when: not openshift.common.version_gte_3_2_or_1_2 | bool
 
 - name: Create cloud config
   template:
     dest: "{{ openshift.common.config_base }}/cloudprovider/openstack.conf"
     src: openstack.conf.j2
-  when: "{{ openshift_cloudprovider_openstack_auth_url is defined and openshift_cloudprovider_openstack_username is defined and openshift_cloudprovider_openstack_password is defined and (openshift_cloudprovider_openstack_tenant_id is defined or openshift_cloudprovider_openstack_tenant_name is defined) }}"
+  when: openshift_cloudprovider_openstack_auth_url is defined and openshift_cloudprovider_openstack_username is defined and openshift_cloudprovider_openstack_password is defined and (openshift_cloudprovider_openstack_tenant_id is defined or openshift_cloudprovider_openstack_tenant_name is defined)
