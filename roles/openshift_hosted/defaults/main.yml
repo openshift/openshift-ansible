@@ -1,9 +1,9 @@
 ---
-r_openshift_hosted_router_firewall_enabled: True
-r_openshift_hosted_router_use_firewalld: False
+r_openshift_hosted_router_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_hosted_router_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-r_openshift_hosted_registry_firewall_enabled: True
-r_openshift_hosted_registry_use_firewalld: False
+r_openshift_hosted_registry_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_hosted_registry_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 openshift_hosted_router_wait: True
 openshift_hosted_registry_wait: True

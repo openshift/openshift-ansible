@@ -1,6 +1,6 @@
 ---
-r_openshift_master_firewall_enabled: True
-r_openshift_master_use_firewalld: False
+r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 openshift_node_ips: []
 r_openshift_master_clean_install: false
