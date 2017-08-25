@@ -22,7 +22,7 @@
     daemon_reload: yes
   when:
     - openshift.common.is_containerized | bool
-    - openshift.common.use_openshift_sdn | default(true) | bool
+    - openshift_node_use_openshift_sdn | default(true) | bool
   register: ovs_start_result
   until: not ovs_start_result | failed
   retries: 3

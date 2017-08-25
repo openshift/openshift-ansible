@@ -29,7 +29,6 @@
   - role: openshift_default_storage_class
     when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
   - role: openshift_hosted
-    r_openshift_hosted_use_calico: "{{ openshift.common.use_calico | default(false) | bool }}"
   - role: openshift_metrics
     when: openshift_hosted_metrics_deploy | default(false) | bool
   - role: openshift_logging

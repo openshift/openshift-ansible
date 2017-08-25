@@ -22,6 +22,14 @@
   tags:
   - always
 
+- name: Set hostname
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  tasks:
+  - name: Set hostname
+    hostname:
+      name: "{{ openshift.common.hostname }}"
+    when: openshift_set_hostname | default(True) | bool
+
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-nfs/config.yml

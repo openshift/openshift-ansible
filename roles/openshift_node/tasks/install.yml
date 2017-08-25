@@ -13,7 +13,7 @@
       name: "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
     when:
-    - openshift.common.use_openshift_sdn | default(true) | bool
+    - openshift_node_use_openshift_sdn | bool
 
   - name: Install conntrack-tools package
     package:

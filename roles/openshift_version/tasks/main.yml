@@ -5,6 +5,12 @@
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
     is_atomic: "{{ openshift.common.is_atomic | default(False) | bool }}"
 
+- name: Install the base package for versioning
+  package:
+    name: "{{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    state: present
+  when: not is_containerized | bool
+
 # Block attempts to install origin without specifying some kind of version information.
 # This is because the latest tags for origin are usually alpha builds, which should not
 # be used by default. Users must indicate what they want.

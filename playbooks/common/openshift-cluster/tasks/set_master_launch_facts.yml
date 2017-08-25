@@ -3,7 +3,7 @@
 
 - name: Generate master instance names(s)
   set_fact:
-    scratch_name: "{{ cluster_id }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
+    scratch_name: "{{ openshift_cluster_id | default('default') }}-{{ k8s_type }}-{{ '%05x' | format(1048576 | random) }}"
   register: master_names_output
   with_sequence: count={{ num_masters }}
 

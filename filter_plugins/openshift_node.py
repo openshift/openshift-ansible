@@ -25,18 +25,7 @@ class FilterModule(object):
         # We always use what they've specified if they've specified a value
         if openshift_dns_ip is not None:
             return openshift_dns_ip
-
-        if bool(hostvars['openshift']['common']['use_dnsmasq']):
-            return hostvars['ansible_default_ipv4']['address']
-        elif bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
-            if 'openshift_master_cluster_vip' in hostvars:
-                return hostvars['openshift_master_cluster_vip']
-        else:
-            if 'openshift_master_cluster_vip' in hostvars:
-                return hostvars['openshift_master_cluster_vip']
-            elif 'openshift_node_first_master_ip' in hostvars:
-                return hostvars['openshift_node_first_master_ip']
-        return None
+        return hostvars['ansible_default_ipv4']['address']
 
     def filters(self):
         ''' returns a mapping of filters to methods '''

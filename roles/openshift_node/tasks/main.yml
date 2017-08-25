@@ -121,4 +121,4 @@
 ##### END Storage #####
 
 - include: config/workaround-bz1331590-ovs-oom-fix.yml
-  when: openshift.common.use_openshift_sdn | default(true) | bool
+  when: openshift_node_use_openshift_sdn | default(true) | bool

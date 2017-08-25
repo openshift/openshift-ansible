@@ -22,5 +22,24 @@ r_openshift_master_os_firewall_allow:
 
 oreg_url: ''
 oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
-oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
+
+
+# NOTE
+# r_openshift_master_*_default may be defined external to this role.
+# openshift_use_*, if defined, may affect other roles or play behavior.
+r_openshift_master_use_openshift_sdn_default: "{{ openshift_use_openshift_sdn | default(True) }}"
+r_openshift_master_use_openshift_sdn: "{{ r_openshift_master_use_openshift_sdn_default }}"
+
+r_openshift_master_use_nuage_default: "{{ openshift_use_nuage | default(False) }}"
+r_openshift_master_use_nuage: "{{ r_openshift_master_use_nuage_default }}"
+
+r_openshift_master_use_contiv_default: "{{ openshift_use_contiv | default(False) }}"
+r_openshift_master_use_contiv: "{{ r_openshift_master_use_contiv_default }}"
+
+r_openshift_master_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
+r_openshift_master_data_dir: "{{ r_openshift_master_data_dir_default }}"
+
+r_openshift_master_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
+r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_plugin_name_default }}"

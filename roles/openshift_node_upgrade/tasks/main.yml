@@ -44,7 +44,7 @@
   changed_when: "'Downloaded newer image' in pull_result.stdout"
   when:
   - openshift.common.is_containerized | bool
-  - openshift.common.use_openshift_sdn | default(true) | bool
+  - openshift_use_openshift_sdn | bool
 
 - include: docker/upgrade.yml
   vars:
@@ -142,7 +142,7 @@
   # End Disable Swap Block
 
 - name: Reset selinux context
-  command: restorecon -RF {{ openshift.common.data_dir }}/openshift.local.volumes
+  command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
   when:
   - ansible_selinux is defined
   - ansible_selinux.status == 'enabled'

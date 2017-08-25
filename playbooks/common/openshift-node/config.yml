@@ -71,14 +71,14 @@
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
-    when: openshift.common.use_flannel | bool
+    when: openshift_use_flannel | default(false) | bool
   - role: calico
-    when: openshift.common.use_calico | bool
+    when: openshift_use_calico | default(false) | bool
   - role: nuage_node
-    when: openshift.common.use_nuage | bool
+    when: openshift_use_nuage | default(false) | bool
   - role: contiv
     contiv_role: netplugin
-    when: openshift.common.use_contiv | bool
+    when: openshift_use_contiv | default(false) | bool
   - role: nickhammond.logrotate
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"

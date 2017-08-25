@@ -13,6 +13,3 @@
   - always
 
 - include: ../../common/openshift-cluster/service_catalog.yml
-  vars:
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_debug_level: "{{ debug_level | default(2) }}"

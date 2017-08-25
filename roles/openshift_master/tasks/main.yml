@@ -47,9 +47,9 @@
   when:
   - not openshift.common.is_containerized | bool
 
-- name: Create openshift.common.data_dir
+- name: Create r_openshift_master_data_dir
   file:
-    path: "{{ openshift.common.data_dir }}"
+    path: "{{ r_openshift_master_data_dir }}"
     state: directory
     mode: 0755
     owner: root
@@ -169,7 +169,7 @@
     register: l_already_set
 
   - set_fact:
-      openshift_push_via_dns: "{{ (openshift_use_dnsmasq | default(true) and openshift.common.version_gte_3_6) or (l_already_set.stdout is defined and l_already_set.stdout | match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
+      openshift_push_via_dns: "{{ openshift.common.version_gte_3_6 or (l_already_set.stdout is defined and l_already_set.stdout | match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
 
 - name: Set fact of all etcd host IPs
   openshift_facts:

@@ -208,9 +208,9 @@
     openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
     openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
   - role: nuage_master
-    when: openshift.common.use_nuage | bool
+    when: openshift_use_nuage | default(false) | bool
   - role: calico_master
-    when: openshift.common.use_calico | bool
+    when: openshift_use_calico | default(false) | bool
 
   post_tasks:
   - name: Create group for deployment type
