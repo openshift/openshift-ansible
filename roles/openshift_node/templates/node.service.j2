@@ -1,9 +1,10 @@
 [Unit]
 Description=OpenShift Node
 After={{ openshift.docker.service_name }}.service
+{% if openshift.common.use_openshift_sdn %}
 Wants=openvswitch.service
-After=ovsdb-server.service
-After=ovs-vswitchd.service
+After=openvswitch.service
+{% endif %}
 Wants={{ openshift.docker.service_name }}.service
 Documentation=https://github.com/openshift/origin
 Requires=dnsmasq.service
