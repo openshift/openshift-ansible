@@ -34,7 +34,7 @@
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
     etcd_initial_cluster_state: "existing"
-    initial_etcd_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') }}"
+    initial_etcd_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
     etcd_ca_setup: False
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   - role: nickhammond.logrotate
@@ -47,5 +47,7 @@
                        --ca-file {{ etcd_peer_ca_file }}
                        -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
                        cluster-health
-    retries: 1
+    register: scaleup_health
+    retries: 3
     delay: 30
+    until: scaleup_health.rc == 0
