@@ -60,13 +60,16 @@
   # It also allows for optional trailing data which:
   # - must start with a dash
   # - may contain numbers
+  # - may containe dots (https://github.com/openshift/openshift-ansible/issues/5192)
+  #
   - name: (Enterprise) Verify openshift_image_tag is valid
     when: openshift.common.deployment_type == 'openshift-enterprise'
     assert:
       that:
-      - "{{ openshift_image_tag|match('(^v\\d+\\.\\d+[\\.\\d+]*(-\\d+)?$)') }}"
+      - "{{ openshift_image_tag|match('(^v\\d+\\.\\d+(\\.\\d+)*(-\\d+(\\.\\d+)*)?$)') }}"
       msg: |-
-        openshift_image_tag must be in the format v#.#[.#[.#]]. Examples: v1.2, v3.4.1, v3.5.1.3, v1.2-1, v1.2.3-4
+        openshift_image_tag must be in the format v#.#[.#[.#]]. Examples: v1.2, v3.4.1, v3.5.1.3,
+        v3.5.1.3.4, v1.2-1, v1.2.3-4, v1.2.3-4.5, v1.2.3-4.5.6
         You specified openshift_image_tag={{ openshift_image_tag }}
 
 # Make sure we copy this to a fact if given a var:
