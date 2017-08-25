@@ -50,10 +50,8 @@
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
-- name: Additional node config
+- name: Additional 3rd party sdn node config
   hosts: oo_nodes_to_config
-  vars:
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
   roles:
   - role: flannel
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
@@ -64,11 +62,21 @@
     when: openshift.common.use_flannel | bool
   - role: calico
     when: openshift.common.use_calico | bool
-  - role: nuage_node
-    when: openshift.common.use_nuage | bool
   - role: contiv
     contiv_role: netplugin
     when: openshift.common.use_contiv | bool
+  tasks:
+  - include_role:
+      name: nuage
+      tasks_from: node.yml
+      vars_from: node.yml
+    when: openshift.common.use_nuage | bool
+
+- name: Additional node config
+  hosts: oo_nodes_to_config
+  vars:
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+  roles:
   - role: nickhammond.logrotate
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"

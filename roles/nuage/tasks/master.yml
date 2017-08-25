@@ -1,0 +1,6 @@
+---
+- include: common.yml
+
+- include: ca.yml
+
+- include: master/main.yml
