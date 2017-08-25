@@ -1,8 +1,4 @@
 ---
-- name: restart vrs
-  become: yes
-  systemd: name=openvswitch state=restarted
-
 - name: restart node
   become: yes
   systemd: name={{ openshift.common.service_type }}-node state=restarted
