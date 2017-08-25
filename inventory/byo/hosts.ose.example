@@ -111,7 +111,7 @@ openshift_release=v3.6
 # Install and run cri-o along side docker
 # NOTE: This uses openshift_docker_systemcontainer_image_registry_override as it's override
 # just as container-engine does.
-#openshift_docker_use_crio=False
+#openshift_use_crio=False
 # Force the registry to use for the container-engine/crio system container. By default the registry
 # will be built off of the deployment type and ansible_distribution. Only
 # use this option if you are sure you know what you are doing!
