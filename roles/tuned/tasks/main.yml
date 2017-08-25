@@ -1,0 +1,19 @@
+---
+- name: Check for tuned package
+  command: rpm -q tuned
+  args:
+    warn: no
+  register: tuned_installed
+  changed_when: false
+  failed_when: false
+
+- name: Make tuned use the recommended tuned profile on restart
+  file: path=/etc/tuned/active_profile state=absent
+  when: tuned_installed.rc == 0 | bool
+
+- name: Restart tuned service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: tuned
+  when: tuned_installed.rc == 0 | bool

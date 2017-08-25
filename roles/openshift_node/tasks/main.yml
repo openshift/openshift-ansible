@@ -78,17 +78,8 @@
     state: present
   when: not openshift.common.is_containerized | bool
 
-- name: Check for tuned package
-  command: rpm -q tuned
-  args:
-    warn: no
-  register: tuned_installed
-  changed_when: false
-  failed_when: false
-
-- name: Set atomic-guest tuned profile
-  command: "tuned-adm profile atomic-guest"
-  when: tuned_installed.rc == 0 and openshift.common.is_atomic | bool
+- name: Configure tuned profiles
+  include: ../../tuned/tasks/main.yml
 
 - name: Install sdn-ovs package
   package:
