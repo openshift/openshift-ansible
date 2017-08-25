@@ -16,39 +16,6 @@
       r_openshift_aws_vpc_tags: "{{ provision.vpc.tags }}"
       r_openshift_aws_vpc_name: "{{ provision.vpc.name | default(provision.clusterid) }}"
 
-  - name: create aws ssh keypair
-    include_role:
-      name: openshift_aws_ssh_keys
-    vars:
-      r_openshift_aws_ssh_keys_users: "{{ provision.instance_users }}"
-      r_openshift_aws_ssh_keys_region: "{{ provision.region }}"
-
-  - when: provision.openshift_registry_s3 | default(false)
-    name: create s3 bucket for registry
-    include_role:
-      name: openshift_aws_s3
-    vars:
-      r_openshift_aws_s3_clusterid: "{{ provision.clusterid }}-docker-registry"
-      r_openshift_aws_s3_region: "{{ provision.region }}"
-      r_openshift_aws_s3_mode: create
-
-  - name: include scale group creation for master
-    include: build_node_group.yml
-    vars:
-      openshift_build_node_type: master
-
-  - name: fetch new master instances
-    ec2_remote_facts:
-      region: "{{ provision.region }}"
-      filters:
-        "tag:clusterid": "{{ provision.clusterid }}"
-        "tag:host-type": master
-        instance-state-name: running
-    register: instancesout
-    retries: 20
-    delay: 3
-    until: instancesout.instances|length > 0
-
   - name: bring iam_cert23 into scope
     include_role:
       name: lib_utils
@@ -69,6 +36,46 @@
     when: provision.iam_cert_ca is defined
 
   - debug: var=elb_cert_chain
+
+  - name: create aws ssh keypair
+    include_role:
+      name: openshift_aws_ssh_keys
+    vars:
+      r_openshift_aws_ssh_keys_users: "{{ provision.instance_users }}"
+      r_openshift_aws_ssh_keys_region: "{{ provision.region }}"
+
+  - when: provision.openshift_registry_s3 | default(false)
+    name: create s3 bucket for registry
+    include_role:
+      name: openshift_aws_s3
+    vars:
+      r_openshift_aws_s3_clusterid: "{{ provision.clusterid }}-docker-registry"
+      r_openshift_aws_s3_region: "{{ provision.region }}"
+      r_openshift_aws_s3_mode: create
+
+  - name: include scale group creation for master
+    include: build_node_group.yml
+    vars:
+      openshift_build_node_type: master
+      openshift_clusterid: "{{ provision.clusterid }}"
+      openshift_region: "{{ provision.region }}"
+      openshift_use_custom_ami: "{{ provision.use_custom_ami }}"
+      openshift_ami_name: "{{ provision.build.ami_name }}"
+      openshift_ami_tags: "{{ provision.build.ami_tags }}"
+      openshift_node_group_config: "{{ provision.node_group_config }}"
+      openshift_subnet_name: "{{ provision.vpc.subnets[provision.region][0].az }}"
+
+  - name: fetch new master instances
+    ec2_remote_facts:
+      region: "{{ provision.region }}"
+      filters:
+        "tag:clusterid": "{{ provision.clusterid }}"
+        "tag:host-type": master
+        instance-state-name: running
+    register: instancesout
+    retries: 20
+    delay: 3
+    until: instancesout.instances|length > 0
 
   - name: create our master external and internal load balancers
     include_role:

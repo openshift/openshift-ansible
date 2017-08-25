@@ -36,12 +36,27 @@
         infra: "infra-{{ ansible_date_time.epoch }}"
         compute: "compute-{{ ansible_date_time.epoch }}"
 
-  - name: include build node group
+  - name: include build node group for infra
     include: build_node_group.yml
     vars:
       openshift_build_node_type: infra
+      openshift_clusterid: "{{ provision.clusterid }}"
+      openshift_region: "{{ provision.region }}"
+      openshift_use_custom_ami: "{{ proviion.use_custom_ami }}"
+      openshift_ami_name: "{{ provision.build.ami_name }}"
+      openshift_ami_tags: "{{ provision.build.openshift_ami_tags }}"
+      openshift_node_group_config: "{{ provision.node_group_config }}"
+      openshift_subnet_name: "{{ provision.vpc.subnets[provision.region][0].az }}"
 
-  - name: include build node group
+
+  - name: include build node group for compute
     include: build_node_group.yml
     vars:
       openshift_build_node_type: compute
+      openshift_clusterid: "{{ provision.clusterid }}"
+      openshift_region: "{{ provision.region }}"
+      openshift_use_custom_ami: "{{ proviion.use_custom_ami }}"
+      openshift_ami_name: "{{ provision.build.ami_name }}"
+      openshift_ami_tags: "{{ provision.build.openshift_ami_tags }}"
+      openshift_node_group_config: "{{ provision.node_group_config }}"
+      openshift_subnet_name: "{{ provision.vpc.subnets[provision.region][0].az }}"

@@ -24,6 +24,14 @@
       r_openshift_aws_ssh_keys_users: "{{ provision.instance_users }}"
       r_openshift_aws_ssh_keys_region: "{{ provision.region }}"
 
+  - name: Create compute sgs
+    include_role:
+      name: openshift_aws_sg
+    vars:
+      r_openshift_aws_sg_clusterid: "{{ provision.clusterid }}"
+      r_openshift_aws_sg_region: "{{ provision.region }}"
+      r_openshift_aws_sg_type: compute
+
   - name: fetch the default subnet id
     ec2_vpc_subnet_facts:
       region: "{{ provision.region }}"

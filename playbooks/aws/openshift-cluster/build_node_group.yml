@@ -1,47 +1,48 @@
 ---
 - name: fetch recently created AMI
   ec2_ami_find:
-    region: "{{ provision.region }}"
+    region: "{{ openshift_region }}"
     sort: creationDate
     sort_order: descending
-    name: "{{ provision.build.ami_name }}*"
-    ami_tags: "{{ provision.build.openshift_ami_tags }}"
+    name: "{{ openshift_ami_name }}*"
+    ami_tags: "{{ openshift_ami_tags }}"
     #no_result_action: fail
   register: amiout
+  when: not openshift_use_custom_ami
 
 - block:
   - name: "Create {{ openshift_build_node_type }} sgs"
     include_role:
       name: openshift_aws_sg
     vars:
-      r_openshift_aws_sg_clusterid: "{{ provision.clusterid }}"
-      r_openshift_aws_sg_region: "{{ provision.region }}"
+      r_openshift_aws_sg_clusterid: "{{ openshift_clusterid }}"
+      r_openshift_aws_sg_region: "{{ openshift_region }}"
       r_openshift_aws_sg_type: "{{ openshift_build_node_type }}"
 
   - name: "generate a launch config name for {{ openshift_build_node_type }}"
     set_fact:
-      launch_config_name: "{{ provision.clusterid }}-{{ openshift_build_node_type }}-{{ ansible_date_time.epoch }}"
+      launch_config_name: "{{ openshift_clusterid }}-{{ openshift_build_node_type }}-{{ ansible_date_time.epoch }}"
 
   - name: create "{{ openshift_build_node_type }} launch config"
     include_role:
       name: openshift_aws_launch_config
     vars:
       r_openshift_aws_launch_config_name: "{{ launch_config_name }}"
-      r_openshift_aws_launch_config_clusterid: "{{ provision.clusterid }}"
-      r_openshift_aws_launch_config_region: "{{ provision.region }}"
-      r_openshift_aws_launch_config: "{{ provision.node_group_config }}"
+      r_openshift_aws_launch_config_clusterid: "{{ openshift_clusterid }}"
+      r_openshift_aws_launch_config_region: "{{ openshift_region }}"
+      r_openshift_aws_launch_config: "{{ openshift_node_group_config }}"
       r_openshift_aws_launch_config_type: "{{ openshift_build_node_type }}"
-      r_openshift_aws_launch_config_custom_image: "{{ '' if 'results' not in amiout else amiout.results[0].ami_id }}"
+      r_openshift_aws_launch_config_custom_image: "{{ '' if 'results' not in amiout and amiout.results|length > 0 else amiout.results[0].ami_id }}"
       r_openshift_aws_launch_config_bootstrap_token: "{{ (local_bootstrap['content'] |b64decode) if local_bootstrap is defined else '' }}"
 
   - name: "create {{ openshift_build_node_type }} node groups"
     include_role:
       name: openshift_aws_node_group
     vars:
-      r_openshift_aws_node_group_name: "{{ provision.clusterid }} openshift {{ openshift_build_node_type }}"
+      r_openshift_aws_node_group_name: "{{ openshift_clusterid }} openshift {{ openshift_build_node_type }}"
       r_openshift_aws_node_group_lc_name: "{{ launch_config_name }}"
-      r_openshift_aws_node_group_clusterid: "{{ provision.clusterid }}"
-      r_openshift_aws_node_group_region: "{{ provision.region }}"
-      r_openshift_aws_node_group_config: "{{ provision.node_group_config }}"
+      r_openshift_aws_node_group_clusterid: "{{ openshift_clusterid }}"
+      r_openshift_aws_node_group_region: "{{ openshift_region }}"
+      r_openshift_aws_node_group_config: "{{ openshift_node_group_config }}"
       r_openshift_aws_node_group_type: "{{ openshift_build_node_type }}"
-      r_openshift_aws_node_group_subnet_name: "{{ provision.vpc.subnets[provision.region][0].az }}"
+      r_openshift_aws_node_group_subnet_name: "{{ openshift_subnet_name }}"

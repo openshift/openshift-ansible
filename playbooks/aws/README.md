@@ -49,12 +49,17 @@ provision:
   region: "{{ region }}"
 
   build:
+    ami_name: "openshift-gi-"
     base_image: ami-bdd5d6ab # base image for AMI to build from
+
     # when creating an encrypted AMI please specify use_encryption
     use_encryption: False
 
   # for s3 registry backend
   openshift_registry_s3: True
+
+  # whether to use custome ami for each node type
+  use_custom_ami: False
 
   # if using custom certificates these are required for the ELB
   iam_cert_ca:
@@ -116,6 +121,37 @@ Repeat the following setup for the infra and compute node groups.  This most lik
 
 #### Step 1
 
+Once the vars.yml file has been updated with the correct settings for the desired AWS account then we are ready to build an AMI.
+
+```
+$ ansible-playbook build_ami.yml
+```
+
+1. This script will build a VPC. Default name will be clusterid if not specified.
+2. Create an ssh key required for the instance.
+3. Create a security group.
+4. Create an instance.
+5. Run some setup roles to ensure packages and services are correctly configured.
+6. Create the AMI.
+7. If encryption is desired
+  - A KMS key is created with the name of $clusterid
+  - An encrypted AMI will be produced with $clusterid KMS key
+8. Terminate the instance used to configure the AMI.
+
+#### Step 2
+
+Now that we have created an AMI for our Openshift installation, that AMI id needs to be placed in the `vars.yml` file.  To do so update the following fields (The AMI can be captured from the output of the previous step or found in the ec2 console under AMIs):
+
+```
+  # when creating an encrypted AMI please specify use_encryption
+  use_encryption: False # defaults to false
+```
+
+**Note**: If using encryption, specify with `use_encryption: True`.  This will ensure to take the recently created AMI and encrypt it to be used later.  If encryption is not desired then set the value to false. The AMI id will be fetched and used according to its most recent creation date.
+
+#### Step 3
+
+>>>>>>> Fixing variables and allowing custom ami.
 Create an openshift-ansible inventory file to use for a byo installation.  The exception here is that there will be no hosts specified by the inventory file.  Here is an example:
 
 ```ini

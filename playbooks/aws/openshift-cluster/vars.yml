@@ -14,13 +14,16 @@ provision:
     # when creating an encrypted AMI please specify use_encryption
     use_encryption: False
 
-    openshift_ami_tags:
+    ami_tags:
       bootstrap: "true"
       openshift-created: "true"
       clusterid: "{{ clusterid }}"
 
   # Use s3 backed registry storage
   openshift_registry_s3: True
+
+  # whether to use custome ami for each node type
+  use_custom_ami: False
 
   # if using custom certificates these are required for the ELB
   iam_cert_ca:
@@ -45,7 +48,7 @@ provision:
     # master specific cluster node settings
     master:
       instance_type: m4.xlarge
-      ami: ami-cdeec8b6  # if using an encrypted AMI this will be replaced
+      ami: ami-cdeec8b6  # if using an encrypted or custom AMI this will be replaced
       volumes:
       - device_name: /dev/sdb
         volume_size: 100
@@ -65,7 +68,7 @@ provision:
     # compute specific cluster node settings
     compute:
       instance_type: m4.xlarge
-      ami: ami-cdeec8b6
+      ami: ami-cdeec8b6  # if using an encrypted or custom AMI this will be replaced
       volumes:
       - device_name: /dev/sdb
         volume_size: 100
@@ -84,7 +87,7 @@ provision:
     # infra specific cluster node settings
     infra:
       instance_type: m4.xlarge
-      ami: ami-cdeec8b6
+      ami: ami-cdeec8b6  # if using an encrypted or custom AMI this will be replaced
       volumes:
       - device_name: /dev/sdb
         volume_size: 100
