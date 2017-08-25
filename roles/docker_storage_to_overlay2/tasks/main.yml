@@ -1,0 +1,166 @@
+---
+
+# As of 7.4, SELinux security labels are now supported
+# on the OverlayFS file system (see RHEL release notes).
+- name: Check if distribution supports overlayfs (RHEL/CentOS)
+  when: ansible_distribution in ["RedHat", "CentOS"]
+  assert:
+    that: ansible_distribution_version | version_compare("7.4", "ge")
+    msg: "The OverlayFS file system only works with SELinux in {{ ansible_distribution }} 7.4 or later."
+
+- name: Install or update required packages
+  package:
+    name: "{{ item.key }}"
+    state: latest
+  with_dict: "{{ docker_storage_to_overlay2_package_requirements }}"
+
+- name: Capture storage setup configuration
+  slurp:
+    src: "{{ docker_storage_to_overlay2_storage_setup_path }}"
+  register: storage_setup
+
+- name: Isolate disk quota from dm.basesize, if present
+  set_fact:
+    disk_quota: "{{ storage_setup['content'] | b64decode | regex_search('(?<=dm.basesize=)(\\w+)', '\\1', multiline=True) }}"
+
+- name: Check package versions for overlay2 disk quota support
+  when: disk_quota|length > 0
+  block:
+
+  - name: "Get {{ item.key }} version"
+    repoquery:
+      name: "{{ item.key }}"
+      query_type: installed
+    register: package_version
+    with_dict: "{{ docker_storage_to_overlay2_package_requirements }}"
+
+  - name: "Ensure {{ item.item.key }} >= {{ item.item.value.minimum }}"
+    assert:
+      that: item.results.versions.latest_full | version_compare(item.item.value.minimum, "ge")
+      msg: "{{ item.item.key }} >= {{ item.item.value.minimum }} required for {{ item.item.value.reason }}"
+    with_items: "{{ package_version.results }}"
+
+- name: Check which optional services are available
+  command: systemctl status {{ item }}
+  register: service_available
+  ignore_errors: yes
+  changed_when: False
+  with_items: "{{ docker_storage_to_overlay2_optional_service_names }}"
+
+- name: Add available optional services to service list
+  when: item.rc == 0
+  set_fact:
+    docker_storage_to_overlay2_service_names: "{{ [item.item] + docker_storage_to_overlay2_service_names }}"
+  with_items: "{{ service_available.results }}"
+
+# Limit the recursion depth. If an immutable flag is present, it's
+# most likely on /var/lib/docker or an immediate child directory.
+#
+# XXX The find module lacks a "maxdepth" option, and both the find
+#     module and GNU command lack a way to search for an immutable
+#     file attribute. So we have to break this into multiple tasks.
+- name: Find directories under /var/lib/docker
+  command: find /var/lib/docker -maxdepth 1 -type d
+  register: directories
+  changed_when: False
+
+- name: Lookup extended attributes on directories
+  stat:
+    path: "{{ item }}"
+    get_attributes: yes
+  register: directory_attributes
+  with_items: "{{ directories.stdout_lines }}"
+
+- name: Initialize list for directories
+  set_fact:
+    immutable_directories: []
+
+- name: Filter immutable directories
+  when: "'immutable' in item.stat.attributes"
+  set_fact:
+    immutable_directories: "{{ immutable_directories + [item.item] }}"
+  with_items: "{{ directory_attributes.results }}"
+
+- name: Stop services
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items: "{{ docker_storage_to_overlay2_service_names }}"
+
+# XXX The file module can set these attributes, but you have to set them all
+#     at once.  chattr is still better at manipulating individual attributes.
+- name: Remove immutable flag on immutable directories
+  command: chattr -i "{{ item }}"
+  with_items: "{{ immutable_directories }}"
+
+# This step is highly destructive!
+- name: Remove Docker storage
+  command: atomic storage reset
+
+# Based on list_devicemapper_params() in container-storage-setup.
+- name: Remove any devicemapper-specific config keys
+  lineinfile:
+    path: "{{ docker_storage_to_overlay2_storage_setup_path }}"
+    regexp: "^{{ item }}="
+    state: absent
+  with_items:
+  - "AUTO_EXTEND_POOL"
+  - "CONTAINER_THINPOOL"
+  - "DEVICE_WAIT_TIMEOUT"
+
+- name: Remove any extra storage options for old driver
+  lineinfile:
+    path: "{{ docker_storage_to_overlay2_storage_setup_path }}"
+    regexp: "^{{ item }}="
+    state: absent
+  with_items:
+  - "EXTRA_STORAGE_OPTIONS"
+  - "EXTRA_DOCKER_STORAGE_OPTIONS"  # Deprecated
+
+- name: Change storage driver to overlay2
+  command: >
+    atomic storage modify --driver=overlay2
+    --rootfs=/var/lib/docker
+    --lvname={{ docker_storage_to_overlay2_lvname }}
+    --lvsize={{ docker_storage_to_overlay2_lvsize }}
+
+- name: Apply previous disk quota for overlay2
+  lineinfile:
+    path: "{{ docker_storage_to_overlay2_storage_setup_path }}"
+    line: EXTRA_STORAGE_OPTIONS="--storage-opt overlay2.size={{ disk_quota[0] }}"
+    state: present
+  when: disk_quota|length > 0
+
+- name: Recreate previously immutable directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items: "{{ immutable_directories }}"
+
+# XXX The file module can set these attributes, but you have to set them all
+#     at once.  chattr is still better at manipulating individual attributes.
+- name: Restore immutable flag to previously immutable directories
+  command: chattr +i "{{ item }}"
+  with_items: "{{ immutable_directories }}"
+
+- name: Start services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items: "{{ docker_storage_to_overlay2_service_names }}"
+
+- name: Reboot
+  command: systemctl reboot
+  async: 1
+  poll: 0
+  when: docker_storage_to_overlay2_reboot
+
+- name: Wait for SSH service
+  local_action:
+    module: wait_for
+      host={{ ansible_ssh_host }}
+      port=22
+      delay=3
+      timeout=600
+  sudo: False
+  when: docker_storage_to_overlay2_reboot

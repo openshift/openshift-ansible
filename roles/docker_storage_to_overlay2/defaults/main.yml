@@ -1,0 +1,4 @@
+---
+docker_storage_to_overlay2_lvname: "docker-root-lv"
+docker_storage_to_overlay2_lvsize: "100%FREE"
+docker_storage_to_overlay2_reboot: True
