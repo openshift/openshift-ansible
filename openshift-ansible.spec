@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.112.0%{?dist}
+Release:        0.113.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.113.0
+- openshift_version: enterprise accepts new style pre-release
+  (smilner@redhat.com)
+- Nuage changes for Atomic hosts OSE Integration
+  (rohan.s.parulekar@nuagenetworks.net)
+
 * Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.112.0
 - fix #5206.  Default ES cpu limit (jcantril@redhat.com)
 
