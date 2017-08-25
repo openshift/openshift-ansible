@@ -84,3 +84,35 @@
     assert:
       that: 'key_result.rc == 0'
       msg: "Keypair {{ openstack_ssh_public_key }} is not available"
+
+# Check that custom images and flavors exist
+- hosts: localhost
+
+  # Include variables that will be used by heat
+  vars_files:
+  - stack_params.yaml
+
+  tasks:
+  # Check that custom images are available
+  - include: custom_image_check.yaml
+    with_items:
+    - "{{ openstack_master_image }}"
+    - "{{ openstack_infra_image }}"
+    - "{{ openstack_node_image }}"
+    - "{{ openstack_lb_image }}"
+    - "{{ openstack_etcd_image }}"
+    - "{{ openstack_dns_image }}"
+    loop_control:
+      loop_var: image
+
+  # Check that custom flavors are available
+  - include: custom_flavor_check.yaml
+    with_items:
+    - "{{ master_flavor }}"
+    - "{{ infra_flavor }}"
+    - "{{ node_flavor }}"
+    - "{{ lb_flavor }}"
+    - "{{ etcd_flavor }}"
+    - "{{ dns_flavor }}"
+    loop_control:
+      loop_var: flavor
