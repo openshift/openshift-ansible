@@ -14,3 +14,11 @@
     (not master_controllers_service_status_changed | default(false)) and
     openshift.master.cluster_method == 'native'
   ignore_errors: yes
+
+- name: restart node
+  become: yes
+  systemd: name={{ openshift.common.service_type }}-node state=restarted
+
+- name: save iptable rules
+  become: yes
+  command: iptables-save

@@ -1,4 +1,5 @@
 ---
+# Common
 nuage_ca_master: "{{ groups.oo_first_master.0 }}"
 nuage_ca_master_crt_dir: /usr/share/nuage-openshift-certificates
 
@@ -15,3 +16,23 @@ nuage_node_cni_netconf_dir: /etc/cni/net.d
 
 nuage_mon_rest_server_port: "{{ nuage_openshift_monitor_rest_server_port | default('9443') }}"
 nuage_mon_cert_validity_period: "{{ nuage_cert_validity_period | default('3650') }}"
+
+# Master
+r_nuage_master_firewall_enabled: True
+r_nuage_master_use_firewalld: False
+
+r_nuage_master_os_firewall_deny: []
+r_nuage_master_os_firewall_allow:
+- service: openshift-monitor
+  port: "{{ nuage_mon_rest_server_port }}/tcp"
+
+# Node
+r_nuage_node_firewall_enabled: True
+r_nuage_node_use_firewalld: False
+
+r_nuage_node_os_firewall_deny: []
+r_nuage_node_os_firewall_allow:
+- service: vxlan
+  port: 4789/udp
+- service: nuage-monitor
+  port: "{{ nuage_mon_rest_server_port }}/tcp"

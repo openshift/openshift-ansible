@@ -1,0 +1,3 @@
+---
+# This role is meant to be run with include_role, which specifies
+# a task file to run.
