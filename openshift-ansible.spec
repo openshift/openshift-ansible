@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.17
+Version:        3.6.173.0.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Aug 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.18-1
+- fix #5206.  Default ES cpu limit (jcantril@redhat.com)
+- remove out of scope variable from exception message
+  (maxamillion@fedoraproject.org)
+- raise AosVersionException if no expected packages found by dnf query
+  (maxamillion@fedoraproject.org)
+- add dnf support to roles/openshift_health_checker/library/aos_version.py
+  (maxamillion@fedoraproject.org)
+
 * Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.17-1
 - 
 
