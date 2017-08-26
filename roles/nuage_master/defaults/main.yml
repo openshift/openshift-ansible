@@ -1,6 +1,6 @@
 ---
-r_nuage_master_firewall_enabled: True
-r_nuage_master_use_firewalld: False
+r_nuage_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_nuage_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 nuage_mon_rest_server_port: '9443'
 

@@ -52,8 +52,8 @@ openshift_storage_glusterfs_registry_heketi_ssh_port: "{{ openshift_storage_glus
 openshift_storage_glusterfs_registry_heketi_ssh_user: "{{ openshift_storage_glusterfs_heketi_ssh_user }}"
 openshift_storage_glusterfs_registry_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_heketi_ssh_sudo }}"
 openshift_storage_glusterfs_registry_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_heketi_ssh_keyfile | default(omit) }}"
-r_openshift_master_firewall_enabled: True
-r_openshift_master_use_firewalld: False
+r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 r_openshift_storage_glusterfs_os_firewall_deny: []
 r_openshift_storage_glusterfs_os_firewall_allow:
 - service: glusterfs_sshd
