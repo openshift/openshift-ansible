@@ -33,17 +33,6 @@
   - vars.yml
   tasks:
   - name: Delete the OpenStack Stack
-    command: 'heat stack-delete openshift-ansible-{{ cluster_id }}-stack'
-    register: stack_delete_result
-    changed_when: stack_delete_result.rc == 0
-    failed_when: stack_delete_result.rc != 0 and 'could not be found' not in stack_delete_result.stdout
-
-  - name: Wait for the completion of the OpenStack Stack deletion
-    shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
-    when: stack_delete_result.changed
-    register: stack_show_result
-    until: stack_show_result.stdout != 'DELETE_IN_PROGRESS'
-    retries: 60
-    delay: 5
-    failed_when: '"Stack not found" not in stack_show_result.stderr and
-                   stack_show_result.stdout != "DELETE_COMPLETE"'
+    os_stack:
+      name: "openshift-ansible-{{ cluster_id }}-stack"
+      state: absent

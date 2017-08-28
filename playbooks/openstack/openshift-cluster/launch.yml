@@ -7,96 +7,33 @@
   vars_files:
   - vars.yml
   tasks:
-  # TODO: Write an Ansible module for dealing with HEAT stacks
-  #       Dealing with the outputs is currently terrible
-
-  - name: Check OpenStack stack
-    command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
-    register: stack_show_result
-    changed_when: false
-    failed_when: stack_show_result.rc != 0 and 'Stack not found' not in stack_show_result.stderr
-
-  - set_fact:
-      heat_stack_action: 'stack-create'
-    when: stack_show_result.rc == 1
-  - set_fact:
-      heat_stack_action: 'stack-update'
-    when: stack_show_result.rc == 0
-
   - name: Create or Update OpenStack Stack
-    command: 'heat {{ heat_stack_action }} -f {{ openstack_infra_heat_stack }}
-             --timeout {{ openstack_heat_timeout }}
-             -P cluster_env={{ cluster_env }}
-             -P cluster_id={{ cluster_id }}
-             -P subnet_24_prefix={{ openstack_subnet_24_prefix }}
-             -P dns_nameservers={{ openstack_network_dns | join(",") }}
-             -P external_net={{ openstack_network_external_net }}
-             -P ssh_public_key="{{ openstack_ssh_public_key }}"
-             -P ssh_incoming={{ openstack_ssh_access_from }}
-             -P node_port_incoming={{ openstack_node_port_access_from }}
-             -P num_etcd={{ num_etcd }}
-             -P num_masters={{ num_masters }}
-             -P num_nodes={{ num_nodes }}
-             -P num_infra={{ num_infra }}
-             -P etcd_image={{ deployment_vars[deployment_type].image }}
-             -P master_image={{ deployment_vars[deployment_type].image }}
-             -P node_image={{ deployment_vars[deployment_type].image }}
-             -P infra_image={{ deployment_vars[deployment_type].image }}
-             -P etcd_flavor={{ openstack_flavor["etcd"] }}
-             -P master_flavor={{ openstack_flavor["master"] }}
-             -P node_flavor={{ openstack_flavor["node"] }}
-             -P infra_flavor={{ openstack_flavor["infra"] }}
-             openshift-ansible-{{ cluster_id }}-stack'
-    args:
-      chdir: '{{ playbook_dir }}'
-
-  - name: Wait for OpenStack Stack readiness
-    shell: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack | awk ''$2 == "stack_status" {print $4}'''
-    register: stack_show_status_result
-    until: stack_show_status_result.stdout not in ['CREATE_IN_PROGRESS', 'UPDATE_IN_PROGRESS']
-    retries: 30
-    delay: 5
-
-  - name: Display the stack resources
-    command: 'heat resource-list openshift-ansible-{{ cluster_id }}-stack'
-    register: stack_resource_list_result
-    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
-
-  - name: Display the stack status
-    command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
-    register: stack_show_result
-    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
-
-  - name: Delete the stack
-    command: 'heat stack-delete openshift-ansible-{{ cluster_id }}-stack'
-    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
-
-  - fail:
-      msg: |
-
-        +--------------------------------------+
-        |   ^                                  |
-        |  /!\ Failed to create the heat stack |
-        | /___\                                |
-        +--------------------------------------+
-
-        Here is the list of stack resources and their status:
-        {{ stack_resource_list_result.stdout }}
-
-        Here is the status of the stack:
-        {{ stack_show_result.stdout }}
-
-          ^   Failed to create the heat stack
-         /!\
-        /___\ Please check the `stack_status_reason` line in the above array to know why.
-    when: stack_show_status_result.stdout not in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']
-
-  - name: Read OpenStack Stack outputs
-    command: 'heat stack-show openshift-ansible-{{ cluster_id }}-stack'
-    register: stack_show_result
-
-  - set_fact:
-      parsed_outputs: "{{ stack_show_result | oo_parse_heat_stack_outputs }}"
+    os_stack:
+      name: openshift-ansible-{{ cluster_id }}-stack
+      parameters:
+        cluster_env: "{{ cluster_env }}"
+        cluster_id: "{{ cluster_id }}"
+        subnet_24_prefix: "{{ openstack_subnet_24_prefix }}"
+        dns_nameservers: "{{ openstack_network_dns | join(',') }}"
+        external_net: "{{ openstack_network_external_net }}"
+        ssh_public_key: "{{ openstack_ssh_public_key }}"
+        ssh_incoming: "{{ openstack_ssh_access_from }}"
+        node_port_incoming: "{{ openstack_node_port_access_from }}"
+        num_etcd: "{{ num_etcd }}"
+        num_masters: "{{ num_masters }}"
+        num_nodes: "{{ num_nodes }}"
+        num_infra: "{{ num_infra }}"
+        etcd_image: "{{ deployment_vars[deployment_type].image }}"
+        master_image: "{{ deployment_vars[deployment_type].image }}"
+        node_image: "{{ deployment_vars[deployment_type].image }}"
+        infra_image: "{{ deployment_vars[deployment_type].image }}"
+        etcd_flavor: "{{ openstack_flavor['etcd'] }}"
+        master_flavor: "{{ openstack_flavor['master'] }}"
+        node_flavor: "{{ openstack_flavor['node'] }}"
+        infra_flavor: "{{ openstack_flavor['infra'] }}"
+      timeout: "{{ openstack_heat_timeout }}"
+      template: "{{ openstack_infra_heat_stack }}"
+    register: stack_result
 
   - name: Add new etcd instances groups and variables
     add_host:
@@ -111,9 +48,9 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-    - '{{ parsed_outputs.etcd_names }}'
-    - '{{ parsed_outputs.etcd_ips }}'
-    - '{{ parsed_outputs.etcd_floating_ips }}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "etcd_names" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "etcd_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "etcd_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
 
   - name: Add new master instances groups and variables
     add_host:
@@ -128,9 +65,9 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-    - '{{ parsed_outputs.master_names }}'
-    - '{{ parsed_outputs.master_ips }}'
-    - '{{ parsed_outputs.master_floating_ips }}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "master_names" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "master_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "master_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
 
   - name: Add new node instances groups and variables
     add_host:
@@ -145,9 +82,9 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-    - '{{ parsed_outputs.node_names }}'
-    - '{{ parsed_outputs.node_ips }}'
-    - '{{ parsed_outputs.node_floating_ips }}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "node_names" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "node_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "node_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
 
   - name: Add new infra instances groups and variables
     add_host:
@@ -162,18 +99,18 @@
         public_v4: '{{ item[2] }}'
         private_v4: '{{ item[1] }}'
     with_together:
-    - '{{ parsed_outputs.infra_names }}'
-    - '{{ parsed_outputs.infra_ips }}'
-    - '{{ parsed_outputs.infra_floating_ips }}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "infra_names" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "infra_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "infra_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
 
   - name: Wait for ssh
     wait_for:
       host: '{{ item }}'
       port: 22
     with_flattened:
-    - '{{ parsed_outputs.master_floating_ips }}'
-    - '{{ parsed_outputs.node_floating_ips }}'
-    - '{{ parsed_outputs.infra_floating_ips }}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "master_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "node_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "infra_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
 
   - name: Wait for user setup
     command: 'ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=no -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null {{ deployment_vars[deployment_type].ssh_user }}@{{ item }} echo {{ deployment_vars[deployment_type].ssh_user }} user is setup'
@@ -182,9 +119,9 @@
     retries: 30
     delay: 1
     with_flattened:
-    - '{{ parsed_outputs.master_floating_ips }}'
-    - '{{ parsed_outputs.node_floating_ips }}'
-    - '{{ parsed_outputs.infra_floating_ips }}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "master_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "node_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
+    - '{% for ok in stack_result["stack"]["outputs"] %}{% if ok["output_key"] == "infra_floating_ips" %}{{ ok.output_value }}{%endif%}{%endfor%}'
 
 - include: update.yml
 
