@@ -80,7 +80,8 @@ def skipped(result):
     None,
     {},
 ])
-def test_action_plugin_missing_openshift_facts(plugin, task_vars):
+def test_action_plugin_missing_openshift_facts(plugin, task_vars, monkeypatch):
+    monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
     result = plugin.run(tmp=None, task_vars=task_vars)
 
     assert failed(result, msg_has=['openshift_facts'])
@@ -94,7 +95,7 @@ def test_action_plugin_cannot_load_checks_with_the_same_name(plugin, task_vars, 
 
     result = plugin.run(tmp=None, task_vars=task_vars)
 
-    assert failed(result, msg_has=['unique', 'duplicate_name', 'FakeCheck'])
+    assert failed(result, msg_has=['duplicate', 'duplicate_name', 'FakeCheck'])
 
 
 def test_action_plugin_skip_non_active_checks(plugin, task_vars, monkeypatch):
@@ -217,24 +218,21 @@ def test_resolve_checks_ok(names, all_checks, expected):
     assert resolve_checks(names, all_checks) == expected
 
 
-@pytest.mark.parametrize('names,all_checks,words_in_exception,words_not_in_exception', [
+@pytest.mark.parametrize('names,all_checks,words_in_exception', [
     (
         ['testA', 'testB'],
         [],
         ['check', 'name', 'testA', 'testB'],
-        ['tag', 'group', '@'],
     ),
     (
         ['@group'],
         [],
         ['tag', 'name', 'group'],
-        ['check', '@'],
     ),
     (
         ['testA', 'testB', '@group'],
         [],
         ['check', 'name', 'testA', 'testB', 'tag', 'group'],
-        ['@'],
     ),
     (
         ['testA', 'testB', '@group'],
@@ -244,13 +242,10 @@ def test_resolve_checks_ok(names, all_checks, expected):
             fake_check('from_group_2', ['preflight', 'group']),
         ],
         ['check', 'name', 'testA', 'testB'],
-        ['tag', 'group', '@'],
     ),
 ])
-def test_resolve_checks_failure(names, all_checks, words_in_exception, words_not_in_exception):
+def test_resolve_checks_failure(names, all_checks, words_in_exception):
     with pytest.raises(Exception) as excinfo:
         resolve_checks(names, all_checks)
     for word in words_in_exception:
         assert word in str(excinfo.value)
-    for word in words_not_in_exception:
-        assert word not in str(excinfo.value)
