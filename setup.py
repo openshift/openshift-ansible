@@ -6,7 +6,7 @@ from __future__ import print_function
 import os
 import fnmatch
 import re
-
+import subprocess
 import yaml
 
 # Always prefer setuptools over distutils
@@ -16,6 +16,7 @@ from six import string_types
 from yamllint.config import YamlLintConfig
 from yamllint.cli import Format
 from yamllint import linter
+
 
 def find_files(base_dir, exclude_dirs, include_dirs, file_regex):
     ''' find files matching file_regex '''
@@ -104,13 +105,14 @@ class OpenShiftAnsibleYamlLint(Command):
                         first = False
 
                     print(format_method(problem, yaml_file))
-                    if problem.level == linter.PROBLEM_LEVELS['error']:
+                    if problem.level == linter.PROBLEM_LEVELS[2]:
                         has_errors = True
-                    elif problem.level == linter.PROBLEM_LEVELS['warning']:
+                    elif problem.level == linter.PROBLEM_LEVELS[1]:
                         has_warnings = True
 
-        assert not has_errors, 'yamllint errors found'
-        assert not has_warnings, 'yamllint warnings found'
+        if has_errors or has_warnings:
+            print('yammlint issues found')
+            raise SystemExit(1)
 
 
 class OpenShiftAnsiblePylint(PylintCommand):
@@ -142,6 +144,68 @@ class OpenShiftAnsiblePylint(PylintCommand):
     def with_project_on_sys_path(self, func, func_args, func_kwargs):
         ''' override behavior, since we don't need to build '''
         return func(*func_args, **func_kwargs)
+
+
+class OpenShiftAnsibleSyntaxCheck(Command):
+    ''' Command to run Ansible syntax check'''
+    description = "Run Ansible syntax check"
+    user_options = []
+
+    # Colors
+    FAIL = '\033[91m'  # Red
+    ENDC = '\033[0m'  # Reset
+
+    def initialize_options(self):
+        ''' initialize_options '''
+        pass
+
+    def finalize_options(self):
+        ''' finalize_options '''
+        pass
+
+    def run(self):
+        ''' run command '''
+
+        has_errors = False
+        playbooks = set()
+        included_playbooks = set()
+
+        for yaml_file in find_files(
+                os.path.join(os.getcwd(), 'playbooks', 'byo'),
+                None, None, r'\.ya?ml$'):
+            with open(yaml_file, 'r') as contents:
+                for task in yaml.safe_load(contents):
+                    if not isinstance(task, dict):
+                        # Skip yaml files which do not contain plays or includes
+                        continue
+                    if 'include' in task:
+                        # Add the playbook and capture included playbooks
+                        playbooks.add(yaml_file)
+                        included_file_name = task['include'].split()[0]
+                        included_file = os.path.normpath(
+                            os.path.join(os.path.dirname(yaml_file),
+                                         included_file_name))
+                        included_playbooks.add(included_file)
+                    elif 'hosts' in task:
+                        playbooks.add(yaml_file)
+        # Evaluate the difference between all playbooks and included playbooks
+        entrypoint_playbooks = sorted(playbooks.difference(included_playbooks))
+        print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
+        # Syntax each entry point playbook
+        for playbook in entrypoint_playbooks:
+            print('-' * 60)
+            print('Syntax checking playbook: {}'.format(playbook))
+            try:
+                subprocess.check_output(
+                    ['ansible-playbook', '-i localhost,',
+                     '--syntax-check', playbook]
+                )
+            except subprocess.CalledProcessError as cpe:
+                print('{}Execution failed: {}{}'.format(
+                    self.FAIL, cpe, self.ENDC))
+                has_errors = True
+        if has_errors:
+            raise SystemExit(1)
 
 
 class UnsupportedCommand(Command):
@@ -186,6 +250,7 @@ setup(
         'sdist': UnsupportedCommand,
         'lint': OpenShiftAnsiblePylint,
         'yamllint': OpenShiftAnsibleYamlLint,
+        'ansible_syntax': OpenShiftAnsibleSyntaxCheck,
     },
     packages=[],
 )
