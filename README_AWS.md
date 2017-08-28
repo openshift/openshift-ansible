@@ -47,11 +47,11 @@ You may also want to allow access from the outside world on the following ports:
 Determine your subnet and setup the VPC
 ---------------------------------------
 
-In the AWS VPC console, look up your subnet ID for the region you want to use and set it as such:
+In the AWS VPC console, look up your subnet CIDR range for the region you want to use and set it as such:
 
-- export ec2_vpc_subnet='my_vpc_subnet'
+- export ec2_vpc_subnet='10.90.0.0/16' (For an example VPC of 10.90.0.0/16)
 
-Go to Your VPCs, select the VPC, and under Actions -> DNS Hostnames, set to Yes and Save.
+Next, allow DNS hostnames on your VPC. Go to Your VPCs, select the VPC, and under Actions -> DNS Hostnames, set to Yes and Save.
 
 
 (Optional) Setup your $HOME/.ssh/config file
@@ -66,6 +66,11 @@ Host *.compute-1.amazonaws.com
 ```
 
 Alternatively, you can configure your ssh-agent to hold the credentials to connect to your AWS instances.
+
+```
+   eval `ssh-agent -s`     (Start ssh-agent in the background)
+   ssh-add ~/.ssh/id_rsa   (or whatever path is to the private key you used to create the cluster)
+```
 
 (Optional) Choose where the cluster will be launched
 ----------------------------------------------------
