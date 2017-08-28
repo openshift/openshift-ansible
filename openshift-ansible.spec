@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.117.0%{?dist}
+Release:        0.118.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Aug 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.118.0
+- Fix origin metrics and logging container version
+  (gevorg15@users.noreply.github.com)
+- Removing deprecation warnings for when conditions. (kwoodson@redhat.com)
+- Default to global setting for firewall. (kwoodson@redhat.com)
+- system-containers: Fallback for system_images_registry (smilner@redhat.com)
+- inventory: Add system_images_registry example (smilner@redhat.com)
+- Remove near-meta role openshift_cli_facts (mgugino@redhat.com)
+- Update error message: s/non-unique/duplicate (rhcarvalho@gmail.com)
+- Make pylint disables more specific (rhcarvalho@gmail.com)
+- Handle exceptions in failure summary cb plugin (rhcarvalho@gmail.com)
+- Rewrite failure summary callback plugin (rhcarvalho@gmail.com)
+- Handle more exceptions when running checks (rhcarvalho@gmail.com)
+- List known checks/tags when check name is invalid (rhcarvalho@gmail.com)
+- List existing health checks when none is requested (rhcarvalho@gmail.com)
+- Add playbook for running arbitrary health checks (rhcarvalho@gmail.com)
+- Update health check README (rhcarvalho@gmail.com)
+- Standardize openshift_provisioners entry point (rteague@redhat.com)
+- Remove unused upgrade playbook (rteague@redhat.com)
+- Bug 1471322: logging roles based image versions (jwozniak@redhat.com)
+
 * Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.117.0
 - Standardize openshift-checks code paths (rteague@redhat.com)
 
