@@ -1,7 +1,7 @@
 ---
 
 __ansible_service_broker_image_prefix: registry.access.redhat.com/openshift3/ose-
-__ansible_service_broker_image_tag: latest
+__ansible_service_broker_image_tag: v3.6
 
 __ansible_service_broker_etcd_image_prefix: rhel7/
 __ansible_service_broker_etcd_image_tag: latest
