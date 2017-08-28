@@ -35,10 +35,7 @@ deployment_vars:
 # Default values for provisioning.
 provision_cluster_id: "{{ openshift_cluster_id | default('default') }}"
 
-provision_aws_default_build: # build specific variables here
-  ami_name: "{{ provision_ami_name | default("openshift-gi") }}"
-  base_image: "{{ provision_aws_build_ami | default("TBD") }}" # base image for AMI to build from
-  yum_repositories:  # this is an example repository but it requires sslclient info
+provision_aws_yum_repos_default:
   - name: openshift-repo
     file: openshift-repo
     description: OpenShift Builds
@@ -50,41 +47,59 @@ provision_aws_default_build: # build specific variables here
     sslclientkey: "/var/lib/yum/client-key.pem"
     gpgkey: "https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted"
 
+provision_aws_openshift_ami_tags_default:
+  bootstrap: "true"
+  openshift-created: "true"
+  clusterid: "{{ provision_cluster_id }}"
+
+provision_aws_default_build: # build specific variables here
+  ami_name: "{{ provision_ami_name | default("openshift-gi") }}"
+  base_image: "{{ provision_aws_build_ami | default("TBD") }}" # base image for AMI to build from
+  yum_repositories: "{{ provision_aws_yum_repos | default(provision_aws_yum_repos_default) }}"
   # when creating an encrypted AMI please specify use_encryption
   use_encryption: False
+  openshift_ami_tags: "{{ provision_aws_openshift_ami_tags | default(provision_aws_openshift_ami_tags_default) }}"
 
-  openshift_ami_tags:
-    bootstrap: "true"
-    openshift-created: "true"
-    clusterid: "{{ provision_cluster_id }}"
+provision_aws_iam_cert_ca_default:
+  name: "{{ provision_cluster_id }}_openshift"
+  cert_path: '/path/to/wildcard.<clusterid>.example.com.crt'
+  key_path: '/path/to/wildcard.<clusterid>.example.com.key'
+  chain_path: '/path/to/cert.ca.crt'
+
+provision_aws_vpc_default:
+  cidr: 172.31.0.0/16
+  subnets:
+    us-east-1:  # These are us-east-1 region defaults. Ensure this matches your region
+    - cidr: 172.31.48.0/20
+      az: "us-east-1c"
+    - cidr: 172.31.32.0/20
+      az: "us-east-1e"
+    - cidr: 172.31.16.0/20
+      az: "us-east-1a"
 
 provision: "{{ openshift_aws_provision | default(provision_default) }}"
+
+# Example of how to create dictionary for provision_aws_instance_users
+#provision_aws_instance_users:
+#  - key_name: myuser_key
+#    username: myuser
+#    pub_key: |
+#           ssh-rsa AAAA== myuser@system
 
 provision_default:
   region: "{{ provision_aws_region | default('us-east-1') }}"
   build: "{{ provision_aws_default_build }}"
   # Use s3 backed registry storage
-  openshift_registry_s3: True
-
+  openshift_registry_s3: "{{ openshift_registry_s3 | default(True) }}"
   # if using custom certificates these are required for the ELB
-  iam_cert_ca:
-    name: "{{ clusterid }}_openshift"
-    cert_path: '/path/to/wildcard.<clusterid>.example.com.crt'
-    key_path: '/path/to/wildcard.<clusterid>.example.com.key'
-    chain_path: '/path/to/cert.ca.crt'
-
-  instance_users:
-  - key_name: myuser_key
-    username: myuser
-    pub_key: |
-           ssh-rsa AAAA== myuser@system
+  iam_cert_ca: "{{ provision_aws_iam_cert_ca | default(provision_aws_iam_cert_ca_default) }}"
+  instance_users: "{{ provision_aws_instance_users | default([]) }}"
 
   node_group_config:
     tags:
-      clusterid: "{{ clusterid }}"
-      environment: stg
-
-    ssh_key_name: myuser_key
+      clusterid: "{{ provision_cluster_id }}"
+      environment: "{{ provision_aws_environment | default('stg') }}"
+    ssh_key_name: "{{ provision_aws_ssh_key_name }}"
 
     # master specific cluster node settings
     master:
@@ -145,13 +160,4 @@ provision_default:
         sub-host-type: infra
 
   # vpc settings
-  vpc:
-    cidr: 172.31.0.0/16
-    subnets:
-      us-east-1:  # These are us-east-1 region defaults. Ensure this matches your region
-      - cidr: 172.31.48.0/20
-        az: "us-east-1c"
-      - cidr: 172.31.32.0/20
-        az: "us-east-1e"
-      - cidr: 172.31.16.0/20
-        az: "us-east-1a"
+  vpc: "{{ provision_aws_vpc | default(provision_aws_vpc_default) }}"
