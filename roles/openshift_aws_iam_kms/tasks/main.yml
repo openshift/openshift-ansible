@@ -1,7 +1,7 @@
 ---
 - fail:
     msg: "{{ item.name }} needs to be defined."
-  when: "{{ item.cond }}"
+  when: item.cond | bool
   with_items:
   - name: "{{ r_openshift_aws_iam_kms_alias }}"
     cond: "{{ r_openshift_aws_iam_kms_alias is undefined }}"
