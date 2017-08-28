@@ -1,1 +1,2 @@
 ---
+openshift_node_dnsmasq_install_network_manager_hook: true

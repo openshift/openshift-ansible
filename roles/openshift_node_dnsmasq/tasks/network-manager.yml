@@ -5,5 +5,6 @@
     dest: /etc/NetworkManager/dispatcher.d/
     mode: 0755
   notify: restart NetworkManager
+  when: openshift_node_dnsmasq_install_network_manager_hook | default(true) | bool
 
 - meta: flush_handlers

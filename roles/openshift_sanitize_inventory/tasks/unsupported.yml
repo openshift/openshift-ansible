@@ -11,6 +11,14 @@
       will not function. This also means that NetworkManager must be installed
       enabled and responsible for management of the primary interface.
 
+- name: Ensure that openshift_node_dnsmasq_install_network_manager_hook is true
+  when:
+  - not openshift_node_dnsmasq_install_network_manager_hook | default(true) | bool
+  fail:
+    msg: |-
+      The NetworkManager hook is considered a critical part of the DNS
+      infrastructure.
+
 - set_fact:
     __using_dynamic: True
   when:
