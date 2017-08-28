@@ -3,6 +3,16 @@
 # playbooks.  For that reason the ha_svc variables are use set_fact instead of
 # the vars directory on the role.
 
+# This play may be consumed outside the role, we need to ensure that
+# openshift_master_config_dir is set.
+- name: Set openshift_master_config_dir if unset
+  set_fact:
+    openshift_master_config_dir: '/var/lib/origin'
+  when: openshift_master_config_dir is not defined
+
+- name: Remove the legacy master service if it exists
+  include: clean_systemd_units.yml
+
 - name: Init HA Service Info
   set_fact:
     containerized_svc_dir: "/usr/lib/systemd/system"
