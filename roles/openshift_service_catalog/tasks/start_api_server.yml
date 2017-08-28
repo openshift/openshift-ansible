@@ -10,7 +10,7 @@
 # wait to see that the apiserver is available
 - name: wait for api server to be ready
   command: >
-    curl -k https://apiserver.kube-service-catalog.svc/healthz
+    curl -k https://apiserver.kube-service-catalog.svc.cluster.local/healthz
   args:
     # Disables the following warning:
     # Consider using get_url or uri module rather than running curl
