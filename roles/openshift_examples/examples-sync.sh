@@ -13,6 +13,9 @@ find ${EXAMPLES_BASE} -name '*.json' -delete
 TEMP=`mktemp -d`
 pushd $TEMP
 
+if [ ! -d "${EXAMPLES_BASE}" ]; then
+  mkdir -p ${EXAMPLES_BASE}
+fi
 wget https://github.com/openshift/origin/archive/master.zip -O origin-master.zip
 wget https://github.com/jboss-fuse/application-templates/archive/GA.zip -O fis-GA.zip
 wget https://github.com/jboss-openshift/application-templates/archive/${XPAAS_VERSION}.zip -O application-templates-master.zip
@@ -37,5 +40,6 @@ popd
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/dotnet_imagestreams.json         -O ${EXAMPLES_BASE}/image-streams/dotnet_imagestreams.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-example.json           -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-example.json
 wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-pgsql-persistent.json    -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-pgsql-persistent.json
+wget https://raw.githubusercontent.com/redhat-developer/s2i-dotnetcore/master/templates/dotnet-runtime-example.json    -O ${EXAMPLES_BASE}/quickstart-templates/dotnet-runtime-example.json
 
 git diff files/examples
