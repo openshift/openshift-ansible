@@ -42,6 +42,9 @@
     command: >
       {{ openshift.common.client_binary }} adm manage-node {{ openshift.common.hostname | lower }} --schedulable=true
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: openshift.node.schedulable | bool
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade and openshift.node.schedulable | bool
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
+    - inventory_hostname in groups.oo_nodes_to_upgrade
+    - openshift.node.schedulable | bool
 
