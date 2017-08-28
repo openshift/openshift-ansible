@@ -22,7 +22,7 @@
   with_items:
     - hawkular-metrics-certificate
     - hawkular-metrics-account
-  when: "not {{ openshift_metrics_heapster_standalone | bool }}"
+  when: not openshift_metrics_heapster_standalone | bool
 
 - name: Generating serviceaccount for heapster
   template: src=serviceaccount.j2 dest={{mktemp.stdout}}/templates/metrics-{{obj_name}}-sa.yaml

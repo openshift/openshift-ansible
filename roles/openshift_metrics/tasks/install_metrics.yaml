@@ -10,7 +10,7 @@
     - cassandra
   loop_control:
     loop_var: include_file
-  when: "not {{ openshift_metrics_heapster_standalone | bool }}"
+  when: not openshift_metrics_heapster_standalone | bool
 
 - name: Install Heapster Standalone
   include: install_heapster.yaml
