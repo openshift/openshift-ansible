@@ -108,6 +108,20 @@
       when:
       - l_any_system_container | bool
 
+  - name: Default system_images_registry to a enterprise registry
+    set_fact:
+      system_images_registry: "registry.access.redhat.com"
+    when:
+    - system_images_registry is not defined
+    - openshift_deployment_type == "openshift-enterprise"
+
+  - name: Default system_images_registry to community registry
+    set_fact:
+      system_images_registry: "docker.io"
+    when:
+    - system_images_registry is not defined
+    - openshift_deployment_type == "origin"
+
   - name: Gather Cluster facts and set is_containerized if needed
     openshift_facts:
       role: common
@@ -125,7 +139,7 @@
         is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
         is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
         etcd_runtime: "{{ l_etcd_runtime }}"
-        system_images_registry: "{{ system_images_registry | default('') }}"
+        system_images_registry: "{{ system_images_registry }}"
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"
         portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"

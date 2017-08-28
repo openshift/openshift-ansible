@@ -56,6 +56,9 @@ openshift_release=v3.6
 #openshift_use_node_system_container=False
 #openshift_use_master_system_container=False
 #openshift_use_etcd_system_container=False
+#
+# In either case, system_images_registry must be specified to be able to find the system images
+#system_images_registry="registry.access.redhat.com"
 
 # Install the openshift examples
 #openshift_install_examples=true
