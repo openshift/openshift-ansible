@@ -32,36 +32,37 @@ deployment_vars:
   openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
   atomic-enterprise: "{{ deployment_rhel7_ent_base }}"
 
-clusterid: mycluster
-region: us-east-1
+# Default values for provisioning.
+provision_cluster_id: "{{ openshift_cluster_id | default('default') }}"
 
-provision:
-  clusterid: "{{ clusterid }}"
-  region: "{{ region }}"
+provision_aws_default_build: # build specific variables here
+  ami_name: "{{ provision_ami_name | default("openshift-gi") }}"
+  base_image: "{{ provision_aws_build_ami | default("TBD") }}" # base image for AMI to build from
+  yum_repositories:  # this is an example repository but it requires sslclient info
+  - name: openshift-repo
+    file: openshift-repo
+    description: OpenShift Builds
+    baseurl: https://mirror.openshift.com/enterprise/online-int/latest/x86_64/os/
+    enabled: yes
+    gpgcheck: no
+    sslverify: no
+    sslclientcert: "/var/lib/yum/client-cert.pem"
+    sslclientkey: "/var/lib/yum/client-key.pem"
+    gpgkey: "https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted"
 
-  build:  # build specific variables here
-    ami_name: "openshift-gi-"
-    base_image: ami-bdd5d6ab  # base image for AMI to build from
-    yum_repositories:  # this is an example repository but it requires sslclient info
-    - name: openshift-repo
-      file: openshift-repo
-      description: OpenShift Builds
-      baseurl: https://mirror.openshift.com/enterprise/online-int/latest/x86_64/os/
-      enabled: yes
-      gpgcheck: no
-      sslverify: no
-      sslclientcert: "/var/lib/yum/client-cert.pem"
-      sslclientkey: "/var/lib/yum/client-key.pem"
-      gpgkey: "https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted"
+  # when creating an encrypted AMI please specify use_encryption
+  use_encryption: False
 
-    # when creating an encrypted AMI please specify use_encryption
-    use_encryption: False
+  openshift_ami_tags:
+    bootstrap: "true"
+    openshift-created: "true"
+    clusterid: "{{ provision_cluster_id }}"
 
-    openshift_ami_tags:
-      bootstrap: "true"
-      openshift-created: "true"
-      clusterid: "{{ clusterid }}"
+provision: "{{ openshift_aws_provision | default(provision_default) }}"
 
+provision_default:
+  region: "{{ provision_aws_region | default('us-east-1') }}"
+  build: "{{ provision_aws_default_build }}"
   # Use s3 backed registry storage
   openshift_registry_s3: True
 
