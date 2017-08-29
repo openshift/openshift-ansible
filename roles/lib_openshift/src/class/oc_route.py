@@ -68,9 +68,6 @@ class OCRoute(OpenShiftCLI):
     @staticmethod
     def get_cert_data(path, content):
         '''get the data for a particular value'''
-        if not path and not content:
-            return None
-
         rval = None
         if path and os.path.exists(path) and os.access(path, os.R_OK):
             rval = open(path).read()
@@ -109,14 +106,14 @@ class OCRoute(OpenShiftCLI):
         if params['tls_termination'] and params['tls_termination'].lower() != 'passthrough':  # E501
 
             for key, option in files.items():
-                if key == 'destcacert' and params['tls_termination'] != 'reencrypt':
+                if not option['path'] and not option['content']:
                     continue
 
                 option['value'] = OCRoute.get_cert_data(option['path'], option['content'])  # E501
 
                 if not option['value']:
                     return {'failed': True,
-                            'msg': 'Verify that you pass a value for %s' % key}
+                            'msg': 'Verify that you pass a correct value for %s' % key}
 
         rconfig = RouteConfig(params['name'],
                               params['namespace'],
