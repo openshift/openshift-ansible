@@ -1,11 +1,4 @@
 ---
-- include: ../openshift-cluster/evaluate_groups.yml
-
-- name: Gather facts
-  hosts: oo_etcd_to_config:oo_masters_to_config:oo_nodes_to_config
-  roles:
-  - openshift_facts
-
 - name: Update master count
   hosts: oo_masters:!oo_masters_to_config
   serial: 1

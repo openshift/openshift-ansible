@@ -14,6 +14,8 @@
     when:
     - g_new_node_hosts | default([]) | length == 0
 
+- include: ../../common/openshift-cluster/std_include.yml
+
 - include: ../../common/openshift-node/scaleup.yml
   vars:
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
