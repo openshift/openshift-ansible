@@ -1,36 +1,4 @@
 ---
-debug_level: 2
-
-deployment_rhel7_ent_base:
-  # rhel-7.1, requires cloud access subscription
-  image: "{{ lookup('oo_option', 'ec2_image') | default('ami-10251c7a', True) }}"
-  image_name: "{{ lookup('oo_option', 'ec2_image_name') | default(None, True) }}"
-  region: "{{ lookup('oo_option', 'ec2_region') | default('us-east-1', True) }}"
-  ssh_user: ec2-user
-  become: yes
-  keypair: "{{ lookup('oo_option', 'ec2_keypair') | default('libra', True) }}"
-  type: "{{ lookup('oo_option', 'ec2_instance_type') | default('m4.large', True) }}"
-  security_groups: "{{ lookup('oo_option', 'ec2_security_groups') | default([ 'public' ], True) }}"
-  vpc_subnet: "{{ lookup('oo_option', 'ec2_vpc_subnet') | default(omit, True) }}"
-  assign_public_ip: "{{ lookup('oo_option', 'ec2_assign_public_ip') | default(omit, True) }}"
-
-deployment_vars:
-  origin:
-    # centos-7, requires marketplace
-    image: "{{ lookup('oo_option', 'ec2_image') | default('ami-6d1c2007', True) }}"
-    image_name: "{{ lookup('oo_option', 'ec2_image_name') | default(None, True) }}"
-    region: "{{ lookup('oo_option', 'ec2_region') | default('us-east-1', True) }}"
-    ssh_user: centos
-    become: yes
-    keypair: "{{ lookup('oo_option', 'ec2_keypair') | default('libra', True) }}"
-    type: "{{ lookup('oo_option', 'ec2_instance_type') | default('m4.large', True) }}"
-    security_groups: "{{ lookup('oo_option', 'ec2_security_groups') | default([ 'public' ], True) }}"
-    vpc_subnet: "{{ lookup('oo_option', 'ec2_vpc_subnet') | default(omit, True) }}"
-    assign_public_ip: "{{ lookup('oo_option', 'ec2_assign_public_ip') | default(omit, True) }}"
-
-  enterprise: "{{ deployment_rhel7_ent_base }}"
-  openshift-enterprise: "{{ deployment_rhel7_ent_base }}"
-  atomic-enterprise: "{{ deployment_rhel7_ent_base }}"
 
 clusterid: mycluster
 region: us-east-1

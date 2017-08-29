@@ -12,8 +12,6 @@ And:
 
 - [`adhoc`](adhoc) is a generic home for playbooks and tasks that are community
   supported and not officially maintained.
-- [`aws`](aws), [`gce`](gce), [`libvirt`](libvirt) and [`openstack`](openstack)
-  are related to the [`bin/cluster`](../bin) tool and its usage is deprecated.
 
 Refer to the `README.md` file in each playbook directory for more information
 about them.

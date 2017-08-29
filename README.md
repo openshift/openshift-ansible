@@ -67,14 +67,10 @@ you are not running a stable release.
     dnf install -y ansible pyOpenSSL python-cryptography python-lxml
     ```
 
-2. Setup for a specific cloud:
+2. OpenShift Installation Documentation:
 
-  - [AWS](http://github.com/openshift/openshift-ansible/blob/master/README_AWS.md)
-  - [GCE](http://github.com/openshift/openshift-ansible/blob/master/README_GCE.md)
-  - [local VMs](http://github.com/openshift/openshift-ansible/blob/master/README_libvirt.md)
-  - Bring your own host deployments:
-      - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
-      - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
+    - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
+    - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
 
 ## Containerized OpenShift Ansible
 
