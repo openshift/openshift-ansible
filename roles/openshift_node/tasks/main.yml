@@ -150,6 +150,21 @@
   notify:
     - restart node
 
+- name: Check for credentials file for registry auth
+  stat:
+    path: "{{oreg_auth_credentials_path }}"
+  when:
+    - oreg_auth_user is defined
+  register: node_oreg_auth_credentials_stat
+
+- name: Create credentials for registry auth
+  command: "docker --config={{ oreg_auth_credentials_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
+  when:
+    - oreg_auth_user is defined
+    - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
+  notify:
+    - restart node
+
 - name: Configure AWS Cloud Provider Settings
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
