@@ -13,12 +13,12 @@
   - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
     fail:
       msg: This playbook requires g_master_hosts or g_new_master_hosts to be set
-    when: g_master_hosts is not defined or g_new_master_hosts is not defined
+    when: g_master_hosts is not defined and g_new_master_hosts is not defined
 
   - name: Evaluate groups - g_node_hosts or g_new_node_hosts required
     fail:
       msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
-    when: g_node_hosts is not defined or g_new_node_hosts is not defined
+    when: g_node_hosts is not defined and g_new_node_hosts is not defined
 
   - name: Evaluate groups - g_lb_hosts required
     fail:
