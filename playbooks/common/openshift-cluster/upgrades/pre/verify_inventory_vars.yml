@@ -9,6 +9,21 @@
         deployment types
     when: deployment_type not in ['origin','openshift-enterprise', 'online']
 
+  # osm_cluster_network_cidr, osm_host_subnet_length and openshift_portal_net are
+  # required when upgrading to avoid changes that may occur between releases
+  # Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1451023
+  - assert:
+      that:
+      - "osm_cluster_network_cidr is defined"
+      - "osm_host_subnet_length is defined"
+      - "openshift_portal_net is defined"
+      msg: >
+        osm_cluster_network_cidr, osm_host_subnet_length, and openshift_portal_net are required inventory
+        variables when upgrading. These variables should match what is currently used in the cluster. If
+        you don't remember what these values are you can find them in /etc/origin/master/master-config.yaml
+        on a master with the names clusterNetworkCIDR (osm_cluster_network_cidr),
+        osm_host_subnet_length (hostSubnetLength), and openshift_portal_net (hostSubnetLength).
+
   # Error out in situations where the user has older versions specified in their
   # inventory in any of the openshift_release, openshift_image_tag, and
   # openshift_pkg_version variables. These must be removed or updated to proceed
