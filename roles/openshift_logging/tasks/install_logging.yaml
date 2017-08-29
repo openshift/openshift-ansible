@@ -216,6 +216,7 @@
   when:
   - openshift_logging_use_ops | bool
 
+- include: annotate_ops_projects.yaml
 
 ## Curator
 - include_role:
