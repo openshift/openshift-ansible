@@ -20,7 +20,17 @@ When `False` the `openshift_logging` role will uninstall Aggregated logging.
 ###Optional vars:
 
 - `openshift_logging_image_prefix`: The prefix for the logging images to use. Defaults to 'docker.io/openshift/origin-'.
+- `openshift_logging_curator_image_prefix`: Setting the image prefix for Curator image. Defaults to `openshift_logging_image_prefix`.
+- `openshift_logging_elasticsearch_image_prefix`: Setting the image prefix for Elasticsearch image. Defaults to `openshift_logging_image_prefix`.
+- `openshift_logging_fluentd_image_prefix`: Setting the image prefix for Fluentd image. Defaults to `openshift_logging_image_prefix`.
+- `openshift_logging_kibana_image_prefix`: Setting the image prefix for Kibana image. Defaults to `openshift_logging_image_prefix`.
+- `openshift_logging_kibana_proxy_image_prefix`: Setting the image prefix for Kibana proxy image. Defaults to `openshift_logging_image_prefix`.
 - `openshift_logging_image_version`: The image version for the logging images to use. Defaults to 'latest'.
+- `openshift_logging_curator_image_version`: Setting the image version for Curator image. Defaults to `openshift_logging_image_version`.
+- `openshift_logging_elasticsearch_image_version`: Setting the image version for Elasticsearch image. Defaults to `openshift_logging_image_version`.
+- `openshift_logging_fluentd_image_version`: Setting the image version for Fluentd image. Defaults to `openshift_logging_image_version`.
+- `openshift_logging_kibana_image_version`: Setting the image version for Kibana image. Defaults to `openshift_logging_image_version`.
+- `openshift_logging_kibana_proxy_image_version`: Setting the image version for Kibana proxy image. Defaults to `openshift_logging_image_version`.
 - `openshift_logging_use_ops`: If 'True', set up a second ES and Kibana cluster for infrastructure logs. Defaults to 'False'.
 - `openshift_logging_master_url`: The URL for the Kubernetes master, this does not need to be public facing but should be accessible from within the cluster. Defaults to 'https://kubernetes.default.svc.{{openshift.common.dns_domain}}'.
 - `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://{{openshift.common.public_hostname}}:{{openshift.master.api_port}}'.
