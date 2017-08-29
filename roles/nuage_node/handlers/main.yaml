@@ -1,7 +1,7 @@
 ---
 - name: restart node
   become: yes
-  systemd: name={{ openshift.common.service_type }}-node state=restarted
+  systemd: name={{ openshift.common.service_type }}-node daemon-reload=yes state=restarted
 
 - name: save iptable rules
   become: yes
