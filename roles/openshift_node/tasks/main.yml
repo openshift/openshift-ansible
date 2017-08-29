@@ -4,7 +4,7 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
     - (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
-    - not openshift_docker_use_crio | default(false)
+    - not openshift_use_crio | default(false)
 
 - name: setup firewall
   include: firewall.yml
@@ -93,7 +93,7 @@
     name: cri-o
     enabled: yes
     state: restarted
-  when: openshift_docker_use_crio | default(false)
+  when: openshift_use_crio | default(false)
 
 - name: Install conntrack-tools package
   package:

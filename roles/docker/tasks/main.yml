@@ -7,8 +7,8 @@
 
 - set_fact:
     l_use_system_container: "{{ openshift.docker.use_system_container | default(False) }}"
-    l_use_crio: "{{ openshift.docker.use_crio | default(False) }}"
-    l_use_crio_only: "{{ openshift.docker.use_crio_only | default(False) }}"
+    l_use_crio: "{{ openshift_use_crio | default(False) }}"
+    l_use_crio_only: "{{ openshift_use_crio_only | default(False) }}"
 
 - name: Use Package Docker if Requested
   include: package_docker.yml

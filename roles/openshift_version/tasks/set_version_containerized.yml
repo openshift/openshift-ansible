@@ -1,6 +1,6 @@
 ---
 - set_fact:
-    l_use_crio: "{{ openshift_docker_use_crio | default(false) }}"
+    l_use_crio: "{{ openshift_use_crio | default(false) }}"
 
 - name: Set containerized version to configure if openshift_image_tag specified
   set_fact:

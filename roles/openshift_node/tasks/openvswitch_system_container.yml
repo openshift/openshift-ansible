@@ -1,6 +1,6 @@
 ---
 - set_fact:
-    l_use_crio: "{{ openshift_docker_use_crio | default(false) }}"
+    l_use_crio: "{{ openshift_use_crio | default(false) }}"
 
 - set_fact:
     l_service_name: "cri-o"
