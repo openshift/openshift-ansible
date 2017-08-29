@@ -14,7 +14,7 @@
     file:
       path: "/etc/origin/{{ item }}"
       state: absent
-    when: "{{ rpmgenerated_config.stat.exists == true and deployment_type in ['openshift-enterprise', 'atomic-enterprise'] }}"
+    when: rpmgenerated_config.stat.exists == true and deployment_type in ['openshift-enterprise', 'atomic-enterprise']
     with_items:
     - master
     - node
@@ -22,7 +22,7 @@
 
   - set_fact:
       openshift_master_pod_eviction_timeout: "{{ lookup('oo_option', 'openshift_master_pod_eviction_timeout') | default(none, true) }}"
-    when: "{{ openshift_master_pod_eviction_timeout is not defined }}"
+    when: openshift_master_pod_eviction_timeout is not defined
 
   - set_fact:
       openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
@@ -34,20 +34,20 @@
 
   - set_fact:
       openshift_master_debug_level: "{{ t_oo_option_master_debug_level }}"
-    when: "{{ openshift_master_debug_level is not defined and t_oo_option_master_debug_level != '' }}"
+    when: openshift_master_debug_level is not defined and t_oo_option_master_debug_level != ''
 
   - set_fact:
       openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
-    when: "{{ openshift_master_default_subdomain is not defined }}"
+    when: openshift_master_default_subdomain is not defined
   - set_fact:
       openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(false, true) }}"
-    when: "{{ openshift_hosted_metrics_deploy is not defined }}"
+    when: openshift_hosted_metrics_deploy is not defined
   - set_fact:
       openshift_hosted_metrics_duration: "{{ lookup('oo_option', 'openshift_hosted_metrics_duration') | default(7) }}"
-    when: "{{ openshift_hosted_metrics_duration is not defined }}"
+    when: openshift_hosted_metrics_duration is not defined
   - set_fact:
       openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
-    when: "{{ openshift_hosted_metrics_resolution is not defined }}"
+    when: openshift_hosted_metrics_resolution is not defined
   roles:
   - openshift_facts
   post_tasks:
@@ -72,7 +72,7 @@
       role: hosted
       openshift_env:
         openshift_hosted_registry_storage_kind: 'nfs'
-    when: "{{ openshift_hosted_registry_storage_kind is not defined and groups.oo_nfs_to_config is defined and groups.oo_nfs_to_config | length > 0 }}"
+    when: openshift_hosted_registry_storage_kind is not defined and groups.oo_nfs_to_config is defined and groups.oo_nfs_to_config | length > 0
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -110,7 +110,7 @@
       local_facts:
         session_auth_secrets: "{{ g_session_auth_secrets }}"
         session_encryption_secrets: "{{ g_session_encryption_secrets }}"
-    when: "{{ not g_session_secrets_present | bool }}"
+    when: not g_session_secrets_present | bool
 
 - name: Configure masters
   hosts: oo_masters_to_config
@@ -140,7 +140,7 @@
     etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
     etcd_cert_prefix: "master.etcd-"
-    when: "{{ groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config }}"
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
   - role: openshift_clock
   - role: openshift_cloud_provider
   - role: openshift_builddefaults
@@ -170,7 +170,7 @@
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
   - role: nickhammond.logrotate
   - role: nuage_master
-    when: "{{ openshift.common.use_nuage | bool }}"
+    when: openshift.common.use_nuage | bool
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}

@@ -2,16 +2,16 @@
     msg: >
       Object Storage Provider: {{ openshift.hosted.registry.storage.provider }}
       is not currently supported
-  when: "{{ openshift.hosted.registry.storage.provider not in ['azure_blob', 's3', 'swift'] }}"
+  when: openshift.hosted.registry.storage.provider not in ['azure_blob', 's3', 'swift']
 
 - fail:
     msg: >
       Support for provider: "{{ openshift.hosted.registry.storage.provider }}"
       not implemented yet
-  when: "{{ openshift.hosted.registry.storage.provider in ['azure_blob', 'swift'] }}"
+  when: openshift.hosted.registry.storage.provider in ['azure_blob', 'swift']
 
 - include: s3.yml
-  when: "{{ openshift.hosted.registry.storage.provider == 's3' }}"
+  when: openshift.hosted.registry.storage.provider == 's3'
 
 - name: Test if docker registry config secret exists
   command: >
@@ -31,7 +31,7 @@
 
 - set_fact:
     same_storage_provider: "{{ (secrets.stdout|from_json)['metadata']['annotations']['provider'] | default(none) == openshift.hosted.registry.storage.provider }}"
-  when: "{{ secrets.rc == 0 }}"
+  when: secrets.rc == 0
 
 - name: Update registry config secret
   command: >
@@ -41,7 +41,7 @@
     patch secret/{{ registry_config_secret_name }}
     -p '{"data": {"config.yml": "{{ registry_config }}"}}'
   register: update_config_secret
-  when: "{{ secrets.rc == 0 and (secrets.stdout|from_json)['data']['config.yml'] != registry_config and same_storage_provider | bool }}"
+  when: secrets.rc == 0 and (secrets.stdout|from_json)['data']['config.yml'] != registry_config and same_storage_provider | bool
 
 - name: Create registry config secret
   shell: >
@@ -50,7 +50,7 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     create -f -
-  when: "{{ secrets.rc == 1 }}"
+  when: secrets.rc == 1
 
 - name: Determine if service account contains secrets
   command: >
@@ -68,7 +68,7 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     secrets add serviceaccount/registry secrets/{{ registry_config_secret_name }}
-  when: "{{ serviceaccount.stdout == '' }}"
+  when: serviceaccount.stdout == ''
 
 - name: Determine if deployment config contains secrets
   command: >
@@ -86,7 +86,7 @@
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     set volumes dc/docker-registry --add --name=docker-config -m /etc/registry
     --type=secret --secret-name={{ registry_config_secret_name }}
-  when: "{{ registry_config_secret_name not in volume.stdout }}"
+  when: registry_config_secret_name not in volume.stdout
 
 - name: Determine if registry environment variable needs to be created
   command: >
@@ -103,7 +103,7 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     set env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/registry/config.yml
-  when: "{{ 'REGISTRY_CONFIGURATION_PATH' not in oc_env.stdout }}"
+  when: "'REGISTRY_CONFIGURATION_PATH' not in oc_env.stdout"
 
 - name: Redeploy registry
   command: >
@@ -111,4 +111,4 @@
     --config={{ openshift_hosted_kubeconfig }}
     --namespace={{ openshift.hosted.registry.namespace | default('default') }}
     deploy dc/docker-registry --latest
-  when: "{{ secrets.rc == 0 and not update_config_secret | skipped and update_config_secret.rc == 0 and same_storage_provider | bool }}"
+  when: secrets.rc == 0 and not update_config_secret | skipped and update_config_secret.rc == 0 and same_storage_provider | bool

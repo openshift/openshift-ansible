@@ -11,7 +11,7 @@
 
 - name: Install dnsmasq
   action: "{{ ansible_pkg_mgr }} name=dnsmasq state=installed"
-  when: "{{ not openshift.common.is_atomic | bool }}"
+  when: not openshift.common.is_atomic | bool
 
 - name: Install dnsmasq configuration
   template:
@@ -26,7 +26,7 @@
    owner: root
    group: root
    mode: 0644
-  when: "{{ openshift_node_dnsmasq_additional_config_file is defined }}"
+  when: openshift_node_dnsmasq_additional_config_file is defined
   notify: restart dnsmasq
 
 - name: Enable dnsmasq
@@ -37,8 +37,8 @@
 
 # Dynamic NetworkManager based dispatcher
 - include: ./network-manager.yml
-  when: "{{ network_manager_active | bool }}"
+  when: network_manager_active | bool
 
 # Relies on ansible in order to configure static config
 - include: ./no-network-manager.yml
-  when: "{{ not network_manager_active | bool }}"
+  when: not network_manager_active | bool

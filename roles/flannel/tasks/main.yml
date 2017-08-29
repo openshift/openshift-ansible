@@ -2,7 +2,7 @@
 - name: Install flannel
   become: yes
   action: "{{ ansible_pkg_mgr }} name=flannel state=present"
-  when: "{{ not openshift.common.is_atomic | bool }}"
+  when: not openshift.common.is_atomic | bool
 
 - name: Set flannel etcd url
   become: yes

@@ -1,13 +1,13 @@
 ---
 - name: Install haproxy
   action: "{{ ansible_pkg_mgr }} name=haproxy state=present"
-  when: "{{ not openshift.common.is_containerized | bool }}"
+  when: not openshift.common.is_containerized | bool
 
 - name: Configure systemd service directory for haproxy
   file:
     path: /etc/systemd/system/haproxy.service.d
     state: directory
-  when: "{{ 'limit_nofile' in openshift.loadbalancer }}"
+  when: "'limit_nofile' in openshift.loadbalancer"
 
 # Work around ini_file create option in 2.2 which defaults to no
 - name: Create limits.conf file
@@ -25,13 +25,13 @@
     section: Service
     option: LimitNOFILE
     value: "{{ openshift.loadbalancer.limit_nofile }}"
-  when: "{{ 'limit_nofile' in openshift.loadbalancer }}"
+  when: "'limit_nofile' in openshift.loadbalancer"
   notify: restart haproxy
   register: nofile_limit_result
 
 - name: Reload systemd if needed
   command: systemctl daemon-reload
-  when: "{{ nofile_limit_result | changed }}"
+  when: nofile_limit_result | changed
 
 - name: Configure haproxy
   template:

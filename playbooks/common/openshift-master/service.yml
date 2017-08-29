@@ -6,7 +6,7 @@
   become: no
   tasks:
   - fail: msg="new_cluster_state is required to be injected in this playbook"
-    when: "{{ new_cluster_state is not defined }}"
+    when: new_cluster_state is not defined
 
   - name: Evaluate g_service_masters
     add_host: name={{ item }} groups=g_service_masters

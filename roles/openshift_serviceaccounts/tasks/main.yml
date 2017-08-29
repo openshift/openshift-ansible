@@ -11,7 +11,7 @@
        echo {{ lookup('template', '../templates/serviceaccount.j2')
        | from_yaml | to_json | quote }} | {{ openshift.common.client_binary }}
        -n {{ openshift_serviceaccounts_namespace }} create -f -
-  when: "{{ item.1.rc != 0 }}"
+  when: item.1.rc != 0
   with_together:
   - "{{ openshift_serviceaccounts_names }}"
   - "{{ account_test.results }}"
@@ -31,10 +31,10 @@
   when:
   - openshift.common.version_gte_3_1_or_1_1
   - item.1.rc == 0
-  - "'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users | default([]) }}" 
+  - "'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users | default([]) }}"
   with_nested:
   - "{{ openshift_serviceaccounts_names }}"
   - "{{ scc_test.results }}"
 
 - include: legacy_add_scc_to_user.yml
-  when: "{{ not openshift.common.version_gte_3_1_or_1_1 }}"
+  when: not openshift.common.version_gte_3_1_or_1_1

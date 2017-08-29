@@ -9,10 +9,10 @@
   file:
     path: "{{ openshift.common.config_base }}/cloudprovider"
     state: directory
-  when: "{{ has_cloudprovider | bool }}"
+  when: has_cloudprovider | bool
 
 - include: openstack.yml
-  when: "{{ cloudprovider_is_openstack | bool }}"
+  when: cloudprovider_is_openstack | bool
 
 - include: aws.yml
-  when: "{{ cloudprovider_is_aws | bool }}"
+  when: cloudprovider_is_aws | bool

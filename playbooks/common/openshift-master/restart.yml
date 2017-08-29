@@ -9,12 +9,12 @@
     command: >
       systemctl is-active {{ openshift.common.service_type }}-master
     register: active_check_output
-    when: "{{ openshift.master.cluster_method | default(None) == 'pacemaker' }}"
+    when: openshift.master.cluster_method | default(None) == 'pacemaker'
     failed_when: false
     changed_when: false
   - set_fact:
       is_active: "{{ active_check_output.stdout == 'active' }}"
-    when: "{{ openshift.master.cluster_method | default(None) == 'pacemaker' }}"
+    when: openshift.master.cluster_method | default(None) == 'pacemaker'
 
 - name: Evaluate master groups
   hosts: localhost
@@ -23,10 +23,10 @@
   - fail:
       msg: >
         Did not receive active status from any masters. Please verify pacemaker cluster.
-    when: "{{ hostvars[groups.oo_first_master.0].openshift.master.cluster_method | default(None) == 'pacemaker' and 'True' not in (hostvars
+    when: hostvars[groups.oo_first_master.0].openshift.master.cluster_method | default(None) == 'pacemaker' and 'True' not in (hostvars
               | oo_select_keys(groups['oo_masters_to_config'])
               | oo_collect('is_active')
-              | list) }}"
+              | list)
   - name: Evaluate oo_active_masters
     add_host:
       name: "{{ item }}"
@@ -34,7 +34,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
-    when: "{{ (hostvars[item]['is_active'] | default(false)) | bool }}"
+    when: (hostvars[item]['is_active'] | default(false)) | bool
   - name: Evaluate oo_current_masters
     add_host:
       name: "{{ item }}"
@@ -42,7 +42,7 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ groups.oo_masters_to_config | default([]) }}"
-    when: "{{ (hostvars[item]['current_host'] | default(false)) | bool }}"
+    when: (hostvars[item]['current_host'] | default(false)) | bool
 
 - name: Validate pacemaker cluster
   hosts: oo_active_masters
@@ -54,7 +54,7 @@
   - fail:
       msg: >
         Pacemaker cluster validation failed. One or more nodes are not online.
-    when: "{{ not (pcs_status_output.stdout | validate_pcs_cluster(groups.oo_masters_to_config)) | bool }}"
+    when: not (pcs_status_output.stdout | validate_pcs_cluster(groups.oo_masters_to_config)) | bool
 
 - name: Restart masters
   hosts: oo_masters_to_config:!oo_active_masters:!oo_current_masters

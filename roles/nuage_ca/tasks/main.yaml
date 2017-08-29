@@ -1,7 +1,7 @@
 ---
 - name: Install openssl
   action: "{{ ansible_pkg_mgr }} name=openssl state=present"
-  when: "{{ not openshift.common.is_atomic | bool }}"
+  when: not openshift.common.is_atomic | bool
 
 - name: Create CA directory
   file: path="{{ nuage_ca_dir }}" state=directory
@@ -22,7 +22,7 @@
   command: openssl genrsa -out "{{ nuage_ca_key }}" 4096
   run_once: true
   delegate_to: "{{ nuage_ca_master }}"
-  when: "{{ nuage_ca_key_check.stat.exists is defined and nuage_ca_key_check.stat.exists == False }}"
+  when: nuage_ca_key_check.stat.exists is defined and nuage_ca_key_check.stat.exists == False
 
 - name: Check if the CA crt already exists
   stat: path="{{ nuage_ca_crt }}"
@@ -33,7 +33,7 @@
   command: openssl req -new -x509 -key "{{ nuage_ca_key }}" -out "{{ nuage_ca_crt }}" -subj "/CN=nuage-signer"
   run_once: true
   delegate_to: "{{ nuage_ca_master }}"
-  when: "{{ nuage_ca_crt_check.stat.exists is defined and nuage_ca_crt_check.stat.exists == False }}"
+  when: nuage_ca_crt_check.stat.exists is defined and nuage_ca_crt_check.stat.exists == False
 
 - name: Create the serial file
   copy: src=serial.txt dest="{{ nuage_ca_serial }}"

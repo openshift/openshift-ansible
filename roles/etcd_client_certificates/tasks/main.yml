@@ -11,7 +11,7 @@
       CA certificate {{ etcd_ca_cert }} doesn't exist on CA host
       {{ etcd_ca_host }}. Apply 'etcd_ca' role to
       {{ etcd_ca_host }}.
-  when: "{{ not g_ca_cert_stat_result.stat.exists | bool }}"
+  when: not g_ca_cert_stat_result.stat.exists | bool
   run_once: true
 
 - name: Check status of external etcd certificatees
@@ -22,7 +22,7 @@
   - "{{ etcd_cert_prefix }}client.key"
   - "{{ etcd_cert_prefix }}ca.crt"
   register: g_external_etcd_cert_stat_result
-  when: "{{ not etcd_certificates_redeploy | default(false) | bool }}"
+  when: not etcd_certificates_redeploy | default(false) | bool
 
 - set_fact:
     etcd_client_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
@@ -36,7 +36,7 @@
     path: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     state: directory
     mode: 0700
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Create the client csr
@@ -52,7 +52,7 @@
                  ~ etcd_cert_prefix ~ 'client.csr' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 # Certificates must be signed serially in order to avoid competing
@@ -69,21 +69,21 @@
                  ~ etcd_cert_prefix ~ 'client.crt' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - file:
     src: "{{ etcd_ca_cert }}"
     dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
     state: hard
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Create local temp directory for syncing certs
   local_action: command mktemp -d /tmp/etcd_certificates-XXXXXXX
   register: g_etcd_client_mktemp
   changed_when: False
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: localhost
   become: no
 
@@ -96,7 +96,7 @@
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Retrieve the etcd cert tarballs
@@ -106,20 +106,20 @@
     flat: yes
     fail_on_missing: yes
     validate_checksum: yes
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Ensure certificate directory exists
   file:
     path: "{{ etcd_cert_config_dir }}"
     state: directory
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
 
 - name: Unarchive etcd cert tarballs
   unarchive:
     src: "{{ g_etcd_client_mktemp.stdout }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
 
 - file:
     path: "{{ etcd_cert_config_dir }}/{{ item }}"
@@ -130,11 +130,11 @@
   - "{{ etcd_cert_prefix }}client.crt"
   - "{{ etcd_cert_prefix }}client.key"
   - "{{ etcd_cert_prefix }}ca.crt"
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
 
 - name: Delete temporary directory
   file: name={{ g_etcd_client_mktemp.stdout }} state=absent
   changed_when: False
-  when: "{{ etcd_client_certs_missing | bool }}"
+  when: etcd_client_certs_missing | bool
   delegate_to: localhost
   become: no

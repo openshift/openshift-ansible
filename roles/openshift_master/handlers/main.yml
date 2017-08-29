@@ -1,17 +1,17 @@
 ---
 - name: restart master
   service: name={{ openshift.common.service_type }}-master state=restarted
-  when: "{{ (openshift.master.ha is not defined or not openshift.master.ha | bool) and (not (master_service_status_changed | default(false) | bool)) }}"
+  when: (openshift.master.ha is not defined or not openshift.master.ha | bool) and (not (master_service_status_changed | default(false) | bool))
   notify: Verify API Server
 
 - name: restart master api
   service: name={{ openshift.common.service_type }}-master-api state=restarted
-  when: "{{ (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native' }}"
+  when: (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
   notify: Verify API Server
 
 - name: restart master controllers
   service: name={{ openshift.common.service_type }}-master-controllers state=restarted
-  when: "{{ (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native' }}"
+  when: (openshift.master.ha is defined and openshift.master.ha | bool) and (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and

@@ -11,21 +11,21 @@
 
 - fail:
     msg: "This role is only supported for Red Hat hosts"
-  when: "{{ ansible_distribution != 'RedHat' }}"
+  when: ansible_distribution != 'RedHat'
 
 - fail:
     msg: Either rhsub_user or the rhel_subscription_user env variable are required for this role.
-  when: "{{ rhel_subscription_user is not defined }}"
+  when: rhel_subscription_user is not defined
 
 - fail:
     msg: Either rhsub_pass or the rhel_subscription_pass env variable are required for this role.
-  when: "{{ rhel_subscription_pass is not defined }}"
+  when: rhel_subscription_pass is not defined
 
 - name: Satellite preparation
   command: "rpm -Uvh http://{{ rhel_subscription_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
   args:
     creates: /etc/rhsm/ca/katello-server-ca.pem
-  when: "{{ rhel_subscription_server is defined and rhel_subscription_server }}"
+  when: rhel_subscription_server is defined and rhel_subscription_server
 
 - name: RedHat subscriptions
   redhat_subscription:
@@ -41,16 +41,16 @@
   command: subscription-manager list --consumed --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_attached
   changed_when: False
-  when: "{{ openshift_pool_id.stdout == '' }}"
+  when: openshift_pool_id.stdout == ''
 
 - fail:
     msg: "Unable to find pool matching {{ rhel_subscription_pool }} in available or consumed pools"
-  when: "{{ openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == '' }}"
+  when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
 
 - name: Attach to OpenShift Pool
   command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
-  when: "{{ openshift_pool_id.stdout != '' }}"
+  when: openshift_pool_id.stdout != ''
 
 - include: enterprise.yml
-  when: "{{ deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and }}"
+  when: deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ] and
         not openshift.common.is_atomic | bool

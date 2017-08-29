@@ -15,7 +15,7 @@
       state=started
       delay=10
       port="{{ openshift.master.api_port }}"
-  when: "{{ openshift.master.cluster_method != 'pacemaker' }}"
+  when: openshift.master.cluster_method != 'pacemaker'
 - name: Wait for master to start
   become: no
   local_action:
@@ -24,7 +24,7 @@
       state=started
       delay=10
       port=22
-  when: "{{ openshift.master.cluster_method == 'pacemaker' }}"
+  when: openshift.master.cluster_method == 'pacemaker'
 - name: Wait for master to become available
   command: pcs status
   register: pcs_status_output
@@ -32,8 +32,8 @@
   retries: 15
   delay: 2
   changed_when: false
-  when: "{{ openshift.master.cluster_method == 'pacemaker' }}"
+  when: openshift.master.cluster_method == 'pacemaker'
 - fail:
     msg: >
       Pacemaker cluster validation failed {{ inventory hostname }} is not online.
-  when: "{{ openshift.master.cluster_method == 'pacemaker' and not (pcs_status_output.stdout | validate_pcs_cluster([inventory_hostname])) | bool }}"
+  when: openshift.master.cluster_method == 'pacemaker' and not (pcs_status_output.stdout | validate_pcs_cluster([inventory_hostname])) | bool

@@ -6,4 +6,4 @@
   with_items:
     - /etc/sysconfig/openvswitch
     - /etc/sysconfig/{{ openshift.common.service_type }}*
-  when: "{{ verify_upgrade_version is defined }}"
+  when: verify_upgrade_version is defined

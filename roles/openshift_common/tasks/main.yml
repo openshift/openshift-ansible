@@ -1,19 +1,19 @@
 ---
 - fail:
     msg: Flannel can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use flannel
-  when: "{{ openshift_use_openshift_sdn | default(true) | bool and openshift_use_flannel | default(false) | bool }}"
+  when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_flannel | default(false) | bool
 
 - fail:
    msg: Nuage sdn can not be used with openshift sdn
-  when: "{{ openshift_use_openshift_sdn | default(false) | bool and openshift_use_nuage | default(false) | bool }}"
+  when: openshift_use_openshift_sdn | default(false) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
    msg: Nuage sdn can not be used with flannel
-  when: "{{ openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool }}"
+  when: openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool
 
 - fail:
     msg: openshift_hostname must be 64 characters or less
-  when: "{{ openshift_hostname is defined and openshift_hostname | length > 64 }}"
+  when: openshift_hostname is defined and openshift_hostname | length > 64
 
 - name: Set common Cluster facts
   openshift_facts:
@@ -31,7 +31,7 @@
 
 - name: Install the base package for versioning
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
-  when: "{{ not openshift.common.is_containerized | bool }}"
+  when: not openshift.common.is_containerized | bool
 
 - name: Set version facts
   openshift_facts:
@@ -44,5 +44,4 @@
 - name: Set hostname
   command: >
     hostnamectl set-hostname {{ openshift.common.hostname }}
-  when: "{{ openshift_set_hostname | default(set_hostname_default) | bool }}"
-
+  when: openshift_set_hostname | default(set_hostname_default) | bool

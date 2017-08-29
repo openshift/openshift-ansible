@@ -21,7 +21,7 @@
   with_items:
   - "{{ openshift_master_certs }}"
   register: g_master_cert_stat_result
-  when: "{{ not openshift_certificates_redeploy | default(false) | bool }}"
+  when: not openshift_certificates_redeploy | default(false) | bool
 
 - set_fact:
     master_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
@@ -35,7 +35,7 @@
     path: "{{ openshift_master_generated_config_dir }}"
     state: directory
     mode: 0700
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - find:
@@ -100,14 +100,14 @@
     force: true
   with_items:
   - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Remove generated etcd client certs when using external etcd
   file:
     path: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: absent
-  when: "{{ openshift_master_etcd_hosts | length > 0 }}"
+  when: openshift_master_etcd_hosts | length > 0
   with_items:
   - master.etcd-client.crt
   - master.etcd-client.key
@@ -117,7 +117,7 @@
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: g_master_mktemp
   changed_when: False
-  when: "{{ master_certs_missing | bool }}"
+  when: master_certs_missing | bool
   delegate_to: localhost
   become: no
 
@@ -127,7 +127,7 @@
       -C {{ openshift_master_generated_config_dir }} .
   args:
     creates: "{{ openshift_master_generated_config_dir }}.tgz"
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Retrieve the master cert tarball from the master
@@ -137,24 +137,24 @@
     flat: yes
     fail_on_missing: yes
     validate_checksum: yes
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Ensure certificate directory exists
   file:
     path: "{{ openshift_master_config_dir }}"
     state: directory
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
 - name: Unarchive the tarball on the master
   unarchive:
     src: "{{ g_master_mktemp.stdout }}/{{ openshift_master_cert_subdir }}.tgz"
     dest: "{{ openshift_master_config_dir }}"
-  when: "{{ master_certs_missing | bool and inventory_hostname != openshift_ca_host }}"
+  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
 - file: name={{ g_master_mktemp.stdout }} state=absent
   changed_when: False
-  when: "{{ master_certs_missing | bool }}"
+  when: master_certs_missing | bool
   delegate_to: localhost
   become: no
 
@@ -211,11 +211,11 @@
   command: mv ca.crt ca-bundle.crt
   args:
     chdir: "{{ openshift.common.config_base }}/master"
-  when: "{{ ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists }}"
+  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
 - name: Link ca.crt to ca-bundle.crt
   file:
     src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
     path: "{{ openshift.common.config_base }}/master/ca.crt"
     state: link
-  when: "{{ ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists }}"
+  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists

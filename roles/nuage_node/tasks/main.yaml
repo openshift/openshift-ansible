@@ -14,7 +14,7 @@
 - name: Set the Standby Controller
   become: yes
   lineinfile: dest={{ vrs_config }} regexp=^STANDBY_CONTROLLER line='STANDBY_CONTROLLER={{ vsc_standby_ip }}'
-  when: "{{ vsc_standby_ip is defined }}"
+  when: vsc_standby_ip is defined
 
 - name: Install plugin rpm
   become: yes

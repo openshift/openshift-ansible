@@ -11,7 +11,7 @@
 
 - name: Restart nfs-config
   service: name=nfs-config state=restarted
-  when: "{{ nfs_config | changed }}"
+  when: nfs_config | changed
 
 - name: Ensure exports directory exists
   file:

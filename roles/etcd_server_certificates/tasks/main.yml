@@ -1,7 +1,7 @@
 ---
 - name: Install etcd
   action: "{{ ansible_pkg_mgr }} name=etcd state=present"
-  when: "{{ not etcd_is_containerized | bool }}"
+  when: not etcd_is_containerized | bool
 
 - name: Check status of etcd certificates
   stat:
@@ -11,7 +11,7 @@
   - "{{ etcd_cert_prefix }}peer.crt"
   - "{{ etcd_cert_prefix }}ca.crt"
   register: g_etcd_server_cert_stat_result
-  when: "{{ not etcd_certificates_redeploy | default(false) | bool }}"
+  when: not etcd_certificates_redeploy | default(false) | bool
 
 - set_fact:
     etcd_server_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
@@ -25,7 +25,7 @@
     path: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}"
     state: directory
     mode: 0700
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Create the server csr
@@ -41,7 +41,7 @@
                  ~ etcd_cert_prefix ~ 'server.csr' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 # Certificates must be signed serially in order to avoid competing
@@ -74,7 +74,7 @@
                  ~ etcd_cert_prefix ~ 'peer.csr' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 # Certificates must be signed serially in order to avoid competing
@@ -91,14 +91,14 @@
                  ~ etcd_cert_prefix ~ 'peer.crt' }}"
   environment:
     SAN: "IP:{{ etcd_ip }}"
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - file:
     src: "{{ etcd_ca_cert }}"
     dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
     state: hard
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Create local temp directory for syncing certs
@@ -106,7 +106,7 @@
   become: no
   register: g_etcd_server_mktemp
   changed_when: False
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: localhost
 
 - name: Create a tarball of the etcd certs
@@ -118,7 +118,7 @@
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Retrieve etcd cert tarball
@@ -128,26 +128,26 @@
     flat: yes
     fail_on_missing: yes
     validate_checksum: yes
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
 - name: Ensure certificate directory exists
   file:
     path: "{{ etcd_cert_config_dir }}"
     state: directory
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
 
 - name: Unarchive cert tarball
   unarchive:
     src: "{{ g_etcd_server_mktemp.stdout }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
 
 - name: Delete temporary directory
   file: name={{ g_etcd_server_mktemp.stdout }} state=absent
   become: no
   changed_when: False
-  when: "{{ etcd_server_certs_missing | bool }}"
+  when: etcd_server_certs_missing | bool
   delegate_to: localhost
 
 - name: Validate permissions on certificate files
@@ -156,7 +156,7 @@
     mode: 0600
     owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
     group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-  when: "{{ etcd_url_scheme == 'https' }}"
+  when: etcd_url_scheme == 'https'
   with_items:
   - "{{ etcd_ca_file }}"
   - "{{ etcd_cert_file }}"
@@ -168,7 +168,7 @@
     mode: 0600
     owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
     group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-  when: "{{ etcd_peer_url_scheme == 'https' }}"
+  when: etcd_peer_url_scheme == 'https'
   with_items:
   - "{{ etcd_peer_ca_file }}"
   - "{{ etcd_peer_cert_file }}"

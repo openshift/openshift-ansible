@@ -11,44 +11,44 @@
   set_fact:
     containerized_svc_dir: "/etc/systemd/system"
     ha_svc_template_path: "docker-cluster"
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 # workaround for missing systemd unit files
 - name: Create the systemd unit files
   template:
     src: "master_docker/master.docker.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
-  when: "{{ openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool) }}"
+  when: openshift.common.is_containerized | bool and (openshift.master.ha is not defined or not openshift.master.ha | bool)
   register: create_master_unit_file
 
 - command: systemctl daemon-reload
-  when: "{{ create_master_unit_file | changed }}"
+  when: create_master_unit_file | changed
 
 - name: Create the ha systemd unit files
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   with_items:
   - api
   - controllers
   register: create_ha_unit_files
 
 - command: systemctl daemon-reload
-  when: "{{ create_ha_unit_files | changed }}"
+  when: create_ha_unit_files | changed
 # end workaround for missing systemd unit files
 
 - name: Preserve Master API Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
   register: master_api_proxy
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   failed_when: false
   changed_when: false
 
 - name: Preserve Master API AWS options
   command: grep AWS_ /etc/sysconfig/{{ openshift.common.service_type }}-master-api
   register: master_api_aws
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   failed_when: false
   changed_when: false
 
@@ -57,24 +57,24 @@
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     backup: true
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   notify:
   - restart master api
 
 - name: Restore Master API Proxy Config Options
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool
+  when: openshift.master.ha is defined and openshift.master.ha | bool
             and openshift_master_cluster_method == 'native' and master_api_proxy.rc == 0
-            and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common }}"
+            and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     line: "{{ item }}"
   with_items: "{{ master_api_proxy.stdout_lines | default([]) }}"
 
 - name: Restore Master API AWS Options
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool
+  when: openshift.master.ha is defined and openshift.master.ha | bool
             and openshift_master_cluster_method == 'native'
             and master_api_aws.rc == 0
-            and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined) }}"
+            and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     line: "{{ item }}"
@@ -83,14 +83,14 @@
 - name: Preserve Master Controllers Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
   register: master_controllers_proxy
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   failed_when: false
   changed_when: false
 
 - name: Preserve Master Controllers AWS options
   command: grep AWS_ /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
   register: master_controllers_aws
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   failed_when: false
   changed_when: false
 
@@ -99,7 +99,7 @@
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     backup: true
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native' }}"
+  when: openshift.master.ha is defined and openshift.master.ha | bool and openshift_master_cluster_method == 'native'
   notify:
   - restart master controllers
 
@@ -108,28 +108,28 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     line: "{{ item }}"
   with_items: "{{ master_controllers_proxy.stdout_lines | default([]) }}"
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool
+  when: openshift.master.ha is defined and openshift.master.ha | bool
             and openshift_master_cluster_method == 'native'
             and master_controllers_proxy.rc == 0
             and 'http_proxy' not in openshift.common
-            and 'https_proxy' not in openshift.common }}"
+            and 'https_proxy' not in openshift.common
 
 - name: Restore Master Controllers AWS Options
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
     line: "{{ item }}"
   with_items: "{{ master_controllers_aws.stdout_lines | default([]) }}"
-  when: "{{ openshift.master.ha is defined and openshift.master.ha | bool
+  when: openshift.master.ha is defined and openshift.master.ha | bool
             and openshift_master_cluster_method == 'native'
             and master_controllers_aws.rc == 0
-            and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined) }}"
+            and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
 
 - name: Install Master docker service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-master.service"
     src: master_docker/master.docker.service.j2
   register: install_result
-  when: "{{ openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool }}"
+  when: openshift.common.is_containerized | bool and openshift.master.ha is defined and not openshift.master.ha | bool
 
 - name: Preserve Master Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master
@@ -156,11 +156,11 @@
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     line: "{{ item }}"
   with_items: "{{ master_proxy.stdout_lines | default([]) }}"
-  when: "{{ master_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common }}"
+  when: master_proxy.rc == 0 and 'http_proxy' not in openshift.common and 'https_proxy' not in openshift.common
 
 - name: Restore Master AWS Options
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master
     line: "{{ item }}"
   with_items: "{{ master_aws.stdout_lines | default([]) }}"
-  when: "{{ master_aws.rc == 0 and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined) }}"
+  when: master_aws.rc == 0 and not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)

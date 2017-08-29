@@ -99,9 +99,9 @@
 
   - fail:
       msg: "Unknown scheduler config apiVersion {{ openshift_master_scheduler_config.apiVersion }}"
-    when: "{{ openshift_master_scheduler_current_config.apiVersion | default(None) != 'v1' }}"
+    when: openshift_master_scheduler_current_config.apiVersion | default(None) != 'v1'
 
   - set_fact:
       openshift_master_scheduler_current_predicates: "{{ openshift_master_scheduler_current_config.predicates }}"
       openshift_master_scheduler_current_priorities: "{{ openshift_master_scheduler_current_config.priorities }}"
-  when: "{{ scheduler_config_stat.stat.exists }}"
+  when: scheduler_config_stat.stat.exists

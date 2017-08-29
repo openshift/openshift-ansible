@@ -2,12 +2,12 @@
   service:
     name: "{{ openshift.common.service_type }}-master"
     state: restarted
-  when: "{{ not openshift_master_ha | bool }}"
+  when: not openshift_master_ha | bool
 - name: Restart master API
   service:
     name: "{{ openshift.common.service_type }}-master-api"
     state: restarted
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method != 'pacemaker' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method != 'pacemaker'
 - name: Wait for master API to come back online
   become: no
   local_action:
@@ -16,7 +16,7 @@
       state=started
       delay=10
       port="{{ openshift.master.api_port }}"
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method != 'pacemaker' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method != 'pacemaker'
 - name: Restart master controllers
   service:
     name: "{{ openshift.common.service_type }}-master-controllers"
@@ -24,4 +24,4 @@
   # Ignore errrors since it is possible that type != simple for
   # pre-3.1.1 installations.
   ignore_errors: true
-  when: "{{ openshift_master_ha | bool and openshift.master.cluster_method != 'pacemaker' }}"
+  when: openshift_master_ha | bool and openshift.master.cluster_method != 'pacemaker'

@@ -2,7 +2,7 @@
 # TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when: "{{ (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise'] }}"
+  when: (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
 
 - name: Set node facts
   openshift_facts:
@@ -32,25 +32,25 @@
 # problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - name: Install Node package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
-  when: "{{ not openshift.common.is_containerized | bool }}"
+  when: not openshift.common.is_containerized | bool
 
 - name: Install sdn-ovs package
   action: "{{ ansible_pkg_mgr }} name={{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }} state=present"
-  when: "{{ openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool }}"
+  when: openshift.common.use_openshift_sdn and not openshift.common.is_containerized | bool
 
 - name: Pull node image
   command: >
     docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Pull OpenVSwitch image
   command: >
     docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: "{{ openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool }}"
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
 - name: Install the systemd units
   include: systemd_units.yml
@@ -63,7 +63,7 @@
 
 - name: Start and enable openvswitch docker service
   service: name=openvswitch.service enabled=yes state=started
-  when: "{{ openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool }}"
+  when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
   register: ovs_start_result
 
 - set_fact:
@@ -139,11 +139,11 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Start and enable node dep
   service: name={{ openshift.common.service_type }}-node-dep enabled=yes state=started
-  when: "{{ openshift.common.is_containerized | bool }}"
+  when: openshift.common.is_containerized | bool
 
 - name: Start and enable node
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
@@ -153,12 +153,12 @@
 - name: Wait 30 seconds for docker initialization whenever node has failed
   pause:
     seconds: 30
-  when: "{{ node_start_result | failed }}"
+  when: node_start_result | failed
 
 - name: Start and enable node again
   service: name={{ openshift.common.service_type }}-node enabled=yes state=started
   register: node_start_result
-  when: "{{ node_start_result | failed }}"
+  when: node_start_result | failed
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"

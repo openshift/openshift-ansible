@@ -8,23 +8,23 @@
 
 - name: Install etcd
   action: "{{ ansible_pkg_mgr }} name=etcd state=present"
-  when: "{{ not etcd_is_containerized | bool }}"
+  when: not etcd_is_containerized | bool
 
 - name: Pull etcd container
   command: docker pull {{ openshift.etcd.etcd_image }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: "{{ etcd_is_containerized | bool }}"
+  when: etcd_is_containerized | bool
 
 - name: Install etcd container service file
   template:
     dest: "/etc/systemd/system/etcd_container.service"
     src: etcd.docker.service
   register: install_etcd_result
-  when: "{{ etcd_is_containerized | bool }}"
+  when: etcd_is_containerized | bool
 
 - name: Ensure etcd datadir exists
-  when: "{{ etcd_is_containerized | bool }}"
+  when: etcd_is_containerized | bool
   file:
     path: "{{ etcd_data_dir }}"
     state: directory
@@ -37,19 +37,19 @@
   failed_when: false
 
 - name: Disable system etcd when containerized
-  when: "{{ etcd_is_containerized | bool and etcd_show.rc == 0 and 'LoadState=not-found' not in etcd_show.stdout }}"
+  when: etcd_is_containerized | bool and etcd_show.rc == 0 and 'LoadState=not-found' not in etcd_show.stdout
   service:
     name: etcd
     state: stopped
     enabled: no
 
 - name: Mask system etcd when containerized
-  when: "{{ etcd_is_containerized | bool and etcd_show.rc == 0 and 'LoadState=not-found' not in etcd_show.stdout }}"
+  when: etcd_is_containerized | bool and etcd_show.rc == 0 and 'LoadState=not-found' not in etcd_show.stdout
   command: systemctl mask etcd
 
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: "{{ etcd_is_containerized | bool and ( install_etcd_result | changed ) }}"
+  when: etcd_is_containerized | bool and ( install_etcd_result | changed )
 
 - name: Validate permissions on the config dir
   file:
