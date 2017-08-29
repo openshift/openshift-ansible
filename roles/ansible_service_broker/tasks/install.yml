@@ -17,15 +17,23 @@
     ansible_service_broker_etcd_image_etcd_path: "{{ ansible_service_broker_etcd_image_etcd_path | default(__ansible_service_broker_etcd_image_etcd_path) }}"
 
     ansible_service_broker_registry_type: "{{ ansible_service_broker_registry_type | default(__ansible_service_broker_registry_type) }}"
+    ansible_service_broker_registry_name: "{{ ansible_service_broker_registry_name | default(__ansible_service_broker_registry_name) }}"
     ansible_service_broker_registry_url: "{{ ansible_service_broker_registry_url | default(__ansible_service_broker_registry_url) }}"
     ansible_service_broker_registry_user: "{{ ansible_service_broker_registry_user | default(__ansible_service_broker_registry_user) }}"
     ansible_service_broker_registry_password: "{{ ansible_service_broker_registry_password | default(__ansible_service_broker_registry_password) }}"
     ansible_service_broker_registry_organization: "{{ ansible_service_broker_registry_organization | default(__ansible_service_broker_registry_organization) }}"
 
+    ansible_service_broker_certs_dir: "{{ openshift.common.config_base }}/service-catalog"
+
 - name: set ansible-service-broker image facts using set prefix and tag
   set_fact:
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
     ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
+
+- slurp:
+    src: "{{ ansible_service_broker_certs_dir }}/ca.crt"
+  register: catalog_ca
+
 
 - include: validate_facts.yml
 
@@ -42,53 +50,119 @@
     namespace: openshift-ansible-service-broker
     state: present
 
-- name: Set SA cluster-role
+- name: create ansible-service-broker client serviceaccount
+  oc_serviceaccount:
+    name: asb-client
+    namespace: openshift-ansible-service-broker
+    state: present
+
+- name: Create asb-auth cluster role
+  oc_clusterrole:
+    state: present
+    name: asb-auth
+    rules:
+      - apiGroups: [""]
+        resources: ["namespaces"]
+        verbs: ["create", "delete"]
+      - apiGroups: ["authorization.openshift.io"]
+        resources: ["subjectrulesreview"]
+        verbs: ["create"]
+      - apiGroups: ["authorization.k8s.io"]
+        resources: ["subjectaccessreviews"]
+        verbs: ["create"]
+      - apiGroups: ["authentication.k8s.io"]
+        resources: ["tokenreviews"]
+        verbs: ["create"]
+
+- name: Create asb-access cluster role
+  oc_clusterrole:
+    state: present
+    name: asb-access
+    rules:
+      - nonResourceURLs: ["/ansible-service-broker", "ansible-service-broker/*"]
+        verbs: ["get", "post", "put", "patch", "delete"]
+
+- name: Bind admin cluster-role to asb serviceaccount
   oc_adm_policy_user:
     state: present
-    namespace: "openshift-ansible-service-broker"
+    namespace: openshift-ansible-service-broker
     resource_kind: cluster-role
     resource_name: admin
     user: "system:serviceaccount:openshift-ansible-service-broker:asb"
 
+- name: Bind auth cluster role to asb service account
+  oc_adm_policy_user:
+    state: present
+    namespace: openshift-ansible-service-broker
+    resource_kind: cluster-role
+    resource_name: asb-auth
+    user: "system:serviceaccount:openshift-ansible-service-broker:asb"
+
+- name: Bind asb-access role to asb-client service account
+  oc_adm_policy_user:
+    state: present
+    namespace: openshift-ansible-service-broker
+    resource_kind: cluster-role
+    resource_name: asb-access
+    user: "system:serviceaccount:openshift-ansible-service-broker:asb-client"
+
+- name: create asb-client token secret
+  oc_obj:
+    name: asb-client
+    state: present
+    kind: Secret
+    content:
+      path: /tmp/asbclientsecretout
+      data:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: asb-client
+          annotations:
+            kubernetes.io/service-account.name: asb-client
+        type: kubernetes.io/service-account-token
+
+# Using oc_obj because oc_service doesn't seem to allow annotations
+# TODO: Extend oc_service to allow annotations
 - name: create ansible-service-broker service
-  oc_service:
+  oc_obj:
     name: asb
     namespace: openshift-ansible-service-broker
     state: present
-    labels:
-      app: openshift-ansible-service-broker
-      service: asb
-    ports:
-      - name: port-1338
-        port: 1338
-    selector:
-      app: openshift-ansible-service-broker
-      service: asb
-
-- name: create etcd service
-  oc_service:
-    name: etcd
-    namespace: openshift-ansible-service-broker
-    state: present
-    ports:
-      - name: etcd-advertise
-        port: 2379
-    selector:
-      app: openshift-ansible-service-broker
-      service: etcd
+    kind: Service
+    content:
+      path: /tmp/asbsvcout
+      data:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: asb
+          labels:
+            app: openshift-ansible-service-broker
+            service: asb
+          annotations:
+            service.alpha.openshift.io/serving-cert-secret-name: asb-tls
+        spec:
+          ports:
+            - name: port-1338
+              port: 1338
+              targetPort: 1338
+              protocol: TCP
+          selector:
+            app: openshift-ansible-service-broker
+            service: asb
 
 - name: create route for ansible-service-broker service
   oc_route:
     name: asb-1338
     namespace: openshift-ansible-service-broker
     state: present
+    labels:
+      app: openshift-ansible-service-broker
+      service: asb
     service_name: asb
     port: 1338
-  register: asb_route_out
-
-- name: get ansible-service-broker route name
-  set_fact:
-    ansible_service_broker_route: "{{ asb_route_out.results.results[0].spec.host }}"
+    tls_termination: Reencrypt
 
 - name: create persistent volume claim for etcd
   oc_obj:
@@ -97,7 +171,7 @@
     state: present
     kind: PersistentVolumeClaim
     content:
-      path: /tmp/dcout
+      path: /tmp/pvcout
       data:
         apiVersion: v1
         kind: PersistentVolumeClaim
@@ -111,50 +185,61 @@
             requests:
               storage: 1Gi
 
-- name: create etcd deployment
+- name: Create Ansible Service Broker deployment config
   oc_obj:
-    name: etcd
+    name: asb
     namespace: openshift-ansible-service-broker
     state: present
-    kind: Deployment
+    kind: DeploymentConfig
     content:
       path: /tmp/dcout
       data:
-        apiVersion: extensions/v1beta1
-        kind: Deployment
+        apiVersion: v1
+        kind: DeploymentConfig
         metadata:
-          name: etcd
-          namespace: openshift-ansible-service-broker
+          name: asb
           labels:
             app: openshift-ansible-service-broker
-            service: etcd
+            service: asb
         spec:
-          selector:
-            matchLabels:
-              app: openshift-ansible-service-broker
-              service: etcd
-          strategy:
-            type: RollingUpdate
-            rollingUpdate:
-              maxSurge: 1
-              maxUnavailable: 1
           replicas: 1
+          selector:
+            app: openshift-ansible-service-broker
+          strategy:
+            type: Rolling
           template:
             metadata:
               labels:
                 app: openshift-ansible-service-broker
-                service: etcd
+                service: asb
             spec:
-              restartPolicy: Always
+              serviceAccount: asb
               containers:
+                - image: "{{ ansible_service_broker_image }}"
+                  name: asb
+                  imagePullPolicy: IfNotPresent
+                  volumeMounts:
+                    - name: config-volume
+                      mountPath: /etc/ansible-service-broker
+                    - name: asb-tls
+                      mountPath: /etc/tls/private
+                  ports:
+                    - containerPort: 1338
+                      protocol: TCP
+                  env:
+                    - name: BROKER_CONFIG
+                      value: /etc/ansible-service-broker/config.yaml
+                  resources: {}
+                  terminationMessagePath: /tmp/termination-log
+
                 - image: "{{ ansible_service_broker_etcd_image }}"
                   name: etcd
                   imagePullPolicy: IfNotPresent
                   terminationMessagePath: /tmp/termination-log
                   workingDir: /etcd
                   args:
-                    - '{{ ansible_service_broker_etcd_image_etcd_path }}'
-                    - --data-dir=/data
+                    - "{{ ansible_service_broker_etcd_image_etcd_path }}"
+                    - "--data-dir=/data"
                     - "--listen-client-urls=http://0.0.0.0:2379"
                     - "--advertise-client-urls=http://0.0.0.0:2379"
                   ports:
@@ -170,57 +255,15 @@
                 - name: etcd
                   persistentVolumeClaim:
                     claimName: etcd
-
-- name: create ansible-service-broker deployment
-  oc_obj:
-    name: asb
-    namespace: openshift-ansible-service-broker
-    state: present
-    kind: Deployment
-    content:
-      path: /tmp/dcout
-      data:
-        apiVersion: extensions/v1beta1
-        kind: Deployment
-        metadata:
-          name: asb
-          namespace: openshift-ansible-service-broker
-          labels:
-            app: openshift-ansible-service-broker
-            service: asb
-        spec:
-          strategy:
-            type: Recreate
-          replicas: 1
-          template:
-            metadata:
-              labels:
-                app: openshift-ansible-service-broker
-                service: asb
-            spec:
-              serviceAccount: asb
-              restartPolicy: Always
-              containers:
-                - image: "{{ ansible_service_broker_image }}"
-                  name: asb
-                  imagePullPolicy: IfNotPresent
-                  volumeMounts:
-                    - name: config-volume
-                      mountPath: /etc/ansible-service-broker
-                  ports:
-                    - containerPort: 1338
-                      protocol: TCP
-                  env:
-                    - name: BROKER_CONFIG
-                      value: /etc/ansible-service-broker/config.yaml
-                  terminationMessagePath: /tmp/termination-log
-              volumes:
                 - name: config-volume
                   configMap:
                     name: broker-config
                     items:
                       - key: broker-config
                         path: config.yaml
+                - name: asb-tls
+                  secret:
+                    secretName: asb-tls
 
 
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
@@ -239,42 +282,65 @@
           name: broker-config
           namespace: openshift-ansible-service-broker
           labels:
-            app: ansible-service-broker
+            app: openshift-ansible-service-broker
         data:
           broker-config: |
             registry:
-              name: "{{ ansible_service_broker_registry_type }}"
-              url:  "{{ ansible_service_broker_registry_url }}"
-              user: "{{ ansible_service_broker_registry_user }}"
-              pass: "{{ ansible_service_broker_registry_password }}"
-              org:  "{{ ansible_service_broker_registry_organization }}"
+              - type: {{ ansible_service_broker_registry_type }}
+                name: {{ ansible_service_broker_registry_name }}
+                url:  {{ ansible_service_broker_registry_url }}
+                user: {{ ansible_service_broker_registry_user }}
+                pass: {{ ansible_service_broker_registry_password }}
+                org:  {{ ansible_service_broker_registry_organization }}
+                tag:  {{ ansible_service_broker_registry_tag }}
+                white_list: {{ ansible_service_broker_registry_whitelist }}
             dao:
-              etcd_host: etcd
+              etcd_host: 0.0.0.0
               etcd_port: 2379
             log:
               logfile: /var/log/ansible-service-broker/asb.log
               stdout: true
-              level: "{{ ansible_service_broker_log_level }}"
+              level: {{ ansible_service_broker_log_level }}
               color: true
-            openshift: {}
+            openshift:
+              host: ""
+              ca_file: ""
+              bearer_token_file: ""
+              sandbox_role: {{ ansible_service_broker_sandbox_role }}
+              image_pull_policy: {{ ansible_service_broker_image_pull_policy }}
             broker:
               dev_broker: {{ ansible_service_broker_dev_broker | bool | lower }}
-              launch_apb_on_bind: {{ ansible_service_broker_launch_apb_on_bind | bool | lower }}
-              recovery: {{ ansible_service_broker_recovery | bool | lower }}
-              output_request: {{ ansible_service_broker_output_request | bool | lower }}
               bootstrap_on_startup: {{ ansible_service_broker_bootstrap_on_startup | bool | lower }}
+              refresh_interval: {{ ansible_service_broker_refresh_interval }}
+              launch_apb_on_bind: {{ ansible_service_broker_launch_apb_on_bind | bool | lower }}
+              output_request: {{ ansible_service_broker_output_request | bool | lower }}
+              recovery: {{ ansible_service_broker_recovery | bool | lower }}
+              ssl_cert_key: /etc/tls/private/tls.key
+              ssl_cert: /etc/tls/private/tls.crt
+              auto_escalate: {{ ansible_service_broker_auto_escalate }}
+              auth:
+                - type: basic
+                  enabled: false
+
 
 - name: Create the Broker resource in the catalog
   oc_obj:
     name: ansible-service-broker
     state: present
-    kind: Broker
+    kind: ServiceBroker
     content:
       path: /tmp/brokerout
       data:
         apiVersion: servicecatalog.k8s.io/v1alpha1
-        kind: Broker
+        kind: ServiceBroker
         metadata:
           name: ansible-service-broker
         spec:
-          url: http://asb.openshift-ansible-service-broker.svc:1338
+          url: http://asb.openshift-ansible-service-broker.svc:1338/ansible-service-broker
+          authInfo:
+            bearer:
+              secretRef:
+                name: asb-client
+                namespace: openshift-ansible-service-broker
+                kind: Secret
+          caBundle: "{{ catalog_ca.content }}"

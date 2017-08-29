@@ -90,6 +90,12 @@ options:
     required: false
     default: str
     aliases: []
+  labels:
+    description:
+    - The labels to apply on the route
+    required: false
+    default: None
+    aliases: []
   tls_termination:
     description:
     - The options for termination. e.g. reencrypt
@@ -1469,6 +1475,7 @@ class RouteConfig(object):
                  sname,
                  namespace,
                  kubeconfig,
+                 labels=None,
                  destcacert=None,
                  cacert=None,
                  cert=None,
@@ -1483,6 +1490,7 @@ class RouteConfig(object):
         self.kubeconfig = kubeconfig
         self.name = sname
         self.namespace = namespace
+        self.labels = labels
         self.host = host
         self.tls_termination = tls_termination
         self.destcacert = destcacert
@@ -1508,6 +1516,8 @@ class RouteConfig(object):
         self.data['metadata'] = {}
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
+        if self.labels:
+            self.data['metadata']['labels'] = self.labels
         self.data['spec'] = {}
 
         self.data['spec']['host'] = self.host
@@ -1715,6 +1725,7 @@ class OCRoute(OpenShiftCLI):
         rconfig = RouteConfig(params['name'],
                               params['namespace'],
                               params['kubeconfig'],
+                              params['labels'],
                               files['destcacert']['value'],
                               files['cacert']['value'],
                               files['cert']['value'],
@@ -1819,6 +1830,7 @@ def main():
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
+            labels=dict(default=None, type='dict'),
             name=dict(default=None, required=True, type='str'),
             namespace=dict(default=None, required=True, type='str'),
             tls_termination=dict(default=None, type='str'),

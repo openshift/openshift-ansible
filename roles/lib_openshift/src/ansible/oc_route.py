@@ -13,6 +13,7 @@ def main():
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
+            labels=dict(default=None, type='dict'),
             name=dict(default=None, required=True, type='str'),
             namespace=dict(default=None, required=True, type='str'),
             tls_termination=dict(default=None, type='str'),
