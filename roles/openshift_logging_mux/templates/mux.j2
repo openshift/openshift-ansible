@@ -45,6 +45,8 @@ spec:
 {% endif %}
 {% if mux_memory_limit is not none %}
             memory: "{{mux_memory_limit}}"
+          requests:
+            memory: "{{mux_memory_limit}}"
 {% endif %}
 {% endif %}
         ports:
