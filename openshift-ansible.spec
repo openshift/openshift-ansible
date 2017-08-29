@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.118.0%{?dist}
+Release:        0.120.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Aug 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.120.0
+- Nuage changes to add custom mounts for atomic-openshift-node service
+  (rohan.s.parulekar@nuagenetworks.net)
+- Add independent registry auth support (mgugino@redhat.com)
+- roles: use openshift_use_crio (gscrivan@redhat.com)
+- cri-o: change to system runc (gscrivan@redhat.com)
+- cri-o: rename openshift_docker_use_crio to openshift_use_crio
+  (gscrivan@redhat.com)
+- Remove unsupported playbooks and utilities (rteague@redhat.com)
+- Updating default tag for enterprise installation for ASB
+  (ewolinet@redhat.com)
+- Only validate certificates that are passed to oc_route (zgalor@redhat.com)
+
 * Mon Aug 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.118.0
 - Fix origin metrics and logging container version
   (gevorg15@users.noreply.github.com)
