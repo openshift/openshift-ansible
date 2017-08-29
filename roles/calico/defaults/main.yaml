@@ -11,4 +11,4 @@ calico_url_ipam: "https://github.com/projectcalico/cni-plugin/releases/download/
 calico_ipv4pool_ipip: "always"
 
 calico_log_dir: "/var/log/calico"
-calico_node_image: "calico/node:v2.4.1"
+calico_node_image: "calico/node:v2.5.0"
