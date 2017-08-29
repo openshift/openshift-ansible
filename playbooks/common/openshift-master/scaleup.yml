@@ -1,11 +1,4 @@
 ---
-- include: ../openshift-cluster/evaluate_groups.yml
-
-- name: Gather facts
-  hosts: oo_etcd_to_config:oo_masters_to_config:oo_nodes_to_config
-  roles:
-  - openshift_facts
-
 - name: Update master count
   hosts: oo_masters:!oo_masters_to_config
   serial: 1
@@ -49,16 +42,6 @@
     retries: 120
     delay: 1
     changed_when: false
-
-- name: Configure docker hosts
-  hosts: oo_masters_to_config:oo_nodes_to_config
-  vars:
-    docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') | oo_split }}"
-    docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') | oo_split }}"
-    docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') | oo_split }}"
-  roles:
-  - openshift_facts
-  - openshift_docker
 
 - name: Disable excluders
   hosts: oo_masters_to_config
