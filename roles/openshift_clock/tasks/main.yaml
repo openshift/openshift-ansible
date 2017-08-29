@@ -1,14 +1,15 @@
 ---
-- name: Set clock facts
-  openshift_facts:
-    role: clock
-    local_facts:
-      enabled: "{{ openshift_clock_enabled | default(None) }}"
+- name: Determine if chrony is installed
+  command: rpm -q chrony
+  failed_when: false
+  register: chrony_installed
 
 - name: Install ntp package
   package: name=ntp state=present
-  when: openshift.clock.enabled | bool and not openshift.clock.chrony_installed | bool
+  when:
+    - openshift_clock_enabled | bool
+    - chrony_installed.rc != 0
 
 - name: Start and enable ntpd/chronyd
-  shell: timedatectl set-ntp true
-  when: openshift.clock.enabled | bool
+  command: timedatectl set-ntp true
+  when: openshift_clock_enabled | bool
