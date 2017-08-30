@@ -59,7 +59,7 @@ controllerConfig:
 controllers: '*'
 corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
-  - {{ origin }}
+  - (?i)\A{{ origin | regex_escape() }}\z
 {% endfor %}
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
   - {{ custom_origin }}
