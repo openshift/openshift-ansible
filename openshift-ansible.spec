@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.121.0%{?dist}
+Release:        0.122.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.122.0
+- Update openshift_hosted_routers example to be in ini format.
+  (abutcher@redhat.com)
+- Update calico to v2.5 (djosborne10@gmail.com)
+
 * Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.121.0
 - Revert "logging set memory request to limit" (sdodson@redhat.com)
 - Move firewall install and fix scaleup playbooks (rteague@redhat.com)
