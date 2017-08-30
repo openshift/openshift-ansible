@@ -93,6 +93,11 @@
              }) }}
         
       with_items: "{{ groups.keepalived }}"
+
+- name: Install os_firewall to prevent IPTables rules wiping
+  hosts: keepalived
+  roles:
+    - role: os_firewall
     
 - name: Enable IPTables
   hosts: keepalived
