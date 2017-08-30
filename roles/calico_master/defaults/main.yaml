@@ -3,5 +3,5 @@ kubeconfig: "{{ openshift.common.config_base }}/master/openshift-master.kubeconf
 
 calicoctl_bin_dir: "/usr/local/bin/"
 
-calico_url_calicoctl: "https://github.com/projectcalico/calicoctl/releases/download/v1.4.0/calicoctl"
+calico_url_calicoctl: "https://github.com/projectcalico/calicoctl/releases/download/v1.5.0/calicoctl"
 calico_url_policy_controller: "quay.io/calico/kube-policy-controller:v0.7.0"
