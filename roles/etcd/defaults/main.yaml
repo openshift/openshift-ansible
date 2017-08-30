@@ -1,6 +1,6 @@
 ---
-r_etcd_firewall_enabled: True
-r_etcd_use_firewalld: False
+r_etcd_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_etcd_use_firewalld: "{{ os_firewall_use_firewalld | default(Falsel) }}"
 
 etcd_initial_cluster_state: new
 etcd_initial_cluster_token: etcd-cluster-1
