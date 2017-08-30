@@ -1,0 +1,54 @@
+---
+- when: openshift_aws_create_vpc | bool
+  name: create default vpc
+  include: vpc.yml
+
+- when: openshift_aws_create_iam_cert | bool
+  name: create the iam_cert for elb certificate
+  include: iam_cert.yml
+
+- when: openshift_aws_users | length > 0
+  name: create aws ssh keypair
+  include: ssh_keys.yml
+
+- when: openshift_aws_create_s3 | bool
+  name: create s3 bucket for registry
+  include: s3.yml
+
+- name: include scale group creation for master
+  include: build_node_group.yml
+
+- name: fetch newly created instances
+  ec2_remote_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:clusterid": "{{ openshift_aws_clusterid }}"
+      "tag:host-type": "{{ openshift_aws_node_group_type }}"
+      instance-state-name: running
+  register: instancesout
+  retries: 20
+  delay: 3
+  until: instancesout.instances|length > 0
+
+- name: create our master internal load balancers
+  include: elb.yml
+  vars:
+    openshift_aws_elb_direction: internal
+    openshift_aws_elb_name: "{{ openshift_aws_clusterid }}-{{openshift_aws_node_group_type }}-internal"
+    openshift_aws_elb_scheme: internal
+
+- name: create our master external load balancers
+  include: elb.yml
+  vars:
+    openshift_aws_elb_direction: external
+    openshift_aws_elb_name: "{{ openshift_aws_clusterid }}-{{openshift_aws_node_group_type }}-external"
+    openshift_aws_elb_scheme: internet-facing
+
+- name: wait for ssh to become available
+  wait_for:
+    port: 22
+    host: "{{ item.public_ip_address }}"
+    timeout: 300
+    search_regex: OpenSSH
+  with_items: "{{ instancesout.instances }}"
+  when: openshift_aws_wait_for_ssh | bool

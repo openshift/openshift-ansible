@@ -1,0 +1,32 @@
+---
+- name: query vpc
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      'tag:Name': "{{ openshift_aws_vpc_name }}"
+  register: vpcout
+
+- name: fetch the subnet to use in scale group
+  ec2_vpc_subnet_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_subnet_name }}"
+      vpc-id: "{{ vpcout.vpcs[0].id }}"
+  register: subnetout
+
+- name: Create the scale group
+  ec2_asg:
+    name: "{{ openshift_aws_scale_group_name }}"
+    launch_config_name: "{{ openshift_aws_launch_config_name }}"
+    health_check_period: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].health_check.period }}"
+    health_check_type: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].health_check.type }}"
+    min_size: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].min_size }}"
+    max_size: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].max_size }}"
+    desired_capacity: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].desired_size }}"
+    region: "{{ openshift_aws_region }}"
+    termination_policies: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].termination_policy if 'termination_policy' in  openshift_aws_node_group_config[openshift_aws_node_group_type] else omit }}"
+    load_balancers: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].elbs if 'elbs' in openshift_aws_node_group_config[openshift_aws_node_group_type] else omit }}"
+    wait_for_instances: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].wait_for_instances | default(False)}}"
+    vpc_zone_identifier: "{{ subnetout.subnets[0].id }}"
+    tags:
+    - "{{ openshift_aws_node_group_config.tags | combine(openshift_aws_node_group_config[openshift_aws_node_group_type].tags) }}"

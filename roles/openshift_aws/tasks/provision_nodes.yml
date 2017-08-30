@@ -1,0 +1,66 @@
+---
+# Get bootstrap config token
+# bootstrap should be created on first master
+# need to fetch it and shove it into cloud data
+- name: fetch master instances
+  ec2_remote_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:clusterid": "{{ openshift_aws_clusterid }}"
+      "tag:host-type": master
+      instance-state-name: running
+  register: instancesout
+  retries: 20
+  delay: 3
+  until: instancesout.instances|length > 0
+
+- name: slurp down the bootstrap.kubeconfig
+  slurp:
+    src: /etc/origin/master/bootstrap.kubeconfig
+  delegate_to: "{{ instancesout.instances[0].public_ip_address }}"
+  remote_user: root
+  register: bootstrap
+
+- name: set_fact for kubeconfig token
+  set_fact:
+    openshift_aws_launch_config_bootstrap_token: "{{ bootstrap['content'] | b64decode }}"
+
+- name: include build node group for infra
+  include: build_node_group.yml
+  vars:
+    openshift_aws_node_group_type: infra
+    openshift_aws_scale_group_name: "{{ openshift_aws_clusterid }} openshift infra"
+    openshift_aws_launch_config_name: "{{ openshift_aws_clusterid }}-infra-{{ ansible_date_time.epoch }}"
+
+- name: include build node group for compute
+  include: build_node_group.yml
+  vars:
+    openshift_aws_node_group_type: compute
+    openshift_aws_scale_group_name: "{{ openshift_aws_clusterid }} openshift compute"
+    openshift_aws_launch_config_name: "{{ openshift_aws_clusterid }}-compute-{{ ansible_date_time.epoch }}"
+
+- when: openshift_aws_wait_for_ssh | bool
+  block:
+  - name: pause and allow for instances to scale before we query them
+    pause:
+      seconds: 10
+
+  - name: fetch newly created instances
+    ec2_remote_facts:
+      region: "{{ openshift_aws_region }}"
+      filters:
+        "tag:clusterid": "{{ openshift_aws_clusterid }}"
+        "tag:host-type": node
+        instance-state-name: running
+    register: instancesout
+    retries: 20
+    delay: 3
+    until: instancesout.instances|length > 0
+
+  - name: wait for ssh to become available
+    wait_for:
+      port: 22
+      host: "{{ item.public_ip_address }}"
+      timeout: 300
+      search_regex: OpenSSH
+    with_items: "{{ instancesout.instances }}"

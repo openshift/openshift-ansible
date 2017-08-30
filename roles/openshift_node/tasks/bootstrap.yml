@@ -42,14 +42,25 @@
     path: /etc/origin/.config_managed
   register: rpmgenerated_config
 
-- name: Remove RPM generated config files if present
-  file:
-    path: "/etc/origin/{{ item }}"
-    state: absent
-  when:
-  - rpmgenerated_config.stat.exists
-  - openshift_deployment_type in ['openshift-enterprise', 'atomic-enterprise']
-  with_items:
-  - master
-  - node
-  - .config_managed
+- when: rpmgenerated_config.stat.exists
+  block:
+  - name: Remove RPM generated config files if present
+    file:
+      path: "/etc/origin/{{ item }}"
+      state: absent
+    with_items:
+    - master
+
+  # with_fileglob doesn't work correctly due to a few issues.
+  # Could change this to fileglob when it gets fixed.
+  - name: find all files in /etc/origin/node so we can remove them
+    find:
+      path: /etc/origin/node/
+    register: find_results
+
+  - name: Remove everything except the resolv.conf required for node
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    when: "'resolv.conf' not in item.path or 'node-dnsmasq.conf' not in item.path"
+    with_items: "{{ find_results.files }}"

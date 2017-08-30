@@ -1,0 +1,34 @@
+---
+# When openshift_aws_use_custom_ami is '' then
+# we retrieve the latest build AMI.
+# Then set openshift_aws_ami to the ami.
+- when: openshift_aws_ami == ''
+  block:
+  - name: fetch recently created AMI
+    ec2_ami_find:
+      region: "{{ openshift_aws_region }}"
+      sort: creationDate
+      sort_order: descending
+      name: "{{ openshift_aws_ami_name }}*"
+      ami_tags: "{{ openshift_aws_ami_tags }}"
+      no_result_action: fail
+    register: amiout
+
+  - name: Set the openshift_aws_ami
+    set_fact:
+      openshift_aws_ami: "{{ amiout.results[0].ami_id }}"
+    when:
+    - "'results' in amiout"
+    - amiout.results|length > 0
+
+- when: openshift_aws_create_security_groups
+  name: "Create {{ openshift_aws_node_group_type }} security groups"
+  include: security_group.yml
+
+- when: openshift_aws_create_launch_config
+  name: "Create {{ openshift_aws_node_group_type }} launch config"
+  include: launch_config.yml
+
+- when: openshift_aws_create_scale_group
+  name: "Create {{ openshift_aws_node_group_type }} node group"
+  include: scale_group.yml

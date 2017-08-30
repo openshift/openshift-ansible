@@ -48,6 +48,7 @@
     when:
     - g_etcd_hosts | default([]) | length == 0
     - not openshift_master_unsupported_all_in_one | default(False)
+    - not openshift_node_bootstrap | default(False)
 
   - name: Evaluate oo_all_hosts
     add_host:

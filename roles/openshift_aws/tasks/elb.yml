@@ -1,0 +1,68 @@
+---
+- name: query vpc
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      'tag:Name': "{{ openshift_aws_vpc_name }}"
+  register: vpcout
+
+- name: debug
+  debug: var=vpcout
+
+- name: fetch the remote instances
+  ec2_remote_facts:
+    region: "{{ openshift_aws_region }}"
+    filters: "{{ openshift_aws_elb_instance_filter }}"
+  register: instancesout
+
+- name: fetch the default subnet id
+  ec2_vpc_subnet_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_subnet_name }}"
+      vpc-id: "{{ vpcout.vpcs[0].id }}"
+  register: subnetout
+
+- name:
+  debug:
+    msg: "{{ openshift_aws_elb_listeners[openshift_aws_node_group_type][openshift_aws_elb_direction]
+                   if 'master' in openshift_aws_node_group_type or 'infra' in openshift_aws_node_group_type
+                   else openshift_aws_elb_listeners }}"
+
+- name: "Create ELB {{ openshift_aws_elb_name }}"
+  ec2_elb_lb:
+    name: "{{ openshift_aws_elb_name }}"
+    state: present
+    security_group_names: "{{ openshift_aws_elb_security_groups }}"
+    idle_timeout: "{{ openshift_aws_elb_idle_timout }}"
+    region: "{{ openshift_aws_region }}"
+    subnets:
+    - "{{ subnetout.subnets[0].id }}"
+    health_check: "{{ openshift_aws_elb_health_check }}"
+    listeners: "{{ openshift_aws_elb_listeners[openshift_aws_node_group_type][openshift_aws_elb_direction]
+                   if 'master' in openshift_aws_node_group_type  or 'infra' in openshift_aws_node_group_type
+                   else openshift_aws_elb_listeners }}"
+    scheme: "{{ openshift_aws_elb_scheme }}"
+    tags:
+      KubernetesCluster: "{{ openshift_aws_clusterid }}"
+  register: new_elb
+
+# It is necessary to ignore_errors here because the instances are not in 'ready'
+#  state when first added to ELB
+- name: "Add instances to ELB {{ openshift_aws_elb_name }}"
+  ec2_elb:
+    instance_id: "{{ item.id }}"
+    ec2_elbs: "{{ openshift_aws_elb_name }}"
+    state: present
+    region: "{{ openshift_aws_region }}"
+    wait: False
+  with_items: "{{ instancesout.instances }}"
+  ignore_errors: True
+  retries: 10
+  register: elb_call
+  until: elb_call|succeeded
+
+- debug:
+    msg: "{{ item }}"
+  with_items:
+  - "{{ new_elb }}"

@@ -49,6 +49,13 @@
     state: restarted
   when: openshift_use_crio | default(false)
 
+- name: restart NetworkManager to ensure resolv.conf is present
+  systemd:
+    name: NetworkManager
+    enabled: yes
+    state: restarted
+  when: openshift_node_bootstrap | bool
+
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
 # lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388

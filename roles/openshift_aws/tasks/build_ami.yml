@@ -1,0 +1,48 @@
+---
+- when: openshift_aws_create_vpc | bool
+  name: create a vpc
+  include: vpc.yml
+
+- when: openshift_aws_users | length  > 0
+  name: create aws ssh keypair
+  include: ssh_keys.yml
+
+- when: openshift_aws_create_security_groups | bool
+  name: Create compute security_groups
+  include: security_group.yml
+
+- name: query vpc
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      'tag:Name': "{{ openshift_aws_vpc_name }}"
+  register: vpcout
+
+- name: fetch the default subnet id
+  ec2_vpc_subnet_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_subnet_name }}"
+      vpc-id: "{{ vpcout.vpcs[0].id }}"
+  register: subnetout
+
+- name: create instance for ami creation
+  ec2:
+    assign_public_ip: yes
+    region: "{{ openshift_aws_region }}"
+    key_name: "{{ openshift_aws_ssh_key_name }}"
+    group: "{{ openshift_aws_clusterid }}"
+    instance_type: m4.xlarge
+    vpc_subnet_id: "{{ subnetout.subnets[0].id }}"
+    image: "{{ openshift_aws_base_ami }}"
+    volumes:
+    - device_name: /dev/sdb
+      volume_type: gp2
+      volume_size: 100
+      delete_on_termination: true
+    wait: yes
+    exact_count: 1
+    count_tag:
+      Name: "{{ openshift_aws_base_ami_name }}"
+    instance_tags:
+      Name: "{{ openshift_aws_base_ami_name }}"
