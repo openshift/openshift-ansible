@@ -1,5 +1,3 @@
-// vim: ft=asciidoc
-
 = openshift-ansible Style Guide
 
 The purpose of this guide is to describe the preferred coding conventions used in this repository (both in ansible and python).
@@ -96,79 +94,24 @@ g_environment: someval
 ----
 
 === Ansible Role Variables
-Ansible role variables are defined as variables contained in (or passed into) a role.
-
 '''
-[[Role-variables-MUST-have-a-prefix-of-atleast-3-characters-See.below.for.specific.naming.rules]]
+[[Ansible-role-variable-prefix]]
 [cols="2v,v"]
 |===
-| <<Role-variables-MUST-have-a-prefix-of-atleast-3-characters-See.below.for.specific.naming.rules, Rule>>
-| Role variables MUST have a prefix of at least 3 characters. See below for specific naming rules.
+| <<Ansible-role-variable-prefix, Rule>>
+| Role variables MUST have a prefix of `r_<role_name>_`
 |===
 
-==== Role with 3 (or more) words in the name
+.Definition
+Ansible variables contained in or passed into a role.
 
-Take the first letter of each of the words.
+.Purpose
+Name variables to avoid name collision between roles or playbooks.
 
-.3 word example:
-* Role name: made_up_role
-* Prefix: mur
-[source]
+.Example
+* Role name: openshift_fooname
+* Prefix: `r_openshift_fooname_`
+[source,yaml]
 ----
-mur_var1: value_one
+r_openshift_fooname_bar_var: value_one
 ----
-
-.4 word example:
-* Role name: totally_made_up_role
-* Prefix: tmur
-[source]
-----
-tmur_var1: value_one
-----
-
-
-
-==== Role with 2 (or less) words in the name
-
-Make up a prefix that makes sense.
-
-.1 word example:
-* Role name: ansible
-* Prefix: ans
-[source]
-----
-ans_var1: value_one
-----
-
-.2 word example:
-* Role name: ansible_tower
-* Prefix: tow
-[source]
-----
-tow_var1: value_one
-----
-
-
-==== Role name prefix conflicts
-If two role names contain words that start with the same letters, it will seem like their prefixes would conflict.
-
-Role variables are confined to the roles themselves, so this is actually only a problem if one of the roles depends on the other role (or uses includes into the other role).
-
-.Same prefix example:
-* First Role Name: made_up_role
-* First Role Prefix: mur
-* Second Role Name: my_uber_role
-* Second Role Prefix: mur
-[source]
-----
-- hosts: localhost
-  roles:
-  - { role: made_up_role, mur_var1: val1 }
-  - { role: my_uber_role, mur_var1: val2 }
-----
-
-Even though both roles have the same prefix (mur), and even though both roles have a variable named mur_var1, these two variables never exist outside of their respective roles. This means that this is not a problem.
-
-This would only be a problem if my_uber_role depended on made_up_role, or vice versa. Or if either of these two roles included things from the other.
-
-This is enough of a corner case that it is unlikely to happen. If it does, it will be addressed on a case by case basis.
