@@ -1,3 +1,14 @@
+# Goal
+Give users the ability to create a deterministic inventory
+
+By this I mean, anything that is placed in the inventory with regards to role
+and play behavior is honored and not overridden by our plays, whenever possible.
+
+inventory group_vars and host_vars are implied when I say "inventory variables"
+
+This allows the consumption of roles outside of using any one specific play,
+where practical.
+
 # Current Situation
 
 First, openshift.common.use_calico is set.  This is created from the inventory
