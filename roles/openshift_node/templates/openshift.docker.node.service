@@ -34,6 +34,7 @@ ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
   -v /lib/modules:/lib/modules -v /etc/origin/openvswitch:/etc/openvswitch \
   -v /etc/origin/sdn:/etc/openshift-sdn -v /var/lib/cni:/var/lib/cni \
   -v /etc/systemd/system:/host-etc/systemd/system -v /var/log:/var/log \
+  {% if openshift_use_nuage | default(false) -%} $NUAGE_ADDTL_BIND_MOUNTS {% endif -%} \
   -v /dev:/dev $DOCKER_ADDTL_BIND_MOUNTS -v /etc/pki:/etc/pki:ro \
   {% if l_bind_docker_reg_auth %} -v {{ oreg_auth_credentials_path }}:/root/.docker:ro{% endif %}\
   {{ openshift.node.node_image }}:${IMAGE_VERSION}

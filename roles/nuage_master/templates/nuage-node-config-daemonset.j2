@@ -23,7 +23,7 @@ data:
       # IP address and port number of master API server
       masterApiServer: {{ api_server_url }}
       # REST server URL 
-      nuageMonRestServer: {{ nuage_mon_rest_server_url }}
+      nuageMonRestServer: https://{{ openshift_master_cluster_hostname }}:{{ nuage_mon_rest_server_port }}
       # Bridge name for the docker bridge
       dockerBridgeName: docker0
       # Certificate for connecting to the openshift monitor REST api
@@ -32,11 +32,6 @@ data:
       nuageMonClientKey: {{ nuage_node_config_dsets_mount_dir }}/vsp-openshift/nuageMonClient.key
       # CA certificate for verifying the master's rest server
       nuageMonServerCA: {{ nuage_node_config_dsets_mount_dir }}/vsp-openshift/nuageMonCA.crt
-      # Nuage vport mtu size
-      interfaceMTU: {{ nuage_vport_mtu  }}
-      # Logging level for the plugin
-      # allowed options are: "dbg", "info", "warn", "err", "emer", "off"
-      logLevel: 3
 
   # This will generate the required Nuage CNI yaml configuration
   cni_yaml_config: |
@@ -72,10 +67,6 @@ spec:
         k8s-app: nuage-cni-ds
     spec:
       hostNetwork: true
-      tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
-          operator: Exists
       containers:
         # This container installs Nuage CNI binaries
         # and CNI network config file on each node.
@@ -157,10 +148,6 @@ spec:
         k8s-app: nuage-vrs-ds
     spec:
       hostNetwork: true
-      tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
-          operator: Exists
       containers:
         # This container installs Nuage VRS running as a
         # container on each worker node
