@@ -44,8 +44,6 @@ spec:
               cpu: "{{curator_cpu_limit}}"
 {% if curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "" %}
               memory: "{{curator_memory_limit}}"
-            requests:
-              memory: "{{curator_memory_limit}}"
 {% endif %}
           env:
             -
