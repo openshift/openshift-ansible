@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.120.0%{?dist}
+Release:        0.121.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.121.0
+- Revert "logging set memory request to limit" (sdodson@redhat.com)
+- Move firewall install and fix scaleup playbooks (rteague@redhat.com)
+- Fix group conditional requirements (rteague@redhat.com)
+- Updating openshift_service_catalog to use oc_service over oc_obj to resolve
+  idempotency issues being seen from rerunning role (ewolinet@redhat.com)
+- annotate the infra projects for logging to fix bz1480988
+  (jcantril@redhat.com)
+- docker_image_availability: timeout skopeo inspect (lmeyer@redhat.com)
+- Fix scaleup on containerized installations (sdodson@redhat.com)
+- bug 1480878. Default pvc for logging (jcantril@redhat.com)
+- logging set memory request to limit (jcantril@redhat.com)
+- openshift_cfme: add nfs directory support (fsimonce@redhat.com)
+
 * Tue Aug 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.120.0
 - Nuage changes to add custom mounts for atomic-openshift-node service
   (rohan.s.parulekar@nuagenetworks.net)
