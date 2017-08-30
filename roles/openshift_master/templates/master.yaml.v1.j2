@@ -62,7 +62,7 @@ corsAllowedOrigins:
   - (?i)\A{{ origin | regex_escape() }}\z {# anchor with start (\A) and end (\z) of the string, make the check case insensitive ((?i)) and escape hostname #}
 {% endfor %}
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
-  - {{ custom_origin }}
+  - (?i)\A{{ custom_origin | regex_escape() }}\z {# anchor with start (\A) and end (\z) of the string, make the check case insensitive ((?i)) and escape hostname #}
 {% endfor %}
 {% if 'disabled_features' in openshift.master %}
 disabledFeatures: {{ openshift.master.disabled_features | to_json }}
