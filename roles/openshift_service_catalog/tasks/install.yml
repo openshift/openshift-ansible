@@ -168,19 +168,19 @@
       - "{{ mktemp.stdout }}/service_catalog_api_server.yml"
     delete_after: yes
 
-- template:
-    src: api_server_service.j2
-    dest: "{{ mktemp.stdout }}/service_catalog_api_service.yml"
-
 - name: Set Service Catalog API Server service
-  oc_obj:
-    state: present
-    namespace: "kube-service-catalog"
-    kind: service
+  oc_service:
     name: apiserver
-    files:
-      - "{{ mktemp.stdout }}/service_catalog_api_service.yml"
-    delete_after: yes
+    namespace: kube-service-catalog
+    state: present
+    ports:
+      - name: secure
+        port: 443
+        protocol: TCP
+        targetPort: 6443
+    selector:
+      app: apiserver
+    session_affinity: None
 
 - template:
     src: api_server_route.j2
@@ -216,19 +216,19 @@
       - "{{ mktemp.stdout }}/controller_manager.yml"
     delete_after: yes
 
-- template:
-    src: controller_manager_service.j2
-    dest: "{{ mktemp.stdout }}/controller_manager_service.yml"
-
 - name: Set Controller Manager service
-  oc_obj:
-    state: present
-    namespace: "kube-service-catalog"
-    kind: service
+  oc_service:
     name: controller-manager
-    files:
-      - "{{ mktemp.stdout }}/controller_manager_service.yml"
-    delete_after: yes
+    namespace: kube-service-catalog
+    state: present
+    ports:
+      - port: 6443
+        protocol: TCP
+        targetPort: 6443
+    selector:
+      app: controller-manager
+    session_affinity: None
+    service_type: ClusterIP
 
 - include: start_api_server.yml
 
