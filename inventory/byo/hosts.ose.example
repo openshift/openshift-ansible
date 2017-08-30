@@ -559,6 +559,20 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure the prefix and version for the component images
 #openshift_hosted_metrics_deployer_prefix=registry.example.com:8888/openshift3/
 #openshift_hosted_metrics_deployer_version=3.6.0
+
+# Additional metrics settings
+# See https://github.com/openshift/openshift-ansible/tree/release-3.6/roles/openshift_metrics
+#
+#openshift_metrics_hawkular_hostname=hawkular-metrics.example.com
+#openshift_metrics_hawkular_replicas=1
+#openshift_metrics_cassandra_storage_type=dynamic
+#openshift_metrics_cassandra_pvc_size=20G
+#openshift_metrics_cassandra_replicas=1
+#openshift_metrics_cassandra_limits_memory=2G
+#openshift_hosted_metrics_cassandra_nodeselector='purpose=infra'
+#openshift_hosted_metrics_hawkular_nodeselector='purpose=infra'
+#openshift_hosted_metrics_heapster_nodeselector='purpose=infra'
+
 #
 # StorageClass
 # openshift_storageclass_name=gp2
@@ -614,6 +628,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Configure the prefix and version for the component images
 #openshift_hosted_logging_deployer_prefix=registry.example.com:8888/openshift3/
 #openshift_hosted_logging_deployer_version=3.6.0
+
+# Additional logging settings
+# See https://github.com/openshift/openshift-ansible/tree/release-3.6/roles/openshift_logging
+openshift_logging_es_cluster_size=1
+openshift_logging_es_memory_limit=4G
+openshift_logging_es_nodeselector='purpose=infra'
+openshift_logging_curator_nodeselector='purpose=infra'
+openshift_logging_kibana_nodeselector='purpose=infra'
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
