@@ -180,6 +180,7 @@
                                                 | oo_collect('openshift.common.ip') | default([]) | join(',')
                                                 }}"
   roles:
+  - role: os_firewall
   - role: openshift_master
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars

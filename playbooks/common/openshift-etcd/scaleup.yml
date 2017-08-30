@@ -28,6 +28,8 @@
     delay: 10
     until: etcd_add_check.rc == 0
   roles:
+  - role: os_firewall
+    when: etcd_add_check.rc == 0
   - role: openshift_etcd
     when: etcd_add_check.rc == 0
     etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"

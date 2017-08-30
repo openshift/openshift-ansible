@@ -14,4 +14,5 @@
                                           + openshift_loadbalancer_additional_backends | default([]) }}"
     openshift_image_tag: "{{ hostvars[groups.oo_first_master.0].openshift_image_tag }}"
   roles:
+  - role: os_firewall
   - role: openshift_loadbalancer

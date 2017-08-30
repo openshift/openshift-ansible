@@ -32,6 +32,7 @@
                                                 }}"
 
   roles:
+  - role: os_firewall
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
@@ -47,6 +48,7 @@
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
   roles:
+  - role: os_firewall
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 

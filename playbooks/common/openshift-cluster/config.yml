@@ -18,10 +18,6 @@
       - docker_image_availability
       - docker_storage
 
-- include: initialize_firewall.yml
-  tags:
-  - always
-
 - hosts: localhost
   tasks:
   - fail:

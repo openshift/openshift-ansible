@@ -1,7 +1,0 @@
----
-- name: Initialize host firewall
-  hosts: oo_all_hosts
-  tasks:
-  - name: Install and configure the proper firewall settings
-    include_role:
-      name: os_firewall
