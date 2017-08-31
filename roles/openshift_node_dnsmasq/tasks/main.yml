@@ -14,6 +14,17 @@
   package: name=dnsmasq state=installed
   when: not openshift.common.is_atomic | bool
 
+- name: ensure origin/node directory exists
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0700'
+  with_items:
+  - /etc/origin
+  - /etc/origin/node
+
 # this file is copied to /etc/dnsmasq.d/ when the node starts and is removed
 # when the node stops. A dbus-message is sent to dnsmasq to add the same entries
 # so that dnsmasq doesn't need to be restarted. Once we can use dnsmasq 2.77 or

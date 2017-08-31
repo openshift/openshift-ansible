@@ -34,6 +34,7 @@ Before any provisioning may occur, AWS account credentials must be present in th
 The newly added playbooks are the following:
 - build_ami.yml
 - provision.yml
+- provision_nodes.yml
 
 The current expected work flow should be to provide the `vars.yml` file with the
 desired settings for cluster instances.  These settings are AWS specific and should
@@ -51,19 +52,6 @@ provision:
     base_image: ami-bdd5d6ab # base image for AMI to build from
     # when creating an encrypted AMI please specify use_encryption
     use_encryption: False
-
-    yum_repositories: # this is an example repository but it requires sslclient info.  Use a valid yum repository for openshift rpms
-    - name: openshift-repo
-      file: openshift-repo
-      description: OpenShift Builds
-      baseurl: https://mirror.openshift.com/enterprise/online-int/latest/x86_64/os/
-      enabled: yes
-      gpgcheck: no
-      sslverify: no
-      # client cert and key required for this repository
-      sslclientcert: "/var/lib/yum/client-cert.pem"
-      sslclientkey: "/var/lib/yum/client-key.pem"
-      gpgkey: "https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted"
 
   # for s3 registry backend
   openshift_registry_s3: True
@@ -123,39 +111,10 @@ provision:
 ```
 
 Repeat the following setup for the infra and compute node groups.  This most likely
- will not need editing but if further customization is required these parameters
+ will not need editing but if the install requires further customization then these parameters
  can be updated.
 
 #### Step 1
-
-Once the vars.yml file has been updated with the correct settings for the desired AWS account then we are ready to build an AMI.
-
-```
-$ ansible-playbook build_ami.yml
-```
-
-1. This script will build a VPC. Default name will be clusterid if not specified.
-2. Create an ssh key required for the instance.
-3. Create an instance.
-4. Run some setup roles to ensure packages and services are correctly configured.
-5. Create the AMI.
-6. If encryption is desired
-  - A KMS key is created with the name of $clusterid
-  - An encrypted AMI will be produced with $clusterid KMS key
-7. Terminate the instance used to configure the AMI.
-
-#### Step 2
-
-Now that we have created an AMI for our Openshift installation, that AMI id needs to be placed in the `vars.yml` file.  To do so update the following fields (The AMI can be captured from the output of the previous step or found in the ec2 console under AMIs):
-
-```
-  # when creating an encrypted AMI please specify use_encryption
-  use_encryption: False # defaults to false
-```
-
-**Note**: If using encryption, specify with `use_encryption: True`.  This will ensure to take the recently created AMI and encrypt it to be used later.  If encryption is not desired then set the value to false. The AMI id will be fetched and used according to its most recent creation date. 
-
-#### Step 3
 
 Create an openshift-ansible inventory file to use for a byo installation.  The exception here is that there will be no hosts specified by the inventory file.  Here is an example:
 
@@ -171,9 +130,19 @@ nodes
 etcd
 
 [OSEv3:vars]
-# cluster specific settings maybe be placed here
+################################################################################
+# Ensure these variables are set for bootstrap
+################################################################################
+openshift_master_bootstrap_enabled=True
+
 openshift_hosted_router_wait=False
 openshift_hosted_registry_wait=False
+
+# Repository for installation
+openshift_additional_repos=[{'name': 'openshift-repo', 'id': 'openshift-repo',  'baseurl': 'https://mirror.openshift.com/enterprise/enterprise-3.6/latest/x86_64/os/', 'enabled': 'yes', 'gpgcheck': 0, 'sslverify': 'no', 'sslclientcert': '/var/lib/yum/client-cert.pem', 'sslclientkey': '/var/lib/yum/client-key.pem', 'gpgkey': 'https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted'}]
+
+################################################################################
+# cluster specific settings maybe be placed here
 
 [masters]
 
@@ -184,12 +153,46 @@ openshift_hosted_registry_wait=False
 
 There are more examples of cluster inventory settings [`here`](../../inventory/byo/).
 
+In order to create the bootstrapable AMI we need to create an openshift-ansible inventory file.  This file enables us to create the AMI using the openshift-ansible node roles.
+
+
+#### Step 2
+
+Once the vars.yml file has been updated with the correct settings for the desired AWS account then we are ready to build an AMI.
+
+```
+$ ansible-playbook -i inventory.yml build_ami.yml
+```
+
+1. This script will build a VPC. Default name will be clusterid if not specified.
+2. Create an ssh key required for the instance.
+3. Create an instance.
+4. Run some setup roles to ensure packages and services are correctly configured.
+5. Create the AMI.
+6. If encryption is desired
+  - A KMS key is created with the name of $clusterid
+  - An encrypted AMI will be produced with $clusterid KMS key
+7. Terminate the instance used to configure the AMI.
+
+
+#### Step 3
+
+Now that we have created an AMI for our Openshift installation, that AMI id needs to be placed in the `vars.yml` file.  To do so update the following fields (The AMI can be captured from the output of the previous step or found in the ec2 console under AMIs):
+
+```
+  # when creating an encrypted AMI please specify use_encryption
+  use_encryption: False # defaults to false
+```
+
+**Note**: If using encryption, specify with `use_encryption: True`.  This will ensure to take the recently created AMI and encrypt it to be used later.  If encryption is not desired then set the value to false. The AMI id will be fetched and used according to its most recent creation date.
+
+
 #### Step 4
 
 We are ready to create the master instances and install Openshift.
 
 ```
-$ ansible-playbook -i <inventory from step 3> provision.yml
+$ ansible-playbook -i <inventory from step 1> provision.yml
 ```
 
 This playbook runs through the following steps:

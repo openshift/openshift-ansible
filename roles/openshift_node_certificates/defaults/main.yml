@@ -1,2 +1,3 @@
 ---
 openshift_node_cert_expire_days: 730
+openshift_ca_host: ''

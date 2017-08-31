@@ -1,5 +1,4 @@
 ---
-# TODO: allow for overriding default ports where possible
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
@@ -10,34 +9,7 @@
   include: firewall.yml
   static: yes
 
-- name: Set node facts
-  openshift_facts:
-    role: "{{ item.role }}"
-    local_facts: "{{ item.local_facts }}"
-  with_items:
-    # Reset node labels to an empty dictionary.
-    - role: node
-      local_facts:
-        labels: {}
-    - role: node
-      local_facts:
-        annotations: "{{ openshift_node_annotations | default(none) }}"
-        debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
-        iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
-        kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
-        labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
-        registry_url: "{{ oreg_url_node | default(oreg_url) | default(None) }}"
-        schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-        storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
-        set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
-        node_image: "{{ osn_image | default(None) }}"
-        ovs_image: "{{ osn_ovs_image | default(None) }}"
-        proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
-        local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
-        dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
-        env_vars: "{{ openshift_node_env_vars | default(None) }}"
-
+#### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
 - name: Check for swap usage
   command: grep "^[^#].*swap" /etc/fstab
@@ -46,9 +18,10 @@
   failed_when: false
   register: swap_result
 
-# Disable Swap Block
-- block:
-
+- when:
+    - swap_result.stdout_lines | length > 0
+    - openshift_disable_swap | default(true) | bool
+  block:
     - name: Disable swap
       command: swapoff --all
 
@@ -64,29 +37,10 @@
         dest: /etc/fstab
         line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
         state: present
+#### End Disable Swap Block ####
 
-  when:
-    - swap_result.stdout_lines | length > 0
-    - openshift_disable_swap | default(true) | bool
-# End Disable Swap Block
-
-- name: Install Node package
-  package:
-    name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
-    state: present
-  when: not openshift.common.is_containerized | bool
-
-- name: setup tuned
-  include: tuned.yml
-  static: yes
-
-- name: Install sdn-ovs package
-  package:
-    name: "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }}"
-    state: present
-  when:
-    - openshift.common.use_openshift_sdn | default(true) | bool
-    - not openshift.common.is_containerized | bool
+- name: include node installer
+  include: install.yml
 
 - name: Restart cri-o
   systemd:
@@ -94,15 +48,6 @@
     enabled: yes
     state: restarted
   when: openshift_use_crio | default(false)
-
-- name: Install conntrack-tools package
-  package:
-    name: "conntrack-tools"
-    state: present
-  when: not openshift.common.is_containerized | bool
-
-- name: Install the systemd units
-  include: systemd_units.yml
 
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
@@ -116,39 +61,13 @@
   notify:
     - reload sysctl.conf
 
-- name: Start and enable openvswitch service
-  systemd:
-    name: openvswitch.service
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  when:
-    - openshift.common.is_containerized | bool
-    - openshift.common.use_openshift_sdn | default(true) | bool
-  register: ovs_start_result
-  until: not ovs_start_result | failed
-  retries: 3
-  delay: 30
+- name: include bootstrap node config
+  include: bootstrap.yml
+  when: openshift_node_bootstrap
 
-- set_fact:
-    ovs_service_status_changed: "{{ ovs_start_result | changed }}"
-
-- file:
-    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
-    state: directory
-  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
-
-# TODO: add the validate parameter when there is a validation command to run
-- name: Create the Node config
-  template:
-    dest: "{{ openshift.common.config_base }}/node/node-config.yaml"
-    src: node.yaml.v1.j2
-    backup: true
-    owner: root
-    group: root
-    mode: 0600
-  notify:
-    - restart node
+- name: include standard node config
+  include: config.yml
+  when: not openshift_node_bootstrap
 
 - name: Check for credentials file for registry auth
   stat:
@@ -181,16 +100,7 @@
   notify:
     - restart node
 
-- name: Configure Node Environment Variables
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
-    regexp: "^{{ item.key }}="
-    line: "{{ item.key }}={{ item.value }}"
-    create: true
-  with_dict: "{{ openshift.node.env_vars | default({}) }}"
-  notify:
-    - restart node
-
+#### Storage class plugins here ####
 - name: NFS storage plugin configuration
   include: storage_plugins/nfs.yml
   tags:
@@ -208,55 +118,7 @@
   include: storage_plugins/iscsi.yml
   when: "'iscsi' in openshift.node.storage_plugin_deps"
 
-# Necessary because when you're on a node that's also a master the master will be
-# restarted after the node restarts docker and it will take up to 60 seconds for
-# systemd to start the master again
-- name: Wait for master API to become available before proceeding
-  # Using curl here since the uri module requires python-httplib2 and
-  # wait_for port doesn't provide health information.
-  command: >
-    curl --silent --tlsv1.2 --cacert {{ openshift.common.config_base }}/node/ca.crt
-    {{ openshift_node_master_api_url }}/healthz/ready
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
-  register: api_available_output
-  until: api_available_output.stdout == 'ok'
-  retries: 120
-  delay: 1
-  changed_when: false
-  when: openshift.common.is_containerized | bool
+##### END Storage #####
 
-- name: Start and enable node dep
-  systemd:
-    daemon_reload: yes
-    name: "{{ openshift.common.service_type }}-node-dep"
-    enabled: yes
-    state: started
-  when: openshift.common.is_containerized | bool
-
-
-- name: Start and enable node
-  systemd:
-    name: "{{ openshift.common.service_type }}-node"
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  register: node_start_result
-  until: not node_start_result | failed
-  retries: 1
-  delay: 30
-  ignore_errors: true
-
-- name: Dump logs from node service if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-node
-  when: node_start_result | failed
-
-- name: Abort if node failed to start
-  fail:
-    msg: Node failed to start please inspect the logs and try again
-  when: node_start_result | failed
-
-- set_fact:
-    node_service_status_changed: "{{ node_start_result | changed }}"
+- include: config/workaround-bz1331590-ovs-oom-fix.yml
+  when: openshift.common.use_openshift_sdn | default(true) | bool

@@ -157,4 +157,4 @@
 
   - name: initialize_facts set_fact on openshift_docker_hosted_registry_network
     set_fact:
-      openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+      openshift_docker_hosted_registry_network: "{{ '' if 'oo_first_master' not in groups else hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"

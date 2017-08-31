@@ -10,17 +10,6 @@ provision:
   build:  # build specific variables here
     ami_name: "openshift-gi-"
     base_image: ami-bdd5d6ab  # base image for AMI to build from
-    yum_repositories:  # this is an example repository but it requires sslclient info
-    - name: openshift-repo
-      file: openshift-repo
-      description: OpenShift Builds
-      baseurl: https://mirror.openshift.com/enterprise/online-int/latest/x86_64/os/
-      enabled: yes
-      gpgcheck: no
-      sslverify: no
-      sslclientcert: "/var/lib/yum/client-cert.pem"
-      sslclientkey: "/var/lib/yum/client-key.pem"
-      gpgkey: "https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted"
 
     # when creating an encrypted AMI please specify use_encryption
     use_encryption: False

@@ -117,7 +117,7 @@
     add_host:
       name: "{{ item }}"
       groups: oo_etcd_hosts_to_backup
-    with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else groups.oo_first_master }}"
+    with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else (groups.oo_first_master | default([])) }}"
     changed_when: False
 
   - name: Evaluate oo_nodes_to_config
@@ -173,5 +173,5 @@
       groups: oo_etcd_to_migrate
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config | default([]) | length != 0 else groups.oo_first_master }}"
+    with_items: "{{ groups.oo_etcd_to_config if groups.oo_etcd_to_config | default([]) | length != 0 else (groups.oo_first_master |default([]))}}"
     changed_when: no

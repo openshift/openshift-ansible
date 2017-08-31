@@ -27,6 +27,7 @@
   when:
   - (not skip_node_svc_handlers | default(False) | bool)
   - not (node_service_status_changed | default(false) | bool)
+  - not openshift_node_bootstrap
 
 - name: reload sysctl.conf
   command: /sbin/sysctl -p
