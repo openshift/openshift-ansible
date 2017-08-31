@@ -115,10 +115,7 @@ class DiskAvailability(OpenShiftCheck):
 
                 return {
                     'failed': True,
-                    'msg': (
-                        'Available disk space in "{}" ({:.1f} GB) '
-                        'is below minimum recommended ({:.1f} GB)'
-                    ).format(path, free_gb, recommended_gb)
+                    'msg': msg,
                 }
 
         return {}
