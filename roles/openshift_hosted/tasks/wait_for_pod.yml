@@ -1,0 +1,36 @@
+---
+- when: l_openshift_hosted_wait_for_pod | default(False) | bool
+  block:
+  - name: Ensure OpenShift pod correctly rolls out (best-effort today)
+    command: |
+      {{ openshift.common.client_binary }} rollout status deploymentconfig {{ item.name }} \
+                        --namespace {{ item.namespace | default('default') }} \
+                        --config {{ openshift_master_config_dir }}/admin.kubeconfig
+    async: 600
+    poll: 15
+    with_items: "{{ l_openshift_hosted_wfp_items }}"
+    failed_when: false
+
+  - name: Determine the latest version of the OpenShift pod deployment
+    command: |
+      {{ openshift.common.client_binary }} get deploymentconfig {{ item.name }} \
+             --namespace {{ item.namespace }} \
+             --config {{ openshift_master_config_dir }}/admin.kubeconfig \
+             -o jsonpath='{ .status.latestVersion }'
+    register: l_openshift_hosted_wfp_latest_version
+    with_items: "{{ l_openshift_hosted_wfp_items }}"
+
+  - name: Poll for OpenShift pod deployment success
+    command: |
+      {{ openshift.common.client_binary }} get replicationcontroller {{ item.0.name }}-{{ item.1.stdout }} \
+             --namespace {{ item.0.namespace }} \
+             --config {{ openshift_master_config_dir }}/admin.kubeconfig \
+             -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
+    register: openshift_hosted_wfp_rc_phase
+    until: "'Running' not in openshift_hosted_wfp_rc_phase.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Failed' in openshift_hosted_wfp_rc_phase.stdout"
+    with_together:
+    - "{{ l_openshift_hosted_wfp_items }}"
+    - "{{ l_openshift_hosted_wfp_latest_version.results }}"

@@ -1,14 +1,33 @@
 ---
+##########
+# Common #
+##########
+openshift_hosted_infra_selector: "region=infra"
+r_openshift_hosted_use_calico_default: "{{ openshift_use_calico | default(False) }}"
+r_openshift_hosted_use_calico: "{{ r_openshift_hosted_use_calico_default }}"
+
+openshift_default_projects:
+  default:
+    default_node_selector: ''
+  logging:
+    default_node_selector: ''
+  openshift-infra:
+    default_node_selector: ''
+
+# openshift_additional_projects shares the same format as openshift_default_projects
+openshift_additional_projects: {}
+
+openshift_config_base: "/etc/origin"
+openshift_master_config_dir: "{{ openshift.common.config_base | default(openshift_config_base) }}/master"
+openshift_cluster_domain: 'cluster.local'
+
+##########
+# Router #
+##########
 r_openshift_hosted_router_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_hosted_router_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-r_openshift_hosted_registry_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
-r_openshift_hosted_registry_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
-
 openshift_hosted_router_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
-openshift_hosted_registry_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
-
-registry_volume_claim: 'registry-claim'
 
 openshift_hosted_router_edits:
 - key: spec.strategy.rollingParams.intervalSeconds
@@ -36,11 +55,22 @@ openshift_hosted_routers:
   certificate: "{{ openshift_hosted_router_certificate | default({}) }}"
 
 openshift_hosted_router_certificate: {}
-openshift_hosted_registry_cert_expire_days: 730
 openshift_hosted_router_create_certificate: True
 
 r_openshift_hosted_router_os_firewall_deny: []
 r_openshift_hosted_router_os_firewall_allow: []
+
+############
+# Registry #
+############
+
+r_openshift_hosted_registry_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_hosted_registry_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+
+openshift_hosted_registry_name: docker-registry
+openshift_hosted_registry_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
+registry_volume_claim: 'registry-claim'
+openshift_hosted_registry_cert_expire_days: 730
 
 r_openshift_hosted_registry_os_firewall_deny: []
 r_openshift_hosted_registry_os_firewall_allow:
@@ -48,8 +78,26 @@ r_openshift_hosted_registry_os_firewall_allow:
   port: 5000/tcp
   cond: "{{ r_openshift_hosted_use_calico }}"
 
-# NOTE
-# r_openshift_hosted_use_calico_default may be defined external to this role.
-# openshift_use_calico, if defined, may affect other roles or play behavior.
-r_openshift_hosted_use_calico_default: "{{ openshift_use_calico | default(False) }}"
-r_openshift_hosted_use_calico: "{{ r_openshift_hosted_use_calico_default }}"
+openshift_hosted_registry_serviceaccount: registry
+openshift_hosted_registry_volumes: []
+openshift_hosted_registry_env_vars: {}
+
+# These edits are being specified only to prevent 'changed' on rerun
+openshift_hosted_registry_edits:
+- key: spec.strategy.rollingParams
+  value:
+    intervalSeconds: 1
+    maxSurge: "25%"
+    maxUnavailable: "25%"
+    timeoutSeconds: 600
+    updatePeriodSeconds: 1
+  action: put
+
+openshift_hosted_registry_force:
+- False
+
+openshift_push_via_dns: False
+
+# NOTE: settting openshift_docker_hosted_registry_insecure may affect other roles
+openshift_hosted_docker_registry_insecure_default: "{{ openshift_docker_hosted_registry_insecure | default(False) }}"
+openshift_hosted_docker_registry_insecure: "{{ openshift_hosted_docker_registry_insecure_default }}"

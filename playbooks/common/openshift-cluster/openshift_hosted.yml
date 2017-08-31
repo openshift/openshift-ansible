@@ -1,57 +1,18 @@
 ---
-- name: Create persistent volumes
-  hosts: oo_first_master
-  tags:
-  - hosted
-  vars:
-    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
-    persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
-  roles:
-  - role: openshift_persistent_volumes
-    when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0
+- include: create_persistent_volumes.yml
 
-- name: Create Hosted Resources
-  hosts: oo_first_master
-  tags:
-  - hosted
-  pre_tasks:
-  - set_fact:
-      openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
-      openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
-    when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+- include: openshift_default_storage_class.yml
 
-  roles:
-  - role: openshift_default_storage_class
-    when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
-  - role: openshift_hosted
-  - role: openshift_metrics
-    when: openshift_metrics_install_metrics | default(false) | bool
-  - role: openshift_logging
-    when: openshift_logging_install_logging | default(false) | bool
+- include: openshift_hosted_create_projects.yml
 
-  - role: cockpit-ui
-    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
+- include: openshift_hosted_router.yml
 
-  - role: openshift_prometheus
-    when: openshift_hosted_prometheus_deploy | default(false) | bool
+- include: openshift_hosted_registry.yml
 
-- name: Update master-config for publicLoggingURL
-  hosts: oo_masters_to_config:!oo_first_master
-  tags:
-  - hosted
-  pre_tasks:
-  - set_fact:
-      openshift_metrics_hawkular_hostname: "{{ g_metrics_hostname | default('hawkular-metrics.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
-  tasks:
+- include: openshift_metrics.yml
 
-  - block:
-    - include_role:
-        name: openshift_logging
-        tasks_from: update_master_config
-    when: openshift_logging_install_logging | default(false) | bool
+- include: openshift_logging.yml
 
-  - block:
-    - include_role:
-        name: openshift_metrics
-        tasks_from: update_master_config
-    when: openshift_metrics_install_metrics | default(false) | bool
+- include: cockpit-ui.yml
+
+- include: openshift_prometheus.yml

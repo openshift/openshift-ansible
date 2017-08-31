@@ -1,7 +1,11 @@
 ---
 - name: setup firewall
   include: firewall.yml
-  static: yes
+  vars:
+    l_openshift_hosted_firewall_enabled: "{{ r_openshift_hosted_registry_firewall_enabled }}"
+    l_openshift_hosted_use_firewalld: "{{ r_openshift_hosted_registry_use_firewalld }}"
+    l_openshift_hosted_fw_allow: "{{ r_openshift_hosted_registry_os_firewall_allow }}"
+    l_openshift_hosted_fw_deny: "{{ r_openshift_hosted_registry_os_firewall_deny }}"
 
 - when: openshift.hosted.registry.replicas | default(none) is none
   block:
@@ -36,30 +40,14 @@
 - name: set openshift_hosted facts
   set_fact:
     openshift_hosted_registry_replicas: "{{ openshift.hosted.registry.replicas | default(l_default_replicas) }}"
-    openshift_hosted_registry_name: docker-registry
-    openshift_hosted_registry_serviceaccount: registry
     openshift_hosted_registry_namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
     openshift_hosted_registry_selector: "{{ openshift.hosted.registry.selector }}"
     openshift_hosted_registry_images: "{{ openshift.hosted.registry.registryurl | default('openshift3/ose-${component}:${version}')}}"
-    openshift_hosted_registry_volumes: []
-    openshift_hosted_registry_env_vars: {}
-    openshift_hosted_registry_edits:
-    # These edits are being specified only to prevent 'changed' on rerun
-    - key: spec.strategy.rollingParams
-      value:
-        intervalSeconds: 1
-        maxSurge: "25%"
-        maxUnavailable: "25%"
-        timeoutSeconds: 600
-        updatePeriodSeconds: 1
-      action: put
-    openshift_hosted_registry_force:
-    - False
 
 - name: Update registry environment variables when pushing via dns
   set_fact:
     openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'OPENSHIFT_DEFAULT_REGISTRY':'docker-registry.default.svc:5000'}) }}"
-  when: openshift_push_via_dns | default(false) | bool
+  when: openshift_push_via_dns | bool
 
 - name: Update registry proxy settings for dc/docker-registry
   set_fact:
@@ -137,36 +125,17 @@
     edits: "{{ openshift_hosted_registry_edits }}"
     force: "{{ True|bool in openshift_hosted_registry_force }}"
 
-- when: openshift_hosted_registry_wait | bool
-  block:
-  - name: Ensure OpenShift registry correctly rolls out (best-effort today)
-    command: |
-      oc rollout status deploymentconfig {{ openshift_hosted_registry_name }} \
-                        --namespace {{ openshift_hosted_registry_namespace }} \
-                        --config {{ openshift.common.config_base }}/master/admin.kubeconfig
-    async: 600
-    poll: 15
-    failed_when: false
+- name: setup registry list
+  set_fact:
+    r_openshift_hosted_registry_list:
+    - name: "{{ openshift_hosted_registry_name }}"
+      namespace: "{{ openshift_hosted_registry_namespace }}"
 
-  - name: Determine the latest version of the OpenShift registry deployment
-    command: |
-      {{ openshift.common.client_binary }} get deploymentconfig {{ openshift_hosted_registry_name }} \
-             --namespace {{ openshift_hosted_registry_namespace }} \
-             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
-             -o jsonpath='{ .status.latestVersion }'
-    register: openshift_hosted_registry_latest_version
-
-  - name: Sanity-check that the OpenShift registry rolled out correctly
-    command: |
-      {{ openshift.common.client_binary }} get replicationcontroller {{ openshift_hosted_registry_name }}-{{ openshift_hosted_registry_latest_version.stdout }} \
-             --namespace {{ openshift_hosted_registry_namespace }} \
-             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
-             -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
-    register: openshift_hosted_registry_rc_phase
-    until: "'Running' not in openshift_hosted_registry_rc_phase.stdout"
-    delay: 15
-    retries: 40
-    failed_when: "'Failed' in openshift_hosted_registry_rc_phase.stdout"
+- name: Wait for pod (Registry)
+  include: wait_for_pod.yml
+  vars:
+    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_registry_wait }}"
+    l_openshift_hosted_wfp_items: "{{ r_openshift_hosted_registry_list }}"
 
 - include: storage/glusterfs.yml
   when:
