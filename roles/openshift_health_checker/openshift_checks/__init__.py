@@ -242,7 +242,7 @@ def load_checks(path=None, subpkg=""):
             modules = modules + load_checks(os.path.join(path, name), subpkg + "." + name)
             continue
 
-        if name.endswith(".py") and name not in LOADER_EXCLUDES:
+        if name.endswith(".py") and not name.startswith(".") and name not in LOADER_EXCLUDES:
             modules.append(import_module(__package__ + subpkg + "." + name[:-3]))
 
     return modules
