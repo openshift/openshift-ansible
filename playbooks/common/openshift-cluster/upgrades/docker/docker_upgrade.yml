@@ -60,7 +60,7 @@
     retries: 60
     delay: 60
 
-  - include: upgrade.yml
+  - include: tasks/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - name: Set node schedulability

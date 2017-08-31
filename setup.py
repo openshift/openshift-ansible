@@ -225,8 +225,9 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         included_playbooks = set()
 
         for yaml_file in find_files(
-                os.path.join(os.getcwd(), 'playbooks', 'byo'),
-                None, None, r'\.ya?ml$'):
+                os.path.join(os.getcwd(), 'playbooks'),
+                ['adhoc', 'tasks'],
+                None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
                 for task in yaml.safe_load(contents):
                     if not isinstance(task, dict):
@@ -245,19 +246,27 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         # Evaluate the difference between all playbooks and included playbooks
         entrypoint_playbooks = sorted(playbooks.difference(included_playbooks))
         print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
-        # Syntax each entry point playbook
+
         for playbook in entrypoint_playbooks:
             print('-' * 60)
             print('Syntax checking playbook: {}'.format(playbook))
-            try:
-                subprocess.check_output(
-                    ['ansible-playbook', '-i localhost,',
-                     '--syntax-check', playbook]
-                )
-            except subprocess.CalledProcessError as cpe:
-                print('{}Execution failed: {}{}'.format(
-                    self.FAIL, cpe, self.ENDC))
+
+            if 'common' in playbook:
+                # Error on any entry points in 'common'
+                print('{}Invalid entry point playbook. All playbooks must'
+                      ' start in playbooks/byo{}'.format(self.FAIL, self.ENDC))
                 has_errors = True
+            else:
+                # Syntax check each entry point playbook
+                try:
+                    subprocess.check_output(
+                        ['ansible-playbook', '-i localhost,',
+                         '--syntax-check', playbook]
+                    )
+                except subprocess.CalledProcessError as cpe:
+                    print('{}Execution failed: {}{}'.format(
+                        self.FAIL, cpe, self.ENDC))
+                    has_errors = True
         if has_errors:
             raise SystemExit(1)
 
