@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.25
+Version:        3.6.173.0.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.26-1
+- annotate the infra projects for logging to fix bz1480988
+  (jcantril@redhat.com)
+- added additional variables for logging and metrics (cbucur@redhat.com)
+- Fix group conditional requirements (rteague@redhat.com)
+- Updating openshift_service_catalog to use oc_service over oc_obj to resolve
+  idempotency issues being seen from rerunning role (ewolinet@redhat.com)
+
 * Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.25-1
 - 
 
