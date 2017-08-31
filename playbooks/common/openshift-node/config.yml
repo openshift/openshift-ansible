@@ -1,4 +1,12 @@
 ---
+- name: Disable excluders
+  hosts: oo_nodes_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
 - name: Evaluate node groups
   hosts: localhost
   become: no
@@ -78,3 +86,11 @@
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
+
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_nodes_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
