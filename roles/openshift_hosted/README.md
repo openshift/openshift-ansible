@@ -39,8 +39,6 @@ variables also control configuration behavior:
 Dependencies
 ------------
 
-* openshift_hosted_facts
-
 Example Playbook
 ----------------
 

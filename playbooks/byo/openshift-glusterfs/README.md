@@ -40,9 +40,9 @@ registry, specify a `glusterfs_registry` group that is populated as the
 group will be used.
 
 To swap an existing hosted registry's backend storage for a GlusterFS volume,
-specify `openshift_hosted_registry_storage_glusterfs_swap=True`. To
+specify `openshift.hosted.registry.storage.glusterfs.swap=True`. To
 additoinally copy any existing contents from an existing hosted registry,
-specify `openshift_hosted_registry_storage_glusterfs_swapcopy=True`.
+specify `openshift.hosted.registry.storage.glusterfs.swapcopy=True`.
 
 **NOTE:** For each namespace that is to have access to GlusterFS volumes an
 Enpoints resource pointing to the GlusterFS cluster nodes and a corresponding

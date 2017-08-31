@@ -1,14 +1,38 @@
 ---
-- name: OpenShift Aggregated Logging
+- name: Create Hosted Resources - logging
   hosts: oo_first_master
+  pre_tasks:
+  - name: Scrape openshift_master_public_api_url
+    include: tasks/master_api_url_facts.yml
+    when: openshift_master_public_api_url is not defined
+  - set_fact:
+      logging_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
+      logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default(openshift_master_public_api_url) | default(None) }}"
+      logging_elasticsearch_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
+      logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
-  - openshift_logging
+  - role: openshift_logging
+    when: openshift_hosted_logging_deploy | default(false) | bool
+    openshift_hosted_logging_hostname: "{{ logging_hostname }}"
+    openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
+    openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
+    openshift_hosted_logging_elasticsearch_cluster_size: "{{ logging_elasticsearch_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_hosted_logging_elasticsearch_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
+    openshift_hosted_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift_hosted_logging_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_hosted_logging_elasticsearch_ops_cluster_size: "{{ logging_elasticsearch_ops_cluster_size }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift_hosted_loggingops_storage_kind | default(none) == 'dynamic' else '' }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_size: "{{ openshift.hosted.logging.storage.volume.size if openshift_hosted_logging_storage_kind | default(none) in ['dynamic','nfs' ] else ''  }}"
+    openshift_hosted_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es-ops' if openshift_hosted_loggingops_storage_kind | default(none) =='dynamic' else '' }}"
 
-- name: Update Master configs
-  hosts: oo_masters:!oo_first_master
+- name: Update master-config for publicLoggingURL
+  hosts: oo_masters_to_config:!oo_first_master
   tasks:
+  - set_fact:
+      openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   - block:
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
-    when: openshift_logging_install_logging | default(false) | bool
+    when: openshift_hosted_logging_deploy | default(false) | bool

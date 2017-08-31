@@ -68,7 +68,7 @@
       name: "{{ openshift_hosted_registry_name }}"
       vol_name: registry-storage
       mount_type: pvc
-      claim_name: "{{ openshift.hosted.registry.storage.volume.name }}-glusterfs-claim"
+      claim_name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs-claim"
 
   - name: Deactivate registry maintenance mode
     oc_env:

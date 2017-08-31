@@ -43,7 +43,7 @@
       {{ openshift.common.client_binary }} new-app --template=registry-console
       {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
       {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
-      -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
+      -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift_master_public_api_url }}"
       -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
       -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
       --config={{ openshift_hosted_kubeconfig }}
