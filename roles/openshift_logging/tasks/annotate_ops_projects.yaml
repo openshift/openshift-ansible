@@ -14,4 +14,4 @@
     content:
       metadata#annotations#openshift.io/logging.ui.hostname: "{{ openshift_logging_kibana_ops_hostname }}"
   with_items: "{{ __logging_ops_projects.results }}"
-  when: "{{ item.results.stderr is not defined }}"
+  when: item.results.stderr is not defined
