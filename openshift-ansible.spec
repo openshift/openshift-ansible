@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.122
+Version:        3.5.123
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Aug 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.123-1
+- 
+
 * Tue Aug 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.122-1
 - Backport recent tox test updates (rteague@redhat.com)
 - Remove Jinja delimiters from when conditions (rteague@redhat.com)
