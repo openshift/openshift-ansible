@@ -99,17 +99,17 @@
 # TODO: set up these certs differently?
 - set_fact:
     kibana_key: "{{ lookup('file', openshift_logging_kibana_key) | b64encode }}"
-  when: "{{ openshift_logging_kibana_key | trim | length > 0 }}"
+  when: openshift_logging_kibana_key | trim | length > 0
   changed_when: false
 
 - set_fact:
     kibana_cert: "{{ lookup('file', openshift_logging_kibana_cert) | b64encode }}"
-  when: "{{ openshift_logging_kibana_cert | trim | length > 0 }}"
+  when: openshift_logging_kibana_cert | trim | length > 0
   changed_when: false
 
 - set_fact:
     kibana_ca: "{{ lookup('file', openshift_logging_kibana_ca) | b64encode }}"
-  when: "{{ openshift_logging_kibana_ca | trim | length > 0 }}"
+  when: openshift_logging_kibana_ca | trim | length > 0
   changed_when: false
 
 - set_fact:
