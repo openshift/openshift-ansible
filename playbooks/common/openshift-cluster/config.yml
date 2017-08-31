@@ -18,12 +18,6 @@
       - docker_image_availability
       - docker_storage
 
-- hosts: localhost
-  tasks:
-  - fail:
-      msg: No etcd hosts defined. Running an all-in-one master is deprecated and will no longer be supported in a future upgrade.
-    when: groups.oo_etcd_to_config | default([]) | length == 0 and not openshift_master_unsupported_all_in_one | default(False)
-
 - include: initialize_oo_option_facts.yml
   tags:
   - always
