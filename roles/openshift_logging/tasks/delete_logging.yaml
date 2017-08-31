@@ -14,6 +14,16 @@
     - templates
     - ds
 
+# return all persistent volume claims as well if purge is set
+- name: delete logging pvc objects
+  oc_obj:
+    state: absent
+    kind: pvc
+    namespace: "{{ openshift_logging_namespace }}"
+    selector: "logging-infra"
+  when:
+    - openshift_logging_purge_logging | default(false) | bool
+
 # delete the oauthclient
 - name: delete oauthclient kibana-proxy
   oc_obj:
