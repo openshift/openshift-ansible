@@ -1,0 +1,12 @@
+---
+- hosts: cluster_hosts
+  vars:
+    yum_repos: []
+  tasks:
+  # enable additional yum repos
+  - name: Add repository
+    yum_repository:
+      name: "{{ item.name }}"
+      description: "{{ item.description }}"
+      baseurl: "{{ item.baseurl }}"
+    with_items: "{{ yum_repos }}"
