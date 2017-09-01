@@ -1,4 +1,12 @@
 ---
+- name: Disable excluders
+  hosts: oo_masters_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
 - name: Gather and set facts for master hosts
   hosts: oo_masters_to_config
   vars:
@@ -208,3 +216,11 @@
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
+
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_masters_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
