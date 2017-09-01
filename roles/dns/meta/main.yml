@@ -1,9 +1,0 @@
----
-galaxy_info:
-  author: Lénaïc Huard
-  description: Deploy and configure a DNS server
-  company: Amadeus SAS
-  license: ASL 2.0
-  min_ansible_version: 2.2
-dependencies:
-- { role: openshift_facts }
