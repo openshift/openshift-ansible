@@ -33,12 +33,21 @@
   - name: Evaluate groups - g_nfs_hosts is single host
     fail:
       msg: The nfs group must be limited to one host
-    when: (groups[g_nfs_hosts] | default([])) | length > 1
+    when: g_nfs_hosts | default([]) | length > 1
 
   - name: Evaluate groups - g_glusterfs_hosts required
     fail:
       msg: This playbook requires g_glusterfs_hosts to be set
     when: g_glusterfs_hosts is not defined
+
+  - name: Evaluate groups - Fail if no etcd hosts group is defined
+    fail:
+      msg: >
+        No etcd hosts defined. Running an all-in-one master is deprecated and
+        will no longer be supported in a future upgrade.
+    when:
+    - g_etcd_hosts | default([]) | length == 0
+    - not openshift_master_unsupported_all_in_one | default(False)
 
   - name: Evaluate oo_all_hosts
     add_host:
