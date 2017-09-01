@@ -1,103 +1,31 @@
 ---
-- name: Calico Node | Error if invalid cert arguments
-  fail:
-    msg: "Must provide all or none for the following etcd params: calico_etcd_cert_dir, calico_etcd_ca_cert_file, calico_etcd_cert_file, calico_etcd_key_file, calico_etcd_endpoints"
-  when:
-  - calico_etcd_cert_dir is defined or calico_etcd_ca_cert_file is defined or calico_etcd_cert_file is defined or calico_etcd_key_file is defined or calico_etcd_endpoints is defined
-  - not (calico_etcd_cert_dir is defined and calico_etcd_ca_cert_file is defined and calico_etcd_cert_file is defined and calico_etcd_key_file is defined and calico_etcd_endpoints is defined)
-
-- name: Calico Node | Generate OpenShift-etcd certs
-  import_role:
-    name: etcd
-    tasks_from: client_certificates
-  when: calico_etcd_ca_cert_file is not defined or calico_etcd_cert_file is not defined or calico_etcd_key_file is not defined or calico_etcd_endpoints is not defined or calico_etcd_cert_dir is not defined
-  vars:
-    etcd_cert_prefix: calico.etcd-
-    etcd_cert_config_dir: "{{ openshift.common.config_base }}/calico"
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    etcd_cert_subdir: "openshift-calico-{{ openshift.common.hostname }}"
-
-- name: Calico Node | Set etcd cert location facts
-  when: calico_etcd_ca_cert_file is not defined or calico_etcd_cert_file is not defined or calico_etcd_key_file is not defined or calico_etcd_endpoints is not defined or calico_etcd_cert_dir is not defined
-  set_fact:
-    calico_etcd_ca_cert_file: "/etc/origin/calico/calico.etcd-ca.crt"
-    calico_etcd_cert_file: "/etc/origin/calico/calico.etcd-client.crt"
-    calico_etcd_key_file: "/etc/origin/calico/calico.etcd-client.key"
-    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls | join(',') }}"
-    calico_etcd_cert_dir: "/etc/origin/calico/"
-
-- name: Calico Node | Error if no certs set.
-  fail:
-    msg: "Invalid etcd configuration for calico."
-  when: item is not defined or item == ''
-  with_items:
-  - calico_etcd_ca_cert_file
-  - calico_etcd_cert_file
-  - calico_etcd_key_file
-  - calico_etcd_endpoints
-
-- name: Calico Node | Assure the calico certs are present
+- name: Check for legacy service
   stat:
-    path: "{{ item }}"
-  with_items:
-  - "{{ calico_etcd_ca_cert_file }}"
-  - "{{ calico_etcd_cert_file }}"
-  - "{{ calico_etcd_key_file }}"
+    path: /lib/systemd/system/calico.service
+  register: sym
+- fail:
+    msg: You are running a systemd based installation of Calico. Please run the calico upgrade playbook to upgrade to a self-hosted installation.
+  when: sym.stat.exists
 
-- name: Calico Node | Configure Calico service unit file
-  template:
-    dest: "/lib/systemd/system/calico.service"
-    src: calico.service.j2
+# TODO: Move into shared vars file
+- name: Load default node image
+  set_fact:
+    calico_node_image: "quay.io/calico/node:v2.6.7"
+  when: calico_node_image is not defined
 
-- name: Calico Node | Enable calico
-  become: yes
-  systemd:
-    name: calico
-    daemon_reload: yes
-    state: started
-    enabled: yes
-  register: start_result
+- name: Prepull Images
+  command: "docker pull {{ calico_node_image }}"
 
-- name: Calico Node | Assure CNI conf dir exists
-  become: yes
-  file: path="{{ cni_conf_dir }}" state=directory
+- name: Apply node label
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  command: >
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig label node {{ openshift.node.nodename | lower }} --overwrite projectcalico.org/ds-ready=true
 
-- name: Calico Node | Generate Calico CNI config
-  become: yes
-  template:
-    src: "10-calico.conf.j2"
-    dest: "{{ cni_conf_dir }}/10-calico.conf"
-
-- name: Calico Node | Assures Kuberentes CNI bin dir exists
-  become: yes
-  file: path="{{ cni_bin_dir }}" state=directory
-
-- name: Calico Node | Download Calico CNI Plugin
-  become: yes
-  get_url:
-    url: "{{ calico_url_cni }}"
-    dest: "{{ cni_bin_dir }}"
-    mode: a+x
-
-- name: Calico Node | Download Calico IPAM Plugin
-  become: yes
-  get_url:
-    url: "{{ calico_url_ipam }}"
-    dest: "{{ cni_bin_dir }}"
-    mode: a+x
-
-- name: Calico Node | Download and extract standard CNI plugins
-  become: yes
-  unarchive:
-    remote_src: True
-    src: "{{ cni_url }}"
-    dest: "{{ cni_bin_dir }}"
-
-- name: Calico Node | Assure Calico conf dir exists
-  become: yes
-  file: path=/etc/calico/ state=directory
-
-- name: Calico Node | Set calicoctl.cfg
-  template:
-    src: calicoctl.cfg.j2
-    dest: "/etc/calico/calicoctl.cfg"
+- name: Wait for node running
+  uri:
+    url: http://localhost:9099/readiness
+    status_code: 204
+  delay: 3
+  retries: 10
+  register: result
+  until: result.status == 204
