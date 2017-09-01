@@ -1,8 +1,6 @@
 ---
 - include: ../openshift-cluster/initialize_groups.yml
 
-- include: ../../common/openshift-cluster/evaluate_groups.yml
+- include: ../../common/openshift-cluster/std_include.yml
+
 - include: ../../common/openshift-etcd/scaleup.yml
-  vars:
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
-    openshift_deployment_type: "{{ deployment_type }}"

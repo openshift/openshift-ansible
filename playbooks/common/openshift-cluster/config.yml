@@ -23,8 +23,6 @@
   - always
 
 - include: ../openshift-etcd/config.yml
-  tags:
-  - etcd
 
 - include: ../openshift-nfs/config.yml
   tags:
