@@ -1909,7 +1909,6 @@ class OpenShiftFacts(object):
     """
     known_roles = ['builddefaults',
                    'buildoverrides',
-                   'clock',
                    'cloudprovider',
                    'common',
                    'docker',
@@ -2098,13 +2097,6 @@ class OpenShiftFacts(object):
                 docker['hosted_registry_insecure'] = hosted_registry_insecure
             docker['service_name'] = 'docker'
             defaults['docker'] = docker
-
-        if 'clock' in roles:
-            exit_code, _, _ = module.run_command(['rpm', '-q', 'chrony'])  # noqa: F405
-            chrony_installed = bool(exit_code == 0)
-            defaults['clock'] = dict(
-                enabled=True,
-                chrony_installed=chrony_installed)
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
