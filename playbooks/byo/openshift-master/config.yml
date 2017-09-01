@@ -3,4 +3,4 @@
 
 - include: ../../common/openshift-cluster/std_include.yml
 
-- include: ../../common/openshift-master/restart.yml
+- include: ../../common/openshift-master/config.yml

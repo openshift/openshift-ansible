@@ -35,12 +35,6 @@
   - loadbalancer
 
 - include: ../openshift-master/config.yml
-  tags:
-  - master
-
-- include: additional_config.yml
-  tags:
-  - master
 
 - include: ../openshift-node/config.yml
   tags:
