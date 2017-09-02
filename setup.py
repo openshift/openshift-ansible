@@ -29,6 +29,7 @@ def find_files(base_dir, exclude_dirs, include_dirs, file_regex):
     if exclude_dirs is not None:
         exclude_regex = r'|'.join([fnmatch.translate(x) for x in exclude_dirs]) or r'$.'
 
+    # Don't use include_dirs, it is broken
     if include_dirs is not None:
         include_regex = r'|'.join([fnmatch.translate(x) for x in include_dirs]) or r'$.'
 
@@ -45,6 +46,36 @@ def find_files(base_dir, exclude_dirs, include_dirs, file_regex):
         found.extend(matches)
 
     return found
+
+
+def find_entrypoint_playbooks():
+    '''find entry point playbooks as defined by openshift-ansible'''
+    playbooks = set()
+    included_playbooks = set()
+
+    exclude_dirs = ['adhoc', 'tasks']
+    for yaml_file in find_files(
+            os.path.join(os.getcwd(), 'playbooks'),
+            exclude_dirs, None, r'\.ya?ml$'):
+        with open(yaml_file, 'r') as contents:
+            for task in yaml.safe_load(contents):
+                if not isinstance(task, dict):
+                    # Skip yaml files which are not a dictionary of tasks
+                    continue
+                if 'include' in task:
+                    # Add the playbook and capture included playbooks
+                    playbooks.add(yaml_file)
+                    included_file_name = task['include'].split()[0]
+                    included_file = os.path.normpath(
+                        os.path.join(os.path.dirname(yaml_file),
+                                     included_file_name))
+                    included_playbooks.add(included_file)
+                elif 'hosts' in task:
+                    playbooks.add(yaml_file)
+    # Evaluate the difference between all playbooks and included playbooks
+    entrypoint_playbooks = sorted(playbooks.difference(included_playbooks))
+    print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
+    return entrypoint_playbooks
 
 
 class OpenShiftAnsibleYamlLint(Command):
@@ -206,7 +237,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
     user_options = []
 
     # Colors
-    FAIL = '\033[91m'  # Red
+    FAIL = '\033[31m'  # Red
     ENDC = '\033[0m'  # Reset
 
     def initialize_options(self):
@@ -221,43 +252,46 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         ''' run command '''
 
         has_errors = False
-        playbooks = set()
-        included_playbooks = set()
 
+        print('Ansible Deprecation Checks')
+        exclude_dirs = ['adhoc', 'files', 'meta', 'test', 'tests', 'vars', '.tox']
         for yaml_file in find_files(
-                os.path.join(os.getcwd(), 'playbooks'),
-                ['adhoc', 'tasks'],
-                None, r'\.ya?ml$'):
+                os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
-                for task in yaml.safe_load(contents):
+                for task in yaml.safe_load(contents) or {}:
                     if not isinstance(task, dict):
-                        # Skip yaml files which do not contain plays or includes
+                        # Skip yaml files which are not a dictionary of tasks
                         continue
-                    if 'include' in task:
-                        # Add the playbook and capture included playbooks
-                        playbooks.add(yaml_file)
-                        included_file_name = task['include'].split()[0]
-                        included_file = os.path.normpath(
-                            os.path.join(os.path.dirname(yaml_file),
-                                         included_file_name))
-                        included_playbooks.add(included_file)
-                    elif 'hosts' in task:
-                        playbooks.add(yaml_file)
-        # Evaluate the difference between all playbooks and included playbooks
-        entrypoint_playbooks = sorted(playbooks.difference(included_playbooks))
-        print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
+                    if 'when' in task:
+                        if '{{' in task['when'] or '{%' in task['when']:
+                            print('{}Error: Usage of Jinja2 templating delimiters '
+                                  'in when conditions is deprecated in Ansible 2.3.\n'
+                                  '  File: {}\n'
+                                  '  Found: "{}"{}'.format(
+                                      self.FAIL, yaml_file,
+                                      task['when'], self.ENDC))
+                            has_errors = True
+                    # TODO (rteague): This test will be enabled once we move to Ansible 2.4
+                    # if 'include' in task:
+                    #     print('{}Error: The `include` directive is deprecated in Ansible 2.4.\n'
+                    #           'https://github.com/ansible/ansible/blob/devel/CHANGELOG.md\n'
+                    #           '  File: {}\n'
+                    #           '  Found: "include: {}"{}'.format(
+                    #               self.FAIL, yaml_file, task['include'], self.ENDC))
+                    #     has_errors = True
 
-        for playbook in entrypoint_playbooks:
+        print('Ansible Playbook Entry Point Syntax Checks')
+        for playbook in find_entrypoint_playbooks():
             print('-' * 60)
             print('Syntax checking playbook: {}'.format(playbook))
 
+            # Error on any entry points in 'common'
             if 'common' in playbook:
-                # Error on any entry points in 'common'
                 print('{}Invalid entry point playbook. All playbooks must'
                       ' start in playbooks/byo{}'.format(self.FAIL, self.ENDC))
                 has_errors = True
+            # --syntax-check each entry point playbook
             else:
-                # Syntax check each entry point playbook
                 try:
                     subprocess.check_output(
                         ['ansible-playbook', '-i localhost,',
@@ -267,6 +301,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
                     print('{}Execution failed: {}{}'.format(
                         self.FAIL, cpe, self.ENDC))
                     has_errors = True
+
         if has_errors:
             raise SystemExit(1)
 
