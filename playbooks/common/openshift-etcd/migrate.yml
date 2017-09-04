@@ -1,21 +1,11 @@
 ---
-- include: ../openshift-cluster/evaluate_groups.yml
-  tags:
-  - always
-
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
-  tags:
-  - always
   roles:
   - role: etcd_migrate
     r_etcd_migrate_action: check
     r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
     etcd_peer: "{{ ansible_default_ipv4.address }}"
-
-- include: ../openshift-cluster/initialize_facts.yml
-  tags:
-  - always
 
 # TODO: This will be different for release-3.6 branch
 - name: Prepare masters for etcd data migration
@@ -36,8 +26,6 @@
 - name: Backup v2 data
   hosts: oo_etcd_to_migrate
   gather_facts: no
-  tags:
-  - always
   roles:
   - role: openshift_facts
   - role: etcd_common
@@ -66,8 +54,6 @@
 - name: Stop etcd
   hosts: oo_etcd_to_migrate
   gather_facts: no
-  tags:
-  - always
   pre_tasks:
   - set_fact:
       l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
@@ -79,8 +65,6 @@
 - name: Migrate data on first etcd
   hosts: oo_etcd_to_migrate[0]
   gather_facts: no
-  tags:
-  - always
   roles:
   - role: etcd_migrate
     r_etcd_migrate_action: migrate
@@ -92,8 +76,6 @@
 - name: Clean data stores on remaining etcd hosts
   hosts: oo_etcd_to_migrate[1:]
   gather_facts: no
-  tags:
-  - always
   roles:
   - role: etcd_migrate
     r_etcd_migrate_action: clean_data
