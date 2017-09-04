@@ -12,7 +12,7 @@
 
   - name: Create any additional repos that are defined
     yum_repository:
-      description: "{{ item.description | default(item.name) }}"
+      description: "{{ item.description | default(item.name | default(item.id)) }}"
       name: "{{ item.name | default(item.id) }}"
       baseurl: "{{ item.baseurl }}"
       gpgkey: "{{ item.gpgkey | default(omit)}}"
