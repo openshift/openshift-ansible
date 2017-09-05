@@ -19,7 +19,7 @@ def _install(module, container, image, values_list):
     if rc != 0:
         return rc, out, err, False
     else:
-        changed = "Extracting" in out
+        changed = "Extracting" in out or "Copying blob" in out
         return rc, out, err, changed
 
 def _uninstall(module, name):
@@ -63,7 +63,7 @@ def do_update(module, container, old_image, image, values_list):
     if rc != 0:
         module.fail_json(rc=rc, msg=err)
     else:
-        changed = "Extracting" in out
+        changed = "Extracting" in out or "Copying blob" in out
         module.exit_json(msg=out, changed=changed)
 
 
