@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.123.0%{?dist}
+Release:        0.124.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,30 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.124.0
+- Fix ansible_syntax check (rteague@redhat.com)
+- Standardize etcd entry point playbooks (rteague@redhat.com)
+- Adding deprecation checks to ansible_syntax (rteague@redhat.com)
+- Break out master config into stand-alone playbook (rteague@redhat.com)
+- Move all-in-one fail check to evaluate_groups.yml (rteague@redhat.com)
+- Break out node config into stand-alone playbook (rteague@redhat.com)
+- Adding another default to protect against missing name/desc
+  (kwoodson@redhat.com)
+- Removed dns role (mgugino@redhat.com)
+- Fix typo in variable names for glusterfs firewall configuration
+  (bacek@bacek.com)
+- disk_availability: fix bug where msg is overwritten (lmeyer@redhat.com)
+- Added firwall defaults to etcd role. (kwoodson@redhat.com)
+- Remove meta depends from clock (mgugino@redhat.com)
+- Only run migrate auth for < 3.7 (rteague@redhat.com)
+- Fix openshift_master upgrade (mgugino@redhat.com)
+- Merging openshift_node with openshift bootstrap. (kwoodson@redhat.com)
+- Test: Fail on entry point playbooks in common (rteague@redhat.com)
+- Bug 1467265 - logging: add 'purge' option with uninstall
+  (jwozniak@redhat.com)
+- openshift_checks: ignore hidden files in checks dir
+  (miciah.masters@gmail.com)
+
 * Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.123.0
 - 
 
