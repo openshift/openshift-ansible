@@ -17,7 +17,7 @@ URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 2.2.2.0
+Requires:      ansible >= 2.3
 Requires:      python2
 Requires:      python-six
 Requires:      tar
