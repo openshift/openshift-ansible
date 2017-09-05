@@ -3,9 +3,9 @@
   stat:
     path: "{{ item }}"
   with_items:
-  - "{{ calico_etcd_ca_cert_file }}"
-  - "{{ calico_etcd_cert_file }}"
-  - "{{ calico_etcd_key_file }}"
+  - "{{ calico_etcd_ca_cert_file | default('') }}"
+  - "{{ calico_etcd_cert_file | default('') }}"
+  - "{{ calico_etcd_key_file | default('') }}"
 
 - name: Calico Master | Create temp directory for policy controller definition
   command: mktemp -d /tmp/openshift-ansible-XXXXXXX
