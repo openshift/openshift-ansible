@@ -32,6 +32,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     # we use python-docker-py to check local docker for images, and skopeo
     # to look for images available remotely without waiting to pull them.
     dependencies = ["python-docker-py", "skopeo"]
+    skopeo_img_check_command = "timeout 10 skopeo inspect --tls-verify=false"
 
     def is_active(self):
         """Skip hosts with unsupported deployment types."""
@@ -67,8 +68,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 "failed": True,
                 "msg": (
                     "One or more required Docker images are not available:\n    {}\n"
-                    "Configured registries: {}"
-                ).format(",\n    ".join(sorted(unavailable_images)), ", ".join(registries)),
+                    "Configured registries: {}\n"
+                    "Checked by: {}"
+                ).format(",\n    ".join(sorted(unavailable_images)), ", ".join(registries),
+                         self.skopeo_img_check_command),
             }
 
         return {}
@@ -169,8 +172,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         for registry in registries:
             args = {
-                "_raw_params": "timeout 10 skopeo inspect --tls-verify=false "
-                               "docker://{}/{}".format(registry, image)
+                "_raw_params": self.skopeo_img_check_command + " docker://{}/{}".format(registry, image)
             }
             result = self.execute_module("command", args)
             if result.get("rc", 0) == 0 and not result.get("failed"):
