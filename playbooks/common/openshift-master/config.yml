@@ -217,9 +217,6 @@
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
-- include: additional_config.yml
-  when: not g_openshift_master_is_scaleup
-
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config
   gather_facts: no

@@ -34,6 +34,8 @@
 
 - include: ../openshift-master/config.yml
 
+- include: ../openshift-master/additional_config.yml
+
 - include: ../openshift-node/config.yml
   tags:
   - node
