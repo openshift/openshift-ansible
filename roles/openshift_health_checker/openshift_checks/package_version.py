@@ -46,6 +46,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         check_multi_minor_release = deployment_type in ['openshift-enterprise']
 
         args = {
+            "package_mgr": self.get_var("ansible_pkg_mgr"),
             "package_list": [
                 {
                     "name": "openvswitch",

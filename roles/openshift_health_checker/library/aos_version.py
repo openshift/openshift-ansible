@@ -26,20 +26,15 @@ from ansible.module_utils.six import string_types
 
 YUM_IMPORT_EXCEPTION = None
 DNF_IMPORT_EXCEPTION = None
-PKG_MGR = None
 try:
     import yum  # pylint: disable=import-error
-    PKG_MGR = "yum"
 except ImportError as err:
     YUM_IMPORT_EXCEPTION = err
 
-# Import and use dnf only if yum is missing
-if YUM_IMPORT_EXCEPTION:
-    try:
-        import dnf  # pylint: disable=import-error
-        PKG_MGR = "dnf"
-    except ImportError as err:
-        DNF_IMPORT_EXCEPTION = err
+try:
+    import dnf  # pylint: disable=import-error
+except ImportError as err:
+    DNF_IMPORT_EXCEPTION = err
 
 
 class AosVersionException(Exception):
@@ -54,14 +49,19 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             package_list=dict(type="list", required=True),
+            package_mgr=dict(type="str", required=True),
         ),
         supports_check_mode=True
     )
 
-    if YUM_IMPORT_EXCEPTION and DNF_IMPORT_EXCEPTION:
+    # determine the package manager to use
+    package_mgr = module.params['package_mgr']
+    if package_mgr not in ('yum', 'dnf'):
+        module.fail_json(msg="package_mgr must be one of: yum, dnf")
+    pkg_mgr_exception = dict(yum=YUM_IMPORT_EXCEPTION, dnf=DNF_IMPORT_EXCEPTION)[package_mgr]
+    if pkg_mgr_exception:
         module.fail_json(
-            msg="aos_version module could not import yum or dnf: %s %s" %
-            (YUM_IMPORT_EXCEPTION, DNF_IMPORT_EXCEPTION)
+            msg="aos_version module could not import {}: {}".format(package_mgr, pkg_mgr_exception)
         )
 
     # determine the packages we will look for
@@ -81,7 +81,7 @@ def main():
 
     # get the list of packages available and complain if anything is wrong
     try:
-        pkgs = _retrieve_available_packages(expected_pkg_names)
+        pkgs = _retrieve_available_packages(package_mgr, expected_pkg_names)
         if versioned_pkgs:
             _check_precise_version_found(pkgs, _to_dict(versioned_pkgs))
             _check_higher_version_found(pkgs, _to_dict(versioned_pkgs))
@@ -96,7 +96,7 @@ def _to_dict(pkg_list):
     return {pkg["name"]: pkg for pkg in pkg_list}
 
 
-def _retrieve_available_packages(expected_pkgs):
+def _retrieve_available_packages(pkg_mgr, expected_pkgs):
     # The openshift excluder prevents unintended updates to openshift
     # packages by setting yum excludes on those packages. See:
     # https://wiki.centos.org/SpecialInterestGroup/PaaS/OpenShift-Origin-Control-Updates
@@ -106,14 +106,15 @@ def _retrieve_available_packages(expected_pkgs):
     # be excluded. So, for our purposes here, disable excludes to see
     # what will really be available during an install or upgrade.
 
-    if PKG_MGR == "yum":
+    if pkg_mgr == "yum":
         # search for package versions available for openshift pkgs
         yb = yum.YumBase()  # pylint: disable=invalid-name
 
         yb.conf.disable_excludes = ['all']
 
         try:
-            pkgs = yb.pkgSack.returnPackages(patterns=expected_pkgs)
+            pkgs = yb.rpmdb.returnPackages(patterns=expected_pkgs)
+            pkgs += yb.pkgSack.returnPackages(patterns=expected_pkgs)
         except yum.Errors.PackageSackError as excinfo:
             # you only hit this if *none* of the packages are available
             raise AosVersionException('\n'.join([
@@ -121,7 +122,7 @@ def _retrieve_available_packages(expected_pkgs):
                 'Check your subscription and repo settings.',
                 str(excinfo),
             ]))
-    elif PKG_MGR == "dnf":
+    elif pkg_mgr == "dnf":
         dbase = dnf.Base()  # pyling: disable=invalid-name
 
         dbase.conf.disable_excludes = ['all']
