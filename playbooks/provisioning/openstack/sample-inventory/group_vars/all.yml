@@ -92,6 +92,10 @@ rhsm_register: False
 #    key_algorithm: 'hmac-md5'
 #    server: '192.168.1.2'
 
+# # Customize DNS server security options
+#named_public_recursion: 'no'
+#named_private_recursion: 'yes'
+
 
 # NOTE(shadower): Do not change this value. The Ansible user is currently
 # hardcoded to `openshift`.

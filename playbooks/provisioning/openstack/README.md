@@ -94,6 +94,8 @@ default hostname (usually the role name) is used.
 The `public_dns_nameservers` is a list of DNS servers accessible from all
 the created Nova servers. These will be serving as your DNS forwarders for
 external FQDNs that do not belong to the cluster's DNS domain and its subdomains.
+If you're unsure what to put in here, you can try the google or opendns servers,
+but note that some organizations may be blocking them.
 
 The `openshift_use_dnsmasq` controls either dnsmasq is deployed or not.
 By default, dnsmasq is deployed and comes as the hosts' /etc/resolv.conf file
@@ -243,6 +245,18 @@ may want to turn off in order to speed up the provisioning tasks. This may
 be the case for development environments. When turned off, the servers will
 be provisioned omitting the ``yum update`` command. This brings security
 implications though, and is not recommended for production deployments.
+
+##### DNS servers security options
+
+Aside from `node_ingress_cidr` restricting public access to in-stack DNS
+servers, there are following (bind/named specific) DNS security
+options available:
+
+    named_public_recursion: 'no'
+    named_private_recursion: 'yes'
+
+External DNS servers, which is not included in the 'dns' hosts group,
+are not managed. It is up to you to configure such ones.
 
 ### Configure the OpenShift parameters
 
