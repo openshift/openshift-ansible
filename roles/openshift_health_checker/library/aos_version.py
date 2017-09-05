@@ -32,11 +32,14 @@ try:
     PKG_MGR = "yum"
 except ImportError as err:
     YUM_IMPORT_EXCEPTION = err
-try:
-    import dnf  # pylint: disable=import-error
-    PKG_MGR = "dnf"
-except ImportError as err:
-    DNF_IMPORT_EXCEPTION = err
+
+# Import and use dnf only if yum is missing
+if YUM_IMPORT_EXCEPTION:
+    try:
+        import dnf  # pylint: disable=import-error
+        PKG_MGR = "dnf"
+    except ImportError as err:
+        DNF_IMPORT_EXCEPTION = err
 
 
 class AosVersionException(Exception):
@@ -127,8 +130,11 @@ def _retrieve_available_packages(expected_pkgs):
 
         dquery = dbase.sack.query()
         aquery = dquery.available()
+        iquery = dquery.installed()
 
-        pkgs = list(aquery.filter(name=expected_pkgs))
+        available_pkgs = list(aquery.filter(name=expected_pkgs))
+        installed_pkgs = list(iquery.filter(name=expected_pkgs))
+        pkgs = available_pkgs + installed_pkgs
 
         if not pkgs:
             # pkgs list is empty, raise because no expected packages found
