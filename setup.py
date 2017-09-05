@@ -58,7 +58,7 @@ def find_entrypoint_playbooks():
             os.path.join(os.getcwd(), 'playbooks'),
             exclude_dirs, None, r'\.ya?ml$'):
         with open(yaml_file, 'r') as contents:
-            for task in yaml.safe_load(contents):
+            for task in yaml.safe_load(contents) or {}:
                 if not isinstance(task, dict):
                     # Skip yaml files which are not a dictionary of tasks
                     continue
