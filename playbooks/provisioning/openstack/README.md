@@ -295,6 +295,15 @@ variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
     deployment_type: origin
     openshift_deployment_type: "{{ deployment_type }}"
 
+#### Setting a custom entrypoint
+
+In order to set a custom entrypoint, update `openshift_master_cluster_public_hostname`
+
+    openshift_master_cluster_public_hostname: api.openshift.example.com
+
+Note than an empty hostname does not work, so if your domain is `openshift.example.com`,
+you cannot set this value to simply `openshift.example.com`.
+
 ### Configure static inventory and access via a bastion node
 
 Example inventory variables:

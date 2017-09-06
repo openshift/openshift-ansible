@@ -9,6 +9,20 @@
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_app_domain, 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['infra_hosts'] }}"
 
+- name: "Add public master cluster hostname records to the private A records (single master)"
+  set_fact:
+    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(full_dns_domain, ''))[:-1], 'ip': hostvars[groups.masters[0]].private_v4 } ] }}"
+  when:
+    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
+    - openstack_num_masters == 1
+
+- name: "Add public master cluster hostname records to the private A records (multi-master)"
+  set_fact:
+    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(full_dns_domain, ''))[:-1], 'ip': hostvars[groups.lb[0]].private_v4 } ] }}"
+  when:
+    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
+    - openstack_num_masters > 1
+
 - name: "Set the private DNS server to use the external value (if provided)"
   set_fact:
     nsupdate_server_private: "{{ external_nsupdate_keys['private']['server'] }}"
@@ -49,6 +63,20 @@
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_app_domain, 'ip': hostvars[item]['public_v4'] } ] }}"
   with_items: "{{ groups['infra_hosts'] }}"
   when: hostvars[item]['public_v4'] is defined
+
+- name: "Add public master cluster hostname records to the public A records (single master)"
+  set_fact:
+    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(full_dns_domain, ''))[:-1], 'ip': hostvars[groups.masters[0]].public_v4 } ] }}"
+  when:
+    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
+    - openstack_num_masters == 1
+
+- name: "Add public master cluster hostname records to the public A records (multi-master)"
+  set_fact:
+    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(full_dns_domain, ''))[:-1], 'ip': hostvars[groups.lb[0]].public_v4 } ] }}"
+  when:
+    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
+    - openstack_num_masters > 1
 
 - name: "Set the public DNS server details to use the external value (if provided)"
   set_fact:
