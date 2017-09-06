@@ -1,32 +1,154 @@
 ---
-# Namespace for the CFME project (Note: changed post-3.6 to use
-# reserved 'openshift-' namespace prefix)
+# Namespace for the CFME project
 openshift_cfme_project: openshift-cfme
 # Namespace/project description
-openshift_cfme_project_description: ManageIQ - CloudForms Management Engine
-# Basic user assigned the `admin` role for the project
-openshift_cfme_user: cfme
-# Project system account for enabling privileged pods
-openshift_cfme_service_account: "system:serviceaccount:{{ openshift_cfme_project }}:default"
-# All the required exports
-openshift_cfme_pv_exports:
-  - miq-pv01
-  - miq-pv02
-  - miq-pv03
-# PV template files and their created object names
-openshift_cfme_pv_data:
-  - pv_name: miq-pv01
-    pv_template: miq-pv-db.yaml
-    pv_label: CFME DB PV
-  - pv_name: miq-pv02
-    pv_template: miq-pv-region.yaml
-    pv_label: CFME Region PV
-  - pv_name: miq-pv03
-    pv_template: miq-pv-server.yaml
-    pv_label: CFME Server PV
+openshift_cfme_project_description: ManageIQ - CloudForms Management Engine 4.6
 
-# Tuning parameter to use more than 5 images at once from an ImageStream
-openshift_cfme_maxImagesBulkImportedPerRepository: 100
+######################################################################
+# BASE TEMPLATE AND DATABASE OPTIONS
+######################################################################
+# Which flavor of CFME would you like? You may install CFME using a
+# podified PostgreSQL server, or you may choose to use an existing
+# PostgreSQL server.
+#
+# Choose 'miq-template' for a podified database install
+# Choose 'miq-template-ext-db' for an external database install
+openshift_cfme_app_template: miq-template
+
+# If you are using the miq-template-ext-db template then you must add
+# the required database parameters to the
+# openshift_cfme_template_parameters variable. For example:
+#
+# openshift_cfme_template_parameters:
+#   DATABASE_USER: root
+#   DATABASE_PASSWORD: @_grrrr8Pa$$.h3r3
+#   DATABASE_IP: 10.1.1.10
+#   DATABASE_PORT: 5432
+#   DATABASE_NAME: vmdb_production
+
+######################################################################
+# STORAGE OPTIONS
+######################################################################
+# DEFAULT - 'nfs'
+# Allowed options: nfs, external, preconfigured, cloudprovider.
+openshift_cfme_storage_class: nfs
+# * nfs - Best used for proof-of-concept installs. Will setup NFS on a
+#   cluster host (defaults to your first master in the inventory file)
+#   to back the required PVCs. The application requires a PVC and the
+#   database (which may be hosted externally) may require a
+#   second. PVC minimum required sizes are: 5GiB for the MIQ
+#   application, and 15GiB for the PostgreSQL database (20GiB minimum
+#   available space on an volume/partition if used specifically for
+#   NFS purposes)
+#
+# * external - You are using an external NFS server, such as a netapp
+#   appliance. See the STORAGE - NFS OPTIONS section below for
+#   required information.
+#
+# * preconfigured - This CFME role will do NOTHING to modify storage
+#   settings. This option assumes expert knowledge and that you have
+#   done everything required ahead of time.
+#
+# * cloudprovider - You are using an OCP cloudprovider integration for
+#   your storage class. For this to work you must have already
+#   configured the required inventory parameters for your cloud
+#   provider
+#
+#   Ensure 'openshift_cloudprovider_kind' is defined (aws or gce) and
+#   that the applicable cloudprovider parameters are provided.
+
+######################################################################
+# STORAGE - NFS OPTIONS
+######################################################################
+# [OPTIONAL] - If you are using an EXTERNAL NFS server, such as a
+# netapp appliance, then you must set the hostname here. Leave the
+# value as 'false' if you are not using external NFS
+openshift_cfme_storage_external_nfs_hostname: false
+# [OPTIONAL] - If you are using external NFS then you must set the base
+# path to the exports location here.
+#
+# Or, change this value if you want to change the default path used
+# for local NFS exports.
+openshift_cfme_storage_external_nfs_base_dir: /exports/
+
+
+######################################################################
+# VARIOUS CONSTANTS - DO NOT OVERRIDE THESE UNDER ANY CIRCUMSTANCES
+######################################################################
+
+######################################################################
+# Misc enumerated values
+# Allowed choices for the storage class parameter
+openshift_cfme_storage_classes:
+  - nfs
+  - external
+  - preconfigured
+  - cloudprovider
+# Name of the application templates with object/parameter definitions
+openshift_cfme_app_templates:
+  - miq-template-ext-db
+  - miq-template
+# PostgreSQL database connection parameters
+openshift_cfme_db_parameters:
+  - DATABASE_USER
+  - DATABASE_PASSWORD
+  - DATABASE_IP
+  - DATABASE_PORT
+  - DATABASE_NAME
+
+
+######################################################################
+# ACCOUNTING
+######################################################################
+# Service Account SSCs
+openshift_system_account_sccs:
+  - name: miq-anyuid
+    resource_name: anyuid
+  - name: miq-orchestrator
+    resource_name: anyuid
+  - name: miq-privileged
+    resource_name: privileged
+  - name: miq-httpd
+    resource_name: miq-httpd
+
+# Service Account Roles
+openshift_cfme_system_account_roles:
+  - name: miq-orchestrator
+    resource_name: view
+  - name: miq-orchestrator
+    resource_name: edit
+
+
+######################################################################
+# SCAFFOLDING - These are parameters we pre-seed that a user may or
+# may not set later
+######################################################################
+# A hash of parameters you want to override or set in the
+# miq-template.yaml or miq-template-ext-db.yaml templates. Set this in
+# your inventory file as a simple hash. Acceptable values are defined
+# under the .parameters list in files/miq-template{-ext-db}.yaml
+# Example:
+#
+# openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
+openshift_cfme_template_parameters: {}
+
+# # All the required exports
+# openshift_cfme_pv_exports:
+#   - miq-pv01
+#   - miq-pv02
+#   - miq-pv03
+# # PV template files and their created object names
+# openshift_cfme_pv_data:
+#   - pv_name: miq-pv01
+#     pv_template: miq-pv-db.yaml
+#     pv_label: CFME DB PV
+#   - pv_name: miq-pv02
+#     pv_template: miq-pv-region.yaml
+#     pv_label: CFME Region PV
+#   - pv_name: miq-pv03
+#     pv_template: miq-pv-server.yaml
+#     pv_label: CFME Server PV
+
 # TODO: Refactor '_install_app' variable. This is just for testing but
 # maybe in the future it should control the entire yes/no for CFME.
 #
@@ -34,9 +156,11 @@ openshift_cfme_maxImagesBulkImportedPerRepository: 100
 # --template=manageiq). If False everything UP TO 'new-app' is ran.
 openshift_cfme_install_app: False
 # Docker image to pull
-openshift_cfme_application_img_name: "{{ 'registry.access.redhat.com/cloudforms45/cfme-openshift-app' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
-openshift_cfme_postgresql_img_name: "{{ 'registry.access.redhat.com/cloudforms45/cfme-openshift-postgresql' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
-openshift_cfme_memcached_img_name: "{{ 'registry.access.redhat.com/cloudforms45/cfme-openshift-memcached' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
-openshift_cfme_application_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'app-latest-fine' }}"
-openshift_cfme_memcached_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'memcached-latest-fine' }}"
-openshift_cfme_postgresql_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'postgresql-latest-fine' }}"
+# openshift_cfme_application_img_name: "{{ 'registry.access.redhat.com/cloudforms46/cfme-openshift-app' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
+# openshift_cfme_application_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'frontend-latest' }}"
+
+# openshift_cfme_memcached_img_name: "{{ 'registry.access.redhat.com/cloudforms46/cfme-openshift-memcached' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
+# openshift_cfme_memcached_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'memcached-latest-fine' }}"
+
+# openshift_cfme_postgresql_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'postgresql-latest-fine' }}"
+# openshift_cfme_postgresql_img_name: "{{ 'registry.access.redhat.com/cloudforms46/cfme-openshift-postgresql' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"

@@ -35,3 +35,6 @@
   retries: 120
   delay: 1
   changed_when: false
+
+- name: OpenShift-CFME - Reload NFS Exports
+  command: exportfs -ar

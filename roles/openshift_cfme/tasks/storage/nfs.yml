@@ -1,0 +1,103 @@
+---
+# Tasks to statically provision NFS volumes
+# Include if not using dynamic volume provisioning
+
+- name: Note Storage Type - NFS
+  debug:
+    msg: Setting up NFS storage, openshift_cfme_storage_class is 'nfs'
+
+- name: TODO
+  debug:
+    msg: TODO - replace hard-coded hostname below with oo_nfs_to_config.0
+
+- name: Set openshift_cfme_nfs_server fact
+  when: openshift_cfme_nfs_server is not defined
+  set_fact:
+    # Hostname/IP of the NFS server. Currently defaults to first master
+    openshift_cfme_nfs_server: m01.example.com
+
+# TODO: I was going to try to apply the openshift_storage_nfs role to
+# handle this, however, that role is not written to be used by
+# itself. Attempting to use it to create CFME exports would just add
+# more hard-coded values to the role. That said, we're doing this here
+# manually for now until some one comes up with a better solution, or
+# the role is made to accept parameters in a more functional way.
+#
+# I can't really even include the openshift_storage_nfs role in here
+# to do basic setup stuff because it would just result in a lot of
+# unwanted exports getting set up for the users.
+
+- name: Ensure the /exports/ directory exists
+  file:
+    path: /exports/
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Ensure exports directory exists
+  file:
+    path: /etc/exports.d/
+    state: directory
+
+# # TODO - with_items should be passed a list of storage configs for the
+# # desired CFME setup. This might mean a local or remote nfs server, as
+# # well as fully qualified filesystem paths.
+# - name: Ensure export directories exist
+#   file:
+#     path: "{{ item.storage.nfs.directory }}/{{ item.storage.volume.name }}"
+#     state: directory
+#     mode: 0777
+#     owner: nfsnobody
+#     group: nfsnobody
+#   with_items:
+
+- name: Enable and start services
+  systemd:
+    name: nfs-server
+    state: started
+    enabled: yes
+  register: start_result
+
+- set_fact:
+    nfs_service_status_changed: "{{ start_result | changed }}"
+
+- name: restart nfs-server
+  systemd:
+    name: nfs-server
+    state: restarted
+  when: nfs_service_status_changed | default(false)
+  notify:
+    - "OpenShift-CFME - Reload NFS Exports"
+
+######################################################################
+# TODO: Move the export directory and PV creation into individual
+# tasks under the respective server/database task files.
+
+# # - name: Ensure the miq-pv0X export directories exist
+# #   file:
+# #     path: "/exports/{{ item }}"
+# #     state: directory
+# #     mode: 0775
+# #     owner: nfsnobody
+# #     group: nfsnobody
+# #   with_items: "{{ openshift_cfme_pv_exports }}"
+
+# # - name: Ensure the NFS exports for CFME PVs exist
+# #   copy:
+# #     src: openshift_cfme.exports
+# #     dest: /etc/exports.d/openshift_cfme.exports
+# #   register: nfs_exports_updated
+
+
+# # Create the required CFME PVs. Check out these online docs if you
+# # need a refresher on includes looping with items:
+# # * http://docs.ansible.com/ansible/playbooks_loops.html#loops-and-includes-in-2-0
+# # * http://stackoverflow.com/a/35128533
+
+# # TODO: Handle the case where a PV template is updated in
+# # openshift-ansible and the change needs to be landed on the managed
+# # cluster.
+
+# # - include: create_pvs.yml
+# #   with_items: "{{ openshift_cfme_pv_data }}"

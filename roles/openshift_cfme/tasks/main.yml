@@ -1,117 +1,99 @@
 ---
-######################################################################
+######################################################################)
 # Users, projects, and privileges
 
-- name: Ensure the CFME user exists
-  oc_user:
-    state: present
-    username: "{{ openshift_cfme_user }}"
+- name: Run pre-install CFME validation checks
+  include: validate.yml
 
-- name: Ensure the CFME namespace exists with CFME user as admin
+- name: "Ensure the CFME '{{ openshift_cfme_project }}' namespace exists"
   oc_project:
     state: present
     name: "{{ openshift_cfme_project }}"
     display_name: "{{ openshift_cfme_project_description }}"
-    admin: "{{ openshift_cfme_user }}"
 
-- name: Ensure the CFME namespace service account is privileged
-  oc_adm_policy_user:
-    namespace: "{{ openshift_cfme_project }}"
-    user: "{{ openshift_cfme_service_account }}"
-    resource_kind: scc
-    resource_name: privileged
-    state: present
+- name: Create and Authorize CFME Accounts
+  include: accounts.yml
 
 ######################################################################
-# NFS
-# In the case that we are not running on a cloud provider, volumes must be statically provisioned
+# STORAGE - Initialize basic storage classes
+#---------------------------------------------------------------------
+# * nfs - set up NFS shares on the first master for a proof of concept
+- name: Create required NFS exports for CFME app storage
+  include: storage/nfs.yml
+  when: openshift_cfme_storage_class == 'nfs'
 
-- include: nfs.yml
-  when: not (openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'))
-
-######################################################################
-# CFME App Template
-#
-# Note, this is different from the create_pvs.yml tasks in that the
-# application template does not require any jinja2 evaluation.
-#
-# TODO: Handle the case where the server template is updated in
-# openshift-ansible and the change needs to be landed on the managed
-# cluster.
-
-- name: Check if the CFME Server template has been created already
-  oc_obj:
-    namespace: "{{ openshift_cfme_project }}"
-    state: list
-    kind: template
-    name: manageiq
-  register: miq_server_check
-
-- name: Copy over CFME Server template
-  copy:
-    src: miq-template.yaml
-    dest: "{{ template_dir }}/miq-template.yaml"
-
-- name: Ensure the server template was read from disk
+#---------------------------------------------------------------------
+# * external - NFS again, but pointing to a pre-configured NFS server
+- name: Note Storage Type -  External NFS
   debug:
-    var=r_openshift_cfme_miq_template_content
+    msg: Setting up external NFS storage, openshift_cfme_storage_class is 'external'
+  when: openshift_cfme_storage_class == 'external'
 
-- name: Ensure CFME Server Template exists
-  oc_obj:
-    namespace: "{{ openshift_cfme_project }}"
-    kind: template
-    name: "manageiq"
-    state: present
-    content: "{{ r_openshift_cfme_miq_template_content }}"
-
-######################################################################
-# Let's do this
-
-- name: Ensure the CFME Server is created
-  oc_process:
-    namespace: "{{ openshift_cfme_project }}"
-    template_name: manageiq
-    create: True
-    params:
-      APPLICATION_IMG_NAME: "{{ openshift_cfme_application_img_name }}"
-      POSTGRESQL_IMG_NAME: "{{ openshift_cfme_postgresql_img_name }}"
-      MEMCACHED_IMG_NAME: "{{ openshift_cfme_memcached_img_name }}"
-      APPLICATION_IMG_TAG: "{{ openshift_cfme_application_img_tag }}"
-      POSTGRESQL_IMG_TAG: "{{ openshift_cfme_postgresql_img_tag }}"
-      MEMCACHED_IMG_TAG: "{{ openshift_cfme_memcached_img_tag }}"
-  register: cfme_new_app_process
-  run_once: True
-  when:
-    # User said to install CFME in their inventory
-    - openshift_cfme_install_app | bool
-    # # The server app doesn't exist already
-    # - not miq_server_check.results.results.0
-
-- debug:
-    var: cfme_new_app_process
-
-######################################################################
-# Various cleanup steps
-
-# TODO: Not sure what to do about this right now. Might be able to
-# just delete it?  This currently warns about "Unable to find
-# '<TEMP_DIR>' in expected paths."
-- name: Ensure the temporary PV/App templates are erased
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_fileglob:
-    - "{{ template_dir }}/*.yaml"
-
-- name: Ensure the temporary PV/app template directory is erased
-  file:
-    path: "{{ template_dir }}"
-    state: absent
-
-######################################################################
-
-- name: Status update
+#---------------------------------------------------------------------
+# * cloudprovider - use an existing cloudprovider based storage
+- name: Note Storage Type - Cloud Provider
   debug:
-    msg: >
-      CFME has been deployed. Note that there will be a delay before
-      it is fully initialized.
+    msg: Validating cloud provider storage type, openshift_cfme_storage_class is 'cloudprovider'
+  when: openshift_cfme_storage_class == 'cloudprovider'
+
+#---------------------------------------------------------------------
+# * preconfigured - don't do anything, assume it's all there ready to go
+- name: Note Storage Type - Preconfigured
+  debug:
+    msg: Skipping storage configuration, openshift_cfme_storage_class is 'preconfigured'
+  when: openshift_cfme_storage_class == 'preconfigured'
+
+######################################################################
+# APPLICATION TEMPLATE
+- name: Install the correct CFME app template
+  include: template.yml
+
+######################################################################
+# APP & DB Storage
+
+
+######################################################################
+
+# ######################################################################
+# # Let's do this
+
+# - name: Ensure the CFME Server is created
+#   oc_process:
+#     namespace: "{{ openshift_cfme_project }}"
+#     template_name: manageiq
+#     create: True
+#     params:
+#       APPLICATION_IMG_NAME: "{{ openshift_cfme_application_img_name }}"
+#       POSTGRESQL_IMG_NAME: "{{ openshift_cfme_postgresql_img_name }}"
+#       MEMCACHED_IMG_NAME: "{{ openshift_cfme_memcached_img_name }}"
+#       APPLICATION_IMG_TAG: "{{ openshift_cfme_application_img_tag }}"
+#       POSTGRESQL_IMG_TAG: "{{ openshift_cfme_postgresql_img_tag }}"
+#       MEMCACHED_IMG_TAG: "{{ openshift_cfme_memcached_img_tag }}"
+#   register: cfme_new_app_process
+#   run_once: True
+#   when:
+#     # User said to install CFME in their inventory
+#     - openshift_cfme_install_app | bool
+#     # # The server app doesn't exist already
+#     # - not miq_server_check.results.results.0
+
+# - debug:
+#     var: cfme_new_app_process
+
+# ######################################################################
+# # Various cleanup steps
+
+# # TODO: Not sure what to do about this right now. Might be able to
+# # just delete it?  This currently warns about "Unable to find
+# # '<TEMP_DIR>' in expected paths."
+# - name: Ensure the temporary PV/App templates are erased
+#   file:
+#     path: "{{ item }}"
+#     state: absent
+#   with_fileglob:
+#     - "{{ template_dir }}/*.yaml"
+
+# - name: Ensure the temporary PV/app template directory is erased
+#   file:
+#     path: "{{ template_dir }}"
+#     state: absent

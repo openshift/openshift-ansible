@@ -6,8 +6,8 @@ spec:
   capacity:
     storage: 15Gi
   accessModes:
-    - ReadWriteOnce
-  nfs: 
-    path: {{ openshift_cfme_nfs_directory }}/miq-pv01
-    server: {{ openshift_cfme_nfs_server }}
+  - ReadWriteOnce
+  nfs:
+    path: "/exports/miq-pv01"
+    server: "<your-nfs-host-here>"
   persistentVolumeReclaimPolicy: Retain

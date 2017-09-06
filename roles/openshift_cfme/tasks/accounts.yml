@@ -1,0 +1,65 @@
+---
+# This role task file is responsible for user/system account creation,
+# and ensuring correct access is provided as required.
+
+# TODO: This is currently not idempotent, bug report will be filed
+# after this. Currently this task will return 'changed' if it just
+# created a user, updated a user, or doesn't modify a user at
+# all. Seems to be failing some kind of 'does it need updating' test
+# condition and running the replace command regardless.
+- name: Check if the miq-httpd scc exists
+  oc_obj:
+    namespace: "{{ openshift_cfme_project }}"
+    state: list
+    kind: scc
+    name: miq-httpd
+  register: miq_httpd_scc_exists
+
+# TODO: Cleanup when conditions
+- name: Copy the miq-httpd SCC to the cluster
+  copy:
+    src: miq-scc-httpd.yaml
+    dest: "{{ template_dir }}"
+  when:
+    - miq_httpd_scc_exists.results.results | length == 1
+    - miq_httpd_scc_exists.results.results[0] == {}
+
+- name: Ensure the CFME miq-httpd SCC exists
+  oc_obj:
+    state: present
+    name: miq-httpd
+    namespace: "{{ openshift_cfme_project }}"
+    kind: scc
+    files:
+      - "{{ template_dir }}/miq-scc-httpd.yaml"
+    delete_after: True
+  run_once: True
+  when:
+    - miq_httpd_scc_exists.results.results | length == 1
+    - miq_httpd_scc_exists.results.results[0] == {}
+
+- name: Ensure the CFME system users exist
+  oc_serviceaccount:
+    namespace: "{{ openshift_cfme_project }}"
+    state: present
+    name: "{{ item.name }}"
+  with_items:
+    - "{{ openshift_system_account_sccs }}"
+
+- name: Ensure the CFME system accounts have all the required SCCs
+  oc_adm_policy_user:
+    namespace: "{{ openshift_cfme_project }}"
+    user: "system:serviceaccount:{{ openshift_cfme_project }}:{{ item.name }}"
+    resource_kind: scc
+    resource_name: "{{ item.resource_name }}"
+  with_items:
+    - "{{ openshift_system_account_sccs }}"
+
+- name: Ensure the CFME system accounts have the required roles
+  oc_adm_policy_user:
+    namespace: "{{ openshift_cfme_project }}"
+    user: "system:serviceaccount:{{ openshift_cfme_project }}:{{ item.name }}"
+    resource_kind: role
+    resource_name: "{{ item.resource_name }}"
+  with_items:
+    - "{{ openshift_cfme_system_account_roles }}"

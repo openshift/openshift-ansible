@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: manageiq
+  template: manageiq-ext-db
 metadata:
-  name: manageiq
+  name: manageiq-ext-db
   annotations:
-    description: ManageIQ appliance with persistent storage
+    description: ManageIQ appliance with persistent storage using a external DB host
     tags: instant-app,manageiq,miq
     iconClass: icon-rails
 objects:
@@ -42,109 +42,6 @@ objects:
     secret-key: "${ANSIBLE_SECRET_KEY}"
     admin-password: "${ANSIBLE_ADMIN_PASSWORD}"
 - apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: "${DATABASE_SERVICE_NAME}-configs"
-  data:
-    01_miq_overrides.conf: |
-      #------------------------------------------------------------------------------
-      # CONNECTIONS AND AUTHENTICATION
-      #------------------------------------------------------------------------------
-
-      tcp_keepalives_count = 9
-      tcp_keepalives_idle = 3
-      tcp_keepalives_interval = 75
-
-      #------------------------------------------------------------------------------
-      # RESOURCE USAGE (except WAL)
-      #------------------------------------------------------------------------------
-
-      shared_preload_libraries = 'pglogical,repmgr_funcs'
-      max_worker_processes = 10
-
-      #------------------------------------------------------------------------------
-      # WRITE AHEAD LOG
-      #------------------------------------------------------------------------------
-
-      wal_level = 'logical'
-      wal_log_hints = on
-      wal_buffers = 16MB
-      checkpoint_completion_target = 0.9
-
-      #------------------------------------------------------------------------------
-      # REPLICATION
-      #------------------------------------------------------------------------------
-
-      max_wal_senders = 10
-      wal_sender_timeout = 0
-      max_replication_slots = 10
-      hot_standby = on
-
-      #------------------------------------------------------------------------------
-      # ERROR REPORTING AND LOGGING
-      #------------------------------------------------------------------------------
-
-      log_filename = 'postgresql.log'
-      log_rotation_age = 0
-      log_min_duration_statement = 5000
-      log_connections = on
-      log_disconnections = on
-      log_line_prefix = '%t:%r:%c:%u@%d:[%p]:'
-      log_lock_waits = on
-
-      #------------------------------------------------------------------------------
-      # AUTOVACUUM PARAMETERS
-      #------------------------------------------------------------------------------
-
-      log_autovacuum_min_duration = 0
-      autovacuum_naptime = 5min
-      autovacuum_vacuum_threshold = 500
-      autovacuum_analyze_threshold = 500
-      autovacuum_vacuum_scale_factor = 0.05
-
-      #------------------------------------------------------------------------------
-      # LOCK MANAGEMENT
-      #------------------------------------------------------------------------------
-
-      deadlock_timeout = 5s
-
-      #------------------------------------------------------------------------------
-      # VERSION/PLATFORM COMPATIBILITY
-      #------------------------------------------------------------------------------
-
-      escape_string_warning = off
-      standard_conforming_strings = off
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: "${HTTPD_SERVICE_NAME}-configs"
-  data:
-    application.conf: |
-      # Timeout: The number of seconds before receives and sends time out.
-      Timeout 120
-
-      RewriteEngine On
-      Options SymLinksIfOwnerMatch
-
-      <VirtualHost *:80>
-        KeepAlive on
-        ProxyPreserveHost on
-        ProxyPass        /ws/ ws://${NAME}/ws/
-        ProxyPassReverse /ws/ ws://${NAME}/ws/
-        ProxyPass        / http://${NAME}/
-        ProxyPassReverse / http://${NAME}/
-      </VirtualHost>
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: "${HTTPD_SERVICE_NAME}-auth-configs"
-  data:
-    auth-type: internal
-    auth-configuration.conf: |
-      # External Authentication Configuration File
-      #
-      # For details on usage please see https://github.com/ManageIQ/manageiq-pods/blob/master/README.md#configuring-external-authentication
-- apiVersion: v1
   kind: Service
   metadata:
     annotations:
@@ -174,16 +71,6 @@ objects:
     to:
       kind: Service
       name: "${HTTPD_SERVICE_NAME}"
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: "${NAME}-${DATABASE_SERVICE_NAME}"
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: "${DATABASE_VOLUME_CAPACITY}"
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
@@ -432,87 +319,23 @@ objects:
   metadata:
     name: "${DATABASE_SERVICE_NAME}"
     annotations:
-      description: Exposes the database server
+      description: Remote database service
   spec:
     ports:
     - name: postgresql
       port: 5432
-      targetPort: 5432
-    selector:
-      name: "${DATABASE_SERVICE_NAME}"
+      targetPort: "${{DATABASE_PORT}}"
+    selector: {}
 - apiVersion: v1
-  kind: DeploymentConfig
+  kind: Endpoints
   metadata:
     name: "${DATABASE_SERVICE_NAME}"
-    annotations:
-      description: Defines how to deploy the database
-  spec:
-    strategy:
-      type: Recreate
-    triggers:
-    - type: ConfigChange
-    replicas: 1
-    selector:
-      name: "${DATABASE_SERVICE_NAME}"
-    template:
-      metadata:
-        name: "${DATABASE_SERVICE_NAME}"
-        labels:
-          name: "${DATABASE_SERVICE_NAME}"
-      spec:
-        volumes:
-        - name: miq-pgdb-volume
-          persistentVolumeClaim:
-            claimName: "${NAME}-${DATABASE_SERVICE_NAME}"
-        - name: miq-pg-configs
-          configMap:
-            name: "${DATABASE_SERVICE_NAME}-configs"
-        containers:
-        - name: postgresql
-          image: "${POSTGRESQL_IMG_NAME}:${POSTGRESQL_IMG_TAG}"
-          ports:
-          - containerPort: 5432
-          readinessProbe:
-            timeoutSeconds: 1
-            initialDelaySeconds: 15
-            exec:
-              command:
-              - "/bin/sh"
-              - "-i"
-              - "-c"
-              - psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'
-          livenessProbe:
-            timeoutSeconds: 1
-            initialDelaySeconds: 60
-            tcpSocket:
-              port: 5432
-          volumeMounts:
-          - name: miq-pgdb-volume
-            mountPath: "/var/lib/pgsql/data"
-          - name: miq-pg-configs
-            mountPath: "${POSTGRESQL_CONFIG_DIR}"
-          env:
-          - name: POSTGRESQL_USER
-            value: "${DATABASE_USER}"
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${NAME}-secrets"
-                key: pg-password
-          - name: POSTGRESQL_DATABASE
-            value: "${DATABASE_NAME}"
-          - name: POSTGRESQL_MAX_CONNECTIONS
-            value: "${POSTGRESQL_MAX_CONNECTIONS}"
-          - name: POSTGRESQL_SHARED_BUFFERS
-            value: "${POSTGRESQL_SHARED_BUFFERS}"
-          - name: POSTGRESQL_CONFIG_DIR
-            value: "${POSTGRESQL_CONFIG_DIR}"
-          resources:
-            requests:
-              memory: "${POSTGRESQL_MEM_REQ}"
-              cpu: "${POSTGRESQL_CPU_REQ}"
-            limits:
-              memory: "${POSTGRESQL_MEM_LIMIT}"
+  subsets:
+  - addresses:
+    - ip: "${DATABASE_IP}"
+    ports:
+    - port: "${{DATABASE_PORT}}"
+      name: postgresql
 - apiVersion: v1
   kind: Service
   metadata:
@@ -608,6 +431,36 @@ objects:
               memory: "${ANSIBLE_MEM_LIMIT}"
         serviceAccount: miq-privileged
         serviceAccountName: miq-privileged
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: "${HTTPD_SERVICE_NAME}-configs"
+  data:
+    application.conf: |
+      # Timeout: The number of seconds before receives and sends time out.
+      Timeout 120
+
+      RewriteEngine On
+      Options SymLinksIfOwnerMatch
+
+      <VirtualHost *:80>
+        KeepAlive on
+        ProxyPreserveHost on
+        ProxyPass        /ws/ ws://${NAME}/ws/
+        ProxyPassReverse /ws/ ws://${NAME}/ws/
+        ProxyPass        / http://${NAME}/
+        ProxyPassReverse / http://${NAME}/
+      </VirtualHost>
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: "${HTTPD_SERVICE_NAME}-auth-configs"
+  data:
+    auth-type: internal
+    auth-configuration.conf: |
+      # External Authentication Configuration File
+      #
+      # For details on usage please see https://github.com/ManageIQ/manageiq-pods/blob/master/README.md#configuring-external-authentication
 - apiVersion: v1
   kind: Service
   metadata:
@@ -720,6 +573,16 @@ parameters:
   description: Password for the PostgreSQL user.
   from: "[a-zA-Z0-9]{8}"
   generate: expression
+- name: DATABASE_IP
+  displayName: PostgreSQL Server IP
+  required: true
+  description: PostgreSQL external server IP used to configure service.
+  value: ''
+- name: DATABASE_PORT
+  displayName: PostgreSQL Server Port
+  required: true
+  description: PostgreSQL external server port used to configure service.
+  value: '5432'
 - name: DATABASE_NAME
   required: true
   displayName: PostgreSQL Database Name
@@ -752,18 +615,6 @@ parameters:
   displayName: Memcached Slab Page Size
   description: Memcached size of each slab page.
   value: 1m
-- name: POSTGRESQL_CONFIG_DIR
-  displayName: PostgreSQL Configuration Overrides
-  description: Directory used to store PostgreSQL configuration overrides.
-  value: "/var/lib/pgsql/conf.d"
-- name: POSTGRESQL_MAX_CONNECTIONS
-  displayName: PostgreSQL Max Connections
-  description: PostgreSQL maximum number of database connections allowed.
-  value: '1000'
-- name: POSTGRESQL_SHARED_BUFFERS
-  displayName: PostgreSQL Shared Buffer Amount
-  description: Amount of memory dedicated for PostgreSQL shared memory buffers.
-  value: 1GB
 - name: ANSIBLE_SERVICE_NAME
   displayName: Ansible Service Name
   description: The name of the OpenShift Service exposed for the Ansible container.
@@ -796,11 +647,6 @@ parameters:
   required: true
   description: Minimum amount of CPU time the Application container will need (expressed in millicores).
   value: 1000m
-- name: POSTGRESQL_CPU_REQ
-  displayName: PostgreSQL Min CPU Requested
-  required: true
-  description: Minimum amount of CPU time the PostgreSQL container will need (expressed in millicores).
-  value: 500m
 - name: MEMCACHED_CPU_REQ
   displayName: Memcached Min CPU Requested
   required: true
@@ -816,11 +662,6 @@ parameters:
   required: true
   description: Minimum amount of memory the Application container will need.
   value: 6144Mi
-- name: POSTGRESQL_MEM_REQ
-  displayName: PostgreSQL Min RAM Requested
-  required: true
-  description: Minimum amount of memory the PostgreSQL container will need.
-  value: 4Gi
 - name: MEMCACHED_MEM_REQ
   displayName: Memcached Min RAM Requested
   required: true
@@ -836,11 +677,6 @@ parameters:
   required: true
   description: Maximum amount of memory the Application container can consume.
   value: 16384Mi
-- name: POSTGRESQL_MEM_LIMIT
-  displayName: PostgreSQL Max RAM Limit
-  required: true
-  description: Maximum amount of memory the PostgreSQL container can consume.
-  value: 8Gi
 - name: MEMCACHED_MEM_LIMIT
   displayName: Memcached Max RAM Limit
   required: true
@@ -851,14 +687,6 @@ parameters:
   required: true
   description: Maximum amount of memory the Ansible container can consume.
   value: 8096Mi
-- name: POSTGRESQL_IMG_NAME
-  displayName: PostgreSQL Image Name
-  description: This is the PostgreSQL image name requested to deploy.
-  value: docker.io/manageiq/postgresql
-- name: POSTGRESQL_IMG_TAG
-  displayName: PostgreSQL Image Tag
-  description: This is the PostgreSQL image tag/version requested to deploy.
-  value: latest
 - name: MEMCACHED_IMG_NAME
   displayName: Memcached Image Name
   description: This is the Memcached image name requested to deploy.
@@ -905,11 +733,6 @@ parameters:
   required: true
   description: Volume space available for application data.
   value: 5Gi
-- name: DATABASE_VOLUME_CAPACITY
-  displayName: Database Volume Capacity
-  required: true
-  description: Volume space available for database.
-  value: 15Gi
 - name: HTTPD_SERVICE_NAME
   required: true
   displayName: Apache httpd Service Name
@@ -924,7 +747,7 @@ parameters:
   description: This is the httpd image tag/version requested to deploy.
   value: latest
 - name: HTTPD_CONFIG_DIR
-  displayName: Apache Configuration Directory
+  displayName: Apache httpd Configuration Directory
   description: Directory used to store the Apache configuration files.
   value: "/etc/httpd/conf.d"
 - name: HTTPD_AUTH_CONFIG_DIR

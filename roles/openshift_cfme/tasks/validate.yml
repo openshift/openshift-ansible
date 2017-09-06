@@ -1,0 +1,34 @@
+---
+# Validate configuration parameters passed to the openshift_cfme role
+
+- name: Ensure openshift_cfme_app_template is valid
+  assert:
+    that:
+      - openshift_cfme_app_template in openshift_cfme_app_templates
+    msg: "openshift_cfme_app_template must be one of {{ openshift_cfme_app_templates | join(', ') }}"
+
+- name: Ensure openshift_cfme_storage_class is a valid type
+  assert:
+    that:
+      - openshift_cfme_storage_class in openshift_cfme_storage_classes
+    msg: "openshift_cfme_storage_class must be one of {{ openshift_cfme_storage_classes | join(', ') }}"
+
+- name: Ensure external NFS storage has a valid NFS server hostname defined
+  assert:
+    that:
+      - openshift_cfme_storage_external_nfs_hostname is not False
+    msg: The selected storage class 'external' requires a valid hostname for the openshift_cfme_storage_external_nfs_hostname parameter
+  when:
+    - openshift_cfme_storage_class == 'external'
+
+- name: Validate Cloud Provider storage class
+  assert:
+    that:
+      - openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'
+    msg: |
+      openshift_cfme_storage_class is 'cloudprovider' but you have an
+      invalid kind defined. See 'openshift_cloudprovider_kind' in the
+      example inventories for the required parameters for your
+      selected cloud provider. Working providers: 'aws' and 'gce'.
+  when:
+    - openshift_cloudprovider_kind is defined

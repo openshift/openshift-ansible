@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "${PV_NAME}"
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: "/${BASE_PATH}/${PV_NAME}"
+    server: "${NFS_SERVER}"
+  persistentVolumeReclaimPolicy: Retain
+parameters:
+- name: BASE_PATH
+  displayName: BasePath
+  required: true
+  description: The parent directory of your NFS exports
+  value: /exports
+- name: PV_NAME
+  displayName: PVName
+  required: true
+  description: The name of this PV
+- name: NFS_SERVER
+  displayName: NFSServer
+  required: true
+  description: The hostname or IP address of the NFS server

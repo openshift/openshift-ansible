@@ -1,0 +1,72 @@
+---
+# Tasks for ensuring the correct CFME templates are landed on the remote system
+
+######################################################################
+# CFME App Template
+#
+# Note, this is different from the create_pvs.yml tasks in that the
+# application template does not require any jinja2 evaluation.
+#
+# TODO: Handle the case where the server template is updated in
+# openshift-ansible and the change needs to be landed on the managed
+# cluster.
+
+######################################################################
+# STANDARD PODIFIED DATABASE TEMPLATE
+- when: openshift_cfme_app_template == 'miq-template'
+  block:
+  - name: Check if the CFME Server template has been created already
+    oc_obj:
+      namespace: "{{ openshift_cfme_project }}"
+      state: list
+      kind: template
+      name: manageiq
+    register: miq_server_check
+
+  - name: Copy over CFME Server template
+    copy:
+      src: miq-template.yaml
+      dest: "{{ template_dir }}/"
+    when:
+    - miq_server_check.results.results == [{}]
+
+  - name: Ensure CFME Server Template is created
+    oc_obj:
+      namespace: "{{ openshift_cfme_project }}"
+      name: manageiq
+      state: present
+      kind: template
+      files:
+      - "{{ template_dir }}/miq-template.yaml"
+    when:
+    - miq_server_check.results.results == [{}]
+
+######################################################################
+# EXTERNAL DATABASE TEMPLATE
+- when: openshift_cfme_app_template == 'miq-template-ext-db'
+  block:
+  - name: Check if the CFME Ext-DB Server template has been created already
+    oc_obj:
+      namespace: "{{ openshift_cfme_project }}"
+      state: list
+      kind: template
+      name: manageiq-ext-db
+    register: miq_ext_db_server_check
+
+  - name: Copy over CFME Ext-DB Server template
+    copy:
+      src: miq-template-ext-db.yaml
+      dest: "{{ template_dir }}/"
+    when:
+    - miq_ext_db_server_check.results.results == [{}]
+
+  - name: Ensure CFME Ext-DB Server Template is created
+    oc_obj:
+      namespace: "{{ openshift_cfme_project }}"
+      name: manageiq-ext-db
+      state: present
+      kind: template
+      files:
+      - "{{ template_dir }}/miq-template-ext-db.yaml"
+    when:
+    - miq_ext_db_server_check.results.results == [{}]
