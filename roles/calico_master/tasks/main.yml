@@ -4,7 +4,7 @@
     path: "{{ item }}"
   with_items:
   - "{{ calico_etcd_ca_cert_file }}"
-  - "{{ calico_etcd_cert_file}}"
+  - "{{ calico_etcd_cert_file }}"
   - "{{ calico_etcd_key_file }}"
 
 - name: Calico Master | Create temp directory for policy controller definition

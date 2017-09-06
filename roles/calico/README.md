@@ -6,12 +6,6 @@ Configure Calico components for the Master host.
 
 * Ansible 2.2
 
-## Warning: This Calico Integration is in Alpha
-
-Calico shares the etcd instance used by OpenShift, and distributes client etcd certificates to each node.
-For this reason, **we do not (yet) recommend running Calico on any production-like
-cluster, or using it for any purpose besides early access testing.**
-
 ## Installation
 
 To install, set the following inventory configuration parameters:
@@ -20,13 +14,24 @@ To install, set the following inventory configuration parameters:
 * `openshift_use_openshift_sdn=False`
 * `os_sdn_network_plugin_name='cni'`
 
-## Additional Calico/Node and Felix Configuration Options
+For more information, see [Calico's official OpenShift Installation Documentation](https://docs.projectcalico.org/latest/getting-started/openshift/installation#bring-your-own-etcd)
+
+## Improving security with BYO-etcd
+
+By default, Calico uses the etcd set up by OpenShift. To accomplish this, it generates and distributes client etcd certificates to each node.
+Distributing these certs across the cluster in this way weakens the overall security,
+so Calico should not be deployed in production in this mode.
+
+Instead, Calico can be installed in BYO-etcd mode, where it connects to an externally
+set up etcd. For information on deploying Calico in BYO-etcd mode, see 
+[Calico's official OpenShift Installation Documentation](https://docs.projectcalico.org/latest/getting-started/openshift/installation#bring-your-own-etcd)
+
+## Calico Configuration Options
 
 Additional parameters that can be defined in the inventory are:
 
 | Environment | Description | Schema | Default |   
 |---------|----------------------|---------|---------|
-|CALICO_IPV4POOL_CIDR|	The IPv4 Pool to create if none exists at start up. It is invalid to define this variable and NO_DEFAULT_POOLS.	|IPv4 CIDR	| 192.168.0.0/16 |
 | CALICO_IPV4POOL_IPIP | IPIP Mode to use for the IPv4 POOL created at start up.	| off, always, cross-subnet	| always |
 | CALICO_LOG_DIR | Directory on the host machine where Calico Logs are written.| String	| /var/log/calico |
 
