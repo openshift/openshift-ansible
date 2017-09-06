@@ -2,3 +2,8 @@
 openshift_node_ips: []
 # TODO: update setting these values based on the facts
 #openshift_version: "{{ openshift_pkg_version | default(openshift_image_tag | default(openshift.docker.openshift_image_tag | default(''))) }}"
+
+oreg_url: ''
+oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_replace: False
