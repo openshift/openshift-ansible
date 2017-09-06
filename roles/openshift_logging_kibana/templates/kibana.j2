@@ -46,6 +46,8 @@ spec:
 {% endif %}
 {% if kibana_memory_limit is not none and kibana_memory_limit != "" %}
               memory: "{{ kibana_memory_limit }}"
+            requests:
+              memory: "{{ kibana_memory_limit }}"
 {% endif %}
 {% endif %}
           env:
@@ -81,6 +83,8 @@ spec:
               cpu: "{{ kibana_proxy_cpu_limit }}"
 {% endif %}
 {% if kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "" %}
+              memory: "{{ kibana_proxy_memory_limit }}"
+            requests:
               memory: "{{ kibana_proxy_memory_limit }}"
 {% endif %}
 {% endif %}

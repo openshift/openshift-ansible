@@ -48,7 +48,7 @@ spec:
               cpu: "{{es_cpu_limit}}"
 {% endif %}
             requests:
-              memory: "512Mi"
+              memory: "{{es_memory_limit}}"
           ports:
             -
               containerPort: 9200
