@@ -7,6 +7,10 @@
   tags:
   - always
 
-- include: ../../common/openshift-cluster/redeploy-certificates/masters.yml
+- include: ../../common/openshift-cluster/redeploy-certificates/masters-backup.yml
+
+- include: ../../common/openshift-master/certificates.yml
+  vars:
+    openshift_certificates_redeploy: true
 
 - include: ../../common/openshift-master/restart.yml

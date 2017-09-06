@@ -14,4 +14,3 @@ galaxy_info:
   - system
 dependencies:
 - role: openshift_cli
-- role: openshift_named_certificates

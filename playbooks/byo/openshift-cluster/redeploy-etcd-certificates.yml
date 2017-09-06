@@ -11,7 +11,11 @@
   vars:
     g_check_expiry_hosts: 'oo_etcd_to_config'
 
-- include: ../../common/openshift-cluster/redeploy-certificates/etcd.yml
+- include: ../../common/openshift-cluster/redeploy-certificates/etcd-backup.yml
+
+- include: ../../common/openshift-etcd/certificates.yml
+  vars:
+    etcd_certificates_redeploy: true
 
 - include: ../../common/openshift-etcd/restart.yml
   vars:

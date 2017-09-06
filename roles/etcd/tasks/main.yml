@@ -1,6 +1,4 @@
 ---
-- include: server_certificates.yml
-
 - name: Set hostname and ip facts
   set_fact:
     # Store etcd_hostname and etcd_ip such that they will be available

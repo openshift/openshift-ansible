@@ -18,6 +18,10 @@
       - docker_image_availability
       - docker_storage
 
+- include: ../openshift-etcd/ca.yml
+
+- include: ../openshift-etcd/certificates.yml
+
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-nfs/config.yml
@@ -26,9 +30,15 @@
 - include: ../openshift-loadbalancer/config.yml
   when: groups.oo_lb_to_config | default([]) | count > 0
 
+- include: ../openshift-master/ca.yml
+
+- include: ../openshift-master/certificates.yml
+
 - include: ../openshift-master/config.yml
 
 - include: ../openshift-master/additional_config.yml
+
+- include: ../openshift-node/certificates.yml
 
 - include: ../openshift-node/config.yml
 
