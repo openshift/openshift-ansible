@@ -34,7 +34,7 @@
   register: fluentd_output
   failed_when: "fluentd_output.rc == 1 and 'exists' not in fluentd_output.stderr"
   check_mode: no
-  when: fluentd_privileged.stdout.find("system:serviceaccount:{{openshift_logging_namespace}}:aggregated-logging-fluentd") == -1
+  when: fluentd_privileged.stdout.find("system:serviceaccount:" + openshift_logging_namespace + ":aggregated-logging-fluentd") == -1
 
 - name: "Check fluentd cluster-reader permissions"
   command: >
@@ -51,4 +51,4 @@
   register: fluentd2_output
   failed_when: "fluentd2_output.rc == 1 and 'exists' not in fluentd2_output.stderr"
   check_mode: no
-  when: fluentd_cluster_reader.stdout.find("system:serviceaccount:{{openshift_logging_namespace}}:aggregated-logging-fluentd") == -1
+  when: fluentd_cluster_reader.stdout.find("system:serviceaccount:" + openshift_logging_namespace + ":aggregated-logging-fluentd") == -1
