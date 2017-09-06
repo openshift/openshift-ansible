@@ -40,6 +40,7 @@
       dest: "{{ mktemp.stdout }}/templates/hawkular-metrics-route.yaml"
     vars:
       name: hawkular-metrics
+      annotations: "{{ openshift_metrics_hawkular_route_annotations }}"
       labels:
         metrics-infra: hawkular-metrics
       host: "{{ openshift_metrics_hawkular_hostname }}"

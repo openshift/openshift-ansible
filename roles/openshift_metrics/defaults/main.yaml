@@ -12,6 +12,7 @@ openshift_metrics_hawkular_cert: ""
 openshift_metrics_hawkular_key: ""
 openshift_metrics_hawkular_ca: ""
 openshift_metrics_hawkular_nodeselector: ""
+openshift_metrics_hawkular_route_annotations: {}
 
 openshift_metrics_cassandra_replicas: 1
 openshift_metrics_cassandra_storage_type: "{{ openshift_hosted_metrics_storage_kind | default('emptydir') }}"
