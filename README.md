@@ -55,7 +55,7 @@ you are not running a stable release.
     ***
 
     Requirements:
-    - Ansible >= 2.2.2.0
+    - Ansible >= 2.3.0.0
     - Jinja >= 2.7
     - pyOpenSSL
     - python-lxml
