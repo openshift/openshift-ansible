@@ -229,6 +229,24 @@ under the ansible group named `ext_lb`:
     openshift_master_cluster_hostname: "{{ groups.ext_lb.0 }}"
     openshift_master_cluster_public_hostname: "{{ groups.ext_lb.0 }}"
 
+#### Provider Network
+
+Normally, the playbooks create a new Neutron network and subnet and attach
+floating IP addresses to each node. If you have a provider network set up, this
+is all unnecessary as you can just access servers that are placed in the
+provider network directly.
+
+To use a provider network, set its name in `openstack_provider_network_name` in
+`inventory/group_vars/all.yml`.
+
+If you set the provider network name, the `openstack_external_network_name` and
+`openstack_private_network_name` fields will be ignored.
+
+**NOTE**: this will not update the nodes' DNS, so running openshift-ansible
+right after provisioning will fail (unless you're using an external DNS server
+your provider network knows about). You must make sure your nodes are able to
+resolve each other by name.
+
 #### Security notes
 
 Configure required `*_ingress_cidr` variables to restrict public access

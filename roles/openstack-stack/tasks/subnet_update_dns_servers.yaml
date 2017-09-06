@@ -6,3 +6,4 @@
     state: present
     use_default_subnetpool: yes
     dns_nameservers: "{{ [private_dns_server|default(public_dns_nameservers[0])]|union(public_dns_nameservers)|unique }}"
+  when: not provider_network
