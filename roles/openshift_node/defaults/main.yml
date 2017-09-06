@@ -12,3 +12,8 @@ os_firewall_allow:
 - service: Calico BGP Port
   port: 179/tcp
   when: openshift.common.use_calico | bool
+
+oreg_url: ''
+oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_replace: False
