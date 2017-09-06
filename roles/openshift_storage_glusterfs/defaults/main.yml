@@ -3,6 +3,7 @@ openshift_storage_glusterfs_timeout: 300
 openshift_storage_glusterfs_is_native: True
 openshift_storage_glusterfs_name: 'storage'
 openshift_storage_glusterfs_nodeselector: "glusterfs={{ openshift_storage_glusterfs_name }}-host"
+openshift_storage_glusterfs_use_default_selector: False
 openshift_storage_glusterfs_storageclass: True
 openshift_storage_glusterfs_image: "{{ 'rhgs3/rhgs-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-centos' | quote }}"
 openshift_storage_glusterfs_version: 'latest'
@@ -31,6 +32,7 @@ openshift_storage_glusterfs_registry_namespace: "{{ openshift.hosted.registry.na
 openshift_storage_glusterfs_registry_is_native: "{{ openshift_storage_glusterfs_is_native }}"
 openshift_storage_glusterfs_registry_name: 'registry'
 openshift_storage_glusterfs_registry_nodeselector: "glusterfs={{ openshift_storage_glusterfs_registry_name }}-host"
+openshift_storage_glusterfs_registry_use_default_selector: "{{ openshift_storage_glusterfs_use_default_selector }}"
 openshift_storage_glusterfs_registry_storageclass: False
 openshift_storage_glusterfs_registry_image: "{{ openshift_storage_glusterfs_image }}"
 openshift_storage_glusterfs_registry_version: "{{ openshift_storage_glusterfs_version }}"
