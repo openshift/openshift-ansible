@@ -21,8 +21,6 @@ kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yam
   - remote
   container-runtime-endpoint:
   - /var/run/crio.sock
-  experimental-cri:
-  - 'true'
   image-service-endpoint:
   - /var/run/crio.sock
   node-labels:
