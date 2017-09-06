@@ -3,6 +3,15 @@
 - set_fact:
     l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(openshift.docker.insecure_registries)) }}"
   when: openshift.docker.insecure_registries
+- set_fact:
+    l_crio_registries: "{{ openshift.docker.additional_registries + ['docker.io'] }}"
+  when: openshift.docker.additional_registries
+- set_fact:
+    l_crio_registries: "{{ ['docker.io'] }}"
+  when: not openshift.docker.additional_registries
+- set_fact:
+    l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
+  when: openshift.docker.additional_registries
 
 - name: Ensure container-selinux is installed
   package:
