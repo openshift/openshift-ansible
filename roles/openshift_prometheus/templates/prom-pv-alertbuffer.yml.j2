@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prometheus-alertbuffer
+  labels:
+    storage: prometheus-alertbuffer
+spec:
+  capacity:
+    storage: 15Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /exports/prometheus-alertbuffer
+    server: {{ openshift_prometheus_nfs_server }}
+  persistentVolumeReclaimPolicy: Retain

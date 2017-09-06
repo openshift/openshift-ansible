@@ -1,0 +1,174 @@
+rule_files:
+  - 'prometheus.rules'
+{% if openshift_prometheus_additional_rules_file is defined and openshift_prometheus_additional_rules_file is not none %}
+  - 'prometheus.additional.rules'
+{% endif %}
+
+
+
+# A scrape configuration for running Prometheus on a Kubernetes cluster.
+# This uses separate scrape configs for cluster components (i.e. API server, node)
+# and services to allow each to use different authentication configs.
+#
+# Kubernetes labels will be added as Prometheus labels on metrics via the
+# `labelmap` relabeling action.
+
+# Scrape config for API servers.
+#
+# Kubernetes exposes API servers as endpoints to the default/kubernetes
+# service so this uses `endpoints` role and uses relabelling to only keep
+# the endpoints associated with the default/kubernetes service using the
+# default named port `https`. This works for single API server deployments as
+# well as HA API server deployments.
+scrape_configs:
+- job_name: 'kubernetes-apiservers'
+
+  kubernetes_sd_configs:
+  - role: endpoints
+
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  # Keep only the default/kubernetes service endpoints for the https port. This
+  # will add targets for each API server which Kubernetes adds an endpoint to
+  # the default/kubernetes service.
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: default;kubernetes;https
+
+# Scrape config for nodes.
+#
+# Each node exposes a /metrics endpoint that contains operational metrics for
+# the Kubelet and other components.
+- job_name: 'kubernetes-nodes'
+
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  kubernetes_sd_configs:
+  - role: node
+
+  relabel_configs:
+  - action: labelmap
+    regex: __meta_kubernetes_node_label_(.+)
+
+# Scrape config for controllers.
+#
+# Each master node exposes a /metrics endpoint on :8444 that contains operational metrics for
+# the controllers.
+#
+# TODO: move this to a pure endpoints based metrics gatherer when controllers are exposed via
+#       endpoints.
+- job_name: 'kubernetes-controllers'
+
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  kubernetes_sd_configs:
+  - role: endpoints
+
+  # Keep only the default/kubernetes service endpoints for the https port, and then
+  # set the port to 8444. This is the default configuration for the controllers on OpenShift
+  # masters.
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: default;kubernetes;https
+  - source_labels: [__address__]
+    action: replace
+    target_label: __address__
+    regex: (.+)(?::\d+)
+    replacement: $1:8444
+
+# Scrape config for cAdvisor.
+#
+# Beginning in Kube 1.7, each node exposes a /metrics/cadvisor endpoint that
+# reports container metrics for each running pod. Scrape those by default.
+- job_name: 'kubernetes-cadvisor'
+
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+{% if kubernetes_version | float() >= 1.7 | float() %}
+  metrics_path: /metrics/cadvisor
+{% else %}
+  metrics_path: /metrics
+{% endif %}
+
+  kubernetes_sd_configs:
+  - role: node
+
+  relabel_configs:
+  - action: labelmap
+    regex: __meta_kubernetes_node_label_(.+)
+
+# Scrape config for service endpoints.
+#
+# The relabeling allows the actual service scrape endpoint to be configured
+# via the following annotations:
+#
+# * `prometheus.io/scrape`: Only scrape services that have a value of `true`
+# * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+# to set this to `https` & most likely set the `tls_config` of the scrape config.
+# * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+# * `prometheus.io/port`: If the metrics are exposed on a different port to the
+# service then set this appropriately.
+- job_name: 'kubernetes-service-endpoints'
+
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    # TODO: this should be per target
+    insecure_skip_verify: true
+
+  kubernetes_sd_configs:
+  - role: endpoints
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+    action: replace
+    target_label: __scheme__
+    regex: (https?)
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+    action: replace
+    target_label: __address__
+    regex: (.+)(?::\d+);(\d+)
+    replacement: $1:$2
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_username]
+    action: replace
+    target_label: __basic_auth_username__
+    regex: (.+)
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_password]
+    action: replace
+    target_label: __basic_auth_password__
+    regex: (.+)
+  - action: labelmap
+    regex: __meta_kubernetes_service_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: kubernetes_namespace
+  - source_labels: [__meta_kubernetes_service_name]
+    action: replace
+    target_label: kubernetes_name
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "localhost:9093"

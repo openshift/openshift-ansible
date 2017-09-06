@@ -1,0 +1,74 @@
+---
+# defaults file for openshift_prometheus
+openshift_prometheus_state: present
+
+openshift_prometheus_namespace: prometheus
+
+openshift_prometheus_replicas: 1
+openshift_prometheus_node_selector: {"region":"infra"}
+
+# images
+openshift_prometheus_image_proxy: "openshift/oauth-proxy:v1.0.0"
+openshift_prometheus_image_prometheus: "openshift/prometheus:v2.0.0-dev"
+openshift_prometheus_image_alertmanager: "openshift/prometheus-alertmanager:dev"
+openshift_prometheus_image_alertbuffer: "ilackarms/message-buffer"
+
+# additional prometheus rules file
+openshift_prometheus_additional_rules_file: null
+
+# All the required exports
+openshift_prometheus_pv_exports:
+  - prometheus
+  - prometheus-alertmanager
+  - prometheus-alertbuffer
+# PV template files and their created object names
+openshift_prometheus_pv_data:
+  - pv_name: prometheus
+    pv_template: prom-pv-server.yml
+    pv_label: Prometheus Server PV
+  - pv_name: prometheus-alertmanager
+    pv_template: prom-pv-alertmanager.yml
+    pv_label: Prometheus Alertmanager PV
+  - pv_name: prometheus-alertbuffer
+    pv_template: prom-pv-alertbuffer.yml
+    pv_label: Prometheus Alert Buffer PV
+
+# Hostname/IP of the NFS server. Currently defaults to first master
+openshift_prometheus_nfs_server: "{{ groups.nfs.0 }}"
+
+# storage
+openshift_prometheus_storage_type: pvc
+openshift_prometheus_pvc_name: prometheus
+openshift_prometheus_pvc_size: 10G
+openshift_prometheus_pvc_access_modes: [ReadWriteOnce]
+openshift_prometheus_pvc_pv_selector: {}
+
+openshift_prometheus_alertmanager_storage_type: pvc
+openshift_prometheus_alertmanager_pvc_name: prometheus-alertmanager
+openshift_prometheus_alertmanager_pvc_size: 10G
+openshift_prometheus_alertmanager_pvc_access_modes: [ReadWriteOnce]
+openshift_prometheus_alertmanager_pvc_pv_selector: {}
+
+openshift_prometheus_alertbuffer_storage_type: pvc
+openshift_prometheus_alertbuffer_pvc_name: prometheus-alertbuffer
+openshift_prometheus_alertbuffer_pvc_size: 10G
+openshift_prometheus_alertbuffer_pvc_access_modes: [ReadWriteOnce]
+openshift_prometheus_alertbuffer_pvc_pv_selector: {}
+
+# container resources
+openshift_prometheus_cpu_limit: null
+openshift_prometheus_memory_limit: null
+openshift_prometheus_cpu_requests: null
+openshift_prometheus_memory_requests: null
+openshift_prometheus_alertmanager_cpu_limit: null
+openshift_prometheus_alertmanager_memory_limit: null
+openshift_prometheus_alertmanager_cpu_requests: null
+openshift_prometheus_alertmanager_memory_requests: null
+openshift_prometheus_alertbuffer_cpu_limit: null
+openshift_prometheus_alertbuffer_memory_limit: null
+openshift_prometheus_alertbuffer_cpu_requests: null
+openshift_prometheus_alertbuffer_memory_requests: null
+openshift_prometheus_oauth_proxy_cpu_limit: null
+openshift_prometheus_oauth_proxy_memory_limit: null
+openshift_prometheus_oauth_proxy_cpu_requests: null
+openshift_prometheus_oauth_proxy_memory_requests: null

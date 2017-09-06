@@ -1,0 +1,3 @@
+/exports/prometheus *(rw,no_root_squash,no_wdelay)
+/exports/prometheus-alertmanager *(rw,no_root_squash,no_wdelay)
+/exports/prometheus-alertbuffer *(rw,no_root_squash,no_wdelay)
