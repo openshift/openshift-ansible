@@ -1,0 +1,51 @@
+---
+# Tasks to statically provision NFS volumes
+# Include if not using dynamic volume provisioning
+
+- name: Set openshift_cfme_nfs_server fact
+  when: openshift_cfme_nfs_server is not defined
+  set_fact:
+    # Hostname/IP of the NFS server. Currently defaults to first master
+    openshift_cfme_nfs_server: "{{ oo_nfs_to_config.0 }}"
+
+- name: Ensure the /exports/ directory exists
+  file:
+    path: /exports/
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Ensure the miq-pv0X export directories exist
+  file:
+    path: "/exports/{{ item }}"
+    state: directory
+    mode: 0775
+    owner: root
+    group: root
+  with_items: "{{ openshift_cfme_pv_exports }}"
+
+- name: Ensure the NFS exports for CFME PVs exist
+  copy:
+    src: openshift_cfme.exports
+    dest: /etc/exports.d/openshift_cfme.exports
+  register: nfs_exports_updated
+
+- name: Ensure the NFS export table is refreshed if exports were added
+  command: exportfs -ar
+  when:
+    - nfs_exports_updated.changed
+
+
+######################################################################
+# Create the required CFME PVs. Check out these online docs if you
+# need a refresher on includes looping with items:
+# * http://docs.ansible.com/ansible/playbooks_loops.html#loops-and-includes-in-2-0
+# * http://stackoverflow.com/a/35128533
+#
+# TODO: Handle the case where a PV template is updated in
+# openshift-ansible and the change needs to be landed on the managed
+# cluster.
+
+- include: create_pvs.yml
+  with_items: "{{ openshift_cfme_pv_data }}"

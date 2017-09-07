@@ -25,6 +25,7 @@
     kind: pv
     name: "{{ item }}"
   with_items: "{{ openshift_cfme_pv_exports }}"
+  when: not (openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'))
 
 - name: Ensure the CFME user is removed
   oc_user:
@@ -36,8 +37,10 @@
     path: /etc/exports.d/openshift_cfme.exports
     state: absent
   register: nfs_exports_removed
+  when: not (openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'))
 
 - name: Ensure the NFS export table is refreshed if exports were removed
   command: exportfs -ar
   when:
     - nfs_exports_removed.changed
+    - not (openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'))
