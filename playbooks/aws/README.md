@@ -43,6 +43,8 @@ The current expected work flow should be to provide an AMI with access to Opensh
 
 ```yaml
 ---
+# when creating an AMI set this to True
+# when installing a cluster set this to False
 openshift_node_bootstrap: True
 
 # specify a clusterid
@@ -96,6 +98,11 @@ etcd
 ################################################################################
 # openshift_deployment_type is required for installation
 openshift_deployment_type=origin
+
+# required when building an AMI.  This will
+# be dependent on the version provided by the yum repository
+openshift_pkg_version=-3.6.0
+
 openshift_master_bootstrap_enabled=True
 
 openshift_hosted_router_wait=False

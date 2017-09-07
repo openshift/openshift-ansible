@@ -63,15 +63,8 @@
 - name: run the std_include
   include: ../../common/openshift-cluster/initialize_openshift_repos.yml
 
-- hosts: nodes
-  remote_user: root
-  tasks:
-  - set_fact:
-      openshift_node_bootstrap: True
-
-  - name: run openshift image preparation
-    include_role:
-      name: openshift_node
+- name: install node config
+  include: ../../common/openshift-node/config.yml
 
 - hosts: localhost
   connection: local
