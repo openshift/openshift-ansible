@@ -27,9 +27,6 @@
       role: "{{ item.role }}"
       local_facts: "{{ item.local_facts }}"
     with_items:
-    - role: common
-      local_facts:
-        use_dnsmasq: True
     - role: master
       local_facts:
         dns_port: '8053'
@@ -50,9 +47,6 @@
       role: "{{ item.role }}"
       local_facts: "{{ item.local_facts }}"
     with_items:
-    - role: common
-      local_facts:
-        use_dnsmasq: True
     - role: node
       local_facts:
         dns_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"

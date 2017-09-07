@@ -3,7 +3,7 @@
   systemd:
     name: openvswitch
     state: restarted
-  when: (not skip_node_svc_handlers | default(False) | bool) and not (ovs_service_status_changed | default(false) | bool) and openshift.common.use_openshift_sdn | default(true) | bool
+  when: (not skip_node_svc_handlers | default(False) | bool) and not (ovs_service_status_changed | default(false) | bool) and openshift_node_use_openshift_sdn | bool
   register: l_openshift_node_stop_openvswitch_result
   until: not l_openshift_node_stop_openvswitch_result | failed
   retries: 3

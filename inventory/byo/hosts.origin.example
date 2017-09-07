@@ -719,11 +719,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Setting this variable to true will override that check.
 #openshift_override_hostname_check=true
 
-# Configure dnsmasq for cluster dns, switch the host's local resolver to use dnsmasq
-# and configure node's dnsIP to point at the node's local dnsmasq instance. Defaults
-# to True for Origin 1.2 and OSE 3.2. False for 1.1 / 3.1 installs, this cannot
-# be used with 1.0 and 3.0.
+# openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
+# in versions >= 3.6
 #openshift_use_dnsmasq=False
+
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
 # This is useful for POC environments where DNS may not actually be available yet or to set
 # options like 'strict-order' to alter dnsmasq configuration.

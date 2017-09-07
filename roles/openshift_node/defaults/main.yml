@@ -69,10 +69,10 @@ r_openshift_node_os_firewall_allow:
   port: 443/tcp
 - service: OpenShift OVS sdn
   port: 4789/udp
-  cond: openshift.common.use_openshift_sdn | default(true) | bool
+  cond: openshift_use_openshift_sdn | bool
 - service: Calico BGP Port
   port: 179/tcp
-  cond: "{{ openshift.common.use_calico | bool }}"
+  cond: "{{ openshift_node_use_calico }}"
 - service: Kubernetes service NodePort TCP
   port: "{{ openshift_node_port_range | default('') }}/tcp"
   cond: "{{ openshift_node_port_range is defined }}"
@@ -82,5 +82,27 @@ r_openshift_node_os_firewall_allow:
 
 oreg_url: ''
 oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
-oreg_auth_credentials_path: "{{ openshift.common.data_dir }}/.docker"
+oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
+
+
+# NOTE
+# r_openshift_node_*_default may be defined external to this role.
+# openshift_use_*, if defined, may affect other roles or play behavior.
+openshift_node_use_openshift_sdn_default: "{{ openshift_use_openshift_sdn | default(True) }}"
+openshift_node_use_openshift_sdn: "{{ openshift_node_use_openshift_sdn_default }}"
+
+openshift_node_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
+openshift_node_sdn_network_plugin_name: "{{ openshift_node_sdn_network_plugin_name_default }}"
+
+openshift_node_use_calico_default: "{{ openshift_use_calico | default(False) }}"
+openshift_node_use_calico: "{{ openshift_node_use_calico_default }}"
+
+openshift_node_use_nuage_default: "{{ openshift_use_nuage | default(False) }}"
+openshift_node_use_nuage: "{{ openshift_node_use_nuage_default }}"
+
+openshift_node_use_contiv_default: "{{ openshift_use_contiv | default(False) }}"
+openshift_node_use_contiv: "{{ openshift_node_use_contiv_default }}"
+
+openshift_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
+openshift_node_data_dir: "{{ openshift_node_data_dir_default }}"

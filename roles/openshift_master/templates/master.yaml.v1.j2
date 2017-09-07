@@ -106,7 +106,7 @@ etcdConfig:
     clientCA: ca.crt
 {% endif %}
     keyFile: etcd.server.key
-  storageDirectory: {{ openshift.common.data_dir }}/openshift.local.etcd
+  storageDirectory: {{ r_openshift_master_data_dir }}/openshift.local.etcd
 {% endif %}
 etcdStorageConfig:
   kubernetesStoragePrefix: kubernetes.io
@@ -179,8 +179,8 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
-{% if openshift.common.use_openshift_sdn or openshift.common.use_nuage or openshift.common.use_contiv or openshift.common.sdn_network_plugin_name == 'cni' %}
-  networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% if r_openshift_master_use_openshift_sdn or r_openshift_master_use_nuage or r_openshift_master_use_contiv or r_openshift_master_sdn_network_plugin_name == 'cni' %}
+  networkPluginName: {{ r_openshift_master_sdn_network_plugin_name_default }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.common.portal_net }}

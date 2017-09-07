@@ -17,22 +17,12 @@ From this role:
 
 | Name                       | Default value         |                                                          |
 |----------------------------|-----------------------|----------------------------------------------------------|
-| openshift_node_debug_level | openshift_debug_level | Verbosity of the debug logs for node                     |
 | oreg_url                   | UNDEF (Optional)      | Default docker registry to use                           |
 | oreg_url_node              | UNDEF (Optional)      | Default docker registry to use, specifically on the node |
-
-From openshift_common:
-
-| Name                          |  Default Value      |                     |
-|-------------------------------|---------------------|---------------------|
-| openshift_debug_level         | 2                   | Global openshift debug log verbosity |
-| openshift_public_ip           | UNDEF (Required)    | Public IP address to use for this host |
-| openshift_hostname            | UNDEF (Required)    | hostname to use for this instance |
 
 Dependencies
 ------------
 
-openshift_common
 
 Example Playbook
 ----------------

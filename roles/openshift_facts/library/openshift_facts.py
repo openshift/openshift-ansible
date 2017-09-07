@@ -449,78 +449,6 @@ def normalize_provider_facts(provider, metadata):
     return facts
 
 
-def set_flannel_facts_if_unset(facts):
-    """ Set flannel facts if not already present in facts dict
-            dict: the facts dict updated with the flannel facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the flannel
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_flannel' not in facts['common']:
-            use_flannel = False
-            facts['common']['use_flannel'] = use_flannel
-    return facts
-
-
-def set_calico_facts_if_unset(facts):
-    """ Set calico facts if not already present in facts dict
-            dict: the facts dict updated with the calico facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the calico
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_calico' not in facts['common']:
-            use_calico = False
-            facts['common']['use_calico'] = use_calico
-    return facts
-
-
-def set_nuage_facts_if_unset(facts):
-    """ Set nuage facts if not already present in facts dict
-            dict: the facts dict updated with the nuage facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the nuage
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_nuage' not in facts['common']:
-            use_nuage = False
-            facts['common']['use_nuage'] = use_nuage
-    return facts
-
-
-def set_contiv_facts_if_unset(facts):
-    """ Set contiv facts if not already present in facts dict
-            dict: the facts dict updated with the contiv facts if
-            missing
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the contiv
-            facts if they were not already present
-
-    """
-    if 'common' in facts:
-        if 'use_contiv' not in facts['common']:
-            use_contiv = False
-            facts['common']['use_contiv'] = use_contiv
-    return facts
-
-
 def set_node_schedulability(facts):
     """ Set schedulable facts if not already present in facts dict
         Args:
@@ -590,13 +518,8 @@ def set_dnsmasq_facts_if_unset(facts):
     """
 
     if 'common' in facts:
-        if 'use_dnsmasq' not in facts['common']:
-            facts['common']['use_dnsmasq'] = bool(safe_get_bool(facts['common']['version_gte_3_2_or_1_2']))
         if 'master' in facts and 'dns_port' not in facts['master']:
-            if safe_get_bool(facts['common']['use_dnsmasq']):
-                facts['master']['dns_port'] = 8053
-            else:
-                facts['master']['dns_port'] = 53
+            facts['master']['dns_port'] = 8053
 
     return facts
 
@@ -968,27 +891,6 @@ def set_version_facts_if_unset(facts):
     return facts
 
 
-def set_manageiq_facts_if_unset(facts):
-    """ Set manageiq facts. This currently includes common.use_manageiq.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-        Raises:
-            OpenShiftFactsInternalError:
-    """
-    if 'common' not in facts:
-        if 'version_gte_3_1_or_1_1' not in facts['common']:
-            raise OpenShiftFactsInternalError(
-                "Invalid invocation: The required facts are not set"
-            )
-    if 'use_manageiq' not in facts['common']:
-        facts['common']['use_manageiq'] = facts['common']['version_gte_3_1_or_1_1']
-
-    return facts
-
-
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -999,15 +901,6 @@ def set_sdn_facts_if_unset(facts, system_facts):
             dict: the facts dict updated with the generated sdn facts if they
                   were not already present
     """
-    # pylint: disable=too-many-branches
-    if 'common' in facts:
-        use_sdn = facts['common']['use_openshift_sdn']
-        if not (use_sdn == '' or isinstance(use_sdn, bool)):
-            use_sdn = safe_get_bool(use_sdn)
-            facts['common']['use_openshift_sdn'] = use_sdn
-        if 'sdn_network_plugin_name' not in facts['common']:
-            plugin = 'redhat/openshift-ovs-subnet' if use_sdn else ''
-            facts['common']['sdn_network_plugin_name'] = plugin
 
     if 'master' in facts:
         # set defaults for sdn_cluster_network_cidr and sdn_host_subnet_length
@@ -1996,10 +1889,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_project_cfg_facts_if_unset(facts)
-        facts = set_flannel_facts_if_unset(facts)
-        facts = set_calico_facts_if_unset(facts)
-        facts = set_nuage_facts_if_unset(facts)
-        facts = set_contiv_facts_if_unset(facts)
         facts = set_node_schedulability(facts)
         facts = set_selectors(facts)
         facts = set_identity_providers_if_unset(facts)
@@ -2011,7 +1900,6 @@ class OpenShiftFacts(object):
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_dnsmasq_facts_if_unset(facts)
-        facts = set_manageiq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_proxy_facts(facts)
@@ -2039,7 +1927,7 @@ class OpenShiftFacts(object):
                            self.system_facts['ansible_fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr)
 
-        defaults['common'] = dict(use_openshift_sdn=True, ip=ip_addr,
+        defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
                                   deployment_type=deployment_type,
                                   deployment_subtype=deployment_subtype,
@@ -2048,10 +1936,8 @@ class OpenShiftFacts(object):
                                   portal_net='172.30.0.0/16',
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
-                                  install_examples=True,
                                   debug_level=2,
-                                  config_base='/etc/origin',
-                                  data_dir='/var/lib/origin')
+                                  config_base='/etc/origin')
 
         if 'master' in roles:
             defaults['master'] = dict(api_use_ssl=True, api_port='8443',

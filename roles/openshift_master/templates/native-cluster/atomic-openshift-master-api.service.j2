@@ -13,7 +13,7 @@ Environment=GOTRACEBACK=crash
 ExecStart=/usr/bin/openshift start master api --config=${CONFIG_FILE} $OPTIONS
 LimitNOFILE=131072
 LimitCORE=infinity
-WorkingDirectory={{ openshift.common.data_dir }}
+WorkingDirectory={{ r_openshift_master_data_dir }}
 SyslogIdentifier=atomic-openshift-master-api
 Restart=always
 RestartSec=5s

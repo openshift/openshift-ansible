@@ -10,5 +10,4 @@ galaxy_info:
     versions:
     - 7
 dependencies:
-- role: openshift_common
 - role: openshift_hosted_facts

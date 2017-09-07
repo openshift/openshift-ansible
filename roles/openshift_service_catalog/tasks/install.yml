@@ -28,7 +28,7 @@
 - name: Make kube-service-catalog project network global
   command: >
     oc adm pod-network make-projects-global kube-service-catalog
-  when: os_sdn_network_plugin_name | default('') == 'redhat/openshift-ovs-multitenant'
+  when: os_sdn_network_plugin_name == 'redhat/openshift-ovs-multitenant'
 
 - include: generate_certs.yml
 

@@ -24,4 +24,10 @@ r_openshift_loadbalancer_os_firewall_allow:
   port: "{{ openshift_master_api_port | default(8443) }}/tcp"
 - service: nuage mon
   port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
-  cond: "{{ openshift_use_nuage | default(false) | bool }}"
+  cond: "{{ r_openshift_lb_use_nuage | bool }}"
+
+# NOTE
+# r_openshift_lb_use_nuage_default may be defined external to this role.
+# openshift_use_nuage, if defined, may affect other roles or play behavior.
+r_openshift_lb_use_nuage_default: "{{ openshift_use_nuage | default(False) }}"
+r_openshift_lb_use_nuage: "{{ r_openshift_lb_use_nuage_default }}"

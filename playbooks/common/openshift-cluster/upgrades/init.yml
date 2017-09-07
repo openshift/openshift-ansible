@@ -4,7 +4,6 @@
     # Do not allow adding hosts during upgrade.
     g_new_master_hosts: []
     g_new_node_hosts: []
-    openshift_cluster_id: "{{ cluster_id | default('default') }}"
 
 - include: ../initialize_oo_option_facts.yml
 

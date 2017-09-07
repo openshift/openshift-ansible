@@ -37,15 +37,15 @@ masterClientConnectionOverrides:
   qps: 100
 {% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
-{% if openshift.common.use_openshift_sdn | bool %}
-networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% if openshift_node_use_openshift_sdn | bool %}
+networkPluginName: {{ openshift_node_sdn_network_plugin_name }}
 {% endif %}
 # networkConfig struct introduced in origin 1.0.6 and OSE 3.0.2 which
 # deprecates networkPluginName above. The two should match.
 networkConfig:
    mtu: {{ openshift.node.sdn_mtu }}
-{% if openshift.common.use_openshift_sdn | bool or openshift.common.use_nuage | bool or openshift.common.use_contiv | bool or openshift.common.sdn_network_plugin_name == 'cni' %}
-   networkPluginName: {{ openshift.common.sdn_network_plugin_name }}
+{% if openshift_node_use_openshift_sdn | bool or openshift_node_use_nuage | bool or openshift_node_use_contiv | bool or openshift_node_sdn_network_plugin_name == 'cni' %}
+   networkPluginName: {{ openshift_node_sdn_network_plugin_name }}
 {% endif %}
 {% if openshift.node.set_node_ip | bool %}
 nodeIP: {{ openshift.common.ip }}
@@ -66,7 +66,7 @@ servingInfo:
   - {{ cipher_suite }}
 {% endfor %}
 {% endif %}
-volumeDirectory: {{ openshift.common.data_dir }}/openshift.local.volumes
+volumeDirectory: {{ openshift_node_data_dir }}/openshift.local.volumes
 proxyArguments:
   proxy-mode:
      - {{ openshift.node.proxy_mode }}

@@ -26,7 +26,7 @@
   - name: Install OpenvSwitch system containers
     include: openvswitch_system_container.yml
     when:
-    - openshift.common.use_openshift_sdn | default(true) | bool
+    - openshift_node_use_openshift_sdn | bool
     - openshift.common.is_openvswitch_system_container | bool
 
 - block:
@@ -39,7 +39,7 @@
   - include: config/install-ovs-docker-service-file.yml
   when:
   - openshift.common.is_containerized | bool
-  - openshift.common.use_openshift_sdn | default(true) | bool
+  - openshift_node_use_openshift_sdn | bool
   - not openshift.common.is_openvswitch_system_container | bool
 
 - include: config/configure-node-settings.yml

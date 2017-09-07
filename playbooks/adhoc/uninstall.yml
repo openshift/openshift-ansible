@@ -35,11 +35,9 @@
     - /etc/dnsmasq.d/origin-upstream-dns.conf
     - /etc/dnsmasq.d/openshift-ansible.conf
     - /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
-    when: openshift_use_dnsmasq | default(true) | bool
   - service:
       name: NetworkManager
       state: restarted
-    when: openshift_use_dnsmasq | default(true) | bool
   - name: Stop services
     service: name={{ item }} state=stopped
     with_items:

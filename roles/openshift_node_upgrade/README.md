@@ -32,14 +32,12 @@ From openshift.common:
 | Name                               |  Default Value      |                     |
 |------------------------------------|---------------------|---------------------|
 | openshift.common.config_base       |---------------------|---------------------|
-| openshift.common.data_dir          |---------------------|---------------------|
 | openshift.common.hostname          |---------------------|---------------------|
 | openshift.common.http_proxy        |---------------------|---------------------|
 | openshift.common.is_atomic         |---------------------|---------------------|
 | openshift.common.is_containerized  |---------------------|---------------------|
 | openshift.common.portal_net        |---------------------|---------------------|
 | openshift.common.service_type      |---------------------|---------------------|
-| openshift.common.use_openshift_sdn |---------------------|---------------------|
 
 From openshift.master:
 
@@ -58,7 +56,7 @@ From openshift.node:
 
 Dependencies
 ------------
-openshift_common
+
 
 TODO
 

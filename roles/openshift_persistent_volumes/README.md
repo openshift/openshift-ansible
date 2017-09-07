@@ -17,13 +17,6 @@ From this role:
 | persistent_volume_claims | []            | List of persistent volume claim dictionaries, keys: name, capacity, access_modes    |
 
 
-From openshift_common:
-
-| Name                          | Default Value  |                                        |
-|-------------------------------|----------------|----------------------------------------|
-| openshift_debug_level         | 2              | Global openshift debug log verbosity   |
-
-
 Dependencies
 ------------
 
