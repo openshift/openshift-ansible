@@ -284,7 +284,7 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
                                           'playbooks/byo/openshift-node/scaleup.yml')
     else:
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
-                                          'playbooks/byo/openshift-cluster/config.yml')
+                                          'playbooks/byo/config.yml')
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
