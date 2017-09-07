@@ -1,15 +1,12 @@
 ---
 openshift_deployment_type: origin
-openshift_release: 1.5.1
 #openshift_deployment_type: openshift-enterprise
 #openshift_release: v3.5
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 
-#openshift_cluster_node_labels:
-#  app:
-#    region: primary
-#  infra:
-#    region: infra
+openshift_master_cluster_method: native
+openshift_master_cluster_hostname: "{{ groups.lb.0|default(groups.masters.0) }}"
+openshift_master_cluster_public_hostname: "{{ groups.lb.0|default(groups.masters.0) }}"
 
 osm_default_node_selector: 'region=primary'
 

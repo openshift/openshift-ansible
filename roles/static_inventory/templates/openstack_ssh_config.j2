@@ -1,0 +1,21 @@
+Host *
+    IdentitiesOnly yes
+
+Host bastion
+    Hostname {{ hostvars['bastion'].ansible_host }}
+    IdentityFile {{ hostvars['bastion'].ansible_private_key_file }}
+    User {{ ssh_user }}
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+
+{% for host in groups['all'] | difference(groups['bastions'][0]) %}
+
+Host {{ host }}
+    Hostname {{ hostvars[host].ansible_host }}
+    ProxyCommand {{ ssh_proxy_command  }} -W {{ hostvars[host].private_v4 }}:22
+    IdentityFile {{ hostvars[host].ansible_private_key_file }}
+    User {{ ssh_user }}
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+
+{% endfor %}

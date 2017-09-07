@@ -4,7 +4,11 @@
   become: False
   gather_facts: False
   tasks:
-    - wait_for_connection:
+    - when: not openstack_use_bastion|default(False)|bool
+      wait_for_connection:
+    - when: openstack_use_bastion|default(False)|bool
+      delegate_to: bastion
+      wait_for_connection:
 
 - hosts: cluster_hosts
   gather_facts: True
@@ -21,8 +25,6 @@
   hosts: cluster_hosts
   gather_facts: False
   become: true
-  pre_tasks:
-    - include: pre_tasks.yml
   roles:
     - role: hostnames
 
@@ -46,22 +48,16 @@
   hosts: dns
   gather_facts: False
   become: true
-  pre_tasks:
-    - include: pre_tasks.yml
-    - name: "Generate dns-server views"
-      include: openstack_dns_views.yml
   roles:
+    - role: dns-views
     - role: infra-ansible/roles/dns-server
 
 - name: Build and process DNS Records
   hosts: localhost
   gather_facts: True
   become: False
-  pre_tasks:
-    - include: pre_tasks.yml
-    - name: "Generate dns records"
-      include: openstack_dns_records.yml
   roles:
+    - role: dns-records
     - role: infra-ansible/roles/dns
 
 - name: Switch the stack subnet to the configured private DNS server

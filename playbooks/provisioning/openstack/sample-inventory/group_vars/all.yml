@@ -3,18 +3,63 @@ env_id: "openshift"
 public_dns_domain: "example.com"
 public_dns_nameservers: []
 
+# # Used Hostnames
+# # - set custom hostnames for roles by uncommenting corresponding lines
+#openstack_master_hostname: "master"
+#openstack_infra_hostname: "infra-node"
+#openstack_node_hostname: "app-node"
+#openstack_lb_hostname: "lb"
+#openstack_etcd_hostname: "etcd"
+#openstack_dns_hostname: "dns"
+
 openstack_ssh_public_key: "openshift"
-openstack_default_image_name: "centos7"
-openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "public"
+#openstack_private_network_name:  "openshift-ansible-{{ stack_name }}-net"
+
+## If you want to use a provider network, set its name here.
+## NOTE: the `openstack_external_network_name` and
+## `openstack_private_network_name` options will be ignored when using a
+## provider network.
+#openstack_provider_network_name: "provider"
+
+# # Used Images
+# # - set specific images for roles by uncommenting corresponding lines
+# # - note: do not remove openstack_default_image_name definition
+#openstack_master_image_name: "centos7"
+#openstack_infra_image_name: "centos7"
+#openstack_node_image_name: "centos7"
+#openstack_lb_image_name: "centos7"
+#openstack_etcd_image_name: "centos7"
+#openstack_dns_image_name: "centos7"
+openstack_default_image_name: "centos7"
 
 openstack_num_masters: 1
 openstack_num_infra: 1
 openstack_num_nodes: 2
 
+# # Used Flavors
+# # - set specific flavors for roles by uncommenting corresponding lines
+# # - note: do note remove openstack_default_flavor definition
+#openstack_master_flavor: "m1.medium"
+#openstack_infra_flavor: "m1.medium"
+#openstack_node_flavor: "m1.medium"
+#openstack_lb_flavor: "m1.medium"
+#openstack_etcd_flavor: "m1.medium"
+#openstack_dns_flavor: "m1.medium"
+openstack_default_flavor: "m1.medium"
+
 # # Numerical index of nodes to remove
 # openstack_nodes_to_remove: []
 
+# # Docker volume size
+# # - set specific volume size for roles by uncommenting corresponding lines
+# # - note: do not remove docker_default_volume_size definition
+#docker_master_volume_size: "15"
+#docker_infra_volume_size: "15"
+#docker_node_volume_size: "15"
+#docker_etcd_volume_size: "2"
+#docker_dns_volume_size: "1"
+#docker_lb_volume_size: "5"
 docker_volume_size: "15"
 
 openstack_subnet_prefix: "192.168.99"
@@ -53,6 +98,10 @@ rhsm_register: False
 #    key_algorithm: 'hmac-md5'
 #    server: '192.168.1.2'
 
+# # Customize DNS server security options
+#named_public_recursion: 'no'
+#named_private_recursion: 'yes'
+
 
 # NOTE(shadower): Do not change this value. The Ansible user is currently
 # hardcoded to `openshift`.
@@ -69,5 +118,26 @@ ansible_user: openshift
 # # The path to checkpoint the static inventory from the in-memory one
 #openstack_inventory_path: ../../../../inventory
 
+# # Use bastion node to access cluster nodes (Defaults to False).
+# # Requires a static inventory.
+#openstack_use_bastion: False
+#bastion_ingress_cidr: "{{openstack_subnet_prefix}}.0/24"
+#
 # # The Nova key-pair's private SSH key to access inventory nodes
 #openstack_private_ssh_key: ~/.ssh/openshift
+# # The path for the SSH config to access all nodes
+#openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.{{ env_id }}.{{ public_dns_domain }}
+
+
+# If you want to use the VM storage instead of Cinder volumes, set this to `true`.
+# NOTE: this is for testing only! Your data will be gone once the VM disappears!
+# ephemeral_volumes: false
+
+# # OpenShift node labels
+# # - in order to customise node labels for app and/or infra group, set the
+# #   openshift_cluster_node_labels variable
+#openshift_cluster_node_labels:
+#  app:
+#    region: primary
+#  infra:
+#    region: infra

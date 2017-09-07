@@ -1,6 +1,6 @@
 heat_template_version: 2016-10-14
 
-description: OpenShift cluster server
+description: OpenShift cluster server w/o floating IP
 
 parameters:
 
@@ -61,24 +61,15 @@ parameters:
     label: Net name
     description: Net name
 
-{% if not provider_network %}
   subnet:
     type: string
     label: Subnet ID
     description: Subnet resource
-{% endif %}
 
   secgrp:
     type: comma_delimited_list
     label: Security groups
     description: Security group resources
-
-{% if not provider_network %}
-  floating_network:
-    type: string
-    label: Floating network
-    description: Network to allocate floating IP from
-{% endif %}
 
   availability_zone:
     type: string
@@ -102,35 +93,21 @@ outputs:
 
   name:
     description: Name of the server
-    value: { get_attr: [ server, name ] }
+    value: { get_attr: [ server_nofloating, name ] }
 
   private_ip:
     description: Private IP of the server
     value:
       get_attr:
-        - server
+        - server_nofloating
         - addresses
         - { get_param: net_name }
         - 0
-        - addr
-
-  floating_ip:
-    description: Floating IP of the server
-    value:
-      get_attr:
-        - server
-        - addresses
-        - { get_param: net_name }
-{% if provider_network %}
-        - 0
-{% else %}
-        - 1
-{% endif %}
         - addr
 
 resources:
 
-  server:
+  server_nofloating:
     type: OS::Nova::Server
     properties:
       name:      { get_param: name }
@@ -155,19 +132,9 @@ resources:
     type: OS::Neutron::Port
     properties:
       network: { get_param: net }
-{% if not provider_network %}
       fixed_ips:
         - subnet: { get_param: subnet }
-{% endif %}
       security_groups: { get_param: secgrp }
-
-{% if not provider_network %}
-  floating-ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network: { get_param: floating_network }
-      port_id: { get_resource: port }
-{% endif %}
 
 {% if not ephemeral_volumes|default(false)|bool %}
   cinder_volume:
@@ -180,6 +147,6 @@ resources:
     type: OS::Cinder::VolumeAttachment
     properties:
       volume_id: { get_resource: cinder_volume }
-      instance_uuid: { get_resource: server }
+      instance_uuid: { get_resource: server_nofloating }
       mountpoint: /dev/sdb
 {% endif %}

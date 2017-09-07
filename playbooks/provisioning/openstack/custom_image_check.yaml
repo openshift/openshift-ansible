@@ -1,0 +1,9 @@
+---
+- name: Try to get image facts
+  os_image_facts:
+    image: "{{ image }}"
+  register: image_result
+- name: Check that custom image is available
+  assert:
+    that: "image_result.ansible_facts.openstack_image"
+    msg: "Image {{ image }} is not available."

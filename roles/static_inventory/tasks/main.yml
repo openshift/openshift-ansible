@@ -4,3 +4,14 @@
 
 - name: Checkpoint in-memory data into a static inventory
   include: checkpoint.yml
+
+- name: Generate SSH config for accessing hosts via bastion
+  include: sshconfig.yml
+  when: use_bastion|bool
+
+- name: Configure SSH tunneling to access UI
+  include: sshtun.yml
+  become: true
+  when:
+    - use_bastion|bool
+    - ui_ssh_tunnel|bool

@@ -31,3 +31,19 @@
   delegate_to: localhost
   when:
   - openshift_master_default_subdomain is undefined
+
+# Check that openshift_cluster_node_labels has regions defined for all groups
+# NOTE(kpilatov): if node labels are to be enabled for more groups,
+#                 this check needs to be modified as well
+- name: Set openshift_cluster_node_labels if undefined (should not happen)
+  set_fact:
+    openshift_cluster_node_labels: {'app': {'region': 'primary'}, 'infra': {'region': 'infra'}}
+  when: openshift_cluster_node_labels is not defined
+
+- name: Set openshift_cluster_node_labels for the infra group
+  set_fact:
+    openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'infra': {'region': 'infra'}}, recursive=True) }}"
+
+- name: Set openshift_cluster_node_labels for the app group
+  set_fact:
+    openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'app': {'region': 'primary'}}, recursive=True) }}"
