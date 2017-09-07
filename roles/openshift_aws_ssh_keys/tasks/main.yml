@@ -1,8 +1,0 @@
----
-- name: Add the public keys for the users
-  ec2_key:
-    name: "{{ item.key_name }}"
-    key_material: "{{ item.pub_key }}"
-    region: "{{ r_openshift_aws_ssh_keys_region }}"
-  with_items: "{{ r_openshift_aws_ssh_keys_users }}"
-  no_log: True

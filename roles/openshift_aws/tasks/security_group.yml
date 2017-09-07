@@ -1,0 +1,45 @@
+---
+- name: Fetch the VPC for the vpc.id
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_clusterid }}"
+  register: vpcout
+
+- name: Create default security group for cluster
+  ec2_group:
+    name: "{{ openshift_aws_node_security_groups.default.name }}"
+    description: "{{ openshift_aws_node_security_groups.default.desc }}"
+    region: "{{ openshift_aws_region }}"
+    vpc_id: "{{ vpcout.vpcs[0].id }}"
+    rules: "{{ openshift_aws_node_security_groups.default.rules | default(omit, True)}}"
+  register: sg_default_created
+
+- name: create the node group sgs
+  ec2_group:
+    name: "{{ item.name}}"
+    description: "{{ item.desc }}"
+    rules: "{{ item.rules if 'rules' in item else [] }}"
+    region: "{{ openshift_aws_region }}"
+    vpc_id: "{{ vpcout.vpcs[0].id }}"
+  register: sg_create
+  with_items:
+  - "{{ openshift_aws_node_security_groups[openshift_aws_node_group_type]}}"
+
+- name: create the k8s sgs for the node group
+  ec2_group:
+    name: "{{ item.name }}_k8s"
+    description: "{{ item.desc }} for k8s"
+    region: "{{ openshift_aws_region }}"
+    vpc_id: "{{ vpcout.vpcs[0].id }}"
+  register: k8s_sg_create
+  with_items:
+  - "{{ openshift_aws_node_security_groups[openshift_aws_node_group_type]}}"
+
+- name: tag sg groups with proper tags
+  ec2_tag:
+    tags:
+      KubernetesCluster: "{{ openshift_aws_clusterid }}"
+    resource: "{{ item.group_id }}"
+    region: "{{ openshift_aws_region }}"
+  with_items: "{{ k8s_sg_create.results }}"

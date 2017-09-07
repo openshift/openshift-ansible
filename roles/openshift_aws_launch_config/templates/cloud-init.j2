@@ -1,9 +1,0 @@
-{% if r_openshift_aws_launch_config_bootstrap_token is defined and r_openshift_aws_launch_config_bootstrap_token is not '' %}
-#cloud-config
-write_files:
-- path: /root/csr_kubeconfig
-  owner: root:root
-  permissions: '0640'
-  content: |-
-  {{ r_openshift_aws_launch_config_bootstrap_token }}
-{% endif %}

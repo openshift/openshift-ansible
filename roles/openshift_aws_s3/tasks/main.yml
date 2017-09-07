@@ -1,6 +1,0 @@
----
-- name: Create an s3 bucket
-  s3:
-    bucket: "{{ r_openshift_aws_s3_clusterid }}"
-    mode: "{{ r_openshift_aws_s3_mode }}"
-    region: "{{ r_openshift_aws_s3_region }}"
