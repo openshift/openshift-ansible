@@ -1,3 +1,17 @@
+# TECH PREVIEW RELEASE NO LONGER SUPPORTED
+
+We are **no longer** accepting pull requests for changes to this role.
+
+As of 2017-09-06 **ALL ONGOING DEVELOPMENT** of the openshift-cfme
+role is taking place in the master branch of this repository.
+
+Please see the
+[CFME 4.6 README](https://github.com/openshift/openshift-ansible/blob/master/roles/openshift_cfme/README.md)
+for additional information and updates.
+
+# The following is old deprecated no longer supported content
+
+
 # OpenShift-Ansible - CFME Role
 
 # PROOF OF CONCEPT - Alpha Version
