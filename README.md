@@ -38,7 +38,7 @@ Follow this release pattern and you can't go wrong:
 | Origin/OCP    | OpenShift-Ansible version | openshift-ansible branch |
 | ------------- | ----------------- |----------------------------------|
 | 1.3 / 3.3          | 3.3               | release-1.3 |
-| 1.4 / 3.4          | 3.4               | releaes-1.4 |
+| 1.4 / 3.4          | 3.4               | release-1.4 |
 | 1.5 / 3.5          | 3.5               | release-1.5 |
 | 3.*X*         | 3.*X*             | release-3.x |
 
