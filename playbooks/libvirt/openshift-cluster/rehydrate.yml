@@ -1,0 +1,17 @@
+---
+- name: Rehydrate dormant OpenShift cluster
+  hosts: localhost
+  gather_facts: no
+  vars_files:
+  - vars.yml
+  vars:
+    os_libvirt_storage_pool: "{{ libvirt_storage_pool | default('images') }}"
+    os_libvirt_storage_pool_path: "{{ libvirt_storage_pool_path | default('/var/lib/libvirt/images') }}"
+    os_libvirt_network: "{{ libvirt_network | default('default') }}"
+    image_url: "{{ deployment_vars[deployment_type].image.url }}"
+    image_sha256: "{{ deployment_vars[deployment_type].image.sha256 }}"
+    image_name: "{{ deployment_vars[deployment_type].image.name }}"
+  tasks:
+  - include: tasks/configure_libvirt.yml
+
+
