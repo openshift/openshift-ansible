@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.30
+Version:        3.6.173.0.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.31-1
+- logging set memory request to limit (jcantril@redhat.com)
+- Notice: CFME 4.5 tech preview is no longer supported or accepting updates
+  (tbielawa@redhat.com)
+- skip openshift_cfme_nfs_server if not using nfs (sdw35@cornell.edu)
+- Change default CFME namespace to use reserved openshift- prefix
+  (tbielawa@redhat.com)
+- nfs only run if cloud_provider not defined (sdw35@cornell.edu)
+- openshift_cfme: add nfs directory support (fsimonce@redhat.com)
+- Backport updated ansible_syntax checks (rteague@redhat.com)
+- Update calico to v2.5 (djosborne10@gmail.com)
+- Add independent registry auth support (mgugino@redhat.com)
+- Fix missing space in calico ansible roles (djosborne10@gmail.com)
+- Missing space (kp@tigera.io)
+- Clean up Calico readme (djosborne10@gmail.com)
+- Bump calico to v2.4.1 (djosborne10@gmail.com)
+- Use sdn_cluster_network_cidr as default calico pool (djosborne10@gmail.com)
+
 * Wed Sep 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.30-1
 - 
 
