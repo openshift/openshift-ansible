@@ -1,8 +1,10 @@
 ---
 # Only check if docker upgrade is required if docker_upgrade is not
 # already set to False.
-- include: ../docker/upgrade_check.yml
-  when: docker_upgrade is not defined or docker_upgrade | bool and not openshift.common.is_atomic | bool
+- include: ../../docker/upgrade_check.yml
+  when:
+  - docker_upgrade is not defined or (docker_upgrade | bool)
+  - not (openshift.common.is_atomic | bool)
 
 # Additional checks for Atomic hosts:
 
