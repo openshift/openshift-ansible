@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.125.0%{?dist}
+Release:        0.125.1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,36 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 08 2017 Scott Dodson <sdodson@redhat.com> 3.7.0-0.125.1
+- Consolidating AWS roles and variables underneath openshift_aws role.
+  (kwoodson@redhat.com)
+- Fix README.md typo (mgugino@redhat.com)
+- Fixing variables and allowing custom ami. (kwoodson@redhat.com)
+- Remove openshift-common (mgugino@redhat.com)
+- Fix openshift_master_config_dir (sdodson@redhat.com)
+- remove experimental-cri flag from node config (sjenning@redhat.com)
+- cri-o: Split RHEL and CentOS images (smilner@redhat.com)
+- openshift_checks aos_version: also check installed under yum
+  (lmeyer@redhat.com)
+- Create ansible role for deploying prometheus on openshift (zgalor@redhat.com)
+- Fix: set openshift_master_config_dir to the correct value.
+  (mgugino@redhat.com)
+- Bump ansible requirement to 2.3 (sdodson@redhat.com)
+- Move master additional config out of base (rteague@redhat.com)
+- Import dnf only if importing yum fails (jhadvig@redhat.com)
+- output skopeo image check command (nakayamakenjiro@gmail.com)
+- skip openshift_cfme_nfs_server if not using nfs (sdw35@cornell.edu)
+- bug 1487573. Bump the allowed ES versions (jcantril@redhat.com)
+- update env in etcd.conf.j2 to reflect the latest naming (jchaloup@redhat.com)
+- logging set memory request to limit (jcantril@redhat.com)
+- Use the proper pod subnet instead the services one (edu@redhat.com)
+- elasticsearch: reintroduce readiness probe (jwozniak@redhat.com)
+- cri-o: add support for additional registries (gscrivan@redhat.com)
+- reverse order between router cert generation (mewt.fr@gmail.com)
+- ensured to always use a certificate for the router (mewt.fr@gmail.com)
+- Adding proxy env vars for dc/docker-registry (kwoodson@redhat.com)
+- oc_atomic_container: support Skopeo output (gscrivan@redhat.com)
+
 * Tue Sep 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.125.0
 - 
 
