@@ -1,0 +1,24 @@
+---
+- name: gather some info
+  hosts: localhost
+
+  tasks:
+  - name: Look up docker registry url
+    shell: oc get service docker-registry --template \{\{.spec.portalIP\}\}
+    register: registry_ip_out
+
+  - set_fact:
+      registry_ip: "{{ registry_ip_out.stdout }}"
+
+- name: apply common configuration to all hosts
+  hosts: all
+  serial: 2
+  roles:
+    - docker
+
+- name: apply configuration to masters
+  hosts: master*
+  serial: 1
+  roles:
+    - master
+
