@@ -6,4 +6,4 @@
 
 - name: Include main action task file
   include: "{{ r_etcd_common_action }}.yml"
-  when: '"noop" not in r_etcd_common_action'
+  when: r_etcd_common_action != "noop"
