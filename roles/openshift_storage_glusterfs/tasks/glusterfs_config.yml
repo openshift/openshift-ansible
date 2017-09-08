@@ -5,6 +5,7 @@
     glusterfs_is_native: "{{ openshift_storage_glusterfs_is_native | bool }}"
     glusterfs_name: "{{ openshift_storage_glusterfs_name }}"
     glusterfs_nodeselector: "{{ openshift_storage_glusterfs_nodeselector | default(['storagenode', openshift_storage_glusterfs_name] | join('=')) | map_from_pairs }}"
+    glusterfs_use_default_selector: "{{ openshift_storage_glusterfs_use_default_selector }}"
     glusterfs_storageclass: "{{ openshift_storage_glusterfs_storageclass }}"
     glusterfs_image: "{{ openshift_storage_glusterfs_image }}"
     glusterfs_version: "{{ openshift_storage_glusterfs_version }}"
