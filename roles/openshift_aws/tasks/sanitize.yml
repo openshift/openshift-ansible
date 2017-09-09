@@ -4,7 +4,7 @@
     - openshift_aws_clusterid is defined
     - not openshift_aws_clusterid | match('[a-zA-Z][a-zA-Z0-9\-\.]*$')
   fail:
-    msg: |-
+    msg: >
       openshift_aws_clusterid is "{{ openshift_aws_clusterid }}" which is not 
       a valid cluster id.  Because AWS resource names are derived from 
       the clusterid, only letters, digits, '.', and '-' are allowed.
