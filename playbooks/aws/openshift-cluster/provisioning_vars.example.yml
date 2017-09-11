@@ -1,4 +1,6 @@
 ---
+# when creating an AMI set this option to True
+# when installing the cluster, set this to False
 openshift_node_bootstrap: True
 
 # specify a clusterid
