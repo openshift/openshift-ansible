@@ -6,8 +6,6 @@
   register: mktemp
   changed_when: False
 
-- include: wire_aggregator.yml
-
 - name: Set default image variables based on deployment_type
   include_vars: "{{ item }}"
   with_first_found:
