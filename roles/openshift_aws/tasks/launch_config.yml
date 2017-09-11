@@ -4,6 +4,11 @@
   when:
   - openshift_aws_ami is undefined
 
+- fail:
+    msg: "Ensure that openshift_deployment_type is defined."
+  when:
+  - openshift_deployment_type is undefined
+
 - name: query vpc
   ec2_vpc_net_facts:
     region: "{{ openshift_aws_region }}"
@@ -27,23 +32,7 @@
     image_id: "{{ openshift_aws_ami }}"
     instance_type: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].instance_type }}"
     security_groups: "{{ openshift_aws_launch_config_security_group_id  | default(ec2sgs.security_groups | map(attribute='group_id')| list) }}"
-    user_data: |-
-      #cloud-config
-      {%  if openshift_aws_node_group_type != 'master' %}
-      write_files:
-      - path: /root/csr_kubeconfig
-        owner: root:root
-        permissions: '0640'
-        content: {{ openshift_aws_launch_config_bootstrap_token | default('') | to_yaml }}
-      - path: /root/openshift_settings
-        owner: root:root
-        permissions: '0640'
-        content:
-          openshift_type: "{{ openshift_aws_node_group_type }}"
-      runcmd:
-      - [ systemctl, enable, atomic-openshift-node]
-      - [ systemctl, start, atomic-openshift-node]
-      {% endif %}
+    user_data: "{{ lookup('template', 'user_data.j2') }}"
     key_name: "{{ openshift_aws_ssh_key_name }}"
     ebs_optimized: False
     volumes: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].volumes }}"

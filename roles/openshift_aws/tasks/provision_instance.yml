@@ -1,4 +1,8 @@
 ---
+- name: set openshift_node_bootstrap to True when building AMI
+  set_fact:
+    openshift_node_bootstrap: True
+
 - name: query vpc
   ec2_vpc_net_facts:
     region: "{{ openshift_aws_region }}"
@@ -52,10 +56,6 @@
     host: "{{ instancesout.instances[0].public_ip_address }}"
     timeout: 300
     search_regex: OpenSSH
-
-- name: Pause 10 seconds to ensure ssh actually accepts logins
-  pause:
-    seconds: 20
 
 - name: add host to nodes
   add_host:

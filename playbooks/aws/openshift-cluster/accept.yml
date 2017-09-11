@@ -42,12 +42,12 @@
     until: "'instances' in instancesout and instancesout.instances|length > 0"
 
   - debug:
-      msg: "{{ instancesout.instances|map(attribute='private_dns_name') | list | regex_replace('.ec2.internal') }}"
+      msg: "{{ instancesout.instances|map(attribute='private_dns_name') | list }}"
 
   - name: approve nodes
     oc_adm_csr:
       #approve_all: True
-      nodes: "{{ instancesout.instances|map(attribute='private_dns_name') | list | regex_replace('.ec2.internal') }}"
-      timeout: 0
+      nodes: "{{ instancesout.instances|map(attribute='private_dns_name') | list  }}"
+      timeout: 60
     register: nodeout
     delegate_to: "{{ mastersout.instances[0].public_ip_address }}"

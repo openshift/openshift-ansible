@@ -2,13 +2,13 @@
 - name: normalize groups
   include: ../../byo/openshift-cluster/initialize_groups.yml
 
-- name: run the std_include
+- name: evaluate the groups
   include: ../openshift-cluster/evaluate_groups.yml
 
-- name: run the std_include
+- name: initialize the facts
   include: ../openshift-cluster/initialize_facts.yml
 
-- name: run the std_include
+- name: initialize the repositories
   include: ../openshift-cluster/initialize_openshift_repos.yml
 
 - name: run node config setup

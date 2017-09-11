@@ -17,17 +17,29 @@
       [Unit]
       After=cloud-init.service
 
-- name: update the sysconfig to have KUBECONFIG
+- name: update the sysconfig to have necessary variables
   lineinfile:
     dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
-    line: "KUBECONFIG=/root/csr_kubeconfig"
+    line: "{{ item.line | default(omit) }}"
+    regexp: "{{ item.regexp }}"
+    state: "{{ item.state | default('present') }}"
+  with_items:
+  # add the kubeconfig
+  - line: "KUBECONFIG=/etc/origin/node/csr_kubeconfig"
     regexp: "^KUBECONFIG=.*"
+  # remove the config file.  This comes from openshift_facts
+  - regexp: "^CONFIG_FILE=.*"
+    state: absent
 
-- name: update the ExecStart to have bootstrap
-  lineinfile:
-    dest: "/usr/lib/systemd/system/{{ openshift_service_type }}-node.service"
-    line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
-    regexp: "^ExecStart=.*"
+- name: include aws sysconfig credentials
+  include: aws.yml
+  static: yes
+
+#- name: update the ExecStart to have bootstrap
+#  lineinfile:
+#    dest: "/usr/lib/systemd/system/{{ openshift_service_type }}-node.service"
+#    line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
+#    regexp: "^ExecStart=.*"
 
 - name: "disable {{ openshift_service_type }}-node and {{ openshift_service_type }}-master services"
   systemd:
@@ -42,6 +54,30 @@
     path: /etc/origin/.config_managed
   register: rpmgenerated_config
 
+- name: create directories for bootstrapping
+  file:
+    state: directory
+    dest: "{{ item }}"
+  with_items:
+  - /root/openshift_bootstrap
+  - /var/lib/origin/openshift.local.config
+  - /var/lib/origin/openshift.local.config/node
+  - "/etc/docker/certs.d/docker-registry.default.svc:5000"
+
+- name: laydown the bootstrap.yml file for on boot configuration
+  copy:
+    src: bootstrap.yml
+    dest: /root/openshift_bootstrap/bootstrap.yml
+
+- name: symlink master ca for docker-registry
+  file:
+    src: "{{ item }}"
+    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/{{ item | basename }}"
+    state: link
+    force: yes
+  with_items:
+  - /var/lib/origin/openshift.local.config/node/node-client-ca.crt
+
 - when: rpmgenerated_config.stat.exists
   block:
   - name: Remove RPM generated config files if present
@@ -50,6 +86,7 @@
       state: absent
     with_items:
     - master
+    - .config_managed
 
   # with_fileglob doesn't work correctly due to a few issues.
   # Could change this to fileglob when it gets fixed.
@@ -62,5 +99,7 @@
     file:
       path: "{{ item.path }}"
       state: absent
-    when: "'resolv.conf' not in item.path or 'node-dnsmasq.conf' not in item.path"
+    when:
+    - "'resolv.conf' not in item.path"
+    - "'node-dnsmasq.conf' not in item.path"
     with_items: "{{ find_results.files }}"

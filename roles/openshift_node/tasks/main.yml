@@ -66,15 +66,10 @@
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
     reload: yes
 
-- name: include bootstrap node config
-  include: bootstrap.yml
-  when: openshift_node_bootstrap
-
 - include: registry_auth.yml
 
 - name: include standard node config
   include: config.yml
-  when: not openshift_node_bootstrap
 
 #### Storage class plugins here ####
 - name: NFS storage plugin configuration
@@ -98,3 +93,7 @@
 
 - include: config/workaround-bz1331590-ovs-oom-fix.yml
   when: openshift_node_use_openshift_sdn | default(true) | bool
+
+- name: include bootstrap node config
+  include: bootstrap.yml
+  when: openshift_node_bootstrap

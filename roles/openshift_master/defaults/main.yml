@@ -54,3 +54,88 @@ r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_p
 
 openshift_master_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
 openshift_master_image_config_latest: "{{ openshift_master_image_config_latest_default }}"
+
+openshift_master_config_dir_default: "{{ (openshift.common.config_base | default('/etc/origin/master')) ~ '/master' }}"
+openshift_master_config_dir: "{{ openshift_master_config_dir_default }}"
+openshift_master_cloud_provider: "{{ openshift_cloudprovider_kind | default('aws') }}"
+
+openshift_master_node_config_networkconfig_mtu: 1450
+
+openshift_master_node_config_kubeletargs_cpu: 500m
+openshift_master_node_config_kubeletargs_mem: 512M
+
+openshift_master_bootstrap_enabled: False
+
+openshift_master_client_binary: "{{ openshift.common.client_binary if openshift is defined else 'oc' }}"
+
+openshift_master_config_imageconfig_format: "{{ oreg_url if oreg_url != '' else 'registry.access.redhat.com/openshift3/ose-${component}:${version}' }}"
+
+# these are for the default settings in a generated node-config.yaml
+openshift_master_node_config_default_edits:
+- key: nodeName
+  state: absent
+- key: dnsBindAddress
+  value: 127.0.0.1:53
+- key: dnsDomain
+  value: cluster.local
+- key: dnsRecursiveResolvConf
+  value: /etc/origin/node/resolv.conf
+- key: imageConfig.format
+  value: "{{ openshift_master_config_imageconfig_format }}"
+- key: kubeletArguments.cloud-config
+  value:
+  - "/etc/origin/cloudprovider/{{ openshift_master_cloud_provider }}.conf"
+- key: kubeletArguments.cloud-provider
+  value:
+  - "{{ openshift_master_cloud_provider }}"
+- key: kubeletArguments.kube-reserved
+  value:
+  - "cpu={{ openshift_master_node_config_kubeletargs_cpu }},memory={{ openshift_master_node_config_kubeletargs_mem }}"
+- key: kubeletArguments.system-reserved
+  value:
+  - "cpu={{ openshift_master_node_config_kubeletargs_cpu }},memory={{ openshift_master_node_config_kubeletargs_mem }}"
+- key: enable-controller-attach-detach
+  value:
+  - 'true'
+- key: networkConfig.mtu
+  value: 8951
+- key: networkConfig.networkPluginName
+  value: "{{ r_openshift_master_sdn_network_plugin_name }}"
+- key: networkPluginName
+  value: "{{ r_openshift_master_sdn_network_plugin_name }}"
+
+
+# We support labels for all nodes here
+openshift_master_node_config_kubeletargs_default_labels: []
+# We do support overrides for node group labels
+openshift_master_node_config_kubeletargs_master_labels: []
+openshift_master_node_config_kubeletargs_infra_labels: []
+openshift_master_node_config_kubeletargs_compute_labels: []
+
+openshift_master_node_config_master:
+  type: master
+  edits:
+  - key: kubeletArguments.node-labels
+    value: "{{ openshift_master_node_config_kubeletargs_default_labels |
+               union(openshift_master_node_config_kubeletargs_master_labels) |
+               union(['type=master']) }}"
+openshift_master_node_config_infra:
+  type: infra
+  edits:
+  - key: kubeletArguments.node-labels
+    value: "{{ openshift_master_node_config_kubeletargs_default_labels |
+               union(openshift_master_node_config_kubeletargs_infra_labels) |
+               union(['type=infra']) }}"
+openshift_master_node_config_compute:
+  type: compute
+  edits:
+  - key: kubeletArguments.node-labels
+    value: "{{ openshift_master_node_config_kubeletargs_default_labels |
+               union(openshift_master_node_config_kubeletargs_compute_labels) |
+               union(['type=compute']) }}"
+
+openshift_master_node_configs:
+- "{{ openshift_master_node_config_infra }}"
+- "{{ openshift_master_node_config_compute }}"
+
+openshift_master_bootstrap_namespace: openshift-node
