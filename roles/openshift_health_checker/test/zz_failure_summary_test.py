@@ -65,6 +65,21 @@ import pytest
             },
         ],
     ),
+    # if a failure contain an unhashable value, it will not be deduplicated
+    (
+        [
+            {
+                'host': 'master1',
+                'msg': {'unhashable': 'value'},
+            },
+        ],
+        [
+            {
+                'host': 'master1',
+                'msg': {'unhashable': 'value'},
+            },
+        ],
+    ),
 ])
 def test_deduplicate_failures(failures, deduplicated):
     assert deduplicate_failures(failures) == deduplicated
