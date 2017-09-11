@@ -100,17 +100,21 @@
         l_docker_image_prepend: "registry.fedoraproject.org/f25"
       when: ansible_distribution == 'Fedora'
 
-    # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
-    - name: Use a testing registry if requested
-      set_fact:
-        l_docker_image_prepend: "{{ openshift_docker_systemcontainer_image_registry_override }}"
-      when:
-        - openshift_docker_systemcontainer_image_registry_override is defined
-        - openshift_docker_systemcontainer_image_registry_override != ""
-
     - name: Set the full image name
       set_fact:
         l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+
+    # For https://github.com/openshift/openshift-ansible/pull/5354#issuecomment-328552959
+    - name: Use a specific image if requested
+      set_fact:
+        l_docker_image: "{{ openshift_docker_systemcontainer_image_override }}"
+      when:
+        - openshift_docker_systemcontainer_image_override is defined
+        - openshift_docker_systemcontainer_image_override != ""
+
+    # Be nice and let the user see the variable result
+    - debug:
+        var: l_docker_image
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
 - name: Pre-pull Container Engine System Container image
