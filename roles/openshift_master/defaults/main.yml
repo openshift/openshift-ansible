@@ -24,7 +24,7 @@ oreg_url: ''
 oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
 oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
-
+l_bind_docker_reg_auth: False
 
 # NOTE
 # r_openshift_master_*_default may be defined external to this role.
