@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.31
+Version:        3.6.173.0.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Sep 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.32-1
+- GlusterFS: Allow option to use or ignore default node selectors
+  (jarrpa@redhat.com)
+- elasticsearch: reintroduce readiness probe (jwozniak@redhat.com)
+
 * Fri Sep 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.31-1
 - logging set memory request to limit (jcantril@redhat.com)
 - Notice: CFME 4.5 tech preview is no longer supported or accepting updates
