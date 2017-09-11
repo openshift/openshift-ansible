@@ -12,5 +12,10 @@
   hosts: oo_all_hosts:!oo_first_master
   vars:
     openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
+  pre_tasks:
+  - set_fact:
+      openshift_pkg_version: -{{ openshift_version }}
+    when: openshift_pkg_version is not defined
+  - debug: msg="openshift_pkg_version set to {{ openshift_pkg_version }}"
   roles:
   - openshift_version
