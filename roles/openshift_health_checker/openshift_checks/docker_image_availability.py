@@ -139,10 +139,14 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     def local_images(self, images):
         """Filter a list of images and return those available locally."""
-        return [
-            image for image in images
-            if self.is_image_local(image)
-        ]
+        registries = self.known_docker_registries()
+        found_images = []
+        for image in images:
+            # docker could have the image name as-is or prefixed with any registry
+            imglist = [image] + [reg + "/" + image for reg in registries]
+            if self.is_image_local(imglist):
+                found_images.append(image)
+        return found_images
 
     def is_image_local(self, image):
         """Check if image is already in local docker index."""
@@ -151,7 +155,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     def known_docker_registries(self):
         """Build a list of docker registries available according to inventory vars."""
-        regs = list(self.get_var("openshift.docker.additional_registries"))
+        regs = list(self.get_var("openshift.docker.additional_registries", default=[]))
 
         deployment_type = self.get_var("openshift_deployment_type")
         if deployment_type == "origin" and "docker.io" not in regs:
