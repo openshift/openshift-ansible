@@ -119,7 +119,7 @@ openshift_release=v3.6
 # will be built off of the deployment type and ansible_distribution. Only
 # use this option if you are sure you know what you are doing!
 #openshift_docker_systemcontainer_image_override="registry.example.com/container-engine:latest"
-#openshift_crio_systemcontainer_image_registry_override="registry.example.com"
+#openshift_crio_systemcontainer_image_override="registry.example.com/cri-o:latest"
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 # Default value: "--log-driver=journald"
 #openshift_docker_options="-l warn --ipv6=false"

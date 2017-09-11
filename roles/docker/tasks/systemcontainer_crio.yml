@@ -108,17 +108,21 @@
         l_crio_image_name: "cri-o"
       when: ansible_distribution == "RedHat"
 
-    # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
-    - name: Use a testing registry if requested
-      set_fact:
-        l_crio_image_prepend: "{{ openshift_crio_systemcontainer_image_registry_override }}"
-      when:
-        - openshift_crio_systemcontainer_image_registry_override is defined
-        - openshift_crio_systemcontainer_image_registry_override != ""
-
     - name: Set the full image name
       set_fact:
         l_crio_image: "{{ l_crio_image_prepend }}/{{ l_crio_image_name }}:latest"
+
+    # For https://github.com/openshift/aos-cd-jobs/pull/624#pullrequestreview-61816548
+    - name: Use a specific image if requested
+      set_fact:
+        l_crio_image: "{{ openshift_crio_systemcontainer_image_override }}"
+      when:
+        - openshift_crio_systemcontainer_image_override is defined
+        - openshift_crio_systemcontainer_image_override != ""
+
+    # Be nice and let the user see the variable result
+    - debug:
+        var: l_crio_image
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
 - name: Pre-pull CRI-O System Container image
