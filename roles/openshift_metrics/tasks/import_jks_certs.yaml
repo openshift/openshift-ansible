@@ -41,7 +41,7 @@
     - hawkular-cassandra.crt
     - ca.crt
 
-  - local_action: command {{role_path}}/files/import_jks_certs.sh
+  - local_action: command "{{role_path}}/files/import_jks_certs.sh"
     environment:
       CERT_DIR: "{{local_tmp.stdout}}"
       METRICS_KEYSTORE_PASSWD: "{{metrics_keystore_password.content}}"
