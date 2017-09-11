@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.125.1%{?dist}
+Release:        0.126.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Sep 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.0
+- Fix rpm version logic for hosts (mgugino@redhat.com)
+- Revert back to hostnamectl and previous default of not setting hostname
+  (sdodson@redhat.com)
+- Correct include path to not follow symlink (rteague@redhat.com)
+- Fix include path for docker upgrade tasks (rteague@redhat.com)
+- Fix issue with etcd_common when using pre_upgrade tag (rteague@redhat.com)
+- inventory: Denote new required upgrade variables (smilner@redhat.com)
+- upgrade: Verify required network items are set (smilner@redhat.com)
+- ami build process calls openshift-node/config.yml (kwoodson@redhat.com)
+
 * Fri Sep 08 2017 Scott Dodson <sdodson@redhat.com> 3.7.0-0.125.1
 - Consolidating AWS roles and variables underneath openshift_aws role.
   (kwoodson@redhat.com)
