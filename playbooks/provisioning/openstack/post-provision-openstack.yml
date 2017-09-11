@@ -86,4 +86,7 @@
     - node-network-manager
 
 - include: prepare-and-format-cinder-volume.yaml
-  when: prepare_and_format_registry_volume|default(False)
+  when: >
+    prepare_and_format_registry_volume|default(False) or
+    (cinder_registry_volume is defined and
+      cinder_registry_volume.changed|default(False))
