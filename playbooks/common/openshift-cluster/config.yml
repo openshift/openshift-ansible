@@ -25,10 +25,11 @@
 - name: Set hostname
   hosts: oo_masters_to_config:oo_nodes_to_config
   tasks:
+  # TODO: switch back to hostname module once we depend on ansible-2.4
+  # https://github.com/ansible/ansible/pull/25906
   - name: Set hostname
-    hostname:
-      name: "{{ openshift.common.hostname }}"
-    when: openshift_set_hostname | default(True) | bool
+    command: "hostnamectl set-hostname {{ openshift.common.hostname }}"
+    when: openshift_set_hostname | default(false,true) | bool
 
 - include: ../openshift-etcd/config.yml
 
