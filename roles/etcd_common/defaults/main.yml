@@ -56,7 +56,7 @@ etcd_is_containerized: False
 etcd_is_thirdparty: False
 
 # etcd dir vars
-etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' if openshift.common.etcd_runtime != 'runc' else '/var/lib/etcd/etcd.etcd/' }}"
+etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' if r_etcd_common_etcd_runtime != 'runc' else '/var/lib/etcd/etcd.etcd/' }}"
 
 # etcd ports and protocols
 etcd_client_port: 2379
