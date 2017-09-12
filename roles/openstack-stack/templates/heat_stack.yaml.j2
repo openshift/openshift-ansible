@@ -193,8 +193,12 @@ resources:
           port_range_max: 4001
         - direction: ingress
           protocol: tcp
-          port_range_min: 8443
-          port_range_max: 8444
+          port_range_min: {{ openshift_master_api_port|default(8443) }}
+          port_range_max: {{ openshift_master_api_port|default(8443) }}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: {{ openshift_master_console_port|default(8443) }}
+          port_range_max: {{ openshift_master_console_port|default(8443) }}
         - direction: ingress
           protocol: tcp
           port_range_min: 8053
@@ -284,8 +288,12 @@ resources:
           port_range_max: 4001
         - direction: ingress
           protocol: tcp
-          port_range_min: 8443
-          port_range_max: 8444
+          port_range_min: {{ openshift_master_api_port|default(8443) }}
+          port_range_max: {{ openshift_master_api_port|default(8443) }}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: {{ openshift_master_console_port|default(8443) }}
+          port_range_max: {{ openshift_master_console_port|default(8443) }}
         - direction: ingress
           protocol: tcp
           port_range_min: 8053
