@@ -1,0 +1,75 @@
+---
+- hosts: localhost
+  gather_facts: False
+  become: False
+  tasks:
+  - set_fact:
+      cinder_volume: "{{ hostvars[groups.masters[0]].openshift_hosted_registry_storage_openstack_volumeID }}"
+      cinder_fs: "{{ hostvars[groups.masters[0]].openshift_hosted_registry_storage_openstack_filesystem }}"
+
+  - name: Attach the volume to the VM
+    os_server_volume:
+      state: present
+      server: "{{ groups['masters'][0] }}"
+      volume: "{{ cinder_volume }}"
+    register: volume_attachment
+
+  - set_fact:
+      attached_device: >-
+        {{ volume_attachment['attachments']|json_query("[?volume_id=='" + cinder_volume + "'].device | [0]") }}
+
+
+- hosts: masters[0]
+  gather_facts: False
+  become: True
+  tasks:
+  - name: Wait for the device to appear
+    wait_for: path={{ hostvars['localhost'].attached_device }}
+
+  - name: Create a temp directory for mounting the volume
+    tempfile:
+      prefix: cinder-volume
+      state: directory
+    register: cinder_mount_dir
+
+  - name: Format the device
+    filesystem:
+      fstype: "{{ openshift_hosted_registry_storage_openstack_filesystem }}"
+      dev: "{{ hostvars['localhost'].attached_device }}"
+
+  - name: Mount the device
+    mount:
+      name: "{{ cinder_mount_dir.path }}"
+      src: "{{ hostvars['localhost'].attached_device }}"
+      state: mounted
+      fstype: "{{ openshift_hosted_registry_storage_openstack_filesystem }}"
+
+  - name: Change mode on the filesystem
+    file:
+      path: "{{ cinder_mount_dir.path }}"
+      state: directory
+      recurse: true
+      mode: 0777
+
+  - name: Unmount the device
+    mount:
+      name: "{{ cinder_mount_dir.path }}"
+      src: "{{ hostvars['localhost'].attached_device }}"
+      state: absent
+      fstype: "{{ openshift_hosted_registry_storage_openstack_filesystem }}"
+
+  - name: Delete the temp directory
+    file:
+      name: "{{ cinder_mount_dir.path }}"
+      state: absent
+
+
+- hosts: localhost
+  gather_facts: False
+  become: False
+  tasks:
+  - name: Detach the volume from the VM
+    os_server_volume:
+      state: absent
+      server: "{{ groups['masters'][0] }}"
+      volume: "{{ cinder_volume }}"

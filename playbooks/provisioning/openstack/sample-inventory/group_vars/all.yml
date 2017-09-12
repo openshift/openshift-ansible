@@ -62,6 +62,13 @@ openstack_default_flavor: "m1.medium"
 #docker_lb_volume_size: "5"
 docker_volume_size: "15"
 
+## Set up a filesystem on the cinder volume specified in `OSEv3.yaml`.
+## You need to specify the file system and volume ID in OSEv3 via
+## `openshift_hosted_registry_storage_openstack_filesystem` and
+## `openshift_hosted_registry_storage_openstack_volumeID`.
+## WARNING: This will delete any data on the volume!
+#prepare_and_format_registry_volume: False
+
 openstack_subnet_prefix: "192.168.99"
 
 # # Red Hat subscription

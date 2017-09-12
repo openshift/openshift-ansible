@@ -84,3 +84,6 @@
         line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
   roles:
     - node-network-manager
+
+- include: prepare-and-format-cinder-volume.yaml
+  when: prepare_and_format_registry_volume|default(False)
