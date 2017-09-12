@@ -1,11 +1,9 @@
 ---
-# We have to add tuned-profiles in the same transaction otherwise we run into depsolving
-# problems because the rpms don't pin the version properly. This was fixed in 3.1 packaging.
 - when: not openshift.common.is_containerized | bool
   block:
   - name: Install Node package
     package:
-      name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }},tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+      name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
 
   - name: Install sdn-ovs package
