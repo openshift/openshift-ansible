@@ -10,6 +10,7 @@ import traceback
 from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
 from ansible.utils.color import stringc
+from ansible.module_utils.six import string_types
 
 
 FAILED_NO_MSG = u'Failed without returning a message.'
@@ -140,11 +141,19 @@ def deduplicate_failures(failures):
     Returns a new list of failures such that identical failures from different
     hosts are grouped together in a single entry. The relative order of failures
     is preserved.
+
+    If failures is unhashable, the original list of failures is returned.
     """
     groups = defaultdict(list)
     for failure in failures:
         group_key = tuple(sorted((key, value) for key, value in failure.items() if key != 'host'))
-        groups[group_key].append(failure)
+        try:
+            groups[group_key].append(failure)
+        except TypeError:
+            # abort and return original list of failures when failures has an
+            # unhashable type.
+            return failures
+
     result = []
     for failure in failures:
         group_key = tuple(sorted((key, value) for key, value in failure.items() if key != 'host'))
@@ -159,7 +168,10 @@ def format_failure(failure):
     """Return a list of pretty-formatted text entries describing a failure, including
     relevant information about it. Expect that the list of text entries will be joined
     by a newline separator when output to the user."""
-    host = u', '.join(failure['host'])
+    if isinstance(failure['host'], string_types):
+        host = failure['host']
+    else:
+        host = u', '.join(failure['host'])
     play = failure['play']
     task = failure['task']
     msg = failure['msg']
