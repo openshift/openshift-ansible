@@ -2,7 +2,7 @@
 - name: Backup etcd
   hosts: oo_etcd_hosts_to_backup
   roles:
-  - role: openshift_facts
+  - role: openshift_etcd_facts
   - role: etcd_common
     r_etcd_common_action: backup
     r_etcd_common_backup_tag: etcd_backup_tag
