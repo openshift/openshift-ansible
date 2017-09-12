@@ -8,6 +8,11 @@
 - name: Pre master upgrade - Upgrade all storage
   hosts: oo_first_master
   tasks:
+  # Ensure we have the right client tools before running
+  - include_role:
+      name: openshift_cli
+    when: openshift.common.is_containerized | bool
+
   - name: Upgrade all storage
     command: >
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
@@ -81,6 +86,11 @@
 
   - include: rpm_upgrade.yml component=master
     when: not openshift.common.is_containerized | bool
+
+  # Ensure the latest cli tools
+  - include_role:
+      name: openshift_cli
+    when: openshift.common.is_containerized | bool
 
   - include_vars: ../../../../roles/openshift_master_facts/vars/main.yml
 
