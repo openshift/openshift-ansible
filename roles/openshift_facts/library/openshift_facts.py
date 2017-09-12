@@ -1131,6 +1131,7 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'aws':
                     controller_args['cloud-provider'] = ['aws']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                    controller_args['disable-attach-detach-reconcile-sync'] = 'true'
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
