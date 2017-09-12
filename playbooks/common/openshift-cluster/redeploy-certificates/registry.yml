@@ -4,99 +4,83 @@
   vars:
   roles:
   - lib_openshift
+  #we need facts as we are including other role tasks
+  - openshift_master_facts
   tasks:
-  - name: Create temp directory for kubeconfig
-    command: mktemp -d /tmp/openshift-ansible-XXXXXX
-    register: mktemp
-    changed_when: false
-
-  - name: Copy admin client config(s)
-    command: >
-      cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
-    changed_when: false
-
-  - name: Determine if docker-registry exists
-    command: >
-      {{ openshift.common.client_binary }} get dc/docker-registry -o json
-      --config={{ mktemp.stdout }}/admin.kubeconfig
-      -n default
-    register: l_docker_registry_dc
-    failed_when: false
-    changed_when: false
 
   - set_fact:
-      docker_registry_env_vars: "{{ ((l_docker_registry_dc.stdout | from_json)['spec']['template']['spec']['containers'][0]['env']
-                                      | oo_collect('name'))
-                                      | default([]) }}"
-      docker_registry_secrets: "{{ ((l_docker_registry_dc.stdout | from_json)['spec']['template']['spec']['volumes']
-                                     | oo_collect('secret')
-                                     | oo_collect('secretName'))
-                                     | default([]) }}"
-    changed_when: false
-    when: l_docker_registry_dc.rc == 0
+      openshift_hosted_registry_namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+      openshift_hosted_router_create_certificate: True
+      openshift_hosted_registry_cert_expire_days: 730
+      openshift_hosted_registry_name: docker-registry
+      openshift_hosted_registry_volumes: []
+      openshift_hosted_registry_env_vars: {}
+      openshift_hosted_registry_force:
+      - False
+      openshift_hosted_registry_edits:
+      # These edits are being specified only to prevent 'changed' on rerun
+      - key: spec.strategy.rollingParams
+        value:
+          intervalSeconds: 1
+          maxSurge: "25%"
+          maxUnavailable: "25%"
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        action: put
 
-  # Replace dc/docker-registry environment variable certificate data if set.
-  - name: Update docker-registry environment variables
-    shell: >
-      {{ openshift.common.client_binary }} env dc/docker-registry
-      OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
-      OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-registry.crt)"
-      OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-registry.key)"
-      --config={{ mktemp.stdout }}/admin.kubeconfig
-      -n default
-    when: l_docker_registry_dc.rc == 0 and 'OPENSHIFT_CA_DATA' in docker_registry_env_vars and 'OPENSHIFT_CERT_DATA' in docker_registry_env_vars and 'OPENSHIFT_KEY_DATA' in docker_registry_env_vars
+  - name: Update registry environment variables when pushing via dns
+    set_fact:
+      openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'OPENSHIFT_DEFAULT_REGISTRY':'docker-registry.default.svc:5000'}) }}"
+    when: openshift_push_via_dns | default(false) | bool
+  
+  - name: Update registry proxy settings for dc/docker-registry
+    set_fact:
+      openshift_hosted_registry_env_vars: "{{ {'HTTPS_PROXY': (openshift.common.https_proxy | default('')),
+                                             'HTTP_PROXY':  (openshift.common.http_proxy  | default('')),
+                                             'NO_PROXY':    (openshift.common.no_proxy    | default(''))}
+                                           | combine(openshift_hosted_registry_env_vars) }}"
+    when: (openshift.common.https_proxy | default(False)) or (openshift.common.http_proxy | default('')) != ''
 
-  # Replace dc/docker-registry certificate secret contents if set.
-  - block:
-    - name: Retrieve registry service IP
-      oc_service:
-        namespace: default
-        name: docker-registry
-        state: list
-      register: docker_registry_service_ip
-      changed_when: false
+  - name: Update openshift_hosted facts for persistent volumes
+    set_fact:
+      openshift_hosted_registry_volumes: "{{ openshift_hosted_registry_volumes | union(pvc_volume_mounts) }}"
+    vars:
+      pvc_volume_mounts:
+      - name: registry-storage
+        type: persistentVolumeClaim
+        claim_name: "{{ openshift.hosted.registry.storage.volume.name }}-claim"
+    when:
+    - openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack', 'glusterfs']
 
-    - set_fact:
-        docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true)) }}"
-      changed_when: false
 
-    - name: Generate registry certificate
-      command: >
-        {{ openshift.common.client_binary }} adm ca create-server-cert
-        --signer-cert={{ openshift.common.config_base }}/master/ca.crt
-        --signer-key={{ openshift.common.config_base }}/master/ca.key
-        --signer-serial={{ openshift.common.config_base }}/master/ca.serial.txt
-        --config={{ mktemp.stdout }}/admin.kubeconfig
-        --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc,docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
-        --cert={{ openshift.common.config_base }}/master/registry.crt
-        --key={{ openshift.common.config_base }}/master/registry.key
-        {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
-        --expire-days={{ openshift_hosted_registry_cert_expire_days | default(730) }}
-        {% endif %}
-
-    - name: Update registry certificates secret
-      oc_secret:
-        kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
-        name: registry-certificates
-        namespace: default
-        state: present
-        files:
-        - name: registry.crt
-          path: "{{ openshift.common.config_base }}/master/registry.crt"
-        - name: registry.key
-          path: "{{ openshift.common.config_base }}/master/registry.key"
-      run_once: true
-    when: l_docker_registry_dc.rc == 0 and 'registry-certificates' in docker_registry_secrets and 'REGISTRY_HTTP_TLS_CERTIFICATE' in docker_registry_env_vars and 'REGISTRY_HTTP_TLS_KEY' in docker_registry_env_vars
-
+  - name: Include openshift_hosted role secure routing
+    include: roles/openshift_hosted/tasks/registry/secure.yml
+ 
   - name: Redeploy docker registry
-    command: >
-      {{ openshift.common.client_binary }} deploy dc/docker-registry
-      --latest
-      --config={{ mktemp.stdout }}/admin.kubeconfig
-      -n default
+    command: |
+      oc rollout latest {{ openshift_hosted_registry_name }} \
+                        --namespace {{ openshift_hosted_registry_namespace }} \
+                        --config {{ openshift.common.config_base }}/master/admin.kubeconfig
+    async: 600
+    poll: 15
+    failed_when: false
 
-  - name: Delete temp directory
-    file:
-      name: "{{ mktemp.stdout }}"
-      state: absent
-    changed_when: False
+  - name: Determine the latest version of the OpenShift registry deployment
+    command: |
+      {{ openshift.common.client_binary }} get deploymentconfig {{ openshift_hosted_registry_name }} \
+             --namespace {{ openshift_hosted_registry_namespace }} \
+             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
+             -o jsonpath='{ .status.latestVersion }'
+    register: openshift_hosted_registry_latest_version
+
+  - name: Sanity-check that the OpenShift registry rolled out correctly
+    command: |
+      {{ openshift.common.client_binary }} get replicationcontroller {{ openshift_hosted_registry_name }}-{{ openshift_hosted_registry_latest_version.stdout }} \
+             --namespace {{ openshift_hosted_registry_namespace }} \
+             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
+             -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
+    register: openshift_hosted_registry_rc_phase
+    until: "'Running' not in openshift_hosted_registry_rc_phase.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Failed' in openshift_hosted_registry_rc_phase.stdout"
