@@ -63,7 +63,7 @@ storage:
     keyfile: /etc/registry/gcs.json
 {%   endif -%}
 {%   if openshift_hosted_registry_storage_gcs_rootdirectory is defined %}
-    rootdirectory: {{ openshift_hosted_registry_storage_gcs_rootdirectory }}
+    rootdirectory: {{ openshift_hosted_registry_storage_gcs_rootdirectory | default('/registry') }}
 {%   endif -%}
 {% endif -%}
 auth:
