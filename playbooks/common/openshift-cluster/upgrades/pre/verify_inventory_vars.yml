@@ -5,9 +5,9 @@
   tasks:
   - fail:
       msg: >
-        This upgrade is only supported for origin, openshift-enterprise, and online
+        This upgrade is only supported for origin and openshift-enterprise
         deployment types
-    when: deployment_type not in ['origin','openshift-enterprise', 'online']
+    when: deployment_type not in ['origin','openshift-enterprise']
 
   # Error out in situations where the user has older versions specified in their
   # inventory in any of the openshift_release, openshift_image_tag, and

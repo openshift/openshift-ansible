@@ -35,7 +35,9 @@
     file:
       path: "/etc/origin/{{ item }}"
       state: absent
-    when: rpmgenerated_config.stat.exists == true and deployment_type in ['openshift-enterprise', 'atomic-enterprise']
+    when:
+    - rpmgenerated_config.stat.exists == true
+    - deployment_type == 'openshift-enterprise'
     with_items:
     - master
     - node

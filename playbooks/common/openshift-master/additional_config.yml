@@ -17,7 +17,10 @@
   - role: openshift_manageiq
     when: openshift_use_manageiq | default(false) | bool
   - role: cockpit
-    when: not openshift.common.is_atomic and ( deployment_type in ['atomic-enterprise','openshift-enterprise'] ) and
-      (osm_use_cockpit | bool or osm_use_cockpit is undefined ) and ( openshift.common.deployment_subtype != 'registry' )
+    when:
+    - openshift.common.is_atomic
+    - deployment_type == 'openshift-enterprise'
+    - osm_use_cockpit is undefined or osm_use_cockpit | bool
+    - openshift.common.deployment_subtype != 'registry'
   - role: flannel_register
     when: openshift_use_flannel | default(false) | bool

@@ -55,7 +55,7 @@
         config: "{{ filename }}"
       from_literal:
         foo: notbar
-        deployment_type: online
+        deployment_type: openshift-enterprise
 
   - name: fetch the updated configmap
     oc_configmap:
@@ -70,7 +70,7 @@
     assert:
       that:
       - cmout.results.results[0].metadata.name == 'configmaptest'
-      - cmout.results.results[0].data.deployment_type == 'online'
+      - cmout.results.results[0].data.deployment_type == 'openshift-enterprise'
       - cmout.results.results[0].data.foo == 'notbar'
   ###### end update test ###########
 

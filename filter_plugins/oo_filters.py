@@ -877,10 +877,8 @@ def oo_pods_match_component(pods, deployment_type, component):
         raise errors.AnsibleFilterError("failed expects component to be a string")
 
     image_prefix = 'openshift/origin-'
-    if deployment_type in ['enterprise', 'online', 'openshift-enterprise']:
+    if deployment_type == 'openshift-enterprise':
         image_prefix = 'openshift3/ose-'
-    elif deployment_type == 'atomic-enterprise':
-        image_prefix = 'aep3_beta/aep-'
 
     matching_pods = []
     image_regex = image_prefix + component + r'.*'

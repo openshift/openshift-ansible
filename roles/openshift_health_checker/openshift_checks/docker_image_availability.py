@@ -109,8 +109,6 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # containerized etcd may not have openshift_image_tag, see bz 1466622
         image_tag = self.get_var("openshift_image_tag", default="latest")
         image_info = DEPLOYMENT_IMAGE_INFO[deployment_type]
-        if not image_info:
-            return required
 
         # template for images that run on top of OpenShift
         image_url = "{}/{}-{}:{}".format(image_info["namespace"], image_info["name"], "${component}", "${version}")
@@ -160,7 +158,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         deployment_type = self.get_var("openshift_deployment_type")
         if deployment_type == "origin" and "docker.io" not in regs:
             regs.append("docker.io")
-        elif "enterprise" in deployment_type and "registry.access.redhat.com" not in regs:
+        elif deployment_type == 'openshift-enterprise' and "registry.access.redhat.com" not in regs:
             regs.append("registry.access.redhat.com")
 
         return regs
