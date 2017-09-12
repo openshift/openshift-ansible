@@ -5,8 +5,8 @@ r_openshift_hosted_router_use_firewalld: "{{ os_firewall_use_firewalld | default
 r_openshift_hosted_registry_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_hosted_registry_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-openshift_hosted_router_wait: "{{ not openshift_master_bootstrap_enabled | default(True) }}"
-openshift_hosted_registry_wait: "{{ not openshift_master_bootstrap_enabled | default(True) }}"
+openshift_hosted_router_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
+openshift_hosted_registry_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
 
 registry_volume_claim: 'registry-claim'
 

@@ -94,7 +94,7 @@
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
 
-- when: openshift_hosted_router_wait == True
+- when: openshift_hosted_router_wait | bool
   block:
   - name: Ensure OpenShift router correctly rolls out (best-effort today)
     command: |
