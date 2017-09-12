@@ -118,7 +118,7 @@ openshift_release=v3.6
 # Force the registry to use for the container-engine/crio system container. By default the registry
 # will be built off of the deployment type and ansible_distribution. Only
 # use this option if you are sure you know what you are doing!
-#openshift_docker_systemcontainer_image_registry_override="registry.example.com"
+#openshift_docker_systemcontainer_image_override="registry.example.com/container-engine:latest"
 #openshift_crio_systemcontainer_image_registry_override="registry.example.com"
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 # Default value: "--log-driver=journald"
