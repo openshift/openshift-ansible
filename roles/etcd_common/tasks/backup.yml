@@ -29,7 +29,6 @@
 - name: Check current etcd disk usage
   shell: du --exclude='*openshift-backup*' -k {{ l_etcd_data_dir }} | tail -n 1 | cut -f1
   register: l_etcd_disk_usage
-  when: r_etcd_common_embedded_etcd | bool
   # AUDIT:changed_when: `false` because we are only inspecting
   # state, not manipulating anything
   changed_when: false
@@ -39,7 +38,7 @@
     msg: >
       {{ l_etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
       {{ l_avail_disk.stdout }} Kb available.
-  when: (r_etcd_common_embedded_etcd | bool) and (l_etcd_disk_usage.stdout|int > l_avail_disk.stdout|int)
+  when: l_etcd_disk_usage.stdout|int*2 > l_avail_disk.stdout|int
 
 # For non containerized and non embedded we should have the correct version of
 # etcd installed already. So don't do anything.
