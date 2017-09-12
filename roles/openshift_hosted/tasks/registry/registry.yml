@@ -137,7 +137,7 @@
     edits: "{{ openshift_hosted_registry_edits }}"
     force: "{{ True|bool in openshift_hosted_registry_force }}"
 
-- when: openshift_hosted_registry_wait
+- when: openshift_hosted_registry_wait == True
   block:
   - name: Ensure OpenShift registry correctly rolls out (best-effort today)
     command: |
