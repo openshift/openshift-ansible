@@ -10,7 +10,7 @@
       is invalid, must be one of: emptydir, pv, dynamic
   when:
   - openshift_metrics_cassandra_storage_type not in openshift_metrics_cassandra_storage_types
-  - "not {{ openshift_metrics_heapster_standalone | bool }}"
+  - not (openshift_metrics_heapster_standalone | bool)
 
 - name: list existing secrets
   command: >

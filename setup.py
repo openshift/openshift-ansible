@@ -48,6 +48,27 @@ def find_files(base_dir, exclude_dirs, include_dirs, file_regex):
     return found
 
 
+def recursive_search(search_list, field):
+    """
+    Takes a list with nested dicts, and searches all dicts for a key of the
+    field provided.  If the items in the list are not dicts, the items are not
+    processed.
+    """
+    fields_found = []
+
+    for item in search_list:
+        if isinstance(item, dict):
+            for key, value in item.items():
+                if key == field:
+                    fields_found.append(value)
+                elif isinstance(value, list):
+                    results = recursive_search(value, field)
+                    for result in results:
+                        fields_found.append(result)
+
+    return fields_found
+
+
 def find_entrypoint_playbooks():
     '''find entry point playbooks as defined by openshift-ansible'''
     playbooks = set()
@@ -248,37 +269,73 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         ''' finalize_options '''
         pass
 
+    def deprecate_jinja2_in_when(self, yaml_contents, yaml_file):
+        ''' Check for Jinja2 templating delimiters in when conditions '''
+        test_result = False
+        failed_items = []
+
+        search_results = recursive_search(yaml_contents, 'when')
+        for item in search_results:
+            if isinstance(item, str):
+                if '{{' in item or '{%' in item:
+                    failed_items.append(item)
+            else:
+                for sub_item in item:
+                    if '{{' in sub_item or '{%' in sub_item:
+                        failed_items.append(sub_item)
+
+        if len(failed_items) > 0:
+            print('{}Error: Usage of Jinja2 templating delimiters in when '
+                  'conditions is deprecated in Ansible 2.3.\n'
+                  '  File: {}'.format(self.FAIL, yaml_file))
+            for item in failed_items:
+                print('  Found: "{}"'.format(item))
+            print(self.ENDC)
+            test_result = True
+
+        return test_result
+
+    def deprecate_include(self, yaml_contents, yaml_file):
+        ''' Check for usage of include directive '''
+        test_result = False
+
+        search_results = recursive_search(yaml_contents, 'include')
+
+        if len(search_results) > 0:
+            print('{}Error: The `include` directive is deprecated in Ansible 2.4.\n'
+                  'https://github.com/ansible/ansible/blob/devel/CHANGELOG.md\n'
+                  '  File: {}'.format(self.FAIL, yaml_file))
+            for item in search_results:
+                print('  Found: "include: {}"'.format(item))
+            print(self.ENDC)
+            test_result = True
+
+        return test_result
+
     def run(self):
         ''' run command '''
 
         has_errors = False
 
         print('Ansible Deprecation Checks')
-        exclude_dirs = ['adhoc', 'files', 'meta', 'test', 'tests', 'vars', '.tox']
+        exclude_dirs = ['adhoc', 'files', 'meta', 'test', 'tests', 'vars', 'defaults', '.tox']
         for yaml_file in find_files(
                 os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
-                for task in yaml.safe_load(contents) or {}:
-                    if not isinstance(task, dict):
-                        # Skip yaml files which are not a dictionary of tasks
-                        continue
-                    if 'when' in task:
-                        if '{{' in task['when'] or '{%' in task['when']:
-                            print('{}Error: Usage of Jinja2 templating delimiters '
-                                  'in when conditions is deprecated in Ansible 2.3.\n'
-                                  '  File: {}\n'
-                                  '  Found: "{}"{}'.format(
-                                      self.FAIL, yaml_file,
-                                      task['when'], self.ENDC))
-                            has_errors = True
-                    # TODO (rteague): This test will be enabled once we move to Ansible 2.4
-                    # if 'include' in task:
-                    #     print('{}Error: The `include` directive is deprecated in Ansible 2.4.\n'
-                    #           'https://github.com/ansible/ansible/blob/devel/CHANGELOG.md\n'
-                    #           '  File: {}\n'
-                    #           '  Found: "include: {}"{}'.format(
-                    #               self.FAIL, yaml_file, task['include'], self.ENDC))
-                    #     has_errors = True
+                yaml_contents = yaml.safe_load(contents)
+                if not isinstance(yaml_contents, list):
+                    continue
+
+                # Check for Jinja2 templating delimiters in when conditions
+                result = self.deprecate_jinja2_in_when(yaml_contents, yaml_file)
+                has_errors = result or has_errors
+
+                # TODO (rteague): This test will be enabled once we move to Ansible 2.4
+                # result = self.deprecate_include(yaml_contents, yaml_file)
+                # has_errors = result or has_errors
+
+        if not has_errors:
+            print('...PASSED')
 
         print('Ansible Playbook Entry Point Syntax Checks')
         for playbook in find_entrypoint_playbooks():
