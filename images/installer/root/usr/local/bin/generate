@@ -263,8 +263,6 @@ def main():
     openshift_logging_image_version = user_config.get('openshift_logging_image_version')
     openshift_disable_check = user_config.get('openshift_disable_check')
 
-    openshift_cluster_user = user_config.get('openshift_cluster_user', 'developer')
-
     # extract host config info from parsed yaml file
     asset_config = y.get("assetConfig")
     master_config = y.get("kubernetesMasterConfig")
@@ -290,9 +288,9 @@ def main():
         oc.whoami()
     except OpenShiftClientError as err:
         msg = ("Unable to obtain user information using the provided kubeconfig file. "
-               "User '{}' does not appear to be logged in, or to have correct authorization. "
+               "Current context does not appear to be able to authenticate to the server. "
                "Error returned from server:\n\n{}")
-        print msg.format(openshift_cluster_user, str(err))
+        print msg.format(str(err))
         exit(1)
 
     # connect to remote host using the provided config and extract all possible node information

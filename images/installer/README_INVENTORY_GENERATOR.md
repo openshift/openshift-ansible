@@ -10,10 +10,6 @@ User configuration helps to provide additional details when creating an inventor
 The default location of this file is in `root/etc/inventory-generator-config.yaml`. The
 following configuration values are either expected or default to the given values when omitted:
 
-- `openshift_cluster_user`:
-  - username of account capable of listing nodes in a cluster
-  - used for querying the cluster using `oc` to retrieve additional node information.
-
 - `master_config_path`:
   - specifies where to look for the bind-mounted `master-config.yaml` file in the container
   - if omitted or a `null` value is given, its value is defaulted to `/opt/app-root/src/master-config.yaml`
@@ -40,7 +36,7 @@ See `README_CONTAINER_IMAGE.md` for information on building this image.
 
 Given a master node's `master-config.yaml` file, a user configuration file (see "Configure" section), and an `admin.kubeconfig` file, the command below will:
 
-1. Use `oc` to query the host about additional node information (using the supplied `kubeconfig` file and `openshift_cluster_user` value)
+1. Use `oc` to query the host about additional node information (using the supplied `kubeconfig` file)
 2. Generate an inventory file based on information retrieved from `oc get nodes` and the given `master-config.yaml` file.
 3. run the specified [openshift-ansible](https://github.com/openshift/openshift-ansible) `health.yml` playbook using the generated inventory file from the previous step
 
