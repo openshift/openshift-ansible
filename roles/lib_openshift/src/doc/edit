@@ -44,31 +44,6 @@ options:
     - The kind attribute of the object.
     required: True
     default: None
-    choices:
-    - bc
-    - buildconfig
-    - configmaps
-    - dc
-    - deploymentconfig
-    - imagestream
-    - imagestreamtag
-    - is
-    - istag
-    - namespace
-    - project
-    - projects
-    - node
-    - ns
-    - persistentvolume
-    - pv
-    - rc
-    - replicationcontroller
-    - routes
-    - scc
-    - secret
-    - securitycontextconstraints
-    - service
-    - svc
     aliases: []
   file_name:
     description:

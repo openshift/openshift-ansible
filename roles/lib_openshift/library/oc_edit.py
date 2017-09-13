@@ -95,31 +95,6 @@ options:
     - The kind attribute of the object.
     required: True
     default: None
-    choices:
-    - bc
-    - buildconfig
-    - configmaps
-    - dc
-    - deploymentconfig
-    - imagestream
-    - imagestreamtag
-    - is
-    - istag
-    - namespace
-    - project
-    - projects
-    - node
-    - ns
-    - persistentvolume
-    - pv
-    - rc
-    - replicationcontroller
-    - routes
-    - scc
-    - secret
-    - securitycontextconstraints
-    - service
-    - svc
     aliases: []
   file_name:
     description:
@@ -1556,20 +1531,7 @@ def main():
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
             name=dict(default=None, required=True, type='str'),
-            kind=dict(required=True,
-                      type='str',
-                      choices=['dc', 'deploymentconfig',
-                               'rc', 'replicationcontroller',
-                               'svc', 'service',
-                               'scc', 'securitycontextconstraints',
-                               'ns', 'namespace', 'project', 'projects',
-                               'is', 'imagestream',
-                               'istag', 'imagestreamtag',
-                               'bc', 'buildconfig',
-                               'routes',
-                               'node',
-                               'secret',
-                               'pv', 'persistentvolume']),
+            kind=dict(required=True, type='str'),
             file_name=dict(default=None, type='str'),
             file_format=dict(default='yaml', type='str'),
             content=dict(default=None, required=True, type='dict'),
