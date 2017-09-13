@@ -95,7 +95,7 @@
     - name: Set to default prepend
       set_fact:
         l_crio_image_prepend: "docker.io/gscrivano"
-        l_crio_image_name: "crio-o-fedora"
+        l_crio_image_name: "cri-o-fedora"
 
     - name: Use Centos based image when distribution is CentOS
       set_fact:
