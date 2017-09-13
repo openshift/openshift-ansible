@@ -4,7 +4,7 @@
   register: setup_storage
 
 - name: Copy heketi-storage list
-  shell: "{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
+  shell: "{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
 
 # This is used in the subsequent task
 - name: Copy the admin client config
