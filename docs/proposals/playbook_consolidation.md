@@ -125,37 +125,32 @@ openshift-ansible/playbooks/openshift-master
 - include: private/config.yml
 ```
 
-The following examples shows how multiple components would be combined to
-perform a complete install.
+With the consolidation of the directory structure and component installs being
+removed from `openshift-cluster`, that directory is no longer necessary.  To
+deploy an entire OpenShift cluster, a playbook would be created to tie together
+all of the different components.  The following example shows how multiple
+components would be combined to perform a complete install.
 
 ```yaml
-# openshift-ansible/playbooks/openshift-cluster/config.yml
+# openshift-ansible/playbooks/deploy_cluster.yml
 ---
-- include: ../init/main.yml
+- include: init/main.yml
 
-- include: private/config.yml
-```
+- include: openshift-etcd/private/config.yml
 
-```yaml
-# openshift-ansible/playbooks/openshift-cluster/private/config.yml
----
-- include: ../../openshift-etcd/private/config.yml
+- include: openshift-nfs/private/config.yml
 
-- include: ../../openshift-nfs/private/config.yml
+- include: openshift-loadbalancer/private/config.yml
 
-- include: ../../openshift-loadbalancer/private/config.yml
+- include: openshift-master/private/config.yml
 
-- include: ../../openshift-master/private/config.yml
+- include: openshift-node/private/config.yml
 
-- include: ../../openshift-node/private/config.yml
+- include: openshift-glusterfs/private/config.yml
 
-- include: ../../openshift-glusterfs/private/config.yml
+- include: openshift-hosted/private/config.yml
 
-- include: openshift_hosted.yml
-
-- include: service_catalog.yml
-  when:
-  - openshift_enable_service_catalog | default(false) | bool
+- include: openshift-service-catalog/private/config.yml
 ```
 
 ## User Story
