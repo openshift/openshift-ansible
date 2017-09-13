@@ -111,6 +111,7 @@ EOF
           echo "# nameserver updated by /etc/NetworkManager/dispatcher.d/99-origin-dns.sh" >> ${NEW_RESOLV_CONF}
       fi
       sed -e '/^nameserver.*$/d' /etc/resolv.conf >> ${NEW_RESOLV_CONF}
+      echo "search svc.cluster.local cluster.local" >> ${NEW_RESOLV_CONF}
       echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
       if ! grep -q 'search.*cluster.local' ${NEW_RESOLV_CONF}; then
         sed -i '/^search/ s/$/ cluster.local/' ${NEW_RESOLV_CONF}
