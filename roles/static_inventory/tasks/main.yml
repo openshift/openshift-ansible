@@ -1,4 +1,12 @@
 ---
+- name: Remove any existing inventory
+  file:
+    path: "{{ inventory_path }}/hosts"
+    state: absent
+
+- name: Refresh the inventory
+  meta: refresh_inventory
+
 - name: Generate in-memory inventory
   include: openstack.yml
 
