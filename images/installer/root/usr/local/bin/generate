@@ -82,22 +82,14 @@ class OpenShiftClient:
         """Execute a remote call using `oc`"""
         cmd = [
             self.oc,
+            '--config',
+            self.kubeconfig
         ] + shlex.split(cmd_str)
         try:
             out = subprocess.check_output(list(cmd), stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             raise OpenShiftClientError('[rc {}] {}\n{}'.format(err.returncode, ' '.join(err.cmd), err.output))
         return out
-
-    def login(self, host, user):
-        """Login using `oc` to the specified host.
-        Expects an admin.kubeconfig file to have been provided, and that
-        the kubeconfig file has a context stanza for the given user.
-        Although a password is not used, a placeholder is automatically
-        specified in order to prevent this script from "hanging" in the
-        event that no valid user stanza exists in the provided kubeconfig."""
-        call_cmd = 'login {host} -u {u} -p none --config {c}'
-        return self.call(call_cmd.format(host=host, u=user, c=self.kubeconfig))
 
     def whoami(self):
         """Retrieve information about the current user in the given kubeconfig"""
