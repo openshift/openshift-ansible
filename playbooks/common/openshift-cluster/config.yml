@@ -1,7 +1,7 @@
 ---
 # TODO: refactor this into its own include
 # and pass a variable for ctx
-- name: Verify Install Requirements
+- name: Verify Requirements
   hosts: oo_all_hosts
   roles:
   - openshift_health_checker
