@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.126.0%{?dist}
+Release:        0.126.1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Sep 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.1
+- Improve searching when conditions for Jinja2 delimiters (rteague@redhat.com)
+- container-engine: Allow full image override (smilner@redhat.com)
+- Add openshift_public_hostname length check (mgugino@redhat.com)
+- Skip failure dedup instead of crashing (rhcarvalho@gmail.com)
+- Properly quote "true" and "false" strings for include_granted_scopes.
+  (jpazdziora@redhat.com)
+- Fix new_master or new_node fail check (denverjanke@gmail.com)
+
 * Mon Sep 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.0
 - Fix rpm version logic for hosts (mgugino@redhat.com)
 - Revert back to hostnamectl and previous default of not setting hostname
