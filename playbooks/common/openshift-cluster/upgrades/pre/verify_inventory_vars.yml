@@ -22,7 +22,7 @@
         variables when upgrading. These variables should match what is currently used in the cluster. If
         you don't remember what these values are you can find them in /etc/origin/master/master-config.yaml
         on a master with the names clusterNetworkCIDR (osm_cluster_network_cidr),
-        osm_host_subnet_length (hostSubnetLength), and openshift_portal_net (hostSubnetLength).
+        hostSubnetLength (osm_host_subnet_length), and serviceNetworkCIDR (openshift_portal_net).
 
   # Error out in situations where the user has older versions specified in their
   # inventory in any of the openshift_release, openshift_image_tag, and
