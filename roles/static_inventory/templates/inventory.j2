@@ -46,7 +46,7 @@ lb
 
 # For OSEv3 normal group vars, see ./group_vars/OSEv3.yml
 
-{% if cinder_registry_volume is defined %}
+{% if cinder_registry_volume is defined and 'volume' in cinder_registry_volume %}
 openshift_hosted_registry_storage_openstack_volumeID="{{ cinder_registry_volume.id }}"
 openshift_hosted_registry_storage_volume_size="{{ cinder_registry_volume.volume.size }}Gi"
 {% endif %}
