@@ -305,18 +305,93 @@ In order to set a custom entrypoint, update `openshift_master_cluster_public_hos
 Note than an empty hostname does not work, so if your domain is `openshift.example.com`,
 you cannot set this value to simply `openshift.example.com`.
 
+### Creating and using a Cinder volume for the OpenShift registry
+
+You can optionally have the playbooks create a Cinder volume and set
+it up as the OpenShift hosted registry.
+
+To do that you need specify the desired Cinder volume name and size in
+Gigabytes in `inventory/group_vars/all.yml`:
+
+    cinder_hosted_registry_name: cinder-registry
+    cinder_hosted_registry_size_gb: 10
+
+With this, the playbooks will create the volume and set up its
+filesystem. If there is an existing volume of the same name, we will
+use it but keep the existing data on it.
+
+To use the volume for the registry, you must first configure it with
+the OpenStack credentials by putting the following to `OSEv3.yml`:
+
+    openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
+    openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
+    openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+    openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_TENANT_NAME') }}"
+
+This will use the credentials from your shell environment. If you want
+to enter them explicitly, you can. You can also use credentials
+different from the provisioning ones (say for quota or access control
+reasons).
+
+**NOTE**: If you're testing this on (DevStack)[devstack], you must
+explicitly set your Keystone API version to v2 (e.g.
+`OS_AUTH_URL=http://10.34.37.47/identity/v2.0`) instead of the default
+value provided by `openrc`. You may also encounter the following issue
+with Cinder:
+
+https://github.com/kubernetes/kubernetes/issues/50461
+
+You can read the (OpenShift documentation on configuring
+OpenStack)[openstack] for more information.
+
+[devstack]: https://docs.openstack.org/devstack/latest/
+[openstack]: https://docs.openshift.org/latest/install_config/configuring_openstack.html
+
+
+Next, we need to instruct OpenShift to use the Cinder volume for it's
+registry. Again in `OSEv3.yml`:
+
+    #openshift_hosted_registry_storage_kind: openstack
+    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
+    #openshift_hosted_registry_storage_openstack_filesystem: xfs
+
+The filesystem value here will be used in the initial formatting of
+the volume.
+
+
 ### Use an existing Cinder volume for the OpenShift registry
 
-You can optionally use an existing Cinder volume for the storage of
-your OpenShift registry.
+You can also use a pre-existing Cinder volume for the storage of your
+OpenShift registry.
 
-To do that, you need to have a Cinder volume (you can create one by
+To do that, you need to have a Cinder volume. You can create one by
 running:
 
     openstack volume create --size <volume size in gb> <volume name>
 
 The volume needs to have a file system created before you put it to
-use. We can do prepare it for you if you put this in inventory/group_vars/all.yml:
+use.
+
+As with the automatically-created volume, you have to set up the
+OpenStack credentials in `inventory/group_vars/OSEv3.yml` as well as
+registry values:
+
+    #openshift_hosted_registry_storage_kind: openstack
+    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
+    #openshift_hosted_registry_storage_openstack_filesystem: xfs
+    #openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
+    #openshift_hosted_registry_storage_volume_size: 10Gi
+
+Note the `openshift_hosted_registry_storage_openstack_volumeID` and
+`openshift_hosted_registry_storage_volume_size` values: these need to
+be added in addition to the previous variables.
+
+The **Cinder volume ID**, **filesystem** and **volume size** variables
+must correspond to the values in your volume. The volume ID must be
+the **UUID** of the Cinder volume, *not its name*.
+
+We can do formate the volume for you if you ask for it in
+`inventory/group_vars/all.yml`:
 
     prepare_and_format_registry_volume: true
 
@@ -329,58 +404,6 @@ You can also run the registry setup playbook directly:
 (the provisioning phase must be completed, first)
 
 
-To instruct OpenShift to actually use the volume, you must first configure it
-with the OpenStack credentials by putting the following to `OSEv3.yml`:
-
-    ## Openstack credentials
-    #openshift_cloudprovider_kind=openstack
-    #openshift_cloudprovider_openstack_auth_url=http://openstack.example.com:35357/v2.0/
-    #openshift_cloudprovider_openstack_username=username
-    #openshift_cloudprovider_openstack_password=password
-    #openshift_cloudprovider_openstack_domain_id=domain_id
-    #openshift_cloudprovider_openstack_domain_name=domain_name
-    #openshift_cloudprovider_openstack_tenant_id=tenant_id
-    #openshift_cloudprovider_openstack_tenant_name=tenant_name
-    #openshift_cloudprovider_openstack_region=region
-
-Note that these credentials may be different from the ones you used for
-provisioning (say for quota or access control reasons). To use the same
-OpenStack credentials for both, take a look at the `sample-inventory`. It shows
-how to read the values from your shell environment.
-
-Make sure to only set the values you need from (e.g. your keystonerc or
-clouds.yaml). Some of the options ar keystone V2 or V3 specific.
-
-**NOTE**: If you're testing this on (DevStack)[devstack], you must
-explicitly set your Keystone API version to v2 (e.g.
-`OS_AUTH_URL=http://10.20.30.40/identity/v2.0`) instead of the default
-value provided by `openrc`. You may also encounter the following issue
-with Cinder:
-
-https://github.com/kubernetes/kubernetes/issues/50461
-
-
-[devstack]: https://docs.openstack.org/devstack/latest/
-
-
-You can read the (OpenShift documentation on configuring
-OpenStack)[openstack] for more information.
-
-[openstack]: https://docs.openshift.org/latest/install_config/configuring_openstack.html
-
-
-Next we need to instruct openshift-ansible to use the Cinder volume
-for it's registry. Again in `OSEv3.yml`:
-
-    ## Use Cinder volume for Openshift registry:
-    #openshift_hosted_registry_storage_kind: openstack
-    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
-    #openshift_hosted_registry_storage_openstack_filesystem: xfs
-    #openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
-    #openshift_hosted_registry_storage_volume_size: 10Gi
-
-The **Cinder volume ID**, **filesystem** and **volume size** variables must
-correspond to the values in your volume.
 
 ### Configure static inventory and access via a bastion node
 

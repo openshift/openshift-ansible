@@ -8,6 +8,10 @@
     - include: pre_tasks.yml
   roles:
     - role: openstack-stack
+    - role: openstack-create-cinder-registry
+      when:
+        - cinder_hosted_registry_name is defined
+        - cinder_hosted_registry_size_gb is defined
     - role: static_inventory
       when: openstack_inventory|default('static') == 'static'
       inventory_path: "{{ openstack_inventory_path|default(inventory_dir) }}"
