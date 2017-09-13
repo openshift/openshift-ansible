@@ -6,7 +6,7 @@ from openshift_health_check import ActionModule, resolve_checks
 from openshift_checks import OpenShiftCheckException
 
 
-def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, run_exception=None):
+def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, run_exception=None, changed=False):
     """Returns a new class that is compatible with OpenShiftCheck for testing."""
 
     _name, _tags = name, tags
@@ -14,6 +14,7 @@ def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, ru
     class FakeCheck(object):
         name = _name
         tags = _tags or []
+        changed = False
 
         def __init__(self, execute_module=None, task_vars=None, tmp=None):
             pass
@@ -22,6 +23,7 @@ def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, ru
             return is_active
 
         def run(self):
+            self.changed = changed
             if run_exception is not None:
                 raise run_exception
             return run_return
@@ -78,7 +80,8 @@ def skipped(result):
     None,
     {},
 ])
-def test_action_plugin_missing_openshift_facts(plugin, task_vars):
+def test_action_plugin_missing_openshift_facts(plugin, task_vars, monkeypatch):
+    monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
     result = plugin.run(tmp=None, task_vars=task_vars)
 
     assert failed(result, msg_has=['openshift_facts'])
@@ -92,7 +95,7 @@ def test_action_plugin_cannot_load_checks_with_the_same_name(plugin, task_vars, 
 
     result = plugin.run(tmp=None, task_vars=task_vars)
 
-    assert failed(result, msg_has=['unique', 'duplicate_name', 'FakeCheck'])
+    assert failed(result, msg_has=['duplicate', 'duplicate_name', 'FakeCheck'])
 
 
 def test_action_plugin_skip_non_active_checks(plugin, task_vars, monkeypatch):
@@ -107,11 +110,16 @@ def test_action_plugin_skip_non_active_checks(plugin, task_vars, monkeypatch):
     assert not skipped(result)
 
 
-def test_action_plugin_skip_disabled_checks(plugin, task_vars, monkeypatch):
+@pytest.mark.parametrize('to_disable', [
+    'fake_check',
+    ['fake_check', 'spam'],
+    '*,spam,eggs',
+])
+def test_action_plugin_skip_disabled_checks(to_disable, plugin, task_vars, monkeypatch):
     checks = [fake_check('fake_check', is_active=True)]
     monkeypatch.setattr('openshift_checks.OpenShiftCheck.subclasses', classmethod(lambda cls: checks))
 
-    task_vars['openshift_disable_check'] = 'fake_check'
+    task_vars['openshift_disable_check'] = to_disable
     result = plugin.run(tmp=None, task_vars=task_vars)
 
     assert result['checks']['fake_check'] == dict(skipped=True, skipped_reason="Disabled by user request")
@@ -135,14 +143,15 @@ def test_action_plugin_run_check_ok(plugin, task_vars, monkeypatch):
 
 
 def test_action_plugin_run_check_changed(plugin, task_vars, monkeypatch):
-    check_return_value = {'ok': 'test', 'changed': True}
-    check_class = fake_check(run_return=check_return_value)
+    check_return_value = {'ok': 'test'}
+    check_class = fake_check(run_return=check_return_value, changed=True)
     monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {'fake_check': check_class()})
     monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
 
     result = plugin.run(tmp=None, task_vars=task_vars)
 
     assert result['checks']['fake_check'] == check_return_value
+    assert changed(result['checks']['fake_check'])
     assert not failed(result)
     assert changed(result)
     assert not skipped(result)
@@ -165,7 +174,7 @@ def test_action_plugin_run_check_fail(plugin, task_vars, monkeypatch):
 def test_action_plugin_run_check_exception(plugin, task_vars, monkeypatch):
     exception_msg = 'fake check has an exception'
     run_exception = OpenShiftCheckException(exception_msg)
-    check_class = fake_check(run_exception=run_exception)
+    check_class = fake_check(run_exception=run_exception, changed=True)
     monkeypatch.setattr(plugin, 'load_known_checks', lambda tmp, task_vars: {'fake_check': check_class()})
     monkeypatch.setattr('openshift_health_check.resolve_checks', lambda *args: ['fake_check'])
 
@@ -173,7 +182,8 @@ def test_action_plugin_run_check_exception(plugin, task_vars, monkeypatch):
 
     assert failed(result['checks']['fake_check'], msg_has=exception_msg)
     assert failed(result, msg_has=['failed'])
-    assert not changed(result)
+    assert changed(result['checks']['fake_check'])
+    assert changed(result)
     assert not skipped(result)
 
 
@@ -213,24 +223,21 @@ def test_resolve_checks_ok(names, all_checks, expected):
     assert resolve_checks(names, all_checks) == expected
 
 
-@pytest.mark.parametrize('names,all_checks,words_in_exception,words_not_in_exception', [
+@pytest.mark.parametrize('names,all_checks,words_in_exception', [
     (
         ['testA', 'testB'],
         [],
         ['check', 'name', 'testA', 'testB'],
-        ['tag', 'group', '@'],
     ),
     (
         ['@group'],
         [],
         ['tag', 'name', 'group'],
-        ['check', '@'],
     ),
     (
         ['testA', 'testB', '@group'],
         [],
         ['check', 'name', 'testA', 'testB', 'tag', 'group'],
-        ['@'],
     ),
     (
         ['testA', 'testB', '@group'],
@@ -240,13 +247,10 @@ def test_resolve_checks_ok(names, all_checks, expected):
             fake_check('from_group_2', ['preflight', 'group']),
         ],
         ['check', 'name', 'testA', 'testB'],
-        ['tag', 'group', '@'],
     ),
 ])
-def test_resolve_checks_failure(names, all_checks, words_in_exception, words_not_in_exception):
+def test_resolve_checks_failure(names, all_checks, words_in_exception):
     with pytest.raises(Exception) as excinfo:
         resolve_checks(names, all_checks)
     for word in words_in_exception:
         assert word in str(excinfo.value)
-    for word in words_not_in_exception:
-        assert word not in str(excinfo.value)

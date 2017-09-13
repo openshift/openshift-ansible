@@ -26,7 +26,7 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
             packages.update(self.node_packages(rpm_prefix))
 
         args = {"packages": sorted(set(packages))}
-        return self.execute_module("check_yum_update", args)
+        return self.execute_module_with_retries("check_yum_update", args)
 
     @staticmethod
     def master_packages(rpm_prefix):

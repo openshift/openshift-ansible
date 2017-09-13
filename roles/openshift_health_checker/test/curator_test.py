@@ -1,22 +1,6 @@
 import pytest
 
-from openshift_checks.logging.curator import Curator
-
-
-def canned_curator(exec_oc=None):
-    """Create a Curator check object with canned exec_oc method"""
-    check = Curator("dummy")  # fails if a module is actually invoked
-    if exec_oc:
-        check._exec_oc = exec_oc
-    return check
-
-
-def assert_error(error, expect_error):
-    if expect_error:
-        assert error
-        assert expect_error in error
-    else:
-        assert not error
+from openshift_checks.logging.curator import Curator, OpenShiftCheckException
 
 
 plain_curator_pod = {
@@ -44,25 +28,30 @@ not_running_curator_pod = {
 }
 
 
+def test_get_curator_pods():
+    check = Curator()
+    check.get_pods_for_component = lambda *_: [plain_curator_pod]
+    result = check.run()
+    assert "failed" not in result or not result["failed"]
+
+
 @pytest.mark.parametrize('pods, expect_error', [
     (
         [],
-        "no Curator pods",
-    ),
-    (
-        [plain_curator_pod],
-        None,
+        'MissingComponentPods',
     ),
     (
         [not_running_curator_pod],
-        "not currently in a running state",
+        'CuratorNotRunning',
     ),
     (
         [plain_curator_pod, plain_curator_pod],
-        "more than one Curator pod",
+        'TooManyCurators',
     ),
 ])
-def test_get_curator_pods(pods, expect_error):
-    check = canned_curator()
-    error = check.check_curator(pods)
-    assert_error(error, expect_error)
+def test_get_curator_pods_fail(pods, expect_error):
+    check = Curator()
+    check.get_pods_for_component = lambda *_: pods
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.run()
+    assert excinfo.value.name == expect_error

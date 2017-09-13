@@ -19,8 +19,6 @@ class LoggingIndexTime(LoggingCheck):
     name = "logging_index_time"
     tags = ["health", "logging"]
 
-    logging_namespace = "logging"
-
     def run(self):
         """Add log entry by making unique request to Kibana. Check for unique entry in the ElasticSearch pod logs."""
         try:
@@ -28,29 +26,25 @@ class LoggingIndexTime(LoggingCheck):
                 self.get_var("openshift_check_logging_index_timeout_seconds", default=ES_CMD_TIMEOUT_SECONDS)
             )
         except ValueError:
-            return {
-                "failed": True,
-                "msg": ('Invalid value provided for "openshift_check_logging_index_timeout_seconds". '
-                        'Value must be an integer representing an amount in seconds.'),
-            }
+            raise OpenShiftCheckException(
+                'InvalidTimeout',
+                'Invalid value provided for "openshift_check_logging_index_timeout_seconds". '
+                'Value must be an integer representing an amount in seconds.'
+            )
 
         running_component_pods = dict()
 
         # get all component pods
-        self.logging_namespace = self.get_var("openshift_logging_namespace", default=self.logging_namespace)
         for component, name in (['kibana', 'Kibana'], ['es', 'Elasticsearch']):
-            pods, error = self.get_pods_for_component(self.logging_namespace, component)
-
-            if error:
-                msg = 'Unable to retrieve pods for the {} logging component: {}'
-                return {"failed": True, "changed": False, "msg": msg.format(name, error)}
-
+            pods = self.get_pods_for_component(component)
             running_pods = self.running_pods(pods)
 
             if not running_pods:
-                msg = ('No {} pods in the "Running" state were found.'
-                       'At least one pod is required in order to perform this check.')
-                return {"failed": True, "changed": False, "msg": msg.format(name)}
+                raise OpenShiftCheckException(
+                    component + 'NoRunningPods',
+                    'No {} pods in the "Running" state were found.'
+                    'At least one pod is required in order to perform this check.'.format(name)
+                )
 
             running_component_pods[component] = running_pods
 
@@ -65,8 +59,11 @@ class LoggingIndexTime(LoggingCheck):
         interval = 1
         while not self.query_es_from_es(es_pod, uuid):
             if time.time() + interval > deadline:
-                msg = "expecting match in Elasticsearch for message with uuid {}, but no matches were found after {}s."
-                raise OpenShiftCheckException(msg.format(uuid, timeout_secs))
+                raise OpenShiftCheckException(
+                    "NoMatchFound",
+                    "expecting match in Elasticsearch for message with uuid {}, "
+                    "but no matches were found after {}s.".format(uuid, timeout_secs)
+                )
             time.sleep(interval)
 
     def curl_kibana_with_uuid(self, kibana_pod):
@@ -76,22 +73,23 @@ class LoggingIndexTime(LoggingCheck):
         exec_cmd = "exec {pod_name} -c kibana -- curl --max-time 30 -s http://localhost:5601/{uuid}"
         exec_cmd = exec_cmd.format(pod_name=pod_name, uuid=uuid)
 
-        error_str = self.exec_oc(self.logging_namespace, exec_cmd, [])
+        error_str = self.exec_oc(exec_cmd, [])
 
         try:
             error_code = json.loads(error_str)["statusCode"]
-        except KeyError:
-            msg = ('invalid response returned from Kibana request (Missing "statusCode" key):\n'
-                   'Command: {}\nResponse: {}').format(exec_cmd, error_str)
-            raise OpenShiftCheckException(msg)
-        except ValueError:
-            msg = ('invalid response returned from Kibana request (Non-JSON output):\n'
-                   'Command: {}\nResponse: {}').format(exec_cmd, error_str)
-            raise OpenShiftCheckException(msg)
+        except (KeyError, ValueError):
+            raise OpenShiftCheckException(
+                'kibanaInvalidResponse',
+                'invalid response returned from Kibana request:\n'
+                'Command: {}\nResponse: {}'.format(exec_cmd, error_str)
+            )
 
         if error_code != 404:
-            msg = 'invalid error code returned from Kibana request. Expecting error code "404", but got "{}" instead.'
-            raise OpenShiftCheckException(msg.format(error_code))
+            raise OpenShiftCheckException(
+                'kibanaInvalidReturnCode',
+                'invalid error code returned from Kibana request.\n'
+                'Expecting error code "404", but got "{}" instead.'.format(error_code)
+            )
 
         return uuid
 
@@ -105,17 +103,18 @@ class LoggingIndexTime(LoggingCheck):
             "--key /etc/elasticsearch/secret/admin-key "
             "https://logging-es:9200/project.{namespace}*/_count?q=message:{uuid}"
         )
-        exec_cmd = exec_cmd.format(pod_name=pod_name, namespace=self.logging_namespace, uuid=uuid)
-        result = self.exec_oc(self.logging_namespace, exec_cmd, [])
+        exec_cmd = exec_cmd.format(pod_name=pod_name, namespace=self.logging_namespace(), uuid=uuid)
+        result = self.exec_oc(exec_cmd, [])
 
         try:
             count = json.loads(result)["count"]
-        except KeyError:
-            msg = 'invalid response from Elasticsearch query:\n"{}"\nMissing "count" key:\n{}'
-            raise OpenShiftCheckException(msg.format(exec_cmd, result))
-        except ValueError:
-            msg = 'invalid response from Elasticsearch query:\n"{}"\nNon-JSON output:\n{}'
-            raise OpenShiftCheckException(msg.format(exec_cmd, result))
+        except (KeyError, ValueError):
+            raise OpenShiftCheckException(
+                'esInvalidResponse',
+                'Invalid response from Elasticsearch query:\n'
+                '  {}\n'
+                'Response was:\n{}'.format(exec_cmd, result)
+            )
 
         return count
 

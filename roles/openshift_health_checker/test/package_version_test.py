@@ -5,6 +5,7 @@ from openshift_checks.package_version import PackageVersion, OpenShiftCheckExcep
 
 def task_vars_for(openshift_release, deployment_type):
     return dict(
+        ansible_pkg_mgr='yum',
         openshift=dict(common=dict(service_type=deployment_type)),
         openshift_release=openshift_release,
         openshift_image_tag='v' + openshift_release,
@@ -27,6 +28,7 @@ def test_openshift_version_not_supported():
 
 def test_invalid_openshift_release_format():
     task_vars = dict(
+        ansible_pkg_mgr='yum',
         openshift=dict(common=dict(service_type='origin')),
         openshift_image_tag='v0',
         openshift_deployment_type='origin',
@@ -50,7 +52,7 @@ def test_invalid_openshift_release_format():
 ])
 def test_package_version(openshift_release):
 
-    return_value = object()
+    return_value = {"foo": object()}
 
     def execute_module(module_name=None, module_args=None, tmp=None, task_vars=None, *_):
         assert module_name == 'aos_version'
@@ -64,7 +66,7 @@ def test_package_version(openshift_release):
 
     check = PackageVersion(execute_module, task_vars_for(openshift_release, 'origin'))
     result = check.run()
-    assert result is return_value
+    assert result == return_value
 
 
 @pytest.mark.parametrize('deployment_type,openshift_release,expected_docker_version', [
@@ -77,7 +79,7 @@ def test_package_version(openshift_release):
 ])
 def test_docker_package_version(deployment_type, openshift_release, expected_docker_version):
 
-    return_value = object()
+    return_value = {"foo": object()}
 
     def execute_module(module_name=None, module_args=None, *_):
         assert module_name == 'aos_version'
@@ -91,7 +93,7 @@ def test_docker_package_version(deployment_type, openshift_release, expected_doc
 
     check = PackageVersion(execute_module, task_vars_for(openshift_release, deployment_type))
     result = check.run()
-    assert result is return_value
+    assert result == return_value
 
 
 @pytest.mark.parametrize('group_names,is_containerized,is_active', [

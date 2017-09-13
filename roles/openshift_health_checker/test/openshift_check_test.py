@@ -81,6 +81,7 @@ def dummy_check(task_vars):
 @pytest.mark.parametrize("keys,expected", [
     (("foo",), 42),
     (("bar", "baz"), "openshift"),
+    (("bar.baz",), "openshift"),
 ])
 def test_get_var_ok(task_vars, keys, expected):
     assert dummy_check(task_vars).get_var(*keys) == expected
@@ -94,3 +95,24 @@ def test_get_var_error(task_vars, missing_keys):
 def test_get_var_default(task_vars, missing_keys):
     default = object()
     assert dummy_check(task_vars).get_var(*missing_keys, default=default) == default
+
+
+@pytest.mark.parametrize("keys, convert, expected", [
+    (("foo",), str, "42"),
+    (("foo",), float, 42.0),
+    (("bar", "baz"), bool, False),
+])
+def test_get_var_convert(task_vars, keys, convert, expected):
+    assert dummy_check(task_vars).get_var(*keys, convert=convert) == expected
+
+
+@pytest.mark.parametrize("keys, convert", [
+    (("bar", "baz"), int),
+    (("bar.baz"), float),
+    (("foo"), "bogus"),
+    (("foo"), lambda a, b: 1),
+    (("foo"), lambda a: 1 / 0),
+])
+def test_get_var_convert_error(task_vars, keys, convert):
+    with pytest.raises(OpenShiftCheckException):
+        dummy_check(task_vars).get_var(*keys, convert=convert)

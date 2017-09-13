@@ -1,6 +1,5 @@
 """Check Docker storage driver and usage."""
 import json
-import os.path
 import re
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 from openshift_checks.mixins import DockerHostMixin
@@ -43,21 +42,20 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
     ]
 
     def run(self):
-        msg, failed, changed = self.ensure_dependencies()
+        msg, failed = self.ensure_dependencies()
         if failed:
             return {
                 "failed": True,
-                "changed": changed,
                 "msg": "Some dependencies are required in order to query docker storage on host:\n" + msg
             }
 
         # attempt to get the docker info hash from the API
         docker_info = self.execute_module("docker_info", {})
         if docker_info.get("failed"):
-            return {"failed": True, "changed": changed,
+            return {"failed": True,
                     "msg": "Failed to query Docker API. Is docker running on this host?"}
         if not docker_info.get("info"):  # this would be very strange
-            return {"failed": True, "changed": changed,
+            return {"failed": True,
                     "msg": "Docker API query missing info:\n{}".format(json.dumps(docker_info))}
         docker_info = docker_info["info"]
 
@@ -68,7 +66,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "Detected unsupported Docker storage driver '{driver}'.\n"
                 "Supported storage drivers are: {drivers}"
             ).format(driver=driver, drivers=', '.join(self.storage_drivers))
-            return {"failed": True, "changed": changed, "msg": msg}
+            return {"failed": True, "msg": msg}
 
         # driver status info is a list of tuples; convert to dict and validate based on driver
         driver_status = {item[0]: item[1] for item in docker_info.get("DriverStatus", [])}
@@ -81,7 +79,6 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
         if driver in ['overlay', 'overlay2']:
             result = self.check_overlay_support(docker_info, driver_status)
 
-        result['changed'] = result.get('changed', False) or changed
         return result
 
     def check_devicemapper_support(self, driver_status):
@@ -254,7 +251,7 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
                 "msg": "Specified 'max_overlay_usage_percent' is not a percentage: {}".format(threshold),
             }
 
-        mount = self.find_ansible_mount(path, self.get_var("ansible_mounts"))
+        mount = self.find_ansible_mount(path)
         try:
             free_bytes = mount['size_available']
             total_bytes = mount['size_total']
@@ -277,22 +274,3 @@ class DockerStorage(DockerHostMixin, OpenShiftCheck):
             }
 
         return {}
-
-    # TODO(lmeyer): migrate to base class
-    @staticmethod
-    def find_ansible_mount(path, ansible_mounts):
-        """Return the mount point for path from ansible_mounts."""
-
-        mount_for_path = {mount['mount']: mount for mount in ansible_mounts}
-        mount_point = path
-        while mount_point not in mount_for_path:
-            if mount_point in ["/", ""]:  # "/" not in ansible_mounts???
-                break
-            mount_point = os.path.dirname(mount_point)
-
-        try:
-            return mount_for_path[mount_point]
-        except KeyError:
-            known_mounts = ', '.join('"{}"'.format(mount) for mount in sorted(mount_for_path)) or 'none'
-            msg = 'Unable to determine mount point for path "{}". Known mount points: {}.'
-            raise OpenShiftCheckException(msg.format(path, known_mounts))

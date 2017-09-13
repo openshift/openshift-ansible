@@ -24,7 +24,6 @@ class FluentdConfig(LoggingCheck):
 
     def run(self):
         """Check that Fluentd has running pods, and that its logging config matches Docker's logging config."""
-        self.logging_namespace = self.get_var("openshift_logging_namespace", default=self.logging_namespace)
         config_error = self.check_logging_config()
         if config_error:
             msg = ("The following Fluentd logging configuration problem was found:"
@@ -120,19 +119,13 @@ class FluentdConfig(LoggingCheck):
 
     def running_fluentd_pods(self):
         """Return a list of running fluentd pods."""
-        fluentd_pods, error = self.get_pods_for_component(
-            self.logging_namespace,
-            "fluentd",
-        )
-        if error:
-            msg = 'Unable to retrieve any pods for the "fluentd" logging component: {}'.format(error)
-            raise OpenShiftCheckException(msg)
+        fluentd_pods = self.get_pods_for_component("fluentd")
 
         running_fluentd_pods = [pod for pod in fluentd_pods if pod['status']['phase'] == 'Running']
         if not running_fluentd_pods:
-            msg = ('No Fluentd pods were found to be in the "Running" state. '
-                   'At least one Fluentd pod is required in order to perform this check.')
-
-            raise OpenShiftCheckException(msg)
+            raise OpenShiftCheckException(
+                'No Fluentd pods were found to be in the "Running" state. '
+                'At least one Fluentd pod is required in order to perform this check.'
+            )
 
         return running_fluentd_pods

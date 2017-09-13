@@ -8,7 +8,7 @@ from openshift_checks.etcd_traffic import EtcdTraffic
     (['masters'], "3.6", False),
     (['nodes'], "3.4", False),
     (['etcd'], "3.4", True),
-    (['etcd'], "3.5", True),
+    (['etcd'], "1.5", True),
     (['etcd'], "3.1", False),
     (['masters', 'nodes'], "3.5", False),
     (['masters', 'etcd'], "3.5", True),
@@ -17,9 +17,7 @@ from openshift_checks.etcd_traffic import EtcdTraffic
 def test_is_active(group_names, version, is_active):
     task_vars = dict(
         group_names=group_names,
-        openshift=dict(
-            common=dict(short_version=version),
-        ),
+        openshift_image_tag=version,
     )
     assert EtcdTraffic(task_vars=task_vars).is_active() == is_active
 

@@ -46,6 +46,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         check_multi_minor_release = deployment_type in ['openshift-enterprise']
 
         args = {
+            "package_mgr": self.get_var("ansible_pkg_mgr"),
             "package_list": [
                 {
                     "name": "openvswitch",
@@ -75,7 +76,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
             ],
         }
 
-        return self.execute_module("aos_version", args)
+        return self.execute_module_with_retries("aos_version", args)
 
     def get_required_ovs_version(self):
         """Return the correct Open vSwitch version(s) for the current OpenShift version."""

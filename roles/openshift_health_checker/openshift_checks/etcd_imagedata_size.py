@@ -2,7 +2,7 @@
 Ansible module for determining if the size of OpenShift image data exceeds a specified limit in an etcd cluster.
 """
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck
 
 
 class EtcdImageDataSize(OpenShiftCheck):
@@ -12,7 +12,7 @@ class EtcdImageDataSize(OpenShiftCheck):
     tags = ["etcd"]
 
     def run(self):
-        etcd_mountpath = self._get_etcd_mountpath(self.get_var("ansible_mounts"))
+        etcd_mountpath = self.find_ansible_mount("/var/lib/etcd")
         etcd_avail_diskspace = etcd_mountpath["size_available"]
         etcd_total_diskspace = etcd_mountpath["size_total"]
 
@@ -56,7 +56,7 @@ class EtcdImageDataSize(OpenShiftCheck):
                     reason = etcdkeysize["module_stderr"]
 
                 msg = msg.format(host=etcd_host, reason=reason)
-                return {"failed": True, "changed": False, "msg": msg}
+                return {"failed": True, "msg": msg}
 
             if etcdkeysize["size_limit_exceeded"]:
                 limit = self._to_gigabytes(etcd_imagedata_size_limit)
@@ -65,20 +65,7 @@ class EtcdImageDataSize(OpenShiftCheck):
                        "Use the `oadm prune images` command to cleanup unused Docker images.")
                 return {"failed": True, "msg": msg.format(host=etcd_host, limit=limit)}
 
-        return {"changed": False}
-
-    @staticmethod
-    def _get_etcd_mountpath(ansible_mounts):
-        valid_etcd_mount_paths = ["/var/lib/etcd", "/var/lib", "/var", "/"]
-
-        mount_for_path = {mnt.get("mount"): mnt for mnt in ansible_mounts}
-        for path in valid_etcd_mount_paths:
-            if path in mount_for_path:
-                return mount_for_path[path]
-
-        paths = ', '.join(sorted(mount_for_path)) or 'none'
-        msg = "Unable to determine a valid etcd mountpath. Paths mounted: {}.".format(paths)
-        raise OpenShiftCheckException(msg)
+        return {}
 
     @staticmethod
     def _to_gigabytes(byte_size):

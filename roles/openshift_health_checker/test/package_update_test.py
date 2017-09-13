@@ -9,7 +9,7 @@ def test_package_update():
         assert 'packages' in module_args
         # empty list of packages means "generic check if 'yum update' will work"
         assert module_args['packages'] == []
-        return return_value
+        return {'foo': return_value}
 
     result = PackageUpdate(execute_module).run()
-    assert result is return_value
+    assert result['foo'] is return_value

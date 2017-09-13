@@ -1,6 +1,6 @@
 """A health check for OpenShift clusters."""
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck
 
 
 class EtcdVolume(OpenShiftCheck):
@@ -11,8 +11,8 @@ class EtcdVolume(OpenShiftCheck):
 
     # Default device usage threshold. Value should be in the range [0, 100].
     default_threshold_percent = 90
-    # Where to find ectd data, higher priority first.
-    supported_mount_paths = ["/var/lib/etcd", "/var/lib", "/var", "/"]
+    # Where to find etcd data
+    etcd_mount_path = "/var/lib/etcd"
 
     def is_active(self):
         etcd_hosts = self.get_var("groups", "etcd", default=[]) or self.get_var("groups", "masters", default=[]) or []
@@ -20,7 +20,7 @@ class EtcdVolume(OpenShiftCheck):
         return super(EtcdVolume, self).is_active() and is_etcd_host
 
     def run(self):
-        mount_info = self._etcd_mount_info()
+        mount_info = self.find_ansible_mount(self.etcd_mount_path)
         available = mount_info["size_available"]
         total = mount_info["size_total"]
         used = total - available
@@ -40,16 +40,4 @@ class EtcdVolume(OpenShiftCheck):
             )
             return {"failed": True, "msg": msg}
 
-        return {"changed": False}
-
-    def _etcd_mount_info(self):
-        ansible_mounts = self.get_var("ansible_mounts")
-        mounts = {mnt.get("mount"): mnt for mnt in ansible_mounts}
-
-        for path in self.supported_mount_paths:
-            if path in mounts:
-                return mounts[path]
-
-        paths = ', '.join(sorted(mounts)) or 'none'
-        msg = "Unable to find etcd storage mount point. Paths mounted: {}.".format(paths)
-        raise OpenShiftCheckException(msg)
+        return {}
