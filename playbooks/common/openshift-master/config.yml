@@ -179,28 +179,36 @@
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                    | union(groups['oo_masters_to_config'])
-                                                    | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
-                                                }}"
-    openshift_no_proxy_etcd_host_ips: "{{ hostvars | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                                | oo_collect('openshift.common.ip') | default([]) | join(',')
-                                                }}"
-  roles:
-  - role: os_firewall
-  - role: openshift_master
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
-    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
-    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    openshift_no_proxy_etcd_host_ips: "{{ hostvars | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                | oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                }}"
+  roles:
+  - role: os_firewall
+  - role: openshift_master_facts
+  - role: openshift_hosted_facts
+  - role: openshift_master_certificates
+  - role: openshift_etcd_client_certificates
     etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
     etcd_cert_prefix: "master.etcd-"
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    when: groups.oo_etcd_to_config | default([]) | length != 0
+  - role: openshift_clock
+  - role: openshift_cloud_provider
+  - role: openshift_builddefaults
+  - role: openshift_buildoverrides
+  - role: nickhammond.logrotate
+  - role: contiv
+    contiv_role: netmaster
+    when: openshift_use_contiv | default(False) | bool
+  - role: openshift_master
+    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
     r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
     r_openshift_master_etcd3_storage: "{{ hostvars[groups.oo_first_master.0].l_etcd3_enabled }}"
     openshift_master_is_scaleup_host: "{{ g_openshift_master_is_scaleup | default(false) }}"
@@ -211,7 +219,6 @@
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
-
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
