@@ -110,11 +110,16 @@ def test_action_plugin_skip_non_active_checks(plugin, task_vars, monkeypatch):
     assert not skipped(result)
 
 
-def test_action_plugin_skip_disabled_checks(plugin, task_vars, monkeypatch):
+@pytest.mark.parametrize('to_disable', [
+    'fake_check',
+    ['fake_check', 'spam'],
+    '*,spam,eggs',
+])
+def test_action_plugin_skip_disabled_checks(to_disable, plugin, task_vars, monkeypatch):
     checks = [fake_check('fake_check', is_active=True)]
     monkeypatch.setattr('openshift_checks.OpenShiftCheck.subclasses', classmethod(lambda cls: checks))
 
-    task_vars['openshift_disable_check'] = 'fake_check'
+    task_vars['openshift_disable_check'] = to_disable
     result = plugin.run(tmp=None, task_vars=task_vars)
 
     assert result['checks']['fake_check'] == dict(skipped=True, skipped_reason="Disabled by user request")

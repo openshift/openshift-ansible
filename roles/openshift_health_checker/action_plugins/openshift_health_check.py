@@ -187,7 +187,7 @@ def normalize(checks):
 
 def run_check(name, check, user_disabled_checks):
     """Run a single check if enabled and return a result dict."""
-    if name in user_disabled_checks:
+    if name in user_disabled_checks or '*' in user_disabled_checks:
         return dict(skipped=True, skipped_reason="Disabled by user request")
 
     # pylint: disable=broad-except; capturing exceptions broadly is intentional,
