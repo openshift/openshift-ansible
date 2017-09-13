@@ -7,7 +7,7 @@ generate an Ansible inventory file from an existing cluster.
 ## Configure
 
 User configuration helps to provide additional details when creating an inventory file.
-The default location of this file is in `root/etc/inventory-generator-config.yaml`. The
+The default location of this file is in `/etc/inventory-generator-config.yaml`. The
 following configuration values are either expected or default to the given values when omitted:
 
 - `master_config_path`:
@@ -26,7 +26,7 @@ following configuration values are either expected or default to the given value
   - specifies a user to "become" on the remote host. Used for privilege escalation.
   - If a non-null value is specified, `ansible_become` is implicitly set to `yes` in the resulting inventory file.
 
-See the supplied sample user configuration file in `root/etc/inventory-generator-config.yaml` for additional optional inventory variables that may be specified.
+See the supplied sample user configuration file in [`root/etc/inventory-generator-config.yaml`](./root/etc/inventory-generator-config.yaml) for additional optional inventory variables that may be specified.
 
 ## Build
 
