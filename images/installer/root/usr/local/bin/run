@@ -24,9 +24,12 @@ elif [[ -v INVENTORY_URL ]]; then
 elif [[ -v DYNAMIC_SCRIPT_URL ]]; then
   curl -o ${INVENTORY} ${DYNAMIC_SCRIPT_URL}
   chmod 755 ${INVENTORY}
+elif [[ -v GENERATE_INVENTORY ]]; then
+  # dynamically generate inventory file using bind-mounted info
+  /usr/local/bin/generate ${INVENTORY}
 else
   echo
-  echo "One of INVENTORY_FILE, INVENTORY_URL or DYNAMIC_SCRIPT_URL must be provided."
+  echo "One of INVENTORY_FILE, INVENTORY_URL, GENERATE_INVENTORY, or DYNAMIC_SCRIPT_URL must be provided."
   exec /usr/local/bin/usage
 fi
 INVENTORY_ARG="-i ${INVENTORY}"
