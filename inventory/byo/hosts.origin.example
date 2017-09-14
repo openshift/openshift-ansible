@@ -34,17 +34,17 @@ openshift_deployment_type=origin
 # use this to lookup the latest exact version of the container images, which is the tag actually used to configure
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
-openshift_release=v3.6
+openshift_release=v3.7
 
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_image_tag=v3.6.0
+#openshift_image_tag=v3.7.0
 
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.6.0
+#openshift_pkg_version=-3.7.0
 
 # This enables all the system containers except for docker:
 #openshift_use_system_containers=False
@@ -538,7 +538,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_metrics_public_url=https://hawkular-metrics.example.com/hawkular/metrics
 # Configure the prefix and version for the component images
 #openshift_hosted_metrics_deployer_prefix=docker.io/openshift/origin-
-#openshift_hosted_metrics_deployer_version=v3.6.0
+#openshift_hosted_metrics_deployer_version=v3.7.0
 #
 # StorageClass
 # openshift_storageclass_name=gp2
@@ -593,7 +593,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_logging_elasticsearch_cluster_size=1
 # Configure the prefix and version for the component images
 #openshift_hosted_logging_deployer_prefix=docker.io/openshift/origin-
-#openshift_hosted_logging_deployer_version=v3.6.0
+#openshift_hosted_logging_deployer_version=v3.7.0
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
