@@ -69,7 +69,7 @@
   - role: etcd_migrate
     r_etcd_migrate_action: migrate
     r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcd_peer: "{{ ansible_default_ipv4.address }}"
+    etcd_peer: "{{ openshift.common.ip }}"
     etcd_url_scheme: "https"
     etcd_peer_url_scheme: "https"
 
@@ -80,7 +80,7 @@
   - role: etcd_migrate
     r_etcd_migrate_action: clean_data
     r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcd_peer: "{{ ansible_default_ipv4.address }}"
+    etcd_peer: "{{ openshift.common.ip }}"
     etcd_url_scheme: "https"
     etcd_peer_url_scheme: "https"
   post_tasks:
@@ -115,7 +115,7 @@
   roles:
   - role: etcd_migrate
     r_etcd_migrate_action: add_ttls
-    etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].ansible_default_ipv4.address }}"
+    etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].openshift.common.ip }}"
     etcd_url_scheme: "https"
     etcd_peer_url_scheme: "https"
     when: etcd_migration_failed | length == 0
