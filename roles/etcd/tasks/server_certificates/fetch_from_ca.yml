@@ -1,6 +1,12 @@
 ---
+- include: ../ca/deploy.yml
+  when:
+  - etcd_ca_setup | default(True) | bool
+
 - name: Install etcd
-  package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
+  package:
+    name: "etcd{{ '-' + etcd_version if etcd_version is defined else '' }}"
+    state: present
   when: not etcd_is_containerized | bool
 
 - name: Check status of etcd certificates

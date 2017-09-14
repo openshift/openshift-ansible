@@ -192,6 +192,7 @@
   - role: openshift_master_facts
   - role: openshift_hosted_facts
   - role: openshift_master_certificates
+  - role: openshift_etcd_facts
   - role: openshift_etcd_client_certificates
     etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
@@ -215,6 +216,8 @@
     openshift_master_default_registry_value: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value }}"
     openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
     openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
+  - role: nuage_ca
+  - role: nuage_common
   - role: nuage_master
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master

@@ -1,0 +1,2 @@
+---
+- include: server_certificates/fetch_from_ca.yml

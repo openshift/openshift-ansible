@@ -2,10 +2,14 @@
 - name: Calico Node | Error if invalid cert arguments
   fail:
     msg: "Must provide all or none for the following etcd params: calico_etcd_cert_dir, calico_etcd_ca_cert_file, calico_etcd_cert_file, calico_etcd_key_file, calico_etcd_endpoints"
-  when: (calico_etcd_cert_dir is defined or calico_etcd_ca_cert_file is defined or calico_etcd_cert_file is defined or calico_etcd_key_file is defined or calico_etcd_endpoints is defined) and not (calico_etcd_cert_dir is defined and calico_etcd_ca_cert_file is defined and calico_etcd_cert_file is defined and calico_etcd_key_file is defined and calico_etcd_endpoints is defined)
+  when:
+  - calico_etcd_cert_dir is defined or calico_etcd_ca_cert_file is defined or calico_etcd_cert_file is defined or calico_etcd_key_file is defined or calico_etcd_endpoints is defined
+  - not (calico_etcd_cert_dir is defined and calico_etcd_ca_cert_file is defined and calico_etcd_cert_file is defined and calico_etcd_key_file is defined and calico_etcd_endpoints is defined)
 
 - name: Calico Node | Generate OpenShift-etcd certs
-  include: ../../../roles/etcd_client_certificates/tasks/main.yml
+  include_role:
+    name: etcd
+    tasks_from: client_certificates
   when: calico_etcd_ca_cert_file is not defined or calico_etcd_cert_file is not defined or calico_etcd_key_file is not defined or calico_etcd_endpoints is not defined or calico_etcd_cert_dir is not defined
   vars:
     etcd_cert_prefix: calico.etcd-
@@ -28,18 +32,18 @@
     msg: "Invalid etcd configuration for calico."
   when: item is not defined or item == ''
   with_items:
-    - calico_etcd_ca_cert_file
-    - calico_etcd_cert_file
-    - calico_etcd_key_file
-    - calico_etcd_endpoints
+  - calico_etcd_ca_cert_file
+  - calico_etcd_cert_file
+  - calico_etcd_key_file
+  - calico_etcd_endpoints
 
 - name: Calico Node | Assure the calico certs are present
   stat:
     path: "{{ item }}"
   with_items:
-    - "{{ calico_etcd_ca_cert_file }}"
-    - "{{ calico_etcd_cert_file }}"
-    - "{{ calico_etcd_key_file }}"
+  - "{{ calico_etcd_ca_cert_file }}"
+  - "{{ calico_etcd_cert_file }}"
+  - "{{ calico_etcd_key_file }}"
 
 - name: Calico Node | Configure Calico service unit file
   template:

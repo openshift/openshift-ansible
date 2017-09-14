@@ -9,7 +9,7 @@
 - fail:
     msg: >
       CA certificate {{ etcd_ca_cert }} doesn't exist on CA host
-      {{ etcd_ca_host }}. Apply 'etcd_ca' role to
+      {{ etcd_ca_host }}. Apply 'etcd_ca' action from `etcd` role to
       {{ etcd_ca_host }}.
   when: not g_ca_cert_stat_result.stat.exists | bool
   run_once: true

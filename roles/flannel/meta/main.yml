@@ -12,7 +12,4 @@ galaxy_info:
   categories:
   - cloud
   - system
-dependencies:
-- role: openshift_facts
-- role: openshift_etcd_client_certificates
-  etcd_cert_prefix: flannel.etcd-
+dependencies: []

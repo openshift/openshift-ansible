@@ -11,6 +11,4 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies:
-- role: openshift_etcd_facts
-- role: etcd_client_certificates
+dependencies: []

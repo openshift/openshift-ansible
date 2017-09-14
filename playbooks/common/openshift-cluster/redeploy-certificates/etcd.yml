@@ -45,19 +45,23 @@
 - name: Redeploy etcd certificates
   hosts: oo_etcd_to_config
   any_errors_fatal: true
-  roles:
-    - role: openshift_etcd_server_certificates
-      etcd_certificates_redeploy: true
-      etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-      etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
-      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  tasks:
+    - include_role:
+        name: etcd
+        tasks_from: server_certificates
+      vars:
+        etcd_certificates_redeploy: true
+        etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+        etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+        etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+        openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+        r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
 
 - name: Redeploy etcd client certificates for masters
   hosts: oo_masters_to_config
   any_errors_fatal: true
   roles:
+    - role: openshift_etcd_facts
     - role: openshift_etcd_client_certificates
       etcd_certificates_redeploy: true
       etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
