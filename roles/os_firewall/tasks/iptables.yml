@@ -33,7 +33,7 @@
   register: result
   delegate_to: "{{item}}"
   run_once: true
-  with_items: "{{ ansible_play_hosts }}"
+  with_items: "{{ ansible_play_batch }}"
 
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail
   pause:
