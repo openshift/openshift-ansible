@@ -1,0 +1,4 @@
+---
+# This is file is here because the usage of tags, specifically `pre_upgrade`
+# breaks the functionality of this role.
+# See https://bugzilla.redhat.com/show_bug.cgi?id=1464025
