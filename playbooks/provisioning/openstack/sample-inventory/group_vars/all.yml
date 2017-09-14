@@ -77,8 +77,9 @@ docker_volume_size: "15"
 
 openstack_subnet_prefix: "192.168.99"
 
-# # Red Hat subscription
-rhsm_register: False
+## Red Hat subscription defaults to false which means we will not attempt to
+## subscribe the nodes
+#rhsm_register: False
 
 # # Using Red Hat Satellite:
 #rhsm_register: True
