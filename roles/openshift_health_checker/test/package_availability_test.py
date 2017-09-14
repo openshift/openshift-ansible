@@ -56,7 +56,7 @@ def test_package_availability(task_vars, must_have_packages, must_not_have_packa
         assert 'packages' in module_args
         assert set(module_args['packages']).issuperset(must_have_packages)
         assert not set(module_args['packages']).intersection(must_not_have_packages)
-        return return_value
+        return {'foo': return_value}
 
     result = PackageAvailability(execute_module, task_vars).run()
-    assert result is return_value
+    assert result['foo'] is return_value

@@ -229,21 +229,7 @@
   - restart master controllers
   when: openshift_master_bootstrap_enabled | default(False)
 
-- name: Check for credentials file for registry auth
-  stat:
-    path: "{{oreg_auth_credentials_path }}"
-  when:
-  - oreg_auth_user is defined
-  register: master_oreg_auth_credentials_stat
-
-- name: Create credentials for registry auth
-  command: "docker --config={{ oreg_auth_credentials_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
-  when:
-  - oreg_auth_user is defined
-  - (not master_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-  notify:
-  - restart master api
-  - restart master controllers
+- include: registry_auth.yml
 
 - include: set_loopback_context.yml
   when:

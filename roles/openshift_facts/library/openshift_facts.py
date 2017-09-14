@@ -1602,11 +1602,13 @@ def set_builddefaults_facts(facts):
             builddefaults['git_no_proxy'] = builddefaults['no_proxy']
         # If we're actually defining a builddefaults config then create admission_plugin_config
         # then merge builddefaults[config] structure into admission_plugin_config
+
+        # 'config' is the 'openshift_builddefaults_json' inventory variable
         if 'config' in builddefaults:
             if 'admission_plugin_config' not in facts['master']:
-                facts['master']['admission_plugin_config'] = dict()
+                # Scaffold out the full expected datastructure
+                facts['master']['admission_plugin_config'] = {'BuildDefaults': {'configuration': {'env': {}}}}
             facts['master']['admission_plugin_config'].update(builddefaults['config'])
-            # if the user didn't actually provide proxy values, delete the proxy env variable defaults.
             delete_empty_keys(facts['master']['admission_plugin_config']['BuildDefaults']['configuration']['env'])
 
     return facts

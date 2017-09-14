@@ -15,6 +15,7 @@
   oc_project:
     state: present
     name: "{{ glusterfs_namespace }}"
+    node_selector: "{% if glusterfs_use_default_selector %}{{ omit }}{% endif %}"
   when: glusterfs_is_native or glusterfs_heketi_is_native or glusterfs_storageclass
 
 - name: Delete pre-existing heketi resources

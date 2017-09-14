@@ -89,7 +89,7 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            name: ${IMAGE_PREFIX}registry-console
+            name: ${IMAGE_PREFIX}registry-console:${IMAGE_VERSION}
           name: ${IMAGE_VERSION}
   - kind: OAuthClient
     apiVersion: v1

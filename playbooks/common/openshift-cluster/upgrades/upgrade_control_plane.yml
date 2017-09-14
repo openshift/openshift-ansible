@@ -13,11 +13,11 @@
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=* --confirm
     register: l_pb_upgrade_control_plane_pre_upgrade_storage
-    when: openshift_upgrade_pre_storage_migration_enabled | default(true,true) | bool
+    when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_pre_storage_migration_enabled | default(true,true) | bool
+    - openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
-    - openshift_upgrade_pre_storage_migration_fatal | default(true,true) | bool
+    - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
 
 # If facts cache were for some reason deleted, this fact may not be set, and if not set
 # it will always default to true. This causes problems for the etcd data dir fact detection
@@ -151,11 +151,11 @@
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=clusterpolicies --confirm
     register: l_pb_upgrade_control_plane_post_upgrade_storage
-    when: openshift_upgrade_post_storage_migration_enabled | default(true,true) | bool
+    when: openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_post_storage_migration_enabled | default(true,true) | bool
+    - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
-    - openshift_upgrade_post_storage_migration_fatal | default(false,true) | bool
+    - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
     run_once: true
     delegate_to: "{{ groups.oo_first_master.0 }}"
 
@@ -247,11 +247,11 @@
       migrate storage --include=* --confirm
     run_once: true
     register: l_pb_upgrade_control_plane_post_upgrade_storage
-    when: openshift_upgrade_post_storage_migration_enabled | default(true,true) | bool
+    when: openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_post_storage_migration_enabled | default(true,true) | bool
+    - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
-    - openshift_upgrade_post_storage_migration_fatal | default(false,true) | bool
+    - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
 
   - set_fact:
       reconcile_complete: True

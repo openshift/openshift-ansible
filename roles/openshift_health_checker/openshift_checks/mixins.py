@@ -36,7 +36,7 @@ class DockerHostMixin(object):
 
         # NOTE: we would use the "package" module but it's actually an action plugin
         # and it's not clear how to invoke one of those. This is about the same anyway:
-        result = self.execute_module(
+        result = self.execute_module_with_retries(
             self.get_var("ansible_pkg_mgr", default="yum"),
             {"name": self.dependencies, "state": "present"},
         )
