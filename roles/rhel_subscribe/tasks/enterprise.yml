@@ -7,7 +7,7 @@
   when: deployment_type == 'openshift-enterprise'
 
 - set_fact:
-    ose_version: "{{ lookup('oo_option', 'ose_version') | default(default_ose_version, True) }}"
+    ose_version: "{{ lookup('env', 'ose_version') | default(default_ose_version, True) }}"
 
 - fail:
     msg: "{{ ose_version }} is not a valid version for {{ deployment_type }} deployment type"
