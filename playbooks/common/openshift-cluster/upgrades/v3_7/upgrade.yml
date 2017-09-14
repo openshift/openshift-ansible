@@ -47,6 +47,14 @@
   tags:
   - pre_upgrade
 
+- include: ../pre/verify_health_checks.yml
+  tags:
+  - pre_upgrade
+
+- include: ../pre/verify_control_plane_running.yml
+  tags:
+  - pre_upgrade
+
 - include: ../disable_master_excluders.yml
   tags:
   - pre_upgrade
@@ -70,14 +78,6 @@
     # docker restarts. At this early stage of upgrade we can assume
     # docker is configured and running.
     skip_docker_role: True
-
-- include: ../pre/verify_health_checks.yml
-  tags:
-  - pre_upgrade
-
-- include: ../pre/verify_control_plane_running.yml
-  tags:
-  - pre_upgrade
 
 - include: ../../../openshift-master/validate_restart.yml
   tags:
