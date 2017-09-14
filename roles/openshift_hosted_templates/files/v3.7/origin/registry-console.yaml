@@ -89,7 +89,7 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            name: ${IMAGE_NAME}
+            name: ${IMAGE_NAME}:${IMAGE_VERSION}
           name: ${IMAGE_VERSION}
   - kind: OAuthClient
     apiVersion: v1
