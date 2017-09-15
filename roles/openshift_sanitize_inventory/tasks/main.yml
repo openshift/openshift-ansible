@@ -14,8 +14,13 @@
 
 # osm_cluster_network_cidr, osm_host_subnet_length and openshift_portal_net are
 # now required to avoid changes that may occur between releases
+#
+# Note: We will skip these checks when some tests run which don't
+# actually do any insalling/upgrading/scaling/etc..
 # Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1451023
-- assert:
+- when:
+    - not testing_skip_some_requirements|default(False)|bool
+  assert:
     that:
       - "osm_cluster_network_cidr is defined"
       - "osm_host_subnet_length is defined"
