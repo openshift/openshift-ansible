@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.126.1%{?dist}
+Release:        0.126.2%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,38 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Sep 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.2
+- Removing setting of pod presets (ewolinet@redhat.com)
+- cri-o: Fix Fedora image name (smilner@redhat.com)
+- inventory generate: fix config doc (lmeyer@redhat.com)
+- inventory generate: remove refs to openshift_cluster_user (lmeyer@redhat.com)
+- inventory generate: always use kubeconfig, no login (lmeyer@redhat.com)
+- Scaffold out the entire build defaults hash (tbielawa@redhat.com)
+- Add IMAGE_VERSION to the image stream tag source (sdodson@redhat.com)
+- Don't assume storage_migration control variables are already boolean
+  (mchappel@redhat.com)
+- upgrade: Updates warning on missing required variables (smilner@redhat.com)
+- Correct logic for openshift_hosted_*_wait (rteague@redhat.com)
+- Adding mangagement-admin SC to admin role for management-infra project
+  (ewolinet@redhat.com)
+- Workaround Ansible Jinja2 delimiter warning (rteague@redhat.com)
+- openshift-checks: add role symlink (lmeyer@redhat.com)
+- double the required disk space for etcd backup (jchaloup@redhat.com)
+- openshift_health_check: allow disabling all checks (lmeyer@redhat.com)
+- docker_image_availability: fix local image search (lmeyer@redhat.com)
+- docker_image_availability: probe registry connectivity (lmeyer@redhat.com)
+- openshift_checks: add retries in python (lmeyer@redhat.com)
+- add inventory-generator under new sub pkg (jvallejo@redhat.com)
+- Re-enabling new tuned profile hierarchy (PR5089) (jmencak@redhat.com)
+- Fix: authenticated registry support for containerized hosts
+  (mgugino@redhat.com)
+- [Proposal] OpenShift-Ansible Proposal Process (rteague@redhat.com)
+- GlusterFS: Allow option to use or ignore default node selectors
+  (jarrpa@redhat.com)
+- GlusterFS: Clarify heketi URL documentation (jarrpa@redhat.com)
+- GlusterFS: Add files/templates for v3.7 (jarrpa@redhat.com)
+- GlusterFS: Correct firewall port names (jarrpa@redhat.com)
+
 * Wed Sep 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.1
 - Improve searching when conditions for Jinja2 delimiters (rteague@redhat.com)
 - container-engine: Allow full image override (smilner@redhat.com)
