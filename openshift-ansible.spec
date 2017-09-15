@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.63
+Version:        3.2.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 15 2017 Scott Dodson <sdodson@redhat.com> 3.2.64-1
+- Remove jinja delimeters and double quotes from when conditions
+  (rteague@redhat.com)
+
 * Mon Aug 07 2017 Scott Dodson <sdodson@redhat.com> 3.2.63-1
 - When trying to grant user to appropriate scc it fails with below error:
   (jkaur@redhat.com)
