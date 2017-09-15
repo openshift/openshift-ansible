@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.126.3%{?dist}
+Release:        0.126.4%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.4
+- No conversion to boolean and no quoting for include_granted_scopes.
+  (jpazdziora@redhat.com)
+- Correct firewall install for openshift-nfs (rteague@redhat.com)
+- inventory: Update versions to 3.7 (smilner@redhat.com)
+- Setup tuned after the node has been restarted. (jmencak@redhat.com)
+- add retry on repoquery_cmd (lmeyer@redhat.com)
+- add retries to repoquery module (lmeyer@redhat.com)
+- Use openshift.common.ip rather than ansible_default_ipv4 in etcd migration
+  playbook. (abutcher@redhat.com)
+- Add loadbalancer config entry point (rteague@redhat.com)
+- Update master config with new client urls during etcd scaleup.
+  (abutcher@redhat.com)
+- Clarify requirement of having etcd group (sdodson@redhat.com)
+
 * Fri Sep 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.3
 - 
 
