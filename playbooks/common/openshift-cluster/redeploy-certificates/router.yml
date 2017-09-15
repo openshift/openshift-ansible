@@ -7,17 +7,18 @@
   tasks:
   - name: Create temp directory for kubeconfig
     command: mktemp -d /tmp/openshift-ansible-XXXXXX
-    register: mktemp
+    register: router_cert_redeploy_tempdir
     changed_when: false
+
   - name: Copy admin client config(s)
     command: >
-      cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+      cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
     changed_when: false
 
   - name: Determine if router exists
     command: >
       {{ openshift.common.client_binary }} get dc/router -o json
-      --config={{ mktemp.stdout }}/admin.kubeconfig
+      --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
     register: l_router_dc
     failed_when: false
@@ -26,13 +27,14 @@
   - name: Determine if router service exists
     command: >
       {{ openshift.common.client_binary }} get svc/router -o json
-      --config={{ mktemp.stdout }}/admin.kubeconfig
+      --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
     register: l_router_svc
     failed_when: false
     changed_when: false
 
-  - set_fact:
+  - name: Collect router environment variables and secrets
+    set_fact:
       router_env_vars: "{{ ((l_router_dc.stdout | from_json)['spec']['template']['spec']['containers'][0]['env']
                              | oo_collect('name'))
                              | default([]) }}"
@@ -43,7 +45,8 @@
     changed_when: false
     when: l_router_dc.rc == 0
 
-  - set_fact:
+  - name: Collect router service annotations
+    set_fact:
       router_service_annotations: "{{ (l_router_svc.stdout | from_json)['metadata']['annotations'] if 'annotations' in (l_router_svc.stdout | from_json)['metadata'] else [] }}"
     when: l_router_svc.rc == 0
 
@@ -53,7 +56,7 @@
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-router.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-router.key)"
-      --config={{ mktemp.stdout }}/admin.kubeconfig
+      --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
     when:
     - l_router_dc.rc == 0
@@ -61,10 +64,13 @@
     - ('OPENSHIFT_CERT_DATA' in router_env_vars)
     - ('OPENSHIFT_KEY_DATA' in router_env_vars)
 
+  # When the router service contains service signer annotations we
+  # will delete the existing certificate secret and allow OpenShift to
+  # replace the secret.
   - block:
     - name: Delete existing router certificate secret
       oc_secret:
-        kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+        kubeconfig: "{{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig"
         name: router-certs
         namespace: default
         state: absent
@@ -75,14 +81,14 @@
         {{ openshift.common.client_binary }} annotate service/router
         service.alpha.openshift.io/serving-cert-secret-name-
         service.alpha.openshift.io/serving-cert-signed-by-
-        --config={{ mktemp.stdout }}/admin.kubeconfig
+        --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
         -n default
 
     - name: Add serving-cert-secret annotation to router service
       command: >
         {{ openshift.common.client_binary }} annotate service/router
         service.alpha.openshift.io/serving-cert-secret-name=router-certs
-        --config={{ mktemp.stdout }}/admin.kubeconfig
+        --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
         -n default
     when:
     - l_router_dc.rc == 0
@@ -92,78 +98,44 @@
     - ('service.alpha.openshift.io/serving-cert-secret-name') in router_service_annotations
     - ('service.alpha.openshift.io/serving-cert-signed-by') in router_service_annotations
 
-  - block:
-    - assert:
-        that:
-        - "'certfile' in openshift_hosted_router_certificate"
-        - "'keyfile' in openshift_hosted_router_certificate"
-        - "'cafile' in openshift_hosted_router_certificate"
-        msg: |-
-          openshift_hosted_router_certificate has been set in the inventory but is
-          missing one or more required keys. Ensure that 'certfile', 'keyfile',
-          and 'cafile' keys have been specified for the openshift_hosted_router_certificate
-          inventory variable.
-
-    - name: Read router certificate and key
-      become: no
-      local_action:
-        module: slurp
-        src: "{{ item }}"
-      register: openshift_router_certificate_output
-      # Defaulting dictionary keys to none to avoid deprecation warnings
-      # (future fatal errors) during template evaluation. Dictionary keys
-      # won't be accessed unless openshift_hosted_router_certificate is
-      # defined and has all keys (certfile, keyfile, cafile) which we
-      # check above.
-      with_items:
-      - "{{ (openshift_hosted_router_certificate | default({'certfile':none})).certfile }}"
-      - "{{ (openshift_hosted_router_certificate | default({'keyfile':none})).keyfile }}"
-      - "{{ (openshift_hosted_router_certificate | default({'cafile':none})).cafile }}"
-
-    - name: Write temporary router certificate file
-      copy:
-        content: "{% for certificate in openshift_router_certificate_output.results -%}{{ certificate.content | b64decode }}{% endfor -%}"
-        dest: "{{ mktemp.stdout }}/openshift-hosted-router-certificate.pem"
-        mode: 0600
-
-    - name: Write temporary router key file
-      copy:
-        content: "{{ (openshift_router_certificate_output.results
-                         | oo_collect('content', {'source':(openshift_hosted_router_certificate | default({'keyfile':none})).keyfile}))[0] | b64decode }}"
-        dest: "{{ mktemp.stdout }}/openshift-hosted-router-certificate.key"
-        mode: 0600
-
-    - name: Replace router-certs secret
-      shell: >
-        {{ openshift.common.client_binary }} secrets new router-certs
-        tls.crt="{{ mktemp.stdout }}/openshift-hosted-router-certificate.pem"
-        tls.key="{{ mktemp.stdout }}/openshift-hosted-router-certificate.key"
-        --type=kubernetes.io/tls
-        --config={{ mktemp.stdout }}/admin.kubeconfig
-        --confirm
-        -o json | {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig replace -f -
-
-    - name: Remove temporary router certificate and key files
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-      - "{{ mktemp.stdout }}/openshift-hosted-router-certificate.pem"
-      - "{{ mktemp.stdout }}/openshift-hosted-router-certificate.key"
+  # When there are no annotations on the router service we will allow
+  # the openshift_hosted role to either create a new wildcard
+  # certificate (since we deleted the original) or reapply a custom
+  # openshift_hosted_router_certificate.
+  - file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /etc/origin/master/openshift-router.crt
+    - /etc/origin/master/openshift-router.key
     when:
     - l_router_dc.rc == 0
+    - l_router_svc.rc == 0
     - ('router-certs' in router_secrets)
-    - openshift_hosted_router_certificate is defined
+    - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
+    - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
+
+  - include_role:
+      name: openshift_hosted
+      tasks_from: main
+    vars:
+      openshift_hosted_manage_registry: false
+    when:
+    - l_router_dc.rc == 0
+    - l_router_svc.rc == 0
+    - ('router-certs' in router_secrets)
+    - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
+    - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
 
   - name: Redeploy router
     command: >
       {{ openshift.common.client_binary }} deploy dc/router
       --latest
-      --config={{ mktemp.stdout }}/admin.kubeconfig
+      --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
 
   - name: Delete temp directory
     file:
-      name: "{{ mktemp.stdout }}"
+      name: "{{ router_cert_redeploy_tempdir.stdout }}"
       state: absent
     changed_when: False
