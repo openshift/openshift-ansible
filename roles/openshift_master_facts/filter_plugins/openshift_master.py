@@ -380,11 +380,6 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
         if 'extra_authorize_parameters' in self._idp:
             self._idp['extraAuthorizeParameters'] = self._idp.pop('extra_authorize_parameters')
 
-        if 'extraAuthorizeParameters' in self._idp:
-            if 'include_granted_scopes' in self._idp['extraAuthorizeParameters']:
-                val = ansible_bool(self._idp['extraAuthorizeParameters'].pop('include_granted_scopes'))
-                self._idp['extraAuthorizeParameters']['include_granted_scopes'] = '"true"' if val else '"false"'
-
     def validate(self):
         ''' validate this idp instance '''
         IdentityProviderOauthBase.validate(self)
