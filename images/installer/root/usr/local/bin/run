@@ -39,7 +39,7 @@ if [[ "$ALLOW_ANSIBLE_CONNECTION_LOCAL" = false ]]; then
 fi
 
 if [[ -v VAULT_PASS ]]; then
-  VAULT_PASS_FILE=.vaultpass
+  VAULT_PASS_FILE="$(mktemp)"
   echo ${VAULT_PASS} > ${VAULT_PASS_FILE}
   VAULT_PASS_ARG="--vault-password-file ${VAULT_PASS_FILE}"
 fi
