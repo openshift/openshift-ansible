@@ -1,0 +1,29 @@
+---
+- name: setup firewall
+  include: firewall.yml
+  static: yes
+
+- name: Install nfs-utils
+  package: name=nfs-utils state=present
+
+- name: Configure NFS
+  lineinfile:
+    dest: /etc/sysconfig/nfs
+    regexp: '^RPCNFSDARGS=.*$'
+    line: 'RPCNFSDARGS="-N 2 -N 3"'
+  register: nfs_config
+
+- name: Restart nfs-config
+  systemd: name=nfs-config state=restarted
+  when: nfs_config | changed
+
+- name: Ensure exports directory exists
+  file:
+    path: "{{ l_nfs_base_dir }}"
+    state: directory
+
+- name: Enable and start NFS services
+  systemd:
+    name: nfs-server
+    state: started
+    enabled: yes

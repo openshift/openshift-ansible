@@ -15,7 +15,7 @@
   include: accounts.yml
 
 ######################################################################
-# STORAGE - Initialize basic storage classes
+# STORAGE - Initialize basic storage class
 #---------------------------------------------------------------------
 # * nfs - set up NFS shares on the first master for a proof of concept
 - name: Create required NFS exports for CFME app storage
@@ -26,8 +26,8 @@
 # * external - NFS again, but pointing to a pre-configured NFS server
 - name: Note Storage Type -  External NFS
   debug:
-    msg: Setting up external NFS storage, openshift_cfme_storage_class is 'external'
-  when: openshift_cfme_storage_class == 'external'
+    msg: "Setting up external NFS storage, openshift_cfme_storage_class is {{ openshift_cfme_storage_class }}"
+  when: openshift_cfme_storage_class == 'nfs_external'
 
 #---------------------------------------------------------------------
 # * cloudprovider - use an existing cloudprovider based storage
@@ -45,55 +45,35 @@
 
 ######################################################################
 # APPLICATION TEMPLATE
-- name: Install the correct CFME app template
+- name: Install the CFME app and PV templates
   include: template.yml
 
 ######################################################################
 # APP & DB Storage
 
+# For local/external NFS backed installations
+- name: "Create the required App and DB PVs using {{ openshift_cfme_storage_class }}"
+  include: storage/create_nfs_pvs.yml
+  when:
+    - openshift_cfme_storage_class in ['nfs', 'nfs_external']
 
 ######################################################################
+# CREATE APP
+- name: Note the correct ext-db template name
+  set_fact:
+    openshift_cfme_template_name: "{{ openshift_cfme_flavor }}-ext-db"
+  when:
+    - openshift_cfme_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
 
-# ######################################################################
-# # Let's do this
+- name: Note the correct podified db template name
+  set_fact:
+    openshift_cfme_template_name: "{{ openshift_cfme_flavor }}"
+  when:
+    - openshift_cfme_app_template in ['miq-template', 'cfme-template']
 
-# - name: Ensure the CFME Server is created
-#   oc_process:
-#     namespace: "{{ openshift_cfme_project }}"
-#     template_name: manageiq
-#     create: True
-#     params:
-#       APPLICATION_IMG_NAME: "{{ openshift_cfme_application_img_name }}"
-#       POSTGRESQL_IMG_NAME: "{{ openshift_cfme_postgresql_img_name }}"
-#       MEMCACHED_IMG_NAME: "{{ openshift_cfme_memcached_img_name }}"
-#       APPLICATION_IMG_TAG: "{{ openshift_cfme_application_img_tag }}"
-#       POSTGRESQL_IMG_TAG: "{{ openshift_cfme_postgresql_img_tag }}"
-#       MEMCACHED_IMG_TAG: "{{ openshift_cfme_memcached_img_tag }}"
-#   register: cfme_new_app_process
-#   run_once: True
-#   when:
-#     # User said to install CFME in their inventory
-#     - openshift_cfme_install_app | bool
-#     # # The server app doesn't exist already
-#     # - not miq_server_check.results.results.0
-
-# - debug:
-#     var: cfme_new_app_process
-
-# ######################################################################
-# # Various cleanup steps
-
-# # TODO: Not sure what to do about this right now. Might be able to
-# # just delete it?  This currently warns about "Unable to find
-# # '<TEMP_DIR>' in expected paths."
-# - name: Ensure the temporary PV/App templates are erased
-#   file:
-#     path: "{{ item }}"
-#     state: absent
-#   with_fileglob:
-#     - "{{ template_dir }}/*.yaml"
-
-# - name: Ensure the temporary PV/app template directory is erased
-#   file:
-#     path: "{{ template_dir }}"
-#     state: absent
+- name: Ensure the CFME App is created
+  oc_process:
+    namespace: "{{ openshift_cfme_project }}"
+    template_name: "{{ openshift_cfme_template_name }}"
+    create: True
+    params: "{{ openshift_cfme_template_parameters }}"

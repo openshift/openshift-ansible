@@ -15,7 +15,7 @@
 #     poll: 0
 
 - name: Setup CFME
-  hosts: m01.example.com
+  hosts: oo_first_master
   pre_tasks:
   - name: Create a temporary place to evaluate the PV templates
     command: mktemp -d /tmp/openshift-ansible-XXXXXXX

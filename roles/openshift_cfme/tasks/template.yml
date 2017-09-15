@@ -4,69 +4,125 @@
 ######################################################################
 # CFME App Template
 #
-# Note, this is different from the create_pvs.yml tasks in that the
-# application template does not require any jinja2 evaluation.
+# Note, this is different from the create_nfs_pvs.yml tasks in that
+# the application template does not require any jinja2 evaluation.
 #
-# TODO: Handle the case where the server template is updated in
-# openshift-ansible and the change needs to be landed on the managed
-# cluster.
+# TODO: Handle the case where the server or PV templates are updated
+# in openshift-ansible and the change needs to be landed on the
+# managed cluster.
 
 ######################################################################
 # STANDARD PODIFIED DATABASE TEMPLATE
-- when: openshift_cfme_app_template == 'miq-template'
+- when: openshift_cfme_app_template in ['miq-template', 'cfme-template']
   block:
   - name: Check if the CFME Server template has been created already
     oc_obj:
       namespace: "{{ openshift_cfme_project }}"
       state: list
       kind: template
-      name: manageiq
+      name: "{{ openshift_cfme_flavor }}"
     register: miq_server_check
 
-  - name: Copy over CFME Server template
-    copy:
-      src: miq-template.yaml
-      dest: "{{ template_dir }}/"
-    when:
-    - miq_server_check.results.results == [{}]
+  - when: miq_server_check.results.results == [{}]
+    block:
+    - name: Copy over CFME Server template
+      copy:
+        src: "templates/{{ openshift_cfme_flavor }}/{{ openshift_cfme_flavor_short }}-template.yaml"
+        dest: "{{ template_dir }}/"
 
-  - name: Ensure CFME Server Template is created
-    oc_obj:
-      namespace: "{{ openshift_cfme_project }}"
-      name: manageiq
-      state: present
-      kind: template
-      files:
-      - "{{ template_dir }}/miq-template.yaml"
-    when:
-    - miq_server_check.results.results == [{}]
+    - name: Ensure CFME Server Template is created
+      oc_obj:
+        namespace: "{{ openshift_cfme_project }}"
+        name: "{{ openshift_cfme_flavor }}"
+        state: present
+        kind: template
+        files:
+        - "{{ template_dir }}/{{ openshift_cfme_flavor_short }}-template.yaml"
 
 ######################################################################
 # EXTERNAL DATABASE TEMPLATE
-- when: openshift_cfme_app_template == 'miq-template-ext-db'
+- when: openshift_cfme_app_template in ['miq-template-ext-db', 'cfme-template']
   block:
   - name: Check if the CFME Ext-DB Server template has been created already
     oc_obj:
       namespace: "{{ openshift_cfme_project }}"
       state: list
       kind: template
-      name: manageiq-ext-db
+      name: "{{ openshift_cfme_flavor }}-ext-db"
     register: miq_ext_db_server_check
 
-  - name: Copy over CFME Ext-DB Server template
-    copy:
-      src: miq-template-ext-db.yaml
-      dest: "{{ template_dir }}/"
-    when:
-    - miq_ext_db_server_check.results.results == [{}]
+  - when: miq_ext_db_server_check.results.results == [{}]
+    block:
+    - name: Copy over CFME Ext-DB Server template
+      copy:
+        src: "templates/{{ openshift_cfme_flavor }}/{{openshift_cfme_flavor_short}}-template-ext-db.yaml"
+        dest: "{{ template_dir }}/"
 
-  - name: Ensure CFME Ext-DB Server Template is created
+    - name: Ensure CFME Ext-DB Server Template is created
+      oc_obj:
+        namespace: "{{ openshift_cfme_project }}"
+        name: "{{ openshift_cfme_flavor }}-ext-db"
+        state: present
+        kind: template
+        files:
+        - "{{ template_dir }}/{{ openshift_cfme_flavor_short }}-template-ext-db.yaml"
+
+# End app template creation.
+######################################################################
+
+######################################################################
+# Begin conditional PV template creations
+
+# Required for the application server
+- name: Check if the CFME App PV template has been created already
+  oc_obj:
+    namespace: "{{ openshift_cfme_project }}"
+    state: list
+    kind: template
+    name: "{{ openshift_cfme_flavor }}-app-pv"
+  register: miq_app_pv_check
+
+- when: miq_app_pv_check.results.results == [{}]
+  block:
+  - name: Copy over CFME App PV template
+    copy:
+      src: "templates/{{ openshift_cfme_flavor }}/{{ openshift_cfme_flavor_short }}-pv-server-example.yaml"
+      dest: "{{ template_dir }}/"
+
+  - name: Ensure CFME App PV Template is created
     oc_obj:
       namespace: "{{ openshift_cfme_project }}"
-      name: manageiq-ext-db
+      name: "{{ openshift_cfme_flavor }}-app-pv"
       state: present
       kind: template
       files:
-      - "{{ template_dir }}/miq-template-ext-db.yaml"
-    when:
-    - miq_ext_db_server_check.results.results == [{}]
+      - "{{ template_dir }}/{{ openshift_cfme_flavor_short }}-pv-server-example.yaml"
+
+#---------------------------------------------------------------------
+
+# Required for database if the installation is fully podified
+- when: openshift_cfme_app_template in ['miq-template', 'cfme-template']
+  block:
+  - name: Check if the CFME DB PV template has been created already
+    oc_obj:
+      namespace: "{{ openshift_cfme_project }}"
+      state: list
+      kind: template
+      name: "{{ openshift_cfme_flavor }}-db-pv"
+    register: miq_db_pv_check
+
+  - when: miq_db_pv_check.results.results == [{}]
+    block:
+    - name: Copy over CFME DB PV template
+      copy:
+        src: "templates/{{ openshift_cfme_flavor }}/{{ openshift_cfme_flavor_short }}-pv-db-example.yaml"
+        dest: "{{ template_dir }}/"
+
+    - name: Ensure CFME DB PV Template is created
+      oc_obj:
+        namespace: "{{ openshift_cfme_project }}"
+        name: "{{ openshift_cfme_flavor }}-db-pv"
+        state: present
+        kind: template
+        files:
+        - "{{ template_dir }}/{{ openshift_cfme_flavor_short }}-pv-db-example.yaml"

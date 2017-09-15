@@ -1,26 +1,35 @@
 ---
 # Validate configuration parameters passed to the openshift_cfme role
 
+######################################################################
+# CORE PARAMETERS
 - name: Ensure openshift_cfme_app_template is valid
   assert:
     that:
-      - openshift_cfme_app_template in openshift_cfme_app_templates
-    msg: "openshift_cfme_app_template must be one of {{ openshift_cfme_app_templates | join(', ') }}"
+      - openshift_cfme_app_template in __openshift_cfme_app_templates
+    msg: "openshift_cfme_app_template must be one of {{ __openshift_cfme_app_templates | join(', ') }}"
 
 - name: Ensure openshift_cfme_storage_class is a valid type
   assert:
     that:
-      - openshift_cfme_storage_class in openshift_cfme_storage_classes
-    msg: "openshift_cfme_storage_class must be one of {{ openshift_cfme_storage_classes | join(', ') }}"
+      - openshift_cfme_storage_class in __openshift_cfme_storage_classes
+    msg: "openshift_cfme_storage_class must be one of {{ __openshift_cfme_storage_classes | join(', ') }}"
 
+######################################################################
+# STORAGE PARAMS - NFS
 - name: Ensure external NFS storage has a valid NFS server hostname defined
   assert:
     that:
-      - openshift_cfme_storage_external_nfs_hostname is not False
-    msg: The selected storage class 'external' requires a valid hostname for the openshift_cfme_storage_external_nfs_hostname parameter
+      - openshift_cfme_storage_nfs_external_hostname | default(False)
+    msg: The selected storage class 'nfs_external' requires a valid hostname for the openshift_cfme_storage_nfs_hostname parameter
   when:
-    - openshift_cfme_storage_class == 'external'
+    - openshift_cfme_storage_class == 'nfs_external'
 
+# that 'nfs' types have one of the following set:
+#
+
+######################################################################
+# STORAGE PARAMS  -CLOUD PROVIDER
 - name: Validate Cloud Provider storage class
   assert:
     that:
@@ -31,4 +40,33 @@
       example inventories for the required parameters for your
       selected cloud provider. Working providers: 'aws' and 'gce'.
   when:
+    - openshift_cfme_storage_class == 'cloudprovider'
     - openshift_cloudprovider_kind is defined
+
+- name: Validate 'cloudprovider' Storage Class has required parameters defined
+  assert:
+    that:
+      - openshift_cloudprovider_kind is defined
+    msg: |
+      openshift_cfme_storage_class is 'cloudprovider' but you do not
+      have 'openshift_cloudprovider_kind' defined, this is
+      required. Search the example inventories for
+      'openshift_cloudprovider_kind'. The required parameters for your
+      selected cloud provider must be defined in your inventory as
+      well. Working providers: 'aws' and 'gce'.
+  when:
+    - openshift_cfme_storage_class == 'cloudprovider'
+
+######################################################################
+# DATABASE CONNECTION VALIDATION
+- name: Validate all required database parameters were provided for ext-db template
+  assert:
+    that:
+      - item in openshift_cfme_template_parameters
+    msg: |
+      "You are not using podified database services and a required
+      database parameter {{ item }} was not found in
+      'openshift_cfme_template_parameters'"
+  with_items: "{{ __openshift_cfme_required_db_conn_params }}"
+  when:
+    - openshift_cfme_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']

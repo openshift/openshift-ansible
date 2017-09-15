@@ -1,0 +1,69 @@
+---
+# Misc enumerated values
+#---------------------------------------------------------------------
+# Allowed choices for the storage class parameter
+__openshift_cfme_storage_classes:
+  - nfs
+  - nfs_external
+  - preconfigured
+  - cloudprovider
+
+# Name of the application templates with object/parameter definitions
+__openshift_cfme_app_templates:
+  - miq-template-ext-db
+  - miq-template
+  - cfme-template-ext-db
+  - cfme-template
+
+# PostgreSQL database connection parameters
+__openshift_cfme_db_parameters:
+  - DATABASE_USER
+  - DATABASE_PASSWORD
+  - DATABASE_IP
+  - DATABASE_PORT
+  - DATABASE_NAME
+
+# # Commented out until we can support both CFME and MIQ
+# # openshift_cfme_flavor: "{{ 'cloudforms' if openshift_deployment_type == 'openshift-enterprise' else 'manageiq' }}"
+#openshift_cfme_flavor: cloudforms
+openshift_cfme_flavor: manageiq
+# TODO: Make this conditional as well based on the prior variable
+# # openshift_cfme_flavor_short: "{{ 'cfme' if openshift_deployment_type == 'openshift-enterprise' else 'miq' }}"
+# openshift_cfme_flavor_short: cfme
+openshift_cfme_flavor_short: miq
+
+######################################################################
+# ACCOUNTING
+######################################################################
+# Service Account SSCs
+__openshift_system_account_sccs:
+  - name: -anyuid
+    resource_name: anyuid
+  - name: -orchestrator
+    resource_name: anyuid
+  - name: -privileged
+    resource_name: privileged
+  - name: -httpd
+    resource_name: anyuid
+
+# Service Account Roles
+__openshift_cfme_system_account_roles:
+  - name: -orchestrator
+    resource_name: view
+  - name: -orchestrator
+    resource_name: edit
+
+######################################################################
+# DEFAULTS
+######################################################################
+# User only has to provide parameters they need to override, we will
+# do a hash update method with the provided user parameters to create
+# the final connection structure.
+#
+# TODO: Update user provided configs with this if they are missing fields
+__openshift_cfme_required_db_conn_params:
+  - DATABASE_USER
+  - DATABASE_PASSWORD
+  - DATABASE_IP
+  - DATABASE_PORT
+  - DATABASE_NAME
