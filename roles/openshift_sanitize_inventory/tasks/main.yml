@@ -12,6 +12,22 @@
       deployment_type is deprecated in favor of openshift_deployment_type.
       Please specify only openshift_deployment_type, or make both the same.
 
+# osm_cluster_network_cidr, osm_host_subnet_length and openshift_portal_net are
+# now required to avoid changes that may occur between releases
+# Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1451023
+- assert:
+    that:
+      - "osm_cluster_network_cidr is defined"
+      - "osm_host_subnet_length is defined"
+      - "openshift_portal_net is defined"
+    msg: >
+      osm_cluster_network_cidr, osm_host_subnet_length, and openshift_portal_net are required inventory
+      variables. If you are upgrading or scaling up these variables should match what is currently used
+      in the cluster. If you don't remember what these values are you can find them in
+      /etc/origin/master/master-config.yaml on a master with the names clusterNetworkCIDR
+      (osm_cluster_network_cidr), hostSubnetLength (osm_host_subnet_length),
+      and serviceNetworkCIDR (openshift_portal_net).
+
 - name: Standardize on latest variable names
   set_fact:
     # goal is to deprecate deployment_type in favor of openshift_deployment_type.
