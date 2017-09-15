@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.34
+Version:        3.6.173.0.35
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.35-1
+- 
+
 * Fri Sep 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.34-1
 - Fix issue with etcd_common when using pre_upgrade tag (rteague@redhat.com)
 - Fix: authenticated registry support for containerized hosts
