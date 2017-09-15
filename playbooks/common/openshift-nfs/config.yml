@@ -2,5 +2,5 @@
 - name: Configure nfs
   hosts: oo_nfs_to_config
   roles:
-  - role: openshift_facts
+  - role: os_firewall
   - role: openshift_storage_nfs
