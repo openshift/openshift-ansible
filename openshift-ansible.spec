@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.134
+Version:        3.4.135
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 15 2017 Scott Dodson <sdodson@redhat.com> 3.4.135-1
+- Fix: authenticated registry support for containerized hosts
+  (mgugino@redhat.com)
+- Remove Jinja2 templating delimiter (rteague@redhat.com)
+- Backport updated ansible_syntax checks (rteague@redhat.com)
+- Add independent registry auth support (mgugino@redhat.com)
+
 * Tue Sep 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.134-1
 - 
 
