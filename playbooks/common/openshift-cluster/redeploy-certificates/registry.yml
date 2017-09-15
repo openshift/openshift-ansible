@@ -32,7 +32,7 @@
     set_fact:
       openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'OPENSHIFT_DEFAULT_REGISTRY':'docker-registry.default.svc:5000'}) }}"
     when: openshift_push_via_dns | default(false) | bool
-  
+
   - name: Update registry proxy settings for dc/docker-registry
     set_fact:
       openshift_hosted_registry_env_vars: "{{ {'HTTPS_PROXY': (openshift.common.https_proxy | default('')),
@@ -55,7 +55,7 @@
 
   - name: Include openshift_hosted role secure routing
     include: roles/openshift_hosted/tasks/registry/secure.yml
- 
+
   - name: Redeploy docker registry
     command: |
       oc rollout latest {{ openshift_hosted_registry_name }} \
