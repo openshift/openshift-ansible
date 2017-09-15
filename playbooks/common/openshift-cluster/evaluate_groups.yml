@@ -43,11 +43,14 @@
   - name: Evaluate groups - Fail if no etcd hosts group is defined
     fail:
       msg: >
-        No etcd hosts defined. Running an all-in-one master is deprecated and
-        will no longer be supported in a future upgrade.
+        Running etcd as an embedded service is no longer supported. If this is a
+        new install please define an 'etcd' group with either one or three
+        hosts. These hosts may be the same hosts as your masters. If this is an
+        upgrade you may set openshift_master_unsupported_embedded_etcd=true
+        until a migration playbook becomes available.
     when:
-    - g_etcd_hosts | default([]) | length == 0
-    - not openshift_master_unsupported_all_in_one | default(False)
+    - g_etcd_hosts | default([]) | length not in [3,1]
+    - not openshift_master_unsupported_embedded_etcd | default(False)
     - not openshift_node_bootstrap | default(False)
 
   - name: Evaluate oo_all_hosts
