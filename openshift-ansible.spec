@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.124
+Version:        3.5.125
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 15 2017 Scott Dodson <sdodson@redhat.com> 3.5.125-1
+- Fix: authenticated registry support for containerized hosts
+  (mgugino@redhat.com)
+- Collapse dict. Remove duplicate comments (tbielawa@redhat.com)
+- Scaffold out the entire build defaults hash (tbielawa@redhat.com)
+- Addded this change to address following issue "[Errno 2] No such file or
+  directory" while trying to run Jenkins job for Integrated Metrics.
+  (skunkerk@redhat.com)
+- Backport updated ansible_syntax checks (rteague@redhat.com)
+- Add independent registry auth support (mgugino@redhat.com)
+
 * Tue Sep 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.124-1
 - 
 
