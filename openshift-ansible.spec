@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.33
+Version:        3.6.173.0.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,43 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.34-1
+- Fix issue with etcd_common when using pre_upgrade tag (rteague@redhat.com)
+- Fix: authenticated registry support for containerized hosts
+  (mgugino@redhat.com)
+- Scaffold out the entire build defaults hash (tbielawa@redhat.com)
+- openshift-checks: add role symlink (lmeyer@redhat.com)
+- openshift_health_check: allow disabling all checks (lmeyer@redhat.com)
+- docker_image_availability: fix local image search (lmeyer@redhat.com)
+- docker_image_availability: probe registry connectivity (lmeyer@redhat.com)
+- openshift_checks: add retries in python (lmeyer@redhat.com)
+- Skip failure dedup instead of crashing (rhcarvalho@gmail.com)
+- output skopeo image check command (nakayamakenjiro@gmail.com)
+- openshift_checks aos_version: also check installed under yum
+  (lmeyer@redhat.com)
+- Import dnf only if importing yum fails (jhadvig@redhat.com)
+- openshift_checks: ignore hidden files in checks dir
+  (miciah.masters@gmail.com)
+- disk_availability: fix bug where msg is overwritten (lmeyer@redhat.com)
+- docker_image_availability: timeout skopeo inspect (lmeyer@redhat.com)
+- Update error message: s/non-unique/duplicate (rhcarvalho@gmail.com)
+- Make pylint disables more specific (rhcarvalho@gmail.com)
+- Handle exceptions in failure summary cb plugin (rhcarvalho@gmail.com)
+- Rewrite failure summary callback plugin (rhcarvalho@gmail.com)
+- Handle more exceptions when running checks (rhcarvalho@gmail.com)
+- List known checks/tags when check name is invalid (rhcarvalho@gmail.com)
+- List existing health checks when none is requested (rhcarvalho@gmail.com)
+- Add playbook for running arbitrary health checks (rhcarvalho@gmail.com)
+- etc_traffic check: factor away short_version (lmeyer@redhat.com)
+- openshift_checks: refactor find_ansible_mount (lmeyer@redhat.com)
+- openshift_checks: enable variable conversion (lmeyer@redhat.com)
+- openshift_checks: refactor logging checks (lmeyer@redhat.com)
+- openshift_checks: add property to track 'changed' (lmeyer@redhat.com)
+- add pre-flight checks to ugrade path (jvallejo@redhat.com)
+- double the required disk space for etcd backup (jchaloup@redhat.com)
+- Adding mangagement-admin SC to admin role for management-infra project
+  (ewolinet@redhat.com)
+
 * Wed Sep 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.33-1
 - 
 
