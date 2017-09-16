@@ -60,7 +60,7 @@ openshift_deployment_type: origin
 openshift_node_bootstrap: False
 
 r_openshift_node_os_firewall_deny: []
-r_openshift_node_os_firewall_allow:
+default_r_openshift_node_os_firewall_allow:
 - service: Kubernetes kubelet
   port: 10250/tcp
 - service: http
@@ -79,6 +79,8 @@ r_openshift_node_os_firewall_allow:
 - service: Kubernetes service NodePort UDP
   port: "{{ openshift_node_port_range | default('') }}/udp"
   cond: "{{ openshift_node_port_range is defined }}"
+# Allow multiple port ranges to be added to the role
+r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_allow | union(openshift_node_open_ports | default([])) }}"
 
 oreg_url: ''
 oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
