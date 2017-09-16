@@ -59,14 +59,11 @@
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
 # lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388
-#
-# Use lineinfile w/ a handler for this task until
-# https://github.com/ansible/ansible/pull/24277 is included in an
-# ansible release and we can use the sysctl module.
-- name: Persist net.ipv4.ip_forward sysctl entry
-  lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.ip_forward' line='net.ipv4.ip_forward=1'
-  notify:
-    - reload sysctl.conf
+- sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_file: "/etc/sysctl.d/99-openshift.conf"
+    reload: yes
 
 - name: include bootstrap node config
   include: bootstrap.yml
