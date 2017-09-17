@@ -1,0 +1,47 @@
+---
+- name: Check for existance of ca.serial.txt on master
+  stat:
+    path: /etc/origin/master/ca.serial.txt
+  register: l_ca_serial_exists
+
+- name: Read value of CA serial number if it exists
+  slurp:
+    src: /etc/origin/master/ca.serial.txt
+  when:
+  - l_ca_serial_exists.stat.exists | bool
+  register: l_ca_serial_number
+
+######################################################################
+- name: what is the serial
+  debug:
+    msg: "{{ l_ca_serial_number }}"
+  when:
+  - l_ca_serial_exists.stat.exists | bool
+
+- name: Record the value of the ca serial number
+  set_fact:
+    ca_serial_number: "{{ l_ca_serial_number.content | b64decode | int(base=16) }}"
+  when:
+  - l_ca_serial_exists.stat.exists | bool
+
+# The ca.serial.txt file does not exist on this master
+- name: Record the empty value of the ca serial number
+  set_fact:
+    ca_serial_number: "{{ None }}"
+  when:
+  - not l_ca_serial_exists.stat.exists | bool
+
+######################################################################
+- debug:
+    var: ca_serial_number
+
+# sort the list of hosts and select the one which has the highest
+# ca_serial_number value
+- name: Record which master is the openshift_ca_host
+  set_fact:
+    openshift_ca_host: "{{ (hostvars | oo_select_keys(ansible_play_hosts)
+                            | sort(attribute='ca_serial_number', reverse=True)
+                            | map(attribute='inventory_hostname')
+                            | list).0 }}"
+
+- debug: var=openshift_ca_host

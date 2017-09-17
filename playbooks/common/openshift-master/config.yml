@@ -69,6 +69,7 @@
   - set_fact:
       openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
     when: openshift_hosted_metrics_resolution is not defined
+
   roles:
   - openshift_facts
   post_tasks:
@@ -190,7 +191,6 @@
   roles:
   - role: os_firewall
   - role: openshift_master
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                      | oo_collect('openshift.common.hostname')

@@ -8,4 +8,8 @@
     --serial='{{ mktemp.stdout }}/ca.serial.txt'
     --name="metrics-signer@{{lookup('pipe','date +%s')}}"
 
+- name: TODO: Call certificate sync handler
+  debug:
+    msg: We just created a cert for metrics, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+
 - include: generate_hawkular_certificates.yaml

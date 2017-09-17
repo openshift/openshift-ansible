@@ -43,8 +43,13 @@
     cert: "{{ docker_registry_cert_path }}"
     key: "{{ docker_registry_key_path }}"
     expire_days: "{{ openshift_hosted_registry_cert_expire_days if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool else omit }}"
-  register: registry_self_cert
+  register: l_registry_self_cert_created
   when: docker_registry_self_signed
+
+- name: TODO - Call certificate sync handler
+  debug:
+    msg: We just created a cert for a master, need to ensure serial file is synced. Delegate to openshift_ca_host, of course
+  when: not l_registry_self_cert_created.skipped | default(false) | bool
 
 # Setting up REGISTRY_HTTP_TLS_CLIENTCAS as the cacert doesn't seem to work.
 # If we need to set up a cacert, bundle it with the cert.
