@@ -11,7 +11,7 @@ openshift_prometheus_node_selector: {"region":"infra"}
 openshift_prometheus_image_proxy: "openshift/oauth-proxy:v1.0.0"
 openshift_prometheus_image_prometheus: "openshift/prometheus:v2.0.0-dev"
 openshift_prometheus_image_alertmanager: "openshift/prometheus-alertmanager:dev"
-openshift_prometheus_image_alertbuffer: "ilackarms/message-buffer"
+openshift_prometheus_image_alertbuffer: "openshift/prometheus-alert-buffer:v0.0.1"
 
 # additional prometheus rules file
 openshift_prometheus_additional_rules_file: null
