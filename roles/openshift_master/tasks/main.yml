@@ -146,6 +146,8 @@
     local_facts:
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
+- include: registry_auth.yml
+
 - name: Install the systemd units
   include: systemd_units.yml
 
@@ -181,8 +183,6 @@
     - restart master
     - restart master api
     - restart master controllers
-
-- include: registry_auth.yml
 
 - include: set_loopback_context.yml
   when: openshift.common.version_gte_3_2_or_1_2
