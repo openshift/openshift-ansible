@@ -24,7 +24,7 @@
             "PLAYBOOK_FILE=$PLAYBOOK_FILE",
             "ANSIBLE_CONFIG=$ANSIBLE_CONFIG"
         ],
-        "cwd": "/opt/app-root/src/",
+        "cwd": "/usr/share/ansible/openshift-ansible",
         "rlimits": [
             {
                 "type": "RLIMIT_NOFILE",
