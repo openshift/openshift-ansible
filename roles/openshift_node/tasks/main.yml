@@ -66,6 +66,8 @@
     state: present
   when: not openshift.common.is_containerized | bool
 
+- include: registry_auth.yml
+
 - name: Install the systemd units
   include: systemd_units.yml
 
@@ -108,8 +110,6 @@
     mode: 0600
   notify:
     - restart node
-
-- include: registry_auth.yml
 
 - name: Configure AWS Cloud Provider Settings
   lineinfile:
