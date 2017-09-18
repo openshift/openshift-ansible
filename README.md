@@ -72,6 +72,19 @@ you are not running a stable release.
     - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
     - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
 
+## Running
+
+Running playbooks directly from openshift-ansible requires changing
+the current directory to the root of the content so that the provided
+`ansible.cfg`, plugins, and roles are used.  If running from a clone of
+the repository then this means using `cd` to change to the repository
+root after checking out. If running from the RPM install then this means
+doing `cd /usr/share/ansible/openshift-ansible/` before running playbooks.
+
+Users of containerized openshift-ansible should consult
+[README_CONTAINERIZED_INSTALLATION.md](README_CONTAINERIZED_INSTALLATION.md)
+for usage directions.
+
 ## Containerized OpenShift Ansible
 
 See [README_CONTAINER_IMAGE.md](README_CONTAINER_IMAGE.md) for information on how to package openshift-ansible as a container image.

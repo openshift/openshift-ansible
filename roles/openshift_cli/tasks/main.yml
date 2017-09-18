@@ -3,7 +3,7 @@
     l_use_crio: "{{ openshift_use_crio | default(false) }}"
 
 - name: Install clients
-  package: name={{ openshift.common.service_type }}-clients state=present
+  openshift_package: name={{ openshift.common.service_type }}-clients state=present
   when: not openshift.common.is_containerized | bool
 
 - block:
@@ -42,5 +42,5 @@
   openshift_facts:
 
 - name: Install bash completion for oc tools
-  package: name=bash-completion state=present
+  openshift_package: name=bash-completion state=present
   when: not openshift.common.is_containerized | bool

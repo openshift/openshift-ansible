@@ -8,7 +8,7 @@
   block:
   # TODO: This needs to be removed and placed into a role
   - name: Ensure libselinux-python is installed
-    package: name=libselinux-python state=present
+    openshift_package: name=libselinux-python state=present
 
   - name: Create any additional repos that are defined
     yum_repository:

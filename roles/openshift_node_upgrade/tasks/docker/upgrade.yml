@@ -35,6 +35,6 @@
   delay: 30
 
 - name: Upgrade Docker
-  package: name=docker{{ '-' + docker_version }} state=present
+  openshift_package: name=docker{{ '-' + docker_version }} state=present
 
 # starting docker happens back in ../main.yml where it calls ../restart.yml

@@ -5,7 +5,7 @@
   when: r_os_firewall_is_atomic | bool
 
 - name: Install firewalld packages
-  package:
+  openshift_package:
     name: firewalld
     state: present
 

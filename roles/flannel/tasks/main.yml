@@ -1,7 +1,7 @@
 ---
 - name: Install flannel
   become: yes
-  package: name=flannel state=present
+  openshift_package: name=flannel state=present
   when: not openshift.common.is_atomic | bool
 
 - name: Set flannel etcd options

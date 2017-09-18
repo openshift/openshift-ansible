@@ -53,7 +53,7 @@
   register: l_ostree_booted
 
 - name: Install latest etcd for embedded
-  package:
+  openshift_package:
     name: etcd
     state: latest
   when:

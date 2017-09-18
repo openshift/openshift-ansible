@@ -15,7 +15,7 @@
   when: task_result | changed
 
 - name: Install iptables packages
-  package:
+  openshift_package:
     name: "{{ item }}"
     state: present
   with_items:

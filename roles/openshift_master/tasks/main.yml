@@ -41,7 +41,7 @@
   static: yes
 
 - name: Install Master package
-  package:
+  openshift_package:
     name: "{{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when:
@@ -90,7 +90,7 @@
   - restart master controllers
 
 - name: Install httpd-tools if needed
-  package: name=httpd-tools state=present
+  openshift_package: name=httpd-tools state=present
   when:
   - item.kind == 'HTPasswdPasswordIdentityProvider'
   - not openshift.common.is_atomic | bool
@@ -360,7 +360,7 @@
   - openshift.master.cluster_method == 'native'
 
 - name: Install cluster packages
-  package: name=pcs state=present
+  openshift_package: name=pcs state=present
   when:
   - openshift.master.cluster_method == 'pacemaker'
   - not openshift.common.is_containerized | bool

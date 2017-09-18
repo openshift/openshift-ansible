@@ -1,6 +1,6 @@
 ---
 - name: Ensure growpart is installed
-  package: name=cloud-utils-growpart state=present
+  openshift_package: name=cloud-utils-growpart state=present
   when: not openshift.common.is_containerized | bool
 
 - name: Determine if growpart is installed

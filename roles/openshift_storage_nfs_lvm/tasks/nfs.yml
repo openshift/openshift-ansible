@@ -1,6 +1,6 @@
 ---
 - name: Install NFS server
-  package: name=nfs-utils state=present
+  openshift_package: name=nfs-utils state=present
   when: not openshift.common.is_containerized | bool
 
 - name: Start rpcbind

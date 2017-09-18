@@ -1,6 +1,6 @@
 ---
 - name: install needed rpm(s)
-  package:
+  openshift_package:
     name: "{{ item }}"
     state: present
   with_items: "{{ openshift_node_ami_prep_packages }}"

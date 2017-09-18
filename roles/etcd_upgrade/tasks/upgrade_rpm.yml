@@ -15,7 +15,7 @@
     l_etcd_target_package: "{{ 'etcd' if r_etcd_upgrade_version is not defined else 'etcd-'+r_etcd_upgrade_version+'*' }}"
 
 - name: Update etcd RPM to {{ l_etcd_target_package }}
-  package:
+  openshift_package:
     name: "{{ l_etcd_target_package }}"
     state: latest
 

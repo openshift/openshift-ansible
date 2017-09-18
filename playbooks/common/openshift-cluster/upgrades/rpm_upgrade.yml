@@ -10,7 +10,7 @@
 # should fix that
 
 - name: Upgrade master packages
-  package: name={{ master_pkgs | join(',') }} state=present
+  openshift_package: name={{ master_pkgs | join(',') }} state=present
   vars:
     master_pkgs:
       - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"
@@ -25,7 +25,7 @@
     - not openshift.common.is_atomic | bool
 
 - name: Upgrade node packages
-  package: name={{ node_pkgs | join(',') }} state=present
+  openshift_package: name={{ node_pkgs | join(',') }} state=present
   vars:
     node_pkgs:
       - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"

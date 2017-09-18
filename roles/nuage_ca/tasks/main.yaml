@@ -1,6 +1,6 @@
 ---
 - name: Install openssl
-  package: name=openssl state=present
+  openshift_package: name=openssl state=present
   when: not openshift.common.is_atomic | bool
 
 - name: Create CA directory

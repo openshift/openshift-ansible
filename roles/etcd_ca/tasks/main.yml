@@ -1,6 +1,6 @@
 ---
 - name: Install openssl
-  package: name=openssl state=present
+  openshift_package: name=openssl state=present
   when: not etcd_is_atomic | bool
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
