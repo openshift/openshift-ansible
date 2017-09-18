@@ -69,11 +69,11 @@
   include: bootstrap.yml
   when: openshift_node_bootstrap
 
+- include: registry_auth.yml
+
 - name: include standard node config
   include: config.yml
   when: not openshift_node_bootstrap
-
-- include: registry_auth.yml
 
 - name: Configure AWS Cloud Provider Settings
   lineinfile:
