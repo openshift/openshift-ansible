@@ -613,7 +613,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # WORKAROUND : If you must use an overlapping subnet, you can configure a non conflicting
 # docker0 CIDR range by adding '--bip=192.168.2.1/24' to DOCKER_NETWORK_OPTIONS
 # environment variable located in /etc/sysconfig/docker-network.
-# When upgrading these must be specificed!
+# When upgrading or scaling up the following must match whats in your master config!
+#  Inventory: master yaml field
+#  osm_cluster_network_cidr: clusterNetworkCIDR
+#  openshift_portal_net: serviceNetworkCIDR
+# When installing osm_cluster_network_cidr and openshift_portal_net must be set.
+# Sane examples are provided below.
 #osm_cluster_network_cidr=10.128.0.0/14
 #openshift_portal_net=172.30.0.0/16
 
@@ -635,7 +640,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure number of bits to allocate to each host’s subnet e.g. 9
 # would mean a /23 network on the host.
-# When upgrading this must be specificed!
+# When upgrading or scaling up the following must match whats in your master config!
+#  Inventory: master yaml field
+#  osm_host_subnet_length:  hostSubnetLength
+# When installing osm_host_subnet_length must be set. A sane example is provided below.
 #osm_host_subnet_length=9
 
 # Configure master API and console ports.

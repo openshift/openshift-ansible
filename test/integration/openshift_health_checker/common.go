@@ -25,7 +25,7 @@ func (p PlaybookTest) Run(t *testing.T) {
 	// A PlaybookTest is intended to be run in parallel with other tests.
 	t.Parallel()
 
-	cmd := exec.Command("ansible-playbook", "-i", "/dev/null", p.Path)
+	cmd := exec.Command("ansible-playbook", "-e", "testing_skip_some_requirements=1", "-i", "/dev/null", p.Path)
 	cmd.Env = append(os.Environ(), "ANSIBLE_FORCE_COLOR=1")
 	b, err := cmd.CombinedOutput()
 
