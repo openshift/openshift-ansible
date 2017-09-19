@@ -18,4 +18,5 @@ galaxy_info:
 dependencies:
 - role: lib_openshift
 - role: lib_os_firewall
+- role: lib_utils
 - role: etcd_common
