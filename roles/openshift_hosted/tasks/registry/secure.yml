@@ -1,7 +1,7 @@
 ---
 - name: Configure facts for docker-registry
   set_fact:
-    openshift_hosted_registry_routecertificates: "{{ ('routecertificates' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routecertificates, {}) }}"
+    openshift_hosted_registry_routecertificates: "{{ ('routecertificates' in openshift.hosted.registry.keys()) | ternary(openshift_hosted_registry_routecertificates, {}) }}"
     openshift_hosted_registry_routehost: "{{ ('routehost' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routehost, False) }}"
     openshift_hosted_registry_routetermination: "{{ ('routetermination' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routetermination, 'passthrough') }}"
 
