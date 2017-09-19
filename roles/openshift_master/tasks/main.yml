@@ -177,6 +177,8 @@
     local_facts:
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
+- include: registry_auth.yml
+
 - name: Install the systemd units
   include: systemd_units.yml
 
@@ -228,8 +230,6 @@
   notify:
   - restart master controllers
   when: openshift_master_bootstrap_enabled | default(False)
-
-- include: registry_auth.yml
 
 - include: set_loopback_context.yml
   when:
