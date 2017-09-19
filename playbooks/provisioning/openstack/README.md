@@ -14,6 +14,9 @@ etc.). The result is an environment ready for openshift-ansible.
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
 * Become (sudo) is not required.
 
+**NOTE**: You can use a Docker image with all dependencies set up.
+Find more in the [Deployment section](#deployment).
+
 ### Optional Dependencies for localhost
 **Note**: When using rhel images, `rhel-7-server-openstack-10-rpms` repository is required in order to install these packages.
 
@@ -443,6 +446,35 @@ floating IPs. In this mode you can not use a bastion node and should specify
 the dynamic inventory file in your ansible commands , like `-i openstack.py`.
 
 ## Deployment
+
+### Using Docker on the Ansible host
+
+If you don't want to worry about the dependencies, you can use the
+[OpenStack Control Host image][control-host-image].
+
+[control-host-image]: https://hub.docker.com/r/redhatcop/control-host-openstack/
+
+It has all the dependencies installed, but you'll need to map your
+code and credentials to it. Assuming your SSH keys live in `~/.ssh`
+and everything else is in your current directory (i.e. `ansible.cfg`,
+`keystonerc`, `inventory`, `openshift-ansible`,
+`openshift-ansible-contrib`), this is how you run the deployment:
+
+    sudo docker run -it -v ~/.ssh:/mnt/.ssh:Z \
+        -v $PWD:/root/openshift:Z \
+        -v $PWD/keystonerc:/root/.config/openstack/keystonerc.sh:Z \
+        redhatcop/control-host-openstack bash
+
+(feel free to replace `$PWD` with an actual path to your inventory and
+checkouts, but note that relative paths don't work)
+
+The first run may take a few minutes while the image is being
+downloaded. After that, you'll be inside the container and you can run
+the playbooks:
+
+    cd openshift
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
+
 
 ### Run the playbook
 
