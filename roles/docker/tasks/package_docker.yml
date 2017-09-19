@@ -4,7 +4,7 @@
   when: not openshift.common.is_atomic | bool
   register: curr_docker_version
   retries: 4
-  until: not curr_docker_version | failed
+  until: curr_docker_version | succeeded
   changed_when: false
 
 - name: Error out if Docker pre-installed but too old
