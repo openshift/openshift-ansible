@@ -31,7 +31,7 @@
   when:
   - openshift.common.version_gte_3_1_or_1_1
   - item.1.rc == 0
-  - "'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users | default([]) }}"
+  - ('system:serviceaccount:' + openshift_serviceaccounts_namespace + ':' + item.0) not in (item.1.stdout | from_yaml).users | default([])
   with_nested:
   - "{{ openshift_serviceaccounts_names }}"
   - "{{ scc_test.results }}"
