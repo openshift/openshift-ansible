@@ -14,4 +14,4 @@
                        | oo_openshift_env }}"
     openshift_env_structures:
     - 'openshift.hosted.router.*'
-  with_items: [hosted, logging, loggingops, metrics]
+  with_items: [hosted, logging, loggingops, metrics, prometheus]
