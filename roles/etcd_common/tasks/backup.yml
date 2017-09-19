@@ -36,7 +36,7 @@
 - name: Abort if insufficient disk space for etcd backup
   fail:
     msg: >
-      {{ l_etcd_disk_usage.stdout }} Kb disk space required for etcd backup,
+      {{ l_etcd_disk_usage.stdout|int*2 }} Kb disk space required for etcd backup,
       {{ l_avail_disk.stdout }} Kb available.
   when: l_etcd_disk_usage.stdout|int*2 > l_avail_disk.stdout|int
 
