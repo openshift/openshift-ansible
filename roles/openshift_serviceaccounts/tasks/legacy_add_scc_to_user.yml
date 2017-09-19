@@ -28,7 +28,9 @@
     dest: /tmp/openshift/scc.yaml
     line: "- system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}"
     insertafter: "^users:$"
-  when: "item.1.rc == 0 and 'system:serviceaccount:{{ openshift_serviceaccounts_namespace }}:{{ item.0 }}' not in {{ (item.1.stdout | from_yaml).users }}"
+  when:
+  - item.1.rc == 0
+  - ('system:serviceaccount:' + openshift_serviceaccounts_namespace + ':' + item.0) not in (item.1.stdout | from_yaml).users | default([])
   with_nested:
   - openshift_serviceaccounts_names
   - scc_test.results
