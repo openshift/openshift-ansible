@@ -98,7 +98,11 @@
   serial: 1
   tasks:
   - include_role:
-      name: etcd_upgrade
+      name: etcd
+      tasks_from: upgrade_image
+    vars:
+      r_etcd_common_etcd_runtime: "host"
+      etcd_peer: "{{ openshift.common.hostname }}"
     when:
     - ansible_distribution == 'Fedora'
     - not openshift.common.is_containerized | bool
