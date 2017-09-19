@@ -16,26 +16,6 @@ openshift_prometheus_image_alertbuffer: "openshift/prometheus-alert-buffer:v0.0.
 # additional prometheus rules file
 openshift_prometheus_additional_rules_file: null
 
-# All the required exports
-#openshift_prometheus_pv_exports:
-#  - prometheus
-#  - prometheus-alertmanager
-#  - prometheus-alertbuffer
-# PV template files and their created object names
-#openshift_prometheus_pv_data:
-#  - pv_name: prometheus
-#    pv_template: prom-pv-server.yml
-#    pv_label: Prometheus Server PV
-#  - pv_name: prometheus-alertmanager
-#    pv_template: prom-pv-alertmanager.yml
-#    pv_label: Prometheus Alertmanager PV
-#  - pv_name: prometheus-alertbuffer
-#    pv_template: prom-pv-alertbuffer.yml
-#    pv_label: Prometheus Alert Buffer PV
-
-# Hostname/IP of the NFS server. Currently defaults to first master
-#openshift_prometheus_nfs_server: "{{ groups.nfs.0 }}"
-
 # storage
 openshift_prometheus_storage_type: pvc
 openshift_prometheus_pvc_name: prometheus
