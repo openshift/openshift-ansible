@@ -44,6 +44,7 @@
     openshift_hosted_registry_volumes: []
     openshift_hosted_registry_env_vars: {}
     openshift_hosted_registry_edits:
+    glusterfs_nodes: "{{ groups.glusterfs }}"
     # These edits are being specified only to prevent 'changed' on rerun
     - key: spec.strategy.rollingParams
       value:

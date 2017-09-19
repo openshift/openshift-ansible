@@ -46,6 +46,48 @@
     mode: "2775"
     recurse: True
 
+#Create EP if we dont have gluster nodes in the cluster (no group defined) but e want to use glusterfs as backend
+- name: Generate GlusterFS registry endpoints
+  template:
+    src: "glusterfs-registry-endpoints.yml.j2"
+    dest: "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
+  when:
+   - "glusterfs_nodes | count == 0"
+   - openshift_hosted_registry_glusterfs_endpoints is defined
+
+- name: Copy GlusterFS registry service
+  template:
+    src: "glusterfs-registry-service.yml.j2"
+    dest: "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
+  when:
+   - "glusterfs_nodes | count == 0"
+   - openshift_hosted_registry_glusterfs_endpoints is defined
+
+
+- name: Create GlusterFS registry endpoints
+  oc_obj:
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    state: present
+    kind: endpoints
+    name: "glusterfs-{{ glusterfs_name }}-endpoints"
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
+  when:
+   - "glusterfs_nodes | count == 0"
+   - openshift_hosted_registry_glusterfs_endpoints is defined
+
+- name: Create GlusterFS registry service
+  oc_obj:
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    state: present
+    kind: service
+    name: "glusterfs-{{ glusterfs_name }}-endpoints"
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
+  when:
+   - "glusterfs_nodes | count == 0"
+   - openshift_hosted_registry_glusterfs_endpoints is defined
+
 - block:
   - name: Activate registry maintenance mode
     oc_env:
