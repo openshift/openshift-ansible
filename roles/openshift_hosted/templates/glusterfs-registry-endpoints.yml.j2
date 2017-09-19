@@ -6,7 +6,7 @@ metadata:
 subsets:
 - addresses:
 {% for ep in openshift_hosted_registry_glusterfs_endpoints %}
-  - ip: ep }}
+  - ip: {{ ep }}
 {% endfor %}
   ports:
   - port: 1

@@ -44,7 +44,6 @@
     openshift_hosted_registry_volumes: []
     openshift_hosted_registry_env_vars: {}
     openshift_hosted_registry_edits:
-    glusterfs_nodes: "{{ groups.glusterfs }}"
     # These edits are being specified only to prevent 'changed' on rerun
     - key: spec.strategy.rollingParams
       value:
@@ -56,6 +55,8 @@
       action: put
     openshift_hosted_registry_force:
     - False
+    glusterfs_nodes: "{{ groups.glusterfs | default([]) }}"
+    glusterfs_name: "{{ openshift_storage_glusterfs_name | default ('registry') }}"
 
 - name: Update registry environment variables when pushing via dns
   set_fact:
@@ -125,6 +126,61 @@
   when:
   - openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack', 'glusterfs']
 
+#Create EP if we dont have gluster nodes in the cluster (no group defined) but e want to use glusterfs as backend
+- name: Create temp mount directory
+  command: mktemp -d /tmp/openshift-glusterfs-registry-XXXXXX
+  register: mktemp
+  changed_when: False
+  check_mode: no
+
+- name: Generate GlusterFS registry endpoints
+  template:
+    src: "glusterfs-registry-endpoints.yml.j2"
+    dest: "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
+  when:
+  - "glusterfs_nodes | count == 0"
+  - openshift_hosted_registry_glusterfs_endpoints is defined
+
+- name: Copy GlusterFS registry service
+  template:
+    src: "glusterfs-registry-service.yml.j2"
+    dest: "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
+  when:
+  - "glusterfs_nodes | count == 0"
+  - openshift_hosted_registry_glusterfs_endpoints is defined
+
+
+- name: Create GlusterFS registry endpoints
+  oc_obj:
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    state: present
+    kind: endpoints
+    name: "glusterfs-{{ glusterfs_name }}-endpoints"
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
+  when:
+  - "glusterfs_nodes | count == 0"
+  - openshift_hosted_registry_glusterfs_endpoints is defined
+
+- name: Create GlusterFS registry service
+  oc_obj:
+    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
+    state: present
+    kind: service
+    name: "glusterfs-{{ glusterfs_name }}-endpoints"
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
+  when:
+  - "glusterfs_nodes | count == 0"
+  - openshift_hosted_registry_glusterfs_endpoints is defined
+
+- name: Delete temp mount directory
+  file:
+    dest: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
+  check_mode: no
+
 - name: Create OpenShift registry
   oc_adm_registry:
     name: "{{ openshift_hosted_registry_name }}"
@@ -172,3 +228,4 @@
 - include: storage/glusterfs.yml
   when:
   - openshift.hosted.registry.storage.kind | default(none) == 'glusterfs' or openshift.hosted.registry.storage.glusterfs.swap
+  - "glusterfs_nodes | count >= 1"
