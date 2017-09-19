@@ -72,7 +72,7 @@ def test_check_elasticsearch():
     assert_error_in_list('NoRunningPods', excinfo.value)
 
     # canned oc responses to match so all the checks pass
-    def exec_oc(cmd, args):
+    def exec_oc(cmd, args, **_):
         if '_cat/master' in cmd:
             return 'name logging-es'
         elif '/_nodes' in cmd:
@@ -97,7 +97,7 @@ def test_check_running_es_pods():
 
 def test_check_elasticsearch_masters():
     pods = [plain_es_pod]
-    check = canned_elasticsearch(task_vars_config_base, lambda *_: plain_es_pod['_test_master_name_str'])
+    check = canned_elasticsearch(task_vars_config_base, lambda *args, **_: plain_es_pod['_test_master_name_str'])
     assert not check.check_elasticsearch_masters(pods_by_name(pods))
 
 
@@ -117,7 +117,7 @@ def test_check_elasticsearch_masters():
 ])
 def test_check_elasticsearch_masters_error(pods, expect_error):
     test_pods = list(pods)
-    check = canned_elasticsearch(task_vars_config_base, lambda *_: test_pods.pop(0)['_test_master_name_str'])
+    check = canned_elasticsearch(task_vars_config_base, lambda *args, **_: test_pods.pop(0)['_test_master_name_str'])
     assert_error_in_list(expect_error, check.check_elasticsearch_masters(pods_by_name(pods)))
 
 
@@ -129,7 +129,7 @@ es_node_list = {
 
 
 def test_check_elasticsearch_node_list():
-    check = canned_elasticsearch(task_vars_config_base, lambda *_: json.dumps(es_node_list))
+    check = canned_elasticsearch(task_vars_config_base, lambda *args, **_: json.dumps(es_node_list))
     assert not check.check_elasticsearch_node_list(pods_by_name([plain_es_pod]))
 
 
@@ -151,13 +151,13 @@ def test_check_elasticsearch_node_list():
     ),
 ])
 def test_check_elasticsearch_node_list_errors(pods, node_list, expect_error):
-    check = canned_elasticsearch(task_vars_config_base, lambda cmd, args: json.dumps(node_list))
+    check = canned_elasticsearch(task_vars_config_base, lambda cmd, args, **_: json.dumps(node_list))
     assert_error_in_list(expect_error, check.check_elasticsearch_node_list(pods_by_name(pods)))
 
 
 def test_check_elasticsearch_cluster_health():
     test_health_data = [{"status": "green"}]
-    check = canned_elasticsearch(exec_oc=lambda *_: json.dumps(test_health_data.pop(0)))
+    check = canned_elasticsearch(exec_oc=lambda *args, **_: json.dumps(test_health_data.pop(0)))
     assert not check.check_es_cluster_health(pods_by_name([plain_es_pod]))
 
 
@@ -175,12 +175,12 @@ def test_check_elasticsearch_cluster_health():
 ])
 def test_check_elasticsearch_cluster_health_errors(pods, health_data, expect_error):
     test_health_data = list(health_data)
-    check = canned_elasticsearch(exec_oc=lambda *_: json.dumps(test_health_data.pop(0)))
+    check = canned_elasticsearch(exec_oc=lambda *args, **_: json.dumps(test_health_data.pop(0)))
     assert_error_in_list(expect_error, check.check_es_cluster_health(pods_by_name(pods)))
 
 
 def test_check_elasticsearch_diskspace():
-    check = canned_elasticsearch(exec_oc=lambda *_: 'IUse% Use%\n 3%  4%\n')
+    check = canned_elasticsearch(exec_oc=lambda *args, **_: 'IUse% Use%\n 3%  4%\n')
     assert not check.check_elasticsearch_diskspace(pods_by_name([plain_es_pod]))
 
 
@@ -199,5 +199,5 @@ def test_check_elasticsearch_diskspace():
     ),
 ])
 def test_check_elasticsearch_diskspace_errors(disk_data, expect_error):
-    check = canned_elasticsearch(exec_oc=lambda *_: disk_data)
+    check = canned_elasticsearch(exec_oc=lambda *args, **_: disk_data)
     assert_error_in_list(expect_error, check.check_elasticsearch_diskspace(pods_by_name([plain_es_pod])))

@@ -104,7 +104,7 @@ class LoggingIndexTime(LoggingCheck):
             "https://logging-es:9200/project.{namespace}*/_count?q=message:{uuid}"
         )
         exec_cmd = exec_cmd.format(pod_name=pod_name, namespace=self.logging_namespace(), uuid=uuid)
-        result = self.exec_oc(exec_cmd, [])
+        result = self.exec_oc(exec_cmd, [], save_as_name="query_for_uuid.json")
 
         try:
             count = json.loads(result)["count"]

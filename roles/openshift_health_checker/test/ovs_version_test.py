@@ -50,7 +50,7 @@ def test_ovs_package_version(openshift_release, expected_ovs_version):
         openshift_release=openshift_release,
         openshift_image_tag='v' + openshift_release,
     )
-    return_value = object()
+    return_value = {}  # note: check.execute_module modifies return hash contents
 
     def execute_module(module_name=None, module_args=None, *_):
         assert module_name == 'rpm_version'

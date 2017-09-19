@@ -72,7 +72,7 @@ class Elasticsearch(LoggingCheck):
         for pod_name in pods_by_name.keys():
             # Compare what each ES node reports as master and compare for split brain
             get_master_cmd = self._build_es_curl_cmd(pod_name, "https://localhost:9200/_cat/master")
-            master_name_str = self.exec_oc(get_master_cmd, [])
+            master_name_str = self.exec_oc(get_master_cmd, [], save_as_name="get_master_names.json")
             master_names = (master_name_str or '').split(' ')
             if len(master_names) > 1:
                 es_master_names.add(master_names[1])
@@ -113,7 +113,7 @@ class Elasticsearch(LoggingCheck):
 
         # get ES cluster nodes
         node_cmd = self._build_es_curl_cmd(list(pods_by_name.keys())[0], 'https://localhost:9200/_nodes')
-        cluster_node_data = self.exec_oc(node_cmd, [])
+        cluster_node_data = self.exec_oc(node_cmd, [], save_as_name="get_es_nodes.json")
         try:
             cluster_nodes = json.loads(cluster_node_data)['nodes']
         except (ValueError, KeyError):
@@ -142,7 +142,7 @@ class Elasticsearch(LoggingCheck):
         errors = []
         for pod_name in pods_by_name.keys():
             cluster_health_cmd = self._build_es_curl_cmd(pod_name, 'https://localhost:9200/_cluster/health?pretty=true')
-            cluster_health_data = self.exec_oc(cluster_health_cmd, [])
+            cluster_health_data = self.exec_oc(cluster_health_cmd, [], save_as_name='get_es_health.json')
             try:
                 health_res = json.loads(cluster_health_data)
                 if not health_res or not health_res.get('status'):
@@ -171,7 +171,7 @@ class Elasticsearch(LoggingCheck):
         errors = []
         for pod_name in pods_by_name.keys():
             df_cmd = 'exec {} -- df --output=ipcent,pcent /elasticsearch/persistent'.format(pod_name)
-            disk_output = self.exec_oc(df_cmd, [])
+            disk_output = self.exec_oc(df_cmd, [], save_as_name='get_pv_diskspace.json')
             lines = disk_output.splitlines()
             # expecting one header looking like 'IUse% Use%' and one body line
             body_re = r'\s*(\d+)%?\s+(\d+)%?\s*$'
