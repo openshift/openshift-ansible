@@ -1,6 +1,9 @@
 ---
 - set_fact:
-    l_use_crio: "{{ openshift_use_crio | default(false) }}"
+    l_use_crio_only: "{{ openshift_use_crio_only | default(false) }}"
+    l_is_system_container_image: "{{ openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool }}"
+- set_fact:
+    l_use_cli_atomic_image: "{{ l_use_crio_only or l_is_system_container_image }}"
 
 - name: Install clients
   package: name={{ openshift.common.service_type }}-clients state=present
@@ -20,7 +23,7 @@
       backend: "docker"
   when:
   - openshift.common.is_containerized | bool
-  - not l_use_crio
+  - not l_use_cli_atomic_image | bool
 
 - block:
   - name: Pull CLI Image
@@ -36,7 +39,7 @@
       backend: "atomic"
   when:
   - openshift.common.is_containerized | bool
-  - l_use_crio
+  - l_use_cli_atomic_image | bool
 
 - name: Reload facts to pick up installed OpenShift version
   openshift_facts:
