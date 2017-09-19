@@ -128,6 +128,8 @@
   when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
+- include: registry_auth.yml
+
 - name: Install the systemd units
   include: systemd_units.yml
 
@@ -163,8 +165,6 @@
     - restart master
     - restart master api
     - restart master controllers
-
-- include: registry_auth.yml
 
 - include: set_loopback_context.yml
   when: openshift.common.version_gte_3_2_or_1_2
