@@ -20,8 +20,8 @@ r_openshift_master_os_firewall_allow:
   port: 4001/tcp
   cond: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 
-oreg_url: ''
-oreg_host: "{{ oreg_url.split('/')[0] if '.' in oreg_url.split('/')[0] else '' }}"
+# oreg_url is defined by user input
+oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
 oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
