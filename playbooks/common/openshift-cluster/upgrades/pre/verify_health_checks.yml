@@ -11,3 +11,4 @@
       checks:
       - disk_availability
       - memory_availability
+      - docker_image_availability
