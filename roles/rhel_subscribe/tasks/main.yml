@@ -41,15 +41,19 @@
   redhat_subscription:
     username: "{{ rhel_subscription_user }}"
     password: "{{ rhel_subscription_pass }}"
+  register: rh_subscription
+  until: rh_subscription | succeeded
 
 - name: Retrieve the OpenShift Pool ID
   command: subscription-manager list --available --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_id
+  until: openshift_pool_id | succeeded
   changed_when: False
 
 - name: Determine if OpenShift Pool Already Attached
   command: subscription-manager list --consumed --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_attached
+  until: openshift_pool_attached | succeeded
   changed_when: False
   when: openshift_pool_id.stdout == ''
 
@@ -59,6 +63,8 @@
 
 - name: Attach to OpenShift Pool
   command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
+  register: subscribe_pool
+  until: subscribe_pool | succeeded
   when: openshift_pool_id.stdout != ''
 
 - include: enterprise.yml
