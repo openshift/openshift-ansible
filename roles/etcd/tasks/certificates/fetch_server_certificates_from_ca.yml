@@ -1,8 +1,4 @@
 ---
-- include: ../ca/deploy.yml
-  when:
-  - etcd_ca_setup | default(True) | bool
-
 - name: Install etcd
   package:
     name: "etcd{{ '-' + etcd_version if etcd_version is defined else '' }}"
