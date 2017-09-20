@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.38
+Version:        3.6.173.0.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Sep 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.39-1
+- 
+
 * Wed Sep 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.38-1
 - reverse order between router cert generation (mewt.fr@gmail.com)
 - double the required disk space for etcd backup (jchaloup@redhat.com)
