@@ -23,8 +23,6 @@ def task_vars():
 @pytest.mark.parametrize('deployment_type, is_containerized, group_names, expect_active', [
     ("origin", True, [], True),
     ("openshift-enterprise", True, [], True),
-    ("enterprise", True, [], False),
-    ("online", True, [], False),
     ("invalid", True, [], False),
     ("", True, [], False),
     ("origin", False, [], False),
@@ -101,6 +99,39 @@ def test_all_images_unavailable(task_vars):
 
     assert actual['failed']
     assert "required Docker images are not available" in actual['msg']
+
+
+def test_no_known_registries():
+    def execute_module(module_name=None, *_):
+        if module_name == "command":
+            return {
+                'failed': True,
+            }
+
+        return {
+            'changed': False,
+        }
+
+    def mock_known_docker_registries():
+        return []
+
+    dia = DockerImageAvailability(execute_module, task_vars=dict(
+        openshift=dict(
+            common=dict(
+                service_type='origin',
+                is_containerized=False,
+                is_atomic=False,
+            ),
+            docker=dict(additional_registries=["docker.io"]),
+        ),
+        openshift_deployment_type="openshift-enterprise",
+        openshift_image_tag='latest',
+        group_names=['nodes', 'masters'],
+    ))
+    dia.known_docker_registries = mock_known_docker_registries
+    actual = dia.run()
+    assert actual['failed']
+    assert "Unable to retrieve any docker registries." in actual['msg']
 
 
 @pytest.mark.parametrize("message,extra_words", [

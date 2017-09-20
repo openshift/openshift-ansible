@@ -1,7 +1,4 @@
 ---
 # origin uses community packages named 'origin'
-# online currently uses 'openshift' packages
-# enterprise is used for OSE 3.0 < 3.1 which uses packages named 'openshift'
-# atomic-enterprise uses Red Hat packages named 'atomic-openshift'
-# openshift-enterprise uses Red Hat packages named 'atomic-openshift' starting with OSE 3.1
-known_openshift_deployment_types: ['origin', 'online', 'enterprise', 'atomic-enterprise', 'openshift-enterprise']
+# openshift-enterprise uses Red Hat packages named 'atomic-openshift'
+known_openshift_deployment_types: ['origin', 'openshift-enterprise']

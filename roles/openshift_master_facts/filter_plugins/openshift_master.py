@@ -6,10 +6,6 @@ Custom filters for use in openshift-master
 import copy
 import sys
 
-# pylint import-error disabled because pylint cannot find the package
-# when installed in a virtualenv
-from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
-
 from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 from ansible.plugins.filter.core import to_bool as ansible_bool
@@ -82,23 +78,8 @@ class IdentityProviderBase(object):
         self._allow_additional = True
 
     @staticmethod
-    def validate_idp_list(idp_list, openshift_version, deployment_type):
+    def validate_idp_list(idp_list):
         ''' validates a list of idps '''
-        login_providers = [x.name for x in idp_list if x.login]
-
-        multiple_logins_unsupported = False
-        if len(login_providers) > 1:
-            if deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']:
-                if LooseVersion(openshift_version) < LooseVersion('3.2'):
-                    multiple_logins_unsupported = True
-            if deployment_type in ['origin']:
-                if LooseVersion(openshift_version) < LooseVersion('1.2'):
-                    multiple_logins_unsupported = True
-        if multiple_logins_unsupported:
-            raise errors.AnsibleFilterError("|failed multiple providers are "
-                                            "not allowed for login. login "
-                                            "providers: {0}".format(', '.join(login_providers)))
-
         names = [x.name for x in idp_list]
         if len(set(names)) != len(names):
             raise errors.AnsibleFilterError("|failed more than one provider configured with the same name")
@@ -471,7 +452,7 @@ class FilterModule(object):
     ''' Custom ansible filters for use by the openshift_master role'''
 
     @staticmethod
-    def translate_idps(idps, api_version, openshift_version, deployment_type):
+    def translate_idps(idps, api_version):
         ''' Translates a list of dictionaries into a valid identityProviders config '''
         idp_list = []
 
@@ -487,7 +468,7 @@ class FilterModule(object):
             idp_inst.set_provider_items()
             idp_list.append(idp_inst)
 
-        IdentityProviderBase.validate_idp_list(idp_list, openshift_version, deployment_type)
+        IdentityProviderBase.validate_idp_list(idp_list)
         return u(yaml.dump([idp.to_dict() for idp in idp_list],
                            allow_unicode=True,
                            default_flow_style=False,

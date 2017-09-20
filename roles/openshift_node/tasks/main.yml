@@ -2,7 +2,8 @@
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
-    - (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+    - (not ansible_selinux or ansible_selinux.status != 'enabled')
+    - deployment_type == 'openshift-enterprise'
     - not openshift_use_crio | default(false)
 
 - name: setup firewall
