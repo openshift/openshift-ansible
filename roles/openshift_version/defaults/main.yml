@@ -1,2 +1,3 @@
 ---
 openshift_protect_installed_version: True
+version_install_base_package: False
