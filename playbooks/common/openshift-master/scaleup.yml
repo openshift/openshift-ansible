@@ -43,6 +43,8 @@
     delay: 1
     changed_when: false
 
+- include: ../openshift-master/set_network_facts.yml
+
 - include: ../openshift-master/config.yml
 
 - include: ../openshift-loadbalancer/config.yml
