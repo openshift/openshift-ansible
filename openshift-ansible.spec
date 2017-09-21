@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.126.0%{?dist}
+Release:        0.127.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,96 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Sep 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.127.0
+- Updating to always configure api aggregation with installation
+  (ewolinet@redhat.com)
+- Do not reconcile in >= 3.7 (simo@redhat.com)
+- Cleanup old deployment types (mgugino@redhat.com)
+- crio: ensure no default CNI configuration files are left
+  (gscrivan@redhat.com)
+- node: specify the DNS domain (gscrivan@redhat.com)
+- more retries on repoquery_cmd (lmeyer@redhat.com)
+- fix etcd back message error (jchaloup@redhat.com)
+- openshift_checks: enable providing file outputs (lmeyer@redhat.com)
+- Fix registry auth task ordering (mgugino@redhat.com)
+- Prometheus role fixes (zgalor@redhat.com)
+- papr: Update inventory to include required vars (smilner@redhat.com)
+- testing: Skip net vars on integration tests (smilner@redhat.com)
+- inventory: Update network variable doc (smilner@redhat.com)
+- installer image: use tmp file for vaultpass (lmeyer@redhat.com)
+- system container: use ansible root as cwd (lmeyer@redhat.com)
+- openshift_sanitize_inventory: Check for required vars (smilner@redhat.com)
+- No conversion to boolean and no quoting for include_granted_scopes.
+  (jpazdziora@redhat.com)
+- Correct firewall install for openshift-nfs (rteague@redhat.com)
+- inventory: Update versions to 3.7 (smilner@redhat.com)
+- Port origin-gce roles for cluster setup to copy AWS provisioning
+  (ccoleman@redhat.com)
+- Bug 1491636 - honor openshift_logging_es_ops_nodeselector
+  (jwozniak@redhat.com)
+- Setup tuned after the node has been restarted. (jmencak@redhat.com)
+- Only attempt to start iptables on hosts in the current batch
+  (sdodson@redhat.com)
+- Removing setting of pod presets (ewolinet@redhat.com)
+- cri-o: Fix Fedora image name (smilner@redhat.com)
+- add retry on repoquery_cmd (lmeyer@redhat.com)
+- add retries to repoquery module (lmeyer@redhat.com)
+- Rework openshift-cluster into deploy_cluster.yml (rteague@redhat.com)
+- inventory generate: fix config doc (lmeyer@redhat.com)
+- inventory generate: remove refs to openshift_cluster_user (lmeyer@redhat.com)
+- inventory generate: always use kubeconfig, no login (lmeyer@redhat.com)
+- Scaffold out the entire build defaults hash (tbielawa@redhat.com)
+- Use openshift.common.ip rather than ansible_default_ipv4 in etcd migration
+  playbook. (abutcher@redhat.com)
+- Add IMAGE_VERSION to the image stream tag source (sdodson@redhat.com)
+- Add loadbalancer config entry point (rteague@redhat.com)
+- pull openshift_master deps out into a play (jchaloup@redhat.com)
+- Don't assume storage_migration control variables are already boolean
+  (mchappel@redhat.com)
+- upgrade: Updates warning on missing required variables (smilner@redhat.com)
+- Update master config with new client urls during etcd scaleup.
+  (abutcher@redhat.com)
+- Increase rate limiting in journald.conf (maszulik@redhat.com)
+- Correct logic for openshift_hosted_*_wait (rteague@redhat.com)
+- Adding mangagement-admin SC to admin role for management-infra project
+  (ewolinet@redhat.com)
+- Only install base openshift package on masters and nodes (mgugino@redhat.com)
+- Workaround Ansible Jinja2 delimiter warning (rteague@redhat.com)
+- openshift-checks: add role symlink (lmeyer@redhat.com)
+- double the required disk space for etcd backup (jchaloup@redhat.com)
+- openshift_health_check: allow disabling all checks (lmeyer@redhat.com)
+- docker_image_availability: fix local image search (lmeyer@redhat.com)
+- docker_image_availability: probe registry connectivity (lmeyer@redhat.com)
+- openshift_checks: add retries in python (lmeyer@redhat.com)
+- add inventory-generator under new sub pkg (jvallejo@redhat.com)
+- Re-enabling new tuned profile hierarchy (PR5089) (jmencak@redhat.com)
+- Add `openshift_node_open_ports` to allow arbitrary firewall exposure
+  (ccoleman@redhat.com)
+- Fix: authenticated registry support for containerized hosts
+  (mgugino@redhat.com)
+- [Proposal] OpenShift-Ansible Proposal Process (rteague@redhat.com)
+- Improve searching when conditions for Jinja2 delimiters (rteague@redhat.com)
+- Clarify requirement of having etcd group (sdodson@redhat.com)
+- add health checks 3_6,3_7 upgrade path (jvallejo@redhat.com)
+- container-engine: Allow full image override (smilner@redhat.com)
+- Add openshift_public_hostname length check (mgugino@redhat.com)
+- Skip failure dedup instead of crashing (rhcarvalho@gmail.com)
+- Properly quote "true" and "false" strings for include_granted_scopes.
+  (jpazdziora@redhat.com)
+- Move sysctl.conf customizations to a separate file (jdesousa@redhat.com)
+- Fix new_master or new_node fail check (denverjanke@gmail.com)
+- [Proposal] OpenShift-Ansible Playbook Consolidation (rteague@redhat.com)
+- GlusterFS: Allow option to use or ignore default node selectors
+  (jarrpa@redhat.com)
+- GlusterFS: Clarify heketi URL documentation (jarrpa@redhat.com)
+- GlusterFS: Add files/templates for v3.7 (jarrpa@redhat.com)
+- Support setting annotations on Hawkular route (hansmi@vshn.ch)
+- add additional preflight checks to upgrade path (jvallejo@redhat.com)
+- hot fix for env variable resolve (m.judeikis@gmail.com)
+- GlusterFS: Correct firewall port names (jarrpa@redhat.com)
+- Make RH subscription more resilient to temporary failures
+  (lhuard@amadeus.com)
+
 * Mon Sep 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.126.0
 - Fix rpm version logic for hosts (mgugino@redhat.com)
 - Revert back to hostnamectl and previous default of not setting hostname
