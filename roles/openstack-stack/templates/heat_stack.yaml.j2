@@ -577,14 +577,14 @@ resources:
           secgrp:
             - { get_resource: lb-secgrp }
             - { get_resource: common-secgrp }
-    {% if not provider_network %}
+{% if not provider_network %}
           floating_network: {{ external_network }}
-    {% endif %}
+{% endif %}
           volume_size: {{ lb_volume_size }}
-    {% if not provider_network %}
+{% if not provider_network %}
     depends_on:
       - interface
-    {% endif %}
+{% endif %}
 {% endif %}
 
   masters:
