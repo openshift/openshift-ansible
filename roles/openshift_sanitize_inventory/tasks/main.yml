@@ -20,6 +20,7 @@
 # Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1451023
 - when:
     - not testing_skip_some_requirements|default(False)|bool
+    - groups['new_masters'] | default([]) | length > 0
   assert:
     that:
       - "osm_cluster_network_cidr is defined"
