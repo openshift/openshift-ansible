@@ -73,7 +73,6 @@ openshift_logging_kibana_ops_ca: ""
 openshift_logging_fluentd_nodeselector: {'logging-infra-fluentd': 'true'}
 openshift_logging_fluentd_cpu_limit: 100m
 openshift_logging_fluentd_memory_limit: 512Mi
-openshift_logging_fluentd_es_copy: false
 openshift_logging_fluentd_journal_source: ""
 openshift_logging_fluentd_journal_read_from_head: ""
 openshift_logging_fluentd_hosts: ['--all']

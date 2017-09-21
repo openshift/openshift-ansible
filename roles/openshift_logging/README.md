@@ -62,7 +62,6 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_fluentd_nodeselector`: The node selector that the Fluentd daemonset uses to determine where to deploy to. Defaults to '"logging-infra-fluentd": "true"'.
 - `openshift_logging_fluentd_cpu_limit`: The CPU limit for Fluentd pods. Defaults to '100m'.
 - `openshift_logging_fluentd_memory_limit`: The memory limit for Fluentd pods. Defaults to '512Mi'.
-- `openshift_logging_fluentd_es_copy`: Whether or not to use the ES_COPY feature for Fluentd (DEPRECATED). Defaults to 'False'.
 - `openshift_logging_fluentd_use_journal`: *DEPRECATED - DO NOT USE* Fluentd will automatically detect whether or not Docker is using the journald log driver.
 - `openshift_logging_fluentd_journal_read_from_head`: If empty, Fluentd will use its internal default, which is false.
 - `openshift_logging_fluentd_hosts`: List of nodes that should be labeled for Fluentd to be deployed to. Defaults to ['--all'].

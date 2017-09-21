@@ -50,8 +50,6 @@ openshift_logging_fluentd_aggregating_key_path: none
 openshift_logging_fluentd_aggregating_passphrase: none
 
 ### Deprecating in 3.6
-openshift_logging_fluentd_es_copy: false
-
 # following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
 #fluentd_config_contents:
 #fluentd_throttle_contents:
