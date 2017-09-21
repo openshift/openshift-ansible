@@ -62,7 +62,7 @@
   when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
 
 - name: Attach to OpenShift Pool
-  command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
+  command: subscription-manager attach --pool {{ openshift_pool_id.stdout_lines[0] }}
   register: subscribe_pool
   until: subscribe_pool | succeeded
   when: openshift_pool_id.stdout != ''
