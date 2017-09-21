@@ -40,18 +40,17 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            namespace=dict(type="str", required=True),
+            namespace=dict(type="str", required=False),
             config_file=dict(type="str", required=True),
             cmd=dict(type="str", required=True),
             extra_args=dict(type="list", default=[]),
         ),
     )
 
-    cmd = [
-        locate_oc_binary(),
-        '--config', module.params["config_file"],
-        '-n', module.params["namespace"],
-    ] + shlex.split(module.params["cmd"])
+    cmd = [locate_oc_binary(), '--config', module.params["config_file"]]
+    if module.params["namespace"]:
+        cmd += ['-n', module.params["namespace"]]
+    cmd += shlex.split(module.params["cmd"]) + module.params["extra_args"]
 
     failed = True
     try:
