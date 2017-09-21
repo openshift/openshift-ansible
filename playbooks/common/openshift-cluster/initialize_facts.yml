@@ -94,7 +94,7 @@
       with_items:
       - iproute
       - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'python-dbus' }}"
-      - PyYAML
+      - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - yum-utils
 
     - name: Ensure various deps for running system containers are installed
