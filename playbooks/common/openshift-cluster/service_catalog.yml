@@ -1,16 +1,4 @@
 ---
-
-- name: Update Master configs
-  hosts: oo_masters
-  serial: 1
-  tasks:
-  - block:
-    - include_role:
-        name: openshift_service_catalog
-        tasks_from: wire_aggregator
-      vars:
-        first_master: "{{ groups.oo_first_master[0] }}"
-
 - name: Service Catalog
   hosts: oo_first_master
   roles:

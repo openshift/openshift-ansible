@@ -57,6 +57,17 @@
   tags:
   - hosted
 
+- name: Configure API Aggregation on masters
+  hosts: oo_masters
+  serial: 1
+  tasks:
+  - block:
+    - include_role:
+        name: openshift_service_catalog
+        tasks_from: wire_aggregator
+      vars:
+        first_master: "{{ groups.oo_first_master[0] }}"
+
 - include: service_catalog.yml
   when:
   - openshift_enable_service_catalog | default(false) | bool
