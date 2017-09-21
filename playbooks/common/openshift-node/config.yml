@@ -65,12 +65,16 @@
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
   roles:
-  - role: flannel
-    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+  - role: openshift_facts
+  - role: openshift_etcd_facts
+  - role: openshift_etcd_client_certificates
+    etcd_cert_prefix: flannel.etcd-
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
     etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
+  - role: flannel
+    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
     when: openshift_use_flannel | default(false) | bool
   - role: calico
     when: openshift_use_calico | default(false) | bool

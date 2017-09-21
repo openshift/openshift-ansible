@@ -1,0 +1,4 @@
+---
+- include_role:
+    name: etcd
+    tasks_from: client_certificates
