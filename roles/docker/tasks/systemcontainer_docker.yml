@@ -1,4 +1,5 @@
 ---
+
 # If docker_options are provided we should fail. We should not install docker and ignore
 # the users configuration. NOTE: docker_options == inventory:openshift_docker_options
 - name: Fail quickly if openshift_docker_options are set
@@ -89,6 +90,14 @@
     - name: Set to default prepend
       set_fact:
         l_docker_image_prepend: "gscrivano"
+        l_docker_image_tag: "latest"
+
+    - name: Set container engine image tag
+      set_fact:
+        l_docker_image_tag: "{{ openshift_image_tag }}"
+      when:
+        - openshift_deployment_type == 'openshift-enterprise'
+        - openshift_image_tag is defined
 
     - name: Use Red Hat Registry for image when distribution is Red Hat
       set_fact:
@@ -102,7 +111,7 @@
 
     - name: Set the full image name
       set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:{{ l_docker_image_tag }}"
 
     # For https://github.com/openshift/openshift-ansible/pull/5354#issuecomment-328552959
     - name: Use a specific image if requested
