@@ -16,7 +16,7 @@ class EtcdVolume(OpenShiftCheck):
 
     def is_active(self):
         etcd_hosts = self.get_var("groups", "etcd", default=[]) or self.get_var("groups", "masters", default=[]) or []
-        is_etcd_host = self.get_var("ansible_ssh_host") in etcd_hosts
+        is_etcd_host = self.get_var("ansible_host") in etcd_hosts
         return super(EtcdVolume, self).is_active() and is_etcd_host
 
     def run(self):
