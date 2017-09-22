@@ -1,6 +1,7 @@
 ---
 
 ansible_service_broker_remove: false
+ansible_service_broker_install: false
 ansible_service_broker_log_level: info
 ansible_service_broker_output_request: false
 ansible_service_broker_recovery: true
