@@ -8,9 +8,6 @@
 
 # TODO: If the sdn package isn't already installed this will install it, we
 # should fix that
-- debug: var=avail_openshift_version
-- debug: var=openshift_pkg_version
-- pause:
 - name: Upgrade master packages
   package: name={{ master_pkgs | join(',') }} state=present
   vars:
