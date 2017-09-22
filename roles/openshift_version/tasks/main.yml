@@ -166,7 +166,9 @@
     - set_fact:
         openshift_pkg_version: -{{ openshift_version }}
 
-    when: openshift_pkg_version is not defined
+    when:
+    - openshift_pkg_version is not defined
+    - openshift_upgrade_target is not defined
 
   - fail:
       msg: openshift_version role was unable to set openshift_version
@@ -181,7 +183,10 @@
   - fail:
       msg: openshift_version role was unable to set openshift_pkg_version
     name: Abort if openshift_pkg_version was not set
-    when: openshift_pkg_version is not defined
+    when:
+    - openshift_pkg_version is not defined
+    - openshift_upgrade_target is not defined
+
 
   - fail:
       msg: "No OpenShift version available; please ensure your systems are fully registered and have access to appropriate yum repositories."

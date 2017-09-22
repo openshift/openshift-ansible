@@ -27,13 +27,17 @@
 
   - name: Set fact avail_openshift_version
     set_fact:
-      avail_openshift_version: "{{ repoquery_out.results.versions.available_versions.0 }}"
+      avail_openshift_version: "{{ repoquery_out.results.versions.available_versions_full.0 }}"
+  - name: Set openshift_pkg_version when not specified
+    set_fact:
+      openshift_pkg_version: "-{{ repoquery_out.results.versions.available_versions_full.0 }}"
+    when: openshift_pkg_version | default('') == ''
 
   - name: Verify OpenShift RPMs are available for upgrade
     fail:
       msg: "OpenShift {{ avail_openshift_version }} is available, but {{ openshift_upgrade_target }} or greater is required"
     when:
-    - avail_openshift_version | default('0.0', True) | version_compare(openshift_release, '<')
+    - openshift_pkg_version | default('0.0', True) | version_compare(openshift_release, '<')
 
 - name: Fail when openshift version does not meet minium requirement for Origin upgrade
   fail:
