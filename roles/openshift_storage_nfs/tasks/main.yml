@@ -31,9 +31,9 @@
     group: nfsnobody
   with_items:
     - "{{ openshift.hosted.registry }}"
-    - "{{ openshift.hosted.metrics }}"
-    - "{{ openshift.hosted.logging }}"
-    - "{{ openshift.hosted.loggingops }}"
+    - "{{ openshift.metrics }}"
+    - "{{ openshift.logging }}"
+    - "{{ openshift.loggingops }}"
     - "{{ openshift.hosted.etcd }}"
 
 - name: Configure exports

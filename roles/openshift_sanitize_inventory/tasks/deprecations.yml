@@ -1,0 +1,21 @@
+---
+
+- name: Check for usage of deprecated variables
+  set_fact:
+    __deprecation_message: "{{ __deprecation_message | default([]) }} + ['{{ __deprecation_header }} {{ item }} is a deprecated variable and will be no longer be used in the next minor release. Please update your inventory accordingly.']"
+  when:
+  - hostvars[inventory_hostname][item] is defined
+  with_items: "{{ __warn_deprecated_vars }}"
+
+- block:
+  - debug: msg="{{__deprecation_message}}"
+  - pause:
+      seconds: "{{ 10 }}"
+  when:
+  - __deprecation_message | default ('') | length > 0
+
+# for with_fileglob Ansible resolves the path relative to the roles/<rolename>/files directory
+- name: Assign deprecated variables to correct counterparts
+  include: "{{ item }}"
+  with_fileglob:
+  - "../tasks/__deprecations_*.yml"

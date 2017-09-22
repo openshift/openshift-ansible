@@ -1,4 +1,8 @@
 ---
+# We should print out deprecations prior to any failures so that if a play does fail for other reasons
+# the user would also be aware of any deprecated variables they should note to adjust
+- include: deprecations.yml
+
 - name: Abort when conflicting deployment type variables are set
   when:
     - deployment_type is defined

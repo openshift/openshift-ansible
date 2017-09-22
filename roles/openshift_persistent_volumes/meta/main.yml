@@ -9,5 +9,4 @@ galaxy_info:
   - name: EL
     versions:
     - 7
-dependencies:
-- role: openshift_hosted_facts
+dependencies: {}

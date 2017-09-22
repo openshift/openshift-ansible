@@ -73,3 +73,11 @@
   - openshift_enable_service_catalog | default(false) | bool
   tags:
   - servicecatalog
+
+- name: Print deprecated variable warning message if necessary
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - debug: msg="{{__deprecation_message}}"
+    when:
+    - __deprecation_message | default ('') | length > 0

@@ -8,9 +8,10 @@
 
 - name: Set hosted facts
   openshift_facts:
-    role: hosted
+    role: "{{ item }}"
     openshift_env: "{{ hostvars
                        | oo_merge_hostvars(vars, inventory_hostname)
                        | oo_openshift_env }}"
     openshift_env_structures:
     - 'openshift.hosted.router.*'
+  with_items: [hosted, logging, loggingops, metrics]

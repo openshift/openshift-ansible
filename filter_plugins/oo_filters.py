@@ -716,6 +716,100 @@ def oo_openshift_env(hostvars):
 
 
 # pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements
+def oo_component_persistent_volumes(hostvars, groups, component):
+    """ Generate list of persistent volumes based on oo_openshift_env
+        storage options set in host variables for a specific component.
+    """
+    if not issubclass(type(hostvars), dict):
+        raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+    if not issubclass(type(groups), dict):
+        raise errors.AnsibleFilterError("|failed expects groups is a dict")
+
+    persistent_volume = None
+
+    if component in hostvars['openshift']:
+        if 'storage' in hostvars['openshift'][component]:
+            params = hostvars['openshift'][component]['storage']
+            kind = params['kind']
+            create_pv = params['create_pv']
+            if kind is not None and create_pv:
+                if kind == 'nfs':
+                    host = params['host']
+                    if host is None:
+                        if 'oo_nfs_to_config' in groups and len(groups['oo_nfs_to_config']) > 0:
+                            host = groups['oo_nfs_to_config'][0]
+                        else:
+                            raise errors.AnsibleFilterError("|failed no storage host detected")
+                    directory = params['nfs']['directory']
+                    volume = params['volume']['name']
+                    path = directory + '/' + volume
+                    size = params['volume']['size']
+                    if 'labels' in params:
+                        labels = params['labels']
+                    else:
+                        labels = dict()
+                    access_modes = params['access']['modes']
+                    persistent_volume = dict(
+                        name="{0}-volume".format(volume),
+                        capacity=size,
+                        labels=labels,
+                        access_modes=access_modes,
+                        storage=dict(
+                            nfs=dict(
+                                server=host,
+                                path=path)))
+
+                elif kind == 'openstack':
+                    volume = params['volume']['name']
+                    size = params['volume']['size']
+                    if 'labels' in params:
+                        labels = params['labels']
+                    else:
+                        labels = dict()
+                    access_modes = params['access']['modes']
+                    filesystem = params['openstack']['filesystem']
+                    volume_id = params['openstack']['volumeID']
+                    persistent_volume = dict(
+                        name="{0}-volume".format(volume),
+                        capacity=size,
+                        labels=labels,
+                        access_modes=access_modes,
+                        storage=dict(
+                            cinder=dict(
+                                fsType=filesystem,
+                                volumeID=volume_id)))
+
+                elif kind == 'glusterfs':
+                    volume = params['volume']['name']
+                    size = params['volume']['size']
+                    if 'labels' in params:
+                        labels = params['labels']
+                    else:
+                        labels = dict()
+                    access_modes = params['access']['modes']
+                    endpoints = params['glusterfs']['endpoints']
+                    path = params['glusterfs']['path']
+                    read_only = params['glusterfs']['readOnly']
+                    persistent_volume = dict(
+                        name="{0}-volume".format(volume),
+                        capacity=size,
+                        labels=labels,
+                        access_modes=access_modes,
+                        storage=dict(
+                            glusterfs=dict(
+                                endpoints=endpoints,
+                                path=path,
+                                readOnly=read_only)))
+
+                elif not (kind == 'object' or kind == 'dynamic'):
+                    msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
+                        kind,
+                        component)
+                    raise errors.AnsibleFilterError(msg)
+    return persistent_volume
+
+
+# pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements
 def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
     """ Generate list of persistent volumes based on oo_openshift_env
         storage options set in host variables.
@@ -734,82 +828,120 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
             if 'storage' in hostvars['openshift']['hosted'][component]:
                 params = hostvars['openshift']['hosted'][component]['storage']
                 kind = params['kind']
-                create_pv = params['create_pv']
-                if kind is not None and create_pv:
-                    if kind == 'nfs':
-                        host = params['host']
-                        if host is None:
-                            if 'oo_nfs_to_config' in groups and len(groups['oo_nfs_to_config']) > 0:
-                                host = groups['oo_nfs_to_config'][0]
+                if 'create_pv' in params:
+                    create_pv = params['create_pv']
+                    if kind is not None and create_pv:
+                        if kind == 'nfs':
+                            host = params['host']
+                            if host is None:
+                                if 'oo_nfs_to_config' in groups and len(groups['oo_nfs_to_config']) > 0:
+                                    host = groups['oo_nfs_to_config'][0]
+                                else:
+                                    raise errors.AnsibleFilterError("|failed no storage host detected")
+                            directory = params['nfs']['directory']
+                            volume = params['volume']['name']
+                            path = directory + '/' + volume
+                            size = params['volume']['size']
+                            if 'labels' in params:
+                                labels = params['labels']
                             else:
-                                raise errors.AnsibleFilterError("|failed no storage host detected")
-                        directory = params['nfs']['directory']
-                        volume = params['volume']['name']
-                        path = directory + '/' + volume
-                        size = params['volume']['size']
-                        if 'labels' in params:
-                            labels = params['labels']
-                        else:
-                            labels = dict()
-                        access_modes = params['access']['modes']
-                        persistent_volume = dict(
-                            name="{0}-volume".format(volume),
-                            capacity=size,
-                            labels=labels,
-                            access_modes=access_modes,
-                            storage=dict(
-                                nfs=dict(
-                                    server=host,
-                                    path=path)))
-                        persistent_volumes.append(persistent_volume)
-                    elif kind == 'openstack':
-                        volume = params['volume']['name']
-                        size = params['volume']['size']
-                        if 'labels' in params:
-                            labels = params['labels']
-                        else:
-                            labels = dict()
-                        access_modes = params['access']['modes']
-                        filesystem = params['openstack']['filesystem']
-                        volume_id = params['openstack']['volumeID']
-                        persistent_volume = dict(
-                            name="{0}-volume".format(volume),
-                            capacity=size,
-                            labels=labels,
-                            access_modes=access_modes,
-                            storage=dict(
-                                cinder=dict(
-                                    fsType=filesystem,
-                                    volumeID=volume_id)))
-                        persistent_volumes.append(persistent_volume)
-                    elif kind == 'glusterfs':
-                        volume = params['volume']['name']
-                        size = params['volume']['size']
-                        if 'labels' in params:
-                            labels = params['labels']
-                        else:
-                            labels = dict()
-                        access_modes = params['access']['modes']
-                        endpoints = params['glusterfs']['endpoints']
-                        path = params['glusterfs']['path']
-                        read_only = params['glusterfs']['readOnly']
-                        persistent_volume = dict(
-                            name="{0}-volume".format(volume),
-                            capacity=size,
-                            labels=labels,
-                            access_modes=access_modes,
-                            storage=dict(
-                                glusterfs=dict(
-                                    endpoints=endpoints,
-                                    path=path,
-                                    readOnly=read_only)))
-                        persistent_volumes.append(persistent_volume)
-                    elif not (kind == 'object' or kind == 'dynamic'):
-                        msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
-                            kind,
-                            component)
-                        raise errors.AnsibleFilterError(msg)
+                                labels = dict()
+                            access_modes = params['access']['modes']
+                            persistent_volume = dict(
+                                name="{0}-volume".format(volume),
+                                capacity=size,
+                                labels=labels,
+                                access_modes=access_modes,
+                                storage=dict(
+                                    nfs=dict(
+                                        server=host,
+                                        path=path)))
+                            persistent_volumes.append(persistent_volume)
+                        elif kind == 'openstack':
+                            volume = params['volume']['name']
+                            size = params['volume']['size']
+                            if 'labels' in params:
+                                labels = params['labels']
+                            else:
+                                labels = dict()
+                            access_modes = params['access']['modes']
+                            filesystem = params['openstack']['filesystem']
+                            volume_id = params['openstack']['volumeID']
+                            persistent_volume = dict(
+                                name="{0}-volume".format(volume),
+                                capacity=size,
+                                labels=labels,
+                                access_modes=access_modes,
+                                storage=dict(
+                                    cinder=dict(
+                                        fsType=filesystem,
+                                        volumeID=volume_id)))
+                            persistent_volumes.append(persistent_volume)
+                        elif kind == 'glusterfs':
+                            volume = params['volume']['name']
+                            size = params['volume']['size']
+                            if 'labels' in params:
+                                labels = params['labels']
+                            else:
+                                labels = dict()
+                            access_modes = params['access']['modes']
+                            endpoints = params['glusterfs']['endpoints']
+                            path = params['glusterfs']['path']
+                            read_only = params['glusterfs']['readOnly']
+                            persistent_volume = dict(
+                                name="{0}-volume".format(volume),
+                                capacity=size,
+                                labels=labels,
+                                access_modes=access_modes,
+                                storage=dict(
+                                    glusterfs=dict(
+                                        endpoints=endpoints,
+                                        path=path,
+                                        readOnly=read_only)))
+                            persistent_volumes.append(persistent_volume)
+                        elif not (kind == 'object' or kind == 'dynamic'):
+                            msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
+                                kind,
+                                component)
+                            raise errors.AnsibleFilterError(msg)
+    if 'logging' in hostvars['openshift']:
+        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'logging')
+        if persistent_volume is not None:
+            persistent_volumes.append(persistent_volume)
+    if 'loggingops' in hostvars['openshift']:
+        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'loggingops')
+        if persistent_volume is not None:
+            persistent_volumes.append(persistent_volume)
+    if 'metrics' in hostvars['openshift']:
+        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'metrics')
+        if persistent_volume is not None:
+            persistent_volumes.append(persistent_volume)
     return persistent_volumes
+
+
+def oo_component_pv_claims(hostvars, component):
+    """ Generate list of persistent volume claims based on oo_openshift_env
+        storage options set in host variables for a speicific component.
+    """
+    if not issubclass(type(hostvars), dict):
+        raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+
+    if component in hostvars['openshift']:
+        if 'storage' in hostvars['openshift'][component]:
+            params = hostvars['openshift'][component]['storage']
+            kind = params['kind']
+            create_pv = params['create_pv']
+            create_pvc = params['create_pvc']
+            if kind not in [None, 'object'] and create_pv and create_pvc:
+                volume = params['volume']['name']
+                size = params['volume']['size']
+                access_modes = params['access']['modes']
+                persistent_volume_claim = dict(
+                    name="{0}-claim".format(volume),
+                    capacity=size,
+                    access_modes=access_modes)
+                return persistent_volume_claim
+    return None
 
 
 def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
@@ -828,17 +960,31 @@ def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
             if 'storage' in hostvars['openshift']['hosted'][component]:
                 params = hostvars['openshift']['hosted'][component]['storage']
                 kind = params['kind']
-                create_pv = params['create_pv']
-                create_pvc = params['create_pvc']
-                if kind not in [None, 'object'] and create_pv and create_pvc:
-                    volume = params['volume']['name']
-                    size = params['volume']['size']
-                    access_modes = params['access']['modes']
-                    persistent_volume_claim = dict(
-                        name="{0}-claim".format(volume),
-                        capacity=size,
-                        access_modes=access_modes)
-                    persistent_volume_claims.append(persistent_volume_claim)
+                if 'create_pv' in params:
+                    if 'create_pvc' in params:
+                        create_pv = params['create_pv']
+                        create_pvc = params['create_pvc']
+                        if kind not in [None, 'object'] and create_pv and create_pvc:
+                            volume = params['volume']['name']
+                            size = params['volume']['size']
+                            access_modes = params['access']['modes']
+                            persistent_volume_claim = dict(
+                                name="{0}-claim".format(volume),
+                                capacity=size,
+                                access_modes=access_modes)
+                            persistent_volume_claims.append(persistent_volume_claim)
+    if 'logging' in hostvars['openshift']:
+        persistent_volume_claim = oo_component_pv_claims(hostvars, 'logging')
+        if persistent_volume_claim is not None:
+            persistent_volume_claims.append(persistent_volume_claim)
+    if 'loggingops' in hostvars['openshift']:
+        persistent_volume_claim = oo_component_pv_claims(hostvars, 'loggingops')
+        if persistent_volume_claim is not None:
+            persistent_volume_claims.append(persistent_volume_claim)
+    if 'metrics' in hostvars['openshift']:
+        persistent_volume_claim = oo_component_pv_claims(hostvars, 'metrics')
+        if persistent_volume_claim is not None:
+            persistent_volume_claims.append(persistent_volume_claim)
     return persistent_volume_claims
 
 
