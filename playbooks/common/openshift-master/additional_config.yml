@@ -10,8 +10,8 @@
   - role: openshift_master_cluster
     when: openshift_master_ha | bool and openshift.master.cluster_method == "pacemaker"
   - role: openshift_examples
+    when: openshift_install_examples | default(true, true) | bool
     registry_url: "{{ openshift.master.registry_url }}"
-    when: openshift_install_examples | default(True)
   - role: openshift_hosted_templates
     registry_url: "{{ openshift.master.registry_url }}"
   - role: openshift_manageiq
