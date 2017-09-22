@@ -192,7 +192,6 @@
   roles:
   - role: os_firewall
   - role: openshift_master_facts
-  - role: openshift_hosted_facts
   - role: openshift_master_certificates
   - role: openshift_etcd_facts
   - role: openshift_etcd_client_certificates

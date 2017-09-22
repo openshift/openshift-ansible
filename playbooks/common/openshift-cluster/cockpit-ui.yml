@@ -1,0 +1,10 @@
+---
+- name: Create Hosted Resources - cockpit-ui
+  hosts: oo_first_master
+  pre_tasks:
+  - name: Scrape openshift_master_public_api_url
+    include: master_facts_tasks.yml
+    when: openshift_master_public_api_url is not defined
+  roles:
+  - role: cockpit-ui
+    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)

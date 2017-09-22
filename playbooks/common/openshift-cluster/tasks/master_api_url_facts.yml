@@ -1,0 +1,25 @@
+---
+- name: Set config_base if unset for hosted roles
+  set_fact:
+    openshift_config_base: "/etc/origin"
+  when: openshift_config_base is not defined
+
+- name: Set openshift_master_config_dir for hosted roles
+  set_fact:
+    openshift_master_config_dir: "{{ openshift_config_base }}/master"
+  when: openshift_master_config_dir is not defined
+
+- name: Set openshift_master_config_file for hosted roles
+  set_fact:
+    openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
+  when: openshift_master_config_file is not defined
+
+- name: slurp openshift_master_config_file
+  slurp:
+    src: "{{ openshift_master_config_file }}"
+  register: omcf_slurp
+
+- name: Set openshift_master_public_api_url for hosted roles
+  set_fact:
+    openshift_master_public_api_url: "{{ (omcf_slurp['content'] | b64decode | from_yaml).masterPublicURL }}"
+  when: openshift_master_public_api_url is not defined
