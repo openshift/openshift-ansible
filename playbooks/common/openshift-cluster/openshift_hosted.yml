@@ -30,9 +30,9 @@
     when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
   - role: openshift_hosted
   - role: openshift_metrics
-    when: openshift_hosted_metrics_deploy | default(false) | bool
+    when: openshift_hosted_metrics_deploy | default(true) | bool
   - role: openshift_logging
-    when: openshift_hosted_logging_deploy | default(false) | bool
+    when: openshift_hosted_logging_deploy | default(true) | bool
     openshift_hosted_logging_hostname: "{{ logging_hostname }}"
     openshift_hosted_logging_ops_hostname: "{{ logging_ops_hostname }}"
     openshift_hosted_logging_master_public_url: "{{ logging_master_public_url }}"
@@ -66,10 +66,10 @@
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
-    when: openshift_hosted_logging_deploy | default(false) | bool
+    when: openshift_hosted_logging_deploy | default(true) | bool
 
   - block:
     - include_role:
         name: openshift_metrics
         tasks_from: update_master_config
-    when: openshift_hosted_metrics_deploy | default(false) | bool
+    when: openshift_hosted_metrics_deploy | default(true) | bool

@@ -63,7 +63,7 @@
       openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
     when: openshift_master_default_subdomain is not defined
   - set_fact:
-      openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(false, true) }}"
+      openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(true, true) }}"
     when: openshift_hosted_metrics_deploy is not defined
   - set_fact:
       openshift_hosted_metrics_duration: "{{ lookup('oo_option', 'openshift_hosted_metrics_duration') | default(7) }}"

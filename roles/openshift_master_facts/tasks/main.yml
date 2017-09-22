@@ -9,7 +9,7 @@
 - name: Verify required variables are set
   fail:
     msg: openshift_master_default_subdomain must be set to deploy metrics
-  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain | default("") == ""
+  when: openshift_hosted_metrics_deploy | default(true) | bool and openshift_master_default_subdomain | default("") == ""
 
 # NOTE: These metrics variables are unfortunately needed by both the master and the metrics roles
 # to properly configure the master-config.yaml file.
@@ -26,7 +26,7 @@
 
 - set_fact:
     openshift_hosted_metrics_deploy_url: "https://{{ g_metrics_hostname }}/hawkular/metrics"
-  when: (openshift_hosted_metrics_deploy | default(false) | bool) or (openshift_hosted_metrics_public_url is defined)
+  when: (openshift_hosted_metrics_deploy | default(true) | bool) or (openshift_hosted_metrics_public_url is defined)
 
 - name: Set master facts
   openshift_facts:
