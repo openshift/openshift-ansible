@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.39
+Version:        3.6.173.0.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Sep 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.40-1
+- Remove default value for oreg_url (mgugino@redhat.com)
+- Switch to origin 3.6 repo (sdodson@redhat.com)
+- Support setting annotations on Hawkular route (hansmi@vshn.ch)
+- update env in etcd.conf.j2 to reflect the latest naming (jchaloup@redhat.com)
+- Update master config with new client urls during etcd scaleup.
+  (abutcher@redhat.com)
+
 * Wed Sep 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.39-1
 - 
 
