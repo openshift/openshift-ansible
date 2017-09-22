@@ -219,7 +219,9 @@
     openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
     openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
   - role: nuage_ca
+    when: openshift_use_nuage | default(false) | bool
   - role: nuage_common
+    when: openshift_use_nuage | default(false) | bool
   - role: nuage_master
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master
