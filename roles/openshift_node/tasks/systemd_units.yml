@@ -1,6 +1,8 @@
 ---
-# This file is included both in the openshift_master role and in the upgrade
+# This file is included both in the openshift_node role and in the upgrade
 # playbooks.
+
+- include: registry_auth.yml
 
 - name: Install Node dependencies docker service file
   template:

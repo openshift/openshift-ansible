@@ -80,8 +80,6 @@
   changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool and openshift.common.use_openshift_sdn | bool
 
-- include: registry_auth.yml
-
 - name: Install the systemd units
   include: systemd_units.yml
 
