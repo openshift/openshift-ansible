@@ -20,7 +20,6 @@ From this role:
 | docker_version                 |                       | Optional inventory var                                 |
 | l_docker_upgrade               |                       |                                                        |
 | node_config_hook               |                       |                                                        |
-| openshift.docker.gte_1_10      |                       |                                                        |
 | openshift_image_tag            |                       | Set by openshift_version role                          |
 | openshift_pkg_version          |                       | Set by openshift_version role                          |
 | openshift_release              |                       | Set by openshift_version role                          |

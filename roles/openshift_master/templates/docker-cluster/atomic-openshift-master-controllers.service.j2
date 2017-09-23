@@ -3,9 +3,9 @@ Description=Atomic OpenShift Master Controllers
 Documentation=https://github.com/openshift/origin
 Wants={{ openshift.common.service_type }}-master-api.service
 After={{ openshift.common.service_type }}-master-api.service
-After={{ openshift.docker.service_name }}.service
-Requires={{ openshift.docker.service_name }}.service
-PartOf={{ openshift.docker.service_name }}.service
+After={{ openshift_docker_service_name }}.service
+Requires={{ openshift_docker_service_name }}.service
+PartOf={{ openshift_docker_service_name }}.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
@@ -32,4 +32,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy={{ openshift.docker.service_name }}.service
+WantedBy={{ openshift_docker_service_name }}.service

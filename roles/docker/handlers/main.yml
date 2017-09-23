@@ -2,7 +2,7 @@
 
 - name: restart docker
   systemd:
-    name: "{{ openshift.docker.service_name }}"
+    name: "{{ openshift_docker_service_name }}"
     state: restarted
   register: r_docker_restart_docker_result
   until: not r_docker_restart_docker_result | failed

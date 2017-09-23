@@ -1,11 +1,10 @@
 ---
-# If docker_options are provided we should fail. We should not install docker and ignore
-# the users configuration. NOTE: docker_options == inventory:openshift_docker_options
+# If openshift_docker_options are provided we should fail. We should not install
+# docker and ignore the users configuration.
 - name: Fail quickly if openshift_docker_options are set
   assert:
     that:
-      - docker_options is defined
-      - docker_options != ""
+      - "{% if not openshift_docker_options %}1{% else %}0{% endif %}"
     msg: |
       Docker via System Container does not allow for the use of the openshift_docker_options
       variable. If you want to use openshift_docker_options you will need to use the
@@ -61,28 +60,28 @@
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?http_proxy[:=]{1}"
-        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
+        line: "http_proxy: {{ docker_http_proxy | default('') }}"
       when:
-        - openshift.common.http_proxy is defined
-        - openshift.common.http_proxy != ''
+        - docker_http_proxy is defined
+        - docker_http_proxy != ''
 
     - name: Add https_proxy to /etc/atomic.conf
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?https_proxy[:=]{1}"
-        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
+        line: "https_proxy: {{ docker_https_proxy | default('') }}"
       when:
-        - openshift.common.https_proxy is defined
-        - openshift.common.https_proxy != ''
+        - docker_https_proxy is defined
+        - docker_https_proxy != ''
 
     - name: Add no_proxy to /etc/atomic.conf
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?no_proxy[:=]{1}"
-        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
+        line: "no_proxy: {{ docker_no_proxy | default('') }}"
       when:
-        - openshift.common.no_proxy is defined
-        - openshift.common.no_proxy != ''
+        - docker_no_proxy is defined
+        - docker_no_proxy != ''
 
 - block:
 
@@ -102,7 +101,7 @@
 
     - name: Set the full image name
       set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift_docker_service_name }}:latest"
 
     # For https://github.com/openshift/openshift-ansible/pull/5354#issuecomment-328552959
     - name: Use a specific image if requested
@@ -121,7 +120,7 @@
   command: "atomic pull --storage ostree {{ l_docker_image }}"
   changed_when: false
   environment:
-    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+    NO_PROXY: "{{ docker_no_proxy | default('') }}"
 
 
 - name: Ensure container-engine.service.d directory exists
@@ -136,7 +135,7 @@
 
 - name: Install Container Engine System Container
   oc_atomic_container:
-    name: "{{ openshift.docker.service_name }}"
+    name: "{{ openshift_docker_service_name }}"
     image: "{{ l_docker_image }}"
     state: latest
 
@@ -144,15 +143,6 @@
   template:
     dest: "{{ container_engine_systemd_dir }}/custom.conf"
     src: systemcontainercustom.conf.j2
-
-# Set local versions of facts that must be in json format for container-daemon.json
-# NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
-- set_fact:
-    l_docker_insecure_registries: "{{ docker_insecure_registries | default([]) | to_json }}"
-    l_docker_log_options: "{{ docker_log_options | default({}) | to_json }}"
-    l_docker_additional_registries: "{{ docker_additional_registries | default([]) | to_json }}"
-    l_docker_blocked_registries: "{{ docker_blocked_registries | default([]) | to_json }}"
-    l_docker_selinux_enabled: "{{ docker_selinux_enabled | default(true) | to_json }}"
 
 # Configure container-engine using the container-daemon.json file
 # NOTE: daemon.json and container-daemon.json have been seperated to avoid
@@ -165,7 +155,7 @@
 # Enable and start the container-engine service
 - name: Start the Container Engine service
   systemd:
-    name: "{{ openshift.docker.service_name }}"
+    name: "{{ openshift_docker_service_name }}"
     enabled: yes
     state: started
     daemon_reload: yes

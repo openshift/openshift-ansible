@@ -15,16 +15,12 @@
 
 - name: Restart docker
   service:
-    name: "{{ openshift.docker.service_name }}"
+    name: "{{ openshift_docker_service_name }}"
     state: started
   register: docker_start_result
   until: not docker_start_result | failed
   retries: 3
   delay: 30
-
-- name: Update docker facts
-  openshift_facts:
-    role: docker
 
 - name: Start services
   service: name={{ item }} state=started

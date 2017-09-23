@@ -19,6 +19,11 @@
   tags:
   - always
 
+- include: setup_docker.yml
+  when: not skip_docker_role | default(False) | bool
+  tags:
+  - always
+
 - include: initialize_openshift_version.yml
   tags:
   - always

@@ -1,7 +1,4 @@
 ---
-- set_fact:
-    l_use_crio: "{{ openshift_use_crio | default(false) }}"
-
 - name: Set containerized version to configure if openshift_image_tag specified
   set_fact:
     # Expects a leading "v" in inventory, strip it off here unless
@@ -22,7 +19,10 @@
   command: >
     docker run --rm {{ openshift.common.cli_image }}:latest version
   register: cli_image_version
-  when: openshift_version is not defined
+  when:
+  - openshift_version is not defined
+  - is_containerized | bool
+  - not openshift_use_crio
 
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
@@ -45,14 +45,16 @@
   when:
   - openshift_version is defined
   - openshift_version.split('.') | length == 2
-  - not l_use_crio
+  - not openshift_use_crio
+  - is_containerized | bool
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when:
   - openshift_version is defined
   - openshift_version.split('.') | length == 2
-  - not l_use_crio
+  - not openshift_use_crio
+  - is_containerized | bool
 
 # TODO: figure out a way to check for the openshift_version when using CRI-O.
 # We should do that using the images in the ostree storage so we don't have

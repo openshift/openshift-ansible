@@ -1,17 +1,17 @@
 ---
 # TODO: Much of this file is shared with container engine tasks
 - set_fact:
-    l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(openshift.docker.insecure_registries)) }}"
-  when: openshift.docker.insecure_registries
+    l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
+  when: l2_docker_insecure_registries
 - set_fact:
-    l_crio_registries: "{{ openshift.docker.additional_registries + ['docker.io'] }}"
-  when: openshift.docker.additional_registries
+    l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
+  when: l2_docker_additional_registries | default(False)
 - set_fact:
     l_crio_registries: "{{ ['docker.io'] }}"
-  when: not openshift.docker.additional_registries
+  when: not l2_docker_additional_registries
 - set_fact:
     l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
-  when: openshift.docker.additional_registries
+  when: l2_docker_additional_registries
 
 - name: Ensure container-selinux is installed
   package:
@@ -66,29 +66,28 @@
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?http_proxy[:=]{1}"
-        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
+        line: "http_proxy: {{ docker_http_proxy | default('') }}"
       when:
-        - openshift.common.http_proxy is defined
-        - openshift.common.http_proxy != ''
+        - docker_http_proxy is defined
+        - docker_http_proxy != ''
 
     - name: Add https_proxy to /etc/atomic.conf
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?https_proxy[:=]{1}"
-        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
+        line: "https_proxy: {{ docker_https_proxy | default('') }}"
       when:
-        - openshift.common.https_proxy is defined
-        - openshift.common.https_proxy != ''
+        - docker_https_proxy is defined
+        - docker_https_proxy != ''
 
     - name: Add no_proxy to /etc/atomic.conf
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?no_proxy[:=]{1}"
-        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
+        line: "no_proxy: {{ docker_no_proxy | default('') }}"
       when:
-        - openshift.common.no_proxy is defined
-        - openshift.common.no_proxy != ''
-
+        - docker_no_proxy is defined
+        - docker_no_proxy != ''
 
 - block:
 
@@ -129,7 +128,7 @@
   command: "atomic pull --storage ostree {{ l_crio_image }}"
   changed_when: false
   environment:
-    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+    NO_PROXY: "{{ docker_no_proxy | default('') }}"
 
 
 - name: Install CRI-O System Container

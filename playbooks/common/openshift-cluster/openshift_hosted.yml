@@ -30,7 +30,7 @@
     when: openshift_logging_install_logging | default(false) | bool
 
   - role: cockpit-ui
-    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift.docker.hosted_registry_insecure | default(false) | bool)
+    when: ( openshift.common.version_gte_3_3_or_1_3  | bool ) and ( openshift_hosted_manage_registry | default(true) | bool ) and not (openshift_docker_hosted_registry_insecure | default(false) | bool)
 
   - role: openshift_prometheus
     when: openshift_hosted_prometheus_deploy | default(false) | bool

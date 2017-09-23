@@ -119,3 +119,5 @@ contiv_h1_gw_default: "10.129.0.1"
 
 # contiv default private subnet for ext access
 contiv_private_ext_subnet: "10.130.0.0/16"
+
+openshift_docker_service_name: docker

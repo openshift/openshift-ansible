@@ -51,42 +51,6 @@ EXAMPLES = '''
 '''
 
 
-def migrate_docker_facts(facts):
-    """ Apply migrations for docker facts """
-    params = {
-        'common': (
-            'additional_registries',
-            'insecure_registries',
-            'blocked_registries',
-            'options'
-        ),
-        'node': (
-            'log_driver',
-            'log_options'
-        )
-    }
-    if 'docker' not in facts:
-        facts['docker'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                old_param = 'docker_' + param
-                if old_param in facts[role]:
-                    facts['docker'][param] = facts[role].pop(old_param)
-
-    if 'node' in facts and 'portal_net' in facts['node']:
-        facts['docker']['hosted_registry_network'] = facts['node'].pop('portal_net')
-
-    # log_options was originally meant to be a comma separated string, but
-    # we now prefer an actual list, with backward compatibility:
-    if 'log_options' in facts['docker'] and \
-            isinstance(facts['docker']['log_options'], string_types):
-        facts['docker']['log_options'] = facts['docker']['log_options'].split(",")
-
-    return facts
-
-
 # TODO: We should add a generic migration function that takes source and destination
 # paths and does the right thing rather than one function for common, one for node, etc.
 def migrate_common_facts(facts):
@@ -159,7 +123,6 @@ def migrate_admission_plugin_facts(facts):
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
-    migrated_facts = migrate_docker_facts(migrated_facts)
     migrated_facts = migrate_common_facts(migrated_facts)
     migrated_facts = migrate_node_facts(migrated_facts)
     migrated_facts = migrate_hosted_facts(migrated_facts)
@@ -768,14 +731,6 @@ def set_deployment_facts_if_unset(facts):
                 service_type = 'origin'
             facts['common']['service_type'] = service_type
 
-    if 'docker' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if deployment_type == 'openshift-enterprise':
-            addtl_regs = facts['docker'].get('additional_registries', [])
-            ent_reg = 'registry.access.redhat.com'
-            if ent_reg not in addtl_regs:
-                facts['docker']['additional_registries'] = addtl_regs + [ent_reg]
-
     for role in ('master', 'node'):
         if role in facts:
             deployment_type = facts['common']['deployment_type']
@@ -1190,38 +1145,6 @@ def get_version_output(binary, version_cmd):
     if os.path.isfile(cmd[0]):
         _, output, _ = module.run_command(cmd)  # noqa: F405
     return output
-
-
-def get_docker_version_info():
-    """ Parses and returns the docker version info """
-    result = None
-    if is_service_running('docker') or is_service_running('container-engine'):
-        version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
-        if 'Server' in version_info:
-            result = {
-                'api_version': version_info['Server']['API version'],
-                'version': version_info['Server']['Version']
-            }
-    return result
-
-
-def get_hosted_registry_insecure():
-    """ Parses OPTIONS from /etc/sysconfig/docker to determine if the
-        registry is currently insecure.
-    """
-    hosted_registry_insecure = None
-    if os.path.exists('/etc/sysconfig/docker'):
-        try:
-            ini_str = text_type('[root]\n' + open('/etc/sysconfig/docker', 'r').read(), 'utf-8')
-            ini_fp = io.StringIO(ini_str)
-            config = configparser.RawConfigParser()
-            config.readfp(ini_fp)
-            options = config.get('root', 'OPTIONS')
-            if 'insecure-registry' in options:
-                hosted_registry_insecure = True
-        except Exception:  # pylint: disable=broad-except
-            pass
-    return hosted_registry_insecure
 
 
 def get_openshift_version(facts):
@@ -1678,11 +1601,6 @@ def set_container_facts_if_unset(facts):
         deployer_image = 'openshift/origin-deployer'
 
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
-    # If openshift_docker_use_system_container is set and is True ....
-    if 'use_system_container' in list(facts['docker'].keys()):
-        if facts['docker']['use_system_container']:
-            # ... set the service name to container-engine
-            facts['docker']['service_name'] = 'container-engine'
 
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']
@@ -1781,7 +1699,6 @@ class OpenShiftFacts(object):
                    'buildoverrides',
                    'cloudprovider',
                    'common',
-                   'docker',
                    'etcd',
                    'hosted',
                    'master',
@@ -1944,25 +1861,6 @@ class OpenShiftFacts(object):
                                     iptables_sync_period='30s',
                                     local_quota_per_fsgroup="",
                                     set_node_ip=False)
-
-        if 'docker' in roles:
-            docker = dict(disable_push_dockerhub=False,
-                          options='--log-driver=journald')
-            # NOTE: This is a workaround for a dnf output racecondition that can occur in
-            # some situations. See https://bugzilla.redhat.com/show_bug.cgi?id=918184
-            if self.system_facts['ansible_pkg_mgr'] == 'dnf':
-                rpm_rebuilddb()
-
-            version_info = get_docker_version_info()
-            if version_info is not None:
-                docker['api_version'] = version_info['api_version']
-                docker['version'] = version_info['version']
-                docker['gte_1_10'] = LooseVersion(version_info['version']) >= LooseVersion('1.10')
-            hosted_registry_insecure = get_hosted_registry_insecure()
-            if hosted_registry_insecure is not None:
-                docker['hosted_registry_insecure'] = hosted_registry_insecure
-            docker['service_name'] = 'docker'
-            defaults['docker'] = docker
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
@@ -2246,25 +2144,6 @@ class OpenShiftFacts(object):
                                       facts_to_set,
                                       additive_facts_to_overwrite,
                                       protected_facts_to_overwrite)
-
-        if 'docker' in new_local_facts:
-            # remove duplicate and empty strings from registry lists, preserving order
-            for cat in ['additional', 'blocked', 'insecure']:
-                key = '{0}_registries'.format(cat)
-                if key in new_local_facts['docker']:
-                    val = new_local_facts['docker'][key]
-                    if isinstance(val, string_types):
-                        val = [x.strip() for x in val.split(',')]
-                    seen = set()
-                    new_local_facts['docker'][key] = list()
-                    for registry in val:
-                        if registry not in seen and registry != '':
-                            seen.add(registry)
-                            new_local_facts['docker'][key].append(registry)
-            # Convert legacy log_options comma sep string to a list if present:
-            if 'log_options' in new_local_facts['docker'] and \
-                    isinstance(new_local_facts['docker']['log_options'], string_types):
-                new_local_facts['docker']['log_options'] = new_local_facts['docker']['log_options'].split(',')
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
 

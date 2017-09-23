@@ -53,3 +53,5 @@ r_openshift_hosted_registry_os_firewall_allow:
 # openshift_use_calico, if defined, may affect other roles or play behavior.
 r_openshift_hosted_use_calico_default: "{{ openshift_use_calico | default(False) }}"
 r_openshift_hosted_use_calico: "{{ r_openshift_hosted_use_calico_default }}"
+
+openshift_docker_hosted_registry_insecure: False

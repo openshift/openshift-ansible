@@ -108,3 +108,6 @@ openshift_node_use_contiv: "{{ openshift_node_use_contiv_default }}"
 
 openshift_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 openshift_node_data_dir: "{{ openshift_node_data_dir_default }}"
+
+openshift_use_crio: False
+openshift_docker_service_name: docker
