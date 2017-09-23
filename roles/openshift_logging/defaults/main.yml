@@ -83,6 +83,8 @@ openshift_logging_fluentd_use_journal: "{{ openshift_hosted_logging_use_journal 
 openshift_logging_fluentd_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
 openshift_logging_fluentd_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
 openshift_logging_fluentd_hosts: ['--all']
+openshift_logging_fluentd_buffer_queue_limit: 1024
+openshift_logging_fluentd_buffer_size_limit: 1m
 
 openshift_logging_es_host: logging-es
 openshift_logging_es_port: 9200
