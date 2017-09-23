@@ -30,5 +30,5 @@
       ovs_image: "{{ osn_ovs_image | default(None) }}"
       proxy_mode: "{{ openshift_node_proxy_mode | default('iptables') }}"
       local_quota_per_fsgroup: "{{ openshift_node_local_quota_per_fsgroup | default(None) }}"
-      dns_ip: "{{ openshift_dns_ip | default(none) | get_dns_ip(hostvars[inventory_hostname])}}"
+      dns_ip: "{{ openshift_dns_ip | default(none) | node_get_dns_ip(hostvars[inventory_hostname])}}"
       env_vars: "{{ openshift_node_env_vars | default(None) }}"

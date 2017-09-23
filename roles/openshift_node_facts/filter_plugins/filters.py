@@ -7,10 +7,10 @@ from ansible import errors
 
 
 class FilterModule(object):
-    ''' Custom ansible filters for use by openshift_node role'''
+    ''' Custom ansible filters for use by openshift_node_facts role'''
 
     @staticmethod
-    def get_dns_ip(openshift_dns_ip, hostvars):
+    def node_get_dns_ip(openshift_dns_ip, hostvars):
         ''' Navigates the complicated logic of when to set dnsIP
 
             In all situations if they've set openshift_dns_ip use that
@@ -29,4 +29,4 @@ class FilterModule(object):
 
     def filters(self):
         ''' returns a mapping of filters to methods '''
-        return {'get_dns_ip': self.get_dns_ip}
+        return {'node_get_dns_ip': self.node_get_dns_ip}
