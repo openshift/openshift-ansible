@@ -1,11 +1,13 @@
 ---
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
-  roles:
-  - role: etcd_migrate
-    r_etcd_migrate_action: check
-    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcd_peer: "{{ ansible_default_ipv4.address }}"
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate.pre_check
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ ansible_default_ipv4.address }}"
 
 # TODO: This will be different for release-3.6 branch
 - name: Prepare masters for etcd data migration
@@ -65,25 +67,28 @@
 - name: Migrate data on first etcd
   hosts: oo_etcd_to_migrate[0]
   gather_facts: no
-  roles:
-  - role: etcd_migrate
-    r_etcd_migrate_action: migrate
-    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcd_peer: "{{ openshift.common.ip }}"
-    etcd_url_scheme: "https"
-    etcd_peer_url_scheme: "https"
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ openshift.common.ip }}"
+      etcd_url_scheme: "https"
+      etcd_peer_url_scheme: "https"
 
 - name: Clean data stores on remaining etcd hosts
   hosts: oo_etcd_to_migrate[1:]
   gather_facts: no
-  roles:
-  - role: etcd_migrate
-    r_etcd_migrate_action: clean_data
-    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcd_peer: "{{ openshift.common.ip }}"
-    etcd_url_scheme: "https"
-    etcd_peer_url_scheme: "https"
-  post_tasks:
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: clean_data
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ openshift.common.ip }}"
+      etcd_url_scheme: "https"
+      etcd_peer_url_scheme: "https"
   - name: Add etcd hosts
     delegate_to: localhost
     add_host:
@@ -112,21 +117,23 @@
 
 - name: Add TTLs on the first master
   hosts: oo_first_master[0]
-  roles:
-  - role: etcd_migrate
-    r_etcd_migrate_action: add_ttls
-    etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].openshift.common.ip }}"
-    etcd_url_scheme: "https"
-    etcd_peer_url_scheme: "https"
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate.add_ttls
+    vars:
+      etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].openshift.common.ip }}"
+      etcd_url_scheme: "https"
+      etcd_peer_url_scheme: "https"
     when: etcd_migration_failed | length == 0
 
 - name: Configure masters if etcd data migration is succesfull
   hosts: oo_masters_to_config
-  roles:
-  - role: etcd_migrate
-    r_etcd_migrate_action: configure
-    when: etcd_migration_failed | length == 0
   tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate.configure_master
+    when: etcd_migration_failed | length == 0
   - debug:
       msg: "Skipping master re-configuration since migration failed."
     when:

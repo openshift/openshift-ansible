@@ -1,3 +1,0 @@
----
-# Default action when calling this role, choices: check, migrate, configure
-r_etcd_migrate_action: migrate
