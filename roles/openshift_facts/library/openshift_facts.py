@@ -1905,7 +1905,7 @@ class OpenShiftFacts(object):
         hostname_f = output.strip() if exit_code == 0 else ''
         hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
                            self.system_facts['ansible_fqdn']]
-        hostname = choose_hostname(hostname_values, ip_addr)
+        hostname = choose_hostname(hostname_values, ip_addr).lower()
 
         defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
