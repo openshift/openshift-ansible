@@ -93,7 +93,7 @@
         state: present
       with_items:
       - iproute
-      - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'python-dbus' }}"
+      - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - yum-utils
 
