@@ -13,6 +13,7 @@ from importlib import import_module
 
 from ansible.module_utils import six
 from ansible.module_utils.six.moves import reduce  # pylint: disable=import-error,redefined-builtin
+from ansible.module_utils.six import string_types
 from ansible.plugins.filter.core import to_bool as ansible_to_bool
 
 
@@ -109,6 +110,11 @@ class OpenShiftCheck(object):
     def is_active():
         """Returns true if this check applies to the ansible-playbook run."""
         return True
+
+    def is_first_master(self):
+        """Determine if running on first master. Returns: bool"""
+        masters = self.get_var("groups", "oo_first_master", default=None) or [None]
+        return masters[0] == self.get_var("ansible_host")
 
     @abstractmethod
     def run(self):
@@ -281,6 +287,17 @@ class OpenShiftCheck(object):
                     type=error.__class__.__name__,
                     error=error
                 ))
+
+    @staticmethod
+    def normalize(name_list):
+        """Return a clean list of names.
+
+        The input may be a comma-separated string or a sequence. Leading and
+        trailing whitespace characters are removed. Empty items are discarded.
+        """
+        if isinstance(name_list, string_types):
+            name_list = name_list.split(',')
+        return [name.strip() for name in name_list if name.strip()]
 
     @staticmethod
     def get_major_minor_version(openshift_image_tag):
