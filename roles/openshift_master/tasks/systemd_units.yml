@@ -17,6 +17,8 @@
     r_openshift_master_data_dir: "{{ openshift_data_dir | default('/var/lib/origin') }}"
   when: r_openshift_master_data_dir is not defined
 
+- include: registry_auth.yml
+
 - name: Remove the legacy master service if it exists
   include: clean_systemd_units.yml
 
