@@ -26,3 +26,4 @@
   include: systemcontainer_crio.yml
   when:
   - l_use_crio
+  - inventory_hostname in groups['oo_masters_to_config'] or inventory_hostname in groups['oo_nodes_to_config']
