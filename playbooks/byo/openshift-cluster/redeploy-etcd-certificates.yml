@@ -7,8 +7,14 @@
   tags:
   - always
 
+- include: ../../common/openshift-cluster/redeploy-certificates/check-expiry.yml
+  vars:
+    g_check_expiry_hosts: 'oo_etcd_to_config'
+
 - include: ../../common/openshift-cluster/redeploy-certificates/etcd.yml
 
 - include: ../../common/openshift-etcd/restart.yml
+  vars:
+    g_etcd_certificates_expired: "{{ ('expired' in (hostvars | oo_select_keys(groups['etcd']) | oo_collect('check_results.check_results.etcd') | oo_collect('health'))) | bool }}"
 
 - include: ../../common/openshift-master/restart.yml
