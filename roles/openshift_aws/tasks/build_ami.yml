@@ -31,7 +31,7 @@
     assign_public_ip: yes
     region: "{{ openshift_aws_region }}"
     key_name: "{{ openshift_aws_ssh_key_name }}"
-    group: "{{ openshift_aws_clusterid }}"
+    group: "{{ openshift_aws_build_ami_group }}"
     instance_type: m4.xlarge
     vpc_subnet_id: "{{ subnetout.subnets[0].id }}"
     image: "{{ openshift_aws_base_ami }}"
