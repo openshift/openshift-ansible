@@ -22,57 +22,33 @@
   tags:
   - always
 
-- name: Set hostname
-  hosts: oo_masters_to_config:oo_nodes_to_config
-  tasks:
-  # TODO: switch back to hostname module once we depend on ansible-2.4
-  # https://github.com/ansible/ansible/pull/25906
-  - name: Set hostname
-    command: "hostnamectl set-hostname {{ openshift.common.hostname }}"
-    when: openshift_set_hostname | default(false,true) | bool
-
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-nfs/config.yml
-  tags:
-  - nfs
+  when: groups.oo_nfs_to_config | default([]) | count > 0
 
 - include: ../openshift-loadbalancer/config.yml
-  tags:
-  - loadbalancer
+  when: groups.oo_lb_to_config | default([]) | count > 0
 
 - include: ../openshift-master/config.yml
 
 - include: ../openshift-master/additional_config.yml
 
 - include: ../openshift-node/config.yml
-  tags:
-  - node
 
 - include: ../openshift-glusterfs/config.yml
-  tags:
-  - glusterfs
+  when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
 - include: openshift_hosted.yml
-  tags:
-  - hosted
 
-- name: Configure API Aggregation on masters
-  hosts: oo_masters
-  serial: 1
-  tasks:
-  - block:
-    - include_role:
-        name: openshift_service_catalog
-        tasks_from: wire_aggregator
-      vars:
-        first_master: "{{ groups.oo_first_master[0] }}"
+- include: openshift_metrics.yml
+  when: openshift_metrics_install_metrics | default(false) | bool
+
+- include: openshift_logging.yml
+  when: openshift_logging_install_logging | default(false) | bool
 
 - include: service_catalog.yml
-  when:
-  - openshift_enable_service_catalog | default(false) | bool
-  tags:
-  - servicecatalog
+  when: openshift_enable_service_catalog | default(false) | bool
 
 - name: Print deprecated variable warning message if necessary
   hosts: oo_first_master

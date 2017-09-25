@@ -1,4 +1,15 @@
 ---
+- name: Node Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Node install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_node: "In Progress"
+      aggregate: false
+
 - name: Disable excluders
   hosts: oo_nodes_to_config
   gather_facts: no
@@ -99,3 +110,14 @@
   - role: openshift_excluder
     r_openshift_excluder_action: enable
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
+- name: Node Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Node install 'Complete'
+    set_stats:
+      data:
+        installer_phase_node: "Complete"
+      aggregate: false

@@ -1,4 +1,17 @@
 ---
+- name: Initialization Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+  - installer_checkpoint
+  tasks:
+  - name: Set install initialization 'In Progress'
+    set_stats:
+      data:
+        installer_phase_initialize: "In Progress"
+      aggregate: false
+
 - include: evaluate_groups.yml
   tags:
   - always
@@ -22,3 +35,14 @@
 - include: initialize_openshift_version.yml
   tags:
   - always
+
+- name: Initialization Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set install initialization 'Complete'
+    set_stats:
+      data:
+        installer_phase_initialize: "Complete"
+      aggregate: false

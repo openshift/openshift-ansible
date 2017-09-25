@@ -9,23 +9,23 @@
     path: /etc/origin/master/front-proxy-ca.crt
   register: first_proxy_ca_crt
   changed_when: false
-  delegate_to: "{{ first_master }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
 
 - name: Check for First Master Aggregator Signer key
   stat:
     path: /etc/origin/master/front-proxy-ca.crt
   register: first_proxy_ca_key
   changed_when: false
-  delegate_to: "{{ first_master }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
 
 # TODO: this currently has a bug where hostnames are required
 - name: Creating First Master Aggregator signer certs
   command: >
-    {{ hostvars[first_master].openshift.common.client_binary }} adm ca create-signer-cert
+    {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm ca create-signer-cert
     --cert=/etc/origin/master/front-proxy-ca.crt
     --key=/etc/origin/master/front-proxy-ca.key
     --serial=/etc/origin/master/ca.serial.txt
-  delegate_to: "{{ first_master }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
   when:
   - not first_proxy_ca_crt.stat.exists
   - not first_proxy_ca_key.stat.exists
@@ -50,7 +50,7 @@
   with_items:
   - front-proxy-ca.crt
   - front-proxy-ca.key
-  delegate_to: "{{ first_master }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
   when:
   - not proxy_ca_key.stat.exists
   - not proxy_ca_crt.stat.exists
@@ -74,7 +74,7 @@
   stat:
     path: /etc/origin/master/aggregator-front-proxy.kubeconfig
   register: first_front_proxy_kubeconfig
-  delegate_to: "{{ first_master }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
   run_once: true
 
 # create-api-client-config generates a ca.crt file which will
@@ -84,14 +84,14 @@
 - block:
   - name: Create first master api-client config for Aggregator
     command: >
-      {{ hostvars[first_master].openshift.common.client_binary }} adm create-api-client-config
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm create-api-client-config
       --certificate-authority=/etc/origin/master/front-proxy-ca.crt
       --signer-cert=/etc/origin/master/front-proxy-ca.crt
       --signer-key=/etc/origin/master/front-proxy-ca.key
       --user aggregator-front-proxy
       --client-dir={{ certtemp.stdout }}
       --signer-serial=/etc/origin/master/ca.serial.txt
-    delegate_to: "{{ first_master }}"
+    delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
   - name: Copy first master api-client config for Aggregator
     copy:
@@ -102,7 +102,7 @@
     - aggregator-front-proxy.crt
     - aggregator-front-proxy.key
     - aggregator-front-proxy.kubeconfig
-    delegate_to: "{{ first_master }}"
+    delegate_to: "{{ groups.oo_first_master.0 }}"
     run_once: true
   when:
   - not first_front_proxy_kubeconfig.stat.exists
@@ -117,7 +117,7 @@
     src: "/etc/origin/master/{{ item }}"
     dest: "{{ certtemp.stdout }}/{{ item }}"
     flat: yes
-  delegate_to: "{{ first_master }}"
+  delegate_to: "{{ groups.oo_first_master.0 }}"
   with_items:
   - aggregator-front-proxy.crt
   - aggregator-front-proxy.key

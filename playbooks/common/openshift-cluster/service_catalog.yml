@@ -1,4 +1,15 @@
 ---
+- name: Service Catalog Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Service Catalog install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_servicecatalog: "In Progress"
+      aggregate: false
+
 - name: Service Catalog
   hosts: oo_first_master
   roles:
@@ -7,3 +18,14 @@
   - template_service_broker
   vars:
     first_master: "{{ groups.oo_first_master[0] }}"
+
+- name: Service Catalog Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Service Catalog install 'Complete'
+    set_stats:
+      data:
+        installer_phase_servicecatalog: "Complete"
+      aggregate: false
