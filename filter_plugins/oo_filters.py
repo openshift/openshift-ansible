@@ -916,6 +916,10 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
         persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'metrics')
         if persistent_volume is not None:
             persistent_volumes.append(persistent_volume)
+    if 'prometheus' in hostvars['openshift']:
+        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'prometheus')
+        if persistent_volume is not None:
+            persistent_volumes.append(persistent_volume)
     return persistent_volumes
 
 
@@ -983,6 +987,10 @@ def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
             persistent_volume_claims.append(persistent_volume_claim)
     if 'metrics' in hostvars['openshift']:
         persistent_volume_claim = oo_component_pv_claims(hostvars, 'metrics')
+        if persistent_volume_claim is not None:
+            persistent_volume_claims.append(persistent_volume_claim)
+    if 'prometheus' in hostvars['openshift']:
+        persistent_volume_claim = oo_component_pv_claims(hostvars, 'prometheus')
         if persistent_volume_claim is not None:
             persistent_volume_claims.append(persistent_volume_claim)
     return persistent_volume_claims
