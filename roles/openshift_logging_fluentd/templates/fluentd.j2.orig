@@ -118,12 +118,14 @@ spec:
         - name: "MUX_CLIENT_MODE"
           value: "{{ openshift_logging_mux_client_mode }}"
 {% endif %}
+<<<<<<< HEAD
 {% if openshift_logging_install_eventrouter is defined and openshift_logging_install_eventrouter %}
         - name: "TRANSFORM_EVENTS"
           value: "true"
 {% endif %}
+=======
 
-{% if openshift_logging_fluentd_remote_syslog is defined and openshift_logging_fluentd_remote_syslog %}
+{% if openshift_logging_fluentd_remote_syslog is defined %}
         - name: USE_REMOTE_SYSLOG
           value: "true"
 {% endif %}
@@ -138,7 +140,7 @@ spec:
           value: "{{ openshift_logging_fluentd_remote_syslog_port }}"
 {% endif %}
 
-{% if openshift_logging_fluentd_remote_syslog_severity is defined %}
+{% if openshift_logging_fluentd_remote_syslog_severity %}
         - name: REMOTE_SYSLOG_SEVERITY
           value: "{{ openshift_logging_fluentd_remote_syslog_severity }}"
 {% endif %}
@@ -168,6 +170,7 @@ spec:
           value: "{{ openshift_logging_fluentd_remote_syslog_payload_key }}"
 {% endif %}
 
+>>>>>>> b06a45744... Added new variables for logging role for remote-syslog plugin
       volumes:
       - name: runlogjournal
         hostPath:

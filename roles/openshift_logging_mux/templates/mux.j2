@@ -119,6 +119,52 @@ spec:
               resource: limits.memory
         - name: "FILE_BUFFER_LIMIT"
           value: "{{ openshift_logging_mux_file_buffer_limit | default('2Gi') }}"
+
+{% if openshift_logging_mux_remote_syslog is defined and openshift_logging_mux_remote_syslog %}
+        - name: USE_REMOTE_SYSLOG
+          value: "true"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_host is defined %}
+        - name: REMOTE_SYSLOG_HOST
+          value: "{{ openshift_logging_mux_remote_syslog_host }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_port is defined %}
+        - name: REMOTE_SYSLOG_PORT
+          value: "{{ openshift_logging_mux_remote_syslog_port }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_severity is defined %}
+        - name: REMOTE_SYSLOG_SEVERITY
+          value: "{{ openshift_logging_mux_remote_syslog_severity }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_facility is defined %}
+        - name: REMOTE_SYSLOG_FACILITY
+          value: "{{ openshift_logging_mux_remote_syslog_facility }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_remove_tag_prefix is defined %}
+        - name: REMOTE_SYSLOG_REMOVE_TAG_PREFIX
+          value: "{{ openshift_logging_mux_remote_syslog_remove_tag_prefix }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_tag_key is defined %}
+        - name: REMOTE_SYSLOG_TAG_KEY
+          value: "{{ openshift_logging_mux_remote_syslog_tag_key }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_use_record is defined %}
+        - name: REMOTE_SYSLOG_USE_RECORD
+          value: "{{ openshift_logging_mux_remote_syslog_use_record }}"
+{% endif %}
+
+{% if openshift_logging_mux_remote_syslog_payload_key is defined %}
+        - name: REMOTE_SYSLOG_PAYLOAD_KEY
+          value: "{{ openshift_logging_mux_remote_syslog_payload_key }}"
+{% endif %}
+
       volumes:
       - name: config
         configMap:
