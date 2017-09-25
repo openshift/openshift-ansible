@@ -106,9 +106,3 @@
     when:
     - ansible_distribution == 'Fedora'
     - not openshift.common.is_containerized | bool
-
-- name: Backup etcd
-  include: backup.yml
-  vars:
-    etcd_backup_tag: "post-3.0-"
-  when: openshift_etcd_backup | default(true) | bool
