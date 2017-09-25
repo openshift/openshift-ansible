@@ -51,8 +51,8 @@
     kind: pod
     state: list
     selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
-  register: heketi_pod
-  until: "heketi_pod.results.results[0]['items'] | count == 0"
+  register: deploy_heketi_pod
+  until: "deploy_heketi_pod.results.results[0]['items'] | count == 0"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when: glusterfs_heketi_wipe
@@ -103,7 +103,7 @@
     state: list
     kind: pod
     selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
-  register: heketi_pod
+  register: deploy_heketi_pod
   when: glusterfs_heketi_is_native
 
 - name: Check if need to deploy deploy-heketi
@@ -111,9 +111,9 @@
     glusterfs_heketi_deploy_is_missing: False
   when:
   - "glusterfs_heketi_is_native"
-  - "heketi_pod.results.results[0]['items'] | count > 0"
+  - "deploy_heketi_pod.results.results[0]['items'] | count > 0"
   # deploy-heketi is not missing when there are one or more pods with matching labels whose 'Ready' status is True
-  - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
+  - "deploy_heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
 
 - name: Check for existing heketi pod
   oc_obj:
@@ -146,6 +146,21 @@
     dest: "{{ mktemp.stdout }}/heketi.json"
   when:
   - glusterfs_heketi_is_native
+
+- name: Get heketi admin secret
+  oc_secret:
+    state: list
+    namespace: "{{ glusterfs_namespace }}"
+    name: "heketi-{{ glusterfs_name }}-admin-secret"
+    decode: True
+  register: glusterfs_heketi_admin_secret
+
+- name: Set heketi admin key
+  set_fact:
+    glusterfs_heketi_admin_key: "{{ glusterfs_heketi_admin_secret.results.decoded.key }}"
+  when:
+  - glusterfs_is_native
+  - glusterfs_heketi_admin_secret.results.results[0]
 
 - name: Generate heketi admin key
   set_fact:
@@ -190,13 +205,36 @@
   - glusterfs_heketi_deploy_is_missing
   - glusterfs_heketi_is_missing
 
+- name: Wait for deploy-heketi pod
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: pod
+    state: list
+    selector: "glusterfs=deploy-heketi-{{ glusterfs_name }}-pod"
+  register: deploy_heketi_pod
+  until:
+  - "deploy_heketi_pod.results.results[0]['items'] | count > 0"
+  # Pod's 'Ready' status must be True
+  - "deploy_heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  delay: 10
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
+  when:
+  - glusterfs_heketi_is_native
+  - not glusterfs_heketi_deploy_is_missing
+  - glusterfs_heketi_is_missing
+
 - name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
 
 - name: Verify heketi service
   command: "{{ glusterfs_heketi_client }} cluster list"
   changed_when: False
+
+- name: Place heketi topology on heketi Pod
+  shell: "{{ openshift.common.client_binary }} exec --namespace={{ glusterfs_namespace }} -i {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} -- bash -c 'mkdir -p {{ mktemp.stdout }} && cat > {{ mktemp.stdout }}/topology.json' < {{ mktemp.stdout }}/topology.json"
+  when:
+  - glusterfs_heketi_is_native
 
 - name: Load heketi topology
   command: "{{ glusterfs_heketi_client }} topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
