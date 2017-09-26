@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.125
+Version:        3.5.126
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.126-1
+- Fix registry_auth logic for upgrades (mgugino@redhat.com)
+- Remove default value for oreg_url (mgugino@redhat.com)
+- Use origin 1.5 repo for release-1.5 branch (sdodson@redhat.com)
+- Support setting annotations on Hawkular route (hansmi@vshn.ch)
+- Fix registry auth task ordering (mgugino@redhat.com)
+- Backport .Net ImageStreams to 1.5 (rromerom@redhat.com)
+
 * Fri Sep 15 2017 Scott Dodson <sdodson@redhat.com> 3.5.125-1
 - Fix: authenticated registry support for containerized hosts
   (mgugino@redhat.com)
