@@ -45,6 +45,21 @@ def map_from_pairs(source, delim="="):
     return dict(item.split(delim) for item in source.split(","))
 
 
+def serviceaccount_name(qualified_sa):
+    ''' Returns the simple name from a fully qualified name '''
+    return qualified_sa.split(":")[-1]
+
+
+def serviceaccount_namespace(qualified_sa, default=None):
+    ''' Returns the namespace from a fully qualified name '''
+    seg = qualified_sa.split(":")
+    if len(seg) > 1:
+        return seg[-2]
+    if default:
+        return default
+    return seg[-1]
+
+
 # pylint: disable=too-few-public-methods
 class FilterModule(object):
     ''' OpenShift Logging Filters '''
@@ -56,5 +71,7 @@ class FilterModule(object):
             'random_word': random_word,
             'entry_from_named_pair': entry_from_named_pair,
             'map_from_pairs': map_from_pairs,
-            'es_storage': es_storage
+            'es_storage': es_storage,
+            'serviceaccount_name': serviceaccount_name,
+            'serviceaccount_namespace': serviceaccount_namespace
         }

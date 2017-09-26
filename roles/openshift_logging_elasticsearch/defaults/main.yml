@@ -40,6 +40,12 @@ openshift_logging_es_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_pvc_
 # config the es plugin to write kibana index based on the index mode
 openshift_logging_elasticsearch_kibana_index_mode: 'unique'
 
+openshift_logging_elasticsearch_proxy_image_prefix: "openshift/oauth-proxy"
+openshift_logging_elasticsearch_proxy_image_version: "v1.0.0"
+openshift_logging_elasticsearch_proxy_cpu_limit: "100m"
+openshift_logging_elasticsearch_proxy_memory_limit: "64Mi"
+openshift_logging_elasticsearch_prometheus_sa: "system:serviceaccount:{{openshift_prometheus_namespace | default('prometheus')}}:prometheus"
+
 # this is used to determine if this is an operations deployment or a non-ops deployment
 # simply used for naming purposes
 openshift_logging_elasticsearch_ops_deployment: false
