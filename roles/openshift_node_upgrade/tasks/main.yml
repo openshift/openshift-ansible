@@ -10,6 +10,8 @@
 
 # tasks file for openshift_node_upgrade
 
+- include: registry_auth.yml
+
 - name: Stop node and openvswitch services
   service:
     name: "{{ item }}"

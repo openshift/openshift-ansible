@@ -3,6 +3,8 @@
 # playbooks.  For that reason the ha_svc variables are use set_fact instead of
 # the vars directory on the role.
 
+- include: registry_auth.yml
+
 - name: Init HA Service Info
   set_fact:
     containerized_svc_dir: "/usr/lib/systemd/system"
