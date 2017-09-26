@@ -1,5 +1,8 @@
 ---
 - fail:
+    msg: The ES_COPY feature is no longer supported. Please remove the variable from your inventory
+  when: openshift_logging_fluentd_es_copy is defined
+- fail:
     msg: Only one Fluentd nodeselector key pair should be provided
   when: openshift_logging_fluentd_nodeselector.keys() | count > 1
 
