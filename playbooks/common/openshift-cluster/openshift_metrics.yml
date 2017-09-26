@@ -2,7 +2,9 @@
 - name: OpenShift Metrics
   hosts: oo_first_master
   roles:
-  - openshift_metrics
+  - role: openshift_metrics
+    when: openshift_metrics_install_metrics | default(false) | bool
+
 
 - name: OpenShift Metrics
   hosts: oo_masters:!oo_first_master
@@ -12,3 +14,4 @@
     include_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
+    when: openshift_metrics_install_metrics | default(false) | bool

@@ -1,7 +1,11 @@
 ---
 - name: setup firewall
   include: firewall.yml
-  static: yes
+  vars:
+    l_openshift_hosted_firewall_enabled: "{{ r_openshift_hosted_router_firewall_enabled }}"
+    l_openshift_hosted_use_firewalld: "{{ r_openshift_hosted_router_use_firewalld }}"
+    l_openshift_hosted_fw_allow: "{{ r_openshift_hosted_router_os_firewall_allow }}"
+    l_openshift_hosted_fw_deny: "{{ r_openshift_hosted_router_os_firewall_deny }}"
 
 - name: Retrieve list of openshift nodes matching router selector
   oc_obj:
@@ -82,7 +86,7 @@
     replicas: "{{ item.replicas }}"
     namespace: "{{ item.namespace | default('default') }}"
     # This option is not yet implemented
-    # force_subdomain: "{{ openshift.hosted.router.force_subdomain | default(none) }}"
+    # force_subdomain: "{{ openshift_hosted_router_force_subdomain | default(none) }}"
     service_account: "{{ item.serviceaccount | default('router') }}"
     selector: "{{ item.selector | default(none) }}"
     images: "{{ item.images | default(omit) }}"
@@ -94,38 +98,8 @@
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
 
-- when: openshift_hosted_router_wait | bool
-  block:
-  - name: Ensure OpenShift router correctly rolls out (best-effort today)
-    command: |
-      {{ openshift.common.client_binary }} rollout status deploymentconfig {{ item.name }} \
-                        --namespace {{ item.namespace | default('default') }} \
-                        --config {{ openshift.common.config_base }}/master/admin.kubeconfig
-    async: 600
-    poll: 15
-    with_items: "{{ openshift_hosted_routers }}"
-    failed_when: false
-
-  - name: Determine the latest version of the OpenShift router deployment
-    command: |
-      {{ openshift.common.client_binary }} get deploymentconfig {{ item.name }} \
-             --namespace {{ item.namespace }} \
-             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
-             -o jsonpath='{ .status.latestVersion }'
-    register: openshift_hosted_routers_latest_version
-    with_items: "{{ openshift_hosted_routers }}"
-
-  - name: Poll for OpenShift router deployment success
-    command: |
-      {{ openshift.common.client_binary }} get replicationcontroller {{ item.0.name }}-{{ item.1.stdout }} \
-             --namespace {{ item.0.namespace }} \
-             --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
-             -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
-    register: openshift_hosted_router_rc_phase
-    until: "'Running' not in openshift_hosted_router_rc_phase.stdout"
-    delay: 15
-    retries: 40
-    failed_when: "'Failed' in openshift_hosted_router_rc_phase.stdout"
-    with_together:
-    - "{{ openshift_hosted_routers }}"
-    - "{{ openshift_hosted_routers_latest_version.results }}"
+- name: Wait for pod (Routers)
+  include: wait_for_pod.yml
+  vars:
+    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
+    l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"

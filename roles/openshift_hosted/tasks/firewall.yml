@@ -1,5 +1,5 @@
 ---
-- when: r_openshift_hosted_registry_firewall_enabled | bool and not r_openshift_hosted_registry_use_firewalld | bool
+- when: r_openshift_hosted_router_firewall_enabled | bool and not r_openshift_hosted_router_use_firewalld | bool
   block:
   - name: Add iptables allow rules
     os_firewall_manage_iptables:
@@ -8,7 +8,7 @@
       protocol: "{{ item.port.split('/')[1] }}"
       port: "{{ item.port.split('/')[0] }}"
     when: item.cond | default(True)
-    with_items: "{{ r_openshift_hosted_registry_os_firewall_allow }}"
+    with_items: "{{ l_openshift_hosted_fw_allow }}"
 
   - name: Remove iptables rules
     os_firewall_manage_iptables:
@@ -17,9 +17,9 @@
       protocol: "{{ item.port.split('/')[1] }}"
       port: "{{ item.port.split('/')[0] }}"
     when: item.cond | default(True)
-    with_items: "{{ r_openshift_hosted_registry_os_firewall_deny }}"
+    with_items: "{{ l_openshift_hosted_fw_deny }}"
 
-- when: r_openshift_hosted_registry_firewall_enabled | bool and r_openshift_hosted_registry_use_firewalld | bool
+- when: l_openshift_hosted_firewall_enabled | bool and l_openshift_hosted_use_firewalld | bool
   block:
   - name: Add firewalld allow rules
     firewalld:
@@ -28,7 +28,7 @@
       immediate: true
       state: enabled
     when: item.cond | default(True)
-    with_items: "{{ r_openshift_hosted_registry_os_firewall_allow }}"
+    with_items: "{{ l_openshift_hosted_fw_allow }}"
 
   - name: Remove firewalld allow rules
     firewalld:
@@ -37,4 +37,4 @@
       immediate: true
       state: disabled
     when: item.cond | default(True)
-    with_items: "{{ r_openshift_hosted_registry_os_firewall_deny }}"
+    with_items: "{{ l_openshift_hosted_fw_deny }}"
