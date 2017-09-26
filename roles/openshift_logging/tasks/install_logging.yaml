@@ -159,6 +159,7 @@
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_ops_pvc_prefix }}-{{ item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
+    openshift_logging_elasticsearch_prometheus_passwd: "{{openshift_logging_elasticsearch_ops_prometheus_passwd | default(8 | oo_random_word) }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_ops_pvc_size }}"

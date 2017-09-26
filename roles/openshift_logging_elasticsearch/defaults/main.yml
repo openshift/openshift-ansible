@@ -37,6 +37,10 @@ openshift_logging_elasticsearch_storage_group: '65534'
 
 openshift_logging_es_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
 
+# The password to use for scraping the prometheus endpoint which is a bcrypt value
+# Temporary until we are able to make the oauth-proxy work with bearer tokens
+# openshift_logging_elasticsearch_prometheus_passwd: none
+
 # config the es plugin to write kibana index based on the index mode
 openshift_logging_elasticsearch_kibana_index_mode: 'unique'
 
