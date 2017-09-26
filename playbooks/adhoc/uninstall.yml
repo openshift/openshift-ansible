@@ -1,5 +1,5 @@
-# This deletes *ALL* Origin, Atomic Enterprise Platform and OpenShift
-# Enterprise content installed by ansible.  This includes:
+# This deletes *ALL* Origin and OpenShift Enterprise content installed by
+# ansible.  This includes:
 #
 #    configuration
 #    containers
@@ -41,7 +41,6 @@
   - name: Stop services
     service: name={{ item }} state=stopped
     with_items:
-    - atomic-enterprise-node
     - atomic-openshift-node
     - openshift-node
     - openvswitch
@@ -54,7 +53,6 @@
   - name: Stop services
     service: name={{ item }} state=stopped
     with_items:
-    - atomic-enterprise-master
     - atomic-openshift-master
     - atomic-openshift-master-api
     - atomic-openshift-master-controllers
@@ -104,9 +102,6 @@
       - name: Remove packages
         package: name={{ item }} state=absent
         with_items:
-        - atomic-enterprise
-        - atomic-enterprise-node
-        - atomic-enterprise-sdn-ovs
         - atomic-openshift
         - atomic-openshift-clients
         - atomic-openshift-excluder
@@ -129,8 +124,6 @@
         - origin-clients
         - origin-node
         - origin-sdn-ovs
-        - tuned-profiles-atomic-enterprise-node
-        - tuned-profiles-atomic-openshift-node
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
 
@@ -165,7 +158,6 @@
     failed_when: False
     with_items:
     - openshift-enterprise
-    - atomic-enterprise
     - origin
 
   - shell: atomic uninstall "{{ item }}"-master-controllers
@@ -173,7 +165,6 @@
     failed_when: False
     with_items:
     - openshift-enterprise
-    - atomic-enterprise
     - origin
 
   - shell: atomic uninstall "{{ item }}"-master
@@ -181,7 +172,6 @@
     failed_when: False
     with_items:
     - openshift-enterprise
-    - atomic-enterprise
     - origin
 
   - shell: atomic uninstall "{{ item }}"-node
@@ -189,7 +179,6 @@
     failed_when: False
     with_items:
     - openshift-enterprise
-    - atomic-enterprise
     - origin
 
   - shell: atomic uninstall "{{ item }}"
@@ -202,18 +191,11 @@
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
 
-  - shell: find /var/lib/atomic-enterprise/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-    changed_when: False
-
-  - shell: find /var/lib/openshift/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
-    changed_when: False
-
   - shell: docker rm -f "{{ item }}"-master "{{ item }}"-node
     changed_when: False
     failed_when: False
     with_items:
     - openshift-enterprise
-    - atomic-enterprise
     - origin
 
   - shell: docker ps -a | grep Exited | egrep "{{ item }}" | awk '{print $1}'
@@ -221,9 +203,6 @@
     failed_when: False
     register: exited_containers_to_delete
     with_items:
-    - aep3.*/aep
-    - aep3.*/node
-    - aep3.*/openvswitch
     - openshift3/ose
     - openshift3/node
     - openshift3/openvswitch
@@ -242,7 +221,6 @@
         register: images_to_delete
         with_items:
         - registry\.access\..*redhat\.com/openshift3
-        - registry\.access\..*redhat\.com/aep3
         - registry\.qe\.openshift\.com/.*
         - registry\.access\..*redhat\.com/rhel7/etcd
         - docker.io/openshift
@@ -290,10 +268,8 @@
     file: path={{ item }} state=absent
     with_items:
     - /etc/ansible/facts.d/openshift.fact
-    - /etc/atomic-enterprise
     - /etc/openshift
     - /etc/openshift-sdn
-    - /etc/sysconfig/atomic-enterprise-node
     - /etc/sysconfig/atomic-openshift-node
     - /etc/sysconfig/atomic-openshift-node-dep
     - /etc/sysconfig/openshift-node-dep
@@ -308,8 +284,6 @@
     - /etc/systemd/system/origin-node-dep.service
     - /etc/systemd/system/origin-node.service
     - /etc/systemd/system/origin-node.service.wants
-    - /var/lib/atomic-enterprise
-    - /var/lib/openshift
 
   - shell: systemctl daemon-reload
     changed_when: False
@@ -347,8 +321,6 @@
     package: name={{ item }} state=absent
     when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
-    - atomic-enterprise
-    - atomic-enterprise-master
     - atomic-openshift
     - atomic-openshift-clients
     - atomic-openshift-excluder
@@ -417,7 +389,6 @@
     file: path={{ item }} state=absent
     with_items:
     - /etc/ansible/facts.d/openshift.fact
-    - /etc/atomic-enterprise
     - /etc/corosync
     - /etc/openshift
     - /etc/openshift-sdn
@@ -428,9 +399,6 @@
     - /etc/systemd/system/origin-master-api.service
     - /etc/systemd/system/origin-master-controllers.service
     - /etc/systemd/system/openvswitch.service
-    - /etc/sysconfig/atomic-enterprise-master
-    - /etc/sysconfig/atomic-enterprise-master-api
-    - /etc/sysconfig/atomic-enterprise-master-controllers
     - /etc/sysconfig/atomic-openshift-master-api
     - /etc/sysconfig/atomic-openshift-master-controllers
     - /etc/sysconfig/origin-master
@@ -441,8 +409,6 @@
     - /etc/sysconfig/origin-master-api
     - /etc/sysconfig/origin-master-controllers
     - /usr/share/openshift/examples
-    - /var/lib/atomic-enterprise
-    - /var/lib/openshift
     - /var/lib/pacemaker
     - /var/lib/pcsd
     - /usr/lib/systemd/system/atomic-openshift-master-api.service
