@@ -29,16 +29,7 @@
     - openshift_additional_repos | length == 0
     notify: refresh cache
 
-  - name: Configure origin gpg keys if needed
-    copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-    with_items:
-    - src: origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS
-      dest: /etc/pki/rpm-gpg/
-    - src: origin/repos/openshift-ansible-centos-paas-sig.repo
-      dest: /etc/yum.repos.d/
-    notify: refresh cache
+  - include: centos_repos.yml
     when:
     - ansible_os_family == "RedHat"
     - ansible_distribution != "Fedora"
