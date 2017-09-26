@@ -135,8 +135,6 @@
   when: openshift.master.request_header_ca is defined and item.kind == 'RequestHeaderIdentityProvider' and item.clientCA | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
-- include: registry_auth.yml
-
 - name: Install the systemd units
   include: systemd_units.yml
 
