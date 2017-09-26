@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.126
+Version:        3.5.127
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.127-1
+- 
+
 * Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.126-1
 - Fix registry_auth logic for upgrades (mgugino@redhat.com)
 - Remove default value for oreg_url (mgugino@redhat.com)
