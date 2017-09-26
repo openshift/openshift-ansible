@@ -67,13 +67,39 @@
     resource_name: hostnetwork
   with_items: "{{ openshift_hosted_routers }}"
 
-- name: Set additional permissions for router service account
+- name: Create the role namespace-reader when using Router Shards
+  oc_obj:
+    kind: ClusterRole
+    name: namespace-reader
+    namespace: "{{ item.namespace }}"
+    content:
+      path: /tmp/osh_namespace_reader
+      data:
+        apiVersion: v1
+        kind: ClusterRole
+        metadata:
+          name: namespace-reader
+        rules:
+        - apiGroups:
+          - ""
+          attributeRestrictions: null
+          resources:
+          - namespaces
+          - namespaces/status
+          verbs:
+          - get
+          - list
+          - watch
+  when: ('NAMESPACE_LABELS' in (item | string )) or ('ROUTE_LABELS' in (item | string ))
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Set permissions for router service account when using Router Shards
   oc_adm_policy_user:
     user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
     namespace: "{{ item.namespace }}"
     resource_kind: cluster-role
-    resource_name: cluster-reader
-  when: item.namespace == 'default'
+    resource_name: namespace-reader
+  when: ('NAMESPACE_LABELS' in (item | string )) or ('ROUTE_LABELS' in (item | string ))
   with_items: "{{ openshift_hosted_routers }}"
 
 - name: Create OpenShift router
