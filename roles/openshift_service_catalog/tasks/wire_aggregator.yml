@@ -75,17 +75,35 @@
     path: /etc/origin/master/aggregator-front-proxy.kubeconfig
   register: first_front_proxy_kubeconfig
   delegate_to: "{{ first_master }}"
+  run_once: true
 
-- name: Create first master api-client config for Aggregator
-  command: >
-    {{ hostvars[first_master].openshift.common.client_binary }} adm create-api-client-config
-    --certificate-authority=/etc/origin/master/front-proxy-ca.crt
-    --signer-cert=/etc/origin/master/front-proxy-ca.crt
-    --signer-key=/etc/origin/master/front-proxy-ca.key
-    --user aggregator-front-proxy
-    --client-dir=/etc/origin/master
-    --signer-serial=/etc/origin/master/ca.serial.txt
-  delegate_to: "{{ first_master }}"
+# create-api-client-config generates a ca.crt file which will
+# overwrite the OpenShift CA certificate.  Generate the aggregator
+# kubeconfig in a temporary directory and then copy files into the
+# master config dir to avoid overwriting ca.crt.
+- block:
+  - name: Create first master api-client config for Aggregator
+    command: >
+      {{ hostvars[first_master].openshift.common.client_binary }} adm create-api-client-config
+      --certificate-authority=/etc/origin/master/front-proxy-ca.crt
+      --signer-cert=/etc/origin/master/front-proxy-ca.crt
+      --signer-key=/etc/origin/master/front-proxy-ca.key
+      --user aggregator-front-proxy
+      --client-dir={{ certtemp.stdout }}
+      --signer-serial=/etc/origin/master/ca.serial.txt
+    delegate_to: "{{ first_master }}"
+    run_once: true
+  - name: Copy first master api-client config for Aggregator
+    copy:
+      src: "{{ certtemp.stdout }}/{{ item }}"
+      dest: "/etc/origin/master/"
+      remote_src: true
+    with_items:
+    - aggregator-front-proxy.crt
+    - aggregator-front-proxy.key
+    - aggregator-front-proxy.kubeconfig
+    delegate_to: "{{ first_master }}"
+    run_once: true
   when:
   - not first_front_proxy_kubeconfig.stat.exists
 
