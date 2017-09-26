@@ -58,6 +58,7 @@
   become: False
   roles:
     - role: dns-records
+      use_bastion: "{{ openstack_use_bastion|default(False)|bool }}"
     - role: infra-ansible/roles/dns
 
 - name: Switch the stack subnet to the configured private DNS server
