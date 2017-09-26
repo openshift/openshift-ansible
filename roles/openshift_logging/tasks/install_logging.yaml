@@ -74,8 +74,6 @@
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
-    openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
-    openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
   with_together:
@@ -95,8 +93,6 @@
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
-    openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
-    openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
 
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
