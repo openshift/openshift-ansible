@@ -16,14 +16,14 @@
       groups: g_service_nodes
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-    with_items: "{{ node_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
+    with_items: "{{ node_hosts | default([]) | difference(['localhost']) | list | difference(groups.status_terminated) | list }}"
 
   - add_host:
       name: "{{ item }}"
       groups: g_service_masters
       ansible_ssh_user: "{{ deployment_vars[deployment_type].ssh_user }}"
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
-    with_items: "{{ master_hosts | default([]) | difference(['localhost']) | difference(groups.status_terminated) }}"
+    with_items: "{{ master_hosts | default([]) | difference(['localhost']) | list | difference(groups.status_terminated) | list }}"
 
 - include: ../../common/openshift-node/service.yml
 - include: ../../common/openshift-master/service.yml

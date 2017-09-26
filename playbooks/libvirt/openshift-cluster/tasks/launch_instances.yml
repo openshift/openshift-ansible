@@ -13,7 +13,7 @@
   get_url:
     url: '{{ image_url }}'
     sha256sum: '{{ image_sha256 }}'
-    dest: '{{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | difference([""]) | join(".") }}'
+    dest: '{{ libvirt_storage_pool_path }}/{{ [image_name, image_compression] | difference([""]) | list | join(".") }}'
   when: ( lookup("oo_option", "skip_image_download") | default("no", True) | lower ) in ["false", "no"]
   register: downloaded_image
 

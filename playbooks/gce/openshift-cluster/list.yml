@@ -18,6 +18,6 @@
       ansible_become: "{{ deployment_vars[deployment_type].become }}"
       oo_public_ipv4: "{{ hostvars[item].gce_public_ip }}"
       oo_private_ipv4: "{{ hostvars[item].gce_private_ip }}"
-    with_items: "{{ groups[scratch_group] | default([], true) | difference(['localhost']) | difference(groups.status_terminated | default([], true)) }}"
+    with_items: "{{ groups[scratch_group] | default([], true) | difference(['localhost']) | list | difference(groups.status_terminated | default([], true)) | list }}"
   - debug:
       msg: "{{ hostvars | oo_select_keys(groups[scratch_group] | default([])) | oo_pretty_print_cluster }}"
