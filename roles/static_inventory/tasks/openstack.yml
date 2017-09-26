@@ -37,7 +37,6 @@
       with_items: "{{ registered_nodes|difference(registered_nodes_floating) }}"
       add_host:
         name: '{{ item.name }}'
-        groups: '{{ item.metadata.group }}'
         ansible_host: >-
           {% if use_bastion|bool -%}
           {{ item.name }}
@@ -57,7 +56,6 @@
       with_items: "{{ registered_nodes_floating }}"
       add_host:
         name: '{{ item.name }}'
-        groups: '{{ item.metadata.group }}'
         ansible_host: >-
           {% if use_bastion|bool -%}
           {{ item.name }}
@@ -79,6 +77,30 @@
           {%- else -%}
           {{ item.public_v4 }}
           {%- endif %}
+
+    # Split registered_nodes into old nodes and new app nodes
+    # Add new app nodes to new_nodes host group for upscaling
+    - name: Create new_app_nodes variable
+      set_fact:
+        new_app_nodes: []
+
+    - name: Filter new app nodes out of registered_nodes
+      include: filter_out_new_app_nodes.yaml
+      with_items: "{{ registered_nodes }}"
+      loop_control:
+        loop_var: node
+
+    - name: Add new app nodes to the new_nodes section (if a deployment already exists)
+      with_items: "{{ new_app_nodes }}"
+      add_host:
+        name: "{{ item.name }}"
+        groups: new_nodes, app
+
+    - name: Add the rest of cluster nodes to their corresponding groups
+      with_items: "{{ registered_nodes }}"
+      add_host:
+        name: '{{ item.name }}'
+        groups: '{{ item.metadata.group }}'
 
     - name: Add bastion node to inventory
       add_host:

@@ -47,3 +47,7 @@
 - name: Set openshift_cluster_node_labels for the app group
   set_fact:
     openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'app': {'region': 'primary'}}, recursive=True) }}"
+
+- name: Set openshift_cluster_node_labels for auto-scaling app nodes
+  set_fact:
+    openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'app': {'autoscaling': 'app'}}, recursive=True) }}"
