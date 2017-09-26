@@ -8,7 +8,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS
 [centos-openshift-origin-testing]
 name=CentOS OpenShift Origin Testing
 baseurl=http://buildlogs.centos.org/centos/7/paas/x86_64/openshift-origin/
-enabled=0
+enabled={% if openshift_repos_enable_testing %}1{% else %}0{% endif %}
 gpgcheck=0
 gpgkey=file:///etc/pki/rpm-gpg/openshift-ansible-CentOS-SIG-PaaS
 
