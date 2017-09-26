@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.135
+Version:        3.4.136
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.136-1
+- Fix registry_auth logic for upgrades (mgugino@redhat.com)
+- Remove default value for oreg_url (mgugino@redhat.com)
+- Fix registry auth task ordering (mgugino@redhat.com)
+- Update openshift-ansible-centos-paas-sig.repo
+  (31991104+Blizzkid@users.noreply.github.com)
+
 * Fri Sep 15 2017 Scott Dodson <sdodson@redhat.com> 3.4.135-1
 - Fix: authenticated registry support for containerized hosts
   (mgugino@redhat.com)
