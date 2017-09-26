@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.128.0%{?dist}
+Release:        0.129.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.129.0
+- Refactor openshift_hosted plays and role (mgugino@redhat.com)
+- Remove logging ES_COPY feature (jcantril@redhat.com)
+
 * Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.128.0
 - check if the storage backend is set to etcd3 before upgrading to 3.7
   (jchaloup@redhat.com)
