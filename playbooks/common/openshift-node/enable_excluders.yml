@@ -1,0 +1,8 @@
+---
+- name: Re-enable excluder if it was previously enabled
+  hosts: oo_nodes_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
