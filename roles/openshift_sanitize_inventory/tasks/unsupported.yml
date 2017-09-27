@@ -10,3 +10,23 @@
       Starting in 3.6 openshift_use_dnsmasq must be true or critical features
       will not function. This also means that NetworkManager must be installed
       enabled and responsible for management of the primary interface.
+
+- set_fact:
+    __using_dynamic: True
+  when:
+  - hostvars[inventory_hostname][item] in ['dynamic']
+  with_items:
+  - "{{ hostvars[inventory_hostname] | vars_with_pattern(pattern='openshift_.*_storage_kind') }}"
+
+- name: Ensure that dynamic provisioning is set if using dynamic storage
+  when:
+  - not openshift_master_dynamic_provisioning_enabled | default(false) | bool
+  - not openshift_cloudprovider_kind is defined
+  - __using_dynamic | bool
+  fail:
+    msg: |-
+      Using a storage kind of 'dynamic' without enabling dynamic provisioning nor
+      setting a cloud provider will cause generated PVCs to not be able to bind as
+      intended. Either update to not use a dynamic storage or set
+      openshift_master_dynamic_provisioning_enabled to True and set an
+      openshift_cloudprovider_kind.
