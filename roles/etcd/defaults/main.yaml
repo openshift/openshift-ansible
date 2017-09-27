@@ -87,3 +87,6 @@ r_etcd_os_firewall_allow:
   port: "{{etcd_client_port}}/tcp"
 - service: etcd peering
   port: "{{ etcd_peer_port }}/tcp"
+
+# set the backend quota to 4GB by default
+etcd_quota_backend_bytes: 4294967296
