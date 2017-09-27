@@ -21,17 +21,17 @@
 - name: Use Package Docker if Requested
   include: package_docker.yml
   when:
-  - not l_use_system_container
-  - not l_use_crio_only
+    - not l_use_system_container
+    - not l_use_crio_only
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
   when:
-  - l_use_system_container
-  - not l_use_crio_only
+    - l_use_system_container
+    - not l_use_crio_only
 
 - name: Add CRI-O usage Requested
   include: systemcontainer_crio.yml
   when:
-  - l_use_crio
-  - inventory_hostname in groups['oo_masters_to_config'] or inventory_hostname in groups['oo_nodes_to_config']
+    - l_use_crio
+    - inventory_hostname in groups['oo_masters_to_config'] or inventory_hostname in groups['oo_nodes_to_config']
