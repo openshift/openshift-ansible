@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.131.0%{?dist}
+Release:        0.132.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Sep 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.132.0
+- make difference filter output a list for Python3 (jchaloup@redhat.com)
+- Updating to check for netnamespace kube-service-catalog to be ready
+  (ewolinet@redhat.com)
+- consolidate etcd_common role (jchaloup@redhat.com)
+- Fluentd: one output tag, one output plugin (nhosoi@redhat.com)
+
 * Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.131.0
 - Generate aggregator api client config in temporary directory.
   (abutcher@redhat.com)
