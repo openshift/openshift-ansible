@@ -31,12 +31,9 @@ openshift_node_ami_prep_packages:
 - python-dbus
 - PyYAML
 - yum-utils
-- python2-boto
-- python2-boto3
 - cloud-utils-growpart
 # gluster
 - glusterfs-fuse
-- heketi-client
 # nfs
 - nfs-utils
 - flannel

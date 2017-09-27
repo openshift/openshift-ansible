@@ -10,106 +10,17 @@
         installer_phase_node: "In Progress"
       aggregate: false
 
-- name: Disable excluders
-  hosts: oo_nodes_to_config
-  gather_facts: no
-  roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: disable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+- include: setup.yml
 
-- name: Evaluate node groups
-  hosts: localhost
-  become: no
-  connection: local
-  tasks:
-  - name: Evaluate oo_containerized_master_nodes
-    add_host:
-      name: "{{ item }}"
-      groups: oo_containerized_master_nodes
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
-    when:
-    - hostvars[item].openshift is defined
-    - hostvars[item].openshift.common is defined
-    - hostvars[item].openshift.common.is_containerized | bool
-    - (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
-    changed_when: False
+- include: containerized_nodes.yml
 
-- name: Configure containerized nodes
-  hosts: oo_containerized_master_nodes
-  serial: 1
-  vars:
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                    | union(groups['oo_masters_to_config'])
-                                                    | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
-                                                }}"
+- include: configure_nodes.yml
 
-  roles:
-  - role: os_firewall
-  - role: openshift_node
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+- include: additional_config.yml
 
-- name: Configure nodes
-  hosts: oo_nodes_to_config:!oo_containerized_master_nodes
-  vars:
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
-    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                    | union(groups['oo_masters_to_config'])
-                                                    | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
-                                                }}"
-  roles:
-  - role: os_firewall
-  - role: openshift_node
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+- include: manage_node.yml
 
-- name: Additional node config
-  hosts: oo_nodes_to_config
-  vars:
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-  roles:
-  - role: openshift_facts
-  - role: openshift_etcd_facts
-  - role: openshift_etcd_client_certificates
-    etcd_cert_prefix: flannel.etcd-
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
-    etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
-  - role: flannel
-    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
-    when: openshift_use_flannel | default(false) | bool
-  - role: calico
-    when: openshift_use_calico | default(false) | bool
-  - role: nuage_node
-    when: openshift_use_nuage | default(false) | bool
-  - role: contiv
-    contiv_role: netplugin
-    when: openshift_use_contiv | default(false) | bool
-  - role: nickhammond.logrotate
-  - role: openshift_manage_node
-    openshift_master_host: "{{ groups.oo_first_master.0 }}"
-    when: not openshift_node_bootstrap | default(False)
-  tasks:
-  - name: Create group for deployment type
-    group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
-    changed_when: False
-
-- name: Re-enable excluder if it was previously enabled
-  hosts: oo_nodes_to_config
-  gather_facts: no
-  roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: enable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+- include: enable_excluders.yml
 
 - name: Node Install Checkpoint End
   hosts: localhost
