@@ -716,7 +716,7 @@ def oo_openshift_env(hostvars):
 
 
 # pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements
-def oo_component_persistent_volumes(hostvars, groups, component):
+def oo_component_persistent_volumes(hostvars, groups, component, subcomponent=None):
     """ Generate list of persistent volumes based on oo_openshift_env
         storage options set in host variables for a specific component.
     """
@@ -728,8 +728,13 @@ def oo_component_persistent_volumes(hostvars, groups, component):
     persistent_volume = None
 
     if component in hostvars['openshift']:
-        if 'storage' in hostvars['openshift'][component]:
-            params = hostvars['openshift'][component]['storage']
+        if subcomponent is not None:
+            storageComponent = hostvars['openshift'][component][subcomponent]
+        else:
+            storageComponent = hostvars['openshift'][component]
+
+        if 'storage' in storageComponent:
+            params = storageComponent['storage']
             kind = params['kind']
             create_pv = params['create_pv']
             if kind is not None and create_pv:
@@ -825,85 +830,10 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
         persistent_volumes = []
     if 'hosted' in hostvars['openshift']:
         for component in hostvars['openshift']['hosted']:
-            if 'storage' in hostvars['openshift']['hosted'][component]:
-                params = hostvars['openshift']['hosted'][component]['storage']
-                kind = params['kind']
-                if 'create_pv' in params:
-                    create_pv = params['create_pv']
-                    if kind is not None and create_pv:
-                        if kind == 'nfs':
-                            host = params['host']
-                            if host is None:
-                                if 'oo_nfs_to_config' in groups and len(groups['oo_nfs_to_config']) > 0:
-                                    host = groups['oo_nfs_to_config'][0]
-                                else:
-                                    raise errors.AnsibleFilterError("|failed no storage host detected")
-                            directory = params['nfs']['directory']
-                            volume = params['volume']['name']
-                            path = directory + '/' + volume
-                            size = params['volume']['size']
-                            if 'labels' in params:
-                                labels = params['labels']
-                            else:
-                                labels = dict()
-                            access_modes = params['access']['modes']
-                            persistent_volume = dict(
-                                name="{0}-volume".format(volume),
-                                capacity=size,
-                                labels=labels,
-                                access_modes=access_modes,
-                                storage=dict(
-                                    nfs=dict(
-                                        server=host,
-                                        path=path)))
-                            persistent_volumes.append(persistent_volume)
-                        elif kind == 'openstack':
-                            volume = params['volume']['name']
-                            size = params['volume']['size']
-                            if 'labels' in params:
-                                labels = params['labels']
-                            else:
-                                labels = dict()
-                            access_modes = params['access']['modes']
-                            filesystem = params['openstack']['filesystem']
-                            volume_id = params['openstack']['volumeID']
-                            persistent_volume = dict(
-                                name="{0}-volume".format(volume),
-                                capacity=size,
-                                labels=labels,
-                                access_modes=access_modes,
-                                storage=dict(
-                                    cinder=dict(
-                                        fsType=filesystem,
-                                        volumeID=volume_id)))
-                            persistent_volumes.append(persistent_volume)
-                        elif kind == 'glusterfs':
-                            volume = params['volume']['name']
-                            size = params['volume']['size']
-                            if 'labels' in params:
-                                labels = params['labels']
-                            else:
-                                labels = dict()
-                            access_modes = params['access']['modes']
-                            endpoints = params['glusterfs']['endpoints']
-                            path = params['glusterfs']['path']
-                            read_only = params['glusterfs']['readOnly']
-                            persistent_volume = dict(
-                                name="{0}-volume".format(volume),
-                                capacity=size,
-                                labels=labels,
-                                access_modes=access_modes,
-                                storage=dict(
-                                    glusterfs=dict(
-                                        endpoints=endpoints,
-                                        path=path,
-                                        readOnly=read_only)))
-                            persistent_volumes.append(persistent_volume)
-                        elif not (kind == 'object' or kind == 'dynamic'):
-                            msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
-                                kind,
-                                component)
-                            raise errors.AnsibleFilterError(msg)
+            persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'hosted', component)
+            if persistent_volume is not None:
+                persistent_volumes.append(persistent_volume)
+
     if 'logging' in hostvars['openshift']:
         persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'logging')
         if persistent_volume is not None:
@@ -920,18 +850,18 @@ def oo_persistent_volumes(hostvars, groups, persistent_volumes=None):
         persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'prometheus')
         if persistent_volume is not None:
             persistent_volumes.append(persistent_volume)
-    if 'prometheus_alertmanager' in hostvars['openshift']:
-        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'prometheus_alertmanager')
+    if 'alertmanager' in hostvars['openshift']['prometheus']:
+        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'prometheus', 'alertmanager')
         if persistent_volume is not None:
             persistent_volumes.append(persistent_volume)
-    if 'prometheus_alertbuffer' in hostvars['openshift']:
-        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'prometheus_alertbuffer')
+    if 'alertbuffer' in hostvars['openshift']['prometheus']:
+        persistent_volume = oo_component_persistent_volumes(hostvars, groups, 'prometheus', 'alertbuffer')
         if persistent_volume is not None:
             persistent_volumes.append(persistent_volume)
     return persistent_volumes
 
 
-def oo_component_pv_claims(hostvars, component):
+def oo_component_pv_claims(hostvars, component, subcomponent=None):
     """ Generate list of persistent volume claims based on oo_openshift_env
         storage options set in host variables for a speicific component.
     """
@@ -939,8 +869,13 @@ def oo_component_pv_claims(hostvars, component):
         raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
 
     if component in hostvars['openshift']:
-        if 'storage' in hostvars['openshift'][component]:
-            params = hostvars['openshift'][component]['storage']
+        if subcomponent is not None:
+            storageComponent = hostvars['openshift'][component][subcomponent]
+        else:
+            storageComponent = hostvars['openshift'][component]
+
+        if 'storage' in storageComponent:
+            params = storageComponent['storage']
             kind = params['kind']
             create_pv = params['create_pv']
             create_pvc = params['create_pvc']
@@ -969,22 +904,10 @@ def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
         persistent_volume_claims = []
     if 'hosted' in hostvars['openshift']:
         for component in hostvars['openshift']['hosted']:
-            if 'storage' in hostvars['openshift']['hosted'][component]:
-                params = hostvars['openshift']['hosted'][component]['storage']
-                kind = params['kind']
-                if 'create_pv' in params:
-                    if 'create_pvc' in params:
-                        create_pv = params['create_pv']
-                        create_pvc = params['create_pvc']
-                        if kind not in [None, 'object'] and create_pv and create_pvc:
-                            volume = params['volume']['name']
-                            size = params['volume']['size']
-                            access_modes = params['access']['modes']
-                            persistent_volume_claim = dict(
-                                name="{0}-claim".format(volume),
-                                capacity=size,
-                                access_modes=access_modes)
-                            persistent_volume_claims.append(persistent_volume_claim)
+            persistent_volume_claim = oo_component_pv_claims(hostvars, 'hosted', component)
+            if persistent_volume_claim is not None:
+                persistent_volume_claims.append(persistent_volume_claim)
+
     if 'logging' in hostvars['openshift']:
         persistent_volume_claim = oo_component_pv_claims(hostvars, 'logging')
         if persistent_volume_claim is not None:
@@ -1001,12 +924,12 @@ def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
         persistent_volume_claim = oo_component_pv_claims(hostvars, 'prometheus')
         if persistent_volume_claim is not None:
             persistent_volume_claims.append(persistent_volume_claim)
-    if 'prometheus_alertmanager' in hostvars['openshift']:
-        persistent_volume_claim = oo_component_pv_claims(hostvars, 'prometheus_alertmanager')
+    if 'alertmanager' in hostvars['openshift']['prometheus']:
+        persistent_volume_claim = oo_component_pv_claims(hostvars, 'prometheus', 'alertmanager')
         if persistent_volume_claim is not None:
             persistent_volume_claims.append(persistent_volume_claim)
-    if 'prometheus_alertbuffer' in hostvars['openshift']:
-        persistent_volume_claim = oo_component_pv_claims(hostvars, 'prometheus_alertbuffer')
+    if 'alertbuffer' in hostvars['openshift']['prometheus']:
+        persistent_volume_claim = oo_component_pv_claims(hostvars, 'prometheus', 'alertbuffer')
         if persistent_volume_claim is not None:
             persistent_volume_claims.append(persistent_volume_claim)
     return persistent_volume_claims
