@@ -50,6 +50,14 @@
       src: custom.conf.j2
   when: not os_firewall_use_firewalld | default(False) | bool
 
+- name: Add enterprise registry, if necessary
+  set_fact:
+    l2_docker_additional_registries: "{{ l2_docker_additional_registries + [openshift_docker_ent_reg] }}"
+  when:
+  - openshift.common.deployment_type == 'openshift-enterprise'
+  - openshift_docker_ent_reg != ''
+  - openshift_docker_ent_reg not in l2_docker_additional_registries
+
 - stat: path=/etc/sysconfig/docker
   register: docker_check
 

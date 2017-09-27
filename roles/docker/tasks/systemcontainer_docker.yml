@@ -148,10 +148,10 @@
 # Set local versions of facts that must be in json format for container-daemon.json
 # NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
 - set_fact:
-    l_docker_insecure_registries: "{{ docker_insecure_registries | default([]) | to_json }}"
+    l_docker_insecure_registries: "{{ l2_docker_insecure_registries | default([]) | to_json }}"
     l_docker_log_options: "{{ docker_log_options | default({}) | to_json }}"
-    l_docker_additional_registries: "{{ docker_additional_registries | default([]) | to_json }}"
-    l_docker_blocked_registries: "{{ docker_blocked_registries | default([]) | to_json }}"
+    l_docker_additional_registries: "{{ l2_docker_additional_registries | default([]) | to_json }}"
+    l_docker_blocked_registries: "{{ l2_docker_blocked_registries | default([]) | to_json }}"
     l_docker_selinux_enabled: "{{ docker_selinux_enabled | default(true) | to_json }}"
 
 # Configure container-engine using the container-daemon.json file

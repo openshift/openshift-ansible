@@ -55,9 +55,6 @@ def migrate_docker_facts(facts):
     """ Apply migrations for docker facts """
     params = {
         'common': (
-            'additional_registries',
-            'insecure_registries',
-            'blocked_registries',
             'options'
         ),
         'node': (
@@ -767,14 +764,6 @@ def set_deployment_facts_if_unset(facts):
             if deployment_type == 'origin':
                 service_type = 'origin'
             facts['common']['service_type'] = service_type
-
-    if 'docker' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if deployment_type == 'openshift-enterprise':
-            addtl_regs = facts['docker'].get('additional_registries', [])
-            ent_reg = 'registry.access.redhat.com'
-            if ent_reg not in addtl_regs:
-                facts['docker']['additional_registries'] = addtl_regs + [ent_reg]
 
     for role in ('master', 'node'):
         if role in facts:
@@ -2248,19 +2237,6 @@ class OpenShiftFacts(object):
                                       protected_facts_to_overwrite)
 
         if 'docker' in new_local_facts:
-            # remove duplicate and empty strings from registry lists, preserving order
-            for cat in ['additional', 'blocked', 'insecure']:
-                key = '{0}_registries'.format(cat)
-                if key in new_local_facts['docker']:
-                    val = new_local_facts['docker'][key]
-                    if isinstance(val, string_types):
-                        val = [x.strip() for x in val.split(',')]
-                    seen = set()
-                    new_local_facts['docker'][key] = list()
-                    for registry in val:
-                        if registry not in seen and registry != '':
-                            seen.add(registry)
-                            new_local_facts['docker'][key].append(registry)
             # Convert legacy log_options comma sep string to a list if present:
             if 'log_options' in new_local_facts['docker'] and \
                     isinstance(new_local_facts['docker']['log_options'], string_types):

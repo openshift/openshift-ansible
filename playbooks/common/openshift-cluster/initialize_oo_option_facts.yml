@@ -5,15 +5,6 @@
   - always
   tasks:
   - set_fact:
-      openshift_docker_additional_registries: "{{ lookup('oo_option', 'docker_additional_registries') }}"
-    when: openshift_docker_additional_registries is not defined
-  - set_fact:
-      openshift_docker_insecure_registries: "{{ lookup('oo_option',  'docker_insecure_registries') }}"
-    when: openshift_docker_insecure_registries is not defined
-  - set_fact:
-      openshift_docker_blocked_registries: "{{ lookup('oo_option', 'docker_blocked_registries') }}"
-    when: openshift_docker_blocked_registries is not defined
-  - set_fact:
       openshift_docker_options: "{{ lookup('oo_option', 'docker_options') }}"
     when: openshift_docker_options is not defined
   - set_fact:

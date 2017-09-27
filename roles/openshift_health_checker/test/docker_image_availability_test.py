@@ -72,7 +72,7 @@ def test_all_images_available_remotely(task_vars, available_locally):
             return {'images': [], 'failed': available_locally}
         return {}
 
-    task_vars['openshift']['docker']['additional_registries'] = ["docker.io", "registry.access.redhat.com"]
+    task_vars['openshift_docker_additional_registries'] = ["docker.io", "registry.access.redhat.com"]
     task_vars['openshift_image_tag'] = 'v3.4'
     check = DockerImageAvailability(execute_module, task_vars)
     check._module_retry_interval = 0
@@ -90,7 +90,7 @@ def test_all_images_unavailable(task_vars):
 
         return {}  # docker_image_facts failure
 
-    task_vars['openshift']['docker']['additional_registries'] = ["docker.io"]
+    task_vars['openshift_docker_additional_registries'] = ["docker.io"]
     task_vars['openshift_deployment_type'] = "openshift-enterprise"
     task_vars['openshift_image_tag'] = 'latest'
     check = DockerImageAvailability(execute_module, task_vars)
@@ -121,9 +121,9 @@ def test_no_known_registries():
                 service_type='origin',
                 is_containerized=False,
                 is_atomic=False,
-            ),
-            docker=dict(additional_registries=["docker.io"]),
+            )
         ),
+        openshift_docker_additional_registries=["docker.io"],
         openshift_deployment_type="openshift-enterprise",
         openshift_image_tag='latest',
         group_names=['nodes', 'masters'],
@@ -154,7 +154,7 @@ def test_skopeo_update_failure(task_vars, message, extra_words):
 
         return {}
 
-    task_vars['openshift']['docker']['additional_registries'] = ["unknown.io"]
+    task_vars['openshift_docker_additional_registries'] = ["unknown.io"]
     task_vars['openshift_deployment_type'] = "openshift-enterprise"
     check = DockerImageAvailability(execute_module, task_vars)
     check._module_retry_interval = 0
