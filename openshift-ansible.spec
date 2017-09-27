@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.2.64
+Version:        3.2.65
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -221,6 +221,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Sep 27 2017 Scott Dodson <sdodson@redhat.com> 3.2.65-1
+- Remove Jinja2 templating delimiter (rteague@redhat.com)
+
 * Fri Sep 15 2017 Scott Dodson <sdodson@redhat.com> 3.2.64-1
 - Remove jinja delimeters and double quotes from when conditions
   (rteague@redhat.com)
