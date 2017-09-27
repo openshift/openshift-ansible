@@ -52,7 +52,7 @@
   tasks:
   - name: set the user to perform installation
     set_fact:
-      ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default(root) }}"
+      ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default('root') }}"
 
 - name: normalize groups
   include: ../../byo/openshift-cluster/initialize_groups.yml
