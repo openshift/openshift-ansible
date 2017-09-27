@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.127
+Version:        3.5.128
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Sep 27 2017 Scott Dodson <sdodson@redhat.com> 3.5.128-1
+- master: Default to false for l_bind_docker_reg_auth (smilner@redhat.com)
+- Bug 1477515 - [3.5] Data loss of logs can occur if fluentd pod is
+  terminated/restarted when Elasticsearch is unavailable (nhosoi@redhat.com)
+
 * Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.127-1
 - 
 
