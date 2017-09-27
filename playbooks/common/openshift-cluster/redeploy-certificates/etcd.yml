@@ -2,73 +2,53 @@
 - name: Backup and remove generated etcd certificates
   hosts: oo_first_etcd
   any_errors_fatal: true
-  roles:
-    - role: etcd_common
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-  post_tasks:
-    - name: Determine if generated etcd certificates exist
-      stat:
-        path: "{{ etcd_conf_dir }}/generated_certs"
-      register: etcd_generated_certs_dir_stat
-    - name: Backup generated etcd certificates
-      command: >
-        tar -czf {{ etcd_conf_dir }}/etcd-generated-certificate-backup-{{ ansible_date_time.epoch }}.tgz
-        {{ etcd_conf_dir }}/generated_certs
-      args:
-        warn: no
-      when: etcd_generated_certs_dir_stat.stat.exists | bool
-    - name: Remove generated etcd certificates
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - "{{ etcd_conf_dir }}/generated_certs"
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: backup_generated_certificates
+  - include_role:
+      name: etcd
+      tasks_from: remove_generated_certificates
 
 - name: Backup and removed deployed etcd certificates
   hosts: oo_etcd_to_config
   any_errors_fatal: true
-  roles:
-    - role: etcd_common
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: backup_server_certificates
+    vars:
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-  post_tasks:
-    - name: Backup etcd certificates
-      command: >
-        tar -czvf /etc/etcd/etcd-server-certificate-backup-{{ ansible_date_time.epoch }}.tgz
-        {{ etcd_conf_dir }}/ca.crt
-        {{ etcd_conf_dir }}/server.crt
-        {{ etcd_conf_dir }}/server.key
-        {{ etcd_conf_dir }}/peer.crt
-        {{ etcd_conf_dir }}/peer.key
-      args:
-        warn: no
 
 - name: Redeploy etcd certificates
   hosts: oo_etcd_to_config
   any_errors_fatal: true
+  roles:
+  - role: openshift_etcd_facts
   tasks:
-    - include_role:
-        name: etcd
-        tasks_from: server_certificates
-      vars:
-        etcd_certificates_redeploy: true
-        etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-        etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
-        etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-        openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-        r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  - include_role:
+      name: etcd
+      tasks_from: server_certificates
+    vars:
+      etcd_certificates_redeploy: true
+      etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+      etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
 
 - name: Redeploy etcd client certificates for masters
   hosts: oo_masters_to_config
   any_errors_fatal: true
   roles:
-    - role: openshift_etcd_facts
-    - role: openshift_etcd_client_certificates
-      etcd_certificates_redeploy: true
-      etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-      etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
-      etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
-      etcd_cert_prefix: "master.etcd-"
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-      openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-      when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config
+  - role: openshift_etcd_facts
+  - role: openshift_etcd_client_certificates
+    etcd_certificates_redeploy: true
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
+    etcd_cert_prefix: "master.etcd-"
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    when: groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config

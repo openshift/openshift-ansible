@@ -15,9 +15,8 @@
   hosts: oo_etcd_hosts_to_upgrade
   tasks:
   - include_role:
-      name: etcd_common
-    vars:
-      r_etcd_common_action: drop_etcdctl
+      name: etcd
+      tasks_from: drop_etcdctl
 
 - name: Perform etcd upgrade
   include: ./upgrade.yml

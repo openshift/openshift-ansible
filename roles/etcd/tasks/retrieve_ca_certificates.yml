@@ -1,0 +1,2 @@
+---
+- include: certificates/retrieve_ca_certificates.yml

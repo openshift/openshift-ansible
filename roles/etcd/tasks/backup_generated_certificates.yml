@@ -1,0 +1,2 @@
+---
+- include: certificates/backup_generated_certificates.yml
