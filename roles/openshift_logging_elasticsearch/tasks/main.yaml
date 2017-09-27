@@ -153,6 +153,9 @@
       elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
       logging.yml: "{{ tempdir }}/elasticsearch-logging.yml"
 
+- copy:
+    content: "{{openshift_logging_elasticsearch_prometheus_passwd | default(8 | oo_random_word) }}"
+    dest: "{{generated_certs_dir}}/prometheus.passwd"
 
 # secret
 - name: Set ES secret
@@ -177,6 +180,8 @@
       path: "{{ generated_certs_dir }}/ca.crt"
     - name: admin.jks
       path: "{{ generated_certs_dir }}/system.admin.jks"
+    - name: prometheus.passwd
+      path: "{{ generated_certs_dir }}/prometheus.passwd"
 
 # services
 - name: Set logging-{{ es_component }}-cluster service
