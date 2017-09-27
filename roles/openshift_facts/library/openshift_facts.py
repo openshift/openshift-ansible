@@ -2103,7 +2103,7 @@ class OpenShiftFacts(object):
                 )
             )
 
-            defaults['prometheus_alertmanager'] = dict(
+            defaults['prometheus']['alertmanager'] = dict(
                 storage=dict(
                     kind=None,
                     volume=dict(
@@ -2123,7 +2123,7 @@ class OpenShiftFacts(object):
                 )
             )
 
-            defaults['prometheus_alertbuffer'] = dict(
+            defaults['prometheus']['alertbuffer'] = dict(
                 storage=dict(
                     kind=None,
                     volume=dict(
