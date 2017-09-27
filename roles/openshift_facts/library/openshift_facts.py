@@ -2100,44 +2100,46 @@ class OpenShiftFacts(object):
                     ),
                     create_pv=True,
                     create_pvc=False
-                ),
-                alertmanager=dict(
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='prometheus-alertmanager',
-                            size='10Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'
-                        ),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteOnce']
-                        ),
-                        create_pv=True,
-                        create_pvc=False
-                    )
-                ),
-                alertbuffer=dict(
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='prometheus-alertbuffer',
-                            size='10Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'
-                        ),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteOnce']
-                        ),
-                        create_pv=True,
-                        create_pvc=False
-                    )
+                )
+            )
+
+            defaults['prometheus_alertmanager'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='prometheus-alertmanager',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
+            )
+
+            defaults['prometheus_alertbuffer'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='prometheus-alertbuffer',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
                 )
             )
 
