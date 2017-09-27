@@ -36,8 +36,8 @@
     - "{{ openshift.loggingops }}"
     - "{{ openshift.hosted.etcd }}"
     - "{{ openshift.prometheus }}"
-    - "{{ openshift.prometheus_alertmanager }}"
-    - "{{ openshift.prometheus_alertbuffer }}"
+    - "{{ openshift.prometheus.alertmanager }}"
+    - "{{ openshift.prometheus.alertbuffer }}"
 
 - name: Configure exports
   template:
