@@ -50,7 +50,14 @@
     - role: node
       local_facts:
         dns_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+  vars:
+    os_firewall_allow:
+    - service: dnsmasq tcp
+      port: 53/tcp
+    - service: dnsmasq udp
+      port: 53/udp
   roles:
+  - os_firewall
   - openshift_node_dnsmasq
   post_tasks:
   - modify_yaml:
