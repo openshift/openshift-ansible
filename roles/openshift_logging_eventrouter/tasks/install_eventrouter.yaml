@@ -1,0 +1,59 @@
+---
+# initial checks
+- assert:
+    msg: Invalid sink type "{{openshift_logging_eventrouter_sink}}", only one of "{{__eventrouter_sinks}}" allowed
+    that: openshift_logging_eventrouter_sink in __eventrouter_sinks
+
+# allow passing in a tempdir
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/templates"
+    mode: 0755
+  changed_when: False
+
+# create EventRouter deployment config
+- name: Generate EventRouter template
+  template:
+    src: eventrouter-template.j2
+    dest: "{{ tempdir }}/templates/eventrouter-template.yaml"
+  vars:
+    node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) }}"
+
+- name: Create EventRouter template
+  oc_obj:
+    namespace: "{{ openshift_logging_eventrouter_namespace }}"
+    kind: template
+    name: eventrouter-template
+    state: present
+    files:
+    - "{{ tempdir }}/templates/eventrouter-template.yaml"
+
+- name: Process EventRouter template
+  oc_process:
+    state: present
+    template_name: eventrouter-template
+    namespace: "{{ openshift_logging_eventrouter_namespace }}"
+    params:
+      IMAGE: "{{openshift_logging_eventrouter_image_prefix}}logging-eventrouter:{{openshift_logging_eventrouter_image_version}}"
+      REPLICAS: "{{ openshift_logging_eventrouter_replicas }}"
+      CPU: "{{ openshift_logging_eventrouter_cpu_limit }}"
+      MEMORY: "{{ openshift_logging_eventrouter_memory_limit }}"
+      NAMESPACE: "{{ openshift_logging_eventrouter_namespace }}"
+      SINK: "{{ openshift_logging_eventrouter_sink }}"
+
+## Placeholder for migration when necessary ##
+
+- name: Delete temp directory
+  file:
+    name: "{{ tempdir }}"
+    state: absent
+  changed_when: False

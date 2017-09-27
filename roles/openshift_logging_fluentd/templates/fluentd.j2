@@ -118,6 +118,10 @@ spec:
         - name: "MUX_CLIENT_MODE"
           value: "{{ openshift_logging_mux_client_mode }}"
 {% endif %}
+{% if openshift_logging_install_eventrouter is defined and openshift_logging_install_eventrouter %}
+        - name: "TRANSFORM_EVENTS"
+          value: "true"
+{% endif %}
       volumes:
       - name: runlogjournal
         hostPath:

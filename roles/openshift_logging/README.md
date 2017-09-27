@@ -12,13 +12,13 @@ generation for Elasticsearch (it uses JKS) as well as openssl to sign certificat
 As part of the installation, it is recommended that you add the Fluentd node selector label
 to the list of persisted [node labels](https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
 
-###Required vars:
+### Required vars:
 
 - `openshift_logging_install_logging`: When `True` the `openshift_logging` role will install Aggregated Logging.
 
 When `openshift_logging_install_logging` is set to `False` the `openshift_logging` role will uninstall Aggregated Logging.
 
-###Optional vars:
+### Optional vars:
 - `openshift_logging_purge_logging`: When `openshift_logging_install_logging` is set to 'False' to trigger uninstalation and `openshift_logging_purge_logging` is set to 'True', it will completely and irreversibly remove all logging persistent data including PVC. Defaults to 'False'.
 - `openshift_logging_image_prefix`: The prefix for the logging images to use. Defaults to 'docker.io/openshift/origin-'.
 - `openshift_logging_curator_image_prefix`: Setting the image prefix for Curator image. Defaults to `openshift_logging_image_prefix`.
@@ -89,6 +89,12 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_es_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the pod will land.
 - `openshift_logging_es_number_of_shards`: The number of primary shards for every new index created in ES. Defaults to '1'.
 - `openshift_logging_es_number_of_replicas`: The number of replica shards per primary shard for every new index. Defaults to '0'.
+
+- `openshift_logging_install_eventrouter`: Coupled with `openshift_logging_install_logging`. When both are 'True', eventrouter will be installed. When both are 'False', eventrouter will be uninstalled.
+Other combinations will keep the eventrouter untouched.
+
+Detailed eventrouter configuration can be found in
+- `roles/openshift_logging_eventrouter/README.md`
 
 When `openshift_logging_use_ops` is `True`, there are some additional vars. These work the
 same as above for their non-ops counterparts, but apply to the OPS cluster instance:

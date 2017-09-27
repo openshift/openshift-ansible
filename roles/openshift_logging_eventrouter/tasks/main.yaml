@@ -1,0 +1,6 @@
+---
+- include: "{{ role_path }}/tasks/install_eventrouter.yaml"
+  when: openshift_logging_install_eventrouter | default(false) | bool
+
+- include: "{{ role_path }}/tasks/delete_eventrouter.yaml"
+  when: not openshift_logging_install_eventrouter | default(false) | bool
