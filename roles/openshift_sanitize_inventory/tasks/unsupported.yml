@@ -20,13 +20,15 @@
 
 - name: Ensure that dynamic provisioning is set if using dynamic storage
   when:
+  - dynamic_volumes_check | default(true) | bool
   - not openshift_master_dynamic_provisioning_enabled | default(false) | bool
   - not openshift_cloudprovider_kind is defined
-  - __using_dynamic | bool
+  - __using_dynamic is defined and __using_dynamic | bool
   fail:
     msg: |-
       Using a storage kind of 'dynamic' without enabling dynamic provisioning nor
       setting a cloud provider will cause generated PVCs to not be able to bind as
       intended. Either update to not use a dynamic storage or set
       openshift_master_dynamic_provisioning_enabled to True and set an
-      openshift_cloudprovider_kind.
+      openshift_cloudprovider_kind. You can disable this check with
+      'dynamic_volumes_check=False'.

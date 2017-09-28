@@ -1,8 +1,9 @@
-import re
-
 '''
  Openshift Sanitize inventory class that provides useful filters used in Logging.
 '''
+
+
+import re
 
 
 # This should be removed after map_from_pairs is no longer used in __deprecations_logging.yml
@@ -25,7 +26,7 @@ def vars_with_pattern(source, pattern=""):
 
     for item in source:
         if var_pattern.match(item):
-          var_list.append(item)
+            var_list.append(item)
 
     return var_list
 
