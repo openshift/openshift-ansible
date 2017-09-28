@@ -8,7 +8,7 @@
       name: etcd
       tasks_from: backup
     vars:
-      r_etcd_common_backup_tag: etcd_backup_tag
+      r_etcd_common_backup_tag: "{{ etcd_backup_tag }}"
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
