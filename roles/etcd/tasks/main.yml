@@ -16,10 +16,7 @@
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
 
-- include_role:
-    name: etcd_common
-  vars:
-    r_etcd_common_action: drop_etcdctl
+- include: drop_etcdctl.yml
   when:
   - openshift_etcd_etcdctl_profile | default(true) | bool
 

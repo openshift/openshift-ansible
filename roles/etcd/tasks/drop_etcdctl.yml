@@ -1,0 +1,2 @@
+---
+- include: auxiliary/drop_etcdctl.yml

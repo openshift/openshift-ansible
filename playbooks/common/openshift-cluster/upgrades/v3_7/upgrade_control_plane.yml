@@ -29,6 +29,10 @@
   tags:
   - pre_upgrade
 
+- include: ../pre/verify_etcd3_backend.yml
+  tags:
+  - pre_upgrade
+
 - name: Update repos on control plane hosts
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tags:

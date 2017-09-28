@@ -104,7 +104,7 @@
 
     - name: Use RHEL based image when distribution is Red Hat
       set_fact:
-        l_crio_image_prepend: "registry.access.redhat.com"
+        l_crio_image_prepend: "registry.access.redhat.com/openshift3"
         l_crio_image_name: "cri-o"
       when: ansible_distribution == "RedHat"
 

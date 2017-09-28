@@ -35,10 +35,10 @@
 
 - set_fact:
     openshift_logging_elasticsearch_pvc_dynamic: "{{ 'true' if openshift_logging_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_storage_volume_size if openshift_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
+    openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_storage_volume_size | default('10Gi') if openshift_logging_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
     openshift_logging_elasticsearch_pvc_prefix: "{{ 'logging-es' if openshift_logging_storage_kind | default(none) == 'dynamic' else '' }}"
     openshift_logging_elasticsearch_ops_pvc_dynamic: "{{ 'true' if openshift_loggingops_storage_kind | default(none) == 'dynamic' else '' }}"
-    openshift_logging_elasticsearch_ops_pvc_size: "{{ openshift_loggingops_storage_volume_size if openshift_loggingops_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
+    openshift_logging_elasticsearch_ops_pvc_size: "{{ openshift_loggingops_storage_volume_size | default('10Gi') if openshift_loggingops_storage_kind | default(none) in ['dynamic','nfs'] else ''  }}"
     openshift_logging_elasticsearch_ops_pvc_prefix: "{{ 'logging-es-ops' if openshift_loggingops_storage_kind | default(none) == 'dynamic' else '' }}"
     openshift_logging_curator_nodeselector: "{{ openshift_hosted_logging_curator_nodeselector | default('') | map_from_pairs }}"
     openshift_logging_curator_ops_nodeselector: "{{ openshift_hosted_logging_curator_ops_nodeselector | default('') | map_from_pairs }}"

@@ -1,0 +1,2 @@
+---
+- include: upgrade/upgrade_rpm.yml

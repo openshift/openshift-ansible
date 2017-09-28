@@ -175,7 +175,7 @@
                                  | oo_select_keys(groups.oo_masters_to_config)
                                  | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
   - set_fact:
-      master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) }}"
+      master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) | list }}"
   - fail:
       msg: "Upgrade cannot continue. The following masters did not finish updating: {{ master_update_failed | join(',') }}"
     when: master_update_failed | length > 0
@@ -268,7 +268,7 @@
                                  | oo_select_keys(groups.oo_masters_to_config)
                                  | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
   - set_fact:
-      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) }}"
+      reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) | list }}"
   - fail:
       msg: "Upgrade cannot continue. The following masters did not finish reconciling: {{ reconcile_failed | join(',') }}"
     when: reconcile_failed | length > 0

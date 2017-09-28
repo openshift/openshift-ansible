@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.127.0%{?dist}
+Release:        0.133.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,95 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Sep 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.133.0
+- papr: use F26 container for extended tests (jlebon@redhat.com)
+- Fix typo in drop_etcdctl.yml (hansmi@vshn.ch)
+- Rename filter_plugins to unique names (rteague@redhat.com)
+- Fix missing quotes on openshift_aws_build_ami_ssh_user default
+  (mgugino@redhat.com)
+- papr: Workaround for RHBZ#1483553 (smilner@redhat.com)
+- Adding default for volume size if not set (ewolinet@redhat.com)
+- Fix origin repo deployment (mgugino@redhat.com)
+- More variables in AWS provisioning plays (mgugino@redhat.com)
+- Support installation of NetworkManager for provisioned nodes
+  (mgugino@redhat.com)
+- Set the etcd backend quota to 4GB by default (jchaloup@redhat.com)
+- logging: introducing event router (jwozniak@redhat.com)
+- logging: fix kibana and kibana-ops defaults (jwozniak@redhat.com)
+- papr: Use Fedora 26 (smilner@redhat.com)
+
+* Wed Sep 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.132.0
+- make difference filter output a list for Python3 (jchaloup@redhat.com)
+- Updating to check for netnamespace kube-service-catalog to be ready
+  (ewolinet@redhat.com)
+- consolidate etcd_common role (jchaloup@redhat.com)
+- Fluentd: one output tag, one output plugin (nhosoi@redhat.com)
+
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.131.0
+- Generate aggregator api client config in temporary directory.
+  (abutcher@redhat.com)
+
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.130.0
+- Passing in image parameter for tsb template (ewolinet@redhat.com)
+
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.129.0
+- Refactor openshift_hosted plays and role (mgugino@redhat.com)
+- Remove logging ES_COPY feature (jcantril@redhat.com)
+
+* Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.128.0
+- check if the storage backend is set to etcd3 before upgrading to 3.7
+  (jchaloup@redhat.com)
+- crio: detect the correct version of the images (gscrivan@redhat.com)
+- crio: set the correct image name with OSE (gscrivan@redhat.com)
+- resolve #5428: python-dbus not found (ltheisen@mitre.org)
+- Updating default behavior for installing metrics and logging. Separating out
+  uninstall to own variable (ewolinet@redhat.com)
+- Add booleans to prevent unwanted install of nuage roles. (mgugino@redhat.com)
+- Set master facts prior to adding new etcd client urls to master config.
+  (abutcher@redhat.com)
+- Remove debugging statements and pause module (sdodson@redhat.com)
+- Fix registry_auth logic for upgrades (mgugino@redhat.com)
+- crio: skip installation on lbs and nfs nodes (gscrivan@redhat.com)
+- Remove override default.py callback plugin (rteague@redhat.com)
+- consolidate etcd_migrate role (jchaloup@redhat.com)
+- Add python3-PyYAML for Fedora installs (mgugino@redhat.com)
+- Do a full stop/start when etcd certificates had expired.
+  (abutcher@redhat.com)
+- Move additional/block/insecure registires to /etc/containers/registries.conf
+  (mgugino@redhat.com)
+- Improve CA playbook restart logic and skip restarts when related services had
+  previously expired certificates. (abutcher@redhat.com)
+- health checks: add diagnostics check (lmeyer@redhat.com)
+- Remove unused openshift_hosted_logging role (mgugino@redhat.com)
+- consolidate etcd_upgrade role (jchaloup@redhat.com)
+- disable excluders after all pre-checks (jchaloup@redhat.com)
+- Fixed AnsibleUnsafeText by converting to int (edu@redhat.com)
+- Ensure that hostname is lowercase (sdodson@redhat.com)
+- Fix deprecated subscription-manager command
+  (bliemli@users.noreply.github.com)
+- Returning actual results of yedit query.  Empty list was returning empty
+  dict. (kwoodson@redhat.com)
+- Default openshift_pkg_version to full version-release during upgrades
+  (sdodson@redhat.com)
+- Creating structure to warn for use of deprecated variables and set them in a
+  single location before they are no longer honored (ewolinet@redhat.com)
+- Remove default value for oreg_url (mgugino@redhat.com)
+- Creating initial tsb role to consume and apply templates provided for tsb
+  (ewolinet@redhat.com)
+- Set network facts using first master's config during scaleup.
+  (abutcher@redhat.com)
+- Use 3.7 RPM repo (ahaile@redhat.com)
+- Changes for Nuage atomic ansible install
+  (rohan.s.parulekar@nuagenetworks.net)
+- Add 3.7 scheduler predicates (jsafrane@redhat.com)
+- Consolidate etcd certs roles (jchaloup@redhat.com)
+- GlusterFS can now be run more than once. Ability to add devices to nodes
+  (ttindell@isenpai.com)
+- Ensure valid search on resolv.conf (mateus.caruccio@getupcloud.com)
+- move (and rename) get_dns_ip filter into openshift_node_facts
+  (jdiaz@redhat.com)
+- cri-o: Allow full image override (smilner@redhat.com)
+
 * Thu Sep 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.127.0
 - Updating to always configure api aggregation with installation
   (ewolinet@redhat.com)

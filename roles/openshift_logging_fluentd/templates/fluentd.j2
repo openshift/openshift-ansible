@@ -94,8 +94,6 @@ spec:
           value: "{{ openshift_logging_fluentd_ops_client_key }}"
         - name: "OPS_CA"
           value: "{{ openshift_logging_fluentd_ops_ca }}"
-        - name: "ES_COPY"
-          value: "false"
         - name: "JOURNAL_SOURCE"
           value: "{{ openshift_logging_fluentd_journal_source | default('') }}"
         - name: "JOURNAL_READ_FROM_HEAD"
@@ -119,6 +117,10 @@ spec:
 {% if openshift_logging_mux_client_mode is defined %}
         - name: "MUX_CLIENT_MODE"
           value: "{{ openshift_logging_mux_client_mode }}"
+{% endif %}
+{% if openshift_logging_install_eventrouter is defined and openshift_logging_install_eventrouter %}
+        - name: "TRANSFORM_EVENTS"
+          value: "true"
 {% endif %}
       volumes:
       - name: runlogjournal

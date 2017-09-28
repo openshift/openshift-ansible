@@ -3,6 +3,7 @@
   systemd:
     name: NetworkManager
     state: restarted
+    enabled: True
 
 - name: restart dnsmasq
   systemd:

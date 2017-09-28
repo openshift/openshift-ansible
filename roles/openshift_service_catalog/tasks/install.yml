@@ -23,10 +23,22 @@
     name: "kube-service-catalog"
     node_selector: ""
 
-- name: Make kube-service-catalog project network global
-  command: >
-    oc adm pod-network make-projects-global kube-service-catalog
-  when: os_sdn_network_plugin_name == 'redhat/openshift-ovs-multitenant'
+- when: os_sdn_network_plugin_name == 'redhat/openshift-ovs-multitenant'
+  block:
+    - name: Waiting for netnamespace kube-service-catalog to be ready
+      oc_obj:
+        kind: netnamespace
+        name: kube-service-catalog
+        state: list
+      register: get_output
+      until: not get_output.results.stderr is defined
+      retries: 30
+      delay: 1
+      changed_when: false
+
+    - name: Make kube-service-catalog project network global
+      command: >
+        oc adm pod-network make-projects-global kube-service-catalog
 
 - include: generate_certs.yml
 

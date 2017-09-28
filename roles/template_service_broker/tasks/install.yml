@@ -8,7 +8,9 @@
 
 - name: set ansible_service_broker facts
   set_fact:
-    template_service_broker_image: "{{ template_service_broker_image | default(__template_service_broker_image) }}"
+    template_service_broker_prefix: "{{ template_service_broker_prefix | default(__template_service_broker_prefix) }}"
+    template_service_broker_version: "{{ template_service_broker_version | default(__template_service_broker_version) }}"
+    template_service_broker_image_name: "{{ template_service_broker_image_name | default(__template_service_broker_image_name) }}"
 
 - oc_project:
     name: openshift-template-service-broker
@@ -28,7 +30,7 @@
 
 - name: Apply template file
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" --param API_SERVER_CONFIG="{{ lookup('file', __tsb_files_location ~ '/' ~ __tsb_config_file) }}" | kubectl apply -f -
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" --param API_SERVER_CONFIG="{{ lookup('file', __tsb_files_location ~ '/' ~ __tsb_config_file) }}" --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}" | kubectl apply -f -
 
 # reconcile with rbac
 - name: Reconcile with RBAC file

@@ -1,0 +1,60 @@
+---
+# INPUT r_etcd_upgrade_version
+- name: Verify cluster is healthy pre-upgrade
+  command: "{{ etcdctlv2 }} cluster-health"
+
+- name: Get current image
+  shell: "grep 'ExecStart=' {{ etcd_service_file }} | awk '{print $NF}'"
+  register: current_image
+
+- name: Set new_etcd_image
+  set_fact:
+    new_etcd_image: "{{ current_image.stdout | regex_replace('/etcd.*$','/etcd:' ~ r_etcd_upgrade_version ) }}"
+
+- name: Pull new etcd image
+  command: "docker pull {{ new_etcd_image }}"
+
+- name: Update to latest etcd image
+  replace:
+    dest: "{{ etcd_service_file }}"
+    regexp: "{{ current_image.stdout }}$"
+    replace: "{{ new_etcd_image }}"
+
+- lineinfile:
+    destfile: "{{ etcd_conf_file }}"
+    regexp: '^ETCD_QUOTA_BACKEND_BYTES='
+    line: "ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}"
+
+- name: Restart etcd_container
+  systemd:
+    name: "{{ etcd_service }}"
+    daemon_reload: yes
+    state: restarted
+
+## TODO: probably should just move this into the backup playbooks, also this
+## will fail on atomic host. We need to revisit how to do etcd backups there as
+## the container may be newer than etcdctl on the host. Assumes etcd3 obsoletes etcd (7.3.1)
+- name: Detecting Atomic Host Operating System
+  stat:
+    path: /run/ostree-booted
+  register: l_ostree_booted
+
+- name: Upgrade etcd for etcdctl when not atomic
+  package:
+    name: etcd
+    state: latest
+  when: not l_ostree_booted.stat.exists | bool
+
+- name: Verify cluster is healthy
+  command: "{{ etcdctlv2 }} cluster-health"
+  register: etcdctl
+  until: etcdctl.rc == 0
+  retries: 3
+  delay: 10
+
+- name: Store new etcd_image
+  # DEPENDENCY openshift_facts
+  openshift_facts:
+    role: etcd
+    local_facts:
+      etcd_image: "{{ new_etcd_image }}"

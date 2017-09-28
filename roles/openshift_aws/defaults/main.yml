@@ -13,6 +13,7 @@ openshift_aws_wait_for_ssh: True
 openshift_aws_clusterid: default
 openshift_aws_region: us-east-1
 openshift_aws_vpc_name: "{{ openshift_aws_clusterid }}"
+openshift_aws_build_ami_group: "{{ openshift_aws_clusterid }}"
 
 openshift_aws_iam_cert_name: "{{ openshift_aws_clusterid }}-master-external"
 openshift_aws_iam_cert_path: ''

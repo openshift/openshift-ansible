@@ -30,12 +30,15 @@
   gather_facts: no
   roles:
   - role: openshift_facts
-  - role: etcd_common
-    r_etcd_common_action: backup
-    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-    r_etcd_common_backup_tag: pre-migration
-    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+  post_tasks:
+  - include_role:
+      name: etcd
+      tasks_from: backup
+    vars:
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+      r_etcd_common_backup_tag: pre-migration
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
 
 - name: Gate on etcd backup
   hosts: localhost
@@ -47,7 +50,7 @@
                                  | oo_select_keys(groups.oo_etcd_to_migrate)
                                  | oo_collect('inventory_hostname', {'r_etcd_common_backup_complete': true}) }}"
   - set_fact:
-      etcd_backup_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_backup_completed) }}"
+      etcd_backup_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_backup_completed) | list }}"
   - fail:
       msg: "Migration cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
     when:
@@ -113,7 +116,7 @@
                                  | oo_select_keys(groups.oo_etcd_to_migrate)
                                  | oo_collect('inventory_hostname', {'r_etcd_migrate_success': true}) }}"
   - set_fact:
-      etcd_migration_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_migration_completed) }}"
+      etcd_migration_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_migration_completed) | list }}"
 
 - name: Add TTLs on the first master
   hosts: oo_first_master[0]
