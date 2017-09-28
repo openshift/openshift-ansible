@@ -16,7 +16,11 @@
 
 - include: configure_nodes.yml
 
+- include: etcd_client_config.yml
+
 - include: additional_config.yml
+
+- include: manage_node.yml
 
 - include: enable_excluders.yml
 

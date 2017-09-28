@@ -1,0 +1,53 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+
+- name: Ensure there are new_nodes
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - fail:
+      msg: >
+        Detected no new_nodes in inventory. Please add hosts to the
+        new_nodes host group to add nodes.
+    when:
+    - g_new_node_hosts | default([]) | length == 0
+
+- include: ../../common/openshift-cluster/evaluate_groups.yml
+
+- include: ../../common/openshift-cluster/initialize_facts.yml
+
+- include: ../../common/openshift-cluster/sanity_checks.yml
+
+- include: ../../common/openshift-cluster/validate_hostnames.yml
+
+- name: Deploy new_nodes config
+  hosts: new_nodes
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_node_scale_up_ami: True
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    openshift_node_first_master_ip: "{{ hostvars[groups.oo_first_master.0].openshift.common.ip }}"
+    openshift_docker_hosted_registry_network: "{{ hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+                                                    | union(groups['oo_masters_to_config'])
+                                                    | union(groups['oo_etcd_to_config'] | default([])))
+                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                }}"
+  tasks:
+  - include_role:
+      name: openshift_node
+      tasks_from: config.yml
+
+- include: ../../common/openshift-node/etcd_client_config.yml
+  vars:
+    openshift_node_scale_up_group: "new_nodes"
+
+- include: ../../common/openshift-node/additional_config.yml
+  vars:
+    openshift_node_scale_up_group: "new_nodes"
+
+- include: ../../common/openshift-node/manage_node.yml
+  vars:
+    openshift_node_scale_up_group: "new_nodes"

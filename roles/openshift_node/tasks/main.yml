@@ -76,6 +76,10 @@
   include: config.yml
   when: not openshift_node_bootstrap
 
+- name: Setup tuned
+  include: tuned.yml
+  static: yes
+
 - name: Configure AWS Cloud Provider Settings
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-node

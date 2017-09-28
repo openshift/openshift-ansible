@@ -16,8 +16,12 @@ dependencies:
 - role: lib_openshift
 - role: lib_os_firewall
 - role: openshift_clock
+  when: not openshift_node_scale_up_ami
 - role: openshift_docker
+  when: not openshift_node_scale_up_ami
 - role: openshift_node_certificates
   when: not openshift_node_bootstrap
 - role: openshift_cloud_provider
+  when: not openshift_node_scale_up_ami
 - role: openshift_node_dnsmasq
+# when: not openshift_node_scale_up_ami

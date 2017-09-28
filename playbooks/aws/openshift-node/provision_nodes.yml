@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  tasks:
+    - ec2:
+        key_name: "{{ TBD }}"
+        instance_type: m4.2xlarge
+        instance_tags:
+          Name: "{{ TBD }}"
+        image: "{{ TBD }}"
+        ec2_url: https://ec2.us-east-1.amazonaws.com/
+        region: us-east-1
+        wait: yes
+        group: default
+        count: 6
+        vpc_subnet_id: "{{ TBD }}"
+        assign_public_ip: yes

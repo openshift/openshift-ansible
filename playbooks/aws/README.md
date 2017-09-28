@@ -1,5 +1,13 @@
 # AWS playbooks
 
+## Notice
+
+The steps provided in this document will deploy various resources to your AWS
+account.  This software is not suitable for a 'free-tier' deployment.
+
+Utilizing the steps in this document will cause your account to accrue
+billing charges on Amazon Web Services.
+
 ## Provisioning
 
 With recent desire for provisioning from customers and developers alike, the AWS
