@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.132.0%{?dist}
+Release:        0.133.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Sep 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.133.0
+- papr: use F26 container for extended tests (jlebon@redhat.com)
+- Fix typo in drop_etcdctl.yml (hansmi@vshn.ch)
+- Rename filter_plugins to unique names (rteague@redhat.com)
+- Fix missing quotes on openshift_aws_build_ami_ssh_user default
+  (mgugino@redhat.com)
+- papr: Workaround for RHBZ#1483553 (smilner@redhat.com)
+- Adding default for volume size if not set (ewolinet@redhat.com)
+- Fix origin repo deployment (mgugino@redhat.com)
+- More variables in AWS provisioning plays (mgugino@redhat.com)
+- Support installation of NetworkManager for provisioned nodes
+  (mgugino@redhat.com)
+- Set the etcd backend quota to 4GB by default (jchaloup@redhat.com)
+- logging: introducing event router (jwozniak@redhat.com)
+- logging: fix kibana and kibana-ops defaults (jwozniak@redhat.com)
+- papr: Use Fedora 26 (smilner@redhat.com)
+
 * Wed Sep 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.132.0
 - make difference filter output a list for Python3 (jchaloup@redhat.com)
 - Updating to check for netnamespace kube-service-catalog to be ready
