@@ -30,29 +30,12 @@
   - when: r_openshift_repos_has_run is not defined
     block:
 
-    # Note: OpenShift repositories under CentOS may be shipped through the
-    # "centos-release-openshift-origin" package which configures the repository.
-    # This task matches the file names provided by the package so that they are
-    # not installed twice in different files and remains idempotent.
-    - name: Configure origin repositories and gpg keys if needed
-      copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-      with_items:
-      - src: origin/gpg_keys/openshift-ansible-CentOS-SIG-PaaS
-        dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-PaaS
-      - src: origin/repos/openshift-ansible-centos-paas-sig.repo
-        dest: /etc/yum.repos.d/CentOS-OpenShift-Origin.repo
-      notify: refresh cache
+    - include: centos_repos.yml
       when:
       - ansible_os_family == "RedHat"
       - ansible_distribution != "Fedora"
       - openshift_deployment_type == 'origin'
       - openshift_enable_origin_repo | default(true) | bool
-
-    - name: Enable centos-openshift-origin-testing repository
-      command: yum-config-manager --enable centos-openshift-origin-testing
-      when: openshift_repos_enable_testing | bool
 
     - name: Ensure clean repo cache in the event repos have been changed manually
       debug:
