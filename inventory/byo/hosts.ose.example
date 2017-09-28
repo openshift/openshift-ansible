@@ -60,7 +60,7 @@ openshift_release=v3.7
 # In either case, system_images_registry must be specified to be able to find the system images
 #system_images_registry="registry.access.redhat.com"
 
-# Install the openshift examples
+# Manage openshift example imagestreams and templates during install and upgrade
 #openshift_install_examples=true
 
 # Configure logoutURL in the master config for console customization
