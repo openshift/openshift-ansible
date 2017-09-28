@@ -9,6 +9,8 @@ openshift_docker_additional_registries: []
 openshift_docker_blocked_registries: []
 openshift_docker_insecure_registries: []
 
+openshift_docker_ent_reg: 'registry.access.redhat.com'
+
 # The l2_docker_* variables convert csv strings to lists, if
 # necessary.  These variables should be used in place of their respective
 # openshift_docker_* counterparts to ensure the properly formatted lists are

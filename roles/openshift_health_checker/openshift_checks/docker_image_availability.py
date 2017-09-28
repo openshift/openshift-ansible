@@ -153,7 +153,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     def known_docker_registries(self):
         """Build a list of docker registries available according to inventory vars."""
-        regs = list(self.get_var("openshift.docker.additional_registries", default=[]))
+        regs = list(self.get_var("openshift_docker_additional_registries", default=[]))
 
         deployment_type = self.get_var("openshift_deployment_type")
         if deployment_type == "origin" and "docker.io" not in regs:

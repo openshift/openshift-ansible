@@ -6,9 +6,6 @@
   with_items:
   - role: docker
     local_facts:
-      additional_registries: "{{ openshift_docker_additional_registries | default(None) }}"
-      blocked_registries: "{{ openshift_docker_blocked_registries | default(None) }}"
-      insecure_registries: "{{ openshift_docker_insecure_registries | default(None) }}"
       selinux_enabled: "{{ openshift_docker_selinux_enabled | default(None) }}"
       log_driver: "{{ openshift_docker_log_driver | default(None) }}"
       log_options: "{{ openshift_docker_log_options | default(None) }}"
@@ -23,12 +20,6 @@
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
 
 - set_fact:
-    docker_additional_registries: "{{ openshift.docker.additional_registries
-                                      | default(omit) }}"
-    docker_blocked_registries: "{{ openshift.docker.blocked_registries
-                                   | default(omit) }}"
-    docker_insecure_registries: "{{ openshift.docker.insecure_registries
-                                    | default(omit) }}"
     docker_selinux_enabled: "{{ openshift.docker.selinux_enabled | default(omit) }}"
     docker_log_driver: "{{ openshift.docker.log_driver | default(omit) }}"
     docker_log_options: "{{ openshift.docker.log_options | default(omit) }}"
