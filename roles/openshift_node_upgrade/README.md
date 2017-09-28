@@ -1,4 +1,4 @@
-OpenShift/Atomic Enterprise Node upgrade
+OpenShift Node upgrade
 =========
 
 Role responsible for a single node upgrade.
