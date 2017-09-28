@@ -35,3 +35,5 @@ os_firewall_allow:
 - service: Docker Registry Port
   port: 5000/tcp
   when: openshift.common.use_calico | bool
+
+openshift_hosted_registry_clusterip: null
