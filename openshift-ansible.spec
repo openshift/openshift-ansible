@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.133.0%{?dist}
+Release:        0.134.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Sep 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.134.0
+- OpenShift-Ansible Installer Checkpointing (rteague@redhat.com)
+- evaluate etcd_backup_tag variable (jchaloup@redhat.com)
+
 * Thu Sep 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.133.0
 - papr: use F26 container for extended tests (jlebon@redhat.com)
 - Fix typo in drop_etcdctl.yml (hansmi@vshn.ch)
