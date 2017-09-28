@@ -18,10 +18,6 @@
       - docker_image_availability
       - docker_storage
 
-- include: initialize_oo_option_facts.yml
-  tags:
-  - always
-
 - name: Set hostname
   hosts: oo_masters_to_config:oo_nodes_to_config
   tasks:
