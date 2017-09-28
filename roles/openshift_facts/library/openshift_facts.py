@@ -505,6 +505,14 @@ def set_selectors(facts):
         facts['prometheus'] = {}
     if 'selector' not in facts['prometheus'] or facts['prometheus']['selector'] in [None, 'None']:
         facts['prometheus']['selector'] = None
+    if 'alertmanager' not in facts['prometheus']:
+        facts['prometheus']['alertmanager'] = {}
+    if 'selector' not in facts['prometheus']['alertmanager'] or facts['prometheus']['alertmanager']['selector'] in [None, 'None']:
+        facts['prometheus']['alertmanager']['selector'] = None
+    if 'alertbuffer' not in facts['prometheus']:
+        facts['prometheus']['alertbuffer'] = {}
+    if 'selector' not in facts['prometheus']['alertbuffer'] or facts['prometheus']['alertbuffer']['selector'] in [None, 'None']:
+        facts['prometheus']['alertbuffer']['selector'] = None
 
     return facts
 
