@@ -169,7 +169,7 @@ Elasticsearch OPS too, if using an OPS cluster:
   send the raw logs to mux for processing.  We do not currently recommend using
   this mode, and ansible will warn you about this.
 - `openshift_logging_mux_hostname`: Default is "mux." +
-  `openshift_master_default_subdomain`.  This is the hostname *external*_
+  `openshift_master_default_subdomain`.  This is the hostname *external*
   clients will use to connect to mux, and will be used in the TLS server cert
   subject.
 - `openshift_logging_mux_port`: 24284
@@ -201,24 +201,24 @@ Elasticsearch OPS too, if using an OPS cluster:
   Defaults to '65534'.
 
 ### remote syslog forwarding
-`openshift_logging_fluentd_remote_syslog`: Set `true` to enable remote syslog forwarding, defaults to `false`
-`openshift_logging_fluentd_remote_syslog_host`: Required, hostname or IP of remote syslog server
-`openshift_logging_fluentd_remote_syslog_port`: Port of remote syslog server, defaults to `514`
-`openshift_logging_fluentd_remote_syslog_severity`: Syslog severity level, defaults to `debug`
-`openshift_logging_fluentd_remote_syslog_facility`: Syslog facility, defaults to `local0`
-`openshift_logging_fluentd_remote_syslog_remove_tag_prefix`: Remove the prefix from the tag, defaults to `''` (empty)
-`openshift_logging_fluentd_remote_syslog_tag_key`: If string specified, use this field from the record to set the key field on the syslog message
-`openshift_logging_fluentd_remote_syslog_use_record`: Set `true` to use the severity and facility from the record, defaults to `false`
-`openshift_logging_fluentd_remote_syslog_payload_key`: If string is specified, use this field from the record as the payload on the syslog message
+- `openshift_logging_fluentd_remote_syslog`: Set `true` to enable remote syslog forwarding, defaults to `false`
+- `openshift_logging_fluentd_remote_syslog_host`: Required, hostname or IP of remote syslog server
+- `openshift_logging_fluentd_remote_syslog_port`: Port of remote syslog server, defaults to `514`
+- `openshift_logging_fluentd_remote_syslog_severity`: Syslog severity level, defaults to `debug`
+- `openshift_logging_fluentd_remote_syslog_facility`: Syslog facility, defaults to `local0`
+- `openshift_logging_fluentd_remote_syslog_remove_tag_prefix`: Remove the prefix from the tag, defaults to `''` (empty)
+- `openshift_logging_fluentd_remote_syslog_tag_key`: If string specified, use this field from the record to set the key field on the syslog message
+- `openshift_logging_fluentd_remote_syslog_use_record`: Set `true` to use the severity and facility from the record, defaults to `false`
+- `openshift_logging_fluentd_remote_syslog_payload_key`: If string is specified, use this field from the record as the payload on the syslog message
 
-The corresponding openshift_logging_mux_ parameters are below.
+The corresponding openshift\_logging\_mux\_* parameters are below.
 
-`openshift_logging_mux_remote_syslog`: Set `true` to enable remote syslog forwarding, defaults to `false`
-`openshift_logging_mux_remote_syslog_host`: Required, hostname or IP of remote syslog server
-`openshift_logging_mux_remote_syslog_port`: Port of remote syslog server, defaults to `514`
-`openshift_logging_mux_remote_syslog_severity`: Syslog severity level, defaults to `debug`
-`openshift_logging_mux_remote_syslog_facility`: Syslog facility, defaults to `local0`
-`openshift_logging_mux_remote_syslog_remove_tag_prefix`: Remove the prefix from the tag, defaults to `''` (empty)
-`openshift_logging_mux_remote_syslog_tag_key`: If string specified, use this field from the record to set the key field on the syslog message
-`openshift_logging_mux_remote_syslog_use_record`: Set `true` to use the severity and facility from the record, defaults to `false`
-`openshift_logging_mux_remote_syslog_payload_key`: If string is specified, use this field from the record as the payload on the syslog message
+- `openshift_logging_mux_remote_syslog`: Set `true` to enable remote syslog forwarding, defaults to `false`
+- `openshift_logging_mux_remote_syslog_host`: Required, hostname or IP of remote syslog server
+- `openshift_logging_mux_remote_syslog_port`: Port of remote syslog server, defaults to `514`
+- `openshift_logging_mux_remote_syslog_severity`: Syslog severity level, defaults to `debug`
+- `openshift_logging_mux_remote_syslog_facility`: Syslog facility, defaults to `local0`
+- `openshift_logging_mux_remote_syslog_remove_tag_prefix`: Remove the prefix from the tag, defaults to `''` (empty)
+- `openshift_logging_mux_remote_syslog_tag_key`: If string specified, use this field from the record to set the key field on the syslog message
+- `openshift_logging_mux_remote_syslog_use_record`: Set `true` to use the severity and facility from the record, defaults to `false`
+- `openshift_logging_mux_remote_syslog_payload_key`: If string is specified, use this field from the record as the payload on the syslog message
