@@ -509,12 +509,12 @@ The Ansible `package` module calls the associated package manager for the underl
 # tasks.yml
 - name: Install etcd (for etcdctl)
   yum: name=etcd state=latest
-  when: "ansible_pkg_mgr == yum"
+  when: ansible_pkg_mgr == yum
   register: install_result
 
 - name: Install etcd (for etcdctl)
   dnf: name=etcd state=latest
-  when: "ansible_pkg_mgr == dnf"
+  when: ansible_pkg_mgr == dnf
   register: install_result
 ----
 

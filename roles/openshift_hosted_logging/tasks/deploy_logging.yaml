@@ -3,9 +3,9 @@
   when: target_registry is defined and target_registry
 
 - fail: msg="This role requires the following vars to be defined. openshift_hosted_logging_master_public_url, openshift_hosted_logging_hostname, openshift_hosted_logging_elasticsearch_cluster_size"
-  when: "openshift_hosted_logging_hostname is not defined or
+  when: openshift_hosted_logging_hostname is not defined or
         openshift_hosted_logging_elasticsearch_cluster_size is not defined or
-        openshift_hosted_logging_master_public_url is not defined"
+        openshift_hosted_logging_master_public_url is not defined
 
 - name: Create temp directory for kubeconfig
   command: mktemp -d /tmp/openshift-ansible-XXXXXX
