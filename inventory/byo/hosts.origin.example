@@ -638,7 +638,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # the CIDRs reserved for external IPs, nodes, pods, or services.
 #openshift_master_ingress_ip_network_cidr=172.46.0.0/16
 
-# Configure number of bits to allocate to each host’s subnet e.g. 9
+# Configure number of bits to allocate to each host's subnet e.g. 9
 # would mean a /23 network on the host.
 # When upgrading or scaling up the following must match whats in your master config!
 #  Inventory: master yaml field
@@ -706,11 +706,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # This is needed in cases where node traffic is desired to go over an
 # interface other than the default network interface.
 #openshift_set_node_ip=True
-
-# Force setting of system hostname when configuring OpenShift
-# This works around issues related to installations that do not have valid dns
-# entries for the interfaces attached to the host.
-#openshift_set_hostname=True
 
 # Configure dnsIP in the node config
 #openshift_dns_ip=172.30.0.1

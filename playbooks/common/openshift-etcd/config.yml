@@ -1,4 +1,15 @@
 ---
+- name: etcd Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set etcd install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_etcd: "In Progress"
+      aggregate: false
+
 - name: Configure etcd
   hosts: oo_etcd_to_config
   any_errors_fatal: true
@@ -10,3 +21,14 @@
     etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   - role: nickhammond.logrotate
+
+- name: etcd Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set etcd install 'Complete'
+    set_stats:
+      data:
+        installer_phase_etcd: "Complete"
+      aggregate: false

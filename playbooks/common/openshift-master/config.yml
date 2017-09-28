@@ -1,4 +1,15 @@
 ---
+- name: Master Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Master install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_master: "In Progress"
+      aggregate: false
+
 - name: Disable excluders
   hosts: oo_masters_to_config
   gather_facts: no
@@ -231,6 +242,12 @@
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
 
+- name: Configure API Aggregation on masters
+  hosts: oo_masters
+  serial: 1
+  tasks:
+  - include: tasks/wire_aggregator.yml
+
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config
   gather_facts: no
@@ -238,3 +255,14 @@
   - role: openshift_excluder
     r_openshift_excluder_action: enable
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
+- name: Master Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Master install 'Complete'
+    set_stats:
+      data:
+        installer_phase_master: "Complete"
+      aggregate: false

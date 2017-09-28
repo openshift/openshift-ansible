@@ -1,4 +1,15 @@
 ---
+- name: Logging Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Logging install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_logging: "In Progress"
+      aggregate: false
+
 - name: OpenShift Aggregated Logging
   hosts: oo_first_master
   roles:
@@ -11,4 +22,14 @@
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
-    when: openshift_logging_install_logging | default(false) | bool
+
+- name: Logging Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Logging install 'Complete'
+    set_stats:
+      data:
+        installer_phase_logging: "Complete"
+      aggregate: false

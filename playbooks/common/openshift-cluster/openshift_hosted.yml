@@ -1,4 +1,15 @@
 ---
+- name: Hosted Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Hosted install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_hosted: "In Progress"
+      aggregate: false
+
 - include: create_persistent_volumes.yml
 
 - include: openshift_default_storage_class.yml
@@ -9,10 +20,17 @@
 
 - include: openshift_hosted_registry.yml
 
-- include: openshift_metrics.yml
-
-- include: openshift_logging.yml
-
 - include: cockpit-ui.yml
 
 - include: openshift_prometheus.yml
+
+- name: Hosted Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Hosted install 'Complete'
+    set_stats:
+      data:
+        installer_phase_hosted: "Complete"
+      aggregate: false

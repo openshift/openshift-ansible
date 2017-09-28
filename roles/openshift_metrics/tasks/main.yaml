@@ -45,11 +45,11 @@
 
 - include: install_metrics.yaml
   when:
-    - openshift_metrics_install_metrics | default(false) | bool
+    - openshift_metrics_install_metrics | bool
 
 - include: uninstall_metrics.yaml
   when:
-    - openshift_metrics_uninstall_metrics | default(false) | bool
+    - openshift_metrics_uninstall_metrics | bool
 
 - include: uninstall_hosa.yaml
   when: not openshift_metrics_install_hawkular_agent | bool
