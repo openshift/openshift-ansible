@@ -149,6 +149,8 @@
     when: openshift.common.use_nuage | bool
   - role: calico_master
     when: openshift.common.use_calico | bool
+  - role: contrail_master
+    when: openshift.common.use_contrail | bool
 
   post_tasks:
   - name: Create group for deployment type
