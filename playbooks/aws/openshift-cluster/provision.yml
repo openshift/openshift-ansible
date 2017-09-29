@@ -1,5 +1,5 @@
 ---
-- name: Setup the vpc and the master node group
+- name: Setup the elb and the master node group
   hosts: localhost
   tasks:
 

@@ -23,7 +23,6 @@ From this role:
 | openshift_aws_ami_copy_wait                       | False
 | openshift_aws_users                               | []
 | openshift_aws_launch_config_name                  | {{ openshift_aws_clusterid }}-{{ openshift_aws_node_group_type }}
-| openshift_aws_create_vpc                          | False
 | openshift_aws_node_group_type                     | master
 | openshift_aws_elb_cert_arn                        | ''
 | openshift_aws_kubernetes_cluster_status           | owned
@@ -72,7 +71,6 @@ Example Playbook
   vars:
     openshift_aws_clusterid: test
     openshift_aws_region: us-east-1
-    openshift_aws_create_vpc: true
 ```
 
 License

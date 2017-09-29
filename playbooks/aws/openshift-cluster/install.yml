@@ -1,68 +1,19 @@
 ---
-- name: Setup the vpc and the master node group
+- name: Setup the master node group
   hosts: localhost
   tasks:
-  - name: Alert user to variables needed - clusterid
-    debug:
-      msg: "openshift_aws_clusterid={{ openshift_aws_clusterid | default('default') }}"
-
-  - name: Alert user to variables needed - region
-    debug:
-      msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
-
-  - name: fetch newly created instances
-    ec2_remote_facts:
-      region: "{{ openshift_aws_region | default('us-east-1') }}"
-      filters:
-        "tag:clusterid": "{{ openshift_aws_clusterid | default('default') }}"
-        "tag:host-type": master
-        instance-state-name: running
-    register: instancesout
-    retries: 20
-    delay: 3
-    until: instancesout.instances|length > 0
-
-  - name: add new master to masters group
-    add_host:
-      groups: "masters,etcd,nodes"
-      name: "{{ item.public_ip_address }}"
-      hostname: "{{ openshift_aws_clusterid | default('default') }}-master-{{ item.id[:-5] }}"
-    with_items: "{{ instancesout.instances }}"
-
-  - name: wait for ssh to become available
-    wait_for:
-      port: 22
-      host: "{{ item.public_ip_address }}"
-      timeout: 300
-      search_regex: OpenSSH
-    with_items: "{{ instancesout.instances }}"
+  - include_role:
+      name: openshift_aws
+      tasks_from: setup_master_group.yml
 
 - name: set the master facts for hostname to elb
   hosts: masters
   gather_facts: no
   remote_user: root
   tasks:
-  - name: fetch elbs
-    ec2_elb_facts:
-      region: "{{ openshift_aws_region | default('us-east-1') }}"
-      names:
-      - "{{ item }}"
-    with_items:
-    - "{{ openshift_aws_clusterid | default('default') }}-master-external"
-    - "{{ openshift_aws_clusterid | default('default') }}-master-internal"
-    delegate_to: localhost
-    register: elbs
-
-  - debug: var=elbs
-
-  - name: set fact
-    set_fact:
-      openshift_master_cluster_hostname: "{{ elbs.results[1].elbs[0].dns_name }}"
-      osm_custom_cors_origins:
-      - "{{ elbs.results[1].elbs[0].dns_name }}"
-      - "console.{{ openshift_aws_clusterid | default('default') }}.openshift.com"
-      - "api.{{ openshift_aws_clusterid | default('default') }}.openshift.com"
-    with_items: "{{ groups['masters'] }}"
+  - include_role:
+      name: openshift_aws
+      tasks_from: master_facts.yml
 
 - name: normalize groups
   include: ../../byo/openshift-cluster/initialize_groups.yml

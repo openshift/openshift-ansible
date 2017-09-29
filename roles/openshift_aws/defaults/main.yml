@@ -1,5 +1,4 @@
 ---
-openshift_aws_create_vpc: True
 openshift_aws_create_s3: True
 openshift_aws_create_iam_cert: True
 openshift_aws_create_security_groups: True
