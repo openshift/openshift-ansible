@@ -49,7 +49,7 @@
 
 - include: uninstall_metrics.yaml
   when:
-    - openshift_metrics_uninstall_metrics | bool
+    - not openshift_metrics_install_metrics | bool
 
 - include: uninstall_hosa.yaml
   when: not openshift_metrics_install_hawkular_agent | bool

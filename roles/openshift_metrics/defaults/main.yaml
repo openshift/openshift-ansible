@@ -1,7 +1,6 @@
 ---
 openshift_metrics_start_cluster: True
 openshift_metrics_install_metrics: False
-openshift_metrics_uninstall_metrics: False
 openshift_metrics_startup_timeout: 500
 
 openshift_metrics_hawkular_replicas: 1
