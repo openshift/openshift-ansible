@@ -6,11 +6,18 @@
 
 - copy:
     src: "{{ __tsb_files_location }}/{{ item }}"
-    dest: "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - "{{ __tsb_template_file }}"
+  - "{{ __tsb_broker_file }}"
+
+- name: Delete TSB broker
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" | oc delete -f -
 
 - name: Delete TSB objects
   shell: >
-    oc process -f "{{ __tsb_files_location }}/{{ __tsb_template_file }}" | kubectl delete -f -
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" | kubectl delete -f -
 
 - name: empty out tech preview extension file for service console UI
   copy:

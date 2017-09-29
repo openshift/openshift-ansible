@@ -27,6 +27,7 @@
   with_items:
     - "{{ __tsb_template_file }}"
     - "{{ __tsb_rbac_file }}"
+    - "{{ __tsb_broker_file }}"
 
 - name: Apply template file
   shell: >
@@ -41,6 +42,33 @@
   copy:
     src: openshift-ansible-catalog-console.js
     dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
+# Check that the TSB is running
+- name: Verify that TSB is running
+  command: >
+    curl -k https://apiserver.openshift-template-service-broker.svc/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: api_health
+  until: api_health.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+
+- set_fact:
+    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+  when: openshift_master_config_dir is undefined
+
+- slurp:
+    src: "{{ openshift_master_config_dir }}/ca.crt"
+  register: __ca_bundle
+
+# Register with broker
+- name: Register TSB with broker
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | oc apply -f -
 
 - file:
     state: absent
