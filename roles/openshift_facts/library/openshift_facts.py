@@ -1669,7 +1669,9 @@ def set_container_facts_if_unset(facts):
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
     # If openshift_docker_use_system_container is set and is True ....
     if 'use_system_container' in list(facts['docker'].keys()):
-        if facts['docker']['use_system_container']:
+        # use safe_get_bool as the inventory variable may not be a
+        # valid boolean on it's own.
+        if safe_get_bool(facts['docker']['use_system_container']):
             # ... set the service name to container-engine
             facts['docker']['service_name'] = 'container-engine'
 
