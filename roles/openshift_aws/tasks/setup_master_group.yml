@@ -22,14 +22,14 @@
 - name: add new master to masters group
   add_host:
     groups: "masters,etcd,nodes"
-    name: "{{ item.public_ip_address }}"
+    name: "{{ item.public_dns_name }}"
     hostname: "{{ openshift_aws_clusterid }}-master-{{ item.id[:-5] }}"
   with_items: "{{ instancesout.instances }}"
 
 - name: wait for ssh to become available
   wait_for:
     port: 22
-    host: "{{ item.public_ip_address }}"
+    host: "{{ item.public_dns_name }}"
     timeout: 300
     search_regex: OpenSSH
   with_items: "{{ instancesout.instances }}"
