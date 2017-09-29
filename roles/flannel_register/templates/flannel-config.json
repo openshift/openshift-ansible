@@ -1,7 +1,6 @@
 {
     "Network": "{{ flannel_network }}",
     "SubnetLen": {{ flannel_subnet_len }},
-    "SubnetMin": "{{ flannel_min_network }}",
     "Backend": {
         "Type": "host-gw"
      }
