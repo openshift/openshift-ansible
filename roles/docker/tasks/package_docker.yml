@@ -73,7 +73,7 @@
   notify:
   - restart docker
 
-- name: Place additional/blocked/insecure registies in /etc/containers/registries.conf
+- name: Place additional/blocked/insecure registries in /etc/containers/registries.conf
   template:
     dest: "{{ containers_registries_conf_path }}"
     src: registries.conf
