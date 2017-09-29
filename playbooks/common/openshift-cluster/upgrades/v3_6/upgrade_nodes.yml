@@ -48,6 +48,10 @@
   tags:
   - pre_upgrade
 
+- include: ../pre/verify_health_checks.yml
+  tags:
+  - pre_upgrade
+
 - include: ../disable_node_excluders.yml
   tags:
   - pre_upgrade
@@ -67,10 +71,6 @@
     # docker restarts. At this early stage of upgrade we can assume
     # docker is configured and running.
     skip_docker_role: True
-
-- include: ../pre/verify_health_checks.yml
-  tags:
-  - pre_upgrade
 
 - name: Verify masters are already upgraded
   hosts: oo_masters_to_config
