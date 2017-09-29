@@ -715,7 +715,7 @@ def oo_openshift_env(hostvars):
     return facts
 
 
-# pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements
+# pylint: disable=too-many-branches, too-many-nested-blocks, too-many-statements, too-many-locals
 def oo_component_persistent_volumes(hostvars, groups, component, subcomponent=None):
     """ Generate list of persistent volumes based on oo_openshift_env
         storage options set in host variables for a specific component.
@@ -729,12 +729,12 @@ def oo_component_persistent_volumes(hostvars, groups, component, subcomponent=No
 
     if component in hostvars['openshift']:
         if subcomponent is not None:
-            storageComponent = hostvars['openshift'][component][subcomponent]
+            storage_component = hostvars['openshift'][component][subcomponent]
         else:
-            storageComponent = hostvars['openshift'][component]
+            storage_component = hostvars['openshift'][component]
 
-        if 'storage' in storageComponent:
-            params = storageComponent['storage']
+        if 'storage' in storage_component:
+            params = storage_component['storage']
             kind = params['kind']
             if 'create_pv' in params:
                 create_pv = params['create_pv']
@@ -871,12 +871,12 @@ def oo_component_pv_claims(hostvars, component, subcomponent=None):
 
     if component in hostvars['openshift']:
         if subcomponent is not None:
-            storageComponent = hostvars['openshift'][component][subcomponent]
+            storage_component = hostvars['openshift'][component][subcomponent]
         else:
-            storageComponent = hostvars['openshift'][component]
+            storage_component = hostvars['openshift'][component]
 
-        if 'storage' in storageComponent:
-            params = storageComponent['storage']
+        if 'storage' in storage_component:
+            params = storage_component['storage']
             kind = params['kind']
             if 'create_pv' in params:
                 if 'create_pvc' in params:

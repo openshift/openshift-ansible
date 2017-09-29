@@ -507,10 +507,12 @@ def set_selectors(facts):
         facts['prometheus']['selector'] = None
     if 'alertmanager' not in facts['prometheus']:
         facts['prometheus']['alertmanager'] = {}
+    # pylint: disable=line-too-long
     if 'selector' not in facts['prometheus']['alertmanager'] or facts['prometheus']['alertmanager']['selector'] in [None, 'None']:
         facts['prometheus']['alertmanager']['selector'] = None
     if 'alertbuffer' not in facts['prometheus']:
         facts['prometheus']['alertbuffer'] = {}
+    # pylint: disable=line-too-long
     if 'selector' not in facts['prometheus']['alertbuffer'] or facts['prometheus']['alertbuffer']['selector'] in [None, 'None']:
         facts['prometheus']['alertbuffer']['selector'] = None
 
