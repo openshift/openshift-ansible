@@ -62,7 +62,7 @@
   # Do not restart etcd when etcd certificates were previously expired.
   when: ('expired' not in (hostvars
                            | oo_select_keys(groups['etcd'])
-                           | oo_collect('check_results.check_results.etcd')
+                           | oo_collect('check_results.etcd')
                            | oo_collect('health')))
 
 - name: Retrieve etcd CA certificate
@@ -103,14 +103,14 @@
   # masters
   - ('expired' not in hostvars
       | oo_select_keys(groups['oo_masters_to_config'])
-      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('check_results.ocp_certs')
       | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
   - ('expired' not in hostvars
       | oo_select_keys(groups['oo_masters_to_config'])
-      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('check_results.ocp_certs')
       | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
   # etcd
   - ('expired' not in (hostvars
       | oo_select_keys(groups['etcd'])
-      | oo_collect('check_results.check_results.etcd')
+      | oo_collect('check_results.etcd')
       | oo_collect('health')))
