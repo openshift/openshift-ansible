@@ -19,6 +19,11 @@
     name: "{{ l_etcd_target_package }}"
     state: latest
 
+- lineinfile:
+    destfile: "{{ etcd_conf_file }}"
+    regexp: '^ETCD_QUOTA_BACKEND_BYTES='
+    line: "ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}"
+
 - name: Restart etcd
   service:
     name: "{{ etcd_service }}"
