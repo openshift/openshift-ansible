@@ -29,9 +29,9 @@
                    if 'master' in openshift_aws_node_group_type or 'infra' in openshift_aws_node_group_type
                    else openshift_aws_elb_listeners }}"
 
-- name: "Create ELB {{ openshift_aws_elb_name }}"
+- name: "Create ELB {{ l_openshift_aws_elb_name }}"
   ec2_elb_lb:
-    name: "{{ openshift_aws_elb_name }}"
+    name: "{{ l_openshift_aws_elb_name }}"
     state: present
     security_group_names: "{{ openshift_aws_elb_security_groups }}"
     idle_timeout: "{{ openshift_aws_elb_idle_timout }}"
@@ -49,10 +49,10 @@
 
 # It is necessary to ignore_errors here because the instances are not in 'ready'
 #  state when first added to ELB
-- name: "Add instances to ELB {{ openshift_aws_elb_name }}"
+- name: "Add instances to ELB {{ l_openshift_aws_elb_name }}"
   ec2_elb:
     instance_id: "{{ item.id }}"
-    ec2_elbs: "{{ openshift_aws_elb_name }}"
+    ec2_elbs: "{{ l_openshift_aws_elb_name }}"
     state: present
     region: "{{ openshift_aws_region }}"
     wait: False
