@@ -12,4 +12,5 @@
     values:
     - "DNS_DOMAIN={{ openshift.common.dns_domain }}"
     - "DOCKER_SERVICE={{ openshift.docker.service_name }}.service"
+    - "MASTER_SERVICE={{ openshift.common.service_type }}.service"
     state: latest
