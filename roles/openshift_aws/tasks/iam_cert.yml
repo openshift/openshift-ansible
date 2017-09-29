@@ -11,13 +11,14 @@
   - "'failed' in elb_cert_chain"
   - elb_cert_chain.failed
   - "'msg' in elb_cert_chain"
-  - "'already exists and has a different certificate body' in elb_cert_chain.msg"
-  - "'BotoServerError' in elb_cert_chain.msg"
+  - "'already exists and has a different certificate body' in elb_cert_chain.msg or 'BotoServerError' in elb_cert_chain.msg or 'Traceback' in elb_cert_chain.msg.module_stderr"
   when:
   - openshift_aws_create_iam_cert | bool
   - openshift_aws_iam_cert_path != ''
   - openshift_aws_iam_cert_key_path != ''
   - openshift_aws_elb_cert_arn == ''
+
+- debug: msg="{{ elb_cert_chain }}"
 
 - name: set_fact openshift_aws_elb_cert_arn
   set_fact:
