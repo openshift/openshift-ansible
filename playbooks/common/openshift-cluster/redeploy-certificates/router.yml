@@ -23,6 +23,15 @@
     failed_when: false
     changed_when: false
 
+  - name: Determine if router service exists
+    command: >
+      {{ openshift.common.client_binary }} get svc/router -o json
+      --config={{ mktemp.stdout }}/admin.kubeconfig
+      -n default
+    register: l_router_svc
+    failed_when: false
+    changed_when: false
+
   - set_fact:
       router_env_vars: "{{ ((l_router_dc.stdout | from_json)['spec']['template']['spec']['containers'][0]['env']
                              | oo_collect('name'))
@@ -34,6 +43,10 @@
     changed_when: false
     when: l_router_dc.rc == 0
 
+  - set_fact:
+      router_service_annotations: "{{ (l_router_svc.stdout | from_json)['metadata']['annotations'] if 'annotations' in (l_router_svc.stdout | from_json)['metadata'] else [] }}"
+    when: l_router_svc.rc == 0
+
   - name: Update router environment variables
     shell: >
       {{ openshift.common.client_binary }} env dc/router
@@ -42,7 +55,11 @@
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-router.key)"
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default
-    when: l_router_dc.rc == 0 and 'OPENSHIFT_CA_DATA' in router_env_vars and 'OPENSHIFT_CERT_DATA' in router_env_vars and 'OPENSHIFT_KEY_DATA' in router_env_vars
+    when:
+    - l_router_dc.rc == 0
+    - ('OPENSHIFT_CA_DATA' in router_env_vars)
+    - ('OPENSHIFT_CERT_DATA' in router_env_vars)
+    - ('OPENSHIFT_KEY_DATA' in router_env_vars)
 
   - block:
     - name: Delete existing router certificate secret
@@ -67,7 +84,13 @@
         service.alpha.openshift.io/serving-cert-secret-name=router-certs
         --config={{ mktemp.stdout }}/admin.kubeconfig
         -n default
-    when: l_router_dc.rc == 0 and 'router-certs' in router_secrets and openshift_hosted_router_certificate is undefined
+    when:
+    - l_router_dc.rc == 0
+    - l_router_svc.rc == 0
+    - ('router-certs' in router_secrets)
+    - openshift_hosted_router_certificate is undefined
+    - ('service.alpha.openshift.io/serving-cert-secret-name') in router_service_annotations
+    - ('service.alpha.openshift.io/serving-cert-signed-by') in router_service_annotations
 
   - block:
     - assert:
@@ -127,7 +150,10 @@
       with_items:
       - "{{ mktemp.stdout }}/openshift-hosted-router-certificate.pem"
       - "{{ mktemp.stdout }}/openshift-hosted-router-certificate.key"
-    when: l_router_dc.rc == 0 and 'router-certs' in router_secrets and openshift_hosted_router_certificate is defined
+    when:
+    - l_router_dc.rc == 0
+    - ('router-certs' in router_secrets)
+    - openshift_hosted_router_certificate is defined
 
   - name: Redeploy router
     command: >
