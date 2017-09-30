@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.134.0%{?dist}
+Release:        0.135.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,28 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Sep 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.135.0
+- fix whitespace for centos repos (jdetiber@redhat.com)
+- Fix registry auth variable (mgugino@redhat.com)
+- move health-checks and control-plane-verification before excluders
+  (jchaloup@redhat.com)
+- Fix typo in files (Docker registries) (william17.burton@gmail.com)
+- Registering the broker for TSB (ewolinet@redhat.com)
+- Quick formatting updates to the logging README. (steveqtran@gmail.com)
+- openshift_facts: coerce docker_use_system_container to bool
+  (smilner@redhat.com)
+- Migrate enterprise registry logic to docker role (mgugino@redhat.com)
+- minor update to README and removed dead file (steveqtran@gmail.com)
+- Added new variables for logging role for remote-syslog plugin
+  (steveqtran@gmail.com)
+- Remove some reminants of Atomic Enterprise (sdodson@redhat.com)
+- Allow examples management to be disabled (sdodson@redhat.com)
+- rename vars to avoid double negatives and ensuing confusion
+  (jsanda@redhat.com)
+- set prometheus endpoint properties to false by default (jsanda@redhat.com)
+- add options to disable prometheus endpoints (jsanda@redhat.com)
+- Enable JMX reporting of internal metrics (jsanda@redhat.com)
+
 * Thu Sep 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.134.0
 - OpenShift-Ansible Installer Checkpointing (rteague@redhat.com)
 - evaluate etcd_backup_tag variable (jchaloup@redhat.com)
