@@ -21,6 +21,10 @@
   tags:
   - pre_upgrade
 
+- include: ../pre/verify_etcd3_backend.yml
+  tags:
+  - pre_upgrade
+
 - name: Update repos and initialize facts on all hosts
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config:oo_lb_to_config
   tags:
