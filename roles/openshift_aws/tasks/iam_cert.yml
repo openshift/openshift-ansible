@@ -22,6 +22,11 @@
 - name: set_fact openshift_aws_elb_cert_arn
   set_fact:
     openshift_aws_elb_cert_arn: "{{ elb_cert_chain.arn }}"
+  when:
+  - openshift_aws_create_iam_cert | bool
+  - openshift_aws_iam_cert_path != ''
+  - openshift_aws_iam_cert_key_path != ''
+  - openshift_aws_elb_cert_arn == ''
 
 - name: wait for cert to propagate
   pause:

@@ -1,0 +1,52 @@
+---
+- name: create additional node network plugin groups
+  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
+  tasks:
+  # Creating these node groups will prevent a ton of skipped tasks.
+  # Create group for flannel nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_flannel | default(False)) | ternary('flannel','nothing') }}
+    changed_when: False
+  # Create group for calico nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_calico | default(False)) | ternary('calico','nothing') }}
+    changed_when: False
+  # Create group for nuage nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_nuage | default(False)) | ternary('nuage','nothing') }}
+    changed_when: False
+  # Create group for contiv nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_contiv | default(False)) | ternary('contiv','nothing') }}
+    changed_when: False
+
+- include: etcd_client_config.yml
+  vars:
+    openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv"
+
+- name: Additional node config
+  hosts: oo_nodes_use_flannel
+  roles:
+  - role: flannel
+    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
+    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
+    when: openshift_use_flannel | default(false) | bool
+
+- name: Additional node config
+  hosts: oo_nodes_use_calico
+  roles:
+  - role: calico
+    when: openshift_use_calico | default(false) | bool
+
+- name: Additional node config
+  hosts: oo_nodes_use_nuage
+  roles:
+  - role: nuage_node
+    when: openshift_use_nuage | default(false) | bool
+
+- name: Additional node config
+  hosts: oo_nodes_use_contiv
+  roles:
+  - role: contiv
+    contiv_role: netplugin
+    when: openshift_use_contiv | default(false) | bool
