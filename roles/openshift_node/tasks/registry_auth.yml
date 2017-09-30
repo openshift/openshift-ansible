@@ -21,4 +21,4 @@
   when:
     - openshift.common.is_containerized | bool
     - oreg_auth_user is defined
-    - (node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace or oreg_auth_credentials_replace.changed) | bool
+    - (node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace or node_oreg_auth_credentials_create.changed) | bool
