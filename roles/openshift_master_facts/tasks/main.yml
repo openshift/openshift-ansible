@@ -1,5 +1,4 @@
 ---
-
 # Ensure the default sub-domain is set:
 - name: Migrate legacy osm_default_subdomain fact
   set_fact:

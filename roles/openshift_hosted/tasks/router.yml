@@ -52,9 +52,9 @@
         certfile: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
         keyfile: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
         cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
-
-  # End Block
-  when: ( openshift_hosted_router_create_certificate | bool ) and openshift_hosted_router_certificate == {}
+  when:
+  - openshift_hosted_router_create_certificate | bool
+  - openshift_hosted_router_certificate == {}
 
 - name: Create the router service account(s)
   oc_serviceaccount:

@@ -1,10 +1,4 @@
 ---
-- set_fact:
-    openshift_node_debug_level: "{{ lookup('oo_option', 'openshift_node_debug_level') }}"
-  when:
-  - openshift_node_debug_level is not defined
-  - lookup('oo_option', 'openshift_node_debug_level') != ""
-
 - name: Set node facts
   openshift_facts:
     role: "{{ item.role }}"
@@ -20,7 +14,7 @@
       debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
-      labels: "{{ lookup('oo_option', 'openshift_node_labels') | default( openshift_node_labels | default(none), true) }}"
+      labels: "{{ openshift_node_labels | default(None) }}"
       registry_url: "{{ oreg_url_node | default(oreg_url) | default(None) }}"
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
       sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
