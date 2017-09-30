@@ -55,16 +55,6 @@
   - glusterfs_wipe
   - item.stdout_lines | count > 0
 
-- name: Add service accounts to privileged SCC
-  oc_adm_policy_user:
-    user: "system:serviceaccount:{{ glusterfs_namespace }}:{{ item }}"
-    resource_kind: scc
-    resource_name: privileged
-    state: present
-  with_items:
-  - 'default'
-  - 'router'
-
 - name: Label GlusterFS nodes
   oc_label:
     name: "{{ hostvars[item].openshift.node.nodename }}"
