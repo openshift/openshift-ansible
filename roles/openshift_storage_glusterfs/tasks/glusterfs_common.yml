@@ -18,6 +18,17 @@
     node_selector: "{% if glusterfs_use_default_selector %}{{ omit }}{% endif %}"
   when: glusterfs_is_native or glusterfs_heketi_is_native or glusterfs_storageclass
 
+- name: Add namespace service accounts to privileged SCC
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ glusterfs_namespace }}:{{ item }}"
+    resource_kind: scc
+    resource_name: privileged
+    state: present
+  with_items:
+  - 'default'
+  - 'router'
+  when: glusterfs_is_native or glusterfs_heketi_is_native
+
 - name: Delete pre-existing heketi resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
