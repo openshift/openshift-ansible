@@ -282,6 +282,7 @@
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
+    es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
 
