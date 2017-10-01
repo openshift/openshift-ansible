@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.135.0%{?dist}
+Release:        0.136.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Oct 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.136.0
+- Include openshift_hosted when redeploying router certificates to handle auto-
+  generated wildcard certificate or custom openshift_hosted_router_certificate.
+  (abutcher@redhat.com)
+- Check for router service annotations when redeploying router certificates.
+  (abutcher@redhat.com)
+- Remove oo_option symlink from specfile. (abutcher@redhat.com)
+- Add a README.md to lookup_plugins/ (abutcher@redhat.com)
+- Remove oo_option facts. (abutcher@redhat.com)
+- block 3.6->3.7 upgrade if storage backend is not set to etcd3
+  (jchaloup@redhat.com)
+- Changes necessary to support AMI building (mgugino@redhat.com)
+
 * Sat Sep 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.135.0
 - fix whitespace for centos repos (jdetiber@redhat.com)
 - Fix registry auth variable (mgugino@redhat.com)
