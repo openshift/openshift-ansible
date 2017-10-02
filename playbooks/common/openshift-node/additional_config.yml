@@ -19,6 +19,7 @@
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_contiv | default(False)) | ternary('contiv','nothing') }}
     changed_when: False
+   # Create group for contrail nodes
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_contrail | default(False)) | ternary('contrail','nothing') }}
     changed_when: False
