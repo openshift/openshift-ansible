@@ -193,6 +193,7 @@
     # Another spot where we assume docker is running and do not want to accidentally trigger an unsafe
     # restart.
     skip_docker_role: True
+    __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
   - name: Reconcile Cluster Roles
     command: >
@@ -230,6 +231,44 @@
     - reconcile_jenkins_role_binding_result.stdout != ''
     - reconcile_jenkins_role_binding_result.rc == 0
     when: (not openshift.common.version_gte_3_7 | bool) and (openshift.common.version_gte_3_4_or_1_4 | bool)
+
+  - when: (openshift.common.version_gte_3_6 | bool) and (not openshift.common.version_gte_3_7 | bool)
+    block:
+    - name: Retrieve shared-resource-viewer
+      oc_obj:
+        state: list
+        kind: role
+        name: "shared-resource-viewer"
+        namespace: "openshift"
+      register: objout
+
+    - name: Determine if shared-resource-viewer is protected
+      set_fact:
+        __shared_resource_viewer_protected: true
+      when:
+      - "'results' in objout"
+      - "'results' in objout['results']"
+      - "'annotations' in objout['results']['results'][0]['metadata']"
+      - "'openshift.io/reconcile-protect' in objout['results']['results'][0]['metadata']['annotations']"
+      - "objout['results']['results'][0]['metadata']['annotations']['openshift.io/reconcile-protect'] == 'true'"
+
+    - copy:
+        src: "{{ item }}"
+        dest: "/tmp/{{ item }}"
+      with_items:
+      - "{{ __master_shared_resource_viewer_file }}"
+      when: __shared_resource_viewer_protected is not defined
+
+    - name: Fixup shared-resource-viewer role
+      oc_obj:
+        state: present
+        kind: role
+        name: "shared-resource-viewer"
+        namespace: "openshift"
+        files:
+        - "/tmp/{{ __master_shared_resource_viewer_file }}"
+        delete_after: true
+      when: __shared_resource_viewer_protected is not defined
 
   - name: Reconcile Security Context Constraints
     command: >
