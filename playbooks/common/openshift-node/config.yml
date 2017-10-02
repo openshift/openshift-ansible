@@ -20,39 +20,12 @@
 
 - include: manage_node.yml
 
-<<<<<<< HEAD
 - include: enable_excluders.yml
 
 - name: Node Install Checkpoint End
   hosts: localhost
   connection: local
   gather_facts: false
-=======
-- name: Additional node config
-  hosts: oo_nodes_to_config
-  vars:
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-  roles:
-  - role: flannel
-    etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
-    etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
-    when: openshift.common.use_flannel | bool
-  - role: calico
-    when: openshift.common.use_calico | bool
-  - role: nuage_node
-    when: openshift.common.use_nuage | bool
-  - role: contiv
-    contiv_role: netplugin
-    when: openshift.common.use_contiv | bool
-  - role: contrail_node
-    when: openshift.common.use_contrail | bool
-  - role: nickhammond.logrotate
-  - role: openshift_manage_node
-    openshift_master_host: "{{ groups.oo_first_master.0 }}"
->>>>>>> 8a3577e... init
   tasks:
   - name: Set Node install 'Complete'
     set_stats:
