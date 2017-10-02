@@ -1,0 +1,8 @@
+---
+- name: Create OpenShift certificates for node hosts
+  hosts: oo_nodes_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_node_certificates
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    when: not openshift_node_bootstrap | default(false) | bool

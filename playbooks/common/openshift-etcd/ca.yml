@@ -1,0 +1,15 @@
+---
+- name: Generate new etcd CA
+  hosts: oo_first_etcd
+  roles:
+  - role: openshift_etcd_facts
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: ca
+    vars:
+      etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+      etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    when:
+    - etcd_ca_setup | default(True) | bool

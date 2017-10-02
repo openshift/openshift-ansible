@@ -1,0 +1,8 @@
+---
+- name: Create OpenShift CA
+  hosts: oo_masters_to_config
+  roles:
+  - role: openshift_master_facts
+  - role: openshift_named_certificates
+  - role: openshift_ca
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"

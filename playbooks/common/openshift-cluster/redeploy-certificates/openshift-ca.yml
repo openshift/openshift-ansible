@@ -105,25 +105,21 @@
     - "ca.serial.txt"
     - "ca-bundle.crt"
 
-- name: Generate new OpenShift CA certificate
+- name: Create temporary directory for creating new CA certificate
   hosts: oo_first_master
-  pre_tasks:
+  tasks:
   - name: Create temporary directory for creating new CA certificate
     command: >
       mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: g_new_openshift_ca_mktemp
     changed_when: false
-  roles:
-  - role: openshift_ca
+
+- include: ../../openshift-master/ca.yml
+  vars:
     # Set openshift_ca_config_dir to a temporary directory where CA
     # will be created. We'll replace the existing CA with the CA
     # created in the temporary directory.
-    openshift_ca_config_dir: "{{ g_new_openshift_ca_mktemp.stdout }}"
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-    openshift_master_hostnames: "{{ hostvars
-                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
-                                    | oo_collect('openshift.common.all_hostnames')
-                                    | oo_flatten | unique }}"
+    openshift_ca_config_dir: "{{ hostvars[groups.oo_first_master.0].g_new_openshift_ca_mktemp.stdout }}"
 
 - name: Create temp directory for syncing certs
   hosts: localhost

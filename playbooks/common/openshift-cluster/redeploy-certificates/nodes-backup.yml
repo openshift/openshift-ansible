@@ -22,8 +22,3 @@
       state: absent
     with_items:
     - "{{ openshift.common.config_base }}/node/ca.crt"
-  roles:
-  - role: openshift_node_certificates
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-    openshift_certificates_redeploy: true

@@ -21,20 +21,7 @@
       name: etcd
       tasks_from: remove_ca_certificates
 
-- name: Generate new etcd CA
-  hosts: oo_first_etcd
-  roles:
-  - role: openshift_etcd_facts
-  tasks:
-  - include_role:
-      name: etcd
-      tasks_from: ca
-    vars:
-      etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
-      etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-    when:
-    - etcd_ca_setup | default(True) | bool
+- include: ../../openshift-etcd/ca.yml
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -72,7 +59,7 @@
       name: etcd
       tasks_from: retrieve_ca_certificates
     vars:
-      etcd_sync_cert_dir: hostvars['localhost'].g_etcd_mktemp.stdout
+      etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
 
 - name: Distribute etcd CA to masters
