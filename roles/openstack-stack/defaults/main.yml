@@ -1,4 +1,7 @@
 ---
+
+stack_state: 'present'
+
 ssh_ingress_cidr: 0.0.0.0/0
 node_ingress_cidr: 0.0.0.0/0
 master_ingress_cidr: 0.0.0.0/0

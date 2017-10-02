@@ -1,51 +1,27 @@
 ---
-- name: create HOT stack template prefix
-  register: stack_template_pre
-  tempfile:
-    state: directory
-    prefix: casl-ansible
 
-- name: set template paths
-  set_fact:
-    stack_template_path: "{{ stack_template_pre.path }}/stack.yaml"
-    user_data_template_path: "{{ stack_template_pre.path }}/user-data"
+- name: Generate the templates
+  include: generate-templates.yml
+  when:
+  - stack_state == 'present'
 
-- name: generate HOT stack template from jinja2 template
-  template:
-    src: heat_stack.yaml.j2
-    dest: "{{ stack_template_path }}"
-
-- name: generate HOT server template from jinja2 template
-  template:
-    src: heat_stack_server.yaml.j2
-    dest: "{{ stack_template_pre.path }}/server.yaml"
-
-- name: generate HOT server w/o floating IPs template from jinja2 template
-  template:
-    src: heat_stack_server_nofloating.yaml.j2
-    dest: "{{ stack_template_pre.path }}/server_nofloating.yaml"
-  when: use_bastion|bool
-
-- name: generate user_data from jinja2 template
-  template:
-    src: user_data.j2
-    dest: "{{ user_data_template_path }}"
-
-- name: create stack
+- name: Handle the Stack (create/delete)
   ignore_errors: False
   register: stack_create
   os_stack:
     name: "{{ stack_name }}"
-    state: present
-    template: "{{ stack_template_path }}"
+    state: "{{ stack_state }}"
+    template: "{{ stack_template_path | default(omit) }}"
     wait: yes
 
 # NOTE(bogdando) OS::Neutron::Subnet doesn't support live updates for
 # dns_nameservers, so we can't do that for the "create stack" task.
 - include: subnet_update_dns_servers.yaml
-  when: private_dns_server is defined
+  when:
+  - private_dns_server is defined
+  - stack_state == 'present'
 
-- name: cleanup temp files
-  file:
-    path: "{{ stack_template_pre.path }}"
-    state: absent
+- name: CleanUp
+  include: cleanup.yml
+  when:
+  - stack_state == 'present'
