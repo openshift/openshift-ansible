@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.136.0%{?dist}
+Release:        0.137.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.137.0
+- openshift_node: Add MASTER_SERVICE on system container install
+  (smilner@redhat.com)
+- openshift_node: Set DOCKER_SERVICE for system container (smilner@redhat.com)
+
 * Sun Oct 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.136.0
 - Include openshift_hosted when redeploying router certificates to handle auto-
   generated wildcard certificate or custom openshift_hosted_router_certificate.
