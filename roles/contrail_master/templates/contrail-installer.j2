@@ -60,8 +60,8 @@ data:
     controller_nodes = {{ groups.oo_first_master.0 }}
     analytics_nodes = {{ groups.oo_first_master.0 }}
     analyticsdb_nodes = {{ groups.oo_first_master.0 }}
-    analyticsdb_minimum_diskgb = 25
-    configdb_minimum_diskgb = 5
+    analyticsdb_minimum_diskgb = {{ analyticsdb_disk_size }}
+    configdb_minimum_diskgb = {{ configdb_disk_size }}
   agent-config: |-
     [AGENT]
     compile_vrouter_module = True
