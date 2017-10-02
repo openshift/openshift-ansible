@@ -3,4 +3,3 @@
   hosts: oo_first_master
   roles:
   - role: openshift_prometheus
-    when: openshift_hosted_prometheus_deploy | default(False) | bool
