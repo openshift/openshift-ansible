@@ -165,7 +165,7 @@ class OpenShiftAnsibleYamlLint(Command):
                         has_warnings = True
 
         if has_errors or has_warnings:
-            print('yammlint issues found')
+            print('yamllint issues found')
             raise SystemExit(1)
 
 
