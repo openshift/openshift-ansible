@@ -36,7 +36,7 @@
 
 - include: delete_logging.yaml
   when:
-    - openshift_logging_uninstall_logging | default(false) | bool
+    - not openshift_logging_install_logging | default(false) | bool
 
 - name: Cleaning up local temp dir
   local_action: file path="{{local_tmp.stdout}}" state=absent
