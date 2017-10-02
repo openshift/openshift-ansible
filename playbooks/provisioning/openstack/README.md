@@ -361,6 +361,19 @@ registry. Again in `OSEv3.yml`:
 The filesystem value here will be used in the initial formatting of
 the volume.
 
+If you're using the dynamic inventory, you must uncomment these two values as
+well:
+
+    #openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', cinder_hosted_registry_name).id }}"
+    #openshift_hosted_registry_storage_volume_size: "{{ cinder_hosted_registry_size_gb }}Gi"
+
+But note that they use the `os_cinder` lookup plugin we provide, so you must
+tell Ansible where to find it either in `ansible.cfg` (the one we provide is
+configured properly) or by exporting the
+`ANSIBLE_LOOKUP_PLUGINS=openshift-ansible-contrib/lookup_plugins` environment
+variable.
+
+
 
 ### Use an existing Cinder volume for the OpenShift registry
 

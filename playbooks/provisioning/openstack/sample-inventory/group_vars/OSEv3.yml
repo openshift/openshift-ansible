@@ -27,9 +27,14 @@ openshift_hosted_registry_wait: True
 #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
 #openshift_hosted_registry_storage_openstack_filesystem: xfs
 
-## Configure this if you're attaching a Cinder volume you've set up.
+## NOTE(shadower): This won't work until the openshift-ansible issue #5657 is fixed:
+## https://github.com/openshift/openshift-ansible/issues/5657
 ## If you're using the `cinder_hosted_registry_name` option from
-## `all.yml`, this will be configured automaticaly.
+## `all.yml`, uncomment these lines:
+#openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', cinder_hosted_registry_name).id }}"
+#openshift_hosted_registry_storage_volume_size: "{{ cinder_hosted_registry_size_gb }}Gi"
+
+## If you're using a Cinder volume you've set up yourself, uncomment these lines:
 #openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
 #openshift_hosted_registry_storage_volume_size: 10Gi
 
