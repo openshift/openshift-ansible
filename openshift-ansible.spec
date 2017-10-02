@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.134.0%{?dist}
+Release:        0.138.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -83,10 +83,6 @@ touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
 # openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
 pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
 ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
-popd
-# openshift_master_facts symlinks lookup_plugins/oo_option.py from ansible_plugins/lookup_plugins
-pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/lookup_plugins
-ln -sf ../../../../../ansible_plugins/lookup_plugins/oo_option.py oo_option.py
 popd
 
 # openshift-ansible-filter-plugins install
@@ -280,6 +276,52 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.138.0
+- Fix typo in openshift_default_storage_class/README (hansmi@vshn.ch)
+- GlusterFS: make ServiceAccounts privileged when either glusterfs or heketi is
+  native (jarrpa@redhat.com)
+- Fix some provisioning variables (mgugino@redhat.com)
+
+* Mon Oct 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.137.0
+- openshift_node: Add MASTER_SERVICE on system container install
+  (smilner@redhat.com)
+- openshift_node: Set DOCKER_SERVICE for system container (smilner@redhat.com)
+
+* Sun Oct 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.136.0
+- Include openshift_hosted when redeploying router certificates to handle auto-
+  generated wildcard certificate or custom openshift_hosted_router_certificate.
+  (abutcher@redhat.com)
+- Check for router service annotations when redeploying router certificates.
+  (abutcher@redhat.com)
+- Remove oo_option symlink from specfile. (abutcher@redhat.com)
+- Add a README.md to lookup_plugins/ (abutcher@redhat.com)
+- Remove oo_option facts. (abutcher@redhat.com)
+- block 3.6->3.7 upgrade if storage backend is not set to etcd3
+  (jchaloup@redhat.com)
+- Changes necessary to support AMI building (mgugino@redhat.com)
+
+* Sat Sep 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.135.0
+- fix whitespace for centos repos (jdetiber@redhat.com)
+- Fix registry auth variable (mgugino@redhat.com)
+- move health-checks and control-plane-verification before excluders
+  (jchaloup@redhat.com)
+- Fix typo in files (Docker registries) (william17.burton@gmail.com)
+- Registering the broker for TSB (ewolinet@redhat.com)
+- Quick formatting updates to the logging README. (steveqtran@gmail.com)
+- openshift_facts: coerce docker_use_system_container to bool
+  (smilner@redhat.com)
+- Migrate enterprise registry logic to docker role (mgugino@redhat.com)
+- minor update to README and removed dead file (steveqtran@gmail.com)
+- Added new variables for logging role for remote-syslog plugin
+  (steveqtran@gmail.com)
+- Remove some reminants of Atomic Enterprise (sdodson@redhat.com)
+- Allow examples management to be disabled (sdodson@redhat.com)
+- rename vars to avoid double negatives and ensuing confusion
+  (jsanda@redhat.com)
+- set prometheus endpoint properties to false by default (jsanda@redhat.com)
+- add options to disable prometheus endpoints (jsanda@redhat.com)
+- Enable JMX reporting of internal metrics (jsanda@redhat.com)
+
 * Thu Sep 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.134.0
 - OpenShift-Ansible Installer Checkpointing (rteague@redhat.com)
 - evaluate etcd_backup_tag variable (jchaloup@redhat.com)

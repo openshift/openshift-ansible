@@ -5,8 +5,6 @@
     g_new_master_hosts: []
     g_new_node_hosts: []
 
-- include: ../initialize_oo_option_facts.yml
-
 - include: ../initialize_facts.yml
 
 - name: Ensure firewall is not switched during upgrade

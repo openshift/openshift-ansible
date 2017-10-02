@@ -20,9 +20,6 @@
 
 - name: Gather and set facts for master hosts
   hosts: oo_masters_to_config
-  vars:
-    t_oo_option_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') }}"
-
   pre_tasks:
   # Per https://bugzilla.redhat.com/show_bug.cgi?id=1469336
   #
@@ -55,33 +52,12 @@
     - .config_managed
 
   - set_fact:
-      openshift_master_pod_eviction_timeout: "{{ lookup('oo_option', 'openshift_master_pod_eviction_timeout') | default(none, true) }}"
-    when: openshift_master_pod_eviction_timeout is not defined
-
-  - set_fact:
       openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
       openshift_master_etcd_hosts: "{{ hostvars
                                        | oo_select_keys(groups['oo_etcd_to_config']
                                                         | default([]))
                                        | oo_collect('openshift.common.hostname')
                                        | default(none, true) }}"
-
-  - set_fact:
-      openshift_master_debug_level: "{{ t_oo_option_master_debug_level }}"
-    when: openshift_master_debug_level is not defined and t_oo_option_master_debug_level != ""
-
-  - set_fact:
-      openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
-    when: openshift_master_default_subdomain is not defined
-  - set_fact:
-      openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(false, true) }}"
-    when: openshift_hosted_metrics_deploy is not defined
-  - set_fact:
-      openshift_hosted_metrics_duration: "{{ lookup('oo_option', 'openshift_hosted_metrics_duration') | default(7) }}"
-    when: openshift_hosted_metrics_duration is not defined
-  - set_fact:
-      openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
-    when: openshift_hosted_metrics_resolution is not defined
   roles:
   - openshift_facts
   post_tasks:

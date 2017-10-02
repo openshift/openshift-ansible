@@ -18,10 +18,6 @@
       - docker_image_availability
       - docker_storage
 
-- include: initialize_oo_option_facts.yml
-  tags:
-  - always
-
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-nfs/config.yml

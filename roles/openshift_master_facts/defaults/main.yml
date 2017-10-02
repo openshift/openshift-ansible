@@ -1,5 +1,5 @@
 ---
-openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
+openshift_master_default_subdomain: "router.default.svc.cluster.local"
 openshift_master_admission_plugin_config:
   openshift.io/ImagePolicy:
     configuration:
