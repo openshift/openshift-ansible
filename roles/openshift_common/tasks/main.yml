@@ -58,7 +58,7 @@
       use_calico: "{{openshift_use_calico | default(None) }}"
       use_nuage: "{{ openshift_use_nuage | default(None) }}"
       use_contiv: "{{ openshift_use_contiv | default(None) }}"
-      use_contrail: "{{openshift_use_contrail | default(None) }}"
+      use_contrail: "{{ openshift_use_contrail | default(None) }}"
       use_manageiq: "{{ openshift_use_manageiq | default(None) }}"
       data_dir: "{{ openshift_data_dir | default(None) }}"
       use_dnsmasq: "{{ openshift_use_dnsmasq | default(None) }}"
