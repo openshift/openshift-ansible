@@ -971,6 +971,16 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_upgrade_post_storage_migration_enabled=true
 # openshift_upgrade_post_storage_migration_fatal=false
 
+# Node restart playbook playbooks/byo/openshift-node/restart.yml
+#
+# Note that the the node restart playbook is included within the
+# certificate redeployment playbooks.
+#
+# Set openshift_node_drain_on_restart to skip marking nodes
+# unschedulable and to also skip draining nodes during execution of
+# the node restart playbook.
+#openshift_node_drain_on_restart=false
+
 ######################################################################
 # CloudForms/ManageIQ (CFME/MIQ) Configuration
 

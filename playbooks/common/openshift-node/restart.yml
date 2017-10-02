@@ -1,12 +1,55 @@
 ---
+- name: Retrieve node list
+  hosts: oo_first_master
+  roles:
+  - lib_openshift
+  post_tasks:
+  # Gather the node list to count nodes. When a cluster is comprised of
+  # a single node we will not mark the node unschedulable or drain the
+  # node. It will just be restarted.
+  #
+  # Note: openshift_node_drain_on_restart=false may also be set to
+  # skip node draining in this playbook.
+  - oc_obj:
+      kind: node
+      state: list
+    register: l_openshift_nodes
+
 - name: Restart nodes
   hosts: oo_nodes_to_config
   serial: "{{ openshift_restart_nodes_serial | default(1) }}"
-
   roles:
   - lib_openshift
+  post_tasks:
+  - name: Mark node unschedulable
+    oc_adm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: False
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    retries: 10
+    delay: 5
+    register: l_node_unschedulable
+    until: l_node_unschedulable | succeeded
+    when:
+    - openshift_node_drain_on_restart | default(true) | bool
+    - hostvars[groups.oo_first_master.0].l_openshift_nodes['results']['results'][0]['items'] | length > 1
 
-  tasks:
+  - name: Drain node
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }}
+      --force
+      --delete-local-data
+      --ignore-daemonsets
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    register: l_nodes_drain_result
+    until: not l_nodes_drain_result | failed
+    retries: "{{ openshift_node_drain_retries | default(60) }}"
+    delay: "{{ openshift_node_drain_delay | default(60) }}"
+    when:
+    - openshift_node_drain_on_restart | default(true) | bool
+    - hostvars[groups.oo_first_master.0].l_openshift_nodes['results']['results'][0]['items'] | length > 1
+
   - name: Restart docker
     service:
       name: docker
@@ -59,3 +102,17 @@
     # Give the node two minutes to come back online.
     retries: 24
     delay: 5
+
+  - name: Set node schedulability
+    oc_adm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: True
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    retries: 10
+    delay: 5
+    register: l_node_schedulable
+    until: l_node_schedulable | succeeded
+    when:
+    - l_node_unschedulable | changed
+    - openshift_node_drain_on_restart | default(true) | bool
+    - hostvars[groups.oo_first_master.0].l_openshift_nodes['results']['results'][0]['items'] | length > 1
