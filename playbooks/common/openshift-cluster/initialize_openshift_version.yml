@@ -1,6 +1,9 @@
 ---
+# openshift_install_base_package_group may be set in a play variable to limit
+# the host groups the base package is installed on.  This is currently used
+# for master/control-plane upgrades.
 - name: Set version_install_base_package true on masters and nodes
-  hosts: oo_masters_to_config:oo_nodes_to_config
+  hosts: "{{ openshift_install_base_package_group | default('oo_masters_to_config:oo_nodes_to_config') }}"
   tasks:
   - name: Set version_install_base_package true
     set_fact:

@@ -72,6 +72,7 @@
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "{{ openshift_upgrade_target }}"
     openshift_protect_installed_version: False
+    openshift_install_base_package_group: "oo_masters_to_config"
 
     # We skip the docker role at this point in upgrade to prevent
     # unintended package, container, or config upgrades which trigger
