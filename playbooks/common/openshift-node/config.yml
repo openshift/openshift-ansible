@@ -86,6 +86,8 @@
   - role: contiv
     contiv_role: netplugin
     when: openshift.common.use_contiv | bool
+  - role: contrail_node
+    when: openshift.common.use_contrail | bool
   - role: nickhammond.logrotate
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"
