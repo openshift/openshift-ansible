@@ -23,6 +23,7 @@
 - include: cockpit-ui.yml
 
 - include: openshift_prometheus.yml
+  when: openshift_hosted_prometheus_deploy | default(False) | bool
 
 - name: Hosted Install Checkpoint End
   hosts: localhost
