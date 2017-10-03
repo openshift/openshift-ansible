@@ -1,47 +1,47 @@
 ---
-- name: Untar Contrail tar-file
-  unarchive:
-    src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
-    dest: "/tmp"
-  when: docker_registry is not defined
+- when:
+  - docker_registry is not defined
 
-- name: Load Contrail-vRouter-Agent image
-  docker_image:
-    name: contrail-agent
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    load_path: "/tmp/contrail-agent-{{ os_release }}-{{ contrail_version }}.tar.gz"
-  when: docker_registry is not defined
+  block:
+  - name: Untar Contrail tar-file
+    unarchive:
+      src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+      dest: "/tmp"
 
-- name: Load Contrail-Kubernetes-Agent image
-  docker_image:
-    name: contrail-k8s-agent
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    load_path: "/tmp/contrail-kubernetes-agent-{{ os_release }}-{{ contrail_version }}.tar.gz"
-  when: docker_registry is not defined
+  - name: Load Contrail-vRouter-Agent image
+    docker_image:
+      name: contrail-agent
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      load_path: "/tmp/contrail-agent-{{ os_release }}-{{ contrail_version }}.tar.gz"
 
-- name: Add contrail service account to privileged scc
-  shell: oadm policy add-scc-to-user privileged system:serviceaccount:kube-system:contrail
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  when: inventory_hostname == groups.oo_first_master.0
+  - name: Load Contrail-Kubernetes-Agent image
+    docker_image:
+      name: contrail-k8s-agent
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      load_path: "/tmp/contrail-kubernetes-agent-{{ os_release }}-{{ contrail_version }}.tar.gz"
 
-- name: Add the daemonset-controller service account to privileged scc
-  shell: oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:daemon-set-controller
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  when: inventory_hostname == groups.oo_first_master.0
+- when:
+  - inventory_hostname == groups.oo_first_master.0
 
-- name: Label master nodes with opencontrail.org/controller=true
-  shell: oc label nodes {{ openshift.common.hostname }} opencontrail.org/controller=true --overwrite=true
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  when: inventory_hostname == groups.oo_first_master.0
+  block:
+  - name: Add contrail service account to privileged scc
+    shell: oadm policy add-scc-to-user privileged system:serviceaccount:kube-system:contrail
+    delegate_to: "{{ groups.oo_first_master.0 }}"
 
-- name: Make master schedulable
-  shell: oadm manage-node {{ openshift.common.hostname }} --schedulable
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  when: inventory_hostname == groups.oo_first_master.0
+  - name: Add the daemonset-controller service account to privileged scc
+    shell: oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:daemon-set-controller
+    delegate_to: "{{ groups.oo_first_master.0 }}"
 
-- name: Launch the installer
-  shell: oc create -f /tmp/contrail-installer.yaml
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  when: inventory_hostname == groups.oo_first_master.0
+  - name: Label master nodes with opencontrail.org/controller=true
+    shell: oc label nodes {{ openshift.common.hostname }} opencontrail.org/controller=true --overwrite=true
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+
+  - name: Make master schedulable
+    shell: oadm manage-node {{ openshift.common.hostname }} --schedulable
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+
+  - name: Launch the installer
+    shell: oc create -f /tmp/contrail-installer.yaml
+    delegate_to: "{{ groups.oo_first_master.0 }}"

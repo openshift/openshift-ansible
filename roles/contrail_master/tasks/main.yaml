@@ -1,47 +1,50 @@
 ---
-- name: Untar Contrail tar-file
-  unarchive:
-    src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
-    dest: "/tmp"
-  when: docker_registry is not defined and inventory_hostname == groups.oo_first_master.0
+- when:
+  - docker_registry is not defined
+  - inventory_hostname == groups.oo_first_master.0
 
-- name: Load Contrail-Controller image
-  docker_image:
-    name: contrail-controller
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    state: present
-    load_path: "/tmp/contrail-controller-{{ os_release }}-{{ contrail_version }}.tar.gz"
-  when: docker_registry is not defined and inventory_hostname == groups.oo_first_master.0
+  block:
+  - name: Untar Contrail tar-file
+    unarchive:
+      src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+      dest: "/tmp"
 
-- name: Load Contrail-Analytics image
-  docker_image:
-    name: contrail-analytics
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    state: present
-    load_path: "/tmp/contrail-analytics-{{ os_release }}-{{ contrail_version }}.tar.gz"
-  when: docker_registry is not defined and inventory_hostname == groups.oo_first_master.0
+  - name: Load Contrail-Controller image
+    docker_image:
+      name: contrail-controller
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      state: present
+      load_path: "/tmp/contrail-controller-{{ os_release }}-{{ contrail_version }}.tar.gz"
 
-- name: Load Contrail-Analytics-DB image
-  docker_image:
-    name: contrail-analyticsdb
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    state: present
-    load_path: "/tmp/contrail-analyticsdb-{{ os_release }}-{{ contrail_version }}.tar.gz"
-  when: docker_registry is not defined and inventory_hostname == groups.oo_first_master.0
+  - name: Load Contrail-Analytics image
+    docker_image:
+      name: contrail-analytics
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      state: present
+      load_path: "/tmp/contrail-analytics-{{ os_release }}-{{ contrail_version }}.tar.gz"
 
-- name: Load Contrail-Kube-Manager image
-  docker_image:
-    name: contrail-kube-manager
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    state: present
-    load_path: "/tmp/contrail-kube-manager-{{ os_release }}-{{ contrail_version }}.tar.gz"
-  when: docker_registry is not defined and inventory_hostname == groups.oo_first_master.0
+  - name: Load Contrail-Analytics-DB image
+    docker_image:
+      name: contrail-analyticsdb
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      state: present
+      load_path: "/tmp/contrail-analyticsdb-{{ os_release }}-{{ contrail_version }}.tar.gz"
 
-- name: Create Contrail single YAML file
-  become: yes
-  template: src=contrail-installer.j2 dest=/tmp/contrail-installer.yaml owner=root mode=0644
-  when: inventory_hostname == groups.oo_first_master.0
+  - name: Load Contrail-Kube-Manager image
+    docker_image:
+      name: contrail-kube-manager
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      state: present
+      load_path: "/tmp/contrail-kube-manager-{{ os_release }}-{{ contrail_version }}.tar.gz"
+
+  - name: Create Contrail single YAML file
+    become: yes
+    template:
+      src: contrail-installer.j2
+      dest: /tmp/contrail-installer.yaml
+      owner: root
+      mode: 0644

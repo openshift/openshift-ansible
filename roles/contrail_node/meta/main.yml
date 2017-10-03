@@ -12,6 +12,3 @@ galaxy_info:
   categories:
   - cloud
   - system
-dependencies:
-- role: openshift_facts
-- role: openshift_master_facts
