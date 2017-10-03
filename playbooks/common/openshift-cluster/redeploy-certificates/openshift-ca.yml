@@ -114,12 +114,18 @@
     register: g_new_openshift_ca_mktemp
     changed_when: false
 
-- include: ../../openshift-master/ca.yml
+- name: Create OpenShift CA
+  hosts: oo_first_master
   vars:
     # Set openshift_ca_config_dir to a temporary directory where CA
     # will be created. We'll replace the existing CA with the CA
     # created in the temporary directory.
     openshift_ca_config_dir: "{{ hostvars[groups.oo_first_master.0].g_new_openshift_ca_mktemp.stdout }}"
+  roles:
+  - role: openshift_master_facts
+  - role: openshift_named_certificates
+  - role: openshift_ca
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Create temp directory for syncing certs
   hosts: localhost

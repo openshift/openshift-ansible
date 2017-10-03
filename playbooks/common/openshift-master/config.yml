@@ -10,6 +10,8 @@
         installer_phase_master: "In Progress"
       aggregate: false
 
+- include: certificates.yml
+
 - name: Disable excluders
   hosts: oo_masters_to_config
   gather_facts: no

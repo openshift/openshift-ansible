@@ -3,6 +3,4 @@
 
 - include: ../../common/openshift-cluster/std_include.yml
 
-- include: ../../common/openshift-master/ca.yml
-
 - include: ../../common/openshift-master/certificates.yml
