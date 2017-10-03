@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.141.0%{?dist}
+Release:        0.142.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.142.0
+- Document that nfs_directory must conform to DNS-1123 (sdodson@redhat.com)
+- Move node aws credentials to config.yml (mgugino@redhat.com)
+- Use etcd_ip when communicating with the cluster as a peer in etcd scaleup.
+  (abutcher@redhat.com)
+- Ensure openshift.common.portal_net updated during scaleup.
+  (abutcher@redhat.com)
+- docker: fix some tox warnings (gscrivan@redhat.com)
+- Require openshift_image_tag in the inventory with openshift-enterprise
+  (gscrivan@redhat.com)
+- crio: use the image_tag on RHEL (gscrivan@redhat.com)
+- docker: use the image_tag on RHEL (gscrivan@redhat.com)
+
 * Tue Oct 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.141.0
 - Restore registires to /etc/sysconfig/docker (mgugino@redhat.com)
 - Fix Prometheus byo entry point (rteague@redhat.com)
