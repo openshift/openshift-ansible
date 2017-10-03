@@ -18,8 +18,8 @@ function teardown_cmd() {
     if [[ -z "${found}" ]]; then
       flag=$((flag+1))
     fi
-    if gcloud --project "{{ gce_project_id }}" ${a[@]::$flag} describe "${name}" ${a[@]:$flag} &>/dev/null; then
-        gcloud --project "{{ gce_project_id }}" ${a[@]::$flag} delete -q "${name}" ${a[@]:$flag}
+    if gcloud --project "{{ openshift_gcp_project }}" ${a[@]::$flag} describe "${name}" ${a[@]:$flag} &>/dev/null; then
+        gcloud --project "{{ openshift_gcp_project }}" ${a[@]::$flag} delete -q "${name}" ${a[@]:$flag}
     fi
 }
 
@@ -33,11 +33,11 @@ function teardown() {
 }
 
 # Preemptively spin down the instances
-{% for node_group in provision_gce_node_groups %}
+{% for node_group in openshift_gcp_node_group_config %}
 # scale down {{ node_group.name }}
 (
     # performs a delete and scale down as one operation to ensure maximum parallelism
-    if ! instances=$( gcloud --project "{{ gce_project_id }}" compute instance-groups managed list-instances "{{ provision_prefix }}ig-{{ node_group.suffix }}" --zone "{{ gce_zone_name }}" --format='value[terminator=","](instance)' ); then
+    if ! instances=$( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed list-instances "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --format='value[terminator=","](instance)' ); then
         exit 0
     fi
     instances="${instances%?}"
@@ -45,7 +45,7 @@ function teardown() {
         echo "warning: No instances in {{ node_group.name }}" 1>&2
         exit 0
     fi
-    if ! gcloud --project "{{ gce_project_id }}" compute instance-groups managed delete-instances "{{ provision_prefix }}ig-{{ node_group.suffix }}" --zone "{{ gce_zone_name }}" --instances "${instances}"; then
+    if ! gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed delete-instances "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --instances "${instances}"; then
         echo "warning: Unable to scale down the node group {{ node_group.name }}" 1>&2
         exit 0
     fi
@@ -54,15 +54,15 @@ function teardown() {
 
 # Bucket for registry
 (
-if gsutil ls -p "{{ gce_project_id }}" "gs://{{ openshift_hosted_registry_storage_gcs_bucket }}" &>/dev/null; then
-    gsutil -m rm -r "gs://{{ openshift_hosted_registry_storage_gcs_bucket }}"
+if gsutil ls -p "{{ openshift_gcp_project }}" "gs://{{ openshift_gcp_registry_bucket_name }}" &>/dev/null; then
+    gsutil -m rm -r "gs://{{ openshift_gcp_registry_bucket_name }}"
 fi
 ) &
 
 # DNS
 (
-dns_zone="{{ dns_managed_zone | default(provision_prefix + 'managed-zone') }}"
-if gcloud --project "{{ gce_project_id }}" dns managed-zones describe "${dns_zone}" &>/dev/null; then
+dns_zone="{{ dns_managed_zone | default(openshift_gcp_prefix + 'managed-zone') }}"
+if gcloud --project "{{ openshift_gcp_project }}" dns managed-zones describe "${dns_zone}" &>/dev/null; then
     # Retry DNS changes until they succeed since this may be a shared resource
     while true; do
         dns="${TMPDIR:-/tmp}/dns.yaml"
@@ -70,16 +70,16 @@ if gcloud --project "{{ gce_project_id }}" dns managed-zones describe "${dns_zon
 
         # export all dns records that match into a zone format, and turn each line into a set of args for
         # record-sets transaction.
-        gcloud dns record-sets export --project "{{ gce_project_id }}" -z "${dns_zone}" --zone-file-format "${dns}"
+        gcloud dns record-sets export --project "{{ openshift_gcp_project }}" -z "${dns_zone}" --zone-file-format "${dns}"
         if grep -F -e '{{ openshift_master_cluster_hostname }}' -e '{{ openshift_master_cluster_public_hostname }}' -e '{{ wildcard_zone }}' "${dns}" | \
                 awk '{ print "--name", $1, "--ttl", $2, "--type", $4, $5; }' > "${dns}.input"
         then
             rm -f "${dns}"
-            gcloud --project "{{ gce_project_id }}" dns record-sets transaction --transaction-file=$dns start -z "${dns_zone}"
-            cat "${dns}.input" | xargs -L1 gcloud --project "{{ gce_project_id }}" dns record-sets transaction --transaction-file="${dns}" remove -z "${dns_zone}"
+            gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns start -z "${dns_zone}"
+            cat "${dns}.input" | xargs -L1 gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file="${dns}" remove -z "${dns_zone}"
 
             # Commit all DNS changes, retrying if preconditions are not met
-            if ! out="$( gcloud --project "{{ gce_project_id }}" dns record-sets transaction --transaction-file=$dns execute -z "${dns_zone}" 2>&1 )"; then
+            if ! out="$( gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns execute -z "${dns_zone}" 2>&1 )"; then
                 rc=$?
                 if [[ "${out}" == *"HTTPError 412: Precondition not met"* ]]; then
                     continue
@@ -95,25 +95,25 @@ fi
 
 (
 # Router network rules
-teardown "{{ provision_prefix }}router-network-lb-rule" compute forwarding-rules --region "{{ gce_region_name }}"
-teardown "{{ provision_prefix }}router-network-lb-pool" compute target-pools --region "{{ gce_region_name }}"
-teardown "{{ provision_prefix }}router-network-lb-health-check" compute http-health-checks
-teardown "{{ provision_prefix }}router-network-lb-ip" compute addresses --region "{{ gce_region_name }}"
+teardown "{{ openshift_gcp_prefix }}router-network-lb-rule" compute forwarding-rules --region "{{ openshift_gcp_region }}"
+teardown "{{ openshift_gcp_prefix }}router-network-lb-pool" compute target-pools --region "{{ openshift_gcp_region }}"
+teardown "{{ openshift_gcp_prefix }}router-network-lb-health-check" compute http-health-checks
+teardown "{{ openshift_gcp_prefix }}router-network-lb-ip" compute addresses --region "{{ openshift_gcp_region }}"
 
 # Internal master network rules
-teardown "{{ provision_prefix }}master-network-lb-rule" compute forwarding-rules --region "{{ gce_region_name }}"
-teardown "{{ provision_prefix }}master-network-lb-pool" compute target-pools --region "{{ gce_region_name }}"
-teardown "{{ provision_prefix }}master-network-lb-health-check" compute http-health-checks
-teardown "{{ provision_prefix }}master-network-lb-ip" compute addresses --region "{{ gce_region_name }}"
+teardown "{{ openshift_gcp_prefix }}master-network-lb-rule" compute forwarding-rules --region "{{ openshift_gcp_region }}"
+teardown "{{ openshift_gcp_prefix }}master-network-lb-pool" compute target-pools --region "{{ openshift_gcp_region }}"
+teardown "{{ openshift_gcp_prefix }}master-network-lb-health-check" compute http-health-checks
+teardown "{{ openshift_gcp_prefix }}master-network-lb-ip" compute addresses --region "{{ openshift_gcp_region }}"
 ) &
 
 (
 # Master SSL network rules
-teardown "{{ provision_prefix }}master-ssl-lb-rule" compute forwarding-rules --global
-teardown "{{ provision_prefix }}master-ssl-lb-target" compute target-tcp-proxies
-teardown "{{ provision_prefix }}master-ssl-lb-ip" compute addresses --global
-teardown "{{ provision_prefix }}master-ssl-lb-backend" compute backend-services --global
-teardown "{{ provision_prefix }}master-ssl-lb-health-check" compute health-checks
+teardown "{{ openshift_gcp_prefix }}master-ssl-lb-rule" compute forwarding-rules --global
+teardown "{{ openshift_gcp_prefix }}master-ssl-lb-target" compute target-tcp-proxies
+teardown "{{ openshift_gcp_prefix }}master-ssl-lb-ip" compute addresses --global
+teardown "{{ openshift_gcp_prefix }}master-ssl-lb-backend" compute backend-services --global
+teardown "{{ openshift_gcp_prefix }}master-ssl-lb-health-check" compute health-checks
 ) &
 
 #Firewall rules
@@ -130,10 +130,10 @@ declare -A FW_RULES=(
   ['infra-node-external']=""
 )
 for rule in "${!FW_RULES[@]}"; do
-    ( if gcloud --project "{{ gce_project_id }}" compute firewall-rules describe "{{ provision_prefix }}$rule" &>/dev/null; then
+    ( if gcloud --project "{{ openshift_gcp_project }}" compute firewall-rules describe "{{ openshift_gcp_prefix }}$rule" &>/dev/null; then
         # retry a few times because this call can be flaky
         for i in `seq 1 3`; do 
-            if gcloud -q --project "{{ gce_project_id }}" compute firewall-rules delete "{{ provision_prefix }}$rule"; then
+            if gcloud -q --project "{{ openshift_gcp_project }}" compute firewall-rules delete "{{ openshift_gcp_prefix }}$rule"; then
                 break
             fi
         done
@@ -142,15 +142,15 @@ done
 
 for i in `jobs -p`; do wait $i; done
 
-{% for node_group in provision_gce_node_groups %}
+{% for node_group in openshift_gcp_node_group_config %}
 # teardown {{ node_group.name }} - any load balancers referencing these groups must be removed
 (
-    teardown "{{ provision_prefix }}ig-{{ node_group.suffix }}" compute instance-groups managed --zone "{{ gce_zone_name }}"
-    teardown "{{ provision_prefix }}instance-template-{{ node_group.name }}" compute instance-templates
+    teardown "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" compute instance-groups managed --zone "{{ openshift_gcp_zone }}"
+    teardown "{{ openshift_gcp_prefix }}instance-template-{{ node_group.name }}" compute instance-templates
 ) &
 {% endfor %}
 
 for i in `jobs -p`; do wait $i; done
 
 # Network
-teardown "{{ gce_network_name }}" compute networks
+teardown "{{ openshift_gcp_network_name }}" compute networks
