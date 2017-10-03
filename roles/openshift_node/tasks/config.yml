@@ -111,9 +111,5 @@
     msg: Node failed to start please inspect the logs and try again
   when: node_start_result | failed
 
-- name: Setup tuned
-  include: tuned.yml
-  static: yes
-
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"

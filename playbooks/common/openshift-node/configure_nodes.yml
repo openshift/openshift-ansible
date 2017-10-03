@@ -13,4 +13,5 @@
   roles:
   - role: os_firewall
   - role: openshift_node
+  - role: tuned
   - role: nickhammond.logrotate
