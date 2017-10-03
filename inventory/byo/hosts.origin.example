@@ -897,3 +897,68 @@ ose3-lb-ansible.test.example.com containerized=false
 [nodes]
 ose3-master[1:3]-ansible.test.example.com
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+# CloudForms/ManageIQ (CFME/MIQ) Configuration
+
+# See the readme for full descriptions and getting started
+# instructions: ../../roles/openshift_cfme/README.md or go directly to
+# their definitions: ../../roles/openshift_cfme/defaults/main.yml
+# ../../roles/openshift_cfme/vars/main.yml
+#
+# Namespace for the CFME project
+#openshift_cfme_project: openshift-cfme
+
+# Namespace/project description
+#openshift_cfme_project_description: CloudForms Management Engine
+
+# Choose 'miq-template' for a podified database install
+# Choose 'miq-template-ext-db' for an external database install
+#
+# If you are using the miq-template-ext-db template then you must add
+# the required database parameters to the
+# openshift_cfme_template_parameters variable.
+#openshift_cfme_app_template: miq-template
+
+# Allowed options: nfs, nfs_external, preconfigured, cloudprovider.
+#openshift_cfme_storage_class: nfs
+
+# [OPTIONAL] - If you are using an EXTERNAL NFS server, such as a
+# netapp appliance, then you must set the hostname here. Leave the
+# value as 'false' if you are not using external NFS.
+#openshift_cfme_storage_nfs_external_hostname: false
+
+# [OPTIONAL] - If you are using external NFS then you must set the base
+# path to the exports location here.
+#
+# Additionally: EXTERNAL NFS REQUIRES that YOU CREATE the nfs exports
+# that will back the application PV and optionally the database
+# pv. Export path definitions, relative to
+# {{ openshift_cfme_storage_nfs_base_dir }}
+#
+# LOCAL NFS NOTE:
+#
+# You may may also change this value if you want to change the default
+# path used for local NFS exports.
+#openshift_cfme_storage_nfs_base_dir: /exports
+
+# LOCAL NFS NOTE:
+#
+# You may override the automatically selected LOCAL NFS server by
+# setting this variable. Useful for testing specific task files.
+#openshift_cfme_storage_nfs_local_hostname: false
+
+# DEFAULT PV SIZES
+# How large to make the MIQ application PV
+#openshift_cfme_app_pv_size: 5Gi
+
+# How large to make the MIQ PostgreSQL PV
+#openshift_cfme_db_pv_size: 15Gi
+
+# A hash of parameters you want to override or set in the
+# miq-template.yaml or miq-template-ext-db.yaml templates. Set this in
+# your inventory file as a simple hash. Acceptable values are defined
+# under the .parameters list in files/miq-template{-ext-db}.yaml
+# Example:
+#
+# openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
+#openshift_cfme_template_parameters: {}
+

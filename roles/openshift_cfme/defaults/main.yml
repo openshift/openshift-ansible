@@ -14,22 +14,9 @@ openshift_cfme_project_description: CloudForms Management Engine
 # Choose 'miq-template' for a podified database install
 # Choose 'miq-template-ext-db' for an external database install
 openshift_cfme_app_template: miq-template
-
 # If you are using the miq-template-ext-db template then you must add
 # the required database parameters to the
-# openshift_cfme_template_parameters variable. You only need to
-# provide parameters that differ from the ones in the following
-# example. Any omitted parameter by the user will be default to its
-# default below:
-#
-# openshift_cfme_template_parameters:
-#   DATABASE_USER: 'root'
-#   DATABASE_PASSWORD: ''
-#   DATABASE_IP: ''
-#   DATABASE_PORT: 5432
-#   DATABASE_NAME: 'vmdb_production'
-#
-# See also var: __openshift_cfme_default_db_connection_info
+# openshift_cfme_template_parameters variable.
 
 ######################################################################
 # STORAGE OPTIONS
@@ -76,10 +63,6 @@ openshift_cfme_storage_nfs_external_hostname: false
 # that will back the application PV and optionally the database
 # pv. Export path definitions, relative to
 # {{ openshift_cfme_storage_nfs_base_dir }}
-#
-# * REQUIRED[ALWAYS]: /miq-app - MIQ Server PV.
-#
-# * REQUIRED[NFS_EXTERNAL]: /miq-db - Podified DB PB
 #
 # LOCAL NFS NOTE:
 #
