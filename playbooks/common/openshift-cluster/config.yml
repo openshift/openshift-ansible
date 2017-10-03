@@ -30,8 +30,6 @@
 
 - include: ../openshift-master/additional_config.yml
 
-- include: ../openshift-node/certificates.yml
-
 - include: ../openshift-node/config.yml
 
 - include: ../openshift-glusterfs/config.yml
