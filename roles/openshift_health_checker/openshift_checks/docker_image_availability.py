@@ -1,5 +1,6 @@
 """Check that required Docker images are available."""
 
+from ansible.module_utils import six
 from openshift_checks import OpenShiftCheck
 from openshift_checks.mixins import DockerHostMixin
 
@@ -153,7 +154,15 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     def known_docker_registries(self):
         """Build a list of docker registries available according to inventory vars."""
-        regs = list(self.get_var("openshift_docker_additional_registries", default=[]))
+        regs = self.get_var("openshift_docker_additional_registries", default=[])
+        # https://bugzilla.redhat.com/show_bug.cgi?id=1497274
+        # if the result was a string type, place it into a list. We must do this
+        # as using list() on a string will split the string into its characters.
+        if isinstance(regs, six.string_types):
+            regs = [regs]
+        else:
+            # Otherwise cast to a list as was done previously
+            regs = list(regs)
 
         deployment_type = self.get_var("openshift_deployment_type")
         if deployment_type == "origin" and "docker.io" not in regs:
