@@ -1359,7 +1359,7 @@ class OpenShiftCLIConfig(object):
         for key in sorted(self.config_options.keys()):
             data = self.config_options[key]
             if data['include'] \
-               and (data['value'] or isinstance(data['value'], int)):
+               and (data['value'] is not None or isinstance(data['value'], int)):
                 if key == ascommalist:
                     val = ','.join(['{}={}'.format(kk, vv) for kk, vv in sorted(data['value'].items())])
                 else:
