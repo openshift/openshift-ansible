@@ -7,6 +7,7 @@
 Components in OpenShift-Ansible consist of two main parts:
 * Entry point playbook(s)
 * Ansible role
+* OWNERS files in both the playbooks and roles associated with the component
 
 When writing playbooks and roles, follow these basic guidelines to ensure
 success and maintainability. 
@@ -48,6 +49,7 @@ playbooks/openshift-component_name
 ├── private
 │   ├── config.yml                      Included by the Cluster Installer
 │   └── roles -> ../../roles            Don't forget to create this symlink
+├── OWNERS                              Assign 2-3 approvers and reviewers
 └── README.md                           Tell us what this component does
 ```
 
@@ -108,6 +110,7 @@ roles/openshift_component_name
 │   └── main.yml
 ├── meta
 │   └── main.yml
+├── OWNERS                              Assign 2-3 approvers and reviewers
 ├── README.md
 ├── tasks
 │   └── main.yml                        Default playbook used when calling the role
