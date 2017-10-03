@@ -707,11 +707,6 @@ def oo_openshift_env(hostvars):
         if regex.match(key):
             facts[key] = hostvars[key]
 
-    migrations = {'openshift_router_selector': 'openshift_hosted_router_selector',
-                  'openshift_registry_selector': 'openshift_hosted_registry_selector'}
-    for old_fact, new_fact in migrations.items():
-        if old_fact in facts and new_fact not in facts:
-            facts[new_fact] = facts[old_fact]
     return facts
 
 
