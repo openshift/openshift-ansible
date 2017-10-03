@@ -22,7 +22,7 @@
 # TODO: this currently has a bug where hostnames are required
 - name: Creating First Master Aggregator signer certs
   command: >
-    oc adm ca create-signer-cert
+    {{ hostvars[first_master].openshift.common.client_binary }} adm ca create-signer-cert
     --cert=/etc/origin/master/front-proxy-ca.crt
     --key=/etc/origin/master/front-proxy-ca.key
     --serial=/etc/origin/master/ca.serial.txt
