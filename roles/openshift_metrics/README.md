@@ -39,6 +39,8 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_metrics_hawkular_replicas:` The number of replicas for Hawkular metrics.
 
+- `openshift_metrics_hawkular_route_annotations`: Dictionary with annotations for the Hawkular route.
+
 - `openshift_metrics_cassandra_replicas`: The number of Cassandra nodes to deploy for the
   initial cluster.
 

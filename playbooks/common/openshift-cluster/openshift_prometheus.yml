@@ -1,9 +1,5 @@
 ---
-- include: std_include.yml
-
-- name: OpenShift Prometheus
+- name: Create Hosted Resources - openshift_prometheus
   hosts: oo_first_master
   roles:
-  - openshift_prometheus
-  vars:
-    openshift_prometheus_state: present
+  - role: openshift_prometheus

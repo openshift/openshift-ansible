@@ -1,0 +1,7 @@
+---
+__tsb_files_location: "../../../files/origin-components/"
+
+__tsb_template_file: "apiserver-template.yaml"
+__tsb_config_file: "apiserver-config.yaml"
+__tsb_rbac_file: "rbac-template.yaml"
+__tsb_broker_file: "template-service-broker-registration.yaml"

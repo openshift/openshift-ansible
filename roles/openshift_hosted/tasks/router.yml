@@ -1,0 +1,105 @@
+---
+- name: setup firewall
+  include: firewall.yml
+  vars:
+    l_openshift_hosted_firewall_enabled: "{{ r_openshift_hosted_router_firewall_enabled }}"
+    l_openshift_hosted_use_firewalld: "{{ r_openshift_hosted_router_use_firewalld }}"
+    l_openshift_hosted_fw_allow: "{{ r_openshift_hosted_router_os_firewall_allow }}"
+    l_openshift_hosted_fw_deny: "{{ r_openshift_hosted_router_os_firewall_deny }}"
+
+- name: Retrieve list of openshift nodes matching router selector
+  oc_obj:
+    state: list
+    kind: node
+    namespace: "{{ openshift.hosted.router.namespace | default('default') }}"
+    selector: "{{ openshift.hosted.router.selector | default(omit) }}"
+  register: router_nodes
+  when: openshift.hosted.router.replicas | default(none) is none
+
+- name: set_fact replicas
+  set_fact:
+    replicas: "{{ openshift.hosted.router.replicas|default(None) | get_router_replicas(router_nodes) }}"
+    openshift_hosted_router_selector: "{{ openshift.hosted.router.selector | default(None) }}"
+    openshift_hosted_router_image: "{{ openshift.hosted.router.registryurl }}"
+
+- name: Get the certificate contents for router
+  copy:
+    backup: True
+    dest: "/etc/origin/master/{{ item | basename }}"
+    src: "{{ item }}"
+  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
+                  oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+  when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {}
+
+# This is for when we desire a cluster signed cert
+# The certificate is generated and placed in master_config_dir/
+- block:
+  - name: generate a default wildcard router certificate
+    oc_adm_ca_server_cert:
+      signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
+      signer_key: "{{ openshift_master_config_dir }}/ca.key"
+      signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+      hostnames:
+      - "{{ openshift_master_default_subdomain | default('router.default.svc.cluster.local') }}"
+      - "*.{{ openshift_master_default_subdomain | default('router.default.svc.cluster.local') }}"
+      cert: "{{ ('/etc/origin/master/' ~ (item.certificate.certfile | basename)) if 'certfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.crt') }}"
+      key: "{{ ('/etc/origin/master/' ~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.key') }}"
+    with_items: "{{ openshift_hosted_routers }}"
+
+  - name: set the openshift_hosted_router_certificate
+    set_fact:
+      openshift_hosted_router_certificate:
+        certfile: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
+        keyfile: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
+        cafile: "{{ openshift_master_config_dir ~ '/ca.crt' }}"
+  when:
+  - openshift_hosted_router_create_certificate | bool
+  - openshift_hosted_router_certificate == {}
+
+- name: Create the router service account(s)
+  oc_serviceaccount:
+    name: "{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    state: present
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Grant the router service account(s) access to the appropriate scc
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    resource_kind: scc
+    resource_name: hostnetwork
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Set additional permissions for router service account
+  oc_adm_policy_user:
+    user: "system:serviceaccount:{{ item.namespace }}:{{ item.serviceaccount }}"
+    namespace: "{{ item.namespace }}"
+    resource_kind: cluster-role
+    resource_name: cluster-reader
+  when: item.namespace == 'default'
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Create OpenShift router
+  oc_adm_router:
+    name: "{{ item.name }}"
+    replicas: "{{ item.replicas }}"
+    namespace: "{{ item.namespace | default('default') }}"
+    # This option is not yet implemented
+    # force_subdomain: "{{ openshift_hosted_router_force_subdomain | default(none) }}"
+    service_account: "{{ item.serviceaccount | default('router') }}"
+    selector: "{{ item.selector | default(none) }}"
+    images: "{{ item.images | default(omit) }}"
+    cert_file: "{{ ('/etc/origin/master/' ~ (item.certificate.certfile | basename)) if 'certfile' in item.certificate else omit }}"
+    key_file: "{{ ('/etc/origin/master/' ~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else omit }}"
+    cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificate.cafile | basename)) if 'cafile' in item.certificate else omit }}"
+    edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
+    ports: "{{ item.ports }}"
+    stats_port: "{{ item.stats_port }}"
+  with_items: "{{ openshift_hosted_routers }}"
+
+- name: Wait for pod (Routers)
+  include: wait_for_pod.yml
+  vars:
+    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
+    l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"

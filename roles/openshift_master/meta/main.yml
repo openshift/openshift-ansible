@@ -14,19 +14,3 @@ galaxy_info:
 dependencies:
 - role: lib_openshift
 - role: lib_os_firewall
-- role: openshift_master_facts
-- role: openshift_hosted_facts
-- role: openshift_master_certificates
-- role: openshift_etcd_client_certificates
-  etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
-  etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
-  etcd_cert_prefix: "master.etcd-"
-  when: groups.oo_etcd_to_config | default([]) | length != 0
-- role: openshift_clock
-- role: openshift_cloud_provider
-- role: openshift_builddefaults
-- role: openshift_buildoverrides
-- role: nickhammond.logrotate
-- role: contiv
-  contiv_role: netmaster
-  when: openshift_use_contiv | default(False) | bool

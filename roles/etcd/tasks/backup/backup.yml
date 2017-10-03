@@ -1,0 +1,101 @@
+---
+# set the etcd backup directory name here in case the tag or sufix consists of dynamic value that changes over time
+# e.g. openshift-backup-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }} value will change every second so if the date changes
+# right after setting l_etcd_incontainer_backup_dir and before l_etcd_backup_dir facts, the backup directory name is different
+- set_fact:
+    l_backup_dir_name: "openshift-backup-{{ r_etcd_common_backup_tag }}{{ r_etcd_common_backup_sufix_name }}"
+
+- set_fact:
+    l_etcd_data_dir: "{{ etcd_data_dir }}{{ '/etcd.etcd' if r_etcd_common_etcd_runtime == 'runc' else '' }}"
+
+- set_fact:
+    l_etcd_incontainer_data_dir: "{{ etcd_data_dir }}"
+
+- set_fact:
+    l_etcd_incontainer_backup_dir: "{{ l_etcd_incontainer_data_dir }}/{{ l_backup_dir_name }}"
+
+- set_fact:
+    l_etcd_backup_dir: "{{ l_etcd_data_dir }}/{{ l_backup_dir_name }}"
+
+# TODO: replace shell module with command and update later checks
+- name: Check available disk space for etcd backup
+  shell: df --output=avail -k {{ l_etcd_data_dir }} | tail -n 1
+  register: l_avail_disk
+  # AUDIT:changed_when: `false` because we are only inspecting
+  # state, not manipulating anything
+  changed_when: false
+
+# TODO: replace shell module with command and update later checks
+- name: Check current etcd disk usage
+  shell: du --exclude='*openshift-backup*' -k {{ l_etcd_data_dir }} | tail -n 1 | cut -f1
+  register: l_etcd_disk_usage
+  # AUDIT:changed_when: `false` because we are only inspecting
+  # state, not manipulating anything
+  changed_when: false
+
+- name: Abort if insufficient disk space for etcd backup
+  fail:
+    msg: >
+      {{ l_etcd_disk_usage.stdout|int*2 }} Kb disk space required for etcd backup,
+      {{ l_avail_disk.stdout }} Kb available.
+  when: l_etcd_disk_usage.stdout|int*2 > l_avail_disk.stdout|int
+
+# For non containerized and non embedded we should have the correct version of
+# etcd installed already. So don't do anything.
+#
+# For containerized installs we now exec into etcd_container
+#
+# For embedded non containerized we need to ensure we have the latest version
+# etcd on the host.
+- name: Detecting Atomic Host Operating System
+  stat:
+    path: /run/ostree-booted
+  register: l_ostree_booted
+
+- name: Install latest etcd for embedded
+  package:
+    name: etcd
+    state: latest
+  when:
+  - r_etcd_common_embedded_etcd | bool
+  - not l_ostree_booted.stat.exists | bool
+
+- name: Check selinux label of '{{ l_etcd_data_dir }}'
+  command: >
+    stat -c '%C' {{ l_etcd_data_dir }}
+  register: l_etcd_selinux_labels
+
+- debug:
+    msg: "{{ l_etcd_selinux_labels }}"
+
+- name: Make sure the '{{ l_etcd_data_dir }}' has the proper label
+  command: >
+    chcon -t svirt_sandbox_file_t  "{{ l_etcd_data_dir }}"
+  when:
+  - l_etcd_selinux_labels.rc == 0
+  - "'svirt_sandbox_file_t' not in l_etcd_selinux_labels.stdout"
+
+- name: Generate etcd backup
+  command: >
+    {{ r_etcd_common_etcdctl_command }} backup --data-dir={{ l_etcd_incontainer_data_dir }}
+    --backup-dir={{ l_etcd_incontainer_backup_dir }}
+
+# According to the docs change you can simply copy snap/db
+# https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
+- name: Check for v3 data store
+  stat:
+    path: "{{ l_etcd_data_dir }}/member/snap/db"
+  register: l_v3_db
+
+- name: Copy etcd v3 data store
+  command: >
+    cp -a {{ l_etcd_data_dir }}/member/snap/db
+    {{ l_etcd_backup_dir }}/member/snap/
+  when: l_v3_db.stat.exists
+
+- set_fact:
+    r_etcd_common_backup_complete: True
+
+- name: Display location of etcd backup
+  debug:
+    msg: "Etcd backup created in {{ l_etcd_backup_dir }}"

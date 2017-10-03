@@ -76,10 +76,11 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | Name                                             | Default value           | Description                             |
 |--------------------------------------------------|-------------------------|-----------------------------------------|
 | openshift_storage_glusterfs_timeout              | 300                     | Seconds to wait for pods to become ready
-| openshift_storage_glusterfs_namespace            | 'glusterfs'             | Namespace in which to create GlusterFS resources
+| openshift_storage_glusterfs_namespace            | 'glusterfs'             | Namespace/project in which to create GlusterFS resources
 | openshift_storage_glusterfs_is_native            | True                    | GlusterFS should be containerized
 | openshift_storage_glusterfs_name                 | 'storage'               | A name to identify the GlusterFS cluster, which will be used in resource names
 | openshift_storage_glusterfs_nodeselector         | 'glusterfs=storage-host'| Selector to determine which nodes will host GlusterFS pods in native mode. **NOTE:** The label value is taken from the cluster name
+| openshift_storage_glusterfs_use_default_selector | False                   | Whether to use a default node selector for the GlusterFS namespace/project. If False, the namespace/project will have no restricting node selector. If True, uses pre-existing or default (e.g. osm_default_node_selector) node selectors. **NOTE:** If True, nodes which will host GlusterFS pods must already have the additional labels.
 | openshift_storage_glusterfs_storageclass         | True                    | Automatically create a StorageClass for each GlusterFS cluster
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
@@ -91,7 +92,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_admin_key     | auto-generated          | String to use as secret key for performing heketi commands as admin
 | openshift_storage_glusterfs_heketi_user_key      | auto-generated          | String to use as secret key for performing heketi commands as user that can only view or modify volumes
 | openshift_storage_glusterfs_heketi_topology_load | True                    | Load the GlusterFS topology information into heketi
-| openshift_storage_glusterfs_heketi_url           | Undefined               | When heketi is native, this sets the hostname portion of the final heketi route URL. When heketi is external, this is the full URL to the heketi service.
+| openshift_storage_glusterfs_heketi_url           | Undefined               | When heketi is native, this sets the hostname portion of the final heketi route URL. When heketi is external, this is the FQDN or IP address to the heketi service.
 | openshift_storage_glusterfs_heketi_port          | 8080                    | TCP port for external heketi service **NOTE:** This has no effect in native mode
 | openshift_storage_glusterfs_heketi_executor      | 'kubernetes'            | Selects how a native heketi service will manage GlusterFS nodes: 'kubernetes' for native nodes, 'ssh' for external nodes
 | openshift_storage_glusterfs_heketi_ssh_port      | 22                      | SSH port for external GlusterFS nodes via native heketi

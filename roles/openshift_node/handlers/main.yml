@@ -29,8 +29,5 @@
   - not (node_service_status_changed | default(false) | bool)
   - not openshift_node_bootstrap
 
-- name: reload sysctl.conf
-  command: /sbin/sysctl -p
-
 - name: reload systemd units
   command: systemctl daemon-reload

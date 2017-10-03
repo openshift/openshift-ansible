@@ -50,7 +50,9 @@
       -n default
     register: deploy_registry_console
     changed_when: "'already exists' not in deploy_registry_console.stderr"
-    failed_when: "'already exists' not in deploy_registry_console.stderr and deploy_registry_console.rc != 0"
+    failed_when:
+    - "'already exists' not in deploy_registry_console.stderr"
+    - "deploy_registry_console.rc != 0"
 
   - name: Delete temp directory
     file:

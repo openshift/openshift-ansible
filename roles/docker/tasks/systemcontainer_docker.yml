@@ -1,4 +1,5 @@
 ---
+
 # If docker_options are provided we should fail. We should not install docker and ignore
 # the users configuration. NOTE: docker_options == inventory:openshift_docker_options
 - name: Fail quickly if openshift_docker_options are set
@@ -89,6 +90,14 @@
     - name: Set to default prepend
       set_fact:
         l_docker_image_prepend: "gscrivano"
+        l_docker_image_tag: "latest"
+
+    - name: Set container engine image tag
+      set_fact:
+        l_docker_image_tag: "{{ openshift_image_tag }}"
+      when:
+        - openshift_deployment_type == 'openshift-enterprise'
+        - openshift_image_tag is defined
 
     - name: Use Red Hat Registry for image when distribution is Red Hat
       set_fact:
@@ -100,17 +109,21 @@
         l_docker_image_prepend: "registry.fedoraproject.org/f25"
       when: ansible_distribution == 'Fedora'
 
-    # For https://github.com/openshift/openshift-ansible/pull/4049#discussion_r114478504
-    - name: Use a testing registry if requested
-      set_fact:
-        l_docker_image_prepend: "{{ openshift_docker_systemcontainer_image_registry_override }}"
-      when:
-        - openshift_docker_systemcontainer_image_registry_override is defined
-        - openshift_docker_systemcontainer_image_registry_override != ""
-
     - name: Set the full image name
       set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:latest"
+        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift.docker.service_name }}:{{ l_docker_image_tag }}"
+
+    # For https://github.com/openshift/openshift-ansible/pull/5354#issuecomment-328552959
+    - name: Use a specific image if requested
+      set_fact:
+        l_docker_image: "{{ openshift_docker_systemcontainer_image_override }}"
+      when:
+        - openshift_docker_systemcontainer_image_override is defined
+        - openshift_docker_systemcontainer_image_override != ""
+
+    # Be nice and let the user see the variable result
+    - debug:
+        var: l_docker_image
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
 - name: Pre-pull Container Engine System Container image
@@ -144,10 +157,10 @@
 # Set local versions of facts that must be in json format for container-daemon.json
 # NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
 - set_fact:
-    l_docker_insecure_registries: "{{ docker_insecure_registries | default([]) | to_json }}"
+    l_docker_insecure_registries: "{{ l2_docker_insecure_registries | default([]) | to_json }}"
     l_docker_log_options: "{{ docker_log_options | default({}) | to_json }}"
-    l_docker_additional_registries: "{{ docker_additional_registries | default([]) | to_json }}"
-    l_docker_blocked_registries: "{{ docker_blocked_registries | default([]) | to_json }}"
+    l_docker_additional_registries: "{{ l2_docker_additional_registries | default([]) | to_json }}"
+    l_docker_blocked_registries: "{{ l2_docker_blocked_registries | default([]) | to_json }}"
     l_docker_selinux_enabled: "{{ docker_selinux_enabled | default(true) | to_json }}"
 
 # Configure container-engine using the container-daemon.json file

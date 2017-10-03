@@ -47,9 +47,12 @@
       groups: nodes
       name: "{{ instancesout.instances[0].public_dns_name }}"
 
+- hosts: nodes
+  gather_facts: False
+  tasks:
   - name: set the user to perform installation
     set_fact:
-      ansible_ssh_user: root
+      ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default('root') }}"
 
 - name: normalize groups
   include: ../../byo/openshift-cluster/initialize_groups.yml
@@ -63,15 +66,14 @@
 - name: run the std_include
   include: ../../common/openshift-cluster/initialize_openshift_repos.yml
 
-- hosts: nodes
-  remote_user: root
-  tasks:
-  - set_fact:
-      openshift_node_bootstrap: True
+- name: run node config setup
+  include: ../../common/openshift-node/setup.yml
 
-  - name: run openshift image preparation
-    include_role:
-      name: openshift_node
+- name: run node config
+  include: ../../common/openshift-node/configure_nodes.yml
+
+- name: Re-enable excluders
+  include: ../../common/openshift-node/enable_excluders.yml
 
 - hosts: localhost
   connection: local

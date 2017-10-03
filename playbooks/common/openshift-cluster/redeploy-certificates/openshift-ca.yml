@@ -7,7 +7,7 @@
     when: not openshift.common.version_gte_3_2_or_1_2 | bool
 
 - name: Check cert expirys
-  hosts: oo_nodes_to_config:oo_masters_to_config
+  hosts: oo_nodes_to_config:oo_masters_to_config:oo_etcd_to_config
   vars:
     openshift_certificate_expiry_show_all: yes
   roles:
@@ -105,25 +105,21 @@
     - "ca.serial.txt"
     - "ca-bundle.crt"
 
-- name: Generate new OpenShift CA certificate
+- name: Create temporary directory for creating new CA certificate
   hosts: oo_first_master
-  pre_tasks:
+  tasks:
   - name: Create temporary directory for creating new CA certificate
     command: >
       mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: g_new_openshift_ca_mktemp
     changed_when: false
-  roles:
-  - role: openshift_ca
+
+- include: ../../openshift-master/ca.yml
+  vars:
     # Set openshift_ca_config_dir to a temporary directory where CA
     # will be created. We'll replace the existing CA with the CA
     # created in the temporary directory.
-    openshift_ca_config_dir: "{{ g_new_openshift_ca_mktemp.stdout }}"
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-    openshift_master_hostnames: "{{ hostvars
-                                    | oo_select_keys(groups['oo_masters_to_config'] | default([]))
-                                    | oo_collect('openshift.common.all_hostnames')
-                                    | oo_flatten | unique }}"
+    openshift_ca_config_dir: "{{ hostvars[groups.oo_first_master.0].g_new_openshift_ca_mktemp.stdout }}"
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -209,16 +205,22 @@
     with_items: "{{ client_users }}"
 
 - include: ../../openshift-master/restart.yml
-  # Do not restart masters when master certificates were previously expired.
-  when: ('expired' not in hostvars
-                       | oo_select_keys(groups['oo_masters_to_config'])
-                       | oo_collect('check_results.check_results.ocp_certs')
-                       | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
-        and
-        ('expired' not in hostvars
-                          | oo_select_keys(groups['oo_masters_to_config'])
-                          | oo_collect('check_results.check_results.ocp_certs')
-                          | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
+  # Do not restart masters when master or etcd certificates were previously expired.
+  when:
+  # masters
+  - ('expired' not in hostvars
+      | oo_select_keys(groups['oo_masters_to_config'])
+      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
+  - ('expired' not in hostvars
+      | oo_select_keys(groups['oo_masters_to_config'])
+      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
+  # etcd
+  - ('expired' not in (hostvars
+      | oo_select_keys(groups['etcd'])
+      | oo_collect('check_results.check_results.etcd')
+      | oo_collect('health')))
 
 - name: Distribute OpenShift CA certificate to nodes
   hosts: oo_nodes_to_config
@@ -268,13 +270,28 @@
     changed_when: false
 
 - include: ../../openshift-node/restart.yml
-  # Do not restart nodes when node certificates were previously expired.
-  when: ('expired' not in hostvars
-                       | oo_select_keys(groups['oo_nodes_to_config'])
-                       | oo_collect('check_results.check_results.ocp_certs')
-                       | oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/server.crt"}))
-        and
-        ('expired' not in hostvars
-                          | oo_select_keys(groups['oo_nodes_to_config'])
-                          | oo_collect('check_results.check_results.ocp_certs')
-                          | oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/ca.crt"}))
+  # Do not restart nodes when node, master or etcd certificates were previously expired.
+  when:
+  # nodes
+  - ('expired' not in hostvars
+      | oo_select_keys(groups['oo_nodes_to_config'])
+      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/server.crt"}))
+  - ('expired' not in hostvars
+      | oo_select_keys(groups['oo_nodes_to_config'])
+      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/ca.crt"}))
+  # masters
+  - ('expired' not in hostvars
+      | oo_select_keys(groups['oo_masters_to_config'])
+      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
+  - ('expired' not in hostvars
+      | oo_select_keys(groups['oo_masters_to_config'])
+      | oo_collect('check_results.check_results.ocp_certs')
+      | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
+  # etcd
+  - ('expired' not in (hostvars
+      | oo_select_keys(groups['etcd'])
+      | oo_collect('check_results.check_results.etcd')
+      | oo_collect('health')))

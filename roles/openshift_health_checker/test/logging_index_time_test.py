@@ -102,7 +102,7 @@ def test_with_running_pods():
     ),
 ], ids=lambda argval: argval[0])
 def test_wait_until_cmd_or_err_succeeds(name, json_response, uuid, timeout):
-    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
+    check = canned_loggingindextime(lambda *args, **_: json.dumps(json_response))
     check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, uuid, timeout)
 
 
@@ -131,7 +131,7 @@ def test_wait_until_cmd_or_err_succeeds(name, json_response, uuid, timeout):
     )
 ], ids=lambda argval: argval[0])
 def test_wait_until_cmd_or_err(name, json_response, timeout, expect_error):
-    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
+    check = canned_loggingindextime(lambda *args, **_: json.dumps(json_response))
     with pytest.raises(OpenShiftCheckException) as error:
         check.wait_until_cmd_or_err(plain_running_elasticsearch_pod, SAMPLE_UUID, timeout)
 
@@ -139,7 +139,7 @@ def test_wait_until_cmd_or_err(name, json_response, timeout, expect_error):
 
 
 def test_curl_kibana_with_uuid():
-    check = canned_loggingindextime(lambda *_: json.dumps({"statusCode": 404}))
+    check = canned_loggingindextime(lambda *args, **_: json.dumps({"statusCode": 404}))
     check.generate_uuid = lambda: SAMPLE_UUID
     assert SAMPLE_UUID == check.curl_kibana_with_uuid(plain_running_kibana_pod)
 
@@ -161,7 +161,7 @@ def test_curl_kibana_with_uuid():
     ),
 ], ids=lambda argval: argval[0])
 def test_failed_curl_kibana_with_uuid(name, json_response, expect_error):
-    check = canned_loggingindextime(lambda *_: json.dumps(json_response))
+    check = canned_loggingindextime(lambda *args, **_: json.dumps(json_response))
     check.generate_uuid = lambda: SAMPLE_UUID
 
     with pytest.raises(OpenShiftCheckException) as error:

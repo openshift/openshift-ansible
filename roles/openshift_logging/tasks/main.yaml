@@ -30,10 +30,11 @@
   check_mode: no
   become: no
 
-- include: "{{ role_path }}/tasks/install_logging.yaml"
-  when: openshift_logging_install_logging | default(false) | bool
+- include: install_logging.yaml
+  when:
+    - openshift_logging_install_logging | default(false) | bool
 
-- include: "{{ role_path }}/tasks/delete_logging.yaml"
+- include: delete_logging.yaml
   when:
     - not openshift_logging_install_logging | default(false) | bool
 

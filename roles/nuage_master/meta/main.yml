@@ -13,8 +13,5 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- role: nuage_ca
-- role: nuage_common
-- role: openshift_etcd_client_certificates
 - role: lib_openshift
 - role: lib_os_firewall

@@ -8,7 +8,6 @@
 
 # TODO: If the sdn package isn't already installed this will install it, we
 # should fix that
-
 - name: Upgrade master packages
   package: name={{ master_pkgs | join(',') }} state=present
   vars:
@@ -16,7 +15,7 @@
       - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"
       - "{{ openshift.common.service_type }}-master{{ openshift_pkg_version }}"
       - "{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
-      - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version}}"
+      - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version }}"
       - "{{ openshift.common.service_type }}-clients{{ openshift_pkg_version }}"
       - "tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
       - PyYAML

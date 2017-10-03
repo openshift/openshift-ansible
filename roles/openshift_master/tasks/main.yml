@@ -180,6 +180,28 @@
 - name: Install the systemd units
   include: systemd_units.yml
 
+- name: Checking for journald.conf
+  stat: path=/etc/systemd/journald.conf
+  register: journald_conf_file
+
+- name: Update journald setup
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^(\#| )?{{ item.var }}=\s*.*?$'
+    replace: ' {{ item.var }}={{ item.val }}'
+    backup: yes
+  with_items: "{{ journald_vars_to_replace | default([]) }}"
+  when: journald_conf_file.stat.exists
+  register: journald_update
+
+# I need to restart journald immediatelly, otherwise it gets into way during
+# further steps in ansible
+- name: Restart journald
+  systemd:
+    name: systemd-journald
+    state: restarted
+  when: journald_update | changed
+
 - name: Install Master system container
   include: system_container.yml
   when:
@@ -200,7 +222,7 @@
   - restart master api
 
 - set_fact:
-    translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1', openshift.common.version, openshift.common.deployment_type) }}"
+    translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1') }}"
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create master config
@@ -228,22 +250,6 @@
   notify:
   - restart master controllers
   when: openshift_master_bootstrap_enabled | default(False)
-
-- name: Check for credentials file for registry auth
-  stat:
-    path: "{{oreg_auth_credentials_path }}"
-  when:
-  - oreg_auth_user is defined
-  register: master_oreg_auth_credentials_stat
-
-- name: Create credentials for registry auth
-  command: "docker --config={{ oreg_auth_credentials_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
-  when:
-  - oreg_auth_user is defined
-  - (not master_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-  notify:
-  - restart master api
-  - restart master controllers
 
 - include: set_loopback_context.yml
   when:

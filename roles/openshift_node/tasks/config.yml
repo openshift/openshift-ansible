@@ -2,18 +2,6 @@
 - name: Install the systemd units
   include: systemd_units.yml
 
-- name: Check for tuned package
-  command: rpm -q tuned
-  args:
-    warn: no
-  register: tuned_installed
-  changed_when: false
-  failed_when: false
-
-- name: Set atomic-guest tuned profile
-  command: "tuned-adm profile atomic-guest"
-  when: tuned_installed.rc == 0 and openshift.common.is_atomic | bool
-
 - name: Start and enable openvswitch service
   systemd:
     name: openvswitch.service
@@ -55,6 +43,22 @@
     line: "{{ item.key }}={{ item.value }}"
     create: true
   with_dict: "{{ openshift.node.env_vars | default({}) }}"
+  notify:
+    - restart node
+
+- name: Configure AWS Cloud Provider Settings
+  lineinfile:
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    create: true
+  with_items:
+    - regex: '^AWS_ACCESS_KEY_ID='
+      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
+    - regex: '^AWS_SECRET_ACCESS_KEY='
+      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
+  no_log: True
+  when: openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined
   notify:
     - restart node
 
@@ -106,6 +110,10 @@
   fail:
     msg: Node failed to start please inspect the logs and try again
   when: node_start_result | failed
+
+- name: Setup tuned
+  include: tuned.yml
+  static: yes
 
 - set_fact:
     node_service_status_changed: "{{ node_start_result | changed }}"

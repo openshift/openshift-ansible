@@ -10,19 +10,28 @@
     l_use_crio: "{{ openshift_use_crio | default(False) }}"
     l_use_crio_only: "{{ openshift_use_crio_only | default(False) }}"
 
+- when:
+    - openshift_deployment_type == 'openshift-enterprise'
+  assert:
+    that:
+      - "openshift_image_tag is defined"
+    msg: >
+      openshift_image_tag is a required inventory variable when installing openshift-enterprise
+
 - name: Use Package Docker if Requested
   include: package_docker.yml
   when:
-  - not l_use_system_container
-  - not l_use_crio_only
+    - not l_use_system_container
+    - not l_use_crio_only
 
 - name: Use System Container Docker if Requested
   include: systemcontainer_docker.yml
   when:
-  - l_use_system_container
-  - not l_use_crio_only
+    - l_use_system_container
+    - not l_use_crio_only
 
 - name: Add CRI-O usage Requested
   include: systemcontainer_crio.yml
   when:
-  - l_use_crio
+    - l_use_crio
+    - inventory_hostname in groups['oo_masters_to_config'] or inventory_hostname in groups['oo_nodes_to_config']

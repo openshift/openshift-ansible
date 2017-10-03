@@ -30,14 +30,6 @@ class LoggingCheck(OpenShiftCheck):
         logging_deployed = self.get_var("openshift_hosted_logging_deploy", convert=bool, default=False)
         return logging_deployed and super(LoggingCheck, self).is_active() and self.is_first_master()
 
-    def is_first_master(self):
-        """Determine if running on first master. Returns: bool"""
-        # Note: It would be nice to use membership in oo_first_master group, however for now it
-        # seems best to avoid requiring that setup and just check this is the first master.
-        hostname = self.get_var("ansible_ssh_host") or [None]
-        masters = self.get_var("groups", "masters", default=None) or [None]
-        return masters[0] == hostname
-
     def run(self):
         return {}
 
@@ -78,7 +70,7 @@ class LoggingCheck(OpenShiftCheck):
         """Returns the namespace in which logging is configured to deploy."""
         return self.get_var("openshift_logging_namespace", default="logging")
 
-    def exec_oc(self, cmd_str="", extra_args=None):
+    def exec_oc(self, cmd_str="", extra_args=None, save_as_name=None):
         """
         Execute an 'oc' command in the remote host.
         Returns: output of command and namespace,
@@ -92,7 +84,7 @@ class LoggingCheck(OpenShiftCheck):
             "extra_args": list(extra_args) if extra_args else [],
         }
 
-        result = self.execute_module("ocutil", args)
+        result = self.execute_module("ocutil", args, save_as_name=save_as_name)
         if result.get("failed"):
             if result['result'] == '[Errno 2] No such file or directory':
                 raise CouldNotUseOc(

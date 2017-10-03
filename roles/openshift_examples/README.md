@@ -21,13 +21,13 @@ Facts
 Role Variables
 --------------
 
-| Name                                | Default value                                       |                                          |
-|-------------------------------------|-----------------------------------------------------|------------------------------------------|
-| openshift_examples_load_centos      | true when openshift_deployment_typenot 'enterprise' | Load centos image streams                |
-| openshift_examples_load_rhel        | true if openshift_deployment_type is 'enterprise'   | Load rhel image streams                  |
-| openshift_examples_load_db_templates| true                                                | Loads database templates                 |
-| openshift_examples_load_quickstarts | true                                                | Loads quickstarts ie: nodejs, rails, etc |
-| openshift_examples_load_xpaas       | false                                               | Loads xpass streams and templates        |
+| Name                                | Default value                                                  |                                          |
+|-------------------------------------|----------------------------------------------------------------|------------------------------------------|
+| openshift_examples_load_centos      | true when openshift_deployment_type not 'openshift-enterprise' | Load centos image streams                |
+| openshift_examples_load_rhel        | true if openshift_deployment_type is 'openshift-enterprise'    | Load rhel image streams                  |
+| openshift_examples_load_db_templates| true                                                           | Loads database templates                 |
+| openshift_examples_load_quickstarts | true                                                           | Loads quickstarts ie: nodejs, rails, etc |
+| openshift_examples_load_xpaas       | false                                                          | Loads xpass streams and templates        |
 
 
 Dependencies

@@ -1,0 +1,35 @@
+---
+- command: mktemp -d /tmp/tsb-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+  become: no
+
+- copy:
+    src: "{{ __tsb_files_location }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - "{{ __tsb_template_file }}"
+  - "{{ __tsb_broker_file }}"
+
+- name: Delete TSB broker
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" | oc delete -f -
+
+- name: Delete TSB objects
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" | kubectl delete -f -
+
+- name: empty out tech preview extension file for service console UI
+  copy:
+    src: remove-openshift-ansible-catalog-console.js
+    dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
+- oc_project:
+    name: openshift-template-service-broker
+    state: absent
+
+- file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False
+  become: no

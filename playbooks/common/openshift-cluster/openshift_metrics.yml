@@ -1,8 +1,19 @@
 ---
+- name: Metrics Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Metrics install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_metrics: "In Progress"
+      aggregate: false
+
 - name: OpenShift Metrics
   hosts: oo_first_master
   roles:
-  - openshift_metrics
+  - role: openshift_metrics
 
 - name: OpenShift Metrics
   hosts: oo_masters:!oo_first_master
@@ -12,3 +23,14 @@
     include_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
+
+- name: Metrics Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Metrics install 'Complete'
+    set_stats:
+      data:
+        installer_phase_metrics: "Complete"
+      aggregate: false

@@ -1,4 +1,4 @@
-OpenShift/Atomic Enterprise Master
+OpenShift Master
 ==================================
 
 Master service installation

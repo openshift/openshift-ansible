@@ -98,21 +98,19 @@ def test_oc_failure(problem, expect):
     assert expect in str(excinfo)
 
 
-groups_with_first_master = dict(masters=['this-host', 'other-host'])
-groups_with_second_master = dict(masters=['other-host', 'this-host'])
-groups_not_a_master = dict(masters=['other-host'])
+groups_with_first_master = dict(oo_first_master=['this-host'])
+groups_not_a_master = dict(oo_first_master=['other-host'], oo_masters=['other-host'])
 
 
 @pytest.mark.parametrize('groups, logging_deployed, is_active', [
     (groups_with_first_master, True, True),
     (groups_with_first_master, False, False),
     (groups_not_a_master, True, False),
-    (groups_with_second_master, True, False),
     (groups_not_a_master, True, False),
 ])
 def test_is_active(groups, logging_deployed, is_active):
     task_vars = dict(
-        ansible_ssh_host='this-host',
+        ansible_host='this-host',
         groups=groups,
         openshift_hosted_logging_deploy=logging_deployed,
     )

@@ -1,0 +1,3 @@
+---
+openshift_config_base: "/etc/origin"
+openshift_master_config_dir: "{{ openshift.common.config_base | default(openshift_config_base) }}/master"

@@ -5,11 +5,15 @@
     is_containerized: "{{ openshift.common.is_containerized | default(False) | bool }}"
     is_atomic: "{{ openshift.common.is_atomic | default(False) | bool }}"
 
+# This is only needed on masters and nodes; version_install_base_package
+# should be set by a play externally.
 - name: Install the base package for versioning
   package:
     name: "{{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
-  when: not is_containerized | bool
+  when:
+  - not is_containerized | bool
+  - version_install_base_package | bool
 
 # Block attempts to install origin without specifying some kind of version information.
 # This is because the latest tags for origin are usually alpha builds, which should not
@@ -162,7 +166,9 @@
     - set_fact:
         openshift_pkg_version: -{{ openshift_version }}
 
-    when: openshift_pkg_version is not defined
+    when:
+    - openshift_pkg_version is not defined
+    - openshift_upgrade_target is not defined
 
   - fail:
       msg: openshift_version role was unable to set openshift_version
@@ -177,7 +183,10 @@
   - fail:
       msg: openshift_version role was unable to set openshift_pkg_version
     name: Abort if openshift_pkg_version was not set
-    when: openshift_pkg_version is not defined
+    when:
+    - openshift_pkg_version is not defined
+    - openshift_upgrade_target is not defined
+
 
   - fail:
       msg: "No OpenShift version available; please ensure your systems are fully registered and have access to appropriate yum repositories."

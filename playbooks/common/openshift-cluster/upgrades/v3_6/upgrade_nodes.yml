@@ -48,6 +48,10 @@
   tags:
   - pre_upgrade
 
+- include: ../pre/verify_health_checks.yml
+  tags:
+  - pre_upgrade
+
 - include: ../disable_node_excluders.yml
   tags:
   - pre_upgrade

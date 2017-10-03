@@ -70,6 +70,10 @@ class DiskAvailability(OpenShiftCheck):
             # If it is not a number, then it should be a nested dict.
             pass
 
+        self.register_log("recommended thresholds", self.recommended_disk_space_bytes)
+        if user_config:
+            self.register_log("user-configured thresholds", user_config)
+
         # TODO: as suggested in
         # https://github.com/openshift/openshift-ansible/pull/4436#discussion_r122180021,
         # maybe we could support checking disk availability in paths that are
@@ -113,10 +117,7 @@ class DiskAvailability(OpenShiftCheck):
                             'in your Ansible inventory, and lower the recommended disk space availability\n'
                             'if necessary for this upgrade.').format(config_bytes)
 
-                return {
-                    'failed': True,
-                    'msg': msg,
-                }
+                self.register_failure(msg)
 
         return {}
 

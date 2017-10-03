@@ -1,0 +1,34 @@
+---
+# To be executed on first master
+- slurp:
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+  register: g_master_config_output
+
+- set_fact:
+    accessTokenMaxAgeSeconds: "{{ (g_master_config_output.content|b64decode|from_yaml).oauthConfig.tokenConfig.accessTokenMaxAgeSeconds | default(86400) }}"
+    authroizeTokenMaxAgeSeconds: "{{ (g_master_config_output.content|b64decode|from_yaml).oauthConfig.tokenConfig.authroizeTokenMaxAgeSeconds | default(500) }}"
+    controllerLeaseTTL: "{{ (g_master_config_output.content|b64decode|from_yaml).controllerLeaseTTL | default(30) }}"
+
+- name: Re-introduce leases (as a replacement for key TTLs)
+  command: >
+    oadm migrate etcd-ttl \
+    --cert {{ r_etcd_common_master_peer_cert_file }} \
+    --key {{ r_etcd_common_master_peer_key_file }} \
+    --cacert {{ r_etcd_common_master_peer_ca_file }} \
+    --etcd-address 'https://{{ etcd_peer }}:{{ etcd_client_port }}' \
+    --ttl-keys-prefix {{ item.keys }} \
+    --lease-duration {{ item.ttl }}
+  environment:
+    ETCDCTL_API: 3
+    PATH: "/usr/local/bin:/var/usrlocal/bin:{{ ansible_env.PATH }}"
+  with_items:
+    - keys: "/kubernetes.io/events"
+      ttl: "1h"
+    - keys: "/kubernetes.io/masterleases"
+      ttl: "10s"
+    - keys: "/openshift.io/oauth/accesstokens"
+      ttl: "{{ accessTokenMaxAgeSeconds }}s"
+    - keys: "/openshift.io/oauth/authorizetokens"
+      ttl: "{{ authroizeTokenMaxAgeSeconds }}s"
+    - keys: "/openshift.io/leases/controllers"
+      ttl: "{{ controllerLeaseTTL }}s"

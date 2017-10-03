@@ -1,0 +1,19 @@
+---
+- name: Ensure all cloud resources necessary for the cluster, including instances, have been started
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+
+  - name: provision a GCP cluster in the specified project
+    include_role:
+      name: openshift_gcp
+
+- name: normalize groups
+  include: ../../byo/openshift-cluster/initialize_groups.yml
+
+- name: run the std_include
+  include: ../../common/openshift-cluster/std_include.yml
+
+- name: run the config
+  include: ../../common/openshift-cluster/config.yml

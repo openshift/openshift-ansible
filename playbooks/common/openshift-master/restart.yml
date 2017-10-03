@@ -7,7 +7,7 @@
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
   handlers:
-  - include: roles/openshift_master/handlers/main.yml
+  - include: ../../../roles/openshift_master/handlers/main.yml
     static: yes
   roles:
   - openshift_facts

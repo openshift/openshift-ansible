@@ -2,7 +2,8 @@
 - fail:
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
-    - (not ansible_selinux or ansible_selinux.status != 'enabled') and deployment_type in ['enterprise', 'online', 'atomic-enterprise', 'openshift-enterprise']
+    - (not ansible_selinux or ansible_selinux.status != 'enabled')
+    - deployment_type == 'openshift-enterprise'
     - not openshift_use_crio | default(false)
 
 - name: setup firewall
@@ -59,53 +60,21 @@
 # The atomic-openshift-node service will set this parameter on
 # startup, but if the network service is restarted this setting is
 # lost. Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1372388
-#
-# Use lineinfile w/ a handler for this task until
-# https://github.com/ansible/ansible/pull/24277 is included in an
-# ansible release and we can use the sysctl module.
-- name: Persist net.ipv4.ip_forward sysctl entry
-  lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.ip_forward' line='net.ipv4.ip_forward=1'
-  notify:
-    - reload sysctl.conf
+- sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_file: "/etc/sysctl.d/99-openshift.conf"
+    reload: yes
 
 - name: include bootstrap node config
   include: bootstrap.yml
   when: openshift_node_bootstrap
 
+- include: registry_auth.yml
+
 - name: include standard node config
   include: config.yml
   when: not openshift_node_bootstrap
-
-- name: Check for credentials file for registry auth
-  stat:
-    path: "{{oreg_auth_credentials_path }}"
-  when:
-    - oreg_auth_user is defined
-  register: node_oreg_auth_credentials_stat
-
-- name: Create credentials for registry auth
-  command: "docker --config={{ oreg_auth_credentials_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
-  when:
-    - oreg_auth_user is defined
-    - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-  notify:
-    - restart node
-
-- name: Configure AWS Cloud Provider Settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    create: true
-  with_items:
-    - regex: '^AWS_ACCESS_KEY_ID='
-      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
-    - regex: '^AWS_SECRET_ACCESS_KEY='
-      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
-  no_log: True
-  when: openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined
-  notify:
-    - restart node
 
 #### Storage class plugins here ####
 - name: NFS storage plugin configuration

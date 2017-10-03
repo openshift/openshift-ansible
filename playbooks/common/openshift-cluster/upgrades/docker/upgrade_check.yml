@@ -18,12 +18,16 @@
 - name: Get current version of Docker
   command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
   register: curr_docker_version
+  retries: 4
+  until: curr_docker_version | succeeded
   changed_when: false
 
 - name: Get latest available version of Docker
   command: >
     {{ repoquery_cmd }} --qf '%{version}' "docker"
   register: avail_docker_version
+  retries: 4
+  until: avail_docker_version | succeeded
   # Don't expect docker rpm to be available on hosts that don't already have it installed:
   when: pkg_check.rc == 0
   failed_when: false

@@ -45,3 +45,7 @@
   - fail:
       msg: openshift_hostname must be 63 characters or less
     when: openshift_hostname is defined and openshift_hostname | length > 63
+
+  - fail:
+      msg: openshift_public_hostname must be 63 characters or less
+    when: openshift_public_hostname is defined and openshift_public_hostname | length > 63

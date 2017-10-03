@@ -1,0 +1,4 @@
+---
+__template_service_broker_prefix: "registry.access.redhat.com/openshift3/"
+__template_service_broker_version: "v3.7"
+__template_service_broker_image_name: "ose"

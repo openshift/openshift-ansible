@@ -1,0 +1,215 @@
+---
+- name: Make temp cert dir
+  command: mktemp -d /tmp/openshift-service-catalog-ansible-XXXXXX
+  register: certtemp
+  changed_when: False
+
+- name: Check for First Master Aggregator Signer cert
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: first_proxy_ca_crt
+  changed_when: false
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+
+- name: Check for First Master Aggregator Signer key
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: first_proxy_ca_key
+  changed_when: false
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+
+# TODO: this currently has a bug where hostnames are required
+- name: Creating First Master Aggregator signer certs
+  command: >
+    {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm ca create-signer-cert
+    --cert=/etc/origin/master/front-proxy-ca.crt
+    --key=/etc/origin/master/front-proxy-ca.key
+    --serial=/etc/origin/master/ca.serial.txt
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  when:
+  - not first_proxy_ca_crt.stat.exists
+  - not first_proxy_ca_key.stat.exists
+
+- name: Check for Aggregator Signer cert
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: proxy_ca_crt
+  changed_when: false
+
+- name: Check for Aggregator Signer key
+  stat:
+    path: /etc/origin/master/front-proxy-ca.crt
+  register: proxy_ca_key
+  changed_when: false
+
+- name: Copy Aggregator Signer certs from first master
+  fetch:
+    src: "/etc/origin/master/{{ item }}"
+    dest: "{{ certtemp.stdout }}/{{ item }}"
+    flat: yes
+  with_items:
+  - front-proxy-ca.crt
+  - front-proxy-ca.key
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  when:
+  - not proxy_ca_key.stat.exists
+  - not proxy_ca_crt.stat.exists
+
+- name: Copy Aggregator Signer certs to host
+  copy:
+    src: "{{ certtemp.stdout }}/{{ item }}"
+    dest: "/etc/origin/master/{{ item }}"
+  with_items:
+  - front-proxy-ca.crt
+  - front-proxy-ca.key
+  when:
+  - not proxy_ca_key.stat.exists
+  - not proxy_ca_crt.stat.exists
+
+#  oc_adm_ca_server_cert:
+#    cert: /etc/origin/master/front-proxy-ca.crt
+#    key: /etc/origin/master/front-proxy-ca.key
+
+- name: Check for first master api-client config
+  stat:
+    path: /etc/origin/master/aggregator-front-proxy.kubeconfig
+  register: first_front_proxy_kubeconfig
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  run_once: true
+
+# create-api-client-config generates a ca.crt file which will
+# overwrite the OpenShift CA certificate.  Generate the aggregator
+# kubeconfig in a temporary directory and then copy files into the
+# master config dir to avoid overwriting ca.crt.
+- block:
+  - name: Create first master api-client config for Aggregator
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm create-api-client-config
+      --certificate-authority=/etc/origin/master/front-proxy-ca.crt
+      --signer-cert=/etc/origin/master/front-proxy-ca.crt
+      --signer-key=/etc/origin/master/front-proxy-ca.key
+      --user aggregator-front-proxy
+      --client-dir={{ certtemp.stdout }}
+      --signer-serial=/etc/origin/master/ca.serial.txt
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    run_once: true
+  - name: Copy first master api-client config for Aggregator
+    copy:
+      src: "{{ certtemp.stdout }}/{{ item }}"
+      dest: "/etc/origin/master/"
+      remote_src: true
+    with_items:
+    - aggregator-front-proxy.crt
+    - aggregator-front-proxy.key
+    - aggregator-front-proxy.kubeconfig
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    run_once: true
+  when:
+  - not first_front_proxy_kubeconfig.stat.exists
+
+- name: Check for api-client config
+  stat:
+    path: /etc/origin/master/aggregator-front-proxy.kubeconfig
+  register: front_proxy_kubeconfig
+
+- name: Copy api-client config from first master
+  fetch:
+    src: "/etc/origin/master/{{ item }}"
+    dest: "{{ certtemp.stdout }}/{{ item }}"
+    flat: yes
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  with_items:
+  - aggregator-front-proxy.crt
+  - aggregator-front-proxy.key
+  - aggregator-front-proxy.kubeconfig
+  when:
+  - not front_proxy_kubeconfig.stat.exists
+
+- name: Copy api-client config to host
+  copy:
+    src: "{{ certtemp.stdout }}/{{ item }}"
+    dest: "/etc/origin/master/{{ item }}"
+  with_items:
+  - aggregator-front-proxy.crt
+  - aggregator-front-proxy.key
+  - aggregator-front-proxy.kubeconfig
+  when:
+  - not front_proxy_kubeconfig.stat.exists
+
+- name: copy tech preview extension file for service console UI
+  copy:
+    src: openshift-ansible-catalog-console.js
+    dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
+- name: Update master config
+  yedit:
+    state: present
+    src: /etc/origin/master/master-config.yaml
+    edits:
+    - key: aggregatorConfig.proxyClientInfo.certFile
+      value: aggregator-front-proxy.crt
+    - key: aggregatorConfig.proxyClientInfo.keyFile
+      value: aggregator-front-proxy.key
+    - key: authConfig.requestHeader.clientCA
+      value: front-proxy-ca.crt
+    - key: authConfig.requestHeader.clientCommonNames
+      value: [aggregator-front-proxy]
+    - key: authConfig.requestHeader.usernameHeaders
+      value: [X-Remote-User]
+    - key: authConfig.requestHeader.groupHeaders
+      value: [X-Remote-Group]
+    - key: authConfig.requestHeader.extraHeaderPrefixes
+      value: [X-Remote-Extra-]
+    - key: assetConfig.extensionScripts
+      value: [/etc/origin/master/openshift-ansible-catalog-console.js]
+    - key: kubernetesMasterConfig.apiServerArguments.runtime-config
+      value: [apis/settings.k8s.io/v1alpha1=true]
+    - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
+      value: DefaultAdmissionConfig
+    - key: admissionConfig.pluginConfig.PodPreset.configuration.apiVersion
+      value: v1
+    - key: admissionConfig.pluginConfig.PodPreset.configuration.disable
+      value: false
+  register: yedit_output
+
+#restart master serially here
+- name: restart master api
+  systemd: name={{ openshift.common.service_type }}-master-api state=restarted
+  when:
+  - yedit_output.changed
+  - openshift.master.cluster_method == 'native'
+
+- name: restart master controllers
+  systemd: name={{ openshift.common.service_type }}-master-controllers state=restarted
+  when:
+  - yedit_output.changed
+  - openshift.master.cluster_method == 'native'
+
+- name: Verify API Server
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl --silent --tlsv1.2
+    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {% else %}
+    --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {% endif %}
+    {{ openshift.master.api_url }}/healthz/ready
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: api_available_output
+  until: api_available_output.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+  when:
+  - yedit_output.changed
+
+- name: Delete temp directory
+  file:
+    name: "{{ certtemp.stdout }}"
+    state: absent
+  changed_when: False

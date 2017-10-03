@@ -1,4 +1,15 @@
 ---
+- name: Master Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Master install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_master: "In Progress"
+      aggregate: false
+
 - name: Disable excluders
   hosts: oo_masters_to_config
   gather_facts: no
@@ -9,9 +20,6 @@
 
 - name: Gather and set facts for master hosts
   hosts: oo_masters_to_config
-  vars:
-    t_oo_option_master_debug_level: "{{ lookup('oo_option', 'openshift_master_debug_level') }}"
-
   pre_tasks:
   # Per https://bugzilla.redhat.com/show_bug.cgi?id=1469336
   #
@@ -35,15 +43,13 @@
     file:
       path: "/etc/origin/{{ item }}"
       state: absent
-    when: rpmgenerated_config.stat.exists == true and deployment_type in ['openshift-enterprise', 'atomic-enterprise']
+    when:
+    - rpmgenerated_config.stat.exists == true
+    - deployment_type == 'openshift-enterprise'
     with_items:
     - master
     - node
     - .config_managed
-
-  - set_fact:
-      openshift_master_pod_eviction_timeout: "{{ lookup('oo_option', 'openshift_master_pod_eviction_timeout') | default(none, true) }}"
-    when: openshift_master_pod_eviction_timeout is not defined
 
   - set_fact:
       openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
@@ -52,23 +58,6 @@
                                                         | default([]))
                                        | oo_collect('openshift.common.hostname')
                                        | default(none, true) }}"
-
-  - set_fact:
-      openshift_master_debug_level: "{{ t_oo_option_master_debug_level }}"
-    when: openshift_master_debug_level is not defined and t_oo_option_master_debug_level != ""
-
-  - set_fact:
-      openshift_master_default_subdomain: "{{ lookup('oo_option', 'openshift_master_default_subdomain') | default(None, true) }}"
-    when: openshift_master_default_subdomain is not defined
-  - set_fact:
-      openshift_hosted_metrics_deploy: "{{ lookup('oo_option', 'openshift_hosted_metrics_deploy') | default(false, true) }}"
-    when: openshift_hosted_metrics_deploy is not defined
-  - set_fact:
-      openshift_hosted_metrics_duration: "{{ lookup('oo_option', 'openshift_hosted_metrics_duration') | default(7) }}"
-    when: openshift_hosted_metrics_duration is not defined
-  - set_fact:
-      openshift_hosted_metrics_resolution: "{{ lookup('oo_option', 'openshift_hosted_metrics_resolution') | default('10s', true) }}"
-    when: openshift_hosted_metrics_resolution is not defined
   roles:
   - openshift_facts
   post_tasks:
@@ -179,43 +168,52 @@
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
-    openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
-                                                    | union(groups['oo_masters_to_config'])
-                                                    | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
-                                                }}"
-    openshift_no_proxy_etcd_host_ips: "{{ hostvars | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                                | oo_collect('openshift.common.ip') | default([]) | join(',')
-                                                }}"
-  roles:
-  - role: os_firewall
-  - role: openshift_master
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
+    openshift_no_proxy_etcd_host_ips: "{{ hostvars | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                | oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                }}"
+  roles:
+  - role: os_firewall
+  - role: openshift_master_facts
+  - role: openshift_hosted_facts
+  - role: openshift_clock
+  - role: openshift_cloud_provider
+  - role: openshift_builddefaults
+  - role: openshift_buildoverrides
+  - role: nickhammond.logrotate
+  - role: contiv
+    contiv_role: netmaster
+    when: openshift_use_contiv | default(False) | bool
+  - role: openshift_master
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
-    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
-    etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
-    etcd_cert_prefix: "master.etcd-"
     r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
     r_openshift_master_etcd3_storage: "{{ hostvars[groups.oo_first_master.0].l_etcd3_enabled }}"
     openshift_master_is_scaleup_host: "{{ g_openshift_master_is_scaleup | default(false) }}"
     openshift_master_default_registry_value: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value }}"
     openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
     openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
+  - role: nuage_ca
+    when: openshift_use_nuage | default(false) | bool
+  - role: nuage_common
+    when: openshift_use_nuage | default(false) | bool
   - role: nuage_master
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
-
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
+
+- name: Configure API Aggregation on masters
+  hosts: oo_masters
+  serial: 1
+  tasks:
+  - include: tasks/wire_aggregator.yml
 
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config
@@ -224,3 +222,14 @@
   - role: openshift_excluder
     r_openshift_excluder_action: enable
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
+- name: Master Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Master install 'Complete'
+    set_stats:
+      data:
+        installer_phase_master: "Complete"
+      aggregate: false

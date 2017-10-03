@@ -90,10 +90,12 @@
   # openshift_examples from failing when trying to replace templates that do
   # not already exist. We could have potentially done a replace --force to
   # create and update in one step.
-  - openshift_examples
+  - role: openshift_examples
+    when: openshift_install_examples | default(true,true) | bool
   - openshift_hosted_templates
   # Update the existing templates
   - role: openshift_examples
+    when: openshift_install_examples | default(true,true) | bool
     registry_url: "{{ openshift.master.registry_url }}"
     openshift_examples_import_command: replace
   - role: openshift_hosted_templates

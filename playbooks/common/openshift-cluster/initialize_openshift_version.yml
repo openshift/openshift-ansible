@@ -1,4 +1,12 @@
 ---
+- name: Set version_install_base_package true on masters and nodes
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  tasks:
+  - name: Set version_install_base_package true
+    set_fact:
+      version_install_base_package: True
+    when: version_install_base_package is not defined
+
 # NOTE: requires openshift_facts be run
 - name: Determine openshift_version to configure on first master
   hosts: oo_first_master
@@ -12,5 +20,10 @@
   hosts: oo_all_hosts:!oo_first_master
   vars:
     openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
+  pre_tasks:
+  - set_fact:
+      openshift_pkg_version: -{{ openshift_version }}
+    when: openshift_pkg_version is not defined
+  - debug: msg="openshift_pkg_version set to {{ openshift_pkg_version }}"
   roles:
   - openshift_version

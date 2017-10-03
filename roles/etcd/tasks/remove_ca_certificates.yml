@@ -1,0 +1,2 @@
+---
+- include: certificates/remove_ca_certificates.yml

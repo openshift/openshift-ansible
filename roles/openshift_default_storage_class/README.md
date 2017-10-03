@@ -1,7 +1,7 @@
 openshift_master_storage_class
 =========
 
-A role that deploys configuratons for Openshift StorageClass
+A role that deploys configurations for Openshift StorageClass
 
 Requirements
 ------------

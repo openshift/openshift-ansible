@@ -33,10 +33,10 @@ def legacy_gte_function_builder(name, versions):
             returns True/False
         """
         version_gte = False
-        if 'enterprise' in deployment_type:
+        if deployment_type == 'openshift-enterprise':
             if str(version) >= LooseVersion(enterprise_version):
                 version_gte = True
-        elif 'origin' in deployment_type:
+        else:
             if str(version) >= LooseVersion(origin_version):
                 version_gte = True
         return version_gte

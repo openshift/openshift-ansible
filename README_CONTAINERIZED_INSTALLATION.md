@@ -1,9 +1,8 @@
 # Overview
 
 Users may now deploy containerized versions of OpenShift Origin, OpenShift
-Enterprise, or Atomic Enterprise Platform on [Atomic
-Host](https://projectatomic.io) or RHEL, Centos, and Fedora. This includes
-OpenvSwitch based SDN.
+Enterprise on [Atomic Host](https://projectatomic.io) or RHEL, Centos, and
+Fedora. This includes OpenvSwitch based SDN.
 
 
 ## Installing on Atomic Host
@@ -54,13 +53,8 @@ before attempting to pull any of the following images.
         openshift3/node
         openshift3/openvswitch
         registry.access.redhat.com/rhel7/etcd
-    Atomic Enterprise Platform
-        aep3/aep
-        aep3/node
-        aep3/openvswitch
-        registry.access.redhat.com/rhel7/etcd
 
-  * note openshift3/* and aep3/* images come from registry.access.redhat.com and
+  * note openshift3/* images come from registry.access.redhat.com and
 rely on the --additional-repository flag being set appropriately.
 
 ### Starting and Stopping Containers

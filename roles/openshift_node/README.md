@@ -1,4 +1,4 @@
-OpenShift/Atomic Enterprise Node
+OpenShift Node
 ================================
 
 Node service installation

@@ -134,6 +134,7 @@
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
+    openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_ops_nodeselector }}"
     openshift_logging_es_key: "{{ openshift_logging_es_ops_key }}"
     openshift_logging_es_cert: "{{ openshift_logging_es_ops_cert }}"
     openshift_logging_es_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
@@ -165,6 +166,7 @@
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
+    openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_ops_nodeselector }}"
     openshift_logging_es_key: "{{ openshift_logging_es_ops_key }}"
     openshift_logging_es_cert: "{{ openshift_logging_es_ops_cert }}"
     openshift_logging_es_ca_ext: "{{ openshift_logging_es_ops_ca_ext }}"
@@ -267,5 +269,13 @@
     openshift_logging_fluentd_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
     openshift_logging_fluentd_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_fluentd_namespace: "{{ openshift_logging_namespace }}"
+
+
+## EventRouter
+- include_role:
+    name: openshift_logging_eventrouter
+  when:
+    openshift_logging_install_eventrouter | default(false) | bool
+
 
 - include: update_master_config.yaml

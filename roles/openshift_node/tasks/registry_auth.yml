@@ -1,0 +1,24 @@
+---
+- name: Check for credentials file for registry auth
+  stat:
+    path: "{{ oreg_auth_credentials_path }}"
+  when: oreg_auth_user is defined
+  register: node_oreg_auth_credentials_stat
+
+- name: Create credentials for registry auth
+  command: "docker --config={{ oreg_auth_credentials_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
+  when:
+    - oreg_auth_user is defined
+    - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
+  register: node_oreg_auth_credentials_create
+  notify:
+    - restart node
+
+# Container images may need the registry credentials
+- name: Setup ro mount of /root/.docker for containerized hosts
+  set_fact:
+    l_bind_docker_reg_auth: True
+  when:
+    - openshift.common.is_containerized | bool
+    - oreg_auth_user is defined
+    - (node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace or node_oreg_auth_credentials_create.changed) | bool

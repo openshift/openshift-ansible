@@ -7,7 +7,7 @@ USER root
 # Playbooks, roles, and their dependencies are installed from packages.
 RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto openssl java-1.8.0-openjdk-headless httpd-tools" \
  && yum repolist > /dev/null \
- && yum-config-manager --enable rhel-7-server-ose-3.6-rpms \
+ && yum-config-manager --enable rhel-7-server-ose-3.7-rpms \
  && yum-config-manager --enable rhel-7-server-rh-common-rpms \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && rpm -q $INSTALL_PKGS \

@@ -52,7 +52,6 @@ Indicates the version of configuration this file was written with. Current imple
 The OpenShift variant to install. Currently valid options are:
 
  * openshift-enterprise
- * atomic-enterprise
 
 ### variant_version (optional)
 

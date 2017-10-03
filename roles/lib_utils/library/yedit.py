@@ -35,6 +35,7 @@ import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
 import tempfile  # noqa: F401
+import time  # noqa: F401
 
 try:
     import ruamel.yaml as yaml  # noqa: F401
@@ -792,7 +793,7 @@ class Yedit(object):
                 yamlfile.yaml_dict = content
 
             if params['key']:
-                rval = yamlfile.get(params['key']) or {}
+                rval = yamlfile.get(params['key'])
 
             return {'changed': False, 'result': rval, 'state': state}
 

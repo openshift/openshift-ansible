@@ -1,0 +1,8 @@
+---
+# do any asserts here
+
+- include: install.yml
+  when: template_service_broker_install | default(false) | bool
+
+- include: remove.yml
+  when: template_service_broker_remove | default(false) | bool

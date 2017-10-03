@@ -183,11 +183,12 @@ def test_fails_with_insufficient_disk_space(name, group_names, configured_min, a
         ansible_mounts=ansible_mounts,
     )
 
-    result = DiskAvailability(fake_execute_module, task_vars).run()
+    check = DiskAvailability(fake_execute_module, task_vars)
+    check.run()
 
-    assert result['failed']
+    assert check.failures
     for chunk in 'below recommended'.split() + expect_chunks:
-        assert chunk in result.get('msg', '')
+        assert chunk in str(check.failures[0])
 
 
 @pytest.mark.parametrize('name,group_names,context,ansible_mounts,failed,extra_words', [
@@ -237,11 +238,11 @@ def test_min_required_space_changes_with_upgrade_context(name, group_names, cont
     )
 
     check = DiskAvailability(fake_execute_module, task_vars)
-    result = check.run()
+    check.run()
 
-    assert result.get("failed", False) == failed
+    assert bool(check.failures) == failed
     for word in extra_words:
-        assert word in result.get('msg', '')
+        assert word in str(check.failures[0])
 
 
 def fake_execute_module(*args):

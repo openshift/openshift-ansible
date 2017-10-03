@@ -14,28 +14,35 @@
 cluster:
   hosts:
     - name: ocp-master
-      distro: fedora/25/atomic
+      distro: fedora/26/atomic
+      specs:
+        ram: 4096
     - name: ocp-node1
-      distro: fedora/25/atomic
+      distro: fedora/26/atomic
     - name: ocp-node2
-      distro: fedora/25/atomic
+      distro: fedora/26/atomic
   container:
-    image: fedora:25
+    image: registry.fedoraproject.org/fedora:26
 
-packages:
-  - gcc
-  - python-pip
-  - python-devel
-  - libffi-devel
-  - openssl-devel
-  - redhat-rpm-config
+# temp workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1483553
+#packages:
+#  - gcc
+#  - python-pip
+#  - python-devel
+#  - libffi-devel
+#  - openssl-devel
+#  - redhat-rpm-config
 
-context: 'fedora/25/atomic'
+context: 'fedora/26/atomic'
 
 env:
   OPENSHIFT_IMAGE_TAG: v3.6.0
 
 tests:
+  # temp workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1483553
+  - if (dnf distro-sync -y || :) |& grep -q -e BDB1539; then
+    rpm --rebuilddb; dnf distro-sync;
+    fi; dnf install -y gcc python-pip python-devel libffi-devel openssl-devel redhat-rpm-config
   - ./.papr.sh
 
 artifacts:

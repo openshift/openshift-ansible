@@ -1,0 +1,2 @@
+---
+- include: certificates/remove_generated_certificates.yml

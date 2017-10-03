@@ -106,13 +106,40 @@ def test_get_var_convert(task_vars, keys, convert, expected):
     assert dummy_check(task_vars).get_var(*keys, convert=convert) == expected
 
 
-@pytest.mark.parametrize("keys, convert", [
-    (("bar", "baz"), int),
-    (("bar.baz"), float),
-    (("foo"), "bogus"),
-    (("foo"), lambda a, b: 1),
-    (("foo"), lambda a: 1 / 0),
+def convert_oscexc(_):
+    raise OpenShiftCheckException("known failure")
+
+
+def convert_exc(_):
+    raise Exception("failure unknown")
+
+
+@pytest.mark.parametrize("keys, convert, expect_text", [
+    (("bar", "baz"), int, "Cannot convert"),
+    (("bar.baz",), float, "Cannot convert"),
+    (("foo",), "bogus", "TypeError"),
+    (("foo",), lambda a, b: 1, "TypeError"),
+    (("foo",), lambda a: 1 / 0, "ZeroDivisionError"),
+    (("foo",), convert_oscexc, "known failure"),
+    (("foo",), convert_exc, "failure unknown"),
 ])
-def test_get_var_convert_error(task_vars, keys, convert):
-    with pytest.raises(OpenShiftCheckException):
+def test_get_var_convert_error(task_vars, keys, convert, expect_text):
+    with pytest.raises(OpenShiftCheckException) as excinfo:
         dummy_check(task_vars).get_var(*keys, convert=convert)
+    assert expect_text in str(excinfo.value)
+
+
+def test_register(task_vars):
+    check = dummy_check(task_vars)
+
+    check.register_failure(OpenShiftCheckException("spam"))
+    assert "spam" in str(check.failures[0])
+
+    with pytest.raises(OpenShiftCheckException) as excinfo:
+        check.register_file("spam")  # no file contents specified
+    assert "not specified" in str(excinfo.value)
+
+    # normally execute_module registers the result file; test disabling that
+    check._execute_module = lambda *args, **_: dict()
+    check.execute_module("eggs", module_args={}, register=False)
+    assert not check.files_to_save

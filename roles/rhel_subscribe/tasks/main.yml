@@ -4,10 +4,10 @@
 #       to make it able to enable repositories
 
 - set_fact:
-    rhel_subscription_pool: "{{ lookup('oo_option', 'rhel_subscription_pool') | default(rhsub_pool, True) | default('Red Hat OpenShift Container Platform, Premium*', True) }}"
-    rhel_subscription_user: "{{ lookup('oo_option', 'rhel_subscription_user') | default(rhsub_user, True) | default(omit, True) }}"
-    rhel_subscription_pass: "{{ lookup('oo_option', 'rhel_subscription_pass') | default(rhsub_pass, True) | default(omit, True) }}"
-    rhel_subscription_server: "{{ lookup('oo_option', 'rhel_subscription_server') | default(rhsub_server) }}"
+    rhel_subscription_pool: "{{ lookup('env', 'rhel_subscription_pool') | default(rhsub_pool | default('Red Hat OpenShift Container Platform, Premium*')) }}"
+    rhel_subscription_user: "{{ lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(omit, True)) }}"
+    rhel_subscription_pass: "{{ lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(omit, True)) }}"
+    rhel_subscription_server: "{{ lookup('env', 'rhel_subscription_server') | default(rhsub_server | default(omit, True)) }}"
 
 - fail:
     msg: "This role is only supported for Red Hat hosts"
@@ -41,15 +41,19 @@
   redhat_subscription:
     username: "{{ rhel_subscription_user }}"
     password: "{{ rhel_subscription_pass }}"
+  register: rh_subscription
+  until: rh_subscription | succeeded
 
 - name: Retrieve the OpenShift Pool ID
   command: subscription-manager list --available --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_id
+  until: openshift_pool_id | succeeded
   changed_when: False
 
 - name: Determine if OpenShift Pool Already Attached
   command: subscription-manager list --consumed --matches="{{ rhel_subscription_pool }}" --pool-only
   register: openshift_pool_attached
+  until: openshift_pool_attached | succeeded
   changed_when: False
   when: openshift_pool_id.stdout == ''
 
@@ -58,10 +62,12 @@
   when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
 
 - name: Attach to OpenShift Pool
-  command: subscription-manager subscribe --pool {{ openshift_pool_id.stdout_lines[0] }}
+  command: subscription-manager attach --pool {{ openshift_pool_id.stdout_lines[0] }}
+  register: subscribe_pool
+  until: subscribe_pool | succeeded
   when: openshift_pool_id.stdout != ''
 
 - include: enterprise.yml
   when:
-  - deployment_type in [ 'enterprise', 'atomic-enterprise', 'openshift-enterprise' ]
+  - deployment_type == 'openshift-enterprise'
   - not ostree_booted.stat.exists | bool
