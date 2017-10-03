@@ -13,7 +13,9 @@
 - name: Set network facts for masters
   hosts: oo_masters_to_config
   gather_facts: no
-  tasks:
+  roles:
+  - role: openshift_facts
+  post_tasks:
   - block:
     - set_fact:
         osm_cluster_network_cidr: "{{ (hostvars[groups.oo_first_master.0].g_master_config_slurp.content|b64decode|from_yaml).networkConfig.clusterNetworkCIDR }}"
@@ -24,5 +26,9 @@
     - set_fact:
         openshift_portal_net: "{{ (hostvars[groups.oo_first_master.0].g_master_config_slurp.content|b64decode|from_yaml).networkConfig.serviceNetworkCIDR }}"
       when: openshift_portal_net is not defined
+    - openshift_facts:
+        role: common
+        local_facts:
+          portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
     when:
     - hostvars[groups.oo_first_master.0].g_master_config_stat.stat.exists | bool
