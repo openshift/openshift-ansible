@@ -13,28 +13,22 @@
       aggregate: false
 
 - include: evaluate_groups.yml
-  tags:
-  - always
 
 - include: initialize_facts.yml
-  tags:
-  - always
 
 - include: sanity_checks.yml
-  tags:
-  - always
 
 - include: validate_hostnames.yml
-  tags:
-  - node
 
 - include: initialize_openshift_repos.yml
-  tags:
-  - always
+
+# openshift_setup_docker should be set a include task's variable.
+# We only need to run setup_docker on first cluster install.
+# We set openshift_setup_docker to True in playbooks/byo/openshift-cluster/config.yml
+- include: setup_docker.yml
+  when: openshift_setup_docker | default(False) | bool
 
 - include: initialize_openshift_version.yml
-  tags:
-  - always
 
 - name: Initialization Checkpoint End
   hosts: localhost

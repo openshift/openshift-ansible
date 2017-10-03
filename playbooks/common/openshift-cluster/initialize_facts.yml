@@ -154,3 +154,8 @@
   - name: initialize_facts set_fact on openshift_docker_hosted_registry_network
     set_fact:
       openshift_docker_hosted_registry_network: "{{ '' if 'oo_first_master' not in groups else hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"
+
+# If we don't run setup_docker, we need to ensure we gather some facts
+# for other roles and plays.
+- include: initialize_docker_facts.yml
+  when: (not openshift_setup_docker | default(False) | bool) or (skip_docker_role | default(False) | bool)
