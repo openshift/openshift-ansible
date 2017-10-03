@@ -1,19 +1,4 @@
 ---
-# TODO: Make this work. The 'name' variable below is undefined
-# presently because it's part of the cfme role. This play can't run
-# until that's re-worked.
-#
-# - name: Pre-Pull manageiq-pods docker images
-#   hosts: nodes
-#   tasks:
-#   - name: Ensure the latest manageiq-pods docker image is pulling
-#     docker_image:
-#       name: "{{ openshift_cfme_container_image }}"
-#     # Fire-and-forget method, never timeout
-#     async: 99999999999
-#     # F-a-f, never check on this. True 'background' task.
-#     poll: 0
-
 - name: Setup CFME
   hosts: oo_first_master
   pre_tasks:

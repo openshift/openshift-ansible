@@ -95,18 +95,3 @@ openshift_cfme_db_pv_size: 15Gi
 #
 # openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
 openshift_cfme_template_parameters: {}
-
-######################################################################
-# Whether or not the cfme app should be initialized ('oc new-app
-# --template=manageiq). If False everything UP TO 'new-app' is ran.
-openshift_cfme_install_app: false
-
-# Docker image to pull
-# openshift_cfme_application_img_name: "{{ 'registry.access.redhat.com/cloudforms46/cfme-openshift-app' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
-# openshift_cfme_application_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'frontend-latest' }}"
-
-# openshift_cfme_memcached_img_name: "{{ 'registry.access.redhat.com/cloudforms46/cfme-openshift-memcached' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
-# openshift_cfme_memcached_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'memcached-latest-fine' }}"
-
-# openshift_cfme_postgresql_img_tag: "{{ 'latest' if openshift_deployment_type == 'openshift-enterprise' else 'postgresql-latest-fine' }}"
-# openshift_cfme_postgresql_img_name: "{{ 'registry.access.redhat.com/cloudforms46/cfme-openshift-postgresql' if openshift_deployment_type == 'openshift-enterprise' else 'docker.io/manageiq/manageiq-pods' }}"
