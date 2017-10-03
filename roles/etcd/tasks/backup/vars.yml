@@ -6,13 +6,10 @@
     l_backup_dir_name: "openshift-backup-{{ r_etcd_common_backup_tag }}{{ r_etcd_common_backup_sufix_name }}"
 
 - set_fact:
-    l_etcd_data_dir: "{{ etcd_data_dir }}{{ '/etcd.etcd' if r_etcd_common_etcd_runtime == 'runc' else '' }}"
-
-- set_fact:
     l_etcd_incontainer_data_dir: "{{ etcd_data_dir }}"
 
 - set_fact:
     l_etcd_incontainer_backup_dir: "{{ l_etcd_incontainer_data_dir }}/{{ l_backup_dir_name }}"
 
 - set_fact:
-    l_etcd_backup_dir: "{{ l_etcd_data_dir }}/{{ l_backup_dir_name }}"
+    l_etcd_backup_dir: "{{ etcd_data_dir }}/{{ l_backup_dir_name }}"

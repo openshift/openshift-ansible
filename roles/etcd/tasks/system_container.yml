@@ -1,7 +1,4 @@
 ---
-- set_fact:
-    l_etcd_src_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' }}"
-
 - name: Ensure proxies are in the atomic.conf
   include_role:
     name: openshift_atomic
@@ -57,36 +54,13 @@
 - name: Systemd reload configuration
   systemd: name=etcd_container daemon_reload=yes
 
-- name: Check for previous etcd data store
-  stat:
-    path: "{{ l_etcd_src_data_dir }}/member/"
-  register: src_datastore
-
-- name: Check for etcd system container data store
-  stat:
-    path: "{{ r_etcd_common_system_container_host_dir }}/etcd.etcd/member"
-  register: dest_datastore
-
-- name: Ensure that etcd system container data dirs exist
-  file: path="{{ item }}" state=directory
-  with_items:
-    - "{{ r_etcd_common_system_container_host_dir }}/etc"
-    - "{{ r_etcd_common_system_container_host_dir }}/etcd.etcd"
-
-- name: Copy etcd data store
-  command: >
-    cp -a {{ l_etcd_src_data_dir }}/member
-    {{ r_etcd_common_system_container_host_dir }}/etcd.etcd/member
-  when:
-    - src_datastore.stat.exists
-    - not dest_datastore.stat.exists
-
 - name: Install or Update Etcd system container package
   oc_atomic_container:
     name: etcd
     image: "{{ openshift.etcd.etcd_image }}"
     state: latest
     values:
+      - ETCD_DATA_DIR=/var/lib/etcd
       - ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
       - ETCD_NAME={{ etcd_hostname }}
       - ETCD_INITIAL_CLUSTER={{ etcd_initial_cluster }}
@@ -95,11 +69,21 @@
       - ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
       - ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
       - ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
-      - ETCD_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-      - ETCD_CERT_FILE={{ etcd_system_container_conf_dir }}/server.crt
-      - ETCD_KEY_FILE={{ etcd_system_container_conf_dir }}/server.key
-      - ETCD_PEER_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-      - ETCD_PEER_CERT_FILE={{ etcd_system_container_conf_dir }}/peer.crt
-      - ETCD_PEER_KEY_FILE={{ etcd_system_container_conf_dir }}/peer.key
-      - ETCD_TRUSTED_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
-      - ETCD_PEER_TRUSTED_CA_FILE={{ etcd_system_container_conf_dir }}/ca.crt
+      - ETCD_CA_FILE={{ etcd_ca_file }}
+      - ETCD_CERT_FILE={{ etcd_cert_file }}
+      - ETCD_KEY_FILE={{ etcd_key_file }}
+      - ETCD_PEER_CA_FILE={{ etcd_peer_ca_file }}
+      - ETCD_PEER_CERT_FILE={{ etcd_peer_cert_file }}
+      - ETCD_PEER_KEY_FILE={{ etcd_peer_key_file }}
+      - ETCD_TRUSTED_CA_FILE={{ etcd_ca_file }}
+      - ETCD_PEER_TRUSTED_CA_FILE={{ etcd_peer_ca_file }}
+      - 'ADDTL_MOUNTS=,{"type":"bind","source":"/etc/","destination":"/etc/","options":["rbind","rw","rslave"]},{"type":"bind","source":"/var/lib/etcd","destination":"/var/lib/etcd/","options":["rbind","rw","rslave"]}'
+
+- name: Ensure etcd datadir ownership for the system container
+  file:
+    path: "{{ etcd_data_dir }}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+    recurse: True

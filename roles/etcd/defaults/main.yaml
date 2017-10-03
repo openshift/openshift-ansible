@@ -13,8 +13,6 @@ r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'h
 
 # etcd server vars
 etcd_conf_dir: '/etc/etcd'
-r_etcd_common_system_container_host_dir: /var/lib/etcd/etcd.etcd
-etcd_system_container_conf_dir: /var/lib/etcd/etc
 etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
 etcd_ca_file: "{{ etcd_conf_dir }}/ca.crt"
 etcd_cert_file: "{{ etcd_conf_dir }}/server.crt"
@@ -54,7 +52,7 @@ etcd_is_containerized: False
 etcd_is_thirdparty: False
 
 # etcd dir vars
-etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' if r_etcd_common_etcd_runtime != 'runc' else '/var/lib/etcd/etcd.etcd/' }}"
+etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' }}"
 
 # etcd ports and protocols
 etcd_client_port: 2379

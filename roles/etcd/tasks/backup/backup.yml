@@ -3,7 +3,7 @@
 
 # TODO: replace shell module with command and update later checks
 - name: Check available disk space for etcd backup
-  shell: df --output=avail -k {{ l_etcd_data_dir }} | tail -n 1
+  shell: df --output=avail -k {{ etcd_data_dir }} | tail -n 1
   register: l_avail_disk
   # AUDIT:changed_when: `false` because we are only inspecting
   # state, not manipulating anything
@@ -11,7 +11,7 @@
 
 # TODO: replace shell module with command and update later checks
 - name: Check current etcd disk usage
-  shell: du --exclude='*openshift-backup*' -k {{ l_etcd_data_dir }} | tail -n 1 | cut -f1
+  shell: du --exclude='*openshift-backup*' -k {{ etcd_data_dir }} | tail -n 1 | cut -f1
   register: l_etcd_disk_usage
   # AUDIT:changed_when: `false` because we are only inspecting
   # state, not manipulating anything
@@ -44,17 +44,17 @@
   - r_etcd_common_embedded_etcd | bool
   - not l_ostree_booted.stat.exists | bool
 
-- name: Check selinux label of '{{ l_etcd_data_dir }}'
+- name: Check selinux label of '{{ etcd_data_dir }}'
   command: >
-    stat -c '%C' {{ l_etcd_data_dir }}
+    stat -c '%C' {{ etcd_data_dir }}
   register: l_etcd_selinux_labels
 
 - debug:
     msg: "{{ l_etcd_selinux_labels }}"
 
-- name: Make sure the '{{ l_etcd_data_dir }}' has the proper label
+- name: Make sure the '{{ etcd_data_dir }}' has the proper label
   command: >
-    chcon -t svirt_sandbox_file_t  "{{ l_etcd_data_dir }}"
+    chcon -t svirt_sandbox_file_t  "{{ etcd_data_dir }}"
   when:
   - l_etcd_selinux_labels.rc == 0
   - "'svirt_sandbox_file_t' not in l_etcd_selinux_labels.stdout"
@@ -68,12 +68,12 @@
 # https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
 - name: Check for v3 data store
   stat:
-    path: "{{ l_etcd_data_dir }}/member/snap/db"
+    path: "{{ etcd_data_dir }}/member/snap/db"
   register: l_v3_db
 
 - name: Copy etcd v3 data store
   command: >
-    cp -a {{ l_etcd_data_dir }}/member/snap/db
+    cp -a {{ etcd_data_dir }}/member/snap/db
     {{ l_etcd_backup_dir }}/member/snap/
   when: l_v3_db.stat.exists
 

@@ -2,4 +2,4 @@
 - name: Copy etcd backup
   copy:
     src: "{{ etcd_backup_sync_directory }}/{{ l_backup_dir_name }}.tgz"
-    dest: "{{ l_etcd_data_dir }}"
+    dest: "{{ etcd_data_dir }}"
