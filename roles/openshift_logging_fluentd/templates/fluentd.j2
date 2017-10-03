@@ -172,6 +172,28 @@ spec:
           value: "{{ openshift_logging_fluentd_remote_syslog_payload_key }}"
 {% endif %}
 
+{% if audit_container_engine %}
+        - name: "AUDIT_CONTAINER_ENGINE"
+          value: "{{ audit_container_engine | lower }}"
+{% endif %}
+
+{% if audit_container_engine %}
+        - name: "NODE_NAME"
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+{% endif %}
+
+{% if audit_log_file != '' %}
+        - name: AUDIT_FILE
+          value: "{{ audit_log_file }}"
+{% endif %}
+
+{% if audit_pos_log_file != '' %}
+        - name: AUDIT_POS_FILE
+          value: "{{ audit_pos_log_file }}"
+{% endif %}
+
       volumes:
       - name: runlogjournal
         hostPath:

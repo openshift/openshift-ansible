@@ -108,7 +108,6 @@
     src: secure-forward.conf
     dest: "{{ tempdir }}/secure-forward.conf"
   when: fluentd_secureforward_contents is undefined
-
   changed_when: no
 
 - copy:
@@ -173,6 +172,9 @@
     ops_port: "{{ openshift_logging_fluentd_ops_port }}"
     fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys()[0] }}"
     fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values()[0] }}"
+    audit_container_engine: "{{ openshift_logging_fluentd_audit_container_engine | default(False) | bool }}"
+    audit_log_file: "{{ openshift_logging_fluentd_audit_file | default() }}"
+    audit_pos_log_file: "{{ openshift_logging_fluentd_audit_pos_file | default() }}"
   check_mode: no
   changed_when: no
 
