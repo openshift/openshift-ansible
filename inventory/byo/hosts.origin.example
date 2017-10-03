@@ -425,6 +425,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # path using these options would be "/exports/registry"
 #openshift_hosted_registry_storage_kind=nfs
 #openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+# nfs_directory must conform to DNS-1123 subdomain must consist of lower case
+# alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
 #openshift_hosted_registry_storage_nfs_directory=/exports
 #openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
 #openshift_hosted_registry_storage_volume_name=registry
@@ -437,6 +439,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_kind=nfs
 #openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
 #openshift_hosted_registry_storage_host=nfs.example.com
+# nfs_directory must conform to DNS-1123 subdomain must consist of lower case
+# alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
 #openshift_hosted_registry_storage_nfs_directory=/exports
 #openshift_hosted_registry_storage_volume_name=registry
 #openshift_hosted_registry_storage_volume_size=10Gi
