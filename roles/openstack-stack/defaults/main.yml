@@ -18,4 +18,4 @@ dns_volume_size: 1
 lb_volume_size: 5
 use_bastion: False
 ui_ssh_tunnel: False
-provider_network: None
+provider_network: False

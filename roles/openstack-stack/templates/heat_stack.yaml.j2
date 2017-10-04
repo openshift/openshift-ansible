@@ -499,7 +499,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: {{ etcd_hostname }}
+                k8s_type: {{ etcd_hostname | default('etcd') }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -509,7 +509,7 @@ resources:
                 k8s_type: etcds
                 cluster_id: {{ stack_name }}
           type:        etcd
-          image:       {{ openstack_etcd_image }}
+          image:       {{ openstack_etcd_image | default(openstack_image) }}
           flavor:      {{ etcd_flavor }}
           key_name:    {{ ssh_public_key }}
 {% if provider_network %}
@@ -549,7 +549,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: {{ lb_hostname }}
+                k8s_type: {{ lb_hostname | default('lb') }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -559,7 +559,7 @@ resources:
                 k8s_type: lb
                 cluster_id: {{ stack_name }}
           type:        lb
-          image:       {{ openstack_lb_image }}
+          image:       {{ openstack_lb_image | default(openstack_image) }}
           flavor:      {{ lb_flavor }}
           key_name:    {{ ssh_public_key }}
 {% if provider_network %}
@@ -603,7 +603,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: {{ master_hostname }}
+                k8s_type: {{ master_hostname | default('master')}}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -613,7 +613,7 @@ resources:
                 k8s_type: masters
                 cluster_id: {{ stack_name }}
           type:        master
-          image:       {{ openstack_master_image }}
+          image:       {{ openstack_master_image | default(openstack_image) }}
           flavor:      {{ master_flavor }}
           key_name:    {{ ssh_public_key }}
 {% if provider_network %}
@@ -666,7 +666,7 @@ resources:
               template: sub_type_k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                sub_type_k8s_type: {{ node_hostname }}
+                sub_type_k8s_type: {{ node_hostname | default('app-node') }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -681,7 +681,7 @@ resources:
 {% for k, v in openshift_cluster_node_labels.app.iteritems() %}
             {{ k|e }}: {{ v|e }}
 {% endfor %}
-          image:       {{ openstack_node_image }}
+          image:       {{ openstack_node_image | default(openstack_image) }}
           flavor:      {{ node_flavor }}
           key_name:    {{ ssh_public_key }}
 {% if provider_network %}
@@ -720,7 +720,7 @@ resources:
               template: sub_type_k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                sub_type_k8s_type: {{ infra_hostname }}
+                sub_type_k8s_type: {{ infra_hostname | default('infranode') }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -735,7 +735,7 @@ resources:
 {% for k, v in openshift_cluster_node_labels.infra.iteritems() %}
             {{ k|e }}: {{ v|e }}
 {% endfor %}
-          image:       {{ openstack_infra_image }}
+          image:       {{ openstack_infra_image | default(openstack_image) }}
           flavor:      {{ infra_flavor }}
           key_name:    {{ ssh_public_key }}
 {% if provider_network %}
@@ -784,7 +784,7 @@ resources:
               template: k8s_type-%index%.cluster_id
               params:
                 cluster_id: {{ stack_name }}
-                k8s_type: {{ dns_hostname }}
+                k8s_type: {{ dns_hostname | default('dns') }}
           cluster_env: {{ public_dns_domain }}
           cluster_id:  {{ stack_name }}
           group:
@@ -794,7 +794,7 @@ resources:
                 k8s_type: dns
                 cluster_id: {{ stack_name }}
           type:        dns
-          image:       {{ openstack_dns_image }}
+          image:       {{ openstack_dns_image | default(openstack_image) }}
           flavor:      {{ dns_flavor }}
           key_name:    {{ ssh_public_key }}
 {% if provider_network %}
