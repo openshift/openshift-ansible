@@ -946,13 +946,6 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 # setting this variable. Useful for testing specific task files.
 #openshift_cfme_storage_nfs_local_hostname: false
 
-# DEFAULT PV SIZES
-# How large to make the MIQ application PV
-#openshift_cfme_app_pv_size: 5Gi
-
-# How large to make the MIQ PostgreSQL PV
-#openshift_cfme_db_pv_size: 15Gi
-
 # A hash of parameters you want to override or set in the
 # miq-template.yaml or miq-template-ext-db.yaml templates. Set this in
 # your inventory file as a simple hash. Acceptable values are defined
@@ -961,4 +954,3 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 #
 # openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
 #openshift_cfme_template_parameters: {}
-
