@@ -61,6 +61,8 @@ spec:
   selector:
     matchLabels:
       k8s-app: nuage-cni-ds
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -104,6 +106,8 @@ spec:
             - mountPath: /var/log
               name: cni-log-dir
             - mountPath: {{ nuage_node_config_dsets_mount_dir }}
+              name: var-usr-share-dir
+            - mountPath: /usr/share/
               name: usr-share-dir
       volumes:
         - name: cni-bin-dir
@@ -121,9 +125,12 @@ spec:
         - name: cni-log-dir
           hostPath:
             path: /var/log
-        - name: usr-share-dir
+        - name: var-usr-share-dir
           hostPath:
             path: {{ nuage_node_config_dsets_mount_dir }}
+        - name: usr-share-dir
+          hostPath:
+            path: /usr/share/
 
 ---
 
@@ -164,7 +171,7 @@ spec:
             - name: NUAGE_PLATFORM
               value: '"kvm, k8s"'
             - name: NUAGE_K8S_SERVICE_IPV4_SUBNET
-              value: '192.168.0.0\/16'
+              value: '172.30.0.0\/16'
             - name: NUAGE_NETWORK_UPLINK_INTF
               value: "eth0"
           volumeMounts:
