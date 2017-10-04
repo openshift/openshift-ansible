@@ -118,6 +118,7 @@ class OCRoute(OpenShiftCLI):
         rconfig = RouteConfig(params['name'],
                               params['namespace'],
                               params['kubeconfig'],
+                              params['labels'],
                               files['destcacert']['value'],
                               files['cacert']['value'],
                               files['cert']['value'],
