@@ -539,7 +539,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Defaults to https://hawkular-metrics.{{openshift_master_default_subdomain}}/hawkular/metrics
 # Currently, you may only alter the hostname portion of the url, alterting the
 # `/hawkular/metrics` path will break installation of metrics.
-#openshift_metrics_hawkular_hostname=https://hawkular-metrics.example.com/hawkular/metrics
+#openshift_metrics_hawkular_hostname=hawkular-metrics.example.com
 # Configure the prefix and version for the component images
 #openshift_metrics_image_prefix=docker.io/openshift/origin-
 #openshift_metrics_image_version=v3.7.0
