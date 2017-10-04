@@ -10,6 +10,8 @@
         installer_phase_node: "In Progress"
       aggregate: false
 
+- include: certificates.yml
+
 - include: setup.yml
 
 - include: containerized_nodes.yml
