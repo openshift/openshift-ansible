@@ -27,7 +27,8 @@ ansible_ssh_user=root
 debug_level=2
 
 # Specify the deployment type. Valid values are origin and openshift-enterprise.
-openshift_deployment_type=openshift-enterprise
+openshift_deployment_type=origin
+#openshift_deployment_type=openshift-enterprise
 
 # Specify the generic release of OpenShift to install. This is used mainly just during installation, after which we
 # rely on the version running on the first master. Works best for containerized installs where we can usually
@@ -58,6 +59,8 @@ openshift_release=v3.7
 #openshift_use_etcd_system_container=False
 #
 # In either case, system_images_registry must be specified to be able to find the system images
+#system_images_registry="docker.io"
+# when openshift_deployment_type=='openshift-enterprise'
 #system_images_registry="registry.access.redhat.com"
 
 # Manage openshift example imagestreams and templates during install and upgrade
@@ -124,14 +127,14 @@ openshift_release=v3.7
 # Default value: "--log-driver=journald"
 #openshift_docker_options="-l warn --ipv6=false"
 
+# Specify exact version of Docker to configure or upgrade to.
+# Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
+# docker_version="1.12.1"
+
 # Specify whether to run Docker daemon with SELinux enabled in containers. Default is True.
 # Uncomment below to disable; for example if your kernel does not support the
 # Docker overlay/overlay2 storage drivers with SELinux enabled.
 #openshift_docker_selinux_enabled=False
-
-# Specify exact version of Docker to configure or upgrade to.
-# Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
-# docker_version="1.12.1"
 
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
@@ -179,7 +182,7 @@ openshift_release=v3.7
 #oreg_auth_credentials_replace: True
 
 # OpenShift repository configuration
-#openshift_additional_repos=[{'id': 'ose-devel', 'name': 'ose-devel', 'baseurl': 'http://example.com/puddle/build/AtomicOpenShift/3.1/latest/RH7-RHOSE-3.0/$basearch/os', 'enabled': 1, 'gpgcheck': 0}]
+#openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 #openshift_repos_enable_testing=false
 
 # htpasswd auth
@@ -346,7 +349,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
-#osn_storage_plugin_deps=['ceph','glusterfs']
+#osn_storage_plugin_deps=['ceph','glusterfs','iscsi']
 
 # OpenShift Router Options
 #
@@ -461,7 +464,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_volume_size=10Gi
 #
 # AWS S3
-#
 # S3 bucket must already exist.
 #openshift_hosted_registry_storage_kind=object
 #openshift_hosted_registry_storage_provider=s3
@@ -549,8 +551,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # `/hawkular/metrics` path will break installation of metrics.
 #openshift_metrics_hawkular_hostname=hawkular-metrics.example.com
 # Configure the prefix and version for the component images
-#openshift_metrics_image_prefix=registry.example.com:8888/openshift3/
-#openshift_metrics_image_version=3.7.0
+#openshift_metrics_image_prefix=docker.io/openshift/origin-
+#openshift_metrics_image_version=v3.7
+# when openshift_deployment_type=='openshift-enterprise'
+#openshift_metrics_image_prefix=registry.access.redhat.com/openshift3/
+#openshift_metrics_image_version=v3.7
 #
 # StorageClass
 # openshift_storageclass_name=gp2
@@ -604,7 +609,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # this value must be 1
 #openshift_logging_es_cluster_size=1
 # Configure the prefix and version for the component images
-#openshift_logging_image_prefix=registry.example.com:8888/openshift3/
+#openshift_logging_image_prefix=docker.io/openshift/origin-
+#openshift_logging_image_version=v3.7.0
+# when openshift_deployment_type=='openshift-enterprise'
+#openshift_logging_image_prefix=registry.access.redhat.com/openshift3/
 #openshift_logging_image_version=3.7.0
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
@@ -662,8 +670,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_api_port=8443
 #openshift_master_console_port=8443
 
-# set RPM version for debugging purposes
-#openshift_pkg_version=-3.1.0.0
+# set exact RPM version (include - prefix)
+#openshift_pkg_version=-3.6.0
+# you may also specify version and release, ie:
+#openshift_pkg_version=-3.7.0-0.126.0.git.0.9351aae.el7
 
 # Configure custom ca certificate
 #openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
@@ -675,6 +685,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure custom named certificates (SNI certificates)
 #
+# https://docs.openshift.org/latest/install_config/certificate_customization.html
 # https://docs.openshift.com/enterprise/latest/install_config/certificate_customization.html
 #
 # NOTE: openshift_master_named_certificates is cached on masters and is an
@@ -739,6 +750,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
 # in versions >= 3.6
 #openshift_use_dnsmasq=False
+
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
 # This is useful for POC environments where DNS may not actually be available yet or to set
 # options like 'strict-order' to alter dnsmasq configuration.
@@ -821,7 +833,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_controllers_env_vars={"ENABLE_HTTP2": "true"}
 #openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
-# Enable API service auditing, available as of 3.2
+# Enable API service auditing
 #openshift_master_audit_config={"enabled": true}
 #
 # In case you want more advanced setup for the auditlog you can
@@ -829,6 +841,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # The directory in "auditFilePath" will be created if it's not
 # exist
 #openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/log/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}
+
+# Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
+# by deployment_type=origin
+#openshift_enable_origin_repo=false
 
 # Validity of the auto-generated OpenShift certificates in days.
 # See also openshift_hosted_registry_cert_expire_days above.
