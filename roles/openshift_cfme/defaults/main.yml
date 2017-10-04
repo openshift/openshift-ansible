@@ -76,13 +76,6 @@ openshift_cfme_storage_nfs_base_dir: /exports
 # setting this variable. Useful for testing specific task files.
 openshift_cfme_storage_nfs_local_hostname: false
 
-#---------------------------------------------------------------------
-# DEFAULT PV SIZES
-# How large to make the MIQ application PV
-openshift_cfme_app_pv_size: 5Gi
-# How large to make the MIQ PostgreSQL PV
-openshift_cfme_db_pv_size: 15Gi
-
 ######################################################################
 # SCAFFOLDING - These are parameters we pre-seed that a user may or
 # may not set later

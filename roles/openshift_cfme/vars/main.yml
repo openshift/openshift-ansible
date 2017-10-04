@@ -8,6 +8,13 @@ __openshift_cfme_storage_classes:
   - preconfigured
   - cloudprovider
 
+#---------------------------------------------------------------------
+# DEFAULT PV SIZES
+# How large to make the MIQ application PV
+__openshift_cfme_app_pv_size: 5Gi
+# How large to make the MIQ PostgreSQL PV
+__openshift_cfme_db_pv_size: 15Gi
+
 # Name of the application templates with object/parameter definitions
 __openshift_cfme_app_templates:
   - miq-template-ext-db

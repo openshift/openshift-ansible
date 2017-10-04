@@ -67,7 +67,7 @@ now for examples of how to set up your Ansible inventory for various
 deployment configurations. However, you are **strongly urged** to
 first read through the [Configuration](#configuration) and
 [Customization](#customization) sections as well as the following
-[Important Note](#important-notes).
+[Important Notes](#important-notes).
 
 ## Important Notes
 
@@ -80,6 +80,30 @@ to there being no databases that require pods.
 *Be extra careful* if you are overriding template
 parameters. Including parameters not defined in a template **will
 cause errors**.
+
+**Container Provider Integration** - If you want add your container
+platform (OCP/Origin) as a *Container Provider* in CFME/MIQ then you
+must ensure that the infrastructure management hooks are installed.
+
+* During your OCP/Origin install, ensure that you have the
+  `openshift_use_manageiq` parameter set to `true` in your inventory
+  at install time. This will create a `management-infra` project and a
+  service account user.
+* After CFME/MIQ is installed, obtain the `management-admin` service
+  account token and copy it somewhere safe.
+
+```bash
+$ oc serviceaccounts get-token -n management-infra management-admin
+eyJhuGdiOiJSUzI1NiIsInR5dCI6IkpXVCJ9.eyJpd9MiOiJrbWJldm5lbGVzL9NldnZpY2VhY2NvbW50Iiwiy9ViZXJuZXRldy5puy9zZXJ2yWNlYWNju9VubC9uYW1ld9BhY2UiOiJtYW5hZ2VtZW50LWluZnJhIiwiy9ViZXJuZXRldy5puy9zZXJ2yWNlYWNju9VubC9zZWNyZXQuumFtZSI6Im1humFnZW1lunQtYWRtyW4tbG9rZW4tdDBnOTAiLCJrbWJldm5lbGVzLmlvL9NldnZpY2VhY2NvbW50L9NldnZpY2UtYWNju9VubC5uYW1lIjoiuWFuYWbluWVubC1hZG1puiIsImt1YmVyumV0ZXMuyW8vd2VybmljZWFjY291unQvd2VybmljZS1hY2NvbW50LnVpZCI6IjRiZDM2MWQ1LWE1NDAtMTFlNy04YzI5LTUyNTQwMDliMmNkZCIsInN1YiI6InN5d9RluTpzZXJ2yWNlYWNju9VubDptYW5hZ2VtZW50LWluZnJhOm1humFnZW1lunQtYWRtyW4ifQ.B6sZLGD9O4vBu9MHwiG-C_4iEwjBXb7Af8BPw-LNlujDmHhOnQ-Oo4QxQKyj9edynfmDy2yutUyJ2Mm9HfDGWg4C9xhWImHoq6Nl7T5_9djkeGKkK7Ejvg4fA-IkrzEsZeQuluBvXnE6wvP0LCjUo_dx4pPyZJyp46teV9NqKQeDzeysjlMCyqp6AK6-Lj8ILG8YA6d_97HlzL_EgFBLAu0lBSn-uC_9J0gLysqBtK6TI0nExfhv9Bm1_5bdHEbKHPW7xIlYlI9AgmyTyhsQ6SoQWtL2khBjkG9TlPBq9wYJj9bzqgVZlqEfICZxgtXO7sYyuoje4y8lo0YQ0kZmig
+```
+
+* In the CFME/MIQ web interface, navigate to `Compute` →
+  `Containers` → `Providers` and select `⚙ Configuration` → `⊕
+  Add a new Containers Provider`
+
+*See the [upstream documentation](http://manageiq.org/docs/reference/latest/doc-Managing_Providers/miq/index.html#containers-providers) for additional information.*
+
+
 
 # Requirements
 
@@ -105,7 +129,8 @@ The implications of this table are summarized below:
 * Your cluster nodes must have lots of memory available
 * You will need several GiB's of storage available, either locally or
   on your cloud provider
-
+* PV sizes can be changed by providing override values to template
+  parameters (see also: [Customization](#customization))
 
 # Role Variables
 
@@ -127,15 +152,10 @@ installer.
 | `openshift_cfme_storage_nfs_base_dir`          | **No**   | `/exports/`                    | If you are using **External NFS** then you may set the base path to the exports location here. <br />**Local NFS Note**: You *may* also change this value if you want to change the default path used for local NFS exports. |
 | `openshift_cfme_storage_nfs_local_hostname`    | **No**   | `false`                        | If you do not have an `[nfs]` group in your inventory, or want to simply manually define the local NFS host in your cluster, set this parameter to the hostname of the preferred NFS server. The server must be a part of your OCP/Origin cluster. |
 | **CUSTOMIZATION OPTIONS** | | | | |
-| `openshift_cfme_app_pv_size`                   | **No**   | `5Gi`                          | How large the application PV will be in Kube units (`Gi`, `Mi`, etc) <sup>[2]</sup>|
-| `openshift_cfme_db_pv_size`                    | **No**   | `15Gi`                         | How large the database PV will be in Kube units <sup>[2]</sup>|
 | `openshift_cfme_template_parameters`           | **No**   | `{}`                           | A dictionary of any parameters you want to override in the application/pv templates.
 
-* <sup>[1]</sup> `cfme-template*` will be available once CFME 4.6 is released
-* <sup>[2]</sup> If you override the PV sizes, read
-  [Override PV Sizes](#override-pv-sizes) (below) for additional
-  required parameters
-
+* <sup>[1]</sup> The `cfme-template`s will be available and
+  automatically detected once CFME 4.6 is released
 
 
 # Getting Started
@@ -143,12 +163,20 @@ installer.
 Below are some inventory snippets that can help you get started right
 away.
 
-Once you've settled on a configuration scheme you can install CFME
-using this `ansible-playbook` invocation:
+If you want to install CFME/MIQ at the same time you install your
+OCP/Origin cluster, ensure that `openshift_cfme_install_cfme` is set
+to `true` in your inventory. Call the standard
+`playbooks/byo/config.yml` playbook to begin the cluster and CFME/MIQ
+installation.
+
+If you are installing CFME/MIQ on an *already provisioned cluster*
+then you can call the CFME/MIQ playbook directly:
 
 ```
 $ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-cfme/config.yml
 ```
+
+*Note: Use `miq-template` in the following examples for ManageIQ installs*
 
 ## All Defaults
 
@@ -159,7 +187,7 @@ created as pods in the container platform.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=miq-template
+openshift_cfme_app_template=cfme-template
 ```
 
 ## External NFS Storage
@@ -174,7 +202,7 @@ as a storage appliance). Note the two new parameters:
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=miq-template
+openshift_cfme_app_template=cfme-template
 openshift_cfme_storage_class=nfs_external
 openshift_cfme_storage_nfs_external_hostname=nfs.example.com
 ```
@@ -190,16 +218,14 @@ openshift_cfme_storage_nfs_base_dir=/exports/hosted/prod
 
 ## Override PV sizes
 
-This example will override the PV sizes. Note that we must **also
-set** template parameters in the `openshift_cfme_template_parameters`
-parameter so that the application/db will be able to make claims on
-created PVs without clobbering each other.
+This example will override the PV sizes. Note that we set the PV sizes
+in the template parameters, `openshift_cfme_template_parameters`. This
+ensures that the application/db will be able to make claims on created
+PVs without clobbering each other.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=miq-template
-openshift_cfme_app_pv_size=10Gi
-openshift_cfme_db_pv_size=25Gi
+openshift_cfme_app_template=cfme-template
 openshift_cfme_template_parameters={'APPLICATION_VOLUME_CAPACITY': '10Gi', 'DATABASE_VOLUME_CAPACITY': '25Gi'}
 ```
 
@@ -212,7 +238,7 @@ performance or a complete failure to initialize the application.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=miq-template
+openshift_cfme_app_template=cfme-template
 openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '3000Mi', 'POSTGRESQL_MEM_REQ': '1Gi', 'ANSIBLE_MEM_REQ': '512Mi'}
 ```
 
