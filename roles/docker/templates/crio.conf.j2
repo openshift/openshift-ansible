@@ -13,12 +13,12 @@ runroot = "/var/run/containers/storage"
 
 # storage_driver select which storage driver is used to manage storage
 # of images and containers.
-storage_driver = "overlay2"
+storage_driver = "overlay"
 
 # storage_option is used to pass an option to the storage driver.
 storage_option = [
 {% if ansible_distribution in ['RedHat', 'CentOS'] %}
-	"overlay2.override_kernel_check=1"
+	"overlay.override_kernel_check=1"
 {% endif %}
 ]
 
