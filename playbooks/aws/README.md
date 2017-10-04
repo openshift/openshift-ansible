@@ -87,11 +87,6 @@ masters
 nodes
 etcd
 
-[OSEv3:children]
-masters
-nodes
-etcd
-
 [OSEv3:vars]
 ################################################################################
 # Ensure these variables are set for bootstrap
