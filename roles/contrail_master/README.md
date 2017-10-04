@@ -9,7 +9,7 @@ To install Contrail SDN with OpenShift, set the following inventory configuratio
 * `openshift_use_contrail=True`
 * `openshift_use_openshift_sdn=False`
 * `os_sdn_network_plugin_name='cni'`
-* `os_release=redhat7`
+* `contrail_os_release=redhat7`
 * `contrail_version=4.0.1.0-44`
 * `vrouter_physical_interface=eno1`
 * `contrail_docker_images_path=/root`

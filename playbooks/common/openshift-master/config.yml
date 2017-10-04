@@ -214,6 +214,7 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   - role: contrail_master
+    contrail_first_master: "{{ groups.oo_first_master.0 }}"
     when: openshift_use_contrail | default(false) | bool
   post_tasks:
   - name: Create group for deployment type

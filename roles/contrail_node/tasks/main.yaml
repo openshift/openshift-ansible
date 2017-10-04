@@ -13,35 +13,43 @@
       name: contrail-agent
       tag: "{{ contrail_version }}"
       timeout: 300
-      load_path: "/tmp/contrail-agent-{{ os_release }}-{{ contrail_version }}.tar.gz"
+      load_path: "/tmp/contrail-agent-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
 
   - name: Load Contrail-Kubernetes-Agent image
     docker_image:
       name: contrail-k8s-agent
       tag: "{{ contrail_version }}"
       timeout: 300
-      load_path: "/tmp/contrail-kubernetes-agent-{{ os_release }}-{{ contrail_version }}.tar.gz"
+      load_path: "/tmp/contrail-kubernetes-agent-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
 
 - when:
-  - inventory_hostname == groups.oo_first_master.0
+  - inventory_hostname == contrail_first_master
 
   block:
   - name: Add contrail service account to privileged scc
-    shell: oadm policy add-scc-to-user privileged system:serviceaccount:kube-system:contrail
-    delegate_to: "{{ groups.oo_first_master.0 }}"
+    oc_adm_policy_user:
+      user: system:serviceaccount:kube-system:contrail
+      resource_kind: scc
+      resource_name: privileged
+      state: present
+    delegate_to: "{{ contrail_first_master }}"
 
   - name: Add the daemonset-controller service account to privileged scc
-    shell: oc adm policy add-scc-to-user privileged system:serviceaccount:kube-system:daemon-set-controller
-    delegate_to: "{{ groups.oo_first_master.0 }}"
+    oc_adm_policy_user:
+      user: system:serviceaccount:kube-system:daemon-set-controller
+      resource_kind: scc
+      resource_name: privileged
+      state: present
+    delegate_to: "{{ contrail_first_master }}"
 
   - name: Label master nodes with opencontrail.org/controller=true
-    shell: oc label nodes {{ openshift.common.hostname }} opencontrail.org/controller=true --overwrite=true
-    delegate_to: "{{ groups.oo_first_master.0 }}"
+    command: oc label nodes {{ openshift.common.hostname }} opencontrail.org/controller=true --overwrite=true
+    delegate_to: "{{ contrail_first_master }}"
 
   - name: Make master schedulable
-    shell: oadm manage-node {{ openshift.common.hostname }} --schedulable
-    delegate_to: "{{ groups.oo_first_master.0 }}"
+    command: oadm manage-node {{ openshift.common.hostname }} --schedulable
+    delegate_to: "{{ contrail_first_master }}"
 
   - name: Launch the installer
-    shell: oc create -f /tmp/contrail-installer.yaml
-    delegate_to: "{{ groups.oo_first_master.0 }}"
+    command: oc create -f /tmp/contrail-installer.yaml
+    delegate_to: "{{ contrail_first_master }}"
