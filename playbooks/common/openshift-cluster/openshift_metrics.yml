@@ -1,7 +1,6 @@
 ---
 - name: Metrics Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Metrics install 'In Progress'
@@ -25,8 +24,7 @@
       tasks_from: update_master_config.yaml
 
 - name: Metrics Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Metrics install 'Complete'

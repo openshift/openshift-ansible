@@ -1,7 +1,6 @@
 ---
 - name: Master Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Master install 'In Progress'
@@ -224,8 +223,7 @@
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - name: Master Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Master install 'Complete'

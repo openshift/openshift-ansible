@@ -1,7 +1,6 @@
 ---
 - name: Load Balancer Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set load balancer install 'In Progress'
@@ -29,8 +28,7 @@
   - role: openshift_loadbalancer
 
 - name: Load Balancer Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set load balancer install 'Complete'
