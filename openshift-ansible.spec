@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.142.0%{?dist}
+Release:        0.143.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.143.0
+- Limit base-package install during master upgrades (mgugino@redhat.com)
+- Fix provisiong scale group and elb logic (mgugino@redhat.com)
+
 * Tue Oct 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.142.0
 - Document that nfs_directory must conform to DNS-1123 (sdodson@redhat.com)
 - Move node aws credentials to config.yml (mgugino@redhat.com)
