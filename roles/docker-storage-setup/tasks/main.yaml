@@ -1,8 +1,29 @@
 ---
-- name: create the docker-storage-setup config file
-  template:
-    src: "{{ role_path }}/templates/docker-storage-setup.j2"
-    dest: /etc/sysconfig/docker-storage-setup
-    owner: root
-    group: root
-    mode: 0644
+- block:
+    - name: create the docker-storage config file
+      template:
+        src: "{{ role_path }}/templates/docker-storage-setup-overlayfs.j2"
+        dest: /etc/sysconfig/docker-storage-setup
+        owner: root
+        group: root
+        mode: 0644
+
+  when:
+    - ansible_distribution_version | version_compare('7.4', '>=')
+    - ansible_distribution == "RedHat"
+
+- block:
+    - name: create the docker-storage-setup config file
+      template:
+        src: "{{ role_path }}/templates/docker-storage-setup-dm.j2"
+        dest: /etc/sysconfig/docker-storage-setup
+        owner: root
+        group: root
+        mode: 0644
+
+  when:
+    - ansible_distribution_version | version_compare('7.4', '<')
+    - ansible_distribution == "RedHat"
+
+- name: start docker
+  service: name=docker state=started enabled=true
