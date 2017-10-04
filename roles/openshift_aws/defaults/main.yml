@@ -143,6 +143,11 @@ openshift_aws_elb_instance_filter:
   "tag:host-type": "{{ openshift_aws_node_group_type }}"
   instance-state-name: running
 
+openshift_aws_launch_config_security_groups:
+- "{{ openshift_aws_clusterid }}"  # default sg
+- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}"  # node type sg
+- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}_k8s"  # node type sg k8s
+
 openshift_aws_node_security_groups:
   default:
     name: "{{ openshift_aws_clusterid }}"

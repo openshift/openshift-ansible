@@ -4,13 +4,18 @@
   when:
   - openshift_aws_ami is undefined
 
+- name: query vpc
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      'tag:Name': "{{ openshift_aws_vpc_name }}"
+  register: vpcout
+
 - name: fetch the security groups for launch config
   ec2_group_facts:
     filters:
-      group-name:
-      - "{{ openshift_aws_clusterid }}"  # default sg
-      - "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}"  # node type sg
-      - "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}_k8s"  # node type sg k8s
+      group-name: "{{ openshift_aws_launch_config_security_groups }}"
+      vpc-id: "{{ vpcout.vpcs[0].id }}"
     region: "{{ openshift_aws_region }}"
   register: ec2sgs
 
@@ -21,7 +26,7 @@
     region: "{{ openshift_aws_region }}"
     image_id: "{{ openshift_aws_ami }}"
     instance_type: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].instance_type }}"
-    security_groups: "{{ ec2sgs.security_groups | map(attribute='group_id')| list }}"
+    security_groups: "{{ openshift_aws_launch_config_security_group_id  | default(ec2sgs.security_groups | map(attribute='group_id')| list) }}"
     user_data: |-
       #cloud-config
       {%  if openshift_aws_node_group_type != 'master' %}
