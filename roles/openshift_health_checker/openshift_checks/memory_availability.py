@@ -14,9 +14,9 @@ class MemoryAvailability(OpenShiftCheck):
     # Values taken from the official installation documentation:
     # https://docs.openshift.org/latest/install_config/install/prerequisites.html#system-requirements
     recommended_memory_bytes = {
-        "masters": 16 * GIB,
-        "nodes": 8 * GIB,
-        "etcd": 8 * GIB,
+        "oo_masters_to_config": 16 * GIB,
+        "oo_nodes_to_config": 8 * GIB,
+        "oo_etcd_to_config": 8 * GIB,
     }
     # https://access.redhat.com/solutions/3006511 physical RAM is partly reserved from memtotal
     memtotal_adjustment = 1 * GIB

@@ -22,7 +22,7 @@ class DockerHostMixin(object):
     def is_active(self):
         """Only run on hosts that depend on Docker."""
         is_containerized = self.get_var("openshift", "common", "is_containerized")
-        is_node = "nodes" in self.get_var("group_names", default=[])
+        is_node = "oo_nodes_to_config" in self.get_var("group_names", default=[])
         return super(DockerHostMixin, self).is_active() and (is_containerized or is_node)
 
     def ensure_dependencies(self):

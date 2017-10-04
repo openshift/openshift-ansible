@@ -5,9 +5,9 @@ from openshift_checks.docker_storage import DockerStorage
 
 
 @pytest.mark.parametrize('is_containerized, group_names, is_active', [
-    (False, ["masters", "etcd"], False),
-    (False, ["masters", "nodes"], True),
-    (True, ["etcd"], True),
+    (False, ["oo_masters_to_config", "oo_etcd_to_config"], False),
+    (False, ["oo_masters_to_config", "oo_nodes_to_config"], True),
+    (True, ["oo_etcd_to_config"], True),
 ])
 def test_is_active(is_containerized, group_names, is_active):
     task_vars = dict(

@@ -4,14 +4,14 @@ from openshift_checks.etcd_traffic import EtcdTraffic
 
 
 @pytest.mark.parametrize('group_names,version,is_active', [
-    (['masters'], "3.5", False),
-    (['masters'], "3.6", False),
-    (['nodes'], "3.4", False),
-    (['etcd'], "3.4", True),
-    (['etcd'], "1.5", True),
-    (['etcd'], "3.1", False),
-    (['masters', 'nodes'], "3.5", False),
-    (['masters', 'etcd'], "3.5", True),
+    (['oo_masters_to_config'], "3.5", False),
+    (['oo_masters_to_config'], "3.6", False),
+    (['oo_nodes_to_config'], "3.4", False),
+    (['oo_etcd_to_config'], "3.4", True),
+    (['oo_etcd_to_config'], "1.5", True),
+    (['oo_etcd_to_config'], "3.1", False),
+    (['oo_masters_to_config', 'oo_nodes_to_config'], "3.5", False),
+    (['oo_masters_to_config', 'oo_etcd_to_config'], "3.5", True),
     ([], "3.4", False),
 ])
 def test_is_active(group_names, version, is_active):
@@ -23,9 +23,9 @@ def test_is_active(group_names, version, is_active):
 
 
 @pytest.mark.parametrize('group_names,matched,failed,extra_words', [
-    (["masters"], True, True, ["Higher than normal", "traffic"]),
-    (["masters", "etcd"], False, False, []),
-    (["etcd"], False, False, []),
+    (["oo_masters_to_config"], True, True, ["Higher than normal", "traffic"]),
+    (["oo_masters_to_config", "oo_etcd_to_config"], False, False, []),
+    (["oo_etcd_to_config"], False, False, []),
 ])
 def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words):
     def execute_module(module_name, *_):

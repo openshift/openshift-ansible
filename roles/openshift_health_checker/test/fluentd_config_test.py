@@ -82,7 +82,7 @@ def test_check_logging_config_non_master(name, use_journald, logging_driver, ext
         return {}
 
     task_vars = dict(
-        group_names=["nodes", "etcd"],
+        group_names=["oo_nodes_to_config", "oo_etcd_to_config"],
         openshift_logging_fluentd_use_journal=use_journald,
         openshift=dict(
             common=dict(config_base=""),
@@ -128,7 +128,7 @@ def test_check_logging_config_non_master_failed(name, use_journald, logging_driv
         return {}
 
     task_vars = dict(
-        group_names=["nodes", "etcd"],
+        group_names=["oo_nodes_to_config", "oo_etcd_to_config"],
         openshift_logging_fluentd_use_journal=use_journald,
         openshift=dict(
             common=dict(config_base=""),
@@ -192,7 +192,7 @@ def test_check_logging_config_master(name, pods, logging_driver, extra_words):
         return {}
 
     task_vars = dict(
-        group_names=["masters"],
+        group_names=["oo_masters_to_config"],
         openshift=dict(
             common=dict(config_base=""),
         ),
@@ -274,7 +274,7 @@ def test_check_logging_config_master_failed(name, pods, logging_driver, words):
         return {}
 
     task_vars = dict(
-        group_names=["masters"],
+        group_names=["oo_masters_to_config"],
         openshift=dict(
             common=dict(config_base=""),
         ),
@@ -331,7 +331,7 @@ def test_check_logging_config_master_fails_on_unscheduled_deployment(name, pods,
         return {}
 
     task_vars = dict(
-        group_names=["masters"],
+        group_names=["oo_masters_to_config"],
         openshift=dict(
             common=dict(config_base=""),
         ),

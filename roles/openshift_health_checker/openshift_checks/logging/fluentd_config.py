@@ -46,7 +46,7 @@ class FluentdConfig(LoggingCheck):
         # if check is running on a master, retrieve all running pods
         # and check any pod's container for the env var "USE_JOURNAL"
         group_names = self.get_var("group_names")
-        if "masters" in group_names:
+        if "oo_masters_to_config" in group_names:
             use_journald = self.check_fluentd_env_var()
 
         docker_info = self.execute_module("docker_info", {})

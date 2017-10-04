@@ -16,7 +16,7 @@ def task_vars():
         ),
         openshift_deployment_type='origin',
         openshift_image_tag='',
-        group_names=['nodes', 'masters'],
+        group_names=['oo_nodes_to_config', 'oo_masters_to_config'],
     )
 
 
@@ -27,8 +27,8 @@ def task_vars():
     ("", True, [], False),
     ("origin", False, [], False),
     ("openshift-enterprise", False, [], False),
-    ("origin", False, ["nodes", "masters"], True),
-    ("openshift-enterprise", False, ["etcd"], False),
+    ("origin", False, ["oo_nodes_to_config", "oo_masters_to_config"], True),
+    ("openshift-enterprise", False, ["oo_etcd_to_config"], False),
 ])
 def test_is_active(task_vars, deployment_type, is_containerized, group_names, expect_active):
     task_vars['openshift_deployment_type'] = deployment_type
@@ -126,7 +126,7 @@ def test_no_known_registries():
         openshift_docker_additional_registries=["docker.io"],
         openshift_deployment_type="openshift-enterprise",
         openshift_image_tag='latest',
-        group_names=['nodes', 'masters'],
+        group_names=['oo_nodes_to_config', 'oo_masters_to_config'],
     ))
     dia.known_docker_registries = mock_known_docker_registries
     actual = dia.run()
@@ -205,7 +205,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
 
 @pytest.mark.parametrize("deployment_type, is_containerized, groups, oreg_url, expected", [
     (  # standard set of stuff required on nodes
-        "origin", False, ['nodes'], None,
+        "origin", False, ['oo_nodes_to_config'], None,
         set([
             'openshift/origin-pod:vtest',
             'openshift/origin-deployer:vtest',
@@ -215,7 +215,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
         ])
     ),
     (  # set a different URL for images
-        "origin", False, ['nodes'], 'foo.io/openshift/origin-${component}:${version}',
+        "origin", False, ['oo_nodes_to_config'], 'foo.io/openshift/origin-${component}:${version}',
         set([
             'foo.io/openshift/origin-pod:vtest',
             'foo.io/openshift/origin-deployer:vtest',
@@ -225,7 +225,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
         ])
     ),
     (
-        "origin", True, ['nodes', 'masters', 'etcd'], None,
+        "origin", True, ['oo_nodes_to_config', 'oo_masters_to_config', 'oo_etcd_to_config'], None,
         set([
             # images running on top of openshift
             'openshift/origin-pod:vtest',
@@ -241,7 +241,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
         ])
     ),
     (  # enterprise images
-        "openshift-enterprise", True, ['nodes'], 'foo.io/openshift3/ose-${component}:f13ac45',
+        "openshift-enterprise", True, ['oo_nodes_to_config'], 'foo.io/openshift3/ose-${component}:f13ac45',
         set([
             'foo.io/openshift3/ose-pod:f13ac45',
             'foo.io/openshift3/ose-deployer:f13ac45',
@@ -255,7 +255,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
         ])
     ),
     (
-        "openshift-enterprise", True, ['etcd', 'lb'], 'foo.io/openshift3/ose-${component}:f13ac45',
+        "openshift-enterprise", True, ['oo_etcd_to_config', 'lb'], 'foo.io/openshift3/ose-${component}:f13ac45',
         set([
             'registry.access.redhat.com/rhel7/etcd',
             # lb does not yet come in a containerized version
@@ -288,7 +288,7 @@ def test_containerized_etcd():
             ),
         ),
         openshift_deployment_type="origin",
-        group_names=['etcd'],
+        group_names=['oo_etcd_to_config'],
     )
     expected = set(['registry.access.redhat.com/rhel7/etcd'])
     assert expected == DockerImageAvailability(task_vars=task_vars).required_images()

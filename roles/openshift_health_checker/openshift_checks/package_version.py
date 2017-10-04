@@ -36,7 +36,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
     def is_active(self):
         """Skip hosts that do not have package requirements."""
         group_names = self.get_var("group_names", default=[])
-        master_or_node = 'masters' in group_names or 'nodes' in group_names
+        master_or_node = 'oo_masters_to_config' in group_names or 'oo_nodes_to_config' in group_names
         return super(PackageVersion, self).is_active() and master_or_node
 
     def run(self):
