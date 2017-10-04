@@ -21,14 +21,14 @@ def task_vars():
 
 
 @pytest.mark.parametrize('deployment_type, is_containerized, group_names, expect_active', [
-    ("origin", True, [], True),
-    ("openshift-enterprise", True, [], True),
     ("invalid", True, [], False),
     ("", True, [], False),
     ("origin", False, [], False),
     ("openshift-enterprise", False, [], False),
     ("origin", False, ["oo_nodes_to_config", "oo_masters_to_config"], True),
     ("openshift-enterprise", False, ["oo_etcd_to_config"], False),
+    ("origin", True, ["nfs"], False),
+    ("openshift-enterprise", True, ["lb"], False),
 ])
 def test_is_active(task_vars, deployment_type, is_containerized, group_names, expect_active):
     task_vars['openshift_deployment_type'] = deployment_type
