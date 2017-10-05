@@ -114,7 +114,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # template for images that run on top of OpenShift
         image_url = "{}/{}-{}:{}".format(image_info["namespace"], image_info["name"], "${component}", "${version}")
         image_url = self.get_var("oreg_url", default="") or image_url
-        if 'nodes' in host_groups:
+        if 'oo_nodes_to_config' in host_groups:
             for suffix in NODE_IMAGE_SUFFIXES:
                 required.add(image_url.replace("${component}", suffix).replace("${version}", image_tag))
             # The registry-console is for some reason not prefixed with ose- like the other components.
@@ -125,13 +125,13 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # images for containerized components
         if self.get_var("openshift", "common", "is_containerized"):
             components = set()
-            if 'nodes' in host_groups:
+            if 'oo_nodes_to_config' in host_groups:
                 components.update(["node", "openvswitch"])
-            if 'masters' in host_groups:  # name is "origin" or "ose"
+            if 'oo_masters_to_config' in host_groups:  # name is "origin" or "ose"
                 components.add(image_info["name"])
             for component in components:
                 required.add("{}/{}:{}".format(image_info["namespace"], component, image_tag))
-            if 'etcd' in host_groups:  # special case, note it is the same for origin/enterprise
+            if 'oo_etcd_to_config' in host_groups:  # special case, note it is the same for origin/enterprise
                 required.add("registry.access.redhat.com/rhel7/etcd")  # and no image tag
 
         return required

@@ -15,7 +15,11 @@ class EtcdVolume(OpenShiftCheck):
     etcd_mount_path = "/var/lib/etcd"
 
     def is_active(self):
-        etcd_hosts = self.get_var("groups", "etcd", default=[]) or self.get_var("groups", "masters", default=[]) or []
+        etcd_hosts = (
+            self.get_var("groups", "oo_etcd_to_config", default=[]) or
+            self.get_var("groups", "oo_masters_to_config", default=[]) or
+            []
+        )
         is_etcd_host = self.get_var("ansible_host") in etcd_hosts
         return super(EtcdVolume, self).is_active() and is_etcd_host
 

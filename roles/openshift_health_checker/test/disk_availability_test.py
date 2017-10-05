@@ -4,11 +4,11 @@ from openshift_checks.disk_availability import DiskAvailability, OpenShiftCheckE
 
 
 @pytest.mark.parametrize('group_names,is_active', [
-    (['masters'], True),
-    (['nodes'], True),
-    (['etcd'], True),
-    (['masters', 'nodes'], True),
-    (['masters', 'etcd'], True),
+    (['oo_masters_to_config'], True),
+    (['oo_nodes_to_config'], True),
+    (['oo_etcd_to_config'], True),
+    (['oo_masters_to_config', 'oo_nodes_to_config'], True),
+    (['oo_masters_to_config', 'oo_etcd_to_config'], True),
     ([], False),
     (['lb'], False),
     (['nfs'], False),
@@ -39,7 +39,7 @@ def test_is_active(group_names, is_active):
 ])
 def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
     task_vars = dict(
-        group_names=['masters'],
+        group_names=['oo_masters_to_config'],
         ansible_mounts=ansible_mounts,
     )
 
@@ -52,7 +52,7 @@ def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
 
 @pytest.mark.parametrize('group_names,configured_min,ansible_mounts', [
     (
-        ['masters'],
+        ['oo_masters_to_config'],
         0,
         [{
             'mount': '/',
@@ -60,7 +60,7 @@ def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
         }],
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         0,
         [{
             'mount': '/',
@@ -68,7 +68,7 @@ def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
         }],
     ),
     (
-        ['etcd'],
+        ['oo_etcd_to_config'],
         0,
         [{
             'mount': '/',
@@ -76,7 +76,7 @@ def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
         }],
     ),
     (
-        ['etcd'],
+        ['oo_etcd_to_config'],
         1,  # configure lower threshold
         [{
             'mount': '/',
@@ -84,7 +84,7 @@ def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
         }],
     ),
     (
-        ['etcd'],
+        ['oo_etcd_to_config'],
         0,
         [{
             # not enough space on / ...
@@ -112,7 +112,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
 @pytest.mark.parametrize('name,group_names,configured_min,ansible_mounts,expect_chunks', [
     (
         'test with no space available',
-        ['masters'],
+        ['oo_masters_to_config'],
         0,
         [{
             'mount': '/',
@@ -122,7 +122,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
     ),
     (
         'test with a higher configured required value',
-        ['masters'],
+        ['oo_masters_to_config'],
         100,  # set a higher threshold
         [{
             'mount': '/',
@@ -132,7 +132,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
     ),
     (
         'test with 1GB available, but "0" GB space requirement',
-        ['nodes'],
+        ['oo_nodes_to_config'],
         0,
         [{
             'mount': '/',
@@ -142,7 +142,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
     ),
     (
         'test with no space available, but "0" GB space requirement',
-        ['etcd'],
+        ['oo_etcd_to_config'],
         0,
         [{
             'mount': '/',
@@ -152,7 +152,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
     ),
     (
         'test with enough space for a node, but not for a master',
-        ['nodes', 'masters'],
+        ['oo_nodes_to_config', 'oo_masters_to_config'],
         0,
         [{
             'mount': '/',
@@ -162,7 +162,7 @@ def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansib
     ),
     (
         'test failure with enough space on "/", but not enough on "/var"',
-        ['etcd'],
+        ['oo_etcd_to_config'],
         0,
         [{
             # enough space on / ...
@@ -194,7 +194,7 @@ def test_fails_with_insufficient_disk_space(name, group_names, configured_min, a
 @pytest.mark.parametrize('name,group_names,context,ansible_mounts,failed,extra_words', [
     (
         'test without enough space for master under "upgrade" context',
-        ['nodes', 'masters'],
+        ['oo_nodes_to_config', 'oo_masters_to_config'],
         "upgrade",
         [{
             'mount': '/',
@@ -206,7 +206,7 @@ def test_fails_with_insufficient_disk_space(name, group_names, configured_min, a
     ),
     (
         'test with enough space for master under "upgrade" context',
-        ['nodes', 'masters'],
+        ['oo_nodes_to_config', 'oo_masters_to_config'],
         "upgrade",
         [{
             'mount': '/',
@@ -218,7 +218,7 @@ def test_fails_with_insufficient_disk_space(name, group_names, configured_min, a
     ),
     (
         'test with not enough space for master, and non-upgrade context',
-        ['nodes', 'masters'],
+        ['oo_nodes_to_config', 'oo_masters_to_config'],
         "health",
         [{
             'mount': '/',

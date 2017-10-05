@@ -26,7 +26,7 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
     (
         dict(
             openshift=dict(common=dict(service_type='origin')),
-            group_names=['masters'],
+            group_names=['oo_masters_to_config'],
         ),
         set(['origin-master']),
         set(['origin-node']),
@@ -34,7 +34,7 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
     (
         dict(
             openshift=dict(common=dict(service_type='atomic-openshift')),
-            group_names=['nodes'],
+            group_names=['oo_nodes_to_config'],
         ),
         set(['atomic-openshift-node']),
         set(['atomic-openshift-master']),
@@ -42,7 +42,7 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
     (
         dict(
             openshift=dict(common=dict(service_type='atomic-openshift')),
-            group_names=['masters', 'nodes'],
+            group_names=['oo_masters_to_config', 'oo_nodes_to_config'],
         ),
         set(['atomic-openshift-master', 'atomic-openshift-node']),
         set(),

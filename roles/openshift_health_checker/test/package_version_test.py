@@ -97,14 +97,14 @@ def test_docker_package_version(deployment_type, openshift_release, expected_doc
 
 
 @pytest.mark.parametrize('group_names,is_containerized,is_active', [
-    (['masters'], False, True),
+    (['oo_masters_to_config'], False, True),
     # ensure check is skipped on containerized installs
-    (['masters'], True, False),
-    (['nodes'], False, True),
-    (['masters', 'nodes'], False, True),
-    (['masters', 'etcd'], False, True),
+    (['oo_masters_to_config'], True, False),
+    (['oo_nodes_to_config'], False, True),
+    (['oo_masters_to_config', 'oo_nodes_to_config'], False, True),
+    (['oo_masters_to_config', 'oo_etcd_to_config'], False, True),
     ([], False, False),
-    (['etcd'], False, False),
+    (['oo_etcd_to_config'], False, False),
     (['lb'], False, False),
     (['nfs'], False, False),
 ])

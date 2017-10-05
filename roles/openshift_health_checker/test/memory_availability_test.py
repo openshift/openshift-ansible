@@ -4,11 +4,11 @@ from openshift_checks.memory_availability import MemoryAvailability
 
 
 @pytest.mark.parametrize('group_names,is_active', [
-    (['masters'], True),
-    (['nodes'], True),
-    (['etcd'], True),
-    (['masters', 'nodes'], True),
-    (['masters', 'etcd'], True),
+    (['oo_masters_to_config'], True),
+    (['oo_nodes_to_config'], True),
+    (['oo_etcd_to_config'], True),
+    (['oo_masters_to_config', 'oo_nodes_to_config'], True),
+    (['oo_masters_to_config', 'oo_etcd_to_config'], True),
     ([], False),
     (['lb'], False),
     (['nfs'], False),
@@ -22,32 +22,32 @@ def test_is_active(group_names, is_active):
 
 @pytest.mark.parametrize('group_names,configured_min,ansible_memtotal_mb', [
     (
-        ['masters'],
+        ['oo_masters_to_config'],
         0,
         17200,
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         0,
         8200,
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         1,  # configure lower threshold
         2000,  # too low for recommended but not for configured
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         2,  # configure threshold where adjustment pushes it over
         1900,
     ),
     (
-        ['etcd'],
+        ['oo_etcd_to_config'],
         0,
         8200,
     ),
     (
-        ['masters', 'nodes'],
+        ['oo_masters_to_config', 'oo_nodes_to_config'],
         0,
         17000,
     ),
@@ -66,43 +66,43 @@ def test_succeeds_with_recommended_memory(group_names, configured_min, ansible_m
 
 @pytest.mark.parametrize('group_names,configured_min,ansible_memtotal_mb,extra_words', [
     (
-        ['masters'],
+        ['oo_masters_to_config'],
         0,
         0,
         ['0.0 GiB'],
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         0,
         100,
         ['0.1 GiB'],
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         24,  # configure higher threshold
         20 * 1024,  # enough to meet recommended but not configured
         ['20.0 GiB'],
     ),
     (
-        ['nodes'],
+        ['oo_nodes_to_config'],
         24,  # configure higher threshold
         22 * 1024,  # not enough for adjustment to push over threshold
         ['22.0 GiB'],
     ),
     (
-        ['etcd'],
+        ['oo_etcd_to_config'],
         0,
         6 * 1024,
         ['6.0 GiB'],
     ),
     (
-        ['etcd', 'masters'],
+        ['oo_etcd_to_config', 'oo_masters_to_config'],
         0,
         9 * 1024,  # enough memory for etcd, not enough for a master
         ['9.0 GiB'],
     ),
     (
-        ['nodes', 'masters'],
+        ['oo_nodes_to_config', 'oo_masters_to_config'],
         0,
         # enough memory for a node, not enough for a master
         11 * 1024,
