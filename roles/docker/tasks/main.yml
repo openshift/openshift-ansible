@@ -53,6 +53,8 @@
   template:
     dest: "{{ docker_systemd_dir }}/custom.conf"
     src: custom.conf.j2
+  notify:
+  - restart docker
 
 - include: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
