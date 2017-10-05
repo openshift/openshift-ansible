@@ -78,7 +78,7 @@ etcd_service: "{{ 'etcd_container' if r_etcd_common_etcd_runtime == 'docker' els
 etcd_service_file: "/etc/systemd/system/{{ etcd_service }}.service"
 
 r_etcd_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
-r_etcd_use_firewalld: "{{ os_firewall_use_firewalld | default(Falsel) }}"
+r_etcd_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 etcd_systemd_dir: "/etc/systemd/system/{{ etcd_service }}.service.d"
 r_etcd_os_firewall_deny: []
