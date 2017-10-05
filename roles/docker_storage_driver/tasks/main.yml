@@ -1,0 +1,19 @@
+---
+
+- name: Start container service
+  service:
+    name: "{{ openshift.docker.service_name }}"
+    state: started
+
+- name: Capture output of "docker info"
+  command: docker info
+  register: docker_info_output
+  changed_when: False
+
+- name: Isolate storage driver
+  set_fact:
+    match_list: "{{ docker_info_output.stdout | regex_search('(?<=Storage Driver:)\\s*(\\w+)', '\\1', ignorecase=True, multiline=True) }}"
+
+- name: Set output variable
+  set_fact:
+    docker_storage_driver: "{{ match_list[0] }}"
