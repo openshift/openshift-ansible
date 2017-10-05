@@ -3,8 +3,6 @@
 from __future__ import print_function
 
 import json
-import os
-import sys
 
 import shade
 
@@ -19,7 +17,7 @@ if __name__ == '__main__':
     cluster_hosts = [
         server for server in cloud.list_servers()
         if 'metadata' in server and 'clusterid' in server.metadata]
-    
+
     masters = [server.name for server in cluster_hosts
                if server.metadata['host-type'] == 'master']
 
@@ -30,11 +28,11 @@ if __name__ == '__main__':
 
     infra_hosts = [server.name for server in cluster_hosts
                    if server.metadata['host-type'] == 'node' and
-                        server.metadata['sub-host-type'] == 'infra']
+                   server.metadata['sub-host-type'] == 'infra']
 
     app = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'node' and
-               server.metadata['sub-host-type'] == 'app']
+           server.metadata['sub-host-type'] == 'app']
 
     nodes = list(set(masters + infra_hosts + app))
 
@@ -42,22 +40,22 @@ if __name__ == '__main__':
            if server.metadata['host-type'] == 'dns']
 
     lb = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'lb']
+          if server.metadata['host-type'] == 'lb']
 
     osev3 = list(set(nodes + etcd + lb))
 
     groups = [server.metadata.group for server in cluster_hosts
               if 'group' in server.metadata]
 
-    inventory['cluster_hosts'] = { 'hosts': [s.name for s in cluster_hosts] }
-    inventory['OSEv3'] = { 'hosts': osev3 }
-    inventory['masters'] = { 'hosts': masters }
-    inventory['etcd'] = { 'hosts': etcd }
-    inventory['nodes'] = { 'hosts': nodes }
-    inventory['infra_hosts'] = { 'hosts': infra_hosts }
-    inventory['app'] = { 'hosts': app }
-    inventory['dns'] = { 'hosts': dns }
-    inventory['lb'] = { 'hosts': lb }
+    inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
+    inventory['OSEv3'] = {'hosts': osev3}
+    inventory['masters'] = {'hosts': masters}
+    inventory['etcd'] = {'hosts': etcd}
+    inventory['nodes'] = {'hosts': nodes}
+    inventory['infra_hosts'] = {'hosts': infra_hosts}
+    inventory['app'] = {'hosts': app}
+    inventory['dns'] = {'hosts': dns}
+    inventory['lb'] = {'hosts': lb}
 
     for server in cluster_hosts:
         if 'group' in server.metadata:
@@ -66,7 +64,7 @@ if __name__ == '__main__':
                 inventory[group] = {'hosts': []}
             inventory[group]['hosts'].append(server.name)
 
-    inventory['_meta'] = { 'hostvars': {} }
+    inventory['_meta'] = {'hostvars': {}}
 
     for server in cluster_hosts:
         ssh_ip_address = server.public_v4 or server.private_v4
