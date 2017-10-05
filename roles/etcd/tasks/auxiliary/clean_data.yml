@@ -1,5 +1,5 @@
 ---
 - name: Remove member data
   file:
-    path: /var/lib/etcd/member
+    path: "{{ etcd_data_dir }}/member"
     state: absent

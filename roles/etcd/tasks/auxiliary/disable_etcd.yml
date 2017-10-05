@@ -1,0 +1,5 @@
+---
+- name: Disable etcd members
+  service:
+    name: "{{ etcd_service }}"
+    state: stopped

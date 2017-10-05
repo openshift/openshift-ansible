@@ -1,0 +1,12 @@
+---
+- include: backup/vars.yml
+
+- name: Move content of etcd backup under the etcd data directory
+  command: >
+    mv "{{ l_etcd_backup_dir }}/member" "{{ l_etcd_data_dir }}"
+
+- name: Set etcd group for the etcd data directory
+  command: >
+    chown -R etcd:etcd "{{ l_etcd_data_dir }}"
+
+- include: auxiliary/force_new_cluster.yml
