@@ -1,4 +1,7 @@
 ---
+- name: check for valid variable definitions
+  include: sanitize.yml
+
 - when: openshift_aws_create_vpc | bool
   name: create default vpc
   include: vpc.yml
