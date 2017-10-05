@@ -1,0 +1,21 @@
+---
+- name: Setup Docker - Masters and Nodes
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  roles:
+  - role: openshift_docker
+    when: not skip_docker_role | default(False) | bool
+
+- name: Setup Docker - etcd hosts
+  hosts: oo_etcd_to_config
+  roles:
+  - role: openshift_docker_facts
+    when:
+    - not skip_docker_role | default(False) | bool
+    - "'oo_masters_to_config' not in group_names"
+    - "'oo_nodes_to_config' not in group_names"
+  - role: docker
+    when:
+    - not skip_docker_role | default(False) | bool
+    - openshift.common.is_containerized | default(False) | bool
+    - "'oo_masters_to_config' not in group_names"
+    - "'oo_nodes_to_config' not in group_names"

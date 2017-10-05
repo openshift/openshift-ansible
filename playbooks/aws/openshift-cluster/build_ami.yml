@@ -62,9 +62,13 @@
 
 - name: run the std_include
   include: ../../common/openshift-cluster/initialize_facts.yml
+  vars:
+    openshift_setup_docker: True
 
-- name: run the std_include
+- name: run the openshift_repos
   include: ../../common/openshift-cluster/initialize_openshift_repos.yml
+
+- include: ../../common/openshift-cluster/setup_docker.yml
 
 - name: run node config setup
   include: ../../common/openshift-node/setup.yml

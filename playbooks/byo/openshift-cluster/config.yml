@@ -1,11 +1,9 @@
 ---
 - include: initialize_groups.yml
-  tags:
-  - always
 
 - include: ../../common/openshift-cluster/std_include.yml
-  tags:
-  - always
+  vars:
+    openshift_setup_docker: True
 
 - include: ../../common/openshift-cluster/config.yml
   vars:
