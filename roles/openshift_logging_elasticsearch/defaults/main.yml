@@ -6,7 +6,7 @@ openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_
 openshift_logging_elasticsearch_namespace: logging
 
 openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector | default('') }}"
-openshift_logging_elasticsearch_cpu_limit: 1000m
+openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_cpu_limit | default('1000m') }}"
 openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit | default('1Gi') }}"
 openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_recover_after_time | default('5m') }}"
 
