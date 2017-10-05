@@ -48,7 +48,9 @@
     template:
       dest: "{{ docker_systemd_dir }}/custom.conf"
       src: custom.conf.j2
-  when: not os_firewall_use_firewalld | default(False) | bool
+    notify:
+    - restart docker
+  when: not (os_firewall_use_firewalld | default(False)) | bool
 
 - name: Add enterprise registry, if necessary
   set_fact:
