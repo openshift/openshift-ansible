@@ -3,4 +3,4 @@
 #   tags:
 #     - always
 
-- include: ../../common/openshift-cfme/uninstall.yml
+- include: ../../common/openshift-management/uninstall.yml

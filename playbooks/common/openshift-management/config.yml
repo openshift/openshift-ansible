@@ -4,12 +4,12 @@
   pre_tasks:
   - name: Create a temporary place to evaluate the PV templates
     command: mktemp -d /tmp/openshift-ansible-XXXXXXX
-    register: r_openshift_cfme_mktemp
+    register: r_openshift_management_mktemp
     changed_when: false
 
   tasks:
   - name: Run the CFME Setup Role
     include_role:
-      name: openshift_cfme
+      name: openshift_management
     vars:
-      template_dir: "{{ hostvars[groups.masters.0].r_openshift_cfme_mktemp.stdout }}"
+      template_dir: "{{ hostvars[groups.masters.0].r_openshift_management_mktemp.stdout }}"

@@ -240,9 +240,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # CloudForms Management Engine (ManageIQ) App Install
 #
 # Enables installation of MIQ server. Recommended for dedicated
-# clusters only. See roles/openshift_cfme/README.md for instructions
+# clusters only. See roles/openshift_management/README.md for instructions
 # and requirements.
-#openshift_cfme_install_app=False
+#openshift_management_install_management=False
 
 # Cloud Provider Configuration
 #
@@ -920,31 +920,31 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 # CloudForms/ManageIQ (CFME/MIQ) Configuration
 
 # See the readme for full descriptions and getting started
-# instructions: ../../roles/openshift_cfme/README.md or go directly to
-# their definitions: ../../roles/openshift_cfme/defaults/main.yml
-# ../../roles/openshift_cfme/vars/main.yml
+# instructions: ../../roles/openshift_management/README.md or go directly to
+# their definitions: ../../roles/openshift_management/defaults/main.yml
+# ../../roles/openshift_management/vars/main.yml
 #
 # Namespace for the CFME project
-#openshift_cfme_project: openshift-cfme
+#openshift_management_project: openshift-management
 
 # Namespace/project description
-#openshift_cfme_project_description: CloudForms Management Engine
+#openshift_management_project_description: CloudForms Management Engine
 
 # Choose 'miq-template' for a podified database install
 # Choose 'miq-template-ext-db' for an external database install
 #
 # If you are using the miq-template-ext-db template then you must add
 # the required database parameters to the
-# openshift_cfme_template_parameters variable.
-#openshift_cfme_app_template: miq-template
+# openshift_management_template_parameters variable.
+#openshift_management_app_template: miq-template
 
 # Allowed options: nfs, nfs_external, preconfigured, cloudprovider.
-#openshift_cfme_storage_class: nfs
+#openshift_management_storage_class: nfs
 
 # [OPTIONAL] - If you are using an EXTERNAL NFS server, such as a
 # netapp appliance, then you must set the hostname here. Leave the
 # value as 'false' if you are not using external NFS.
-#openshift_cfme_storage_nfs_external_hostname: false
+#openshift_management_storage_nfs_external_hostname: false
 
 # [OPTIONAL] - If you are using external NFS then you must set the base
 # path to the exports location here.
@@ -952,19 +952,19 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 # Additionally: EXTERNAL NFS REQUIRES that YOU CREATE the nfs exports
 # that will back the application PV and optionally the database
 # pv. Export path definitions, relative to
-# {{ openshift_cfme_storage_nfs_base_dir }}
+# {{ openshift_management_storage_nfs_base_dir }}
 #
 # LOCAL NFS NOTE:
 #
 # You may may also change this value if you want to change the default
 # path used for local NFS exports.
-#openshift_cfme_storage_nfs_base_dir: /exports
+#openshift_management_storage_nfs_base_dir: /exports
 
 # LOCAL NFS NOTE:
 #
 # You may override the automatically selected LOCAL NFS server by
 # setting this variable. Useful for testing specific task files.
-#openshift_cfme_storage_nfs_local_hostname: false
+#openshift_management_storage_nfs_local_hostname: false
 
 # A hash of parameters you want to override or set in the
 # miq-template.yaml or miq-template-ext-db.yaml templates. Set this in
@@ -972,5 +972,5 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 # under the .parameters list in files/miq-template{-ext-db}.yaml
 # Example:
 #
-# openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
-#openshift_cfme_template_parameters: {}
+# openshift_management_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
+#openshift_management_template_parameters: {}

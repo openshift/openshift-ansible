@@ -81,6 +81,7 @@ class CallbackModule(CallbackBase):
             'installer_phase_metrics',
             'installer_phase_logging',
             'installer_phase_servicecatalog',
+            'installer_phase_management',
         ]
 
         # Define the attributes of the installer phases
@@ -132,6 +133,10 @@ class CallbackModule(CallbackBase):
             'installer_phase_servicecatalog': {
                 'title': 'Service Catalog Install',
                 'playbook': 'playbooks/byo/openshift-cluster/service-catalog.yml'
+            },
+            'installer_phase_management': {
+                'title': 'Management Install',
+                'playbook': 'playbooks/common/openshift-cluster/openshift_management.yml'
             },
         }
 

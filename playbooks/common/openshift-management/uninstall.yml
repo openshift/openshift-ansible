@@ -4,5 +4,5 @@
   tasks:
   - name: Run the CFME Uninstall Role Tasks
     include_role:
-      name: openshift_cfme
+      name: openshift_management
       tasks_from: uninstall
