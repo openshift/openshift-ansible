@@ -33,7 +33,7 @@ openshift_logging_elasticsearch_pvc_size: ""
 openshift_logging_elasticsearch_pvc_dynamic: false
 openshift_logging_elasticsearch_pvc_pv_selector: {}
 openshift_logging_elasticsearch_pvc_access_modes: ['ReadWriteOnce']
-openshift_logging_elasticsearch_storage_group: '65534'
+openshift_logging_elasticsearch_storage_group: ['65534']
 
 openshift_logging_es_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
 
