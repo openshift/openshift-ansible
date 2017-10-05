@@ -46,3 +46,5 @@ These options may be set via the ``atomic`` ``--set`` flag. For defaults see ``r
 * ANSIBLE_CONFIG - Full path for the ansible configuration file to use inside the container
 
 * INVENTORY_FILE - Full path for the inventory to use from the host
+
+* INVENTORY_DIR - Full path for the inventory directory to use (e.g. for use with a hybrid dynamic/static inventory)
