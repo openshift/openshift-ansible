@@ -1,0 +1,3 @@
+---
+- include: nfs.yml
+  when: not (openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'))

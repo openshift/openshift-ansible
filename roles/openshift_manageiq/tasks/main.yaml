@@ -1,8 +1,4 @@
 ---
-- fail:
-    msg: "The openshift_manageiq role requires OpenShift Enterprise 3.1 or Origin 1.1."
-  when: not openshift.common.version_gte_3_1_or_1_1 | bool
-
 - name: Add Management Infrastructure project
   oc_project:
     name: management-infra
@@ -61,4 +57,3 @@
     resource_kind: "{{ item.resource_kind }}"
     user: "{{ item.user }}"
   with_items: "{{manage_iq_openshift_3_2_tasks}}"
-  when: openshift.common.version_gte_3_2_or_1_2 | bool
