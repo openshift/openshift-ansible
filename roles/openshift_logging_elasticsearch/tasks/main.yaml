@@ -37,6 +37,7 @@
 # we want to make sure we have all the necessary components here
 
 # service account
+
 - name: Create ES service account
   oc_serviceaccount:
     state: present
@@ -76,6 +77,38 @@
     resource_kind: cluster-role
     resource_name: rolebinding-reader
     user: "system:serviceaccount:{{ openshift_logging_elasticsearch_namespace }}:aggregated-logging-elasticsearch"
+
+- oc_adm_policy_user:
+    state: present
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    resource_kind: cluster-role
+    resource_name: system:auth-delegator
+    user: "system:serviceaccount:{{ openshift_logging_elasticsearch_namespace}}:aggregated-logging-elasticsearch"
+
+# logging-metrics-reader role
+- template:
+    src: logging-metrics-role.j2
+    dest: "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
+  vars:
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    role_namespace: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_namespace(openshift_logging_elasticsearch_namespace) }}"
+    role_user: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_name }}"
+
+- name: Create logging-metrics-reader-role
+  command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    -n "{{ openshift_logging_elasticsearch_namespace }}"
+    create -f "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
+  register: prometheus_out
+  check_mode: no
+  ignore_errors: yes
+
+- fail:
+    msg: "There was an error creating the logging-metrics-role and binding: {{prometheus_out}}"
+  when:
+  - "prometheus_out.stderr | length > 0"
+  - "'already exists' not in prometheus_out.stderr"
 
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
@@ -206,6 +239,32 @@
     - port: 9200
       targetPort: "restapi"
 
+- name: Set logging-{{ es_component}}-prometheus service
+  oc_service:
+    state: present
+    name: "logging-{{es_component}}-prometheus"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    labels:
+      logging-infra: 'support'
+    ports:
+    - name: proxy
+      port: 443
+      targetPort: 4443
+    selector:
+      component: "{{ es_component }}-prometheus"
+      provider: openshift
+
+- oc_edit:
+    kind: service
+    name: "logging-{{es_component}}-prometheus"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    separator: '#'
+    content:
+      metadata#annotations#service.alpha.openshift.io/serving-cert-secret-name: "prometheus-tls"
+      metadata#annotations#prometheus.io/scrape: "true"
+      metadata#annotations#prometheus.io/scheme: "https"
+      metadata#annotations#prometheus.io/path: "_prometheus/metrics"
+
 - name: Check to see if PVC already exists
   oc_obj:
     state: list
@@ -260,7 +319,7 @@
       delete_after: true
 
 - set_fact:
-    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 'abcdefghijklmnopqrstuvwxyz0123456789' | random_word(8) }}"
+    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
   when: openshift_logging_elasticsearch_deployment_name == ""
 
 - set_fact:
