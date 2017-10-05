@@ -72,8 +72,9 @@ if __name__ == '__main__':
             'ansible_host': ssh_ip_address
         }
 
-        if server.public_v4:
-            vars['public_v4'] = server.public_v4
+        public_v4 = server.public_v4 or server.private_v4
+        if public_v4:
+            vars['public_v4'] = public_v4
         # TODO(shadower): what about multiple networks?
         if server.private_v4:
             vars['private_v4'] = server.private_v4
