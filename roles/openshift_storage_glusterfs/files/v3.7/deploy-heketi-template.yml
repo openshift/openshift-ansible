@@ -85,8 +85,6 @@ objects:
           volumeMounts:
           - name: db
             mountPath: /var/lib/heketi
-          - name: topology
-            mountPath: ${TOPOLOGY_PATH}
           - name: config
             mountPath: /etc/heketi
           readinessProbe:
@@ -103,9 +101,6 @@ objects:
               port: 8080
         volumes:
         - name: db
-        - name: topology
-          secret:
-            secretName: heketi-${CLUSTER_NAME}-topology-secret
         - name: config
           secret:
             secretName: heketi-${CLUSTER_NAME}-config-secret
@@ -138,6 +133,3 @@ parameters:
   displayName: GlusterFS cluster name
   description: A unique name to identify this heketi service, useful for running multiple heketi instances
   value: glusterfs
-- name: TOPOLOGY_PATH
-  displayName: heketi topology file location
-  required: True
