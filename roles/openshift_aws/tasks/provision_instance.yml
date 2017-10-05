@@ -1,16 +1,4 @@
 ---
-- when: openshift_aws_create_vpc | bool
-  name: create a vpc
-  include: vpc.yml
-
-- when: openshift_aws_users | length  > 0
-  name: create aws ssh keypair
-  include: ssh_keys.yml
-
-- when: openshift_aws_create_security_groups | bool
-  name: Create compute security_groups
-  include: security_group.yml
-
 - name: query vpc
   ec2_vpc_net_facts:
     region: "{{ openshift_aws_region }}"
@@ -33,7 +21,7 @@
     key_name: "{{ openshift_aws_ssh_key_name }}"
     group: "{{ openshift_aws_build_ami_group }}"
     instance_type: m4.xlarge
-    vpc_subnet_id: "{{ subnetout.subnets[0].id }}"
+    vpc_subnet_id: "{{ openshift_aws_subnet_id | default(subnetout.subnets[0].id) }}"
     image: "{{ openshift_aws_base_ami }}"
     volumes:
     - device_name: /dev/sdb
@@ -46,3 +34,30 @@
       Name: "{{ openshift_aws_base_ami_name }}"
     instance_tags:
       Name: "{{ openshift_aws_base_ami_name }}"
+
+- name: fetch newly created instances
+  ec2_remote_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_base_ami_name }}"
+      instance-state-name: running
+  register: instancesout
+  retries: 20
+  delay: 3
+  until: instancesout.instances|length > 0
+
+- name: wait for ssh to become available
+  wait_for:
+    port: 22
+    host: "{{ instancesout.instances[0].public_ip_address }}"
+    timeout: 300
+    search_regex: OpenSSH
+
+- name: Pause 10 seconds to ensure ssh actually accepts logins
+  pause:
+    seconds: 20
+
+- name: add host to nodes
+  add_host:
+    groups: nodes
+    name: "{{ instancesout.instances[0].public_dns_name }}"
