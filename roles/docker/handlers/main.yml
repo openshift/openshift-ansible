@@ -4,6 +4,7 @@
   systemd:
     name: "{{ openshift.docker.service_name }}"
     state: restarted
+    daemon_reload: yes
   register: r_docker_restart_docker_result
   until: not r_docker_restart_docker_result | failed
   retries: 3
