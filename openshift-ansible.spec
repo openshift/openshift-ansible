@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.137
+Version:        3.4.140
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
