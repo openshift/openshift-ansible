@@ -275,12 +275,5 @@ servingInfo:
   - {{ cipher_suite }}
 {% endfor %}
 {% endif %}
-{% if openshift_template_service_broker_namespaces is defined %}
-templateServiceBrokerConfig:
-  templateNamespaces:
-{% for namespace in openshift_template_service_broker_namespaces %}
-  - {{ namespace }}
-{% endfor %}
-{% endif %}
 volumeConfig:
   dynamicProvisioningEnabled: {{ openshift.master.dynamic_provisioning_enabled }}
