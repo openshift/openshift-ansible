@@ -120,6 +120,17 @@
   notify:
   - restart docker
 
+- name: Start the Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- set_fact:
+    docker_service_status_changed: start_result | changed
+
 - name: Check for credentials file for registry auth
   stat:
     path: "{{ docker_cli_auth_config_path }}/config.json"
@@ -131,16 +142,5 @@
   when:
   - oreg_auth_user is defined
   - (not docker_cli_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-
-- name: Start the Docker service
-  systemd:
-    name: docker
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  register: start_result
-
-- set_fact:
-    docker_service_status_changed: start_result | changed
 
 - meta: flush_handlers
