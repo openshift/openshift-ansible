@@ -35,6 +35,10 @@ stream_address = ""
 # stream_port is the port on which the stream server will listen
 stream_port = "10010"
 
+# file_locking is whether file-based locking will be used instead of
+# in-memory locking
+file_locking = true
+
 # The "crio.runtime" table contains settings pertaining to the OCI
 # runtime used and options for how to set up and manage the OCI runtime.
 [crio.runtime]
@@ -67,6 +71,9 @@ runtime_untrusted_workload = ""
 # container runtime for all containers.
 default_workload_trust = "trusted"
 
+# no_pivot instructs the runtime to not use pivot_root, but instead use MS_MOVE
+no_pivot = false
+
 # conmon is the path to conmon binary, used for managing the runtime.
 conmon = "/usr/libexec/crio/conmon"
 
@@ -91,7 +98,17 @@ apparmor_profile = "crio-default"
 
 # cgroup_manager is the cgroup management implementation to be used
 # for the runtime.
-cgroup_manager = "systemd"
+cgroup_manager = "cgroupfs"
+
+# hooks_dir_path is the oci hooks directory for automatically executed hooks
+hooks_dir_path = "/usr/share/containers/oci/hooks.d"
+
+# pids_limit is the number of processes allowed in a container
+pids_limit = 1024
+
+# log_size_max is the max limit for the container log size in bytes.
+# Negative values indicate that no limit is imposed.
+log_size_max = -1
 
 # The "crio.image" table contains settings pertaining to the
 # management of OCI images.
@@ -115,6 +132,10 @@ pause_command = "/pause"
 # unspecified so that the default system-wide policy will be used.
 signature_policy = ""
 
+# image_volumes controls how image volumes are handled.
+# The valid values are mkdir and ignore.
+image_volumes = "mkdir"
+
 # insecure_registries is used to skip TLS verification when pulling images.
 insecure_registries = [
 {{ l_insecure_crio_registries|default("") }}
@@ -125,6 +146,7 @@ insecure_registries = [
 registries = [
 {{ l_additional_crio_registries|default("") }}
 ]
+
 # The "crio.network" table contains settings pertaining to the
 # management of CNI plugins.
 [crio.network]
