@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.143.0%{?dist}
+Release:        0.144.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,51 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.144.0
+- fix typo for default in etcd (mgugino@redhat.com)
+- Bumping version of service catalog image for 3.7 (ewolinet@redhat.com)
+- remove duplicate [OSEv3:children] group (jfchevrette@gmail.com)
+- Fix lint error (tbielawa@redhat.com)
+- Update hosts.ose.example (ephillipe@gmail.com)
+- Remove the no-longer-used App/DB pv size override variables from inventories
+  (tbielawa@redhat.com)
+- openshift_checks: lb and nfs do not need docker (lmeyer@redhat.com)
+- openshift_checks: use oo group names everywhere (lmeyer@redhat.com)
+- Add notes about SA token. Improve NFS validation. (tbielawa@redhat.com)
+- Hooks for installing CFME during full openshift installation
+  (tbielawa@redhat.com)
+- Documentation (tbielawa@redhat.com)
+- Import upstream templates. Do the work. Validate parameters.
+  (tbielawa@redhat.com)
+- CFME 4.6 work begins. CFME 4.5 references added to the release-3.6 branch
+  (tbielawa@redhat.com)
+- Update hosts.origin.example (ephillipe@gmail.com)
+- Add logging es prometheus endpoint (jcantril@redhat.com)
+- bug 1497401. Default logging and metrics images to 3.7 (jcantril@redhat.com)
+- Ensure docker service started prior to credentials (mgugino@redhat.com)
+- Adding support for an inventory directory/hybrid inventory
+  (esauer@redhat.com)
+- Remove unused tasks file in openshift_named_certificates (rteague@redhat.com)
+- Move node cert playbook into node config path (rteague@redhat.com)
+- Move master cert playbooks into master config path (rteague@redhat.com)
+- Move etcd cert playbooks into etcd config path (rteague@redhat.com)
+- Fix hosted selector variable migration (mgugino@redhat.com)
+- Bug 1496271 - Perserve SCC for ES local persistent storage
+  (jcantril@redhat.com)
+- Limit hosts that run openshift_version role (mgugino@redhat.com)
+- Update ansible-service-broker config to track latest broker
+  (fabian@fabianism.us)
+- fix master-facts for provisioning (mgugino@redhat.com)
+- Make provisioning steps more reusable (mgugino@redhat.com)
+- logging: honor openshift_logging_es_cpu_limit (jwozniak@redhat.com)
+- Addressing tox issues (ewolinet@redhat.com)
+- bug 1482661. Preserve ES dc nodeSelector and supplementalGroups
+  (jcantril@redhat.com)
+- Checking if any openshift_*_storage_kind variables are set to dynamic without
+  enabling dynamic provisioning (ewolinet@redhat.com)
+- Removing setting pvc size and dynamic to remove looped var setting
+  (ewolinet@redhat.com)
+
 * Wed Oct 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.143.0
 - Limit base-package install during master upgrades (mgugino@redhat.com)
 - Fix provisiong scale group and elb logic (mgugino@redhat.com)
