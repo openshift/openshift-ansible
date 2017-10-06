@@ -1,15 +1,56 @@
 ---
 
-- name: remove openshift-ansible-service-broker project
-  oc_project:
-    name: openshift-ansible-service-broker
-    state: absent
-
 - name: remove ansible-service-broker serviceaccount
   oc_serviceaccount:
     name: asb
     namespace: openshift-ansible-service-broker
     state: absent
+
+- name: remove ansible-service-broker client serviceaccount
+  oc_serviceaccount:
+    name: asb-client
+    namespace: openshift-ansible-service-broker
+    state: absent
+
+- name: remove asb-auth cluster role
+  oc_clusterrole:
+    state: absent
+    name: asb-auth
+
+- name: remove asb-access cluster role
+  oc_clusterrole:
+    state: absent
+    name: asb-access
+
+- name: Unbind admin cluster-role to asb serviceaccount
+  oc_adm_policy_user:
+    state: absent
+    namespace: openshift-ansible-service-broker
+    resource_kind: cluster-role
+    resource_name: admin
+    user: "system:serviceaccount:openshift-ansible-service-broker:asb"
+
+- name: Unbind auth cluster role to asb service account
+  oc_adm_policy_user:
+    state: absent
+    namespace: openshift-ansible-service-broker
+    resource_kind: cluster-role
+    resource_name: asb-auth
+    user: "system:serviceaccount:openshift-ansible-service-broker:asb"
+
+- name: Unbind asb-access role to asb-client service account
+  oc_adm_policy_user:
+    state: absent
+    namespace: openshift-ansible-service-broker
+    resource_kind: cluster-role
+    resource_name: asb-access
+    user: "system:serviceaccount:openshift-ansible-service-broker:asb-client"
+
+- name: remove asb-client token secret
+  oc_secret:
+    state: absent
+    name: asb-client
+    namespace: openshift-ansible-service-broker
 
 - name: remove ansible-service-broker service
   oc_service:
@@ -35,19 +76,19 @@
     namespace: openshift-ansible-service-broker
     state: absent
 
-- name: remove etcd deployment
-  oc_obj:
-    name: etcd
-    namespace: openshift-ansible-service-broker
-    state: absent
-    kind: Deployment
-
-- name: remove ansible-service-broker deployment
+- name: remove Ansible Service Broker deployment config
   oc_obj:
     name: asb
     namespace: openshift-ansible-service-broker
+    kind: DeploymentConfig
     state: absent
-    kind: Deployment
+
+- name: remove secret for broker auth
+  oc_obj:
+    name: asb-auth-secret
+    namespace: openshift-ansible-service-broker
+    kind: Broker
+    state: absent
 
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
 - name: remove config map for ansible-service-broker
@@ -62,4 +103,9 @@
   oc_obj:
     name: ansible-service-broker
     state: absent
-    kind: Broker
+    kind: ServiceBroker
+
+- name: remove openshift-ansible-service-broker project
+  oc_project:
+    name: openshift-ansible-service-broker
+    state: absent

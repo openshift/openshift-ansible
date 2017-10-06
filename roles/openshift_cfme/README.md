@@ -1,404 +1,467 @@
-# OpenShift-Ansible - CFME Role
+# CloudForms Availability
 
-# PROOF OF CONCEPT - Alpha Version
+As noted in [Limitations - Product Choice](#product-choice),
+[CloudForms](https://www.redhat.com/en/technologies/management/cloudforms)
+(CFME) 4.6 is not yet released. Until such time, this role is limited
+to installing [ManageIQ](http://manageiq.org) (MIQ), the open source
+project that CFME is based on.
 
-This role is based on the work in the upstream
-[manageiq/manageiq-pods](https://github.com/ManageIQ/manageiq-pods)
-project. For additional literature on configuration specific to
-ManageIQ (optional post-installation tasks), visit the project's
-[upstream documentation page](http://manageiq.org/docs/get-started/basic-configuration).
+After CFME 4.6 is available to customers this role will enable
+(optional) logic which will install CFME or MIQ based on your
+deployment type (`openshift_deployment_type`):
 
-Please submit a
-[new issue](https://github.com/openshift/openshift-ansible/issues/new)
-if you run into bugs with this role or wish to request enhancements.
-
-# Important Notes
-
-This is an early *proof of concept* role to install the Cloud Forms
-Management Engine (ManageIQ) on OpenShift Container Platform (OCP).
-
-* This role is still in **ALPHA STATUS**
-* Many options are hard-coded still (ex: NFS setup)
-* Not many configurable options yet
-* **Should** be ran on a dedicated cluster
-* **Will not run** on undersized infra
-* The terms *CFME* and *MIQ* / *ManageIQ* are interchangeable
-
-## Requirements
-
-**NOTE:** These requirements are copied from the upstream
-[manageiq/manageiq-pods](https://github.com/ManageIQ/manageiq-pods)
-project.
-
-### Prerequisites:
-
-*
-  [OpenShift Origin 1.5](https://docs.openshift.com/container-platform/3.5/welcome/index.html)
-  or
-  [higher](https://docs.openshift.com/container-platform/latest/welcome/index.html)
-  provisioned
-* NFS or other compatible volume provider
-* A cluster-admin user (created by role if required)
-
-### Cluster Sizing
-
-In order to avoid random deployment failures due to resource
-starvation, we recommend a minimum cluster size for a **test**
-environment.
-
-| Type           | Size    | CPUs     | Memory   |
-|----------------|---------|----------|----------|
-| Masters        | `1+`    | `8`      | `12GB`   |
-| Nodes          | `2+`    | `4`      | `8GB`    |
-| PV Storage     | `25GB`  | `N/A`    | `N/A`    |
+* `openshift-enterprise` → CloudForms
+* `origin` → ManageIQ
 
 
-![Basic CFME Deployment](img/CFMEBasicDeployment.png)
+# Table of Contents
 
-**CFME has hard-requirements for memory. CFME will NOT install if your
-  infrastructure does not meet or exceed the requirements given
-  above. Do not run this playbook if you do not have the required
-  memory, you will just waste your time.**
+   * [Introduction](#introduction)
+      * [Important Notes](#important-notes)
+   * [Requirements](#requirements)
+   * [Role Variables](#role-variables)
+   * [Getting Started](#getting-started)
+      * [All Defaults](#all-defaults)
+      * [External NFS Storage](#external-nfs-storage)
+      * [Override PV sizes](#override-pv-sizes)
+      * [Override Memory Requirements](#override-memory-requirements)
+      * [External PostgreSQL Database](#external-postgresql-database)
+   * [Limitations](#limitations)
+      * [Product Choice](#product-choice)
+   * [Configuration](#configuration)
+      * [Database](#database)
+         * [Podified](#podified)
+         * [External](#external)
+      * [Storage Classes](#storage-classes)
+         * [NFS (Default)](#nfs-default)
+         * [NFS External](#nfs-external)
+         * [Cloud Provider](#cloud-provider)
+         * [Preconfigured (Expert Configuration Only)](#preconfigured-expert-configuration-only)
+   * [Customization](#customization)
+   * [Additional Information](#additional-information)
 
+# Introduction
 
-### Other sizing considerations
+This role will allow a user to install CFME 4.6 or MIQ on an OCP
+3.7 cluster. The role provides customization options for overriding
+default deployment parameters. This role allows the user to deploy
+different installation flavors:
 
-* Recommendations assume MIQ will be the **only application running**
-  on this cluster.
-* Alternatively, you can provision an infrastructure node to run
-  registry/metrics/router/logging pods.
-* Each MIQ application pod will consume at least `3GB` of RAM on initial
-  deployment (blank deployment without providers).
-* RAM consumption will ramp up higher depending on appliance use, once
-  providers are added expect higher resource consumption.
+* **Fully Podified** - In this way all application services are ran as
+  pods in the container platform.
+* **External Database** - In this way the application utilizes an
+  externally hosted database server. All other services are ran in the
+  container platform.
 
+This role includes the following storage class options:
 
-### Assumptions
+* NFS - **Default** - local, on cluster
+* NFS External - NFS somewhere else, like a storage appliance
+* Cloud Provider - Use automatic storage provisioning from your cloud
+  provider (*gce* or *aws*)
+* Preconfigured - **expert only**, assumes you created everything ahead
+  of time
 
-1) You meet/exceed the [cluster sizing](#cluster-sizing) requirements
-1) Your NFS server is on your master host
-1) Your PV backing NFS storage volume is mounted on `/exports/`
+You may skip ahead to the [Getting Started](#getting-started) section
+now for examples of how to set up your Ansible inventory for various
+deployment configurations. However, you are **strongly urged** to
+first read through the [Configuration](#configuration) and
+[Customization](#customization) sections as well as the following
+[Important Notes](#important-notes).
 
-Required directories that NFS will export to back the PVs:
+## Important Notes
 
-* `/exports/miq-pv0[123]`
+Not all parameters are present in **both** template versions (podified
+db and external db). For example, while the podified database template
+has a `POSTGRESQL_MEM_REQ` parameter, no such parameter is present in
+the external db template, as there is no need for this information due
+to there being no databases that require pods.
 
-If the required directories are not present at install-time, they will
-be created using the recommended permissions per the
-[upstream documentation](https://github.com/ManageIQ/manageiq-pods#make-persistent-volumes-to-host-the-miq-database-and-application-data):
+*Be extra careful* if you are overriding template
+parameters. Including parameters not defined in a template **will
+cause errors**.
 
-* UID/GID: `root`/`root`
-* Mode: `0775`
+**Container Provider Integration** - If you want add your container
+platform (OCP/Origin) as a *Container Provider* in CFME/MIQ then you
+must ensure that the infrastructure management hooks are installed.
 
-**IMPORTANT:** If you are using a separate volume (`/dev/vdX`) for NFS
-  storage, **ensure** it is mounted on `/exports/` **before** running
-  this role.
+* During your OCP/Origin install, ensure that you have the
+  `openshift_use_manageiq` parameter set to `true` in your inventory
+  at install time. This will create a `management-infra` project and a
+  service account user.
+* After CFME/MIQ is installed, obtain the `management-admin` service
+  account token and copy it somewhere safe.
 
-
-
-## Role Variables
-
-Core variables in this role:
-
-| Name                          | Default value | Description   |
-|-------------------------------|---------------|---------------|
-| `openshift_cfme_install_app`  | `False`       | `True`: Install everything and create a new CFME app, `False`: Just install all of the templates and scaffolding |
-
-
-Variables you may override have defaults defined in
-[defaults/main.yml](defaults/main.yml).
-
-
-# Important Notes
-
-This is a **tech preview** status role presently. Use it with the same
-caution you would give any other pre-release software.
-
-**Most importantly** follow this one rule: don't re-run the entrypoint
-playbook multiple times in a row without cleaning up after previous
-runs if some of the CFME steps have ran. This is a known
-flake. Cleanup instructions are provided at the bottom of this README.
-
-
-# Usage
-
-This section describes the basic usage of this role. All parameters
-will use their [default values](defaults/main.yml).
-
-## Pre-flight Checks
-
-**IMPORTANT:** As documented above in [the prerequisites](#prerequisites),
-  you **must already** have your OCP cluster up and running.
-
-**Optional:** The ManageIQ pod is fairly large (about 1.7 GB) so to
-save some spin-up time post-deployment, you can begin pre-pulling the
-docker image to each of your nodes now:
-
-```
-root@node0x # docker pull docker.io/manageiq/manageiq-pods:app-latest-fine
+```bash
+$ oc serviceaccounts get-token -n management-infra management-admin
+eyJhuGdiOiJSUzI1NiIsInR5dCI6IkpXVCJ9.eyJpd9MiOiJrbWJldm5lbGVzL9NldnZpY2VhY2NvbW50Iiwiy9ViZXJuZXRldy5puy9zZXJ2yWNlYWNju9VubC9uYW1ld9BhY2UiOiJtYW5hZ2VtZW50LWluZnJhIiwiy9ViZXJuZXRldy5puy9zZXJ2yWNlYWNju9VubC9zZWNyZXQuumFtZSI6Im1humFnZW1lunQtYWRtyW4tbG9rZW4tdDBnOTAiLCJrbWJldm5lbGVzLmlvL9NldnZpY2VhY2NvbW50L9NldnZpY2UtYWNju9VubC5uYW1lIjoiuWFuYWbluWVubC1hZG1puiIsImt1YmVyumV0ZXMuyW8vd2VybmljZWFjY291unQvd2VybmljZS1hY2NvbW50LnVpZCI6IjRiZDM2MWQ1LWE1NDAtMTFlNy04YzI5LTUyNTQwMDliMmNkZCIsInN1YiI6InN5d9RluTpzZXJ2yWNlYWNju9VubDptYW5hZ2VtZW50LWluZnJhOm1humFnZW1lunQtYWRtyW4ifQ.B6sZLGD9O4vBu9MHwiG-C_4iEwjBXb7Af8BPw-LNlujDmHhOnQ-Oo4QxQKyj9edynfmDy2yutUyJ2Mm9HfDGWg4C9xhWImHoq6Nl7T5_9djkeGKkK7Ejvg4fA-IkrzEsZeQuluBvXnE6wvP0LCjUo_dx4pPyZJyp46teV9NqKQeDzeysjlMCyqp6AK6-Lj8ILG8YA6d_97HlzL_EgFBLAu0lBSn-uC_9J0gLysqBtK6TI0nExfhv9Bm1_5bdHEbKHPW7xIlYlI9AgmyTyhsQ6SoQWtL2khBjkG9TlPBq9wYJj9bzqgVZlqEfICZxgtXO7sYyuoje4y8lo0YQ0kZmig
 ```
 
-## Getting Started
+* In the CFME/MIQ web interface, navigate to `Compute` →
+  `Containers` → `Providers` and select `⚙ Configuration` → `⊕
+  Add a new Containers Provider`
 
-1) The *entry point playbook* to install CFME is located in
-[the BYO playbooks](../../playbooks/byo/openshift-cfme/config.yml)
-directory
-
-2) Update your existing `hosts` inventory file and ensure the
-parameter `openshift_cfme_install_app` is set to `True` under the
-`[OSEv3:vars]` block.
-
-2) Using your existing `hosts` inventory file, run `ansible-playbook`
-with the entry point playbook:
-
-```
-$ ansible-playbook -v -i <INVENTORY_FILE> playbooks/byo/openshift-cfme/config.yml
-```
-
-## Next Steps
-
-Once complete, the playbook will let you know:
+*See the [upstream documentation](http://manageiq.org/docs/reference/latest/doc-Managing_Providers/miq/index.html#containers-providers) for additional information.*
 
 
-```
-TASK [openshift_cfme : Status update] *********************************************************
-ok: [ho.st.na.me] => {
-    "msg": "CFME has been deployed. Note that there will be a delay before it is fully initialized.\n"
-}
-```
 
-This will take several minutes (*possibly 10 or more*, depending on
-your network connection). However, you can get some insight into the
-deployment process during initialization.
+# Requirements
 
-### oc describe pod manageiq-0
+The **default** requirements are listed in the table below. These can
+be overridden through customization parameters (See
+[Customization](#customization), below).
 
-*Some useful information about the output you will see if you run the
-`oc describe pod manageiq-0` command*
-
-**Readiness probe**s - These will take a while to become
-`Healthy`. The initial health probes won't even happen for at least 8
-minutes depending on how long it takes you to pull down the large
-images. ManageIQ is a large application so it may take a considerable
-amount of time for it to deploy and be marked as `Healthy`.
-
-If you go to the node you know the application is running on (check
-for `Successfully assigned manageiq-0 to <HOST|IP>` in the `describe`
-output) you can run a `docker pull` command to monitor the progress of
-the image pull:
-
-```
-[root@cfme-node ~]# docker pull docker.io/manageiq/manageiq-pods:app-latest-fine
-Trying to pull repository docker.io/manageiq/manageiq-pods ...
-sha256:6c055ca9d3c65cd694d6c0e28986b5239ba56bbdf0488cccdaa283d545258f8a: Pulling from docker.io/manageiq/manageiq-pods
-Digest: sha256:6c055ca9d3c65cd694d6c0e28986b5239ba56bbdf0488cccdaa283d545258f8a
-Status: Image is up to date for docker.io/manageiq/manageiq-pods:app-latest-fine
-```
-
-The example above demonstrates the case where the image has been
-successfully pulled already.
-
-If the image isn't completely pulled already then you will see
-multiple progress bars detailing each image layer download status.
+**Note** that the application performance will suffer, or possibly
+even fail to deploy, if these requirements are not satisfied.
 
 
-### rsh
+| Item                | Requirement   | Description                                  | Customization Parameter       |
+|---------------------|---------------|----------------------------------------------|-------------------------------|
+| Application Memory  | `≥ 4.0 Gi`    | Minimum required memory for the application  | `APPLICATION_MEM_REQ`         |
+| Application Storage | `≥ 5.0 Gi`    | Minimum PV size required for the application | `APPLICATION_VOLUME_CAPACITY` |
+| PostgreSQL Memory   | `≥ 6.0 Gi`    | Minimum required memory for the database     | `POSTGRESQL_MEM_REQ`          |
+| PostgreSQL Storage  | `≥ 15.0 Gi`   | Minimum PV size required for the database    | `DATABASE_VOLUME_CAPACITY`    |
+| Cluster Hosts       | `≥ 3`         | Number of hosts in your cluster              |                               |
 
-*Useful inspection/progress monitoring techniques with the `oc rsh`
-command.*
+The implications of this table are summarized below:
+
+* You need several cluster nodes
+* Your cluster nodes must have lots of memory available
+* You will need several GiB's of storage available, either locally or
+  on your cloud provider
+* PV sizes can be changed by providing override values to template
+  parameters (see also: [Customization](#customization))
+
+# Role Variables
+
+The following is a table of the publicly exposed variables that may be
+used in your Ansible inventory to control the behavior of this
+installer.
 
 
-On your master node, switch to the `cfme` project (or whatever you
-named it if you overrode the `openshift_cfme_project` variable) and
-check on the pod states:
+| Variable                                       | Required | Default                        | Description                         |
+|------------------------------------------------|:--------:|:------------------------------:|-------------------------------------|
+| `openshift_cfme_project`                       | **No**   | `openshift-cfme`               | Namespace for the installation.     |
+| `openshift_cfme_project_description`           | **No**   | *CloudForms Management Engine* | Namespace/project description.      |
+| `openshift_cfme_install_cfme`                  | **No**   | `false`                        | Boolean, set to `true` to install the application |
+| **PRODUCT CHOICE**  | | | | |
+| `openshift_cfme_app_template`                  | **No**   | `miq-template`                 | The project flavor to install. Choices: <ul><li>`miq-template`: ManageIQ using a podified database</li> <li> `miq-template-ext-db`: ManageIQ using an external database</li> <li>`cfme-template`: CloudForms using a podified database<sup>[1]</sup></li> <li> `cfme-template-ext-db`: CloudForms using an external database.<sup>[1]</sup></li></ul> |
+| **STORAGE CLASSES** | | | | |
+| `openshift_cfme_storage_class`                 | **No**   | `nfs`                          | Storage type to use, choices: <ul><li>`nfs` - Best used for proof-of-concept installs. Will setup NFS on a cluster host (defaults to your first master in the inventory file) to back the required PVCs. The application requires a PVC and the database (which may be hosted externally) may require a second. PVC minimum required sizes are 5GiB for the MIQ application, and 15GiB for the PostgreSQL database (20GiB minimum available space on a volume/partition if used specifically for NFS purposes)</li> <li>`nfs_external` - You are using an external NFS server, such as a netapp appliance. See the [Configuration - Storage Classes](#storage-classes) section below for required information.</li> <li>`preconfigured` - This CFME role will do NOTHING to modify storage settings. This option assumes expert knowledge and that you have done everything required ahead of time.</li> <li>`cloudprovider` - You are using an OCP cloudprovider integration for your storage class. For this to work you must have already configured the required inventory parameters for your cloud provider. Ensure `openshift_cloudprovider_kind` is defined (aws or gce) and that the applicable cloudprovider parameters are provided. |
+| `openshift_cfme_storage_nfs_external_hostname` | **No**   | `false`                        | If you are using an *external NFS server*, such as a netapp appliance, then you must set the hostname here. Leave the value as `false` if you are not using external NFS. <br /> *Additionally*: **External NFS REQUIRES** that you create the NFS exports that will back the application PV and optionally the database PV.
+| `openshift_cfme_storage_nfs_base_dir`          | **No**   | `/exports/`                    | If you are using **External NFS** then you may set the base path to the exports location here. <br />**Local NFS Note**: You *may* also change this value if you want to change the default path used for local NFS exports. |
+| `openshift_cfme_storage_nfs_local_hostname`    | **No**   | `false`                        | If you do not have an `[nfs]` group in your inventory, or want to simply manually define the local NFS host in your cluster, set this parameter to the hostname of the preferred NFS server. The server must be a part of your OCP/Origin cluster. |
+| **CUSTOMIZATION OPTIONS** | | | | |
+| `openshift_cfme_template_parameters`           | **No**   | `{}`                           | A dictionary of any parameters you want to override in the application/pv templates.
 
-```
-[root@cfme-master01 ~]# oc project cfme
-Now using project "cfme" on server "https://10.10.0.100:8443".
+* <sup>[1]</sup> The `cfme-template`s will be available and
+  automatically detected once CFME 4.6 is released
 
-[root@cfme-master01 ~]# oc get pod
-NAME                 READY     STATUS    RESTARTS   AGE
-manageiq-0           0/1       Running   0          14m
-memcached-1-3lk7g    1/1       Running   0          14m
-postgresql-1-12slb   1/1       Running   0          14m
-```
 
-Note how the `manageiq-0` pod says `0/1` under the **READY**
-column. After some time (depending on your network connection) you'll
-be able to `rsh` into the pod to find out more of what's happening in
-real time. First, the easy-mode command, run this once `rsh` is
-available and then watch until it says `Started Initialize Appliance
-Database`:
+# Getting Started
+
+Below are some inventory snippets that can help you get started right
+away.
+
+If you want to install CFME/MIQ at the same time you install your
+OCP/Origin cluster, ensure that `openshift_cfme_install_cfme` is set
+to `true` in your inventory. Call the standard
+`playbooks/byo/config.yml` playbook to begin the cluster and CFME/MIQ
+installation.
+
+If you are installing CFME/MIQ on an *already provisioned cluster*
+then you can call the CFME/MIQ playbook directly:
 
 ```
-[root@cfme-master01 ~]# oc rsh manageiq-0 journalctl -f -u appliance-initialize.service
+$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-cfme/config.yml
 ```
 
-For the full explanation of what this means, and more interactive
-inspection techniques, keep reading on.
+*Note: Use `miq-template` in the following examples for ManageIQ installs*
 
-To obtain a shell on our `manageiq` pod we use this command:
+## All Defaults
 
-```
-[root@cfme-master01 ~]# oc rsh manageiq-0 bash -l
-```
+This example is the simplest. All of the default values and choices
+are used. This will result in a fully podified CFME installation. All
+application components, as well as the PostgreSQL database will be
+created as pods in the container platform.
 
-The `rsh` command opens a shell in your pod for you. In this case it's
-the pod called `manageiq-0`. `systemd` is managing the services in
-this pod so we can use the `list-units` command to see what is running
-currently: `# systemctl list-units | grep appliance`.
-
-If you see the `appliance-initialize` service running, this indicates
-that basic setup is still in progress. We can monitor the process with
-the `journalctl` command like so:
-
-
-```
-[root@manageiq-0 vmdb]# journalctl -f -u appliance-initialize.service
-Jun 14 14:55:52 manageiq-0 appliance-initialize.sh[58]: == Checking deployment status ==
-Jun 14 14:55:52 manageiq-0 appliance-initialize.sh[58]: No pre-existing EVM configuration found on region PV
-Jun 14 14:55:52 manageiq-0 appliance-initialize.sh[58]: == Checking for existing data on server PV ==
-Jun 14 14:55:52 manageiq-0 appliance-initialize.sh[58]: == Starting New Deployment ==
-Jun 14 14:55:52 manageiq-0 appliance-initialize.sh[58]: == Applying memcached config ==
-Jun 14 14:55:53 manageiq-0 appliance-initialize.sh[58]: == Initializing Appliance ==
-Jun 14 14:55:57 manageiq-0 appliance-initialize.sh[58]: create encryption key
-Jun 14 14:55:57 manageiq-0 appliance-initialize.sh[58]: configuring external database
-Jun 14 14:55:57 manageiq-0 appliance-initialize.sh[58]: Checking for connections to the database...
-Jun 14 14:56:09 manageiq-0 appliance-initialize.sh[58]: Create region starting
-Jun 14 14:58:15 manageiq-0 appliance-initialize.sh[58]: Create region complete
-Jun 14 14:58:15 manageiq-0 appliance-initialize.sh[58]: == Initializing PV data ==
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: == Initializing PV data backup ==
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: sending incremental file list
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: created directory /persistent/server-deploy/backup/backup_2017_06_14_145816
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/vmdb/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/vmdb/REGION
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/vmdb/certs/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/vmdb/certs/v2_key
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/vmdb/config/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: region-data/var/www/miq/vmdb/config/database.yml
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: server-data/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: server-data/var/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: server-data/var/www/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: server-data/var/www/miq/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: server-data/var/www/miq/vmdb/
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: server-data/var/www/miq/vmdb/GUID
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: sent 1330 bytes  received 136 bytes  2932.00 bytes/sec
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: total size is 770  speedup is 0.53
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: == Restoring PV data symlinks ==
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: /var/www/miq/vmdb/REGION symlink is already in place, skipping
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: /var/www/miq/vmdb/config/database.yml symlink is already in place, skipping
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: /var/www/miq/vmdb/certs/v2_key symlink is already in place, skipping
-Jun 14 14:58:16 manageiq-0 appliance-initialize.sh[58]: /var/www/miq/vmdb/log symlink is already in place, skipping
-Jun 14 14:58:28 manageiq-0 systemctl[304]: Removed symlink /etc/systemd/system/multi-user.target.wants/appliance-initialize.service.
-Jun 14 14:58:29 manageiq-0 systemd[1]: Started Initialize Appliance Database.
+```ini
+[OSEv3:vars]
+openshift_cfme_app_template=cfme-template
 ```
 
-Most of what we see here (above) is the initial database seeding
-process. This process isn't very quick, so be patient.
+## External NFS Storage
 
-At the bottom of the log there is a special line from the `systemctl`
-service, `Removed symlink
-/etc/systemd/system/multi-user.target.wants/appliance-initialize.service`. The
-`appliance-initialize` service is no longer marked as enabled. This
-indicates that the base application initialization is complete now.
+This is as the previous example, except that instead of using local
+NFS services in the cluster it will use an external NFS server (such
+as a storage appliance). Note the two new parameters:
 
-We're not done yet though, there are other ancillary services which
-run in this pod to support the application. *Still in the rsh shell*,
-Use the `ps` command to monitor for the `httpd` processes
-starting. You will see output similar to the following when that stage
-has completed:
+* `openshift_cfme_storage_class` - set to `nfs_external`
+* `openshift_cfme_storage_nfs_external_hostname` - set to the hostname
+  of the NFS server
 
-```
-[root@manageiq-0 vmdb]# ps aux | grep http
-root       1941  0.0  0.1 249820  7640 ?        Ss   15:02   0:00 /usr/sbin/httpd -DFOREGROUND
-apache     1942  0.0  0.0 250752  6012 ?        S    15:02   0:00 /usr/sbin/httpd -DFOREGROUND
-apache     1943  0.0  0.0 250472  5952 ?        S    15:02   0:00 /usr/sbin/httpd -DFOREGROUND
-apache     1944  0.0  0.0 250472  5916 ?        S    15:02   0:00 /usr/sbin/httpd -DFOREGROUND
-apache     1945  0.0  0.0 250360  5764 ?        S    15:02   0:00 /usr/sbin/httpd -DFOREGROUND
+```ini
+[OSEv3:vars]
+openshift_cfme_app_template=cfme-template
+openshift_cfme_storage_class=nfs_external
+openshift_cfme_storage_nfs_external_hostname=nfs.example.com
 ```
 
-Furthermore, you can find other related processes by just looking for
-ones with `MIQ` in their name:
+If the external NFS host exports directories under a different parent
+directory, such as `/exports/hosted/prod` then we would add an
+additional parameter, `openshift_cfme_storage_nfs_base_dir`:
 
-```
-[root@manageiq-0 vmdb]# ps aux | grep miq
-root        333 27.7  4.2 555884 315916 ?       Sl   14:58   3:59 MIQ Server
-root       1976  0.6  4.0 507224 303740 ?       SNl  15:02   0:03 MIQ: MiqGenericWorker id: 1, queue: generic
-root       1984  0.6  4.0 507224 304312 ?       SNl  15:02   0:03 MIQ: MiqGenericWorker id: 2, queue: generic
-root       1992  0.9  4.0 508252 304888 ?       SNl  15:02   0:05 MIQ: MiqPriorityWorker id: 3, queue: generic
-root       2000  0.7  4.0 510308 304696 ?       SNl  15:02   0:04 MIQ: MiqPriorityWorker id: 4, queue: generic
-root       2008  1.2  4.0 514000 303612 ?       SNl  15:02   0:07 MIQ: MiqScheduleWorker id: 5
-root       2026  0.2  4.0 517504 303644 ?       SNl  15:02   0:01 MIQ: MiqEventHandler id: 6, queue: ems
-root       2036  0.2  4.0 518532 303768 ?       SNl  15:02   0:01 MIQ: MiqReportingWorker id: 7, queue: reporting
-root       2044  0.2  4.0 519560 303812 ?       SNl  15:02   0:01 MIQ: MiqReportingWorker id: 8, queue: reporting
-root       2059  0.2  4.0 528372 303956 ?       SNl  15:02   0:01 puma 3.3.0 (tcp://127.0.0.1:5000) [MIQ: Web Server Worker]
-root       2067  0.9  4.0 529664 305716 ?       SNl  15:02   0:05 puma 3.3.0 (tcp://127.0.0.1:3000) [MIQ: Web Server Worker]
-root       2075  0.2  4.0 529408 304056 ?       SNl  15:02   0:01 puma 3.3.0 (tcp://127.0.0.1:4000) [MIQ: Web Server Worker]
-root       2329  0.0  0.0  10640   972 ?        S+   15:13   0:00 grep --color=auto -i miq
+```ini
+# ...
+openshift_cfme_storage_nfs_base_dir=/exports/hosted/prod
 ```
 
-Finally, *still in the rsh shell*, to test if the application is
-running correctly, we can request the application homepage. If the
-page is available the page title will be `ManageIQ: Login`:
+## Override PV sizes
+
+This example will override the PV sizes. Note that we set the PV sizes
+in the template parameters, `openshift_cfme_template_parameters`. This
+ensures that the application/db will be able to make claims on created
+PVs without clobbering each other.
+
+```ini
+[OSEv3:vars]
+openshift_cfme_app_template=cfme-template
+openshift_cfme_template_parameters={'APPLICATION_VOLUME_CAPACITY': '10Gi', 'DATABASE_VOLUME_CAPACITY': '25Gi'}
+```
+
+## Override Memory Requirements
+
+In a test or proof-of-concept installation you may need to reduce the
+application/database memory requirements to fit within your
+capacity. Note that reducing memory limits can result in reduced
+performance or a complete failure to initialize the application.
+
+```ini
+[OSEv3:vars]
+openshift_cfme_app_template=cfme-template
+openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '3000Mi', 'POSTGRESQL_MEM_REQ': '1Gi', 'ANSIBLE_MEM_REQ': '512Mi'}
+```
+
+Here we have instructed the installer to process the application
+template with the parameter `APPLICATION_MEM_REQ` set to `3000Mi`,
+`POSTGRESQL_MEM_REQ` set to `1Gi`, and `ANSIBLE_MEM_REQ` set to
+`512Mi`.
+
+These parameters can be combined with the PV size override parameters
+displayed in the previous example.
+
+## External PostgreSQL Database
+
+To use an external database you must change the
+`openshift_cfme_app_template` parameter value to `miq-template-ext-db`
+or `cfme-template-ext-db`.
+
+Additionally, database connection information **must** be supplied in
+the `openshift_cfme_template_parameters` customization parameter. See
+[Customization - Database - External](#external) for more
+information.
+
+```ini
+[OSEv3:vars]
+openshift_cfme_app_template=cfme-template-ext-db
+openshift_cfme_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
+```
+
+# Limitations
+
+This release is the first OpenShift CFME release in the OCP 3.7
+series. It is not complete yet.
+
+## Product Choice
+
+Due to staggered release dates, **CFME support is not
+integrated**. Presently this role will only deploy a ManageIQ
+installation. This role will be updated once CFME 4.6 is released and
+this limitation note will be removed.
+
+# Configuration
+
+Before you can deploy CFME you must decide *how* you want to deploy
+it. There are two major decisions to make:
+
+1. Do you want an external, or a podified database?
+1. Which storage class will back your PVs?
+
+## Database
+
+### Podified
+
+Any `POSTGRES_*` or `DATABASE_*` template parameters in
+[miq-template.yaml](files/templates/manageiq/miq-template.yaml) or
+[cfme-template.yaml](files/templates/cloudforms/cfme-template.yaml)
+may be customized through the `openshift_cfme_template_parameters`
+hash.
+
+### External
+
+Any `POSTGRES_*` or `DATABASE_*` template parameters in
+[miq-template-ext-db.yaml](files/templates/manageiq/miq-template-ext-db.yaml)
+or
+[cfme-template-ext-db.yaml](files/templates/cloudforms/cfme-template-ext-db.yaml)
+may be customized through the `openshift_cfme_template_parameters`
+hash.
+
+External PostgreSQL databases require you to provide database
+connection parameters. You must set the required connection keys in
+the `openshift_cfme_template_parameters` parameter in your
+inventory. The following keys are required:
+
+* `DATABASE_USER`
+* `DATABASE_PASSWORD`
+* `DATABASE_IP`
+* `DATABASE_PORT` - *note: Most PostgreSQL servers run on port `5432`*
+* `DATABASE_NAME`
+
+Your inventory would contain a line similar to this:
+
+```ini
+[OSEv3:vars]
+openshift_cfme_app_template=cfme-template-ext-db
+openshift_cfme_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
+```
+
+**Note** the new value for the `openshift_cfme_app_template`
+parameter, `cfme-template-ext-db` (ManageIQ installations would use
+`miq-template-ext-db` instead).
+
+At run time you may run into errors similar to this:
 
 ```
-[root@manageiq-0 vmdb]# curl -s -k https://localhost | grep -A2 '<title>'
-<title>
-ManageIQ: Login
-</title>
+TASK [openshift_cfme : Ensure the CFME App is created] ***********************************
+task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_cfme/tasks/main.yml:74
+Tuesday 03 October 2017  15:30:44 -0400 (0:00:00.056)       0:00:12.278 *******
+{"cmd": "/usr/bin/oc create -f /tmp/postgresql-ZPEWQS -n openshift-cfme", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "Error from server (BadRequest): error when creating \"/tmp/postgresql-ZPEWQS\": Endpoints in version \"v1\" cannot be handled as a Endpoints: [pos 218]: json: decNum: got first char 'f'\n", "stdout": ""}
 ```
 
-**Note:** The `-s` flag makes `curl` operations silent and the `-k`
-flag to ignore errors about untrusted certificates.
+Or like this:
+
+```
+TASK [openshift_cfme : Ensure the CFME App is created] ***********************************
+task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_cfme/tasks/main.yml:74
+Tuesday 03 October 2017  16:05:36 -0400 (0:00:00.052)       0:00:18.948 *******
+fatal: [m01.example.com]: FAILED! => {"changed": true, "failed": true, "msg":
+{"cmd": "/usr/bin/oc create -f /tmp/postgresql-igS5sx -n openshift-cfme", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "The Endpoints \"postgresql\" is invalid: subsets[0].addresses[0].ip: Invalid value: \"doo\": must be a valid IP address, (e.g. 10.9.8.7)\n", "stdout": ""},
+```
+
+While intimidating at first, there are useful bits of information in
+here. Examine the error output closely and we can tell exactly what is
+wrong.
+
+In the first example we see `Endpoints in version \"v1\" cannot be
+handled as a Endpoints: [pos 218]: json: decNum: got first char
+...`. This is because in my example I used the value `foo` for the
+parameter `DATABASE_PORT`.
+
+In the second example we see `The Endpoints \"postgresql\" is invalid:
+subsets[0].addresses[0].ip: Invalid value: \"doo\": must be a valid IP
+address ...`. This is because in my example I used the value `doo` in
+the `DATABASE_IP` field.
+
+Luckily for us when the templates are processed behind the scenes they
+are also running type checking validation. So, don't worry, just look
+closely at the errors and ensure you are providing the correct values
+for each parameter.
+
+## Storage Classes
+
+OpenShift CFME supports several storage class options.
+
+### NFS (Default)
+
+The NFS storage class is best suited for proof-of-concept and
+test/demo deployments. It is also the **default** storage class for
+deployments. No additional configuration is required for this
+choice.
+
+Customization is provided through the following role variables:
+
+* `openshift_cfme_storage_nfs_base_dir`
+* `openshift_cfme_storage_nfs_local_hostname`
+
+### NFS External
+
+External NFS leans on pre-configured NFS servers to provide exports
+for the required PVs. For external NFS you must have:
+
+* For CFME: a `cfme-app` and optionally a `cfme-db` (for podified database) exports
+* For ManageIQ: an `miq-app` and optionally an `miq-db` (for podified database) exports
+
+Configuration is provided through the following role variables:
+
+* `openshift_cfme_storage_nfs_external_hostname`
+* `openshift_cfme_storage_nfs_base_dir`
+
+The `openshift_cfme_storage_nfs_external_hostname` parameter must be
+set to the hostname or IP of your external NFS server.
+
+If `/exports` is not the parent directory to your exports then you
+must set the base directory via the
+`openshift_cfme_storage_nfs_base_dir` parameter.
+
+For example, if your server export is `/exports/hosted/prod/cfme-app`
+then you must set
+`openshift_cfme_storage_nfs_base_dir=/exports/hosted/prod`.
+
+### Cloud Provider
+
+CFME can also use a cloud provider storage to back required PVs. For
+this functionality to work you must have also configured the
+`openshift_cloudprovider_kind` variable and all associated parameters
+specific to your chosen cloud provider.
+
+Using this storage class, when the application is created the required
+PVs will automatically be provisioned using the configured cloud
+provider storage integration.
+
+There are no additional variables to configure the behavior of this
+storage class.
+
+### Preconfigured (Expert Configuration Only)
+
+The *preconfigured* storage class implies that you know exactly what
+you're doing and that all storage requirements have been taken care
+ahead of time. Typically this means that you've already created the
+correctly sized PVs.
+
+There are no additional variables to configure the behavior of this
+storage class.
+
+# Customization
+
+Application and database parameters may be customized by means of the
+`openshift_cfme_template_parameters` inventory parameter.
+
+**For example**, if you wanted to reduce the memory requirement of the
+PostgreSQL pod then you could configure the parameter like this:
+
+`openshift_cfme_template_parameters={'POSTGRESQL_MEM_REQ': '1Gi'}`
+
+When the CFME template is processed `1Gi` will be used for the value
+of the `POSTGRESQL_MEM_REQ` template parameter.
+
+Any parameter in the `parameters` section of the
+[miq-template.yaml](files/templates/manageiq/miq-template.yaml) or
+[miq-template-ext-db.yaml](files/templates/manageiq/miq-template-ext-db.yaml)
+may be overridden through the `openshift_cfme_template_parameters`
+hash. This applies to **CloudForms** installations as well:
+[cfme-template.yaml](files/templates/cloudforms/cfme-template.yaml),
+[cfme-template-ext-db.yaml](files/templates/cloudforms/cfme-template-ext-db.yaml).
 
 
+# Additional Information
 
-# Additional Upstream Resources
+The upstream project,
+[@manageiq/manageiq-pods](https://github.com/ManageIQ/manageiq-pods),
+contains a wealth of additional information useful for managing and
+operating your CFME installation. Topics include:
 
-Below are some useful resources from the upstream project
-documentation. You may find these of value.
-
-* [Verify Setup Was Successful](https://github.com/ManageIQ/manageiq-pods#verifying-the-setup-was-successful)
-* [POD Access And Routes](https://github.com/ManageIQ/manageiq-pods#pod-access-and-routes)
+* [Verifying Successful Installation](https://github.com/ManageIQ/manageiq-pods#verifying-the-setup-was-successful)
+* [Disabling Image Change Triggers](https://github.com/ManageIQ/manageiq-pods#disable-image-change-triggers)
+* [Scaling CFME](https://github.com/ManageIQ/manageiq-pods#scale-miq)
+* [Backing up and Restoring the DB](https://github.com/ManageIQ/manageiq-pods#backup-and-restore-of-the-miq-database)
 * [Troubleshooting](https://github.com/ManageIQ/manageiq-pods#troubleshooting)
-
-
-# Manual Cleanup
-
-At this time uninstallation/cleanup is still a manual process. You
-will have to follow a few steps to fully remove CFME from your
-cluster.
-
-Delete the project:
-
-* `oc delete project cfme`
-
-Delete the PVs:
-
-* `oc delete pv miq-pv01`
-* `oc delete pv miq-pv02`
-* `oc delete pv miq-pv03`
-
-Clean out the old PV data:
-
-* `cd /exports/`
-* `find miq* -type f -delete`
-* `find miq* -type d -delete`
-
-Remove the NFS exports:
-
-* `rm /etc/exports.d/openshift_cfme.exports`
-* `exportfs -ar`
-
-Delete the user:
-
-* `oc delete user cfme`
-
-**NOTE:** The `oc delete project cfme` command will return quickly
-however it will continue to operate in the background. Continue
-running `oc get project` after you've completed the other steps to
-monitor the pods and final project termination progress.

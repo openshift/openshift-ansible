@@ -6,7 +6,7 @@ openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_
 openshift_logging_elasticsearch_namespace: logging
 
 openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector | default('') }}"
-openshift_logging_elasticsearch_cpu_limit: 1000m
+openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_cpu_limit | default('1000m') }}"
 openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit | default('1Gi') }}"
 openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_recover_after_time | default('5m') }}"
 
@@ -33,12 +33,18 @@ openshift_logging_elasticsearch_pvc_size: ""
 openshift_logging_elasticsearch_pvc_dynamic: false
 openshift_logging_elasticsearch_pvc_pv_selector: {}
 openshift_logging_elasticsearch_pvc_access_modes: ['ReadWriteOnce']
-openshift_logging_elasticsearch_storage_group: '65534'
+openshift_logging_elasticsearch_storage_group: ['65534']
 
 openshift_logging_es_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
 
 # config the es plugin to write kibana index based on the index mode
 openshift_logging_elasticsearch_kibana_index_mode: 'unique'
+
+openshift_logging_elasticsearch_proxy_image_prefix: "openshift/oauth-proxy"
+openshift_logging_elasticsearch_proxy_image_version: "v1.0.0"
+openshift_logging_elasticsearch_proxy_cpu_limit: "100m"
+openshift_logging_elasticsearch_proxy_memory_limit: "64Mi"
+openshift_logging_elasticsearch_prometheus_sa: "system:serviceaccount:{{openshift_prometheus_namespace | default('prometheus')}}:prometheus"
 
 # this is used to determine if this is an operations deployment or a non-ops deployment
 # simply used for naming purposes

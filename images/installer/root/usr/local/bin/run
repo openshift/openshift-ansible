@@ -19,6 +19,9 @@ if [[ -v INVENTORY_FILE ]]; then
   # Make a copy so that ALLOW_ANSIBLE_CONNECTION_LOCAL below
   # does not attempt to modify the original
   cp -a ${INVENTORY_FILE} ${INVENTORY}
+elif [[ -v INVENTORY_DIR ]]; then
+  INVENTORY="$(mktemp -d)"
+  cp -R ${INVENTORY_DIR}/* ${INVENTORY}
 elif [[ -v INVENTORY_URL ]]; then
   curl -o ${INVENTORY} ${INVENTORY_URL}
 elif [[ -v DYNAMIC_SCRIPT_URL ]]; then
@@ -29,7 +32,7 @@ elif [[ -v GENERATE_INVENTORY ]]; then
   /usr/local/bin/generate ${INVENTORY}
 else
   echo
-  echo "One of INVENTORY_FILE, INVENTORY_URL, GENERATE_INVENTORY, or DYNAMIC_SCRIPT_URL must be provided."
+  echo "One of INVENTORY_FILE, INVENTORY_DIR, INVENTORY_URL, GENERATE_INVENTORY, or DYNAMIC_SCRIPT_URL must be provided."
   exec /usr/local/bin/usage
 fi
 INVENTORY_ARG="-i ${INVENTORY}"

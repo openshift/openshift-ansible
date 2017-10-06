@@ -1,0 +1,22 @@
+---
+- name: fetch elbs
+  ec2_elb_facts:
+    region: "{{ openshift_aws_region }}"
+    names:
+    - "{{ item }}"
+  with_items:
+  - "{{ openshift_aws_elb_name }}-external"
+  - "{{ openshift_aws_elb_name }}-internal"
+  delegate_to: localhost
+  register: elbs
+
+- debug: var=elbs
+
+- name: set fact
+  set_fact:
+    openshift_master_cluster_hostname: "{{ elbs.results[1].elbs[0].dns_name }}"
+    osm_custom_cors_origins:
+    - "{{ elbs.results[1].elbs[0].dns_name }}"
+    - "console.{{ openshift_aws_clusterid | default('default') }}.openshift.com"
+    - "api.{{ openshift_aws_clusterid | default('default') }}.openshift.com"
+  with_items: "{{ groups['masters'] }}"

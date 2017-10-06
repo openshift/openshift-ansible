@@ -92,6 +92,7 @@
   with_items:
     - rolebinding-reader
     - daemonset-admin
+    - prometheus-metrics-viewer
 
 # delete our configmaps
 - name: delete configmaps

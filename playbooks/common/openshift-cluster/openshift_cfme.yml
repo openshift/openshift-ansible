@@ -1,0 +1,25 @@
+---
+- name: CFME Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set CFME install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_cfme: "In Progress"
+      aggregate: false
+
+- name: CFME
+  include: ../openshift-cfme/config.yml
+
+- name: CFME Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set CFME install 'Complete'
+    set_stats:
+      data:
+        installer_phase_CFME: "Complete"
+      aggregate: false

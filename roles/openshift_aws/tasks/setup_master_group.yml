@@ -1,0 +1,35 @@
+---
+- name: Alert user to variables needed - clusterid
+  debug:
+    msg: "openshift_aws_clusterid={{ openshift_aws_clusterid }}"
+
+- name: Alert user to variables needed - region
+  debug:
+    msg: "openshift_aws_region={{ openshift_aws_region }}"
+
+- name: fetch newly created instances
+  ec2_remote_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:clusterid": "{{ openshift_aws_clusterid }}"
+      "tag:host-type": master
+      instance-state-name: running
+  register: instancesout
+  retries: 20
+  delay: 3
+  until: instancesout.instances|length > 0
+
+- name: add new master to masters group
+  add_host:
+    groups: "masters,etcd,nodes"
+    name: "{{ item.public_dns_name }}"
+    hostname: "{{ openshift_aws_clusterid }}-master-{{ item.id[:-5] }}"
+  with_items: "{{ instancesout.instances }}"
+
+- name: wait for ssh to become available
+  wait_for:
+    port: 22
+    host: "{{ item.public_dns_name }}"
+    timeout: 300
+    search_regex: OpenSSH
+  with_items: "{{ instancesout.instances }}"

@@ -94,7 +94,7 @@ openshift_logging_es_pvc_dynamic: "{{ openshift_logging_elasticsearch_pvc_dynami
 openshift_logging_es_pvc_size: "{{ openshift_logging_elasticsearch_pvc_size | default('') }}"
 openshift_logging_es_pvc_prefix: "{{ openshift_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
 openshift_logging_es_recover_after_time: 5m
-openshift_logging_es_storage_group: "{{ openshift_logging_elasticsearch_storage_group | default('65534') }}"
+openshift_logging_es_storage_group: "65534"
 openshift_logging_es_nodeselector: {}
 # openshift_logging_es_config is a hash to be merged into the defaults for the elasticsearch.yaml
 openshift_logging_es_config: {}
@@ -133,7 +133,7 @@ openshift_logging_es_ops_pvc_dynamic: "{{ openshift_logging_elasticsearch_ops_pv
 openshift_logging_es_ops_pvc_size: "{{ openshift_logging_elasticsearch_ops_pvc_size | default('') }}"
 openshift_logging_es_ops_pvc_prefix: "{{ openshift_logging_elasticsearch_ops_pvc_prefix | default('logging-es-ops') }}"
 openshift_logging_es_ops_recover_after_time: 5m
-openshift_logging_es_ops_storage_group: "{{ openshift_logging_elasticsearch_storage_group | default('65534') }}"
+openshift_logging_es_ops_storage_group: "65534"
 openshift_logging_es_ops_nodeselector: {}
 
 # for exposing es-ops to external (outside of the cluster) clients

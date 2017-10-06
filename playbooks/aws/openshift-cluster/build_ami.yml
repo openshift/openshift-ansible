@@ -17,35 +17,17 @@
     - name: openshift_aws_region
       msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
 
-  - name: create an instance and prepare for ami
-    include_role:
-      name: openshift_aws
-      tasks_from: build_ami.yml
-    vars:
-      openshift_aws_node_group_type: compute
+- include: provision_vpc.yml
 
-  - name: fetch newly created instances
-    ec2_remote_facts:
-      region: "{{ openshift_aws_region | default('us-east-1') }}"
-      filters:
-        "tag:Name": "{{ openshift_aws_base_ami_name | default('ami_base') }}"
-        instance-state-name: running
-    register: instancesout
-    retries: 20
-    delay: 3
-    until: instancesout.instances|length > 0
+- include: provision_ssh_keypair.yml
 
-  - name: wait for ssh to become available
-    wait_for:
-      port: 22
-      host: "{{ instancesout.instances[0].public_ip_address }}"
-      timeout: 300
-      search_regex: OpenSSH
+- include: provision_sec_group.yml
+  vars:
+    openshift_aws_node_group_type: compute
 
-  - name: add host to nodes
-    add_host:
-      groups: nodes
-      name: "{{ instancesout.instances[0].public_dns_name }}"
+- include: provision_instance.yml
+  vars:
+    openshift_aws_node_group_type: compute
 
 - hosts: nodes
   gather_facts: False
@@ -54,34 +36,10 @@
     set_fact:
       ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default('root') }}"
 
-- name: normalize groups
-  include: ../../byo/openshift-cluster/initialize_groups.yml
+# This is the part that installs all of the software and configs for the instance
+# to become a node.
+- include: ../../common/openshift-node/image_prep.yml
 
-- name: run the std_include
-  include: ../../common/openshift-cluster/evaluate_groups.yml
-
-- name: run the std_include
-  include: ../../common/openshift-cluster/initialize_facts.yml
-
-- name: run the std_include
-  include: ../../common/openshift-cluster/initialize_openshift_repos.yml
-
-- name: run node config setup
-  include: ../../common/openshift-node/setup.yml
-
-- name: run node config
-  include: ../../common/openshift-node/configure_nodes.yml
-
-- name: Re-enable excluders
-  include: ../../common/openshift-node/enable_excluders.yml
-
-- hosts: localhost
-  connection: local
-  become: no
-  tasks:
-  - name: seal the ami
-    include_role:
-      name: openshift_aws
-      tasks_from: seal_ami.yml
-    vars:
-      openshift_aws_ami_name: "openshift-gi-{{ lookup('pipe', 'date +%Y%m%d%H%M')}}"
+- include: seal_ami.yml
+  vars:
+    openshift_aws_ami_name: "openshift-gi-{{ lookup('pipe', 'date +%Y%m%d%H%M')}}"

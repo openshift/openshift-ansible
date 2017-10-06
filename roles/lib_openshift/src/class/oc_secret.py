@@ -142,8 +142,7 @@ class OCSecret(OpenShiftCLI):
             elif params['contents']:
                 files = Utils.create_tmp_files_from_contents(params['contents'])
             else:
-                return {'failed': True,
-                        'msg': 'Either specify files or contents.'}
+                files = [{'name': 'null', 'path': os.devnull}]
 
             ########
             # Create

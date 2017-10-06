@@ -1,15 +1,7 @@
 ---
-- when: openshift_aws_create_vpc | bool
-  name: create default vpc
-  include: vpc.yml
-
 - when: openshift_aws_create_iam_cert | bool
   name: create the iam_cert for elb certificate
   include: iam_cert.yml
-
-- when: openshift_aws_users | length > 0
-  name: create aws ssh keypair
-  include: ssh_keys.yml
 
 - when: openshift_aws_create_s3 | bool
   name: create s3 bucket for registry

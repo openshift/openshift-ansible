@@ -29,7 +29,9 @@ spec:
       serviceAccountName: aggregated-logging-elasticsearch
       securityContext:
         supplementalGroups:
-        - {{openshift_logging_elasticsearch_storage_group}}
+{% for group in es_storage_groups %}
+        - {{group}}
+{% endfor %}
 {% if es_node_selector is iterable and es_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in es_node_selector.iteritems() %}
@@ -37,6 +39,40 @@ spec:
 {% endfor %}
 {% endif %}
       containers:
+        - name: proxy
+          image: {{openshift_logging_elasticsearch_proxy_image_prefix}}:{{openshift_logging_elasticsearch_proxy_image_version}}
+          imagePullPolicy: Always
+          args:
+           - --upstream-ca=/etc/elasticsearch/secret/admin-ca
+           - --https-address=:4443
+           - -provider=openshift
+           - -client-id={{openshift_logging_elasticsearch_prometheus_sa}}
+           - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+           - -cookie-secret={{ 16 | oo_random_word | b64encode }}
+           - -upstream=https://localhost:9200
+           - '-openshift-sar={"namespace": "{{ openshift_logging_elasticsearch_namespace}}", "verb": "view", "resource": "prometheus", "group": "metrics.openshift.io"}'
+           - '-openshift-delegate-urls={"/": {"resource": "prometheus", "verb": "view", "group": "metrics.openshift.io", "namespace": "{{ openshift_logging_elasticsearch_namespace}}"}}'
+           - --tls-cert=/etc/tls/private/tls.crt
+           - --tls-key=/etc/tls/private/tls.key
+           - -pass-access-token
+           - -pass-user-headers
+          ports:
+          - containerPort: 4443
+            name: proxy
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /etc/tls/private
+            name: proxy-tls
+            readOnly: true
+          - mountPath: /etc/elasticsearch/secret
+            name: elasticsearch
+            readOnly: true
+          resources:
+            limits:
+              cpu: "{{openshift_logging_elasticsearch_proxy_cpu_limit }}"
+              memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
+            requests:
+              memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
         -
           name: "elasticsearch"
           image: {{image}}
@@ -49,6 +85,9 @@ spec:
 {% endif %}
             requests:
               memory: "{{es_memory_limit}}"
+{% if es_container_security_context %}
+          securityContext: {{ es_container_security_context | to_yaml }} 
+{% endif %}
           ports:
             -
               containerPort: 9200
@@ -94,7 +133,7 @@ spec:
               value: "30"
             -
               name: "POD_LABEL"
-              value: "component={{component}}" 
+              value: "component={{component}}"
             -
               name: "IS_MASTER"
               value: "{% if deploy_type in ['data-master', 'master'] %}true{% else %}false{% endif %}"
@@ -102,6 +141,9 @@ spec:
             -
               name: "HAS_DATA"
               value: "{% if deploy_type in ['data-master', 'data-client'] %}true{% else %}false{% endif %}"
+            -
+              name: "PROMETHEUS_USER"
+              value: "{{openshift_logging_elasticsearch_prometheus_sa}}"
 
           volumeMounts:
             - name: elasticsearch
@@ -120,6 +162,9 @@ spec:
             timeoutSeconds: 30
             periodSeconds: 5
       volumes:
+        - name: proxy-tls
+          secret:
+            secretName: prometheus-tls
         - name: elasticsearch
           secret:
             secretName: logging-elasticsearch
