@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.45
+Version:        3.6.173.0.47
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.47-1
+- Ensure docker is restarted when iptables is restarted (mgugino@redhat.com)
+- Ensure docker service started prior to credentials (mgugino@redhat.com)
+- logging: honor openshift_logging_es_cpu_limit (jwozniak@redhat.com)
+- Add --image flag to setup-openshift-heketi-storage (ttindell@isenpai.com)
+- Adding proxy env vars for dc/docker-registry (kwoodson@redhat.com)
+- Reference client binary from first master when generating aggregator signer
+  cert. (abutcher@redhat.com)
+- Fix origin repo deployment (mgugino@redhat.com)
+- Fix registry auth variable (mgugino@redhat.com)
+- Fixes #4809 (edu@redhat.com)
+- Set the etcd backend quota to 4GB by default (jchaloup@redhat.com)
+- evaluate etcd_backup_tag variable (jchaloup@redhat.com)
+- openshift_facts: coerce docker_use_system_container to bool
+  (smilner@redhat.com)
+- logging: fix kibana and kibana-ops defaults (jwozniak@redhat.com)
+- Miscellaneous fixes (lhuard@amadeus.com)
+
 * Fri Sep 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.45-1
 - 
 
