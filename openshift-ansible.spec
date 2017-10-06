@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.130
+Version:        3.5.131
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.131-1
+- Bumping version to fix conflict (smunilla@redhat.com)
+- Ensure docker service started prior to credentials (mgugino@redhat.com)
+- Fix origin repo deployment (mgugino@redhat.com)
+- Fix registry auth variable (mgugino@redhat.com)
+- Fixes #4809 (edu@redhat.com)
+- logging: fix kibana and kibana-ops defaults (jwozniak@redhat.com)
+- master: Default to false for l_bind_docker_reg_auth (smilner@redhat.com)
+- Bug 1477515 - [3.5] Data loss of logs can occur if fluentd pod is
+  terminated/restarted when Elasticsearch is unavailable (nhosoi@redhat.com)
+- Don't double quote when conditions #4526 (per.carlson@vegvesen.no)
+
 * Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.127-1
 - 
 
