@@ -8,6 +8,13 @@ With recent desire for provisioning from customers and developers alike, the AWS
  deploy highly scalable Openshift clusters utilizing AWS auto scale groups and
  custom AMIs.
 
+To speed in the provisioning of medium and large clusters, openshift-node
+instances are created using a pre-built AMI.  A list of pre-built AMIs will
+be available soon.
+
+If the deployer wishes to build their own AMI for provisioning, instructions
+to do so are provided here.
+
 ### Where do I start?
 
 Before any provisioning may occur, AWS account credentials must be present in the environment.  This can be done in two ways:
@@ -31,8 +38,13 @@ Before any provisioning may occur, AWS account credentials must be present in th
 
 ### Let's Provision!
 
-The newly added playbooks are the following:
-- build_ami.yml - Builds a custom AMI.  This currently requires the user to supply a valid AMI with access to repositories that contain openshift repositories.
+Warning:  Running these plays will provision items in your AWS account (if not
+present), and you may incur billing charges.  These plays are not suitable
+for the free-tier.
+
+#### High-level overview
+- prerequisites.yml - Provision VPC, Security Groups, SSH keys, if needed.  See PREREQUISITES.md for more information.
+- build_ami.yml - Builds a custom AMI.  See BUILD_AMI.md for more information.
 - provision.yml - Create a vpc, elbs, security groups, launch config, asg's, etc.
 - install.yml - Calls the openshift-ansible installer on the newly created instances
 - provision_nodes.yml - Creates the infra and compute node scale groups
@@ -41,82 +53,38 @@ The newly added playbooks are the following:
 
 The current expected work flow should be to provide an AMI with access to Openshift repositories.  There should be a repository specified in the `openshift_additional_repos` parameter of the inventory file. The next expectation is a minimal set of values in the `provisioning_vars.yml` file to configure the desired settings for cluster instances.  These settings are AWS specific and should be tailored to the consumer's AWS custom account settings.
 
+Values specified in provisioning_vars.yml may instead be specified in your inventory group_vars
+under the appropriate groups.  Most variables can exist in the 'all' group.
+
 ```yaml
 ---
-# when creating an AMI set this to True
-# when installing a cluster set this to False
-openshift_node_bootstrap: True
-
-# specify a clusterid
-# openshift_aws_clusterid: default
-
-# specify a region
-# openshift_aws_region: us-east-1
-
-# must specify a base_ami when building an AMI
-# openshift_aws_base_ami: # base image for AMI to build from
-# specify when using a custom AMI
-# openshift_aws_ami:
-
-# when creating an encrypted AMI please specify use_encryption
-# openshift_aws_ami_encrypt: False
-
-# custom certificates are required for the ELB
-# openshift_aws_iam_cert_path: '/path/to/cert/wildcard.<clusterid>.<domain>.com.crt'
-# openshift_aws_iam_cert_key_path: '/path/to/key/wildcard.<clusterid>.<domain>.com.key'
-# openshift_aws_iam_cert_chain_path: '/path/to/ca_cert_file/ca.crt'
-
-# This is required for any ec2 instances
-# openshift_aws_ssh_key_name: myuser_key
-
-# This will ensure these users are created
-#openshift_aws_users:
-#- key_name: myuser_key
-#  username: myuser
-#  pub_key: |
-#         ssh-rsa AAAA
+# Minimum mandatory provisioning variables.  See provisioning_vars.yml.example.
+# for more information.
+openshift_deployment_type: # 'origin' or 'openshift-enterprise'
+openshift_release: # example: v3.7
+openshift_pkg_version: # example: -3.7.0
+openshift_aws_ssh_key_name: # example: myuser_key
+openshift_aws_base_ami: # example: ami-12345678
+openshift_aws_iam_cert_path: # example: '/path/to/wildcard.<clusterid>.example.com.crt'
+openshift_aws_iam_key_path: # example: '/path/to/wildcard.<clusterid>.example.com.key'
 ```
 
 If customization is required for the instances, scale groups, or any other configurable option please see the ['openshift_aws/defaults/main.yml'](../../roles/openshift_aws/defaults/main.yml) for variables and overrides. These overrides can be placed in the `provisioning_vars.yml`, `inventory`, or `group_vars`.
 
-In order to create the bootstrap-able AMI we need to create an openshift-ansible inventory file.  This file enables us to create the AMI using the openshift-ansible node roles. The exception here is that there will be no hosts specified by the inventory file.  Here is an example:
-
-```ini
-[OSEv3:children]
-masters
-nodes
-etcd
-
-[OSEv3:vars]
-################################################################################
-# Ensure these variables are set for bootstrap
-################################################################################
-# openshift_deployment_type is required for installation
-openshift_deployment_type=origin
-
-# required when building an AMI.  This will
-# be dependent on the version provided by the yum repository
-openshift_pkg_version=-3.6.0
-
-openshift_master_bootstrap_enabled=True
-
-openshift_hosted_router_wait=False
-openshift_hosted_registry_wait=False
-
-# Repository for installation
-openshift_additional_repos=[{'name': 'openshift-repo', 'id': 'openshift-repo',  'baseurl': 'https://mirror.openshift.com/enterprise/enterprise-3.6/latest/x86_64/os/', 'enabled': 'yes', 'gpgcheck': 0, 'sslverify': 'no', 'sslclientcert': '/var/lib/yum/client-cert.pem', 'sslclientkey': '/var/lib/yum/client-key.pem', 'gpgkey': 'https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-release https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-beta https://mirror.ops.rhcloud.com/libra/keys/RPM-GPG-KEY-redhat-openshifthosted'}]
-
-################################################################################
-# cluster specific settings maybe be placed here
-
-[masters]
-
-[etcd]
-
-[nodes]
-```
+In order to create the bootstrap-able AMI we need to create a basic openshift-ansible inventory.  This enables us to create the AMI using the openshift-ansible node roles.  This inventory should not include any hosts, but certain variables should be defined in the appropriate groups, just as deploying a cluster
+using the normal openshift-ansible method.  See provisioning-inventory.example.ini for an example.
 
 There are more examples of cluster inventory settings [`here`](../../inventory/byo/).
+
+#### Step 0 (optional)
+
+You may provision a VPC, Security Group, and SSH keypair to build the AMI.
+
+```
+$ ansible-playbook -i inventory.yml prerequisites.yml -e @provisioning_vars.yml
+```
+
+See PREREQUISITES.md for more information.
 
 #### Step 1
 
@@ -125,24 +93,6 @@ Once the `inventory` and the `provisioning_vars.yml` file has been updated with 
 ```
 $ ansible-playbook -i inventory.yml build_ami.yml -e @provisioning_vars.yml
 ```
-
-1. This script will build a VPC. Default name will be clusterid if not specified.
-2. Create an ssh key required for the instance.
-3. Create a security group.
-4. Create an instance using the key from step 2 or a specified key.
-5. Run openshift-ansible setup roles to ensure packages and services are correctly configured.
-6. Create the AMI.
-7. If encryption is desired
-  - A KMS key is created with the name of $clusterid
-  - An encrypted AMI will be produced with $clusterid KMS key
-8. Terminate the instance used to configure the AMI.
-
-More AMI specific options can be found in ['openshift_aws/defaults/main.yml'](../../roles/openshift_aws/defaults/main.yml).  When creating an encrypted AMI please specify use_encryption:
-```
-# openshift_aws_ami_encrypt: True  # defaults to false
-```
-
-**Note**:  This will ensure to take the recently created AMI and encrypt it to be used later.  If encryption is not desired then set the value to false (defaults to false). The AMI id will be fetched and used according to its most recent creation date.
 
 #### Step 2
 
@@ -167,16 +117,14 @@ $ ansible-playbook provision.yml -e @provisioning_vars.yml
 ```
 
 This playbook runs through the following steps:
-1. Ensures a VPC is created.
-2. Ensures a SSH key exists.
-3. Creates an s3 bucket for the registry named $clusterid-docker-registry
-4. Create master security groups.
-5. Create a master launch config.
-6. Create the master auto scaling groups.
-7. If certificates are desired for ELB, they will be uploaded.
-8. Create internal and external master ELBs.
-9. Add newly created masters to the correct groups.
-10. Set a couple of important facts for the masters.
+1. Creates an s3 bucket for the registry named $clusterid-docker-registry
+2. Create master security groups.
+3. Create a master launch config.
+4. Create the master auto scaling groups.
+5. If certificates are desired for ELB, they will be uploaded.
+6. Create internal and external master ELBs.
+7. Add newly created masters to the correct groups.
+8. Set a couple of important facts for the masters.
 
 At this point we have successfully created the infrastructure including the master nodes.
 
@@ -195,13 +143,13 @@ Once this playbook completes, the cluster masters should be installed and config
 
 #### Step 5
 
-Now that we have a cluster deployed it will be more interesting to create some node types.  This can be done easily with the following playbook:
+Now that we have the cluster masters deployed, we need to deploy our infrastructure and compute nodes:
 
 ```
 $ ansible-playbook provision_nodes.yml -e @provisioning_vars.yml
 ```
 
-Once this playbook completes, it should create the compute and infra node scale groups.  These nodes will attempt to register themselves to the cluster.  These requests must be approved by an administrator.
+Once this playbook completes, it should create the compute and infra node scale groups.  These nodes will attempt to register themselves to the cluster.  These requests must be approved by an administrator in Step 6.
 
 #### Step 6
 
