@@ -7,7 +7,7 @@
 
 - name: Set default Environment ID
   set_fact:
-    default_env_id: "casl-{{ lookup('env','OS_USERNAME') }}-{{ env_random_id }}"
+    default_env_id: "openshift-{{ lookup('env','OS_USERNAME') }}-{{ env_random_id }}"
   delegate_to: localhost
 
 - name: Setting Common Facts
