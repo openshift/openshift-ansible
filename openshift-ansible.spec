@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.140
+Version:        3.4.141
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.141-1
+- Bumping version to avoid conflict (smunilla@redhat.com)
+- Ensure docker service started prior to credentials (mgugino@redhat.com)
+- Fix origin repo deployment (mgugino@redhat.com)
+- Fix registry auth variable (mgugino@redhat.com)
+- Fixes #4809 (edu@redhat.com)
+- master: Default to false for l_bind_docker_reg_auth (smilner@redhat.com)
+
 * Tue Sep 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.137-1
 - 
 
