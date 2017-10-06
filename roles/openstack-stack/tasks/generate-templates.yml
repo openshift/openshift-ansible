@@ -3,7 +3,7 @@
   register: stack_template_pre
   tempfile:
     state: directory
-    prefix: casl-ansible
+    prefix: openshift-ansible
 
 - name: set template paths
   set_fact:
