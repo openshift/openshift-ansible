@@ -14,3 +14,8 @@
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
     yaml_key: 'kubernetesMasterConfig.admissionConfig'
     yaml_value:
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'controllerConfig.election.lockName'
+    yaml_value: 'openshift-master-controllers'
