@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.47
+Version:        3.6.173.0.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.48-1
+- Bug 1496271 - Perserve SCC for ES local persistent storage
+  (jcantril@redhat.com)
+
 * Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.47-1
 - Ensure docker is restarted when iptables is restarted (mgugino@redhat.com)
 - Ensure docker service started prior to credentials (mgugino@redhat.com)
