@@ -65,7 +65,7 @@
     until: scaleup_health.rc == 0
 
 - name: Update master etcd client urls
-  hosts: oo_masters_to_config
+  hosts: oo_masters
   serial: 1
   vars:
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
