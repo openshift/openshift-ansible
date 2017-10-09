@@ -38,7 +38,7 @@ spec:
         -
           name: "curator"
           image: {{image}}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           resources:
             limits:
               cpu: "{{curator_cpu_limit}}"

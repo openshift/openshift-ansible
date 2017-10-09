@@ -195,3 +195,9 @@ Elasticsearch OPS too, if using an OPS cluster:
   Defaults to 'logging-mux'.
 - `openshift_logging_mux_file_buffer_storage_group`: The storage group used for Mux.
   Defaults to '65534'.
+
+Changelog
+---------
+
+Tue Oct 10, 2017
+- Default imagePullPolicy changed from Always to IfNotPresent 

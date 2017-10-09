@@ -29,7 +29,7 @@ spec:
       containers:
       - name: "{{ daemonset_container_name }}"
         image: "{{ openshift_logging_fluentd_image_prefix }}{{ daemonset_name }}:{{ openshift_logging_fluentd_image_version }}"
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
         resources:
