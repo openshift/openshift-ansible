@@ -251,11 +251,7 @@ servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
   bindNetwork: tcp4
   certFile: master.server.crt
-{% if openshift.common.version_gte_3_2_or_1_2 | bool %}
-  clientCA: ca-bundle.crt
-{% else %}
   clientCA: ca.crt
-{% endif %}
   keyFile: master.server.key
   maxRequestsInFlight: {{ openshift.master.max_requests_inflight }}
   requestTimeoutSeconds: 3600
