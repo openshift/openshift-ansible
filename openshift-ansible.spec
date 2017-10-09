@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.144.0%{?dist}
+Release:        0.145.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.145.0
+- add missing restart node handler to flannel (jchaloup@redhat.com)
+- Switch to configmap leader election on 3.7 upgrade (mkhan@redhat.com)
+- crio.conf.j2: sync from upstream (gscrivan@redhat.com)
+- cri-o: use overlay instead of overlay2 (gscrivan@redhat.com)
+- Ensure docker is restarted when iptables is restarted (mgugino@redhat.com)
+- Stop including origin and ose hosts example file (sdodson@redhat.com)
+- node: make node service PartOf=openvswitch.service when openshift-sdn is used
+  (dcbw@redhat.com)
+
 * Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.144.0
 - fix typo for default in etcd (mgugino@redhat.com)
 - Bumping version of service catalog image for 3.7 (ewolinet@redhat.com)
