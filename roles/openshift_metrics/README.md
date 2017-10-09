@@ -109,3 +109,78 @@ Author Information
 ------------------
 
 Jose David Martín (j.david.nieto@gmail.com)
+
+Image update procedure
+----------------------
+An upgrade of the metrics stack from older version to newer is an automated process and should be performed by calling appropriate ansible playbook and setting required ansible variables in your inventory as documented in https://docs.openshift.org/.
+
+Following text describes manual update of the metrics images without version upgrade. To determine the current version of images being used you can:
+```
+oc describe pod | grep 'Image ID:'
+```
+This will get the repo digest that can later be compared to the inspected image details.
+
+A way to determine when was your image last updated:
+```
+$ docker images
+REPOSITORY                                       TAG     IMAGE ID       CREATED             SIZE
+<registry>/openshift3/origin-metrics-cassandra   v3.7    f8ad8d569e27   14 hours ago        783.7 MB
+
+$ docker inspect 9c3597aeb39f 
+[
+    {
+        . . .
+        "RepoDigests": [
+            "<registry>/openshift3/metrics-cassandra@sha256:d37fc0cab268625b53a92bb98d09fcc501cfca1c68e16bac6dd98446d32ba135
+        ],
+        . . .
+        "Config": {
+            . . .
+            "Labels": {
+                . . .
+                "build-date": "2017-10-17T16:47:44.350655",
+                . . . 
+                "release": "0.143.4.0",
+                . . .
+                "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift3/metrics-cassandra/images/v3.7.0-0.143.4.0",
+                . . .
+                "version": "v3.7.0"
+            }
+        },
+        . . .
+```
+
+Pull a new image to see if registry has any newer images with the same tag:
+```
+$ docker pull <registry>/openshift3/origin-metrics-cassandra:v3.7
+```
+
+If there was an update, you need to run the `docker pull` on each node.
+
+It is recommended that you now rerun the `openshift_metrics` playbook to ensure that any necessary config changes are also picked up.
+ 
+To manually redeploy your pod you can do the following:
+- for a DC you can do:
+```
+oc rollout latest <dc_name>
+```
+     
+- for a RC you can scale down and scale back up
+```
+oc scale --replicas=0 <rc_name>
+
+... wait for scale down
+
+oc scale --replicas=<original_replica_count> <rc_name>
+```
+
+- for a DS you can delete the pod or unlabel and relabel your node
+```
+oc delete pod --selector=<ds_selector>
+```
+
+Changelog
+---------
+
+Tue Oct 10, 2017
+- Default imagePullPolicy changed from Always to IfNotPresent 
