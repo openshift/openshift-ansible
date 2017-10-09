@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.145.0%{?dist}
+Release:        0.146.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Oct 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.146.0
+- docker_image_availability: credentials to skopeo (mgugino@redhat.com)
+- Rename openshift_cfme role to openshift_management (tbielawa@redhat.com)
+
 * Mon Oct 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.145.0
 - add missing restart node handler to flannel (jchaloup@redhat.com)
 - Switch to configmap leader election on 3.7 upgrade (mkhan@redhat.com)
