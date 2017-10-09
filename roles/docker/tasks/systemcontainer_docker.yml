@@ -1,5 +1,21 @@
 ---
 
+- set_fact:
+    l_openshift_image_tag: "{{ openshift_image_tag | string }}"
+  when: openshift_image_tag is defined
+
+- set_fact:
+    l_openshift_image_tag: "latest"
+  when:
+    - openshift_image_tag is not defined
+    - openshift_release == "latest"
+
+- set_fact:
+    l_openshift_image_tag: "v{{ openshift_release | string }}"
+  when:
+    - openshift_image_tag is not defined
+    - openshift_release != "latest"
+
 # If docker_options are provided we should fail. We should not install docker and ignore
 # the users configuration. NOTE: docker_options == inventory:openshift_docker_options
 - name: Fail quickly if openshift_docker_options are set
@@ -94,10 +110,9 @@
 
     - name: Set container engine image tag
       set_fact:
-        l_docker_image_tag: "{{ openshift_image_tag }}"
+        l_docker_image_tag: "{{ l_openshift_image_tag }}"
       when:
         - openshift_deployment_type == 'openshift-enterprise'
-        - openshift_image_tag is defined
 
     - name: Use Red Hat Registry for image when distribution is Red Hat
       set_fact:
