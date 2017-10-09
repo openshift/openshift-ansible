@@ -1,5 +1,5 @@
 ---
-# Install default storage classes in GCE & AWS
+# Install default storage classes in GCE & AWS & OPENSTACK
 - name: Ensure storageclass object
   oc_storageclass:
     name: "{{ openshift_storageclass_name }}"
