@@ -10,14 +10,6 @@
     l_use_crio: "{{ openshift_use_crio | default(False) }}"
     l_use_crio_only: "{{ openshift_use_crio_only | default(False) }}"
 
-- when:
-    - openshift_deployment_type == 'openshift-enterprise'
-  assert:
-    that:
-      - "openshift_image_tag is defined"
-    msg: >
-      openshift_image_tag is a required inventory variable when installing openshift-enterprise
-
 - name: Use Package Docker if Requested
   include: package_docker.yml
   when:

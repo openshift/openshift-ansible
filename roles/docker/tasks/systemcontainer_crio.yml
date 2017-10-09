@@ -14,6 +14,22 @@
     l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
   when: l2_docker_additional_registries
 
+- set_fact:
+    l_openshift_image_tag: "{{ openshift_image_tag | string }}"
+  when: openshift_image_tag is defined
+
+- set_fact:
+    l_openshift_image_tag: "latest"
+  when:
+    - openshift_image_tag is not defined
+    - openshift_release == "latest"
+
+- set_fact:
+    l_openshift_image_tag: "v{{ openshift_release | string }}"
+  when:
+    - openshift_image_tag is not defined
+    - openshift_release != "latest"
+
 - name: Ensure container-selinux is installed
   package:
     name: container-selinux
@@ -106,10 +122,9 @@
 
     - name: Set CRI-O image tag
       set_fact:
-        l_crio_image_tag: "{{ openshift_image_tag }}"
+        l_crio_image_tag: "{{ l_openshift_image_tag }}"
       when:
         - openshift_deployment_type == 'openshift-enterprise'
-        - openshift_image_tag is defined
 
     - name: Use RHEL based image when distribution is Red Hat
       set_fact:
