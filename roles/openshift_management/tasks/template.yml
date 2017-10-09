@@ -15,7 +15,7 @@
 # STANDARD PODIFIED DATABASE TEMPLATE
 - when: openshift_management_app_template in ['miq-template', 'cfme-template']
   block:
-  - name: Check if the CFME Server template has been created already
+  - name: Check if the Management Server template has been created already
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       state: list
@@ -25,12 +25,12 @@
 
   - when: miq_server_check.results.results == [{}]
     block:
-    - name: Copy over CFME Server template
+    - name: Copy over Management Server template
       copy:
         src: "templates/{{ openshift_management_flavor }}/{{ openshift_management_flavor_short }}-template.yaml"
         dest: "{{ template_dir }}/"
 
-    - name: Ensure CFME Server Template is created
+    - name: Ensure Management Server Template is created
       oc_obj:
         namespace: "{{ openshift_management_project }}"
         name: "{{ openshift_management_flavor }}"
@@ -41,9 +41,9 @@
 
 ######################################################################
 # EXTERNAL DATABASE TEMPLATE
-- when: openshift_management_app_template in ['miq-template-ext-db', 'cfme-template']
+- when: openshift_management_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
   block:
-  - name: Check if the CFME Ext-DB Server template has been created already
+  - name: Check if the Management Ext-DB Server template has been created already
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       state: list
@@ -53,12 +53,12 @@
 
   - when: miq_ext_db_server_check.results.results == [{}]
     block:
-    - name: Copy over CFME Ext-DB Server template
+    - name: Copy over Management Ext-DB Server template
       copy:
         src: "templates/{{ openshift_management_flavor }}/{{openshift_management_flavor_short}}-template-ext-db.yaml"
         dest: "{{ template_dir }}/"
 
-    - name: Ensure CFME Ext-DB Server Template is created
+    - name: Ensure Management Ext-DB Server Template is created
       oc_obj:
         namespace: "{{ openshift_management_project }}"
         name: "{{ openshift_management_flavor }}-ext-db"
@@ -74,7 +74,7 @@
 # Begin conditional PV template creations
 
 # Required for the application server
-- name: Check if the CFME App PV template has been created already
+- name: Check if the Management App PV template has been created already
   oc_obj:
     namespace: "{{ openshift_management_project }}"
     state: list
@@ -84,12 +84,12 @@
 
 - when: miq_app_pv_check.results.results == [{}]
   block:
-  - name: Copy over CFME App PV template
+  - name: Copy over Management App PV template
     copy:
       src: "templates/{{ openshift_management_flavor }}/{{ openshift_management_flavor_short }}-pv-server-example.yaml"
       dest: "{{ template_dir }}/"
 
-  - name: Ensure CFME App PV Template is created
+  - name: Ensure Management App PV Template is created
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       name: "{{ openshift_management_flavor }}-app-pv"
@@ -103,7 +103,7 @@
 # Required for database if the installation is fully podified
 - when: openshift_management_app_template in ['miq-template', 'cfme-template']
   block:
-  - name: Check if the CFME DB PV template has been created already
+  - name: Check if the Management DB PV template has been created already
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       state: list
@@ -113,12 +113,12 @@
 
   - when: miq_db_pv_check.results.results == [{}]
     block:
-    - name: Copy over CFME DB PV template
+    - name: Copy over Management DB PV template
       copy:
         src: "templates/{{ openshift_management_flavor }}/{{ openshift_management_flavor_short }}-pv-db-example.yaml"
         dest: "{{ template_dir }}/"
 
-    - name: Ensure CFME DB PV Template is created
+    - name: Ensure Management DB PV Template is created
       oc_obj:
         namespace: "{{ openshift_management_project }}"
         name: "{{ openshift_management_flavor }}-db-pv"

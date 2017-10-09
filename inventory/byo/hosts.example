@@ -968,25 +968,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_upgrade_post_storage_migration_enabled=true
 # openshift_upgrade_post_storage_migration_fatal=false
 
-# host group for masters
-[masters]
-ose3-master[1:3]-ansible.test.example.com
-
-[etcd]
-ose3-etcd[1:3]-ansible.test.example.com
-
-# NOTE: Containerized load balancer hosts are not yet supported, if using a global
-# containerized=true host variable we must set to false.
-[lb]
-ose3-lb-ansible.test.example.com containerized=false
-
-# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
-# However, in order to ensure that your masters are not burdened with running pods you should
-# make them unschedulable by adding openshift_schedulable=False any node that's also a master.
-[nodes]
-ose3-master[1:3]-ansible.test.example.com
-ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
-
+######################################################################
 # CloudForms/ManageIQ (CFME/MIQ) Configuration
 
 # See the readme for full descriptions and getting started
@@ -1036,6 +1018,17 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 # setting this variable. Useful for testing specific task files.
 #openshift_management_storage_nfs_local_hostname: false
 
+# These are the default values for the username and password of the
+# management app. Changing these values in your inventory will not
+# change your username or password. You should only need to change
+# these values in your inventory if you already changed the actual
+# name and password AND are trying to use integration scripts.
+#
+# For example, adding this cluster as a container provider,
+# playbooks/byo/openshift-management/add_container_provider.yml
+#openshift_management_username: admin
+#openshift_management_password: smartvm
+
 # A hash of parameters you want to override or set in the
 # miq-template.yaml or miq-template-ext-db.yaml templates. Set this in
 # your inventory file as a simple hash. Acceptable values are defined
@@ -1044,3 +1037,22 @@ ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'prima
 #
 # openshift_management_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
 #openshift_management_template_parameters: {}
+
+# host group for masters
+[masters]
+ose3-master[1:3]-ansible.test.example.com
+
+[etcd]
+ose3-etcd[1:3]-ansible.test.example.com
+
+# NOTE: Containerized load balancer hosts are not yet supported, if using a global
+# containerized=true host variable we must set to false.
+[lb]
+ose3-lb-ansible.test.example.com containerized=false
+
+# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
+# However, in order to ensure that your masters are not burdened with running pods you should
+# make them unschedulable by adding openshift_schedulable=False any node that's also a master.
+[nodes]
+ose3-master[1:3]-ansible.test.example.com
+ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"

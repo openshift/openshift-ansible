@@ -12,7 +12,7 @@
 #   l_nfs_export_name: Name of sub-directory of the export
 #   l_nfs_options: Mount Options
 
-- name: Ensure CFME App NFS export directory exists
+- name: "Ensure {{ l_nfs_export_name }} NFS export directory exists"
   file:
     path: "{{ l_nfs_base_dir }}/{{ l_nfs_export_name }}"
     state: directory

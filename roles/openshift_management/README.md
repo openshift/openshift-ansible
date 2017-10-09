@@ -38,6 +38,10 @@ deployment type (`openshift_deployment_type`):
          * [Cloud Provider](#cloud-provider)
          * [Preconfigured (Expert Configuration Only)](#preconfigured-expert-configuration-only)
    * [Customization](#customization)
+   * [Container Provider](#container-provider)
+      * [Manually](#manually)
+      * [Automatically](#automatically)
+      * [Multiple Providers](#multiple-providers)
    * [Uninstall](#uninstall)
    * [Additional Information](#additional-information)
 
@@ -80,30 +84,10 @@ to there being no databases that require pods.
 
 *Be extra careful* if you are overriding template
 parameters. Including parameters not defined in a template **will
-cause errors**.
-
-**Container Provider Integration** - If you want add your container
-platform (OCP/Origin) as a *Container Provider* in CFME/MIQ then you
-must ensure that the infrastructure management hooks are installed.
-
-* During your OCP/Origin install, ensure that you have the
-  `openshift_use_manageiq` parameter set to `true` in your inventory
-  at install time. This will create a `management-infra` project and a
-  service account user.
-* After CFME/MIQ is installed, obtain the `management-admin` service
-  account token and copy it somewhere safe.
-
-```bash
-$ oc serviceaccounts get-token -n management-infra management-admin
-eyJhuGdiOiJSUzI1NiIsInR5dCI6IkpXVCJ9.eyJpd9MiOiJrbWJldm5lbGVzL9NldnZpY2VhY2NvbW50Iiwiy9ViZXJuZXRldy5puy9zZXJ2yWNlYWNju9VubC9uYW1ld9BhY2UiOiJtYW5hZ2VtZW50LWluZnJhIiwiy9ViZXJuZXRldy5puy9zZXJ2yWNlYWNju9VubC9zZWNyZXQuumFtZSI6Im1humFnZW1lunQtYWRtyW4tbG9rZW4tdDBnOTAiLCJrbWJldm5lbGVzLmlvL9NldnZpY2VhY2NvbW50L9NldnZpY2UtYWNju9VubC5uYW1lIjoiuWFuYWbluWVubC1hZG1puiIsImt1YmVyumV0ZXMuyW8vd2VybmljZWFjY291unQvd2VybmljZS1hY2NvbW50LnVpZCI6IjRiZDM2MWQ1LWE1NDAtMTFlNy04YzI5LTUyNTQwMDliMmNkZCIsInN1YiI6InN5d9RluTpzZXJ2yWNlYWNju9VubDptYW5hZ2VtZW50LWluZnJhOm1humFnZW1lunQtYWRtyW4ifQ.B6sZLGD9O4vBu9MHwiG-C_4iEwjBXb7Af8BPw-LNlujDmHhOnQ-Oo4QxQKyj9edynfmDy2yutUyJ2Mm9HfDGWg4C9xhWImHoq6Nl7T5_9djkeGKkK7Ejvg4fA-IkrzEsZeQuluBvXnE6wvP0LCjUo_dx4pPyZJyp46teV9NqKQeDzeysjlMCyqp6AK6-Lj8ILG8YA6d_97HlzL_EgFBLAu0lBSn-uC_9J0gLysqBtK6TI0nExfhv9Bm1_5bdHEbKHPW7xIlYlI9AgmyTyhsQ6SoQWtL2khBjkG9TlPBq9wYJj9bzqgVZlqEfICZxgtXO7sYyuoje4y8lo0YQ0kZmig
-```
-
-* In the CFME/MIQ web interface, navigate to `Compute` →
-  `Containers` → `Providers` and select `⚙ Configuration` → `⊕
-  Add a new Containers Provider`
-
-*See the [upstream documentation](http://manageiq.org/docs/reference/latest/doc-Managing_Providers/miq/index.html#containers-providers) for additional information.*
-
+cause errors**. If you do receive an error during the `Ensure the CFME
+App is created` task, we recommend running the
+[uninstall scripts](#uninstall) first before running the installer
+again.
 
 
 # Requirements
@@ -140,11 +124,13 @@ used in your Ansible inventory to control the behavior of this
 installer.
 
 
-| Variable                                       | Required | Default                        | Description                         |
-|------------------------------------------------|:--------:|:------------------------------:|-------------------------------------|
-| `openshift_management_project`                       | **No**   | `openshift-management`               | Namespace for the installation.     |
+| Variable                                             | Required | Default                        | Description                         |
+|------------------------------------------------------|:--------:|:------------------------------:|-------------------------------------|
+| `openshift_management_project`                       | **No**   | `openshift-management`         | Namespace for the installation.     |
 | `openshift_management_project_description`           | **No**   | *CloudForms Management Engine* | Namespace/project description.      |
-| `openshift_management_install_management`                  | **No**   | `false`                        | Boolean, set to `true` to install the application |
+| `openshift_management_install_management`            | **No**   | `false`                        | Boolean, set to `true` to install the application |
+| `openshift_management_username`                      | **No**   | `admin`                        | Default management username. Changing this values **does not change the username**. Only change this value if you have changed the name already and are running integration scripts (such as the [add container provider](#container-provider) script) |
+| `openshift_management_password`                      | **No**   | `smartvm`                      | Default management password. Changing this values **does not change the password**. Only change this value if you have changed the password already and are running integration scripts (such as the [add-container-provider](#container-provider) script) |
 | **PRODUCT CHOICE**  | | | | |
 | `openshift_management_app_template`                  | **No**   | `miq-template`                 | The project flavor to install. Choices: <ul><li>`miq-template`: ManageIQ using a podified database</li> <li> `miq-template-ext-db`: ManageIQ using an external database</li> <li>`cfme-template`: CloudForms using a podified database<sup>[1]</sup></li> <li> `cfme-template-ext-db`: CloudForms using an external database.<sup>[1]</sup></li></ul> |
 | **STORAGE CLASSES** | | | | |
@@ -268,6 +254,9 @@ openshift_management_app_template=cfme-template-ext-db
 openshift_management_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
 ```
 
+**NOTE:** Ensure your are running PostgreSQL 9.5 or you may not be
+able to deploy the app successfully.
+
 # Limitations
 
 This release is the first OpenShift CFME release in the OCP 3.7
@@ -317,6 +306,9 @@ inventory. The following keys are required:
 * `DATABASE_IP`
 * `DATABASE_PORT` - *note: Most PostgreSQL servers run on port `5432`*
 * `DATABASE_NAME`
+
+**NOTE:** Ensure your are running PostgreSQL 9.5 or you may not be
+able to deploy the app successfully.
 
 Your inventory would contain a line similar to this:
 
@@ -453,6 +445,120 @@ hash. This applies to **CloudForms** installations as well:
 [cfme-template.yaml](files/templates/cloudforms/cfme-template.yaml),
 [cfme-template-ext-db.yaml](files/templates/cloudforms/cfme-template-ext-db.yaml).
 
+# Container Provider
+
+There are two methods for enabling container provider integration. You
+can manually add OCP/Origin as a container provider, or you can try
+the playbooks included with this role.
+
+## Manually
+
+See the online documentation for steps to manually add you cluster as
+a container provider:
+
+* [Container Providers](http://manageiq.org/docs/reference/latest/doc-Managing_Providers/miq/#containers-providers)
+
+## Automatically
+
+Automated container provider integration can be accomplished using the
+playbooks included with this role.
+
+This playbook will:
+
+1. Gather the necessary authentication secrets
+1. Find the public routes to the Management app and the cluster API
+1. Make a REST call to add this cluster as a container provider
+
+
+```
+$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-management/add_container_provider.yml
+```
+
+## Multiple Providers
+
+As well as providing playbooks to integrate your *current* container
+platform into the management service, this role includes a **tech
+preview** script which allows you to add multiple container platforms
+as container providers in any arbitrary MIQ/CFME server.
+
+Using the multiple-provider script requires manual configuration and
+the setting of an additional inventory parameter.
+
+
+1. Copy the
+   [container_providers.yml](files/examples/container_providers.yml)
+   example somewhere
+1. Add the `openshift_management_many_container_providers_config`
+   parameter to your inventory and set the value to the full path of
+   the file you copied in `Step 1`
+1. Update the `hostname`, `user`, and `password` parameters in the
+   `management_server` key in the `container_providers.yml` file copy
+1. Fill in an entry under the `container_providers` key for *each* OCP
+   or Origin cluster you want to add as container providers
+
+**Parameters Which MUST Be Configured:**
+
+* `auth_key` - This is the token of a service account which has admin capabilities on the cluster.
+* `hostname` - This is the hostname that points to the cluster API. Each container provider must have a unique hostname.
+* `name` - This is the name of the cluster as displayed in the management server container providers overview. This must be unique.
+
+*Note*: You can obtain the `auth_key` bearer token from your clusters
+ with this command: `oc serviceaccounts get-token -n management-infra
+ management-admin`
+
+**Parameters Which MAY Be Configured:**
+
+* `port` - Update this key if your OCP/Origin cluster runs the API on a port other than `8443`
+* `endpoint` - You may enable SSL verification (`verify_ssl`) or change the validation setting to `ssl-with-validation`. Support for custom trusted CA certificates is not available at this time.
+
+Let's see an example describing the following scenario:
+
+* You copied `files/examples/container_providers.yml` to `/tmp/cp.yml`
+* You're adding two OCP clusters
+* Your management server runs on `mgmt.example.com`
+
+You would customize `/tmp/cp.yml` as such:
+
+```yaml
+---
+container_providers:
+  - connection_configurations:
+      - authentication: {auth_key: "management-token-for-this-cluster", authtype: bearer, type: AuthToken}
+        endpoint: {role: default, security_protocol: ssl-without-validation, verify_ssl: 0}
+    hostname: "ocp-prod.example.com"
+    name: OCP Production
+    port: 8443
+    type: "ManageIQ::Providers::Openshift::ContainerManager"
+  - connection_configurations:
+      - authentication: {auth_key: "management-token-for-this-cluster", authtype: bearer, type: AuthToken}
+        endpoint: {role: default, security_protocol: ssl-without-validation, verify_ssl: 0}
+    hostname: "ocp-test.example.com"
+    name: OCP Testing
+    port: 8443
+    type: "ManageIQ::Providers::Openshift::ContainerManager"
+management_server:
+  hostname: "mgmt.example.com"
+  user: admin
+  password: b3tt3r_p4SSw0rd
+```
+
+Then you would add to your inventory file:
+
+```ini
+[OSEv3:vars]
+# ...
+openshift_management_many_container_providers_config=/tmp/cp.yml
+```
+
+Finally, run the many-container-providers integration script:
+
+```
+$ ansible-playbook -v -i <YOUR_INVENTORY> roles/openshift_management/tasks/add_many_container_providers.yml
+```
+
+Afterwards you will find two new container providers in your
+management service. Navigate to `Compute` → `Containers` → `Providers`
+to see an overview.
 
 # Uninstall
 
@@ -460,6 +566,11 @@ This role includes a playbook to uninstall and erase the CFME/MIQ
 installation:
 
 * `playbooks/byo/openshift-management/uninstall.yml`
+
+NFS export definitions and data stored on NFS exports are not
+automatically removed. You are urged to manually erase any data from
+old application or database deployments before attempting to
+initialize a new deployment.
 
 # Additional Information
 

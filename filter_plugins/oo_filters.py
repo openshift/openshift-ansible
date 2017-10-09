@@ -1125,6 +1125,73 @@ of items as ['region=infra', 'zone=primary']
     return selectors
 
 
+def oo_filter_sa_secrets(sa_secrets, secret_hint='-token-'):
+    """Parse the Service Account Secrets list, `sa_secrets`, (as from
+oc_serviceaccount_secret:state=list) and return the name of the secret
+containing the `secret_hint` string. For example, by default this will
+return the name of the secret holding the SA bearer token.
+
+Only provide the 'results' object to this filter. This filter expects
+to receive a list like this:
+
+    [
+        {
+            "name": "management-admin-dockercfg-p31s2"
+        },
+        {
+            "name": "management-admin-token-bnqsh"
+        }
+    ]
+
+
+Returns:
+
+* `secret_name` [string] - The name of the secret matching the
+  `secret_hint` parameter. By default this is the secret holding the
+  SA's bearer token.
+
+Example playbook usage:
+
+Register a return value from oc_serviceaccount_secret with and pass
+that result to this filter plugin.
+
+    - name: Get all SA Secrets
+      oc_serviceaccount_secret:
+        state: list
+        service_account: management-admin
+        namespace: management-infra
+      register: sa
+
+    - name: Save the SA bearer token secret name
+      set_fact:
+        management_token: "{{ sa.results | oo_filter_sa_secrets }}"
+
+    - name: Get the SA bearer token value
+      oc_secret:
+        state: list
+        name: "{{ management_token }}"
+        namespace: management-infra
+        decode: true
+      register: sa_secret
+
+    - name: Print the bearer token value
+      debug:
+        var: sa_secret.results.decoded.token
+
+    """
+    secret_name = None
+
+    for secret in sa_secrets:
+        # each secret is a hash
+        if secret['name'].find(secret_hint) == -1:
+            continue
+        else:
+            secret_name = secret['name']
+            break
+
+    return secret_name
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -1167,5 +1234,6 @@ class FilterModule(object):
             "to_padded_yaml": to_padded_yaml,
             "oo_random_word": oo_random_word,
             "oo_contains_rule": oo_contains_rule,
-            "oo_selector_to_string_list": oo_selector_to_string_list
+            "oo_selector_to_string_list": oo_selector_to_string_list,
+            "oo_filter_sa_secrets": oo_filter_sa_secrets,
         }

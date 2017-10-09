@@ -1,4 +1,2 @@
 ---
-# - include: ../openshift-cluster/initialize_groups.yml
-
 - include: ../../common/openshift-management/uninstall.yml

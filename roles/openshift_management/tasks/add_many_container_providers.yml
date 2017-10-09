@@ -1,0 +1,27 @@
+---
+- hosts: "{{ groups['masters'][0] }}"
+  tasks:
+  - name: Include providers/management configuration
+    include_vars:
+      file: "{{ openshift_management_many_container_providers_config }}"
+
+  - name: Ensure this cluster is a container provider
+    uri:
+      url: "https://{{ management_server['hostname'] }}/api/providers"
+      body_format: json
+      method: POST
+      user: "{{ management_server['user'] }}"
+      password: "{{ management_server['password'] }}"
+      validate_certs: no
+      # Docs on formatting the BODY of the POST request:
+      # http://manageiq.org/docs/reference/latest/api/reference/providers.html#specifying-connection-configurations
+      body: "{{ item }}"
+    failed_when: false
+    with_items: "{{ container_providers }}"
+    register: results
+
+  - name: Ensure failed additions are reported for each container provider
+    debug:
+      msg: |
+        FLOOP {{ item.item.hostname }}
+    with_items: "{{ results.results }}"

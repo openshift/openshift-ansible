@@ -26,7 +26,7 @@
       when:
         - openshift_management_template_parameters.DATABASE_VOLUME_CAPACITY is not defined
 
-- name: Check if the CFME App PV has been created
+- name: Check if the Management App PV has been created
   oc_obj:
     namespace: "{{ openshift_management_project }}"
     state: list
@@ -34,7 +34,7 @@
     name: "{{ openshift_management_flavor_short }}-app"
   register: miq_app_pv_check
 
-- name: Check if the CFME DB PV has been created
+- name: Check if the Management DB PV has been created
   oc_obj:
     namespace: "{{ openshift_management_project }}"
     state: list
@@ -44,7 +44,7 @@
   when:
     - openshift_management_app_template in ['miq-template', 'cfme-template']
 
-- name: Ensure the CFME App PV is created
+- name: Ensure the Management App PV is created
   oc_process:
     namespace: "{{ openshift_management_project }}"
     template_name: "{{ openshift_management_flavor }}-app-pv"
@@ -55,7 +55,7 @@
       NFS_HOST: "{{ openshift_management_nfs_server }}"
   when: miq_app_pv_check.results.results == [{}]
 
-- name: Ensure the CFME DB PV is created
+- name: Ensure the Management DB PV is created
   oc_process:
     namespace: "{{ openshift_management_project }}"
     template_name: "{{ openshift_management_flavor }}-db-pv"

@@ -1,6 +1,6 @@
 ---
 - name: Uninstall CFME
-  hosts: masters
+  hosts: masters[0]
   tasks:
   - name: Run the CFME Uninstall Role Tasks
     include_role:
