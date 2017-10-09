@@ -44,8 +44,8 @@
   - modify_yaml:
       dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
       yaml_key: servingInfo.clientCA
-      yaml_value: ca-bundle.crt
-    when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'ca-bundle.crt'
+      yaml_value: ca.crt
+    when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'ca.crt'
   - modify_yaml:
       dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
       yaml_key: etcdClientInfo.ca
