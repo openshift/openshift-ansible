@@ -38,6 +38,7 @@ deployment type (`openshift_deployment_type`):
          * [Cloud Provider](#cloud-provider)
          * [Preconfigured (Expert Configuration Only)](#preconfigured-expert-configuration-only)
    * [Customization](#customization)
+   * [Uninstall](#uninstall)
    * [Additional Information](#additional-information)
 
 # Introduction
@@ -141,18 +142,18 @@ installer.
 
 | Variable                                       | Required | Default                        | Description                         |
 |------------------------------------------------|:--------:|:------------------------------:|-------------------------------------|
-| `openshift_cfme_project`                       | **No**   | `openshift-cfme`               | Namespace for the installation.     |
-| `openshift_cfme_project_description`           | **No**   | *CloudForms Management Engine* | Namespace/project description.      |
-| `openshift_cfme_install_cfme`                  | **No**   | `false`                        | Boolean, set to `true` to install the application |
+| `openshift_management_project`                       | **No**   | `openshift-management`               | Namespace for the installation.     |
+| `openshift_management_project_description`           | **No**   | *CloudForms Management Engine* | Namespace/project description.      |
+| `openshift_management_install_management`                  | **No**   | `false`                        | Boolean, set to `true` to install the application |
 | **PRODUCT CHOICE**  | | | | |
-| `openshift_cfme_app_template`                  | **No**   | `miq-template`                 | The project flavor to install. Choices: <ul><li>`miq-template`: ManageIQ using a podified database</li> <li> `miq-template-ext-db`: ManageIQ using an external database</li> <li>`cfme-template`: CloudForms using a podified database<sup>[1]</sup></li> <li> `cfme-template-ext-db`: CloudForms using an external database.<sup>[1]</sup></li></ul> |
+| `openshift_management_app_template`                  | **No**   | `miq-template`                 | The project flavor to install. Choices: <ul><li>`miq-template`: ManageIQ using a podified database</li> <li> `miq-template-ext-db`: ManageIQ using an external database</li> <li>`cfme-template`: CloudForms using a podified database<sup>[1]</sup></li> <li> `cfme-template-ext-db`: CloudForms using an external database.<sup>[1]</sup></li></ul> |
 | **STORAGE CLASSES** | | | | |
-| `openshift_cfme_storage_class`                 | **No**   | `nfs`                          | Storage type to use, choices: <ul><li>`nfs` - Best used for proof-of-concept installs. Will setup NFS on a cluster host (defaults to your first master in the inventory file) to back the required PVCs. The application requires a PVC and the database (which may be hosted externally) may require a second. PVC minimum required sizes are 5GiB for the MIQ application, and 15GiB for the PostgreSQL database (20GiB minimum available space on a volume/partition if used specifically for NFS purposes)</li> <li>`nfs_external` - You are using an external NFS server, such as a netapp appliance. See the [Configuration - Storage Classes](#storage-classes) section below for required information.</li> <li>`preconfigured` - This CFME role will do NOTHING to modify storage settings. This option assumes expert knowledge and that you have done everything required ahead of time.</li> <li>`cloudprovider` - You are using an OCP cloudprovider integration for your storage class. For this to work you must have already configured the required inventory parameters for your cloud provider. Ensure `openshift_cloudprovider_kind` is defined (aws or gce) and that the applicable cloudprovider parameters are provided. |
-| `openshift_cfme_storage_nfs_external_hostname` | **No**   | `false`                        | If you are using an *external NFS server*, such as a netapp appliance, then you must set the hostname here. Leave the value as `false` if you are not using external NFS. <br /> *Additionally*: **External NFS REQUIRES** that you create the NFS exports that will back the application PV and optionally the database PV.
-| `openshift_cfme_storage_nfs_base_dir`          | **No**   | `/exports/`                    | If you are using **External NFS** then you may set the base path to the exports location here. <br />**Local NFS Note**: You *may* also change this value if you want to change the default path used for local NFS exports. |
-| `openshift_cfme_storage_nfs_local_hostname`    | **No**   | `false`                        | If you do not have an `[nfs]` group in your inventory, or want to simply manually define the local NFS host in your cluster, set this parameter to the hostname of the preferred NFS server. The server must be a part of your OCP/Origin cluster. |
+| `openshift_management_storage_class`                 | **No**   | `nfs`                          | Storage type to use, choices: <ul><li>`nfs` - Best used for proof-of-concept installs. Will setup NFS on a cluster host (defaults to your first master in the inventory file) to back the required PVCs. The application requires a PVC and the database (which may be hosted externally) may require a second. PVC minimum required sizes are 5GiB for the MIQ application, and 15GiB for the PostgreSQL database (20GiB minimum available space on a volume/partition if used specifically for NFS purposes)</li> <li>`nfs_external` - You are using an external NFS server, such as a netapp appliance. See the [Configuration - Storage Classes](#storage-classes) section below for required information.</li> <li>`preconfigured` - This CFME role will do NOTHING to modify storage settings. This option assumes expert knowledge and that you have done everything required ahead of time.</li> <li>`cloudprovider` - You are using an OCP cloudprovider integration for your storage class. For this to work you must have already configured the required inventory parameters for your cloud provider. Ensure `openshift_cloudprovider_kind` is defined (aws or gce) and that the applicable cloudprovider parameters are provided. |
+| `openshift_management_storage_nfs_external_hostname` | **No**   | `false`                        | If you are using an *external NFS server*, such as a netapp appliance, then you must set the hostname here. Leave the value as `false` if you are not using external NFS. <br /> *Additionally*: **External NFS REQUIRES** that you create the NFS exports that will back the application PV and optionally the database PV.
+| `openshift_management_storage_nfs_base_dir`          | **No**   | `/exports/`                    | If you are using **External NFS** then you may set the base path to the exports location here. <br />**Local NFS Note**: You *may* also change this value if you want to change the default path used for local NFS exports. |
+| `openshift_management_storage_nfs_local_hostname`    | **No**   | `false`                        | If you do not have an `[nfs]` group in your inventory, or want to simply manually define the local NFS host in your cluster, set this parameter to the hostname of the preferred NFS server. The server must be a part of your OCP/Origin cluster. |
 | **CUSTOMIZATION OPTIONS** | | | | |
-| `openshift_cfme_template_parameters`           | **No**   | `{}`                           | A dictionary of any parameters you want to override in the application/pv templates.
+| `openshift_management_template_parameters`           | **No**   | `{}`                           | A dictionary of any parameters you want to override in the application/pv templates.
 
 * <sup>[1]</sup> The `cfme-template`s will be available and
   automatically detected once CFME 4.6 is released
@@ -164,7 +165,7 @@ Below are some inventory snippets that can help you get started right
 away.
 
 If you want to install CFME/MIQ at the same time you install your
-OCP/Origin cluster, ensure that `openshift_cfme_install_cfme` is set
+OCP/Origin cluster, ensure that `openshift_management_install_management` is set
 to `true` in your inventory. Call the standard
 `playbooks/byo/config.yml` playbook to begin the cluster and CFME/MIQ
 installation.
@@ -173,7 +174,7 @@ If you are installing CFME/MIQ on an *already provisioned cluster*
 then you can call the CFME/MIQ playbook directly:
 
 ```
-$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-cfme/config.yml
+$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-management/config.yml
 ```
 
 *Note: Use `miq-template` in the following examples for ManageIQ installs*
@@ -187,7 +188,7 @@ created as pods in the container platform.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=cfme-template
+openshift_management_app_template=cfme-template
 ```
 
 ## External NFS Storage
@@ -196,37 +197,37 @@ This is as the previous example, except that instead of using local
 NFS services in the cluster it will use an external NFS server (such
 as a storage appliance). Note the two new parameters:
 
-* `openshift_cfme_storage_class` - set to `nfs_external`
-* `openshift_cfme_storage_nfs_external_hostname` - set to the hostname
+* `openshift_management_storage_class` - set to `nfs_external`
+* `openshift_management_storage_nfs_external_hostname` - set to the hostname
   of the NFS server
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=cfme-template
-openshift_cfme_storage_class=nfs_external
-openshift_cfme_storage_nfs_external_hostname=nfs.example.com
+openshift_management_app_template=cfme-template
+openshift_management_storage_class=nfs_external
+openshift_management_storage_nfs_external_hostname=nfs.example.com
 ```
 
 If the external NFS host exports directories under a different parent
 directory, such as `/exports/hosted/prod` then we would add an
-additional parameter, `openshift_cfme_storage_nfs_base_dir`:
+additional parameter, `openshift_management_storage_nfs_base_dir`:
 
 ```ini
 # ...
-openshift_cfme_storage_nfs_base_dir=/exports/hosted/prod
+openshift_management_storage_nfs_base_dir=/exports/hosted/prod
 ```
 
 ## Override PV sizes
 
 This example will override the PV sizes. Note that we set the PV sizes
-in the template parameters, `openshift_cfme_template_parameters`. This
+in the template parameters, `openshift_management_template_parameters`. This
 ensures that the application/db will be able to make claims on created
 PVs without clobbering each other.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=cfme-template
-openshift_cfme_template_parameters={'APPLICATION_VOLUME_CAPACITY': '10Gi', 'DATABASE_VOLUME_CAPACITY': '25Gi'}
+openshift_management_app_template=cfme-template
+openshift_management_template_parameters={'APPLICATION_VOLUME_CAPACITY': '10Gi', 'DATABASE_VOLUME_CAPACITY': '25Gi'}
 ```
 
 ## Override Memory Requirements
@@ -238,8 +239,8 @@ performance or a complete failure to initialize the application.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=cfme-template
-openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '3000Mi', 'POSTGRESQL_MEM_REQ': '1Gi', 'ANSIBLE_MEM_REQ': '512Mi'}
+openshift_management_app_template=cfme-template
+openshift_management_template_parameters={'APPLICATION_MEM_REQ': '3000Mi', 'POSTGRESQL_MEM_REQ': '1Gi', 'ANSIBLE_MEM_REQ': '512Mi'}
 ```
 
 Here we have instructed the installer to process the application
@@ -253,18 +254,18 @@ displayed in the previous example.
 ## External PostgreSQL Database
 
 To use an external database you must change the
-`openshift_cfme_app_template` parameter value to `miq-template-ext-db`
+`openshift_management_app_template` parameter value to `miq-template-ext-db`
 or `cfme-template-ext-db`.
 
 Additionally, database connection information **must** be supplied in
-the `openshift_cfme_template_parameters` customization parameter. See
+the `openshift_management_template_parameters` customization parameter. See
 [Customization - Database - External](#external) for more
 information.
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=cfme-template-ext-db
-openshift_cfme_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
+openshift_management_app_template=cfme-template-ext-db
+openshift_management_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
 ```
 
 # Limitations
@@ -294,7 +295,7 @@ it. There are two major decisions to make:
 Any `POSTGRES_*` or `DATABASE_*` template parameters in
 [miq-template.yaml](files/templates/manageiq/miq-template.yaml) or
 [cfme-template.yaml](files/templates/cloudforms/cfme-template.yaml)
-may be customized through the `openshift_cfme_template_parameters`
+may be customized through the `openshift_management_template_parameters`
 hash.
 
 ### External
@@ -303,12 +304,12 @@ Any `POSTGRES_*` or `DATABASE_*` template parameters in
 [miq-template-ext-db.yaml](files/templates/manageiq/miq-template-ext-db.yaml)
 or
 [cfme-template-ext-db.yaml](files/templates/cloudforms/cfme-template-ext-db.yaml)
-may be customized through the `openshift_cfme_template_parameters`
+may be customized through the `openshift_management_template_parameters`
 hash.
 
 External PostgreSQL databases require you to provide database
 connection parameters. You must set the required connection keys in
-the `openshift_cfme_template_parameters` parameter in your
+the `openshift_management_template_parameters` parameter in your
 inventory. The following keys are required:
 
 * `DATABASE_USER`
@@ -321,31 +322,31 @@ Your inventory would contain a line similar to this:
 
 ```ini
 [OSEv3:vars]
-openshift_cfme_app_template=cfme-template-ext-db
-openshift_cfme_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
+openshift_management_app_template=cfme-template-ext-db
+openshift_management_template_parameters={'DATABASE_USER': 'root', 'DATABASE_PASSWORD': 'r1ck&M0r7y', 'DATABASE_IP': '10.10.10.10', 'DATABASE_PORT': '5432', 'DATABASE_NAME': 'cfme'}
 ```
 
-**Note** the new value for the `openshift_cfme_app_template`
+**Note** the new value for the `openshift_management_app_template`
 parameter, `cfme-template-ext-db` (ManageIQ installations would use
 `miq-template-ext-db` instead).
 
 At run time you may run into errors similar to this:
 
 ```
-TASK [openshift_cfme : Ensure the CFME App is created] ***********************************
-task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_cfme/tasks/main.yml:74
+TASK [openshift_management : Ensure the CFME App is created] ***********************************
+task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_management/tasks/main.yml:74
 Tuesday 03 October 2017  15:30:44 -0400 (0:00:00.056)       0:00:12.278 *******
-{"cmd": "/usr/bin/oc create -f /tmp/postgresql-ZPEWQS -n openshift-cfme", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "Error from server (BadRequest): error when creating \"/tmp/postgresql-ZPEWQS\": Endpoints in version \"v1\" cannot be handled as a Endpoints: [pos 218]: json: decNum: got first char 'f'\n", "stdout": ""}
+{"cmd": "/usr/bin/oc create -f /tmp/postgresql-ZPEWQS -n openshift-management", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "Error from server (BadRequest): error when creating \"/tmp/postgresql-ZPEWQS\": Endpoints in version \"v1\" cannot be handled as a Endpoints: [pos 218]: json: decNum: got first char 'f'\n", "stdout": ""}
 ```
 
 Or like this:
 
 ```
-TASK [openshift_cfme : Ensure the CFME App is created] ***********************************
-task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_cfme/tasks/main.yml:74
+TASK [openshift_management : Ensure the CFME App is created] ***********************************
+task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_management/tasks/main.yml:74
 Tuesday 03 October 2017  16:05:36 -0400 (0:00:00.052)       0:00:18.948 *******
 fatal: [m01.example.com]: FAILED! => {"changed": true, "failed": true, "msg":
-{"cmd": "/usr/bin/oc create -f /tmp/postgresql-igS5sx -n openshift-cfme", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "The Endpoints \"postgresql\" is invalid: subsets[0].addresses[0].ip: Invalid value: \"doo\": must be a valid IP address, (e.g. 10.9.8.7)\n", "stdout": ""},
+{"cmd": "/usr/bin/oc create -f /tmp/postgresql-igS5sx -n openshift-management", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "The Endpoints \"postgresql\" is invalid: subsets[0].addresses[0].ip: Invalid value: \"doo\": must be a valid IP address, (e.g. 10.9.8.7)\n", "stdout": ""},
 ```
 
 While intimidating at first, there are useful bits of information in
@@ -380,8 +381,8 @@ choice.
 
 Customization is provided through the following role variables:
 
-* `openshift_cfme_storage_nfs_base_dir`
-* `openshift_cfme_storage_nfs_local_hostname`
+* `openshift_management_storage_nfs_base_dir`
+* `openshift_management_storage_nfs_local_hostname`
 
 ### NFS External
 
@@ -393,19 +394,19 @@ for the required PVs. For external NFS you must have:
 
 Configuration is provided through the following role variables:
 
-* `openshift_cfme_storage_nfs_external_hostname`
-* `openshift_cfme_storage_nfs_base_dir`
+* `openshift_management_storage_nfs_external_hostname`
+* `openshift_management_storage_nfs_base_dir`
 
-The `openshift_cfme_storage_nfs_external_hostname` parameter must be
+The `openshift_management_storage_nfs_external_hostname` parameter must be
 set to the hostname or IP of your external NFS server.
 
 If `/exports` is not the parent directory to your exports then you
 must set the base directory via the
-`openshift_cfme_storage_nfs_base_dir` parameter.
+`openshift_management_storage_nfs_base_dir` parameter.
 
 For example, if your server export is `/exports/hosted/prod/cfme-app`
 then you must set
-`openshift_cfme_storage_nfs_base_dir=/exports/hosted/prod`.
+`openshift_management_storage_nfs_base_dir=/exports/hosted/prod`.
 
 ### Cloud Provider
 
@@ -434,12 +435,12 @@ storage class.
 # Customization
 
 Application and database parameters may be customized by means of the
-`openshift_cfme_template_parameters` inventory parameter.
+`openshift_management_template_parameters` inventory parameter.
 
 **For example**, if you wanted to reduce the memory requirement of the
 PostgreSQL pod then you could configure the parameter like this:
 
-`openshift_cfme_template_parameters={'POSTGRESQL_MEM_REQ': '1Gi'}`
+`openshift_management_template_parameters={'POSTGRESQL_MEM_REQ': '1Gi'}`
 
 When the CFME template is processed `1Gi` will be used for the value
 of the `POSTGRESQL_MEM_REQ` template parameter.
@@ -447,11 +448,18 @@ of the `POSTGRESQL_MEM_REQ` template parameter.
 Any parameter in the `parameters` section of the
 [miq-template.yaml](files/templates/manageiq/miq-template.yaml) or
 [miq-template-ext-db.yaml](files/templates/manageiq/miq-template-ext-db.yaml)
-may be overridden through the `openshift_cfme_template_parameters`
+may be overridden through the `openshift_management_template_parameters`
 hash. This applies to **CloudForms** installations as well:
 [cfme-template.yaml](files/templates/cloudforms/cfme-template.yaml),
 [cfme-template-ext-db.yaml](files/templates/cloudforms/cfme-template-ext-db.yaml).
 
+
+# Uninstall
+
+This role includes a playbook to uninstall and erase the CFME/MIQ
+installation:
+
+* `playbooks/byo/openshift-management/uninstall.yml`
 
 # Additional Information
 

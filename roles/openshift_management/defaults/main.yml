@@ -1,8 +1,8 @@
 ---
 # Namespace for the CFME project
-openshift_cfme_project: openshift-cfme
+openshift_management_project: openshift-management
 # Namespace/project description
-openshift_cfme_project_description: CloudForms Management Engine
+openshift_management_project_description: CloudForms Management Engine
 
 ######################################################################
 # BASE TEMPLATE AND DATABASE OPTIONS
@@ -13,17 +13,17 @@ openshift_cfme_project_description: CloudForms Management Engine
 #
 # Choose 'miq-template' for a podified database install
 # Choose 'miq-template-ext-db' for an external database install
-openshift_cfme_app_template: miq-template
+openshift_management_app_template: miq-template
 # If you are using the miq-template-ext-db template then you must add
 # the required database parameters to the
-# openshift_cfme_template_parameters variable.
+# openshift_management_template_parameters variable.
 
 ######################################################################
 # STORAGE OPTIONS
 ######################################################################
 # DEFAULT - 'nfs'
 # Allowed options: nfs, nfs_external, preconfigured, cloudprovider.
-openshift_cfme_storage_class: nfs
+openshift_management_storage_class: nfs
 # * nfs - Best used for proof-of-concept installs. Will setup NFS on a
 #   cluster host (defaults to your first master in the inventory file)
 #   to back the required PVCs. The application requires a PVC and the
@@ -55,26 +55,26 @@ openshift_cfme_storage_class: nfs
 # [OPTIONAL] - If you are using an EXTERNAL NFS server, such as a
 # netapp appliance, then you must set the hostname here. Leave the
 # value as 'false' if you are not using external NFS.
-openshift_cfme_storage_nfs_external_hostname: false
+openshift_management_storage_nfs_external_hostname: false
 # [OPTIONAL] - If you are using external NFS then you must set the base
 # path to the exports location here.
 #
 # Additionally: EXTERNAL NFS REQUIRES that YOU CREATE the nfs exports
 # that will back the application PV and optionally the database
 # pv. Export path definitions, relative to
-# {{ openshift_cfme_storage_nfs_base_dir }}
+# {{ openshift_management_storage_nfs_base_dir }}
 #
 # LOCAL NFS NOTE:
 #
 # You may may also change this value if you want to change the default
 # path used for local NFS exports.
-openshift_cfme_storage_nfs_base_dir: /exports
+openshift_management_storage_nfs_base_dir: /exports
 #
 # LOCAL NFS NOTE:
 #
 # You may override the automatically selected LOCAL NFS server by
 # setting this variable. Useful for testing specific task files.
-openshift_cfme_storage_nfs_local_hostname: false
+openshift_management_storage_nfs_local_hostname: false
 
 ######################################################################
 # SCAFFOLDING - These are parameters we pre-seed that a user may or
@@ -86,5 +86,5 @@ openshift_cfme_storage_nfs_local_hostname: false
 # under the .parameters list in files/miq-template{-ext-db}.yaml
 # Example:
 #
-# openshift_cfme_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
-openshift_cfme_template_parameters: {}
+# openshift_management_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
+openshift_management_template_parameters: {}

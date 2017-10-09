@@ -1,0 +1,67 @@
+---
+# Tasks to statically provision NFS volumes
+# Include if not using dynamic volume provisioning
+
+- name: Ensure we save the local NFS server if one is provided
+  set_fact:
+    openshift_management_nfs_server: "{{ openshift_management_storage_nfs_local_hostname }}"
+  when:
+    - openshift_management_storage_nfs_local_hostname is defined
+    - openshift_management_storage_nfs_local_hostname != False
+    - openshift_management_storage_class == "nfs"
+
+- name: Ensure we save the local NFS server
+  set_fact:
+    openshift_management_nfs_server: "{{ groups['oo_nfs_to_config'].0 }}"
+  when:
+    - openshift_management_nfs_server is not defined
+    - openshift_management_storage_class == "nfs"
+
+- name: Ensure we save the external NFS server
+  set_fact:
+    openshift_management_nfs_server: "{{ openshift_management_storage_nfs_external_hostname }}"
+  when:
+    - openshift_management_storage_class == "nfs_external"
+
+- name: Failed NFS server detection
+  assert:
+    that:
+      - openshift_management_nfs_server is defined
+    msg: |
+      "Unable to detect an NFS server. The 'nfs_external'
+      openshift_management_storage_class option requires that you set
+      openshift_management_storage_nfs_external_hostname. NFS hosts detected
+      for local nfs services: {{ groups['oo_nfs_to_config'] | join(', ') }}"
+
+- name: Setting up NFS storage
+  block:
+    - name: Include the NFS Setup role tasks
+      include_role:
+        role: openshift_nfs
+        tasks_from: setup
+      vars:
+        l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
+
+    - name: Create the App export
+      include_role:
+        role: openshift_nfs
+        tasks_from: create_export
+      vars:
+        l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
+        l_nfs_export_config: "{{ openshift_management_flavor_short }}"
+        l_nfs_export_name: "{{ openshift_management_flavor_short }}-app"
+        l_nfs_options: "*(rw,no_root_squash,no_wdelay)"
+
+    - name: Create the DB export
+      include_role:
+        role: openshift_nfs
+        tasks_from: create_export
+      vars:
+        l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
+        l_nfs_export_config: "{{ openshift_management_flavor_short }}"
+        l_nfs_export_name: "{{ openshift_management_flavor_short }}-db"
+        l_nfs_options: "*(rw,no_root_squash,no_wdelay)"
+      when:
+        - openshift_management_app_template in ['miq-template', 'cfme-template']
+
+  delegate_to: "{{ openshift_management_nfs_server }}"

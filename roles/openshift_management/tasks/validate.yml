@@ -1,49 +1,49 @@
 ---
-# Validate configuration parameters passed to the openshift_cfme role
+# Validate configuration parameters passed to the openshift_management role
 
 ######################################################################
 # CORE PARAMETERS
-- name: Ensure openshift_cfme_app_template is valid
+- name: Ensure openshift_management_app_template is valid
   assert:
     that:
-      - openshift_cfme_app_template in __openshift_cfme_app_templates
+      - openshift_management_app_template in __openshift_management_app_templates
 
     msg: |
-      "openshift_cfme_app_template must be one of {{
-      __openshift_cfme_app_templates | join(', ') }}"
+      "openshift_management_app_template must be one of {{
+      __openshift_management_app_templates | join(', ') }}"
 
-- name: Ensure openshift_cfme_storage_class is a valid type
+- name: Ensure openshift_management_storage_class is a valid type
   assert:
     that:
-      - openshift_cfme_storage_class in __openshift_cfme_storage_classes
+      - openshift_management_storage_class in __openshift_management_storage_classes
     msg: |
-      "openshift_cfme_storage_class must be one of {{
-      __openshift_cfme_storage_classes | join(', ') }}"
+      "openshift_management_storage_class must be one of {{
+      __openshift_management_storage_classes | join(', ') }}"
 
 ######################################################################
 # STORAGE PARAMS - NFS
 - name: Ensure external NFS storage has a valid NFS server hostname defined
   assert:
     that:
-      - openshift_cfme_storage_nfs_external_hostname | default(False)
+      - openshift_management_storage_nfs_external_hostname | default(False)
     msg: |
       The selected storage class 'nfs_external' requires a valid
-      hostname for the openshift_cfme_storage_nfs_hostname parameter
+      hostname for the openshift_management_storage_nfs_hostname parameter
   when:
-    - openshift_cfme_storage_class == 'nfs_external'
+    - openshift_management_storage_class == 'nfs_external'
 
 - name: Ensure local NFS storage has a valid NFS server to use
   fail:
     msg: |
       No NFS hosts detected or defined but storage class is set to
       'nfs'. Add hosts to your [nfs] group or define one manually with
-      the 'openshift_cfme_storage_nfs_local_hostname' parameter
+      the 'openshift_management_storage_nfs_local_hostname' parameter
   when:
-    - openshift_cfme_storage_class == 'nfs'
+    - openshift_management_storage_class == 'nfs'
     # You haven't created any NFS groups
     - (groups.nfs is defined and groups.nfs | length == 0) or (groups.nfs is not defined)
     # You did not manually specify a host to use
-    - (openshift_cfme_storage_nfs_local_hostname is not defined) or (openshift_cfme_storage_nfs_local_hostname == false)
+    - (openshift_management_storage_nfs_local_hostname is not defined) or (openshift_management_storage_nfs_local_hostname == false)
 
 ######################################################################
 # STORAGE PARAMS  -CLOUD PROVIDER
@@ -52,13 +52,13 @@
     that:
       - openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'
     msg: |
-      openshift_cfme_storage_class is 'cloudprovider' but you have an
+      openshift_management_storage_class is 'cloudprovider' but you have an
       invalid kind defined, '{{ openshift_cloudprovider_kind }}'. See
       'openshift_cloudprovider_kind' in the example inventories for
       the required parameters for your selected cloud
       provider. Working providers: 'aws' and 'gce'.
   when:
-    - openshift_cfme_storage_class == 'cloudprovider'
+    - openshift_management_storage_class == 'cloudprovider'
     - openshift_cloudprovider_kind is defined
 
 - name: Validate 'cloudprovider' Storage Class has required parameters defined
@@ -66,25 +66,25 @@
     that:
       - openshift_cloudprovider_kind is defined
     msg: |
-      openshift_cfme_storage_class is 'cloudprovider' but you do not
+      openshift_management_storage_class is 'cloudprovider' but you do not
       have 'openshift_cloudprovider_kind' defined, this is
       required. Search the example inventories for
       'openshift_cloudprovider_kind'. The required parameters for your
       selected cloud provider must be defined in your inventory as
       well. Working providers: 'aws' and 'gce'.
   when:
-    - openshift_cfme_storage_class == 'cloudprovider'
+    - openshift_management_storage_class == 'cloudprovider'
 
 ######################################################################
 # DATABASE CONNECTION VALIDATION
 - name: Validate all required database parameters were provided for ext-db template
   assert:
     that:
-      - item in openshift_cfme_template_parameters
+      - item in openshift_management_template_parameters
     msg: |
       "You are using external database services but a required
       database parameter {{ item }} was not found in
-      'openshift_cfme_template_parameters'"
-  with_items: "{{ __openshift_cfme_required_db_conn_params }}"
+      'openshift_management_template_parameters'"
+  with_items: "{{ __openshift_management_required_db_conn_params }}"
   when:
-    - openshift_cfme_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
+    - openshift_management_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']

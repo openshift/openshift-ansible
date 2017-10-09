@@ -1,0 +1,25 @@
+---
+- name: Management Install Checkpoint Start
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Management install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_Management: "In Progress"
+      aggregate: false
+
+- name: Management
+  include: ../openshift-management/config.yml
+
+- name: Management Install Checkpoint End
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Set Management install 'Complete'
+    set_stats:
+      data:
+        installer_phase_Management: "Complete"
+      aggregate: false

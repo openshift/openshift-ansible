@@ -46,8 +46,8 @@
 - include: service_catalog.yml
   when: openshift_enable_service_catalog | default(false) | bool
 
-- include: openshift_cfme.yml
-  when: openshift_cfme_install_cfme | default(false) | bool
+- include: openshift_management.yml
+  when: openshift_management_install_management | default(false) | bool
 
 - name: Print deprecated variable warning message if necessary
   hosts: oo_first_master

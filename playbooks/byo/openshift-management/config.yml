@@ -5,4 +5,4 @@
 
 - include: ../../common/openshift-cluster/evaluate_groups.yml
 
-- include: ../../common/openshift-cfme/config.yml
+- include: ../../common/openshift-management/config.yml
