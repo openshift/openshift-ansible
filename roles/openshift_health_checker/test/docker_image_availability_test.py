@@ -100,7 +100,7 @@ def test_all_images_unavailable(task_vars):
     actual = check.run()
 
     assert actual['failed']
-    assert "required Docker images are not available" in actual['msg']
+    assert "required container images are not available" in actual['msg']
 
 
 @pytest.mark.parametrize("message,extra_words", [
@@ -141,13 +141,13 @@ def test_skopeo_update_failure(task_vars, message, extra_words):
             "spam/eggs:v1", ["test.reg"],
             True, True,
             False,
-            {"test.reg": False},
+            {"test.reg": False, "docker.io": False},
         ),
         (
             "spam/eggs:v1", ["test.reg"],
             False, True,
             False,
-            {"test.reg": True},
+            {"test.reg": True, "docker.io": True},
         ),
         (
             "eggs.reg/spam/eggs:v1", ["test.reg"],
@@ -164,17 +164,19 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
         elif module_name == "command":
             return dict(msg="msg", failed=skopeo_failed)
 
-    check = DockerImageAvailability(execute_module, task_vars())
+    tv = task_vars()
+    tv['openshift']['docker'] = {'additional_registries': registries}
+    check = DockerImageAvailability(execute_module, tv)
     check._module_retry_interval = 0
 
-    available = check.is_available_skopeo_image(image, registries)
+    available = check.is_available_skopeo_image(image)
     assert available == expect_success
     assert expect_registries_reached == check.reachable_registries
 
 
 @pytest.mark.parametrize("deployment_type, is_containerized, groups, oreg_url, expected", [
     (  # standard set of stuff required on nodes
-        "origin", False, ['nodes'], None,
+        "origin", False, ['nodes'], "",
         set([
             'openshift/origin-pod:vtest',
             'openshift/origin-deployer:vtest',
@@ -194,7 +196,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
         ])
     ),
     (
-        "origin", True, ['nodes', 'masters', 'etcd'], None,
+        "origin", True, ['nodes', 'masters', 'etcd'], "",
         set([
             # images running on top of openshift
             'openshift/origin-pod:vtest',
