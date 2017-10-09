@@ -1,12 +1,19 @@
 ---
-- name: Install Node service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
-    src: "{{ openshift.common.is_containerized | bool | ternary('openshift.docker.node.service', 'node.service.j2') }}"
-  when: not openshift.common.is_node_system_container | bool
-  notify:
-  - reload systemd units
-  - restart node
+- when: not openshift.common.is_node_system_container | bool
+  block:
+  - name: Install Node service file
+    template:
+      dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+      src: "{{ openshift.common.is_containerized | bool | ternary('openshift.docker.node.service', 'node.service.j2') }}"
+    notify:
+    - reload systemd units
+    - restart node
+    register: node_service
+
+  #TODO: systemd: daemon_reload=yes when we require ansible 2.4
+  - name: Reload systemd
+    command: systemctl daemon-reload
+    when: node_service | changed
 
 - when: openshift.common.is_containerized | bool
   block:

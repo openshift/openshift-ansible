@@ -14,10 +14,12 @@ After=dnsmasq.service
 Type=notify
 EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-node
 Environment=GOTRACEBACK=crash
-ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
+{% if not openshift.common.version_gte_3_7 | bool %}
+ExecStartPre=-/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
 ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
-ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
+ExecStopPost=-/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
 ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
+{% endif %}
 ExecStart=/usr/bin/openshift start node {% if openshift_node_bootstrap %} --kubeconfig=${KUBECONFIG} --bootstrap-config-name=${BOOTSTRAP_CONFIG_NAME}{% endif %} --config=${CONFIG_FILE} $OPTIONS
 LimitNOFILE=65536
 LimitCORE=infinity

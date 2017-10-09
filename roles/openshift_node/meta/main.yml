@@ -18,4 +18,3 @@ dependencies:
 - role: openshift_clock
 - role: openshift_docker
 - role: openshift_cloud_provider
-- role: openshift_node_dnsmasq

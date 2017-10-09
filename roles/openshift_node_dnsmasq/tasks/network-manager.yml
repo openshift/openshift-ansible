@@ -1,9 +1,32 @@
 ---
+
+- name: Configured dnsmasq interfaces
+  lineinfile:
+    path: /etc/sysconfig/atomic-openshift-node
+    line: "OPENSHIFT_NODE_DNSMASQ_INTERFACES={{ openshift_node_dnsmasq_interfaces | split(',') | join (',') }}"
+    regexp: "^OPENSHIFT_NODE_DNSMASQ_INTERFACES=.*"
+  notify: restart NetworkManager
+  when: openshift_node_dnsmasq_interfaces is defined
+
 - name: Install network manager dispatch script
   copy:
     src: networkmanager/99-origin-dns.sh
     dest: /etc/NetworkManager/dispatcher.d/
     mode: 0755
   notify: restart NetworkManager
+
+- name: Ensure dnsmasq can read /etc/origin/node/resolv.conf
+  file:
+    path: "{{ item }}"
+    mode: "o+x"
+  with_items:
+  - "/etc/origin"
+  - "/etc/origin/node"
+
+- name: Install node-dnsmasq.conf on < 3.7
+  template:
+    dest: /etc/origin/node/node-dnsmasq.conf
+    src: node-dnsmasq.conf.j2
+  when: not openshift.common.version_gte_3_7 | bool
 
 - meta: flush_handlers
