@@ -182,16 +182,14 @@ class OpenshiftLoggingFacts(OCBaseCommand):
                     facts["nodeSelector"] = spec["nodeSelector"]
                 if "supplementalGroups" in spec["securityContext"]:
                     facts["storageGroups"] = spec["securityContext"]["supplementalGroups"]
+                facts["spec"] = spec
                 if "volumes" in spec:
                     for vol in spec["volumes"]:
                         clone = copy.deepcopy(vol)
                         clone.pop("name", None)
                         facts["volumes"][vol["name"]] = clone
                 for container in spec["containers"]:
-                    facts["containers"][container["name"]] = dict(
-                        image=container["image"],
-                        resources=container["resources"],
-                    )
+                    facts["containers"][container["name"]] = container
                 self.add_facts_for(comp, "deploymentconfigs", name, facts)
 
     def facts_for_services(self, namespace):

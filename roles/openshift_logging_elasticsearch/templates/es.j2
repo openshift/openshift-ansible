@@ -51,6 +51,9 @@ spec:
 {% endif %}
             requests:
               memory: "{{es_memory_limit}}"
+{% if es_container_security_context %}
+          securityContext: {{ es_container_security_context | to_yaml }} 
+{% endif %}
           ports:
             -
               containerPort: 9200
