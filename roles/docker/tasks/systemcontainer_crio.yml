@@ -147,7 +147,7 @@
     image: "{{ l_crio_image }}"
     state: latest
 
-- name: Remove CRI-o default configuration files
+- name: Remove CRI-O default configuration files
   file:
     path: "{{ item }}"
     state: absent
