@@ -56,7 +56,6 @@
     register: l_pb_upgrade_control_plane_pre_upgrade_storage
     when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
 
@@ -122,7 +121,6 @@
     - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - openshift_version is version_compare('3.7','<')
     failed_when:
-    - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
     run_once: true
@@ -258,7 +256,6 @@
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when: openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
 
