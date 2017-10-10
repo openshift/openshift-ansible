@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.132
+Version:        3.5.133
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.133-1
+- Automatic commit of package [openshift-ansible] release [3.5.132-1].
+  (sdodson@redhat.com)
+- Backport 1.5 - Bug 1452939 - change imagePullPolicy in logging and metrics
+  (jwozniak@redhat.com)
+
 * Tue Oct 10 2017 Scott Dodson <sdodson@redhat.com> 3.5.132-1
 - Add PartOf to docker systemd service unit. (mgugino@redhat.com)
 - Ensure docker is restarted when iptables is restarted (mgugino@redhat.com)
