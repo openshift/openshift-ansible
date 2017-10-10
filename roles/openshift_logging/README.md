@@ -105,3 +105,9 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_kibana_ops_proxy_cpu_limit`: The amount of CPU to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_proxy_memory_limit`: The amount of memory to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_replica_count`: The number of replicas Kibana ops should be scaled up to. Defaults to 1.
+
+Changelog
+---------
+
+Tue Oct 10, 2017
+- Default imagePullPolicy changed from Always to IfNotPresent 
