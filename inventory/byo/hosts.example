@@ -894,9 +894,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # You may wish to disable these or make them non fatal
 #
 # openshift_upgrade_pre_storage_migration_enabled=true
-# openshift_upgrade_pre_storage_migration_fatal==true
+# openshift_upgrade_pre_storage_migration_fatal=true
 # openshift_upgrade_post_storage_migration_enabled=true
-# openshift_upgrade_post_storage_migration_fatal==false
+# openshift_upgrade_post_storage_migration_fatal=false
 
 # host group for masters
 [masters]
