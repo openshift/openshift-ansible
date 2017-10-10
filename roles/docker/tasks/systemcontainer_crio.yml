@@ -25,7 +25,7 @@
     - openshift_release == "latest"
 
 - set_fact:
-    l_openshift_image_tag: "v{{ openshift_release | string }}"
+    l_openshift_image_tag: "{{ openshift_release | string }}"
   when:
     - openshift_image_tag is not defined
     - openshift_release != "latest"
