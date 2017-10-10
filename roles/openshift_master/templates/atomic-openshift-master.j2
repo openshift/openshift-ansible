@@ -1,4 +1,4 @@
-OPTIONS=--loglevel={{ openshift.master.debug_level | default(2) }}
+OPTIONS=--loglevel={{ openshift_master_debug_level }}
 CONFIG_FILE={{ openshift_master_config_file }}
 {# Preserve existing OPENSHIFT_DEFAULT_REGISTRY settings in scale up runs #}
 {% if openshift_master_is_scaleup_host %}

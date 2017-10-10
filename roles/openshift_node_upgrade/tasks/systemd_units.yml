@@ -6,7 +6,7 @@
 # - openshift.node.ovs_image
 # - openshift_use_openshift_sdn
 # - openshift.common.service_type
-# - openshift.node.debug_level
+# - openshift_node_debug_level
 # - openshift.common.config_base
 # - openshift.common.http_proxy
 # - openshift.common.portal_net
