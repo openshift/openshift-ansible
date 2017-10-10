@@ -12,8 +12,6 @@
   - name: Set tuned OpenShift variables
     set_fact:
       openshift_tuned_guest_profile: "{{ 'atomic-guest' if openshift.common.is_atomic else 'virtual-guest' }}"
-      tuned_etc_directory: '/etc/tuned'
-      tuned_templates_source: '../templates/tuned'
 
   - name: Ensure directory structure exists
     file:

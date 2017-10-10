@@ -27,6 +27,7 @@
   roles:
   - role: os_firewall
   - role: openshift_loadbalancer
+  - role: tuned
 
 - name: Load Balancer Install Checkpoint End
   hosts: localhost
