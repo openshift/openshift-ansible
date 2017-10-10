@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.146.0%{?dist}
+Release:        0.147.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 10 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.147.0
+- Add PartOf to docker systemd service unit. (mgugino@redhat.com)
+- crio: use systemd manager (gscrivan@redhat.com)
+- Ensure servingInfo.clientCA is set as ca.crt rather than ca-bundle.crt.
+  (abutcher@redhat.com)
+- crio, docker: use openshift_release when openshift_image_tag is not used
+  (gscrivan@redhat.com)
+- crio: fix typo (gscrivan@redhat.com)
+- Update registry_config.j2 (jialiu@redhat.com)
+- Update registry_config.j2 (jialiu@redhat.com)
+
 * Mon Oct 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.146.0
 - docker_image_availability: credentials to skopeo (mgugino@redhat.com)
 - Rename openshift_cfme role to openshift_management (tbielawa@redhat.com)
