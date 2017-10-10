@@ -11,32 +11,16 @@
       that: groups.oo_masters_to_config | default([]) | length == 1
       msg: "[master] group must contain only one host"
 
-# Check the etcd cluster and master are running and healthy
-- name: Check master and embedded etcd are healthy
-  hosts: oo_first_master
-  tasks:
-  - name: Check the embedded etcd is healthy
-    include_role:
-      name: etcd
-      tasks_from: check_cluster_health
-    vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-      r_etcd_common_backup_tag: pre-migrate
-      r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
-      etcd_peer: "{{ openshift.common.ip }}"
-      etcd_url_scheme: "https"
-      etcd_peer_url_scheme: "https"
-  - name: Check the master API is ready
-    include_role:
-      name: openshift_master
-      tasks_from: check_master_api_is_ready
-
 # 1. stop a master
 - name: Prepare masters for etcd data migration
   hosts: oo_first_master
   roles:
   - role: openshift_facts
   tasks:
+  - name: Check the master API is ready
+    include_role:
+      name: openshift_master
+      tasks_from: check_master_api_is_ready
   - set_fact:
       master_service: "{{ openshift.common.service_type + '-master' }}"
       embedded_etcd_backup_suffix: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
