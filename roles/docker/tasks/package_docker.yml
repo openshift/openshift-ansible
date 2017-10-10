@@ -139,6 +139,13 @@
   notify:
   - restart docker
 
+# The following task is needed as the systemd module may report a change in
+# state even though docker is already running.
+- name: Detect if docker is already started
+  command: "systemctl show docker -p ActiveState"
+  changed_when: False
+  register: r_docker_already_running_result
+
 - name: Start the Docker service
   systemd:
     name: docker
@@ -151,7 +158,7 @@
   delay: 30
 
 - set_fact:
-    docker_service_status_changed: "{{ r_docker_package_docker_start_result | changed }}"
+    docker_service_status_changed: "{{ (r_docker_package_docker_start_result | changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
 
 - name: Check for credentials file for registry auth
   stat:
