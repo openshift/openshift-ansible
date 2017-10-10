@@ -109,3 +109,9 @@ Author Information
 ------------------
 
 Jose David Martín (j.david.nieto@gmail.com)
+
+Changelog
+---------
+
+Tue Oct 10, 2017
+- Default imagePullPolicy changed from Always to IfNotPresent 

@@ -8,7 +8,7 @@ spec:
   containers:
   - name: jks-cert-gen
     image: {{openshift_logging_image_prefix}}logging-deployer:{{openshift_logging_image_version}}
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     command: ["sh",  "{{generated_certs_dir}}/generate-jks.sh"]
     securityContext:
       privileged: true

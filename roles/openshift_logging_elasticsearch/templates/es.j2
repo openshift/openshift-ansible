@@ -42,7 +42,7 @@ spec:
         -
           name: "elasticsearch"
           image: {{image}}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           resources:
             limits:
               memory: "{{es_memory_limit}}"

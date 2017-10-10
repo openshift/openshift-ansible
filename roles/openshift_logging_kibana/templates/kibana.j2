@@ -37,7 +37,7 @@ spec:
         -
           name: "kibana"
           image: {{ image }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 {% if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") %}
           resources:
             limits:
@@ -75,7 +75,7 @@ spec:
         -
           name: "kibana-proxy"
           image: {{ proxy_image }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 {% if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") %}
           resources:
             limits:
