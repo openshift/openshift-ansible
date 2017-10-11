@@ -14,6 +14,16 @@
     nuage_node_cni_bin_dir: /var/opt/cni/bin/
   when: openshift.common.is_atomic | bool
 
+- name: Set the Nuage master monitor directory fact to handle Atomic host install
+  set_fact:
+    nuage_master_mon_dir: /var/usr/share/nuage-openshift-monitor
+  when: openshift.common.is_atomic | bool
+
+- name: Set the Nuage master CA directory fact to handle Atomic host install
+  set_fact:
+    nuage_ca_dir: /var/usr/share/nuage-openshift-ca
+  when: openshift.common.is_atomic | bool
+
 - name: Assure CNI plugin config dir exists before daemon set install
   become: yes
   file: path="{{ nuage_node_plugin_dir }}" state=directory
@@ -25,3 +35,32 @@
 - name: Assure CNI plugin binary directory exists before daemon set install
   become: yes
   file: path="{{ nuage_node_cni_bin_dir }}" state=directory
+
+- name: Delete the stale server certificate CA and serial files on all nodes
+  file: path="{{ nuage_ca_dir }}/{{ item }}" state=absent
+  with_items:
+    - nuageMonCA.crt
+    - nuageMonCA.key
+    - nuageMonCA.serial.txt
+    - openssl.cnf
+  ignore_errors: yes
+
+- name: Delete the stale server certificate key files on all nodes
+  file: path="{{ nuage_master_mon_dir }}/{{ item }}" state=absent
+  with_items:
+    - nuage.kubeconfig
+    - nuageMonServer.crt
+    - nuageMonServer.key
+    - nuageMonCA.crt
+    - nuage-serviceaccount.yaml
+  ignore_errors: yes
+
+- name: Delete the stale client certificate key files on all nodes
+  file: path="{{ nuage_node_plugin_dir }}/{{ item }}" state=absent
+  with_items:
+    - nuage.kubeconfig
+    - nuageMonClient.crt
+    - nuageMonServer.key
+    - nuageMonClient.key
+    - vsp-openshift.yaml
+  ignore_errors: yes
