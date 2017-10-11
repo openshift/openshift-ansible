@@ -103,9 +103,16 @@
     openshift_hosted_templates_import_command: replace
 
 # Check for warnings to be printed at the end of the upgrade:
-- name: Check for warnings
+- name: Clean up and display warnings
   hosts: oo_masters_to_config
-  tasks:
+  tags:
+  - always
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+  post_tasks:
   # Check if any masters are using pluginOrderOverride and warn if so, only for 1.3/3.3 and beyond:
   - name: grep pluginOrderOverride
     command: grep pluginOrderOverride {{ openshift.common.config_base }}/master/master-config.yaml
@@ -121,12 +128,8 @@
     - not grep_plugin_order_override | skipped
     - grep_plugin_order_override.rc == 0
 
-- name: Re-enable excluder if it was previously enabled
-  hosts: oo_masters_to_config
-  tags:
-  - always
-  gather_facts: no
-  roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: enable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+  - name: Warn if shared-resource-viewer could not be updated
+    debug:
+      msg: "WARNING the shared-resource-viewer role could not be upgraded to 3.6 spec because it's marked protected, please see https://bugzilla.redhat.com/show_bug.cgi?id=1493213"
+    when:
+    - __shared_resource_viewer_protected | default(false)
