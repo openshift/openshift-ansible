@@ -1718,8 +1718,7 @@ def set_installed_variant_rpm_facts(facts):
     for base_rpm in ['openshift', 'atomic-openshift', 'origin']:
         optional_rpms = ['master', 'node', 'clients', 'sdn-ovs']
         variant_rpms = [base_rpm] + \
-                       ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms] + \
-                       ['tuned-profiles-%s-node' % base_rpm]
+                       ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms]
         for rpm in variant_rpms:
             exit_code, _, _ = module.run_command(['rpm', '-q', rpm])  # noqa: F405
             if exit_code == 0:
