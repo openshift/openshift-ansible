@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.48
+Version:        3.6.173.0.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.49-1
+- Display warnings at the end of the control plane upgrade (sdodson@redhat.com)
+- Backport 3.6 - Bug 1452939 - change imagePullPolicy in logging and metrics
+  (jwozniak@redhat.com)
+- Add PartOf to docker systemd service unit. (mgugino@redhat.com)
+- Force reconciliation of role for 3.6 (simo@redhat.com)
+- Backport docker_image_availability checks (mgugino@redhat.com)
+- Add version_gte_3_7 facts (sdodson@redhat.com)
+
 * Mon Oct 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.48-1
 - Bug 1496271 - Perserve SCC for ES local persistent storage
   (jcantril@redhat.com)
