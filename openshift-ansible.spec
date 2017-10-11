@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.147.0%{?dist}
+Release:        0.148.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.148.0
+- Bug 1490647 - logging-fluentd deployed with openshift_logging_use_mux=false
+  fails to start due to missing (nhosoi@redhat.com)
+- Fix typo in inventory example (rteague@redhat.com)
+- Separate tuned daemon setup into a role. (jmencak@redhat.com)
+- crio, docker: expect openshift_release to have 'v' (gscrivan@redhat.com)
+- rebase on master (maxamillion@fedoraproject.org)
+- Add fedora compatibility (maxamillion@fedoraproject.org)
+- Allow checkpoint status to work across all groups (rteague@redhat.com)
+- Add valid search when search does not exist on resolv.conf
+  (nakayamakenjiro@gmail.com)
+
 * Tue Oct 10 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.147.0
 - Add PartOf to docker systemd service unit. (mgugino@redhat.com)
 - crio: use systemd manager (gscrivan@redhat.com)
