@@ -70,7 +70,8 @@ etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_
 etcd_advertise_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
 etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
 
-etcd_peer: 127.0.0.1
+# required role variable
+#etcd_peer: 127.0.0.1
 etcdctlv2: "etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} -C https://{{ etcd_peer }}:{{ etcd_client_port }}"
 
 etcd_service: "{{ 'etcd_container' if r_etcd_common_etcd_runtime == 'docker' else 'etcd' }}"

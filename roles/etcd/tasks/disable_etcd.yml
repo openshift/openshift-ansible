@@ -1,0 +1,2 @@
+---
+- include: auxiliary/disable_etcd.yml

@@ -1,0 +1,2 @@
+---
+- include: migration/check_cluster_health.yml
