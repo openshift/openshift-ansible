@@ -1,7 +1,6 @@
 ---
 - name: NFS Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set NFS install 'In Progress'
@@ -17,8 +16,7 @@
   - role: openshift_storage_nfs
 
 - name: NFS Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set NFS install 'Complete'

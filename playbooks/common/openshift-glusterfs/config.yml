@@ -1,7 +1,6 @@
 ---
 - name: GlusterFS Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set GlusterFS install 'In Progress'
@@ -37,8 +36,7 @@
     when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
 - name: GlusterFS Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set GlusterFS install 'Complete'

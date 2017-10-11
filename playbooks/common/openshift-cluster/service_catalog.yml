@@ -1,7 +1,6 @@
 ---
 - name: Service Catalog Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Service Catalog install 'In Progress'
@@ -20,8 +19,7 @@
     first_master: "{{ groups.oo_first_master[0] }}"
 
 - name: Service Catalog Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Service Catalog install 'Complete'

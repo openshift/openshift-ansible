@@ -1,7 +1,6 @@
 ---
 - name: Logging Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Logging install 'In Progress'
@@ -24,8 +23,7 @@
         tasks_from: update_master_config
 
 - name: Logging Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Logging install 'Complete'

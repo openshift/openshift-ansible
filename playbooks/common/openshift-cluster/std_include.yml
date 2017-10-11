@@ -1,7 +1,6 @@
 ---
 - name: Initialization Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   roles:
   - installer_checkpoint
@@ -37,8 +36,7 @@
   - always
 
 - name: Initialization Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set install initialization 'Complete'

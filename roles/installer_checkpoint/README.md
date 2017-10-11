@@ -92,8 +92,7 @@ phase/component and then a final play for setting `installer_hase_initialize` to
 # common/openshift-cluster/std_include.yml
 ---
 - name: Initialization Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   roles:
   - installer_checkpoint

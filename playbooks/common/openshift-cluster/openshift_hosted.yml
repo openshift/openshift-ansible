@@ -1,7 +1,6 @@
 ---
 - name: Hosted Install Checkpoint Start
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Hosted install 'In Progress'
@@ -26,8 +25,7 @@
   when: openshift_hosted_prometheus_deploy | default(False) | bool
 
 - name: Hosted Install Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: oo_all_hosts
   gather_facts: false
   tasks:
   - name: Set Hosted install 'Complete'
