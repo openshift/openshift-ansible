@@ -1,0 +1,21 @@
+---
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-glusterfs-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+  check_mode: no
+
+- include: glusterfs_config.yml
+  when:
+  - groups.glusterfs | default([]) | count > 0
+
+- include: glusterfs_registry.yml
+  when:
+  - "groups.glusterfs_registry | default([]) | count > 0 or openshift.hosted.registry.storage.kind == 'glusterfs' or openshift.hosted.registry.storage.glusterfs.swap"
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
+  check_mode: no

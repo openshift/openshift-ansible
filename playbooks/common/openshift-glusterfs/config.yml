@@ -1,0 +1,46 @@
+---
+- name: GlusterFS Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set GlusterFS install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_glusterfs: "In Progress"
+      aggregate: false
+
+- name: Open firewall ports for GlusterFS nodes
+  hosts: glusterfs
+  tasks:
+  - include_role:
+      name: openshift_storage_glusterfs
+      tasks_from: firewall.yml
+    when:
+    - openshift_storage_glusterfs_is_native | default(True) | bool
+
+- name: Open firewall ports for GlusterFS registry nodes
+  hosts: glusterfs_registry
+  tasks:
+  - include_role:
+      name: openshift_storage_glusterfs
+      tasks_from: firewall.yml
+    when:
+    - openshift_storage_glusterfs_registry_is_native | default(True) | bool
+
+- name: Configure GlusterFS
+  hosts: oo_first_master
+  tasks:
+  - name: setup glusterfs
+    include_role:
+      name: openshift_storage_glusterfs
+    when: groups.oo_glusterfs_to_config | default([]) | count > 0
+
+- name: GlusterFS Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set GlusterFS install 'Complete'
+    set_stats:
+      data:
+        installer_phase_glusterfs: "Complete"
+      aggregate: false
