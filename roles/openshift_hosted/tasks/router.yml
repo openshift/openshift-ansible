@@ -26,7 +26,6 @@
   command: mktemp -d /tmp/openshift-ansible-XXXXXXX
   register: l_openshift_hosted_router_tempdir
   changed_when: False
-  when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {}
 
 - name: Get the certificate contents for router
   copy:
@@ -48,8 +47,8 @@
       hostnames:
       - "{{ openshift_master_default_subdomain | default('router.default.svc.cluster.local') }}"
       - "*.{{ openshift_master_default_subdomain | default('router.default.svc.cluster.local') }}"
-      cert: "{{ ((l_openshift_hosted_router_tempdir.stdout ~ '/') ~ (item.certificate.certfile | basename)) if 'certfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.crt') }}"
-      key: "{{ ((l_openshift_hosted_router_tempdir.stdout ~ '/')~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else ((openshift_master_config_dir) ~ '/openshift-router.key') }}"
+      cert: "{{ l_openshift_hosted_router_tempdir.stdout ~ '/openshift-router.crt' }}"
+      key: "{{ l_openshift_hosted_router_tempdir.stdout ~ '/openshift-router.key' }}"
     with_items: "{{ openshift_hosted_routers }}"
 
   - name: set the openshift_hosted_router_certificate
