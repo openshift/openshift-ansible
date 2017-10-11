@@ -1907,7 +1907,6 @@ class OpenShiftFacts(object):
                                   portal_net='172.30.0.0/16',
                                   client_binary='oc', admin_binary='oadm',
                                   dns_domain='cluster.local',
-                                  debug_level=2,
                                   config_base='/etc/origin')
 
         if 'master' in roles:

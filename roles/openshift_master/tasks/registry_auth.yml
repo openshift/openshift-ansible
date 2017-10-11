@@ -1,14 +1,4 @@
 ---
-# We need to setup some variables as this play might be called directly
-# from outside of the role.
-- set_fact:
-    oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
-  when: oreg_auth_credentials_path is not defined
-
-- set_fact:
-    oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
-  when: oreg_host is not defined
-
 - name: Check for credentials file for registry auth
   stat:
     path: "{{ oreg_auth_credentials_path }}"

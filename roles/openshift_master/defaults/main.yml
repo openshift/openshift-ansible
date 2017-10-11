@@ -1,4 +1,9 @@
 ---
+# openshift_master_defaults_in_use is a workaround to detect if we are consuming
+# the plays from the role or outside of the role.
+openshift_master_defaults_in_use: True
+openshift_master_debug_level: "{{ debug_level | default(2) }}"
+
 r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
@@ -25,6 +30,9 @@ oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_ur
 oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
+
+containerized_svc_dir: "/usr/lib/systemd/system"
+ha_svc_template_path: "native-cluster"
 
 # NOTE
 # r_openshift_master_*_default may be defined external to this role.

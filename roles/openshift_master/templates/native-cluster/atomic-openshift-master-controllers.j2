@@ -1,4 +1,4 @@
-OPTIONS=--loglevel={{ openshift.master.debug_level }} --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://{{ openshift.master.bind_addr }}:{{ openshift.master.controllers_port }}
+OPTIONS=--loglevel={{ openshift_master_debug_level }} --listen={{ 'https' if openshift.master.api_use_ssl else 'http' }}://{{ openshift.master.bind_addr }}:{{ openshift.master.controllers_port }}
 CONFIG_FILE={{ openshift_master_config_file }}
 {# Preserve existing OPENSHIFT_DEFAULT_REGISTRY settings in scale up runs #}
 {% if openshift_master_is_scaleup_host %}

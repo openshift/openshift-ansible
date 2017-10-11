@@ -1,4 +1,6 @@
 ---
+openshift_node_debug_level: "{{ debug_level | default(2) }}"
+
 openshift_use_openshift_sdn: True
 os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
 

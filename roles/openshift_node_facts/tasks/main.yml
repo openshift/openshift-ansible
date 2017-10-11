@@ -11,7 +11,6 @@
   - role: node
     local_facts:
       annotations: "{{ openshift_node_annotations | default(none) }}"
-      debug_level: "{{ openshift_node_debug_level | default(openshift.common.debug_level) }}"
       iptables_sync_period: "{{ openshift_node_iptables_sync_period | default(None) }}"
       kubelet_args: "{{ openshift_node_kubelet_args | default(None) }}"
       labels: "{{ openshift_node_labels | default(None) }}"

@@ -1,4 +1,6 @@
 ---
+openshift_node_debug_level: "{{ debug_level | default(2) }}"
+
 r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
