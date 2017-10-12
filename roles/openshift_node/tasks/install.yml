@@ -27,5 +27,3 @@
       docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
-
-  - include: config/install-node-docker-service-file.yml
