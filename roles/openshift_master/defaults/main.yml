@@ -51,3 +51,6 @@ r_openshift_master_data_dir: "{{ r_openshift_master_data_dir_default }}"
 
 r_openshift_master_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
 r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_plugin_name_default }}"
+
+openshift_master_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
+openshift_master_image_config_latest: "{{ openshift_master_image_config_latest_default }}"

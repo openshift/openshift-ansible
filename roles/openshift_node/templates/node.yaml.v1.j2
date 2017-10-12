@@ -13,7 +13,7 @@ dockerConfig:
 iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"
 imageConfig:
   format: {{ openshift.node.registry_url }}
-  latest: false
+  latest: {{ openshift_node_image_config_latest }}
 kind: NodeConfig
 kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
 {% if openshift_use_crio | default(False) %}

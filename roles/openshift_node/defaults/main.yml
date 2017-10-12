@@ -107,3 +107,6 @@ openshift_node_use_contiv: "{{ openshift_node_use_contiv_default }}"
 
 openshift_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 openshift_node_data_dir: "{{ openshift_node_data_dir_default }}"
+
+openshift_node_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
+openshift_node_image_config_latest: "{{ openshift_node_image_config_latest_default }}"
