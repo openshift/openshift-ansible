@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.148.0%{?dist}
+Release:        0.149.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.149.0
+- Fix broken debug_level (mgugino@redhat.com)
+- Ensure host was reached for proper conditional validation
+  (rteague@redhat.com)
+- Ensure docker service status actually changes (mgugino@redhat.com)
+- Display warnings at the end of the control plane upgrade (sdodson@redhat.com)
+- Force reconciliation of role for 3.6 (simo@redhat.com)
+- Remove etcd health check (sdodson@redhat.com)
+- migrate embedded etcd to external etcd (jchaloup@redhat.com)
+
 * Wed Oct 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.148.0
 - Bug 1490647 - logging-fluentd deployed with openshift_logging_use_mux=false
   fails to start due to missing (nhosoi@redhat.com)
