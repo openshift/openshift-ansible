@@ -5,8 +5,8 @@ openshift_deployment_type: origin
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 
 openshift_master_cluster_method: native
-openshift_master_cluster_hostname: "{{ groups.lb.0|default(groups.masters.0) }}"
-openshift_master_cluster_public_hostname: "{{ groups.lb.0|default(groups.masters.0) }}"
+openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ public_dns_domain }}"
+openshift_master_cluster_hostname: "{{ openshift_master_cluster_public_hostname }}"
 
 osm_default_node_selector: 'region=primary'
 
