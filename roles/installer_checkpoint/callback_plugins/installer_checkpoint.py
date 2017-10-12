@@ -136,7 +136,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_management': {
                 'title': 'Management Install',
-                'playbook': 'playbooks/common/openshift-cluster/openshift_management.yml'
+                'playbook': 'playbooks/byo/openshift-management/config.yml'
             },
         }
 
