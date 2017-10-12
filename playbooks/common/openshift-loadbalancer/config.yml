@@ -9,6 +9,15 @@
         installer_phase_loadbalancer: "In Progress"
       aggregate: false
 
+- name: Configure firewall and docker for load balancers
+  hosts: oo_lb_to_config:!oo_masters_to_config:!oo_nodes_to_config
+  vars:
+    openshift_image_tag: "{{ hostvars[groups.oo_first_master.0].openshift_image_tag }}"
+  roles:
+  - role: os_firewall
+  - role: openshift_docker
+    when: openshift.common.is_containerized | default(False) | bool and not skip_docker_role | default(False) | bool
+
 - name: Configure load balancers
   hosts: oo_lb_to_config
   vars:
@@ -24,7 +33,6 @@
                                           + openshift_loadbalancer_additional_backends | default([]) }}"
     openshift_image_tag: "{{ hostvars[groups.oo_first_master.0].openshift_image_tag }}"
   roles:
-  - role: os_firewall
   - role: openshift_loadbalancer
   - role: tuned
 
