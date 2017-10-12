@@ -4,7 +4,7 @@
     image: preflight-aos-package-checks
     l_host_vars:
       openshift_deployment_type: openshift-enterprise
-      openshift_release: 3.2
+      openshift_release: 3.7
 
 - name: Fails when a dependency required for update is missing
   hosts: all

@@ -77,7 +77,7 @@ func TestPackageVersionMultiple(t *testing.T) {
 		ExitCode: 2,
 		Output: []string{
 			"check \"package_version\":",
-			"Multiple minor versions of these packages are available",
+			"Some required package(s) are available at a version",
 		},
 	}.Run(t)
 }

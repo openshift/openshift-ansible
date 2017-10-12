@@ -18,15 +18,15 @@ RUN cd /root/rpmbuild/SOURCES && \
 
 # we'll also build some RPMs that can be used to exercise OCP package version tests.
 RUN cd /root/rpmbuild/SOURCES && \
-    mkdir atomic-openshift-3.2 && \
-    mkdir atomic-openshift-3.3 && \
-    tar zfc ose.tgz atomic-openshift-3.{2,3} && \
-    rpmbuild -bb /root/ose-3.2.spec  && \
-    rpmbuild -bb /root/ose-3.3.spec  && \
-    mkdir /mnt/localrepo/ose-3.{2,3} && \
-    cp /root/rpmbuild/RPMS/noarch/atomic-openshift*-3.2-1.noarch.rpm /mnt/localrepo/ose-3.2 && \
-    cp /root/rpmbuild/RPMS/noarch/{openvswitch-2.4,docker-1.10}-1.noarch.rpm /mnt/localrepo/ose-3.2 && \
-    createrepo /mnt/localrepo/ose-3.2 && \
-    cp /root/rpmbuild/RPMS/noarch/atomic-openshift*-3.3-1.noarch.rpm /mnt/localrepo/ose-3.3 && \
-    cp /root/rpmbuild/RPMS/noarch/{openvswitch-2.4,docker-1.10}-1.noarch.rpm /mnt/localrepo/ose-3.3 && \
-    createrepo /mnt/localrepo/ose-3.3
+    mkdir atomic-openshift-3.7 && \
+    mkdir atomic-openshift-3.8 && \
+    tar zfc ose.tgz atomic-openshift-3.{7,8} && \
+    rpmbuild -bb /root/ose-3.7.spec  && \
+    rpmbuild -bb /root/ose-3.8.spec  && \
+    mkdir /mnt/localrepo/ose-3.{7,8} && \
+    cp /root/rpmbuild/RPMS/noarch/atomic-openshift*-3.7-1.noarch.rpm /mnt/localrepo/ose-3.7 && \
+    cp /root/rpmbuild/RPMS/noarch/{openvswitch-2.8,docker-1.12}-1.noarch.rpm /mnt/localrepo/ose-3.7 && \
+    createrepo /mnt/localrepo/ose-3.7 && \
+    cp /root/rpmbuild/RPMS/noarch/atomic-openshift*-3.8-1.noarch.rpm /mnt/localrepo/ose-3.8 && \
+    cp /root/rpmbuild/RPMS/noarch/{openvswitch-2.8,docker-1.12}-1.noarch.rpm /mnt/localrepo/ose-3.8 && \
+    createrepo /mnt/localrepo/ose-3.8

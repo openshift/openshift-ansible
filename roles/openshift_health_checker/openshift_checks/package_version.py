@@ -27,6 +27,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 4): "1.12",
         (3, 5): "1.12",
         (3, 6): "1.12",
+        (3, 7): "1.12",
     }
 
     # map major OpenShift release versions across releases to a common major version

@@ -5,6 +5,7 @@
     image: preflight-aos-package-checks
     l_host_vars:
       deployment_type: openshift-enterprise
+      openshift_release: 3.7
 
 - name: Fail as required packages cannot be installed
   hosts: all
@@ -16,7 +17,7 @@
 
         # put the repo back to disabled
         - include: tasks/enable_repo.yml
-          vars: { repo_name: "ose-3.2", repo_enabled: 0 }
+          vars: { repo_name: "ose-3.7", repo_enabled: 0 }
 
         - action: openshift_health_check
           args:

@@ -76,3 +76,5 @@ __warn_deprecated_vars:
   - 'openshift_hosted_metrics_storage_labels'
   - 'openshift_hosted_metrics_deployer_prefix'
   - 'openshift_hosted_metrics_deployer_version'
+
+__valid_openshift_releases: ['3.6', '3.7', '3.8']
