@@ -34,22 +34,14 @@
 
 - name: Normalize openshift_release
   set_fact:
-    # Normalize release if provided, e.g. "v3.5" => "3.5"
-    # Currently this is not required to be defined for all installs, and the
-    # `openshift_version` role can generally figure out the specific version
-    # that gets installed (e.g. 3.5.0.1). So consider this the user's expressed
-    # intent (if any), not the authoritative version that will be installed.
     openshift_release: "{{ openshift_release | string | regex_replace('^v', '') }}"
   when: openshift_release is defined
 
-- name: Abort when openshift_release is invalid
-  when:
-    - openshift_release is defined
-    - not openshift_release | match('\d+(\.\d+){1,3}$')
+- name: Validate openshift_release
+  when: openshift_release is undefined or openshift_release not in __valid_openshift_releases
   fail:
     msg: |-
-      openshift_release is "{{ openshift_release }}" which is not a valid version string.
-      Please set it to a version string like "3.4".
+      openshift_release must be defined. Valid values are {{ __valid_openshift_releases | join(' or ') | string }}.
 
 - include: unsupported.yml
   when:
