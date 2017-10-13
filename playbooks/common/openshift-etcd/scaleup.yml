@@ -71,7 +71,7 @@
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
-                                     | oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config']))
+                                     | oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
                                      | oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
     openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
