@@ -69,9 +69,9 @@ spec:
             readOnly: true
           resources:
             limits:
-              cpu: "{{openshift_logging_elasticsearch_proxy_cpu_limit }}"
               memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
             requests:
+              cpu: "{{openshift_logging_elasticsearch_proxy_cpu_request }}"
               memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
         -
           name: "elasticsearch"
@@ -79,11 +79,12 @@ spec:
           imagePullPolicy: Always
           resources:
             limits:
-              memory: "{{es_memory_limit}}"
-{% if es_cpu_limit is defined and es_cpu_limit is not none %}
+{% if es_cpu_limit is defined and es_cpu_limit is not none and es_cpu_limit != '' %}
               cpu: "{{es_cpu_limit}}"
 {% endif %}
+              memory: "{{es_memory_limit}}"
             requests:
+              cpu: "{{es_cpu_request}}"
               memory: "{{es_memory_limit}}"
 {% if es_container_security_context %}
           securityContext: {{ es_container_security_context | to_yaml }}

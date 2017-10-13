@@ -37,17 +37,26 @@ spec:
       - name: "mux"
         image: {{image}}
         imagePullPolicy: Always
-{% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) %}
+{% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) or (mux_cpu_request is defined and mux_cpu_request is not none) %}
         resources:
+{%   if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) %}
           limits:
-{% if mux_cpu_limit is not none %}
+{%     if mux_cpu_limit is not none %}
             cpu: "{{mux_cpu_limit}}"
-{% endif %}
-{% if mux_memory_limit is not none %}
+{%     endif %}
+{%     if mux_memory_limit is not none %}
             memory: "{{mux_memory_limit}}"
+{%     endif %}
+{%   endif %}
+{%   if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_request is defined and mux_cpu_request is not none) %}
           requests:
+{%     if mux_cpu_request is not none %}
+            cpu: "{{mux_cpu_request}}"
+{%     endif %}
+{%     if mux_memory_limit is not none %}
             memory: "{{mux_memory_limit}}"
-{% endif %}
+{%     endif %}
+{%   endif %}
 {% endif %}
         ports:
         - containerPort: "{{ openshift_logging_mux_port }}"

@@ -25,7 +25,7 @@ objects:
     metadata:
       name: logging-eventrouter
     data:
-      config.json: |- 
+      config.json: |-
         {
           "sink": "${SINK}"
         }
@@ -65,9 +65,9 @@ objects:
               imagePullPolicy: Always
               resources:
                 limits:
-                  memory: ${MEMORY} 
-                  cpu: ${CPU}
+                  memory: ${MEMORY}
                 requires:
+                  cpu: ${CPU}
                   memory: ${MEMORY}
               volumeMounts:
               - name: config-volume

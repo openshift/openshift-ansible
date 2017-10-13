@@ -45,7 +45,7 @@
     params:
       IMAGE: "{{openshift_logging_eventrouter_image_prefix}}logging-eventrouter:{{openshift_logging_eventrouter_image_version}}"
       REPLICAS: "{{ openshift_logging_eventrouter_replicas }}"
-      CPU: "{{ openshift_logging_eventrouter_cpu_limit }}"
+      CPU: "{{ openshift_logging_eventrouter_cpu_request }}"
       MEMORY: "{{ openshift_logging_eventrouter_memory_limit }}"
       NAMESPACE: "{{ openshift_logging_eventrouter_namespace }}"
       SINK: "{{ openshift_logging_eventrouter_sink }}"
