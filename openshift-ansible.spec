@@ -5,7 +5,7 @@
 }
 
 Name:           openshift-ansible
-Version:        3.4.143
+Version:        3.4.144
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -250,6 +250,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.144-1
+- Bump version to 3.4.143-1 (smunilla@redhat.com)
+- Ensure docker service status actually changes (mgugino@redhat.com)
+- Add PartOf to docker systemd service unit. (mgugino@redhat.com)
+- Ensure docker is restarted when iptables is restarted (mgugino@redhat.com)
+
 * Fri Oct 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.4.141-1
 - Bumping version to avoid conflict (smunilla@redhat.com)
 - Ensure docker service started prior to credentials (mgugino@redhat.com)
