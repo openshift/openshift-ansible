@@ -64,6 +64,9 @@
   tags:
   - hosted
 
+- include: ../openshift-glusterfs/config.yml
+  when: groups.oo_glusterfs_to_config | default([]) | count > 0
+
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config:oo_nodes_to_config
   tags:
