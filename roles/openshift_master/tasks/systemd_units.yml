@@ -1,4 +1,7 @@
 ---
+# systemd_units.yml is included both in the openshift_master role and in the upgrade
+# playbooks.
+
 - include: upgrade_facts.yml
   when: openshift_master_defaults_in_use is not defined
 

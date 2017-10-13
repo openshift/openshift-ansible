@@ -29,7 +29,7 @@
     line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
     regexp: "^ExecStart=.*"
 
-- name: "systemctl enable {{ openshift_service_type }}-node"
+- name: "disable {{ openshift_service_type }}-node and {{ openshift_service_type }}-master services"
   systemd:
     name: "{{ item }}"
     enabled: no

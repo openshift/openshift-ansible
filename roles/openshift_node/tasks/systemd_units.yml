@@ -1,11 +1,9 @@
 ---
-# This file is included both in the openshift_master role and in the upgrade
-# playbooks.
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
-    src: "node.service.j2"
-  when: not openshift.common.is_containerized | bool
+    src: "{{ openshift.common.is_containerized | bool | ternary('openshift.docker.node.service', 'node.service.j2') }}"
+  when: not openshift.common.is_node_system_container | bool
   notify:
   - reload systemd units
   - restart node
