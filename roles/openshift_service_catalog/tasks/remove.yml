@@ -1,7 +1,7 @@
 ---
 - name: Remove Service Catalog APIServer
   command: >
-    oc delete apiservices.apiregistration.k8s.io/v1alpha1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
+    oc delete apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
 
 - name: Remove Policy Binding
   command: >
@@ -13,7 +13,7 @@
 #    state: absent
 #    namespace: "kube-service-catalog"
 #    kind: apiservices.apiregistration.k8s.io
-#    name: v1alpha1.servicecatalog.k8s.io
+#    name: v1beta1.servicecatalog.k8s.io
 
 - name: Remove Service Catalog API Server route
   oc_obj:

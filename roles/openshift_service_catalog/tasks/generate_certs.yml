@@ -41,14 +41,14 @@
   register: apiserver_ca
 
 - shell: >
-    oc get apiservices.apiregistration.k8s.io/v1alpha1.servicecatalog.k8s.io -n kube-service-catalog || echo "not found"
+    oc get apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io -n kube-service-catalog || echo "not found"
   register: get_apiservices
   changed_when: no
 
 - name: Create api service
   oc_obj:
     state: present
-    name: v1alpha1.servicecatalog.k8s.io
+    name: v1beta1.servicecatalog.k8s.io
     kind: apiservices.apiregistration.k8s.io
     namespace: "kube-service-catalog"
     content:
@@ -57,7 +57,7 @@
         apiVersion: apiregistration.k8s.io/v1beta1
         kind: APIService
         metadata:
-          name: v1alpha1.servicecatalog.k8s.io
+          name: v1beta1.servicecatalog.k8s.io
         spec:
           group: servicecatalog.k8s.io
           version: v1alpha1
