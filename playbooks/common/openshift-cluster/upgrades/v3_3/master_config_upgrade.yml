@@ -41,12 +41,12 @@
 
 - modify_yaml:
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
-    yaml_key: 'controllerConfig.servicesServingCert.signer.certFile'
+    yaml_key: 'controllerConfig.serviceServingCert.signer.certFile'
     yaml_value: service-signer.crt
 
 - modify_yaml:
     dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
-    yaml_key: 'controllerConfig.servicesServingCert.signer.keyFile'
+    yaml_key: 'controllerConfig.serviceServingCert.signer.keyFile'
     yaml_value: service-signer.key
 
 - modify_yaml:
