@@ -24,6 +24,7 @@ Requires:      tar
 Requires:      %{name}-docs = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
+Obsoletes:     atomic-openshift-utils <= 3.10
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
@@ -42,16 +43,13 @@ for Openshift and Atomic Enterprise.
 
 %build
 
-# atomic-openshift-utils install
-pushd utils
-%{__python} setup.py build
-popd
-
 %install
 # Base openshift-ansible install
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}/inventory
 cp -rp inventory/dynamic %{buildroot}%{_datadir}/ansible/%{name}/inventory
+cp etc/ansible.cfg %{buildroot}%{_datadir}/ansible/%{name}/ansible.cfg
+cp etc/ansible-quiet.cfg %{buildroot}%{_datadir}/ansible/%{name}/ansible-quiet.cfg
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -83,18 +81,6 @@ rm -rf %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/*
 # touch a file in contiv so that it can be added to SCM's
 touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
 
-# atomic-openshift-utils install
-pushd utils
-%{__python} setup.py install --skip-build --root %{buildroot}
-# Remove this line once the name change has happened
-mv -f %{buildroot}%{_bindir}/oo-install %{buildroot}%{_bindir}/atomic-openshift-installer
-mkdir -p %{buildroot}%{_datadir}/atomic-openshift-utils/
-cp etc/ansible.cfg %{buildroot}%{_datadir}/atomic-openshift-utils/ansible.cfg
-mkdir -p %{buildroot}%{_mandir}/man1/
-cp -v docs/man/man1/atomic-openshift-installer.1 %{buildroot}%{_mandir}/man1/
-cp etc/ansible-quiet.cfg %{buildroot}%{_datadir}/atomic-openshift-utils/ansible-quiet.cfg
-popd
-
 # Base openshift-ansible files
 %files
 %doc README*
@@ -102,6 +88,8 @@ popd
 %dir %{_datadir}/ansible/%{name}
 %{_datadir}/ansible/%{name}/inventory/dynamic
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
+%{_datadir}/ansible/%{name}/ansible.cfg
+%{_datadir}/ansible/%{name}/ansible-quiet.cfg
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
@@ -175,30 +163,6 @@ BuildArch:     noarch
 %files roles
 %{_datadir}/ansible/%{name}/roles
 
-# ----------------------------------------------------------------------------------
-# atomic-openshift-utils subpackage
-# ----------------------------------------------------------------------------------
-
-%package -n atomic-openshift-utils
-Summary:       Atomic OpenShift Utilities
-BuildRequires: python-setuptools
-Requires:      %{name}-playbooks = %{version}-%{release}
-Requires:      python-click
-Requires:      python-setuptools
-Requires:      PyYAML
-BuildArch:     noarch
-
-%description -n atomic-openshift-utils
-Atomic OpenShift Utilities includes
- - atomic-openshift-installer
- - other utilities
-
-%files -n atomic-openshift-utils
-%{python_sitelib}/ooinstall*
-%{_bindir}/atomic-openshift-installer
-%{_datadir}/atomic-openshift-utils/ansible.cfg
-%{_mandir}/man1/*
-%{_datadir}/atomic-openshift-utils/ansible-quiet.cfg
 
 
 %changelog
