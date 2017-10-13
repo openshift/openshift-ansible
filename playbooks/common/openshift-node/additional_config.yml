@@ -59,4 +59,5 @@
   hosts: oo_nodes_use_contrail
   roles:
   - role: contrail_node
+    contrail_first_master: "{{ groups.oo_first_master.0 }}"
     when: openshift_use_contrail | default(false) | bool
