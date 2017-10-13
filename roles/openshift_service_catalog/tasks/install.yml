@@ -25,6 +25,15 @@
     name: "kube-service-catalog"
     node_selector: ""
 
+- name: Set Service Catalog namespace nodeSelector annotation
+  oc_edit:
+    state: present
+    kind: project
+    name: kube-service-catalog
+    separator: '#'
+    content:
+      metadata#annotations#openshift.io/node-selector: ""
+
 - name: Make kube-service-catalog project network global
   command: >
     oc adm pod-network make-projects-global kube-service-catalog
