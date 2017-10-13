@@ -40,7 +40,7 @@ spec:
 {% endif %}
       containers:
         - name: proxy
-          image: {{openshift_logging_elasticsearch_proxy_image_prefix}}:{{openshift_logging_elasticsearch_proxy_image_version}}
+          image: {{ proxy_image }}
           imagePullPolicy: Always
           args:
            - --upstream-ca=/etc/elasticsearch/secret/admin-ca
@@ -86,7 +86,7 @@ spec:
             requests:
               memory: "{{es_memory_limit}}"
 {% if es_container_security_context %}
-          securityContext: {{ es_container_security_context | to_yaml }} 
+          securityContext: {{ es_container_security_context | to_yaml }}
 {% endif %}
           ports:
             -
