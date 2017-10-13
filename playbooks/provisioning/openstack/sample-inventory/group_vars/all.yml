@@ -62,6 +62,11 @@ openstack_default_flavor: "m1.medium"
 #docker_lb_volume_size: "5"
 docker_volume_size: "15"
 
+## Specify server group policies for master and infra nodes. Nova must be configured to
+## enable these policies. 'anti-affinity' will ensure that each VM is launched on a
+## different physical host.
+#openstack_master_server_group_policies: [anti-affinity]
+#openstack_infra_server_group_policies: [anti-affinity]
 
 ## Create a Cinder volume and use it for the OpenShift registry.
 ## NOTE: the openstack credentials and hosted registry options must be set in OSEv3.yml!

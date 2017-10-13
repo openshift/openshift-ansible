@@ -89,6 +89,11 @@ parameters:
     description: OpenShift Node Labels
     default: {"region": "default" }
 
+  scheduler_hints:
+    type: json
+    description: Server scheduler hints.
+    default: {}
+
 outputs:
 
   name:
@@ -131,6 +136,7 @@ resources:
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
         node_labels: { get_param: node_labels }
+      scheduler_hints: { get_param: scheduler_hints }
 
 {% if use_trunk_ports|default(false)|bool %}
   trunk-port:
