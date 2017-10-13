@@ -622,7 +622,9 @@ If you'd like to limit the run to one particular host, you can do so as follows:
 ansible-playbook -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml -l app-node-0.openshift.example.com
 ```
 
-You can also create your own custom playbook. Here's one example that adds additional YUM repositories:
+You can also create your own custom playbook. Here are a few examples:
+
+#### Adding additional YUM repositories
 
 ```
 ---
@@ -646,13 +648,34 @@ This example runs against app nodes. The list of options include:
   - masters
   - infra_hosts
 
+
+
+#### Attaching additional RHN pools
+
+```
+---
+- hosts: cluster_hosts
+  tasks:
+  - name: Attach additional RHN pool
+    become: true
+    command: "/usr/bin/subscription-manager attach --pool=<pool ID>"
+    register: attach_rhn_pool_result
+    until: attach_rhn_pool_result.rc == 0
+    retries: 10
+    delay: 1
+```
+
+This playbook runs against all cluster nodes. In order to help prevent slow connectivity
+problems, the task is retried 10 times in case of initial failure.
+Note that in order for this example to work in your deployment, your servers must use the RHEL image.
+
 Please consider contributing your custom playbook back to openshift-ansible-contrib!
 
 A library of custom post-provision actions exists in `openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions`. Playbooks include:
 
-### add-yum-repos.yml
+* [add-yum-repos.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-yum-repos.yml): adds a list of custom yum repositories to every node in the cluster
+* [add-rhn-pools.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-rhn-pools.yml): attaches a list of additional RHN pools to every node in the cluster
 
-[add-yum-repos.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-yum-repos.yml) adds a list of custom yum repositories to every node in the cluster.
 
 ## Install OpenShift
 

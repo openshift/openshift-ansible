@@ -536,6 +536,20 @@ resources:
       - interface
 {% endif %}
 
+{% if master_server_group_policies|length > 0 %}
+  master_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: master_server_group
+      policies: {{ master_server_group_policies }}
+{% endif %}
+{% if infra_server_group_policies|length > 0 %}
+  infra_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: infra_server_group
+      policies: {{ infra_server_group_policies }}
+{% endif %}
 {% if num_masters|int > 1 %}
   loadbalancer:
     type: OS::Heat::ResourceGroup
@@ -643,6 +657,10 @@ resources:
           floating_network: {{ external_network }}
 {% endif %}
           volume_size: {{ master_volume_size }}
+{% if master_server_group_policies|length > 0 %}
+          scheduler_hints:
+            group: { get_resource: master_server_group }
+{% endif %}
 {% if not provider_network %}
     depends_on:
       - interface
@@ -766,6 +784,10 @@ resources:
           floating_network: {{ external_network }}
 {% endif %}
           volume_size: {{ infra_volume_size }}
+{% if infra_server_group_policies|length > 0 %}
+          scheduler_hints:
+            group: { get_resource: infra_server_group }
+{% endif %}
 {% if not provider_network %}
     depends_on:
       - interface

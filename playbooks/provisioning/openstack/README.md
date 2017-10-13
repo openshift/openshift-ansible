@@ -90,7 +90,6 @@ $ sudo docker run -it -v ~/.ssh:/mnt/.ssh:Z \
      redhatcop/control-host-openstack bash
 ```
 
-
 This will create the container, add your SSH key and source your
 `keystonerc`. It should be set up for the installation.
 
@@ -200,7 +199,6 @@ $ ansible-playbook -i inventory openshift-ansible-contrib/playbooks/provisioning
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
-
 
 
 ### 4. Installing OpenShift
