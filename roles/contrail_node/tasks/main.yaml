@@ -23,7 +23,7 @@
       load_path: "/tmp/contrail-kubernetes-agent-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
 
 - when:
-  - inventory_hostname == contrail_first_master
+  - inventory_hostname == "{{ contrail_first_master }}"
 
   block:
   - name: Add contrail service account to privileged scc
