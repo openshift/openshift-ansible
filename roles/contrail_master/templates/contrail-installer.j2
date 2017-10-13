@@ -98,7 +98,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analyticsdb
-        image: "contrail-analyticsdb-{{ os_release }}:{{ contrail_version }}"
+        image: "contrail-analyticsdb-{{ contrail_os_release }}:{{ contrail_version }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -141,7 +141,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analytics
-        image: "contrail-analytics-{{ os_release }}:{{ contrail_version }}"
+        image: "contrail-analytics-{{ contrail_os_release }}:{{ contrail_version }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -174,7 +174,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller
-        image: "contrail-controller-{{ os_release }}:{{ contrail_version }}"
+        image: "contrail-controller-{{ contrail_os_release }}:{{ contrail_version }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -218,7 +218,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
-        image: "contrail-kube-manager-{{ os_release }}:{{ contrail_version }}"
+        image: "contrail-kube-manager-{{ contrail_os_release }}:{{ contrail_version }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -264,7 +264,7 @@ spec:
       hostNetwork: true
       initContainers:
       - name: contrail-kubernetes-agent
-        image: "contrail-kubernetes-agent-{{ os_release }}:{{ contrail_version }}"
+        image: "contrail-kubernetes-agent-{{ contrail_os_release }}:{{ contrail_version }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -281,7 +281,7 @@ spec:
           name: var-log-contrail-cni
       containers:
       - name: contrail-agent
-        image: "contrail-agent-{{ os_release }}:{{ contrail_version }}"
+        image: "contrail-agent-{{ contrail_os_release }}:{{ contrail_version }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
