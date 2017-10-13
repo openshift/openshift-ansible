@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.149.0%{?dist}
+Release:        0.150.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -276,6 +276,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.150.0
+- Ensure upgrade playbook exits on health check failures (rteague@redhat.com)
+- Ensure docker is installed for containerized load balancers
+  (mgugino@redhat.com)
+- Fix containerized node service unit placement order (mgugino@redhat.com)
+- Provisioning Documentation Updates (mgugino@redhat.com)
+
 * Thu Oct 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.149.0
 - Fix broken debug_level (mgugino@redhat.com)
 - Ensure host was reached for proper conditional validation
