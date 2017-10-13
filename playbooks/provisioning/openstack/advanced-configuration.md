@@ -99,7 +99,7 @@ https://github.com/openshift/origin/releases/latest/
 
 Or you can now copy it from the master node:
 
-    $ ansible --private-key ~/.ssh/openshift -i inventory masters[0] -m fetch -a "src=/bin/oc dest=oc"
+    $ ansible -i inventory masters[0] -m fetch -a "src=/bin/oc dest=oc"
 
 Either way, find the `oc` binary and put it in your `PATH`.
 
@@ -245,9 +245,11 @@ See also the [security notes](#security-notes)
 
 ## Other configuration variables
 
-`openstack_ssh_key` is a Nova keypair - you can see your keypairs with
-`openstack keypair list`. This guide assumes that its corresponding private
-key is `~/.ssh/openshift`, stored on the ansible admin (control) node.
+`openstack_ssh_public_key` is a Nova keypair - you can see your
+keypairs with `openstack keypair list`. It must correspond to the
+private SSH key Ansible will use to log into the created VMs. This is
+`~/.ssh/id_rsa` by default, but you can use a different key by passing
+`--private-key` to `ansible-playbook`.
 
 `openstack_default_image_name` is the default name of the Glance image the
 servers will use. You can see your images with `openstack image list`.
@@ -525,7 +527,7 @@ Example inventory variables:
 
     openstack_use_bastion: true
     bastion_ingress_cidr: "{{openstack_subnet_prefix}}.0/24"
-    openstack_private_ssh_key: ~/.ssh/openshift
+    openstack_private_ssh_key: ~/.ssh/id_rsa
     openstack_inventory: static
     openstack_inventory_path: ../../../../inventory
     openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.openshift.example.com
@@ -611,13 +613,13 @@ if requested, and DNS server, and ensures other OpenShift requirements to be met
 A custom playbook can be run like this:
 
 ```
-ansible-playbook --private-key ~/.ssh/openshift -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml
+ansible-playbook -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml
 ```
 
 If you'd like to limit the run to one particular host, you can do so as follows:
 
 ```
-ansible-playbook --private-key ~/.ssh/openshift -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml -l app-node-0.openshift.example.com
+ansible-playbook -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml -l app-node-0.openshift.example.com
 ```
 
 You can also create your own custom playbook. Here's one example that adds additional YUM repositories:
