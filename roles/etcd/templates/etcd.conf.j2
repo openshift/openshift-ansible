@@ -29,8 +29,8 @@ ETCD_INITIAL_CLUSTER={{ etcd_hostname}}={{ etcd_initial_advertise_peer_urls }}
 ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
 ETCD_INITIAL_CLUSTER_TOKEN=thirdparty-etcd-cluster-1
 {% else %}
-{% if initial_etcd_cluster is defined and initial_etcd_cluster %}
-ETCD_INITIAL_CLUSTER={{ initial_etcd_cluster }}
+{% if etcd_initial_cluster is defined and etcd_initial_cluster %}
+ETCD_INITIAL_CLUSTER={{ etcd_initial_cluster }}
 {% else %}
 ETCD_INITIAL_CLUSTER={{ initial_cluster() }}
 {% endif %}
