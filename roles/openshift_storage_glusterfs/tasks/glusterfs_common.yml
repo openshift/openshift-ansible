@@ -307,3 +307,6 @@
     - "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
   when:
   - glusterfs_storageclass
+
+- include: glusterblock_deploy.yml
+  when: glusterfs_block_deploy
