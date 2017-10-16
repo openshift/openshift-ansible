@@ -1,4 +1,14 @@
 ---
+- name: Management Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Management install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_management: "In Progress"
+      aggregate: false
+
 - name: Setup CFME
   hosts: oo_first_master
   pre_tasks:
@@ -13,3 +23,13 @@
       name: openshift_management
     vars:
       template_dir: "{{ hostvars[groups.masters.0].r_openshift_management_mktemp.stdout }}"
+
+- name: Management Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Management install 'Complete'
+    set_stats:
+      data:
+        installer_phase_management: "Complete"
+      aggregate: false
