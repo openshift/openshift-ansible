@@ -259,54 +259,59 @@
   - glusterfs_heketi_is_native
   - glusterfs_heketi_is_missing
 
-- name: Create heketi secret
-  oc_secret:
-    namespace: "{{ glusterfs_namespace }}"
-    state: present
-    name: "heketi-{{ glusterfs_name }}-admin-secret"
-    type: "kubernetes.io/glusterfs"
-    force: True
-    contents:
-    - path: key
-      data: "{{ glusterfs_heketi_admin_key }}"
-  when:
-  - glusterfs_storageclass
-  - glusterfs_heketi_admin_key is defined
-
-- name: Get heketi route
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: route
-    state: list
-    name: "heketi-{{ glusterfs_name }}"
-  register: heketi_route
-  when:
-  - glusterfs_storageclass
-  - glusterfs_heketi_is_native
-
-- name: Determine StorageClass heketi URL
+- name: Check if gluster-s3 can't be deployed
   set_fact:
-    glusterfs_heketi_route: "{{ heketi_route.results.results[0]['spec']['host'] }}"
+    glusterfs_s3_deploy: False
   when:
-  - glusterfs_storageclass
-  - glusterfs_heketi_is_native
+  - "glusterfs_s3_account is not defined or glusterfs_s3_user is not defined or glusterfs_s3_password is not defined"
 
-- name: Generate GlusterFS StorageClass file
-  template:
-    src: "{{ openshift.common.examples_content_version }}/glusterfs-storageclass.yml.j2"
-    dest: "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
-  when:
-  - glusterfs_storageclass
+- block:
+  - name: Create heketi secret
+    oc_secret:
+      namespace: "{{ glusterfs_namespace }}"
+      state: present
+      name: "heketi-{{ glusterfs_name }}-admin-secret"
+      type: "kubernetes.io/glusterfs"
+      force: True
+      contents:
+      - path: key
+        data: "{{ glusterfs_heketi_admin_key }}"
+    when:
+    - glusterfs_heketi_admin_key is defined
 
-- name: Create GlusterFS StorageClass
-  oc_obj:
-    state: present
-    kind: storageclass
-    name: "glusterfs-{{ glusterfs_name }}"
-    files:
-    - "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
+  - name: Get heketi route
+    oc_obj:
+      namespace: "{{ glusterfs_namespace }}"
+      kind: route
+      state: list
+      name: "heketi-{{ glusterfs_name }}"
+    register: heketi_route
+    when:
+    - glusterfs_heketi_is_native
+
+  - name: Determine StorageClass heketi URL
+    set_fact:
+      glusterfs_heketi_route: "{{ heketi_route.results.results[0]['spec']['host'] }}"
+    when:
+    - glusterfs_heketi_is_native
+
+  - name: Generate GlusterFS StorageClass file
+    template:
+      src: "{{ openshift.common.examples_content_version }}/glusterfs-storageclass.yml.j2"
+      dest: "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
+
+  - name: Create GlusterFS StorageClass
+    oc_obj:
+      state: present
+      kind: storageclass
+      name: "glusterfs-{{ glusterfs_name }}"
+      files:
+      - "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
   when:
-  - glusterfs_storageclass
+  - glusterfs_storageclass or glusterfs_s3_deploy
 
 - include: glusterblock_deploy.yml
   when: glusterfs_block_deploy
+
+- include: gluster_s3_deploy.yml
+  when: glusterfs_s3_deploy
