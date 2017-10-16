@@ -1,5 +1,5 @@
 ---
-- include: initialize_groups.yml
+- include:  ../openshift-cluster/initialize_groups.yml
   tags:
   - always
 
@@ -7,6 +7,6 @@
   tags:
   - always
 
-- include: ../openshift-glusterfs/config.yml
+- include: config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
