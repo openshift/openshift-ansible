@@ -106,13 +106,13 @@ $ openstack image list
 ### 2. Configuring the OpenStack Environment and OpenShift Cluster
 
 The configuration is all done in an Ansible inventory directory. We
-will clone the [openshift-ansible-contrib][contrib] repository and set
+will clone the [openshift-ansible][openshift-ansible] repository and set
 things up for a minimal installation.
 
 
 ```
-$ git clone https://github.com/openshift/openshift-ansible-contrib
-$ cp -r openshift-ansible-contrib/playbooks/provisioning/openstack/sample-inventory/ inventory
+$ git clone https://github.com/openshift/openshift-ansible
+$ cp -r openshift-ansible/playbooks/openstack/sample-inventory/ inventory
 ```
 
 If you're testing multiple configurations, you can have multiple
@@ -185,8 +185,8 @@ has useful defaults -- copy it to the directory you're going to run
 Ansible from.
 
 ```bash
-$ ansible-galaxy install -r openshift-ansible-contrib/playbooks/provisioning/openstack/galaxy-requirements.yaml -p openshift-ansible-contrib/roles
-$ cp openshift-ansible-contrib/playbooks/provisioning/openstack/ansible.cfg ansible.cfg
+$ ansible-galaxy install -r openshift-ansible/playbooks/openstack/galaxy-requirements.yaml -p openshift-ansible/roles
+$ cp openshift-ansible/playbooks/openstack/ansible.cfg ansible.cfg
 ```
 (you will only need to do this once)
 
@@ -194,7 +194,7 @@ Then run the provisioning playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook -i inventory openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
+$ ansible-playbook -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision.yaml
 ```
 
 If you're using multiple inventories, make sure you pass the path to
@@ -203,11 +203,10 @@ the right one to `-i`.
 
 ### 4. Installing OpenShift
 
-We will use the `openshift-ansible` project to install openshift on
-top of the OpenStack nodes we have prepared:
+Run the `byo/config.yml` playbook on top of the OpenStack nodes we have
+prepared.
 
 ```bash
-$ git clone https://github.com/openshift/openshift-ansible
 $ ansible-playbook -i inventory openshift-ansible/playbooks/byo/config.yml
 ```
 
@@ -236,7 +235,6 @@ advanced configuration:
 [devstack]: https://docs.openstack.org/devstack/
 [tripleo]: http://tripleo.org/
 [ansible-dependencies]: ./advanced-configuration.md#dependencies-for-localhost-ansible-controladmin-node
-[contrib]: https://github.com/openshift/openshift-ansible-contrib
 [control-host-image]: https://hub.docker.com/r/redhatcop/control-host-openstack/
 [hardware-requirements]: https://docs.openshift.org/latest/install_config/install/prerequisites.html#hardware
 [origin]: https://www.openshift.org/
@@ -249,10 +247,3 @@ advanced configuration:
 [external-dns]: ./advanced-configuration.md#dns-configuration-variables
 [cinder-registry]: ./advanced-configuration.md#creating-and-using-a-cinder-volume-for-the-openshift-registry
 [bastion]: ./advanced-configuration.md#configure-static-inventory-and-access-via-a-bastion-node
-
-
-
-## License
-
-Like the rest of the openshift-ansible-contrib repository, the code
-here is licensed under Apache 2.
