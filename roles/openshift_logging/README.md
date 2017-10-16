@@ -69,6 +69,9 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_fluentd_buffer_size_limit`: Buffer chunk limit for Fluentd. Defaults to 1m.
 - `openshift_logging_fluentd_file_buffer_limit`: Fluentd will set the value to the file buffer limit.  Defaults to '1Gi' per destination.
 
+- `openshift_logging_fluentd_audit_container_engine`: When `openshift_logging_fluentd_audit_container_engine` is set to `True`, the audit log of the container engine will be collected and stored in ES.
+- `openshift_logging_fluentd_audit_file`: Location of audit log file. The default is `/var/log/audit/audit.log`
+- `openshift_logging_fluentd_audit_pos_file`: Location of fluentd in_tail position file for the audit log file. The default is `/var/log/audit/audit.log.pos`
 
 - `openshift_logging_es_host`: The name of the ES service Fluentd should send logs to. Defaults to 'logging-es'.
 - `openshift_logging_es_port`: The port for the ES service Fluentd should sent its logs to. Defaults to '9200'.

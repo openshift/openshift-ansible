@@ -56,3 +56,7 @@ openshift_logging_fluentd_aggregating_passphrase: none
 #fluentd_secureforward_contents:
 
 openshift_logging_fluentd_file_buffer_limit: 1Gi
+
+# Configure fluentd to tail audit log file and filter out container engine's logs from there
+# These logs are then stored in ES operation index
+openshift_logging_fluentd_audit_container_engine: False
