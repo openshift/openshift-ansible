@@ -15,6 +15,10 @@ public_dns_nameservers: []
 openstack_ssh_public_key: "openshift"
 openstack_external_network_name: "public"
 #openstack_private_network_name:  "openshift-ansible-{{ stack_name }}-net"
+# # A dedicated Neutron network name for containers data network
+# # Configures the data network to be separated from openstack_private_network_name
+# # NOTE: this is only supported with Flannel SDN yet
+#openstack_private_data_network_name: "openshift-ansible-{{ stack_name }}-data-net"
 
 ## If you want to use a provider network, set its name here.
 ## NOTE: the `openstack_external_network_name` and

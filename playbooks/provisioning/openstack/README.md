@@ -250,6 +250,9 @@ right after provisioning will fail (unless you're using an external DNS server
 your provider network knows about). You must make sure your nodes are able to
 resolve each other by name.
 
+**NOTE**: Flannel SDN requires a dedicated containers data network and cannot
+work over a single provider network.
+
 #### Security notes
 
 Configure required `*_ingress_cidr` variables to restrict public access
@@ -266,6 +269,10 @@ may want to turn off in order to speed up the provisioning tasks. This may
 be the case for development environments. When turned off, the servers will
 be provisioned omitting the ``yum update`` command. This brings security
 implications though, and is not recommended for production deployments.
+
+Flannel network used for user applications and workloads data should be
+isolated from other networks as it has Neutron ports security disabled.
+Openshift master, compute and infra nodes will be connected to that network.
 
 ##### DNS servers security options
 
@@ -646,7 +653,7 @@ The `increment_by` variable is used to specify by how much the deployment should
 be scaled up (if none exists, it serves as a target number of application nodes).
 The path to `openshift-ansible` directory can be customised by the `openshift_ansible_dir`
 variable. Its value must be an absolute path to `openshift-ansible` and it cannot
-contain the '/' symbol at the end. 
+contain the '/' symbol at the end.
 
 Usage:
 

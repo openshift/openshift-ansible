@@ -2,6 +2,9 @@
 - hosts: localhost
   tasks:
 
+  # Sanity check of inventory variables
+  - include: net_vars_check.yaml
+
   # Check ansible
   - name: Check Ansible version
     assert:
