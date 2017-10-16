@@ -11,6 +11,16 @@ openshift_storage_glusterfs_block_deploy: True
 openshift_storage_glusterfs_block_image: "{{ 'rhgs3/rhgs-gluster-block-prov-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/glusterblock-provisioner' | quote }}"
 openshift_storage_glusterfs_block_version: 'latest'
 openshift_storage_glusterfs_block_max_host_vol: 15
+openshift_storage_glusterfs_s3_deploy: True
+openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-gluster-s3-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
+openshift_storage_glusterfs_s3_version: 'latest'
+openshift_storage_glusterfs_s3_account: "{{ omit }}"
+openshift_storage_glusterfs_s3_user: "{{ omit }}"
+openshift_storage_glusterfs_s3_password: "{{ omit }}"
+openshift_storage_glusterfs_s3_pvc: "gluster-s3-{{ openshift_storage_glusterfs_name }}-{{ openshift_storage_glusterfs_s3_account }}-claim"
+openshift_storage_glusterfs_s3_pvc_size: "2Gi"
+openshift_storage_glusterfs_s3_meta_pvc: "gluster-s3-{{ openshift_storage_glusterfs_name }}-{{ openshift_storage_glusterfs_s3_account }}-meta-claim"
+openshift_storage_glusterfs_s3_meta_pvc_size: "1Gi"
 openshift_storage_glusterfs_wipe: False
 openshift_storage_glusterfs_heketi_is_native: "{{ openshift_storage_glusterfs_is_native }}"
 openshift_storage_glusterfs_heketi_is_missing: True
@@ -45,6 +55,16 @@ openshift_storage_glusterfs_registry_block_deploy: "{{ openshift_storage_gluster
 openshift_storage_glusterfs_registry_block_image: "{{ openshift_storage_glusterfs_block_image }}"
 openshift_storage_glusterfs_registry_block_version: "{{ openshift_storage_glusterfs_block_version }}"
 openshift_storage_glusterfs_registry_block_max_host_vol: "{{ openshift_storage_glusterfs_block_max_host_vol }}"
+openshift_storage_glusterfs_registry_s3_deploy: "{{ openshift_storage_glusterfs_s3_deploy }}"
+openshift_storage_glusterfs_registry_s3_image: "{{ openshift_storage_glusterfs_s3_image }}"
+openshift_storage_glusterfs_registry_s3_version: "{{ openshift_storage_glusterfs_s3_version }}"
+openshift_storage_glusterfs_registry_s3_account: "{{ openshift_storage_glusterfs_s3_account }}"
+openshift_storage_glusterfs_registry_s3_user: "{{ openshift_storage_glusterfs_s3_user }}"
+openshift_storage_glusterfs_registry_s3_password: "{{ openshift_storage_glusterfs_s3_password }}"
+openshift_storage_glusterfs_registry_s3_pvc: "gluster-s3-{{ openshift_storage_glusterfs_registry_name }}-{{ openshift_storage_glusterfs_registry_s3_account }}-claim"
+openshift_storage_glusterfs_registry_s3_pvc_size: "{{ openshift_storage_glusterfs_s3_pvc_size }}"
+openshift_storage_glusterfs_registry_s3_meta_pvc: "gluster-s3-{{ openshift_storage_glusterfs_registry_name }}-{{ openshift_storage_glusterfs_registry_s3_account }}-meta-claim"
+openshift_storage_glusterfs_registry_s3_meta_pvc_size: "{{ openshift_storage_glusterfs_s3_meta_pvc_size }}"
 openshift_storage_glusterfs_registry_wipe: "{{ openshift_storage_glusterfs_wipe }}"
 openshift_storage_glusterfs_registry_heketi_is_native: "{{ openshift_storage_glusterfs_registry_is_native }}"
 openshift_storage_glusterfs_registry_heketi_is_missing: "{{ openshift_storage_glusterfs_heketi_is_missing }}"
