@@ -115,11 +115,12 @@
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='\
-      {% if ansible_selinux.status | default(None) == 'enabled' and docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %}\
-      {% if docker_log_driver is defined  %} --log-driver {{ docker_log_driver }}{% endif %}\
-      {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %}\
-      {% if docker_options is defined %} {{ docker_options }}{% endif %}\
-      {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %}'"
+      {% if ansible_selinux.status | default(None) == 'enabled' and docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %} \
+      {% if docker_log_driver is defined  %} --log-driver {{ docker_log_driver }}{% endif %} \
+      {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %} \
+      {% if docker_options is defined %} {{ docker_options }}{% endif %} \
+      {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %} \
+      --signature-verification={{ openshift_docker_signature_verification | bool }}'"
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
   - restart docker
