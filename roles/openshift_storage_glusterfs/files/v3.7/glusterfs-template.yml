@@ -35,6 +35,10 @@ objects:
         - name: glusterfs
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
           volumeMounts:
           - name: glusterfs-heketi
             mountPath: "/var/lib/heketi"
@@ -83,7 +87,6 @@ objects:
             periodSeconds: 25
             successThreshold: 1
             failureThreshold: 15
-          resources: {}
           terminationMessagePath: "/dev/termination-log"
         volumes:
         - name: glusterfs-heketi
