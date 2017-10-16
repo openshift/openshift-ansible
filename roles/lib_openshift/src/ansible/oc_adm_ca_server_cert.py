@@ -1,6 +1,10 @@
 # pylint: skip-file
 # flake8: noqa
 
+
+# pylint: disable=wrong-import-position
+from ansible.module_utils.six import string_types
+
 def main():
     '''
     ansible oc adm module for ca create-server-cert

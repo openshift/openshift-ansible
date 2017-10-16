@@ -127,20 +127,18 @@ EXAMPLES = '''
 # -*- -*- -*- End included fragment: doc/policy_user -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
-# pylint: disable=undefined-variable,missing-docstring
-# noqa: E301,E302
 
 
-class YeditException(Exception):
+class YeditException(Exception):  # pragma: no cover
     ''' Exception class for Yedit '''
     pass
 
 
 # pylint: disable=too-many-public-methods
-class Yedit(object):
+class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
-    re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z%s/_-]+)"
+    re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z{}/_-]+)"
     com_sep = set(['.', '#', '|', ':'])
 
     # pylint: disable=too-many-arguments
@@ -162,13 +160,13 @@ class Yedit(object):
 
     @property
     def separator(self):
-        ''' getter method for yaml_dict '''
+        ''' getter method for separator '''
         return self._separator
 
     @separator.setter
-    def separator(self):
-        ''' getter method for yaml_dict '''
-        return self._separator
+    def separator(self, inc_sep):
+        ''' setter method for separator '''
+        self._separator = inc_sep
 
     @property
     def yaml_dict(self):
@@ -184,13 +182,13 @@ class Yedit(object):
     def parse_key(key, sep='.'):
         '''parse the key allowing the appropriate separator'''
         common_separators = list(Yedit.com_sep - set([sep]))
-        return re.findall(Yedit.re_key % ''.join(common_separators), key)
+        return re.findall(Yedit.re_key.format(''.join(common_separators)), key)
 
     @staticmethod
     def valid_key(key, sep='.'):
         '''validate the incoming key'''
         common_separators = list(Yedit.com_sep - set([sep]))
-        if not re.match(Yedit.re_valid_key % ''.join(common_separators), key):
+        if not re.match(Yedit.re_valid_key.format(''.join(common_separators)), key):
             return False
 
         return True
@@ -212,7 +210,7 @@ class Yedit(object):
         key_indexes = Yedit.parse_key(key, sep)
         for arr_ind, dict_key in key_indexes[:-1]:
             if dict_key and isinstance(data, dict):
-                data = data.get(dict_key, None)
+                data = data.get(dict_key)
             elif (arr_ind and isinstance(data, list) and
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
@@ -301,7 +299,7 @@ class Yedit(object):
         key_indexes = Yedit.parse_key(key, sep)
         for arr_ind, dict_key in key_indexes:
             if dict_key and isinstance(data, dict):
-                data = data.get(dict_key, None)
+                data = data.get(dict_key)
             elif (arr_ind and isinstance(data, list) and
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
@@ -401,7 +399,7 @@ class Yedit(object):
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. %s' % err)
+            raise YeditException('Problem with loading yaml file. {}'.format(err))
 
         return self.yaml_dict
 
@@ -520,8 +518,8 @@ class Yedit(object):
             # AUDIT:maybe-no-member makes sense due to fuzzy types
             # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
-                raise YeditException('Cannot replace key, value entry in ' +
-                                     'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
+                raise YeditException('Cannot replace key, value entry in dict with non-dict type. ' +
+                                     'value=[{}] type=[{}]'.format(value, type(value)))
 
             entry.update(value)
             return (True, self.yaml_dict)
@@ -582,7 +580,17 @@ class Yedit(object):
             pass
 
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
-        if not result:
+        if result is None:
+            return (False, self.yaml_dict)
+
+        # When path equals "" it is a special case.
+        # "" refers to the root of the document
+        # Only update the root path (entire document) when its a list or dict
+        if path == '':
+            if isinstance(result, list) or isinstance(result, dict):
+                self.yaml_dict = result
+                return (True, self.yaml_dict)
+
             return (False, self.yaml_dict)
 
         self.yaml_dict = tmp_copy
@@ -608,7 +616,7 @@ class Yedit(object):
                 pass
 
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
-            if result:
+            if result is not None:
                 self.yaml_dict = tmp_copy
                 return (True, self.yaml_dict)
 
@@ -640,114 +648,149 @@ class Yedit(object):
         # we will convert to bool if it matches any of the above cases
         if isinstance(inc_value, str) and 'bool' in vtype:
             if inc_value not in true_bools and inc_value not in false_bools:
-                raise YeditException('Not a boolean type. str=[%s] vtype=[%s]'
-                                     % (inc_value, vtype))
+                raise YeditException('Not a boolean type. str=[{}] vtype=[{}]'.format(inc_value, vtype))
         elif isinstance(inc_value, bool) and 'str' in vtype:
             inc_value = str(inc_value)
 
+        # There is a special case where '' will turn into None after yaml loading it so skip
+        if isinstance(inc_value, str) and inc_value == '':
+            pass
         # If vtype is not str then go ahead and attempt to yaml load it.
-        if isinstance(inc_value, str) and 'str' not in vtype:
+        elif isinstance(inc_value, str) and 'str' not in vtype:
             try:
-                inc_value = yaml.load(inc_value)
+                inc_value = yaml.safe_load(inc_value)
             except Exception:
-                raise YeditException('Could not determine type of incoming ' +
-                                     'value. value=[%s] vtype=[%s]'
-                                     % (type(inc_value), vtype))
+                raise YeditException('Could not determine type of incoming value. ' +
+                                     'value=[{}] vtype=[{}]'.format(type(inc_value), vtype))
 
         return inc_value
 
+    @staticmethod
+    def process_edits(edits, yamlfile):
+        '''run through a list of edits and process them one-by-one'''
+        results = []
+        for edit in edits:
+            value = Yedit.parse_value(edit['value'], edit.get('value_type', ''))
+            if edit.get('action') == 'update':
+                # pylint: disable=line-too-long
+                curr_value = Yedit.get_curr_value(
+                    Yedit.parse_value(edit.get('curr_value')),
+                    edit.get('curr_value_format'))
+
+                rval = yamlfile.update(edit['key'],
+                                       value,
+                                       edit.get('index'),
+                                       curr_value)
+
+            elif edit.get('action') == 'append':
+                rval = yamlfile.append(edit['key'], value)
+
+            else:
+                rval = yamlfile.put(edit['key'], value)
+
+            if rval[0]:
+                results.append({'key': edit['key'], 'edit': rval[1]})
+
+        return {'changed': len(results) > 0, 'results': results}
+
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def run_ansible(module):
+    def run_ansible(params):
         '''perform the idempotent crud operations'''
-        yamlfile = Yedit(filename=module.params['src'],
-                         backup=module.params['backup'],
-                         separator=module.params['separator'])
+        yamlfile = Yedit(filename=params['src'],
+                         backup=params['backup'],
+                         separator=params['separator'])
 
-        if module.params['src']:
+        state = params['state']
+
+        if params['src']:
             rval = yamlfile.load()
 
-            if yamlfile.yaml_dict is None and \
-               module.params['state'] != 'present':
+            if yamlfile.yaml_dict is None and state != 'present':
                 return {'failed': True,
-                        'msg': 'Error opening file [%s].  Verify that the ' +
-                               'file exists, that it is has correct' +
-                               ' permissions, and is valid yaml.'}
+                        'msg': 'Error opening file [{}].  Verify that the '.format(params['src']) +
+                               'file exists, that it is has correct permissions, and is valid yaml.'}
 
-        if module.params['state'] == 'list':
-            if module.params['content']:
-                content = Yedit.parse_value(module.params['content'],
-                                            module.params['content_type'])
+        if state == 'list':
+            if params['content']:
+                content = Yedit.parse_value(params['content'], params['content_type'])
                 yamlfile.yaml_dict = content
 
-            if module.params['key']:
-                rval = yamlfile.get(module.params['key']) or {}
+            if params['key']:
+                rval = yamlfile.get(params['key'])
 
-            return {'changed': False, 'result': rval, 'state': "list"}
+            return {'changed': False, 'result': rval, 'state': state}
 
-        elif module.params['state'] == 'absent':
-            if module.params['content']:
-                content = Yedit.parse_value(module.params['content'],
-                                            module.params['content_type'])
+        elif state == 'absent':
+            if params['content']:
+                content = Yedit.parse_value(params['content'], params['content_type'])
                 yamlfile.yaml_dict = content
 
-            if module.params['update']:
-                rval = yamlfile.pop(module.params['key'],
-                                    module.params['value'])
+            if params['update']:
+                rval = yamlfile.pop(params['key'], params['value'])
             else:
-                rval = yamlfile.delete(module.params['key'])
+                rval = yamlfile.delete(params['key'])
 
-            if rval[0] and module.params['src']:
+            if rval[0] and params['src']:
                 yamlfile.write()
 
-            return {'changed': rval[0], 'result': rval[1], 'state': "absent"}
+            return {'changed': rval[0], 'result': rval[1], 'state': state}
 
-        elif module.params['state'] == 'present':
+        elif state == 'present':
             # check if content is different than what is in the file
-            if module.params['content']:
-                content = Yedit.parse_value(module.params['content'],
-                                            module.params['content_type'])
+            if params['content']:
+                content = Yedit.parse_value(params['content'], params['content_type'])
 
                 # We had no edits to make and the contents are the same
                 if yamlfile.yaml_dict == content and \
-                   module.params['value'] is None:
-                    return {'changed': False,
-                            'result': yamlfile.yaml_dict,
-                            'state': "present"}
+                   params['value'] is None:
+                    return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
 
                 yamlfile.yaml_dict = content
 
-            # we were passed a value; parse it
-            if module.params['value']:
-                value = Yedit.parse_value(module.params['value'],
-                                          module.params['value_type'])
-                key = module.params['key']
-                if module.params['update']:
-                    # pylint: disable=line-too-long
-                    curr_value = Yedit.get_curr_value(Yedit.parse_value(module.params['curr_value']),  # noqa: E501
-                                                      module.params['curr_value_format'])  # noqa: E501
+            # If we were passed a key, value then
+            # we enapsulate it in a list and process it
+            # Key, Value passed to the module : Converted to Edits list #
+            edits = []
+            _edit = {}
+            if params['value'] is not None:
+                _edit['value'] = params['value']
+                _edit['value_type'] = params['value_type']
+                _edit['key'] = params['key']
 
-                    rval = yamlfile.update(key, value, module.params['index'], curr_value)  # noqa: E501
+                if params['update']:
+                    _edit['action'] = 'update'
+                    _edit['curr_value'] = params['curr_value']
+                    _edit['curr_value_format'] = params['curr_value_format']
+                    _edit['index'] = params['index']
 
-                elif module.params['append']:
-                    rval = yamlfile.append(key, value)
-                else:
-                    rval = yamlfile.put(key, value)
+                elif params['append']:
+                    _edit['action'] = 'append'
 
-                if rval[0] and module.params['src']:
+                edits.append(_edit)
+
+            elif params['edits'] is not None:
+                edits = params['edits']
+
+            if edits:
+                results = Yedit.process_edits(edits, yamlfile)
+
+                # if there were changes and a src provided to us we need to write
+                if results['changed'] and params['src']:
                     yamlfile.write()
 
-                return {'changed': rval[0],
-                        'result': rval[1], 'state': "present"}
+                return {'changed': results['changed'], 'result': results['results'], 'state': state}
 
             # no edits to make
-            if module.params['src']:
+            if params['src']:
                 # pylint: disable=redefined-variable-type
                 rval = yamlfile.write()
                 return {'changed': rval[0],
                         'result': rval[1],
-                        'state': "present"}
+                        'state': state}
 
+            # We were passed content but no src, key or value, or edits.  Return contents in memory
+            return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
         return {'failed': True, 'msg': 'Unkown state passed'}
 
 # -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
@@ -855,11 +898,15 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, rname, selector=None):
+    def _delete(self, resource, name=None, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname]
-        if selector:
-            cmd.append('--selector=%s' % selector)
+        cmd = ['delete', resource]
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
+        else:
+            raise OpenShiftCLIError('Either name or selector is required when calling delete.')
 
         return self.openshift_cmd(cmd)
 
@@ -877,7 +924,7 @@ class OpenShiftCLI(object):
         else:
             cmd.append(template_name)
         if params:
-            param_str = ["%s=%s" % (key, value) for key, value in params.items()]
+            param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
             cmd.append('-v')
             cmd.extend(param_str)
 
@@ -894,13 +941,13 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, rname=None, selector=None):
+    def _get(self, resource, name=None, selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
-        if selector:
-            cmd.append('--selector=%s' % selector)
-        elif rname:
-            cmd.append(rname)
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
 
         cmd.extend(['-o', 'json'])
 
@@ -920,9 +967,9 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
-        cmd.append('--schedulable=%s' % schedulable)
+        cmd.append('--schedulable={}'.format(schedulable))
 
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
 
@@ -937,10 +984,10 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         cmd.extend(['--list-pods', '-o', 'json'])
 
@@ -953,16 +1000,16 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if dry_run:
             cmd.append('--dry-run')
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         if grace_period:
-            cmd.append('--grace-period=%s' % int(grace_period))
+            cmd.append('--grace-period={}'.format(int(grace_period)))
 
         if force:
             cmd.append('--force')
@@ -1022,10 +1069,6 @@ class OpenShiftCLI(object):
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
 
-        rval = {}
-        results = ''
-        err = None
-
         if self.verbose:
             print(' '.join(cmds))
 
@@ -1035,39 +1078,31 @@ class OpenShiftCLI(object):
             returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
-                "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if returncode == 0:
-            if output:
-                if output_type == 'json':
-                    try:
-                        rval['results'] = json.loads(stdout)
-                    except ValueError as err:
-                        if "No JSON object could be decoded" in err.args:
-                            err = err.args
-                elif output_type == 'raw':
-                    rval['results'] = stdout
+        if output_type == 'json':
+            rval['results'] = {}
+            if output and stdout:
+                try:
+                    rval['results'] = json.loads(stdout)
+                except ValueError as verr:
+                    if "No JSON object could be decoded" in verr.args:
+                        rval['err'] = verr.args
+        elif output_type == 'raw':
+            rval['results'] = stdout if output else ''
 
-            if self.verbose:
-                print("STDOUT: {0}".format(stdout))
-                print("STDERR: {0}".format(stderr))
+        if self.verbose:
+            print("STDOUT: {0}".format(stdout))
+            print("STDERR: {0}".format(stderr))
 
-            if err:
-                rval.update({"err": err,
-                             "stderr": stderr,
-                             "stdout": stdout,
-                             "cmd": cmds})
-
-        else:
+        if 'err' in rval or returncode != 0:
             rval.update({"stderr": stderr,
-                         "stdout": stdout,
-                         "results": {}})
+                         "stdout": stdout})
 
         return rval
 
 
-class Utils(object):
+class Utils(object):  # pragma: no cover
     ''' utilities for openshiftcli modules '''
 
     @staticmethod
@@ -1225,13 +1260,12 @@ class Utils(object):
     @staticmethod
     def openshift_installed():
         ''' check if openshift is installed '''
-        import yum
+        import rpm
 
-        yum_base = yum.YumBase()
-        if yum_base.rpmdb.searchNevra(name='atomic-openshift'):
-            return True
+        transaction_set = rpm.TransactionSet()
+        rpmquery = transaction_set.dbMatch("name", "atomic-openshift")
 
-        return False
+        return rpmquery.count() > 0
 
     # Disabling too-many-branches.  This is a yaml dictionary comparison function
     # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
@@ -1330,7 +1364,6 @@ class Utils(object):
             print('returning true')
         return True
 
-
 class OpenShiftCLIConfig(object):
     '''Generic Config'''
     def __init__(self, rname, namespace, kubeconfig, options):
@@ -1344,17 +1377,28 @@ class OpenShiftCLIConfig(object):
         ''' return config options '''
         return self._options
 
-    def to_option_list(self):
-        '''return all options as a string'''
-        return self.stringify()
+    def to_option_list(self, ascommalist=''):
+        '''return all options as a string
+           if ascommalist is set to the name of a key, and
+           the value of that key is a dict, format the dict
+           as a list of comma delimited key=value pairs'''
+        return self.stringify(ascommalist)
 
-    def stringify(self):
-        ''' return the options hash as cli params in a string '''
+    def stringify(self, ascommalist=''):
+        ''' return the options hash as cli params in a string
+            if ascommalist is set to the name of a key, and
+            the value of that key is a dict, format the dict
+            as a list of comma delimited key=value pairs '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
-               and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+               and (data['value'] is not None or isinstance(data['value'], int)):
+                if key == ascommalist:
+                    val = ','.join(['{}={}'.format(kk, vv) for kk, vv in sorted(data['value'].items())])
+                else:
+                    val = data['value']
+                rval.append('--{}={}'.format(key.replace('_', '-'), val))
 
         return rval
 
@@ -1905,14 +1949,36 @@ class PolicyUser(OpenShiftCLI):
     ''' Class to handle attaching policies to users '''
 
     def __init__(self,
-                 policy_config,
+                 config,
                  verbose=False):
         ''' Constructor for PolicyUser '''
-        super(PolicyUser, self).__init__(policy_config.namespace, policy_config.kubeconfig, verbose)
-        self.config = policy_config
+        super(PolicyUser, self).__init__(config.namespace, config.kubeconfig, verbose)
+        self.config = config
         self.verbose = verbose
         self._rolebinding = None
         self._scc = None
+        self._cluster_role_bindings = None
+        self._role_bindings = None
+
+    @property
+    def rolebindings(self):
+        if self._role_bindings is None:
+            results = self._get('rolebindings', None)
+            if results['returncode'] != 0:
+                raise OpenShiftCLIError('Could not retrieve rolebindings')
+            self._role_bindings = results['results'][0]['items']
+
+        return self._role_bindings
+
+    @property
+    def clusterrolebindings(self):
+        if self._cluster_role_bindings is None:
+            results = self._get('clusterrolebindings', None)
+            if results['returncode'] != 0:
+                raise OpenShiftCLIError('Could not retrieve clusterrolebindings')
+            self._cluster_role_bindings = results['results'][0]['items']
+
+        return self._cluster_role_bindings
 
     @property
     def role_binding(self):
@@ -1935,36 +2001,36 @@ class PolicyUser(OpenShiftCLI):
         self._scc = scc
 
     def get(self):
-        '''fetch the desired kind'''
+        '''fetch the desired kind
+
+           This is only used for scc objects.
+           The {cluster}rolebindings happen in exists.
+        '''
         resource_name = self.config.config_options['name']['value']
         if resource_name == 'cluster-reader':
             resource_name += 's'
 
-        # oc adm policy add-... creates policy bindings with the name
-        # "[resource_name]-binding", however some bindings in the system
-        # simply use "[resource_name]". So try both.
-
-        results = self._get(self.config.kind, resource_name)
-        if results['returncode'] == 0:
-            return results
-
-        # Now try -binding naming convention
-        return self._get(self.config.kind, resource_name + "-binding")
+        return self._get(self.config.kind, resource_name)
 
     def exists_role_binding(self):
         ''' return whether role_binding exists '''
-        results = self.get()
-        if results['returncode'] == 0:
-            self.role_binding = RoleBinding(results['results'][0])
-            if self.role_binding.find_user_name(self.config.config_options['user']['value']) != None:
+        bindings = None
+        if self.config.config_options['resource_kind']['value'] == 'cluster-role':
+            bindings = self.clusterrolebindings
+        else:
+            bindings = self.rolebindings
+
+        if bindings is None:
+            return False
+
+        for binding in bindings:
+            if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
+                    binding['userNames'] is not None and \
+                    self.config.config_options['user']['value'] in binding['userNames']:
+                self.role_binding = binding
                 return True
 
-            return False
-
-        elif self.config.config_options['name']['value'] in results['stderr'] and '" not found' in results['stderr']:
-            return False
-
-        return results
+        return False
 
     def exists_scc(self):
         ''' return whether scc exists '''

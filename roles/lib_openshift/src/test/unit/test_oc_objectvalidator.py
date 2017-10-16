@@ -25,9 +25,10 @@ class OCObjectValidatorTest(unittest.TestCase):
 
     maxDiff = None
 
+    @mock.patch('oc_objectvalidator.locate_oc_binary')
     @mock.patch('oc_objectvalidator.Utils.create_tmpfile_copy')
     @mock.patch('oc_objectvalidator.OCObjectValidator._run')
-    def test_no_data(self, mock_cmd, mock_tmpfile_copy):
+    def test_no_data(self, mock_cmd, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing when both all objects are empty '''
 
         # Arrange
@@ -62,6 +63,10 @@ class OCObjectValidatorTest(unittest.TestCase):
             '/tmp/mocked_kubeconfig',
         ]
 
+        mock_oc_binary.side_effect = [
+            'oc',
+        ]
+
         # Act
         results = OCObjectValidator.run_ansible(params)
 
@@ -76,9 +81,10 @@ class OCObjectValidatorTest(unittest.TestCase):
             mock.call(['oc', 'get', 'namespace', '-o', 'json', '-n', 'default'], None),
         ])
 
+    @mock.patch('oc_objectvalidator.locate_oc_binary')
     @mock.patch('oc_objectvalidator.Utils.create_tmpfile_copy')
     @mock.patch('oc_objectvalidator.OCObjectValidator._run')
-    def test_error_code(self, mock_cmd, mock_tmpfile_copy):
+    def test_error_code(self, mock_cmd, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing when we fail to get objects '''
 
         # Arrange
@@ -96,6 +102,10 @@ class OCObjectValidatorTest(unittest.TestCase):
 
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
+        ]
+
+        mock_oc_binary.side_effect = [
+            'oc'
         ]
 
         error_results = {
@@ -120,9 +130,10 @@ class OCObjectValidatorTest(unittest.TestCase):
             mock.call(['oc', 'get', 'hostsubnet', '-o', 'json', '-n', 'default'], None),
         ])
 
+    @mock.patch('oc_objectvalidator.locate_oc_binary')
     @mock.patch('oc_objectvalidator.Utils.create_tmpfile_copy')
     @mock.patch('oc_objectvalidator.OCObjectValidator._run')
-    def test_valid_both(self, mock_cmd, mock_tmpfile_copy):
+    def test_valid_both(self, mock_cmd, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing when both all objects are valid '''
 
         # Arrange
@@ -427,6 +438,10 @@ class OCObjectValidatorTest(unittest.TestCase):
             '/tmp/mocked_kubeconfig',
         ]
 
+        mock_oc_binary.side_effect = [
+            'oc'
+        ]
+
         # Act
         results = OCObjectValidator.run_ansible(params)
 
@@ -441,9 +456,10 @@ class OCObjectValidatorTest(unittest.TestCase):
             mock.call(['oc', 'get', 'namespace', '-o', 'json', '-n', 'default'], None),
         ])
 
+    @mock.patch('oc_objectvalidator.locate_oc_binary')
     @mock.patch('oc_objectvalidator.Utils.create_tmpfile_copy')
     @mock.patch('oc_objectvalidator.OCObjectValidator._run')
-    def test_invalid_both(self, mock_cmd, mock_tmpfile_copy):
+    def test_invalid_both(self, mock_cmd, mock_tmpfile_copy, mock_oc_binary):
         ''' Testing when all objects are invalid '''
 
         # Arrange
@@ -884,6 +900,10 @@ class OCObjectValidatorTest(unittest.TestCase):
 
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
+        ]
+
+        mock_oc_binary.side_effect = [
+            'oc'
         ]
 
         # Act

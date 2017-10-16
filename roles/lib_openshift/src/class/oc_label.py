@@ -134,9 +134,9 @@ class OCLabel(OpenShiftCLI):
         label_list = []
 
         if self.name:
-            result = self._get(resource=self.kind, rname=self.name, selector=self.selector)
+            result = self._get(resource=self.kind, name=self.name, selector=self.selector)
 
-            if 'labels' in result['results'][0]['metadata']:
+            if result['results'][0] and 'labels' in result['results'][0]['metadata']:
                 label_list.append(result['results'][0]['metadata']['labels'])
             else:
                 label_list.append({})

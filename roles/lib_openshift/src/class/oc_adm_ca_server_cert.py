@@ -96,6 +96,10 @@ class CAServerCert(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
+        # Filter non-strings from hostnames list s.t. the omit filter
+        # may be used to conditionally add a hostname.
+        params['hostnames'] = [host for host in params['hostnames'] if isinstance(host, string_types)]
+
         config = CAServerCertConfig(params['kubeconfig'],
                                     params['debug'],
                                     {'cert':          {'value': params['cert'], 'include': True},
@@ -127,7 +131,7 @@ class CAServerCert(OpenShiftCLI):
                 api_rval = server_cert.create()
 
                 if api_rval['returncode'] != 0:
-                    return {'Failed': True, 'msg': api_rval}
+                    return {'failed': True, 'msg': api_rval}
 
                 return {'changed': True, 'results': api_rval, 'state': state}
 

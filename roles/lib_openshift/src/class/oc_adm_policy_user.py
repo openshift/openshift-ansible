@@ -32,14 +32,36 @@ class PolicyUser(OpenShiftCLI):
     ''' Class to handle attaching policies to users '''
 
     def __init__(self,
-                 policy_config,
+                 config,
                  verbose=False):
         ''' Constructor for PolicyUser '''
-        super(PolicyUser, self).__init__(policy_config.namespace, policy_config.kubeconfig, verbose)
-        self.config = policy_config
+        super(PolicyUser, self).__init__(config.namespace, config.kubeconfig, verbose)
+        self.config = config
         self.verbose = verbose
         self._rolebinding = None
         self._scc = None
+        self._cluster_role_bindings = None
+        self._role_bindings = None
+
+    @property
+    def rolebindings(self):
+        if self._role_bindings is None:
+            results = self._get('rolebindings', None)
+            if results['returncode'] != 0:
+                raise OpenShiftCLIError('Could not retrieve rolebindings')
+            self._role_bindings = results['results'][0]['items']
+
+        return self._role_bindings
+
+    @property
+    def clusterrolebindings(self):
+        if self._cluster_role_bindings is None:
+            results = self._get('clusterrolebindings', None)
+            if results['returncode'] != 0:
+                raise OpenShiftCLIError('Could not retrieve clusterrolebindings')
+            self._cluster_role_bindings = results['results'][0]['items']
+
+        return self._cluster_role_bindings
 
     @property
     def role_binding(self):
@@ -62,36 +84,36 @@ class PolicyUser(OpenShiftCLI):
         self._scc = scc
 
     def get(self):
-        '''fetch the desired kind'''
+        '''fetch the desired kind
+
+           This is only used for scc objects.
+           The {cluster}rolebindings happen in exists.
+        '''
         resource_name = self.config.config_options['name']['value']
         if resource_name == 'cluster-reader':
             resource_name += 's'
 
-        # oc adm policy add-... creates policy bindings with the name
-        # "[resource_name]-binding", however some bindings in the system
-        # simply use "[resource_name]". So try both.
-
-        results = self._get(self.config.kind, resource_name)
-        if results['returncode'] == 0:
-            return results
-
-        # Now try -binding naming convention
-        return self._get(self.config.kind, resource_name + "-binding")
+        return self._get(self.config.kind, resource_name)
 
     def exists_role_binding(self):
         ''' return whether role_binding exists '''
-        results = self.get()
-        if results['returncode'] == 0:
-            self.role_binding = RoleBinding(results['results'][0])
-            if self.role_binding.find_user_name(self.config.config_options['user']['value']) != None:
+        bindings = None
+        if self.config.config_options['resource_kind']['value'] == 'cluster-role':
+            bindings = self.clusterrolebindings
+        else:
+            bindings = self.rolebindings
+
+        if bindings is None:
+            return False
+
+        for binding in bindings:
+            if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
+                    binding['userNames'] is not None and \
+                    self.config.config_options['user']['value'] in binding['userNames']:
+                self.role_binding = binding
                 return True
 
-            return False
-
-        elif self.config.config_options['name']['value'] in results['stderr'] and '" not found' in results['stderr']:
-            return False
-
-        return results
+        return False
 
     def exists_scc(self):
         ''' return whether scc exists '''
