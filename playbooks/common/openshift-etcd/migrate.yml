@@ -1,4 +1,17 @@
 ---
+- name: Check if the master has embedded etcd
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tags:
+  - always
+  tasks:
+  - fail:
+      msg: "Migration of an embedded etcd is not supported. Please, migrate the embedded etcd into an external etcd first."
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
   tasks:
@@ -60,12 +73,11 @@
   hosts: oo_etcd_to_migrate
   gather_facts: no
   pre_tasks:
-  - set_fact:
-      l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
-  - name: Disable etcd members
-    service:
-      name: "{{ l_etcd_service }}"
-      state: stopped
+  - include_role:
+      name: etcd
+      tasks_from: disable_etcd
+    vars:
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
 
 - name: Migrate data on first etcd
   hosts: oo_etcd_to_migrate[0]
