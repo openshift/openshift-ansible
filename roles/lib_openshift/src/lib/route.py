@@ -11,7 +11,6 @@ class RouteConfig(object):
                  sname,
                  namespace,
                  kubeconfig,
-                 labels=None,
                  destcacert=None,
                  cacert=None,
                  cert=None,
@@ -26,7 +25,6 @@ class RouteConfig(object):
         self.kubeconfig = kubeconfig
         self.name = sname
         self.namespace = namespace
-        self.labels = labels
         self.host = host
         self.tls_termination = tls_termination
         self.destcacert = destcacert
@@ -52,8 +50,6 @@ class RouteConfig(object):
         self.data['metadata'] = {}
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
-        if self.labels:
-            self.data['metadata']['labels'] = self.labels
         self.data['spec'] = {}
 
         self.data['spec']['host'] = self.host

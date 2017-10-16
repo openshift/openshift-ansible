@@ -102,15 +102,11 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, name=None, selector=None):
+    def _delete(self, resource, rname, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource]
-        if selector is not None:
-            cmd.append('--selector={}'.format(selector))
-        elif name is not None:
-            cmd.append(name)
-        else:
-            raise OpenShiftCLIError('Either name or selector is required when calling delete.')
+        cmd = ['delete', resource, rname]
+        if selector:
+            cmd.append('--selector=%s' % selector)
 
         return self.openshift_cmd(cmd)
 
@@ -128,7 +124,7 @@ class OpenShiftCLI(object):
         else:
             cmd.append(template_name)
         if params:
-            param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
+            param_str = ["%s=%s" % (key, value) for key, value in params.items()]
             cmd.append('-v')
             cmd.extend(param_str)
 
@@ -145,13 +141,13 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, name=None, selector=None):
+    def _get(self, resource, rname=None, selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
-        if selector is not None:
-            cmd.append('--selector={}'.format(selector))
-        elif name is not None:
-            cmd.append(name)
+        if selector:
+            cmd.append('--selector=%s' % selector)
+        elif rname:
+            cmd.append(rname)
 
         cmd.extend(['-o', 'json'])
 
@@ -171,9 +167,9 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector={}'.format(selector))
+            cmd.append('--selector=%s' % selector)
 
-        cmd.append('--schedulable={}'.format(schedulable))
+        cmd.append('--schedulable=%s' % schedulable)
 
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
 
@@ -188,10 +184,10 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector={}'.format(selector))
+            cmd.append('--selector=%s' % selector)
 
         if pod_selector:
-            cmd.append('--pod-selector={}'.format(pod_selector))
+            cmd.append('--pod-selector=%s' % pod_selector)
 
         cmd.extend(['--list-pods', '-o', 'json'])
 
@@ -204,16 +200,16 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector={}'.format(selector))
+            cmd.append('--selector=%s' % selector)
 
         if dry_run:
             cmd.append('--dry-run')
 
         if pod_selector:
-            cmd.append('--pod-selector={}'.format(pod_selector))
+            cmd.append('--pod-selector=%s' % pod_selector)
 
         if grace_period:
-            cmd.append('--grace-period={}'.format(int(grace_period)))
+            cmd.append('--grace-period=%s' % int(grace_period))
 
         if force:
             cmd.append('--force')
@@ -273,6 +269,10 @@ class OpenShiftCLI(object):
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
 
+        rval = {}
+        results = ''
+        err = None
+
         if self.verbose:
             print(' '.join(cmds))
 
@@ -282,26 +282,34 @@ class OpenShiftCLI(object):
             returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
+                "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if output_type == 'json':
-            rval['results'] = {}
-            if output and stdout:
-                try:
-                    rval['results'] = json.loads(stdout)
-                except ValueError as verr:
-                    if "No JSON object could be decoded" in verr.args:
-                        rval['err'] = verr.args
-        elif output_type == 'raw':
-            rval['results'] = stdout if output else ''
+        if returncode == 0:
+            if output:
+                if output_type == 'json':
+                    try:
+                        rval['results'] = json.loads(stdout)
+                    except ValueError as err:
+                        if "No JSON object could be decoded" in err.args:
+                            err = err.args
+                elif output_type == 'raw':
+                    rval['results'] = stdout
 
-        if self.verbose:
-            print("STDOUT: {0}".format(stdout))
-            print("STDERR: {0}".format(stderr))
+            if self.verbose:
+                print("STDOUT: {0}".format(stdout))
+                print("STDERR: {0}".format(stderr))
 
-        if 'err' in rval or returncode != 0:
+            if err:
+                rval.update({"err": err,
+                             "stderr": stderr,
+                             "stdout": stdout,
+                             "cmd": cmds})
+
+        else:
             rval.update({"stderr": stderr,
-                         "stdout": stdout})
+                         "stdout": stdout,
+                         "results": {}})
 
         return rval
 
@@ -464,12 +472,13 @@ class Utils(object):
     @staticmethod
     def openshift_installed():
         ''' check if openshift is installed '''
-        import rpm
+        import yum
 
-        transaction_set = rpm.TransactionSet()
-        rpmquery = transaction_set.dbMatch("name", "atomic-openshift")
+        yum_base = yum.YumBase()
+        if yum_base.rpmdb.searchNevra(name='atomic-openshift'):
+            return True
 
-        return rpmquery.count() > 0
+        return False
 
     # Disabling too-many-branches.  This is a yaml dictionary comparison function
     # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
@@ -568,6 +577,7 @@ class Utils(object):
             print('returning true')
         return True
 
+
 class OpenShiftCLIConfig(object):
     '''Generic Config'''
     def __init__(self, rname, namespace, kubeconfig, options):
@@ -581,28 +591,17 @@ class OpenShiftCLIConfig(object):
         ''' return config options '''
         return self._options
 
-    def to_option_list(self, ascommalist=''):
-        '''return all options as a string
-           if ascommalist is set to the name of a key, and
-           the value of that key is a dict, format the dict
-           as a list of comma delimited key=value pairs'''
-        return self.stringify(ascommalist)
+    def to_option_list(self):
+        '''return all options as a string'''
+        return self.stringify()
 
-    def stringify(self, ascommalist=''):
-        ''' return the options hash as cli params in a string
-            if ascommalist is set to the name of a key, and
-            the value of that key is a dict, format the dict
-            as a list of comma delimited key=value pairs '''
+    def stringify(self):
+        ''' return the options hash as cli params in a string '''
         rval = []
-        for key in sorted(self.config_options.keys()):
-            data = self.config_options[key]
+        for key, data in self.config_options.items():
             if data['include'] \
-               and (data['value'] is not None or isinstance(data['value'], int)):
-                if key == ascommalist:
-                    val = ','.join(['{}={}'.format(kk, vv) for kk, vv in sorted(data['value'].items())])
-                else:
-                    val = data['value']
-                rval.append('--{}={}'.format(key.replace('_', '-'), val))
+               and (data['value'] or isinstance(data['value'], int)):
+                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
 
         return rval
 

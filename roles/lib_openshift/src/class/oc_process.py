@@ -30,7 +30,7 @@ class OCProcess(OpenShiftCLI):
         if self._template is None:
             results = self._process(self.name, False, self.params, self.data)
             if results['returncode'] != 0:
-                raise OpenShiftCLIError('Error processing template [%s]: %s' %(self.name, results))
+                raise OpenShiftCLIError('Error processing template [%s].' % self.name)
             self._template = results['results']['items']
 
         return self._template

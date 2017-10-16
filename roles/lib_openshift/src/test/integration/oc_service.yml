@@ -18,9 +18,6 @@
         test-registtry: default
       session_affinity: ClientIP
       service_type: ClusterIP
-      labels:
-        component: test-registry
-        infra: registry
     register: svc_out
   - debug: var=svc_out
 
@@ -28,8 +25,6 @@
       that:
       - "svc_out.results.results[0]['metadata']['name'] == 'test-registry'"
       - svc_out.changed
-      - "svc_out.results.results[0]['metadata']['labels']['component'] == 'test-registry'"
-      - "svc_out.results.results[0]['metadata']['labels']['infra'] == 'registry'"
       msg: service create failed.
 
   # Test idempotent create

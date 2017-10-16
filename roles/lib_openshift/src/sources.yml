@@ -9,25 +9,15 @@ oc_adm_ca_server_cert.py:
 - class/oc_adm_ca_server_cert.py
 - ansible/oc_adm_ca_server_cert.py
 
-oc_adm_csr.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/csr
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- class/oc_adm_csr.py
-- ansible/oc_adm_csr.py
-
-oc_adm_manage_node.py:
+oadm_manage_node.py:
 - doc/generated
 - doc/license
 - lib/import.py
 - doc/manage_node
 - ../../lib_utils/src/class/yedit.py
 - lib/base.py
-- class/oc_adm_manage_node.py
-- ansible/oc_adm_manage_node.py
+- class/oadm_manage_node.py
+- ansible/oadm_manage_node.py
 
 oc_adm_policy_user.py:
 - doc/generated
@@ -89,28 +79,6 @@ oc_atomic_container.py:
 - doc/atomic_container
 - ansible/oc_atomic_container.py
 
-oc_configmap.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/configmap
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- class/oc_configmap.py
-- ansible/oc_configmap.py
-
-oc_clusterrole.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/clusterrole
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/rule.py
-- lib/clusterrole.py
-- class/oc_clusterrole.py
-- ansible/oc_clusterrole.py
-
 oc_edit.py:
 - doc/generated
 - doc/license
@@ -131,28 +99,6 @@ oc_env.py:
 - lib/deploymentconfig.py
 - class/oc_env.py
 - ansible/oc_env.py
-
-
-oc_group.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/group
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/group.py
-- class/oc_group.py
-- ansible/oc_group.py
-
-oc_image.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/image
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- class/oc_image.py
-- ansible/oc_image.py
 
 oc_label.py:
 - doc/generated
@@ -194,17 +140,6 @@ oc_project.py:
 - lib/project.py
 - class/oc_project.py
 - ansible/oc_project.py
-
-oc_pvc.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/pvc
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/pvc.py
-- class/oc_pvc.py
-- ansible/oc_pvc.py
 
 oc_route.py:
 - doc/generated
@@ -273,28 +208,6 @@ oc_service.py:
 - class/oc_service.py
 - ansible/oc_service.py
 
-oc_storageclass.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/storageclass
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/storageclass.py
-- class/oc_storageclass.py
-- ansible/oc_storageclass.py
-
-oc_user.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/user
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/user.py
-- class/oc_user.py
-- ansible/oc_user.py
-
 oc_version.py:
 - doc/generated
 - doc/license
@@ -304,18 +217,6 @@ oc_version.py:
 - lib/base.py
 - class/oc_version.py
 - ansible/oc_version.py
-
-oc_volume.py:
-- doc/generated
-- doc/license
-- lib/import.py
-- doc/volume
-- ../../lib_utils/src/class/yedit.py
-- lib/base.py
-- lib/deploymentconfig.py
-- lib/volume.py
-- class/oc_volume.py
-- ansible/oc_volume.py
 
 oc_objectvalidator.py:
 - doc/generated

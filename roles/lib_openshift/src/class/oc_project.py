@@ -61,34 +61,30 @@ class OCProject(OpenShiftCLI):
     def update(self):
         '''update a project '''
 
-        if self.config.config_options['display_name']['value'] is not None:
-            self.project.update_annotation('display-name', self.config.config_options['display_name']['value'])
-
-        if self.config.config_options['description']['value'] is not None:
-            self.project.update_annotation('description', self.config.config_options['description']['value'])
+        self.project.update_annotation('display-name', self.config.config_options['display_name']['value'])
+        self.project.update_annotation('description', self.config.config_options['description']['value'])
 
         # work around for immutable project field
-        if self.config.config_options['node_selector']['value'] is not None:
+        if self.config.config_options['node_selector']['value']:
             self.project.update_annotation('node-selector', self.config.config_options['node_selector']['value'])
+        else:
+            self.project.update_annotation('node-selector', self.project.find_annotation('node-selector'))
 
         return self._replace_content(self.kind, self.config.name, self.project.yaml_dict)
 
     def needs_update(self):
         ''' verify an update is needed '''
-        if self.config.config_options['display_name']['value'] is not None:
-            result = self.project.find_annotation("display-name")
-            if result != self.config.config_options['display_name']['value']:
-                return True
+        result = self.project.find_annotation("display-name")
+        if result != self.config.config_options['display_name']['value']:
+            return True
 
-        if self.config.config_options['description']['value'] is not None:
-            result = self.project.find_annotation("description")
-            if result != self.config.config_options['description']['value']:
-                return True
+        result = self.project.find_annotation("description")
+        if result != self.config.config_options['description']['value']:
+            return True
 
-        if self.config.config_options['node_selector']['value'] is not None:
-            result = self.project.find_annotation("node-selector")
-            if result != self.config.config_options['node_selector']['value']:
-                return True
+        result = self.project.find_annotation("node-selector")
+        if result != self.config.config_options['node_selector']['value']:
+            return True
 
         return False
 
@@ -97,22 +93,19 @@ class OCProject(OpenShiftCLI):
     def run_ansible(params, check_mode):
         '''run the idempotent ansible code'''
 
-        node_selector = None
+        _ns = None
         if params['node_selector'] is not None:
-            node_selector = ','.join(params['node_selector'])
+            _ns = ','.join(params['node_selector'])
 
-        pconfig = ProjectConfig(
-            params['name'],
-            'None',
-            params['kubeconfig'],
-            {
-                'admin': {'value': params['admin'], 'include': True},
-                'admin_role': {'value': params['admin_role'], 'include': True},
-                'description': {'value': params['description'], 'include': True},
-                'display_name': {'value': params['display_name'], 'include': True},
-                'node_selector': {'value': node_selector, 'include': True},
-            },
-        )
+        pconfig = ProjectConfig(params['name'],
+                                'None',
+                                params['kubeconfig'],
+                                {'admin': {'value': params['admin'], 'include': True},
+                                 'admin_role': {'value': params['admin_role'], 'include': True},
+                                 'description': {'value': params['description'], 'include': True},
+                                 'display_name': {'value': params['display_name'], 'include': True},
+                                 'node_selector': {'value': _ns, 'include': True},
+                                })
 
         oadm_project = OCProject(pconfig, verbose=params['debug'])
 
@@ -155,9 +148,6 @@ class OCProject(OpenShiftCLI):
 
                 # Create it here
                 api_rval = oadm_project.create()
-
-                if api_rval['returncode'] != 0:
-                    return {'failed': True, 'msg': api_rval}
 
                 # return the created object
                 api_rval = oadm_project.get()

@@ -2,7 +2,6 @@
  Unit tests for oc project
 '''
 
-import copy
 import os
 import sys
 import unittest
@@ -21,21 +20,8 @@ from oc_project import OCProject  # noqa: E402
 
 class OCProjectTest(unittest.TestCase):
     '''
-     Test class for OCProject
+     Test class for OCSecret
     '''
-
-    # run_ansible input parameters
-    params = {
-        'state': 'present',
-        'display_name': 'operations project',
-        'name': 'operations',
-        'node_selector': ['ops_only=True'],
-        'kubeconfig': '/etc/origin/master/admin.kubeconfig',
-        'debug': False,
-        'admin': None,
-        'admin_role': 'admin',
-        'description': 'All things operations project',
-    }
 
     @mock.patch('oc_project.locate_oc_binary')
     @mock.patch('oc_project.Utils.create_tmpfile_copy')
@@ -44,9 +30,21 @@ class OCProjectTest(unittest.TestCase):
     def test_adding_a_project(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
         ''' Testing adding a project '''
 
-        params = copy.deepcopy(OCProjectTest.params)
+        # Arrange
 
         # run_ansible input parameters
+        params = {
+            'state': 'present',
+            'display_name': 'operations project',
+            'name': 'operations',
+            'node_selector': ['ops_only=True'],
+            'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+            'debug': False,
+            'admin': None,
+            'admin_role': 'admin',
+            'description': 'All things operations project',
+        }
+
         project_results = '''{
             "kind": "Project",
             "apiVersion": "v1",
@@ -92,6 +90,7 @@ class OCProjectTest(unittest.TestCase):
         ]
 
         # Act
+
         results = OCProject.run_ansible(params, False)
 
         # Assert
@@ -108,173 +107,4 @@ class OCProjectTest(unittest.TestCase):
                        mock.ANY, mock.ANY, mock.ANY], None),
             mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
 
-        ])
-
-    @mock.patch('oc_project.locate_oc_binary')
-    @mock.patch('oc_project.Utils.create_tmpfile_copy')
-    @mock.patch('oc_project.Utils._write')
-    @mock.patch('oc_project.OCProject._run')
-    def test_modifying_a_project_no_attributes(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
-        ''' Testing adding a project '''
-        params = copy.deepcopy(self.params)
-        params['display_name'] = None
-        params['node_selector'] = None
-        params['description'] = None
-
-        # run_ansible input parameters
-        project_results = '''{
-            "kind": "Project",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "operations",
-                "selfLink": "/oapi/v1/projects/operations",
-                "uid": "5e52afb8-ee33-11e6-89f4-0edc441d9666",
-                "resourceVersion": "1584",
-                "labels": {},
-                "annotations": {
-                    "openshift.io/node-selector": "",
-                    "openshift.io/description: "This is a description",
-                    "openshift.io/sa.initialized-roles": "true",
-                    "openshift.io/sa.scc.mcs": "s0:c3,c2",
-                    "openshift.io/sa.scc.supplemental-groups": "1000010000/10000",
-                    "openshift.io/sa.scc.uid-range": "1000010000/10000"
-                }
-            },
-            "spec": {
-                "finalizers": [
-                    "kubernetes",
-                    "openshift.io/origin"
-                ]
-            },
-            "status": {
-                "phase": "Active"
-            }
-        }'''
-
-        # Return values of our mocked function call. These get returned once per call.
-        mock_cmd.side_effect = [
-            (0, project_results, ''),
-        ]
-
-        mock_tmpfile_copy.side_effect = [
-            '/tmp/mocked_kubeconfig',
-        ]
-
-        mock_loc_oc_bin.side_effect = [
-            'oc',
-        ]
-
-        # Act
-        results = OCProject.run_ansible(params, False)
-
-        # Assert
-        self.assertFalse(results['changed'])
-
-        # Making sure our mock was called as we expected
-        mock_cmd.assert_has_calls([
-            mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
-        ])
-
-    @mock.patch('oc_project.locate_oc_binary')
-    @mock.patch('oc_project.Utils.create_tmpfile_copy')
-    @mock.patch('oc_project.Utils._write')
-    @mock.patch('oc_project.OCProject._run')
-    def test_modifying_project_attributes(self, mock_cmd, mock_write, mock_tmpfile_copy, mock_loc_oc_bin):
-        ''' Testing adding a project '''
-        params = copy.deepcopy(self.params)
-        params['display_name'] = 'updated display name'
-        params['node_selector'] = 'type=infra'
-        params['description'] = 'updated description'
-
-        # run_ansible input parameters
-        project_results = '''{
-            "kind": "Project",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "operations",
-                "selfLink": "/oapi/v1/projects/operations",
-                "uid": "5e52afb8-ee33-11e6-89f4-0edc441d9666",
-                "resourceVersion": "1584",
-                "labels": {},
-                "annotations": {
-                    "openshift.io/node-selector": "",
-                    "openshift.io/description": "This is a description",
-                    "openshift.io/sa.initialized-roles": "true",
-                    "openshift.io/sa.scc.mcs": "s0:c3,c2",
-                    "openshift.io/sa.scc.supplemental-groups": "1000010000/10000",
-                    "openshift.io/sa.scc.uid-range": "1000010000/10000"
-                }
-            },
-            "spec": {
-                "finalizers": [
-                    "kubernetes",
-                    "openshift.io/origin"
-                ]
-            },
-            "status": {
-                "phase": "Active"
-            }
-        }'''
-
-        mod_project_results = '''{
-            "kind": "Project",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "operations",
-                "selfLink": "/oapi/v1/projects/operations",
-                "uid": "5e52afb8-ee33-11e6-89f4-0edc441d9666",
-                "resourceVersion": "1584",
-                "labels": {},
-                "annotations": {
-                    "openshift.io/node-selector": "type=infra",
-                    "openshift.io/description": "updated description",
-                    "openshift.io/display-name": "updated display name",
-                    "openshift.io/sa.initialized-roles": "true",
-                    "openshift.io/sa.scc.mcs": "s0:c3,c2",
-                    "openshift.io/sa.scc.supplemental-groups": "1000010000/10000",
-                    "openshift.io/sa.scc.uid-range": "1000010000/10000"
-                }
-            },
-            "spec": {
-                "finalizers": [
-                    "kubernetes",
-                    "openshift.io/origin"
-                ]
-            },
-            "status": {
-                "phase": "Active"
-            }
-        }'''
-
-        # Return values of our mocked function call. These get returned once per call.
-        mock_cmd.side_effect = [
-            (0, project_results, ''),
-            (0, project_results, ''),
-            (0, '', ''),
-            (0, mod_project_results, ''),
-        ]
-
-        mock_tmpfile_copy.side_effect = [
-            '/tmp/mocked_kubeconfig',
-        ]
-
-        mock_loc_oc_bin.side_effect = [
-            'oc',
-        ]
-
-        # Act
-        results = OCProject.run_ansible(params, False)
-
-        # Assert
-        self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
-        self.assertEqual(results['results']['results']['metadata']['annotations']['openshift.io/description'], 'updated description')
-        self.assertEqual(results['state'], 'present')
-
-        # Making sure our mock was called as we expected
-        mock_cmd.assert_has_calls([
-            mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
-            mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
-            mock.call(['oc', 'replace', '-f', mock.ANY], None),
-            mock.call(['oc', 'get', 'namespace', 'operations', '-o', 'json'], None),
         ])

@@ -39,12 +39,6 @@ options:
     required: false
     default: str
     aliases: []
-  labels:
-    description:
-    - The labels to apply on the route
-    required: false
-    default: None
-    aliases: []
   tls_termination:
     description:
     - The options for termination. e.g. reencrypt

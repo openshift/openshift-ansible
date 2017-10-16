@@ -21,7 +21,7 @@ from oc_route import OCRoute, locate_oc_binary  # noqa: E402
 
 class OCRouteTest(unittest.TestCase):
     '''
-     Test class for OCRoute
+     Test class for OCServiceAccount
     '''
 
     @mock.patch('oc_route.locate_oc_binary')
@@ -39,7 +39,6 @@ class OCRouteTest(unittest.TestCase):
             'debug': False,
             'name': 'test',
             'namespace': 'default',
-            'labels': {'route': 'route'},
             'tls_termination': 'passthrough',
             'dest_cacert_path': None,
             'cacert_path': None,
@@ -65,10 +64,7 @@ class OCRouteTest(unittest.TestCase):
                 "selfLink": "/oapi/v1/namespaces/default/routes/test",
                 "uid": "1b127c67-ecd9-11e6-96eb-0e0d9bdacd26",
                 "resourceVersion": "439182",
-                "creationTimestamp": "2017-02-07T01:59:48Z",
-                "labels": {
-                    "route": "route"
-                }
+                "creationTimestamp": "2017-02-07T01:59:48Z"
             },
             "spec": {
                 "host": "test.example",
@@ -145,7 +141,6 @@ class OCRouteTest(unittest.TestCase):
             'debug': False,
             'name': 'test',
             'namespace': 'default',
-            'labels': {'route': 'route'},
             'tls_termination': 'edge',
             'dest_cacert_path': None,
             'cacert_path': None,
@@ -171,8 +166,7 @@ class OCRouteTest(unittest.TestCase):
                     "namespace": "default",
                     "resourceVersion": "517745",
                     "selfLink": "/oapi/v1/namespaces/default/routes/test",
-                    "uid": "b6f25898-ed77-11e6-9755-0e737db1e63a",
-                    "labels": {"route": "route"}
+                    "uid": "b6f25898-ed77-11e6-9755-0e737db1e63a"
                 },
                 "spec": {
                     "host": "test.openshift.com",
@@ -256,7 +250,6 @@ metadata:
         self.assertTrue(results['changed'])
         self.assertEqual(results['state'], 'present')
         self.assertEqual(results['results']['results'][0]['metadata']['name'], 'test')
-        self.assertEqual(results['results']['results'][0]['metadata']['labels']['route'], 'route')
 
         # Making sure our mock was called as we expected
         mock_cmd.assert_has_calls([

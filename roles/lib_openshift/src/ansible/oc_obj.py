@@ -23,7 +23,7 @@ def main():
             force=dict(default=False, type='bool'),
             selector=dict(default=None, type='str'),
         ),
-        mutually_exclusive=[["content", "files"], ["selector", "name"]],
+        mutually_exclusive=[["content", "files"]],
 
         supports_check_mode=True,
     )

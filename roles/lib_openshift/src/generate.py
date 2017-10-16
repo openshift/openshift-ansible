@@ -5,16 +5,12 @@
 
 import argparse
 import os
-import re
 import yaml
 import six
 
 OPENSHIFT_ANSIBLE_PATH = os.path.dirname(os.path.realpath(__file__))
 OPENSHIFT_ANSIBLE_SOURCES_PATH = os.path.join(OPENSHIFT_ANSIBLE_PATH, 'sources.yml')  # noqa: E501
 LIBRARY = os.path.join(OPENSHIFT_ANSIBLE_PATH, '..', 'library/')
-SKIP_COVERAGE_PATTERN = [re.compile('class Yedit.*$'),
-                         re.compile('class Utils.*$')]
-PRAGMA_STRING = '  # pragma: no cover'
 
 
 class GenerateAnsibleException(Exception):
@@ -75,11 +71,6 @@ def generate(parts):
             for idx, line in enumerate(pfd):
                 if idx in [0, 1] and 'flake8: noqa' in line or 'pylint: skip-file' in line:  # noqa: E501
                     continue
-
-                for skip in SKIP_COVERAGE_PATTERN:
-                    if re.match(skip, line):
-                        line = line.strip()
-                        line += PRAGMA_STRING + os.linesep
 
                 data.write(line)
 

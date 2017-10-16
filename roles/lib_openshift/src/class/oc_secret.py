@@ -13,14 +13,12 @@ class OCSecret(OpenShiftCLI):
     def __init__(self,
                  namespace,
                  secret_name=None,
-                 secret_type=None,
                  decode=False,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False):
         ''' Constructor for OpenshiftOC '''
         super(OCSecret, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
         self.name = secret_name
-        self.type = secret_type
         self.decode = decode
 
     def get(self):
@@ -44,17 +42,13 @@ class OCSecret(OpenShiftCLI):
         '''delete a secret by name'''
         return self._delete('secrets', self.name)
 
-    def create(self, files=None, contents=None, force=False):
+    def create(self, files=None, contents=None):
         '''Create a secret '''
         if not files:
             files = Utils.create_tmp_files_from_contents(contents)
 
         secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
         cmd = ['secrets', 'new', self.name]
-        if self.type is not None:
-            cmd.append("--type=%s" % (self.type))
-            if force:
-                cmd.append('--confirm')
         cmd.extend(secrets)
 
         results = self.openshift_cmd(cmd)
@@ -67,7 +61,7 @@ class OCSecret(OpenShiftCLI):
            This receives a list of file names and converts it into a secret.
            The secret is then written to disk and passed into the `oc replace` command.
         '''
-        secret = self.prep_secret(files, force)
+        secret = self.prep_secret(files)
         if secret['returncode'] != 0:
             return secret
 
@@ -79,7 +73,7 @@ class OCSecret(OpenShiftCLI):
 
         return self._replace(sfile_path, force=force)
 
-    def prep_secret(self, files=None, contents=None, force=False):
+    def prep_secret(self, files=None, contents=None):
         ''' return what the secret would look like if created
             This is accomplished by passing -ojson.  This will most likely change in the future
         '''
@@ -88,10 +82,6 @@ class OCSecret(OpenShiftCLI):
 
         secrets = ["%s=%s" % (sfile['name'], sfile['path']) for sfile in files]
         cmd = ['-ojson', 'secrets', 'new', self.name]
-        if self.type is not None:
-            cmd.extend(["--type=%s" % (self.type)])
-            if force:
-                cmd.append('--confirm')
         cmd.extend(secrets)
 
         return self.openshift_cmd(cmd, output=True)
@@ -104,7 +94,6 @@ class OCSecret(OpenShiftCLI):
 
         ocsecret = OCSecret(params['namespace'],
                             params['name'],
-                            params['type'],
                             params['decode'],
                             kubeconfig=params['kubeconfig'],
                             verbose=params['debug'])
@@ -142,7 +131,8 @@ class OCSecret(OpenShiftCLI):
             elif params['contents']:
                 files = Utils.create_tmp_files_from_contents(params['contents'])
             else:
-                files = [{'name': 'null', 'path': os.devnull}]
+                return {'failed': True,
+                        'msg': 'Either specify files or contents.'}
 
             ########
             # Create
@@ -153,7 +143,7 @@ class OCSecret(OpenShiftCLI):
                     return {'changed': True,
                             'msg': 'Would have performed a create.'}
 
-                api_rval = ocsecret.create(files, params['contents'], force=params['force'])
+                api_rval = ocsecret.create(files, params['contents'])
 
                 # Remove files
                 if files and params['delete_after']:
@@ -170,7 +160,7 @@ class OCSecret(OpenShiftCLI):
             ########
             # Update
             ########
-            secret = ocsecret.prep_secret(params['files'], params['contents'], force=params['force'])
+            secret = ocsecret.prep_secret(params['files'], params['contents'])
 
             if secret['returncode'] != 0:
                 return {'failed': True, 'msg': secret}

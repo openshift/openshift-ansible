@@ -136,7 +136,7 @@ class Router(OpenShiftCLI):
         self.secret = None
         self.rolebinding = None
         for part in self.router_parts:
-            result = self._get(part['kind'], name=part['name'])
+            result = self._get(part['kind'], rname=part['name'])
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':
@@ -222,9 +222,9 @@ class Router(OpenShiftCLI):
             # No certificate was passed to us.  do not pass one to oc adm router
             self.config.config_options['default_cert']['include'] = False
 
-        options = self.config.to_option_list(ascommalist='labels')
+        options = self.config.to_option_list()
 
-        cmd = ['router', self.config.name]
+        cmd = ['router', self.config.name, '-n', self.config.namespace]
         cmd.extend(options)
         cmd.extend(['--dry-run=True', '-o', 'json'])
 
