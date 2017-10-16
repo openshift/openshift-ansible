@@ -10,7 +10,9 @@
   become: true
   roles:
     - { role: subscription-manager, when: hostvars.localhost.rhsm_register|default(False), tags: 'subscription-manager', ansible_sudo: true }
-    - { role: docker, tags: 'docker' }
+    - role: docker-storage-setup
+      docker_dev: /dev/vdb
+      tags: 'docker'
     - { role: openshift-prep, tags: 'openshift-prep' }
 
 - hosts: localhost:cluster_hosts
