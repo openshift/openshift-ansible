@@ -9,6 +9,13 @@
         installer_phase_glusterfs: "In Progress"
       aggregate: false
 
+- name: Enable thin pool kernel module
+  hosts: glusterfs
+  tasks:
+  - modprobe:
+      name: dm_thin_pool
+      state: present
+
 - name: Open firewall ports for GlusterFS nodes
   hosts: glusterfs
   tasks:
