@@ -26,34 +26,12 @@ def main():
                                    type='str'),
             backup=dict(default=True, type='bool'),
             separator=dict(default='.', type='str'),
-            edits=dict(default=None, type='list'),
         ),
         mutually_exclusive=[["curr_value", "index"], ['update', "append"]],
         required_one_of=[["content", "src"]],
     )
 
-    # Verify we recieved either a valid key or edits with valid keys when receiving a src file.
-    # A valid key being not None or not ''.
-    if module.params['src'] is not None:
-        key_error = False
-        edit_error = False
-
-        if module.params['key'] in [None, '']:
-            key_error = True
-
-        if module.params['edits'] in [None, []]:
-            edit_error = True
-
-        else:
-            for edit in module.params['edits']:
-                if edit.get('key') in [None, '']:
-                    edit_error = True
-                    break
-
-        if key_error and edit_error:
-            module.fail_json(failed=True, msg='Empty value for parameter key not allowed.')
-
-    rval = Yedit.run_ansible(module.params)
+    rval = Yedit.run_ansible(module)
     if 'failed' in rval and rval['failed']:
         module.fail_json(**rval)
 

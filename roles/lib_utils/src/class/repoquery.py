@@ -48,7 +48,7 @@ class Repoquery(RepoqueryCLI):
 
         version_dict = defaultdict(dict)
 
-        for version in query_output.decode().split('\n'):
+        for version in query_output.split('\n'):
             pkg_info = version.split("|")
 
             pkg_version = {}

@@ -135,20 +135,4 @@ EXAMPLES = '''
 # a:
 #   b:
 #     c: d
-#
-# multiple edits at the same time
-- name: perform multiple edits
-  yedit:
-    src: somefile.yml
-    edits:
-    - key: a#b#c
-      value: d
-    - key: a#b#c#d
-      value: e
-    state: present
-# Results:
-# a:
-#   b:
-#     c:
-#       d: e
 '''

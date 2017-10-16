@@ -45,7 +45,7 @@ class RepoQueryTest(unittest.TestCase):
 
         # Return values of our mocked function call. These get returned once per call.
         mock_cmd.side_effect = [
-            (0, b'4.2.46|21.el7_3|x86_64|rhel-7-server-rpms|4.2.46-21.el7_3', valid_stderr),  # first call to the mock
+            (0, '4.2.46|21.el7_3|x86_64|rhel-7-server-rpms|4.2.46-21.el7_3', valid_stderr),  # first call to the mock
         ]
 
         # Act

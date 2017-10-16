@@ -10,7 +10,6 @@ import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
 import tempfile  # noqa: F401
-import time  # noqa: F401
 
 try:
     import ruamel.yaml as yaml  # noqa: F401
