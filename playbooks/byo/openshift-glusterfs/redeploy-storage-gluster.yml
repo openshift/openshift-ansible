@@ -9,4 +9,3 @@
 
 - include: config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
-
