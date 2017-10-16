@@ -87,6 +87,7 @@
       IMAGE_VERSION: "{{ glusterfs_version }}"
       NODE_LABELS: "{{ glusterfs_nodeselector }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
+      GB_GLFS_LRU_COUNT: "{{ glusterfs_block_max_host_vol }}"
 
 - name: Wait for GlusterFS pods
   oc_obj:

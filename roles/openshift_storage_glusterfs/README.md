@@ -84,6 +84,10 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_storageclass         | True                    | Automatically create a StorageClass for each GlusterFS cluster
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
+| openshift_storage_glusterfs_block_deploy         | True                    | Deploy glusterblock provisioner service
+| openshift_storage_glusterfs_block_image          | 'gluster/glusterblock-provisioner'| Container image to use for glusterblock-provisioner pod, enterprise default is 'rhgs3/rhgs-gluster-block-prov-rhel7'
+| openshift_storage_glusterfs_block_version        | 'latest'                | Container image version to use for glusterblock-provisioner pod
+| openshift_storage_glusterfs_block_max_host_vol   | 15                      | Max number of GlusterFS volumes to host glusterblock volumes
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
 | openshift_storage_glusterfs_heketi_is_native     | True                    | heketi should be containerized
 | openshift_storage_glusterfs_heketi_cli           | 'heketi-cli'            | Command/Path to invoke the heketi-cli tool **NOTE:** Change this only for **non-native heketi** if heketi-cli is not in the global `$PATH` of the machine running openshift-ansible
