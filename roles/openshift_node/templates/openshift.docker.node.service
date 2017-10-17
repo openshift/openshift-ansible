@@ -20,8 +20,12 @@ After=dnsmasq.service
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node-dep
 ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type }}-node
-ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
+{% if not openshift.common.version_gte_3_7 %}
+ExecStartPre=-/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
 ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
+ExecStopPost=-/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
+ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
+{% endif %}
 ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
   --rm --privileged --net=host --pid=host --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-node \
   -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} \
@@ -41,8 +45,6 @@ ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
   {{ openshift.node.node_image }}:${IMAGE_VERSION}
 ExecStartPost=/usr/bin/sleep 10
 ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-node
-ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
-ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
 SyslogIdentifier={{ openshift.common.service_type }}-node
 Restart=always
 RestartSec=5s
