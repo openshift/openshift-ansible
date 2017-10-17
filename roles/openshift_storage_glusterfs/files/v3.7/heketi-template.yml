@@ -15,6 +15,7 @@ objects:
     name: heketi-${CLUSTER_NAME}
     labels:
       glusterfs: heketi-${CLUSTER_NAME}-service
+      heketi: ${CLUSTER_NAME}-service
     annotations:
       description: Exposes Heketi service
   spec:
@@ -30,6 +31,7 @@ objects:
     name: ${HEKETI_ROUTE}
     labels:
       glusterfs: heketi-${CLUSTER_NAME}-route
+      heketi: ${CLUSTER_NAME}-route
   spec:
     to:
       kind: Service
@@ -40,6 +42,7 @@ objects:
     name: heketi-${CLUSTER_NAME}
     labels:
       glusterfs: heketi-${CLUSTER_NAME}-dc
+      heketi: ${CLUSTER_NAME}-dc
     annotations:
       description: Defines how to deploy Heketi
   spec:
@@ -55,6 +58,7 @@ objects:
         name: heketi-${CLUSTER_NAME}
         labels:
           glusterfs: heketi-${CLUSTER_NAME}-pod
+          heketi: ${CLUSTER_NAME}-pod
       spec:
         serviceAccountName: heketi-${CLUSTER_NAME}-service-account
         containers:
@@ -69,13 +73,11 @@ objects:
           - name: HEKETI_EXECUTOR
             value: ${HEKETI_EXECUTOR}
           - name: HEKETI_FSTAB
-            value: /var/lib/heketi/fstab
+            value: ${HEKETI_FSTAB}
           - name: HEKETI_SNAPSHOT_LIMIT
             value: '14'
           - name: HEKETI_KUBE_GLUSTER_DAEMONSET
             value: '1'
-          - name: HEKETI_KUBE_NAMESPACE
-            value: ${HEKETI_KUBE_NAMESPACE}
           ports:
           - containerPort: 8080
           volumeMounts:
@@ -114,10 +116,10 @@ parameters:
   displayName: heketi executor type
   description: Set the executor type, kubernetes or ssh
   value: kubernetes
-- name: HEKETI_KUBE_NAMESPACE
-  displayName: Namespace
-  description: Set the namespace where the GlusterFS pods reside
-  value: default
+- name: HEKETI_FSTAB
+  displayName: heketi fstab path
+  description: Set the fstab path, file that is populated with bricks that heketi creates
+  value: /var/lib/heketi/fstab
 - name: HEKETI_ROUTE
   displayName: heketi route name
   description: Set the hostname for the route URL
