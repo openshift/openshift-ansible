@@ -64,6 +64,9 @@ rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
 mkdir -p docs/example-inventories
 cp inventory/byo/* docs/example-inventories/
 
+# openshift-ansible-files install
+cp -rp files %{buildroot}%{_datadir}/ansible/%{name}/
+
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
 # remove contiv plabooks
@@ -122,6 +125,7 @@ popd
 %doc README*
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
+%{_datadir}/ansible/%{name}/files
 %{_datadir}/ansible/%{name}/library
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
