@@ -95,9 +95,17 @@ parameters:
     label: Security groups
     description: Security group resources
 
+  attach_float_net:
+    type: boolean
+    default: true
+
+    label: Attach-float-net
+    description: A switch for floating network port connection
+
 {% if not provider_network %}
   floating_network:
     type: string
+    default: ''
     label: Floating network
     description: Network to allocate floating IP from
 {% endif %}
@@ -155,8 +163,9 @@ outputs:
 {% endif %}
         - addr
 
-{% if openshift_use_flannel|default(False)|bool %}
 conditions:
+  no_floating: {not: { get_param: attach_float_net} }
+{% if openshift_use_flannel|default(False)|bool %}
   no_data_subnet: {not: { get_param: attach_data_net} }
 {% endif %}
 
@@ -238,6 +247,7 @@ resources:
 
 {% if not provider_network %}
   floating-ip:
+    condition: { not: no_floating }
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: floating_network }
