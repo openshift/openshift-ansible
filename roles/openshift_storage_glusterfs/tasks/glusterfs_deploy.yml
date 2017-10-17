@@ -77,8 +77,13 @@
     files:
     - "{{ mktemp.stdout }}/glusterfs-template.yml"
 
+- name: Copy GlusterFS DaemonSet deploy script
+  copy:
+    src: "{{ openshift.common.examples_content_version }}/gluster-pods-deployer.sh"
+    dest: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
+
 - name: Deploy GlusterFS pods 
-  shell: 'oc process glusterfs -p IMAGE_NAME="{{ glusterfs_image }}" -p IMAGE_VERSION="{{ glusterfs_version }}" -p CLUSTER_NAME="{{ glusterfs_name }}" NODE_LABELS="{{ glusterfs_nodeselector }}" | oc create -n "{{ glusterfs_namespace }}" -f - '
+  script: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
 
 - name: Wait for GlusterFS pods
   oc_obj:
