@@ -54,9 +54,9 @@ objects:
           serviceAccount: aggregated-logging-eventrouter
           serviceAccountName: aggregated-logging-eventrouter
 {% if node_selector is iterable and node_selector | length > 0 %}
-      nodeSelector:
+          nodeSelector:
 {% for key, value in node_selector.iteritems() %}
-        {{ key }}: "{{ value }}"
+            {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
           containers:
