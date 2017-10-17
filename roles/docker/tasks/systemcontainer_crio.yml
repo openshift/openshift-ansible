@@ -36,6 +36,12 @@
     state: present
   when: not openshift.common.is_atomic | bool
 
+- name: Check we are not using node as a Docker container with CRI-O
+  fail: msg='Cannot use CRI-O with node configured as a Docker container'
+  when:
+    - openshift.common.is_containerized | bool
+    - not openshift.common.is_node_system_container | bool
+
 # Used to pull and install the system container
 - name: Ensure atomic is installed
   package:
