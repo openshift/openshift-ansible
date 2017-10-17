@@ -1,0 +1,103 @@
+---
+- assert:
+    that: "glusterfs_nodes | count >= 3"
+    msg: There must be at least three GlusterFS nodes specified
+
+- name: Delete pre-existing GlusterFS resources
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: "{{ item.kind }}"
+    name: "{{ item.name }}"
+    state: absent
+  with_items:
+  - kind: template
+    name: glusterfs
+  - kind: daemonset
+    name: "glusterfs-{{ glusterfs_name | default }}"
+  when: glusterfs_wipe
+
+- name: Unlabel any existing GlusterFS nodes
+  oc_label:
+    name: "{{ hostvars[item].openshift.node.nodename }}"
+    kind: node
+    state: absent
+    labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
+  with_items: "{{ groups.all }}"
+  when: glusterfs_wipe
+
+- name: Delete pre-existing GlusterFS config
+  file:
+    path: /var/lib/glusterd
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ glusterfs_nodes | default([]) }}"
+  when: glusterfs_wipe
+
+- name: Get GlusterFS storage devices state
+  command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
+  register: devices_info
+  delegate_to: "{{ item }}"
+  with_items: "{{ glusterfs_nodes | default([]) }}"
+  failed_when: False
+  when: glusterfs_wipe
+
+  # Runs "lvremove -ff <vg>; vgremove -fy <vg>; pvremove -fy <pv>" for every device found to be a physical volume.
+- name: Clear GlusterFS storage device contents
+  shell: "{% for line in item.stdout_lines %}{% set fields = line.split() %}{% if fields | count > 1 %}lvremove -ff {{ fields[1] }}; vgremove -fy {{ fields[1] }}; {% endif %}pvremove -fy {{ fields[0] }}; {% endfor %}"
+  delegate_to: "{{ item.item }}"
+  with_items: "{{ devices_info.results }}"
+  register: clear_devices
+  until:
+  - "'contains a filesystem in use' not in clear_devices.stderr"
+  delay: 1
+  retries: 30
+  when:
+  - glusterfs_wipe
+  - item.stdout_lines | count > 0
+
+- name: Label GlusterFS nodes
+  oc_label:
+    name: "{{ hostvars[item].openshift.node.nodename }}"
+    kind: node
+    state: add
+    labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
+  with_items: "{{ glusterfs_nodes | default([]) }}"
+
+- name: Copy GlusterFS DaemonSet template
+  copy:
+    src: "{{ openshift.common.examples_content_version }}/glusterfs-template.yml"
+    dest: "{{ mktemp.stdout }}/glusterfs-template.yml"
+
+- name: Create GlusterFS template
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: template
+    name: "glusterfs"
+    state: present
+    files:
+    - "{{ mktemp.stdout }}/glusterfs-template.yml"
+
+- name: Deploy GlusterFS pods
+  oc_process:
+    namespace: "{{ glusterfs_namespace }}"
+    template_name: "glusterfs"
+    create: True
+    params:
+      IMAGE_NAME: "{{ glusterfs_image }}"
+      IMAGE_VERSION: "{{ glusterfs_version }}"
+      NODE_LABELS: "{{ glusterfs_nodeselector }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
+
+- name: Wait for GlusterFS pods
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: pod
+    state: list
+    selector: "glusterfs={{ glusterfs_name }}-pod"
+  register: glusterfs_pods
+  until:
+  - "glusterfs_pods.results.results[0]['items'] | count > 0"
+  # There must be as many pods with 'Ready' staus  True as there are nodes expecting those pods
+  - "glusterfs_pods.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == glusterfs_nodes | count"
+  delay: 10
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"

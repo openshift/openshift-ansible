@@ -50,22 +50,19 @@ from ansible.module_utils.basic import AnsibleModule
 
 # -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: doc/process -*- -*- -*-
+# -*- -*- -*- Begin included fragment: doc/storageclass -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
-module: oc_process
-short_description: Module to process openshift templates
+module: oc_storageclass
+short_description: Create, modify, and idempotently manage openshift storageclasses.
 description:
-  - Process openshift templates programmatically.
+  - Manage openshift storageclass objects programmatically.
 options:
   state:
     description:
-    - State has a few different meanings when it comes to process.
-    - state: present - This state runs an `oc process <template>`.  When used in
-    - conjunction with 'create: True' the process will be piped to | oc create -f
-    - state: absent - will remove a template
-    - state: list - will perform an `oc get template <template_name>`
+    - State represents whether to create, modify, delete, or list
+    required: False
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
@@ -81,40 +78,35 @@ options:
     required: false
     default: False
     aliases: []
-  template_name:
+  name:
     description:
-    - Name of the openshift template that is being processed.
+    - Name of the object that is being queried.
     required: false
     default: None
     aliases: []
-  namespace:
+  provisioner:
     description:
-    - The namespace where the template lives.
+    - Any annotations to add to the storageclass
     required: false
-    default: default
+    default: 'aws-ebs'
     aliases: []
-  content:
+  default_storage_class:
     description:
-    - Template content that will be processed.
+    - Whether or not this is the default storage class
     required: false
-    default: None
-    aliases: []
-  params:
-    description:
-    - A list of parameters that will be inserted into the template.
-    required: false
-    default: None
-    aliases: []
-  create:
-    description:
-    - Whether or not to create the template after being processed. e.g.  oc process | oc create -f -
-    required: False
     default: False
     aliases: []
-  reconcile:
+  parameters:
     description:
-    - Whether or not to attempt to determine if there are updates or changes in the incoming template.
-    default: true
+    - A dictionary with the parameters to configure the storageclass.  This will be based on provisioner
+    required: false
+    default: None
+    aliases: []
+  api_version:
+    description:
+    - The api version.
+    required: false
+    default: v1
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -122,19 +114,29 @@ extends_documentation_fragment: []
 '''
 
 EXAMPLES = '''
-- name: process the cloud volume provisioner template with variables
-  oc_process:
-    namespace: openshift-infra
-    template_name: online-volume-provisioner
-    create: True
-    params:
-      PLAT: rhel7
-  register: processout
+- name: get storageclass
   run_once: true
-- debug: var=processout
+  oc_storageclass:
+    name: gp2
+    state: list
+  register: registry_sc_out
+
+- name: create the storageclass
+  oc_storageclass:
+  run_once: true
+    name: gp2
+    parameters:
+      type: gp2
+      encrypted: 'true'
+      kmsKeyId: '<full kms key arn>'
+    provisioner: aws-ebs
+    default_storage_class: False
+  register: sc_out
+  notify:
+  - restart openshift master services
 '''
 
-# -*- -*- -*- End included fragment: doc/process -*- -*- -*-
+# -*- -*- -*- End included fragment: doc/storageclass -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
 
@@ -1415,223 +1417,268 @@ class OpenShiftCLIConfig(object):
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
-# -*- -*- -*- Begin included fragment: class/oc_process.py -*- -*- -*-
+# -*- -*- -*- Begin included fragment: lib/storageclass.py -*- -*- -*-
 
 
 # pylint: disable=too-many-instance-attributes
-class OCProcess(OpenShiftCLI):
-    ''' Class to wrap the oc command line tools '''
-
-    # pylint allows 5. we need 6
+class StorageClassConfig(object):
+    ''' Handle service options '''
     # pylint: disable=too-many-arguments
     def __init__(self,
-                 namespace,
-                 tname=None,
-                 params=None,
-                 create=False,
-                 kubeconfig='/etc/origin/master/admin.kubeconfig',
-                 tdata=None,
-                 verbose=False):
-        ''' Constructor for OpenshiftOC '''
-        super(OCProcess, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose)
-        self.name = tname
-        self.data = tdata
-        self.params = params
-        self.create = create
-        self._template = None
+                 name,
+                 provisioner,
+                 parameters=None,
+                 annotations=None,
+                 default_storage_class="false",
+                 api_version='v1',
+                 kubeconfig='/etc/origin/master/admin.kubeconfig'):
+        ''' constructor for handling storageclass options '''
+        self.name = name
+        self.parameters = parameters
+        self.annotations = annotations
+        self.provisioner = provisioner
+        self.api_version = api_version
+        self.default_storage_class = str(default_storage_class).lower()
+        self.kubeconfig = kubeconfig
+        self.data = {}
 
-    @property
-    def template(self):
-        '''template property'''
-        if self._template is None:
-            results = self._process(self.name, False, self.params, self.data)
-            if results['returncode'] != 0:
-                raise OpenShiftCLIError('Error processing template [%s]: %s' %(self.name, results))
-            self._template = results['results']['items']
+        self.create_dict()
 
-        return self._template
+    def create_dict(self):
+        ''' instantiates a storageclass dict '''
+        self.data['apiVersion'] = self.api_version
+        self.data['kind'] = 'StorageClass'
+        self.data['metadata'] = {}
+        self.data['metadata']['name'] = self.name
 
-    def get(self):
-        '''get the template'''
-        results = self._get('template', self.name)
-        if results['returncode'] != 0:
-            # Does the template exist??
-            if 'not found' in results['stderr']:
-                results['returncode'] = 0
-                results['exists'] = False
-                results['results'] = []
+        self.data['metadata']['annotations'] = {}
+        if self.annotations is not None:
+            self.data['metadata']['annotations'] = self.annotations
 
-        return results
+        self.data['metadata']['annotations']['storageclass.beta.kubernetes.io/is-default-class'] = \
+                self.default_storage_class
 
-    def delete(self, obj):
-        '''delete a resource'''
-        return self._delete(obj['kind'], obj['metadata']['name'])
+        self.data['provisioner'] = self.provisioner
 
-    def create_obj(self, obj):
-        '''create a resource'''
-        return self._create_from_content(obj['metadata']['name'], obj)
+        self.data['parameters'] = {}
+        if self.parameters is not None:
+            self.data['parameters'].update(self.parameters)
 
-    def process(self, create=None):
-        '''process a template'''
-        do_create = False
-        if create != None:
-            do_create = create
+        # default to aws if no params were passed
         else:
-            do_create = self.create
+            self.data['parameters']['type'] = 'gp2'
 
-        return self._process(self.name, do_create, self.params, self.data)
+
+
+# pylint: disable=too-many-instance-attributes,too-many-public-methods
+class StorageClass(Yedit):
+    ''' Class to model the oc storageclass object '''
+    annotations_path = "metadata.annotations"
+    provisioner_path = "provisioner"
+    parameters_path = "parameters"
+    kind = 'StorageClass'
+
+    def __init__(self, content):
+        '''StorageClass constructor'''
+        super(StorageClass, self).__init__(content=content)
+
+    def get_annotations(self):
+        ''' get a list of ports '''
+        return self.get(StorageClass.annotations_path) or {}
+
+    def get_parameters(self):
+        ''' get the service selector'''
+        return self.get(StorageClass.parameters_path) or {}
+
+# -*- -*- -*- End included fragment: lib/storageclass.py -*- -*- -*-
+
+# -*- -*- -*- Begin included fragment: class/oc_storageclass.py -*- -*- -*-
+
+# pylint: disable=too-many-instance-attributes
+class OCStorageClass(OpenShiftCLI):
+    ''' Class to wrap the oc command line tools '''
+    kind = 'storageclass'
+
+    # pylint allows 5
+    # pylint: disable=too-many-arguments
+    def __init__(self,
+                 config,
+                 verbose=False):
+        ''' Constructor for OCStorageClass '''
+        super(OCStorageClass, self).__init__(None, kubeconfig=config.kubeconfig, verbose=verbose)
+        self.config = config
+        self.storage_class = None
 
     def exists(self):
-        '''return whether the template exists'''
-        # Always return true if we're being passed template data
-        if self.data:
+        ''' return whether a storageclass exists'''
+        if self.storage_class:
             return True
-        t_results = self._get('template', self.name)
 
-        if t_results['returncode'] != 0:
-            # Does the template exist??
-            if 'not found' in t_results['stderr']:
-                return False
-            else:
-                raise OpenShiftCLIError('Something went wrong. %s' % t_results)
+        return False
 
-        return True
+    def get(self):
+        '''return storageclass '''
+        result = self._get(self.kind, self.config.name)
+        if result['returncode'] == 0:
+            self.storage_class = StorageClass(content=result['results'][0])
+        elif '\"%s\" not found' % self.config.name in result['stderr']:
+            result['returncode'] = 0
+            result['results'] = [{}]
+
+        return result
+
+    def delete(self):
+        '''delete the object'''
+        return self._delete(self.kind, self.config.name)
+
+    def create(self):
+        '''create the object'''
+        return self._create_from_content(self.config.name, self.config.data)
+
+    def update(self):
+        '''update the object'''
+        # parameters are currently unable to be updated.  need to delete and recreate
+        self.delete()
+        # pause here and attempt to wait for delete.
+        # Better option would be to poll
+        import time
+        time.sleep(5)
+        return self.create()
 
     def needs_update(self):
-        '''attempt to process the template and return it for comparison with oc objects'''
-        obj_results = []
-        for obj in self.template:
+        ''' verify an update is needed '''
+        # check if params have updated
+        if self.storage_class.get_parameters() != self.config.parameters:
+            return True
 
-            # build a list of types to skip
-            skip = []
+        for anno_key, anno_value in self.storage_class.get_annotations().items():
+            if 'is-default-class' in anno_key and anno_value != self.config.default_storage_class:
+                return True
 
-            if obj['kind'] == 'ServiceAccount':
-                skip.extend(['secrets', 'imagePullSecrets'])
-            if obj['kind'] == 'BuildConfig':
-                skip.extend(['lastTriggeredImageID'])
-            if obj['kind'] == 'ImageStream':
-                skip.extend(['generation'])
-            if obj['kind'] == 'DeploymentConfig':
-                skip.extend(['lastTriggeredImage'])
+        return False
 
-            # fetch the current object
-            curr_obj_results = self._get(obj['kind'], obj['metadata']['name'])
-            if curr_obj_results['returncode'] != 0:
-                # Does the template exist??
-                if 'not found' in curr_obj_results['stderr']:
-                    obj_results.append((obj, True))
-                    continue
-
-            # check the generated object against the existing object
-            if not Utils.check_def_equal(obj, curr_obj_results['results'][0], skip_keys=skip):
-                obj_results.append((obj, True))
-                continue
-
-            obj_results.append((obj, False))
-
-        return obj_results
-
-    # pylint: disable=too-many-return-statements
     @staticmethod
+    # pylint: disable=too-many-return-statements,too-many-branches
+    # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
         '''run the ansible idempotent code'''
 
-        ocprocess = OCProcess(params['namespace'],
-                              params['template_name'],
-                              params['params'],
-                              params['create'],
-                              kubeconfig=params['kubeconfig'],
-                              tdata=params['content'],
-                              verbose=params['debug'])
+        rconfig = StorageClassConfig(params['name'],
+                                     provisioner="kubernetes.io/{}".format(params['provisioner']),
+                                     parameters=params['parameters'],
+                                     annotations=params['annotations'],
+                                     api_version="storage.k8s.io/{}".format(params['api_version']),
+                                     default_storage_class=params.get('default_storage_class', 'false'),
+                                     kubeconfig=params['kubeconfig'],
+                                    )
+
+        oc_sc = OCStorageClass(rconfig, verbose=params['debug'])
 
         state = params['state']
 
-        api_rval = ocprocess.get()
+        api_rval = oc_sc.get()
 
+        #####
+        # Get
+        #####
         if state == 'list':
-            if api_rval['returncode'] != 0:
-                return {"failed": True, "msg" : api_rval}
+            return {'changed': False, 'results': api_rval['results'], 'state': 'list'}
 
-            return {"changed" : False, "results": api_rval, "state": state}
+        ########
+        # Delete
+        ########
+        if state == 'absent':
+            if oc_sc.exists():
 
-        elif state == 'present':
-            if check_mode and params['create']:
-                return {"changed": True, 'msg': "CHECK_MODE: Would have processed template."}
+                if check_mode:
+                    return {'changed': True, 'msg': 'Would have performed a delete.'}
 
-            if not ocprocess.exists() or not params['reconcile']:
-            #FIXME: this code will never get run in a way that succeeds when
-            #       module.params['reconcile'] is true. Because oc_process doesn't
-            #       create the actual template, the check of ocprocess.exists()
-            #       is meaningless. Either it's already here and this code
-            #       won't be run, or this code will fail because there is no
-            #       template available for oc process to use. Have we conflated
-            #       the template's existence with the existence of the objects
-            #       it describes?
+                api_rval = oc_sc.delete()
 
-            # Create it here
-                api_rval = ocprocess.process()
+                return {'changed': True, 'results': api_rval, 'state': 'absent'}
+
+            return {'changed': False, 'state': 'absent'}
+
+        if state == 'present':
+            ########
+            # Create
+            ########
+            if not oc_sc.exists():
+
+                if check_mode:
+                    return {'changed': True, 'msg': 'Would have performed a create.'}
+
+                # Create it here
+                api_rval = oc_sc.create()
+
                 if api_rval['returncode'] != 0:
-                    return {"failed": True, "msg": api_rval}
+                    return {'failed': True, 'msg': api_rval}
 
-                if params['create']:
-                    return {"changed": True, "results": api_rval, "state": state}
+                # return the created object
+                api_rval = oc_sc.get()
 
-                return {"changed": False, "results": api_rval, "state": state}
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
-        # verify results
-        update = False
-        rval = []
-        all_results = ocprocess.needs_update()
-        for obj, status in all_results:
-            if status:
-                ocprocess.delete(obj)
-                results = ocprocess.create_obj(obj)
-                results['kind'] = obj['kind']
-                rval.append(results)
-                update = True
+                return {'changed': True, 'results': api_rval, 'state': 'present'}
 
-        if not update:
-            return {"changed": update, "results": api_rval, "state": state}
+            ########
+            # Update
+            ########
+            if oc_sc.needs_update():
+                api_rval = oc_sc.update()
 
-        for cmd in rval:
-            if cmd['returncode'] != 0:
-                return {"failed": True, "changed": update, "msg": rval, "state": state}
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
 
-        return {"changed": update, "results": rval, "state": state}
+                # return the created object
+                api_rval = oc_sc.get()
+
+                if api_rval['returncode'] != 0:
+                    return {'failed': True, 'msg': api_rval}
+
+                return {'changed': True, 'results': api_rval, 'state': 'present'}
+
+            return {'changed': False, 'results': api_rval, 'state': 'present'}
 
 
-# -*- -*- -*- End included fragment: class/oc_process.py -*- -*- -*-
+        return {'failed': True,
+                'changed': False,
+                'msg': 'Unknown state passed. %s' % state,
+                'state': 'unknown'}
 
-# -*- -*- -*- Begin included fragment: ansible/oc_process.py -*- -*- -*-
+# -*- -*- -*- End included fragment: class/oc_storageclass.py -*- -*- -*-
 
+# -*- -*- -*- Begin included fragment: ansible/oc_storageclass.py -*- -*- -*-
 
 def main():
     '''
-    ansible oc module for processing templates
+    ansible oc module for storageclass
     '''
 
     module = AnsibleModule(
         argument_spec=dict(
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
-            state=dict(default='present', type='str', choices=['present', 'list']),
+            state=dict(default='present', type='str', choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
-            namespace=dict(default='default', type='str'),
-            template_name=dict(default=None, type='str'),
-            content=dict(default=None, type='str'),
-            params=dict(default=None, type='dict'),
-            create=dict(default=False, type='bool'),
-            reconcile=dict(default=True, type='bool'),
+            name=dict(default=None, type='str'),
+            annotations=dict(default=None, type='dict'),
+            parameters=dict(default=None, type='dict'),
+            provisioner=dict(required=True, type='str', choices=['aws-ebs', 'gce-pd', 'glusterfs', 'cinder']),
+            api_version=dict(default='v1', type='str'),
+            default_storage_class=dict(default="false", type='str'),
         ),
         supports_check_mode=True,
     )
 
-    rval = OCProcess.run_ansible(module.params, module.check_mode)
+    rval = OCStorageClass.run_ansible(module.params, module.check_mode)
     if 'failed' in rval:
-        module.fail_json(**rval)
+        return module.fail_json(**rval)
 
-    module.exit_json(**rval)
+    return module.exit_json(**rval)
+
 
 if __name__ == '__main__':
     main()
 
-# -*- -*- -*- End included fragment: ansible/oc_process.py -*- -*- -*-
+# -*- -*- -*- End included fragment: ansible/oc_storageclass.py -*- -*- -*-

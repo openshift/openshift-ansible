@@ -10,7 +10,7 @@ class OCObject(OpenShiftCLI):
     def __init__(self,
                  kind,
                  namespace,
-                 rname=None,
+                 name=None,
                  selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False,
@@ -19,21 +19,26 @@ class OCObject(OpenShiftCLI):
         super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
-        self.name = rname
+        self.name = name
         self.selector = selector
 
     def get(self):
         '''return a kind by name '''
-        results = self._get(self.kind, rname=self.name, selector=self.selector)
-        if results['returncode'] != 0 and 'stderr' in results and \
-           '\"%s\" not found' % self.name in results['stderr']:
+        results = self._get(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
+                '\"{}\" not found'.format(self.name) in results['stderr']):
             results['returncode'] = 0
 
         return results
 
     def delete(self):
-        '''return all pods '''
-        return self._delete(self.kind, self.name)
+        '''delete the object'''
+        results = self._delete(self.kind, name=self.name, selector=self.selector)
+        if (results['returncode'] != 0 and 'stderr' in results and
+                '\"{}\" not found'.format(self.name) in results['stderr']):
+            results['returncode'] = 0
+
+        return results
 
     def create(self, files=None, content=None):
         '''
@@ -45,7 +50,16 @@ class OCObject(OpenShiftCLI):
         if files:
             return self._create(files[0])
 
-        content['data'] = yaml.dump(content['data'])
+        # pylint: disable=no-member
+        # The purpose of this change is twofold:
+        # - we need a check to only use the ruamel specific dumper if ruamel is loaded
+        # - the dumper or the flow style change is needed so openshift is able to parse
+        # the resulting yaml, at least until gopkg.in/yaml.v2 is updated
+        if hasattr(yaml, 'RoundTripDumper'):
+            content['data'] = yaml.dump(content['data'], Dumper=yaml.RoundTripDumper)
+        else:
+            content['data'] = yaml.safe_dump(content['data'], default_flow_style=False)
+
         content_file = Utils.create_tmp_files_from_contents(content)[0]
 
         return self._create(content_file['path'])
@@ -109,24 +123,31 @@ class OCObject(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': 'list'}
-
-        if not params['name']:
-            return {'failed': True, 'msg': 'Please specify a name when state is absent|present.'}  # noqa: E501
+            return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
         # Delete
         ########
         if state == 'absent':
-            if not Utils.exists(api_rval['results'], params['name']):
-                return {'changed': False, 'state': 'absent'}
+            # verify its not in our results
+            if (params['name'] is not None or params['selector'] is not None) and \
+               (len(api_rval['results']) == 0 or \
+               ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
+                return {'changed': False, 'state': state}
 
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed a delete'}
 
             api_rval = ocobj.delete()
 
-            return {'changed': True, 'results': api_rval, 'state': 'absent'}
+            if api_rval['returncode'] != 0:
+                return {'failed': True, 'msg': api_rval}
+
+            return {'changed': True, 'results': api_rval, 'state': state}
+
+        # create/update: Must define a name beyond this point
+        if not params['name']:
+            return {'failed': True, 'msg': 'Please specify a name when state is present.'}
 
         if state == 'present':
             ########
@@ -152,7 +173,7 @@ class OCObject(OpenShiftCLI):
                 if params['files'] and params['delete_after']:
                     Utils.cleanup(params['files'])
 
-                return {'changed': True, 'results': api_rval, 'state': "present"}
+                return {'changed': True, 'results': api_rval, 'state': state}
 
             ########
             # Update
@@ -167,7 +188,7 @@ class OCObject(OpenShiftCLI):
                 if params['files'] and params['delete_after']:
                     Utils.cleanup(params['files'])
 
-                return {'changed': False, 'results': api_rval['results'][0], 'state': "present"}
+                return {'changed': False, 'results': api_rval['results'][0], 'state': state}
 
             if check_mode:
                 return {'changed': True, 'msg': 'CHECK_MODE: Would have performed an update.'}
@@ -186,4 +207,4 @@ class OCObject(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'failed': True, 'msg': api_rval}
 
-            return {'changed': True, 'results': api_rval, 'state': "present"}
+            return {'changed': True, 'results': api_rval, 'state': state}
