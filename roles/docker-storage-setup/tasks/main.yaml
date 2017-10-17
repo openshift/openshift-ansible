@@ -1,4 +1,7 @@
 ---
+- name: stop docker
+  service: name=docker state=stopped
+
 - block:
     - name: create the docker-storage config file
       template:
@@ -7,7 +10,6 @@
         owner: root
         group: root
         mode: 0644
-
   when:
     - ansible_distribution_version | version_compare('7.4', '>=')
     - ansible_distribution == "RedHat"
@@ -20,7 +22,6 @@
         owner: root
         group: root
         mode: 0644
-
   when:
     - ansible_distribution_version | version_compare('7.4', '<')
     - ansible_distribution == "RedHat"
