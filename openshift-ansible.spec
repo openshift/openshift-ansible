@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.134
+Version:        3.5.135
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 17 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.135-1
+- bug 1493820. Use DC name for searchguard index (jcantril@redhat.com)
+- Ensure controllerConfig.serviceServingCert is correctly set during upgrade.
+  (abutcher@redhat.com)
+
 * Thu Oct 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.134-1
 - Ensure docker service status actually changes (mgugino@redhat.com)
 
