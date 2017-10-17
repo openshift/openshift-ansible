@@ -90,7 +90,12 @@ class ActionModule(ActionBase):
                     "duplicate check name '{}' in: '{}' and '{}'"
                     "".format(name, full_class_name(cls), full_class_name(other_cls))
                 )
-            known_checks[name] = cls(execute_module=self._execute_module, tmp=tmp, task_vars=task_vars)
+            known_checks[name] = cls(
+                execute_module=self._execute_module,
+                tmp=tmp,
+                task_vars=task_vars,
+                templar=self._templar
+            )
         return known_checks
 
 

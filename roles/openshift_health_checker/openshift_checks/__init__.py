@@ -53,10 +53,13 @@ class OpenShiftCheck(object):
     This is stored so that it can be invoked in subclasses via check.execute_module("name", args)
     which provides the check's stored task_vars and tmp.
     """
-
-    def __init__(self, execute_module=None, task_vars=None, tmp=None):
+    # pylint: disable=too-many-arguments
+    def __init__(self, execute_module=None, task_vars=None, tmp=None, templar=None):
+        # store a method for executing ansible modules from the check
         self._execute_module = execute_module
         self.task_vars = task_vars or {}
+        # We may need to template some task_vars
+        self._templar = templar
         self.tmp = tmp
         # mainly for testing purposes; see execute_module_with_retries
         self._module_retries = 3
