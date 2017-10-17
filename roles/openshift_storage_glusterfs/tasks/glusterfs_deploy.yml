@@ -78,7 +78,7 @@
     - "{{ mktemp.stdout }}/glusterfs-template.yml"
 
 - name: Deploy GlusterFS pods 
-  shell: 'oc process glusterfs -p IMAGE_NAME="{{ glusterfs_image }}" -p IMAGE_VERSION="{{ glusterfs_version }}" -p CLUSTER_NAME="{{ glusterfs_name }}" NODE_LABELS="{{ glusterfs_nodeselector }}" | oc create -n "{{ glusterfs_namespace }}" -f - '
+  shell: 'oc process glusterfs -p IMAGE_NAME="{{ glusterfs_image }}" -p IMAGE_VERSION="{{ glusterfs_version }}" -p CLUSTER_NAME="{{ glusterfs_name }}" NODE_LABELS="{{ glusterfs_nodeselector }}" -n "{{ glusterfs_namespace }}" | oc create -f - '
 
 - name: Wait for GlusterFS pods
   oc_obj:
