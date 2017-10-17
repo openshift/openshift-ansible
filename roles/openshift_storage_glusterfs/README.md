@@ -99,6 +99,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_ssh_user      | 'root'                  | SSH user for external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_sudo      | False                   | Whether to sudo (if non-root user) for SSH to external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_keyfile   | Undefined               | Path to a private key file for use with SSH connections to external GlusterFS nodes via native heketi **NOTE:** This must be an absolute path
+| openshift_storage_glusterfs_heketi_fstab         | '/var/lib/heketi/fstab' | When heketi is native, sets the path to the fstab file on the GlusterFS nodes to update on LVM volume mounts, changes to '/etc/fstab/' when the heketi executor is 'ssh' **NOTE:** This should not need to be changed
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 
 Each role variable also has a corresponding variable to optionally configure a
