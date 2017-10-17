@@ -28,10 +28,24 @@
     - "{{ __tsb_template_file }}"
     - "{{ __tsb_rbac_file }}"
     - "{{ __tsb_broker_file }}"
+    - "{{ __tsb_config_file }}"
+
+- yedit:
+    src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
+    key: templateNamespaces
+    value: "{{ openshift_template_service_broker_namespaces }}"
+    value_type: list
+
+- slurp:
+    src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
+  register: config
 
 - name: Apply template file
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" --param API_SERVER_CONFIG="{{ lookup('file', __tsb_files_location ~ '/' ~ __tsb_config_file) }}" --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}" | kubectl apply -f -
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
+    --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
+    --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
+    | kubectl apply -f -
 
 # reconcile with rbac
 - name: Reconcile with RBAC file
