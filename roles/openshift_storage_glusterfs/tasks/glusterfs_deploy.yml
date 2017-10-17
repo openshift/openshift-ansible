@@ -79,7 +79,7 @@
 
 - name: Copy GlusterFS DaemonSet deploy script
   copy:
-    src: "{{ openshift.common.examples_content_version }}/gluster-pods-deployer.sh.j2"
+    src: "{{ openshift.common.examples_content_version }}/gluster-pods-deployer.sh"
     dest: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
 
 - name: Deploy GlusterFS pods 
