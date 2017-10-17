@@ -17,6 +17,17 @@
 
 - include: determine_version.yaml
 
+- name: Set default image variables based on deployment_type
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+
+- name: Set elasticsearch_prefix image facts
+  set_fact:
+    openshift_logging_elasticsearch_proxy_image_prefix: "{{ openshift_logging_elasticsearch_proxy_image_prefix | default(__openshift_logging_elasticsearch_proxy_image_prefix) }}"
+    openshift_logging_elasticsearch_proxy_image_version: "{{ openshift_logging_elasticsearch_proxy_image_version | default(__openshift_logging_elasticsearch_proxy_image_version) }}"
+
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -52,7 +63,7 @@
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
   when:
-  - openshift_logging_image_pull_secret == ''
+    - openshift_logging_image_pull_secret == ''
 
 # rolebinding reader
 - copy:
@@ -66,7 +77,7 @@
     kind: clusterrole
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     files:
-    - "{{ tempdir }}/rolebinding-reader.yml"
+      - "{{ tempdir }}/rolebinding-reader.yml"
     delete_after: true
 
 # SA roles
@@ -107,8 +118,8 @@
 - fail:
     msg: "There was an error creating the logging-metrics-role and binding: {{prometheus_out}}"
   when:
-  - "prometheus_out.stderr | length > 0"
-  - "'already exists' not in prometheus_out.stderr"
+    - "prometheus_out.stderr | length > 0"
+    - "'already exists' not in prometheus_out.stderr"
 
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
@@ -120,8 +131,8 @@
     roleRef:
       name: view
     subjects:
-    - kind: ServiceAccount
-      name: aggregated-logging-elasticsearch
+      - kind: ServiceAccount
+        name: aggregated-logging-elasticsearch
   changed_when: no
 
 - name: Set logging-elasticsearch-view-role role
@@ -131,18 +142,18 @@
     kind: rolebinding
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     files:
-    - "{{ tempdir }}/logging-elasticsearch-view-role.yaml"
+      - "{{ tempdir }}/logging-elasticsearch-view-role.yaml"
     delete_after: true
 
 # configmap
 - assert:
     that:
-    - openshift_logging_elasticsearch_kibana_index_mode in __kibana_index_modes
+      - openshift_logging_elasticsearch_kibana_index_mode in __kibana_index_modes
     msg: "The openshift_logging_elasticsearch_kibana_index_mode '{{ openshift_logging_elasticsearch_kibana_index_mode  }}' only supports one of: {{ __kibana_index_modes | join(', ') }}"
 
 - assert:
     that:
-    - "{{ openshift_logging_es_log_appenders | length > 0 }}"
+      - "{{ openshift_logging_es_log_appenders | length > 0 }}"
     msg: "The openshift_logging_es_log_appenders '{{ openshift_logging_es_log_appenders }}' has an unrecognized option and only supports the following as a list: {{ __es_log_appenders | join(', ') }}"
 
 - template:
@@ -194,22 +205,22 @@
     name: "logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     files:
-    - name: key
-      path: "{{ generated_certs_dir }}/logging-es.jks"
-    - name: truststore
-      path: "{{ generated_certs_dir }}/truststore.jks"
-    - name: searchguard.key
-      path: "{{ generated_certs_dir }}/elasticsearch.jks"
-    - name: searchguard.truststore
-      path: "{{ generated_certs_dir }}/truststore.jks"
-    - name: admin-key
-      path: "{{ generated_certs_dir }}/system.admin.key"
-    - name: admin-cert
-      path: "{{ generated_certs_dir }}/system.admin.crt"
-    - name: admin-ca
-      path: "{{ generated_certs_dir }}/ca.crt"
-    - name: admin.jks
-      path: "{{ generated_certs_dir }}/system.admin.jks"
+      - name: key
+        path: "{{ generated_certs_dir }}/logging-es.jks"
+      - name: truststore
+        path: "{{ generated_certs_dir }}/truststore.jks"
+      - name: searchguard.key
+        path: "{{ generated_certs_dir }}/elasticsearch.jks"
+      - name: searchguard.truststore
+        path: "{{ generated_certs_dir }}/truststore.jks"
+      - name: admin-key
+        path: "{{ generated_certs_dir }}/system.admin.key"
+      - name: admin-cert
+        path: "{{ generated_certs_dir }}/system.admin.crt"
+      - name: admin-ca
+        path: "{{ generated_certs_dir }}/ca.crt"
+      - name: admin.jks
+        path: "{{ generated_certs_dir }}/system.admin.jks"
 
 # services
 - name: Set logging-{{ es_component }}-cluster service
@@ -223,7 +234,7 @@
     labels:
       logging-infra: 'support'
     ports:
-    - port: 9300
+      - port: 9300
 
 - name: Set logging-{{ es_component }} service
   oc_service:
@@ -236,8 +247,8 @@
     labels:
       logging-infra: 'support'
     ports:
-    - port: 9200
-      targetPort: "restapi"
+      - port: 9200
+        targetPort: "restapi"
 
 - name: Set logging-{{ es_component}}-prometheus service
   oc_service:
@@ -247,9 +258,9 @@
     labels:
       logging-infra: 'support'
     ports:
-    - name: proxy
-      port: 443
-      targetPort: 4443
+      - name: proxy
+        port: 443
+        targetPort: 4443
     selector:
       component: "{{ es_component }}-prometheus"
       provider: openshift
@@ -277,46 +288,46 @@
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
 - when:
-  - logging_elasticsearch_pvc.results.stderr is defined
-  - openshift_logging_elasticsearch_storage_type == "pvc"
+    - logging_elasticsearch_pvc.results.stderr is defined
+    - openshift_logging_elasticsearch_storage_type == "pvc"
   block:
-  # storageclasses are used by default but if static then disable
-  # storageclasses with the storageClassName set to "" in pvc.j2
-  - name: Creating ES storage template - static
-    template:
-      src: pvc.j2
-      dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
-    vars:
-      obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-      size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
-      access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
-      pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
-      storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
-    when:
-    - not openshift_logging_elasticsearch_pvc_dynamic | bool
+    # storageclasses are used by default but if static then disable
+    # storageclasses with the storageClassName set to "" in pvc.j2
+    - name: Creating ES storage template - static
+      template:
+        src: pvc.j2
+        dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
+      vars:
+        obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+        size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
+        access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
+        pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+        storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
+      when:
+        - not openshift_logging_elasticsearch_pvc_dynamic | bool
 
-  # Storageclasses are used by default if configured
-  - name: Creating ES storage template - dynamic
-    template:
-      src: pvc.j2
-      dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
-    vars:
-      obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-      size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
-      access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
-      pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
-    when:
-    - openshift_logging_elasticsearch_pvc_dynamic | bool
+    # Storageclasses are used by default if configured
+    - name: Creating ES storage template - dynamic
+      template:
+        src: pvc.j2
+        dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
+      vars:
+        obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+        size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
+        access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
+        pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+      when:
+        - openshift_logging_elasticsearch_pvc_dynamic | bool
 
-  - name: Set ES storage
-    oc_obj:
-      state: present
-      kind: pvc
-      name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-      files:
-      - "{{ tempdir }}/templates/logging-es-pvc.yml"
-      delete_after: true
+    - name: Set ES storage
+      oc_obj:
+        state: present
+        kind: pvc
+        name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+        namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+        files:
+          - "{{ tempdir }}/templates/logging-es-pvc.yml"
+        delete_after: true
 
 - set_fact:
     es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
@@ -337,6 +348,7 @@
     logging_component: elasticsearch
     deploy_name: "{{ es_deploy_name }}"
     image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch:{{ openshift_logging_elasticsearch_image_version }}"
+    proxy_image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
     es_cpu_limit: "{{ openshift_logging_elasticsearch_cpu_limit }}"
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
@@ -352,7 +364,7 @@
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     kind: dc
     files:
-    - "{{ tempdir }}/templates/logging-es-dc.yml"
+      - "{{ tempdir }}/templates/logging-es-dc.yml"
     delete_after: true
 
 - name: Retrieving the cert to use when generating secrets for the {{ es_component }} component
@@ -360,37 +372,37 @@
     src: "{{ generated_certs_dir }}/{{ item.file }}"
   register: key_pairs
   with_items:
-  - { name: "ca_file", file: "ca.crt" }
-  - { name: "es_key", file: "system.logging.es.key" }
-  - { name: "es_cert", file: "system.logging.es.crt" }
+    - { name: "ca_file", file: "ca.crt" }
+    - { name: "es_key", file: "system.logging.es.key" }
+    - { name: "es_cert", file: "system.logging.es.crt" }
   when: openshift_logging_es_allow_external | bool
 
 - set_fact:
     es_key: "{{ lookup('file', openshift_logging_es_key) | b64encode }}"
   when:
-  - openshift_logging_es_key | trim | length > 0
-  - openshift_logging_es_allow_external | bool
+    - openshift_logging_es_key | trim | length > 0
+    - openshift_logging_es_allow_external | bool
   changed_when: false
 
 - set_fact:
     es_cert: "{{ lookup('file', openshift_logging_es_cert) | b64encode  }}"
   when:
-  - openshift_logging_es_cert | trim | length > 0
-  - openshift_logging_es_allow_external | bool
+    - openshift_logging_es_cert | trim | length > 0
+    - openshift_logging_es_allow_external | bool
   changed_when: false
 
 - set_fact:
     es_ca: "{{ lookup('file', openshift_logging_es_ca_ext) | b64encode  }}"
   when:
-  - openshift_logging_es_ca_ext | trim | length > 0
-  - openshift_logging_es_allow_external | bool
+    - openshift_logging_es_ca_ext | trim | length > 0
+    - openshift_logging_es_allow_external | bool
   changed_when: false
 
 - set_fact:
     es_ca: "{{ key_pairs | entry_from_named_pair('ca_file') }}"
   when:
-  - es_ca is not defined
-  - openshift_logging_es_allow_external | bool
+    - es_ca is not defined
+    - openshift_logging_es_allow_external | bool
   changed_when: false
 
 - name: Generating Elasticsearch {{ es_component }} route template
@@ -421,7 +433,7 @@
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     kind: route
     files:
-    - "{{ tempdir }}/templates/logging-{{ es_component }}-route.yaml"
+      - "{{ tempdir }}/templates/logging-{{ es_component }}-route.yaml"
   when: openshift_logging_es_allow_external | bool
 
 ## Placeholder for migration when necessary ##
