@@ -64,7 +64,7 @@
   with_items: "{{ glusterfs_nodes | default([]) }}"
 
 - name: Copy GlusterFS DaemonSet template
-  copy:
+  template:
     src: "{{ openshift.common.examples_content_version }}/glusterfs-template.yml"
     dest: "{{ mktemp.stdout }}/glusterfs-template.yml"
 
@@ -78,7 +78,7 @@
     - "{{ mktemp.stdout }}/glusterfs-template.yml"
 
 - name: Copy GlusterFS DaemonSet deploy script
-  template:
+  copy:
     src: "{{ openshift.common.examples_content_version }}/gluster-pods-deployer.sh.j2"
     dest: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
 
