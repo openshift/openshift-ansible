@@ -84,7 +84,7 @@
     mode: '0750'
 
 - name: Deploy GlusterFS pods 
-  script: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
+  command: sh {{ mktemp.stdout }}/gluster-pods-deployer.sh
 
 - name: Wait for GlusterFS pods
   oc_obj:
