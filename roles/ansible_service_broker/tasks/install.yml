@@ -327,12 +327,12 @@
   oc_obj:
     name: ansible-service-broker
     state: present
-    kind: ServiceBroker
+    kind: ClusterServiceBroker
     content:
       path: /tmp/brokerout
       data:
         apiVersion: servicecatalog.k8s.io/v1beta1
-        kind: ServiceBroker
+        kind: ClusterServiceBroker
         metadata:
           name: ansible-service-broker
         spec:
