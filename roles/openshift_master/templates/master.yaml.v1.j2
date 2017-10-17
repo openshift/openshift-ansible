@@ -115,7 +115,7 @@ etcdStorageConfig:
   openShiftStorageVersion: v1
 imageConfig:
   format: {{ openshift.master.registry_url }}
-  latest: false
+  latest: {{ openshift_master_image_config_latest }}
 {% if 'image_policy_config' in openshift.master %}
 imagePolicyConfig:{{ openshift.master.image_policy_config | to_padded_yaml(level=1) }}
 {% endif %}
