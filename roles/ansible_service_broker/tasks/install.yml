@@ -231,20 +231,20 @@
                       value: /etc/ansible-service-broker/config.yaml
                   resources: {}
                   terminationMessagePath: /tmp/termination-log
-                readinessProbe:
-                  httpGet:
-                    port: 1338
-                    path: /healthz
-                    scheme: HTTPS
-                  initialDelaySeconds: 15
-                  timeoutSeconds: 1
-                livenessProbe:
-                  httpGet:
-                    port: 1338
-                    path: /healthz
-                    scheme: HTTPS
-                  initialDelaySeconds: 15
-                  timeoutSeconds: 1
+                  readinessProbe:
+                    httpGet:
+                      port: 1338
+                      path: /healthz
+                      scheme: HTTPS
+                    initialDelaySeconds: 15
+                    timeoutSeconds: 1
+                  livenessProbe:
+                    httpGet:
+                      port: 1338
+                      path: /healthz
+                      scheme: HTTPS
+                    initialDelaySeconds: 15
+                    timeoutSeconds: 1
 
                 - image: "{{ ansible_service_broker_etcd_image }}"
                   name: etcd
