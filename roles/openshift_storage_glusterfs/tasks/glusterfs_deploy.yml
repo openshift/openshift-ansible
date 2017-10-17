@@ -81,6 +81,7 @@
   template:
     src: "{{ openshift.common.examples_content_version }}/gluster-pods-deployer.sh.j2"
     dest: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
+    mode: '0750'
 
 - name: Deploy GlusterFS pods 
   script: "{{ mktemp.stdout }}/gluster-pods-deployer.sh"
