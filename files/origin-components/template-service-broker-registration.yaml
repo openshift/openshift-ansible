@@ -9,7 +9,7 @@ parameters:
   required: true
 objects:
 # register the tsb with the service catalog
-- apiVersion: servicecatalog.k8s.io/v1alpha1
+- apiVersion: servicecatalog.k8s.io/v1beta1
   kind: ServiceBroker
   metadata:
     name: template-service-broker

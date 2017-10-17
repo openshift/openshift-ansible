@@ -206,19 +206,6 @@ objects:
     name: service-catalog-controller
 
 - apiVersion: authorization.openshift.io/v1
-  kind: RoleBinding
-  metadata:
-    name: extension-apiserver-authentication-reader-binding
-    namespace: ${KUBE_SYSTEM_NAMESPACE}
-  roleRef:
-    name: extension-apiserver-authentication-reader
-    namespace: ${KUBE_SYSTEM_NAMESPACE}
-  subjects:
-  - kind: ServiceAccount
-    name: service-catalog-apiserver
-    namespace: kube-service-catalog
-
-- apiVersion: authorization.openshift.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: system:auth-delegator-binding

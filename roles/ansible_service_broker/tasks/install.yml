@@ -331,7 +331,7 @@
     content:
       path: /tmp/brokerout
       data:
-        apiVersion: servicecatalog.k8s.io/v1alpha1
+        apiVersion: servicecatalog.k8s.io/v1beta1
         kind: ServiceBroker
         metadata:
           name: ansible-service-broker
