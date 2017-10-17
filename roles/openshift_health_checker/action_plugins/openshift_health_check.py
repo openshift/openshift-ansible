@@ -101,7 +101,8 @@ class ActionModule(ActionBase):
                 execute_module=self._execute_module,
                 tmp=tmp,
                 task_vars=task_vars,
-                want_full_results=want_full_results
+                want_full_results=want_full_results,
+                templar=self._templar
             )
         return known_checks
 

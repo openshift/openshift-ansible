@@ -65,12 +65,15 @@ class OpenShiftCheck(object):
     If the check can gather logs, tarballs, etc., do so when True; but no need to spend
     the time if they're not wanted (won't be written to output directory).
     """
-
-    def __init__(self, execute_module=None, task_vars=None, tmp=None, want_full_results=False):
+    # pylint: disable=too-many-arguments
+    def __init__(self, execute_module=None, task_vars=None, tmp=None, want_full_results=False,
+                 templar=None):
         # store a method for executing ansible modules from the check
         self._execute_module = execute_module
         # the task variables and tmpdir passed into the health checker task
         self.task_vars = task_vars or {}
+        # We may need to template some task_vars
+        self._templar = templar
         self.tmp = tmp
         # a boolean for disabling the gathering of results (files, computations) that won't
         # actually be recorded/used
