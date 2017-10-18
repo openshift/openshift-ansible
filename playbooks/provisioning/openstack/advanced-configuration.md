@@ -107,7 +107,7 @@ Either way, find the `oc` binary and put it in your `PATH`.
 ### Logging in Using the Command Line
 
 
-```bash
+```
 oc login --insecure-skip-tls-verify=true https://master-0.openshift.example.com:8443 -u user -p password
 oc new-project test
 oc new-app --template=cakephp-mysql-example
