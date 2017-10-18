@@ -4,3 +4,7 @@
 # From 'infra-ansible'
 - src: https://github.com/redhat-cop/infra-ansible
   version: master
+
+# From 'openshift-ansible'
+- src: https://github.com/openshift/openshift-ansible
+  version: master

@@ -20,12 +20,6 @@
     src: heat_stack_server.yaml.j2
     dest: "{{ stack_template_pre.path }}/server.yaml"
 
-- name: generate HOT server w/o floating IPs template from jinja2 template
-  template:
-    src: heat_stack_server_nofloating.yaml.j2
-    dest: "{{ stack_template_pre.path }}/server_nofloating.yaml"
-  when: use_bastion|bool
-
 - name: generate user_data from jinja2 template
   template:
     src: user_data.j2

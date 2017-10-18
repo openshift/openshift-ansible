@@ -68,14 +68,44 @@ parameters:
     description: Subnet resource
 {% endif %}
 
+{% if openshift_use_flannel|default(False)|bool %}
+  attach_data_net:
+    type: boolean
+    default: false
+    label: Attach-data-net
+    description: A switch for data port connection
+
+  data_net:
+    type: string
+    default: ''
+    label: Net ID
+    description: Net resource
+
+{% if not provider_network %}
+  data_subnet:
+    type: string
+    default: ''
+    label: Subnet ID
+    description: Subnet resource
+{% endif %}
+{% endif %}
+
   secgrp:
     type: comma_delimited_list
     label: Security groups
     description: Security group resources
 
+  attach_float_net:
+    type: boolean
+    default: true
+
+    label: Attach-float-net
+    description: A switch for floating network port connection
+
 {% if not provider_network %}
   floating_network:
     type: string
+    default: ''
     label: Floating network
     description: Network to allocate floating IP from
 {% endif %}
@@ -133,6 +163,12 @@ outputs:
 {% endif %}
         - addr
 
+conditions:
+  no_floating: {not: { get_param: attach_float_net} }
+{% if openshift_use_flannel|default(False)|bool %}
+  no_data_subnet: {not: { get_param: attach_data_net} }
+{% endif %}
+
 resources:
 
   server:
@@ -143,10 +179,27 @@ resources:
       image:     { get_param: image }
       flavor:    { get_param: flavor }
       networks:
+{% if openshift_use_flannel|default(False)|bool %}
+        if:
+          - no_data_subnet
+{% if use_trunk_ports|default(false)|bool %}
+          - - port:  { get_attr: [trunk-port, port_id] }
+{% else %}
+          - - port:  { get_resource: port }
+{% endif %}
+{% if use_trunk_ports|default(false)|bool %}
+          - - port:  { get_attr: [trunk-port, port_id] }
+{% else %}
+          - - port:  { get_resource: port }
+            - port:  { get_resource: data_port }
+{% endif %}
+
+{% else %}
 {% if use_trunk_ports|default(false)|bool %}
         - port:  { get_attr: [trunk-port, port_id] }
 {% else %}
         - port:  { get_resource: port }
+{% endif %}
 {% endif %}
       user_data:
         get_file: user-data
@@ -179,8 +232,22 @@ resources:
 {% endif %}
       security_groups: { get_param: secgrp }
 
+{% if openshift_use_flannel|default(False)|bool %}
+  data_port:
+    type: OS::Neutron::Port
+    condition: { not: no_data_subnet }
+    properties:
+      network: { get_param: data_net }
+      port_security_enabled: false
+{% if not provider_network %}
+      fixed_ips:
+        - subnet: { get_param: data_subnet }
+{% endif %}
+{% endif %}
+
 {% if not provider_network %}
   floating-ip:
+    condition: { not: no_floating }
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: floating_network }

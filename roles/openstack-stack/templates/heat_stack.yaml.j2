@@ -71,6 +71,9 @@ outputs:
     value: { get_attr: [ dns, private_ip ] }
 {% endif %}
 
+conditions:
+  no_floating: {% if provider_network or use_bastion|bool %}true{% else %}false{% endif %}
+
 resources:
 
 {% if not provider_network %}
@@ -112,6 +115,22 @@ resources:
 {% for nameserver in dns_nameservers %}
         - {{ nameserver }}
 {% endfor %}
+
+{% if openshift_use_flannel|default(False)|bool %}
+  data_net:
+    type: OS::Neutron::Net
+    properties:
+      name: openshift-ansible-{{ stack_name }}-data-net
+      port_security_enabled: false
+
+  data_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name: openshift-ansible-{{ stack_name }}-data-subnet
+      network: { get_resource: data_net }
+      cidr: {{ osm_cluster_network_cidr|default('10.128.0.0/14') }}
+      gateway_ip: null
+{% endif %}
 
   router:
     type: OS::Neutron::Router
@@ -322,6 +341,12 @@ resources:
           protocol: tcp
           port_range_min: 9090
           port_range_max: 9090
+{% if openshift_use_flannel|default(False)|bool %}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 2379
+          port_range_max: 2379
+{% endif %}
 
   etcd-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -488,11 +513,7 @@ resources:
     properties:
       count: {{ num_etcd }}
       resource_def:
-{% if use_bastion|bool %}
-        type: server_nofloating.yaml
-{% else %}
         type: server.yaml
-{% endif %}
         properties:
           name:
             str_replace:
@@ -527,8 +548,13 @@ resources:
           secgrp:
             - { get_resource: {% if openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}etcd-secgrp{% endif %} }
             - { get_resource: common-secgrp }
-{% if not use_bastion|bool and not provider_network %}
-          floating_network: {{ external_network }}
+          floating_network:
+            if:
+              - no_floating
+              - null
+              - {{ external_network }}
+{% if use_bastion|bool or provider_network %}
+          attach_float_net: false
 {% endif %}
           volume_size: {{ etcd_volume_size }}
 {% if not provider_network %}
@@ -606,11 +632,7 @@ resources:
     properties:
       count: {{ num_masters }}
       resource_def:
-{% if use_bastion|bool %}
-        type: server_nofloating.yaml
-{% else %}
         type: server.yaml
-{% endif %}
         properties:
           name:
             str_replace:
@@ -641,6 +663,11 @@ resources:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: {{ stack_name }}
+{% if openshift_use_flannel|default(False)|bool %}
+          attach_data_net: true
+          data_net:    { get_resource: data_net }
+          data_subnet: { get_resource: data_subnet }
+{% endif %}
 {% endif %}
           secgrp:
 {% if openstack_flat_secgrp|default(False)|bool %}
@@ -653,8 +680,13 @@ resources:
 {% endif %}
 {% endif %}
             - { get_resource: common-secgrp }
-{% if not use_bastion|bool and not provider_network %}
-          floating_network: {{ external_network }}
+          floating_network:
+            if:
+              - no_floating
+              - null
+              - {{ external_network }}
+{% if use_bastion|bool or provider_network %}
+          attach_float_net: false
 {% endif %}
           volume_size: {{ master_volume_size }}
 {% if master_server_group_policies|length > 0 %}
@@ -673,11 +705,7 @@ resources:
       removal_policies:
       - resource_list: {{ nodes_to_remove }}
       resource_def:
-{% if use_bastion|bool %}
-        type: server_nofloating.yaml
-{% else %}
         type: server.yaml
-{% endif %}
         properties:
           name:
             str_replace:
@@ -713,12 +741,22 @@ resources:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: {{ stack_name }}
+{% if openshift_use_flannel|default(False)|bool %}
+          attach_data_net: true
+          data_net:    { get_resource: data_net }
+          data_subnet: { get_resource: data_subnet }
+{% endif %}
 {% endif %}
           secgrp:
             - { get_resource: {% if openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}node-secgrp{% endif %} }
             - { get_resource: common-secgrp }
-{% if not use_bastion|bool and not provider_network %}
-          floating_network: {{ external_network }}
+          floating_network:
+            if:
+              - no_floating
+              - null
+              - {{ external_network }}
+{% if use_bastion|bool or provider_network %}
+          attach_float_net: false
 {% endif %}
           volume_size: {{ node_volume_size }}
 {% if not provider_network %}
@@ -767,6 +805,11 @@ resources:
               template: openshift-ansible-cluster_id-net
               params:
                 cluster_id: {{ stack_name }}
+{% if openshift_use_flannel|default(False)|bool %}
+          attach_data_net: true
+          data_net:    { get_resource: data_net }
+          data_subnet: { get_resource: data_subnet }
+{% endif %}
 {% endif %}
           secgrp:
 # TODO(bogdando) filter only required node rules into infra-secgrp

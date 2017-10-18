@@ -243,6 +243,26 @@ via the public IP of the server. You can not send updates via the private
 IP yet. This forces the in-stack private server to have a floating IP.
 See also the [security notes](#security-notes)
 
+## Flannel networking
+
+In order to configure the
+[flannel networking](https://docs.openshift.com/container-platform/3.6/install_config/configuring_sdn.html#using-flannel),
+uncomment and adjust the appropriate `inventory/group_vars/OSEv3.yml` group vars.
+Note that the `osm_cluster_network_cidr` must not overlap with the default
+Docker bridge subnet of 172.17.0.0/16. Or you should change the docker0 default
+CIDR range otherwise. For example, by adding `--bip=192.168.2.1/24` to
+`DOCKER_NETWORK_OPTIONS` located in `/etc/sysconfig/docker-network`.
+
+Also note that the flannel network will be provisioned on a separate isolated Neutron
+subnet defined from `osm_cluster_network_cidr` and having ports security disabled.
+Use the `openstack_private_data_network_name` variable to define the network
+name for the heat stack resource.
+
+After the cluster deployment done, you should run an additional post installation
+step for flannel and docker iptables configuration:
+
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-install.yml
+
 ## Other configuration variables
 
 `openstack_ssh_public_key` is a Nova keypair - you can see your
@@ -608,23 +628,24 @@ The first infra node then becomes a bastion node as well and proxies access
 for future ansible commands. The post-provision step also configures Satellite,
 if requested, and DNS server, and ensures other OpenShift requirements to be met.
 
+
 ## Running Custom Post-Provision Actions
 
 A custom playbook can be run like this:
 
 ```
-ansible-playbook -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml
+ansible-playbook --private-key ~/.ssh/openshift -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml
 ```
 
 If you'd like to limit the run to one particular host, you can do so as follows:
 
 ```
-ansible-playbook -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml -l app-node-0.openshift.example.com
+ansible-playbook --private-key ~/.ssh/openshift -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml -l app-node-0.openshift.example.com
 ```
 
 You can also create your own custom playbook. Here are a few examples:
 
-#### Adding additional YUM repositories
+### Adding additional YUM repositories
 
 ```
 ---
@@ -648,9 +669,7 @@ This example runs against app nodes. The list of options include:
   - masters
   - infra_hosts
 
-
-
-#### Attaching additional RHN pools
+### Attaching additional RHN pools
 
 ```
 ---
@@ -669,12 +688,42 @@ This playbook runs against all cluster nodes. In order to help prevent slow conn
 problems, the task is retried 10 times in case of initial failure.
 Note that in order for this example to work in your deployment, your servers must use the RHEL image.
 
+### Adding extra Docker registry URLs
+
+This playbook is located in the [custom-actions](https://github.com/openshift/openshift-ansible-contrib/tree/master/playbooks/provisioning/openstack/custom-actions) directory.
+
+It adds URLs passed as arguments to the docker configuration program.
+Going into more detail, the configuration program (which is in the YAML format) is loaded into an ansible variable
+([lines 27-30](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml#L27-L30))
+and in its structure, `registries` and `insecure_registries` sections are expanded with the newly added items
+([lines 56-76](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml#L56-L76)).
+The new content is then saved into the original file
+([lines 78-82](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml#L78-L82))
+and docker is restarted.
+
+Example usage:
+```
+ansible-playbook -i <inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml  --extra-vars '{"registries": "reg1", "insecure_registries": ["ins_reg1","ins_reg2"]}'
+```
+
+### Adding extra CAs to the trust chain
+
+This playbook is also located in the [custom-actions](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions) directory.
+It copies passed CAs to the trust chain location and updates the trust chain on each selected host.
+
+Example usage:
+```
+ansible-playbook -i <inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/add-cas.yml --extra-vars '{"ca_files": [<absolute path to ca1 file>, <absolute path to ca2 file>]}'
+```
+
 Please consider contributing your custom playbook back to openshift-ansible-contrib!
 
 A library of custom post-provision actions exists in `openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions`. Playbooks include:
 
 * [add-yum-repos.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-yum-repos.yml): adds a list of custom yum repositories to every node in the cluster
 * [add-rhn-pools.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-rhn-pools.yml): attaches a list of additional RHN pools to every node in the cluster
+* [add-docker-registry.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml): adds a list of docker registries to the docker configuration on every node in the cluster
+* [add-cas.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-rhn-pools.yml): adds a list of CAs to the trust chain on every node in the cluster
 
 
 ## Install OpenShift
