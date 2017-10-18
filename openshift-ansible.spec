@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.159.0%{?dist}
+Release:        0.160.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.160.0
+- Fix pvc selector default to be empty dict instead of string
+  (zgalor@redhat.com)
+- Fix typo in setting prom-proxy memory limit (zgalor@redhat.com)
+- Do not remove files for bootstrap if resolv or dns. (kwoodson@redhat.com)
+- Fix missing docker option signature-verification (mgugino@redhat.com)
+- Fix prometheus role nfs (zgalor@redhat.com)
+
 * Wed Oct 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.159.0
 - Updating openshift-ansible.spec file to include files dir
   (sdodson@redhat.com)
