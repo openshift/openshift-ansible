@@ -1,0 +1,12 @@
+#{{ ansible_managed }}
+[Unit]
+Requires=dnsmasq.service
+After=dnsmasq.service
+
+[Service]
+{% if not openshift.common.version_gte_3_7 | bool %}
+ExecStartPre=-/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
+ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
+ExecStopPost=-/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
+ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
+{% endif %}

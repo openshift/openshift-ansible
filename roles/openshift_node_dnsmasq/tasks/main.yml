@@ -57,3 +57,14 @@
         value: "127.0.0.1:53"
       - key: "dnsRecursiveResolvConf"
         value: "/etc/origin/node/resolv.conf"
+
+- name: Ensure node drop in dir exists
+  file:
+    dest: /etc/systemd/sysystem/{{ openshift.common.service_type }}-node.service.d
+    state: directory
+
+- name: Deploy node dnmasq drop in
+  template:
+    dest: /etc/systemd/sysystem/{{ openshift.common.service_type }}-node.service.d/dnsmasq.conf
+    src: node-dnsmasq-systemd.conf.j2
+  notify: restart node
