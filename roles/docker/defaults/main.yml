@@ -1,5 +1,6 @@
 ---
 docker_cli_auth_config_path: '/root/.docker'
+openshift_docker_signature_verification: False
 
 # oreg_url is defined by user input.
 oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
