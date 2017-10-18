@@ -21,5 +21,29 @@
 - name: run the std_include
   include: ../../common/openshift-cluster/std_include.yml
 
-- name: run the config
-  include: ../../common/openshift-cluster/config.yml
+- name: perform the installer openshift-checks
+  include: ../../common/openshift-checks/install.yml
+
+- name: etcd install
+  include: ../../common/openshift-etcd/config.yml
+
+- name: include nfs
+  include: ../../common/openshift-nfs/config.yml
+  when: groups.oo_nfs_to_config | default([]) | count > 0
+
+- name: include loadbalancer
+  include: ../../common/openshift-loadbalancer/config.yml
+  when: groups.oo_lb_to_config | default([]) | count > 0
+
+- name: include openshift-master config
+  include: ../../common/openshift-master/config.yml
+
+- name: include master additional config
+  include: ../../common/openshift-master/additional_config.yml
+
+- name: include master additional config
+  include: ../../common/openshift-node/config.yml
+
+- name: include openshift-glusterfs
+  include: ../../common/openshift-glusterfs/config.yml
+  when: groups.oo_glusterfs_to_config | default([]) | count > 0
