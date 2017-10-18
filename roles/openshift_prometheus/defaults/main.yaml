@@ -21,19 +21,19 @@ openshift_prometheus_storage_type: pvc
 openshift_prometheus_pvc_name: prometheus
 openshift_prometheus_pvc_size: "{{ openshift_prometheus_storage_volume_size | default('10Gi') }}"
 openshift_prometheus_pvc_access_modes: [ReadWriteOnce]
-openshift_prometheus_pvc_pv_selector: "{{ openshift_prometheus_storage_labels | default('') }}"
+openshift_prometheus_pvc_pv_selector: "{{ openshift_prometheus_storage_labels | default({}) }}"
 
 openshift_prometheus_alertmanager_storage_type: pvc
 openshift_prometheus_alertmanager_pvc_name: prometheus-alertmanager
 openshift_prometheus_alertmanager_pvc_size: "{{ openshift_prometheus_alertmanager_storage_volume_size | default('10Gi') }}"
 openshift_prometheus_alertmanager_pvc_access_modes: [ReadWriteOnce]
-openshift_prometheus_alertmanager_pvc_pv_selector: "{{ openshift_prometheus_alertmanager_storage_labels | default('') }}"
+openshift_prometheus_alertmanager_pvc_pv_selector: "{{ openshift_prometheus_alertmanager_storage_labels | default({}) }}"
 
 openshift_prometheus_alertbuffer_storage_type: pvc
 openshift_prometheus_alertbuffer_pvc_name: prometheus-alertbuffer
 openshift_prometheus_alertbuffer_pvc_size: "{{ openshift_prometheus_alertbuffer_storage_volume_size | default('10Gi') }}"
 openshift_prometheus_alertbuffer_pvc_access_modes: [ReadWriteOnce]
-openshift_prometheus_alertbuffer_pvc_pv_selector: "{{ openshift_prometheus_alertbuffer_storage_labels | default('') }}"
+openshift_prometheus_alertbuffer_pvc_pv_selector: "{{ openshift_prometheus_alertbuffer_storage_labels | default({}) }}"
 
 # container resources
 openshift_prometheus_cpu_limit: null
