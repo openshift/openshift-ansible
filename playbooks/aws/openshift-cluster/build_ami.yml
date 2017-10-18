@@ -26,7 +26,7 @@
   tasks:
   - name: set the user to perform installation
     set_fact:
-      ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default('root') }}"
+      ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default(ansible_ssh_user) }}"
       openshift_node_bootstrap: True
 
 # This is the part that installs all of the software and configs for the instance
