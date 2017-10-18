@@ -146,6 +146,9 @@
     local_facts:
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
+- name: Update journald config
+  include: journald.yml
+
 - name: Install the systemd units
   include: systemd_units.yml
 
