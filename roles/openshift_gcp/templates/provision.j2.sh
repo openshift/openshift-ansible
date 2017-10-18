@@ -313,7 +313,7 @@ fi
 # wait until all node groups are stable
 {% for node_group in openshift_gcp_node_group_config %}
 # wait for stable {{ node_group.name }}
-( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed wait-until-stable "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --timeout=300) &
+( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed wait-until-stable "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --timeout=600 ) &
 {% endfor %}
 
 
