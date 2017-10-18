@@ -1,0 +1,120 @@
+---
+- no_log: true
+  block:
+    - name: fetch all nodes from openstack shade dynamic inventory
+      command: shade-inventory --list
+      register: registered_nodes_output
+      when: refresh_inventory|bool
+
+    - name: set fact for openstack inventory cluster nodes
+      set_fact:
+        registered_nodes: "{{ (registered_nodes_output.stdout | from_json) | json_query(q) }}"
+      vars:
+        q: "[] | [?metadata.clusterid=='{{stack_name}}']"
+      when:
+        - refresh_inventory|bool
+
+    - name: set_fact for openstack inventory nodes
+      set_fact:
+        registered_bastion_nodes: "{{ (registered_nodes_output.stdout | from_json) | json_query(q) }}"
+        registered_nodes_floating: "{{ (registered_nodes_output.stdout | from_json) | json_query(q2) }}"
+      vars:
+        q: "[] | [?metadata.group=='infra.{{stack_name}}']"
+        q2: "[] | [?metadata.clusterid=='{{stack_name}}'] | [?public_v4!='']"
+      when:
+        - refresh_inventory|bool
+
+    - name: set_fact for openstack inventory nodes with provider network
+      set_fact:
+        registered_nodes_floating: "{{ (registered_nodes_output.stdout | from_json) | json_query(q) }}"
+      vars:
+        q: "[] | [?metadata.clusterid=='{{stack_name}}'] | [?public_v4=='']"
+      when:
+        - refresh_inventory|bool
+        - openstack_provider_network_name|default(None)
+
+    - name: Add cluster nodes w/o floating IPs to inventory
+      with_items: "{{ registered_nodes|difference(registered_nodes_floating) }}"
+      add_host:
+        name: '{{ item.name }}'
+        ansible_host: >-
+          {% if use_bastion|bool -%}
+          {{ item.name }}
+          {%- else -%}
+          {%- set node = registered_nodes | json_query("[?name=='" + item.name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
+          {%- endif %}
+        ansible_fqdn: '{{ item.name }}'
+        ansible_user: '{{ ssh_user }}'
+        ansible_private_key_file: '{{ private_ssh_key }}'
+        ansible_ssh_extra_args: '-F {{ ssh_config_path }}'
+        private_v4: >-
+          {% set node = registered_nodes | json_query("[?name=='" + item.name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
+
+    - name: Add cluster nodes with floating IPs to inventory
+      with_items: "{{ registered_nodes_floating }}"
+      add_host:
+        name: '{{ item.name }}'
+        ansible_host: >-
+          {% if use_bastion|bool -%}
+          {{ item.name }}
+          {%- elif openstack_provider_network_name|default(None) -%}
+          {{ item.private_v4 }}
+          {%- else -%}
+          {{ item.public_v4 }}
+          {%- endif %}
+        ansible_fqdn: '{{ item.name }}'
+        ansible_user: '{{ ssh_user }}'
+        ansible_private_key_file: '{{ private_ssh_key }}'
+        ansible_ssh_extra_args: '-F {{ ssh_config_path }}'
+        private_v4: >-
+          {% set node = registered_nodes | json_query("[?name=='" + item.name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
+        public_v4: >-
+          {% if openstack_provider_network_name|default(None) -%}
+          {{ item.private_v4 }}
+          {%- else -%}
+          {{ item.public_v4 }}
+          {%- endif %}
+
+    # Split registered_nodes into old nodes and new app nodes
+    # Add new app nodes to new_nodes host group for upscaling
+    - name: Create new_app_nodes variable
+      set_fact:
+        new_app_nodes: []
+
+    - name: Filter new app nodes out of registered_nodes
+      include: filter_out_new_app_nodes.yaml
+      with_items: "{{ registered_nodes }}"
+      loop_control:
+        loop_var: node
+
+    - name: Add new app nodes to the new_nodes section (if a deployment already exists)
+      with_items: "{{ new_app_nodes }}"
+      add_host:
+        name: "{{ item.name }}"
+        groups: new_nodes, app
+
+    - name: Add the rest of cluster nodes to their corresponding groups
+      with_items: "{{ registered_nodes }}"
+      add_host:
+        name: '{{ item.name }}'
+        groups: '{{ item.metadata.group }}'
+
+    - name: Add bastion node to inventory
+      add_host:
+        name: bastion
+        groups: bastions
+        ansible_host: '{{ registered_bastion_nodes[0].public_v4 }}'
+        ansible_fqdn: '{{ registered_bastion_nodes[0].name }}'
+        ansible_user: '{{ ssh_user }}'
+        ansible_private_key_file: '{{ private_ssh_key }}'
+        ansible_ssh_extra_args: '-F {{ ssh_config_path }}'
+        private_v4: >-
+          {% set node = registered_nodes | json_query("[?name=='" + registered_bastion_nodes[0].name + "']") -%}
+          {{ node[0].addresses[openstack_private_network|quote][0].addr }}
+        public_v4: '{{ registered_bastion_nodes[0].public_v4 }}'
+      when:
+        - registered_bastion_nodes is defined
+        - use_bastion|bool

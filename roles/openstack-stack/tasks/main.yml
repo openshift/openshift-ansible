@@ -1,0 +1,27 @@
+---
+
+- name: Generate the templates
+  include: generate-templates.yml
+  when:
+  - stack_state == 'present'
+
+- name: Handle the Stack (create/delete)
+  ignore_errors: False
+  register: stack_create
+  os_stack:
+    name: "{{ stack_name }}"
+    state: "{{ stack_state }}"
+    template: "{{ stack_template_path | default(omit) }}"
+    wait: yes
+
+# NOTE(bogdando) OS::Neutron::Subnet doesn't support live updates for
+# dns_nameservers, so we can't do that for the "create stack" task.
+- include: subnet_update_dns_servers.yaml
+  when:
+  - private_dns_server is defined
+  - stack_state == 'present'
+
+- name: CleanUp
+  include: cleanup.yml
+  when:
+  - stack_state == 'present'

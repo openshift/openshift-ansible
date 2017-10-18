@@ -1,0 +1,9 @@
+---
+- name: Live update the subnet's DNS servers
+  os_subnet:
+    name: openshift-ansible-{{ stack_name }}-subnet
+    network_name: openshift-ansible-{{ stack_name }}-net
+    state: present
+    use_default_subnetpool: yes
+    dns_nameservers: "{{ [private_dns_server|default(public_dns_nameservers[0])]|union(public_dns_nameservers)|unique }}"
+  when: not provider_network

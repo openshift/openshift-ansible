@@ -1,0 +1,17 @@
+---
+- name: check for static inventory dir
+  stat:
+    path: "{{ inventory_path }}"
+  register: stat_inventory_path
+
+- name: create static inventory dir
+  file:
+    path: "{{ inventory_path }}"
+    state: directory
+    mode: 0750
+  when: not stat_inventory_path.stat.exists
+
+- name: create inventory from template
+  template:
+    src: inventory.j2
+    dest: "{{ inventory_path }}/hosts"

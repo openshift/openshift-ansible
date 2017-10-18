@@ -1,0 +1,75 @@
+---
+# Get the needed information about the current deployment
+- hosts: masters[0]
+  tasks:
+  - name: Get number of app nodes
+    shell: oc get nodes -l autoscaling=app --no-headers=true | wc -l
+    register: oc_old_num_nodes
+  - name: Get names of app nodes
+    shell: oc get nodes -l autoscaling=app --no-headers=true | cut -f1 -d " "
+    register: oc_old_app_nodes
+
+- hosts: localhost
+  tasks:
+  # Since both number and names of app nodes are to be removed
+  # localhost variables for these values need to be set
+  - name: Store old number and names of app nodes locally (if there is an existing deployment)
+    when: '"masters" in groups'
+    register: set_fact_result
+    set_fact:
+      oc_old_num_nodes: "{{ hostvars[groups['masters'][0]]['oc_old_num_nodes'].stdout }}"
+      oc_old_app_nodes: "{{ hostvars[groups['masters'][0]]['oc_old_app_nodes'].stdout_lines }}"
+
+  - name: Set default values for old app nodes (if there is no existing deployment)
+    when: 'set_fact_result | skipped'
+    set_fact:
+      oc_old_num_nodes: 0
+      oc_old_app_nodes: []
+
+  # Set how many nodes are to be added (1 by default)
+  - name: Set how many nodes are to be added
+    set_fact:
+      increment_by: 1
+  - name: Check that the number corresponds to scaling up (not down)
+    assert:
+      that: 'increment_by | int >= 1'
+      msg: >
+        FAIL: The value of increment_by must be at least 1
+        (but it is {{ increment_by | int }}).
+  - name: Update openstack_num_nodes variable
+    set_fact:
+      openstack_num_nodes: "{{ oc_old_num_nodes | int + increment_by | int }}"
+
+# Run provision.yaml with higher number of nodes to create a new app-node VM
+- include: provision.yaml
+
+# Run config.yml to perform openshift installation
+# Path to openshift-ansible can be customised:
+# - the value of openshift_ansible_dir has to be an absolute path
+# - the path cannot contain the '/' symbol at the end
+
+# Creating a new deployment by the full installation
+- include: "{{ openshift_ansible_dir }}/playbooks/byo/config.yml"
+  vars:
+    openshift_ansible_dir: ../../../../openshift-ansible
+  when: 'not groups["new_nodes"] | list'
+
+# Scaling up existing deployment
+- include: "{{ openshift_ansible_dir }}/playbooks/byo/openshift-node/scaleup.yml"
+  vars:
+    openshift_ansible_dir: ../../../../openshift-ansible
+  when: 'groups["new_nodes"] | list'
+
+# Post-verification: Verify new number of nodes
+- hosts: masters[0]
+  tasks:
+  - name: Get number of nodes
+    shell: oc get nodes -l autoscaling=app --no-headers=true | wc -l
+    register: oc_new_num_nodes
+  - name: Check that the actual result matches the defined value
+    assert:
+      that: 'oc_new_num_nodes.stdout | int == (hostvars["localhost"]["oc_old_num_nodes"] | int + hostvars["localhost"]["increment_by"] | int)'
+      msg: >
+        FAIL: Number of application nodes has not been increased accordingly
+        (it should be {{ hostvars["localhost"]["oc_old_num_nodes"] | int + hostvars["localhost"]["increment_by"] | int }}
+        but it is {{ oc_new_num_nodes.stdout | int }}).

@@ -1,0 +1,9 @@
+---
+- name: Try to get flavor facts
+  os_flavor_facts:
+    name: "{{ flavor }}"
+  register: flavor_result
+- name: Check that custom flavor is available
+  assert:
+    that: "flavor_result.ansible_facts.openstack_flavors"
+    msg: "Flavor {{ flavor }} is not available."

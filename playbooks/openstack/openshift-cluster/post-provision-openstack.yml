@@ -1,0 +1,118 @@
+---
+- hosts: cluster_hosts
+  name: Wait for the the nodes to come up
+  become: False
+  gather_facts: False
+  tasks:
+    - when: not openstack_use_bastion|default(False)|bool
+      wait_for_connection:
+    - when: openstack_use_bastion|default(False)|bool
+      delegate_to: bastion
+      wait_for_connection:
+
+- hosts: cluster_hosts
+  gather_facts: True
+  tasks:
+    - name: Debug hostvar
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+        verbosity: 2
+
+- name: OpenShift Pre-Requisites (part 1)
+  include: pre-install.yml
+
+- name: Assign hostnames
+  hosts: cluster_hosts
+  gather_facts: False
+  become: true
+  roles:
+    - role: hostnames
+
+- name: Subscribe DNS Host to allow for configuration below
+  hosts: dns
+  gather_facts: False
+  become: true
+  roles:
+    - role: subscription-manager
+      when: hostvars.localhost.rhsm_register|default(False)
+      tags: 'subscription-manager'
+
+- name: Determine which DNS server(s) to use for our generated records
+  hosts: localhost
+  gather_facts: False
+  become: False
+  roles:
+    - dns-server-detect
+
+- name: Build the DNS Server Views and Configure DNS Server(s)
+  hosts: dns
+  gather_facts: False
+  become: true
+  roles:
+    - role: dns-views
+    - role: infra-ansible/roles/dns-server
+
+- name: Build and process DNS Records
+  hosts: localhost
+  gather_facts: True
+  become: False
+  roles:
+    - role: dns-records
+      use_bastion: "{{ openstack_use_bastion|default(False)|bool }}"
+    - role: infra-ansible/roles/dns
+
+- name: Switch the stack subnet to the configured private DNS server
+  hosts: localhost
+  gather_facts: False
+  become: False
+  vars_files:
+    - stack_params.yaml
+  tasks:
+    - include_role:
+        name: openstack-stack
+        tasks_from: subnet_update_dns_servers
+
+- name: OpenShift Pre-Requisites (part 2)
+  hosts: OSEv3
+  gather_facts: true
+  become: true
+  vars:
+    interface: "{{ flannel_interface|default('eth1') }}"
+    interface_file: /etc/sysconfig/network-scripts/ifcfg-{{ interface }}
+    interface_config:
+      DEVICE: "{{ interface }}"
+      TYPE: Ethernet
+      BOOTPROTO: dhcp
+      ONBOOT: 'yes'
+      DEFTROUTE: 'no'
+      PEERDNS: 'no'
+  pre_tasks:
+    - name: "Include DNS configuration to ensure proper name resolution"
+      lineinfile:
+        state: present
+        dest: /etc/sysconfig/network
+        regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+        line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+    - name: "Configure the flannel interface options"
+      when: openshift_use_flannel|default(False)|bool
+      block:
+        - file:
+            dest: "{{ interface_file }}"
+            state: touch
+            mode: 0644
+            owner: root
+            group: root
+        - lineinfile:
+            state: present
+            dest: "{{ interface_file }}"
+            regexp: "{{ item.key }}="
+            line: "{{ item.key }}={{ item.value }}"
+          with_dict: "{{ interface_config }}"
+  roles:
+    - node-network-manager
+
+- include: prepare-and-format-cinder-volume.yaml
+  when: >
+    prepare_and_format_registry_volume|default(False) or
+    (cinder_registry_volume is defined and
+      cinder_registry_volume.changed|default(False))

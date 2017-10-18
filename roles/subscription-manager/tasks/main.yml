@@ -1,0 +1,150 @@
+---
+- name: "Initialize rhsm_password variable if vars_prompt was used"
+  set_fact:
+    rhsm_password: "{{ hostvars.localhost.rhsm_password }}"
+  when:
+    - rhsm_password is not defined or rhsm_password is none or rhsm_password|trim == ''
+
+- name: "Initializing Subscription Manager authentication method"
+  set_fact:
+    rhsm_authentication: false
+
+# 'rhsm_activationkey' will take precedence even if 'rhsm_username' and 'rhsm_password' are also set
+- name: "Setting Subscription Manager Activation Key Fact"
+  set_fact:
+    rhsm_authentication: "key"
+  when:
+    - rhsm_activationkey is defined
+    - rhsm_activationkey is not none
+    - rhsm_activationkey|trim != ''
+    - not rhsm_authentication
+
+# If 'rhsm_username' and 'rhsm_password' are set but not 'rhsm_activationkey', set 'rhsm_authentication' to password
+- name: "Setting Subscription Manager Username and Password Fact"
+  set_fact:
+    rhsm_authentication: "password"
+  when:
+    - rhsm_username is defined
+    - rhsm_username is not none
+    - rhsm_username|trim != ''
+    - rhsm_password is defined
+    - rhsm_password is not none
+    - rhsm_password|trim != ''
+    - not rhsm_authentication
+
+- name: "Initializing registration status"
+  set_fact:
+    registered: false
+
+- name: "Checking subscription status (a failure means it is not registered and will be)"
+  command: "/usr/bin/subscription-manager status"
+  ignore_errors: yes
+  changed_when: no
+  register: check_if_registered
+
+- name: "Set registration fact if system is already registered"
+  set_fact:
+    registered: true
+  when: check_if_registered.rc == 0
+
+- name: "Cleaning any old subscriptions"
+  command: "/usr/bin/subscription-manager clean"
+  when:
+    - not registered
+    - rhsm_authentication is defined
+  register: cleaningsubs_result
+  until: cleaningsubs_result.rc == 0
+  retries: 10
+  delay: 1
+
+- name: "Install Satellite certificate"
+  command: "rpm -Uvh --force http://{{ rhsm_satellite }}/pub/katello-ca-consumer-latest.noarch.rpm"
+  when:
+    - not registered
+    - rhsm_satellite is defined
+    - rhsm_satellite is not none
+    - rhsm_satellite|trim != ''
+
+- name: "Register to Satellite using activation key"
+  command: "/usr/bin/subscription-manager register --activationkey={{ rhsm_activationkey }} --org='{{ rhsm_org }}'"
+  when:
+    - not registered
+    - rhsm_authentication == 'key'
+    - rhsm_satellite is defined
+    - rhsm_satellite is not none
+    - rhsm_satellite|trim != ''
+  register: register_key_result
+  until: register_key_result.rc == 0
+  retries: 10
+  delay: 1
+
+# This can apply to either Hosted or Satellite
+- name: "Register using username and password"
+  command: "/usr/bin/subscription-manager register --username={{ rhsm_username }} --password={{ rhsm_password }}"
+  no_log: true
+  when:
+    - not registered
+    - rhsm_authentication == "password"
+    - rhsm_org is not defined or rhsm_org is none or rhsm_org|trim == ''
+  register: register_userpw_result
+  until: register_userpw_result.rc == 0
+  retries: 10
+  delay: 1
+
+# This can apply to either Hosted or Satellite
+- name: "Register using username, password and organization"
+  command: "/usr/bin/subscription-manager register --username={{ rhsm_username }} --password={{ rhsm_password }} --org={{ rhsm_org }}"
+  no_log: true
+  when:
+    - not registered
+    - rhsm_authentication == "password"
+    - rhsm_org is defined
+    - rhsm_org is not none
+    - rhsm_org|trim != ''
+  register: register_userpworg_result
+  until: register_userpworg_result.rc == 0
+  retries: 10
+  delay: 1
+
+- name: "Auto-attach to Subscription Manager Pool"
+  command: "/usr/bin/subscription-manager attach --auto"
+  when:
+    - not registered
+    - rhsm_pool is undefined or rhsm_pool is none or rhsm_pool|trim == ''
+  register: autoattach_result
+  until: autoattach_result.rc == 0
+  retries: 10
+  delay: 1
+
+- name: "Attach to a specific pool"
+  command: "/usr/bin/subscription-manager attach --pool={{ rhsm_pool }}"
+  when:
+    - rhsm_pool is defined
+    - rhsm_pool is not none
+    - rhsm_pool|trim != ''
+    - not registered
+  register: attachpool_result
+  until: attachpool_result.rc == 0
+  retries: 10
+  delay: 1
+
+- name: "Disable all repositories"
+  command: "/usr/bin/subscription-manager repos --disable=*"
+  when:
+    - not registered
+    - rhsm_repos is defined
+    - rhsm_repos is not none
+    - rhsm_repos|trim != ''
+
+- name: "Enable specified repositories"
+  command: "/usr/bin/subscription-manager repos --enable={{ item }}"
+  with_items: "{{ rhsm_repos }}"
+  when:
+    - not registered
+    - rhsm_repos is defined
+    - rhsm_repos is not none
+    - rhsm_repos|trim != ''
+  register: enablerepos_result
+  until: enablerepos_result.rc == 0
+  retries: 10
+  delay: 1

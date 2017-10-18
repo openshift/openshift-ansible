@@ -1,0 +1,6 @@
+---
+openshift_cluster_node_labels:
+  app:
+    region: primary
+  infra:
+    region: infra
