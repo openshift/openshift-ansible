@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.158.0%{?dist}
+Release:        0.159.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.159.0
+- Updating openshift-ansible.spec file to include files dir
+  (sdodson@redhat.com)
+- Bug 1501768: fix eventrouter nodeSelector padding (jwozniak@redhat.com)
+- Reverting proxy image version to v1.0.0 to pass CI (ewolinet@redhat.com)
+- Making travis happy (ewolinet@redhat.com)
+- cri-o: error out when node is a Docker container (gscrivan@redhat.com)
+- Rewire openshift_template_service_broker_namespaces configurable
+  (jminter@redhat.com)
+- Ensure controllerConfig.serviceServingCert is correctly set during upgrade.
+  (abutcher@redhat.com)
+- Updating pattern for elasticsearch_proxy images (ewolinet@redhat.com)
+- Updating ES proxy image prefix and version to match other components
+  (ewolinet@redhat.com)
+- Add ability to set node and master imageConfig to latest (mgugino@redhat.com)
+- Restart all controllers to force reconfiguration during upgrade
+  (sdodson@redhat.com)
+
 * Tue Oct 17 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.158.0
 - Refactor openshift-management entry point (rteague@redhat.com)
 - Add switch to enable/disable container engine's audit log being stored in ES.
