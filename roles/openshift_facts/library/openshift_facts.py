@@ -498,6 +498,20 @@ def set_selectors(facts):
         facts['hosted']['etcd'] = {}
     if 'selector' not in facts['hosted']['etcd'] or facts['hosted']['etcd']['selector'] in [None, 'None']:
         facts['hosted']['etcd']['selector'] = None
+    if 'prometheus' not in facts:
+        facts['prometheus'] = {}
+    if 'selector' not in facts['prometheus'] or facts['prometheus']['selector'] in [None, 'None']:
+        facts['prometheus']['selector'] = None
+    if 'alertmanager' not in facts['prometheus']:
+        facts['prometheus']['alertmanager'] = {}
+    # pylint: disable=line-too-long
+    if 'selector' not in facts['prometheus']['alertmanager'] or facts['prometheus']['alertmanager']['selector'] in [None, 'None']:
+        facts['prometheus']['alertmanager']['selector'] = None
+    if 'alertbuffer' not in facts['prometheus']:
+        facts['prometheus']['alertbuffer'] = {}
+    # pylint: disable=line-too-long
+    if 'selector' not in facts['prometheus']['alertbuffer'] or facts['prometheus']['alertbuffer']['selector'] in [None, 'None']:
+        facts['prometheus']['alertbuffer']['selector'] = None
 
     return facts
 
@@ -1779,7 +1793,8 @@ class OpenShiftFacts(object):
                    'node',
                    'logging',
                    'loggingops',
-                   'metrics']
+                   'metrics',
+                   'prometheus']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
@@ -2053,6 +2068,66 @@ class OpenShiftFacts(object):
                     kind=None,
                     volume=dict(
                         name='metrics',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
+            )
+
+            defaults['prometheus'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='prometheus',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
+            )
+
+            defaults['prometheus']['alertmanager'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='prometheus-alertmanager',
+                        size='10Gi'
+                    ),
+                    nfs=dict(
+                        directory='/exports',
+                        options='*(rw,root_squash)'
+                    ),
+                    host=None,
+                    access=dict(
+                        modes=['ReadWriteOnce']
+                    ),
+                    create_pv=True,
+                    create_pvc=False
+                )
+            )
+
+            defaults['prometheus']['alertbuffer'] = dict(
+                storage=dict(
+                    kind=None,
+                    volume=dict(
+                        name='prometheus-alertbuffer',
                         size='10Gi'
                     ),
                     nfs=dict(

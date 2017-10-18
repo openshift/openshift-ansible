@@ -54,15 +54,6 @@
     resource_name: cluster-reader
     user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:prometheus"
 
-
-######################################################################
-# NFS
-# In the case that we are not running on a cloud provider, volumes must be statically provisioned
-
-- include: nfs.yaml
-  when: not (openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce'))
-
-
 # create prometheus and alerts services
 # TODO join into 1 task with loop
 - name: Create prometheus service
