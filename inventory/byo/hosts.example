@@ -812,14 +812,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Setting this variable to true will override that check.
 #openshift_override_hostname_check=true
 
-# openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
-# in versions >= 3.6
-#openshift_use_dnsmasq=False
-
 # Define an additional dnsmasq.conf file to deploy to /etc/dnsmasq.d/openshift-ansible.conf
 # This is useful for POC environments where DNS may not actually be available yet or to set
 # options like 'strict-order' to alter dnsmasq configuration.
 #openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
+# Define which interfaces dnsmasq will listen on, defaults to all interfaces except
+# lo as the node has a dns service on 127.0.0.1:53 that we must avoid.
+#openshift_node_dnsmasq_interfaces="eth0,ens10"
 
 # Global Proxy Configuration
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
