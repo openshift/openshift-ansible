@@ -76,6 +76,16 @@
   hosts: OSEv3
   gather_facts: true
   become: true
+  vars:
+    interface: "{{ flannel_interface|default('eth1') }}"
+    interface_file: /etc/sysconfig/network-scripts/ifcfg-{{ interface }}
+    interface_config:
+      DEVICE: "{{ interface }}"
+      TYPE: Ethernet
+      BOOTPROTO: dhcp
+      ONBOOT: 'yes'
+      DEFTROUTE: 'no'
+      PEERDNS: 'no'
   pre_tasks:
     - name: "Include DNS configuration to ensure proper name resolution"
       lineinfile:
@@ -83,6 +93,21 @@
         dest: /etc/sysconfig/network
         regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
         line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+    - name: "Configure the flannel interface options"
+      when: openshift_use_flannel|default(False)|bool
+      block:
+        - file:
+            dest: "{{ interface_file }}"
+            state: touch
+            mode: 0644
+            owner: root
+            group: root
+        - lineinfile:
+            state: present
+            dest: "{{ interface_file }}"
+            regexp: "{{ item.key }}="
+            line: "{{ item.key }}={{ item.value }}"
+          with_dict: "{{ interface_config }}"
   roles:
     - node-network-manager
 

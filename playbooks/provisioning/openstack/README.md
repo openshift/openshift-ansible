@@ -145,6 +145,26 @@ via the public IP of the server. You can not send updates via the private
 IP yet. This forces the in-stack private server to have a floating IP.
 See also the [security notes](#security-notes)
 
+#### Flannel networking
+
+In order to configure the
+[flannel networking](https://docs.openshift.com/container-platform/3.6/install_config/configuring_sdn.html#using-flannel),
+uncomment and adjust the appropriate `inventory/group_vars/OSEv3.yml` group vars.
+Note that the `osm_cluster_network_cidr` must not overlap with the default
+Docker bridge subnet of 172.17.0.0/16. Or you should change the docker0 default
+CIDR range otherwise. For example, by adding `--bip=192.168.2.1/24` to
+`DOCKER_NETWORK_OPTIONS` located in `/etc/sysconfig/docker-network`.
+
+Also note that the flannel network will be provisioned on a separate isolated Neutron
+subnet defined from `osm_cluster_network_cidr` and having ports security disabled.
+Use the `openstack_private_data_network_name` variable to define the network
+name for the heat stack resource.
+
+After the cluster deployment done, you should run an additional post installation
+step for flannel and docker iptables configuration:
+
+   ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-install.yml
+
 #### Other configuration variables
 
 `openstack_ssh_key` is a Nova keypair - you can see your keypairs with

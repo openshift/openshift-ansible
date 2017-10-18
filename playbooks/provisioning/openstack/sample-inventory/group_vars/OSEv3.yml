@@ -53,5 +53,7 @@ openshift_override_hostname_check: true
 ansible_become: true
 
 # # Flannel networking
+#osm_cluster_network_cidr: 10.128.0.0/14
 #openshift_use_openshift_sdn: false
 #openshift_use_flannel: true
+#flannel_interface: eth1

@@ -341,6 +341,12 @@ resources:
           protocol: tcp
           port_range_min: 9090
           port_range_max: 9090
+{% if openshift_use_flannel|default(False)|bool %}
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 2379
+          port_range_max: 2379
+{% endif %}
 
   etcd-secgrp:
     type: OS::Neutron::SecurityGroup
