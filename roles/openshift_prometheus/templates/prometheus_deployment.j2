@@ -38,7 +38,7 @@ spec:
             cpu: "{{openshift_prometheus_oauth_proxy_cpu_requests}}"
 {% endif %}
           limits:
-{% if openshift_prometheus_memory_requests_limit_proxy is defined and openshift_prometheus_oauth_proxy_memory_limit is not none %}
+{% if openshift_prometheus_oauth_proxy_memory_limit is defined and openshift_prometheus_oauth_proxy_memory_limit is not none %}
             memory: "{{openshift_prometheus_oauth_proxy_memory_limit}}"
 {% endif %}
 {% if openshift_prometheus_oauth_proxy_cpu_limit is defined and openshift_prometheus_oauth_proxy_cpu_limit is not none %}
