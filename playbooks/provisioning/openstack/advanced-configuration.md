@@ -108,7 +108,7 @@ Either way, find the `oc` binary and put it in your `PATH`.
 
 
 ```bash
-oc login --insecure-skip-tls-verify=true https://console.openshift.example.com:8443 -u user -p password
+oc login --insecure-skip-tls-verify=true https://master-0.openshift.example.com:8443 -u user -p password
 oc new-project test
 oc new-app --template=cakephp-mysql-example
 oc status -v
@@ -122,7 +122,7 @@ Wait until the build has finished and both pods are deployed and running:
 
 ```
 $ oc status -v
-In project test on server https://console.openshift.example.com:8443
+In project test on server https://master-0.openshift.example.com:8443
 
 http://cakephp-mysql-example-test.apps.openshift.example.com (svc/cakephp-mysql-example)
   dc/cakephp-mysql-example deploys istag/cakephp-mysql-example:latest <-
@@ -153,7 +153,7 @@ Its `title` should say: "Welcome to OpenShift".
 
 You can also access the OpenShift cluster with a web browser by going to:
 
-https://console.openshift.example.com:8443
+https://master-0.openshift.example.com:8443
 
 Note that for this to work, the OpenShift nodes must be accessible
 from your computer and it's DNS configuration must use the cruster's
