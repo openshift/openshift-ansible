@@ -46,26 +46,16 @@
   notify:
     - restart node
 
-- name: Configure AWS Cloud Provider Settings
-  lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    create: true
-  with_items:
-    - regex: '^AWS_ACCESS_KEY_ID='
-      line: "AWS_ACCESS_KEY_ID={{ openshift_cloudprovider_aws_access_key | default('') }}"
-    - regex: '^AWS_SECRET_ACCESS_KEY='
-      line: "AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key | default('') }}"
-  no_log: True
-  when: openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined
-  notify:
-    - restart node
+- name: include aws provider credentials
+  include: aws.yml
+  static: yes
 
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for
 # systemd to start the master again
-- when: openshift.common.is_containerized | bool
+- when:
+    - openshift.common.is_containerized | bool
+    - not openshift_node_bootstrap
   block:
     - name: Wait for master API to become available before proceeding
       # Using curl here since the uri module requires python-httplib2 and
@@ -90,26 +80,28 @@
         enabled: yes
         state: started
 
-- name: Start and enable node
-  systemd:
-    name: "{{ openshift.common.service_type }}-node"
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  register: node_start_result
-  until: not node_start_result | failed
-  retries: 1
-  delay: 30
-  ignore_errors: true
+- when: not openshift_node_bootstrap
+  block:
+    - name: Start and enable node
+      systemd:
+        name: "{{ openshift.common.service_type }}-node"
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      register: node_start_result
+      until: not node_start_result | failed
+      retries: 1
+      delay: 30
+      ignore_errors: true
 
-- name: Dump logs from node service if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-node
-  when: node_start_result | failed
+    - name: Dump logs from node service if it failed
+      command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-node
+      when: node_start_result | failed
 
-- name: Abort if node failed to start
-  fail:
-    msg: Node failed to start please inspect the logs and try again
-  when: node_start_result | failed
+    - name: Abort if node failed to start
+      fail:
+        msg: Node failed to start please inspect the logs and try again
+      when: node_start_result | failed
 
-- set_fact:
-    node_service_status_changed: "{{ node_start_result | changed }}"
+    - set_fact:
+        node_service_status_changed: "{{ node_start_result | changed }}"

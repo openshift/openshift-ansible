@@ -4,7 +4,8 @@ openshift_node_debug_level: "{{ debug_level | default(2) }}"
 r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-openshift_service_type: "{{ openshift.common.service_type }}"
+openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
+openshift_service_type: "{{ 'origin' if openshift_deployment_type == 'origin' else 'atomic-openshift' }}"
 
 openshift_image_tag: ''
 
@@ -17,7 +18,6 @@ openshift_node_ami_prep_packages:
 - openvswitch
 - docker
 - etcd
-#- pcs
 - haproxy
 - dnsmasq
 - ntp
@@ -54,7 +54,6 @@ openshift_node_ami_prep_packages:
 # - container-selinux
 # - atomic
 #
-openshift_deployment_type: origin
 
 openshift_node_bootstrap: False
 

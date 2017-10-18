@@ -4,7 +4,6 @@ openshift_aws_create_iam_cert: True
 openshift_aws_create_security_groups: True
 openshift_aws_create_launch_config: True
 openshift_aws_create_scale_group: True
-openshift_aws_kubernetes_cluster_status: owned  # or shared
 openshift_aws_node_group_type: master
 
 openshift_aws_wait_for_ssh: True
@@ -13,6 +12,7 @@ openshift_aws_clusterid: default
 openshift_aws_region: us-east-1
 openshift_aws_vpc_name: "{{ openshift_aws_clusterid }}"
 openshift_aws_build_ami_group: "{{ openshift_aws_clusterid }}"
+openshift_aws_kubernetes_cluster_status: "{{ openshift_aws_clusterid }}"
 
 openshift_aws_iam_cert_name: "{{ openshift_aws_clusterid }}-master-external"
 openshift_aws_iam_cert_path: ''
@@ -89,6 +89,10 @@ openshift_aws_node_group_config_node_volumes:
   delete_on_termination: True
 
 openshift_aws_node_group_config_tags: "{{ openshift_aws_clusterid | build_instance_tags(openshift_aws_kubernetes_cluster_status) }}"
+openshift_aws_node_group_termination_policy: Default
+openshift_aws_node_group_replace_instances: []
+openshift_aws_node_group_replace_all_instances: False
+openshift_aws_node_group_config_extra_labels: {}
 
 openshift_aws_node_group_config:
   tags: "{{ openshift_aws_node_group_config_tags }}"
@@ -105,7 +109,11 @@ openshift_aws_node_group_config:
     tags:
       host-type: master
       sub-host-type: default
+    labels:
+      type: master
     wait_for_instances: True
+    termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
+    replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
   compute:
     instance_type: m4.xlarge
     ami: "{{ openshift_aws_ami }}"
@@ -119,6 +127,10 @@ openshift_aws_node_group_config:
     tags:
       host-type: node
       sub-host-type: compute
+    labels:
+      type: compute
+    termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
+    replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
   infra:
     instance_type: m4.xlarge
     ami: "{{ openshift_aws_ami }}"
@@ -132,6 +144,10 @@ openshift_aws_node_group_config:
     tags:
       host-type: node
       sub-host-type: infra
+    labels:
+      type: infra
+    termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
+    replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
 
 openshift_aws_elb_security_groups:
 - "{{ openshift_aws_clusterid }}"
@@ -211,3 +227,7 @@ openshift_aws_vpc:
       az: "us-east-1e"
     - cidr: 172.31.16.0/20
       az: "us-east-1a"
+
+openshift_aws_node_run_bootstrap_startup: True
+openshift_aws_node_user_data: ''
+openshift_aws_node_config_namespace: openshift-node

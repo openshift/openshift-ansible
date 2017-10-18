@@ -51,7 +51,7 @@
     when:
     - g_etcd_hosts | default([]) | length not in [3,1]
     - not openshift_master_unsupported_embedded_etcd | default(False)
-    - not openshift_node_bootstrap | default(False)
+    - not (openshift_node_bootstrap | default(False))
 
   - name: Evaluate oo_all_hosts
     add_host:

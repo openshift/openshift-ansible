@@ -28,5 +28,7 @@
     load_balancers: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].elbs if 'elbs' in openshift_aws_node_group_config[openshift_aws_node_group_type] else omit }}"
     wait_for_instances: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].wait_for_instances | default(False)}}"
     vpc_zone_identifier: "{{ subnetout.subnets[0].id }}"
+    replace_instances: "{{ openshift_aws_node_group_replace_instances if openshift_aws_node_group_replace_instances != [] else omit }}"
+    replace_all_instances: "{{ omit if openshift_aws_node_group_replace_instances != [] else (openshift_aws_node_group_config[openshift_aws_node_group_type].replace_all_instances | default(omit)) }}"
     tags:
     - "{{ openshift_aws_node_group_config.tags | combine(openshift_aws_node_group_config[openshift_aws_node_group_type].tags) }}"

@@ -3,12 +3,12 @@
   block:
   - name: Install Node package
     package:
-      name: "{{ openshift.common.service_type }}-node{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+      name: "{{ openshift.common.service_type }}-node{{ (openshift_pkg_version | default('')) | oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
 
   - name: Install sdn-ovs package
     package:
-      name: "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version | oo_image_tag_to_rpm_version(include_dash=True) }}"
+      name: "{{ openshift.common.service_type }}-sdn-ovs{{ (openshift_pkg_version | default('')) | oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
     when:
     - openshift_node_use_openshift_sdn | bool

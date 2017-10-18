@@ -1478,11 +1478,23 @@ class OCcsr(OpenShiftCLI):
 
         return False
 
+    def get_csr_request(self, request):
+        '''base64 decode the request object and call openssl to determine the
+           subject and specifically the CN: from the request
+
+           Output:
+           (0, '...
+                Subject: O=system:nodes, CN=system:node:ip-172-31-54-54.ec2.internal
+                ...')
+        '''
+        import base64
+        return self._run(['openssl', 'req', '-noout', '-text'], base64.b64decode(request))[1]
+
     def match_node(self, csr):
         '''match an inc csr to a node in self.nodes'''
         for node in self.nodes:
-            # we have a match
-            if node['name'] in csr['metadata']['name']:
+            # we need to match based upon the csr's request certificate's CN
+            if node['name'] in self.get_csr_request(csr['spec']['request']):
                 node['csrs'][csr['metadata']['name']] = csr
 
                 # check that the username is the node and type is 'Approved'

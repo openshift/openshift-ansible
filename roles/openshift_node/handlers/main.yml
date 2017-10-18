@@ -3,7 +3,11 @@
   systemd:
     name: openvswitch
     state: restarted
-  when: (not skip_node_svc_handlers | default(False) | bool) and not (ovs_service_status_changed | default(false) | bool) and openshift_node_use_openshift_sdn | bool
+  when:
+  - (not skip_node_svc_handlers | default(False) | bool)
+  - not (ovs_service_status_changed | default(false) | bool)
+  - openshift_node_use_openshift_sdn | bool
+  - not openshift_node_bootstrap
   register: l_openshift_node_stop_openvswitch_result
   until: not l_openshift_node_stop_openvswitch_result | failed
   retries: 3
@@ -11,10 +15,11 @@
   notify:
   - restart openvswitch pause
 
-
 - name: restart openvswitch pause
   pause: seconds=15
-  when: (not skip_node_svc_handlers | default(False) | bool) and openshift.common.is_containerized | bool
+  when:
+  - (not skip_node_svc_handlers | default(False) | bool)
+  - openshift.common.is_containerized | bool
 
 - name: restart node
   systemd:
