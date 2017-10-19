@@ -96,6 +96,24 @@ def test_cannot_determine_available_disk(desc, ansible_mounts, expect_chunks):
             'size_available': 20 * 10**9 + 1,
         }],
     ),
+    (
+        ['oo_masters_to_config'],
+        0,
+        [{
+            'mount': '/',
+            'size_available': 2 * 10**9,
+        }, {  # not enough directly on /var
+            'mount': '/var',
+            'size_available': 10 * 10**9 + 1,
+        }, {
+            # but subdir mounts add up to enough
+            'mount': '/var/lib/docker',
+            'size_available': 20 * 10**9 + 1,
+        }, {
+            'mount': '/var/lib/origin',
+            'size_available': 20 * 10**9 + 1,
+        }],
+    ),
 ])
 def test_succeeds_with_recommended_disk_space(group_names, configured_min, ansible_mounts):
     task_vars = dict(
