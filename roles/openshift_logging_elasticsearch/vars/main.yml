@@ -2,7 +2,7 @@
 __latest_es_version: "3_6"
 __allowed_es_versions: ["3_5", "3_6", "3_7"]
 __allowed_es_versions: ["3_5", "3_6"]
-__allowed_es_types: ["master", "clientdata"]
+__allowed_es_types: ["master", "clientdata", "clientdatamaster"]
 __es_log_appenders: ['file', 'console']
 __kibana_index_modes: ["unique", "shared_ops"]
 
@@ -11,6 +11,7 @@ openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 es_node_quorum: "{{ openshift_logging_elasticsearch_replica_count | int/2 + 1 }}"
 es_recover_after_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
 es_recover_expected_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
-es_masters_quorum: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.replicas |int /2 + 1 }}"
-es_recover_expected_data_nodes: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdata|length |default(1) }}"
 openshift_elasticsearch_recover_after_time: 5m
+
+#es_masters_quorum: "{{ es_node_topology.masters.replicas |int /2 + 1 }}"
+#es_recover_expected_data_nodes: "{{ es_node_topology.clientdata|length }}"

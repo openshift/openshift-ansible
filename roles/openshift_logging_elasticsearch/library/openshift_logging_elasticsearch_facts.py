@@ -146,8 +146,8 @@ class OpenshiftLoggingFacts(OCBaseCommand):
 
     def facts_for_ex_node_topology(self, namespace, es_role):
         ''' Gathers facts for DeploymentConfigs in logging namespace '''
-        if es_role == "masterclientdata":
-            # masterclientdata role exists only for older deployments,
+        if es_role == "component-aio":
+            # component-aio role exists only for older deployments,
             # so cluster_name will be either "logging-es" or "logging-es-ops"
             selector = "component=" + self.cluster_name[8:] + "," +\
                 CLUSTER_NAME_LABEL + "!=" + self.cluster_name
@@ -274,7 +274,8 @@ class OpenshiftLoggingFacts(OCBaseCommand):
         ''' Builds the logging facts and returns them '''
         self.facts_for_ex_node_topology(self.namespace, "master")
         self.facts_for_ex_node_topology(self.namespace, "clientdata")
-        self.facts_for_ex_node_topology(self.namespace, "masterclientdata")
+        self.facts_for_ex_node_topology(self.namespace, "clientdatamaster")
+        self.facts_for_ex_node_topology(self.namespace, "component-aio")
 
         self.facts_for_services(self.namespace)
         self.facts_for_configmaps(self.namespace)

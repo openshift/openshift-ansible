@@ -106,8 +106,13 @@ class OpenshiftLoggingTopology(object):
             cur_nd = clientdata_nd.copy()
             cur_nd['pvc_name'] = self._pvc_prefix + '-' + str(node)
             clientdata.append(cur_nd)
-        self._node_topology = dict(masters=masters,
-                                   clientdata=clientdata)
+
+        if self._cluster_size > 1:
+            self._node_topology = dict(masters=masters,
+                                       clientdata=clientdata)
+        else:
+            self._node_topology = dict(clientdatamaster=clientdata[0])
+
 
     @staticmethod
     def reconcile_masters(masters_ex, masters_des):
@@ -136,9 +141,11 @@ class OpenshiftLoggingTopology(object):
 
     def reconcile_clientdata(self, clientdata_ex, clientdata_des):
         '''Reconsile desired and existing clientdata node topologies'''
-        desired_clientdata = clientdata_des[:]
         if not clientdata_ex:
             return True
+        if not clientdata_des:
+            raise Exception("No desired clientdata nodes defined for existing clientdata nodes")
+        desired_clientdata = clientdata_des[:]
         if len(clientdata_ex) > len(clientdata_des):
             # TODO: Crash and burn, we can't scale down.
             raise Exception("Scaling down Elasticsearch cluster is not supported")
@@ -146,16 +153,31 @@ class OpenshiftLoggingTopology(object):
             ex_nd_id = self.find_similar_clientdata_node(desired_clientdata, node)
             del desired_clientdata[ex_nd_id]
 
+    def reconcile_clientdatamaster(self, cdm_ex, cdm_des):
+        '''We assume we get just 1 existing clientdata node'''
+        # pylint: disable=unused-argument
+
+        if not cdm_ex:
+            return cdm_des
+        if len(cdm_ex) > 1:
+            raise Exception("Multi-node clientdatamaster nodes must be converted to separate roles")
+        return cdm_des
+
     def reconcile_node_topology(self):
         '''Reconcile Elasticsearch node topology'''
+
         masters = OpenshiftLoggingTopology.reconcile_masters(
             self._existing_topology.get('masters', {}),
-            self._node_topology['masters'])
+            self._node_topology.get('masters', {}))
         clientdata = self.reconcile_clientdata(
-            self._existing_topology.get('clientdata', {}),
-            self._node_topology['clientdata'])
+            self._existing_topology.get('clientdata', []),
+            self._node_topology.get('clientdata',{}))
+        clientdatamaster = self.reconcile_clientdatamaster(
+            self._existing_topology.get('clientdatamaster', []),
+            self._node_topology.get('clientdatamaster',{}))
         self._reconciled_topology = dict(masters=masters,
-                                         clientdata=clientdata)
+                                         clientdata=clientdata,
+                                         clientdatamaster=clientdatamaster)
 
     def build_facts(self):
         ''' Builds the logging facts and returns them '''
@@ -184,7 +206,7 @@ def main():
             elasticsearch_cpu_limit={"required": False, "type": "str"},
             elasticsearch_memory_limit={"required": False, "type": "str"},
             elasticsearch_pv_selector={"required": False, "type": "dict"},
-            elasticsearch_pvc_dynamic={"required": False, "type": "bool"},
+            elasticsearch_pvc_dynamic={"required": False, "type": "str"},
             elasticsearch_pvc_size={"required": False, "type": "str"},
             elasticsearch_pvc_prefix={"required": False, "type": "str"},
             elasticsearch_storage_group={"required": False, "type": "int"},

@@ -81,6 +81,21 @@
 
 - include: "{{ role_path }}/tasks/svcs_routes.yaml"
 
+- debug:
+    var: openshift_logging_elasticsearch_topology
+
+- name: Set ES configuration facts for all-in-one node
+  set_fact:
+    es_masters_quorum: 1
+    es_recover_expected_data_nodes: 1
+  when: openshift_logging_elasticsearch_topology.node_topology.clientdatamaster is defined
+
+- name: Set ES configuration facts for multi-node configuration
+  set_fact:
+    es_masters_quorum: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.replicas |int /2 + 1 }}"
+    es_recover_expected_data_nodes: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdata|length |default(1) }}"
+  when:  openshift_logging_elasticsearch_topology.node_topology.clientdatamaster is not defined
+
 # Deploy masters
 - include: "{{ role_path }}/tasks/node_provision.yaml"
   vars:
@@ -98,7 +113,7 @@
     node_storage_type: emptydir
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
-
+  when: openshift_logging_elasticsearch_topology.node_topology.masters is defined
 
 # Deploy client-data nodes
 - include: "{{ role_path }}/tasks/node_provision.yaml"
@@ -120,3 +135,24 @@
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
   with_indexed_items: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdata }}"
+  when: openshift_logging_elasticsearch_topology.node_topology.clientdata is defined
+
+# Deploy client-data-master nodes
+- include: "{{ role_path }}/tasks/node_provision.yaml"
+  vars:
+    es_cluster_name: "{{ openshift_logging_elasticsearch_clustername }}"
+    es_role: clientdatamaster
+    es_http_service: "true"
+    node_master: "true"
+    node_data: "true"
+    node_client: "false"
+    openshift_logging_elasticsearch_deployment_name: "{{ openshift_logging_elasticsearch_clustername }}-clientdatamaster"
+    generated_certs_dir: "{{ certs_dir }}"
+    node_storage_type: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.node_storage_type | default(emptydir) }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-0"
+    hostmount_path: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.hostmount_path |default ({})}}"
+    limits: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.limits }}"
+    requests: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.requests }}"
+    es_node_selector: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.nodeSelector | default({}) }}"
+  when: openshift_logging_elasticsearch_topology.node_topology.clientdatamaster is defined
+

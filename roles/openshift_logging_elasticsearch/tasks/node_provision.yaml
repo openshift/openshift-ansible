@@ -124,6 +124,8 @@
     storage_type: "{{ node_storage_type | default(emptydir) }}"
     image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch:{{ openshift_logging_elasticsearch_image_version }}"
     proxy_image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
+    es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
+    es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
   changed_when: false
 
 - name: Set ES dc for role {{ es_role }}

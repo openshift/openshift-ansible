@@ -17,28 +17,35 @@ openshift_logging_elasticsearch_replica_count: 1
 # ES deployment type
 openshift_logging_elasticsearch_deployment_type: "data-master"
 openshift_logging_elasticsearch_node_topology:
-  masters:
+  clientdatamaster:
     replicas: 1
     limits:
-      cpu: 1000m
-    requests:
-      memory: 1Gi
-  clientdata:
-  -
-    node_storage_type: emptydir
-    hostmount_path:
-    - /mnt/data1
-    - /mnt/data2
-    limits:
       memory: 8Gi
-      cpu: 4000m
     requests:
       memory: 8Gi
-    pv_selector:
-      label: value
-    pvc_size: 10Gi
-    pvc_name: pvc1
-    storage_group: 65534
+
+#  masters:
+#    replicas: 1
+#    limits:
+#      cpu: 1000m
+#    requests:
+#      memory: 1Gi
+#  clientdata:
+#  -
+#    node_storage_type: emptydir
+#    hostmount_path:
+#    - /mnt/data1
+#    - /mnt/data2
+#    limits:
+#      memory: 8Gi
+#      cpu: 4000m
+#    requests:
+#      memory: 8Gi
+#    pv_selector:
+#      label: value
+#    pvc_size: 10Gi
+#    pvc_name: pvc1
+#    storage_group: 65534
 
 # ES deployment name
 openshift_logging_elasticsearch_deployment_name: ""
