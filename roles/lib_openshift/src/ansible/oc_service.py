@@ -21,6 +21,7 @@ def main():
             ports=dict(default=None, type='list'),
             session_affinity=dict(default='None', type='str'),
             service_type=dict(default='ClusterIP', type='str'),
+            external_ips=dict(default=None, type='list'),
         ),
         supports_check_mode=True,
     )

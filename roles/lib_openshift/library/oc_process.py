@@ -137,6 +137,8 @@ EXAMPLES = '''
 # -*- -*- -*- End included fragment: doc/process -*- -*- -*-
 
 # -*- -*- -*- Begin included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
+# pylint: disable=undefined-variable,missing-docstring
+# noqa: E301,E302
 
 
 class YeditException(Exception):  # pragma: no cover
@@ -148,7 +150,7 @@ class YeditException(Exception):  # pragma: no cover
 class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
-    re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z{}/_-]+)"
+    re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z%s/_-]+)"
     com_sep = set(['.', '#', '|', ':'])
 
     # pylint: disable=too-many-arguments
@@ -170,13 +172,13 @@ class Yedit(object):  # pragma: no cover
 
     @property
     def separator(self):
-        ''' getter method for separator '''
+        ''' getter method for yaml_dict '''
         return self._separator
 
     @separator.setter
-    def separator(self, inc_sep):
-        ''' setter method for separator '''
-        self._separator = inc_sep
+    def separator(self):
+        ''' getter method for yaml_dict '''
+        return self._separator
 
     @property
     def yaml_dict(self):
@@ -192,13 +194,13 @@ class Yedit(object):  # pragma: no cover
     def parse_key(key, sep='.'):
         '''parse the key allowing the appropriate separator'''
         common_separators = list(Yedit.com_sep - set([sep]))
-        return re.findall(Yedit.re_key.format(''.join(common_separators)), key)
+        return re.findall(Yedit.re_key % ''.join(common_separators), key)
 
     @staticmethod
     def valid_key(key, sep='.'):
         '''validate the incoming key'''
         common_separators = list(Yedit.com_sep - set([sep]))
-        if not re.match(Yedit.re_valid_key.format(''.join(common_separators)), key):
+        if not re.match(Yedit.re_valid_key % ''.join(common_separators), key):
             return False
 
         return True
@@ -220,7 +222,7 @@ class Yedit(object):  # pragma: no cover
         key_indexes = Yedit.parse_key(key, sep)
         for arr_ind, dict_key in key_indexes[:-1]:
             if dict_key and isinstance(data, dict):
-                data = data.get(dict_key)
+                data = data.get(dict_key, None)
             elif (arr_ind and isinstance(data, list) and
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
@@ -309,7 +311,7 @@ class Yedit(object):  # pragma: no cover
         key_indexes = Yedit.parse_key(key, sep)
         for arr_ind, dict_key in key_indexes:
             if dict_key and isinstance(data, dict):
-                data = data.get(dict_key)
+                data = data.get(dict_key, None)
             elif (arr_ind and isinstance(data, list) and
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
@@ -409,7 +411,7 @@ class Yedit(object):  # pragma: no cover
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. {}'.format(err))
+            raise YeditException('Problem with loading yaml file. %s' % err)
 
         return self.yaml_dict
 
@@ -528,8 +530,8 @@ class Yedit(object):  # pragma: no cover
             # AUDIT:maybe-no-member makes sense due to fuzzy types
             # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
-                raise YeditException('Cannot replace key, value entry in dict with non-dict type. ' +
-                                     'value=[{}] type=[{}]'.format(value, type(value)))
+                raise YeditException('Cannot replace key, value entry in ' +
+                                     'dict with non-dict type. value=[%s] [%s]' % (value, type(value)))  # noqa: E501
 
             entry.update(value)
             return (True, self.yaml_dict)
@@ -590,17 +592,7 @@ class Yedit(object):  # pragma: no cover
             pass
 
         result = Yedit.add_entry(tmp_copy, path, value, self.separator)
-        if result is None:
-            return (False, self.yaml_dict)
-
-        # When path equals "" it is a special case.
-        # "" refers to the root of the document
-        # Only update the root path (entire document) when its a list or dict
-        if path == '':
-            if isinstance(result, list) or isinstance(result, dict):
-                self.yaml_dict = result
-                return (True, self.yaml_dict)
-
+        if not result:
             return (False, self.yaml_dict)
 
         self.yaml_dict = tmp_copy
@@ -626,7 +618,7 @@ class Yedit(object):  # pragma: no cover
                 pass
 
             result = Yedit.add_entry(tmp_copy, path, value, self.separator)
-            if result is not None:
+            if result:
                 self.yaml_dict = tmp_copy
                 return (True, self.yaml_dict)
 
@@ -658,149 +650,114 @@ class Yedit(object):  # pragma: no cover
         # we will convert to bool if it matches any of the above cases
         if isinstance(inc_value, str) and 'bool' in vtype:
             if inc_value not in true_bools and inc_value not in false_bools:
-                raise YeditException('Not a boolean type. str=[{}] vtype=[{}]'.format(inc_value, vtype))
+                raise YeditException('Not a boolean type. str=[%s] vtype=[%s]'
+                                     % (inc_value, vtype))
         elif isinstance(inc_value, bool) and 'str' in vtype:
             inc_value = str(inc_value)
 
-        # There is a special case where '' will turn into None after yaml loading it so skip
-        if isinstance(inc_value, str) and inc_value == '':
-            pass
         # If vtype is not str then go ahead and attempt to yaml load it.
-        elif isinstance(inc_value, str) and 'str' not in vtype:
+        if isinstance(inc_value, str) and 'str' not in vtype:
             try:
-                inc_value = yaml.safe_load(inc_value)
+                inc_value = yaml.load(inc_value)
             except Exception:
-                raise YeditException('Could not determine type of incoming value. ' +
-                                     'value=[{}] vtype=[{}]'.format(type(inc_value), vtype))
+                raise YeditException('Could not determine type of incoming ' +
+                                     'value. value=[%s] vtype=[%s]'
+                                     % (type(inc_value), vtype))
 
         return inc_value
 
-    @staticmethod
-    def process_edits(edits, yamlfile):
-        '''run through a list of edits and process them one-by-one'''
-        results = []
-        for edit in edits:
-            value = Yedit.parse_value(edit['value'], edit.get('value_type', ''))
-            if edit.get('action') == 'update':
-                # pylint: disable=line-too-long
-                curr_value = Yedit.get_curr_value(
-                    Yedit.parse_value(edit.get('curr_value')),
-                    edit.get('curr_value_format'))
-
-                rval = yamlfile.update(edit['key'],
-                                       value,
-                                       edit.get('index'),
-                                       curr_value)
-
-            elif edit.get('action') == 'append':
-                rval = yamlfile.append(edit['key'], value)
-
-            else:
-                rval = yamlfile.put(edit['key'], value)
-
-            if rval[0]:
-                results.append({'key': edit['key'], 'edit': rval[1]})
-
-        return {'changed': len(results) > 0, 'results': results}
-
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def run_ansible(params):
+    def run_ansible(module):
         '''perform the idempotent crud operations'''
-        yamlfile = Yedit(filename=params['src'],
-                         backup=params['backup'],
-                         separator=params['separator'])
+        yamlfile = Yedit(filename=module.params['src'],
+                         backup=module.params['backup'],
+                         separator=module.params['separator'])
 
-        state = params['state']
-
-        if params['src']:
+        if module.params['src']:
             rval = yamlfile.load()
 
-            if yamlfile.yaml_dict is None and state != 'present':
+            if yamlfile.yaml_dict is None and \
+               module.params['state'] != 'present':
                 return {'failed': True,
-                        'msg': 'Error opening file [{}].  Verify that the '.format(params['src']) +
-                               'file exists, that it is has correct permissions, and is valid yaml.'}
+                        'msg': 'Error opening file [%s].  Verify that the ' +
+                               'file exists, that it is has correct' +
+                               ' permissions, and is valid yaml.'}
 
-        if state == 'list':
-            if params['content']:
-                content = Yedit.parse_value(params['content'], params['content_type'])
+        if module.params['state'] == 'list':
+            if module.params['content']:
+                content = Yedit.parse_value(module.params['content'],
+                                            module.params['content_type'])
                 yamlfile.yaml_dict = content
 
-            if params['key']:
-                rval = yamlfile.get(params['key'])
+            if module.params['key']:
+                rval = yamlfile.get(module.params['key']) or {}
 
-            return {'changed': False, 'result': rval, 'state': state}
+            return {'changed': False, 'result': rval, 'state': "list"}
 
-        elif state == 'absent':
-            if params['content']:
-                content = Yedit.parse_value(params['content'], params['content_type'])
+        elif module.params['state'] == 'absent':
+            if module.params['content']:
+                content = Yedit.parse_value(module.params['content'],
+                                            module.params['content_type'])
                 yamlfile.yaml_dict = content
 
-            if params['update']:
-                rval = yamlfile.pop(params['key'], params['value'])
+            if module.params['update']:
+                rval = yamlfile.pop(module.params['key'],
+                                    module.params['value'])
             else:
-                rval = yamlfile.delete(params['key'])
+                rval = yamlfile.delete(module.params['key'])
 
-            if rval[0] and params['src']:
+            if rval[0] and module.params['src']:
                 yamlfile.write()
 
-            return {'changed': rval[0], 'result': rval[1], 'state': state}
+            return {'changed': rval[0], 'result': rval[1], 'state': "absent"}
 
-        elif state == 'present':
+        elif module.params['state'] == 'present':
             # check if content is different than what is in the file
-            if params['content']:
-                content = Yedit.parse_value(params['content'], params['content_type'])
+            if module.params['content']:
+                content = Yedit.parse_value(module.params['content'],
+                                            module.params['content_type'])
 
                 # We had no edits to make and the contents are the same
                 if yamlfile.yaml_dict == content and \
-                   params['value'] is None:
-                    return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
+                   module.params['value'] is None:
+                    return {'changed': False,
+                            'result': yamlfile.yaml_dict,
+                            'state': "present"}
 
                 yamlfile.yaml_dict = content
 
-            # If we were passed a key, value then
-            # we enapsulate it in a list and process it
-            # Key, Value passed to the module : Converted to Edits list #
-            edits = []
-            _edit = {}
-            if params['value'] is not None:
-                _edit['value'] = params['value']
-                _edit['value_type'] = params['value_type']
-                _edit['key'] = params['key']
+            # we were passed a value; parse it
+            if module.params['value']:
+                value = Yedit.parse_value(module.params['value'],
+                                          module.params['value_type'])
+                key = module.params['key']
+                if module.params['update']:
+                    # pylint: disable=line-too-long
+                    curr_value = Yedit.get_curr_value(Yedit.parse_value(module.params['curr_value']),  # noqa: E501
+                                                      module.params['curr_value_format'])  # noqa: E501
 
-                if params['update']:
-                    _edit['action'] = 'update'
-                    _edit['curr_value'] = params['curr_value']
-                    _edit['curr_value_format'] = params['curr_value_format']
-                    _edit['index'] = params['index']
+                    rval = yamlfile.update(key, value, module.params['index'], curr_value)  # noqa: E501
 
-                elif params['append']:
-                    _edit['action'] = 'append'
+                elif module.params['append']:
+                    rval = yamlfile.append(key, value)
+                else:
+                    rval = yamlfile.put(key, value)
 
-                edits.append(_edit)
-
-            elif params['edits'] is not None:
-                edits = params['edits']
-
-            if edits:
-                results = Yedit.process_edits(edits, yamlfile)
-
-                # if there were changes and a src provided to us we need to write
-                if results['changed'] and params['src']:
+                if rval[0] and module.params['src']:
                     yamlfile.write()
 
-                return {'changed': results['changed'], 'result': results['results'], 'state': state}
+                return {'changed': rval[0],
+                        'result': rval[1], 'state': "present"}
 
             # no edits to make
-            if params['src']:
+            if module.params['src']:
                 # pylint: disable=redefined-variable-type
                 rval = yamlfile.write()
                 return {'changed': rval[0],
                         'result': rval[1],
-                        'state': state}
+                        'state': "present"}
 
-            # We were passed content but no src, key or value, or edits.  Return contents in memory
-            return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
         return {'failed': True, 'msg': 'Unkown state passed'}
 
 # -*- -*- -*- End included fragment: ../../lib_utils/src/class/yedit.py -*- -*- -*-
