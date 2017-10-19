@@ -30,8 +30,12 @@
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
     ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
 
+- set_fact:
+    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+  when: openshift_master_config_dir is undefined
+
 - slurp:
-    src: "{{ ansible_service_broker_certs_dir }}/ca.crt"
+    src: "{{ openshift_master_config_dir }}/service-signer.crt"
   register: catalog_ca
 
 
@@ -327,12 +331,12 @@
   oc_obj:
     name: ansible-service-broker
     state: present
-    kind: ServiceBroker
+    kind: ClusterServiceBroker
     content:
       path: /tmp/brokerout
       data:
-        apiVersion: servicecatalog.k8s.io/v1alpha1
-        kind: ServiceBroker
+        apiVersion: servicecatalog.k8s.io/v1beta1
+        kind: ClusterServiceBroker
         metadata:
           name: ansible-service-broker
         spec:

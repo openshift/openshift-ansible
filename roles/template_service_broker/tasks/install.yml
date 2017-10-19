@@ -6,7 +6,7 @@
     - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
     - "default_images.yml"
 
-- name: set ansible_service_broker facts
+- name: set template_service_broker facts
   set_fact:
     template_service_broker_prefix: "{{ template_service_broker_prefix | default(__template_service_broker_prefix) }}"
     template_service_broker_version: "{{ template_service_broker_version | default(__template_service_broker_version) }}"
@@ -76,7 +76,7 @@
   when: openshift_master_config_dir is undefined
 
 - slurp:
-    src: "{{ openshift_master_config_dir }}/ca.crt"
+    src: "{{ openshift_master_config_dir }}/service-signer.crt"
   register: __ca_bundle
 
 # Register with broker

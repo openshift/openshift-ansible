@@ -31,7 +31,12 @@ spec:
         args:
         - -v
         - "5"
-        - "--leader-election-namespace=$(K8S_NAMESPACE)"
+        - --leader-election-namespace
+        - kube-service-catalog
+        - --broker-relist-interval
+        - "5m"
+        - --feature-gates
+        - OriginatingIdentity=true
         image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
         command: ["/usr/bin/controller-manager"]
         imagePullPolicy: Always
@@ -41,7 +46,19 @@ spec:
           protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /var/run/kubernetes-service-catalog
+          name: service-catalog-ssl
+          readOnly: true
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      volumes:
+      - name: service-catalog-ssl
+        secret:
+          defaultMode: 420
+          items:
+          - key: tls.crt
+            path: apiserver.crt
+          secretName: apiserver-ssl
