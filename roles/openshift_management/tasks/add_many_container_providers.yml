@@ -1,9 +1,15 @@
 ---
-- hosts: "{{ groups['masters'][0] }}"
+- hosts: localhost
   tasks:
+  - name: Ensure the container provider configuration is defined
+    assert:
+      that: container_providers_config is defined
+      msg: |
+        Error: Must provide providers config path. Fix: Add '-e container_providers_config=/path/to/your/config' to the ansible-playbook command
+
   - name: Include providers/management configuration
     include_vars:
-      file: "{{ openshift_management_many_container_providers_config }}"
+      file: "{{ container_providers_config }}"
 
   - name: Ensure this cluster is a container provider
     uri:
@@ -20,8 +26,16 @@
     with_items: "{{ container_providers }}"
     register: results
 
-  - name: Ensure failed additions are reported for each container provider
+  # TODO: Make this prettier and easier to read
+  - name: Save results
+    copy:
+      dest: /tmp/results.json
+      content: "{{ results.results | to_nice_json }}"
+      # state: present
+    # debug:
+    #   var: item.item
+    # with_items: "{{ results.results }}"
+
+  - name: print each result
     debug:
-      msg: |
-        FLOOP {{ item.item.hostname }}
-    with_items: "{{ results.results }}"
+      msg: "{{ results.results | oo_filter_container_providers }}"

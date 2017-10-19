@@ -482,16 +482,14 @@ preview** script which allows you to add multiple container platforms
 as container providers in any arbitrary MIQ/CFME server.
 
 Using the multiple-provider script requires manual configuration and
-the setting of an additional inventory parameter.
+setting an `EXTRA_VARS` parameter on the command-line.
 
 
 1. Copy the
    [container_providers.yml](files/examples/container_providers.yml)
-   example somewhere
-1. Add the `openshift_management_many_container_providers_config`
-   parameter to your inventory and set the value to the full path of
-   the file you copied in `Step 1`
-1. Update the `hostname`, `user`, and `password` parameters in the
+   example somewhere, such as `/tmp/cp.yml`
+1. If you changed your CFME/MIQ name or password, update the
+   `hostname`, `user`, and `password` parameters in the
    `management_server` key in the `container_providers.yml` file copy
 1. Fill in an entry under the `container_providers` key for *each* OCP
    or Origin cluster you want to add as container providers
@@ -510,6 +508,7 @@ the setting of an additional inventory parameter.
 
 * `port` - Update this key if your OCP/Origin cluster runs the API on a port other than `8443`
 * `endpoint` - You may enable SSL verification (`verify_ssl`) or change the validation setting to `ssl-with-validation`. Support for custom trusted CA certificates is not available at this time.
+
 
 Let's see an example describing the following scenario:
 
@@ -542,18 +541,15 @@ management_server:
   password: b3tt3r_p4SSw0rd
 ```
 
-Then you would add to your inventory file:
-
-```ini
-[OSEv3:vars]
-# ...
-openshift_management_many_container_providers_config=/tmp/cp.yml
-```
-
-Finally, run the many-container-providers integration script:
+Then you will run the many-container-providers integration script. You
+**must** provide the path to the container providers configuration
+file as an `EXTRA_VARS` parameter to `ansible-playbook`. Use the `-e`
+(or `--extra-vars`) parameter to set `container_providers_config` to
+the config file path.
 
 ```
-$ ansible-playbook -v -i <YOUR_INVENTORY> roles/openshift_management/tasks/add_many_container_providers.yml
+$ ansible-playbook -v -e container_providers_config=/tmp/cp.yml \
+      roles/openshift_management/tasks/add_many_container_providers.yml
 ```
 
 Afterwards you will find two new container providers in your

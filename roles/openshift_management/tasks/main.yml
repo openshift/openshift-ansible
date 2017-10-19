@@ -22,6 +22,10 @@
 
 ######################################################################
 # STORAGE - Initialize basic storage class
+- name: Determine the correct NFS host if required
+  include: storage/nfs_server.yml
+  when: openshift_management_storage_class in ['nfs', 'nfs_external']
+
 #---------------------------------------------------------------------
 # * nfs - set up NFS shares on the first master for a proof of concept
 - name: Create required NFS exports for Management app storage
