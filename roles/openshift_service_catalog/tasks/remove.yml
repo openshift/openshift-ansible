@@ -3,9 +3,10 @@
   command: >
     oc delete apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
 
-- name: Remove Policy Binding
-  command: >
-    oc delete policybindings/kube-system:default -n kube-system --ignore-not-found
+# TODO: policybinding is not a resource type. what was the original intention of this?
+#- name: Remove Policy Binding
+#  command: >
+#    oc delete policybindings/kube-system:default -n kube-system --ignore-not-found
 
 # TODO: this module doesn't currently remove this
 #- name: Remove service catalog api service
