@@ -31,6 +31,7 @@ GlusterFS Install          : Not Started
 Hosted Install             : Complete
 Metrics Install            : Not Started
 Logging Install            : Not Started
+Prometheus Install         : Not Started
 Service Catalog Install    : Not Started
 
 -----------------------------------------------------
@@ -49,6 +50,7 @@ GlusterFS Install          : Not Started
 Hosted Install             : Not Started
 Metrics Install            : Not Started
 Logging Install            : Not Started
+Prometheus Install         : Not Started
 Service Catalog Install    : Not Started
 
 '''
@@ -80,6 +82,7 @@ class CallbackModule(CallbackBase):
             'installer_phase_hosted',
             'installer_phase_metrics',
             'installer_phase_logging',
+            'installer_phase_prometheus',
             'installer_phase_servicecatalog',
             'installer_phase_management',
         ]
@@ -129,6 +132,10 @@ class CallbackModule(CallbackBase):
             'installer_phase_logging': {
                 'title': 'Logging Install',
                 'playbook': 'playbooks/byo/openshift-cluster/openshift-logging.yml'
+            },
+            'installer_phase_prometheus': {
+                'title': 'Prometheus Install',
+                'playbook': 'playbooks/byo/openshift-cluster/openshift-prometheus.yml'
             },
             'installer_phase_servicecatalog': {
                 'title': 'Service Catalog Install',
