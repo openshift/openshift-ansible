@@ -9,14 +9,21 @@ metadata:
     cluster-name: "{{ es_cluster_name }}"
     logging-infra: "{{logging_component}}"
     es-node-role: "{{ es_role }}"
-    elasticsearch-http: "{{ es_http_service }}"
+    es-node-client: "{{ es_http_service }}"
+    es-node-data: "{{ node_data }}"
+    es-node-master: "{{ node_master }}"
 spec:
   replicas: {{es_replicas|default(1)}}
   selector:
     provider: openshift
     component: "{{es_component}}"
     deployment: "{{deploy_name}}"
+    cluster-name: "{{ es_cluster_name }}"
     logging-infra: "{{logging_component}}"
+    es-node-role: "{{ es_role }}"
+    es-node-client: "{{ es_http_service }}"
+    es-node-data: "{{ node_data }}"
+    es-node-master: "{{ node_master }}"
   strategy:
     type: Recreate
   template:
@@ -29,7 +36,9 @@ spec:
         deployment: "{{deploy_name}}"
         cluster-name: "{{ es_cluster_name }}"
         es-node-role: "{{ es_role }}"
-        elasticsearch-http: "{{ es_http_service }}"
+        es-node-client: "{{ es_http_service }}"
+        es-node-data: "{{ node_data }}"
+        es-node-master: "{{ node_master }}"
     spec:
       terminationGracePeriod: 600
       serviceAccountName: {{ openshift_logging_elasticsearch_sa_name }}
