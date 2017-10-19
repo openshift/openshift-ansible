@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.163.0%{?dist}
+Release:        0.164.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.164.0
+- Change to service-signer.crt for template_service_broker CA_BUNDLE
+  (staebler@redhat.com)
+- Use service-signer.crt for ca_bundle passed to clusterservicebroker
+  (staebler@redhat.com)
+- Rename ServiceBroker to ClusterServiceBroker for ansible_service_broker task.
+  (staebler@redhat.com)
+- Add apiserver.crt to service-catalog controller-manager deployment.
+  (staebler@redhat.com)
+- Remove redundant faulty role binding ifrom
+  kubeservicecatalog_roles_bindings.yml (staebler@redhat.com)
+- Update service catalog playbook for service-catalog rc1 (staebler@redhat.com)
+
 * Thu Oct 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.163.0
 - set use_manageiq as default (efreiber@redhat.com)
 
