@@ -2,9 +2,21 @@
 - name: update ca trust
   command: update-ca-trust
   notify:
-    - restart docker after updating ca trust
+    - check for container runtime after updating ca trust
 
-- name: restart docker after updating ca trust
+- name: check for container runtime after updating ca trust
+  command: >
+    systemctl -q is-active {{ openshift.docker.service_name }}.service
+  register: l_docker_installed
+  # An rc of 0 indicates that the container runtime service is
+  # running. We will restart it by notifying the restart handler since
+  # we have updated the system CA trust.
+  changed_when: l_docker_installed.rc == 0
+  failed_when: false
+  notify:
+    - restart container runtime after updating ca trust
+
+- name: restart container runtime after updating ca trust
   systemd:
     name: "{{ openshift.docker.service_name }}"
     state: restarted
