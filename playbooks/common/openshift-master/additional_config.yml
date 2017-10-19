@@ -25,7 +25,7 @@
   - role: openshift_hosted_templates
     registry_url: "{{ openshift.master.registry_url }}"
   - role: openshift_manageiq
-    when: openshift_use_manageiq | default(false) | bool
+    when: openshift_use_manageiq | default(true) | bool
   - role: cockpit
     when:
     - openshift.common.is_atomic
