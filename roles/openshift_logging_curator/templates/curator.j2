@@ -39,13 +39,26 @@ spec:
           name: "curator"
           image: {{image}}
           imagePullPolicy: IfNotPresent
+{% if (curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "") or (curator_cpu_limit is defined and curator_cpu_limit is not none and curator_cpu_limit != "") or (curator_cpu_request is defined and curator_cpu_request is not none and curator_cpu_request != "") %}
           resources:
+{%   if (curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "") or (curator_cpu_limit is defined and curator_cpu_limit is not none and curator_cpu_limit != "") %}
             limits:
+{%     if curator_cpu_limit is defined and curator_cpu_limit is not none and curator_cpu_limit != "" %}
               cpu: "{{curator_cpu_limit}}"
-{% if curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "" %}
+{%     endif %}
+{%     if curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "" %}
               memory: "{{curator_memory_limit}}"
+{%     endif %}
+{%   endif %}
+{%   if (curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "") or (curator_cpu_request is defined and curator_cpu_request is not none and curator_cpu_request != "") %}
             requests:
+{%     if curator_cpu_request is defined and curator_cpu_request is not none and curator_cpu_request != "" %}
+              cpu: "{{curator_cpu_request}}"
+{%     endif %}
+{%     if curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "" %}
               memory: "{{curator_memory_limit}}"
+{%     endif %}
+{%   endif %}
 {% endif %}
           env:
             -

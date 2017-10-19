@@ -9,10 +9,11 @@ openshift_logging_mux_namespace: logging
 
 ### Common settings
 openshift_logging_mux_nodeselector: "{{ openshift_hosted_logging_mux_nodeselector_label | default('') | map_from_pairs }}"
-openshift_logging_mux_cpu_limit: 500m
-openshift_logging_mux_memory_limit: 2Gi
-openshift_logging_mux_buffer_queue_limit: 1024
-openshift_logging_mux_buffer_size_limit: 1m
+openshift_logging_mux_cpu_limit: null
+openshift_logging_mux_cpu_request: 100m
+openshift_logging_mux_memory_limit: 512Mi
+openshift_logging_mux_buffer_queue_limit: 32
+openshift_logging_mux_buffer_size_limit: 8m
 
 openshift_logging_mux_replicas: 1
 
@@ -57,11 +58,11 @@ openshift_logging_mux_file_buffer_storage_type: "emptydir"
 openshift_logging_mux_file_buffer_pvc_name: "logging-mux-pvc"
 
 # required if the PVC does not already exist
-openshift_logging_mux_file_buffer_pvc_size: 4Gi
+openshift_logging_mux_file_buffer_pvc_size: 1Gi
 openshift_logging_mux_file_buffer_pvc_dynamic: false
 openshift_logging_mux_file_buffer_pvc_pv_selector: {}
 openshift_logging_mux_file_buffer_pvc_access_modes: ['ReadWriteOnce']
 openshift_logging_mux_file_buffer_storage_group: '65534'
 
 openshift_logging_mux_file_buffer_pvc_prefix: "logging-mux"
-openshift_logging_mux_file_buffer_limit: 2Gi
+openshift_logging_mux_file_buffer_limit: 256Mi

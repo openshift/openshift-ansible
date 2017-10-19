@@ -16,20 +16,24 @@ openshift_logging_curator_run_minute: 0
 openshift_logging_curator_run_timezone: UTC
 openshift_logging_curator_script_log_level: INFO
 openshift_logging_curator_log_level: ERROR
-openshift_logging_curator_cpu_limit: 100m
-openshift_logging_curator_memory_limit: null
+openshift_logging_curator_cpu_limit: null
+openshift_logging_curator_memory_limit: 256Mi
+openshift_logging_curator_cpu_request: 100m
 openshift_logging_curator_nodeselector: "{{ openshift_hosted_logging_curator_nodeselector | default('') | map_from_pairs }}"
 
-openshift_logging_curator_ops_cpu_limit: 100m
-openshift_logging_curator_ops_memory_limit: null
+openshift_logging_curator_ops_cpu_limit: null
+openshift_logging_curator_ops_memory_limit: 256Mi
+openshift_logging_curator_ops_cpu_request: 100m
 openshift_logging_curator_ops_nodeselector: "{{ openshift_hosted_logging_curator_ops_nodeselector | default('') | map_from_pairs }}"
 
 openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 openshift_logging_kibana_cpu_limit: null
 openshift_logging_kibana_memory_limit: 736Mi
+openshift_logging_kibana_cpu_request: 100m
 openshift_logging_kibana_proxy_debug: false
 openshift_logging_kibana_proxy_cpu_limit: null
 openshift_logging_kibana_proxy_memory_limit: 256Mi
+openshift_logging_kibana_proxy_cpu_request: 100m
 openshift_logging_kibana_replica_count: 1
 openshift_logging_kibana_edge_term_policy: Redirect
 
@@ -51,9 +55,11 @@ openshift_logging_kibana_ca: ""
 openshift_logging_kibana_ops_hostname: "{{ openshift_hosted_logging_ops_hostname | default('kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
 openshift_logging_kibana_ops_cpu_limit: null
 openshift_logging_kibana_ops_memory_limit: 736Mi
+openshift_logging_kibana_ops_cpu_request: 100m
 openshift_logging_kibana_ops_proxy_debug: false
 openshift_logging_kibana_ops_proxy_cpu_limit: null
 openshift_logging_kibana_ops_proxy_memory_limit: 256Mi
+openshift_logging_kibana_ops_proxy_cpu_request: 100m
 openshift_logging_kibana_ops_replica_count: 1
 
 #The absolute path on the control node to the cert file to use
@@ -69,14 +75,15 @@ openshift_logging_kibana_ops_key: ""
 openshift_logging_kibana_ops_ca: ""
 
 openshift_logging_fluentd_nodeselector: "{{ openshift_hosted_logging_fluentd_nodeselector_label | default('logging-infra-fluentd=true') | map_from_pairs }}"
-openshift_logging_fluentd_cpu_limit: 100m
+openshift_logging_fluentd_cpu_limit: null
 openshift_logging_fluentd_memory_limit: 512Mi
+openshift_logging_fluentd_cpu_request: 100m
 openshift_logging_fluentd_es_copy: false
 openshift_logging_fluentd_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
 openshift_logging_fluentd_journal_read_from_head: "{{ openshift_hosted_logging_journal_read_from_head | default('') }}"
 openshift_logging_fluentd_hosts: ['--all']
-openshift_logging_fluentd_buffer_queue_limit: 1024
-openshift_logging_fluentd_buffer_size_limit: 1m
+openshift_logging_fluentd_buffer_queue_limit: 32
+openshift_logging_fluentd_buffer_size_limit: 8m
 
 openshift_logging_es_host: logging-es
 openshift_logging_es_port: 9200
@@ -84,7 +91,8 @@ openshift_logging_es_ca: /etc/fluent/keys/ca
 openshift_logging_es_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_client_key: /etc/fluent/keys/key
 openshift_logging_es_cluster_size: "{{ openshift_hosted_logging_elasticsearch_cluster_size | default(1) }}"
-openshift_logging_es_cpu_limit: 1000m
+openshift_logging_es_cpu_limit: null
+openshift_logging_es_cpu_request: "1"
 # the logging appenders for the root loggers to write ES logs. Valid values: 'file', 'console'
 openshift_logging_es_log_appenders: ['file']
 openshift_logging_es_memory_limit: "{{ openshift_hosted_logging_elasticsearch_instance_ram | default('8Gi') }}"
@@ -125,8 +133,9 @@ openshift_logging_es_ops_ca: /etc/fluent/keys/ca
 openshift_logging_es_ops_client_cert: /etc/fluent/keys/cert
 openshift_logging_es_ops_client_key: /etc/fluent/keys/key
 openshift_logging_es_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
-openshift_logging_es_ops_cpu_limit: 1000m
+openshift_logging_es_ops_cpu_limit: null
 openshift_logging_es_ops_memory_limit: "{{ openshift_hosted_logging_elasticsearch_ops_instance_ram | default('8Gi') }}"
+openshift_logging_es_ops_cpu_request: "1"
 openshift_logging_es_ops_pv_selector: "{{ openshift_hosted_loggingops_storage_labels | default('') }}"
 openshift_logging_es_ops_pvc_dynamic: "{{ openshift_hosted_logging_elasticsearch_ops_pvc_dynamic | default(False) }}"
 openshift_logging_es_ops_pvc_size: "{{ openshift_hosted_logging_elasticsearch_ops_pvc_size | default('') }}"
@@ -159,8 +168,9 @@ openshift_logging_mux_allow_external: False
 openshift_logging_use_mux: "{{ openshift_logging_mux_allow_external | default(False) }}"
 openshift_logging_mux_hostname: "{{ 'mux.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
 openshift_logging_mux_port: 24284
-openshift_logging_mux_cpu_limit: 500m
-openshift_logging_mux_memory_limit: 1Gi
+openshift_logging_mux_cpu_limit: null
+openshift_logging_mux_memory_limit: 512Mi
+openshift_logging_mux_cpu_request: 100m
 # the namespace to use for undefined projects should come first, followed by any
 # additional namespaces to create by default - users will typically not need to set this
 openshift_logging_mux_default_namespaces: ["mux-undefined"]

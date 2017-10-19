@@ -38,17 +38,26 @@ spec:
           name: "kibana"
           image: {{ image }}
           imagePullPolicy: IfNotPresent
-{% if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") %}
+{% if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") or (kibana_cpu_request is defined and kibana_cpu_request is not none and kibana_cpu_request != "") %}
           resources:
+{%   if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") %}
             limits:
-{% if kibana_cpu_limit is not none and kibana_cpu_limit != "" %}
+{%     if kibana_cpu_limit is not none and kibana_cpu_limit != "" %}
               cpu: "{{ kibana_cpu_limit }}"
-{% endif %}
-{% if kibana_memory_limit is not none and kibana_memory_limit != "" %}
+{%     endif %}
+{%     if kibana_memory_limit is not none and kibana_memory_limit != "" %}
               memory: "{{ kibana_memory_limit }}"
+{%     endif %}
+{%   endif %}
+{%   if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_request is defined and kibana_cpu_request is not none and kibana_cpu_request != "") %}
             requests:
+{%     if kibana_cpu_request is not none and kibana_cpu_request != "" %}
+              cpu: "{{ kibana_cpu_request }}"
+{%     endif %}
+{%     if kibana_memory_limit is not none and kibana_memory_limit != "" %}
               memory: "{{ kibana_memory_limit }}"
-{% endif %}
+{%     endif %}
+{%   endif %}
 {% endif %}
           env:
             - name: "ES_HOST"
@@ -76,17 +85,26 @@ spec:
           name: "kibana-proxy"
           image: {{ proxy_image }}
           imagePullPolicy: IfNotPresent
-{% if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") %}
+{% if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") or (kibana_proxy_cpu_request is defined and kibana_proxy_cpu_request is not none and kibana_proxy_cpu_request != "") %}
           resources:
+{%   if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") %}
             limits:
-{% if kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "" %}
+{%     if kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "" %}
               cpu: "{{ kibana_proxy_cpu_limit }}"
-{% endif %}
-{% if kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "" %}
+{%     endif %}
+{%     if kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "" %}
               memory: "{{ kibana_proxy_memory_limit }}"
+{%     endif %}
+{%   endif %}
+{%   if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_request is defined and kibana_proxy_cpu_request is not none and kibana_proxy_cpu_request != "") %}
             requests:
+{%     if kibana_proxy_cpu_request is not none and kibana_proxy_cpu_request != "" %}
+              cpu: "{{ kibana_proxy_cpu_request }}"
+{%     endif %}
+{%     if kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "" %}
               memory: "{{ kibana_proxy_memory_limit }}"
-{% endif %}
+{%     endif %}
+{%   endif %}
 {% endif %}
           ports:
             -

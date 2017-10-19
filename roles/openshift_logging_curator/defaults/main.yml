@@ -9,8 +9,9 @@ openshift_logging_curator_namespace: logging
 
 ### Common settings
 openshift_logging_curator_nodeselector: ""
-openshift_logging_curator_cpu_limit: 100m
-openshift_logging_curator_memory_limit: null
+openshift_logging_curator_cpu_limit: null
+openshift_logging_curator_cpu_request: 100m
+openshift_logging_curator_memory_limit: 256Mi
 
 openshift_logging_curator_es_host: "logging-es"
 openshift_logging_curator_es_port: 9200
