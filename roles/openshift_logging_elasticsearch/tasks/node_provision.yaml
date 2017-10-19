@@ -122,7 +122,7 @@
     es_component: "{{ es_component }}"
     deploy_name: "{{ es_deploy_name }}"
     storage_type: "{{ node_storage_type | default(emptydir) }}"
-    image: "{{ openshift_logging_elasticsearch_image_prefix }}{{ openshift_logging_elasticsearch_image_name }}:{{ openshift_logging_elasticsearch_image_version }}"
+    image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch:{{ openshift_logging_elasticsearch_image_version }}"
     proxy_image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
   changed_when: false
 
