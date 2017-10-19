@@ -1,12 +1,14 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: prometheus
   namespace: {{ namespace }}
   labels:
     app: prometheus
 spec:
-  replicas: {{ prom_replicas|default(1) }}
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
   selector:
     provider: openshift
     matchLabels:
@@ -60,6 +62,8 @@ spec:
         - -tls-key=/etc/tls/private/tls.key
         - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
         - -cookie-secret-file=/etc/proxy/secrets/session_secret
+        - -openshift-ca=/etc/pki/tls/cert.pem
+        - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         - -skip-auth-regex=^/metrics
         volumeMounts:
         - mountPath: /etc/tls/private
@@ -72,6 +76,7 @@ spec:
       - name: prometheus
         args:
         - --storage.tsdb.retention=6h
+        - --storage.tsdb.min-block-duration=2m
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.listen-address=localhost:9090
         image: "{{ openshift_prometheus_image_prometheus }}"
@@ -133,6 +138,8 @@ spec:
         - -tls-key=/etc/tls/private/tls.key
         - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
         - -cookie-secret-file=/etc/proxy/secrets/session_secret
+        - -openshift-ca=/etc/pki/tls/cert.pem
+        - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         volumeMounts:
         - mountPath: /etc/tls/private
           name: alerts-tls

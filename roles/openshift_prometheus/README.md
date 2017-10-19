@@ -17,8 +17,6 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 - `openshift_prometheus_namespace`: project (i.e. namespace) where the components will be
   deployed.
 
-- `openshift_prometheus_replicas`: The number of replicas for prometheus deployment.
-
 - `openshift_prometheus_node_selector`: Selector for the nodes prometheus will be deployed on.
 
 - `openshift_prometheus_image_<COMPONENT>`: specify image for the component 
