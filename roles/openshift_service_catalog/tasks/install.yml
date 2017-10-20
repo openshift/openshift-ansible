@@ -47,16 +47,15 @@
     dest: "{{ mktemp.stdout }}/kubeservicecatalog_roles_bindings.yml"
 
 - oc_obj:
-    name: service-catalog
+    name: service-catalog-role-bindings
     kind: template
     namespace: "kube-service-catalog"
     files:
       - "{{ mktemp.stdout }}/kubeservicecatalog_roles_bindings.yml"
-    delete_after: yes
 
 - oc_process:
     create: True
-    template_name: service-catalog
+    template_name: service-catalog-role-bindings
     namespace: "kube-service-catalog"
 
 - copy:
@@ -64,16 +63,15 @@
     dest: "{{ mktemp.stdout }}/kubesystem_roles_bindings.yml"
 
 - oc_obj:
-    name: kube-system-service-catalog
+    name: kube-system-service-catalog-role-bindings
     kind: template
     namespace: kube-system
     files:
       - "{{ mktemp.stdout }}/kubesystem_roles_bindings.yml"
-    delete_after: yes
 
 - oc_process:
     create: True
-    template_name: kube-system-service-catalog
+    template_name: kube-system-service-catalog-role-bindings
     namespace: kube-system
 
 - oc_obj:
