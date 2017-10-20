@@ -9,6 +9,10 @@
     oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
   when: oreg_host is not defined
 
+- set_fact:
+    oreg_auth_credentials_replace: False
+  when: oreg_auth_credentials_replace is not defined
+
 - name: Check for credentials file for registry auth
   stat:
     path: "{{ oreg_auth_credentials_path }}"
