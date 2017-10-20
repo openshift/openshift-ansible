@@ -549,7 +549,7 @@ the config file path.
 
 ```
 $ ansible-playbook -v -e container_providers_config=/tmp/cp.yml \
-      roles/openshift_management/tasks/add_many_container_providers.yml
+      playbooks/byo/openshift-management/add_many_container_providers.yml
 ```
 
 Afterwards you will find two new container providers in your

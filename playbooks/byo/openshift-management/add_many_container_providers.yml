@@ -36,6 +36,11 @@
     #   var: item.item
     # with_items: "{{ results.results }}"
 
+  # Include openshift_management for access to filter_plugins.
+  - include_role:
+      name: openshift_management
+      tasks_from: noop
+
   - name: print each result
     debug:
       msg: "{{ results.results | oo_filter_container_providers }}"
