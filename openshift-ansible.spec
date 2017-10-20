@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.168.0%{?dist}
+Release:        0.169.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.169.0
+- Initial Kuryr support (mdulko@redhat.com)
+- Indentation errors (dymurray@redhat.com)
+- Bug 1503233 - Add liveness and readiness probe checks to ASB deploymentconfig
+  (dymurray@redhat.com)
+
 * Fri Oct 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.168.0
 - 
 
