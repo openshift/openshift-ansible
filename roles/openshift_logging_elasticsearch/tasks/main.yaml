@@ -94,7 +94,7 @@
   set_fact:
     es_masters_quorum: "{{ openshift_logging_elasticsearch_topology.node_topology.masters.replicas |int /2 + 1 }}"
     es_recover_expected_data_nodes: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdata|length |default(1) }}"
-  when:  openshift_logging_elasticsearch_topology.node_topology.clientdatamaster is not defined
+  when: openshift_logging_elasticsearch_topology.node_topology.clientdatamaster is not defined
 
 # Deploy masters
 - include: "{{ role_path }}/tasks/node_provision.yaml"
@@ -155,4 +155,3 @@
     requests: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.requests }}"
     es_node_selector: "{{ openshift_logging_elasticsearch_topology.node_topology.clientdatamaster.nodeSelector | default({}) }}"
   when: openshift_logging_elasticsearch_topology.node_topology.clientdatamaster is defined
-

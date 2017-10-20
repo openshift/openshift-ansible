@@ -54,36 +54,36 @@
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
 - when:
-    - logging_elasticsearch_pvc.results.stderr is defined
-    - node_storage_type == "pvc"
+  - logging_elasticsearch_pvc.results.stderr is defined
+  - node_storage_type == "pvc"
   block:
-    # storageclasses are used by default but if static then disable
-    # storageclasses with the storageClassName set to "" in pvc.j2
-    - name: Creating ES storage template - static
-      template:
-        src: pvc.j2
-        dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
-      vars:
-        obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-        size: "{{ openshift_logging_elasticsearch_pvc_size }}"
-        access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
-        pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
-        storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
-      when:
-        - not openshift_logging_elasticsearch_pvc_dynamic | bool
+  # storageclasses are used by default but if static then disable
+  # storageclasses with the storageClassName set to "" in pvc.j2
+  - name: Creating ES storage template - static
+    template:
+      src: pvc.j2
+      dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
+    vars:
+      obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+      size: "{{ openshift_logging_elasticsearch_pvc_size }}"
+      access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
+      pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+      storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
+    when:
+    - not openshift_logging_elasticsearch_pvc_dynamic | bool
 
     # Storageclasses are used by default if configured
-    - name: Creating ES storage template - dynamic
-      template:
-        src: pvc.j2
-        dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
-      vars:
-        obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
-        size: "{{ openshift_logging_elasticsearch_pvc_size }}"
-        access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
-        pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
-      when:
-        - openshift_logging_elasticsearch_pvc_dynamic | bool
+  - name: Creating ES storage template - dynamic
+    template:
+      src: pvc.j2
+      dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
+    vars:
+      obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+      size: "{{ openshift_logging_elasticsearch_pvc_size }}"
+      access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
+      pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+    when:
+    - openshift_logging_elasticsearch_pvc_dynamic | bool
 
 - name: Set ES data node storage
   oc_obj:
@@ -92,7 +92,7 @@
     name: "{{ openshift_logging_elasticsearch_pvc_name }}"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     files:
-      - "{{ tempdir }}/templates/logging-es-pvc.yml"
+    - "{{ tempdir }}/templates/logging-es-pvc.yml"
     delete_after: true
   when:
   - node_storage_type == "pvc"
@@ -135,7 +135,7 @@
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     kind: dc
     files:
-      - "{{ tempdir }}/templates/logging-es-dc.yml"
+    - "{{ tempdir }}/templates/logging-es-dc.yml"
     delete_after: true
 
 # scale up

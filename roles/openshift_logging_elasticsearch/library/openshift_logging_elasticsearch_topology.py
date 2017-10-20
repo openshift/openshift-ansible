@@ -113,7 +113,6 @@ class OpenshiftLoggingTopology(object):
         else:
             self._node_topology = dict(clientdatamaster=clientdata[0])
 
-
     @staticmethod
     def reconcile_masters(masters_ex, masters_des):
         '''We can scale masters however we want'''
@@ -153,7 +152,8 @@ class OpenshiftLoggingTopology(object):
             ex_nd_id = self.find_similar_clientdata_node(desired_clientdata, node)
             del desired_clientdata[ex_nd_id]
 
-    def reconcile_clientdatamaster(self, cdm_ex, cdm_des):
+    @staticmethod
+    def reconcile_clientdatamaster(cdm_ex, cdm_des):
         '''We assume we get just 1 existing clientdata node'''
         # pylint: disable=unused-argument
 
@@ -171,10 +171,10 @@ class OpenshiftLoggingTopology(object):
             self._node_topology.get('masters', {}))
         clientdata = self.reconcile_clientdata(
             self._existing_topology.get('clientdata', []),
-            self._node_topology.get('clientdata',{}))
-        clientdatamaster = self.reconcile_clientdatamaster(
+            self._node_topology.get('clientdata', {}))
+        clientdatamaster = OpenshiftLoggingTopology.reconcile_clientdatamaster(
             self._existing_topology.get('clientdatamaster', []),
-            self._node_topology.get('clientdatamaster',{}))
+            self._node_topology.get('clientdatamaster', {}))
         self._reconciled_topology = dict(masters=masters,
                                          clientdata=clientdata,
                                          clientdatamaster=clientdatamaster)
