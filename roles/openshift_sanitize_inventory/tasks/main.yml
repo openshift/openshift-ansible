@@ -23,6 +23,8 @@
     # TODO: once this is well-documented, add deprecation notice if using old name.
     deployment_type: "{{ openshift_deployment_type | default(deployment_type) | default | string }}"
     openshift_deployment_type: "{{ openshift_deployment_type | default(deployment_type) | default | string }}"
+    deployment_subtype: "{{ openshift_deployment_subtype | default(deployment_subtype) | default('basic') | string }}"
+    openshift_deployment_subtype: "{{ openshift_deployment_subtype | default(deployment_subtype) | default('basic') | string }}"
 
 - name: Abort when deployment type is invalid
   # this variable is required; complain early and clearly if it is invalid.
