@@ -19,10 +19,14 @@
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_contiv | default(False)) | ternary('contiv','nothing') }}
     changed_when: False
+  # Create group for kuryr nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_kuryr | default(False)) | ternary('kuryr','nothing') }}
+    changed_when: False
 
 - include: etcd_client_config.yml
   vars:
-    openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv"
+    openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv:oo_nodes_use_kuryr"
 
 - name: Additional node config
   hosts: oo_nodes_use_flannel
@@ -50,3 +54,11 @@
   - role: contiv
     contiv_role: netplugin
     when: openshift_use_contiv | default(false) | bool
+
+- name: Configure Kuryr node
+  hosts: oo_nodes_use_kuryr
+  tasks:
+  - include_role:
+      name: kuryr
+      tasks_from: node
+    when: openshift_use_kuryr | default(false) | bool

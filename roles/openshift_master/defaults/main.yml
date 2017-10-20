@@ -46,6 +46,9 @@ r_openshift_master_use_nuage: "{{ r_openshift_master_use_nuage_default }}"
 r_openshift_master_use_contiv_default: "{{ openshift_use_contiv | default(False) }}"
 r_openshift_master_use_contiv: "{{ r_openshift_master_use_contiv_default }}"
 
+r_openshift_master_use_kuryr_default: "{{ openshift_use_kuryr | default(False) }}"
+r_openshift_master_use_kuryr: "{{ r_openshift_master_use_kuryr_default }}"
+
 r_openshift_master_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 r_openshift_master_data_dir: "{{ r_openshift_master_data_dir_default }}"
 

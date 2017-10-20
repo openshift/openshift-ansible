@@ -206,6 +206,12 @@
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
+  tasks:
+  - include_role:
+      name: kuryr
+      tasks_from: master
+    when: openshift_use_kuryr | default(false) | bool
+
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
