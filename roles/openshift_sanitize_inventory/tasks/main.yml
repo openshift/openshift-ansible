@@ -54,3 +54,16 @@
 - include: unsupported.yml
   when:
     - not openshift_enable_unsupported_configurations | default(false) | bool
+
+- name: Ensure clusterid is set along with the cloudprovider
+  fail:
+    msg: >
+      Ensure that the openshift_clusterid is set and that all infrastructure has the required tags.
+
+      For dynamic provisioning when using multiple clusters in different zones, tag each node with Key=kubernetes.io/cluster/xxxx,Value=clusterid where xxxx and clusterid are unique per cluster. In versions prior to 3.6, this was Key=KubernetesCluster,Value=clusterid.
+
+      https://github.com/openshift/openshift-docs/blob/master/install_config/persistent_storage/dynamically_provisioning_pvs.adoc#available-dynamically-provisioned-plug-ins
+  when:
+    - openshift_clusterid is not defined
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'aws'
