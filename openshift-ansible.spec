@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.57
+Version:        3.6.173.0.58
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.58-1
+- Improve CA playbook restart logic and skip restarts when related services had
+  previously expired certificates. (abutcher@redhat.com)
+- Fix undefined variable for master upgrades (mgugino@redhat.com)
+- Ensuring that kube-service-catalog project has empty node-selector
+  (ewolinet@redhat.com)
+
 * Wed Oct 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.57-1
 - Ensure controllerConfig.serviceServingCert is correctly set during upgrade.
   (abutcher@redhat.com)
