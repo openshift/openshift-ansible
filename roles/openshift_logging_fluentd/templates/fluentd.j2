@@ -32,12 +32,27 @@ spec:
         imagePullPolicy: Always
         securityContext:
           privileged: true
+{% if (fluentd_memory_limit is defined and fluentd_memory_limit is not none) or (fluentd_cpu_limit is defined and fluentd_cpu_limit is not none) or (fluentd_cpu_request is defined and fluentd_cpu_request is not none) %}
         resources:
+{%   if (fluentd_memory_limit is defined and fluentd_memory_limit is not none) or (fluentd_cpu_limit is defined and fluentd_cpu_limit is not none) %}
           limits:
-            cpu: {{ openshift_logging_fluentd_cpu_limit }}
-            memory: {{ openshift_logging_fluentd_memory_limit }}
+{%     if fluentd_cpu_limit is not none %}
+            cpu: "{{fluentd_cpu_limit}}"
+{%     endif %}
+{%     if fluentd_memory_limit is not none %}
+            memory: "{{fluentd_memory_limit}}"
+{%     endif %}
+{%   endif %}
+{%   if (fluentd_memory_limit is defined and fluentd_memory_limit is not none) or (fluentd_cpu_request is defined and fluentd_cpu_request is not none) %}
           requests:
-            memory: {{ openshift_logging_fluentd_memory_limit }}
+{%     if fluentd_cpu_request is not none %}
+            cpu: "{{fluentd_cpu_request}}"
+{%     endif %}
+{%     if fluentd_memory_limit is not none %}
+            memory: "{{fluentd_memory_limit}}"
+{%     endif %}
+{%   endif %}
+{% endif %}
         volumeMounts:
         - name: runlogjournal
           mountPath: /run/log/journal
@@ -115,7 +130,7 @@ spec:
               containerName: "{{ daemonset_container_name }}"
               resource: limits.memory
         - name: "FILE_BUFFER_LIMIT"
-          value: "{{ openshift_logging_fluentd_file_buffer_limit | default('1Gi') }}"
+          value: "{{ openshift_logging_fluentd_file_buffer_limit | default('256i') }}"
 {% if openshift_logging_mux_client_mode is defined and
      ((openshift_logging_mux_allow_external is defined and openshift_logging_mux_allow_external | bool) or
       (openshift_logging_use_mux is defined and openshift_logging_use_mux | bool)) %}
