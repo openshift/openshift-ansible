@@ -414,10 +414,11 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #    action: append
 
 # OpenShift Registry Console Options
-# Override the console image prefix for enterprise deployments, not used in origin
-# default is "registry.access.redhat.com/openshift3/" and the image appended is "registry-console"
+# Override the console image prefix:
+# origin default is "cockpit/" and the image appended is "kubernetes"
+# enterprise default is "registry.access.redhat.com/openshift3/" and the image appended is "registry-console"
 #openshift_cockpit_deployer_prefix=registry.example.com/myrepo/
-# Override image version, defaults to latest for origin, matches the product version for enterprise
+# Override image version, defaults to latest for origin, vX.Y product version for enterprise
 #openshift_cockpit_deployer_version=1.4.1
 
 # Openshift Registry Options

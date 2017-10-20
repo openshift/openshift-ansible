@@ -37,7 +37,6 @@
       cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
     changed_when: False
 
-  # TODO: Need to fix the origin and enterprise templates so that they both respect IMAGE_PREFIX
   - name: Deploy registry-console
     command: >
       {{ openshift.common.client_binary }} new-app --template=registry-console
