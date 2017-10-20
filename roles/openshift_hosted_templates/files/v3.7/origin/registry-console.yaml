@@ -27,7 +27,7 @@ objects:
         spec:
           containers:
             - name: registry-console
-              image: ${IMAGE_NAME}:${IMAGE_VERSION}
+              image: ${IMAGE_PREFIX}kubernetes:${IMAGE_VERSION}
               ports:
                 - containerPort: 9090
                   protocol: TCP
@@ -89,7 +89,7 @@ objects:
         - annotations: null
           from:
             kind: DockerImage
-            name: ${IMAGE_NAME}:${IMAGE_VERSION}
+            name: ${IMAGE_PREFIX}kubernetes:${IMAGE_VERSION}
           name: ${IMAGE_VERSION}
   - kind: OAuthClient
     apiVersion: v1
@@ -100,9 +100,9 @@ objects:
     redirectURIs:
       - "${COCKPIT_KUBE_URL}"
 parameters:
-  - description: "Container image name"
-    name: IMAGE_NAME
-    value: "cockpit/kubernetes"
+  - description: 'Specify "registry/namespace" prefix for container image; e.g. for "registry.example.com/cockpit/kubernetes:latest", set prefix "registry.example.com/cockpit/"'
+    name: IMAGE_PREFIX
+    value: "cockpit/"
   - description: 'Specify image version; e.g. for "cockpit/kubernetes:latest", set version "latest"'
     name: IMAGE_VERSION
     value: latest
