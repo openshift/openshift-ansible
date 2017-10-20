@@ -26,16 +26,6 @@
     with_items: "{{ container_providers }}"
     register: results
 
-  # TODO: Make this prettier and easier to read
-  - name: Save results
-    copy:
-      dest: /tmp/results.json
-      content: "{{ results.results | to_nice_json }}"
-      # state: present
-    # debug:
-    #   var: item.item
-    # with_items: "{{ results.results }}"
-
   # Include openshift_management for access to filter_plugins.
   - include_role:
       name: openshift_management
