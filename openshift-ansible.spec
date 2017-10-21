@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.170.0%{?dist}
+Release:        0.171.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Oct 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.171.0
+- Use "requests" for CPU resources instead of limits
+  (peter.portante@redhat.com)
+- [bz1501271] Attempt to use ami ssh user and default to ansible_ssh_user.
+  (kwoodson@redhat.com)
+- Fix undefined variable for master upgrades (mgugino@redhat.com)
+- Adding pre check to verify clusterid is set along with cloudprovider when
+  performing upgrade. (kwoodson@redhat.com)
+
 * Fri Oct 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.170.0
 - Check for container runtime prior to restarting when updating system CA
   trust. (abutcher@redhat.com)
