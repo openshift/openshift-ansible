@@ -22,22 +22,13 @@
     ansible_service_broker_registry_user: "{{ ansible_service_broker_registry_user | default(__ansible_service_broker_registry_user) }}"
     ansible_service_broker_registry_password: "{{ ansible_service_broker_registry_password | default(__ansible_service_broker_registry_password) }}"
     ansible_service_broker_registry_organization: "{{ ansible_service_broker_registry_organization | default(__ansible_service_broker_registry_organization) }}"
-
-    ansible_service_broker_certs_dir: "{{ openshift.common.config_base }}/service-catalog"
+    ansible_service_broker_registry_tag: "{{ ansible_service_broker_registry_tag | default(__ansible_service_broker_registry_tag) }}"
+    ansible_service_broker_registry_whitelist: "{{ ansible_service_broker_registry_whitelist | default(__ansible_service_broker_registry_whitelist) }}"
 
 - name: set ansible-service-broker image facts using set prefix and tag
   set_fact:
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
     ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
-
-- set_fact:
-    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
-  when: openshift_master_config_dir is undefined
-
-- slurp:
-    src: "{{ openshift_master_config_dir }}/service-signer.crt"
-  register: catalog_ca
-
 
 - include: validate_facts.yml
 
@@ -83,13 +74,12 @@
     state: present
     name: asb-access
     rules:
-      - nonResourceURLs: ["/ansible-service-broker", "ansible-service-broker/*"]
+      - nonResourceURLs: ["/ansible-service-broker", "/ansible-service-broker/*"]
         verbs: ["get", "post", "put", "patch", "delete"]
 
 - name: Bind admin cluster-role to asb serviceaccount
   oc_adm_policy_user:
     state: present
-    namespace: openshift-ansible-service-broker
     resource_kind: cluster-role
     resource_name: admin
     user: "system:serviceaccount:openshift-ansible-service-broker:asb"
@@ -97,7 +87,6 @@
 - name: Bind auth cluster role to asb service account
   oc_adm_policy_user:
     state: present
-    namespace: openshift-ansible-service-broker
     resource_kind: cluster-role
     resource_name: asb-auth
     user: "system:serviceaccount:openshift-ansible-service-broker:asb"
@@ -105,7 +94,6 @@
 - name: Bind asb-access role to asb-client service account
   oc_adm_policy_user:
     state: present
-    namespace: openshift-ansible-service-broker
     resource_kind: cluster-role
     resource_name: asb-access
     user: "system:serviceaccount:openshift-ansible-service-broker:asb-client"
@@ -113,6 +101,7 @@
 - name: create asb-client token secret
   oc_obj:
     name: asb-client
+    namespace: openshift-ansible-service-broker
     state: present
     kind: Secret
     content:
@@ -122,9 +111,19 @@
         kind: Secret
         metadata:
           name: asb-client
+          namespace: openshift-ansible-service-broker
           annotations:
             kubernetes.io/service-account.name: asb-client
         type: kubernetes.io/service-account-token
+
+- oc_secret:
+    state: list
+    namespace: openshift-ansible-service-broker
+    name: asb-client
+  register: asb_client_secret
+
+- set_fact:
+    service_ca_crt: asb_client_secret.results.results.0.data['service-ca.crt']
 
 # Using oc_obj because oc_service doesn't seem to allow annotations
 # TODO: Extend oc_service to allow annotations
@@ -141,6 +140,7 @@
         kind: Service
         metadata:
           name: asb
+          namespace: openshift-ansible-service-broker
           labels:
             app: openshift-ansible-service-broker
             service: asb
@@ -354,11 +354,11 @@
         metadata:
           name: ansible-service-broker
         spec:
-          url: http://asb.openshift-ansible-service-broker.svc:1338/ansible-service-broker
+          url: https://asb.openshift-ansible-service-broker.svc:1338/ansible-service-broker
           authInfo:
             bearer:
               secretRef:
                 name: asb-client
                 namespace: openshift-ansible-service-broker
                 kind: Secret
-          caBundle: "{{ catalog_ca.content }}"
+          caBundle: "{{ service_ca_crt }}"
