@@ -1,6 +1,9 @@
 ---
 - set_fact:
-    l_use_crio: "{{ openshift_use_crio | default(false) }}"
+    l_use_crio_only: "{{ openshift_use_crio_only | default(false) }}"
+    l_is_system_container_image: "{{ openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool }}"
+- set_fact:
+    l_use_cli_atomic_image: "{{ l_use_crio_only or l_is_system_container_image }}"
 
 - name: Install clients
   package: name={{ openshift.common.service_type }}-clients state=present
@@ -20,23 +23,23 @@
       backend: "docker"
   when:
   - openshift.common.is_containerized | bool
-  - not l_use_crio
+  - not l_use_cli_atomic_image | bool
 
 - block:
   - name: Pull CLI Image
     command: >
-      atomic pull --storage ostree {{ openshift.common.system_images_registry }}/{{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+      atomic pull --storage ostree {{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.common.cli_image }}:{{ openshift_image_tag }}
     register: pull_result
     changed_when: "'Pulling layer' in pull_result.stdout"
 
   - name: Copy client binaries/symlinks out of CLI image for use on the host
     openshift_container_binary_sync:
-      image: "{{ openshift.common.system_images_registry }}/{{ openshift.common.cli_image }}"
+      image: "{{ '' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.common.cli_image }}"
       tag: "{{ openshift_image_tag }}"
       backend: "atomic"
   when:
   - openshift.common.is_containerized | bool
-  - l_use_crio
+  - l_use_cli_atomic_image | bool
 
 - name: Reload facts to pick up installed OpenShift version
   openshift_facts:
