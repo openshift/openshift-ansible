@@ -1,0 +1,34 @@
+import unittest
+from openshift_logging import walk
+
+class TestFilterMethods(unittest.TestCase):
+
+
+    def test_walk_find_key(self):
+        source = {'foo': {'bar.xyz': 'myvalue'}}
+        self.assertEquals(walk(source,'foo#bar.xyz', 123, delimiter='#'), 'myvalue')
+
+
+    def test_walk_return_default(self):
+        source = {'foo': {'bar.xyz': 'myvalue'}}
+        self.assertEquals(walk(source,'foo#bar.abc', 123, delimiter='#'), 123)
+
+
+    def test_walk_limit_max_depth(self):
+        source = {'foo': {'bar.xyz': 'myvalue'}}
+        self.assertEquals(walk(source,'foo#bar.abc#dontfindme', 123, delimiter='#'), 123)
+
+    def test_complex_hash(self):
+        source = {
+            'elasticsearch': {
+                'configmaps': {
+                    'logging-elasticsearch': {
+                        'elasticsearch.yml':  "a string value"
+                    } 
+                }
+            }
+        } 
+        self.assertEquals(walk(source,'elasticsearch#configmaps#logging-elasticsearch#elasticsearch.yml', 123, delimiter='#'), "a string value")
+
+if __name__ == '__main__':
+    unittest.main()
