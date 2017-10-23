@@ -48,7 +48,7 @@
 
 - name: Remove Service Catalog kube-system Role Bindinds
   shell: >
-    oc process kube-system-service-catalog-role-bindings -n kube-system | oc delete --ignore-not-found -f - 
+    oc process kube-system-service-catalog-role-bindings -n kube-system | oc delete --ignore-not-found -f -
 
 - oc_obj:
     kind: template
@@ -58,14 +58,14 @@
 
 - name: Remove Service Catalog kube-service-catalog Role Bindinds
   shell: >
-    oc process service-catalog-role-bindings -n kube-service-catalog | oc delete --ignore-not-found -f - 
+    oc process service-catalog-role-bindings -n kube-service-catalog | oc delete --ignore-not-found -f -
 
 - oc_obj:
     kind: template
     name: "service-catalog-role-bindings"
     namespace: kube-service-catalog
     state: absent
-    
+
 - name: Remove Service Catalog namespace
   oc_project:
     state: absent
