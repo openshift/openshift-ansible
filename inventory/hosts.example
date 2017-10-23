@@ -651,6 +651,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_storage_volume_size=10Gi
 #openshift_prometheus_storage_labels={'storage': 'prometheus'}
 #openshift_prometheus_storage_type='pvc'
+#openshift_prometheus_storage_class=glusterfs-storage
 # For prometheus-alertmanager
 #openshift_prometheus_alertmanager_storage_kind=nfs
 #openshift_prometheus_alertmanager_storage_access_modes=['ReadWriteOnce']
@@ -660,6 +661,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertmanager_storage_volume_size=10Gi
 #openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
 #openshift_prometheus_alertmanager_storage_type='pvc'
+#openshift_prometheus_alertmanager_storage_class=glusterfs-storage
 # For prometheus-alertbuffer
 #openshift_prometheus_alertbuffer_storage_kind=nfs
 #openshift_prometheus_alertbuffer_storage_access_modes=['ReadWriteOnce']
@@ -669,6 +671,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 #openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 #openshift_prometheus_alertbuffer_storage_type='pvc'
+#openshift_prometheus_alertbuffer_storage_class=glusterfs-storage
 #
 # Option B - External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
@@ -682,6 +685,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_storage_volume_size=10Gi
 #openshift_prometheus_storage_labels={'storage': 'prometheus'}
 #openshift_prometheus_storage_type='pvc'
+#openshift_prometheus_storage_class=glusterfs-storage
 # For prometheus-alertmanager
 #openshift_prometheus_alertmanager_storage_kind=nfs
 #openshift_prometheus_alertmanager_storage_access_modes=['ReadWriteOnce']
@@ -691,6 +695,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertmanager_storage_volume_size=10Gi
 #openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
 #openshift_prometheus_alertmanager_storage_type='pvc'
+#openshift_prometheus_alertmanager_storage_class=glusterfs-storage
 # For prometheus-alertbuffer
 #openshift_prometheus_alertbuffer_storage_kind=nfs
 #openshift_prometheus_alertbuffer_storage_access_modes=['ReadWriteOnce']
@@ -700,6 +705,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 #openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 #openshift_prometheus_alertbuffer_storage_type='pvc'
+#openshift_prometheus_alertbuffer_storage_class=glusterfs-storage
 #
 # Option C - none -- Prometheus, alertmanager and alertbuffer will use emptydir volumes
 # which are destroyed when pods are deleted
