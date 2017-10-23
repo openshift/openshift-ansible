@@ -24,7 +24,7 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 ## PVC related variables
 Each prometheus component (prometheus, alertmanager, alertbuffer) can set pv claim by setting corresponding role variable:
 ```
-openshift_prometheus_<COMPONENT>_storage_type: <VALUE>
+openshift_prometheus_<COMPONENT>_storage_type: <VALUE> (pvc, emptydir)
 openshift_prometheus_<COMPONENT>_pvc_(name|size|access_modes|pv_selector): <VALUE>
 ```
 e.g
