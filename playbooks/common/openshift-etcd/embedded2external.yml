@@ -158,7 +158,7 @@
       tasks_from: configure_external_etcd
     vars:
       etcd_peer_url_scheme: "https"
-      etcd_ip: "{{ openshift.common.ip }}"
+      etcd_ip: "{{ hostvars[groups.oo_etcd_to_config.0].openshift.common.ip }}"
       etcd_peer_port: 2379
 
   # 9. start the master
