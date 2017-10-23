@@ -41,21 +41,16 @@
       openstack_num_nodes: "{{ oc_old_num_nodes | int + increment_by | int }}"
 
 # Run provision.yaml with higher number of nodes to create a new app-node VM
-- include: provision.yaml
+- include: provision.yml
 
 # Run config.yml to perform openshift installation
-# Path to openshift-ansible can be customised:
-# - the value of openshift_ansible_dir has to be an absolute path
-# - the path cannot contain the '/' symbol at the end
 
 # Creating a new deployment by the full installation
-- include: "{{ openshift_ansible_dir }}/playbooks/byo/config.yml"
-  vars:
-    openshift_ansible_dir: ../../../../openshift-ansible
+- include: install.yml
   when: 'not groups["new_nodes"] | list'
 
 # Scaling up existing deployment
-- include: "{{ openshift_ansible_dir }}/playbooks/byo/openshift-node/scaleup.yml"
+- include: "../../byo/openshift-node/scaleup.yml"
   vars:
     openshift_ansible_dir: ../../../../openshift-ansible
   when: 'groups["new_nodes"] | list'

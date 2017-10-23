@@ -22,9 +22,9 @@
     - when: openshift_use_flannel|default(False)|bool
       block:
         - include_role:
-            name: openshift-ansible/roles/os_firewall
+            name: os_firewall
         - include_role:
-            name: openshift-ansible/roles/lib_os_firewall
+            name: lib_os_firewall
         - name: set allow rules for dnsmasq
           os_firewall_manage_iptables:
             name: "{{ item.service }}"

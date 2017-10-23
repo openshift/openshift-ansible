@@ -13,14 +13,18 @@
     template: "{{ stack_template_path | default(omit) }}"
     wait: yes
 
-# NOTE(bogdando) OS::Neutron::Subnet doesn't support live updates for
-# dns_nameservers, so we can't do that for the "create stack" task.
-- include: subnet_update_dns_servers.yaml
+- name: Add the new nodes to the inventory
+  meta: refresh_inventory
+
+- name: Populate DNS entries
+  include: populate-dns.yml
   when:
-  - private_dns_server is defined
   - stack_state == 'present'
 
 - name: CleanUp
   include: cleanup.yml
   when:
   - stack_state == 'present'
+
+# TODO(shadower): create the registry and PV Cinder volumes if specified
+# and include the `prepare-and-format-cinder-volume` tasks to set it up

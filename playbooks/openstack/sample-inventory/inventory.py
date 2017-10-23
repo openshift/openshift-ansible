@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+"""
+This is an Ansible dynamic inventory for OpenStack.
+
+It requires your OpenStack credentials to be set in clouds.yaml or your shell
+environment.
+
+"""
 
 from __future__ import print_function
 
@@ -7,7 +14,8 @@ import json
 import shade
 
 
-if __name__ == '__main__':
+def build_inventory():
+    '''Build the dynamic inventory.'''
     cloud = shade.openstack_cloud()
 
     inventory = {}
@@ -39,13 +47,10 @@ if __name__ == '__main__':
     dns = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'dns']
 
-    lb = [server.name for server in cluster_hosts
-          if server.metadata['host-type'] == 'lb']
+    load_balancers = [server.name for server in cluster_hosts
+                      if server.metadata['host-type'] == 'lb']
 
-    osev3 = list(set(nodes + etcd + lb))
-
-    groups = [server.metadata.group for server in cluster_hosts
-              if 'group' in server.metadata]
+    osev3 = list(set(nodes + etcd + load_balancers))
 
     inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
     inventory['OSEv3'] = {'hosts': osev3}
@@ -55,7 +60,7 @@ if __name__ == '__main__':
     inventory['infra_hosts'] = {'hosts': infra_hosts}
     inventory['app'] = {'hosts': app}
     inventory['dns'] = {'hosts': dns}
-    inventory['lb'] = {'hosts': lb}
+    inventory['lb'] = {'hosts': load_balancers}
 
     for server in cluster_hosts:
         if 'group' in server.metadata:
@@ -68,21 +73,24 @@ if __name__ == '__main__':
 
     for server in cluster_hosts:
         ssh_ip_address = server.public_v4 or server.private_v4
-        vars = {
+        hostvars = {
             'ansible_host': ssh_ip_address
         }
 
         public_v4 = server.public_v4 or server.private_v4
         if public_v4:
-            vars['public_v4'] = public_v4
+            hostvars['public_v4'] = public_v4
         # TODO(shadower): what about multiple networks?
         if server.private_v4:
-            vars['private_v4'] = server.private_v4
+            hostvars['private_v4'] = server.private_v4
 
         node_labels = server.metadata.get('node_labels')
         if node_labels:
-            vars['openshift_node_labels'] = node_labels
+            hostvars['openshift_node_labels'] = node_labels
 
-        inventory['_meta']['hostvars'][server.name] = vars
+        inventory['_meta']['hostvars'][server.name] = hostvars
+    return inventory
 
-    print(json.dumps(inventory, indent=4, sort_keys=True))
+
+if __name__ == '__main__':
+    print(json.dumps(build_inventory(), indent=4, sort_keys=True))

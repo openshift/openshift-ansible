@@ -1,0 +1,15 @@
+---
+# TODO: subscribe to RHEL and install docker and other packages here
+
+- name: Install required packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ required_packages }}"
+
+- name: Install debug packages (optional)
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ debug_packages }}"
+  when: install_debug_packages|bool
