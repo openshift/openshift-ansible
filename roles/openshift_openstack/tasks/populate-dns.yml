@@ -1,0 +1,5 @@
+# TODO: use nsupdate to populate the DNS servers using the keys
+# specified in the inventory.
+
+# this is an optional step -- the deployers may do whatever else they
+# wish here.

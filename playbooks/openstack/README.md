@@ -38,6 +38,19 @@ Optional:
 * External Neutron network with a floating IP address pool
 
 
+## DNS Requirements
+
+OpenShift requires DNS to operate properly. OpenStack supports DNS-as-a-service
+in the form of the Designate project, but the playbooks here don't support it
+yet. Until we do, you will need to provide a DNS solution yourself (or in case
+you are not running Designate when we do).
+
+If your server supports nsupdate, we will use it to add the necessary records.
+
+TODO(shadower): describe how to build a sample DNS server and how to configure
+our playbooks for nsupdate.
+
+
 ## Installation
 
 There are four main parts to the installation:
@@ -143,6 +156,8 @@ $ vi inventory/group_vars/all.yml
 4. Set the `openstack_default_flavor` to the flavor you want your
    OpenShift VMs to use.
    - See `openstack flavor list` for the list of available flavors.
+5. Set the `public_dns_nameservers` to the list of the IP addresses
+   of the DNS servers used for the **private** address resolution[1].
 
 **NOTE**: In most OpenStack environments, you will also need to
 configure the forwarders for the DNS server we create. This depends on
@@ -151,6 +166,9 @@ your environment.
 Launch a VM in your OpenStack and look at its `/etc/resolv.conf` and
 put the IP addresses into `public_dns_nameservers` in
 `inventory/group_vars/all.yml`.
+
+
+[1]: Yes, the name is bad. We will fix it.
 
 
 #### OpenShift configuration
