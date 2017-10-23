@@ -105,8 +105,6 @@ openshift_logging_es_storage_group: "{{ openshift_hosted_logging_elasticsearch_s
 openshift_logging_es_nodeselector: "{{ openshift_hosted_logging_elasticsearch_nodeselector | default('') | map_from_pairs }}"
 # openshift_logging_es_config is a hash to be merged into the defaults for the elasticsearch.yaml
 openshift_logging_es_config: {}
-openshift_logging_es_number_of_shards: 1
-openshift_logging_es_number_of_replicas: 0
 
 # for exposing es to external (outside of the cluster) clients
 openshift_logging_es_allow_external: False

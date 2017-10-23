@@ -207,7 +207,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
     def facts_for_configmaps(self, namespace):
         ''' Gathers facts for configmaps in logging namespace '''
         self.default_keys_for("configmaps")
-        a_list = self.oc_command("get", "configmaps", namespace=namespace, add_options=["-l", LOGGING_SELECTOR])
+        a_list = self.oc_command("get", "configmaps", namespace=namespace)
         if len(a_list["items"]) == 0:
             return
         for item in a_list["items"]:

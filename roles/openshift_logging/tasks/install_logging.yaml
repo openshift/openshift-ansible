@@ -80,6 +80,7 @@
     openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector if item.0.nodeSelector | default(None) is none else item.0.nodeSelector }}"
     openshift_logging_elasticsearch_storage_group: "{{ [openshift_logging_es_storage_group] if item.0.storageGroups | default([]) | length == 0 else item.0.storageGroups }}"
     _es_containers: "{{item.0.containers}}"
+    _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch#configmaps#logging-elasticsearch#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
   with_together:
   - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() }}"
@@ -146,7 +147,10 @@
     openshift_logging_es_hostname: "{{ openshift_logging_es_ops_hostname }}"
     openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
     openshift_logging_es_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
+    openshift_logging_es_number_of_shards: "{{ openshift_logging_es_ops_number_of_shards | default(None) }}"
+    openshift_logging_es_number_of_replicas: "{{ openshift_logging_es_ops_number_of_replicas | default(None) }}"
     _es_containers: "{{item.0.containers}}"
+    _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch_ops#configmaps#logging-elasticsearch-ops#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
   with_together:
   - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() }}"
