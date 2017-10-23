@@ -10,6 +10,15 @@
     l_use_crio: "{{ openshift_use_crio | default(False) }}"
     l_use_crio_only: "{{ openshift_use_crio_only | default(False) }}"
 
+- name: Add enterprise registry, if necessary
+  set_fact:
+    l2_docker_additional_registries: "{{ l2_docker_additional_registries + [openshift_docker_ent_reg] }}"
+  when:
+    - openshift.common.deployment_type == 'openshift-enterprise'
+    - openshift_docker_ent_reg != ''
+    - openshift_docker_ent_reg not in l2_docker_additional_registries
+    - not l_use_crio_only
+
 - name: Use Package Docker if Requested
   include: package_docker.yml
   when:
