@@ -2,6 +2,11 @@
 - set_fact:
     l_etcd_src_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' }}"
 
+- name: Ensure proxies are in the atomic.conf
+  include_role:
+    name: openshift_atomic
+    tasks_from: proxy
+
 - name: Pull etcd system container
   command: atomic pull --storage=ostree {{ openshift.etcd.etcd_image }}
   register: pull_result

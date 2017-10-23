@@ -82,36 +82,10 @@
         enabled: yes
         state: restarted
 
-
-- block:
-
-    - name: Add http_proxy to /etc/atomic.conf
-      lineinfile:
-        dest: /etc/atomic.conf
-        regexp: "^#?http_proxy[:=]{1}"
-        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
-      when:
-        - openshift.common.http_proxy is defined
-        - openshift.common.http_proxy != ''
-
-    - name: Add https_proxy to /etc/atomic.conf
-      lineinfile:
-        dest: /etc/atomic.conf
-        regexp: "^#?https_proxy[:=]{1}"
-        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
-      when:
-        - openshift.common.https_proxy is defined
-        - openshift.common.https_proxy != ''
-
-    - name: Add no_proxy to /etc/atomic.conf
-      lineinfile:
-        dest: /etc/atomic.conf
-        regexp: "^#?no_proxy[:=]{1}"
-        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
-      when:
-        - openshift.common.no_proxy is defined
-        - openshift.common.no_proxy != ''
-
+- name: Ensure proxies are in the atomic.conf
+  include_role:
+    name: openshift_atomic
+    tasks_from: proxy
 
 - block:
 
