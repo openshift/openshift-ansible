@@ -125,7 +125,7 @@
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode
-  hosts: oo_etcd_to_config
+  hosts: oo_masters_to_config
   gather_facts: no
   tasks:
   - name: Stop {{ openshift.common.service_type }}-master-controllers
