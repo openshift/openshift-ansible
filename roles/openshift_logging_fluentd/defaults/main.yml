@@ -8,7 +8,8 @@ openshift_logging_fluentd_namespace: logging
 
 ### Common settings
 openshift_logging_fluentd_nodeselector: "{{ openshift_hosted_logging_fluentd_nodeselector_label | default('logging-infra-fluentd=true') | map_from_pairs }}"
-openshift_logging_fluentd_cpu_limit: 100m
+openshift_logging_fluentd_cpu_limit: null
+openshift_logging_fluentd_cpu_request: 100m
 openshift_logging_fluentd_memory_limit: 512Mi
 openshift_logging_fluentd_hosts: ['--all']
 
@@ -57,4 +58,4 @@ openshift_logging_fluentd_es_copy: false
 #fluentd_throttle_contents:
 #fluentd_secureforward_contents:
 
-openshift_logging_fluentd_file_buffer_limit: 1Gi
+openshift_logging_fluentd_file_buffer_limit: 256Mi

@@ -32,12 +32,27 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
+{% if (fluentd_memory_limit is defined and fluentd_memory_limit is not none) or (fluentd_cpu_limit is defined and fluentd_cpu_limit is not none) or (fluentd_cpu_request is defined and fluentd_cpu_request is not none) %}
         resources:
+{%   if (fluentd_memory_limit is defined and fluentd_memory_limit is not none) or (fluentd_cpu_limit is defined and fluentd_cpu_limit is not none) %}
           limits:
-            cpu: {{ openshift_logging_fluentd_cpu_limit }}
-            memory: {{ openshift_logging_fluentd_memory_limit }}
+{%     if fluentd_cpu_limit is not none %}
+            cpu: "{{fluentd_cpu_limit}}"
+{%     endif %}
+{%     if fluentd_memory_limit is not none %}
+            memory: "{{fluentd_memory_limit}}"
+{%     endif %}
+{%   endif %}
+{%   if (fluentd_memory_limit is defined and fluentd_memory_limit is not none) or (fluentd_cpu_request is defined and fluentd_cpu_request is not none) %}
           requests:
-            memory: {{ openshift_logging_fluentd_memory_limit }}
+{%     if fluentd_cpu_request is not none %}
+            cpu: "{{fluentd_cpu_request}}"
+{%     endif %}
+{%     if fluentd_memory_limit is not none %}
+            memory: "{{fluentd_memory_limit}}"
+{%     endif %}
+{%   endif %}
+{% endif %}
         volumeMounts:
         - name: runlogjournal
           mountPath: /run/log/journal

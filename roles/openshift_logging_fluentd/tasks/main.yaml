@@ -170,6 +170,9 @@
     ops_port: "{{ openshift_logging_fluentd_ops_port }}"
     fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys()[0] }}"
     fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values()[0] }}"
+    fluentd_cpu_limit: "{{ openshift_logging_fluentd_cpu_limit }}"
+    fluentd_cpu_request: "{{ openshift_logging_fluentd_cpu_request }}"
+    fluentd_memory_limit: "{{ openshift_logging_fluentd_memory_limit }}"
   check_mode: no
   changed_when: no
 
