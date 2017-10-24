@@ -145,21 +145,21 @@
     volume_capacity: "{{ openshift_prometheus_alertbuffer_pvc_size }}"
     selector: "{{ openshift_prometheus_alertbuffer_pvc_pv_selector }}"
 
-# create prometheus deployment
-- name: Set prometheus deployment template
+# create prometheus stateful set
+- name: Set prometheus template
   template:
-    src: prometheus_deployment.j2
+    src: prometheus.j2
     dest: "{{ tempdir }}/templates/prometheus.yaml"
   vars:
     namespace: "{{ openshift_prometheus_namespace }}"
-    prom_replicas: "{{ openshift_prometheus_replicas }}"
+#    prom_replicas: "{{ openshift_prometheus_replicas }}"
 
-- name: Set prometheus deployment
+- name: Set prometheus stateful set
   oc_obj:
     state: "{{ state }}"
     name: "prometheus"
     namespace: "{{ openshift_prometheus_namespace }}"
-    kind: deployment
+    kind: statefulset
     files:
       - "{{ tempdir }}/templates/prometheus.yaml"
     delete_after: true
