@@ -363,7 +363,6 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
 
     def validate(self):
         ''' validate this idp instance '''
-        IdentityProviderOauthBase.validate(self)
         if not isinstance(self.provider['claims'], dict):
             raise errors.AnsibleFilterError("|failed claims for provider {0} "
                                             "must be a dictionary".format(self.__class__.__name__))
