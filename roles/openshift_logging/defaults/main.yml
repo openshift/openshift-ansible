@@ -103,8 +103,6 @@ openshift_logging_es_pvc_prefix: "{{ openshift_hosted_logging_elasticsearch_pvc_
 openshift_logging_es_recover_after_time: 5m
 openshift_logging_es_storage_group: "{{ openshift_hosted_logging_elasticsearch_storage_group | default('65534') }}"
 openshift_logging_es_nodeselector: "{{ openshift_hosted_logging_elasticsearch_nodeselector | default('') | map_from_pairs }}"
-openshift_logging_es_number_of_shards: 1
-openshift_logging_es_number_of_replicas: 0
 
 # allow cluster-admin or cluster-reader to view operations index
 openshift_logging_es_ops_allow_cluster_reader: False
