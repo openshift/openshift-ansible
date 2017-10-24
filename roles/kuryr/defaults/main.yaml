@@ -5,10 +5,10 @@ kuryr_config_dir: /etc/kuryr
 # Kuryr username
 kuryr_openstack_username: kuryr
 
-# Kuryr username domain
+# Kuryr domain name or id containing user
 kuryr_openstack_user_domain_name: default
 
-# Kuryr username domain
+# Kuryr domain name or id containing project
 kuryr_openstack_project_domain_name: default
 
 # Kuryr OpenShift namespace
@@ -31,7 +31,7 @@ cni_bin_url_base: "https://github.com/containernetworking/cni/releases/download/
 cni_bin_url: "{{ cni_bin_url_base }}/{{ cni_version }}/cni-{{ cni_version }}.tgz"
 cni_bin_checksum: "71f411080245aa14d0cc06f6824e8039607dd9e9"
 
-# Kuryr ClusterRole definiton
+# Kuryr ClusterRole definition
 kuryr_clusterrole:
   name: kuryrctl
   state: present
