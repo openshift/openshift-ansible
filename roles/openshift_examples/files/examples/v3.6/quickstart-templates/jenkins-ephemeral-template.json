@@ -8,10 +8,10 @@
       "description": "Jenkins service, without persistent storage.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
       "iconClass": "icon-jenkins",
       "tags": "instant-app,jenkins",
-      "template.openshift.io/long-description": "This template deploys a Jenkins server capable of managing OpenShift Pipeline builds and supporting OpenShift-based oauth login.  The Jenkins configuration is stored in non-persistent storage, so this configuration should be used for experimental purposes only.",
-      "template.openshift.io/provider-display-name": "Red Hat, Inc.",
-      "template.openshift.io/documentation-url": "https://docs.openshift.org/latest/using_images/other_images/jenkins.html",
-      "template.openshift.io/support-url": "https://access.redhat.com"
+      "openshift.io/long-description": "This template deploys a Jenkins server capable of managing OpenShift Pipeline builds and supporting OpenShift-based oauth login.  The Jenkins configuration is stored in non-persistent storage, so this configuration should be used for experimental purposes only.",
+      "openshift.io/provider-display-name": "Red Hat, Inc.",
+      "openshift.io/documentation-url": "https://docs.openshift.org/latest/using_images/other_images/jenkins.html",
+      "openshift.io/support-url": "https://access.redhat.com"
     }
   },
   "message": "A Jenkins service has been created in your project.  Log into Jenkins with your OpenShift account.  The tutorial at https://github.com/openshift/origin/blob/master/examples/jenkins/README.md contains more information about using this template.",
@@ -112,16 +112,16 @@
                     "value": "true"
                   },
                   {
-                    "name": "OPENSHIFT_JENKINS_JVM_ARCH",
-                    "value": "${JVM_ARCH}"
-                  },
-                  {
                     "name": "KUBERNETES_MASTER",
                     "value": "https://kubernetes.default:443"
                   },
                   {
                     "name": "KUBERNETES_TRUST_CERTIFICATES",
                     "value": "true"
+                  },
+                  {
+                    "name": "JENKINS_SERVICE_NAME",
+                    "value": "${JENKINS_SERVICE_NAME}"
                   },
                   {
                     "name": "JNLP_SERVICE_NAME",
@@ -258,12 +258,6 @@
       "displayName": "Enable OAuth in Jenkins",
       "description": "Whether to enable OAuth OpenShift integration. If false, the static account 'admin' will be initialized with the password 'password'.",
       "value": "true"
-    },
-    {
-      "name": "JVM_ARCH",
-      "displayName": "Jenkins JVM Architecture",
-      "description": "Whether Jenkins runs with a 32 bit (i386) or 64 bit (x86_64) JVM.",
-      "value": "i386"
     },
     {
       "name": "MEMORY_LIMIT",
