@@ -82,6 +82,8 @@ spec:
           mountPath: "/hawkular-metrics-certs"
         - name: hawkular-metrics-account
           mountPath: "/hawkular-account"
+        - name: hawkular-metrics-logs
+          mountPath: "/opt/eap/standalone/log/"
 {% if ((openshift_metrics_hawkular_limits_cpu is defined and openshift_metrics_hawkular_limits_cpu is not none)
    or (openshift_metrics_hawkular_limits_memory is defined and openshift_metrics_hawkular_limits_memory is not none)
    or (openshift_metrics_hawkular_requests_cpu is defined and openshift_metrics_hawkular_requests_cpu is not none)
@@ -126,3 +128,6 @@ spec:
       - name: hawkular-metrics-account
         secret:
           secretName: hawkular-metrics-account
+      - name: hawkular-metrics-logs
+        persistentVolumeClaim:
+          claimName: "hawkular-logs-pv-claim"

@@ -80,6 +80,8 @@ spec:
           mountPath: "/cassandra_data"
         - name: hawkular-cassandra-certs
           mountPath: "/hawkular-cassandra-certs"
+        - name: hawkular-cassandra-logs
+          mountPath: "/opt/apache-cassandra/logs"
 {% if ((openshift_metrics_cassandra_limits_cpu is defined and openshift_metrics_cassandra_limits_cpu is not none)
    or (openshift_metrics_cassandra_limits_memory is defined and openshift_metrics_cassandra_limits_memory is not none)
    or (openshift_metrics_cassandra_requests_cpu is defined and openshift_metrics_cassandra_requests_cpu is not none)
@@ -124,6 +126,9 @@ spec:
               - "/opt/apache-cassandra/bin/cassandra-poststart.sh"
         terminationGracePeriodSeconds: 1800
       volumes:
+      - name: hawkular-cassandra-logs
+        persistentVolumeClaim:
+           claimName: "cassandra-logs-{{ node }}"
       - name: cassandra-data
 {%      if openshift_metrics_cassandra_storage_type == 'emptydir' %}
         emptyDir: {}

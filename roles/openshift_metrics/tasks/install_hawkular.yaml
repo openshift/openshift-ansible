@@ -16,6 +16,19 @@
     node_selector: "{{openshift_metrics_hawkular_nodeselector | default('') }}"
   changed_when: false
 
+- name: generate hawkular-metrics persistent volume claims for logs
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular-metrics-logs-pvc.yaml"
+  vars:
+    obj_name: "hawkular-logs-pv-claim"
+    labels:
+      metrics-infra: hawkular-metrics
+    access_modes:
+    - ReadWriteOnce
+    size: "{{ openshift_metrics_hawkular_log_pvc_size }}"
+  changed_when: false
+
 - name: read hawkular-metrics route destination ca certificate
   slurp: src={{ mktemp.stdout }}/ca.crt
   register: metrics_route_dest_ca_cert
