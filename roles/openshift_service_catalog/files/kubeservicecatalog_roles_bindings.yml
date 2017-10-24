@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: service-catalog
+  name: service-catalog-role-bindings
 objects:
 
 - apiVersion: authorization.openshift.io/v1

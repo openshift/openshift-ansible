@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: kube-system-service-catalog
+  name: kube-system-service-catalog-role-bindings
 objects:
 
 - apiVersion: authorization.openshift.io/v1

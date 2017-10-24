@@ -16,6 +16,16 @@
     --key={{ generated_certs_dir }}/ca.key --cert={{ generated_certs_dir }}/ca.crt
     --serial={{ generated_certs_dir }}/apiserver.serial.txt --name=service-catalog-signer
 
+- name: Delete old apiserver.crt
+  file:
+    path: "{{ generated_certs_dir }}/apiserver.crt"
+    state: absent
+
+- name: Delete old apiserver.key
+  file:
+    path: "{{ generated_certs_dir }}/apiserver.key"
+    state: absent
+
 - name: Generating server keys
   oc_adm_ca_server_cert:
     cert: "{{ generated_certs_dir }}/apiserver.crt"

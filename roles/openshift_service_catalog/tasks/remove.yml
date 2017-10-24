@@ -3,10 +3,6 @@
   command: >
     oc delete apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
 
-- name: Remove Policy Binding
-  command: >
-    oc delete policybindings/kube-system:default -n kube-system --ignore-not-found
-
 # TODO: this module doesn't currently remove this
 #- name: Remove service catalog api service
 #  oc_obj:
@@ -49,6 +45,26 @@
     namespace: "kube-service-catalog"
     kind: deployment
     name: controller-manager
+
+- name: Remove Service Catalog kube-system Role Bindinds
+  shell: >
+    oc process kube-system-service-catalog-role-bindings -n kube-system | oc delete --ignore-not-found -f -
+
+- oc_obj:
+    kind: template
+    name: "kube-system-service-catalog-role-bindings"
+    namespace: kube-system
+    state: absent
+
+- name: Remove Service Catalog kube-service-catalog Role Bindinds
+  shell: >
+    oc process service-catalog-role-bindings -n kube-service-catalog | oc delete --ignore-not-found -f -
+
+- oc_obj:
+    kind: template
+    name: "service-catalog-role-bindings"
+    namespace: kube-service-catalog
+    state: absent
 
 - name: Remove Service Catalog namespace
   oc_project:
