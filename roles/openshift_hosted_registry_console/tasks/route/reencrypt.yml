@@ -1,0 +1,38 @@
+---
+- name: Validate route termination configuration
+  fail:
+    msg: >
+     When 'openshift_hosted_registry_console_routetermination' is 'reencrypt', you must
+     provide certificate files with 'openshift_hosted_registry_console_routecertificates'
+  when: ('certfile' not in openshift_hosted_registry_console_routecertificates) or
+        ('keyfile' not in openshift_hosted_registry_console_routecertificates) or
+        ('cafile' not in openshift_hosted_registry_console_routecertificates)
+
+- name: Configure self-signed certificate file paths
+  set_fact:
+    docker_registry_console_cert_path: "{{ openshift_master_config_dir }}/registry-console.crt"
+    docker_registry_console_key_path: "{{ openshift_master_config_dir }}/registry-console.key"
+    docker_registry_console_cacert_path: "{{ openshift_master_config_dir }}/ca.crt"
+    docker_registry_console_self_signed: true
+
+- name: Retrieve provided certificate files
+  copy:
+    backup: True
+    dest: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ item.value | basename }}"
+    src: "{{ item.value }}"
+  when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
+  with_dict: "{{ openshift_hosted_registry_console_routecertificates }}"
+
+# Encrypt with the provided certificate and provide the dest_cacert for the
+# self-signed certificate at the endpoint
+- name: Configure a reencrypt route for registry-console
+  oc_route:
+    name: registry-console
+    namespace: "{{ openshift_hosted_registry_console_namespace }}"
+    service_name: registry-console
+    tls_termination: "{{ openshift_hosted_registry_console_routetermination }}"
+    host: "{{ openshift_hosted_registry_console_routehost | default(omit, true) }}"
+    cert_path: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ openshift_hosted_registry_console_routecertificates['certfile'] | basename }}"
+    key_path: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ openshift_hosted_registry_console_routecertificates['keyfile'] | basename }}"
+    cacert_path: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ openshift_hosted_registry_console_routecertificates['cafile'] | basename }}"
+    dest_cacert_path: "{{ openshift_master_config_dir }}/ca.crt"

@@ -1,0 +1,118 @@
+---
+- block:
+  - name: Configure facts for registry-console
+    set_fact:
+      openshift_hosted_registry_console_namespace: "{{ ('namespace' in openshift.hosted.registry.console.keys()) | ternary(openshift.hosted.registry.console.namespace, 'default') }}"
+      openshift_hosted_registry_console_routecertificates: "{{ ('routecertificates' in openshift.hosted.registry.console.keys()) | ternary(openshift.hosted.registry.console.routecertificates, {}) }}"
+      openshift_hosted_registry_console_routehost: "{{ ('routehost' in openshift.hosted.registry.console.keys()) | ternary(openshift.hosted.registry.console.routehost, False) }}"
+      openshift_hosted_registry_console_routetermination: "{{ ('routetermination' in openshift.hosted.registry.console.keys()) | ternary(openshift.hosted.registry.console.routetermination, 'passthrough') }}"
+
+  - name: Create directory for registry-console certificates
+    file:
+      path: "{{ openshift_master_config_dir }}/registry_console_certificates"
+      state: directory
+      owner: root
+      group: root
+      mode: 0700
+
+  - name: Include reencrypt route configuration
+    include: route/reencrypt.yml
+    static: no
+    when: openshift_hosted_registry_console_routetermination == 'reencrypt'
+
+  - name: Include passthrough route configuration
+    include: route/passthrough.yml
+    static: no
+    when: openshift_hosted_registry_console_routetermination == 'passthrough'
+
+  # When openshift_hosted_manage_registry=true the openshift_hosted
+  # role will create the appropriate route for the docker-registry.
+  # When openshift_hosted_manage_registry=false then this code will
+  # not be run.
+  - name: Fetch the docker-registry route
+    oc_route:
+      name: docker-registry
+      namespace: default
+      state: list
+    register: docker_registry_route
+
+  - name: Fetch the registry-console route
+    oc_route:
+      name: registry-console
+      namespace: default
+      state: list
+    register: registry_console_route
+
+  # TODO: Need to fix the origin and enterprise templates so that they both respect IMAGE_PREFIX
+  - name: Deploy registry-console
+    command: >
+      {{ openshift.common.client_binary }} new-app --template=registry-console
+      {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
+      {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
+      -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
+      -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
+      -p COCKPIT_KUBE_URL="https://{{ registry_console_route.results[0].spec.host }}"
+      --config={{ openshift_master_config_dir }}/admin.kubeconfig
+      -n {{ openshift_hosted_registry_console_namespace }}
+    register: deploy_registry_console
+    changed_when: "'already exists' not in deploy_registry_console.stderr"
+    failed_when: "'already exists' not in deploy_registry_console.stderr and deploy_registry_console.rc != 0"
+
+  - name: Retrieve registry-console service for the clusterip
+    oc_service:
+      namespace: "{{ openshift_hosted_registry_console_namespace }}"
+      name: registry-console
+      state: list
+    register: docker_registry_console_service
+
+  - name: Generate self-signed registry-console certificates
+    oc_adm_ca_server_cert:
+      signer_cert: "{{ openshift_master_config_dir }}/ca.crt"
+      signer_key: "{{ openshift_master_config_dir }}/ca.key"
+      signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
+      hostnames:
+      - "{{ docker_registry_console_service.results.clusterip }}"
+      - "{{ registry_console_route.results[0].spec.host }}"
+      cert: "{{ docker_registry_console_cert_path }}"
+      key: "{{ docker_registry_console_key_path }}"
+      expire_days: "{{ openshift_hosted_registry_console_cert_expire_days if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool else omit }}"
+    when: docker_registry_console_self_signed
+
+  # The certificate file expected inside the registry-console service is
+  # in .pem format that bundles the certificate(s) and the private key.
+  - name: Retrieve certificate files to generate certificate bundle
+    slurp:
+      src: "{{ item }}"
+    with_items: >
+      {%- set files = [ docker_registry_console_cert_path ] %}
+      {%- if docker_registry_console_cacert is defined %}
+      {%-   set _ = files.append(docker_registry_console_cacert) %}
+      {%- endif %}
+      {%- set _ = files.append(docker_registry_console_key_path) %}
+      {{- files -}}
+    register: certificate_files
+
+  - name: Generate certificate bundle
+    copy:
+      content: "{{ certificate_files.results | map(attribute='content') | map('b64decode') | join('') }}"
+      dest: "{{ openshift_master_config_dir }}/registry_console_certificates/registry-console.pem"
+
+  - name: Create the secret for the registry-console certificate
+    oc_secret:
+      name: registry-console-certificate
+      namespace: "{{ openshift_hosted_registry_console_namespace }}"
+      files:
+      - name: registry-console.cert
+        path: "{{ openshift_master_config_dir }}/registry_console_certificates/registry-console.pem"
+
+  - name: Mount secret registry console certificates volume
+    oc_volume:
+      state: present
+      namespace: "{{ openshift_hosted_registry_console_namespace }}"
+      kind: dc
+      name: registry-console
+      mount_type: secret
+      mount_path: "/etc/cockpit/ws-certs.d"
+      secret_name: registry-console-certificate
+      vol_name: registry-console-certificate
+  run_once: true

@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Samuel Munilla
-  description: Deploy and Enable cockpit-ui
+  description: Deploy and Enable Registry Console (cockpit-ui)
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 2.1

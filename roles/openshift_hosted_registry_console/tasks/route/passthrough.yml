@@ -1,0 +1,46 @@
+---
+# We'll generate a self-signed certificate when there is no user-supplied
+# certificate
+- name: Configure self-signed certificate file paths
+  set_fact:
+    docker_registry_console_cert_path: "{{ openshift_master_config_dir }}/registry-console.crt"
+    docker_registry_console_key_path: "{{ openshift_master_config_dir }}/registry-console.key"
+    docker_registry_console_cacert_path: "{{ openshift_master_config_dir }}/ca.crt"
+    docker_registry_console_self_signed: true
+  when:
+  - "'certfile' not in openshift_hosted_registry_console_routecertificates"
+  - "'keyfile' not in openshift_hosted_registry_console_routecertificates"
+
+# Retrieve user supplied certificate files if they are provided
+- when:
+  - "'certfile' in openshift_hosted_registry_console_routecertificates"
+  - "'keyfile' in openshift_hosted_registry_console_routecertificates"
+  block:
+  - name: Configure provided certificate file paths
+    set_fact:
+      docker_registry_console_cert_path: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ openshift_hosted_registry_console_routecertificates['certfile'] | basename }}"
+      docker_registry_console_key_path: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ openshift_hosted_registry_console_routecertificates['keyfile'] | basename }}"
+      docker_registry_console_self_signed: false
+
+  # Since we end up bundling the cert, cacert and key in a .pem file, the 'cafile'
+  # is optional
+  - name: Configure provided ca certificate file path
+    set_fact:
+      docker_registry_console_cacert_path: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ openshift_hosted_registry_console_routecertificates['cafile'] | basename }}"
+    when: "'cafile' in openshift_hosted_registry_console_routecertificates"
+
+  - name: Retrieve provided certificate files
+    copy:
+      backup: True
+      dest: "{{ openshift_master_config_dir }}/registry_console_certificates/{{ item.value | basename }}"
+      src: "{{ item.value }}"
+    when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
+    with_dict: "{{ openshift_hosted_registry_console_routecertificates }}"
+
+- name: Configure a passthrough route for registry-console
+  oc_route:
+    name: registry-console
+    namespace: "{{ openshift_hosted_registry_console_namespace }}"
+    service_name: registry-console
+    tls_termination: "{{ openshift_hosted_registry_console_routetermination }}"
+    host: "{{ openshift_hosted_registry_console_routehost | default(omit, true) }}"
