@@ -90,6 +90,9 @@
 
   - include_vars: ../../../../roles/openshift_master/vars/main.yml
 
+  - name: Update journald config
+    include: ../../../../roles/openshift_master/tasks/journald.yml
+
   - name: Remove any legacy systemd units and update systemd units
     include: ../../../../roles/openshift_master/tasks/systemd_units.yml
 
