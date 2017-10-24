@@ -199,7 +199,7 @@
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       policy reconcile-cluster-roles --additive-only=true --confirm -o name
     register: reconcile_cluster_role_result
-    when: not openshift.common.version_gte_3_7 | bool
+    when: openshift_version | version_compare('3.7','<')
     changed_when:
     - reconcile_cluster_role_result.stdout != ''
     - reconcile_cluster_role_result.rc == 0
@@ -214,7 +214,7 @@
       --exclude-groups=system:unauthenticated
       --exclude-users=system:anonymous
       --additive-only=true --confirm -o name
-    when: not openshift.common.version_gte_3_7 | bool
+    when: openshift_version | version_compare('3.7','<')
     register: reconcile_bindings_result
     changed_when:
     - reconcile_bindings_result.stdout != ''
@@ -229,9 +229,11 @@
     changed_when:
     - reconcile_jenkins_role_binding_result.stdout != ''
     - reconcile_jenkins_role_binding_result.rc == 0
-    when: (not openshift.common.version_gte_3_7 | bool) and (openshift.common.version_gte_3_4_or_1_4 | bool)
+    when:
+    - openshift_version | version_compare('3.7','<')
+    - openshift_version | version_compare('3.4','>=')
 
-  - when: (openshift.common.version_gte_3_6 | bool) and (not openshift.common.version_gte_3_7 | bool)
+  - when: openshift_upgrade_target | version_compare('3.7','<')
     block:
     - name: Retrieve shared-resource-viewer
       oc_obj:
@@ -250,7 +252,6 @@
       - "'annotations' in objout['results']['results'][0]['metadata']"
       - "'openshift.io/reconcile-protect' in objout['results']['results'][0]['metadata']['annotations']"
       - "objout['results']['results'][0]['metadata']['annotations']['openshift.io/reconcile-protect'] == 'true'"
-
     - copy:
         src: "{{ item }}"
         dest: "/tmp/{{ item }}"
@@ -268,6 +269,12 @@
         - "/tmp/{{ __master_shared_resource_viewer_file }}"
         delete_after: true
       when: __shared_resource_viewer_protected is not defined
+      register: result
+      retries: 3
+      delay: 5
+      until: result.rc == 0
+      ignore_errors: true
+
 
   - name: Reconcile Security Context Constraints
     command: >
