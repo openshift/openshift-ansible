@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.176.0%{?dist}
+Release:        0.177.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,25 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.177.0
+- Check if the master service is non-ha or not (jchaloup@redhat.com)
+- Correct host group for controller restart (rteague@redhat.com)
+- Set the proper external etcd ip address when migrating embeded etcd
+  (jchaloup@redhat.com)
+- Switch to stateful set in prometheus (zgalor@redhat.com)
+- cli: use the correct name for the master system container
+  (gscrivan@redhat.com)
+- cli: do not pull again the image when using Docker (gscrivan@redhat.com)
+- verstion_gte seems unreliable on containerized installs (sdodson@redhat.com)
+- Retry reconcile in case of error and give up eventually (simo@redhat.com)
+- Updating ocp es proxy image to use openshift_logging_proxy_image_prefix if
+  specified (ewolinet@redhat.com)
+- Generate all internal hostnames of no_proxy (ghuang@redhat.com)
+- Add nfs variables documentation to README file (zgalor@redhat.com)
+- Avoid undefined variable in master sysconfig template (hansmi@vshn.ch)
+- Ensure proper variable templating for skopeo auth credentials
+  (mgugino@redhat.com)
+
 * Mon Oct 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.176.0
 - Update defaults (fabian@fabianism.us)
 - Use service-ca.crt instead of master ca.crt (fabian@fabianism.us)
