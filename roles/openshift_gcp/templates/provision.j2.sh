@@ -125,10 +125,11 @@ fi ) &
     if ! gcloud --project "{{ openshift_gcp_project }}" compute instance-templates describe "{{ openshift_gcp_prefix }}instance-template-{{ node_group.name }}" &>/dev/null; then
         gcloud --project "{{ openshift_gcp_project }}" compute instance-templates create "{{ openshift_gcp_prefix }}instance-template-{{ node_group.name }}" \
                 --machine-type "{{ node_group.machine_type }}" --network "{{ openshift_gcp_network_name }}" \
-                --tags "{{ openshift_gcp_prefix }}ocp,ocp,{{ node_group.tags }}" \
+                --tags "{{ openshift_gcp_prefix }}ocp,ocp,{{ 'ocp-bootstrap,' if (node_group.bootstrap | default(False)) else '' }}{{ node_group.tags }}" \
                 --boot-disk-size "{{ node_group.boot_disk_size }}" --boot-disk-type "pd-ssd" \
                 --scopes "logging-write,monitoring-write,useraccounts-ro,service-control,service-management,storage-ro,compute-rw" \
-                --image "${image}" ${metadata}
+                --image "{{ node_group.image | default('${image}') }}" ${metadata}  \
+                --metadata "bootstrap={{ node_group.bootstrap | default(False) | bool | to_json }},cluster-id={{ openshift_gcp_prefix + openshift_gcp_clusterid }},node-group={{ node_group.name }}"
     else
         echo "Instance template '{{ openshift_gcp_prefix }}instance-template-{{ node_group.name }}' already exists"
     fi
@@ -312,8 +313,12 @@ fi
 
 # wait until all node groups are stable
 {% for node_group in openshift_gcp_node_group_config %}
+{% if node_group.bootstrap | default(False) %}
+# not waiting for {{ node_group.name }} due to bootstrapping
+{% else %}
 # wait for stable {{ node_group.name }}
 ( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed wait-until-stable "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --timeout=600 ) &
+{% endif %}
 {% endfor %}
 
 
