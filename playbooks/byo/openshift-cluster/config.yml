@@ -8,5 +8,3 @@
   - always
 
 - include: ../../common/openshift-cluster/config.yml
-  vars:
-    openshift_deployment_subtype: "{{ deployment_subtype | default(none) }}"
