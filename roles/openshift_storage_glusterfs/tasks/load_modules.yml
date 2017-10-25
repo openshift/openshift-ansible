@@ -1,6 +1,7 @@
 ---
-- name: Load kernel modules
   tasks:
-  - modprobe: name=dm_thin_pool state=present
-  - modprobe: name=dm_mirror state=present
-  - modprobe: name=dm_snapshot state=present
+  - name: Load kernel modules
+    modprobe: 
+      name=dm_thin_pool state=present
+      name=dm_mirror state=present
+      name=dm_snapshot state=present
