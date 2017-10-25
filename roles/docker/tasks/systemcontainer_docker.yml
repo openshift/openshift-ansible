@@ -173,4 +173,6 @@
 - set_fact:
     docker_service_status_changed: "{{ r_docker_systemcontainer_docker_start_result | changed }}"
 
+- include: registry_auth.yml
+
 - meta: flush_handlers
