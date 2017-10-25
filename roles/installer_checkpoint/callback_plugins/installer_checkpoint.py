@@ -159,11 +159,6 @@ class CallbackModule(CallbackBase):
                         self._display.display(
                             '\tThis phase can be restarted by running: {}'.format(
                                 phase_attributes[phase]['playbook']))
-                else:
-                    # Phase was not found in custom stats
-                    self._display.display(
-                        '{}{}: {}'.format(phase_title, ' ' * padding, 'Not Started'),
-                        color=C.COLOR_SKIP)
 
         self._display.display("", screen_only=True)
 
