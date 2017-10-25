@@ -29,7 +29,7 @@ spec:
       containers:
       # Deploy Prometheus behind an oauth proxy
       - name: prom-proxy
-        image: "{{ openshift_prometheus_image_proxy }}"
+        image: "{{openshift_prometheus_proxy_image_prefix}}oauth-proxy:{{openshift_prometheus_proxy_image_version}}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -79,7 +79,7 @@ spec:
         - --storage.tsdb.min-block-duration=2m
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.listen-address=localhost:9090
-        image: "{{ openshift_prometheus_image_prometheus }}"
+        image: "{{openshift_prometheus_image_prefix}}prometheus:{{openshift_prometheus_image_version}}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -105,7 +105,7 @@ spec:
 
       # Deploy alertmanager behind prometheus-alert-buffer behind an oauth proxy
       - name: alerts-proxy
-        image: "{{ openshift_prometheus_image_proxy }}"
+        image: "{{openshift_prometheus_proxy_image_prefix}}oauth-proxy:{{openshift_prometheus_proxy_image_version}}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -149,7 +149,7 @@ spec:
       - name: alert-buffer
         args:
         - --storage-path=/alert-buffer/messages.db
-        image: "{{ openshift_prometheus_image_alertbuffer }}"
+        image: "{{openshift_prometheus_alertbuffer_image_prefix}}prometheus-alert-buffer:{{openshift_prometheus_alertbuffer_image_version}}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -176,7 +176,7 @@ spec:
       - name: alertmanager
         args:
         - -config.file=/etc/alertmanager/alertmanager.yml
-        image: "{{ openshift_prometheus_image_alertmanager }}"
+        image: "{{openshift_prometheus_alertmanager_image_prefix}}prometheus-alertmanager:{{openshift_prometheus_alertmanager_image_version}}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
