@@ -158,7 +158,7 @@
   - key: "dnsBindAddress"
     value: "127.0.0.1:53"
   - key: "dnsRecursiveResolvConf"
-    value: "/etc/origin/node/resolv.conf"
+    value: "/etc/resolv.conf"
 
 # Restart all services
 - include: restart.yml

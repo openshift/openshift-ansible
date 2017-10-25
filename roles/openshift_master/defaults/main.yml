@@ -82,7 +82,7 @@ openshift_master_node_config_default_edits:
 - key: dnsDomain
   value: cluster.local
 - key: dnsRecursiveResolvConf
-  value: /etc/origin/node/resolv.conf
+  value: /etc/resolv.conf
 - key: imageConfig.format
   value: "{{ openshift_master_config_imageconfig_format }}"
 - key: kubeletArguments.cloud-config
