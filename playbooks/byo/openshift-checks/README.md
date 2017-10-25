@@ -18,7 +18,8 @@ callback plugin summarizes execution errors at the end of a playbook run.
 
 1. Pre-install playbook ([pre-install.yml](pre-install.yml)) - verifies system
    requirements and look for common problems that can prevent a successful
-   installation of a production cluster.
+   installation of a production cluster. Includes simple hosts level checks
+   for DNS resolve and ICMP ping.
 
 2. Diagnostic playbook ([health.yml](health.yml)) - check an existing cluster
    for known signs of problems.

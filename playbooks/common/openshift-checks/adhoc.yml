@@ -11,3 +11,8 @@
     action: openshift_health_check
     args:
       checks: '{{ openshift_checks | default([]) }}'
+
+# TODO(bogdando) trigger from the connectivity.py check
+- include: connectivity.yml
+  when: ('@connectivity' in openshift_checks | default([]) or
+         'connectivity' in openshift_checks | default([]))
