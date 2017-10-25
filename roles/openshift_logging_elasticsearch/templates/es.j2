@@ -116,7 +116,10 @@ spec:
               value: "logging-{{es_cluster_name}}"
             -
               name: "INSTANCE_RAM"
-              value: "{{openshift_logging_elasticsearch_memory_limit}}"
+              valueFrom:
+                resourceFieldRef:
+                  containerName: "elasticsearch"
+                  resource: limits.memory
             -
               name: "HEAP_DUMP_LOCATION"
               value: "/elasticsearch/persistent/heapdump.hprof"
