@@ -11,4 +11,4 @@
   #   src: "{{ l_etcd_backup_dir }}.tgz"
   #   dest: "{{ l_etcd_backup_dir }}"
   command: >
-    tar -xf "{{ l_etcd_backup_dir }}.tgz" -C "{{ l_etcd_data_dir }}"
+    tar -xf "{{ l_etcd_backup_dir }}.tgz" -C "{{ etcd_data_dir }}"
