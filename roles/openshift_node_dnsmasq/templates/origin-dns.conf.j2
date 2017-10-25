@@ -4,4 +4,7 @@ no-negcache
 max-cache-ttl=1
 enable-dbus
 bind-interfaces
-listen-address={{ openshift.node.dns_ip }}
+{% for interface in openshift_node_dnsmasq_except_interfaces %}
+except-interface={{ interface }}
+{% endfor %}
+# End of config
