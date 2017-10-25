@@ -17,7 +17,7 @@ def main():
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
             images=dict(default=None, type='str'),
             latest_images=dict(default=False, type='bool'),
-            labels=dict(default=None, type='list'),
+            labels=dict(default=None, type='dict'),
             ports=dict(default=['5000'], type='list'),
             replicas=dict(default=1, type='int'),
             selector=dict(default=None, type='str'),

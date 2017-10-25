@@ -39,15 +39,15 @@ options:
     required: false
     default: str
     aliases: []
-  all_namespace:
+  all_namespaces:
     description:
-    - The namespace where the object lives.
+    - Search in all namespaces for the object.
     required: false
     default: false
     aliases: []
   kind:
     description:
-    - The kind attribute of the object. e.g. dc, bc, svc, route
+    - The kind attribute of the object. e.g. dc, bc, svc, route. May be a comma-separated list, e.g. "dc,po,svc".
     required: True
     default: None
     aliases: []

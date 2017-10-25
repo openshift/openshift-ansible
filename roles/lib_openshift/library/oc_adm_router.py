@@ -274,13 +274,13 @@ EXAMPLES = '''
 # noqa: E301,E302
 
 
-class YeditException(Exception):
+class YeditException(Exception):  # pragma: no cover
     ''' Exception class for Yedit '''
     pass
 
 
 # pylint: disable=too-many-public-methods
-class Yedit(object):
+class Yedit(object):  # pragma: no cover
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
     re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z%s/_-]+)"
@@ -998,11 +998,15 @@ class OpenShiftCLI(object):
         '''call oc create on a filename'''
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _delete(self, resource, rname, selector=None):
+    def _delete(self, resource, name=None, selector=None):
         '''call oc delete on a resource'''
-        cmd = ['delete', resource, rname]
-        if selector:
-            cmd.append('--selector=%s' % selector)
+        cmd = ['delete', resource]
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
+        else:
+            raise OpenShiftCLIError('Either name or selector is required when calling delete.')
 
         return self.openshift_cmd(cmd)
 
@@ -1020,7 +1024,7 @@ class OpenShiftCLI(object):
         else:
             cmd.append(template_name)
         if params:
-            param_str = ["%s=%s" % (key, value) for key, value in params.items()]
+            param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
             cmd.append('-v')
             cmd.extend(param_str)
 
@@ -1037,13 +1041,13 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, rname=None, selector=None):
+    def _get(self, resource, name=None, selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
-        if selector:
-            cmd.append('--selector=%s' % selector)
-        elif rname:
-            cmd.append(rname)
+        if selector is not None:
+            cmd.append('--selector={}'.format(selector))
+        elif name is not None:
+            cmd.append(name)
 
         cmd.extend(['-o', 'json'])
 
@@ -1063,9 +1067,9 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
-        cmd.append('--schedulable=%s' % schedulable)
+        cmd.append('--schedulable={}'.format(schedulable))
 
         return self.openshift_cmd(cmd, oadm=True, output=True, output_type='raw')  # noqa: E501
 
@@ -1080,10 +1084,10 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         cmd.extend(['--list-pods', '-o', 'json'])
 
@@ -1096,16 +1100,16 @@ class OpenShiftCLI(object):
         if node:
             cmd.extend(node)
         else:
-            cmd.append('--selector=%s' % selector)
+            cmd.append('--selector={}'.format(selector))
 
         if dry_run:
             cmd.append('--dry-run')
 
         if pod_selector:
-            cmd.append('--pod-selector=%s' % pod_selector)
+            cmd.append('--pod-selector={}'.format(pod_selector))
 
         if grace_period:
-            cmd.append('--grace-period=%s' % int(grace_period))
+            cmd.append('--grace-period={}'.format(int(grace_period)))
 
         if force:
             cmd.append('--force')
@@ -1165,10 +1169,6 @@ class OpenShiftCLI(object):
         elif self.namespace is not None and self.namespace.lower() not in ['none', 'emtpy']:  # E501
             cmds.extend(['-n', self.namespace])
 
-        rval = {}
-        results = ''
-        err = None
-
         if self.verbose:
             print(' '.join(cmds))
 
@@ -1178,39 +1178,31 @@ class OpenShiftCLI(object):
             returncode, stdout, stderr = 1, '', 'Failed to execute {}: {}'.format(subprocess.list2cmdline(cmds), ex)
 
         rval = {"returncode": returncode,
-                "results": results,
                 "cmd": ' '.join(cmds)}
 
-        if returncode == 0:
-            if output:
-                if output_type == 'json':
-                    try:
-                        rval['results'] = json.loads(stdout)
-                    except ValueError as err:
-                        if "No JSON object could be decoded" in err.args:
-                            err = err.args
-                elif output_type == 'raw':
-                    rval['results'] = stdout
+        if output_type == 'json':
+            rval['results'] = {}
+            if output and stdout:
+                try:
+                    rval['results'] = json.loads(stdout)
+                except ValueError as verr:
+                    if "No JSON object could be decoded" in verr.args:
+                        rval['err'] = verr.args
+        elif output_type == 'raw':
+            rval['results'] = stdout if output else ''
 
-            if self.verbose:
-                print("STDOUT: {0}".format(stdout))
-                print("STDERR: {0}".format(stderr))
+        if self.verbose:
+            print("STDOUT: {0}".format(stdout))
+            print("STDERR: {0}".format(stderr))
 
-            if err:
-                rval.update({"err": err,
-                             "stderr": stderr,
-                             "stdout": stdout,
-                             "cmd": cmds})
-
-        else:
+        if 'err' in rval or returncode != 0:
             rval.update({"stderr": stderr,
-                         "stdout": stdout,
-                         "results": {}})
+                         "stdout": stdout})
 
         return rval
 
 
-class Utils(object):
+class Utils(object):  # pragma: no cover
     ''' utilities for openshiftcli modules '''
 
     @staticmethod
@@ -1368,13 +1360,12 @@ class Utils(object):
     @staticmethod
     def openshift_installed():
         ''' check if openshift is installed '''
-        import yum
+        import rpm
 
-        yum_base = yum.YumBase()
-        if yum_base.rpmdb.searchNevra(name='atomic-openshift'):
-            return True
+        transaction_set = rpm.TransactionSet()
+        rpmquery = transaction_set.dbMatch("name", "atomic-openshift")
 
-        return False
+        return rpmquery.count() > 0
 
     # Disabling too-many-branches.  This is a yaml dictionary comparison function
     # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
@@ -1473,7 +1464,6 @@ class Utils(object):
             print('returning true')
         return True
 
-
 class OpenShiftCLIConfig(object):
     '''Generic Config'''
     def __init__(self, rname, namespace, kubeconfig, options):
@@ -1487,17 +1477,28 @@ class OpenShiftCLIConfig(object):
         ''' return config options '''
         return self._options
 
-    def to_option_list(self):
-        '''return all options as a string'''
-        return self.stringify()
+    def to_option_list(self, ascommalist=''):
+        '''return all options as a string
+           if ascommalist is set to the name of a key, and
+           the value of that key is a dict, format the dict
+           as a list of comma delimited key=value pairs'''
+        return self.stringify(ascommalist)
 
-    def stringify(self):
-        ''' return the options hash as cli params in a string '''
+    def stringify(self, ascommalist=''):
+        ''' return the options hash as cli params in a string
+            if ascommalist is set to the name of a key, and
+            the value of that key is a dict, format the dict
+            as a list of comma delimited key=value pairs '''
         rval = []
-        for key, data in self.config_options.items():
+        for key in sorted(self.config_options.keys()):
+            data = self.config_options[key]
             if data['include'] \
-               and (data['value'] or isinstance(data['value'], int)):
-                rval.append('--%s=%s' % (key.replace('_', '-'), data['value']))
+               and (data['value'] is not None or isinstance(data['value'], int)):
+                if key == ascommalist:
+                    val = ','.join(['{}={}'.format(kk, vv) for kk, vv in sorted(data['value'].items())])
+                else:
+                    val = data['value']
+                rval.append('--{}={}'.format(key.replace('_', '-'), val))
 
         return rval
 
@@ -1520,7 +1521,8 @@ class ServiceConfig(object):
                  cluster_ip=None,
                  portal_ip=None,
                  session_affinity=None,
-                 service_type=None):
+                 service_type=None,
+                 external_ips=None):
         ''' constructor for handling service options '''
         self.name = sname
         self.namespace = namespace
@@ -1531,6 +1533,7 @@ class ServiceConfig(object):
         self.portal_ip = portal_ip
         self.session_affinity = session_affinity
         self.service_type = service_type
+        self.external_ips = external_ips
         self.data = {}
 
         self.create_dict()
@@ -1543,8 +1546,9 @@ class ServiceConfig(object):
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
         if self.labels:
-            for lab, lab_value  in self.labels.items():
-                self.data['metadata'][lab] = lab_value
+            self.data['metadata']['labels'] = {}
+            for lab, lab_value in self.labels.items():
+                self.data['metadata']['labels'][lab] = lab_value
         self.data['spec'] = {}
 
         if self.ports:
@@ -1566,6 +1570,10 @@ class ServiceConfig(object):
         if self.service_type:
             self.data['spec']['type'] = self.service_type
 
+        if self.external_ips:
+            self.data['spec']['externalIPs'] = self.external_ips
+
+
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
 class Service(Yedit):
     ''' Class to model the oc service object '''
@@ -1574,6 +1582,7 @@ class Service(Yedit):
     cluster_ip = "spec.clusterIP"
     selector_path = 'spec.selector'
     kind = 'Service'
+    external_ips = "spec.externalIPs"
 
     def __init__(self, content):
         '''Service constructor'''
@@ -1634,6 +1643,53 @@ class Service(Yedit):
     def add_portal_ip(self, pip):
         '''add cluster ip'''
         self.put(Service.portal_ip, pip)
+
+    def get_external_ips(self):
+        ''' get a list of external_ips '''
+        return self.get(Service.external_ips) or []
+
+    def add_external_ips(self, inc_external_ips):
+        ''' add an external_ip to the external_ips list '''
+        if not isinstance(inc_external_ips, list):
+            inc_external_ips = [inc_external_ips]
+
+        external_ips = self.get_external_ips()
+        if not external_ips:
+            self.put(Service.external_ips, inc_external_ips)
+        else:
+            external_ips.extend(inc_external_ips)
+
+        return True
+
+    def find_external_ips(self, inc_external_ip):
+        ''' find a specific external IP '''
+        val = None
+        try:
+            idx = self.get_external_ips().index(inc_external_ip)
+            val = self.get_external_ips()[idx]
+        except ValueError:
+            pass
+
+        return val
+
+    def delete_external_ips(self, inc_external_ips):
+        ''' remove an external IP from a service '''
+        if not isinstance(inc_external_ips, list):
+            inc_external_ips = [inc_external_ips]
+
+        external_ips = self.get(Service.external_ips) or []
+
+        if not external_ips:
+            return True
+
+        removed = False
+        for inc_external_ip in inc_external_ips:
+            external_ip = self.find_external_ips(inc_external_ip)
+            if external_ip:
+                external_ips.remove(external_ip)
+                removed = True
+
+        return removed
 
 # -*- -*- -*- End included fragment: lib/service.py -*- -*- -*-
 
@@ -2130,12 +2186,16 @@ class SecretConfig(object):
                  sname,
                  namespace,
                  kubeconfig,
-                 secrets=None):
+                 secrets=None,
+                 stype=None,
+                 annotations=None):
         ''' constructor for handling secret options '''
         self.kubeconfig = kubeconfig
         self.name = sname
+        self.type = stype
         self.namespace = namespace
         self.secrets = secrets
+        self.annotations = annotations
         self.data = {}
 
         self.create_dict()
@@ -2144,6 +2204,7 @@ class SecretConfig(object):
         ''' assign the correct properties for a secret dict '''
         self.data['apiVersion'] = 'v1'
         self.data['kind'] = 'Secret'
+        self.data['type'] = self.type
         self.data['metadata'] = {}
         self.data['metadata']['name'] = self.name
         self.data['metadata']['namespace'] = self.namespace
@@ -2151,6 +2212,8 @@ class SecretConfig(object):
         if self.secrets:
             for key, value in self.secrets.items():
                 self.data['data'][key] = value
+        if self.annotations:
+            self.data['metadata']['annotations'] = self.annotations
 
 # pylint: disable=too-many-instance-attributes
 class Secret(Yedit):
@@ -2648,7 +2711,7 @@ class Router(OpenShiftCLI):
         self.secret = None
         self.rolebinding = None
         for part in self.router_parts:
-            result = self._get(part['kind'], rname=part['name'])
+            result = self._get(part['kind'], name=part['name'])
             if result['returncode'] == 0 and part['kind'] == 'dc':
                 self.deploymentconfig = DeploymentConfig(result['results'][0])
             elif result['returncode'] == 0 and part['kind'] == 'svc':
@@ -2734,9 +2797,9 @@ class Router(OpenShiftCLI):
             # No certificate was passed to us.  do not pass one to oc adm router
             self.config.config_options['default_cert']['include'] = False
 
-        options = self.config.to_option_list()
+        options = self.config.to_option_list(ascommalist='labels')
 
-        cmd = ['router', self.config.name, '-n', self.config.namespace]
+        cmd = ['router', self.config.name]
         cmd.extend(options)
         cmd.extend(['--dry-run=True', '-o', 'json'])
 
@@ -3035,7 +3098,7 @@ def main():
             key_file=dict(default=None, type='str'),
             images=dict(default=None, type='str'), #'openshift3/ose-${component}:${version}'
             latest_images=dict(default=False, type='bool'),
-            labels=dict(default=None, type='list'),
+            labels=dict(default=None, type='dict'),
             ports=dict(default=['80:80', '443:443'], type='list'),
             replicas=dict(default=1, type='int'),
             selector=dict(default=None, type='str'),

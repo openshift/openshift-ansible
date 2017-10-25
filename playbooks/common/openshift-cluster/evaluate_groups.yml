@@ -25,6 +25,11 @@
       msg: This playbook requires g_nfs_hosts to be set
     when: g_nfs_hosts is not defined
 
+  - name: Evaluate groups - g_glusterfs_hosts required
+    fail:
+      msg: This playbook requires g_glusterfs_hosts to be set
+    when: g_glusterfs_hosts is not defined
+
   - fail:
       msg: The nfs group must be limited to one host
     when: (groups[g_nfs_hosts] | default([])) | length > 1
@@ -109,6 +114,15 @@
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
     with_items: "{{ g_lb_hosts | default([]) }}"
+    changed_when: no
+
+  - name: Evaluate oo_glusterfs_to_config
+    add_host:
+      name: "{{ item }}"
+      groups: oo_glusterfs_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ g_glusterfs_hosts | union(g_glusterfs_registry_hosts | default([])) }}"
     changed_when: no
 
   - name: Evaluate oo_nfs_to_config

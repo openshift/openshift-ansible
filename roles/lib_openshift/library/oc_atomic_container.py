@@ -65,20 +65,25 @@ options:
 
 # -*- -*- -*- Begin included fragment: ansible/oc_atomic_container.py -*- -*- -*-
 
-# pylint: disable=wrong-import-position,too-many-branches,invalid-name
+# pylint: disable=wrong-import-position,too-many-branches,invalid-name,no-name-in-module, import-error
 import json
+
+from distutils.version import StrictVersion
+
 from ansible.module_utils.basic import AnsibleModule
 
 
 def _install(module, container, image, values_list):
     ''' install a container using atomic CLI.  values_list is the list of --set arguments.
     container is the name given to the container.  image is the image to use for the installation. '''
-    args = ['atomic', 'install', "--system", '--name=%s' % container] + values_list + [image]
+    # NOTE: system-package=no is hardcoded. This should be changed to an option in the future.
+    args = ['atomic', 'install', '--system', '--system-package=no',
+            '--name=%s' % container] + values_list + [image]
     rc, out, err = module.run_command(args, check_rc=False)
     if rc != 0:
         return rc, out, err, False
     else:
-        changed = "Extracting" in out
+        changed = "Extracting" in out or "Copying blob" in out
         return rc, out, err, changed
 
 def _uninstall(module, name):
@@ -122,7 +127,7 @@ def do_update(module, container, old_image, image, values_list):
     if rc != 0:
         module.fail_json(rc=rc, msg=err)
     else:
-        changed = "Extracting" in out
+        changed = "Extracting" in out or "Copying blob" in out
         module.exit_json(msg=out, changed=changed)
 
 
@@ -157,7 +162,9 @@ def core(module):
         module.fail_json(rc=rc, msg=err)
         return
 
-    containers = json.loads(out)
+    # NOTE: "or '[]' is a workaround until atomic containers list --json
+    # provides an empty list when no containers are present.
+    containers = json.loads(out or '[]')
     present = len(containers) > 0
     old_image = containers[0]["image_name"] if present else None
 
@@ -187,9 +194,15 @@ def main():
         )
 
     # Verify that the platform supports atomic command
-    rc, _, err = module.run_command('atomic -v', check_rc=False)
+    rc, version_out, err = module.run_command('rpm -q --queryformat "%{VERSION}\n" atomic', check_rc=False)
     if rc != 0:
         module.fail_json(msg="Error in running atomic command", err=err)
+    # This module requires atomic version 1.17.2 or later
+    atomic_version = StrictVersion(version_out.replace('\n', ''))
+    if atomic_version < StrictVersion('1.17.2'):
+        module.fail_json(
+            msg="atomic version 1.17.2+ is required",
+            err=str(atomic_version))
 
     try:
         core(module)
