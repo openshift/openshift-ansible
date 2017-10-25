@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   tasks:
-  - name: create a vpc
+  - name: create a vpc for our openshift installation
     include_role:
       name: openshift_aws
       tasks_from: vpc.yml
