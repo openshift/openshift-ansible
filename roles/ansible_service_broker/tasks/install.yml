@@ -123,7 +123,7 @@
   register: asb_client_secret
 
 - set_fact:
-    service_ca_crt: asb_client_secret.results.results.0.data['service-ca.crt']
+    service_ca_crt: "{{ asb_client_secret.results.results.0.data['service-ca.crt'] }}"
 
 # Using oc_obj because oc_service doesn't seem to allow annotations
 # TODO: Extend oc_service to allow annotations
