@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.59
+Version:        3.6.173.0.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -280,6 +280,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.60-1
+- Update v3.6 content (sdodson@redhat.com)
+- Ensure proper variable templating for skopeo auth credentials
+  (mgugino@redhat.com)
+
 * Mon Oct 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.59-1
 - Default groups.oo_new_etcd_to_config to an empty list (jchaloup@redhat.com)
 - bug 1489498. preserve replica and shard settings (jcantril@redhat.com)
