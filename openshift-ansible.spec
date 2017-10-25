@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.177.0%{?dist}
+Release:        0.178.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Oct 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.178.0
+- Split prometheus image defaults to prefix and version (zgalor@redhat.com)
+- Remove extraneous spaces that yamllint dislikes (staebler@redhat.com)
+- Fix edit and admin role patching for service catalog (staebler@redhat.com)
+- strip dash when comparing version with Python3 (jchaloup@redhat.com)
+- Bug 1452939 - change Logging & Metrics imagePullPolicy (jwozniak@redhat.com)
+- Remove role bindings during service catalog un-install (staebler@redhat.com)
+- Fix a few small issues in service catalog uninstall (staebler@redhat.com)
+- Remove incorrect validation for OpenIDIdentityProvider (mgugino@redhat.com)
+- Enable oreg_auth credential replace during upgrades (mgugino@redhat.com)
+- Handle bootstrap behavior in GCP template (ccoleman@redhat.com)
+- Ensure upgrades apply latest journald settings (mgugino@redhat.com)
+
 * Tue Oct 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.177.0
 - Check if the master service is non-ha or not (jchaloup@redhat.com)
 - Correct host group for controller restart (rteague@redhat.com)
