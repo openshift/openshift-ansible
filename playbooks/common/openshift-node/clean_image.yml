@@ -1,0 +1,10 @@
+---
+- name: Configure nodes
+  hosts: oo_nodes_to_config:!oo_containerized_master_nodes
+  tasks:
+  - name: Remove any ansible facts created during AMI creation
+    file:
+      path: "/etc/ansible/facts.d/{{ item }}"
+      state: absent
+    with_items:
+    - openshift.fact
