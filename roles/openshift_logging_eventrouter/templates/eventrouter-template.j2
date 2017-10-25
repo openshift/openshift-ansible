@@ -62,7 +62,7 @@ objects:
           containers:
             - name: kube-eventrouter
               image: ${IMAGE}
-              imagePullPolicy: Always
+              imagePullPolicy: IfNotPresent
               resources:
                 limits:
                   memory: ${MEMORY}

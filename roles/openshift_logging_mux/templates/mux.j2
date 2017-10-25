@@ -36,7 +36,7 @@ spec:
       containers:
       - name: "mux"
         image: {{image}}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
 {% if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) or (mux_cpu_request is defined and mux_cpu_request is not none) %}
         resources:
 {%   if (mux_memory_limit is defined and mux_memory_limit is not none) or (mux_cpu_limit is defined and mux_cpu_limit is not none) %}

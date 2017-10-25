@@ -41,7 +41,7 @@ spec:
       containers:
         - name: proxy
           image: {{ proxy_image }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           args:
            - --upstream-ca=/etc/elasticsearch/secret/admin-ca
            - --https-address=:4443
@@ -76,7 +76,7 @@ spec:
         -
           name: "elasticsearch"
           image: {{image}}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           resources:
             limits:
 {% if es_cpu_limit is defined and es_cpu_limit is not none and es_cpu_limit != '' %}
