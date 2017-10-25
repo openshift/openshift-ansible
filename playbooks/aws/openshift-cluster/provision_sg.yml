@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: create the necessary security groups
+    include_role:
+      name: openshift_aws
+      tasks_from: security_group.yml

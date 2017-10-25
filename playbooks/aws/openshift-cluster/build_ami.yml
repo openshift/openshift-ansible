@@ -17,6 +17,12 @@
     - name: openshift_aws_region
       msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
 
+# this is required when installing in fresh region or account
+- include: provision_vpc.yml
+
+# this is required when installing in fresh region or account
+- include: provision_sg.yml
+
 - include: provision_instance.yml
   vars:
     openshift_aws_node_group_type: compute
