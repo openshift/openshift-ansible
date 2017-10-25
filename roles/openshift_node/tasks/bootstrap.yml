@@ -25,7 +25,7 @@
     state: "{{ item.state | default('present') }}"
   with_items:
   # add the kubeconfig
-  - line: "KUBECONFIG=/etc/origin/node/csr_kubeconfig"
+  - line: "KUBECONFIG=/etc/origin/node/bootstrap.kubeconfig"
     regexp: "^KUBECONFIG=.*"
   # remove the config file.  This comes from openshift_facts
   - regexp: "^CONFIG_FILE=.*"
