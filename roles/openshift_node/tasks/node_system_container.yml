@@ -1,4 +1,12 @@
 ---
+- set_fact:
+    l_src_creds: ""
+
+- set_fact:
+    l_src_creds: "{{ oreg_auth_user }}:{{ oreg_auth_password }}"
+  when:
+    - oreg_auth_user is defined
+
 - name: Ensure proxies are in the atomic.conf
   include_role:
     name: openshift_atomic
@@ -6,7 +14,7 @@
 
 - name: Pre-pull node system container image
   command: >
-    atomic pull --storage=ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
+    atomic pull --src-creds="{{ l_src_creds }}" --storage=ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
