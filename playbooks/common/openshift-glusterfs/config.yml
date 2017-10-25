@@ -27,6 +27,15 @@
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
 
+- name: Load kernel modules required
+  hosts: glusterfs
+  tasks:
+  - include_role:
+      name: openshift_storage_glusterfs
+      tasks_from: load_modules.yml
+    when:
+    - openshift_storage_glusterfs_is_native | default(True) | bool
+
 - name: Configure GlusterFS
   hosts: oo_first_master
   tasks:
