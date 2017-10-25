@@ -119,9 +119,9 @@
   tasks:
   - include: ../cleanup_unused_images.yml
 
-#TODO: Why doesn't this compose using ./upgrade_control_plane rather than
-# ../upgrade_control_plane?
 - include: ../upgrade_control_plane.yml
+  vars:
+    master_config_hook: "v3_7/master_config_upgrade.yml"
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode
