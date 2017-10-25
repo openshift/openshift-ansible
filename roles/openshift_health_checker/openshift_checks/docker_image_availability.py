@@ -60,10 +60,15 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # for the oreg_url registry there may be credentials specified
         components = self.get_var("oreg_url", default="").split('/')
         self.registries["oreg"] = "" if len(components) < 3 else components[0]
+
+        # Retrieve and template registry credentials, if provided
         self.skopeo_command_creds = ""
         oreg_auth_user = self.get_var('oreg_auth_user', default='')
         oreg_auth_password = self.get_var('oreg_auth_password', default='')
         if oreg_auth_user != '' and oreg_auth_password != '':
+            if self._templar is not None:
+                oreg_auth_user = self._templar.template(oreg_auth_user)
+                oreg_auth_password = self._templar.template(oreg_auth_password)
             self.skopeo_command_creds = "--creds={}:{}".format(quote(oreg_auth_user), quote(oreg_auth_password))
 
         # record whether we could reach a registry or not (and remember results)

@@ -16,7 +16,7 @@ def fake_check(name='fake_check', tags=None, is_active=True, run_return=None, ru
         tags = _tags or []
         changed = False
 
-        def __init__(self, execute_module=None, task_vars=None, tmp=None):
+        def __init__(self, execute_module=None, task_vars=None, tmp=None, templar=None):
             pass
 
         def is_active(self):
