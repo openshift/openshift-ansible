@@ -297,14 +297,13 @@
   - openshift.master.cluster_method == 'native'
   - master_api_service_status_changed | bool
 
-- name: Start and enable master controller on first master
+- name: Start and enable master controller service
   systemd:
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
   when:
   - openshift.master.cluster_method == 'native'
-  - inventory_hostname == openshift_master_hosts[0]
   register: l_start_result
   until: not l_start_result | failed
   retries: 1
@@ -315,31 +314,8 @@
   when:
   - l_start_result | failed
 
-- name: Wait for master controller service to start on first master
-  pause:
-    seconds: 15
-  when:
-  - openshift.master.cluster_method == 'native'
-
-- name: Start and enable master controller on all masters
-  systemd:
-    name: "{{ openshift.common.service_type }}-master-controllers"
-    enabled: yes
-    state: started
-  when:
-  - openshift.master.cluster_method == 'native'
-  - inventory_hostname != openshift_master_hosts[0]
-  register: l_start_result
-  until: not l_start_result | failed
-  retries: 1
-  delay: 60
-
-- name: Dump logs from master-controllers if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-controllers
-  when:
-  - l_start_result | failed
-
-- set_fact:
+- name: Set fact master_controllers_service_status_changed
+  set_fact:
     master_controllers_service_status_changed: "{{ l_start_result | changed }}"
   when:
   - openshift.master.cluster_method == 'native'
