@@ -64,7 +64,7 @@ options:
     - Supported states, present, absent, list
     - present - will ensure object is created or updated to the value specified
     - list - will return a list of environment variables
-    - absent - will remove the environment varibale from the object
+    - absent - will remove the environment variable from the object
     required: False
     default: present
     choices: ["present", 'absent', 'list']
@@ -106,7 +106,7 @@ options:
   env_vars:
     description:
     - The environment variables to insert.  The format is a dict of value pairs.
-    - e.g. {key1: value1, key2: value2}) 
+    - "e.g. {key1: value1, key2: value2}"
     required: False
     default: None
     aliases: []
