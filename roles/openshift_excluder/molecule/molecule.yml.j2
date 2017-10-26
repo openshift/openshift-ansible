@@ -1,0 +1,44 @@
+---
+# http://molecule.readthedocs.io/en/stable-1.22/usage.html
+molecule:
+  test:
+    sequence:
+      - destroy
+      - create
+      - converge
+      - verify
+# pip install pytest-cov
+# https://stackoverflow.com/questions/26589990/py-test-error-unrecognized-arguments-cov-ner-brands-cov-report-term-missi
+dependency:
+  name: galaxy
+driver:
+  name: docker
+docker:
+  containers:
+  {% for container in containers -%}
+  - name: {{ container.name }}
+    image: {{ container.image }}
+    image_version: {{ container.image_version }}
+    ansible_groups:
+    {% for group in container.ansible_groups -%}
+      - {{ group }}
+    {% endfor -%}
+    dockerfile: {{ container.dockerfile }}
+  {% endfor %}
+ansible:
+  config_file: ./ansible.cfg
+  group_vars:
+    # all for all groups
+    all.yml:
+      {% for var in vars -%}
+        {{ var }}: {{ "'" + vars[var] + "'" if vars[var] is string else vars[var] }}
+      {% endfor %}
+  {% if playbook != "" %}
+  playbook: {{ playbook }}
+  {% endif %}
+verifier:
+  name: testinfra
+  options:
+    verbose: true
+    capture: no
+    s: true

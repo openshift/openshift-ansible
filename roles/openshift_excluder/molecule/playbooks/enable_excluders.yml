@@ -1,0 +1,5 @@
+---
+- hosts: openshift_excluder_enable
+  roles:
+    - role: openshift_excluder
+      r_openshift_excluder_action: enable
