@@ -116,5 +116,5 @@ openshift_aws_base_ami: # ami-12345678
 
 # custom certificates are required for the ELB
 openshift_aws_iam_cert_path: # '/path/to/wildcard.<clusterid>.example.com.crt'
-openshift_aws_iam_key_path: # '/path/to/wildcard.<clusterid>.example.com.key'
-#openshift_aws_iam_cert_chain_path: '/path/to/cert.ca.crt'
+openshift_aws_iam_cert_key_path: # '/path/to/wildcard.<clusterid>.example.com.key'
+openshift_aws_iam_cert_chain_path: # '/path/to/cert.ca.crt'
