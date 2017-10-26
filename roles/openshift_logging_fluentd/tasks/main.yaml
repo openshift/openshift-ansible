@@ -154,7 +154,6 @@
       path: "{{ generated_certs_dir }}/system.logging.fluentd.crt"
 
 # create Fluentd daemonset
-
 # this should change based on the type of fluentd deployment to be done...
 # TODO: pass in aggregation configurations
 - name: Generate logging-fluentd daemonset definition
@@ -173,7 +172,7 @@
     fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys()[0] }}"
     fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values()[0] }}"
     fluentd_cpu_limit: "{{ openshift_logging_fluentd_cpu_limit }}"
-    fluentd_cpu_request: "{{ openshift_logging_fluentd_cpu_request }}"
+    fluentd_cpu_request: "{{ openshift_logging_fluentd_cpu_request | min_cpu(openshift_logging_fluentd_cpu_limit | default(none)) }}"
     fluentd_memory_limit: "{{ openshift_logging_fluentd_memory_limit }}"
     audit_container_engine: "{{ openshift_logging_fluentd_audit_container_engine | default(False) | bool }}"
     audit_log_file: "{{ openshift_logging_fluentd_audit_file | default() }}"
