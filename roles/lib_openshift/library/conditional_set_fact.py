@@ -29,6 +29,10 @@ EXAMPLES = '''
     fact1: not_defined_variable
     fact2: defined_variable
 
+- name: Conditionally set fact falling back on default
+  conditional_set_fact:
+    fact1: not_defined_var | defined_variable
+
 '''
 
 
@@ -48,12 +52,14 @@ def run_module():
     is_changed = False
 
     for param in module.params['vars']:
-        other_var = module.params['vars'][param]
+        other_vars = module.params['vars'][param].replace(" ", "")
 
-        if other_var in module.params['facts']:
-            local_facts[param] = module.params['facts'][other_var]
-            if not is_changed:
-                is_changed = True
+        for other_var in other_vars.split('|'):
+            if other_var in module.params['facts']:
+                local_facts[param] = module.params['facts'][other_var]
+                if not is_changed:
+                    is_changed = True
+                break
 
     return module.exit_json(changed=is_changed,  # noqa: F405
                             ansible_facts=local_facts)
