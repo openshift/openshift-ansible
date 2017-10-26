@@ -66,7 +66,7 @@ openshift_pkg_version: # example: -3.7.0
 openshift_aws_ssh_key_name: # example: myuser_key
 openshift_aws_base_ami: # example: ami-12345678
 openshift_aws_iam_cert_path: # example: '/path/to/wildcard.<clusterid>.example.com.crt'
-openshift_aws_iam_key_path: # example: '/path/to/wildcard.<clusterid>.example.com.key'
+openshift_aws_iam_cert_key_path: # example: '/path/to/wildcard.<clusterid>.example.com.key'
 ```
 
 If customization is required for the instances, scale groups, or any other configurable option please see the ['openshift_aws/defaults/main.yml'](../../roles/openshift_aws/defaults/main.yml) for variables and overrides. These overrides can be placed in the `provisioning_vars.yml`, `inventory`, or `group_vars`.
