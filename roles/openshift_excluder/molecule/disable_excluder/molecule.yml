@@ -1,0 +1,43 @@
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+- name: openshift_excluder_disable
+  image: rhel7-ansible
+  image_version: latest
+  dockerfile: Dockerfile
+  command: sleep infinity
+  groups:
+  - openshift_excluder_disable
+provisioner:
+  name: ansible
+  playbooks:
+    setup: ../resources/playbooks/docker/create.yml
+    teardown: ../resources/playbooks/docker/destroy.yml
+    converge: ../resources/playbooks/tests/disable_excluders.yml
+  env:
+    ANSIBLE_ROLES_PATH: ../../../../../roles
+    ANSIBLE_FILTER_PLUGINS: ../../../../filter_plugins
+  group_vars:
+    all.yml:
+      install_version: '3.5'
+      r_openshift_excluder_service_type: atomic-openshift
+scenario:
+  name: disable_excluder
+  converge_sequence:
+  - create
+  - converge
+  test_sequence:
+  - destroy
+  - create
+  - converge
+  #- lint
+  - verify
+  - destroy
+verifier:
+  name: testinfra
+  options:
+    capture: false
+    s: true
+    verbose: true
