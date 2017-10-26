@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.181.0%{?dist}
+Release:        0.182.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.182.0
+- Fixing documentation for the cert_key_path variable name.
+  (kwoodson@redhat.com)
+- Moving removal of unwanted artifacts to image_prep. (kwoodson@redhat.com)
+- Ensure journald persistence directories exist (mgugino@redhat.com)
+- Fix lint (tbielawa@redhat.com)
+- Move add_many_container_providers.yml to playbooks/byo/openshift-management
+  with a noop task include to load filter plugins. (abutcher@redhat.com)
+- Refactor adding multiple container providers (tbielawa@redhat.com)
+- Management Cleanup and Provider Integration (tbielawa@redhat.com)
+
 * Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.181.0
 - Fix loop_var warnings during logging install (mgugino@redhat.com)
 - Fix typo and add detailed comments in kuryr (sngchlko@gmail.com)
