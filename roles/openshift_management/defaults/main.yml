@@ -77,6 +77,20 @@ openshift_management_storage_nfs_base_dir: /exports
 openshift_management_storage_nfs_local_hostname: false
 
 ######################################################################
+# DEFAULT ACCOUNT INFORMATION
+######################################################################
+# These are the default values for the username and password of the
+# management app. Changing these values in your inventory will not
+# change your username or password. You should only need to change
+# these values in your inventory if you already changed the actual
+# name and password AND are trying to use integration scripts.
+#
+# For example, adding this cluster as a container provider,
+# playbooks/byo/openshift-management/add_container_provider.yml
+openshift_management_username: admin
+openshift_management_password: smartvm
+
+######################################################################
 # SCAFFOLDING - These are parameters we pre-seed that a user may or
 # may not set later
 ######################################################################

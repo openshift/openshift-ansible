@@ -1,0 +1,65 @@
+---
+- name: Ensure lib_openshift modules are available
+  include_role:
+    role: lib_openshift
+
+- name: Ensure OpenShift facts module is available
+  include_role:
+    role: openshift_facts
+
+- name: Ensure OpenShift facts are loaded
+  openshift_facts:
+
+- name: Ensure the management SA Secrets are read
+  oc_serviceaccount_secret:
+    state: list
+    service_account: management-admin
+    namespace: management-infra
+  register: sa
+
+- name: Ensure the management SA bearer token is identified
+  set_fact:
+    management_token: "{{ sa.results | oo_filter_sa_secrets }}"
+
+- name: Ensure the SA bearer token value is read
+  oc_secret:
+    state: list
+    name: "{{ management_token }}"
+    namespace: management-infra
+    decode: true
+  no_log: True
+  register: sa_secret
+
+- name: Ensure the SA bearer token value is saved
+  set_fact:
+    management_bearer_token: "{{ sa_secret.results.decoded.token }}"
+
+- name: Ensure we have the public route to the management service
+  oc_route:
+    state: list
+    name: httpd
+    namespace: openshift-management
+  register: route
+
+- name: Ensure the management service route is saved
+  set_fact:
+    management_route: "{{ route.results.0.spec.host }}"
+
+- name: Ensure this cluster is a container provider
+  uri:
+    url: "https://{{ management_route }}/api/providers"
+    body_format: json
+    method: POST
+    user: "{{ openshift_management_username }}"
+    password: "{{ openshift_management_password }}"
+    validate_certs: no
+    # Docs on formatting the BODY of the POST request:
+    # http://manageiq.org/docs/reference/latest/api/reference/providers.html#specifying-connection-configurations
+    body:
+      connection_configurations:
+        - authentication: {auth_key: "{{ management_bearer_token }}", authtype: bearer, type: AuthToken}
+          endpoint: {role: default, security_protocol: ssl-without-validation, verify_ssl: 0}
+      hostname: "{{ openshift.master.cluster_public_hostname }}"
+      name: "{{ openshift_management_project }}"
+      port: "{{ openshift.master.api_port }}"
+      type: "ManageIQ::Providers::Openshift::ContainerManager"
