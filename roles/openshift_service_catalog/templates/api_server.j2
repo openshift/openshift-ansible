@@ -24,6 +24,7 @@ spec:
 {% endfor %}
       containers:
       - args:
+        - apiserver
         - --storage-type
         - etcd
         - --secure-port
@@ -45,7 +46,7 @@ spec:
         - --feature-gates
         - OriginatingIdentity=true
         image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
-        command: ["/usr/bin/apiserver"]
+        command: ["/usr/bin/service-catalog"]
         imagePullPolicy: Always
         name: apiserver
         ports:
