@@ -22,21 +22,25 @@
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/elasticsearch.jks" state=touch mode="u=rw,g=r,o=r"
+  become: false
   when: elasticsearch_jks.stat.exists
   changed_when: False
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/logging-es.jks" state=touch mode="u=rw,g=r,o=r"
-  when: logging_es_jks.stat.exists
+  become: false
   changed_when: False
+  when: logging_es_jks.stat.exists
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/system.admin.jks" state=touch mode="u=rw,g=r,o=r"
+  become: false
   when: system_admin_jks.stat.exists
   changed_when: False
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/truststore.jks" state=touch mode="u=rw,g=r,o=r"
+  become: false
   when: truststore_jks.stat.exists
   changed_when: False
 
@@ -56,10 +60,12 @@
 - local_action: template src=signing.conf.j2 dest={{local_tmp.stdout}}/signing.conf
   vars:
     - top_dir: "{{local_tmp.stdout}}"
+  become: false
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Run JKS generation script
   local_action: script generate-jks.sh {{local_tmp.stdout}} {{openshift_logging_namespace}}
+  become: false
   check_mode: no
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
