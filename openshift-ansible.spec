@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.178.0%{?dist}
+Release:        0.179.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.179.0
+- Remove pause from master service startup (rteague@redhat.com)
+- Change default in prometheus storage type to emptydir (zgalor@redhat.com)
+- Bug 1491636 - honor node selectors (jwozniak@redhat.com)
+- Sync latest imagestreams and templates (sdodson@redhat.com)
+- Remove base package install (mgugino@redhat.com)
+- etcd: remove hacks for the system container (gscrivan@redhat.com)
+- Ensure deployment_subtype is set within openshift_sanitize_inventory.
+  (abutcher@redhat.com)
+- Add installer checkpoint for prometheus (zgalor@redhat.com)
+- Remove unused registry_volume_claim variable (hansmi@vshn.ch)
+
 * Wed Oct 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.178.0
 - Split prometheus image defaults to prefix and version (zgalor@redhat.com)
 - Remove extraneous spaces that yamllint dislikes (staebler@redhat.com)
