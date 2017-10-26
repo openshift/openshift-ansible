@@ -3,6 +3,11 @@
   stat: path=/etc/systemd/journald.conf
   register: journald_conf_file
 
+- name: Create journald persistence directories
+  file:
+    path: /var/log/journal
+    state: directory
+
 - name: Update journald setup
   replace:
     dest: /etc/systemd/journald.conf
