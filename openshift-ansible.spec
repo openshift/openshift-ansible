@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.179.0%{?dist}
+Release:        0.181.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -280,6 +280,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.181.0
+- Fix loop_var warnings during logging install (mgugino@redhat.com)
+- Fix typo and add detailed comments in kuryr (sngchlko@gmail.com)
+
 * Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.179.0
 - Remove pause from master service startup (rteague@redhat.com)
 - Change default in prometheus storage type to emptydir (zgalor@redhat.com)
