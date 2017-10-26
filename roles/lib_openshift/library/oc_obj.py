@@ -1477,7 +1477,16 @@ class OCObject(OpenShiftCLI):
         if files:
             return self._create(files[0])
 
-        content['data'] = yaml.dump(content['data'])
+        # pylint: disable=no-member
+        # The purpose of this change is twofold:
+        # - we need a check to only use the ruamel specific dumper if ruamel is loaded
+        # - the dumper or the flow style change is needed so openshift is able to parse
+        # the resulting yaml, at least until gopkg.in/yaml.v2 is updated
+        if hasattr(yaml, 'RoundTripDumper'):
+            content['data'] = yaml.dump(content['data'], Dumper=yaml.RoundTripDumper)
+        else:
+            content['data'] = yaml.safe_dump(content['data'], default_flow_style=False)
+
         content_file = Utils.create_tmp_files_from_contents(content)[0]
 
         return self._create(content_file['path'])
