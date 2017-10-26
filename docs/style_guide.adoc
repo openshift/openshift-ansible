@@ -172,3 +172,20 @@ Even though both roles have the same prefix (mur), and even though both roles ha
 This would only be a problem if my_uber_role depended on made_up_role, or vice versa. Or if either of these two roles included things from the other.
 
 This is enough of a corner case that it is unlikely to happen. If it does, it will be addressed on a case by case basis.
+
+==== Coordinating logic across roles with variables
+From time to time, it may be necessary to set some value to coordinate actions and logic across various roles.
+
+In these cases, it is preferable to have a back-reference to the coordinating variable which is defined outside of the role.
+
+.Back reference example:
+[source]
+----
+# role1/defaults/main.yml
+role1_var1_default: "{{ coordinating_var | default(True) }}"
+role1_var1: "{{ role1_var1_default }}"
+
+# role2/defaults/main.yml
+role2_var1_default: "{{ coordinating_var | default(True) }}"
+role2_var1: "{{ role2_var1_default }}"
+----
