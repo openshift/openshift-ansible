@@ -47,7 +47,7 @@
 - name: Abort when openshift_release is invalid
   when:
     - openshift_release is defined
-    - not openshift_release | match('\d+(\.\d+){1,3}$')
+    - not openshift_release | match('^\d+(\.\d+){1,3}$')
   fail:
     msg: |-
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
