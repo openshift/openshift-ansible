@@ -63,8 +63,10 @@
 
 - name: Import Centos Image streams
   command: >
-    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ centos_image_streams }}
+    {{ openshift.common.client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ item }}
   when: openshift_examples_load_centos | bool
+  with_items:
+    - "{{ centos_image_streams }}"
   register: oex_import_centos_streams
   failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
   changed_when: false
