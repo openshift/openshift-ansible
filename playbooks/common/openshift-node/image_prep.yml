@@ -19,3 +19,6 @@
 
 - name: Re-enable excluders
   include: enable_excluders.yml
+
+- name: Remove any undesired artifacts from build
+  include: clean_image.yml

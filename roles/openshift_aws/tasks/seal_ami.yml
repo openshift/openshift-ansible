@@ -1,11 +1,4 @@
 ---
-- name: Remove any ansible facts created during AMI creation
-  file:
-    path: "/etc/ansible/facts.d/{{ item }}"
-    state: absent
-  with_items:
-  - openshift.fact
-
 - name: fetch newly created instances
   ec2_remote_facts:
     region: "{{ openshift_aws_region }}"
