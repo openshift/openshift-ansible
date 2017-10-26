@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.137
+Version:        3.5.138
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -271,6 +271,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.138-1
+- 
+
 * Tue Oct 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.137-1
 - bug 1489498. preserve replica and shard settings (jcantril@redhat.com)
 - Fix undefined variable for master upgrades (mgugino@redhat.com)
