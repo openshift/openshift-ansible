@@ -62,7 +62,7 @@
   shell: lsmod | grep overlay
   register: l_has_overlay_in_kernel
   ignore_errors: yes
-
+  failed_when: false
 
 - when: l_has_overlay_in_kernel.rc != 0
   block:
