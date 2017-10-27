@@ -1,7 +1,22 @@
 import unittest
 from openshift_logging import walk
+from openshift_logging import min_cpu
 
 class TestFilterMethods(unittest.TestCase):
+    
+
+    def test_min_cpu_for_none(self):
+        source = "1000M"
+        self.assertEquals(min_cpu(source, None), "1000M")
+
+    def test_min_cpu_for_millis(self):
+        source = "1"
+        self.assertEquals(min_cpu(source, "0.1"), "0.1")
+
+
+    def test_min_cpu_for_whole(self):
+        source = "120M"
+        self.assertEquals(min_cpu(source, "2"), "120M")
 
 
     def test_walk_find_key(self):
