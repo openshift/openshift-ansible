@@ -29,11 +29,12 @@ objects:
 - kind: Route
   apiVersion: v1
   metadata:
-    name: ${HEKETI_ROUTE}
+    name: deploy-heketi-${CLUSTER_NAME}
     labels:
       glusterfs: deploy-heketi-${CLUSTER_NAME}-route
       deploy-heketi: support
   spec:
+    host: ${HEKETI_ROUTE}   
     to:
       kind: Service
       name: deploy-heketi-${CLUSTER_NAME}
