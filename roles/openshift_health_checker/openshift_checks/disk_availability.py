@@ -1,6 +1,7 @@
 """Check that there is enough disk space in predefined paths."""
 
 import tempfile
+import os.path
 
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 
@@ -121,11 +122,21 @@ class DiskAvailability(OpenShiftCheck):
 
         return {}
 
+    def find_ansible_submounts(self, path):
+        """Return a list of ansible_mounts that are below the given path."""
+        base = os.path.join(path, "")
+        return [
+            mount
+            for mount in self.get_var("ansible_mounts")
+            if mount["mount"].startswith(base)
+        ]
+
     def free_bytes(self, path):
         """Return the size available in path based on ansible_mounts."""
+        submounts = sum(mnt.get('size_available', 0) for mnt in self.find_ansible_submounts(path))
         mount = self.find_ansible_mount(path)
         try:
-            return mount['size_available']
+            return mount['size_available'] + submounts
         except KeyError:
             raise OpenShiftCheckException(
                 'Unable to retrieve disk availability for "{path}".\n'
