@@ -21,3 +21,11 @@ l2_docker_blocked_registries: "{% if openshift_docker_blocked_registries is stri
 l2_docker_insecure_registries: "{% if openshift_docker_insecure_registries is string %}{% if openshift_docker_insecure_registries == '' %}[]{% elif ',' in openshift_docker_insecure_registries %}{{ openshift_docker_insecure_registries.split(',') | list }}{% else %}{{ [ openshift_docker_insecure_registries ] }}{% endif %}{% else %}{{ openshift_docker_insecure_registries }}{% endif %}"
 
 containers_registries_conf_path: /etc/containers/registries.conf
+
+r_crio_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_crio_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+
+r_crio_os_firewall_deny: []
+r_crio_os_firewall_allow:
+- service: crio
+  port: 10010/tcp

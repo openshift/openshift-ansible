@@ -161,6 +161,10 @@
     path: /etc/cni/net.d/
     state: directory
 
+- name: setup firewall for CRI-O
+  include: crio_firewall.yml
+  static: yes
+
 - name: Configure the CNI network
   template:
     dest: /etc/cni/net.d/openshift-sdn.conf
