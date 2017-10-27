@@ -9,7 +9,7 @@ write_files:
   content: |
     openshift_group_type: {{ openshift_aws_node_group_type }}
 {%   if openshift_aws_node_group_type != 'master' %}
-- path: /etc/origin/node/csr_kubeconfig
+- path: /etc/origin/node/bootstrap.kubeconfig
   owner: 'root:root'
   permissions: '0640'
   encoding: b64
