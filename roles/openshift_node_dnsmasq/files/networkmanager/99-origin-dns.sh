@@ -9,12 +9,14 @@
 # a pod would fail.
 #
 # To use this,
-# - If this host is also a master, reconfigure master dnsConfig to listen on
-#   8053 to avoid conflicts on port 53 and open port 8053 in the firewall
 # - Drop this script in /etc/NetworkManager/dispatcher.d/
 # - systemctl restart NetworkManager
 # - Configure node-config.yaml to set dnsIP: to the ip address of this
 #   node
+#
+# dnsmasq will bind to all interfaces except lo by default
+# If you want to bind to specific interfaces set OPENSHIFT_NODE_DNSMASQ_INTERFACES
+# to the comma separated list of interfaces you wish to bind to
 #
 # Test it:
 # host kubernetes.default.svc.cluster.local
@@ -25,21 +27,16 @@
 
 cd /etc/sysconfig/network-scripts
 . ./network-functions
+. /etc/sysconfig/atomic-openshift-node
 
 [ -f ../network ] && . ../network
 
 if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
-  # If the origin-upstream-dns config file changed we need to restart
   NEEDS_RESTART=0
-  UPSTREAM_DNS='/etc/dnsmasq.d/origin-upstream-dns.conf'
-  # We'll regenerate the dnsmasq origin config in a temp file first
-  UPSTREAM_DNS_TMP=`mktemp`
-  UPSTREAM_DNS_TMP_SORTED=`mktemp`
-  CURRENT_UPSTREAM_DNS_SORTED=`mktemp`
   NEW_RESOLV_CONF=`mktemp`
-  NEW_NODE_RESOLV_CONF=`mktemp`
-
-
+  if [ ! -f /etc/origin/node/resolv.conf ]; then
+    cp /etc/resolv.conf /etc/origin/node/resolv.conf
+  fi
   ######################################################################
   # couldn't find an existing method to determine if the interface owns the
   # default route
@@ -49,52 +46,26 @@ if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
   if [[ ${DEVICE_IFACE} == ${def_route_int} ]]; then
     if [ ! -f /etc/dnsmasq.d/origin-dns.conf ]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
-no-resolv
 domain-needed
-server=/cluster.local/172.30.0.1
-server=/30.172.in-addr.arpa/172.30.0.1
 enable-dbus
+bind-interfaces
+dns-loop-detect
+resolv-file=/etc/origin/node/resolv.conf
+except-interface=lo
 EOF
+      if [ ! -z $OPENSHIFT_NODE_DNSMASQ_INTERFACES ]; then
+        interfaces=$(echo $OPENSHIFT_NODE_DNSMASQ_INTERFACES | tr "," "\n")
+        echo "${interfaces[@]}"
+        for i in $interfaces; do
+          echo "interface=${i}" >> /etc/dnsmasq.d/origin-dns.conf
+        done
+      fi
+
       # New config file, must restart
       NEEDS_RESTART=1
     fi
 
-    # If network manager doesn't know about the nameservers then the best
-    # we can do is grab them from /etc/resolv.conf but only if we've got no
-    # watermark
-    if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
-      if [[ -z "${IP4_NAMESERVERS}" || "${IP4_NAMESERVERS}" == "${def_route_ip}" ]]; then
-            IP4_NAMESERVERS=`grep '^nameserver ' /etc/resolv.conf | awk '{ print $2 }'`
-      fi
-      ######################################################################
-      # Write out default nameservers for /etc/dnsmasq.d/origin-upstream-dns.conf
-      # and /etc/origin/node/resolv.conf in their respective formats
-      for ns in ${IP4_NAMESERVERS}; do
-        if [[ ! -z $ns ]]; then
-          echo "server=${ns}" >> $UPSTREAM_DNS_TMP
-          echo "nameserver ${ns}" >> $NEW_NODE_RESOLV_CONF
-        fi
-      done
-      # Sort it in case DNS servers arrived in a different order
-      sort $UPSTREAM_DNS_TMP > $UPSTREAM_DNS_TMP_SORTED
-      sort $UPSTREAM_DNS > $CURRENT_UPSTREAM_DNS_SORTED
-      # Compare to the current config file (sorted)
-      NEW_DNS_SUM=`md5sum ${UPSTREAM_DNS_TMP_SORTED} | awk '{print $1}'`
-      CURRENT_DNS_SUM=`md5sum ${CURRENT_UPSTREAM_DNS_SORTED} | awk '{print $1}'`
-      if [ "${NEW_DNS_SUM}" != "${CURRENT_DNS_SUM}" ]; then
-        # DNS has changed, copy the temp file to the proper location (-Z
-        # sets default selinux context) and set the restart flag
-        cp -Z $UPSTREAM_DNS_TMP $UPSTREAM_DNS
-        NEEDS_RESTART=1
-      fi
-      # compare /etc/origin/node/resolv.conf checksum and replace it if different
-      NEW_NODE_RESOLV_CONF_MD5=`md5sum ${NEW_NODE_RESOLV_CONF}`
-      OLD_NODE_RESOLV_CONF_MD5=`md5sum /etc/origin/node/resolv.conf`
-      if [ "${NEW_NODE_RESOLV_CONF_MD5}" != "${OLD_NODE_RESOLV_CONF_MD5}" ]; then
-        cp -Z $NEW_NODE_RESOLV_CONF /etc/origin/node/resolv.conf
-      fi
-    fi
-
+    # dnsmasq not running, needs a restart
     if ! `systemctl -q is-active dnsmasq.service`; then
       NEEDS_RESTART=1
     fi
@@ -122,5 +93,5 @@ EOF
   fi
 
   # Clean up after yourself
-  rm -f $UPSTREAM_DNS_TMP $UPSTREAM_DNS_TMP_SORTED $CURRENT_UPSTREAM_DNS_SORTED $NEW_RESOLV_CONF
+  rm -f $NEW_RESOLV_CONF
 fi
