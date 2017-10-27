@@ -10,6 +10,7 @@
   - name: load openshift_facts module
     include_role:
       name: openshift_facts
+    static: yes
 
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
