@@ -16,7 +16,12 @@ BuildArch:      noarch
 Requires:      ansible >= 2.2.2.0
 Requires:      python2
 Requires:      python-six
-Requires:      openshift-ansible-docs = %{version}-%{release}
+Requires:      %{name}-docs = %{version}
+Requires:      %{name}-playbooks = %{version}
+Requires:      %{name}-roles = %{version}
+Requires:      %{name}-filter-plugins = %{version}
+Requires:      %{name}-lookup-plugins = %{version}
+Requires:      %{name}-callback-plugins = %{version}
 
 %description
 Openshift and Atomic Enterprise Ansible
