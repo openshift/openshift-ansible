@@ -14,7 +14,7 @@
 # and configure their DNS if they have to.
 
 - name: Prepare the Nodes in the cluster for installation
-  hosts: cluster_hosts
+  hosts: oo_all_hosts
   become: true
   # NOTE: The nodes may not be up yet, don't gather facts here.
   # They'll be collected after `wait_for_connection`.
