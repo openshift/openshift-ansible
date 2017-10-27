@@ -28,7 +28,7 @@
     when: openshift_use_manageiq | default(true) | bool
   - role: cockpit
     when:
-    - openshift.common.is_atomic
+    - not openshift.common.is_atomic | bool
     - deployment_type == 'openshift-enterprise'
     - osm_use_cockpit is undefined or osm_use_cockpit | bool
     - openshift.common.deployment_subtype != 'registry'
