@@ -11,6 +11,14 @@
     include_role:
       name: openshift_facts
 
+  # TODO(jchaloup): Once the openshift_version role is docker roles free
+  #                 move this task under it and use include_role to call it
+  - name: Set openshift_release if openshift_pkg_version is set
+    set_fact:
+      # openshift_pkg_version expected in "-\d.\d[.\d]*-.* form
+      openshift_release: "{{ '.'.join(openshift_pkg_version[1:].split('-')[0].split('.')[0:2]) }}"
+    when: openshift_pkg_version is defined
+
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
     include_role:
