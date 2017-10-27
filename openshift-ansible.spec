@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.183.0%{?dist}
+Release:        0.184.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.184.0
+- cri-o: Set max log size to 50 mb (mrunalp@gmail.com)
+- cri-o: open port 10010 (gscrivan@redhat.com)
+- bug 1435144. Remove uneeded upgrade in openshift_logging role
+  (jcantril@redhat.com)
+- Remove inadvertently committed inventory file (rteague@redhat.com)
+- crio: restorcon /var/lib/containers (smilner@redhat.com)
+- Correct openshift_release regular expression (rteague@redhat.com)
+- crio: Add failed_when to overlay check (smilner@redhat.com)
+- docker: set credentials when using system container (gscrivan@redhat.com)
+- Change dnsmasq to bind-interfaces + except-interfaces (mgugino@redhat.com)
+- Fix CA Bundle passed to service-catalog broker for ansible-service-broker
+  (staebler@redhat.com)
+- Renaming csr to bootstrap for consistency. (kwoodson@redhat.com)
+- Add master config upgrade hook to upgrade-all plays (mgugino@redhat.com)
+- Remove 'Not Started' status from playbook checkpoint (rteague@redhat.com)
+- Force include_role to static for loading openshift_facts module
+  (rteague@redhat.com)
+- Make openshift-ansible depend on all subpackages (sdodson@redhat.com)
+- Refactor health check playbooks (rteague@redhat.com)
+
 * Fri Oct 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.183.0
 - 
 
