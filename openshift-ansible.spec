@@ -21,7 +21,12 @@ Requires:      ansible >= 2.3
 Requires:      python2
 Requires:      python-six
 Requires:      tar
-Requires:      openshift-ansible-docs = %{version}
+Requires:      %{name}-docs = %{version}
+Requires:      %{name}-playbooks = %{version}
+Requires:      %{name}-roles = %{version}
+Requires:      %{name}-filter-plugins = %{version}
+Requires:      %{name}-lookup-plugins = %{version}
+Requires:      %{name}-callback-plugins = %{version}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
