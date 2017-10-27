@@ -112,6 +112,8 @@
   - include: ../cleanup_unused_images.yml
 
 - include: ../upgrade_control_plane.yml
+  vars:
+    master_config_hook: "v3_5/master_config_upgrade.yml"
 
 - include: ../upgrade_nodes.yml
 
