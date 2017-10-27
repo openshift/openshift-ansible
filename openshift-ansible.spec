@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.61
+Version:        3.6.173.0.62
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Oct 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.62-1
+- adding check to a yaml dump to work properly with new ruamel lib
+  (ihorvath@redhat.com)
+- [3.6] Add variable to control whether NetworkManager hook is installed
+  (hansmi@vshn.ch)
+- Backport 3.6 - Bug 1452939 - image update doc (jwozniak@redhat.com)
+- Bug 1491636 - honor ES ops node selector (jwozniak@redhat.com)
+- Make openshift-ansible depend on all subpackages (sdodson@redhat.com)
+
 * Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.61-1
 - 
 
