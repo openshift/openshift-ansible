@@ -1,11 +1,13 @@
 ---
-- name: Run OpenShift health checks
+- name: OpenShift Health Checks
   hosts: oo_all_hosts
+
   roles:
   - openshift_health_checker
   vars:
   - r_openshift_health_checker_playbook_context: health
   post_tasks:
-  - action: openshift_health_check
+  - name: Run health checks (@health)
+    action: openshift_health_check
     args:
       checks: ['@health']

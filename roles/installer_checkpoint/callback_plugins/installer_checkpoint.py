@@ -72,6 +72,7 @@ class CallbackModule(CallbackBase):
         # Set the order of the installer phases
         installer_phases = [
             'installer_phase_initialize',
+            'installer_phase_health',
             'installer_phase_etcd',
             'installer_phase_nfs',
             'installer_phase_loadbalancer',
@@ -92,6 +93,10 @@ class CallbackModule(CallbackBase):
             'installer_phase_initialize': {
                 'title': 'Initialization',
                 'playbook': ''
+            },
+            'installer_phase_health': {
+                'title': 'Health Check',
+                'playbook': 'playbooks/byo/openshift-checks/pre-install.yml'
             },
             'installer_phase_etcd': {
                 'title': 'etcd Install',
