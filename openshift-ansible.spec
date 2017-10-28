@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.184.0%{?dist}
+Release:        0.185.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Oct 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.185.0
+- bug 1506073. Lower cpu request for logging when it exceeds limit
+  (jcantril@redhat.com)
+- Update the name of the service-catalog binary (staebler@redhat.com)
+- disk_availability check: include submount storage (lmeyer@redhat.com)
+
 * Fri Oct 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.184.0
 - cri-o: Set max log size to 50 mb (mrunalp@gmail.com)
 - cri-o: open port 10010 (gscrivan@redhat.com)
