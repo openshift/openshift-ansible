@@ -41,6 +41,7 @@
     file_name: "{{ item.source }}"
     file_content: "{{ item.content | b64decode | from_yaml }}"
   with_items: "{{ object_defs.results }}"
+  when: object_defs is defined
 
 - find:
     paths: "{{ mktemp.stdout }}/templates"
