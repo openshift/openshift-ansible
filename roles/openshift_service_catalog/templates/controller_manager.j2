@@ -29,6 +29,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         args:
+        - controller-manager
         - -v
         - "5"
         - --leader-election-namespace
@@ -38,7 +39,7 @@ spec:
         - --feature-gates
         - OriginatingIdentity=true
         image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
-        command: ["/usr/bin/controller-manager"]
+        command: ["/usr/bin/service-catalog"]
         imagePullPolicy: Always
         name: controller-manager
         ports:
