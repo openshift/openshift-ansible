@@ -25,19 +25,23 @@
   set_fact:
     openshift_aws_launch_config_bootstrap_token: "{{ bootstrap['content'] | b64decode }}"
 
-- name: include build node group for infra
-  include: build_node_group.yml
-  vars:
-    openshift_aws_node_group_type: infra
-    openshift_aws_scale_group_name: "{{ openshift_aws_clusterid }} openshift infra"
-    openshift_aws_launch_config_name: "{{ openshift_aws_clusterid }}-infra-{{ ansible_date_time.epoch }}"
+- include: vpc_and_subnet_id.yml
 
-- name: include build node group for compute
+- name: include build compute and infra node groups
   include: build_node_group.yml
   vars:
-    openshift_aws_node_group_type: compute
-    openshift_aws_scale_group_name: "{{ openshift_aws_clusterid }} openshift compute"
-    openshift_aws_launch_config_name: "{{ openshift_aws_clusterid }}-compute-{{ ansible_date_time.epoch }}"
+    l_nodes_to_build: "{{ openshift_aws_node_group_config }}"
+    l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups }}"
+    l_aws_ami_map: "{{ openshift_aws_ami_map }}"
+
+- name: include build node group for extra nodes
+  include: build_node_group.yml
+  when: openshift_aws_node_group_config_extra is defined
+  vars:
+    l_nodes_to_build: "{{ openshift_aws_node_group_config_extra | default({}) }}"
+    l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups_extra }}"
+    l_aws_ami_map: "{{ openshift_aws_ami_map_extra }}"
+
 
 - when: openshift_aws_wait_for_ssh | bool
   block:
