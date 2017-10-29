@@ -313,11 +313,11 @@ fi
 
 # wait until all node groups are stable
 {% for node_group in openshift_gcp_node_group_config %}
-{% if node_group.bootstrap | default(False) %}
-# not waiting for {{ node_group.name }} due to bootstrapping
-{% else %}
+{% if node_group.wait_for_stable | default(False) or not (node_group.bootstrap | default(False)) %}
 # wait for stable {{ node_group.name }}
 ( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed wait-until-stable "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --timeout=600 ) &
+{% else %}
+# not waiting for {{ node_group.name }} due to bootstrapping
 {% endif %}
 {% endfor %}
 
