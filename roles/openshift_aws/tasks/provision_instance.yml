@@ -3,20 +3,7 @@
   set_fact:
     openshift_node_bootstrap: True
 
-- name: query vpc
-  ec2_vpc_net_facts:
-    region: "{{ openshift_aws_region }}"
-    filters:
-      'tag:Name': "{{ openshift_aws_vpc_name }}"
-  register: vpcout
-
-- name: fetch the default subnet id
-  ec2_vpc_subnet_facts:
-    region: "{{ openshift_aws_region }}"
-    filters:
-      "tag:Name": "{{ openshift_aws_subnet_name }}"
-      vpc-id: "{{ vpcout.vpcs[0].id }}"
-  register: subnetout
+- include: vpc_and_subnet_id.yml
 
 - name: create instance for ami creation
   ec2:

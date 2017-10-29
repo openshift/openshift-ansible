@@ -1,0 +1,26 @@
+---
+openshift_node_groups:
+- name: node-config-master
+  labels:
+  - 'type=master'
+  edits: []
+- name: node-config-infra
+  labels:
+  - 'type=infra'
+  edits: []
+- name: node-config-compute
+  labels:
+  - 'type=compute'
+  edits: []
+
+openshift_node_group_edits: []
+openshift_node_group_namespace: openshift-node
+openshift_node_group_labels: []
+
+openshift_imageconfig_format: "{{ oreg_url if oreg_url is defined else openshift.node.registry_url }}"
+openshift_node_group_cloud_provider: "{{ openshift_cloudprovider_kind | default('aws') }}"
+openshift_node_group_network_plugin_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
+openshift_node_group_network_plugin: "{{ openshift_node_group_network_plugin_default }}"
+openshift_node_group_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
+openshift_node_group_node_data_dir: "{{ openshift_node_group_node_data_dir_default }}"
+openshift_node_group_network_mtu: "{{ openshift_node_sdn_mtu | default(8951) }}"

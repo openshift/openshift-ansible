@@ -1,0 +1,58 @@
+---
+- name: fetch node configmap
+  oc_configmap:
+    name: "{{ openshift_node_group_name }}"
+    namespace: "{{ openshift_node_group_namespace }}"
+    state: list
+  register: configout
+  run_once: true
+
+- name: debug node config
+  debug: var=configout
+
+- when:
+  - configout.results.results.0 == {} or (configout.results.results.0 != {} and openshift_node_group_edits|length > 0)
+  block:
+  - name: create a temp dir for this work
+    command: mktemp -d /tmp/openshift_node_config-XXXXXX
+    register: mktempout
+    run_once: true
+
+  - name: create node config template
+    template:
+      src: node-config.yaml.j2
+      dest: "{{ mktempout.stdout }}/node-config.yaml"
+    when:
+    - configout.results.results.0 == {}
+
+  - name: lay down the config from the existing configmap
+    copy:
+      content: "{{ configout.results.results.0.data['node-config.yaml'] }}"
+      dest: "{{ mktempout.stdout }}/node-config.yaml"
+    when:
+    - configout.results.results.0 != {}
+
+  - name: "specialize the generated configs for {{ openshift_node_group_name }}"
+    yedit:
+      content:
+      src: "{{ mktempout.stdout }}/node-config.yaml"
+      edits: "{{ openshift_node_group_edits }}"
+    register: yeditout
+    when: openshift_node_group_edits|length > 0
+    run_once: true
+
+  - debug: var=yeditout
+
+  - name: create node-config.yaml configmap
+    oc_configmap:
+      name: "{{ openshift_node_group_name }}"
+      namespace: "{{ openshift_node_group_namespace }}"
+      from_file:
+        node-config.yaml: "{{ mktempout.stdout }}/node-config.yaml"
+    run_once: true
+
+  - name: remove templated files
+    file:
+      dest: "{{ mktempout.stdout }}/"
+      state: absent
+    run_once: true

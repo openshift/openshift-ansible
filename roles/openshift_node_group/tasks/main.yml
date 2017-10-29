@@ -1,0 +1,10 @@
+---
+- name: Build node config maps
+  include: create_config.yml
+  vars:
+    openshift_node_group_name: "{{ node_group.name }}"
+    openshift_node_group_edits: "{{ node_group.edits | default([]) }}"
+    openshift_node_group_labels: "{{ node_group.labels | default([]) }}"
+  with_items: "{{ openshift_node_groups }}"
+  loop_control:
+    loop_var: node_group
