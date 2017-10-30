@@ -21,12 +21,12 @@ Requires:      ansible >= 2.3
 Requires:      python2
 Requires:      python-six
 Requires:      tar
-Requires:      %{name}-docs = %{version}
-Requires:      %{name}-playbooks = %{version}
-Requires:      %{name}-roles = %{version}
-Requires:      %{name}-filter-plugins = %{version}
-Requires:      %{name}-lookup-plugins = %{version}
-Requires:      %{name}-callback-plugins = %{version}
+Requires:      %{name}-docs = %{version}-%{release}
+Requires:      %{name}-playbooks = %{version}-%{release}
+Requires:      %{name}-roles = %{version}-%{release}
+Requires:      %{name}-filter-plugins = %{version}-%{release}
+Requires:      %{name}-lookup-plugins = %{version}-%{release}
+Requires:      %{name}-callback-plugins = %{version}-%{release}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
@@ -139,7 +139,7 @@ popd
 # ----------------------------------------------------------------------------------
 %package docs
 Summary:       Openshift and Atomic Enterprise Ansible documents
-Requires:      %{name} = %{version}
+Requires:      %{name} = %{version}-%{release}
 BuildArch:     noarch
 
 %description docs
@@ -153,11 +153,11 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package playbooks
 Summary:       Openshift and Atomic Enterprise Ansible Playbooks
-Requires:      %{name} = %{version}
-Requires:      %{name}-roles = %{version}
-Requires:      %{name}-lookup-plugins = %{version}
-Requires:      %{name}-filter-plugins = %{version}
-Requires:      %{name}-callback-plugins = %{version}
+Requires:      %{name} = %{version}-%{release}
+Requires:      %{name}-roles = %{version}-%{release}
+Requires:      %{name}-lookup-plugins = %{version}-%{release}
+Requires:      %{name}-filter-plugins = %{version}-%{release}
+Requires:      %{name}-callback-plugins = %{version}-%{release}
 BuildArch:     noarch
 
 %description playbooks
@@ -197,10 +197,10 @@ end
 # openshift-ansible-roles subpackage
 # ----------------------------------------------------------------------------------
 Summary:       Openshift and Atomic Enterprise Ansible roles
-Requires:      %{name} = %{version}
-Requires:      %{name}-lookup-plugins = %{version}
-Requires:      %{name}-filter-plugins = %{version}
-Requires:      %{name}-callback-plugins = %{version}
+Requires:      %{name} = %{version}-%{release}
+Requires:      %{name}-lookup-plugins = %{version}-%{release}
+Requires:      %{name}-filter-plugins = %{version}-%{release}
+Requires:      %{name}-callback-plugins = %{version}-%{release}
 BuildArch:     noarch
 
 %description roles
@@ -215,7 +215,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package filter-plugins
 Summary:       Openshift and Atomic Enterprise Ansible filter plugins
-Requires:      %{name} = %{version}
+Requires:      %{name} = %{version}-%{release}
 BuildArch:     noarch
 Requires:      pyOpenSSL
 
@@ -232,7 +232,7 @@ Requires:      pyOpenSSL
 # ----------------------------------------------------------------------------------
 %package lookup-plugins
 Summary:       Openshift and Atomic Enterprise Ansible lookup plugins
-Requires:      %{name} = %{version}
+Requires:      %{name} = %{version}-%{release}
 BuildArch:     noarch
 
 %description lookup-plugins
@@ -248,7 +248,7 @@ BuildArch:     noarch
 # ----------------------------------------------------------------------------------
 %package callback-plugins
 Summary:       Openshift and Atomic Enterprise Ansible callback plugins
-Requires:      %{name} = %{version}
+Requires:      %{name} = %{version}-%{release}
 BuildArch:     noarch
 
 %description callback-plugins
@@ -265,7 +265,7 @@ BuildArch:     noarch
 %package -n atomic-openshift-utils
 Summary:       Atomic OpenShift Utilities
 BuildRequires: python-setuptools
-Requires:      %{name}-playbooks = %{version}
+Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      python-click
 Requires:      python-setuptools
 Requires:      PyYAML
