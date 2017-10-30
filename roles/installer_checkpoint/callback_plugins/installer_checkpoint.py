@@ -1,59 +1,9 @@
 """Ansible callback plugin to print a summary completion status of installation
 phases.
 """
+from datetime import datetime
 from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
-
-DOCUMENTATION = '''
-
-'''
-
-EXAMPLES = '''
----------------------------------------------
-Example display of a successful playbook run:
-
-PLAY RECAP *********************************************************************
-master01.example.com : ok=158  changed=16   unreachable=0    failed=0
-node01.example.com   : ok=469  changed=74   unreachable=0    failed=0
-node02.example.com   : ok=157  changed=17   unreachable=0    failed=0
-localhost            : ok=24   changed=0    unreachable=0    failed=0
-
-
-INSTALLER STATUS ***************************************************************
-Initialization             : Complete
-etcd Install               : Complete
-NFS Install                : Not Started
-Load balancer Install      : Not Started
-Master Install             : Complete
-Master Additional Install  : Complete
-Node Install               : Complete
-GlusterFS Install          : Not Started
-Hosted Install             : Complete
-Metrics Install            : Not Started
-Logging Install            : Not Started
-Prometheus Install         : Not Started
-Service Catalog Install    : Not Started
-
------------------------------------------------------
-Example display if a failure occurs during execution:
-
-INSTALLER STATUS ***************************************************************
-Initialization             : Complete
-etcd Install               : Complete
-NFS Install                : Not Started
-Load balancer Install      : Not Started
-Master Install             : In Progress
-     This phase can be restarted by running: playbooks/byo/openshift-master/config.yml
-Master Additional Install  : Not Started
-Node Install               : Not Started
-GlusterFS Install          : Not Started
-Hosted Install             : Not Started
-Metrics Install            : Not Started
-Logging Install            : Not Started
-Prometheus Install         : Not Started
-Service Catalog Install    : Not Started
-
-'''
 
 
 class CallbackModule(CallbackBase):
@@ -163,9 +113,10 @@ class CallbackModule(CallbackBase):
                 phase_title = phase_attributes[phase]['title']
                 padding = max_column - len(phase_title) + 2
                 if phase in stats.custom['_run']:
-                    phase_status = stats.custom['_run'][phase]
+                    phase_status = stats.custom['_run'][phase]['status']
+                    phase_time = phase_time_delta(stats.custom['_run'][phase])
                     self._display.display(
-                        '{}{}: {}'.format(phase_title, ' ' * padding, phase_status),
+                        '{}{}: {} ({})'.format(phase_title, ' ' * padding, phase_status, phase_time),
                         color=self.phase_color(phase_status))
                     if phase_status == 'In Progress' and phase != 'installer_phase_initialize':
                         self._display.display(
@@ -192,3 +143,17 @@ class CallbackModule(CallbackBase):
             phase_color = C.COLOR_WARN
 
         return phase_color
+
+
+def phase_time_delta(phase):
+    """ Calculate the difference between phase start and end times """
+    time_format = '%Y%m%d%H%M%SZ'
+    phase_start = datetime.strptime(phase['start'], time_format)
+    if 'end' not in phase:
+        # The phase failed so set the end time to now
+        phase_end = datetime.now()
+    else:
+        phase_end = datetime.strptime(phase['end'], time_format)
+    delta = str(phase_end - phase_start).split(".")[0]  # Trim microseconds
+
+    return delta

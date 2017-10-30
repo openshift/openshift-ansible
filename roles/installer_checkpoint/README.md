@@ -92,31 +92,34 @@ phase/component and then a final play for setting `installer_hase_initialize` to
 # common/openshift-cluster/std_include.yml
 ---
 - name: Initialization Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   roles:
   - installer_checkpoint
   tasks:
   - name: Set install initialization 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_initialize: "In Progress"
-      aggregate: false
+        installer_phase_initialize:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 #...
 # Various plays here
 #...
 
 - name: Initialization Checkpoint End
-  hosts: localhost
-  connection: local
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set install initialization 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_initialize: "Complete"
-      aggregate: false
+        installer_phase_initialize:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 ``` 
 
 Each phase or component of the installer will follow a similar pattern, with the
@@ -139,37 +142,25 @@ localhost            : ok=24   changed=0    unreachable=0    failed=0
 
 
 INSTALLER STATUS ***************************************************************
-Initialization             : Complete
-etcd Install               : Complete
-NFS Install                : Not Started
-Load balancer Install      : Not Started
-Master Install             : Complete
-Master Additional Install  : Complete
-Node Install               : Complete
-GlusterFS Install          : Not Started
-Hosted Install             : Complete
-Metrics Install            : Not Started
-Logging Install            : Not Started
-Service Catalog Install    : Not Started
+Initialization             : Complete (0:02:14)
+Health Check               : Complete (0:01:10)
+etcd Install               : Complete (0:02:01)
+Master Install             : Complete (0:11:43)
+Master Additional Install  : Complete (0:00:54)
+Node Install               : Complete (0:14:11)
+Hosted Install             : Complete (0:03:28)
 ```
 
 Example display if a failure occurs during execution:
 
 ```
 INSTALLER STATUS ***************************************************************
-Initialization             : Complete
-etcd Install               : Complete
-NFS Install                : Not Started
-Load balancer Install      : Not Started
-Master Install             : In Progress
-     This phase can be restarted by running: playbooks/byo/openshift-master/config.yml
-Master Additional Install  : Not Started
-Node Install               : Not Started
-GlusterFS Install          : Not Started
-Hosted Install             : Not Started
-Metrics Install            : Not Started
-Logging Install            : Not Started
-Service Catalog Install    : Not Started
+Initialization             : Complete (0:02:14)
+Health Check               : Complete (0:01:10)
+etcd Install               : Complete (0:02:58)
+Master Install             : Complete (0:09:20)
+Master Additional Install  : In Progress (0:20:04)
+    This phase can be restarted by running: playbooks/byo/openshift-master/additional_config.yml
 ```
 
 [set_stats]: http://docs.ansible.com/ansible/latest/set_stats_module.html

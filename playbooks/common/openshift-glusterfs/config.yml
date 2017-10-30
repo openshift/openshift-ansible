@@ -1,13 +1,15 @@
 ---
 - name: GlusterFS Install Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set GlusterFS install 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_glusterfs: "In Progress"
-      aggregate: false
+        installer_phase_glusterfs:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - name: Open firewall ports for GlusterFS nodes
   hosts: glusterfs
@@ -46,11 +48,13 @@
     when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
 - name: GlusterFS Install Checkpoint End
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set GlusterFS install 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_glusterfs: "Complete"
-      aggregate: false
+        installer_phase_glusterfs:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

@@ -1,13 +1,15 @@
 ---
 - name: Hosted Install Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Hosted install 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_hosted: "In Progress"
-      aggregate: false
+        installer_phase_hosted:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - include: create_persistent_volumes.yml
 
@@ -25,11 +27,13 @@
   when: openshift_hosted_prometheus_deploy | default(False) | bool
 
 - name: Hosted Install Checkpoint End
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Hosted install 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_hosted: "Complete"
-      aggregate: false
+        installer_phase_hosted:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

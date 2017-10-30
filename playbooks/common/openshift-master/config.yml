@@ -1,13 +1,15 @@
 ---
 - name: Master Install Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Master install 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_master: "In Progress"
-      aggregate: false
+        installer_phase_master:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - include: certificates.yml
 
@@ -232,11 +234,13 @@
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - name: Master Install Checkpoint End
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Master install 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_master: "Complete"
-      aggregate: false
+        installer_phase_master:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
