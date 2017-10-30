@@ -1,0 +1,35 @@
+---
+
+- when: ansible_service_broker_certs_dir is undefined
+  block:
+  - name: Create ansible-service-broker cert directory
+    file:
+      path: "{{ openshift.common.config_base }}/ansible-service-broker"
+      state: directory
+      mode: 0755
+    check_mode: no
+
+  - set_fact:
+      ansible_service_broker_certs_dir: "{{ openshift.common.config_base }}/ansible-service-broker"
+
+  - name: Create self signing ca cert
+    command: 'openssl req -nodes -x509 -newkey rsa:4096 -keyout {{ ansible_service_broker_certs_dir }}/key.pem -out {{ ansible_service_broker_certs_dir }}/cert.pem -days 365 -subj "/CN=asb-etcd.openshift-ansible-service-broker.svc"'
+    args:
+      creates: '{{ ansible_service_broker_certs_dir }}/cert.pem'
+
+  - name: Create self signed client cert
+    command: '{{ item.cmd }}'
+    args:
+      creates: '{{ item.creates }}'
+    with_items:
+    - cmd: openssl genrsa -out {{ ansible_service_broker_certs_dir }}/client.key 2048
+      creates: '{{ ansible_service_broker_certs_dir }}/client.key'
+    - cmd: 'openssl req -new -key {{ ansible_service_broker_certs_dir }}/client.key -out {{ ansible_service_broker_certs_dir }}/client.csr -subj "/CN=client"'
+      creates: '{{ ansible_service_broker_certs_dir }}/client.csr'
+    - cmd: openssl x509 -req -in {{ ansible_service_broker_certs_dir }}/client.csr -CA {{ ansible_service_broker_certs_dir }}/cert.pem -CAkey {{ ansible_service_broker_certs_dir }}/key.pem -CAcreateserial -out {{ ansible_service_broker_certs_dir }}/client.pem -days 1024
+      creates: '{{ ansible_service_broker_certs_dir }}/client.pem'
+
+- set_fact:
+    etcd_ca_cert: "{{ lookup('file', '{{ ansible_service_broker_certs_dir }}/cert.pem') }}"
+    etcd_client_cert: "{{ lookup('file', '{{ ansible_service_broker_certs_dir }}/client.pem') }}"
+    etcd_client_key: "{{ lookup('file', '{{ ansible_service_broker_certs_dir }}/client.key') }}"
