@@ -36,6 +36,14 @@
   - openshift_logging_label_key != ""
   - openshift_logging_label_value is defined
 
+- name: Annotate Logging Project to allow overcommit
+  oc_edit:
+    kind: ns
+    name: "{{ openshift_logging_namespace }}"
+    separator: '#'
+    content:
+      metadata#annotations#quota.openshift.io/cluster-resource-override-enabled: "false"
+
 - name: Create logging cert directory
   file:
     path: "{{ openshift.common.config_base }}/logging"
