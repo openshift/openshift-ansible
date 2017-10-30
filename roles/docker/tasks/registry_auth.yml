@@ -7,6 +7,10 @@
 
 - name: Create credentials for docker cli registry auth
   command: "docker --config={{ docker_cli_auth_config_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
+  register: openshift_docker_credentials_create_res
+  retries: 3
+  delay: 5
+  until: openshift_docker_credentials_create_res.rc == 0
   when:
   - oreg_auth_user is defined
   - (not docker_cli_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
