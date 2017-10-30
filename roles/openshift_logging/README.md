@@ -106,6 +106,75 @@ same as above for their non-ops counterparts, but apply to the OPS cluster insta
 - `openshift_logging_kibana_ops_proxy_memory_limit`: The amount of memory to allocate to Kibana proxy or unset if not specified.
 - `openshift_logging_kibana_ops_replica_count`: The number of replicas Kibana ops should be scaled up to. Defaults to 1.
 
+Image update procedure
+----------------------
+An upgrade of the logging stack from older version to newer is an automated process and should be performed by calling appropriate ansible playbook and setting required ansible variables in your inventory as documented in https://docs.openshift.org/.
+
+Following text describes manual update of the logging images without version upgrade. To determine the current version of images being used you can.
+```
+oc describe pod | grep 'Image ID:'
+```
+This will get the repo digest that can later be compared to the inspected image details.
+
+A way to determine when was your image last updated:
+```
+$ docker images
+REPOSITORY                              TAG     IMAGE ID       CREATED             SIZE
+<registry>/openshift3/logging-fluentd   v3.7    ff2e249fc45a   About an hour ago   235.2 MB
+
+$ docker inspect ff2e249fc45a
+[
+    {
+        . . .
+        "RepoDigests": [
+            "<registry>/openshift3/logging-fluentd@sha256:4346f0aa9694f32735115705ad324803b1a6ff08343c3288f7a62c3a5cb70495"
+        ],
+        . . .
+        "Config": {
+            . . .
+            "Labels": {
+                . . .
+                "build-date": "2017-10-12T14:38:22.414827",
+                . . . 
+                "release": "0.143.3.0",
+                . . .
+                "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift3/logging-fluentd/images/v3.7.0-0.143.3.0",
+                . . .
+                "version": "v3.7.0"
+            }
+        },
+        . . .
+```
+
+Pull a new image to see if registry has any newer images with the same tag:
+```
+$ docker pull <registry>/openshift3/logging-fluentd:v3.7
+```
+
+If there was an update, you need to run the `docker pull` on each node.
+
+It is recommended that you now rerun the `openshift_logging` playbook to ensure that any necessary config changes are also picked up.
+ 
+To manually redeploy your pod you can do the following:
+- for a DC you can do:
+```
+oc rollout latest <dc_name>
+```
+     
+- for a RC you can scale down and scale back up
+```
+oc scale --replicas=0 <rc_name>
+
+... wait for scale down
+
+oc scale --replicas=<original_replica_count> <rc_name>
+```
+
+- for a DS you can delete the pod or unlabel and relabel your node
+```
+oc delete pod --selector=<ds_selector>
+```
+
 Changelog
 ---------
 
