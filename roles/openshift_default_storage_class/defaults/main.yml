@@ -14,7 +14,7 @@ openshift_storageclass_defaults:
       type: pd-standard
 
   openstack:
-    name: sc-cinder
+    name: standard
     provisioner: cinder
     parameters:
       fstype: xfs
