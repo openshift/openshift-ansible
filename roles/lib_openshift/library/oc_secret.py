@@ -1633,7 +1633,7 @@ class OCSecret(OpenShiftCLI):
            This receives a list of file names and converts it into a secret.
            The secret is then written to disk and passed into the `oc replace` command.
         '''
-        secret = self.prep_secret(files, force)
+        secret = self.prep_secret(files, force=force)
         if secret['returncode'] != 0:
             return secret
 
