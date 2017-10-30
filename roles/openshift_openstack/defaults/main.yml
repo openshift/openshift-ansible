@@ -47,3 +47,9 @@ docker_data_size: "95%VG"
 docker_dm_basesize: "3G"
 container_root_lv_name: "dockerlv"
 container_root_lv_mount_path: "/var/lib/docker"
+
+
+# populate-dns
+dns_records_rm: []
+dns_records_add: []
+external_nsupdate_keys: {}
