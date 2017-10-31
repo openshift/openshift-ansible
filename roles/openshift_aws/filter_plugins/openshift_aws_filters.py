@@ -9,17 +9,17 @@ class FilterModule(object):
     ''' Custom ansible filters for use by openshift_aws role'''
 
     @staticmethod
-    def build_instance_tags(clusterid, status='owned'):
+    def build_instance_tags(clusterid):
         ''' This function will return a dictionary of the instance tags.
 
             The main desire to have this inside of a filter_plugin is that we
             need to build the following key.
 
-            {"kubernetes.io/cluster/{{ openshift_aws_clusterid }}": 'owned'}
+            {"kubernetes.io/cluster/{{ openshift_aws_clusterid }}": "{{ openshift_aws_clusterid}}"}
 
         '''
         tags = {'clusterid': clusterid,
-                'kubernetes.io/cluster/{}'.format(clusterid): status}
+                'kubernetes.io/cluster/{}'.format(clusterid): clusterid}
 
         return tags
 

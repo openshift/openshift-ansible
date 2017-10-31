@@ -25,6 +25,8 @@
   set_fact:
     openshift_aws_launch_config_bootstrap_token: "{{ bootstrap['content'] | b64decode }}"
 
+- include: vpc_and_subnet_id.yml
+
 - name: include build compute and infra node groups
   include: build_node_group.yml
   vars:

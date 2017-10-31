@@ -7,6 +7,27 @@
   name: create s3 bucket for registry
   include: s3.yml
 
+- when: openshift_aws_create_security_groups
+  block:
+  - name: "Create {{ openshift_aws_node_group_type }} security groups"
+    include: security_group.yml
+
+  - name: "Create {{ openshift_aws_node_group_type }} security groups"
+    include: security_group.yml
+    vars:
+      openshift_aws_node_group_type: infra
+
+- include: vpc_and_subnet_id.yml
+
+- name: create elbs
+  include: elb.yml
+  with_dict: "{{ openshift_aws_elb_dict }}"
+  vars:
+    l_elb_security_groups: "{{ openshift_aws_elb_security_groups }}"
+    l_openshift_aws_elb_name_dict: "{{ openshift_aws_elb_name_dict }}"
+  loop_control:
+    loop_var: l_elb_dict_item
+
 - name: include scale group creation for master
   include: build_node_group.yml
   vars:
@@ -24,20 +45,6 @@
   retries: 20
   delay: 3
   until: instancesout.instances|length > 0
-
-- name: create our master internal load balancers
-  include: elb.yml
-  vars:
-    openshift_aws_elb_direction: internal
-    l_openshift_aws_elb_name: "{{ openshift_aws_elb_name }}-internal"
-    openshift_aws_elb_scheme: internal
-
-- name: create our master external load balancers
-  include: elb.yml
-  vars:
-    openshift_aws_elb_direction: external
-    l_openshift_aws_elb_name: "{{ openshift_aws_elb_name }}-external"
-    openshift_aws_elb_scheme: internet-facing
 
 - name: wait for ssh to become available
   wait_for:
