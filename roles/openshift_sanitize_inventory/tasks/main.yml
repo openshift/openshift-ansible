@@ -69,3 +69,21 @@
     - openshift_clusterid is not defined
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'aws'
+
+- name: Ensure ansible_service_broker_remove and ansible_service_broker_install are mutually exclusive
+  fail:
+    msg: >
+      Ensure ansible_service_broker_remove and ansible_service_broker_install are mutually exclusive,
+      do not set both to true. ansible_service_broker_install defaults to true.
+  when:
+    - ansible_service_broker_remove | default(false) | bool
+    - ansible_service_broker_install | default(true) | bool
+
+- name: Ensure template_service_broker_remove and template_service_broker_install are mutually exclusive
+  fail:
+    msg: >
+      Ensure that template_service_broker_remove and template_service_broker_install are mutually exclusive,
+      do not set both to true. template_service_broker_remove defaults to true.
+  when:
+    - template_service_broker_remove | default(false) | bool
+    - template_service_broker_install | default(true) | bool
