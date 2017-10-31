@@ -54,6 +54,8 @@ domain-needed
 server=/cluster.local/172.30.0.1
 server=/30.172.in-addr.arpa/172.30.0.1
 enable-dbus
+dns-forward-max=5000
+cache-size=5000
 EOF
       # New config file, must restart
       NEEDS_RESTART=1
