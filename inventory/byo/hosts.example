@@ -310,9 +310,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 
-# Override the default controller lease ttl
-#osm_controller_lease_ttl=30
-
 # Configure controller arguments
 #osm_controller_args={'resource-quota-sync-period': ['10s']}
 
