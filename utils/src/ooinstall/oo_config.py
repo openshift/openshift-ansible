@@ -220,6 +220,7 @@ class OOConfig(object):
                     persisted_value = loaded_config.get(setting)
                     if persisted_value is not None:
                         self.settings[setting] = str(persisted_value)
+                        installer_log.debug("config: set (%s) to value (%s)", setting, persisted_value)
 
                 # We've loaded any persisted configs, let's verify any
                 # paths which are required for a correct and complete
@@ -344,8 +345,9 @@ class OOConfig(object):
         if 'ansible_ssh_user' not in self.settings:
             self.settings['ansible_ssh_user'] = ''
 
-        self.settings['ansible_inventory_path'] = \
-            '{}/hosts'.format(os.path.dirname(self.config_path))
+        if 'ansible_inventory_path' not in self.settings:
+            self.settings['ansible_inventory_path'] = \
+                '{}/hosts'.format(os.path.dirname(self.config_path))
 
         # clean up any empty sets
         empty_keys = []
