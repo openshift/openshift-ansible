@@ -1,0 +1,7 @@
+---
+# image defaults
+__openshift_prometheus_image_prefix: "registry.access.redhat.com/openshift3/"
+__openshift_prometheus_image_version: "v3.7"
+__openshift_prometheus_proxy_image_version: "v3.7"
+__openshift_prometheus_alertmanager_image_version: "v3.7"
+__openshift_prometheus_alertbuffer_image_version: "v3.7"
