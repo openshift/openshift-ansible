@@ -68,6 +68,12 @@ fi
     done
 ) &
 
+# Instances and disks used for image building
+(
+    teardown "{{ openshift_gcp_prefix }}build-image-instance" compute instances --zone "{{ openshift_gcp_zone }}"
+    teardown "{{ openshift_gcp_prefix }}build-image-instance" compute disks --zone "{{ openshift_gcp_zone }}"
+) &
+
 # DNS
 (
 dns_zone="{{ dns_managed_zone | default(openshift_gcp_prefix + 'managed-zone') }}"
