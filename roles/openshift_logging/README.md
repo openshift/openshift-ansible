@@ -267,6 +267,8 @@ oc delete pod --selector=<ds_selector>
 
 Changelog
 ---------
+Tue Oct 26, 2017
+- Make CPU request equal limit if limit is greater then request
 
 Tue Oct 10, 2017
 - Default imagePullPolicy changed from Always to IfNotPresent
