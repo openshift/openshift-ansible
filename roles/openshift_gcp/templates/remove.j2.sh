@@ -161,5 +161,12 @@ for i in `jobs -p`; do wait $i; done
 
 for i in `jobs -p`; do wait $i; done
 
+# Images specifically located under this cluster prefix family
+for name in $( gcloud --project "{{ openshift_gcp_project }}" compute images list "--filter=family={{ openshift_gcp_prefix }}images" '--format=value(name)' ); do
+    ( gcloud --project "{{ openshift_gcp_project }}" compute images delete "${name}" ) &
+done
+
 # Network
-teardown "{{ openshift_gcp_network_name }}" compute networks
+( teardown "{{ openshift_gcp_network_name }}" compute networks ) &
+
+for i in `jobs -p`; do wait $i; done
