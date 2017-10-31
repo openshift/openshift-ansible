@@ -234,7 +234,6 @@
     - reconcile_jenkins_role_binding_result.rc == 0
     when:
     - openshift_version | version_compare('3.7','<')
-    - openshift_version | version_compare('3.4','>=')
 
   - when: openshift_upgrade_target | version_compare('3.7','<')
     block:

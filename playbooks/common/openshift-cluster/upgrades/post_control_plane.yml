@@ -117,7 +117,6 @@
   - name: grep pluginOrderOverride
     command: grep pluginOrderOverride {{ openshift.common.config_base }}/master/master-config.yaml
     register: grep_plugin_order_override
-    when: openshift.common.version_gte_3_3_or_1_3 | bool
     changed_when: false
     failed_when: false
 

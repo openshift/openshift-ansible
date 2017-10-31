@@ -10,40 +10,6 @@ Custom version comparison filters for use in openshift-ansible
 from distutils.version import LooseVersion
 
 
-def legacy_gte_function_builder(name, versions):
-    """
-    Build and return a version comparison function.
-
-    Ex: name = 'oo_version_gte_3_1_or_1_1'
-        versions = {'enterprise': '3.1', 'origin': '1.1'}
-
-        returns oo_version_gte_3_1_or_1_1, a function which based on the
-        version and deployment type will return true if the provided
-        version is greater than or equal to the function's version
-    """
-    enterprise_version = versions['enterprise']
-    origin_version = versions['origin']
-
-    def _gte_function(version, deployment_type):
-        """
-        Dynamic function created by gte_function_builder.
-
-        Ex: version = '3.1'
-            deployment_type = 'openshift-enterprise'
-            returns True/False
-        """
-        version_gte = False
-        if deployment_type == 'openshift-enterprise':
-            if str(version) >= LooseVersion(enterprise_version):
-                version_gte = True
-        else:
-            if str(version) >= LooseVersion(origin_version):
-                version_gte = True
-        return version_gte
-    _gte_function.__name__ = name
-    return _gte_function
-
-
 def gte_function_builder(name, gte_version):
     """
     Build and return a version comparison function.
@@ -95,30 +61,6 @@ class FilterModule(object):
                 func = gte_function_builder(func_name, "{}.{}.0".format(major, minor))
                 # Add the function to the mapping
                 self._filters[func_name] = func
-
-        # Create filters with special versioning requirements.
-        # Treat all Origin 1.x as special case.
-        legacy_filters = [{'name': 'oo_version_gte_3_1_or_1_1',
-                           'versions': {'enterprise': '3.0.2.905',
-                                        'origin': '1.1.0'}},
-                          {'name': 'oo_version_gte_3_1_1_or_1_1_1',
-                           'versions': {'enterprise': '3.1.1',
-                                        'origin': '1.1.1'}},
-                          {'name': 'oo_version_gte_3_2_or_1_2',
-                           'versions': {'enterprise': '3.1.1.901',
-                                        'origin': '1.2.0'}},
-                          {'name': 'oo_version_gte_3_3_or_1_3',
-                           'versions': {'enterprise': '3.3.0',
-                                        'origin': '1.3.0'}},
-                          {'name': 'oo_version_gte_3_4_or_1_4',
-                           'versions': {'enterprise': '3.4.0',
-                                        'origin': '1.4.0'}},
-                          {'name': 'oo_version_gte_3_5_or_1_5',
-                           'versions': {'enterprise': '3.5.0',
-                                        'origin': '1.5.0'}}]
-        for legacy_filter in legacy_filters:
-            self._filters[legacy_filter['name']] = legacy_gte_function_builder(legacy_filter['name'],
-                                                                               legacy_filter['versions'])
 
     def filters(self):
         """

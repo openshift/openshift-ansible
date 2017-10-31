@@ -18,11 +18,7 @@
   # wait_for port doesn't provide health information.
   command: >
     curl --silent --tlsv1.2
-    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
     --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
-    {% else %}
-    --cacert {{ openshift.common.config_base }}/master/ca.crt
-    {% endif %}
     {{ openshift.master.api_url }}/healthz/ready
   args:
     # Disables the following warning:

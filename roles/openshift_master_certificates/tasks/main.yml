@@ -3,7 +3,7 @@
     openshift_master_certs_no_etcd:
     - admin.crt
     - master.kubelet-client.crt
-    - "{{ 'master.proxy-client.crt' if openshift.common.version_gte_3_1_or_1_1 else omit }}"
+    - master.proxy-client.crt
     - master.server.crt
     - openshift-master.crt
     - openshift-registry.crt
@@ -57,9 +57,7 @@
     --hostnames={{ hostvars[item].openshift.common.all_hostnames | join(',') }}
     --cert={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.crt
     --key={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.key
-    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
     --expire-days={{ openshift_master_cert_expire_days }}
-    {% endif %}
     --signer-cert={{ openshift_ca_cert }}
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}
@@ -87,9 +85,7 @@
       --signer-serial={{ openshift_ca_serial }}
       --user=system:openshift-master
       --basename=openshift-master
-      {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
       --expire-days={{ openshift_master_cert_expire_days }}
-      {% endif %}
   args:
     creates: "{{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/openshift-master.kubeconfig"
   with_items: "{{ hostvars

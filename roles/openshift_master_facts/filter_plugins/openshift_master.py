@@ -518,29 +518,16 @@ class FilterModule(object):
                  'admin.key',
                  'admin.kubeconfig',
                  'master.kubelet-client.crt',
-                 'master.kubelet-client.key']
+                 'master.kubelet-client.key',
+                 'master.proxy-client.crt',
+                 'master.proxy-client.key',
+                 'service-signer.crt',
+                 'service-signer.key']
         if bool(include_ca):
             certs += ['ca.crt', 'ca.key', 'ca-bundle.crt', 'client-ca-bundle.crt']
         if bool(include_keys):
             certs += ['serviceaccounts.private.key',
                       'serviceaccounts.public.key']
-        if bool(hostvars['openshift']['common']['version_gte_3_1_or_1_1']):
-            certs += ['master.proxy-client.crt',
-                      'master.proxy-client.key']
-        if not bool(hostvars['openshift']['common']['version_gte_3_2_or_1_2']):
-            certs += ['openshift-master.crt',
-                      'openshift-master.key',
-                      'openshift-master.kubeconfig']
-        if bool(hostvars['openshift']['common']['version_gte_3_3_or_1_3']):
-            certs += ['service-signer.crt',
-                      'service-signer.key']
-        if not bool(hostvars['openshift']['common']['version_gte_3_5_or_1_5']):
-            certs += ['openshift-registry.crt',
-                      'openshift-registry.key',
-                      'openshift-registry.kubeconfig',
-                      'openshift-router.crt',
-                      'openshift-router.key',
-                      'openshift-router.kubeconfig']
         return certs
 
     @staticmethod
