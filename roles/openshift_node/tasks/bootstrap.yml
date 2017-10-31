@@ -3,7 +3,7 @@
   package:
     name: "{{ item }}"
     state: present
-  with_items: "{{ openshift_node_ami_prep_packages }}"
+  with_items: "{{ r_openshift_node_image_prep_packages }}"
 
 - name: create the directory for node
   file:

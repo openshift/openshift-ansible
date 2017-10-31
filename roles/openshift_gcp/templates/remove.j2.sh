@@ -37,7 +37,7 @@ function teardown() {
 # scale down {{ node_group.name }}
 (
     # performs a delete and scale down as one operation to ensure maximum parallelism
-    if ! instances=$( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed list-instances "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --format='value[terminator=","](instance)' ); then
+    if ! instances=$( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed list-instances "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --format='value[terminator=","](instance)' 2>/dev/null ); then
         exit 0
     fi
     instances="${instances%?}"
@@ -57,6 +57,15 @@ function teardown() {
 if gsutil ls -p "{{ openshift_gcp_project }}" "gs://{{ openshift_gcp_registry_bucket_name }}" &>/dev/null; then
     gsutil -m rm -r "gs://{{ openshift_gcp_registry_bucket_name }}"
 fi
+) &
+
+# Project metadata prefixed with {{ openshift_gcp_prefix }}
+(
+    for key in $( gcloud --project "{{ openshift_gcp_project }}" compute project-info describe --flatten=commonInstanceMetadata.items[] '--format=value(commonInstanceMetadata.items.key)' ); do
+        if [[ "${key}" == "{{ openshift_gcp_prefix }}"* ]]; then
+            gcloud --project "{{ openshift_gcp_project }}" compute project-info remove-metadata "--keys=${key}"
+        fi
+    done
 ) &
 
 # DNS
@@ -152,5 +161,12 @@ for i in `jobs -p`; do wait $i; done
 
 for i in `jobs -p`; do wait $i; done
 
+# Images specifically located under this cluster prefix family
+for name in $( gcloud --project "{{ openshift_gcp_project }}" compute images list "--filter=family={{ openshift_gcp_prefix }}images" '--format=value(name)' ); do
+    ( gcloud --project "{{ openshift_gcp_project }}" compute images delete "${name}" ) &
+done
+
 # Network
-teardown "{{ openshift_gcp_network_name }}" compute networks
+( teardown "{{ openshift_gcp_network_name }}" compute networks ) &
+
+for i in `jobs -p`; do wait $i; done

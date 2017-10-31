@@ -9,7 +9,7 @@ openshift_service_type: "{{ 'origin' if openshift_deployment_type == 'origin' el
 
 openshift_image_tag: ''
 
-openshift_node_ami_prep_packages:
+default_r_openshift_node_image_prep_packages:
 - "{{ openshift_service_type }}-master"
 - "{{ openshift_service_type }}-node"
 - "{{ openshift_service_type }}-docker-excluder"
@@ -33,7 +33,6 @@ openshift_node_ami_prep_packages:
 - python-dbus
 - PyYAML
 - yum-utils
-- cloud-utils-growpart
 # gluster
 - glusterfs-fuse
 # nfs
@@ -54,6 +53,7 @@ openshift_node_ami_prep_packages:
 # - container-selinux
 # - atomic
 #
+r_openshift_node_image_prep_packages: "{{ default_r_openshift_node_image_prep_packages | union(openshift_node_image_prep_packages | default([])) }}"
 
 openshift_node_bootstrap: False
 

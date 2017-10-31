@@ -25,6 +25,7 @@
     --node-dir={{ mktempout.stdout }}/
     --node=CONFIGMAP
     --hostnames=test
+    --dns-ip=0.0.0.0
     --certificate-authority={{ openshift_master_config_dir }}/ca.crt
     --signer-cert={{ openshift_master_config_dir }}/ca.crt
     --signer-key={{ openshift_master_config_dir }}/ca.key
