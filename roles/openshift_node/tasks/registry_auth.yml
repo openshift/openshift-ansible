@@ -11,6 +11,9 @@
     - oreg_auth_user is defined
     - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
   register: node_oreg_auth_credentials_create
+  retries: 3
+  delay: 5
+  until: node_oreg_auth_credentials_create.rc == 0
   notify:
     - restart node
 
