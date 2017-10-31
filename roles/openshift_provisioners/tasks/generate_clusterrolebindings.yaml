@@ -1,6 +1,8 @@
 ---
 - name: Generate ClusterRoleBindings
-  template: src=clusterrolebinding.j2 dest={{mktemp.stdout}}/templates/{{obj_name}}-clusterrolebinding.yaml
+  template:
+    src: clusterrolebinding.j2
+    dest: "{{ mktemp.stdout }}/templates/{{ obj_name }}-clusterrolebinding.yaml"
   vars:
     acct_name: provisioners-{{item}}
     obj_name: run-provisioners-{{item}}

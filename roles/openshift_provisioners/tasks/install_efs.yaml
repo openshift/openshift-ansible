@@ -9,7 +9,9 @@
   changed_when: no
 
 - name: Generate efs PersistentVolumeClaim
-  template: src=pvc.j2 dest={{mktemp.stdout}}/templates/{{obj_name}}-pvc.yaml
+  template:
+    src: pvc.j2
+    dest: "{{ mktemp.stdout }}/templates/{{ obj_name }}-pvc.yaml"
   vars:
     obj_name: "provisioners-efs"
     size: "1Mi"
@@ -21,7 +23,9 @@
   changed_when: no
 
 - name: Generate efs PersistentVolume
-  template: src=pv.j2 dest={{mktemp.stdout}}/templates/{{obj_name}}-pv.yaml
+  template:
+    src: pv.j2
+    dest: "{{ mktemp.stdout }}/templates/{{ obj_name }}-pv.yaml"
   vars:
     obj_name: "provisioners-efs"
     size: "1Mi"
