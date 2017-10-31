@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.188.0%{?dist}
+Release:        0.178.2%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.178.2
+- dnsmasq cache-size dns-forward-max change (pcameron@redhat.com)
+- Also require that we match the release (sdodson@redhat.com)
+- Removing unneeded bootstrap which moved into the product.
+  (kwoodson@redhat.com)
+- Add retry logic to docker auth credentials (mgugino@redhat.com)
+- Retry restarting journald (mgugino@redhat.com)
+- Modify StorageClass name to standard (piqin@redhat.com)
+- Create default storageclass for cloudprovider openstack (piqin@redhat.com)
+- preserve the oo-install ansible_inventory_path value (rmeggins@redhat.com)
+
 * Tue Oct 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.188.0
 - Add dm_thin_pool for gluster use (sdodson@redhat.com)
 - Fix broken oc_secret update function (barlik@gmx.com)
