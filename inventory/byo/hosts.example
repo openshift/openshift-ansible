@@ -1044,6 +1044,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_management_template_parameters={'APPLICATION_MEM_REQ': '512Mi'}
 #openshift_management_template_parameters: {}
 
+# Firewall configuration
+# You can open additional firewall ports by defining them as a list. of service
+# names and ports/port ranges for either masters or nodes.
+#openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
+#openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
