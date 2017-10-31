@@ -21,10 +21,6 @@
     - "'results' in amiout"
     - amiout.results|length > 0
 
-- when: openshift_aws_create_security_groups
-  name: "Create {{ openshift_aws_node_group_type }} security groups"
-  include: security_group.yml
-
 - when: openshift_aws_create_launch_config
   name: "Create {{ openshift_aws_node_group_type }} launch config"
   include: launch_config.yml

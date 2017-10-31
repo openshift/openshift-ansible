@@ -12,7 +12,6 @@ openshift_aws_clusterid: default
 openshift_aws_region: us-east-1
 openshift_aws_vpc_name: "{{ openshift_aws_clusterid }}"
 openshift_aws_build_ami_group: "{{ openshift_aws_clusterid }}"
-openshift_aws_kubernetes_cluster_status: "{{ openshift_aws_clusterid }}"
 
 openshift_aws_iam_cert_name: "{{ openshift_aws_clusterid }}-master-external"
 openshift_aws_iam_cert_path: ''
@@ -48,7 +47,14 @@ openshift_aws_elb_health_check:
   unhealthy_threshold: 2
   healthy_threshold: 2
 
-openshift_aws_elb_name: "{{ openshift_aws_clusterid }}-{{ openshift_aws_node_group_type }}"
+openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}-{{ openshift_aws_node_group_type }}"
+openshift_aws_elb_name_dict:
+  master:
+    external: "{{ openshift_aws_elb_basename }}-external"
+    internal: "{{ openshift_aws_elb_basename }}-internal"
+  infra:
+    external: "{{ openshift_aws_elb_basename }}"
+
 openshift_aws_elb_idle_timout: 400
 openshift_aws_elb_scheme: internet-facing
 openshift_aws_elb_cert_arn: ''
@@ -75,6 +81,18 @@ openshift_aws_elb_listeners:
       load_balancer_port: 443
       instance_protocol: tcp
       instance_port: 443
+  infra:
+    external:
+    - protocol: tcp
+      load_balancer_port: 80
+      instance_protocol: tcp
+      instance_port: 443
+      proxy_protocol: True
+    - protocol: tcp
+      load_balancer_port: 443
+      instance_protocol: tcp
+      instance_port: 443
+      proxy_protocol: True
 
 openshift_aws_node_group_config_master_volumes:
 - device_name: /dev/sdb
@@ -88,7 +106,7 @@ openshift_aws_node_group_config_node_volumes:
   device_type: gp2
   delete_on_termination: True
 
-openshift_aws_node_group_config_tags: "{{ openshift_aws_clusterid | build_instance_tags(openshift_aws_kubernetes_cluster_status) }}"
+openshift_aws_node_group_config_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 openshift_aws_node_group_termination_policy: Default
 openshift_aws_node_group_replace_instances: []
 openshift_aws_node_group_replace_all_instances: False
@@ -114,6 +132,7 @@ openshift_aws_node_group_config:
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
+    elbs: "{{ openshift_aws_elb_name_dict[openshift_aws_node_group_type].keys()| map('extract', openshift_aws_elb_name_dict[openshift_aws_node_group_type]) | list }}"
   compute:
     instance_type: m4.xlarge
     ami: "{{ openshift_aws_ami }}"
@@ -148,21 +167,22 @@ openshift_aws_node_group_config:
       type: infra
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
+    elbs: "{{ openshift_aws_elb_name_dict[openshift_aws_node_group_type].keys()| map('extract', openshift_aws_elb_name_dict[openshift_aws_node_group_type]) | list }}"
+
+openshift_aws_elb_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
+openshift_aws_elb_az_load_balancing: False
 
 openshift_aws_elb_security_groups:
-- "{{ openshift_aws_clusterid }}"
-- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}"
+- "{{ openshift_aws_clusterid }}"  # default sg
+- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}"  # node type sg
+- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}_k8s"  # node type sg k8s
 
 openshift_aws_elb_instance_filter:
   "tag:clusterid": "{{ openshift_aws_clusterid }}"
   "tag:host-type": "{{ openshift_aws_node_group_type }}"
   instance-state-name: running
 
-openshift_aws_launch_config_security_groups:
-- "{{ openshift_aws_clusterid }}"  # default sg
-- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}"  # node type sg
-- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}_k8s"  # node type sg k8s
-
+openshift_aws_security_groups_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 openshift_aws_node_security_groups:
   default:
     name: "{{ openshift_aws_clusterid }}"
