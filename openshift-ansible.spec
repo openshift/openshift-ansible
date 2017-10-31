@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.187.0%{?dist}
+Release:        0.188.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Oct 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.188.0
+- Add dm_thin_pool for gluster use (sdodson@redhat.com)
+- Fix broken oc_secret update function (barlik@gmx.com)
+- add new clusterNetworks fields to new installs (jtanenba@redhat.com)
+- docker: Create openshift_docker_is_node_or_master variable
+  (smilner@redhat.com)
+- Correctly install cockpit (sdodson@redhat.com)
+- Glusterfs storage templates for v1.5 added (chinacoolhacker@gmail.com)
+- bug 1501599.  Omit logging project from overcommit restrictions
+  (jcantril@redhat.com)
+- GlusterFS: Remove image option from heketi command (jarrpa@redhat.com)
+
 * Mon Oct 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.187.0
 - 
 
