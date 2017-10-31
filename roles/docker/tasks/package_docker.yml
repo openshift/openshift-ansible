@@ -77,6 +77,11 @@
   notify:
   - restart docker
 
+- name: Ensure /etc/containers directory exists
+  file:
+    path: /etc/containers
+    state: directory
+
 - name: Place additional/blocked/insecure registries in /etc/containers/registries.conf
   template:
     dest: "{{ containers_registries_conf_path }}"
