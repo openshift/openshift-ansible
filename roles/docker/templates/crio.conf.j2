@@ -103,6 +103,11 @@ cgroup_manager = "systemd"
 # hooks_dir_path is the oci hooks directory for automatically executed hooks
 hooks_dir_path = "/usr/share/containers/oci/hooks.d"
 
+# default_mounts is the mounts list to be mounted for the container when created
+default_mounts = [
+	"/usr/share/rhel/secrets:/run/secrets",
+]
+
 # pids_limit is the number of processes allowed in a container
 pids_limit = 1024
 
