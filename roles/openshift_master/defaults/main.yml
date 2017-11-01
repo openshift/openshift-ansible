@@ -64,7 +64,7 @@ openshift_master_config_dir_default: "{{ (openshift.common.config_base | default
 openshift_master_config_dir: "{{ openshift_master_config_dir_default }}"
 openshift_master_cloud_provider: "{{ openshift_cloudprovider_kind | default('aws') }}"
 
-openshift_master_node_config_networkconfig_mtu: 1450
+openshift_master_node_config_networkconfig_mtu: "{{ openshift_node_sdn_mtu | default(1450) }}"
 
 openshift_master_node_config_kubeletargs_cpu: 500m
 openshift_master_node_config_kubeletargs_mem: 512M
@@ -103,7 +103,7 @@ openshift_master_node_config_default_edits:
   value:
   - 'true'
 - key: networkConfig.mtu
-  value: 8951
+  value: "{{ openshift_master_node_config_networkconfig_mtu }}"
 - key: networkConfig.networkPluginName
   value: "{{ r_openshift_master_sdn_network_plugin_name }}"
 - key: networkPluginName
