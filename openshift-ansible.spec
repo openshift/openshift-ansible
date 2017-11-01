@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.188.0%{?dist}
+Release:        0.189.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,38 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.189.0
+- Stating that certificate it is required when doing SSL on ELB.
+  (kwoodson@redhat.com)
+- Ensure GCP image build instance gets cleaned up on teardown
+  (ccoleman@redhat.com)
+- Switch from bind-interfaces to bind-dynamic (sdodson@redhat.com)
+- Remove unused osm_controller_lease_ttl (mgugino@redhat.com)
+- Delete images located in a family named {{ prefix }}images
+  (ccoleman@redhat.com)
+- Use global IP to indicate node should pick DNS (ccoleman@redhat.com)
+- Remove project metadata prefixed with the cluster prefix
+  (ccoleman@redhat.com)
+- Use openshift.node.registry_url instead of oreg_url (ccoleman@redhat.com)
+- Allow master node group to wait for stable on GCP (ccoleman@redhat.com)
+- GCP cannot use AWS growpart package (ccoleman@redhat.com)
+- dnsmasq cache-size dns-forward-max change (pcameron@redhat.com)
+- Also require that we match the release (sdodson@redhat.com)
+- Add arbitrary firewall port config to master too (sdodson@redhat.com)
+- remove master.service during the non-ha to ha upgrade (jchaloup@redhat.com)
+- Removing unneeded bootstrap which moved into the product.
+  (kwoodson@redhat.com)
+- Add retry logic to docker auth credentials (mgugino@redhat.com)
+- Retry restarting journald (mgugino@redhat.com)
+- Modify StorageClass name to standard (piqin@redhat.com)
+- Give PV & PVC empty storage class to avoid being assigned default gp2
+  (mawong@redhat.com)
+- Use oc_project to ensure openshift_provisioners_project present
+  (mawong@redhat.com)
+- Fix yaml formatting (mawong@redhat.com)
+- Create default storageclass for cloudprovider openstack (piqin@redhat.com)
+- preserve the oo-install ansible_inventory_path value (rmeggins@redhat.com)
+
 * Tue Oct 31 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.188.0
 - Add dm_thin_pool for gluster use (sdodson@redhat.com)
 - Fix broken oc_secret update function (barlik@gmx.com)
