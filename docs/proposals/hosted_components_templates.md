@@ -37,6 +37,7 @@ so that the majority of on-boarding and supporting a hosted component be the
   for the component
 * Verify that the templates are synchronized from the component's repository to
   openshift-ansible under the repo level files dir
+* Verify that roles are idempotent (side effects only when necessary)
 
 ## References
 * https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/
