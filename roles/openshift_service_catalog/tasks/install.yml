@@ -83,7 +83,7 @@
 # only do this if we don't already have the updated role info
 - name: Generate apply template for clusterrole/edit
   template:
-    src: sc_role_patching.j2
+    src: sc_admin_edit_role_patching.j2
     dest: "{{ mktemp.stdout }}/edit_sc_patch.yml"
   vars:
     original_content: "{{ edit_yaml.results.results[0] | to_yaml }}"
@@ -106,7 +106,7 @@
 # only do this if we don't already have the updated role info
 - name: Generate apply template for clusterrole/admin
   template:
-    src: sc_role_patching.j2
+    src: sc_admin_edit_role_patching.j2
     dest: "{{ mktemp.stdout }}/admin_sc_patch.yml"
   vars:
     original_content: "{{ admin_yaml.results.results[0] | to_yaml }}"
@@ -119,6 +119,29 @@
     oc replace -f {{ mktemp.stdout }}/admin_sc_patch.yml
   when:
     - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
+
+- oc_obj:
+    name: view
+    kind: clusterrole
+    state: list
+  register: view_yaml
+
+# only do this if we don't already have the updated role info
+- name: Generate apply template for clusterrole/view
+  template:
+    src: sc_view_role_patching.j2
+    dest: "{{ mktemp.stdout }}/view_sc_patch.yml"
+  vars:
+    original_content: "{{ view_yaml.results.results[0] | to_yaml }}"
+  when:
+    - not view_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['get', 'list', 'watch'])
+
+# only do this if we don't already have the updated role info
+- name: update view role for service catalog access
+  command: >
+    oc replace -f {{ mktemp.stdout }}/view_sc_patch.yml
+  when:
+    - not view_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['get', 'list', 'watch'])
 
 - oc_adm_policy_user:
     namespace: kube-service-catalog
