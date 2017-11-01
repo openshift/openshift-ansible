@@ -4,6 +4,9 @@
 - name: create service account kubeconfig with csr rights
   command: "oc serviceaccounts create-kubeconfig node-bootstrapper -n openshift-infra"
   register: kubeconfig_out
+  until: kubeconfig_out.rc == 0
+  retries: 24
+  delay: 5
 
 - name: put service account kubeconfig into a file on disk for bootstrap
   copy:
