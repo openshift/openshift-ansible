@@ -1,5 +1,4 @@
 ---
-
 stack_state: 'present'
 
 ssh_ingress_cidr: 0.0.0.0/0
@@ -7,18 +6,13 @@ node_ingress_cidr: 0.0.0.0/0
 master_ingress_cidr: 0.0.0.0/0
 lb_ingress_cidr: 0.0.0.0/0
 bastion_ingress_cidr: 0.0.0.0/0
-num_etcd: 0
-num_masters: 1
-num_nodes: 1
-num_dns: 1
-num_infra: 1
-nodes_to_remove: []
-etcd_volume_size: 2
-dns_volume_size: 1
-lb_volume_size: 5
-use_bastion: False
-ui_ssh_tunnel: False
-provider_network: False
+openstack_num_etcd: 0
+openstack_num_masters: 1
+openstack_num_nodes: 1
+openstack_num_dns: 0
+openstack_num_infra: 1
+openstack_dns_nameservers: []
+openstack_nodes_to_remove: []
 
 
 openshift_cluster_node_labels:
@@ -61,48 +55,41 @@ openshift_app_domain: "apps"
 
 # heat vars
 stack_name: "{{ env_id }}.{{ public_dns_domain }}"
-dns_domain: "{{ public_dns_domain }}"
-dns_nameservers: "{{ public_dns_nameservers }}"
-subnet_prefix: "{{ openstack_subnet_prefix }}"
-master_hostname: "{{ openstack_master_hostname | default('master') }}"
-infra_hostname: "{{ openstack_infra_hostname | default('infra-node') }}"
-node_hostname: "{{ openstack_node_hostname | default('app-node') }}"
-lb_hostname: "{{ openstack_lb_hostname | default('lb') }}"
-etcd_hostname: "{{ openstack_etcd_hostname | default('etcd') }}"
-dns_hostname: "{{ openstack_dns_hostname | default('dns') }}"
-ssh_public_key: "{{ openstack_ssh_public_key }}"
-openstack_image: "{{ openstack_default_image_name }}"
-lb_flavor: "{{ openstack_lb_flavor | default(openstack_default_flavor) }}"
-etcd_flavor: "{{ openstack_etcd_flavor | default(openstack_default_flavor) }}"
-master_flavor: "{{ openstack_master_flavor | default(openstack_default_flavor) }}"
-node_flavor: "{{ openstack_node_flavor | default(openstack_default_flavor) }}"
-infra_flavor: "{{ openstack_infra_flavor | default(openstack_default_flavor) }}"
-dns_flavor: "{{ openstack_dns_flavor | default(openstack_default_flavor) }}"
-openstack_master_image: "{{ openstack_master_image_name | default(openstack_default_image_name) }}"
-openstack_infra_image: "{{ openstack_infra_image_name | default(openstack_default_image_name) }}"
-openstack_node_image: "{{ openstack_node_image_name | default(openstack_default_image_name) }}"
-openstack_lb_image: "{{ openstack_lb_image_name | default(openstack_default_image_name) }}"
-openstack_etcd_image: "{{ openstack_etcd_image_name | default(openstack_default_image_name) }}"
-openstack_dns_image: "{{ openstack_dns_image_name | default(openstack_default_image_name) }}"
+openstack_subnet_prefix: "192.168.99"
+openstack_master_hostname: master
+openstack_infra_hostname: infra-node
+openstack_node_hostname: app-node
+openstack_lb_hostname: lb
+openstack_etcd_hostname: etcd
+openstack_dns_hostname: dns
+openstack_keypair_name: openshift
+openstack_lb_flavor: "{{ openstack_default_flavor }}"
+openstack_etcd_flavor: "{{ openstack_default_flavor }}"
+openstack_master_flavor: "{{ openstack_default_flavor }}"
+openstack_node_flavor: "{{ openstack_default_flavor }}"
+openstack_infra_flavor: "{{ openstack_default_flavor }}"
+openstack_dns_flavor: "{{ openstack_default_flavor }}"
+openstack_master_image: "{{ openstack_default_image_name }}"
+openstack_infra_image: "{{ openstack_default_image_name }}"
+openstack_node_image: "{{ openstack_default_image_name }}"
+openstack_lb_image: "{{ openstack_default_image_name }}"
+openstack_etcd_image: "{{ openstack_default_image_name }}"
+openstack_dns_image: "{{ openstack_default_image_name }}"
+openstack_provider_network_name: False
+openstack_external_network_name: False
 openstack_private_network: >-
   {% if openstack_provider_network_name | default(None) -%}
   {{ openstack_provider_network_name }}
   {%- else -%}
   {{ openstack_private_network_name | default ('openshift-ansible-' + stack_name + '-net') }}
   {%- endif -%}
-provider_network: "{{ openstack_provider_network_name | default(None) }}"
-external_network: "{{ openstack_external_network_name | default(None) }}"
-num_etcd: "{{ openstack_num_etcd | default(0) }}"
-num_masters: "{{ openstack_num_masters }}"
-num_nodes: "{{ openstack_num_nodes }}"
-num_infra: "{{ openstack_num_infra }}"
-num_dns: "{{ openstack_num_dns | default(1) }}"
-master_server_group_policies: "{{ openstack_master_server_group_policies | default([]) | to_yaml }}"
-infra_server_group_policies: "{{ openstack_infra_server_group_policies | default([]) | to_yaml }}"
-master_volume_size: "{{ docker_master_volume_size | default(docker_volume_size) }}"
-infra_volume_size: "{{ docker_infra_volume_size | default(docker_volume_size) }}"
-node_volume_size: "{{ docker_node_volume_size | default(docker_volume_size) }}"
-etcd_volume_size: "{{ docker_etcd_volume_size | default('2') }}"
-dns_volume_size: "{{ docker_dns_volume_size | default('1') }}"
-lb_volume_size: "{{ docker_lb_volume_size | default('5') }}"
-nodes_to_remove: "{{ openstack_nodes_to_remove | default([]) |  to_yaml }}"
+openstack_master_server_group_policies: []
+openstack_infra_server_group_policies: []
+openstack_master_volume_size: "{{ docker_volume_size }}"
+openstack_infra_volume_size: "{{ docker_volume_size }}"
+openstack_node_volume_size: "{{ docker_volume_size }}"
+openstack_etcd_volume_size: 2
+openstack_dns_volume_size: 1
+openstack_lb_volume_size: 5
+openstack_use_bastion: false
+openshift_ui_ssh_tunnel: false

@@ -76,13 +76,13 @@
 - name: Try to show keypair
   command: >
            python -c 'import shade; cloud = shade.openstack_cloud();
-           exit(cloud.get_keypair("{{ openstack_ssh_public_key }}") is None)'
+           exit(cloud.get_keypair("{{ openstack_keypair_name }}") is None)'
   ignore_errors: yes
   register: key_result
 - name: Check that keypair is available
   assert:
     that: 'key_result.rc == 0'
-    msg: "Keypair {{ openstack_ssh_public_key }} is not available"
+    msg: "Keypair {{ openstack_keypair_name }} is not available"
 
 # Check that custom images are available
 - include: custom_image_check.yaml

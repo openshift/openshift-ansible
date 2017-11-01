@@ -16,11 +16,6 @@
 - name: Add the new nodes to the inventory
   meta: refresh_inventory
 
-- name: Populate DNS entries
-  include: populate-dns.yml
-  when:
-  - stack_state == 'present'
-
 - name: CleanUp
   include: cleanup.yml
   when:

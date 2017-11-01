@@ -10,6 +10,9 @@
     stack_template_path: "{{ stack_template_pre.path }}/stack.yaml"
     user_data_template_path: "{{ stack_template_pre.path }}/user-data"
 
+- name: Print out the Heat template directory
+  debug: var=stack_template_pre
+
 - name: generate HOT stack template from jinja2 template
   template:
     src: heat_stack.yaml.j2

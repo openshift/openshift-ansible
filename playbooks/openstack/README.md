@@ -142,7 +142,7 @@ corresponding to your OpenStack installation.
 $ vi inventory/group_vars/all.yml
 ```
 
-1. Set the `openstack_ssh_public_key` to your OpenStack keypair name.
+1. Set the `openstack_keypair_name` to your OpenStack keypair name.
    - See `openstack keypair list` to find the keypairs registered with
    OpenShift.
    - This must correspond to your private SSH key in `~/.ssh/id_rsa`
@@ -156,19 +156,15 @@ $ vi inventory/group_vars/all.yml
 4. Set the `openstack_default_flavor` to the flavor you want your
    OpenShift VMs to use.
    - See `openstack flavor list` for the list of available flavors.
-5. Set the `public_dns_nameservers` to the list of the IP addresses
-   of the DNS servers used for the **private** address resolution[1].
+5. Set the `openstack_dns_nameservers` to the list of the IP addresses
+   of the DNS servers used for the **private** address resolution.
 
-**NOTE**: In most OpenStack environments, you will also need to
-configure the forwarders for the DNS server we create. This depends on
-your environment.
-
-Launch a VM in your OpenStack and look at its `/etc/resolv.conf` and
-put the IP addresses into `public_dns_nameservers` in
-`inventory/group_vars/all.yml`.
+**NOTE ON DNS**: at minimum, the OpenShift nodes need to be able to access each
+other by their hostname.  OpenStack doesn't provide this by default, so you
+need to provide a DNS server. Put the address of that DNS server in
+`openstack_dns_nameservers` variable.
 
 
-[1]: Yes, the name is bad. We will fix it.
 
 
 #### OpenShift configuration
