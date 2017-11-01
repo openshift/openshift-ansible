@@ -46,10 +46,6 @@
   notify:
     - restart node
 
-- name: include aws provider credentials
-  include: aws.yml
-  static: yes
-
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for
 # systemd to start the master again

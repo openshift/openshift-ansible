@@ -31,10 +31,6 @@
   - regexp: "^CONFIG_FILE=.*"
     state: absent
 
-- name: include aws sysconfig credentials
-  include: aws.yml
-  static: yes
-
 #- name: update the ExecStart to have bootstrap
 #  lineinfile:
 #    dest: "/usr/lib/systemd/system/{{ openshift_service_type }}-node.service"
