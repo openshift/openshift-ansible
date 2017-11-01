@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.63
+Version:        3.6.173.0.64
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.64-1
+- Retry restarting journald (mgugino@redhat.com)
+- Ensure journald persistence directories exist (mgugino@redhat.com)
+- Ensure upgrades apply latest journald settings (mgugino@redhat.com)
+- Use existing OPENSHIFT_DEFAULT_REGISTRY setting during masters scaleup
+  (tbielawa@redhat.com)
+- bug 1501599.  Omit logging project from overcommit restrictions
+  (jcantril@redhat.com)
+- Fix broken oc_secret update function (barlik@gmx.com)
+- bug 1506073. Lower cpu request for logging when it exceeds limit
+  (jcantril@redhat.com)
+
 * Mon Oct 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.63-1
 - 
 
