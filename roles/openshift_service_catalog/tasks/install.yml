@@ -88,14 +88,14 @@
   vars:
     original_content: "{{ edit_yaml.results.results[0] | to_yaml }}"
   when:
-    - not edit_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not edit_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
+    - not edit_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch', 'patch']) or not edit_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
 # only do this if we don't already have the updated role info
 - name: update edit role for service catalog and pod preset access
   command: >
     oc replace -f {{ mktemp.stdout }}/edit_sc_patch.yml
   when:
-    - not edit_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not edit_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
+    - not edit_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch', 'patch']) or not edit_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
 - oc_obj:
     name: admin
@@ -111,14 +111,14 @@
   vars:
     original_content: "{{ admin_yaml.results.results[0] | to_yaml }}"
   when:
-    - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
+    - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch', 'patch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
 # only do this if we don't already have the updated role info
 - name: update admin role for service catalog and pod preset access
   command: >
     oc replace -f {{ mktemp.stdout }}/admin_sc_patch.yml
   when:
-    - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
+    - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch', 'patch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
 - oc_obj:
     name: view
