@@ -197,26 +197,25 @@ the [advanced configuration][advanced-configuration].
 
 ### 3. Creating the OpenStack resources (VMs, networking, etc.)
 
-We will install the DNS server roles using ansible galaxy and then run
-the openstack provisioning playbook. The `ansible.cfg` file we provide
-has useful defaults -- copy it to the directory you're going to run
-Ansible from.
+We provide an `ansible.cfg` file which has some useful defaults -- you should
+copy it to the directory you're going to run `ansible-playbook` from.
 
 ```bash
-$ ansible-galaxy install -r openshift-ansible/playbooks/openstack/galaxy-requirements.yaml -p openshift-ansible/roles
-$ cp openshift-ansible/playbooks/openstack/ansible.cfg ansible.cfg
+$ cp openshift-ansible/ansible.cfg ansible.cfg
 ```
-(you will only need to do this once)
 
 Then run the provisioning playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision.yaml
+$ ansible-playbook --user openshift -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision.yaml
 ```
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
+
+If your SSH private key is not in `~/.ssh/id_rsa` use the `--private-key`
+option to specify the correct path.
 
 
 ### 4. Installing OpenShift
