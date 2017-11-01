@@ -24,4 +24,3 @@ multi_ec2.yaml
 *.egg-info
 .eggs
 cover/
-roles/infra-ansible/

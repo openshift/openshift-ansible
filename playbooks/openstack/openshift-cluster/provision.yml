@@ -7,15 +7,17 @@
       name: openshift_openstack
       tasks_from: provision.yml
 
-# NOTE(shadower): the (internal) DNS must be functional at this point!!
-# That will have happened in provision.yml if nsupdate was configured.
 
-# TODO(shadower): consider splitting this up so people can stop here
-# and configure their DNS if they have to.
+# NOTE(shadower): Bring in the host groups:
+- name: normalize groups
+  include: ../../byo/openshift-cluster/initialize_groups.yml
+- name: evaluate groups
+  include: ../../common/openshift-cluster/evaluate_groups.yml
 
-- name: Prepare the Nodes in the cluster for installation
+
+- name: Wait for the nodes and gather their facts
   hosts: oo_all_hosts
-  become: true
+  become: yes
   # NOTE: The nodes may not be up yet, don't gather facts here.
   # They'll be collected after `wait_for_connection`.
   gather_facts: no
@@ -26,6 +28,28 @@
   - name: Gather facts for the new nodes
     setup:
 
+
+# NOTE(shadower): the (internal) DNS must be functional at this point!!
+# That will have happened in provision.yml if nsupdate was configured.
+
+# TODO(shadower): consider splitting this up so people can stop here
+# and configure their DNS if they have to.
+- name: Populate the DNS entries
+  hosts: localhost
+  tasks:
+  - name: Populate DNS entries
+    include_role:
+      name: openshift_openstack
+      tasks_from: populate-dns.yml
+    when:
+    - external_nsupdate_keys is defined
+    - external_nsupdate_keys.private is defined or external_nsupdate_keys.public is defined
+
+- name: Prepare the Nodes in the cluster for installation
+  hosts: oo_all_hosts
+  become: yes
+  gather_facts: yes
+  tasks:
   - name: Install dependencies
     include_role:
       name: openshift_openstack
