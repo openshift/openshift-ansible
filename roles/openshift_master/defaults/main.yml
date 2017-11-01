@@ -141,7 +141,5 @@ openshift_master_node_configs:
 - "{{ openshift_master_node_config_compute }}"
 
 openshift_master_bootstrap_namespace: openshift-node
-=======
 openshift_master_csr_sa: node-bootstrapper
 openshift_master_csr_namespace: openshift-infra
->>>>>>> Bootstrap enhancements.
