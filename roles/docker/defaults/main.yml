@@ -20,6 +20,7 @@ l2_docker_additional_registries: "{% if openshift_docker_additional_registries i
 l2_docker_blocked_registries: "{% if openshift_docker_blocked_registries is string %}{% if openshift_docker_blocked_registries == '' %}[]{% elif ',' in openshift_docker_blocked_registries %}{{ openshift_docker_blocked_registries.split(',') | list }}{% else %}{{ [ openshift_docker_blocked_registries ] }}{% endif %}{% else %}{{ openshift_docker_blocked_registries }}{% endif %}"
 l2_docker_insecure_registries: "{% if openshift_docker_insecure_registries is string %}{% if openshift_docker_insecure_registries == '' %}[]{% elif ',' in openshift_docker_insecure_registries %}{{ openshift_docker_insecure_registries.split(',') | list }}{% else %}{{ [ openshift_docker_insecure_registries ] }}{% endif %}{% else %}{{ openshift_docker_insecure_registries }}{% endif %}"
 
+openshift_docker_use_etc_containers: False
 containers_registries_conf_path: /etc/containers/registries.conf
 
 r_crio_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
