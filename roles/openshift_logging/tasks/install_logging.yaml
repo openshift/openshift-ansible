@@ -78,7 +78,7 @@
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_deployment_name: "{{ outer_item.0.name }}"
-    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim.claimName if outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim is defined else openshift_logging_es_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_cluster_size | int }}"
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
@@ -136,7 +136,7 @@
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_deployment_name: "{{ outer_item.0.name }}"
-    openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_ops_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
+    openshift_logging_elasticsearch_pvc_name: "{{ outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim.claimName if outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim is defined else openshift_logging_es_ops_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
     openshift_logging_elasticsearch_replica_count: "{{ openshift_logging_es_ops_cluster_size | int }}"
 
