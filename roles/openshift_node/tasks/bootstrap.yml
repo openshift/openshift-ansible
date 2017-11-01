@@ -25,10 +25,10 @@
     state: "{{ item.state | default('present') }}"
   with_items:
   # add the kubeconfig
-  - line: "KUBECONFIG={{ openshift_node_data_dir }}/bootstrap.kubeconfig"
+  - line: "KUBECONFIG={{ openshift_node_config_dir }}/bootstrap.kubeconfig"
     regexp: "^KUBECONFIG=.*"
   # remove the config file.  This comes from openshift_facts
-  - line: "CONFIG_FILE={{ openshift_node_data_dir }}/"
+  - line: "CONFIG_FILE={{ openshift_node_config_dir }}/node-config.yaml"
     regexp: "^CONFIG_FILE=.*"
 
 - name: include aws sysconfig credentials
@@ -76,7 +76,7 @@
     state: link
     force: yes
   with_items:
-  - /var/lib/origin/openshift.local.config/node/node-client-ca.crt
+  - "{{ openshift_node_config_dir }}/node-client-ca.crt"
 
 - when: rpmgenerated_config.stat.exists
   block:
