@@ -18,9 +18,7 @@
 
 - name: Reload generated facts
   openshift_facts:
-  when: install_result | changed
-  delegate_to: "{{ openshift_ca_host }}"
-  run_once: true
+  when: hostvars[openshift_ca_host].install_result | changed
 
 - name: Create openshift_ca_config_dir if it does not exist
   file:
