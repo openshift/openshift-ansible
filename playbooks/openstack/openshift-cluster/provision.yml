@@ -42,8 +42,8 @@
       name: openshift_openstack
       tasks_from: populate-dns.yml
     when:
-    - external_nsupdate_keys is defined
-    - external_nsupdate_keys.private is defined or external_nsupdate_keys.public is defined
+    - openshift_openstack_external_nsupdate_keys is defined
+    - openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined
 
 - name: Prepare the Nodes in the cluster for installation
   hosts: oo_all_hosts

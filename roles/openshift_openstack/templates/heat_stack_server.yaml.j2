@@ -61,7 +61,7 @@ parameters:
     label: Net name
     description: Net name
 
-{% if not openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name %}
   subnet:
     type: string
     label: Subnet ID
@@ -81,7 +81,7 @@ parameters:
     label: Net ID
     description: Net resource
 
-{% if not openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name %}
   data_subnet:
     type: string
     default: ''
@@ -102,7 +102,7 @@ parameters:
     label: Attach-float-net
     description: A switch for floating network port connection
 
-{% if not openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name %}
   floating_network:
     type: string
     default: ''
@@ -156,7 +156,7 @@ outputs:
         - server
         - addresses
         - { get_param: net_name }
-{% if openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name %}
         - 0
 {% else %}
         - 1
@@ -226,7 +226,7 @@ resources:
     type: OS::Neutron::Port
     properties:
       network: { get_param: net }
-{% if not openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name %}
       fixed_ips:
         - subnet: { get_param: subnet }
 {% endif %}
@@ -239,13 +239,13 @@ resources:
     properties:
       network: { get_param: data_net }
       port_security_enabled: false
-{% if not openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name %}
       fixed_ips:
         - subnet: { get_param: data_subnet }
 {% endif %}
 {% endif %}
 
-{% if not openstack_provider_network_name %}
+{% if not openshift_openstack_provider_network_name %}
   floating-ip:
     condition: { not: no_floating }
     type: OS::Neutron::FloatingIP
@@ -254,7 +254,7 @@ resources:
       port_id: { get_resource: port }
 {% endif %}
 
-{% if not ephemeral_volumes|default(false)|bool %}
+{% if not openshift_openstack_ephemeral_volumes|default(false)|bool %}
   cinder_volume:
     type: OS::Cinder::Volume
     properties:

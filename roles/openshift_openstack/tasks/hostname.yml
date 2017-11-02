@@ -5,7 +5,7 @@
 
 - name: Setting FQDN Fact
   set_fact:
-    new_fqdn: "{{ new_hostname }}.{{ full_dns_domain }}"
+    new_fqdn: "{{ new_hostname }}.{{ openshift_openstack_full_dns_domain }}"
 
 - name: Setting hostname and DNS domain
   hostname: name="{{ new_fqdn }}"
