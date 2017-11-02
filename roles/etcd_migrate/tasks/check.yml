@@ -2,6 +2,17 @@
 # Check the cluster is healthy
 - include: check_cluster_health.yml
 
+# Check if there is at least one v2 snapshot
+- name: Check if there is at least one v2 snapshot
+  find:
+    paths: "{{ etcd_data_dir }}/member/snap"
+    patterns: '*.snap'
+  register: snapshots_result
+
+- fail:
+    msg: "Before the migration can proceed the etcd member must write down at least one snapshot under {{ etcd_data_dir }}/member/snap directory."
+  when: snapshots_result.matched | int == 0
+
 # Check if the member has v3 data already
 # Run the migration only if the data are v2
 - name: Check if there are any v3 data
