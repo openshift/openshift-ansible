@@ -316,7 +316,6 @@
               etcd_host: 0.0.0.0
               etcd_port: 2379
             log:
-              logfile: /var/log/ansible-service-broker/asb.log
               stdout: true
               level: {{ ansible_service_broker_log_level }}
               color: true
