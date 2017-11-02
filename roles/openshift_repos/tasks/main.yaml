@@ -10,6 +10,11 @@
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
 
+  - name: Remove openshift_additional.repo file
+    file:
+      dest: /etc/yum.repos.d/openshift_additional.repo
+      state: absent
+
   - name: Create any additional repos that are defined
     yum_repository:
       description: "{{ item.description | default(item.name | default(item.id)) }}"
