@@ -182,17 +182,17 @@ So the provisioned cluster nodes will start using those natively as
 default nameservers. Technically, this allows to deploy OpenShift clusters
 without dnsmasq proxies.
 
-The `env_id` and `public_dns_domain` will form the cluster's DNS domain all
+The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain` will form the cluster's DNS domain all
 your servers will be under. With the default values, this will be
 `openshift.example.com`. For workloads, the default subdomain is 'apps'.
-That sudomain can be set as well by the `openshift_app_domain` variable in
+That sudomain can be set as well by the `openshift_openstack_app_subdomain` variable in
 the inventory.
 
 The `openstack_<role name>_hostname` is a set of variables used for customising
 hostnames of servers with a given role. When such a variable stays commented,
 default hostname (usually the role name) is used.
 
-The `openstack_dns_nameservers` is a list of DNS servers accessible from all
+The `openshift_openstack_dns_nameservers` is a list of DNS servers accessible from all
 the created Nova servers. These will provide the internal name resolution for
 your OpenShift nodes (as well as upstream name resolution for installing
 packages, etc.).
@@ -204,10 +204,10 @@ daemon that in turn proxies DNS requests to the authoritative DNS server.
 When Network Manager is enabled for provisioned cluster nodes, which is
 normally the case, you should not change the defaults and always deploy dnsmasq.
 
-`external_nsupdate_keys` describes an external authoritative DNS server(s)
+`openshift_openstack_external_nsupdate_keys` describes an external authoritative DNS server(s)
 processing dynamic records updates in the public and private cluster views:
 
-    external_nsupdate_keys:
+    openshift_openstack_external_nsupdate_keys:
       public:
         key_secret: <some nsupdate key>
         key_algorithm: 'hmac-md5'
@@ -227,7 +227,7 @@ another external DNS server.
 Another example defines an external DNS server for the public view
 additionally to the in-stack DNS server used for the private view only:
 
-    external_nsupdate_keys:
+    openshift_openstack_external_nsupdate_keys:
       public:
         key_secret: <some nsupdate key>
         key_algorithm: 'hmac-sha256'
@@ -264,51 +264,51 @@ step for flannel and docker iptables configuration:
 
 ## Other configuration variables
 
-`openstack_keypair_name` is a Nova keypair - you can see your
+`openshift_openstack_keypair_name` is a Nova keypair - you can see your
 keypairs with `openstack keypair list`. It must correspond to the
 private SSH key Ansible will use to log into the created VMs. This is
 `~/.ssh/id_rsa` by default, but you can use a different key by passing
 `--private-key` to `ansible-playbook`.
 
-`openstack_default_image_name` is the default name of the Glance image the
+`openshift_openstack_default_image_name` is the default name of the Glance image the
 servers will use. You can see your images with `openstack image list`.
 In order to set a different image for a role, uncomment the line with the
-corresponding variable (e.g. `openstack_lb_image_name` for load balancer) and
-set its value to another available image name. `openstack_default_image_name`
+corresponding variable (e.g. `openshift_openstack_lb_image_name` for load balancer) and
+set its value to another available image name. `openshift_openstack_default_image_name`
 must stay defined as it is used as a default value for the rest of the roles.
 
-`openstack_default_flavor` is the default Nova flavor the servers will use.
+`openshift_openstack_default_flavor` is the default Nova flavor the servers will use.
 You can see your flavors with `openstack flavor list`.
 In order to set a different flavor for a role, uncomment the line with the
-corresponding variable (e.g. `openstack_lb_flavor` for load balancer) and
-set its value to another available flavor. `openstack_default_flavor` must
+corresponding variable (e.g. `openshift_openstack_lb_flavor` for load balancer) and
+set its value to another available flavor. `openshift_openstack_default_flavor` must
 stay defined as it is used as a default value for the rest of the roles.
 
-`openstack_external_network_name` is the name of the Neutron network
+`openshift_openstack_external_network_name` is the name of the Neutron network
 providing external connectivity. It is often called `public`,
 `external` or `ext-net`. You can see your networks with `openstack
 network list`.
 
-`openstack_private_network_name` is the name of the private Neutron network
+`openshift_openstack_private_network_name` is the name of the private Neutron network
 providing admin/control access for ansible. It can be merged with other
 cluster networks, there are no special requirements for networking.
 
-The `openstack_num_masters`, `openstack_num_infra` and
-`openstack_num_nodes` values specify the number of Master, Infra and
+The `openshift_openstack_num_masters`, `openshift_openstack_num_infra` and
+`openshift_openstack_num_nodes` values specify the number of Master, Infra and
 App nodes to create.
 
-The `openshift_cluster_node_labels` defines custom labels for your openshift
+The `openshift_openstack_cluster_node_labels` defines custom labels for your openshift
 cluster node groups. It currently supports app and infra node groups.
 The default value of this variable sets `region: primary` to app nodes and
 `region: infra` to infra nodes.
 An example of setting a customised label:
 ```
-openshift_cluster_node_labels:
+openshift_openstack_cluster_node_labels:
   app:
     mylabel: myvalue
 ```
 
-The `openstack_nodes_to_remove` allows you to specify the numerical indexes
+The `openshift_openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 
 The `docker_volume_size` is the default Docker volume size the servers will use.
@@ -318,15 +318,15 @@ for master) and change its value. `docker_volume_size` must stay defined as it i
 used as a default value for some of the servers (master, infra, app node).
 The rest of the roles (etcd, load balancer, dns) have their defaults hard-coded.
 
-**Note**: If the `ephemeral_volumes` is set to `true`, the `*_volume_size` variables
+**Note**: If the `openshift_openstack_ephemeral_volumes` is set to `true`, the `*_volume_size` variables
 will be ignored and the deployment will not create any cinder volumes.
 
-The `openstack_flat_secgrp`, controls Neutron security groups creation for Heat
+The `openshift_openstack_flat_secgrp`, controls Neutron security groups creation for Heat
 stacks. Set it to true, if you experience issues with sec group rules
 quotas. It trades security for number of rules, by sharing the same set
 of firewall rules for master, node, etcd and infra nodes.
 
-The `required_packages` variable also provides a list of the additional
+The `openshift_openstack_required_packages` variable also provides a list of the additional
 prerequisite packages to be installed before to deploy an OpenShift cluster.
 Those are ignored though, if the `manage_packages: False`.
 
@@ -358,11 +358,11 @@ floating IP addresses to each node. If you have a provider network set up, this
 is all unnecessary as you can just access servers that are placed in the
 provider network directly.
 
-To use a provider network, set its name in `openstack_provider_network_name` in
+To use a provider network, set its name in `openshift_openstack_provider_network_name` in
 `inventory/group_vars/all.yml`.
 
-If you set the provider network name, the `openstack_external_network_name` and
-`openstack_private_network_name` fields will be ignored.
+If you set the provider network name, the `openshift_openstack_external_network_name` and
+`openshift_openstack_private_network_name` fields will be ignored.
 
 **NOTE**: this will not update the nodes' DNS, so running openshift-ansible
 right after provisioning will fail (unless you're using an external DNS server
@@ -373,7 +373,7 @@ resolve each other by name.
 
 Configure required `*_ingress_cidr` variables to restrict public access
 to provisioned servers from your laptop (a /32 notation should be used)
-or your trusted network. The most important is the `node_ingress_cidr`
+or your trusted network. The most important is the `openshift_openstack_node_ingress_cidr`
 that restricts public access to the deployed DNS server and cluster
 nodes' ephemeral ports range.
 
@@ -388,7 +388,7 @@ implications though, and is not recommended for production deployments.
 
 ### DNS servers security options
 
-Aside from `node_ingress_cidr` restricting public access to in-stack DNS
+Aside from `openshift_openstack_node_ingress_cidr` restricting public access to in-stack DNS
 servers, there are following (bind/named specific) DNS security
 options available:
 
@@ -435,8 +435,8 @@ it up as the OpenShift hosted registry.
 To do that you need specify the desired Cinder volume name and size in
 Gigabytes in `inventory/group_vars/all.yml`:
 
-    cinder_hosted_registry_name: cinder-registry
-    cinder_hosted_registry_size_gb: 10
+    openshift_openstack_cinder_hosted_registry_name: cinder-registry
+    openshift_openstack_cinder_hosted_registry_size_gb: 10
 
 With this, the playbooks will create the volume and set up its
 filesystem. If there is an existing volume of the same name, we will
@@ -483,8 +483,8 @@ the volume.
 If you're using the dynamic inventory, you must uncomment these two values as
 well:
 
-    #openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', cinder_hosted_registry_name).id }}"
-    #openshift_hosted_registry_storage_volume_size: "{{ cinder_hosted_registry_size_gb }}Gi"
+    #openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', openshift_openstack_cinder_hosted_registry_name).id }}"
+    #openshift_hosted_registry_storage_volume_size: "{{ openshift_openstack_cinder_hosted_registry_size_gb }}Gi"
 
 But note that they use the `os_cinder` lookup plugin we provide, so you must
 tell Ansible where to find it either in `ansible.cfg` (the one we provide is
@@ -528,7 +528,7 @@ the **UUID** of the Cinder volume, *not its name*.
 We can do formate the volume for you if you ask for it in
 `inventory/group_vars/all.yml`:
 
-    prepare_and_format_registry_volume: true
+    openshift_openstack_prepare_and_format_registry_volume: true
 
 **NOTE:** doing so **will destroy any data that's currently on the volume**!
 
@@ -544,16 +544,16 @@ You can also run the registry setup playbook directly:
 
 Example inventory variables:
 
-    openstack_use_bastion: true
-    bastion_ingress_cidr: "{{openstack_subnet_prefix}}.0/24"
+    openshift_openstack_use_bastion: true
+    openshift_openstack_bastion_ingress_cidr: "{{openshift_openstack_subnet_prefix}}.0/24"
     openstack_private_ssh_key: ~/.ssh/id_rsa
     openstack_inventory: static
     openstack_inventory_path: ../../../../inventory
     openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.openshift.example.com
 
-The `openstack_subnet_prefix` is the openstack private network for your cluster.
-And the `bastion_ingress_cidr` defines accepted range for SSH connections to nodes
-additionally to the `ssh_ingress_cidr`` (see the security notes above).
+The `openshift_openstack_subnet_prefix` is the openstack private network for your cluster.
+And the `openshift_openstack_bastion_ingress_cidr` defines accepted range for SSH connections to nodes
+additionally to the `openshift_openstack_ssh_ingress_cidr`` (see the security notes above).
 
 The SSH config will be stored on the ansible control node by the
 gitven path. Ansible uses it automatically. To access the cluster nodes with
@@ -738,7 +738,7 @@ OpenShift UI may be accessed via the 1st master node FQDN, port 8443.
 When using a bastion, you may want to make an SSH tunnel from your control node
 to access UI on the `https://localhost:8443`, with this inventory variable:
 
-   openshift_ui_ssh_tunnel: True
+   openshift_openstack_ui_ssh_tunnel: True
 
 Note, this requires sudo rights on the ansible control node and an absolute path
 for the `openstack_private_ssh_key`. You should also update the control node's
@@ -769,4 +769,4 @@ Usage:
 ansible-playbook -i <path to inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/scale-up.yaml` [-e increment_by=<number>] [-e openshift_ansible_dir=<path to openshift-ansible>]
 ```
 
-Note: This playbook works only without a bastion node (`openstack_use_bastion: False`).
+Note: This playbook works only without a bastion node (`openshift_openstack_use_bastion: False`).

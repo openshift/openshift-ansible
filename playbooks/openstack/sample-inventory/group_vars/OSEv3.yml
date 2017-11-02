@@ -2,10 +2,10 @@
 openshift_deployment_type: origin
 #openshift_deployment_type: openshift-enterprise
 #openshift_release: v3.5
-openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
+openshift_master_default_subdomain: "apps.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
 
 openshift_master_cluster_method: native
-openshift_master_cluster_hostname: "console.{{ env_id }}.{{ public_dns_domain }}"
+openshift_master_cluster_hostname: "console.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
 openshift_master_cluster_public_hostname: "{{ openshift_master_cluster_hostname }}"
 
 osm_default_node_selector: 'region=primary'
@@ -29,10 +29,10 @@ openshift_hosted_registry_wait: True
 
 ## NOTE(shadower): This won't work until the openshift-ansible issue #5657 is fixed:
 ## https://github.com/openshift/openshift-ansible/issues/5657
-## If you're using the `cinder_hosted_registry_name` option from
+## If you're using the `openshift_openstack_cinder_hosted_registry_name` option from
 ## `all.yml`, uncomment these lines:
-#openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', cinder_hosted_registry_name).id }}"
-#openshift_hosted_registry_storage_volume_size: "{{ cinder_hosted_registry_size_gb }}Gi"
+#openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', openshift_openstack_cinder_hosted_registry_name).id }}"
+#openshift_hosted_registry_storage_volume_size: "{{ openshift_openstack_cinder_hosted_registry_size_gb }}Gi"
 
 ## If you're using a Cinder volume you've set up yourself, uncomment these lines:
 #openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
