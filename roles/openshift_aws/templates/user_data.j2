@@ -20,6 +20,7 @@ runcmd:
 - [ ansible-playbook, /root/openshift_bootstrap/bootstrap.yml]
 {%     endif %}
 {%     if launch_config_item.key != 'master' %}
+- [ systemctl, restart, NetworkManager]
 - [ systemctl, enable, {% if openshift_deployment_type == 'openshift-enterprise' %}atomic-openshift{% else %}origin{% endif %}-node]
 - [ systemctl, start, {% if openshift_deployment_type == 'openshift-enterprise' %}atomic-openshift{% else %}origin{% endif %}-node]
 {%     endif %}

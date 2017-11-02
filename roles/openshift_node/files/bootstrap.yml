@@ -61,3 +61,11 @@
       with_items:
       - line: "BOOTSTRAP_CONFIG_NAME=node-config-{{ openshift_group_type }}"
         regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
+
+    - name: "Start the {{ openshift_service_type }}-node service"
+      systemd:
+        daemon_reload: yes
+        state: restarted
+        enabled: True
+        name: "{{ openshift_service_type }}-node"
+        no_block: true
