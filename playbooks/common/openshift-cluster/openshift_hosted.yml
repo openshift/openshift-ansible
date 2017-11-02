@@ -24,6 +24,11 @@
 - include: openshift_prometheus.yml
   when: openshift_hosted_prometheus_deploy | default(False) | bool
 
+- include: install_docker_gc.yml
+  when:
+  - openshift_use_crio | default(False) | bool
+  - openshift_crio_enable_docker_gc | default(False) | bool
+
 - name: Hosted Install Checkpoint End
   hosts: oo_all_hosts
   gather_facts: false
