@@ -51,7 +51,6 @@ openshift_openstack_full_dns_domain: "{{ (openshift_openstack_clusterid|trim == 
 openshift_openstack_app_subdomain: "apps"
 
 
-
 # heat vars
 openshift_openstack_clusterid: openshift
 openshift_openstack_stack_name: "{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
