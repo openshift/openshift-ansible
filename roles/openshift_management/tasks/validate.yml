@@ -2,12 +2,25 @@
 # Validate configuration parameters passed to the openshift_management role
 
 ######################################################################
+# BETA ACKNOWLEDGEMENT
+- name: Ensure BETA software notice has been acknowledged
+  assert:
+    that:
+      - openshift_management_install_beta | default(false) | bool
+    msg: |
+      openshift-management (CFME/MIQ) is currently BETA status. You
+      must set openshift_management_install_beta to true to
+      acknowledge that you accept this risk and understand that
+      support is limited or nonexistent.
+  when:
+    - openshift_deployment_type == 'openshift-enterprise'
+
+######################################################################
 # CORE PARAMETERS
 - name: Ensure openshift_management_app_template is valid
   assert:
     that:
       - openshift_management_app_template in __openshift_management_app_templates
-
     msg: |
       "openshift_management_app_template must be one of {{
       __openshift_management_app_templates | join(', ') }}"
