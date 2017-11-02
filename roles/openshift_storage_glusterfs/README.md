@@ -119,13 +119,13 @@ are an exception:
 Additionally, this role's behavior responds to the following registry-specific
 variables:
 
-| Name                                          | Default value                | Description                             |
-|-----------------------------------------------|------------------------------|-----------------------------------------|
-| openshift_hosted_registry_glusterfs_endpoints | glusterfs-registry-endpoints | The name for the Endpoints resource that will point the registry to the GlusterFS nodes
-| openshift_hosted_registry_glusterfs_path      | glusterfs-registry-volume    | The name for the GlusterFS volume that will provide registry storage
-| openshift_hosted_registry_glusterfs_readonly  | False                        | Whether the GlusterFS volume should be read-only
-| openshift_hosted_registry_glusterfs_swap      | False                        | Whether to swap an existing registry's storage volume for a GlusterFS volume
-| openshift_hosted_registry_glusterfs_swapcopy  | True                         | If swapping, copy the contents of the pre-existing registry storage to the new GlusterFS volume
+| Name                                                  | Default value                | Description                             |
+|-------------------------------------------------------|------------------------------|-----------------------------------------|
+| openshift_hosted_registry_storage_glusterfs_endpoints | glusterfs-registry-endpoints | The name for the Endpoints resource that will point the registry to the GlusterFS nodes
+| openshift_hosted_registry_storage_glusterfs_path      | glusterfs-registry-volume    | The name for the GlusterFS volume that will provide registry storage
+| openshift_hosted_registry_storage_glusterfs_readonly  | False                        | Whether the GlusterFS volume should be read-only
+| openshift_hosted_registry_storage_glusterfs_swap      | False                        | Whether to swap an existing registry's storage volume for a GlusterFS volume
+| openshift_hosted_registry_storage_glusterfs_swapcopy  | True                         | If swapping, copy the contents of the pre-existing registry storage to the new GlusterFS volume
 
 Dependencies
 ------------
