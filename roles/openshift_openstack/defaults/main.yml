@@ -75,8 +75,8 @@ openstack_node_image: "{{ openstack_default_image_name }}"
 openstack_lb_image: "{{ openstack_default_image_name }}"
 openstack_etcd_image: "{{ openstack_default_image_name }}"
 openstack_dns_image: "{{ openstack_default_image_name }}"
-openstack_provider_network_name: False
-openstack_external_network_name: False
+openstack_provider_network_name: null
+openstack_external_network_name: null
 openstack_private_network: >-
   {% if openstack_provider_network_name | default(None) -%}
   {{ openstack_provider_network_name }}
