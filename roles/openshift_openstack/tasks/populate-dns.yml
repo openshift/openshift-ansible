@@ -1,3 +1,4 @@
+---
 - name: "Generate list of private A records"
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'], 'ip': hostvars[item]['private_v4'] } ] }}"
@@ -119,8 +120,8 @@
     # TODO(shadower): add a cleanup playbook that removes these records, too!
     state: present
   with_subelements:
-  - "{{ openshift_openstack_dns_records_add | default({}) }}"
-  - entries
+    - "{{ openshift_openstack_dns_records_add | default({}) }}"
+    - entries
   register: nsupdate_add_result
   until: nsupdate_add_result|succeeded
   retries: 10
