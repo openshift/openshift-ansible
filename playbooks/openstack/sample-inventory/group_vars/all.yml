@@ -58,13 +58,13 @@ openshift_openstack_default_flavor: "m1.medium"
 # # Docker volume size
 # # - set specific volume size for roles by uncommenting corresponding lines
 # # - note: do not remove docker_default_volume_size definition
-#docker_master_volume_size: "15"
-#docker_infra_volume_size: "15"
-#docker_node_volume_size: "15"
-#docker_etcd_volume_size: "2"
-#docker_dns_volume_size: "1"
-#docker_lb_volume_size: "5"
-docker_volume_size: "15"
+#openshift_openstack_docker_master_volume_size: "15"
+#openshift_openstack_docker_infra_volume_size: "15"
+#openshift_openstack_docker_node_volume_size: "15"
+#openshift_openstack_docker_etcd_volume_size: "2"
+#openshift_openstack_docker_dns_volume_size: "1"
+#openshift_openstack_docker_lb_volume_size: "5"
+openshift_openstack_docker_volume_size: "15"
 
 ## Specify server group policies for master and infra nodes. Nova must be configured to
 ## enable these policies. 'anti-affinity' will ensure that each VM is launched on a
