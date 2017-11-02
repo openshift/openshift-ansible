@@ -38,7 +38,7 @@
 
     - name: Make kube-service-catalog project network global
       command: >
-        oc adm pod-network make-projects-global kube-service-catalog
+        {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig adm pod-network make-projects-global kube-service-catalog
 
 - include: generate_certs.yml
 
@@ -93,7 +93,7 @@
 # only do this if we don't already have the updated role info
 - name: update edit role for service catalog and pod preset access
   command: >
-    oc replace -f {{ mktemp.stdout }}/edit_sc_patch.yml
+    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig replace -f {{ mktemp.stdout }}/edit_sc_patch.yml
   when:
     - not edit_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not edit_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
@@ -116,7 +116,7 @@
 # only do this if we don't already have the updated role info
 - name: update admin role for service catalog and pod preset access
   command: >
-    oc replace -f {{ mktemp.stdout }}/admin_sc_patch.yml
+    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig replace -f {{ mktemp.stdout }}/admin_sc_patch.yml
   when:
     - not admin_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['create', 'update', 'delete', 'get', 'list', 'watch']) or not admin_yaml.results.results[0] | oo_contains_rule(['settings.k8s.io'], ['podpresets'], ['create', 'update', 'delete', 'get', 'list', 'watch'])
 
@@ -139,7 +139,7 @@
 # only do this if we don't already have the updated role info
 - name: update view role for service catalog access
   command: >
-    oc replace -f {{ mktemp.stdout }}/view_sc_patch.yml
+    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig replace -f {{ mktemp.stdout }}/view_sc_patch.yml
   when:
     - not view_yaml.results.results[0] | oo_contains_rule(['servicecatalog.k8s.io'], ['serviceinstances', 'servicebindings'], ['get', 'list', 'watch'])
 

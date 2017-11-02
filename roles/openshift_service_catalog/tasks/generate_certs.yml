@@ -60,7 +60,7 @@
   register: apiserver_ca
 
 - shell: >
-    oc get apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io -n kube-service-catalog || echo "not found"
+    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig get apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io -n kube-service-catalog || echo "not found"
   register: get_apiservices
   changed_when: no
 
