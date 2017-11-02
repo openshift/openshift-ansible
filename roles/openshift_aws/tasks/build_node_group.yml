@@ -23,6 +23,10 @@
     - "'results' in amiout"
     - amiout.results|length > 0
 
+# Need to set epoch time in one place to use for launch_config and scale_group
+- set_fact:
+    l_epoch_time: "{{ ansible_date_time.epoch }}"
+
 - when: openshift_aws_create_launch_config
   include: launch_config.yml
 

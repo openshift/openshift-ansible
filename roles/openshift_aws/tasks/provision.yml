@@ -7,16 +7,6 @@
   name: create s3 bucket for registry
   include: s3.yml
 
-- when: openshift_aws_create_security_groups
-  block:
-  - name: "Create {{ openshift_aws_node_group_type }} security groups"
-    include: security_group.yml
-
-  - name: "Create {{ openshift_aws_node_group_type }} security groups"
-    include: security_group.yml
-    vars:
-      openshift_aws_node_group_type: infra
-
 - include: vpc_and_subnet_id.yml
 
 - name: create elbs
@@ -39,7 +29,7 @@
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:clusterid": "{{ openshift_aws_clusterid }}"
-      "tag:host-type": "{{ openshift_aws_node_group_type }}"
+      "tag:host-type": "master"
       instance-state-name: running
   register: instancesout
   retries: 20

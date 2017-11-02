@@ -19,8 +19,7 @@
 
 - name: tag sg groups with proper tags
   ec2_tag:
-    tags:
-      KubernetesCluster: "{{ openshift_aws_clusterid }}"
+    tags: "{{ openshift_aws_security_groups_tags }}"
     resource: "{{ item.group_id }}"
     region: "{{ openshift_aws_region }}"
   with_items: "{{ k8s_sg_create.results }}"
