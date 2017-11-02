@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.189.0%{?dist}
+Release:        0.190.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.190.0
+- check presence of v2 snapshot before the migration proceeds
+  (jchaloup@redhat.com)
+- Remove delegate_to from openshift_facts within the openshift_ca role.
+  (abutcher@redhat.com)
+- Don't use possibly undefined variables in error messages
+  (tbielawa@redhat.com)
+- MTU for bootstrapping should default to openshift_node_sdn_mtu
+  (ccoleman@redhat.com)
+- Retry service account bootstrap kubeconfig creation (ccoleman@redhat.com)
+- Docker: make use of new etc/containers/registries.conf optional
+  (mgugino@redhat.com)
+- Add rules to the view ClusterRole for service catalog. (staebler@redhat.com)
+- Updating console OPENSHIFT_CONSTANTS flag for TSB (ewolinet@redhat.com)
+- GlusterFS: Fix registry storage documentation (jarrpa@redhat.com)
+- fix comment and make it visible to end-user (azagayno@redhat.com)
+- escape also custom_cors_origins (azagayno@redhat.com)
+- add comment on regexp specifics (azagayno@redhat.com)
+- escape corsAllowedOrigins regexp strings and anchor them
+  (azagayno@redhat.com)
+
 * Wed Nov 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.189.0
 - Stating that certificate it is required when doing SSL on ELB.
   (kwoodson@redhat.com)
