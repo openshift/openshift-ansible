@@ -93,17 +93,13 @@
   - "{{ openstack_lb_image }}"
   - "{{ openstack_etcd_image }}"
   - "{{ openstack_dns_image }}"
-  loop_control:
-    loop_var: image
 
 # Check that custom flavors are available
 - include: custom_flavor_check.yaml
   with_items:
-  - "{{ master_flavor }}"
-  - "{{ infra_flavor }}"
-  - "{{ node_flavor }}"
-  - "{{ lb_flavor }}"
-  - "{{ etcd_flavor }}"
-  - "{{ dns_flavor }}"
-  loop_control:
-    loop_var: flavor
+  - "{{ openstack_master_flavor }}"
+  - "{{ openstack_infra_flavor }}"
+  - "{{ openstack_node_flavor }}"
+  - "{{ openstack_lb_flavor }}"
+  - "{{ openstack_etcd_flavor }}"
+  - "{{ openstack_dns_flavor }}"
