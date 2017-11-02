@@ -2,7 +2,7 @@
 - block:
     - name: create the docker-storage config file
       template:
-        src: "{{ role_path }}/templates/docker-storage-setup-overlayfs.j2"
+        src: docker-storage-setup-overlayfs.j2
         dest: /etc/sysconfig/docker-storage-setup
         owner: root
         group: root
@@ -14,7 +14,7 @@
 - block:
     - name: create the docker-storage-setup config file
       template:
-        src: "{{ role_path }}/templates/docker-storage-setup-dm.j2"
+        src: docker-storage-setup-dm.j2
         dest: /etc/sysconfig/docker-storage-setup
         owner: root
         group: root
@@ -26,7 +26,7 @@
 - block:
     - name: create the docker-storage-setup config file for CentOS
       template:
-        src: "{{ role_path }}/templates/docker-storage-setup-dm.j2"
+        src: docker-storage-setup-dm.j2
         dest: /etc/sysconfig/docker-storage-setup
         owner: root
         group: root
