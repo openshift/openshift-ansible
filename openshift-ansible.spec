@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.64
+Version:        3.6.173.0.65
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.65-1
+- Move etcd_quota_backend_bytes to etcd_common (rteague@redhat.com)
+- Add undefined reg auth variables to node_upgrade role (mgugino@redhat.com)
+- check presence of v2 snapshot before the migration proceeds
+  (jchaloup@redhat.com)
+- Add master config upgrade hook to upgrade-all plays (mgugino@redhat.com)
+- Remove incorrect validation for OpenIDIdentityProvider (mgugino@redhat.com)
+- Allow examples management to be disabled (sdodson@redhat.com)
+
 * Wed Nov 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.64-1
 - Retry restarting journald (mgugino@redhat.com)
 - Ensure journald persistence directories exist (mgugino@redhat.com)
