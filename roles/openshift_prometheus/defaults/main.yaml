@@ -6,16 +6,6 @@ openshift_prometheus_namespace: prometheus
 
 openshift_prometheus_node_selector: {"region":"infra"}
 
-# image defaults
-openshift_prometheus_image_prefix: "openshift/"
-openshift_prometheus_image_version: "v2.0.0-dev.3"
-openshift_prometheus_proxy_image_prefix: "openshift/"
-openshift_prometheus_proxy_image_version: "v1.0.0"
-openshift_prometheus_alertmanager_image_prefix: "openshift/"
-openshift_prometheus_alertmanager_image_version: "v0.9.1"
-openshift_prometheus_alertbuffer_image_prefix: "openshift/"
-openshift_prometheus_alertbuffer_image_version: "v0.0.2"
-
 # additional prometheus rules file
 openshift_prometheus_additional_rules_file: null
 

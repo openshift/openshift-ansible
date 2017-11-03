@@ -1,0 +1,7 @@
+---
+# image defaults
+__openshift_prometheus_image_prefix: "openshift/"
+__openshift_prometheus_image_version: "v2.0.0-dev.3"
+__openshift_prometheus_proxy_image_version: "v1.0.0"
+__openshift_prometheus_alertmanager_image_version: "v0.9.1"
+__openshift_prometheus_alertbuffer_image_version: "v0.0.2"
