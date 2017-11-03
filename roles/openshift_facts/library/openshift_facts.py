@@ -1289,7 +1289,7 @@ def get_container_openshift_version(facts):
     If containerized, see if we can determine the installed version via the
     systemd environment files.
     """
-    for filename in ['/etc/sysconfig/%s-master', '/etc/sysconfig/%s-node']:
+    for filename in ['/etc/sysconfig/%s-master-controllers', '/etc/sysconfig/%s-node']:
         env_path = filename % facts['common']['service_type']
         if not os.path.exists(env_path):
             continue
