@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.190.0%{?dist}
+Release:        0.191.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Nov 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.191.0
+- Adding CONFIG_FILE option back. (kwoodson@redhat.com)
+- Configurable node config location. (kwoodson@redhat.com)
+- Add enterprise prometheus image defaults (sdodson@redhat.com)
+- Adding meta/main.yml to allow for Galaxy use of this repo (bedin@redhat.com)
+
 * Thu Nov 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.190.0
 - check presence of v2 snapshot before the migration proceeds
   (jchaloup@redhat.com)
