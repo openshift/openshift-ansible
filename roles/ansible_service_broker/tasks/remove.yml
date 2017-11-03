@@ -46,6 +46,12 @@
     resource_name: asb-access
     user: "system:serviceaccount:openshift-ansible-service-broker:asb-client"
 
+- name: remove asb-registry auth secret
+  oc_secret:
+    state: absent
+    name: asb-registry-auth
+    namespace: openshift-ansible-service-broker
+
 - name: remove asb-client token secret
   oc_secret:
     state: absent
