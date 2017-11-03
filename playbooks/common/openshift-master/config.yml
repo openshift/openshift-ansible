@@ -212,6 +212,13 @@
       tasks_from: master
     when: openshift_use_kuryr | default(false) | bool
 
+  - name: Setup the compute and infra node config maps
+    include_role:
+      name: openshift_node_bootstrap_configmap
+      tasks_from: standard.yml
+    when: openshift_master_bootstrap_enabled | default(false) | bool
+    run_once: True
+
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
