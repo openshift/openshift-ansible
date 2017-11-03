@@ -347,9 +347,9 @@
     state: present
     contents:
       - path: username
-        data: {{ ansible_service_broker_registry_user }}
+        data: "{{ ansible_service_broker_registry_user }}"
       - path: password
-        data: {{ ansible_service_broker_registry_password }}
+        data: "{{ ansible_service_broker_registry_password }}"
 
 - name: Create the Broker resource in the catalog
   oc_obj:
