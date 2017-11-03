@@ -19,7 +19,7 @@
 - name: fetch the security groups for launch config
   ec2_group_facts:
     filters:
-      group-name: "{{ openshift_aws_launch_config_security_groups }}"
+      group-name: "{{ openshift_aws_elb_security_groups }}"
       vpc-id: "{{ vpcout.vpcs[0].id }}"
     region: "{{ openshift_aws_region }}"
   register: ec2sgs
