@@ -9,16 +9,22 @@
         installer_phase_management: "In Progress"
       aggregate: false
 
-- name: Setup CFME
+- name: Setup Management
   hosts: oo_first_master
   pre_tasks:
-  - name: Create a temporary place to evaluate the PV templates
-    command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+  - name: Create a temporary place to store management templates
+    command: mktemp -d /tmp/openshift-management-XXXXXXX
     register: r_openshift_management_mktemp
     changed_when: false
 
+  post_tasks:
+  - name: Cleanup the temporary place for management template storage
+    file:
+      state: absent
+      path: "{{ hostvars[groups.masters.0].r_openshift_management_mktemp.stdout }}"
+
   tasks:
-  - name: Run the CFME Setup Role
+  - name: Run the Management Setup Role
     include_role:
       name: openshift_management
     vars:

@@ -88,6 +88,12 @@
     create: True
     params: "{{ openshift_management_template_parameters }}"
 
+# TODO: Wrap this in a try/catch block thing so we don't destroy
+# installs. Find a way to add it to checkpoint output or something.
+
+# NOTE: If this fails then the post_tasks that run the temp dir
+# cleanup are not run. it would be nice to find a way to fix that.
+
 - name: Wait for the app to come up. May take several minutes, 30s check intervals, 10m max
   command: "oc logs {{ openshift_management_flavor }}-0 -n {{ openshift_management_project }}"
   register: app_seeding_logs

@@ -14,7 +14,7 @@
 - name: Remove the project
   command: "oc delete -n {{ openshift_management_project }} project {{ openshift_management_project }}"
 
-- name: Verify project has been destroyed
+- name: Verify project has been destroyed, 3s check intervals, 90s max
   command: "oc get project {{ openshift_management_project }}"
   ignore_errors: True
   register: project_terminated
