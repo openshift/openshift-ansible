@@ -10,6 +10,18 @@
 - name: Ensure OpenShift facts are loaded
   openshift_facts:
 
+- name: Ensure we use openshift_master_cluster_public_hostname if it is available
+  set_fact:
+    l_cluster_hostname: "{{ openshift.master.cluster_public_hostname }}"
+  when:
+    - openshift.master.cluster_public_hostname is defined
+
+- name: Ensure we default to the first master if openshift_master_cluster_public_hostname is unavailable
+  set_fact:
+    l_cluster_hostname: "{{ openshift.master.cluster_hostname }}"
+  when:
+    - l_cluster_hostname is not defined
+
 - name: Ensure the management SA Secrets are read
   oc_serviceaccount_secret:
     state: list
@@ -59,7 +71,7 @@
       connection_configurations:
         - authentication: {auth_key: "{{ management_bearer_token }}", authtype: bearer, type: AuthToken}
           endpoint: {role: default, security_protocol: ssl-without-validation, verify_ssl: 0}
-      hostname: "{{ openshift.master.cluster_public_hostname }}"
+      hostname: "{{ l_cluster_hostname }}"
       name: "{{ openshift_management_project }}"
       port: "{{ openshift.master.api_port }}"
       type: "ManageIQ::Providers::Openshift::ContainerManager"
