@@ -58,6 +58,17 @@
   - l_create_ha_unit_files | changed
 # end workaround for missing systemd unit files
 
+- name: enable master services
+  systemd:
+    name: "{{ openshift.common.service_type }}-master-{{ item }}"
+    enabled: yes
+  with_items:
+  - api
+  - controllers
+  when:
+  - openshift.master.cluster_method == "native"
+  - not openshift.common.is_master_system_container | bool
+
 - name: Preserve Master API Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
   register: l_master_api_proxy
