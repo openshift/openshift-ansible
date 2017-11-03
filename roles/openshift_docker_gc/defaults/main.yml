@@ -1,0 +1,3 @@
+---
+r_enable_docker_gc: "{{ openshift_crio_enable_docker_gc | default(False) }}"
+r_docker_gc_node_selectors: "{{ openshift_crio_docker_gc_node_selector | default({}) }}"

@@ -123,6 +123,15 @@ openshift_release=v3.7
 # use this option if you are sure you know what you are doing!
 #openshift_docker_systemcontainer_image_override="registry.example.com/container-engine:latest"
 #openshift_crio_systemcontainer_image_override="registry.example.com/cri-o:latest"
+# NOTE: The following crio docker-gc items are tech preview and likely shouldn't be used
+# unless you know what you are doing!!
+# The following two variables are used when opneshift_use_crio is True
+# and cleans up after builds that pass through docker.
+# Enable docker garbage collection when using cri-o
+#openshift_crio_enable_docker_gc=false
+# Node Selectors to run the garbage collection
+#openshift_crio_docker_gc_node_selector: {'runtime': 'cri-o'}
+
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 # Default value: "--log-driver=journald"
 #openshift_docker_options="-l warn --ipv6=false"
