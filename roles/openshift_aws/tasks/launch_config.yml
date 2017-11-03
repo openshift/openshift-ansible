@@ -9,31 +9,7 @@
   when:
   - openshift_deployment_type is undefined
 
-- name: query vpc
-  ec2_vpc_net_facts:
-    region: "{{ openshift_aws_region }}"
-    filters:
-      'tag:Name': "{{ openshift_aws_vpc_name }}"
-  register: vpcout
-
-- name: fetch the security groups for launch config
-  ec2_group_facts:
-    filters:
-      group-name: "{{ openshift_aws_launch_config_security_groups }}"
-      vpc-id: "{{ vpcout.vpcs[0].id }}"
-    region: "{{ openshift_aws_region }}"
-  register: ec2sgs
-
-# Create the scale group config
-- name: Create the node scale group launch config
-  ec2_lc:
-    name: "{{ openshift_aws_launch_config_name }}"
-    region: "{{ openshift_aws_region }}"
-    image_id: "{{ openshift_aws_ami }}"
-    instance_type: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].instance_type }}"
-    security_groups: "{{ openshift_aws_launch_config_security_group_id  | default(ec2sgs.security_groups | map(attribute='group_id')| list) }}"
-    user_data: "{{ lookup('template', 'user_data.j2') }}"
-    key_name: "{{ openshift_aws_ssh_key_name }}"
-    ebs_optimized: False
-    volumes: "{{ openshift_aws_node_group_config[openshift_aws_node_group_type].volumes }}"
-    assign_public_ip: True
+- include: launch_config_create.yml
+  with_dict: "{{ l_nodes_to_build }}"
+  loop_control:
+    loop_var: launch_config_item
