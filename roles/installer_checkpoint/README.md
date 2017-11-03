@@ -16,7 +16,7 @@ displaying and logging of the installer status at the end of a playbook run.
 
 To ensure the callback plugin is loaded, regardless of ansible.cfg file
 configuration, the plugin has been placed inside the installer_checkpoint role
-which must be called early in playbook execution. The `std_include.yml` playbook
+which must be called early in playbook execution. The `init/main.yml` playbook
 is run first for all entry point playbooks, therefore, the initialization of the
 checkpoint plugin has been placed at the beginning of that file.
 
@@ -89,7 +89,7 @@ phase/component and then a final play for setting `installer_hase_initialize` to
 "Complete".
 
 ```yaml
-# common/openshift-cluster/std_include.yml
+# init/main.yml
 ---
 - name: Initialization Checkpoint Start
   hosts: all
@@ -124,7 +124,7 @@ phase/component and then a final play for setting `installer_hase_initialize` to
 
 Each phase or component of the installer will follow a similar pattern, with the
 exception that the `installer_checkpoint` role does not need to be called since
-it was already loaded by the play in `std_include.yml`.  It is important to
+it was already loaded by the play in `init/main.yml`.  It is important to
 place the 'In Progress' and 'Complete' plays as the first and last plays of the
 phase or component.
  

@@ -63,7 +63,7 @@
   tags:
   - pre_upgrade
 
-- include: ../../initialize_openshift_version.yml
+- include: ../../../../init/version.yml
   tags:
   - pre_upgrade
   vars:

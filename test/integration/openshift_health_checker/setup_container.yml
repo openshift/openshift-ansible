@@ -51,8 +51,7 @@
     - include: preflight/playbooks/tasks/enable_repo.yml
       vars: { repo_name: "ose-3.2" }
 
-- include: ../../../playbooks/byo/openshift-cluster/initialize_groups.yml
-- include: ../../../playbooks/common/openshift-cluster/std_include.yml
+- include: ../../../playbooks/init/main.yml
 
 - hosts: all
   tasks:

@@ -1,7 +1,5 @@
 ---
-- include: ../openshift-cluster/initialize_groups.yml
-
-- include: ../../common/openshift-cluster/std_include.yml
+- include: ../../init/main.yml
 
 - include: ../../common/openshift-etcd/ca.yml
 

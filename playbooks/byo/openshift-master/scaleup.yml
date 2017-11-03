@@ -1,5 +1,5 @@
 ---
-- include: ../openshift-cluster/initialize_groups.yml
+- include: ../../init/evaluate_groups.yml
 
 - name: Ensure there are new_masters or new_nodes
   hosts: localhost
@@ -13,8 +13,11 @@
         add hosts to the new_masters and new_nodes host groups to add
         masters.
     when:
-    - (g_new_master_hosts | default([]) | length == 0) and (g_new_node_hosts | default([]) | length == 0)
+    - g_new_master_hosts | default([]) | length == 0
+    - g_new_node_hosts | default([]) | length == 0
 
-- include: ../../common/openshift-cluster/std_include.yml
+# Need a better way to do the above check for node without
+# running evaluate_groups and init/main.yml
+- include: ../../init/main.yml
 
 - include: ../../common/openshift-master/scaleup.yml

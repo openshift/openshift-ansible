@@ -1,6 +1,4 @@
 ---
-- include: evaluate_groups.yml
-
 - name: Load openshift_facts
   hosts: oo_masters_to_config:oo_nodes_to_config
   roles:

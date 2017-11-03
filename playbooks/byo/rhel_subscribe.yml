@@ -1,11 +1,8 @@
 ---
-- include: openshift-cluster/initialize_groups.yml
-  tags:
-  - always
+- include: ../init/evaluate_groups.yml
 
 - name: Subscribe hosts, update repos and update OS packages
-  # Temporarily reverting to OSEv3 until group standardization is complete
-  hosts: OSEv3
+  hosts: oo_all_hosts
   roles:
   - role: rhel_subscribe
     when:
