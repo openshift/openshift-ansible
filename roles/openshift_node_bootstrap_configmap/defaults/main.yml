@@ -1,0 +1,15 @@
+---
+openshift_node_bootstrap_configmap_custom_labels: []
+openshift_node_bootstrap_configmap_edits: []
+openshift_node_bootstrap_configmap_name: node-config-compute
+openshift_node_bootstrap_configmap_namespace: openshift-node
+openshift_node_bootstrap_configmap_default_labels:
+- type=compute
+
+openshift_imageconfig_format: "{{ openshift.node.registry_url if openshift is defined and 'node' in openshift else oreg_url  }}"
+openshift_node_bootstrap_configmap_cloud_provider: "{{ openshift_cloudprovider_kind | default('aws') }}"
+openshift_node_bootstrap_configmap_network_plugin_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
+openshift_node_bootstrap_configmap_network_plugin: "{{ openshift_node_bootstrap_configmap_network_plugin_default }}"
+openshift_node_bootstrap_configmap_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
+openshift_node_bootstrap_configmap_node_data_dir: "{{ openshift_node_bootstrap_configmap_node_data_dir_default }}"
+openshift_node_bootstrap_configmap_network_mtu: "{{ openshift_node_sdn_mtu | default(8951) }}"

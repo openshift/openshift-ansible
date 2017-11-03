@@ -1,4 +1,6 @@
 ---
+# This task file expects l_nodes_to_build to be passed in.
+
 # When openshift_aws_use_custom_ami is '' then
 # we retrieve the latest build AMI.
 # Then set openshift_aws_ami to the ami.
@@ -21,14 +23,19 @@
     - "'results' in amiout"
     - amiout.results|length > 0
 
-- when: openshift_aws_create_security_groups
-  name: "Create {{ openshift_aws_node_group_type }} security groups"
-  include: security_group.yml
+- name: Fetch the VPC for the vpc.id
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_clusterid }}"
+  register: vpcout
+
+# Need to set epoch time in one place to use for launch_config and scale_group
+- set_fact:
+    l_epoch_time: "{{ ansible_date_time.epoch }}"
 
 - when: openshift_aws_create_launch_config
-  name: "Create {{ openshift_aws_node_group_type }} launch config"
   include: launch_config.yml
 
 - when: openshift_aws_create_scale_group
-  name: "Create {{ openshift_aws_node_group_type }} node group"
   include: scale_group.yml

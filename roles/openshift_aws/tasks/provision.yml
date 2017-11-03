@@ -9,6 +9,9 @@
 
 - name: include scale group creation for master
   include: build_node_group.yml
+  vars:
+    l_nodes_to_build: "{{ openshift_aws_master_group_config }}"
+    l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups }}"
 
 - name: fetch newly created instances
   ec2_remote_facts:

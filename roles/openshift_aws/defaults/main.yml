@@ -17,7 +17,7 @@ openshift_aws_kubernetes_cluster_status: "{{ openshift_aws_clusterid }}"
 openshift_aws_iam_cert_name: "{{ openshift_aws_clusterid }}-master-external"
 openshift_aws_iam_cert_path: ''
 openshift_aws_iam_cert_key_path: ''
-openshift_aws_scale_group_name: "{{ openshift_aws_clusterid }} openshift {{ openshift_aws_node_group_type }}"
+openshift_aws_scale_group_basename: "{{ openshift_aws_clusterid }} openshift"
 
 openshift_aws_iam_kms_alias: "alias/{{ openshift_aws_clusterid }}_kms"
 openshift_aws_ami: ''
@@ -28,7 +28,7 @@ openshift_aws_ami_name: openshift-gi
 openshift_aws_base_ami_name: ami_base
 
 openshift_aws_launch_config_bootstrap_token: ''
-openshift_aws_launch_config_name: "{{ openshift_aws_clusterid }}-{{ openshift_aws_node_group_type }}-{{ ansible_date_time.epoch }}"
+openshift_aws_launch_config_basename: "{{ openshift_aws_clusterid }}"
 
 openshift_aws_users: []
 
@@ -94,8 +94,8 @@ openshift_aws_node_group_replace_instances: []
 openshift_aws_node_group_replace_all_instances: False
 openshift_aws_node_group_config_extra_labels: {}
 
-openshift_aws_node_group_config:
-  tags: "{{ openshift_aws_node_group_config_tags }}"
+openshift_aws_master_group_config:
+  # The 'master' key is always required here.
   master:
     instance_type: m4.xlarge
     ami: "{{ openshift_aws_ami }}"
@@ -114,6 +114,9 @@ openshift_aws_node_group_config:
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
+
+openshift_aws_node_group_config:
+  # The 'compute' key is always required here.
   compute:
     instance_type: m4.xlarge
     ami: "{{ openshift_aws_ami }}"
@@ -131,6 +134,7 @@ openshift_aws_node_group_config:
       type: compute
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
+  # The 'infra' key is always required here.
   infra:
     instance_type: m4.xlarge
     ami: "{{ openshift_aws_ami }}"
@@ -159,9 +163,18 @@ openshift_aws_elb_instance_filter:
   instance-state-name: running
 
 openshift_aws_launch_config_security_groups:
-- "{{ openshift_aws_clusterid }}"  # default sg
-- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}"  # node type sg
-- "{{ openshift_aws_clusterid }}_{{ openshift_aws_node_group_type }}_k8s"  # node type sg k8s
+  compute:
+  - "{{ openshift_aws_clusterid }}"  # default sg
+  - "{{ openshift_aws_clusterid }}_compute"  # node type sg
+  - "{{ openshift_aws_clusterid }}_compute_k8s"  # node type sg k8s
+  infra:
+  - "{{ openshift_aws_clusterid }}"  # default sg
+  - "{{ openshift_aws_clusterid }}_infra"  # node type sg
+  - "{{ openshift_aws_clusterid }}_infra_k8s"  # node type sg k8s
+  master:
+  - "{{ openshift_aws_clusterid }}"  # default sg
+  - "{{ openshift_aws_clusterid }}_master"  # node type sg
+  - "{{ openshift_aws_clusterid }}_master_k8s"  # node type sg k8s
 
 openshift_aws_node_security_groups:
   default:
@@ -231,3 +244,16 @@ openshift_aws_vpc:
 openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''
 openshift_aws_node_config_namespace: openshift-node
+
+# If creating extra node groups, you'll need to define all of the following
+
+# The format is the same as openshift_aws_node_group_config, but the top-level
+# key names should be different (ie, not == master or infra).
+# openshift_aws_node_group_config_extra: {}
+
+# This variable should look like openshift_aws_launch_config_security_groups
+# and contain a one-to-one mapping of top level keys that are defined in
+# openshift_aws_node_group_config_extra.
+# openshift_aws_launch_config_security_groups_extra: {}
+
+# openshift_aws_node_security_groups_extra: {}
