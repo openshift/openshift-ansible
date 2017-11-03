@@ -16,6 +16,7 @@
 [OSEv3:children]
 masters
 nodes
+etcd
 # Specify there will be GlusterFS nodes
 glusterfs
 
@@ -33,6 +34,9 @@ master  openshift_schedulable=False
 node0   openshift_schedulable=True
 node1   openshift_schedulable=True
 node2   openshift_schedulable=True
+
+[etcd]
+master
 
 # Specify the glusterfs group, which contains the nodes that will host
 # GlusterFS storage pods. At a minimum, each node must have a
