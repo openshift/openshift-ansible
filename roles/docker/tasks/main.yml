@@ -36,3 +36,48 @@
   when:
     - l_use_crio
     - openshift_docker_is_node_or_master | bool
+
+- name: stat the docker data dir
+  stat:
+    path: "{{ docker_default_storage_path }}"
+  register: dockerstat
+
+- when:
+    - l_use_crio
+    - dockerstat.stat.islink is defined and not (dockerstat.stat.islink | bool)
+  block:
+    - name: stop the current running docker
+      systemd:
+        state: stopped
+        name: "{{ openshift.docker.service_name }}"
+
+    - name: "Ensure {{ docker_alt_storage_path }} exists"
+      file:
+        path: "{{ docker_alt_storage_path }}"
+        state: directory
+
+    - name: "Set the selinux context on {{ docker_alt_storage_path }}"
+      command: "semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
+      register: results
+      failed_when:
+        - results.rc == 1
+        - "'already exists' not in results.stderr"
+
+    - name: "restorecon the {{ docker_alt_storage_path }}"
+      command: "restorecon -r {{ docker_alt_storage_path }}"
+
+    - name: Remove the old docker location
+      file:
+        state: absent
+        path: "{{ docker_default_storage_path }}"
+
+    - name: Setup the link
+      file:
+        state: link
+        src: "{{ docker_alt_storage_path }}"
+        path: "{{ docker_default_storage_path }}"
+
+    - name: start docker
+      systemd:
+        state: started
+        name: "{{ openshift.docker.service_name }}"
