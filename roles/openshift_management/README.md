@@ -89,6 +89,16 @@ App is created` task, we recommend running the
 [uninstall scripts](#uninstall) first before running the installer
 again.
 
+### Beta
+
+Only required for enterprise
+(`openshift_deployment_type=openshift-enterprise`) users:
+
+* `openshift_management_install_beta` - by setting this value to
+  `true` you acknowledge that this software is currently in BETA and
+  support may be limited nonexistent. This is required to begin the
+  installation.
+
 
 # Requirements
 
@@ -129,6 +139,7 @@ installer.
 | `openshift_management_project`                       | **No**   | `openshift-management`         | Namespace for the installation.     |
 | `openshift_management_project_description`           | **No**   | *CloudForms Management Engine* | Namespace/project description.      |
 | `openshift_management_install_management`            | **No**   | `false`                        | Boolean, set to `true` to install the application |
+| `openshift_management_install_beta`                  | **No**   | `false`                        | Boolean, by setting this value to `true` you acknowledge that this software is currently in BETA and support may be limited. Only required for *openshift-enterprise* users. |
 | `openshift_management_username`                      | **No**   | `admin`                        | Default management username. Changing this values **does not change the username**. Only change this value if you have changed the name already and are running integration scripts (such as the [add container provider](#container-provider) script) |
 | `openshift_management_password`                      | **No**   | `smartvm`                      | Default management password. Changing this values **does not change the password**. Only change this value if you have changed the password already and are running integration scripts (such as the [add-container-provider](#container-provider) script) |
 | **PRODUCT CHOICE**  | | | | |
@@ -310,7 +321,7 @@ inventory. The following keys are required:
 **NOTE:** Ensure your are running PostgreSQL 9.5 or you may not be
 able to deploy the app successfully.
 
-Your inventory would contain a line similar to this:
+Your inventory would contain lines similar to this:
 
 ```ini
 [OSEv3:vars]
@@ -328,7 +339,11 @@ At run time you may run into errors similar to this:
 TASK [openshift_management : Ensure the CFME App is created] ***********************************
 task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_management/tasks/main.yml:74
 Tuesday 03 October 2017  15:30:44 -0400 (0:00:00.056)       0:00:12.278 *******
-{"cmd": "/usr/bin/oc create -f /tmp/postgresql-ZPEWQS -n openshift-management", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "Error from server (BadRequest): error when creating \"/tmp/postgresql-ZPEWQS\": Endpoints in version \"v1\" cannot be handled as a Endpoints: [pos 218]: json: decNum: got first char 'f'\n", "stdout": ""}
+{"cmd": "/usr/bin/oc create -f /tmp/postgresql-ZPEWQS -n openshift-management",
+  "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "Error from server
+  (BadRequest): error when creating \"/tmp/postgresql-ZPEWQS\": Endpoints in version
+  \"v1\" cannot be handled as a Endpoints: [pos 218]: json: decNum: got first char
+  'f'\n", "stdout": ""}
 ```
 
 Or like this:
@@ -338,7 +353,10 @@ TASK [openshift_management : Ensure the CFME App is created] *******************
 task path: /home/tbielawa/rhat/os/openshift-ansible/roles/openshift_management/tasks/main.yml:74
 Tuesday 03 October 2017  16:05:36 -0400 (0:00:00.052)       0:00:18.948 *******
 fatal: [m01.example.com]: FAILED! => {"changed": true, "failed": true, "msg":
-{"cmd": "/usr/bin/oc create -f /tmp/postgresql-igS5sx -n openshift-management", "kind": "Endpoints", "results": {}, "returncode": 1, "stderr": "The Endpoints \"postgresql\" is invalid: subsets[0].addresses[0].ip: Invalid value: \"doo\": must be a valid IP address, (e.g. 10.9.8.7)\n", "stdout": ""},
+{"cmd": "/usr/bin/oc create -f /tmp/postgresql-igS5sx -n openshift-management", "kind":
+ "Endpoints", "results": {}, "returncode": 1, "stderr": "The Endpoints \"postgresql\"
+  is invalid: subsets[0].addresses[0].ip: Invalid value: \"doo\": must be a valid IP
+  address, (e.g. 10.9.8.7)\n", "stdout": ""},
 ```
 
 While intimidating at first, there are useful bits of information in
@@ -567,6 +585,35 @@ NFS export definitions and data stored on NFS exports are not
 automatically removed. You are urged to manually erase any data from
 old application or database deployments before attempting to
 initialize a new deployment.
+
+Failure to erase old PostgreSQL data can result in cascading
+errors. The postgres pod may enter a `crashloopbackoff` state. This
+will block the management pod from ever starting. The cause of the
+`crashloopbackoff` is due to incorrect file permissions on the
+database NFS export created during a previous deployment.
+
+To continue, erase all data from the postgres export and delete the
+pod (**not** the deployer pod). For example, if you have pods like
+such:
+
+```
+# oc get pods
+NAME                 READY     STATUS             RESTARTS   AGE
+httpd-1-cx7fk        1/1       Running            1          21h
+manageiq-0           0/1       Running            1          21h
+memcached-1-vkc7p    1/1       Running            1          21h
+postgresql-1-deploy  1/1       Running            1          21h
+postgresql-1-6w2t4   0/1       CrashLoopBackOff   1          21h
+```
+
+Then you would:
+
+1. Erase the data from the database NFS export
+2. `oc delete postgresql-1-6w2t4`
+
+The postgres deployer pod will try to scale up a new postgres pod to
+replace the one you deleted. Once the postgres pod is running the
+manageiq pod will stop blocking and begin application initialization.
 
 # Additional Information
 
