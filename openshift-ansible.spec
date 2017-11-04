@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.191.0%{?dist}
+Release:        0.192.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Nov 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.192.0
+- Bootstrap enhancements. (kwoodson@redhat.com)
+- Fix master upgrade version detect and systemd enable (mgugino@redhat.com)
+- Correct groupname during upgrade_control_plane play (mgugino@redhat.com)
+- openshift_hosted: Add docker-gc (smilner@redhat.com)
+- Remove old /etc/yum.repos.d/openshift_additional.repo file.
+  (abutcher@redhat.com)
+- CFME: Use cluster_hostname if cluster_public_hostname isn't available
+  (tbielawa@redhat.com)
+- Use client binary and well defined kubeconfig (sdodson@redhat.com)
+- Ensure install and remove are mutually exclusive via
+  openshift_sanitize_inventory (sdodson@redhat.com)
+- Enable SC, ASB, TSB by default (sdodson@redhat.com)
+- Using the currently attached pvc for an ES dc if available, otherwise falling
+  back to current logic (ewolinet@redhat.com)
+- Adding elb changes to provision elbs and add to scale group.
+  (kwoodson@redhat.com)
+- Give admin and edit roles permission to patch ServiceInstances and
+  ServiceBindings (staebler@redhat.com)
+
 * Fri Nov 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.191.0
 - Adding CONFIG_FILE option back. (kwoodson@redhat.com)
 - Configurable node config location. (kwoodson@redhat.com)
