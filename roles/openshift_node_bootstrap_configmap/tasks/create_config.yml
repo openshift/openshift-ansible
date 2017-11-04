@@ -1,0 +1,32 @@
+---
+- name: create a temp dir for this work
+  command: mktemp -d /tmp/openshift_node_config-XXXXXX
+  register: mktempout
+  run_once: true
+
+- name: create node config template
+  template:
+    src: node-config.yaml.j2
+    dest: "{{ mktempout.stdout }}/node-config.yaml"
+
+- name: "specialize the generated configs for {{ openshift_node_bootstrap_configmap_name }}"
+  yedit:
+    content:
+    src: "{{ mktempout.stdout }}/node-config.yaml"
+    edits: "{{ openshift_node_bootstrap_configmap_edits }}"
+  when: openshift_node_bootstrap_configmap_edits|length > 0
+  run_once: true
+
+- name: create node-config.yaml configmap
+  oc_configmap:
+    name: "{{ openshift_node_bootstrap_configmap_name }}"
+    namespace: "{{ openshift_node_bootstrap_configmap_namespace }}"
+    from_file:
+      node-config.yaml: "{{ mktempout.stdout }}/node-config.yaml"
+  run_once: true
+
+- name: remove templated files
+  file:
+    dest: "{{ mktempout.stdout }}/"
+    state: absent
+  run_once: true
