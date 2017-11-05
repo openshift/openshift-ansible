@@ -1,24 +1,45 @@
 ---
-- name: "dump the elb listeners for {{ l_elb_dict_item.key }}"
-  debug:
-    msg: "{{ l_elb_dict_item.value }}"
+- name: query vpc
+  ec2_vpc_net_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      'tag:Name': "{{ openshift_aws_vpc_name }}"
+  register: vpcout
 
-- name: "Create ELB {{ l_elb_dict_item.key }}"
+- name: debug
+  debug: var=vpcout
+
+- name: fetch the default subnet id
+  ec2_vpc_subnet_facts:
+    region: "{{ openshift_aws_region }}"
+    filters:
+      "tag:Name": "{{ openshift_aws_subnet_name }}"
+      vpc-id: "{{ vpcout.vpcs[0].id }}"
+  register: subnetout
+
+- name: dump the elb listeners
+  debug:
+    msg: "{{ openshift_aws_elb_listeners[openshift_aws_node_group_type][openshift_aws_elb_direction]
+                   if 'master' in openshift_aws_node_group_type or 'infra' in openshift_aws_node_group_type
+                   else openshift_aws_elb_listeners }}"
+
+- name: "Create ELB {{ l_openshift_aws_elb_name }}"
   ec2_elb_lb:
-    name: "{{ l_openshift_aws_elb_name_dict[l_elb_dict_item.key][item.key] }}"
+    name: "{{ l_openshift_aws_elb_name }}"
     state: present
     cross_az_load_balancing: "{{ openshift_aws_elb_az_load_balancing }}"
-    security_group_names: "{{ l_elb_security_groups[l_elb_dict_item.key] }}"
+    security_group_names: "{{ openshift_aws_elb_security_groups }}"
     idle_timeout: "{{ openshift_aws_elb_idle_timout }}"
     region: "{{ openshift_aws_region }}"
     subnets:
     - "{{ subnetout.subnets[0].id }}"
     health_check: "{{ openshift_aws_elb_health_check }}"
-    listeners: "{{ item.value }}"
+    listeners: "{{ openshift_aws_elb_listeners[openshift_aws_node_group_type][openshift_aws_elb_direction]
+                   if 'master' in openshift_aws_node_group_type  or 'infra' in openshift_aws_node_group_type
+                   else openshift_aws_elb_listeners }}"
     scheme: "{{ openshift_aws_elb_scheme }}"
     tags: "{{ openshift_aws_elb_tags }}"
   register: new_elb
-  with_dict: "{{ l_elb_dict_item.value }}"
 
 - debug:
     msg: "{{ item }}"

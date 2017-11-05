@@ -26,6 +26,7 @@ default_r_openshift_master_os_firewall_allow:
   cond: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 r_openshift_master_os_firewall_allow: "{{ default_r_openshift_master_os_firewall_allow | union(openshift_master_open_ports | default([])) }}"
 
+
 # oreg_url is defined by user input
 oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
 oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
@@ -59,7 +60,7 @@ r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_p
 openshift_master_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
 openshift_master_image_config_latest: "{{ openshift_master_image_config_latest_default }}"
 
-openshift_master_config_dir_default: "{{ openshift.common.config_base ~ '/master' if openshift is defined and 'common' in openshift else '/etc/origin/master' }}"
+openshift_master_config_dir_default: "{{ (openshift.common.config_base | default('/etc/origin/master')) ~ '/master' }}"
 openshift_master_config_dir: "{{ openshift_master_config_dir_default }}"
 openshift_master_cloud_provider: "{{ openshift_cloudprovider_kind | default('aws') }}"
 
@@ -69,6 +70,8 @@ openshift_master_node_config_kubeletargs_cpu: 500m
 openshift_master_node_config_kubeletargs_mem: 512M
 
 openshift_master_bootstrap_enabled: False
+
+openshift_master_client_binary: "{{ openshift.common.client_binary if openshift is defined else 'oc' }}"
 
 openshift_master_config_imageconfig_format: "{{ openshift.node.registry_url }}"
 
@@ -141,5 +144,3 @@ openshift_master_node_configs:
 - "{{ openshift_master_node_config_compute }}"
 
 openshift_master_bootstrap_namespace: openshift-node
-openshift_master_csr_sa: node-bootstrapper
-openshift_master_csr_namespace: openshift-infra
