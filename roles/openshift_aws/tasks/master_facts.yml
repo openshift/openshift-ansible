@@ -3,7 +3,7 @@
   ec2_elb_facts:
     region: "{{ openshift_aws_region }}"
     names:
-    - "{{ openshift_aws_elb_name_dict['master']['internal'] }}"
+    - "{{ openshift_aws_elb_name_dict[openshift_aws_node_group_type]['internal'] }}"
   delegate_to: localhost
   register: elbs
 
