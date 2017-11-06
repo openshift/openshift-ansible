@@ -42,3 +42,7 @@
 
 - include: ../../common/openshift-cluster/redeploy-certificates/registry.yml
   when: openshift_hosted_manage_registry | default(true) | bool
+
+- include: ../../common/openshift-master/revert-client-ca.yml
+
+- include: ../../common/openshift-master/restart.yml
