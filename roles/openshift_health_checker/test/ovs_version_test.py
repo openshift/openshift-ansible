@@ -38,8 +38,9 @@ def test_invalid_openshift_release_format():
 
 
 @pytest.mark.parametrize('openshift_release,expected_ovs_version', [
+    ("3.7", ["2.6", "2.7", "2.8"]),
     ("3.5", ["2.6", "2.7"]),
-    ("3.6", ["2.6", "2.7"]),
+    ("3.6", ["2.6", "2.7", "2.8"]),
     ("3.4", "2.4"),
     ("3.3", "2.4"),
     ("1.0", "2.4"),
