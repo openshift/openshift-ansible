@@ -1,7 +1,12 @@
 ---
-# image defaults
-__openshift_prometheus_image_prefix: "registry.access.redhat.com/openshift3/"
-__openshift_prometheus_image_version: "v3.7"
-__openshift_prometheus_proxy_image_version: "v3.7"
-__openshift_prometheus_alertmanager_image_version: "v3.7"
-__openshift_prometheus_alertbuffer_image_version: "v3.7"
+# image prefix defaults
+l_openshift_prometheus_image_prefix: "{{ openshift_prometheus_image_prefix | default('registry.access.redhat.com/openshift3/') }}"
+l_openshift_prometheus_proxy_image_prefix: "{{ openshift_prometheus_proxy_image_prefix | default(l_openshift_prometheus_image_prefix) }}"
+l_openshift_prometheus_alertmanager_image_prefix: "{{ openshift_prometheus_altermanager_image_prefix | default(l_openshift_prometheus_image_prefix) }}"
+l_openshift_prometheus_alertbuffer_image_prefix: "{{ openshift_prometheus_alertbuffer_image_prefix | default(l_openshift_prometheus_image_prefix) }}"
+
+# image version defaults
+l_openshift_prometheus_image_version: "{{ openshift_prometheus_image_version | default('v3.7') }}"
+l_openshift_prometheus_proxy_image_version: "{{ openshift_prometheus_proxy_image_version | default('v3.7') }}"
+l_openshift_prometheus_alertmanager_image_version: "{{ openshift_prometheus_alertmanager_image_version | default('v3.7') }}"
+l_openshift_prometheus_alertbuffer_image_version: "{{ openshift_prometheus_alertbuffer_image_version | default('v3.7') }}"
