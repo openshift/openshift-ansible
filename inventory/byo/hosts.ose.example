@@ -251,6 +251,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cloudprovider_openstack_region=region
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
 #
+# Note: If you're getting a "BS API version autodetection failed" when provisioning cinder volumes you may need this setting
+#openshift_cloudprovider_openstack_blockstorage_version=v2
+#
 # GCE
 #openshift_cloudprovider_kind=gce
 
