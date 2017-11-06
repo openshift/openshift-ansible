@@ -34,6 +34,19 @@
     msg: WARNING Use of openshift_logging_mux_client_mode=minimal is not recommended due to current scaling issues
   when: openshift_logging_mux_client_mode is defined and openshift_logging_mux_client_mode == 'minimal'
 
+- name: Set default image variables based on deployment_type
+  include_vars: "{{ var_file_name }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+  loop_control:
+    loop_var: var_file_name
+
+- name: Set fluentd image facts
+  set_fact:
+    openshift_logging_fluentd_image_prefix: "{{ openshift_logging_fluentd_image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
+    openshift_logging_fluentd_image_version: "{{ openshift_logging_fluentd_image_version | default(__openshift_logging_fluentd_image_version) }}"
+
 - include: determine_version.yaml
 
 # allow passing in a tempdir

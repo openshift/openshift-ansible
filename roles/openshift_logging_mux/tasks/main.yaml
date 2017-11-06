@@ -7,6 +7,19 @@
     msg: Operations logs destination is required
   when: not openshift_logging_mux_ops_host or openshift_logging_mux_ops_host == ''
 
+- name: Set default image variables based on deployment_type
+  include_vars: "{{ var_file_name }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+  loop_control:
+    loop_var: var_file_name
+
+- name: Set mux image facts
+  set_fact:
+    openshift_logging_mux_image_prefix: "{{ openshift_logging_mux_image_prefix | default(__openshift_logging_mux_image_prefix) }}"
+    openshift_logging_mux_image_version: "{{ openshift_logging_mux_image_version | default(__openshift_logging_mux_image_version) }}"
+
 - include: determine_version.yaml
 
 # allow passing in a tempdir
