@@ -312,6 +312,9 @@
                 org:  {{ ansible_service_broker_registry_organization }}
                 tag:  {{ ansible_service_broker_registry_tag }}
                 white_list: {{ ansible_service_broker_registry_whitelist }}
+              - type: local_registry
+                namespaces: ['openshift']
+                white_list: {{ ansible_service_broker_local_registry_whitelist }}
             dao:
               etcd_host: 0.0.0.0
               etcd_port: 2379
