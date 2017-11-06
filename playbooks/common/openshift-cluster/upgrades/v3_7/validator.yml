@@ -15,7 +15,7 @@
   - name: Confirm OpenShift authorization objects are in sync
     command: >
       {{ openshift.common.client_binary }} adm migrate authorization
-    when: openshift_version | version_compare('3.7','<')
+    when: openshift_upgrade_target | version_compare('3.8','<')
     changed_when: false
     register: l_oc_result
     until: l_oc_result.rc == 0
