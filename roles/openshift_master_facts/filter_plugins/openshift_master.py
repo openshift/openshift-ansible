@@ -326,10 +326,8 @@ class IdentityProviderOauthBase(IdentityProviderBase):
         self._required += [['clientID', 'client_id'], ['clientSecret', 'client_secret']]
 
     def validate(self):
-        ''' validate this idp instance '''
-        if self.challenge:
-            raise errors.AnsibleFilterError("|failed provider {0} does not "
-                                            "allow challenge authentication".format(self.__class__.__name__))
+        ''' validate an instance of this idp class '''
+        pass
 
 
 class OpenIDIdentityProvider(IdentityProviderOauthBase):
