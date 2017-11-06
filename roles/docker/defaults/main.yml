@@ -33,3 +33,6 @@ r_crio_os_firewall_allow:
 
 
 openshift_docker_is_node_or_master: "{{ True if inventory_hostname in (groups['oo_masters_to_config']|default([])) or inventory_hostname in (groups['oo_nodes_to_config']|default([])) else False | bool }}"
+
+docker_alt_storage_path: /var/lib/containers/docker
+docker_default_storage_path: /var/lib/docker
