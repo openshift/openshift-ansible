@@ -84,6 +84,7 @@
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name }}"
     openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector if outer_item.0.nodeSelector | default(None) is none else outer_item.0.nodeSelector }}"
     openshift_logging_elasticsearch_storage_group: "{{ [openshift_logging_es_storage_group] if outer_item.0.storageGroups | default([]) | length == 0 else outer_item.0.storageGroups }}"
     _es_containers: "{{ outer_item.0.containers}}"
@@ -110,6 +111,7 @@
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name }}"
 
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   loop_control:
@@ -146,6 +148,7 @@
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_ops_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_ops_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_ops_pvc_storage_class_name }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
     openshift_logging_elasticsearch_cpu_request: "{{ openshift_logging_es_ops_cpu_request }}"
@@ -187,6 +190,7 @@
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_ops_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_ops_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_ops_pvc_storage_class_name }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
     openshift_logging_elasticsearch_cpu_request: "{{ openshift_logging_es_ops_cpu_request }}"
