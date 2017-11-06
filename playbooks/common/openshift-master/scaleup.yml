@@ -22,8 +22,13 @@
   - name: restart master api
     service: name={{ openshift.common.service_type }}-master-controllers state=restarted
     notify: verify api server
+  # We retry the controllers because the API may not be 100% initialized yet.
   - name: restart master controllers
-    service: name={{ openshift.common.service_type }}-master-controllers state=restarted
+    command: "systemctl restart {{ openshift.common.service_type }}-master-controllers"
+    retries: 3
+    delay: 5
+    register: result
+    until: result.rc == 0
   - name: verify api server
     command: >
       curl --silent --tlsv1.2

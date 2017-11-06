@@ -179,8 +179,13 @@
   - yedit_output.changed
   - openshift.master.cluster_method == 'native'
 
+# We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
-  systemd: name={{ openshift.common.service_type }}-master-controllers state=restarted
+  command: "systemctl restart {{ openshift.common.service_type }}-master-controllers"
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
   when:
   - yedit_output.changed
   - openshift.master.cluster_method == 'native'
