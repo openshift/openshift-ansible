@@ -31,6 +31,11 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``kuryr_openstack_pod_service_id=service_subnet_uuid``
 * ``kuryr_openstack_pod_project_id=pod_project_uuid``
 * ``kuryr_openstack_worker_nodes_subnet_id=worker_nodes_subnet_uuid``
+* ``kuryr_openstack_enable_pools=True``
+* ``kuryr_openstack_pool_max=0``
+* ``kuryr_openstack_pool_min=1``
+* ``kuryr_openstack_pool_batch=5``
+* ``kuryr_openstack_pool_update_frequency=20``
 
 ## Kuryr resources
 
