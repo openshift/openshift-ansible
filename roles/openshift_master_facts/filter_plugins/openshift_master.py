@@ -426,6 +426,12 @@ class GoogleIdentityProvider(IdentityProviderOauthBase):
         IdentityProviderOauthBase.__init__(self, api_version, idp)
         self._optional += [['hostedDomain', 'hosted_domain']]
 
+    def validate(self):
+        ''' validate this idp instance '''
+        if self.challenge:
+            raise errors.AnsibleFilterError("|failed provider {0} does not "
+                                            "allow challenge authentication".format(self.__class__.__name__))
+
 
 class GitHubIdentityProvider(IdentityProviderOauthBase):
     """ GitHubIdentityProvider
@@ -443,6 +449,12 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
         IdentityProviderOauthBase.__init__(self, api_version, idp)
         self._optional += [['organizations'],
                            ['teams']]
+
+    def validate(self):
+        ''' validate this idp instance '''
+        if self.challenge:
+            raise errors.AnsibleFilterError("|failed provider {0} does not "
+                                            "allow challenge authentication".format(self.__class__.__name__))
 
 
 class FilterModule(object):
