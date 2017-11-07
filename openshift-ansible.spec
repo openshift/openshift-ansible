@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.140
+Version:        3.5.141
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -276,6 +276,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.141-1
+- Add undefined reg auth variables to node_upgrade role (mgugino@redhat.com)
+
 * Thu Nov 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.140-1
 - Add master config upgrade hook to upgrade-all plays (mgugino@redhat.com)
 - Remove incorrect validation for OpenIDIdentityProvider (mgugino@redhat.com)
