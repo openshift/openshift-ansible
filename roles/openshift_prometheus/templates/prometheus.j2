@@ -23,28 +23,28 @@ spec:
 {% if openshift_prometheus_node_selector is iterable and openshift_prometheus_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in openshift_prometheus_node_selector.iteritems() %}
-        {{key}}: "{{value}}"
+        {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
       containers:
       # Deploy Prometheus behind an oauth proxy
       - name: prom-proxy
-        image: "{{openshift_prometheus_proxy_image_prefix}}oauth-proxy:{{openshift_prometheus_proxy_image_version}}"
+        image: "{{ l_openshift_prometheus_proxy_image_prefix }}oauth-proxy:{{ l_openshift_prometheus_proxy_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
 {% if openshift_prometheus_oauth_proxy_memory_requests is defined and openshift_prometheus_oauth_proxy_memory_requests is not none %}
-            memory: "{{openshift_prometheus_oauth_proxy_memory_requests}}"
+            memory: "{{ openshift_prometheus_oauth_proxy_memory_requests }}"
 {% endif %}
 {% if openshift_prometheus_oauth_proxy_cpu_requests is defined and openshift_prometheus_oauth_proxy_cpu_requests is not none %}
-            cpu: "{{openshift_prometheus_oauth_proxy_cpu_requests}}"
+            cpu: "{{ openshift_prometheus_oauth_proxy_cpu_requests }}"
 {% endif %}
           limits:
 {% if openshift_prometheus_oauth_proxy_memory_limit is defined and openshift_prometheus_oauth_proxy_memory_limit is not none %}
-            memory: "{{openshift_prometheus_oauth_proxy_memory_limit}}"
+            memory: "{{ openshift_prometheus_oauth_proxy_memory_limit }}"
 {% endif %}
 {% if openshift_prometheus_oauth_proxy_cpu_limit is defined and openshift_prometheus_oauth_proxy_cpu_limit is not none %}
-            cpu: "{{openshift_prometheus_oauth_proxy_cpu_limit}}"
+            cpu: "{{ openshift_prometheus_oauth_proxy_cpu_limit }}"
 {% endif %}
         ports:
         - containerPort: 8443
@@ -79,22 +79,22 @@ spec:
         - --storage.tsdb.min-block-duration=2m
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.listen-address=localhost:9090
-        image: "{{openshift_prometheus_image_prefix}}prometheus:{{openshift_prometheus_image_version}}"
+        image: "{{ l_openshift_prometheus_image_prefix }}prometheus:{{ l_openshift_prometheus_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
 {% if openshift_prometheus_memory_requests is defined and openshift_prometheus_memory_requests is not none %}
-            memory: "{{openshift_prometheus_memory_requests}}"
+            memory: "{{ openshift_prometheus_memory_requests }}"
 {% endif %}
 {% if openshift_prometheus_cpu_requests is defined and openshift_prometheus_cpu_requests is not none %}
-            cpu: "{{openshift_prometheus_cpu_requests}}"
+            cpu: "{{ openshift_prometheus_cpu_requests }}"
 {% endif %}
           limits:
 {% if openshift_prometheus_memory_limit is defined and openshift_prometheus_memory_limit is not none %}
             memory: "{{ openshift_prometheus_memory_limit }}"
 {% endif %}
 {% if openshift_prometheus_cpu_limit is defined and openshift_prometheus_cpu_limit is not none %}
-            cpu: "{{openshift_prometheus_cpu_limit}}"
+            cpu: "{{ openshift_prometheus_cpu_limit }}"
 {% endif %}
 
         volumeMounts:
@@ -105,22 +105,22 @@ spec:
 
       # Deploy alertmanager behind prometheus-alert-buffer behind an oauth proxy
       - name: alerts-proxy
-        image: "{{openshift_prometheus_proxy_image_prefix}}oauth-proxy:{{openshift_prometheus_proxy_image_version}}"
+        image: "{{ l_openshift_prometheus_proxy_image_prefix }}oauth-proxy:{{ l_openshift_prometheus_proxy_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
 {% if openshift_prometheus_oauth_proxy_memory_requests is defined and openshift_prometheus_oauth_proxy_memory_requests is not none %}
-            memory: "{{openshift_prometheus_oauth_proxy_memory_requests}}"
+            memory: "{{ openshift_prometheus_oauth_proxy_memory_requests }}"
 {% endif %}
 {% if openshift_prometheus_oauth_proxy_cpu_requests is defined and openshift_prometheus_oauth_proxy_cpu_requests is not none %}
-            cpu: "{{openshift_prometheus_oauth_proxy_cpu_requests}}"
+            cpu: "{{ openshift_prometheus_oauth_proxy_cpu_requests }}"
 {% endif %}
           limits:
 {% if openshift_prometheus_oauth_proxy_memory_limit is defined and openshift_prometheus_oauth_proxy_memory_limit is not none %}
-            memory: "{{openshift_prometheus_oauth_proxy_memory_limit}}"
+            memory: "{{ openshift_prometheus_oauth_proxy_memory_limit }}"
 {% endif %}
 {% if openshift_prometheus_oauth_proxy_cpu_limit is defined and openshift_prometheus_oauth_proxy_cpu_limit is not none %}
-            cpu: "{{openshift_prometheus_oauth_proxy_cpu_limit}}"
+            cpu: "{{ openshift_prometheus_oauth_proxy_cpu_limit }}"
 {% endif %}
         ports:
         - containerPort: 9443
@@ -149,22 +149,22 @@ spec:
       - name: alert-buffer
         args:
         - --storage-path=/alert-buffer/messages.db
-        image: "{{openshift_prometheus_alertbuffer_image_prefix}}prometheus-alert-buffer:{{openshift_prometheus_alertbuffer_image_version}}"
+        image: "{{ l_openshift_prometheus_alertbuffer_image_prefix }}prometheus-alert-buffer:{{ l_openshift_prometheus_alertbuffer_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
 {% if openshift_prometheus_alertbuffer_memory_requests is defined and openshift_prometheus_alertbuffer_memory_requests is not none %}
-            memory: "{{openshift_prometheus_alertbuffer_memory_requests}}"
+            memory: "{{ openshift_prometheus_alertbuffer_memory_requests }}"
 {% endif %}
 {% if openshift_prometheus_alertbuffer_cpu_requests is defined and openshift_prometheus_alertbuffer_cpu_requests is not none %}
-            cpu: "{{openshift_prometheus_alertbuffer_cpu_requests}}"
+            cpu: "{{ openshift_prometheus_alertbuffer_cpu_requests }}"
 {% endif %}
           limits:
 {% if openshift_prometheus_alertbuffer_memory_limit is defined and openshift_prometheus_alertbuffer_memory_limit is not none %}
-            memory: "{{openshift_prometheus_alertbuffer_memory_limit}}"
+            memory: "{{ openshift_prometheus_alertbuffer_memory_limit }}"
 {% endif %}
 {% if openshift_prometheus_alertbuffer_cpu_limit is defined and openshift_prometheus_alertbuffer_cpu_limit is not none %}
-            cpu: "{{openshift_prometheus_alertbuffer_cpu_limit}}"
+            cpu: "{{ openshift_prometheus_alertbuffer_cpu_limit }}"
 {% endif %}
         volumeMounts:
         - mountPath: /alert-buffer
@@ -176,22 +176,22 @@ spec:
       - name: alertmanager
         args:
         - -config.file=/etc/alertmanager/alertmanager.yml
-        image: "{{openshift_prometheus_alertmanager_image_prefix}}prometheus-alertmanager:{{openshift_prometheus_alertmanager_image_version}}"
+        image: "{{ l_openshift_prometheus_alertmanager_image_prefix }}prometheus-alertmanager:{{ l_openshift_prometheus_alertmanager_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:
           requests:
 {% if openshift_prometheus_alertmanager_memory_requests is defined and openshift_prometheus_alertmanager_memory_requests is not none %}
-            memory: "{{openshift_prometheus_alertmanager_memory_requests}}"
+            memory: "{{ openshift_prometheus_alertmanager_memory_requests }}"
 {% endif %}
 {% if openshift_prometheus_alertmanager_cpu_requests is defined and openshift_prometheus_alertmanager_cpu_requests is not none %}
-            cpu: "{{openshift_prometheus_alertmanager_cpu_requests}}"
+            cpu: "{{ openshift_prometheus_alertmanager_cpu_requests }}"
 {% endif %}
           limits:
 {% if openshift_prometheus_alertmanager_memory_limit is defined and openshift_prometheus_alertmanager_memory_limit is not none %}
-            memory: "{{openshift_prometheus_alertmanager_memory_limit}}"
+            memory: "{{ openshift_prometheus_alertmanager_memory_limit }}"
 {% endif %}
 {% if openshift_prometheus_alertmanager_cpu_limit is defined and openshift_prometheus_alertmanager_cpu_limit is not none %}
-            cpu: "{{openshift_prometheus_alertmanager_cpu_limit}}"
+            cpu: "{{ openshift_prometheus_alertmanager_cpu_limit }}"
 {% endif %}
         ports:
         - containerPort: 9093
