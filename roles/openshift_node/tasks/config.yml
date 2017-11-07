@@ -40,7 +40,7 @@
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
     regexp: "^{{ item.key }}="
-    line: "{{ item.key }}={{ item.value }}"
+    line: "{{ item.key }}=\"{{ item.value }}\""
     create: true
   with_dict: "{{ openshift.node.env_vars | default({}) }}"
   notify:
