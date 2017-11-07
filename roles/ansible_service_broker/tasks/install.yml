@@ -69,6 +69,9 @@
       - apiGroups: ["authentication.k8s.io"]
         resources: ["tokenreviews"]
         verbs: ["create"]
+      - apiGroups: ["image.openshift.io", ""]
+        resources: ["images"]
+        verbs: ["get", "list"]
 
 - name: Create asb-access cluster role
   oc_clusterrole:
@@ -404,8 +407,6 @@
               - type: {{ ansible_service_broker_registry_type }}
                 name: {{ ansible_service_broker_registry_name }}
                 url:  {{ ansible_service_broker_registry_url }}
-                user: {{ ansible_service_broker_registry_user }}
-                pass: {{ ansible_service_broker_registry_password }}
                 org:  {{ ansible_service_broker_registry_organization }}
                 tag:  {{ ansible_service_broker_registry_tag }}
                 white_list: {{ ansible_service_broker_registry_whitelist }}
@@ -442,6 +443,15 @@
                 - type: basic
                   enabled: false
 
+- oc_secret:
+    name: asb-registry-auth
+    namespace: openshift-ansible-service-broker
+    state: present
+    contents:
+      - path: username
+        data: "{{ ansible_service_broker_registry_user }}"
+      - path: password
+        data: "{{ ansible_service_broker_registry_password }}"
 
 - name: Create the Broker resource in the catalog
   oc_obj:
