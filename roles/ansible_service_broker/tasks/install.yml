@@ -32,6 +32,7 @@
 
 - include: validate_facts.yml
 
+- include: generate_certs.yml
 
 # Deployment of ansible-service-broker starts here
 - name: create openshift-ansible-service-broker project
@@ -116,6 +117,24 @@
             kubernetes.io/service-account.name: asb-client
         type: kubernetes.io/service-account-token
 
+- name: Create etcd-auth secret
+  oc_secret:
+    name: etcd-auth-secret
+    namespace: openshift-ansible-service-broker
+    contents:
+      - path: ca.crt
+        data: '{{ etcd_ca_cert }}'
+
+- name: Create broker-etcd-auth secret
+  oc_secret:
+    name: broker-etcd-auth-secret
+    namespace: openshift-ansible-service-broker
+    contents:
+      - path: client.crt
+        data: '{{ etcd_client_cert }}'
+      - path: client.key
+        data: '{{ etcd_client_key }}'
+
 - oc_secret:
     state: list
     namespace: openshift-ansible-service-broker
@@ -155,6 +174,34 @@
           selector:
             app: openshift-ansible-service-broker
             service: asb
+
+- name: create asb-etcd service
+  oc_obj:
+    name: asb-etcd
+    namespace: openshift-ansible-service-broker
+    state: present
+    kind: Service
+    content:
+      path: /tmp/asbetcdsvcout
+      data:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: asb-etcd
+          labels:
+            app: etcd
+            service: asb-etcd
+          annotations:
+            service.alpha.openshift.io/serving-cert-secret-name: etcd-tls
+        spec:
+          ports:
+            - name: port-2379
+              port: 2379
+              targetPort: 2379
+              protocol: TCP
+          selector:
+            app: etcd
+            service: asb-etcd
 
 - name: create route for ansible-service-broker service
   oc_route:
@@ -227,6 +274,8 @@
                       mountPath: /etc/ansible-service-broker
                     - name: asb-tls
                       mountPath: /etc/tls/private
+                    - name: asb-etcd-auth
+                      mountPath: /var/run/asb-etcd-auth
                   ports:
                     - containerPort: 1338
                       protocol: TCP
@@ -249,30 +298,7 @@
                       scheme: HTTPS
                     initialDelaySeconds: 15
                     timeoutSeconds: 1
-
-                - image: "{{ ansible_service_broker_etcd_image }}"
-                  name: etcd
-                  imagePullPolicy: IfNotPresent
-                  terminationMessagePath: /tmp/termination-log
-                  workingDir: /etcd
-                  args:
-                    - "{{ ansible_service_broker_etcd_image_etcd_path }}"
-                    - "--data-dir=/data"
-                    - "--listen-client-urls=http://0.0.0.0:2379"
-                    - "--advertise-client-urls=http://0.0.0.0:2379"
-                  ports:
-                    - containerPort: 2379
-                      protocol: TCP
-                  env:
-                    - name: ETCDCTL_API
-                      value: "3"
-                  volumeMounts:
-                    - mountPath: /data
-                      name: etcd
               volumes:
-                - name: etcd
-                  persistentVolumeClaim:
-                    claimName: etcd
                 - name: config-volume
                   configMap:
                     name: broker-config
@@ -282,6 +308,77 @@
                 - name: asb-tls
                   secret:
                     secretName: asb-tls
+                - name: asb-etcd-auth
+                  secret:
+                    secretName: broker-etcd-auth-secret
+
+- name: Create asb-etcd deployment config
+  oc_obj:
+    name: etcd
+    namespace: openshift-ansible-service-broker
+    state: present
+    kind: DeploymentConfig
+    content:
+      path: /tmp/dcout
+      data:
+        apiVersion: v1
+        kind: DeploymentConfig
+        metadata:
+          name: asb-etcd
+          labels:
+            app: etcd
+            service: asb-etcd
+        spec:
+          replicas: 1
+          selector:
+            app: etcd
+          strategy:
+            type: Rolling
+          template:
+            metadata:
+              labels:
+                app: etcd
+                service: asb-etcd
+            spec:
+              serviceAccount: asb
+              containers:
+                - image: "{{ ansible_service_broker_etcd_image }}"
+                  name: etcd
+                  imagePullPolicy: IfNotPresent
+                  terminationMessagePath: /tmp/termination-log
+                  workingDir: /etcd
+                  args:
+                    - "{{ ansible_service_broker_etcd_image_etcd_path }}"
+                    - "--data-dir=/data"
+                    - "--listen-client-urls=https://0.0.0.0:2379"
+                    - "--advertise-client-urls=https://0.0.0.0:2379"
+                    - "--client-cert-auth"
+                    - "--trusted-ca-file=/var/run/etcd-auth-secret/ca.crt"
+                    - "--cert-file=/etc/tls/private/tls.crt"
+                    - "--key-file=/etc/tls/private/tls.key"
+                  ports:
+                    - containerPort: 2379
+                      protocol: TCP
+                  env:
+                    - name: ETCDCTL_API
+                      value: "3"
+                  volumeMounts:
+                    - name: etcd
+                      mountPath: /data
+                    - name: etcd-tls
+                      mountPath: /etc/tls/private
+                    - name: etcd-auth
+                      mountPath: /var/run/etcd-auth-secret
+              volumes:
+                - name: etcd
+                  persistentVolumeClaim:
+                    claimName: etcd
+                - name: etcd-tls
+                  secret:
+                    secretName: etcd-tls
+                - name: etcd-auth
+                  secret:
+                    secretName: etcd-auth-secret
 
 
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
@@ -316,8 +413,11 @@
                 namespaces: ['openshift']
                 white_list: {{ ansible_service_broker_local_registry_whitelist }}
             dao:
-              etcd_host: 0.0.0.0
+              etcd_host: asb-etcd.openshift-ansible-service-broker.svc
               etcd_port: 2379
+              etcd_ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+              etcd_client_cert: /var/run/asb-etcd-auth/client.crt
+              etcd_client_key: /var/run/asb-etcd-auth/client.key
             log:
               stdout: true
               level: {{ ansible_service_broker_log_level }}

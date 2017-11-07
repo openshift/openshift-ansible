@@ -52,11 +52,29 @@
     name: asb-client
     namespace: openshift-ansible-service-broker
 
+- name: Remove etcd-auth secret
+  oc_secret:
+    state: absent
+    name: etcd-auth-secret
+    namespace: openshift-ansible-service-broker
+
+- name: Remove broker-etcd-auth secret
+  oc_secret:
+    state: absent
+    name: broker-etcd-auth-secret
+    namespace: openshift-ansible-service-broker
+
 - name: remove ansible-service-broker service
   oc_service:
     name: asb
     namespace: openshift-ansible-service-broker
     state: absent
+
+- name: remove asb-etcd service
+  oc_service:
+    state: absent
+    name: asb-etcd
+    namespace: openshift-ansible-service-broker
 
 - name: remove etcd service
   oc_service:
@@ -82,6 +100,14 @@
     namespace: openshift-ansible-service-broker
     kind: DeploymentConfig
     state: absent
+
+- name: remove Ansible Service Broker etcd deployment config
+  oc_obj:
+    name: asb-etcd
+    namespace: openshift-ansible-service-broker
+    kind: DeploymentConfig
+    state: absent
+
 
 - name: remove secret for broker auth
   oc_obj:
