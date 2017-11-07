@@ -26,8 +26,8 @@
     - cmd: openssl x509 -req -in {{ openshift.common.config_base }}/ansible-service-broker/client.csr -CA {{ openshift.common.config_base }}/ansible-service-broker/cert.pem -CAkey {{ openshift.common.config_base }}/ansible-service-broker/key.pem -CAcreateserial -out {{ openshift.common.config_base }}/ansible-service-broker/client.pem -days 1024
       creates: '{{ openshift.common.config_base }}/ansible-service-broker/client.pem'
 
-    - set_fact:
-        ansible_service_broker_certs_dir: "{{ openshift.common.config_base }}/ansible-service-broker"
+  - set_fact:
+      ansible_service_broker_certs_dir: "{{ openshift.common.config_base }}/ansible-service-broker"
 
 - set_fact:
     etcd_ca_cert: "{{ lookup('file', '{{ ansible_service_broker_certs_dir }}/cert.pem') }}"
