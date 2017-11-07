@@ -644,9 +644,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # See https://github.com/openshift/openshift-ansible/tree/release-3.6/roles/openshift_logging
 openshift_logging_es_cluster_size=1
 openshift_logging_es_memory_limit=4G
-openshift_logging_es_nodeselector='purpose=infra'
-openshift_logging_curator_nodeselector='purpose=infra'
-openshift_logging_kibana_nodeselector='purpose=infra'
+openshift_logging_es_nodeselector={'region':'infra'}
+openshift_logging_curator_nodeselector={'region':'infra'}
+openshift_logging_kibana_nodeselector={'region':'infra'}
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
