@@ -43,11 +43,6 @@
     when: (g_master_config_output.content|b64decode|from_yaml).oauthConfig.masterCA != 'ca-bundle.crt'
   - modify_yaml:
       dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
-      yaml_key: servingInfo.clientCA
-      yaml_value: ca.crt
-    when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'ca.crt'
-  - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
       yaml_key: etcdClientInfo.ca
       yaml_value: ca-bundle.crt
     when:
@@ -67,6 +62,13 @@
     when:
     - groups.oo_etcd_to_config | default([]) | length == 0
     - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.servingInfo.clientCA != 'ca-bundle.crt'
+  # Set servingInfo.clientCA to client-ca-bundle.crt in order to roll the CA certificate.
+  # This change will be reverted in playbooks/byo/openshift-cluster/redeploy-certificates.yml
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: servingInfo.clientCA
+      yaml_value: client-ca-bundle.crt
+    when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'client-ca-bundle.crt'
 
 - name: Copy current OpenShift CA to legacy directory
   hosts: oo_masters_to_config
@@ -155,6 +157,7 @@
     - ca.key
     - ca-bundle.crt
     - ca.serial.txt
+    - client-ca-bundle.crt
     delegate_to: "{{ openshift_ca_host }}"
     run_once: true
     changed_when: false
@@ -173,6 +176,7 @@
     - ca.key
     - ca-bundle.crt
     - ca.serial.txt
+    - client-ca-bundle.crt
   - name: Update master client kubeconfig CA data
     kubeclient_ca:
       client_path: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"

@@ -508,7 +508,7 @@ class FilterModule(object):
                  'master.kubelet-client.crt',
                  'master.kubelet-client.key']
         if bool(include_ca):
-            certs += ['ca.crt', 'ca.key', 'ca-bundle.crt']
+            certs += ['ca.crt', 'ca.key', 'ca-bundle.crt', 'client-ca-bundle.crt']
         if bool(include_keys):
             certs += ['serviceaccounts.private.key',
                       'serviceaccounts.public.key']
