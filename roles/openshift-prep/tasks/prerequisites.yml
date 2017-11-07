@@ -1,0 +1,37 @@
+---
+- name: "Cleaning yum repositories"
+  command: "yum clean all"
+
+- name: "Install required packages"
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ required_packages }}"
+  when: manage_packages|bool
+
+- name: "Install debug packages (optional)"
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ debug_packages }}"
+  when: install_debug_packages|bool
+
+- name: "Update all packages (this can take a very long time)"
+  yum:
+    name: '*'
+    state: latest
+  when: manage_packages|bool
+
+- name: "Verify hostname"
+  shell: hostnamectl status | awk "/Static hostname/"'{ print $3 }'
+  register: hostname_fqdn
+
+- name: "Set hostname if required"
+  hostname:
+    name: "{{ ansible_fqdn }}"
+  when: hostname_fqdn.stdout != ansible_fqdn
+
+- name: "Verify SELinux is enforcing"
+  fail:
+    msg: "SELinux is required for OpenShift and has been detected as '{{ ansible_selinux.config_mode }}'"
+  when: ansible_selinux.config_mode != "enforcing"

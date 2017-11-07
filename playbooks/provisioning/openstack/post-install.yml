@@ -1,0 +1,57 @@
+---
+- hosts: OSEv3
+  gather_facts: False
+  become: True
+  tasks:
+    - name: Save iptables rules to a backup file
+      when: openshift_use_flannel|default(False)|bool
+      shell: iptables-save > /etc/sysconfig/iptables.orig-$(date +%Y%m%d%H%M%S)
+
+# Enable iptables service on app nodes to persist custom rules (flannel SDN)
+# FIXME(bogdando) w/a https://bugzilla.redhat.com/show_bug.cgi?id=1490820
+- hosts: app
+  gather_facts: False
+  become: True
+  vars:
+    os_firewall_allow:
+      - service: dnsmasq tcp
+        port: 53/tcp
+      - service: dnsmasq udp
+        port: 53/udp
+  tasks:
+    - when: openshift_use_flannel|default(False)|bool
+      block:
+        - include_role:
+            name: openshift-ansible/roles/os_firewall
+        - include_role:
+            name: openshift-ansible/roles/lib_os_firewall
+        - name: set allow rules for dnsmasq
+          os_firewall_manage_iptables:
+            name: "{{ item.service }}"
+            action: add
+            protocol: "{{ item.port.split('/')[1] }}"
+            port: "{{ item.port.split('/')[0] }}"
+          with_items: "{{ os_firewall_allow }}"
+
+- hosts: OSEv3
+  gather_facts: False
+  become: True
+  tasks:
+    - name: Apply post-install iptables hacks for Flannel SDN (the best effort)
+      when: openshift_use_flannel|default(False)|bool
+      block:
+        - name: set allow/masquerade rules for for flannel/docker
+          shell: >-
+            (iptables-save | grep -q custom-flannel-docker-1) ||
+            iptables -A DOCKER -w
+            -p all -j ACCEPT
+            -m comment --comment "custom-flannel-docker-1";
+            (iptables-save | grep -q custom-flannel-docker-2) ||
+            iptables -t nat -A POSTROUTING -w
+            -o {{flannel_interface|default('eth1')}}
+            -m comment --comment "custom-flannel-docker-2"
+            -j MASQUERADE
+
+        # NOTE(bogdando) the rules will not be restored, when iptables service unit is disabled & masked
+        - name: Persist in-memory iptables rules (w/o dynamic KUBE rules)
+          shell: iptables-save | grep -v KUBE > /etc/sysconfig/iptables

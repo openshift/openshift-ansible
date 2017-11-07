@@ -1,0 +1,13 @@
+---
+- hosts: cluster_hosts
+  vars:
+    rhn_pools: []
+  tasks:
+  - name: Attach additional RHN pools
+    become: true
+    with_items: "{{ rhn_pools }}"
+    command: "/usr/bin/subscription-manager attach --pool={{ item }}"
+    register: attach_rhn_pools_result
+    until: attach_rhn_pools_result.rc == 0
+    retries: 10
+    delay: 1

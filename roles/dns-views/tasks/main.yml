@@ -1,0 +1,30 @@
+---
+- name: "Generate ACL list for DNS server"
+  set_fact:
+    acl_list: "{{ acl_list | default([]) + [ (hostvars[item]['private_v4'] + '/32') ] }}"
+  with_items: "{{ groups['cluster_hosts'] }}"
+
+- name: "Generate the private view"
+  set_fact:
+    private_named_view:
+      - name: "private"
+        recursion: "{{ named_private_recursion }}"
+        acl_entry: "{{ acl_list }}"
+        zone:
+          - dns_domain: "{{ full_dns_domain }}"
+        forwarder: "{{ public_dns_nameservers }}"
+  when: external_nsupdate_keys['private'] is undefined
+
+- name: "Generate the public view"
+  set_fact:
+    public_named_view:
+      - name: "public"
+        recursion: "{{ named_public_recursion }}"
+        zone:
+          - dns_domain: "{{ full_dns_domain }}"
+        forwarder: "{{ public_dns_nameservers }}"
+  when: external_nsupdate_keys['public'] is undefined
+
+- name: "Generate the final named_config_views"
+  set_fact:
+    named_config_views: "{{ private_named_view|default([]) + public_named_view|default([]) }}"

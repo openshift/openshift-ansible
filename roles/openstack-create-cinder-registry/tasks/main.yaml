@@ -1,0 +1,5 @@
+---
+- os_volume:
+    display_name: "{{ cinder_hosted_registry_name }}"
+    size: "{{ cinder_hosted_registry_size_gb }}"
+  register: cinder_registry_volume

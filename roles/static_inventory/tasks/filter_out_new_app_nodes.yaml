@@ -1,0 +1,15 @@
+---
+- name: Add all new app nodes to new_app_nodes
+  when:
+  - 'oc_old_app_nodes is defined'
+  - 'oc_old_app_nodes | list'
+  - 'node.name not in oc_old_app_nodes'
+  - 'node["metadata"]["sub-host-type"] == "app"'
+  register: result
+  set_fact:
+    new_app_nodes: '{{ new_app_nodes }} + [ {{ node }} ]'
+
+- name: If the node was added to new_nodes, remove it from registered nodes
+  set_fact:
+    registered_nodes: '{{ registered_nodes | difference([ node ]) }}'
+  when: 'not result | skipped'

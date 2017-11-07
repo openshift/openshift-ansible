@@ -1,0 +1,21 @@
+---
+
+stack_state: 'present'
+
+ssh_ingress_cidr: 0.0.0.0/0
+node_ingress_cidr: 0.0.0.0/0
+master_ingress_cidr: 0.0.0.0/0
+lb_ingress_cidr: 0.0.0.0/0
+bastion_ingress_cidr: 0.0.0.0/0
+num_etcd: 0
+num_masters: 1
+num_nodes: 1
+num_dns: 1
+num_infra: 1
+nodes_to_remove: []
+etcd_volume_size: 2
+dns_volume_size: 1
+lb_volume_size: 5
+use_bastion: False
+ui_ssh_tunnel: False
+provider_network: False

@@ -1,0 +1,53 @@
+---
+- name: Generate Environment ID
+  set_fact:
+    env_random_id: "{{ ansible_date_time.epoch }}"
+  run_once: true
+  delegate_to: localhost
+
+- name: Set default Environment ID
+  set_fact:
+    default_env_id: "openshift-{{ lookup('env','OS_USERNAME') }}-{{ env_random_id }}"
+  delegate_to: localhost
+
+- name: Setting Common Facts
+  set_fact:
+    env_id: "{{ env_id | default(default_env_id) }}"
+  delegate_to: localhost
+
+- name: Updating DNS domain to include env_id (if not empty)
+  set_fact:
+    full_dns_domain: "{{ (env_id|trim == '') | ternary(public_dns_domain, env_id + '.' + public_dns_domain) }}"
+  delegate_to: localhost
+
+- name: Set the APP domain for OpenShift use
+  set_fact:
+    openshift_app_domain: "{{ openshift_app_domain | default('apps') }}"
+  delegate_to: localhost
+
+- name: Set the default app domain for routing purposes
+  set_fact:
+    openshift_master_default_subdomain: "{{ openshift_app_domain }}.{{ full_dns_domain }}"
+  delegate_to: localhost
+  when:
+  - openshift_master_default_subdomain is undefined
+
+# Check that openshift_cluster_node_labels has regions defined for all groups
+# NOTE(kpilatov): if node labels are to be enabled for more groups,
+#                 this check needs to be modified as well
+- name: Set openshift_cluster_node_labels if undefined (should not happen)
+  set_fact:
+    openshift_cluster_node_labels: {'app': {'region': 'primary'}, 'infra': {'region': 'infra'}}
+  when: openshift_cluster_node_labels is not defined
+
+- name: Set openshift_cluster_node_labels for the infra group
+  set_fact:
+    openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'infra': {'region': 'infra'}}, recursive=True) }}"
+
+- name: Set openshift_cluster_node_labels for the app group
+  set_fact:
+    openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'app': {'region': 'primary'}}, recursive=True) }}"
+
+- name: Set openshift_cluster_node_labels for auto-scaling app nodes
+  set_fact:
+    openshift_cluster_node_labels: "{{ openshift_cluster_node_labels | combine({'app': {'autoscaling': 'app'}}, recursive=True) }}"
