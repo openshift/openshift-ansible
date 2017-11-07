@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.196.0%{?dist}
+Release:        0.197.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.197.0
+- Temporarily set master servingInfo.clientCA as client-ca-bundle.crt during
+  rolling CA redeployment. (abutcher@redhat.com)
+- container-engine: ensure /var/lib/containers/ is properly labelled
+  (gscrivan@redhat.com)
+- Moving docker location to share path with system containers.
+  (kwoodson@redhat.com)
+- Retry restarting master controllers (mgugino@redhat.com)
+- Bug 1509680- Fix ansible-service-broker registry validations
+  (fabian@fabianism.us)
+- Fix preupgrade authorization objects are in sync (mgugino@redhat.com)
+- Bug 1507617- Move etcd into its own service/dc with SSL (fabian@fabianism.us)
+
 * Mon Nov 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.196.0
 - Bug 1509052 - Remove logfile from broker config (david.j.zager@gmail.com)
 - Fix github auth validation (mgugino@redhat.com)
