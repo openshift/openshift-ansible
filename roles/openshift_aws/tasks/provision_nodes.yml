@@ -12,7 +12,9 @@
   register: instancesout
   retries: 20
   delay: 3
-  until: instancesout.instances|length > 0
+  until:
+  - "'instances' in instancesout"
+  - instancesout.instances|length > 0
 
 - name: slurp down the bootstrap.kubeconfig
   slurp:
@@ -42,29 +44,7 @@
     l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups_extra }}"
     l_aws_ami_map: "{{ openshift_aws_ami_map_extra }}"
 
-
+# instances aren't scaling fast enough here, we need to wait for them
 - when: openshift_aws_wait_for_ssh | bool
-  block:
-  - name: pause and allow for instances to scale before we query them
-    pause:
-      seconds: 10
-
-  - name: fetch newly created instances
-    ec2_remote_facts:
-      region: "{{ openshift_aws_region }}"
-      filters:
-        "tag:clusterid": "{{ openshift_aws_clusterid }}"
-        "tag:host-type": node
-        instance-state-name: running
-    register: instancesout
-    retries: 20
-    delay: 3
-    until: instancesout.instances|length > 0
-
-  - name: wait for ssh to become available
-    wait_for:
-      port: 22
-      host: "{{ item.public_ip_address }}"
-      timeout: 300
-      search_regex: OpenSSH
-    with_items: "{{ instancesout.instances }}"
+  name: wait for our new nodes to come up
+  include: wait_for_groups.yml

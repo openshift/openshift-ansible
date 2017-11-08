@@ -10,7 +10,7 @@
 # Create the scale group config
 - name: Create the node scale group launch config
   ec2_lc:
-    name: "{{ openshift_aws_launch_config_basename }}-{{ launch_config_item.key }}-{{ l_epoch_time }}"
+    name: "{{ openshift_aws_launch_config_basename }}-{{ launch_config_item.key }}{{'-' ~ openshift_aws_new_version if openshift_aws_new_version != '' else '' }}"
     region: "{{ openshift_aws_region }}"
     image_id: "{{ l_aws_ami_map[launch_config_item.key] | default(openshift_aws_ami) }}"
     instance_type: "{{ launch_config_item.value.instance_type }}"

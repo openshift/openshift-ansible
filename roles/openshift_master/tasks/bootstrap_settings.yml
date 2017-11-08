@@ -11,4 +11,5 @@
       - /etc/origin/master/ca.key
   notify:
   - restart master controllers
+  - restart master api
   when: openshift_master_bootstrap_enabled | default(False)

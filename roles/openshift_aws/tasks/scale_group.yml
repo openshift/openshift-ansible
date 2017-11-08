@@ -1,16 +1,8 @@
 ---
-- name: fetch the subnet to use in scale group
-  ec2_vpc_subnet_facts:
-    region: "{{ openshift_aws_region }}"
-    filters:
-      "tag:Name": "{{ openshift_aws_subnet_name }}"
-      vpc-id: "{{ vpcout.vpcs[0].id }}"
-  register: subnetout
-
 - name: Create the scale group
   ec2_asg:
     name: "{{ openshift_aws_scale_group_basename }} {{ item.key }}"
-    launch_config_name: "{{ openshift_aws_launch_config_basename }}-{{ item.key }}-{{ l_epoch_time }}"
+    launch_config_name: "{{ openshift_aws_launch_config_basename }}-{{ item.key }}{{ '-' ~ openshift_aws_new_version if openshift_aws_new_version != '' else '' }}"
     health_check_period: "{{ item.value.health_check.period }}"
     health_check_type: "{{ item.value.health_check.type }}"
     min_size: "{{ item.value.min_size }}"

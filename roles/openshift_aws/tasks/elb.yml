@@ -17,6 +17,7 @@
     listeners: "{{ item.value }}"
     scheme: "{{ openshift_aws_elb_scheme }}"
     tags: "{{ openshift_aws_elb_tags }}"
+    wait: True
   register: new_elb
   with_dict: "{{ l_elb_dict_item.value }}"
 
