@@ -9,7 +9,12 @@
 
 - name: Ensure firewall is not switched during upgrade
   hosts: oo_all_hosts
+  vars:
+    openshift_master_installed_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
   tasks:
+  - name: set currently installed version
+    set_fact:
+      openshift_currently_installed_version: "{{ openshift_master_installed_version }}"
   - name: Check if iptables is running
     command: systemctl status iptables
     changed_when: false
