@@ -10,6 +10,8 @@ ansible_service_broker_dev_broker: false
 ansible_service_broker_refresh_interval: 600s
 # Recommended you do not enable this for now
 ansible_service_broker_launch_apb_on_bind: false
+ansible_service_broker_keep_namespace_on_error: true
+ansible_service_broker_keep_namespace: false
 
 ansible_service_broker_image_pull_policy: IfNotPresent
 ansible_service_broker_sandbox_role: edit

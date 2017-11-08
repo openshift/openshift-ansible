@@ -430,6 +430,8 @@
               bearer_token_file: ""
               sandbox_role: {{ ansible_service_broker_sandbox_role }}
               image_pull_policy: {{ ansible_service_broker_image_pull_policy }}
+              keep_namespace: {{ ansible_service_broker_keep_namespace | bool | lower }}
+              keep_namespace_on_error: {{ ansible_service_broker_keep_namespace_on_error | bool | lower }}
             broker:
               dev_broker: {{ ansible_service_broker_dev_broker | bool | lower }}
               bootstrap_on_startup: {{ ansible_service_broker_bootstrap_on_startup | bool | lower }}
