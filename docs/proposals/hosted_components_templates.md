@@ -1,4 +1,4 @@
-# Use OCP templates and emulate ABPs to install hosted components
+# Use [OCP templates and] ABPs to install hosted components
 
 ## Description
 Currently most of our hosted components have their own repositories where they
@@ -34,11 +34,10 @@ We should describe a way to create a containerized playbook and role to mirror
 what is done with ABPs for hosted components so that the openshift-ansible roles
 would reuse these containers to install/uninstall these components.
 
-The containerized role would follow the pattern used by the TSB within its
+The containerized role could follow the pattern used by the TSB within its
 openshift-ansible role `template_service_broker` to maintain a lower learning
-curve for those not familiar with ansible as well as still provide a unified
-interface for installing the component (aligning with `oc cluster up` as it can
-leverage these OCP template files).
+curve for those not familiar with ansible as well as decrease duplication of work
+in cases where the component provides OCP templates already.
 
 Within the openshift-ansible role, installing in a way similar to APBs would
 create an interface that would not need to change once the role is created,
@@ -65,9 +64,7 @@ so that the majority of on-boarding and supporting a hosted component be the
   for the component
 * Verify that openshift-ansible roles are idempotent (side effects only when necessary)
 * Verify that the component APB containers adhere to necessary structure so that
-  it can be reused by the Serice Broker if desired
-* Verify that the APB role and playbook leverage oc and provided templates to
-  maintain the objects for the component
+  it can be reused by the Service Broker if desired
 * Verify that APB container roles are idempotent (side effects only when necessary)
 
 ## References
