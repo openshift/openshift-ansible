@@ -36,7 +36,7 @@ class BinarySyncer(object):
         self.changed = False
         self.output = []
         self.bin_dir = '/usr/local/bin'
-        self.image = image
+        self._image = image
         self.tag = tag
         self.backend = backend
         self.temp_dir = None  # TBD
@@ -141,6 +141,33 @@ class BinarySyncer(object):
             shutil.move(src_path, dest_path)
             self.output.append("Moved %s to %s." % (src_path, dest_path))
             self.changed = True
+
+    @property
+    def raw_image(self):
+        """
+        Returns the image as it was originally passed in to the instance.
+
+        .. note::
+           This image string will only work directly with the atomic command.
+
+        :returns: The original image passed in.
+        :rtype: str
+        """
+        return self._image
+
+    @property
+    def image(self):
+        """
+        Returns the image without atomic prefixes used to map to skopeo args.
+
+        :returns: The image string without prefixes
+        :rtype: str
+        """
+        image = self._image
+        for remove in ('oci:', 'http:', 'https:'):
+            if image.startswith(remove):
+                image = image.replace(remove, '')
+        return image
 
 
 def main():
