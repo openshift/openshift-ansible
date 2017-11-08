@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.197.0%{?dist}
+Release:        0.198.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.198.0
+- container_binary_sync: Remove atomic prefix from image (smilner@redhat.com)
+- Bug 1510546- Fix previous fix, task was indented one level too deep
+  (fabian@fabianism.us)
+- Use oc rather than kubectl (sdodson@redhat.com)
+- Re-add challenge auth verification to github and google (mgugino@redhat.com)
+- Move fact definition that breaks when check to end of block
+  (fabian@fabianism.us)
+- [Bug 1509354] Check if routers have certificates and use them
+  (kwoodson@redhat.com)
+- Fix v3.6 xpaas image streams (sdodson@redhat.com)
+- Fix v3.7 xpaas image streams (sdodson@redhat.com)
+- Fix prometheus default vars (mgugino@redhat.com)
+- openshift_checks: Add OVS versions for OCP 3.7 (miciah.masters@gmail.com)
+- Proper quotes (dymurray@redhat.com)
+- Update service broker configmap and serviceaccount privileges
+  (dymurray@redhat.com)
+- Add etcd as part of inventory file. Otherwise, it fails as "Running etcd as
+  an embedded service is no longer supported." (sarumuga@redhat.com)
+- Add centos based dotnet 2.0 image streams (sdodson@redhat.com)
+
 * Tue Nov 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.197.0
 - Temporarily set master servingInfo.clientCA as client-ca-bundle.crt during
   rolling CA redeployment. (abutcher@redhat.com)
