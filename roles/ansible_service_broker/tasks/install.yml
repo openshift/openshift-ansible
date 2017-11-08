@@ -409,10 +409,11 @@
                 url:  {{ ansible_service_broker_registry_url }}
                 org:  {{ ansible_service_broker_registry_organization }}
                 tag:  {{ ansible_service_broker_registry_tag }}
-                white_list: {{ ansible_service_broker_registry_whitelist }}
-              - type: local_registry
+                white_list: {{  ansible_service_broker_registry_whitelist | to_yaml }}
+              - type: local_openshift
+                name: localregistry
                 namespaces: ['openshift']
-                white_list: {{ ansible_service_broker_local_registry_whitelist }}
+                white_list: {{ ansible_service_broker_local_registry_whitelist | to_yaml }}
             dao:
               etcd_host: asb-etcd.openshift-ansible-service-broker.svc
               etcd_port: 2379
