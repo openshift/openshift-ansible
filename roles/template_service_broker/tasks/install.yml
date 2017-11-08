@@ -42,7 +42,7 @@
 
 - name: Apply template file
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
+    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
     --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
     --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
     | {{ openshift.common.client_binary }} apply -f -
@@ -50,7 +50,7 @@
 # reconcile with rbac
 - name: Reconcile with RBAC file
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | oc auth reconcile -f -
+    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | {{ openshift.common.client_binary }} auth reconcile -f -
 
 - name: copy tech preview extension file for service console UI
   copy:
@@ -82,7 +82,7 @@
 # Register with broker
 - name: Register TSB with broker
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | oc apply -f -
+    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | {{ openshift.common.client_binary }} apply -f -
 
 - file:
     state: absent

@@ -2,7 +2,7 @@
 # do any asserts here
 
 - include: install.yml
-  when: ansible_service_broker_install | default(true) | bool
+  when: ansible_service_broker_install | bool
 
 - include: remove.yml
-  when: ansible_service_broker_remove | default(false) | bool
+  when: ansible_service_broker_remove | bool
