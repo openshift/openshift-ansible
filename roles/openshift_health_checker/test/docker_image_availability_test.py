@@ -1,6 +1,6 @@
 import pytest
 
-from openshift_checks.docker_image_availability import DockerImageAvailability
+from openshift_checks.docker_image_availability import DockerImageAvailability, DEPLOYMENT_IMAGE_INFO
 
 
 @pytest.fixture()
@@ -180,7 +180,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'openshift/origin-deployer:vtest',
             'openshift/origin-docker-registry:vtest',
             'openshift/origin-haproxy-router:vtest',
-            'cockpit/kubernetes',  # origin version of registry-console
+            'cockpit/kubernetes:latest',  # origin version of registry-console
         ])
     ),
     (  # set a different URL for images
@@ -190,7 +190,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'foo.io/openshift/origin-deployer:vtest',
             'foo.io/openshift/origin-docker-registry:vtest',
             'foo.io/openshift/origin-haproxy-router:vtest',
-            'cockpit/kubernetes',  # AFAICS this is not built from the URL
+            'cockpit/kubernetes:latest',  # AFAICS this is not built from the URL
         ])
     ),
     (
@@ -201,7 +201,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'openshift/origin-deployer:vtest',
             'openshift/origin-docker-registry:vtest',
             'openshift/origin-haproxy-router:vtest',
-            'cockpit/kubernetes',
+            'cockpit/kubernetes:latest',
             # containerized component images
             'openshift/origin:vtest',
             'openshift/node:vtest',
@@ -217,7 +217,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'foo.io/openshift3/ose-docker-registry:f13ac45',
             'foo.io/openshift3/ose-haproxy-router:f13ac45',
             # registry-console is not constructed/versioned the same as the others.
-            'registry.access.redhat.com/openshift3/registry-console',
+            'registry.access.redhat.com/openshift3/registry-console:vtest',
             # containerized images aren't built from oreg_url
             'openshift3/node:vtest',
             'openshift3/openvswitch:vtest',
@@ -247,6 +247,42 @@ def test_required_images(deployment_type, is_containerized, groups, oreg_url, ex
     )
 
     assert expected == DockerImageAvailability(task_vars=task_vars).required_images()
+
+
+@pytest.mark.parametrize("task_vars, expected", [
+    (
+        dict(
+            openshift_deployment_type="origin",
+            openshift_image_tag="vtest",
+        ),
+        "cockpit/kubernetes:latest",
+    ), (
+        dict(
+            openshift_deployment_type="openshift-enterprise",
+            openshift_image_tag="vtest",
+        ),
+        "registry.access.redhat.com/openshift3/registry-console:vtest",
+    ), (
+        dict(
+            openshift_deployment_type="openshift-enterprise",
+            openshift_image_tag="v3.7.0-alpha.0",
+            openshift_cockpit_deployer_prefix="registry.example.com/spam/",
+        ),
+        "registry.example.com/spam/registry-console:v3.7",
+    ), (
+        dict(
+            openshift_deployment_type="origin",
+            openshift_image_tag="v3.7.0-alpha.0",
+            openshift_cockpit_deployer_prefix="registry.example.com/eggs/",
+            openshift_cockpit_deployer_version="spam",
+        ),
+        "registry.example.com/eggs/kubernetes:spam",
+    ),
+])
+def test_registry_console_image(task_vars, expected):
+    info = DEPLOYMENT_IMAGE_INFO[task_vars["openshift_deployment_type"]]
+    tag = task_vars["openshift_image_tag"]
+    assert expected == DockerImageAvailability(task_vars=task_vars)._registry_console_image(tag, info)
 
 
 def test_containerized_etcd():

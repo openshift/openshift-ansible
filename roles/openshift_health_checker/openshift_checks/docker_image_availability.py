@@ -1,5 +1,6 @@
 """Check that required Docker images are available."""
 
+import re
 from pipes import quote
 from ansible.module_utils import six
 from openshift_checks import OpenShiftCheck
@@ -11,12 +12,16 @@ DEPLOYMENT_IMAGE_INFO = {
     "origin": {
         "namespace": "openshift",
         "name": "origin",
-        "registry_console_image": "cockpit/kubernetes",
+        "registry_console_template": "${prefix}kubernetes:${version}",
+        "registry_console_prefix": "cockpit/",
+        "registry_console_default_version": "latest",
     },
     "openshift-enterprise": {
         "namespace": "openshift3",
         "name": "ose",
-        "registry_console_image": "registry.access.redhat.com/openshift3/registry-console",
+        "registry_console_template": "${prefix}registry-console:${version}",
+        "registry_console_prefix": "registry.access.redhat.com/openshift3/",
+        "registry_console_default_version": "${short_version}",
     },
 }
 
@@ -151,10 +156,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         if 'oo_nodes_to_config' in host_groups:
             for suffix in NODE_IMAGE_SUFFIXES:
                 required.add(image_url.replace("${component}", suffix).replace("${version}", image_tag))
-            # The registry-console is for some reason not prefixed with ose- like the other components.
-            # Nor is it versioned the same, so just look for latest.
-            # Also a completely different name is used for Origin.
-            required.add(image_info["registry_console_image"])
+            required.add(self._registry_console_image(image_tag, image_info))
 
         # images for containerized components
         if self.get_var("openshift", "common", "is_containerized"):
@@ -169,6 +171,24 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 required.add("registry.access.redhat.com/rhel7/etcd")  # and no image tag
 
         return required
+
+    def _registry_console_image(self, image_tag, image_info):
+        """Returns image with logic to parallel what happens with the registry-console template."""
+        # The registry-console is for some reason not prefixed with ose- like the other components.
+        # Nor is it versioned the same. Also a completely different name is used for Origin.
+        prefix = self.get_var(
+            "openshift_cockpit_deployer_prefix",
+            default=image_info["registry_console_prefix"],
+        )
+
+        # enterprise template just uses v3.6, v3.7, etc
+        match = re.match(r'v\d+\.\d+', image_tag)
+        short_version = match.group() if match else image_tag
+        version = image_info["registry_console_default_version"].replace("${short_version}", short_version)
+        version = self.get_var("openshift_cockpit_deployer_version", default=version)
+
+        template = image_info["registry_console_template"]
+        return template.replace('${prefix}', prefix).replace('${version}', version)
 
     def local_images(self, images):
         """Filter a list of images and return those available locally."""
