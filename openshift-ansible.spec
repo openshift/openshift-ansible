@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.7.0
-Release:        0.198.0%{?dist}
+Release:        0.198.1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.198.1
+- 
+
 * Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.198.0
 - container_binary_sync: Remove atomic prefix from image (smilner@redhat.com)
 - Bug 1510546- Fix previous fix, task was indented one level too deep
