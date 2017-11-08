@@ -7,8 +7,8 @@ write_files:
   owner: 'root:root'
   permissions: '0640'
   content: |
-    openshift_group_type: {{ openshift_aws_node_group_type }}
-{%   if openshift_aws_node_group_type != 'master' %}
+    openshift_group_type: {{ launch_config_item.key }}
+{%   if launch_config_item.key != 'master' %}
 - path: /etc/origin/node/bootstrap.kubeconfig
   owner: 'root:root'
   permissions: '0640'
@@ -19,7 +19,7 @@ runcmd:
 {%     if openshift_aws_node_run_bootstrap_startup %}
 - [ ansible-playbook, /root/openshift_bootstrap/bootstrap.yml]
 {%     endif %}
-{%     if openshift_aws_node_group_type != 'master' %}
+{%     if launch_config_item.key != 'master' %}
 - [ systemctl, enable, {% if openshift_deployment_type == 'openshift-enterprise' %}atomic-openshift{% else %}origin{% endif %}-node]
 - [ systemctl, start, {% if openshift_deployment_type == 'openshift-enterprise' %}atomic-openshift{% else %}origin{% endif %}-node]
 {%     endif %}
