@@ -13,10 +13,14 @@
 - name: Upgrade default router and default registry
   hosts: oo_first_master
   vars:
-    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  |
-                         replace ( '${version}', openshift_image_tag ) }}"
-    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) |
-                      replace ( '${version}', openshift_image_tag ) }}"
+    registry_image: "{{ openshift_hosted_registry_registryurl |
+                        default(openshift.master.registry_url) |
+                        replace('${component}', 'docker-registry') |
+                        replace('${version}', openshift_image_tag) }}"
+    router_image: "{{ openshift_hosted_router_registryurl |
+                      default(openshift.master.registry_url) |
+                      replace('${component}', 'haproxy-router') |
+                      replace('${version}', openshift_image_tag) }}"
     registry_console_image: "{{ openshift.master.registry_url | regex_replace ( '(origin|ose)-\\${component}', 'registry-console') |
                                 replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
 
