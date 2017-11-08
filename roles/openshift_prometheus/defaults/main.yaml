@@ -2,7 +2,7 @@
 # defaults file for openshift_prometheus
 openshift_prometheus_state: present
 
-openshift_prometheus_namespace: prometheus
+openshift_prometheus_namespace: openshift-metrics
 
 openshift_prometheus_node_selector: {"region":"infra"}
 
