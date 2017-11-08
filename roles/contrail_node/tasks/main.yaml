@@ -53,3 +53,16 @@
   - name: Launch the installer
     command: oc create -f /tmp/contrail-installer.yaml
     delegate_to: "{{ contrail_first_master }}"
+
+  - name: Download & extract loopback CNI binary
+    unarchive:
+      src: https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ cni_version }}.tgz
+      dest: /tmp
+      remote_src: True
+
+  - name: Copy loopback to CNI bin path
+    copy:
+      src: /tmp/loopback
+      dest: /opt/cni/bin
+      mode: a+x
+      remote_src: True
