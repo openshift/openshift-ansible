@@ -1,13 +1,4 @@
 ---
-- name: Create persistent volumes
-  hosts: oo_first_master
-  vars:
-    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
-    persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
-  tasks:
-  - debug: var=persistent_volumes
-  - debug: var=persistent_volume_claims
-
 - name: Create Hosted Resources - persistent volumes
   hosts: oo_first_master
   vars:
