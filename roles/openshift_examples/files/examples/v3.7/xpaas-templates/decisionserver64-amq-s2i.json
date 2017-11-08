@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for Red Hat JBoss BRMS 6.4 decision server A-MQ applications built using S2I.",
-            "iconClass": "icon-jboss",
-            "tags": "decisionserver,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss BRMS 6.4 decision server + A-MQ (with https)"
+            "iconClass": "icon-decisionserver",
+            "tags": "decisionserver,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss BRMS 6.4 decision server + A-MQ (with https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example BRMS decision server A-MQ application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss BRMS 6.4 decision server with A-MQ application, including a build configuration and application deployment configuration.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-brms/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "decisionserver64-amq-s2i"
     },
     "labels": {
         "template": "decisionserver64-amq-s2i",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new BRMS/A-MQ application with SSL support has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the A-MQ service use the credentials ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the \"decisionserver-service-account\" service account and the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [
@@ -392,7 +396,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-decisionserver64-openshift:1.0"
+                            "name": "jboss-decisionserver64-openshift:1.1"
                         }
                     }
                 },
@@ -626,7 +630,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-63:1.0"
+                                "name": "jboss-amq-63:1.2"
                             }
                         }
                     },

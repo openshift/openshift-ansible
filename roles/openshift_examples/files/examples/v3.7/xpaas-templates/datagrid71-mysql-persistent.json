@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
-            "description": "Application template for JDG 7.1 and MySQL applications with persistent storage.",
-            "tags": "datagrid,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1 + MySQL (Persistent with https)"
+            "iconClass": "icon-datagrid",
+            "tags": "datagrid,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss Data Grid 7.1 + MySQL (with https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example JBoss Data Grid application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.1 based application, including a deployment configuration, using MySQL databased using persistence and secure communication using https.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "datagrid71-mysql-persistent"
     },
     "labels": {
         "template": "datagrid71-mysql-persistent",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new data grid service (using MySQL with persistent storage) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"datagrid-service-account\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -49,6 +53,34 @@
             "displayName": "Password",
             "description": "The password to access the JDG Caches. Must be different than username; must not be root, admin, or administrator; must contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), and 1 non-alphanumeric symbol(s). (optional)",
             "name": "PASSWORD",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "JDG User Roles/Groups",
+            "description": "Comma delimited list of roles/groups associated with the JDG user",
+            "name": "ADMIN_GROUP",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Hotrod Authentication",
+            "description": "Enable Hotrod Authentication",
+            "name": "HOTROD_AUTHENTICATION",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Container Security Role Mapper",
+            "description": "Defines which role mapper to use for cache authentication",
+            "name": "CONTAINER_SECURITY_ROLE_MAPPER",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Container Security Roles",
+            "description": "Comma delimited list of role names and assigned permissions",
+            "name": "CONTAINER_SECURITY_ROLES",
             "value": "",
             "required": false
         },
@@ -457,7 +489,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid71-openshift:1.0"
+                                "name": "jboss-datagrid71-openshift:1.1"
                             }
                         }
                     },
@@ -562,6 +594,22 @@
                                         "value": "${PASSWORD}"
                                     },
                                     {
+                                        "name": "ADMIN_GROUP",
+                                        "value": "${ADMIN_GROUP}"
+                                    },
+                                    {
+                                        "name": "HOTROD_AUTHENTICATION",
+                                        "value": "${HOTROD_AUTHENTICATION}"
+                                    },
+                                    {
+                                        "name": "CONTAINER_SECURITY_ROLE_MAPPER",
+                                        "value": "${CONTAINER_SECURITY_ROLE_MAPPER}"
+                                    },
+                                    {
+                                        "name": "CONTAINER_SECURITY_ROLES",
+                                        "value": "${CONTAINER_SECURITY_ROLES}"
+                                    },
+                                    {
                                         "name": "HTTPS_KEYSTORE_DIR",
                                         "value": "/etc/datagrid-secret-volume"
                                     },
@@ -664,6 +712,10 @@
                                     {
                                         "name": "HOTROD_SERVICE_NAME",
                                         "value": "${APPLICATION_NAME}-hotrod"
+                                    },
+                                    {
+                                        "name": "HOTROD_ENCRYPTION",
+                                        "value": "${HTTPS_NAME}"
                                     },
                                     {
                                         "name": "MEMCACHED_CACHE",
