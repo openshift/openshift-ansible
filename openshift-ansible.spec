@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.2
+Version:        3.7.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.3-1
+- Adding configuration for keeping transient namespace on error.
+  (shawn.hurley21@gmail.com)
+- Use openshift.common.client_binary (sdodson@redhat.com)
+- Fix examples image streams (mgugino@redhat.com)
+- Remove duplicate defaulting for ASB and TSB (sdodson@redhat.com)
+- Fix preupgrade authorization objects are in sync minor versions
+  (mgugino@redhat.com)
+- General template updates for v3.7 (sdodson@redhat.com)
+- Update to xPaaS v1.4.6 (sdodson@redhat.com)
+- Bug 1511044- Slurp the etcd certs instead of using the lookup
+  (fabian@fabianism.us)
+- Change prometheus default namespace to 'openshift-metrics'
+  (zgalor@redhat.com)
+- Bootstrap enhancements. (kwoodson@redhat.com)
+- reconcile registry-console and docker_image_availability (lmeyer@redhat.com)
+
 * Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.2-1
 - Remove debug code that was mistakenly committed (zgalor@redhat.com)
 - Correct service restart command (sdodson@redhat.com)
