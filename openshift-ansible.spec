@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.1
+Version:        3.7.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.2-1
+- Remove debug code that was mistakenly committed (zgalor@redhat.com)
+- Correct service restart command (sdodson@redhat.com)
+- Give service-catalog controller-manager permissions to update status of
+  ClusterServiceClasses and ClusterServicePlans (staebler@redhat.com)
+
 * Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.1-1
 - Bug 1510636- add name to local registry config (fabian@fabianism.us)
 
