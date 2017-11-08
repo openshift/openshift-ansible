@@ -13,11 +13,11 @@
 
 - name: Delete TSB broker
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" | oc delete --ignore-not-found -f -
+    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" | {{ openshift.common.client_binary }} delete --ignore-not-found -f -
 
 - name: Delete TSB objects
   shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" | oc delete --ignore-not-found -f -
+    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" | {{ openshift.common.client_binary }} delete --ignore-not-found -f -
 
 - name: empty out tech preview extension file for service console UI
   copy:
