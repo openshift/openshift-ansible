@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for SSO 7.1 MySQL applications",
-            "iconClass" : "icon-jboss",
-            "tags" : "sso,keycloak,jboss,xpaas",
-            "version": "1.0.0",
-            "openshift.io/display-name": "Red Hat Single Sign-On 7.1 + MySQL (Ephemeral)"
+            "iconClass" : "icon-sso",
+            "tags" : "sso,keycloak,jboss,hidden",
+            "version": "1.4.7",
+            "openshift.io/display-name": "Single Sign-On 7.1 + MySQL (Ephemeral)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example SSO 7 application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Single Sign-On 7.1 server based deployment and deployment configuration for MySQL using ephemeral (temporary) storage.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-single-sign-on/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "sso71-mysql"
     },
     "labels": {
         "template": "sso71-mysql",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new SSO service (using MySQL) has been created in your project. The admin username/password for accessing the master realm via the SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing SSO requests.",
     "parameters": [
@@ -415,7 +419,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "redhat-sso71-openshift:1.1"
+                                "name": "redhat-sso71-openshift:1.2"
                             }
                         }
                     },
@@ -479,7 +483,8 @@
                                             "-c",
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 10
                                 },
                                 "readinessProbe": {
                                     "exec": {

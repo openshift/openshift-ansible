@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone and use persistent storage for saving messages, including message migration when the number of pods are reduced. This template doesn't feature SSL support.",
-            "iconClass": "icon-jboss",
-            "tags": "messaging,amq,jboss,xpaas",
-            "version": "1.1",
-            "openshift.io/display-name": "Red Hat JBoss A-MQ 6.3 (Persistent, no SSL)"
+            "iconClass": "icon-amq",
+            "tags": "messaging,amq,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss A-MQ 6.3 (no SSL)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example JBoss A-MQ application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss A-MQ 6.3 based application, including a deployment configuration and using persistence.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-amq/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "amq63-persistent"
     },
     "labels": {
         "template": "amq63-persistent",
-        "xpaas": "1.5.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new persistent messaging service has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}.",
     "parameters": [
@@ -94,6 +98,13 @@
             "description": "The A-MQ storage usage limit",
             "name": "AMQ_STORAGE_USAGE_LIMIT",
             "value": "100 gb",
+            "required": false
+        },
+        {
+            "displayName": "Queue Memory Limit",
+            "description": "The queue memory limit (default is 1mb)",
+            "name": "AMQ_QUEUE_MEMORY_LIMIT",
+            "value": "",
             "required": false
         },
         {
@@ -229,7 +240,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-63:1.1"
+                                "name": "jboss-amq-63:1.2"
                             }
                         }
                     },
@@ -346,6 +357,10 @@
                                     {
                                         "name": "AMQ_STORAGE_USAGE_LIMIT",
                                         "value": "${AMQ_STORAGE_USAGE_LIMIT}"
+                                    },
+                                    {
+                                        "name": "AMQ_QUEUE_MEMORY_LIMIT",
+                                        "value": "${AMQ_QUEUE_MEMORY_LIMIT}"
                                     }
                                 ]
                             }
@@ -386,7 +401,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-63:1.1"
+                                "name": "jboss-amq-63:1.2"
                             }
                         }
                     },

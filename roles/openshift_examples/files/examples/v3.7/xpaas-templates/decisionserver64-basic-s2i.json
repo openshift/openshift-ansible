@@ -4,16 +4,16 @@
     "metadata": {
         "annotations": {
             "description": "Application template for Red Hat JBoss BRMS 6.4 decision server applications built using S2I.",
-            "iconClass": "icon-jboss",
+            "iconClass": "icon-decisionserver",
             "tags": "decisionserver,jboss,xpaas",
-            "version": "1.4.0",
+            "version": "1.4.7",
             "openshift.io/display-name": "Red Hat JBoss BRMS 6.4 decision server (no https)"
         },
         "name": "decisionserver64-basic-s2i"
     },
     "labels": {
         "template": "decisionserver64-basic-s2i",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new BRMS application has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}.",
     "parameters": [
@@ -227,7 +227,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-decisionserver64-openshift:1.0"
+                            "name": "jboss-decisionserver64-openshift:1.1"
                         }
                     }
                 },
