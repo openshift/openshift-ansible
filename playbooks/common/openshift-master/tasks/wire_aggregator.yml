@@ -163,7 +163,7 @@
     - key: assetConfig.extensionScripts
       value: [/etc/origin/master/openshift-ansible-catalog-console.js]
     - key: kubernetesMasterConfig.apiServerArguments.runtime-config
-      value: [apis/settings.k8s.io/v1alpha1=true]
+      value: "{{ ['apis/settings.k8s.io/v1alpha1=true'] if openshift.common.version_gte_3_6 | bool else 'null' }}"
     - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
       value: DefaultAdmissionConfig
     - key: admissionConfig.pluginConfig.PodPreset.configuration.apiVersion
