@@ -66,3 +66,6 @@ openshift_master_bootstrap_enabled: False
 
 openshift_master_csr_sa: node-bootstrapper
 openshift_master_csr_namespace: openshift-infra
+
+openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
+openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
