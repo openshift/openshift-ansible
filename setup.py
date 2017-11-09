@@ -83,10 +83,14 @@ def find_entrypoint_playbooks():
                 if not isinstance(task, dict):
                     # Skip yaml files which are not a dictionary of tasks
                     continue
-                if 'include' in task:
+                if 'include' in task or 'import_playbook' in task:
                     # Add the playbook and capture included playbooks
                     playbooks.add(yaml_file)
-                    included_file_name = task['include'].split()[0]
+                    if 'include' in task:
+                        directive = task['include']
+                    else:
+                        directive = task['import_playbook']
+                    included_file_name = directive.split()[0]
                     included_file = os.path.normpath(
                         os.path.join(os.path.dirname(yaml_file),
                                      included_file_name))
@@ -318,7 +322,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         has_errors = False
 
         print('Ansible Deprecation Checks')
-        exclude_dirs = ['adhoc', 'files', 'meta', 'test', 'tests', 'vars', 'defaults', '.tox']
+        exclude_dirs = ['adhoc', 'files', 'meta', 'vars', 'defaults', '.tox']
         for yaml_file in find_files(
                 os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
@@ -336,7 +340,6 @@ class OpenShiftAnsibleSyntaxCheck(Command):
 
         if not has_errors:
             print('...PASSED')
-
         print('Ansible Playbook Entry Point Syntax Checks')
         for playbook in find_entrypoint_playbooks():
             print('-' * 60)
@@ -350,8 +353,21 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             # --syntax-check each entry point playbook
             else:
                 try:
+                    # Create a host group list to avoid WARNING on unmatched host patterns
+                    host_group_list = [
+                        'etcd,masters,nodes,OSEv3',
+                        'oo_all_hosts',
+                        'oo_etcd_to_config,oo_new_etcd_to_config,oo_first_etcd,oo_etcd_hosts_to_backup,'
+                        'oo_etcd_hosts_to_upgrade,oo_etcd_to_migrate',
+                        'oo_masters,oo_masters_to_config,oo_first_master,oo_containerized_master_nodes',
+                        'oo_nodes_to_config,oo_nodes_to_upgrade',
+                        'oo_nodes_use_kuryr,oo_nodes_use_flannel',
+                        'oo_nodes_use_calico,oo_nodes_use_nuage,oo_nodes_use_contiv',
+                        'oo_lb_to_config',
+                        'oo_nfs_to_config',
+                        'glusterfs,glusterfs_registry,']
                     subprocess.check_output(
-                        ['ansible-playbook', '-i localhost,',
+                        ['ansible-playbook', '-i ' + ','.join(host_group_list),
                          '--syntax-check', playbook]
                     )
                 except subprocess.CalledProcessError as cpe:

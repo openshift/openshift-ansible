@@ -29,7 +29,7 @@ else:
 
 
 # Set to minimum required Ansible version
-REQUIRED_VERSION = '2.3.0.0'
+REQUIRED_VERSION = '2.4.0.0'
 DESCRIPTION = "Supported versions: %s or newer" % REQUIRED_VERSION
 
 
