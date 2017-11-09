@@ -89,6 +89,7 @@
       docker-registry: default
     session_affinity: ClientIP
     service_type: ClusterIP
+    clusterip: '{{ openshift_hosted_registry_clusterip | default(omit) }}'
 
 - include: secure.yml
   static: no

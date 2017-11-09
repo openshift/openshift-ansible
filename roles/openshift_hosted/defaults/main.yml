@@ -80,6 +80,7 @@ r_openshift_hosted_registry_os_firewall_allow:
 openshift_hosted_registry_serviceaccount: registry
 openshift_hosted_registry_volumes: []
 openshift_hosted_registry_env_vars: {}
+openshift_hosted_registry_clusterip: null
 
 # These edits are being specified only to prevent 'changed' on rerun
 openshift_hosted_registry_edits:
