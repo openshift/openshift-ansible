@@ -1,0 +1,6 @@
+---
+# this is the default SDN mtu for OpenShift
+default_sdn_mtu: 1500
+# other configurable defaults
+default_openshift_overhead: 50
+default_ipsec_overhead: 62

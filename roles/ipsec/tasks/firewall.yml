@@ -1,0 +1,11 @@
+- name: "Accept connections on various ports"
+  lineinfile:
+    path: /etc/sysconfig/iptables
+    insertafter: "-A OS_FIREWALL_ALLOW -p udp -m state --state NEW -m udp --dport 4789 -j ACCEPT"
+    line: "-A OS_FIREWALL_ALLOW {{ item }} -j ACCEPT"
+  with_items:
+    - "-p 50"
+    - "-p 51"
+    - "-p udp --dport 500"
+  notify:
+    - iptables

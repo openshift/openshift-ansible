@@ -1,0 +1,12 @@
+- include: initialize_groups.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
+
+# uses openshift-ansible inventory nodes as targets
+- hosts: nodes
+  roles:
+    - "{{ playbook_dir }}/roles/ipsec"

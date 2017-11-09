@@ -1,0 +1,10 @@
+- name: "iptables"
+  service:
+    name: "iptables"
+    state: restarted
+
+- name: "ipsec"
+  service:
+    name: "ipsec"
+    state: restarted
+    

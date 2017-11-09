@@ -1,0 +1,39 @@
+# get nickname (just like documentation)
+- name: "Get nickname from certificate file"
+  shell: "openssl x509 -in /etc/origin/node/server.crt -subject -noout | cut -d= -f3 "
+  changed_when: false
+  register: server_nickname_result
+
+- name: "Use certificate CN as nickname in IPsec configuration"
+  set_fact:
+    server_nick: "{{ server_nickname_result.stdout }}"
+
+# initialize ipsec db so the next command doesn't fail
+- name: "Initialize ipsec database"
+  command: "ipsec initnss"
+  args:
+    creates: /etc/ipsec.d/*.db
+
+# check the certificate databse for the key nickname so that we can skip adding it if required
+- name: "Check database for certificate by nickname"
+  shell: "certutil -L -d sql:/etc/ipsec.d | grep {{ server_nick }}"
+  changed_when: false
+  failed_when: false
+  register: cert_check
+
+# handle certificate creation and import if cert check doesn't find a cert
+- name: "Combine certificate files into PKCS#12 bundle"
+  command: "openssl pkcs12 -export -in /etc/origin/node/server.crt -inkey /etc/origin/node/server.key -certfile /etc/origin/node/ca.crt -passout pass: -out /tmp/ipsec_certs.p12"
+  args:
+    creates: /tmp/ipsec_certs.p12
+  when: cert_check.rc > 0
+
+- name: "Import certificate into certificate db"
+  command: "pk12util -i /tmp/ipsec_certs.p12 -d sql:/etc/ipsec.d -W \"\""
+  when: cert_check.rc > 0
+
+- name: "Remove temporary pkcs certs file"
+  file:
+    path: /tmp/ipsec_certs.p12
+    state: absent
+  when: cert_check.rc > 0

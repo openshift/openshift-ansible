@@ -1,0 +1,13 @@
+- name: "Place peer-2-peer configuration file"
+  template:
+    src: "peer_openshift-cluster.conf.j2"
+    dest: "/etc/ipsec.d/openshift-cluster.conf"
+  notify:
+    - ipsec
+    
+- name: "Place secret for ipsec cluster configuration"
+  copy:
+    dest: "/etc/ipsec.d/openshift-cluster.secrets"
+    content: ": RSA \"{[ server_nick ]}\""
+  notify:
+    - ipsec
