@@ -59,7 +59,7 @@
 - include: "{{ node_config_hook }}"
   when: node_config_hook is defined
 
-- include: rpm_upgrade.yml
+- include: upgrade/rpm_upgrade.yml
   vars:
     component: "node"
     openshift_version: "{{ openshift_pkg_version | default('') }}"
@@ -70,7 +70,7 @@
     path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
     state: absent
 
-- include: containerized_node_upgrade.yml
+- include: upgrade/containerized_node_upgrade.yml
   when: openshift.common.is_containerized | bool
 
 - name: Ensure containerized services stopped before Docker restart
@@ -165,7 +165,7 @@
     value: "/etc/origin/node/resolv.conf"
 
 # Restart all services
-- include: restart.yml
+- include: upgrade/restart.yml
 
 - name: Wait for node to be ready
   oc_obj:
