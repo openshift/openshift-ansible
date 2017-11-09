@@ -490,7 +490,7 @@ def set_selectors(facts):
         facts['hosted']['metrics'] = {}
     if 'selector' not in facts['hosted']['metrics'] or facts['hosted']['metrics']['selector'] in [None, 'None']:
         facts['hosted']['metrics']['selector'] = None
-    if 'logging' not in facts:
+    if 'logging' not in facts or not isinstance(facts['logging'], dict):
         facts['logging'] = {}
     if 'selector' not in facts['logging'] or facts['logging']['selector'] in [None, 'None']:
         facts['logging']['selector'] = None
