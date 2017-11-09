@@ -16,7 +16,7 @@ Currently the default installation method for traditional operating systems is
 via RPMs. If you wish to deploy using containerized installation you may set the
 ansible variable 'containerized=true' on a per host basis. This means that you
 may easily deploy environments mixing containerized and RPM based installs. At
-this point we suggest deploying heterogeneous environments.
+this point we don't suggest deploying heterogeneous environments.
 
 ## CLI Wrappers
 
