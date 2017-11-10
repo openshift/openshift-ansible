@@ -79,14 +79,7 @@
       - REGISTRY_STORAGE_MAINTENANCE_READONLY_ENABLED: 'true'
   when: openshift.hosted.registry.storage.glusterfs.swap
 
-- name: Unmount registry volume
+- name: Unmount registry volume and clean up mount point/fstab
   mount:
-    state: unmounted
-    name: "{{ mktemp.stdout }}"
-
-- name: Delete temp mount directory
-  file:
-    dest: "{{ mktemp.stdout }}"
     state: absent
-  changed_when: False
-  check_mode: no
+    name: "{{ mktemp.stdout }}"
