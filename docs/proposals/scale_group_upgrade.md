@@ -24,7 +24,8 @@ The upgrade process would look like this:
 * Allow nodes to join the cluster by approving node CSRs
 * Set the nodes from `compute 123` as unschedulable
 * Drain the `compute 123` pods from the nodes
-* Remove scale group `compute 123`
+* Determine if we want to role back to `compute 123` or continue on with `compute 456`.
+* Remove scale group `compute 123` or `compute 456`
 
 ## Benefits
 
