@@ -22,16 +22,24 @@
       timeout: 300
       load_path: "/tmp/contrail-kubernetes-agent-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
       
+  - name: Ensure CNI bin path exists
+    file:
+      path: /opt/cni/bin
+      recurse: yes
+      state: directory
+
   - name: Download & extract loopback CNI binary
     unarchive:
       src: https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ cni_version }}.tgz
       dest: /tmp
+      remote_src: yes
 
   - name: Copy loopback to CNI bin path
     copy:
       src: /tmp/loopback
       dest: /opt/cni/bin
       mode: a+x
+      remote_src: yes
 
 - when:
   - inventory_hostname == "{{ contrail_first_master }}"
