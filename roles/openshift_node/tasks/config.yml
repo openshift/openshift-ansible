@@ -49,6 +49,7 @@
 - name: include aws provider credentials
   include: aws.yml
   static: yes
+  when: not (openshift_node_use_instance_profiles | default(False))
 
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for

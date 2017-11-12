@@ -15,6 +15,10 @@
     image_id: "{{ l_aws_ami_map[launch_config_item.key] | default(openshift_aws_ami) }}"
     instance_type: "{{ launch_config_item.value.instance_type }}"
     security_groups: "{{ openshift_aws_launch_config_security_group_id  | default(ec2sgs.security_groups | map(attribute='group_id')| list) }}"
+    instance_profile_name: "{{ launch_config_item.value.iam_role if launch_config_item.value.iam_role is defined and
+                                                                    launch_config_item.value.iam_role != '' and
+                                                                    openshift_aws_create_iam_role
+                                                                 else omit }}"
     user_data: "{{ lookup('template', 'user_data.j2') }}"
     key_name: "{{ openshift_aws_ssh_key_name }}"
     ebs_optimized: False

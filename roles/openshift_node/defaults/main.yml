@@ -115,3 +115,5 @@ openshift_node_config_dir: "{{ openshift_node_config_dir_default }}"
 
 openshift_node_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
 openshift_node_image_config_latest: "{{ openshift_node_image_config_latest_default }}"
+
+openshift_node_use_instance_profiles: False

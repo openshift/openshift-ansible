@@ -27,6 +27,9 @@
 - set_fact:
     l_epoch_time: "{{ ansible_date_time.epoch }}"
 
+- when: openshift_aws_create_iam_role
+  include: iam_role.yml
+
 - when: openshift_aws_create_launch_config
   include: launch_config.yml
 
