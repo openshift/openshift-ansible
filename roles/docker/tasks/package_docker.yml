@@ -140,6 +140,6 @@
 - set_fact:
     docker_service_status_changed: "{{ (r_docker_package_docker_start_result | changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
 
-- include: registry_auth.yml
-
 - meta: flush_handlers
+
+- include: registry_auth.yml
