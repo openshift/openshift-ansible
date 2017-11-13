@@ -50,27 +50,27 @@ you are not running a stable release.
 
 ## Setup
 
-1. Install base dependencies:
+Install base dependencies:
 
-    ***
+Requirements:
 
-    Requirements:
-    - Ansible >= 2.3.0.0
-    - Jinja >= 2.7
-    - pyOpenSSL
-    - python-lxml
+- Ansible >= 2.3.0.0
+- Jinja >= 2.7
+- pyOpenSSL
+- python-lxml
 
-    ***
+----
 
-    Fedora:
-    ```
-    dnf install -y ansible pyOpenSSL python-cryptography python-lxml
-    ```
+Fedora:
 
-2. OpenShift Installation Documentation:
+```
+dnf install -y ansible pyOpenSSL python-cryptography python-lxml
+```
 
-    - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
-    - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
+## OpenShift Installation Documentation:
+
+- [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
+- [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
 
 ## Containerized OpenShift Ansible
 
