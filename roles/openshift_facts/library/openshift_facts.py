@@ -829,6 +829,7 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_5_or_1_5 = version >= LooseVersion('1.5')
                 version_gte_3_6 = version >= LooseVersion('3.6')
                 version_gte_3_7 = version >= LooseVersion('3.7')
+                version_gte_3_8 = version >= LooseVersion('3.8')
             else:
                 version_gte_3_1_or_1_1 = version >= LooseVersion('3.0.2.905')
                 version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('3.1.1')
@@ -838,6 +839,7 @@ def set_version_facts_if_unset(facts):
                 version_gte_3_5_or_1_5 = version >= LooseVersion('3.5')
                 version_gte_3_6 = version >= LooseVersion('3.6')
                 version_gte_3_7 = version >= LooseVersion('3.7')
+                version_gte_3_8 = version >= LooseVersion('3.8')
         else:
             # 'Latest' version is set to True, 'Next' versions set to False
             version_gte_3_1_or_1_1 = True
@@ -847,7 +849,8 @@ def set_version_facts_if_unset(facts):
             version_gte_3_4_or_1_4 = True
             version_gte_3_5_or_1_5 = True
             version_gte_3_6 = True
-            version_gte_3_7 = False
+            version_gte_3_7 = True
+            version_gte_3_8 = False
         facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
         facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
         facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
@@ -856,8 +859,11 @@ def set_version_facts_if_unset(facts):
         facts['common']['version_gte_3_5_or_1_5'] = version_gte_3_5_or_1_5
         facts['common']['version_gte_3_6'] = version_gte_3_6
         facts['common']['version_gte_3_7'] = version_gte_3_7
+        facts['common']['version_gte_3_8'] = version_gte_3_8
 
-        if version_gte_3_7:
+        if version_gte_3_8:
+            examples_content_version = 'v3.8'
+        elif version_gte_3_7:
             examples_content_version = 'v3.7'
         elif version_gte_3_6:
             examples_content_version = 'v3.6'

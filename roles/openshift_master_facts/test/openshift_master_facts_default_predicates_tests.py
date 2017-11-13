@@ -71,6 +71,8 @@ DEFAULT_PREDICATES_3_7 = [
     {'name': 'NoVolumeNodeConflict'},
 ]
 
+DEFAULT_PREDICATES_3_8 = DEFAULT_PREDICATES_3_7
+
 REGION_PREDICATE = {
     'name': 'Region',
     'argument': {
@@ -95,6 +97,8 @@ TEST_VARS = [
     ('3.6', 'openshift-enterprise', DEFAULT_PREDICATES_3_6),
     ('3.7', 'origin', DEFAULT_PREDICATES_3_7),
     ('3.7', 'openshift-enterprise', DEFAULT_PREDICATES_3_7),
+    ('3.8', 'origin', DEFAULT_PREDICATES_3_8),
+    ('3.8', 'openshift-enterprise', DEFAULT_PREDICATES_3_8),
 ]
 
 
