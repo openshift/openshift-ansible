@@ -12,22 +12,26 @@ installed and what is configured (is what we configured correct for the image
 version we installed).
 
 ## Rationale
-As was piloted with the Template Service Broker, a role was created to process
-and configure OCP templates that were synchronized (currently still a manual
-process) from the origin repo where the component resides.
+As was piloted with the Template Service Broker ("TSB" for short), a role was
+created to process and configure OCP templates that were synchronized (currently
+still a manual process) from the origin repo where the component resides.
 
 This allowed any changes for the installation to be maintained by the developers
 and keep them from needing to be fluent with Ansible. It also afforded a level
 of abstraction from needing to keep in sync with TSB related changes and then
 translate them to changes within an Ansible role.
 
-However, there is still the gap of ensuring our role configures changes appropriate
-for the version of the component we are installing. Prior to 3.4 with Aggregated
-Logging this was resolved and contained due to using a deployer pod, since everything
-was versioned and contained within an artifact the Integration Services team
-provided. This is something that is addressed again now with the Service Broker,
-APBs are configured in such a way that a containerized install/uninstall is done
-for the component.
+However, there is still the gap of ensuring a role configures changes appropriately
+for the version of the component it is installing and we are violating the "DRY"
+principle by needing to sync files between repos.
+
+Prior to 3.4, Aggregated Logging solved this using a deployer pod. Everything
+was versioned and contained within this artifact that the Integration
+Services team provided and maintained. The deployer pod lived in the same
+repo as the components that it configured. This is something that is addressed
+again now with the Service Broker, Ansible Playbook Bundles ("APBs" for short)
+are configured in such a way that a containerized install/uninstall is done for
+the component.
 
 ## Design
 We should describe a way to create a containerized playbook and role to mirror
@@ -55,7 +59,7 @@ I want to roles for hosted components to run the APB container that is provided
   by the developer of the component
 so that the majority of on-boarding and supporting a hosted component be the
   responsibility of the developer of the component, reducing the amount of
-  copypasta, translating to Ansible, and changes within the openshift-ansible
+  copy and paste, translating to Ansible, and changes within the openshift-ansible
   role that is done as updates are made.
 
 ## Acceptance Criteria
@@ -70,6 +74,7 @@ so that the majority of on-boarding and supporting a hosted component be the
 ## References
 * https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/
 * https://github.com/ansibleplaybookbundle/manageiq-apb
+* https://github.com/ansibleplaybookbundle/ansible-playbook-bundle
 
 ### proposed example role snippets
 
