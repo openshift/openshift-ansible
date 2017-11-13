@@ -53,7 +53,7 @@
 
 - when:
     - l_use_crio
-    - dockerstat.stat.islink is defined and not (dockerstat.stat.islink | bool)
+    - dockerstat.stat.islnk is defined and not (dockerstat.stat.islnk | bool)
   block:
     - name: stop the current running docker
       systemd:
