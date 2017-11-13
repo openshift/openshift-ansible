@@ -136,9 +136,15 @@
   when:
   - not front_proxy_kubeconfig.stat.exists
 
-- name: copy tech preview extension file for service console UI
-  copy:
-    src: openshift-ansible-catalog-console.js
+- name: Delete temp directory
+  file:
+    name: "{{ certtemp.stdout }}"
+    state: absent
+  changed_when: False
+
+- name: Setup extension file for service console UI
+  template:
+    src: ../templates/openshift-ansible-catalog-console.js
     dest: /etc/origin/master/openshift-ansible-catalog-console.js
 
 - name: Update master config
@@ -212,9 +218,3 @@
   changed_when: false
   when:
   - yedit_output.changed
-
-- name: Delete temp directory
-  file:
-    name: "{{ certtemp.stdout }}"
-    state: absent
-  changed_when: False
