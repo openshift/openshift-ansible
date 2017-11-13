@@ -148,25 +148,6 @@
     selector: "{{ openshift_prometheus_alertbuffer_pvc_pv_selector }}"
   when: openshift_prometheus_alertbuffer_storage_type == 'pvc'
 
-# create prometheus stateful set
-- name: Set prometheus template
-  template:
-    src: prometheus.j2
-    dest: "{{ tempdir }}/templates/prometheus.yaml"
-  vars:
-    namespace: "{{ openshift_prometheus_namespace }}"
-#    prom_replicas: "{{ openshift_prometheus_replicas }}"
-
-- name: Set prometheus stateful set
-  oc_obj:
-    state: "{{ state }}"
-    name: "prometheus"
-    namespace: "{{ openshift_prometheus_namespace }}"
-    kind: statefulset
-    files:
-      - "{{ tempdir }}/templates/prometheus.yaml"
-    delete_after: true
-
 # prometheus configmap
 # Copy the additional rules file if it is defined
 - name: Copy additional rules file to host
@@ -236,3 +217,22 @@
     namespace: "{{ openshift_prometheus_namespace }}"
     from_file:
       alertmanager.yml: "{{ tempdir }}/alertmanager.yml"
+
+# create prometheus stateful set
+- name: Set prometheus template
+  template:
+    src: prometheus.j2
+    dest: "{{ tempdir }}/templates/prometheus.yaml"
+  vars:
+    namespace: "{{ openshift_prometheus_namespace }}"
+#    prom_replicas: "{{ openshift_prometheus_replicas }}"
+
+- name: Set prometheus stateful set
+  oc_obj:
+    state: "{{ state }}"
+    name: "prometheus"
+    namespace: "{{ openshift_prometheus_namespace }}"
+    kind: statefulset
+    files:
+      - "{{ tempdir }}/templates/prometheus.yaml"
+    delete_after: true
