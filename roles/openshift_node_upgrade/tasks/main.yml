@@ -98,6 +98,12 @@
   failed_when: false
   when: not openshift.common.is_containerized | bool
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1513054
+- name: Clean up dockershim data
+  file:
+    path: "/var/lib/dockershim/sandbox/"
+    state: absent
+
 - name: Upgrade openvswitch
   package:
     name: openvswitch
