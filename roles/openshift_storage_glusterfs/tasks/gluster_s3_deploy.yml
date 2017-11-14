@@ -1,0 +1,113 @@
+---
+- name: Delete pre-existing gluster-s3 resources
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    selector: "{{ item.selector | default(omit) }}"
+    state: absent
+  with_items:
+  - kind: "all,svc,deploy,secret,sc,pvc"
+    selector: "gluster-s3"
+  failed_when: False
+  when: glusterfs_wipe
+
+- name: Wait for gluster-s3 pods to terminate
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: pod
+    state: list
+    selector: "glusterfs=s3-{{ glusterfs_name }}-provisioner-pod"
+  register: gluster_s3_pod
+  until: "gluster_s3_pod.results.results[0]['items'] | count == 0"
+  delay: 10
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
+  when: glusterfs_wipe
+
+- name: Copy gluster-s3 PVCs template file
+  copy:
+    src: "{{ openshift.common.examples_content_version }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - "gluster-s3-pvcs-template.yml"
+
+- name: Create gluster-s3 PVCs template
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: template
+    name: "gluster-s3-pvcs"
+    state: present
+    files:
+    - "{{ mktemp.stdout }}/gluster-s3-pvcs-template.yml"
+
+- name: Create gluster-s3 PVCs
+  oc_process:
+    namespace: "{{ glusterfs_namespace }}"
+    template_name: "gluster-s3-pvcs"
+    create: True
+    params:
+      S3_ACCOUNT: "{{ glusterfs_s3_account }}"
+      PVC: "{{ glusterfs_s3_pvc }}"
+      PVC_SIZE: "{{ glusterfs_s3_pvc_size }}"
+      META_PVC: "{{ glusterfs_s3_meta_pvc }}"
+      META_PVC_SIZE: "{{ glusterfs_s3_meta_pvc_size }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
+
+- name: Wait for gluster-s3 PVCs
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: pvc
+    state: list
+    selector: "glusterfs=s3-{{ glusterfs_name }}-{{ glusterfs_s3_account }}-storage"
+  register: gluster_s3_pvcs
+  until:
+  - "gluster_s3_pvcs.results.results[0]['items'] | count > 0"
+  # Pod's 'Bound' status must be True
+  - "gluster_s3_pvcs.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Bound'}) | map('bool') | select | list | count == 2"
+  delay: 10
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"
+
+- name: Copy gluster-s3 template file
+  copy:
+    src: "{{ openshift.common.examples_content_version }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - "gluster-s3-template.yml"
+
+- name: Create gluster-s3 template
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: template
+    name: "gluster-s3"
+    state: present
+    files:
+    - "{{ mktemp.stdout }}/gluster-s3-template.yml"
+
+- name: Deploy gluster-s3 service
+  oc_process:
+    namespace: "{{ glusterfs_namespace }}"
+    template_name: "gluster-s3"
+    create: True
+    params:
+      IMAGE_NAME: "{{ glusterfs_s3_image }}"
+      IMAGE_VERSION: "{{ glusterfs_s3_version }}"
+      S3_ACCOUNT: "{{ glusterfs_s3_account }}"
+      S3_USER: "{{ glusterfs_s3_user }}"
+      S3_PASSWORD: "{{ glusterfs_s3_password }}"
+      PVC: "{{ glusterfs_s3_pvc }}"
+      META_PVC: "{{ glusterfs_s3_meta_pvc }}"
+      CLUSTER_NAME: "{{ glusterfs_name }}"
+
+- name: Wait for gluster-s3 pod
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: pod
+    state: list
+    selector: "glusterfs=s3-{{ glusterfs_name }}-{{ glusterfs_s3_account }}-pod"
+  register: gluster_s3_pod
+  until:
+  - "gluster_s3_pod.results.results[0]['items'] | count > 0"
+  # Pod's 'Ready' status must be True
+  - "gluster_s3_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  delay: 10
+  retries: "{{ (glusterfs_timeout | int / 10) | int }}"

@@ -84,6 +84,20 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_storageclass         | True                    | Automatically create a StorageClass for each GlusterFS cluster
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
+| openshift_storage_glusterfs_block_deploy         | True                    | Deploy glusterblock provisioner service
+| openshift_storage_glusterfs_block_image          | 'gluster/glusterblock-provisioner'| Container image to use for glusterblock-provisioner pod, enterprise default is 'rhgs3/rhgs-gluster-block-prov-rhel7'
+| openshift_storage_glusterfs_block_version        | 'latest'                | Container image version to use for glusterblock-provisioner pod
+| openshift_storage_glusterfs_block_max_host_vol   | 15                      | Max number of GlusterFS volumes to host glusterblock volumes
+| openshift_storage_glusterfs_s3_deploy            | True                    | Deploy gluster-s3 service
+| openshift_storage_glusterfs_s3_image             | 'gluster/gluster-object'| Container image to use for gluster-s3 pod, enterprise default is 'rhgs3/rhgs-gluster-s3-server-rhel7'
+| openshift_storage_glusterfs_s3_version           | 'latest'                | Container image version to use for gluster=s3 pod
+| openshift_storage_glusterfs_s3_account           | Undefined               | S3 account name for the S3 service, required for S3 service deployment
+| openshift_storage_glusterfs_s3_user              | Undefined               | S3 user name for the S3 service, required for S3 service deployment
+| openshift_storage_glusterfs_s3_password          | Undefined               | S3 user password for the S3 service, required for S3 service deployment
+| openshift_storage_glusterfs_s3_pvc               | Dynamic                 | Name of the GlusterFS-backed PVC which will be used for S3 object data storage, generated from the cluster name and S3 account by default
+| openshift_storage_glusterfs_s3_pvc_size          | "2Gi"                   | Size, in Gi, of the GlusterFS-backed PVC which will be used for S3 object data storage
+| openshift_storage_glusterfs_s3_meta_pvc          | Dynamic                 | Name of the GlusterFS-backed PVC which will be used for S3 object metadata storage, generated from the cluster name and S3 account by default
+| openshift_storage_glusterfs_s3_meta_pvc_size     | "1Gi"                   | Size, in Gi, of the GlusterFS-backed PVC which will be used for S3 object metadata storage
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
 | openshift_storage_glusterfs_heketi_is_native     | True                    | heketi should be containerized
 | openshift_storage_glusterfs_heketi_cli           | 'heketi-cli'            | Command/Path to invoke the heketi-cli tool **NOTE:** Change this only for **non-native heketi** if heketi-cli is not in the global `$PATH` of the machine running openshift-ansible
@@ -99,6 +113,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_ssh_user      | 'root'                  | SSH user for external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_sudo      | False                   | Whether to sudo (if non-root user) for SSH to external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_keyfile   | Undefined               | Path to a private key file for use with SSH connections to external GlusterFS nodes via native heketi **NOTE:** This must be an absolute path
+| openshift_storage_glusterfs_heketi_fstab         | '/var/lib/heketi/fstab' | When heketi is native, sets the path to the fstab file on the GlusterFS nodes to update on LVM volume mounts, changes to '/etc/fstab/' when the heketi executor is 'ssh' **NOTE:** This should not need to be changed
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 
 Each role variable also has a corresponding variable to optionally configure a
