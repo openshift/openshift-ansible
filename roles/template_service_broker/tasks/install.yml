@@ -52,11 +52,6 @@
   shell: >
     {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | {{ openshift.common.client_binary }} auth reconcile -f -
 
-- name: copy tech preview extension file for service console UI
-  copy:
-    src: openshift-ansible-catalog-console.js
-    dest: /etc/origin/master/openshift-ansible-catalog-console.js
-
 # Check that the TSB is running
 - name: Verify that TSB is running
   command: >
