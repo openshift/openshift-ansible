@@ -20,7 +20,7 @@ DEPLOYMENT_IMAGE_INFO = {
         "namespace": "openshift3",
         "name": "ose",
         "registry_console_template": "${prefix}registry-console:${version}",
-        "registry_console_prefix": "registry.access.redhat.com/openshift3/",
+        "registry_console_prefix": "openshift3/",
         "registry_console_default_version": "${short_version}",
     },
 }
