@@ -1,13 +1,15 @@
 ---
 - name: Node Install Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Node install 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_node: "In Progress"
-      aggregate: false
+        installer_phase_node:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - include: certificates.yml
 
@@ -24,11 +26,13 @@
 - include: enable_excluders.yml
 
 - name: Node Install Checkpoint End
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Node install 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_node: "Complete"
-      aggregate: false
+        installer_phase_node:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

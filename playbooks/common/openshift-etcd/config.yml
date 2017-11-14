@@ -1,13 +1,15 @@
 ---
 - name: etcd Install Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set etcd install 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_etcd: "In Progress"
-      aggregate: false
+        installer_phase_etcd:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - include: ca.yml
 
@@ -26,11 +28,13 @@
   - role: nickhammond.logrotate
 
 - name: etcd Install Checkpoint End
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set etcd install 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_etcd: "Complete"
-      aggregate: false
+        installer_phase_etcd:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

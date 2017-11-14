@@ -1,13 +1,15 @@
 ---
 - name: Logging Install Checkpoint Start
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Logging install 'In Progress'
+    run_once: true
     set_stats:
       data:
-        installer_phase_logging: "In Progress"
-      aggregate: false
+        installer_phase_logging:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - name: OpenShift Aggregated Logging
   hosts: oo_first_master
@@ -23,11 +25,13 @@
         tasks_from: update_master_config
 
 - name: Logging Install Checkpoint End
-  hosts: oo_all_hosts
+  hosts: all
   gather_facts: false
   tasks:
   - name: Set Logging install 'Complete'
+    run_once: true
     set_stats:
       data:
-        installer_phase_logging: "Complete"
-      aggregate: false
+        installer_phase_logging:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
