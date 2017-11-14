@@ -525,3 +525,7 @@
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /var/lib/haproxy/stats
+    # Here we remove only limits.conf rather than directory, as users may put their files.
+    # - /etc/systemd/system/haproxy.service.d
+    - /etc/systemd/system/haproxy.service.d/limits.conf
+    - /etc/systemd/system/haproxy.service
