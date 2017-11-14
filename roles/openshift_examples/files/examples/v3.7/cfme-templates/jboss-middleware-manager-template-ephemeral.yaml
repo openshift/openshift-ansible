@@ -24,7 +24,6 @@ metadata:
     description: Middleware Manager all-in-one
     iconClass: icon-jboss
     tags: middleware-manager,metrics,alerts,cloudforms,cassandra
-
 parameters:
 - name: HAWKULAR_SERVICES_IMAGE
   description: What docker image should be used for Middleware Manager.
@@ -38,14 +37,6 @@ parameters:
   description: Maximum amount of memory for Cassandra container.
   displayName: Cassandra Memory Limit
   value: 2Gi
-- name: CASSANDRA_DATA_LIMIT
-  description: Maximum amount data used by Cassandra container.
-  displayName: Cassandra Container Data Limit
-  value: 2Gi
-- name: HAWKULAR_SERVICES_DATA_LIMIT
-  description: Maximum amount data used by Middleware Manager container (mostly logging).
-  displayName: Middleware Manager Container Data Limit
-  value: 1Gi
 - name: ROUTE_NAME
   description: Public route with this name will be created.
   displayName: Route Name
@@ -74,7 +65,6 @@ objects:
     annotations:
       description: Exposes and load balances the application pods
       service.alpha.openshift.io/dependencies: '[{"name":"hawkular-cassandra","namespace":"","kind":"Service"}]'
-      service.alpha.openshift.io/serving-cert-secret-name: hawkular-ssl-secret
     name: hawkular-services
   spec:
     ports:
@@ -130,7 +120,7 @@ objects:
     selector:
       name: hawkular-services
     strategy:
-      type: Rolling
+      type: Recreate
     template:
       metadata:
         labels:
@@ -143,24 +133,15 @@ objects:
             value: remote
           - name: CASSANDRA_NODES
             value: hawkular-cassandra
-          - name: HAWKULAR_USE_SSL
-            value: 'true'
           - name: HAWKULAR_USER
             value: ${HAWKULAR_USER}
           - name: HAWKULAR_PASSWORD
             value: ${HAWKULAR_PASSWORD}
-          - name: HAWKULAR_PUBLIC_KEY_FILENAME
-            value: /client-secrets/tls.crt
-          - name: HAWKULAR_PRIVATE_KEY_FILENAME
-            value: /client-secrets/tls.key
           imagePullPolicy: IfNotPresent
           name: hawkular-services
           volumeMounts:
           - name: h-services-data
             mountPath: /var/opt/hawkular
-          - name: hawkular-secret-volume
-            mountPath: /client-secrets/
-            readOnly: true
           ports:
           - containerPort: 8080
           - containerPort: 8443
@@ -175,7 +156,7 @@ objects:
             exec:
               command:
               - /opt/hawkular/bin/ready.sh
-            initialDelaySeconds: 120
+            initialDelaySeconds: 35
             timeoutSeconds: 15
             periodSeconds: 20
             successThreshold: 1
@@ -188,11 +169,7 @@ objects:
         restartPolicy: Always
         volumes:
         - name: h-services-data
-          persistentVolumeClaim:
-            claimName: h-services-pvc
-        - name: hawkular-secret-volume
-          secret:
-            secretName: hawkular-ssl-secret
+          emptyDir: {}
 
 - apiVersion: v1
   kind: DeploymentConfig
@@ -205,7 +182,7 @@ objects:
     selector:
       name: hawkular-cassandra
     strategy:
-      type: Recreate
+      type: Rolling
       rollingParams:
         timeoutSeconds: 300
     template:
@@ -217,9 +194,6 @@ objects:
         - image: ${CASSANDRA_IMAGE}
           imagePullPolicy: Always
           name: hawkular-cassandra
-          env:
-          - name: DATA_VOLUME
-            value: /var/lib/cassandra
           volumeMounts:
           - name: cassandra-data
             mountPath: /var/lib/cassandra
@@ -228,15 +202,15 @@ objects:
           - containerPort: 9160
           readinessProbe:
             exec:
-              command: ['nodetool', 'status']
-            initialDelaySeconds: 30
+              command: [nodetool, status]
+            initialDelaySeconds: 15
             timeoutSeconds: 10
             periodSeconds: 15
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 6
           livenessProbe:
             exec:
-              command: ['nodetool', 'status']
+              command: [nodetool, status]
             initialDelaySeconds: 300
             timeoutSeconds: 10
             periodSeconds: 15
@@ -247,26 +221,4 @@ objects:
               memory: ${CASSANDRA_MEMORY_LIMIT}
         volumes:
         - name: cassandra-data
-          persistentVolumeClaim:
-            claimName: cassandra-pvc
-
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: h-services-pvc
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: ${HAWKULAR_SERVICES_DATA_LIMIT}
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: cassandra-pvc
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: ${CASSANDRA_DATA_LIMIT}
+          emptyDir: {}
