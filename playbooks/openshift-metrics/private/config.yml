@@ -16,6 +16,7 @@
   roles:
   - role: openshift_metrics
 
+# TODO: Remove when master config property is removed
 - name: OpenShift Metrics
   hosts: oo_masters:!oo_first_master
   serial: 1
