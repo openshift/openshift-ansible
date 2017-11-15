@@ -151,6 +151,14 @@
       - lbr0
       - vlinuxbr
       - vovsbr
+
+    - name: Remove virtual devices
+      command: nmcli delete device "{{ item }}"
+      failed_when: False
+      with_items:
+      - tun0
+      - docker0
+
     when: openshift_remove_all | default(true) | bool
 
   - shell: atomic uninstall "{{ item }}"-master-api
@@ -264,12 +272,30 @@
     - "{{ directories.results | default([]) }}"
     - files
 
+  - shell: systemctl daemon-reload
+    changed_when: False
+
+  - name: restart container-engine
+    service: name=container-engine state=stopped enabled=no
+    failed_when: false
+    register: container_engine
+
+  - name: restart docker
+    service: name=docker state=stopped enabled=no
+    failed_when: false
+    when: not (container_engine | changed)
+    register: l_docker_restart_docker_in_pb_result
+    until: not l_docker_restart_docker_in_pb_result | failed
+    retries: 3
+    delay: 30
+
   - name: Remove remaining files
     file: path={{ item }} state=absent
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /etc/openshift
     - /etc/openshift-sdn
+    - /etc/pki/ca-trust/source/anchors/openshift-ca.crt
     - /etc/sysconfig/atomic-openshift-node
     - /etc/sysconfig/atomic-openshift-node-dep
     - /etc/sysconfig/openshift-node-dep
@@ -284,23 +310,38 @@
     - /etc/systemd/system/origin-node-dep.service
     - /etc/systemd/system/origin-node.service
     - /etc/systemd/system/origin-node.service.wants
+    - /var/lib/docker
 
-  - shell: systemctl daemon-reload
-    changed_when: False
+  - name: Rebuild ca-trust
+    command: update-ca-trust
 
-  - name: restart container-engine
-    service: name=container-engine state=restarted
+  - name: Reset Docker proxy configuration
+    lineinfile:
+      state=absent
+      dest=/etc/sysconfig/docker
+      regexp='(NO_PROXY|HTTP_PROXY|HTTPS_PROXY)=.*'
+
+  - name: Reset Docker registry configuration
+    lineinfile:
+      state=absent
+      dest=/etc/sysconfig/docker
+      regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
+
+  - name: Detect Docker storage configuration
+    shell: vgs -o name | grep docker
+    register: docker_vg_name
     failed_when: false
-    register: container_engine
+    changed_when: false
 
-  - name: restart docker
-    service: name=docker state=restarted
-    failed_when: false
-    when: not (container_engine | changed)
-    register: l_docker_restart_docker_in_pb_result
-    until: not l_docker_restart_docker_in_pb_result | failed
-    retries: 3
-    delay: 30
+  - name: Wipe out Docker storage contents
+    command: vgremove -f {{ item }}
+    with_items: "{{ docker_vg_name.stdout_lines }}"
+    when: docker_vg_name.rc == 0
+
+  - name: Wipe out Docker storage configuration
+    file: path=/etc/sysconfig/docker-storage state=absent
+    when: docker_vg_name.rc == 0
+
 
 - hosts: masters
   become: yes
