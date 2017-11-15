@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.8.0
-Release:        0.0.0%{?dist}
+Release:        0.1.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,38 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.1.0
+- Allow disabling authorization migration check (sdodson@redhat.com)
+- Alternative method to create docker registry auth creds (mgugino@redhat.com)
+- Nuke /var/lib/dockershim/sandbox/* while nodes are drained
+  (sdodson@redhat.com)
+- crio: sync crio.conf (gscrivan@redhat.com)
+- Updating provisioning order. (kwoodson@redhat.com)
+- Regex anchors changed to match protocol start and ports.
+  (kwoodson@redhat.com)
+- First pass at v3.8 support (sdodson@redhat.com)
+- Run registry auth after docker restart (mgugino@redhat.com)
+- Fix extension script for catalog (mgugino@redhat.com)
+- Adding instance profile support for node groups. (kwoodson@redhat.com)
+- Bumping openshift-ansible to 3.8 (smunilla@redhat.com)
+- ansible.cfg: error when inventory does not parse (lmeyer@redhat.com)
+- removing kind restrictions from oc_edit (kwoodson@redhat.com)
+- Update Docs. Make Clearer where the actual docs are. (tbielawa@redhat.com)
+- Remove upgrade playbooks for 3.3 through 3.5 (rteague@redhat.com)
+- GlusterFS: Add gluster-s3 functionality (jarrpa@redhat.com)
+- GlusterFS: Add glusterblock functionality (jarrpa@redhat.com)
+- GlusterFS: Update heketi templates for latest version (jarrpa@redhat.com)
+- GlusterFS: Specify resource requests (jarrpa@redhat.com)
+- Remove remaining haproxy files with uninstallation
+  (nakayamakenjiro@gmail.com)
+- Proposal: container_runtime role (mgugino@redhat.com)
+- Fix contenerized documentation? (mickael.canevet@camptocamp.com)
+- Cleans up additional artifacts in uninstall. Closes 3082
+  (gregswift@gmail.com)
+- Add execution times to checkpoint status (rteague@redhat.com)
+- Make clearer *_nfs_directory and *_volume_name (lpsantil@gmail.com)
+- Allow cluster IP for docker-registry service to be set (hansmi@vshn.ch)
+
 * Thu Nov 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.5-1
 - 
 
