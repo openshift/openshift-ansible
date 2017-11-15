@@ -20,20 +20,22 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 
 ### Optional vars:
 - `openshift_logging_purge_logging`: When `openshift_logging_install_logging` is set to 'False' to trigger uninstalation and `openshift_logging_purge_logging` is set to 'True', it will completely and irreversibly remove all logging persistent data including PVC. Defaults to 'False'.
-- `openshift_logging_image_prefix`: The prefix for the logging images to use. Defaults to 'docker.io/openshift/origin-'.
-- `openshift_logging_curator_image_prefix`: Setting the image prefix for Curator image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_elasticsearch_image_prefix`: Setting the image prefix for Elasticsearch image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_fluentd_image_prefix`: Setting the image prefix for Fluentd image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_kibana_image_prefix`: Setting the image prefix for Kibana image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_kibana_proxy_image_prefix`: Setting the image prefix for Kibana proxy image. Defaults to `openshift_logging_image_prefix`.
+- `openshift_logging_image_prefix`: The prefix for all of the logging images to use. The order in which prefix will be determined is 1) each component image has own default, 2) setting `openshift_logging_image_prefix` selects prefix for all components, 3) the prefix can be cherry-picked with `openshift_logging_{{component}}_image_prefix` for a specific component, eg. `openshift_logging_elasticsearch_image_prefix`.
+- `openshift_logging_curator_image_prefix`: Setting the image prefix for Curator image. Defaults to either `docker.io/openshift/origin-` or `registry.access.redhat.com/openshift3/` depending on `openshift_deployment_type`.
+- `openshift_logging_elasticsearch_image_prefix`: Setting the image prefix for Elasticsearch image. Defaults to either `docker.io/openshift/origin-` or `registry.access.redhat.com/openshift3/` depending on `openshift_deployment_type`.
+- `openshift_logging_elasticsearch_proxy_image_prefix`: Setting the image prefix for Elasticsearch proxy image. Defaults to either `docker.io/openshift/origin-` or `registry.access.redhat.com/openshift3/` depending on `openshift_deployment_type`.
+- `openshift_logging_fluentd_image_prefix`: Setting the image prefix for Fluentd image. Defaults to either `docker.io/openshift/origin-` or `registry.access.redhat.com/openshift3/` depending on `openshift_deployment_type`.
+- `openshift_logging_kibana_image_prefix`: Setting the image prefix for Kibana image. Defaults to either `docker.io/openshift/origin-` or `registry.access.redhat.com/openshift3/` depending on `openshift_deployment_type`.
+- `openshift_logging_kibana_proxy_image_prefix`: Setting the image prefix for Kibana proxy image. Defaults to either `docker.io/openshift/origin-` or `registry.access.redhat.com/openshift3/` depending on `openshift_deployment_type`.
 - `openshift_logging_mux_image_prefix`: Setting the image prefix for Mux image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_image_version`: The image version for the logging images to use. Defaults to 'latest'.
-- `openshift_logging_curator_image_version`: Setting the image version for Curator image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_elasticsearch_image_version`: Setting the image version for Elasticsearch image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_fluentd_image_version`: Setting the image version for Fluentd image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_kibana_image_version`: Setting the image version for Kibana image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_kibana_proxy_image_version`: Setting the image version for Kibana proxy image. Defaults to `openshift_logging_image_version`.
-- `openshift_logging_mux_image_version`: Setting the image version for Mux image. Defaults to `openshift_logging_image_version`.
+- `openshift_logging_image_version`: The version for all of the logging images to use. The order in which version will be determined is 1) each component image has own default, 2) setting `openshift_logging_image_version` selects version for all components, 3) the version can be cherry-picked with `openshift_logging_{{component}}_image_version` for a specific component, eg. `openshift_logging_elasticsearch_image_version`.
+- `openshift_logging_curator_image_version`: Setting the image version for Curator image. Defaults to `__openshift_logging_image_version`.
+- `openshift_logging_elasticsearch_image_version`: Setting the image version for Elasticsearch image. Defaults to `__openshift_logging_image_version`.
+- `openshift_logging_elasticsearch_proxy_image_version`: Setting the image version for Elasticsearch proxy image. Defaults to `__openshift_logging_image_version`.
+- `openshift_logging_fluentd_image_version`: Setting the image version for Fluentd image. Defaults to `__openshift_logging_image_version`.
+- `openshift_logging_kibana_image_version`: Setting the image version for Kibana image. Defaults to `__openshift_logging_image_version`.
+- `openshift_logging_kibana_proxy_image_version`: Setting the image version for Kibana proxy image. Defaults to `__openshift_logging_image_version`.
+- `openshift_logging_mux_image_version`: Setting the image version for Mux image. Defaults to `__openshift_logging_image_version`.
 - `openshift_logging_use_ops`: If 'True', set up a second ES and Kibana cluster for infrastructure logs. Defaults to 'False'.
 - `openshift_logging_master_url`: The URL for the Kubernetes master, this does not need to be public facing but should be accessible from within the cluster. Defaults to 'https://kubernetes.default.svc.{{openshift.common.dns_domain}}'.
 - `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://{{openshift.common.public_hostname}}:{{openshift.master.api_port}}'.
