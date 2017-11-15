@@ -87,7 +87,9 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_block_deploy         | True                    | Deploy glusterblock provisioner service
 | openshift_storage_glusterfs_block_image          | 'gluster/glusterblock-provisioner'| Container image to use for glusterblock-provisioner pod, enterprise default is 'rhgs3/rhgs-gluster-block-prov-rhel7'
 | openshift_storage_glusterfs_block_version        | 'latest'                | Container image version to use for glusterblock-provisioner pod
-| openshift_storage_glusterfs_block_max_host_vol   | 15                      | Max number of GlusterFS volumes to host glusterblock volumes
+| openshift_storage_glusterfs_block_host_vol_create| True                    | Automatically create GlusterFS volumes to host glusterblock volumes. **NOTE:** If this is False, block-hosting volumes will need to be manually created before glusterblock volumes can be provisioned
+| openshift_storage_glusterfs_block_host_vol_size  | 100                     | Size, in GB, of GlusterFS volumes that will be automatically create to host glusterblock volumes if not enough space is available for a glusterblock volume create request. **NOTE:** This value is effectively an upper limit on the size of glusterblock volumes unless you manually create larger GlusterFS block-hosting volumes
+| openshift_storage_glusterfs_block_host_vol_max   | 15                      | Max number of GlusterFS volumes to host glusterblock volumes
 | openshift_storage_glusterfs_s3_deploy            | True                    | Deploy gluster-s3 service
 | openshift_storage_glusterfs_s3_image             | 'gluster/gluster-object'| Container image to use for gluster-s3 pod, enterprise default is 'rhgs3/rhgs-gluster-s3-server-rhel7'
 | openshift_storage_glusterfs_s3_version           | 'latest'                | Container image version to use for gluster=s3 pod
