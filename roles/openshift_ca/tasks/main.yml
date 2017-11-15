@@ -97,10 +97,8 @@
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}
-    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
     --expire-days={{ openshift_master_cert_expire_days }}
     --signer-expire-days={{ openshift_ca_cert_expire_days }}
-    {% endif %}
     --overwrite=false
   when: master_ca_missing | bool or openshift_certificates_redeploy | default(false) | bool
   delegate_to: "{{ openshift_ca_host }}"
@@ -169,9 +167,7 @@
         --signer-serial={{ openshift_ca_serial }}
         --user=system:openshift-master
         --basename=openshift-master
-        {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
         --expire-days={{ openshift_master_cert_expire_days }}
-        {% endif %}
   - name: Copy generated loopback master client config to master config dir
     copy:
       src: "{{ openshift_ca_loopback_tmpdir.stdout }}/{{ item }}"

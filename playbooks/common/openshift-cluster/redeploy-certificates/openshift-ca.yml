@@ -1,11 +1,4 @@
 ---
-- name: Verify OpenShift version is greater than or equal to 1.2 or 3.2
-  hosts: oo_first_master
-  tasks:
-  - fail:
-      msg: "The current OpenShift version is less than 1.2/3.2 and does not support CA bundles."
-    when: not openshift.common.version_gte_3_2_or_1_2 | bool
-
 - name: Check cert expirys
   hosts: oo_nodes_to_config:oo_masters_to_config:oo_etcd_to_config
   vars:

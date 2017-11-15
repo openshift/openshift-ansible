@@ -69,8 +69,6 @@
   file:
     path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
     state: absent
-  when: (deployment_type == 'openshift-enterprise' and openshift_release | version_compare('3.4', '>='))
-     or (deployment_type == 'origin' and openshift_release | version_compare('1.4', '>='))
 
 - include: containerized_node_upgrade.yml
   when: openshift.common.is_containerized | bool

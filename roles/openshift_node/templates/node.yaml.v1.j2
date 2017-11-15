@@ -29,13 +29,11 @@ kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yam
   runtime-request-timeout:
   - 10m
 {% endif %}
-{% if openshift.common.version_gte_3_3_or_1_3 | bool %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
   contentType: application/vnd.kubernetes.protobuf
   burst: 200
   qps: 100
-{% endif %}
 masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
 {% if openshift_node_use_openshift_sdn | bool %}
 networkPluginName: {{ openshift_node_sdn_network_plugin_name }}

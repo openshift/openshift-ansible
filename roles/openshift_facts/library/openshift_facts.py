@@ -806,7 +806,7 @@ def set_deployment_facts_if_unset(facts):
 # pylint: disable=too-many-statements
 def set_version_facts_if_unset(facts):
     """ Set version facts. This currently includes common.version and
-        common.version_gte_3_1_or_1_1.
+        common.version_gte_3_x
 
         Args:
             facts (dict): existing facts
@@ -814,49 +814,19 @@ def set_version_facts_if_unset(facts):
             dict: the facts dict updated with version facts.
     """
     if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
         openshift_version = get_openshift_version(facts)
         if openshift_version and openshift_version != "latest":
             version = LooseVersion(openshift_version)
             facts['common']['version'] = openshift_version
             facts['common']['short_version'] = '.'.join([str(x) for x in version.version[0:2]])
-            if deployment_type == 'origin':
-                version_gte_3_1_or_1_1 = version >= LooseVersion('1.1.0')
-                version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('1.1.1')
-                version_gte_3_2_or_1_2 = version >= LooseVersion('1.2.0')
-                version_gte_3_3_or_1_3 = version >= LooseVersion('1.3.0')
-                version_gte_3_4_or_1_4 = version >= LooseVersion('1.4')
-                version_gte_3_5_or_1_5 = version >= LooseVersion('1.5')
-                version_gte_3_6 = version >= LooseVersion('3.6')
-                version_gte_3_7 = version >= LooseVersion('3.7')
-                version_gte_3_8 = version >= LooseVersion('3.8')
-            else:
-                version_gte_3_1_or_1_1 = version >= LooseVersion('3.0.2.905')
-                version_gte_3_1_1_or_1_1_1 = version >= LooseVersion('3.1.1')
-                version_gte_3_2_or_1_2 = version >= LooseVersion('3.1.1.901')
-                version_gte_3_3_or_1_3 = version >= LooseVersion('3.3.0')
-                version_gte_3_4_or_1_4 = version >= LooseVersion('3.4')
-                version_gte_3_5_or_1_5 = version >= LooseVersion('3.5')
-                version_gte_3_6 = version >= LooseVersion('3.6')
-                version_gte_3_7 = version >= LooseVersion('3.7')
-                version_gte_3_8 = version >= LooseVersion('3.8')
+            version_gte_3_6 = version >= LooseVersion('3.6')
+            version_gte_3_7 = version >= LooseVersion('3.7')
+            version_gte_3_8 = version >= LooseVersion('3.8')
         else:
             # 'Latest' version is set to True, 'Next' versions set to False
-            version_gte_3_1_or_1_1 = True
-            version_gte_3_1_1_or_1_1_1 = True
-            version_gte_3_2_or_1_2 = True
-            version_gte_3_3_or_1_3 = True
-            version_gte_3_4_or_1_4 = True
-            version_gte_3_5_or_1_5 = True
             version_gte_3_6 = True
             version_gte_3_7 = True
             version_gte_3_8 = False
-        facts['common']['version_gte_3_1_or_1_1'] = version_gte_3_1_or_1_1
-        facts['common']['version_gte_3_1_1_or_1_1_1'] = version_gte_3_1_1_or_1_1_1
-        facts['common']['version_gte_3_2_or_1_2'] = version_gte_3_2_or_1_2
-        facts['common']['version_gte_3_3_or_1_3'] = version_gte_3_3_or_1_3
-        facts['common']['version_gte_3_4_or_1_4'] = version_gte_3_4_or_1_4
-        facts['common']['version_gte_3_5_or_1_5'] = version_gte_3_5_or_1_5
         facts['common']['version_gte_3_6'] = version_gte_3_6
         facts['common']['version_gte_3_7'] = version_gte_3_7
         facts['common']['version_gte_3_8'] = version_gte_3_8
@@ -867,18 +837,8 @@ def set_version_facts_if_unset(facts):
             examples_content_version = 'v3.7'
         elif version_gte_3_6:
             examples_content_version = 'v3.6'
-        elif version_gte_3_5_or_1_5:
-            examples_content_version = 'v1.5'
-        elif version_gte_3_4_or_1_4:
-            examples_content_version = 'v1.4'
-        elif version_gte_3_3_or_1_3:
-            examples_content_version = 'v1.3'
-        elif version_gte_3_2_or_1_2:
-            examples_content_version = 'v1.2'
-        elif version_gte_3_1_or_1_1:
-            examples_content_version = 'v1.1'
         else:
-            examples_content_version = 'v1.0'
+            examples_content_version = 'v1.5'
 
         facts['common']['examples_content_version'] = examples_content_version
 

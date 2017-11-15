@@ -18,12 +18,6 @@
   - openshift.master.ha | bool
   - (openshift.master.cluster_method is not defined) or (openshift.master.cluster_method is defined and openshift.master.cluster_method not in ["native", "pacemaker"])
 - fail:
-    msg: "'native' high availability is not supported for the requested OpenShift version"
-  when:
-  - openshift.master.ha | bool
-  - openshift.master.cluster_method == "native"
-  - not openshift.common.version_gte_3_1_or_1_1 | bool
-- fail:
     msg: "openshift_master_cluster_password must be set for multi-master installations"
   when:
   - openshift.master.ha | bool
@@ -222,8 +216,6 @@
   when: openshift_master_bootstrap_enabled | default(False)
 
 - include: set_loopback_context.yml
-  when:
-  - openshift.common.version_gte_3_2_or_1_2
 
 - name: Start and enable master api on first master
   systemd:

@@ -42,7 +42,7 @@
     - "{{ openshift_hosted_registry_routehost }}"
     cert: "{{ docker_registry_cert_path }}"
     key: "{{ docker_registry_key_path }}"
-    expire_days: "{{ openshift_hosted_registry_cert_expire_days if openshift_version | oo_version_gte_3_5_or_1_5(openshift_deployment_type) | bool else omit }}"
+    expire_days: "{{ openshift_hosted_registry_cert_expire_days }}"
   register: registry_self_cert
   when: docker_registry_self_signed
 
