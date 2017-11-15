@@ -17,7 +17,6 @@
       - "{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
       - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version }}"
       - "{{ openshift.common.service_type }}-clients{{ openshift_pkg_version }}"
-      - "tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
       - PyYAML
   when:
     - component == "master"

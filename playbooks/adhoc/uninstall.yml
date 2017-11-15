@@ -124,8 +124,6 @@
         - origin-clients
         - origin-node
         - origin-sdn-ovs
-        - tuned-profiles-openshift-node
-        - tuned-profiles-origin-node
 
       - name: Remove flannel package
         package: name=flannel state=absent
