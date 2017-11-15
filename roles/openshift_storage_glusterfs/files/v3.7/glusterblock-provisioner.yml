@@ -2,7 +2,7 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: glusterblock
+  name: glusterblock-provisioner
   labels:
     glusterfs: block-template
     glusterblock: template
