@@ -729,7 +729,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #  openshift_portal_net: serviceNetworkCIDR
 # When installing osm_cluster_network_cidr and openshift_portal_net must be set.
 # Sane examples are provided below.
-#osm_cluster_network_cidr=10.128.0.0/14
+#osm_cluster_network_cidr=10.1.0.0/16
 #openshift_portal_net=172.30.0.0/16
 
 # ExternalIPNetworkCIDRs controls what values are acceptable for the
