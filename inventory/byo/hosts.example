@@ -17,9 +17,9 @@ nfs
 # SSH user, this user should allow ssh based auth without requiring a
 # password. If using ssh key based auth, then the key should be managed by an
 # ssh agent.
-ansible_ssh_user=root
+ansible_user=root
 
-# If ansible_ssh_user is not root, ansible_become must be set to true and the
+# If ansible_user is not root, ansible_become must be set to true and the
 # user must be configured for passwordless sudo
 #ansible_become=yes
 
@@ -1087,3 +1087,6 @@ ose3-lb-ansible.test.example.com containerized=false
 [nodes]
 ose3-master[1:3]-ansible.test.example.com
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+[nfs]
+ose3-nfs-ansible.test.example.com
