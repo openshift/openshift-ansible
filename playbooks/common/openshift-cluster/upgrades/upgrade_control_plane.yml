@@ -63,13 +63,9 @@
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
-  handlers:
-  - include: ../../../../roles/openshift_master/handlers/main.yml
-    static: yes
-  roles:
-  - openshift_facts
-  - lib_utils
-  post_tasks:
+  tasks:
+  - include_role:
+      name: openshift_facts
 
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
@@ -78,55 +74,9 @@
   - include: "{{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
 
-  - include: rpm_upgrade.yml component=master
-    when: not openshift.common.is_containerized | bool
-
-  - include_vars: ../../../../roles/openshift_master_facts/vars/main.yml
-
-  - include: upgrade_scheduler.yml
-
-  - include: "{{ master_config_hook }}"
-    when: master_config_hook is defined
-
-  - include_vars: ../../../../roles/openshift_master/vars/main.yml
-
-  - name: Update journald config
-    include: ../../../../roles/openshift_master/tasks/journald.yml
-
-  - name: Remove any legacy systemd units and update systemd units
-    include: ../../../../roles/openshift_master/tasks/systemd_units.yml
-
-  - name: Check for ca-bundle.crt
-    stat:
-      path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
-    register: ca_bundle_stat
-    failed_when: false
-
-  - name: Check for ca.crt
-    stat:
-      path: "{{ openshift.common.config_base }}/master/ca.crt"
-    register: ca_crt_stat
-    failed_when: false
-
-  - name: Migrate ca.crt to ca-bundle.crt
-    command: mv ca.crt ca-bundle.crt
-    args:
-      chdir: "{{ openshift.common.config_base }}/master"
-    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
-
-  - name: Link ca.crt to ca-bundle.crt
-    file:
-      src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
-      path: "{{ openshift.common.config_base }}/master/ca.crt"
-      state: link
-    when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
-
-  - name: Update oreg value
-    yedit:
-      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
-      key: 'imageConfig.format'
-      value: "{{ oreg_url | default(oreg_url_master) }}"
-    when: oreg_url is defined or oreg_url_master is defined
+  - include_role:
+      name: openshift_master
+      tasks_from: upgrade.yml
 
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
