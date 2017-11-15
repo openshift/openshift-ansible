@@ -67,7 +67,17 @@ Fedora:
 dnf install -y ansible pyOpenSSL python-cryptography python-lxml
 ```
 
-## OpenShift Installation Documentation:
+## Simple all-in-one localhost Installation
+This assumes that you've installed the base dependencies and you're running on
+Fedora or RHEL
+```
+git clone https://github.com/openshift/openshift-ansible
+cd openshift-ansible
+sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
+sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
+```
+
+## Complete Production Installation Documentation:
 
 - [OpenShift Enterprise](https://docs.openshift.com/enterprise/latest/install_config/install/advanced_install.html)
 - [OpenShift Origin](https://docs.openshift.org/latest/install_config/install/advanced_install.html)
