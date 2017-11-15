@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.7
+Version:        3.7.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Nov 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.8-1
+- Allow disabling authorization migration check (sdodson@redhat.com)
+- Nuke /var/lib/dockershim/sandbox/* while nodes are drained
+  (sdodson@redhat.com)
+- Fix extension script for catalog (mgugino@redhat.com)
+- Regex anchors changed to match protocol start and ports.
+  (kwoodson@redhat.com)
+
 * Sat Nov 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.7-1
 - 
 
