@@ -29,21 +29,21 @@
     src: "{{ openshift.common.examples_content_version }}/{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
-  - "glusterblock-template.yml"
+  - "glusterblock-provisioner.yml"
 
 - name: Create glusterblock provisioner template
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: template
-    name: "glusterblock"
+    name: "glusterblock-provisioner"
     state: present
     files:
-    - "{{ mktemp.stdout }}/glusterblock-template.yml"
+    - "{{ mktemp.stdout }}/glusterblock-provisioner.yml"
 
 - name: Deploy glusterblock provisioner
   oc_process:
     namespace: "{{ glusterfs_namespace }}"
-    template_name: "glusterblock"
+    template_name: "glusterblock-provisioner"
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_block_image }}"
