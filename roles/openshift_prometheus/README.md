@@ -25,6 +25,8 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_args`: Modify or add arguments for prometheus application
 
+- `openshift_prometheus_<COMPONENT>_hostname`: specify the hostname for the route of that compontent: defaults to `<COMPONENT>-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
+
 e.g
 ```
 openshift_prometheus_args=['--storage.tsdb.retention=6h', '--storage.tsdb.min-block-duration=5s', '--storage.tsdb.max-block-duration=6m']
