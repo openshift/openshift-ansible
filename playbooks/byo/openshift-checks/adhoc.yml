@@ -20,8 +20,6 @@
     action: openshift_health_check
     when: openshift_checks is undefined or not openshift_checks
 
-- include: ../openshift-cluster/initialize_groups.yml
-
-- include: ../../common/openshift-cluster/std_include.yml
+- include: ../../init/main.yml
 
 - include: ../../common/openshift-checks/adhoc.yml

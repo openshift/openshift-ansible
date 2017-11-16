@@ -1,5 +1,5 @@
 ---
-- include: ../../evaluate_groups.yml
+- include: ../../../../init/evaluate_groups.yml
   vars:
     # Do not allow adding hosts during upgrade.
     g_new_master_hosts: []

@@ -1,5 +1,5 @@
 ---
-- include: ../openshift-cluster/initialize_groups.yml
+- include: ../../init/evaluate_groups.yml
 
 - name: Ensure there are new_nodes
   hosts: localhost
@@ -14,6 +14,8 @@
     when:
     - g_new_node_hosts | default([]) | length == 0
 
-- include: ../../common/openshift-cluster/std_include.yml
+# Need a better way to do the above check for node without
+# running evaluate_groups and init/main.yml
+- include: ../../init/main.yml
 
 - include: ../../common/openshift-node/config.yml

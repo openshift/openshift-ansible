@@ -1,15 +1,12 @@
 ---
 - name: normalize groups
-  include: ../../byo/openshift-cluster/initialize_groups.yml
-
-- name: evaluate the groups
-  include: ../openshift-cluster/evaluate_groups.yml
+  include: ../../init/evaluate_groups.yml
 
 - name: initialize the facts
-  include: ../openshift-cluster/initialize_facts.yml
+  include: ../../init/facts.yml
 
 - name: initialize the repositories
-  include: ../openshift-cluster/initialize_openshift_repos.yml
+  include: ../../init/repos.yml
 
 - name: run node config setup
   include: setup.yml

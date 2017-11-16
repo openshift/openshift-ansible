@@ -1,6 +1,4 @@
 ---
-- include: initialize_groups.yml
-
-- include: ../../common/openshift-cluster/std_include.yml
+- include: ../../init/main.yml
 
 - include: ../../common/openshift-cluster/openshift_hosted.yml

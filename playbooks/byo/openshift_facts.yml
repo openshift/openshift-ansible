@@ -1,19 +1,13 @@
 ---
-- include: openshift-cluster/initialize_groups.yml
-  tags:
-  - always
-
-- include: ../common/openshift-cluster/std_include.yml
-  tags:
-  - always
+- include: ../init/main.yml
 
 - name: Gather Cluster facts
-  # Temporarily reverting to OSEv3 until group standardization is complete
-  hosts: OSEv3
+  hosts: oo_all_hosts
   roles:
   - openshift_facts
   tasks:
   - openshift_facts:
       openshift_env: "{{ hostvars[inventory_hostname] | oo_openshift_env }}"
     register: result
-  - debug: var=result
+  - debug:
+      var: result

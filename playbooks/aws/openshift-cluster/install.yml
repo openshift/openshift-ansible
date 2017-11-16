@@ -15,11 +15,8 @@
       name: openshift_aws
       tasks_from: master_facts.yml
 
-- name: normalize groups
-  include: ../../byo/openshift-cluster/initialize_groups.yml
-
-- name: run the std_include
-  include: ../../common/openshift-cluster/std_include.yml
+- name: run the init
+  include: ../../init/main.yml
 
 - name: perform the installer openshift-checks
   include: ../../common/openshift-checks/install.yml

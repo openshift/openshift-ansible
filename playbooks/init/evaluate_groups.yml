@@ -5,6 +5,9 @@
   become: no
   gather_facts: no
   tasks:
+  - name: Load group name mapping variables
+    include_vars: vars/cluster_hosts.yml
+
   - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
     fail:
       msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
