@@ -270,7 +270,7 @@
         port: 443
         targetPort: 4443
     selector:
-      component: "{{ es_component }}-prometheus"
+      component: "{{ es_component }}"
       provider: openshift
 
 - oc_edit:
