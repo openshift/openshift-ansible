@@ -5,3 +5,5 @@ etcd_hosts: "{{ etcd_urls }}"
 etcd_peer_ca_file: "{{ openshift.common.config_base }}/node/{{ 'ca' if (embedded_etcd | bool) else 'flannel.etcd-ca' }}.crt"
 etcd_peer_cert_file: "{{ openshift.common.config_base }}/node/{{ 'system:node:' + openshift.common.hostname if (embedded_etcd | bool) else 'flannel.etcd-client' }}.crt"
 etcd_peer_key_file: "{{ openshift.common.config_base }}/node/{{ 'system:node:' + openshift.common.hostname if (embedded_etcd | bool) else 'flannel.etcd-client' }}.key"
+
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"

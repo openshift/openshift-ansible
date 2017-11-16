@@ -1,4 +1,4 @@
 ---
-- include: ../../init/main.yml
+- include: prerequisites.yml
 
-- include: ../../common/openshift-cluster/config.yml
+- include: old_config.yml

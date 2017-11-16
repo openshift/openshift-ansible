@@ -1,0 +1,9 @@
+---
+- include: ../../init/main.yml
+  vars:
+    skip_verison: True
+
+- hosts: all
+  tasks:
+    - include_role:
+        name: container_runtime

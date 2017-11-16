@@ -19,7 +19,6 @@ dependencies:
   when: not (openshift_node_upgrade_in_progress | default(False))
 - role: openshift_clock
   when: not (openshift_node_upgrade_in_progress | default(False))
-- role: openshift_docker
 - role: openshift_cloud_provider
   when: not (openshift_node_upgrade_in_progress | default(False))
 - role: openshift_node_dnsmasq

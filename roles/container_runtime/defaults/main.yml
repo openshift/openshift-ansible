@@ -2,17 +2,33 @@
 docker_cli_auth_config_path: '/root/.docker'
 openshift_docker_signature_verification: False
 
+repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
+
 openshift_docker_alternative_creds: False
 
 # oreg_url is defined by user input.
 oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
 oreg_auth_credentials_replace: False
 
+openshift_docker_use_system_container: False
+openshift_docker_disable_push_dockerhub: False  # bool
+openshift_docker_selinux_enabled: True
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+
+openshift_docker_hosted_registry_insecure: False  # bool
+
+openshift_docker_hosted_registry_network_default: "{{ openshift_portal_net | default(False) }}"
+openshift_docker_hosted_registry_network: "{{ openshift_docker_hosted_registry_network_default }}"
+
 openshift_docker_additional_registries: []
 openshift_docker_blocked_registries: []
 openshift_docker_insecure_registries: []
 
 openshift_docker_ent_reg: 'registry.access.redhat.com'
+
+openshift_docker_options: False  # str
+openshift_docker_log_driver: False  # str
+openshift_docker_log_options: []
 
 # The l2_docker_* variables convert csv strings to lists, if
 # necessary.  These variables should be used in place of their respective
@@ -21,6 +37,7 @@ openshift_docker_ent_reg: 'registry.access.redhat.com'
 l2_docker_additional_registries: "{% if openshift_docker_additional_registries is string %}{% if openshift_docker_additional_registries == '' %}[]{% elif ',' in openshift_docker_additional_registries %}{{ openshift_docker_additional_registries.split(',') | list }}{% else %}{{ [ openshift_docker_additional_registries ] }}{% endif %}{% else %}{{ openshift_docker_additional_registries }}{% endif %}"
 l2_docker_blocked_registries: "{% if openshift_docker_blocked_registries is string %}{% if openshift_docker_blocked_registries == '' %}[]{% elif ',' in openshift_docker_blocked_registries %}{{ openshift_docker_blocked_registries.split(',') | list }}{% else %}{{ [ openshift_docker_blocked_registries ] }}{% endif %}{% else %}{{ openshift_docker_blocked_registries }}{% endif %}"
 l2_docker_insecure_registries: "{% if openshift_docker_insecure_registries is string %}{% if openshift_docker_insecure_registries == '' %}[]{% elif ',' in openshift_docker_insecure_registries %}{{ openshift_docker_insecure_registries.split(',') | list }}{% else %}{{ [ openshift_docker_insecure_registries ] }}{% endif %}{% else %}{{ openshift_docker_insecure_registries }}{% endif %}"
+l2_docker_log_options: "{% if openshift_docker_log_options is string %}{% if ',' in openshift_docker_log_options %}{{ openshift_docker_log_options.split(',') | list }}{% else %}{{ [ openshift_docker_log_options ] }}{% endif %}{% else %}{{ openshift_docker_log_options }}{% endif %}"
 
 openshift_docker_use_etc_containers: False
 containers_registries_conf_path: /etc/containers/registries.conf
@@ -38,3 +55,18 @@ openshift_docker_is_node_or_master: "{{ True if inventory_hostname in (groups['o
 
 docker_alt_storage_path: /var/lib/containers/docker
 docker_default_storage_path: /var/lib/docker
+
+# Set local versions of facts that must be in json format for container-daemon.json
+# NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
+l_docker_log_options: "{{ l2_docker_log_options | to_json }}"
+l_docker_additional_registries: "{{ l2_docker_additional_registries | to_json }}"
+l_docker_blocked_registries: "{{ l2_docker_blocked_registries | to_json }}"
+l_docker_insecure_registries: "{{ l2_docker_insecure_registries | to_json }}"
+l_docker_selinux_enabled: "{{ openshift_docker_selinux_enabled | to_json }}"
+
+docker_http_proxy: "{{ openshift_http_proxy | default('') }}"
+docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
+docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
+
+openshift_use_crio: False
+openshift_use_crio_only: False

@@ -6,7 +6,7 @@
 
 - name: Update oreg_auth docker login credentials if necessary
   include_role:
-    name: docker
+    name: container_runtime
     tasks_from: registry_auth.yml
   when: oreg_auth_user is defined
 

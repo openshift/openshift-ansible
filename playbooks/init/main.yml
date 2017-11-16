@@ -24,6 +24,7 @@
 - include: repos.yml
 
 - include: version.yml
+  when: not (skip_verison | default(False))
 
 - name: Initialization Checkpoint End
   hosts: all

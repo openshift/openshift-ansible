@@ -10,27 +10,23 @@ Requirements
 
 Ansible 2.2
 
-Role Variables
+Mandator Role Variables
 --------------
 
-docker_conf_dir: location of the Docker configuration directory
-docker_systemd_dir location of the systemd directory for Docker
-docker_udev_workaround: raises udevd timeout to 5 minutes (https://bugzilla.redhat.com/show_bug.cgi?id=1272446)
-udevw_udevd_dir: location of systemd config for systemd-udevd.service
+
 
 Dependencies
 ------------
 
-Depends on the os_firewall role.
+Depends on openshift_facts having already been run.
 
 Example Playbook
 ----------------
 
     - hosts: servers
       roles:
-      - role: docker
+      - role: container_runtime
         docker_udev_workaround: "true"
-        docker_use_system_container: False
 
 License
 -------

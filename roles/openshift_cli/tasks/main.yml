@@ -1,10 +1,4 @@
 ---
-- set_fact:
-    l_use_crio_only: "{{ openshift_use_crio_only | default(false) }}"
-    l_is_system_container_image: "{{ openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool }}"
-- set_fact:
-    l_use_cli_atomic_image: "{{ l_use_crio_only or l_is_system_container_image }}"
-
 - name: Install clients
   package: name={{ openshift.common.service_type }}-clients state=present
   when: not openshift.common.is_containerized | bool
