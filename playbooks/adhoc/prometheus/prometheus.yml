@@ -1,0 +1,9 @@
+---
+- name: Configure openshift-prometheus
+  hosts: localhost
+  vars:
+    openshift:
+      common:
+        client_binary: oc
+  roles:
+  - role: openshift_prometheus
