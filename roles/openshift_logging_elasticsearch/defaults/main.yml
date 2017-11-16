@@ -55,7 +55,7 @@ openshift_logging_elasticsearch_ops_allow_cluster_reader: false
 
 
 openshift_logging_master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"
-openshift_logging_master_public_url: "{{ openshift_hosted_logging_master_public_url | default('https://' + openshift.common.public_hostname + ':' ~ (openshift_master_api_port | default('8443', true))) }}"
+openshift_logging_master_public_url: "{{ openshift.master.public_api_url }}"
 openshift_logging_es_host: logging-es
 openshift_logging_es_port: 9200
 openshift_logging_es_ca: /etc/fluent/keys/ca
