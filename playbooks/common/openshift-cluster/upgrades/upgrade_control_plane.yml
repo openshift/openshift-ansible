@@ -85,10 +85,10 @@
   - include: "{{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
 
-  - include: ../../openshift-master/restart_hosts.yml
+  - include: ../../../openshift-master/private/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
 
-  - include: ../../openshift-master/restart_services.yml
+  - include: ../../../openshift-master/private/restart_services.yml
     when: openshift.common.rolling_restart_mode == 'services'
 
   # Run the post-upgrade hook if defined:

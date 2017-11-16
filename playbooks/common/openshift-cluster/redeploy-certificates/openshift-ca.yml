@@ -207,7 +207,7 @@
       group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
     with_items: "{{ client_users }}"
 
-- include: ../../openshift-master/restart.yml
+- include: ../../../openshift-master/private/restart.yml
   # Do not restart masters when master or etcd certificates were previously expired.
   when:
   # masters

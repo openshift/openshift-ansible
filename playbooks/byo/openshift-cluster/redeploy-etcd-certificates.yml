@@ -15,4 +15,4 @@
   vars:
     g_etcd_certificates_expired: "{{ ('expired' in (hostvars | oo_select_keys(groups['etcd']) | oo_collect('check_results.check_results.etcd') | oo_collect('health'))) | bool }}"
 
-- include: ../../common/openshift-master/restart.yml
+- include: ../../openshift-master/private/restart.yml

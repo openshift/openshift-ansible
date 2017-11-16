@@ -84,7 +84,7 @@
       state: absent
     changed_when: false
 
-- include: ../../openshift-master/restart.yml
+- include: ../../../openshift-master/private/restart.yml
   # Do not restart masters when master or etcd certificates were previously expired.
   when:
   # masters

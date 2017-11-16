@@ -160,7 +160,7 @@ Health Check               : Complete (0:01:10)
 etcd Install               : Complete (0:02:58)
 Master Install             : Complete (0:09:20)
 Master Additional Install  : In Progress (0:20:04)
-    This phase can be restarted by running: playbooks/byo/openshift-master/additional_config.yml
+    This phase can be restarted by running: playbooks/openshift-master/additional_config.yml
 ```
 
 [set_stats]: http://docs.ansible.com/ansible/latest/set_stats_module.html

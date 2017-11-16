@@ -3,8 +3,8 @@
 
 - include: ../../common/openshift-cluster/redeploy-certificates/masters-backup.yml
 
-- include: ../../common/openshift-master/certificates.yml
+- include: ../../openshift-master/private/certificates.yml
   vars:
     openshift_certificates_redeploy: true
 
-- include: ../../common/openshift-master/restart.yml
+- include: ../../openshift-master/private/restart.yml
