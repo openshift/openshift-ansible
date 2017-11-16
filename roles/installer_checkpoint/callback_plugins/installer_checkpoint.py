@@ -82,7 +82,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_metrics': {
                 'title': 'Metrics Install',
-                'playbook': 'playbooks/byo/openshift-cluster/openshift-metrics.yml'
+                'playbook': 'playbooks/openshift-metrics/config.yml'
             },
             'installer_phase_logging': {
                 'title': 'Logging Install',
