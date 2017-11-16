@@ -29,7 +29,7 @@
   when: groups.oo_nfs_to_config | default([]) | count > 0
 
 - name: include loadbalancer
-  include: ../../common/openshift-loadbalancer/config.yml
+  include: ../../openshift-loadbalancer/private/config.yml
   when: groups.oo_lb_to_config | default([]) | count > 0
 
 - name: include openshift-master config

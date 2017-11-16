@@ -58,7 +58,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_loadbalancer': {
                 'title': 'Load balancer Install',
-                'playbook': 'playbooks/byo/openshift-loadbalancer/config.yml'
+                'playbook': 'playbooks/openshift-loadbalancer/config.yml'
             },
             'installer_phase_master': {
                 'title': 'Master Install',
