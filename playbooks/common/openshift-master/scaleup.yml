@@ -52,6 +52,6 @@
 
 - include: ../openshift-loadbalancer/config.yml
 
-- include: ../openshift-node/certificates.yml
+- include: ../../openshift-node/private/certificates.yml
 
-- include: ../openshift-node/config.yml
+- include: ../../openshift-node/private/config.yml

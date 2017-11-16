@@ -39,7 +39,7 @@
   include: ../../common/openshift-master/additional_config.yml
 
 - name: include master additional config
-  include: ../../common/openshift-node/config.yml
+  include: ../../openshift-node/private/config.yml
 
 - name: include openshift-glusterfs
   include: ../../common/openshift-glusterfs/config.yml

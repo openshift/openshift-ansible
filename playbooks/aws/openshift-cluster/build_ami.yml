@@ -33,7 +33,7 @@
 
 # This is the part that installs all of the software and configs for the instance
 # to become a node.
-- include: ../../common/openshift-node/image_prep.yml
+- include: ../../openshift-node/private/image_prep.yml
 
 - include: seal_ami.yml
   vars:

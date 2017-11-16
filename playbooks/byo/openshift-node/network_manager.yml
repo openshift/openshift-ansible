@@ -1,4 +1,0 @@
----
-- include: ../../init/evaluate_groups.yml
-
-- include: ../../common/openshift-node/network_manager.yml

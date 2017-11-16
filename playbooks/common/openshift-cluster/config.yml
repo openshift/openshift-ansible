@@ -13,7 +13,7 @@
 
 - include: ../openshift-master/additional_config.yml
 
-- include: ../openshift-node/config.yml
+- include: ../../openshift-node/private/config.yml
 
 - include: ../openshift-glusterfs/config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0

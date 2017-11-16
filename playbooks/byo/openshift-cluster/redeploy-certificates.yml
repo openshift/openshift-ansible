@@ -19,7 +19,7 @@
 
 - include: ../../common/openshift-cluster/redeploy-certificates/nodes-backup.yml
 
-- include: ../../common/openshift-node/certificates.yml
+- include: ../../openshift-node/private/certificates.yml
   vars:
     openshift_certificates_redeploy: true
 
@@ -29,7 +29,7 @@
 
 - include: ../../common/openshift-master/restart.yml
 
-- include: ../../common/openshift-node/restart.yml
+- include: ../../openshift-node/private/restart.yml
 
 - include: ../../common/openshift-cluster/redeploy-certificates/router.yml
   when: openshift_hosted_manage_router | default(true) | bool
