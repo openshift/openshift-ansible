@@ -16,10 +16,6 @@
     retries: 3
     delay: 30
 
-  - name: Update docker facts
-    openshift_facts:
-      role: docker
-
   - name: Restart containerized services
     service:
       name: "{{ item }}"

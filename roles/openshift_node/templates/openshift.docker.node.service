@@ -1,9 +1,9 @@
 [Unit]
 After={{ openshift.common.service_type }}-master.service
-After={{ openshift.docker.service_name }}.service
+After={{ openshift_docker_service_name }}.service
 After=openvswitch.service
-PartOf={{ openshift.docker.service_name }}.service
-Requires={{ openshift.docker.service_name }}.service
+PartOf={{ openshift_docker_service_name }}.service
+Requires={{ openshift_docker_service_name }}.service
 {% if openshift_node_use_openshift_sdn %}
 Wants=openvswitch.service
 PartOf=openvswitch.service
@@ -26,7 +26,7 @@ ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
   --rm --privileged --net=host --pid=host --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-node \
   -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} \
   -e HOST=/rootfs -e HOST_ETC=/host-etc \
-  -v {{ openshift_node_data_dir }}:{{ openshift_node_data_dir }}{{ ':rslave' if openshift.docker.gte_1_10 | default(False) | bool else '' }} \
+  -v {{ openshift_node_data_dir }}:{{ openshift_node_data_dir }}:rslave \
   -v {{ openshift.common.config_base }}/node:{{ openshift.common.config_base }}/node \
   {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} \
   -v /etc/localtime:/etc/localtime:ro -v /etc/machine-id:/etc/machine-id:ro \
@@ -48,4 +48,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy={{ openshift.docker.service_name }}.service
+WantedBy={{ openshift_docker_service_name }}.service

@@ -101,7 +101,7 @@
   static: no
   run_once: true
   when:
-  - not (openshift.docker.hosted_registry_insecure | default(false) | bool)
+  - not (openshift_docker_hosted_registry_insecure | default(False)) | bool
 
 - include: storage/object_storage.yml
   static: no

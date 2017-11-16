@@ -16,6 +16,6 @@
     image: "{{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}"
     values:
     - "DNS_DOMAIN={{ openshift.common.dns_domain }}"
-    - "DOCKER_SERVICE={{ openshift.docker.service_name }}.service"
+    - "DOCKER_SERVICE={{ openshift_docker_service_name }}.service"
     - "MASTER_SERVICE={{ openshift.common.service_type }}.service"
     state: latest

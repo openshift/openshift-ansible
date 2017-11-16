@@ -101,7 +101,10 @@ oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_ur
 oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
+openshift_use_crio: False
 openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False)) or (openshift_use_crio_only | default(False)) }}"
+
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
 
 # NOTE
 # r_openshift_node_*_default may be defined external to this role.

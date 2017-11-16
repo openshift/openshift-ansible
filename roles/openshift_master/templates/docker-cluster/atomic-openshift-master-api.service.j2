@@ -4,9 +4,9 @@ Documentation=https://github.com/openshift/origin
 After=etcd_container.service
 Wants=etcd_container.service
 Before={{ openshift.common.service_type }}-node.service
-After={{ openshift.docker.service_name }}.service
-PartOf={{ openshift.docker.service_name }}.service
-Requires={{ openshift.docker.service_name }}.service
+After={{ openshift_docker_service_name }}.service
+PartOf={{ openshift_docker_service_name }}.service
+Requires={{ openshift_docker_service_name }}.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-api
@@ -33,5 +33,5 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy={{ openshift.docker.service_name }}.service
+WantedBy={{ openshift_docker_service_name }}.service
 WantedBy={{ openshift.common.service_type }}-node.service
