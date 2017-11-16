@@ -24,7 +24,7 @@
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
   - role: openshift_examples
-    when: openshift_install_examples | default(true, true) | bool
+    when: openshift_install_examples | default(true) | bool
     registry_url: "{{ openshift.master.registry_url }}"
   - role: openshift_hosted_templates
     registry_url: "{{ openshift.master.registry_url }}"
