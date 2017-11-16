@@ -46,7 +46,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_health': {
                 'title': 'Health Check',
-                'playbook': 'playbooks/byo/openshift-checks/pre-install.yml'
+                'playbook': 'playbooks/openshift-checks/pre-install.yml'
             },
             'installer_phase_etcd': {
                 'title': 'etcd Install',

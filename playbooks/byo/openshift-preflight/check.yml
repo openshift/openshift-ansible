@@ -1,3 +1,0 @@
----
-# location is moved; this file remains so existing instructions keep working
-- include: ../openshift-checks/pre-install.yml

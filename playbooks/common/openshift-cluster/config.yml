@@ -1,5 +1,5 @@
 ---
-- include: ../openshift-checks/install.yml
+- include: ../../openshift-checks/private/install.yml
 
 - include: ../openshift-etcd/config.yml
 
