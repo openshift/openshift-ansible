@@ -9,7 +9,7 @@
 # some logic here?
 
 - name: normalize groups
-  include: ../../byo/openshift-cluster/initialize_groups.yml
+  include: ../../init/initialize_host_groups.yml
 
 - name: run the std_include
   include: ../../common/openshift-cluster/std_include.yml
