@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Check dependencies and OpenStack prerequisites
+    include_role:
+      name: openshift_openstack
+      tasks_from: check-prerequisites.yml
+
+  - name: Check network configuration
+    include_role:
+      name: openshift_openstack
+      tasks_from: net_vars_check.yaml

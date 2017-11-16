@@ -1,0 +1,4 @@
+DEVS="{{ openshift_openstack_container_storage_setup.docker_dev }}"
+VG="{{ openshift_openstack_container_storage_setup.docker_vg }}"
+DATA_SIZE="{{ openshift_openstack_container_storage_setup.docker_data_size }}"
+EXTRA_DOCKER_STORAGE_OPTIONS="--storage-opt dm.basesize={{ openshift_openstack_container_storage_setup.docker_dm_basesize }}"
