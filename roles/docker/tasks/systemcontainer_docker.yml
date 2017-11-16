@@ -177,6 +177,6 @@
 
 # Since docker is running as a system container, docker login will fail to create
 # credentials.  Use alternate method if requiring authenticated registries.
-- include: registry_auth.yml
+- include_tasks: registry_auth.yml
   vars:
     openshift_docker_alternative_creds: True

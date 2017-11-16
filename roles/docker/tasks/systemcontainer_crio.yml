@@ -162,7 +162,7 @@
     state: directory
 
 - name: setup firewall for CRI-O
-  include: crio_firewall.yml
+  include_tasks: crio_firewall.yml
   static: yes
 
 - name: Configure the CNI network
@@ -182,6 +182,6 @@
 
 # If we are using crio only, docker.service might not be available for
 # 'docker login'
-- include: registry_auth.yml
+- include_tasks: registry_auth.yml
   vars:
     openshift_docker_alternative_creds: "{{ l_use_crio_only }}"

@@ -2,7 +2,7 @@
 # These tasks dispatch to the proper set of docker tasks based on the
 # inventory:openshift_docker_use_system_container variable
 
-- include: udev_workaround.yml
+- include_tasks: udev_workaround.yml
   when: docker_udev_workaround | default(False) | bool
 
 - set_fact:
@@ -20,7 +20,7 @@
     - not l_use_crio_only
 
 - name: Use Package Docker if Requested
-  include: package_docker.yml
+  include_tasks: package_docker.yml
   when:
     - not l_use_system_container
     - not l_use_crio_only
@@ -35,13 +35,13 @@
   changed_when: false
 
 - name: Use System Container Docker if Requested
-  include: systemcontainer_docker.yml
+  include_tasks: systemcontainer_docker.yml
   when:
     - l_use_system_container
     - not l_use_crio_only
 
 - name: Add CRI-O usage Requested
-  include: systemcontainer_crio.yml
+  include_tasks: systemcontainer_crio.yml
   when:
     - l_use_crio
     - openshift_docker_is_node_or_master | bool

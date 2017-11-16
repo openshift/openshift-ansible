@@ -157,4 +157,4 @@
 - meta: flush_handlers
 
 # This needs to run after docker is restarted to account for proxy settings.
-- include: registry_auth.yml
+- include_tasks: registry_auth.yml

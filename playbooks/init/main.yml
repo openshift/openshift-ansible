@@ -13,17 +13,17 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- include: evaluate_groups.yml
+- import_playbook: evaluate_groups.yml
 
-- include: facts.yml
+- import_playbook: facts.yml
 
-- include: sanity_checks.yml
+- import_playbook: sanity_checks.yml
 
-- include: validate_hostnames.yml
+- import_playbook: validate_hostnames.yml
 
-- include: repos.yml
+- import_playbook: repos.yml
 
-- include: version.yml
+- import_playbook: version.yml
 
 - name: Initialization Checkpoint End
   hosts: all
