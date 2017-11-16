@@ -62,7 +62,6 @@
     - origin-master
     - origin-master-api
     - origin-master-controllers
-    - pcsd
     failed_when: false
 
 - hosts: etcd
@@ -384,8 +383,6 @@
     - origin-excluder
     - origin-docker-excluder
     - origin-master
-    - pacemaker
-    - pcs
     register: result
     until: result | success
 
@@ -456,8 +453,6 @@
     - /etc/sysconfig/origin-master-api
     - /etc/sysconfig/origin-master-controllers
     - /usr/share/openshift/examples
-    - /var/lib/pacemaker
-    - /var/lib/pcsd
     - /usr/lib/systemd/system/atomic-openshift-master-api.service
     - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
     - /usr/lib/systemd/system/origin-master-api.service

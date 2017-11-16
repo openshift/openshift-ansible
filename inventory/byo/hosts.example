@@ -298,24 +298,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Set cockpit plugins
 #osm_cockpit_plugins=['cockpit-kubernetes']
 
-# Native high availability cluster method with optional load balancer.
+# Native high availability (default cluster method)
 # If no lb group is defined, the installer assumes that a load balancer has
 # been preconfigured. For installation the value of
 # openshift_master_cluster_hostname must resolve to the load balancer
 # or to one or all of the masters defined in the inventory if no load
 # balancer is present.
-#openshift_master_cluster_method=native
-#openshift_master_cluster_hostname=openshift-ansible.test.example.com
-#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
-
-# Pacemaker high availability cluster method.
-# Pacemaker HA environment must be able to self provision the
-# configured VIP. For installation openshift_master_cluster_hostname
-# must resolve to the configured VIP.
-#openshift_master_cluster_method=pacemaker
-#openshift_master_cluster_password=openshift_cluster
-#openshift_master_cluster_vip=192.168.133.25
-#openshift_master_cluster_public_vip=192.168.133.25
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
 #openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
 

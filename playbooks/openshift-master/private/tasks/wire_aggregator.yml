@@ -183,7 +183,6 @@
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
   when:
   - yedit_output.changed
-  - openshift.master.cluster_method == 'native'
 
 # We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
@@ -194,7 +193,6 @@
   until: result.rc == 0
   when:
   - yedit_output.changed
-  - openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
