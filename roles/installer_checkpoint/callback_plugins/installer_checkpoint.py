@@ -54,7 +54,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_nfs': {
                 'title': 'NFS Install',
-                'playbook': 'playbooks/byo/openshift-nfs/config.yml'
+                'playbook': 'playbooks/openshift-nfs/config.yml'
             },
             'installer_phase_loadbalancer': {
                 'title': 'Load balancer Install',
