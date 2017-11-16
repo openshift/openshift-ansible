@@ -9,10 +9,8 @@
 
 
 # NOTE(shadower): Bring in the host groups:
-- name: normalize groups
-  include: ../../byo/openshift-cluster/initialize_groups.yml
 - name: evaluate groups
-  include: ../../common/openshift-cluster/evaluate_groups.yml
+  include: ../../init/evaluate_groups.yml
 
 
 - name: Wait for the nodes and gather their facts

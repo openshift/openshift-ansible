@@ -8,11 +8,8 @@
 # values here. We do it in the OSEv3 group vars. Do we need to add
 # some logic here?
 
-- name: normalize groups
-  include: ../../byo/openshift-cluster/initialize_groups.yml
-
-- name: run the std_include
-  include: ../../common/openshift-cluster/std_include.yml
+- name: run the initialization
+  include: ../../init/main.yml
 
 - name: run the config
   include: ../../common/openshift-cluster/config.yml
