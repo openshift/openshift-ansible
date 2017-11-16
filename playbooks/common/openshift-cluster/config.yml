@@ -15,7 +15,7 @@
 
 - include: ../openshift-node/config.yml
 
-- include: ../openshift-glusterfs/config.yml
+- include: ../../openshift-glusterfs/private/config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
 - include: openshift_hosted.yml
