@@ -1,0 +1,17 @@
+---
+- when: openshift_cluster_autoscaler_cloud_provider == 'aws'
+  block:
+  - name: laydown the aws-credentials
+    template:
+      src: aws-creds.j2
+      dest: "{{ openshift_cluster_autoscaler_template_location }}/{{ openshift_cluster_autoscaler_aws_creds_name }}"
+    when: openshift_cluster_autoscaler_state == 'present'
+
+  - name: create the aws creds secret
+    oc_secret:
+      state: "{{ openshift_cluster_autoscaler_state }}"
+      name: "{{ openshift_cluster_autoscaler_aws_secret_name }}"
+      namespace: "{{ openshift_cluster_autoscaler_namespace }}"
+      files:
+      - name: creds
+        path: "{{ openshift_cluster_autoscaler_template_location }}/{{ openshift_cluster_autoscaler_aws_creds_name }}"

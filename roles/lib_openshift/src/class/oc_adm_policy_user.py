@@ -148,6 +148,9 @@ class PolicyUser(OpenShiftCLI):
                self.config.config_options['name']['value'],
                self.config.config_options['user']['value']]
 
+        if self.config.config_options['role_namespace']['value'] is not None:
+            cmd.extend(['--role-namespace', self.config.config_options['role_namespace']['value']])
+
         return self.openshift_cmd(cmd, oadm=True)
 
     @staticmethod
@@ -168,6 +171,7 @@ class PolicyUser(OpenShiftCLI):
                                     'user': {'value': params['user'], 'include': False},
                                     'resource_kind': {'value': params['resource_kind'], 'include': False},
                                     'name': {'value': params['resource_name'], 'include': False},
+                                    'role_namespace': {'value': params['role_namespace'], 'include': False},
                                    })
 
         policyuser = PolicyUser(nconfig, params['debug'])

@@ -71,6 +71,12 @@ options:
     required: false
     default: None
     aliases: []
+  role_namespace:
+    description:
+    - The namespace where to find the role
+    required: false
+    default: None
+    aliases: []
   debug:
     description:
     - Turn on debug output.
@@ -122,6 +128,14 @@ EXAMPLES = '''
     resource_kind: cluster-role
     resource_name: system:build-strategy-docker
     state: present
+
+- name: oc adm policy add-role-to-user system:build-strategy-docker ausername --role-namespace foo
+  oc_adm_policy_user:
+    user: ausername
+    resource_kind: cluster-role
+    resource_name: system:build-strategy-docker
+    state: present
+    role_namespace: foo
 '''
 
 # -*- -*- -*- End included fragment: doc/policy_user -*- -*- -*-
@@ -2065,6 +2079,9 @@ class PolicyUser(OpenShiftCLI):
                self.config.config_options['name']['value'],
                self.config.config_options['user']['value']]
 
+        if self.config.config_options['role_namespace']['value'] is not None:
+            cmd.extend(['--role-namespace', self.config.config_options['role_namespace']['value']])
+
         return self.openshift_cmd(cmd, oadm=True)
 
     @staticmethod
@@ -2085,6 +2102,7 @@ class PolicyUser(OpenShiftCLI):
                                     'user': {'value': params['user'], 'include': False},
                                     'resource_kind': {'value': params['resource_kind'], 'include': False},
                                     'name': {'value': params['resource_name'], 'include': False},
+                                    'role_namespace': {'value': params['role_namespace'], 'include': False},
                                    })
 
         policyuser = PolicyUser(nconfig, params['debug'])
@@ -2149,6 +2167,7 @@ def main():
             debug=dict(default=False, type='bool'),
             resource_name=dict(required=True, type='str'),
             namespace=dict(default='default', type='str'),
+            role_namespace=dict(default=None, type='str'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
 
             user=dict(required=True, type='str'),
