@@ -1,5 +1,19 @@
 ---
 # fail is we don't have an endpoint for ES to connect to?
+- name: Set default image variables based on deployment_type
+  include_vars: "{{ var_file_name }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+  loop_control:
+    loop_var: var_file_name
+
+- name: Set kibana image facts
+  set_fact:
+    openshift_logging_kibana_image_prefix: "{{ openshift_logging_kibana_image_prefix | default(__openshift_logging_kibana_image_prefix) }}"
+    openshift_logging_kibana_image_version: "{{ openshift_logging_kibana_image_version | default(__openshift_logging_kibana_image_version) }}"
+    openshift_logging_kibana_proxy_image_prefix: "{{ openshift_logging_kibana_proxy_image_prefix | default(__openshift_logging_kibana_proxy_image_prefix) }}"
+    openshift_logging_kibana_proxy_image_version: "{{ openshift_logging_kibana_proxy_image_version | default(__openshift_logging_kibana_proxy_image_version) }}"
 
 - include: determine_version.yaml
 
@@ -37,7 +51,7 @@
     name: "aggregated-logging-kibana"
     namespace: "{{ openshift_logging_namespace }}"
   when:
-  - openshift_logging_image_pull_secret == ''
+    - openshift_logging_image_pull_secret == ''
 
 - set_fact:
     kibana_name: "{{ 'logging-kibana' ~ ( (openshift_logging_kibana_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
@@ -58,7 +72,7 @@
     content: "{{ 200 | oo_random_word }}"
     dest: "{{ generated_certs_dir }}/session_secret"
   when:
-  - not session_secret_file.stat.exists
+    - not session_secret_file.stat.exists
 
 # gen oauth_secret if necessary
 - name: Generate oauth secret
@@ -66,19 +80,19 @@
     content: "{{ 64 | oo_random_word }}"
     dest: "{{ generated_certs_dir }}/oauth_secret"
   when:
-  - not oauth_secret_file.stat.exists
+    - not oauth_secret_file.stat.exists
 
 - name: Retrieving the cert to use when generating secrets for the logging components
   slurp:
     src: "{{ generated_certs_dir }}/{{ item.file }}"
   register: key_pairs
   with_items:
-  - { name: "ca_file", file: "ca.crt" }
-  - { name: "kibana_internal_key", file: "kibana-internal.key"}
-  - { name: "kibana_internal_cert", file: "kibana-internal.crt"}
-  - { name: "server_tls", file: "server-tls.json"}
-  - { name: "session_secret", file: "session_secret" }
-  - { name: "oauth_secret", file: "oauth_secret" }
+    - { name: "ca_file", file: "ca.crt" }
+    - { name: "kibana_internal_key", file: "kibana-internal.key"}
+    - { name: "kibana_internal_cert", file: "kibana-internal.crt"}
+    - { name: "server_tls", file: "server-tls.json"}
+    - { name: "session_secret", file: "session_secret" }
+    - { name: "oauth_secret", file: "oauth_secret" }
 
 # services
 - name: Set {{ kibana_name }} service
@@ -92,8 +106,8 @@
     labels:
       logging-infra: 'support'
     ports:
-    - port: 443
-      targetPort: "oaproxy"
+      - port: 443
+        targetPort: "oaproxy"
 
 # create routes
 # TODO: set up these certs differently?
@@ -144,7 +158,7 @@
     namespace: "{{ openshift_logging_namespace }}"
     kind: route
     files:
-    - "{{ tempdir }}/templates/kibana-route.yaml"
+      - "{{ tempdir }}/templates/kibana-route.yaml"
 
 # preserve list of current hostnames
 - name: Get current oauthclient hostnames
@@ -173,7 +187,7 @@
     namespace: "{{ openshift_logging_namespace }}"
     kind: oauthclient
     files:
-    - "{{ tempdir }}/templates/oauth-client.yml"
+      - "{{ tempdir }}/templates/oauth-client.yml"
     delete_after: true
 
 # create Kibana secret
@@ -183,12 +197,12 @@
     name: "logging-kibana"
     namespace: "{{ openshift_logging_namespace }}"
     files:
-    - name: ca
-      path: "{{ generated_certs_dir }}/ca.crt"
-    - name: key
-      path: "{{ generated_certs_dir }}/system.logging.kibana.key"
-    - name: cert
-      path: "{{ generated_certs_dir }}/system.logging.kibana.crt"
+      - name: ca
+        path: "{{ generated_certs_dir }}/ca.crt"
+      - name: key
+        path: "{{ generated_certs_dir }}/system.logging.kibana.key"
+      - name: cert
+        path: "{{ generated_certs_dir }}/system.logging.kibana.crt"
 
 # create Kibana-proxy secret
 - name: Set Kibana Proxy secret
@@ -205,16 +219,16 @@
     #- name: server-tls.json
     #  path: "{{ generated_certs_dir }}/server-tls.json"
     contents:
-    - path: oauth-secret
-      data: "{{ key_pairs | entry_from_named_pair('oauth_secret') | b64decode }}"
-    - path: session-secret
-      data: "{{ key_pairs | entry_from_named_pair('session_secret') | b64decode }}"
-    - path: server-key
-      data: "{{ key_pairs | entry_from_named_pair('kibana_internal_key') | b64decode }}"
-    - path: server-cert
-      data: "{{ key_pairs | entry_from_named_pair('kibana_internal_cert') | b64decode }}"
-    - path: server-tls.json
-      data: "{{ key_pairs | entry_from_named_pair('server_tls') | b64decode }}"
+      - path: oauth-secret
+        data: "{{ key_pairs | entry_from_named_pair('oauth_secret') | b64decode }}"
+      - path: session-secret
+        data: "{{ key_pairs | entry_from_named_pair('session_secret') | b64decode }}"
+      - path: server-key
+        data: "{{ key_pairs | entry_from_named_pair('kibana_internal_key') | b64decode }}"
+      - path: server-cert
+        data: "{{ key_pairs | entry_from_named_pair('kibana_internal_cert') | b64decode }}"
+      - path: server-tls.json
+        data: "{{ key_pairs | entry_from_named_pair('server_tls') | b64decode }}"
 
 # create Kibana DC
 - name: Generate Kibana DC template
@@ -245,7 +259,7 @@
     namespace: "{{ openshift_logging_namespace }}"
     kind: dc
     files:
-    - "{{ tempdir }}/templates/kibana-dc.yaml"
+      - "{{ tempdir }}/templates/kibana-dc.yaml"
     delete_after: true
 
 # update master configs?

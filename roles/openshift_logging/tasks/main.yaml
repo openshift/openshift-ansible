@@ -3,17 +3,6 @@
     msg: Only one Fluentd nodeselector key pair should be provided
   when: openshift_logging_fluentd_nodeselector.keys() | count > 1
 
-- name: Set default image variables based on deployment_type
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
-    - "default_images.yml"
-
-- name: Set logging image facts
-  set_fact:
-    openshift_logging_image_prefix: "{{ openshift_logging_image_prefix | default(__openshift_logging_image_prefix) }}"
-    openshift_logging_image_version: "{{ openshift_logging_image_version | default(__openshift_logging_image_version) }}"
-
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
   register: mktemp
