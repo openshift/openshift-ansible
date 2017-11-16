@@ -7,7 +7,7 @@
 
 - include: ../../common/openshift-cluster/redeploy-certificates/etcd-backup.yml
 
-- include: ../../common/openshift-etcd/certificates.yml
+- include: ../../openshift-etcd/private/certificates.yml
   vars:
     etcd_certificates_redeploy: true
 
@@ -23,7 +23,7 @@
   vars:
     openshift_certificates_redeploy: true
 
-- include: ../../common/openshift-etcd/restart.yml
+- include: ../../openshift-etcd/private/restart.yml
   vars:
     g_etcd_certificates_expired: "{{ ('expired' in (hostvars | oo_select_keys(groups['etcd']) | oo_collect('check_results.check_results.etcd') | oo_collect('health'))) | bool }}"
 

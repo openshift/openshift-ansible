@@ -22,7 +22,7 @@
   include: ../../common/openshift-checks/install.yml
 
 - name: etcd install
-  include: ../../common/openshift-etcd/config.yml
+  include: ../../openshift-etcd/private/config.yml
 
 - name: include nfs
   include: ../../common/openshift-nfs/config.yml

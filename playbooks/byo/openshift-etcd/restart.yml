@@ -1,4 +1,0 @@
----
-- include: ../../init/main.yml
-
-- include: ../../common/openshift-etcd/restart.yml

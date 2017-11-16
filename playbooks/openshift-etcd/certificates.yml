@@ -1,0 +1,6 @@
+---
+- include: ../init/main.yml
+
+- include: private/ca.yml
+
+- include: private/certificates.yml

@@ -21,7 +21,7 @@
       name: etcd
       tasks_from: remove_ca_certificates
 
-- include: ../../openshift-etcd/ca.yml
+- include: ../../../openshift-etcd/private/ca.yml
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -45,7 +45,7 @@
       etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
       etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
 
-- include: ../../openshift-etcd/restart.yml
+- include: ../../../openshift-etcd/private/restart.yml
   # Do not restart etcd when etcd certificates were previously expired.
   when: ('expired' not in (hostvars
                            | oo_select_keys(groups['etcd'])

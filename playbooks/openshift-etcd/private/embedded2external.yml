@@ -68,7 +68,7 @@
     etcd_certificates_redeploy: "{{ true }}"
 
 # 4. deploy external etcd
-- include: ../openshift-etcd/config.yml
+- include: config.yml
 
 # 5. stop external etcd
 - name: Cleanse etcd

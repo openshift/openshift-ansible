@@ -46,7 +46,7 @@
 
 - include: ../openshift-master/set_network_facts.yml
 
-- include: ../openshift-etcd/certificates.yml
+- include: ../../openshift-etcd/private/certificates.yml
 
 - include: ../openshift-master/config.yml
 
