@@ -9,19 +9,19 @@
     oc_route:
       kubeconfig: "{{ openshift_master_config_dir }}/admin.kubeconfig"
       name: docker-registry
+      host: "{{ openshift_cockpit_docker_registry_hostname }}"
       namespace: default
       state: list
-    register: docker_registry_route
 
   - name: Create passthrough route for registry-console
     oc_route:
       kubeconfig: "{{ openshift_master_config_dir }}/admin.kubeconfig"
       name: registry-console
+      host: "{{ openshift_cockpit_registry_console_hostname }}"
       namespace: default
       service_name: registry-console
       state: present
       tls_termination: passthrough
-    register: registry_console_cockpit_kube
 
   # XXX: Required for items still using command
   - name: Create temp directory for kubeconfig
@@ -44,8 +44,8 @@
       {% if openshift_cockpit_deployer_basename is defined  %}-p IMAGE_BASENAME="{{ openshift_cockpit_deployer_basename }}"{% endif %}
       {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
       -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
-      -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
-      -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
+      -p REGISTRY_HOST="{{ openshift_cockpit_docker_registry_hostname }}"
+      -p COCKPIT_KUBE_URL="https://{{ openshift_cockpit_registry_console_hostname }}"
       --config={{ openshift_hosted_kubeconfig }}
       -n default
     register: deploy_registry_console
