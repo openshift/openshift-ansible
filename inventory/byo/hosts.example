@@ -838,6 +838,17 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Setting this variable to true will override that check.
 #openshift_override_hostname_check=true
 
+# openshift-ansible will fail when it detects that a host
+# could not resove all of the cluster members' hostnames. This mis-configuration might
+# be problematic for the cluster setup and for pods using host networking.
+# Setting this variable to true will override that check.
+#openshift_override_resolve_check=true
+
+# openshift-ansible will fail when it detects that a host
+# could not ping all of the cluster members'. This mis-configuration is probably
+# not problematic at all. Setting this variable to true will override that check.
+#openshift_override_icmp_check=true
+
 # openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
 # in versions >= 3.6
 #openshift_use_dnsmasq=False

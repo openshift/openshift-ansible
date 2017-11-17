@@ -1,0 +1,23 @@
+---
+- name: OpenShift hosts level DNS/connectivity checks
+  hosts: oo_all_hosts
+  tasks:
+    - name: Check DNS resolve for cluster hosts
+      command: getent ahostsv4 {{ item }}
+      register: lookuphost
+      changed_when: false
+      check_mode: false
+      with_items: "{{ groups.oo_all_hosts }}"
+      when:
+        - item not in [ openshift.common.hostname, ansible_nodename ]
+        - not openshift_override_resolve_check | default(false) | bool
+
+    - name: Check ICMP ping for cluster hosts
+      command: ping -c3 -W1 -w2 {{ item }}
+      register: pinghost
+      changed_when: false
+      check_mode: false
+      with_items: "{{ groups.oo_all_hosts }}"
+      when:
+        - item not in [ openshift.common.hostname, ansible_nodename ]
+        - not openshift_override_icmp_check | default(false) | bool
