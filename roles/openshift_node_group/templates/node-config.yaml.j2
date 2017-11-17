@@ -33,7 +33,7 @@ masterClientConnectionOverrides:
   qps: 20
 masterKubeConfig: node.kubeconfig
 networkConfig:
-  mtu: "{{ openshift_node_group_network_mtu }}"
+  mtu: {{ openshift_node_group_network_mtu }}
   networkPluginName: {{ openshift_node_group_network_plugin }}
 nodeIP: ""
 podManifestConfig: null
