@@ -28,7 +28,7 @@ Here is an example of how to run a containerized `openshift-ansible` playbook th
            -v $HOME/.ssh/id_rsa:/opt/app-root/src/.ssh/id_rsa:Z \
            -v /etc/ansible/hosts:/tmp/inventory \
            -e INVENTORY_FILE=/tmp/inventory \
-           -e PLAYBOOK_FILE=playbooks/byo/openshift-checks/certificate_expiry/default.yaml \
+           -e PLAYBOOK_FILE=playbooks/openshift-checks/certificate_expiry/default.yaml \
            -e OPTS="-v" -t \
            openshift/origin-ansible
 
@@ -44,7 +44,7 @@ Here is a detailed explanation of the options used in the command above:
 
 * `-v /etc/ansible/hosts:/tmp/inventory` and `-e INVENTORY_FILE=/tmp/inventory` mount the Ansible inventory file into the container as `/tmp/inventory` and set the corresponding environment variable to point at it respectively. The example uses `/etc/ansible/hosts` as the inventory file as this is a default location, but your inventory is likely to be elsewhere so please adjust as needed. Note that depending on the file you point to you might have to handle SELinux labels in a similar way as with the ssh keys, e.g. by adding a `:z` flag to the volume mount, so again you might prefer to copy the inventory to a dedicated location first.
 
-* `-e PLAYBOOK_FILE=playbooks/byo/openshift-checks/certificate_expiry/default.yaml` specifies the playbook to run as a relative path from the top level directory of openshift-ansible.
+* `-e PLAYBOOK_FILE=playbooks/openshift-checks/certificate_expiry/default.yaml` specifies the playbook to run as a relative path from the top level directory of openshift-ansible.
 
 * `-e OPTS="-v"` and `-t` make the output look nicer: the `default.yaml` playbook does not generate results and runs quietly unless we add the `-v` option to the `ansible-playbook` invocation, and a TTY is allocated via `-t` so that Ansible adds color to the output.
 

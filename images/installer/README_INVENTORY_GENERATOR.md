@@ -46,7 +46,7 @@ docker run -u `id -u` \
        -v /tmp/origin/master/admin.kubeconfig:/opt/app-root/src/.kube/config:Z \
        -v /tmp/origin/master/master-config.yaml:/opt/app-root/src/master-config.yaml:Z \
        -e OPTS="-v --become-user root" \
-       -e PLAYBOOK_FILE=playbooks/byo/openshift-checks/health.yml \
+       -e PLAYBOOK_FILE=playbooks/openshift-checks/health.yml \
        -e GENERATE_INVENTORY=true \
        -e USER=`whoami` \
        openshift/origin-ansible

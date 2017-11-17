@@ -47,19 +47,19 @@ against your inventory file. Here is the step-by-step:
 3. Run the appropriate playbook:
 
     ```console
-    $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/pre-install.yml
+    $ ansible-playbook -i <inventory file> playbooks/openshift-checks/pre-install.yml
     ```
 
     or
 
     ```console
-    $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/health.yml
+    $ ansible-playbook -i <inventory file> playbooks/openshift-checks/health.yml
     ```
 
     or
 
     ```console
-    $ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/certificate_expiry/default.yaml -v
+    $ ansible-playbook -i <inventory file> playbooks/openshift-checks/certificate_expiry/default.yaml -v
     ```
 
 ### The adhoc playbook
@@ -72,19 +72,19 @@ using the `-e` flag.
 For example, to run the `docker_storage` check:
 
 ```console
-$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml -e openshift_checks=docker_storage
+$ ansible-playbook -i <inventory file> playbooks/openshift-checks/adhoc.yml -e openshift_checks=docker_storage
 ```
 
 To run more checks, use a comma-separated list of check names:
 
 ```console
-$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml -e openshift_checks=docker_storage,disk_availability
+$ ansible-playbook -i <inventory file> playbooks/openshift-checks/adhoc.yml -e openshift_checks=docker_storage,disk_availability
 ```
 
 To run an entire class of checks, use the name of a check group tag, prefixed by `@`. This will run all checks tagged `preflight`:
 
 ```console
-$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml -e openshift_checks=@preflight
+$ ansible-playbook -i <inventory file> playbooks/openshift-checks/adhoc.yml -e openshift_checks=@preflight
 ```
 
 It is valid to specify multiple check tags and individual check names together
@@ -94,7 +94,7 @@ To list all of the available checks and tags, run the adhoc playbook without
 setting the `openshift_checks` variable:
 
 ```console
-$ ansible-playbook -i <inventory file> playbooks/byo/openshift-checks/adhoc.yml
+$ ansible-playbook -i <inventory file> playbooks/openshift-checks/adhoc.yml
 ```
 
 ## Running in a container

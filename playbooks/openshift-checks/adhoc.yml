@@ -1,6 +1,6 @@
 ---
 # NOTE: ideally this would be just part of a single play in
-# common/openshift-checks/adhoc.yml that lists the existing checks when
+# private/adhoc.yml that lists the existing checks when
 # openshift_checks is not set or run the requested checks. However, to actually
 # run the checks we need to have the included dependencies to run first and that
 # takes time. To speed up listing checks, we use this separate play that runs
@@ -20,6 +20,6 @@
     action: openshift_health_check
     when: openshift_checks is undefined or not openshift_checks
 
-- include: ../../init/main.yml
+- include: ../init/main.yml
 
-- include: ../../common/openshift-checks/adhoc.yml
+- include: private/adhoc.yml

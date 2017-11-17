@@ -19,7 +19,7 @@
   include: ../../init/main.yml
 
 - name: perform the installer openshift-checks
-  include: ../../common/openshift-checks/install.yml
+  include: ../../openshift-checks/private/install.yml
 
 - name: etcd install
   include: ../../common/openshift-etcd/config.yml
