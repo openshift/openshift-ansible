@@ -407,6 +407,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cockpit_deployer_basename=my-console
 # Override image version, defaults to latest for origin, vX.Y product version for enterprise
 #openshift_cockpit_deployer_version=1.4.1
+#
+# Override default hostname for the registry-console route
+#openshift_cockpit_registry_console_hostname="registry-console-default.example.com"
 
 # Openshift Registry Options
 #
@@ -434,6 +437,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # Manage the OpenShift Registry (optional)
 #openshift_hosted_manage_registry=true
+#
+# Override default hostname for the registry route
+#openshift_cockpit_docker_registry_hostname="docker-registry-default.example.com"
 
 # Registry Storage Options
 #
