@@ -19,6 +19,8 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_node_selector`: Selector for the nodes prometheus will be deployed on.
 
+- `openshift_prometheus_web_listen_address`: specify listen address for prometheus. Defaults to `localhost`.
+
 - `openshift_prometheus_<COMPONENT>_image_prefix`: specify image prefix for the component 
 
 - `openshift_prometheus_<COMPONENT>_image_version`: specify image version for the component 

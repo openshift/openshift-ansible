@@ -78,7 +78,7 @@ spec:
         - --storage.tsdb.retention=6h
         - --storage.tsdb.min-block-duration=2m
         - --config.file=/etc/prometheus/prometheus.yml
-        - --web.listen-address=localhost:9090
+        - --web.listen-address={{ openshift_prometheus_web_listen_address }}:9090
         image: "{{ l_openshift_prometheus_image_prefix }}prometheus:{{ l_openshift_prometheus_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:
@@ -96,6 +96,9 @@ spec:
 {% if openshift_prometheus_cpu_limit is defined and openshift_prometheus_cpu_limit is not none %}
             cpu: "{{ openshift_prometheus_cpu_limit }}"
 {% endif %}
+        ports:
+        - containerPort: 9090
+          name: web
 
         volumeMounts:
         - mountPath: /etc/prometheus
