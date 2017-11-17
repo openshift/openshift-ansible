@@ -39,6 +39,10 @@ openshift_hosted_router_edits:
 - key: spec.strategy.activeDeadlineSeconds
   value: 21600
   action: put
+- key: spec.template.metadata.annotations
+  value:
+    prometheus.io/scrape: 'true'
+  action: put
 
 openshift_hosted_routers:
 - name: router
