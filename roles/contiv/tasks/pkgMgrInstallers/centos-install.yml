@@ -23,7 +23,7 @@
 
 - name: PkgMgr RHEL/CentOS | Install ovs
   yum:
-    pkg=openvswitch-2.5.0-2.el7.x86_64
+    pkg=openvswitch
     state=present
   environment:
     http_proxy: "{{ http_proxy|default('') }}"
