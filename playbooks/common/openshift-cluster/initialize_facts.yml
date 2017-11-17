@@ -10,6 +10,7 @@
   - name: load openshift_facts module
     include_role:
       name: openshift_facts
+    static: yes
 
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
@@ -145,7 +146,19 @@
         https_proxy: "{{ openshift_https_proxy | default(None) }}"
         no_proxy: "{{ openshift_no_proxy | default(None) }}"
         generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
-        no_proxy_internal_hostnames: "{{ openshift_no_proxy_internal_hostnames | default(None) }}"
+
+  - name: Set fact of no_proxy_internal_hostnames
+    openshift_facts:
+      role: common
+      local_facts:
+        no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+                                             | union(groups['oo_masters_to_config'])
+                                             | union(groups['oo_etcd_to_config'] | default([])))
+                                         | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                         }}"
+    when:
+    - openshift_http_proxy is defined or openshift_https_proxy is defined
+    - openshift_generate_no_proxy_hosts | default(True) | bool
 
   - name: initialize_facts set_fact repoquery command
     set_fact:
