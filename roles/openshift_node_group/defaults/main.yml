@@ -23,4 +23,4 @@ openshift_node_group_network_plugin_default: "{{ os_sdn_network_plugin_name | de
 openshift_node_group_network_plugin: "{{ openshift_node_group_network_plugin_default }}"
 openshift_node_group_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 openshift_node_group_node_data_dir: "{{ openshift_node_group_node_data_dir_default }}"
-openshift_node_group_network_mtu: "{{ openshift_node_sdn_mtu | default(8951) }}"
+openshift_node_group_network_mtu: "{{ openshift_node_sdn_mtu | default(8951) | int }}"
