@@ -9,6 +9,9 @@ openshift_prometheus_node_selector: {"region":"infra"}
 # additional prometheus rules file
 openshift_prometheus_additional_rules_file: null
 
+#prometheus application arguments
+openshift_prometheus_args: ['--storage.tsdb.retention=6h', '--storage.tsdb.min-block-duration=2m']
+
 # storage
 # One of ['emptydir', 'pvc']
 openshift_prometheus_storage_type: "emptydir"

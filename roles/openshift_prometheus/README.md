@@ -23,6 +23,13 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_<COMPONENT>_image_version`: specify image version for the component 
 
+- `openshift_prometheus_args`: Modify or add arguments for prometheus application
+
+e.g
+```
+openshift_prometheus_args=['--storage.tsdb.retention=6h', '--storage.tsdb.min-block-duration=5s', '--storage.tsdb.max-block-duration=6m']
+```
+
 ## PVC related variables
 Each prometheus component (prometheus, alertmanager, alertbuffer) can set pv claim by setting corresponding role variable:
 ```
