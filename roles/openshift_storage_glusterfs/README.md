@@ -133,8 +133,7 @@ are an exception:
 | openshift_storage_glusterfs_registry_heketi_admin_key | auto-generated        | Separate from the above
 | openshift_storage_glusterfs_registry_heketi_user_key  | auto-generated        | Separate from the above
 
-Additionally, this role's behavior responds to the following registry-specific
-variables:
+Additionally, this role's behavior responds to several registry-specific variables in the [openshift_hosted role](../openshift_hosted/README.md):
 
 | Name                                                  | Default value                | Description                             |
 |-------------------------------------------------------|------------------------------|-----------------------------------------|
