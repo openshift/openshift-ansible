@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.8.0
-Release:        0.3.0%{?dist}
+Release:        0.4.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Nov 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.4.0
+- bug 1498398. Enclose content between store tag (rromerom@redhat.com)
+
 * Fri Nov 17 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.3.0
 - papr: auto-detect image tag to use and bump to f27 (jlebon@redhat.com)
 - Updating mtu value to int (kwoodson@redhat.com)
