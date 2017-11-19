@@ -77,6 +77,14 @@
     files:
     - "{{ mktemp.stdout }}/glusterfs-template.yml"
 
+- name: Check GlusterFS DaemonSet status
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: daemonset
+    name: glusterfs-{{ glusterfs_name }}
+    state: list
+  register: glusterfs_ds
+
 - name: Deploy GlusterFS pods
   oc_process:
     namespace: "{{ glusterfs_namespace }}"
@@ -88,6 +96,8 @@
       NODE_LABELS: "{{ glusterfs_nodeselector }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
       GB_GLFS_LRU_COUNT: "{{ glusterfs_block_host_vol_max }}"
+  when: (glusterfs_ds.results.results[0].status is not defined) or
+        (glusterfs_ds.results.results[0].status.numberReady | default(0) < glusterfs_ds.results.results[0].status.desiredNumberScheduled | default(glusterfs_nodes | count))
 
 - name: Wait for GlusterFS pods
   oc_obj:
