@@ -90,6 +90,12 @@ options:
     required: false
     default: default
     aliases: []
+  annotations:
+    description:
+    - Annotations to apply to the object
+    required: false
+    default: None
+    aliases: []
   selector:
     description:
     - The selector to apply when filtering for services.
@@ -1471,6 +1477,7 @@ class ServiceConfig(object):
                  sname,
                  namespace,
                  ports,
+                 annotations=None,
                  selector=None,
                  labels=None,
                  cluster_ip=None,
@@ -1482,6 +1489,7 @@ class ServiceConfig(object):
         self.name = sname
         self.namespace = namespace
         self.ports = ports
+        self.annotations = annotations
         self.selector = selector
         self.labels = labels
         self.cluster_ip = cluster_ip
@@ -1504,6 +1512,9 @@ class ServiceConfig(object):
             self.data['metadata']['labels'] = {}
             for lab, lab_value in self.labels.items():
                 self.data['metadata']['labels'][lab] = lab_value
+        if self.annotations:
+            self.data['metadata']['annotations'] = self.annotations
+
         self.data['spec'] = {}
 
         if self.ports:
@@ -1662,6 +1673,7 @@ class OCService(OpenShiftCLI):
                  sname,
                  namespace,
                  labels,
+                 annotations,
                  selector,
                  cluster_ip,
                  portal_ip,
@@ -1674,7 +1686,7 @@ class OCService(OpenShiftCLI):
         ''' Constructor for OCVolume '''
         super(OCService, self).__init__(namespace, kubeconfig, verbose)
         self.namespace = namespace
-        self.config = ServiceConfig(sname, namespace, ports, selector, labels,
+        self.config = ServiceConfig(sname, namespace, ports, annotations, selector, labels,
                                     cluster_ip, portal_ip, session_affinity, service_type,
                                     external_ips)
         self.user_svc = Service(content=self.config.data)
@@ -1739,6 +1751,7 @@ class OCService(OpenShiftCLI):
         oc_svc = OCService(params['name'],
                            params['namespace'],
                            params['labels'],
+                           params['annotations'],
                            params['selector'],
                            params['clusterip'],
                            params['portalip'],
@@ -1840,6 +1853,7 @@ def main():
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
             name=dict(default=None, type='str'),
+            annotations=dict(default=None, type='dict'),
             labels=dict(default=None, type='dict'),
             selector=dict(default=None, type='dict'),
             clusterip=dict(default=None, type='str'),

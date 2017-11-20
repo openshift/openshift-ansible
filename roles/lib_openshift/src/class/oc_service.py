@@ -13,6 +13,7 @@ class OCService(OpenShiftCLI):
                  sname,
                  namespace,
                  labels,
+                 annotations,
                  selector,
                  cluster_ip,
                  portal_ip,
@@ -25,7 +26,7 @@ class OCService(OpenShiftCLI):
         ''' Constructor for OCVolume '''
         super(OCService, self).__init__(namespace, kubeconfig, verbose)
         self.namespace = namespace
-        self.config = ServiceConfig(sname, namespace, ports, selector, labels,
+        self.config = ServiceConfig(sname, namespace, ports, annotations, selector, labels,
                                     cluster_ip, portal_ip, session_affinity, service_type,
                                     external_ips)
         self.user_svc = Service(content=self.config.data)
@@ -90,6 +91,7 @@ class OCService(OpenShiftCLI):
         oc_svc = OCService(params['name'],
                            params['namespace'],
                            params['labels'],
+                           params['annotations'],
                            params['selector'],
                            params['clusterip'],
                            params['portalip'],
