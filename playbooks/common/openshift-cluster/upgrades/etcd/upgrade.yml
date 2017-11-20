@@ -93,6 +93,14 @@
   vars:
     etcd_upgrade_version: '3.1.3'
 
+- include: upgrade_rpm_members.yml
+  vars:
+    etcd_upgrade_version: '3.2'
+
+- include: upgrade_image_members.yml
+  vars:
+    etcd_upgrade_version: '3.2.7'
+
 - name: Upgrade fedora to latest
   hosts: oo_etcd_hosts_to_upgrade
   serial: 1
