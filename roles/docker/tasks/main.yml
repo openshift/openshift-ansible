@@ -60,10 +60,11 @@
         state: stopped
         name: "{{ openshift.docker.service_name }}"
 
-    - name: "Ensure {{ docker_alt_storage_path }} exists"
-      file:
-        path: "{{ docker_alt_storage_path }}"
-        state: directory
+    - name: copy "{{ docker_default_storage_path }}" to "{{ docker_alt_storage_path }}"
+      command: "cp -r {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
+      register: results
+      failed_when:
+        - results.rc != 0
 
     - name: "Set the selinux context on {{ docker_alt_storage_path }}"
       command: "semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
