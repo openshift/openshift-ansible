@@ -1993,6 +1993,7 @@ class ServiceConfig(object):
                  sname,
                  namespace,
                  ports,
+                 annotations=None,
                  selector=None,
                  labels=None,
                  cluster_ip=None,
@@ -2004,6 +2005,7 @@ class ServiceConfig(object):
         self.name = sname
         self.namespace = namespace
         self.ports = ports
+        self.annotations = annotations
         self.selector = selector
         self.labels = labels
         self.cluster_ip = cluster_ip
@@ -2026,6 +2028,9 @@ class ServiceConfig(object):
             self.data['metadata']['labels'] = {}
             for lab, lab_value in self.labels.items():
                 self.data['metadata']['labels'][lab] = lab_value
+        if self.annotations:
+            self.data['metadata']['annotations'] = self.annotations
+
         self.data['spec'] = {}
 
         if self.ports:
