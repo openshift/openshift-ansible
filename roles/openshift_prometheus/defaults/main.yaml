@@ -5,7 +5,7 @@ openshift_prometheus_state: present
 openshift_prometheus_namespace: openshift-metrics
 
 # defaults hosts for routes
-openshift_prometheus_prometheus_hostname: prometheus-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}
+openshift_prometheus_hostname: prometheus-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}
 openshift_prometheus_alerts_hostname: alerts-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}
 
 openshift_prometheus_node_selector: {"region":"infra"}
