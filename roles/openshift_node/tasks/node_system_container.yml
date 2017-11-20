@@ -6,14 +6,14 @@
 
 - name: Pre-pull node system container image
   command: >
-    atomic pull --storage=ostree {{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
+    atomic pull --storage=ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
 - name: Install or Update node system container
   oc_atomic_container:
     name: "{{ openshift.common.service_type }}-node"
-    image: "{{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}"
+    image: "{{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}"
     values:
     - "DNS_DOMAIN={{ openshift.common.dns_domain }}"
     - "DOCKER_SERVICE={{ openshift.docker.service_name }}.service"
