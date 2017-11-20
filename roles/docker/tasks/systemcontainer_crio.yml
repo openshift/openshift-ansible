@@ -3,16 +3,10 @@
 # TODO: Much of this file is shared with container engine tasks
 - set_fact:
     l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
-  when: l2_docker_insecure_registries | bool
 - set_fact:
     l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
-  when: l2_docker_additional_registries | bool
-- set_fact:
-    l_crio_registries: "{{ ['docker.io'] }}"
-  when: not (l2_docker_additional_registries | bool)
 - set_fact:
     l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
-  when: l2_docker_additional_registries | bool
 
 - set_fact:
     l_openshift_image_tag: "{{ openshift_image_tag | string }}"
