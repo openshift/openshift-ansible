@@ -21,8 +21,10 @@
   changed_when: False
 
 - include: install_prometheus.yaml
-  vars:
-    state: "{{ openshift_prometheus_state }}"
+  when: openshift_prometheus_state == 'present'
+
+- include: uninstall_prometheus.yaml
+  when: openshift_prometheus_state == 'absent'
 
 - name: Delete temp directory
   file:
