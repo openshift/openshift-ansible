@@ -3,7 +3,7 @@
   template:
     dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
     src: "{{ openshift.common.is_containerized | bool | ternary('openshift.docker.node.service', 'node.service.j2') }}"
-  when: not openshift.common.is_node_system_container | bool
+  when: not l_is_node_system_container | bool
   notify:
   - reload systemd units
   - restart node
@@ -19,7 +19,7 @@
   - name: Install Node system container
     include: node_system_container.yml
     when:
-    - openshift.common.is_node_system_container | bool
+    - l_is_node_system_container | bool
 
   - name: Install OpenvSwitch system containers
     include: openvswitch_system_container.yml

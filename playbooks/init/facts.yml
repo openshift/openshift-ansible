@@ -31,7 +31,6 @@
     set_fact:
       l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
       l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-      l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
       l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
       l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
@@ -135,7 +134,6 @@
         ip: "{{ openshift_ip | default(None) }}"
         is_containerized: "{{ l_is_containerized | default(None) }}"
         is_openvswitch_system_container: "{{ l_is_openvswitch_system_container | default(false) }}"
-        is_node_system_container: "{{ l_is_node_system_container | default(false) }}"
         is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
         is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
         etcd_runtime: "{{ l_etcd_runtime }}"
