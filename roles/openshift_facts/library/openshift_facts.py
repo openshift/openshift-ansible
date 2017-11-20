@@ -1665,7 +1665,6 @@ def set_container_facts_if_unset(facts):
         cli_image = master_image
         node_image = 'openshift3/node'
         ovs_image = 'openshift3/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         pod_image = 'openshift3/ose-pod'
         router_image = 'openshift3/ose-haproxy-router'
         registry_image = 'openshift3/ose-docker-registry'
@@ -1675,7 +1674,6 @@ def set_container_facts_if_unset(facts):
         cli_image = master_image
         node_image = 'openshift/node'
         ovs_image = 'openshift/openvswitch'
-        etcd_image = 'registry.access.redhat.com/rhel7/etcd'
         pod_image = 'openshift/origin-pod'
         router_image = 'openshift/origin-haproxy-router'
         registry_image = 'openshift/origin-docker-registry'
@@ -1702,8 +1700,6 @@ def set_container_facts_if_unset(facts):
         facts['common']['registry_image'] = registry_image
     if 'deployer_image' not in facts['common']:
         facts['common']['deployer_image'] = deployer_image
-    if 'etcd' in facts and 'etcd_image' not in facts['etcd']:
-        facts['etcd']['etcd_image'] = etcd_image
     if 'master' in facts and 'master_image' not in facts['master']:
         facts['master']['master_image'] = master_image
         facts['master']['master_system_image'] = master_image
