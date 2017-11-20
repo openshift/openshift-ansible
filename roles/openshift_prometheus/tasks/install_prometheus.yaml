@@ -119,7 +119,7 @@
     tls_termination: reencrypt
   with_items:
     - name: prometheus
-      host: "{{ openshift_prometheus_prometheus_hostname }}"
+      host: "{{ openshift_prometheus_hostname }}"
     - name: alerts
       host: "{{ openshift_prometheus_alerts_hostname }}"
 
