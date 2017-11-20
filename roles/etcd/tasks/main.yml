@@ -20,7 +20,7 @@
 
 - block:
   - name: Pull etcd container
-    command: docker pull {{ openshift.etcd.etcd_image }}
+    command: docker pull {{ etcd_image }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
 
