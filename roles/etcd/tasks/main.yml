@@ -30,7 +30,7 @@
       src: etcd.docker.service
   when:
   - etcd_is_containerized | bool
-  - not openshift.common.is_etcd_system_container | bool
+  - not l_is_etcd_system_container | bool
 
 # Start secondary etcd instance for third party integrations
 # TODO: Determine an alternative to using thirdparty variable
@@ -90,7 +90,7 @@
       enabled: no
       masked: yes
       daemon_reload: yes
-    when: not openshift.common.is_etcd_system_container | bool
+    when: not l_is_etcd_system_container | bool
     register: task_result
     failed_when: task_result|failed and 'could not' not in task_result.msg|lower
 
@@ -98,11 +98,11 @@
     template:
       dest: "/etc/systemd/system/etcd_container.service"
       src: etcd.docker.service
-    when: not openshift.common.is_etcd_system_container | bool
+    when: not l_is_etcd_system_container | bool
 
   - name: Install Etcd system container
     include: system_container.yml
-    when: openshift.common.is_etcd_system_container | bool
+    when: l_is_etcd_system_container | bool
   when: etcd_is_containerized | bool
 
 - name: Validate permissions on the config dir

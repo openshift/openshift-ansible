@@ -33,11 +33,6 @@
       l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
       l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
       l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-      l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-
-  - name: initialize_facts set fact for l_etcd_runtime
-    set_fact:
-      l_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if l_is_containerized else 'host' }}"
 
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
@@ -137,8 +132,6 @@
         is_openvswitch_system_container: "{{ l_is_openvswitch_system_container | default(false) }}"
         is_node_system_container: "{{ l_is_node_system_container | default(false) }}"
         is_master_system_container: "{{ l_is_master_system_container | default(false) }}"
-        is_etcd_system_container: "{{ l_is_etcd_system_container | default(false) }}"
-        etcd_runtime: "{{ l_etcd_runtime }}"
         system_images_registry: "{{ system_images_registry }}"
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"

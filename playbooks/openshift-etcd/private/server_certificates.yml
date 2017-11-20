@@ -12,4 +12,3 @@
         etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
         etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
         etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-        r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"

@@ -1,0 +1,21 @@
+---
+
+- name: restart etcd
+  service:
+    name: "{{ etcd_service }}"
+    state: restarted
+  when:
+    - not g_etcd_certificates_expired | default(false) | bool
+
+- name: stop etcd
+  service:
+    name: "{{ etcd_service }}"
+    state: stopped
+  when:
+    - g_etcd_certificates_expired | default(false) | bool
+- name: start etcd
+  service:
+    name: "{{ etcd_service }}"
+    state: started
+  when:
+    - g_etcd_certificates_expired | default(false) | bool

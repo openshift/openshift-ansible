@@ -36,7 +36,6 @@
       name: etcd
       tasks_from: backup
     vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
       r_etcd_common_backup_sufix_name: "{{ embedded_etcd_backup_suffix }}"
@@ -45,7 +44,6 @@
       name: etcd
       tasks_from: backup.archive
     vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
       r_etcd_common_backup_sufix_name: "{{ embedded_etcd_backup_suffix }}"
@@ -78,13 +76,9 @@
   - include_role:
       name: etcd
       tasks_from: disable_etcd
-    vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   - include_role:
       name: etcd
       tasks_from: clean_data
-    vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
 
 # 6. copy the embedded etcd backup to the external host
 # TODO(jchaloup): if the etcd and first master are on the same host, just copy the directory
@@ -101,7 +95,6 @@
       name: etcd
       tasks_from: backup.fetch
     vars:
-      r_etcd_common_etcd_runtime: "{{ hostvars[groups.oo_first_master.0].openshift.common.etcd_runtime }}"
       etcd_backup_sync_directory: "{{ g_etcd_client_mktemp.stdout }}"
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
@@ -112,7 +105,6 @@
       name: etcd
       tasks_from: backup.copy
     vars:
-      r_etcd_common_etcd_runtime: "{{ hostvars[groups.oo_etcd_to_config.0].openshift.common.etcd_runtime }}"
       etcd_backup_sync_directory: "{{ g_etcd_client_mktemp.stdout }}"
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
@@ -134,7 +126,6 @@
       name: etcd
       tasks_from: backup.unarchive
     vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
 
@@ -142,7 +133,6 @@
       name: etcd
       tasks_from: backup.force_new_cluster
     vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
       etcd_peer: "{{ openshift.common.ip }}"

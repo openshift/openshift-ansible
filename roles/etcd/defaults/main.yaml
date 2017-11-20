@@ -2,8 +2,10 @@
 r_etcd_common_backup_tag: ''
 r_etcd_common_backup_sufix_name: ''
 
+l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+
 # runc, docker, host
-r_etcd_common_etcd_runtime: "docker"
+r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if l_is_containerized else 'host' }}"
 r_etcd_common_embedded_etcd: false
 
 osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'

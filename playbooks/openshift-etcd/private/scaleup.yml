@@ -36,7 +36,6 @@
     vars:
       etcd_peers: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   roles:
   - role: os_firewall
     when: etcd_add_check.rc == 0
@@ -48,7 +47,6 @@
     etcd_initial_cluster_state: "existing"
     etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
     etcd_ca_setup: False
-    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   - role: nickhammond.logrotate
     when: etcd_add_check.rc == 0
   post_tasks:

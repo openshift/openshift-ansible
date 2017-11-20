@@ -3,25 +3,17 @@
   hosts: oo_etcd_to_config
   serial: 1
   tasks:
-    - name: restart etcd
-      service:
-        name: "{{ 'etcd_container' if openshift.common.etcd_runtime == 'docker' else 'etcd' }}"
-        state: restarted
+    - include_role:
+        name: etcd
+        tasks_from: restart.yml
       when:
         - not g_etcd_certificates_expired | default(false) | bool
 
 - name: Restart etcd
   hosts: oo_etcd_to_config
   tasks:
-    - name: stop etcd
-      service:
-        name: "{{ 'etcd_container' if openshift.common.etcd_runtime == 'docker' else 'etcd' }}"
-        state: stopped
-      when:
-        - g_etcd_certificates_expired | default(false) | bool
-    - name: start etcd
-      service:
-        name: "{{ 'etcd_container' if openshift.common.etcd_runtime == 'docker' else 'etcd' }}"
-        state: started
+    - include_role:
+        name: etcd
+        tasks_from: restart.yml
       when:
         - g_etcd_certificates_expired | default(false) | bool
