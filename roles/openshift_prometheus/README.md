@@ -27,7 +27,7 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_hostname`: specify the hostname for the route to prometheus `prometheus-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
 
-- `openshift_prometheus_alerts_hostname`: specify the hostname for the route to prometheus `prometheus_alerts-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
+- `openshift_prometheus_alerts_hostname`: specify the hostname for the route to prometheus-alerts `prometheus_alerts-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
 
 e.g
 ```
