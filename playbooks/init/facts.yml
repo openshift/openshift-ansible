@@ -35,10 +35,6 @@
       l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
       l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
-  - name: initialize_facts set facts for l_any_system_container
-    set_fact:
-      l_any_system_container: "{{ l_is_etcd_system_container or l_is_openvswitch_system_container or l_is_node_system_container or l_is_master_system_container }}"
-
   - name: initialize_facts set fact for l_etcd_runtime
     set_fact:
       l_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if l_is_containerized else 'host' }}"
@@ -107,7 +103,12 @@
       - ostree
       - runc
       when:
-      - l_any_system_container | bool
+      - >
+        (openshift_use_system_containers | default(False)) | bool
+        or (openshift_use_etcd_system_container | default(False)) | bool
+        or (openshift_use_openvswitch_system_container | default(False)) | bool
+        or (openshift_use_node_system_container | default(False)) | bool
+        or (openshift_use_master_system_container | default(False)) | bool
 
   - name: Default system_images_registry to a enterprise registry
     set_fact:
