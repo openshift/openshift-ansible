@@ -100,6 +100,7 @@
     {{ openshift.common.client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
     service prometheus
     prometheus.io/scrape='true'
+    prometheus.io/port='8443'
     prometheus.io/scheme=https
     service.alpha.openshift.io/serving-cert-secret-name=prometheus-tls
 
