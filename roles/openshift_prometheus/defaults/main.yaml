@@ -6,6 +6,10 @@ openshift_prometheus_namespace: openshift-metrics
 
 openshift_prometheus_node_selector: {"region":"infra"}
 
+openshift_prometheus_scrape_interval: "1m"
+openshift_prometheus_scrape_timeout: "10s"
+openshift_prometheus_evaluation_interval: "1m"
+
 # additional prometheus rules file
 openshift_prometheus_additional_rules_file: null
 
