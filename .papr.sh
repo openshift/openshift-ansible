@@ -1,22 +1,6 @@
 #!/bin/bash
 set -xeuo pipefail
 
-pip install requests
-
-query_github() {
-    repo=$1; shift
-    resource=$1; shift
-    python -c "
-import sys
-import requests
-j = requests.get('https://api.github.com/repos/$repo/$resource').json()
-for q in sys.argv[1:]:
-    if q.isdigit():
-        q = int(q)
-    j = j[q]
-print(j)" "$@"
-}
-
 # Essentially use a similar procedure other openshift-ansible PR tests use to
 # determine which image tag should be used. This allows us to avoid hardcoding a
 # specific version which quickly becomes stale.
@@ -24,9 +8,7 @@ print(j)" "$@"
 if [ -n "${PAPR_BRANCH:-}" ]; then
     target_branch=$PAPR_BRANCH
 else
-    # check which branch we're targeting if we're a PR
-    target_branch=$(query_github $PAPR_REPO pulls/$PAPR_PULL_ID base ref)
-    [ -n "$target_branch" ]
+    target_branch=$PAPR_PULL_TARGET_BRANCH
 fi
 
 # this is a bit wasteful, though there's no easy way to say "only clone up to
