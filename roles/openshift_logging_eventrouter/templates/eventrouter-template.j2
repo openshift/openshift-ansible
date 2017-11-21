@@ -42,7 +42,7 @@ objects:
         component: eventrouter
         logging-infra: eventrouter
         provider: openshift
-      replicas: ${REPLICAS}
+      replicas: "${{ '{{' }}REPLICAS{{ '}}' }}"
       template:
         metadata:
           labels:
