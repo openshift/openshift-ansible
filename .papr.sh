@@ -9,7 +9,10 @@ query_github() {
     python -c "
 import sys
 import requests
-j = requests.get('https://api.github.com/repos/$repo/$resource').json()
+d = requests.get('https://api.github.com/repos/$repo/$resource')
+if (d.status_code != requests.codes.ok):
+    raise Exception('API Error: {}'.format(d.content))
+j = d.json()
 for q in sys.argv[1:]:
     if q.isdigit():
         q = int(q)
