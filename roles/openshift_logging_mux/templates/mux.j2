@@ -59,7 +59,7 @@ spec:
 {%   endif %}
 {% endif %}
         ports:
-        - containerPort: "{{ openshift_logging_mux_port }}"
+        - containerPort: {{ openshift_logging_mux_port }}
           name: mux-forward
         volumeMounts:
         - name: config
