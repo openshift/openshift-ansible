@@ -20,7 +20,7 @@
 
 - when:
   - openshift.common.is_containerized | bool
-  - not openshift.common.is_node_system_container | bool
+  - not l_is_node_system_container | bool
   block:
   - name: Pre-pull node image when containerized
     command: >
