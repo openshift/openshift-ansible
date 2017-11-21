@@ -78,7 +78,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_hosted': {
                 'title': 'Hosted Install',
-                'playbook': 'playbooks/byo/openshift-cluster/openshift-hosted.yml'
+                'playbook': 'playbooks/openshift-hosted/config.yml'
             },
             'installer_phase_metrics': {
                 'title': 'Metrics Install',
@@ -90,7 +90,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_prometheus': {
                 'title': 'Prometheus Install',
-                'playbook': 'playbooks/byo/openshift-cluster/openshift-prometheus.yml'
+                'playbook': 'playbooks/openshift-prometheus/config.yml'
             },
             'installer_phase_servicecatalog': {
                 'title': 'Service Catalog Install',

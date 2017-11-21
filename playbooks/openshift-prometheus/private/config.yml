@@ -11,7 +11,7 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- name: Create Hosted Resources - openshift_prometheus
+- name: OpenShift Prometheus
   hosts: oo_first_master
   roles:
   - role: openshift_prometheus
