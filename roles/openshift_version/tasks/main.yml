@@ -93,11 +93,11 @@
   - inventory_hostname in groups['oo_masters_to_config'] or inventory_hostname in groups['oo_nodes_to_config']
   block:
   - name: Set openshift_version for rpm installation
-    include: set_version_rpm.yml
+    include_tasks: set_version_rpm.yml
     when: not is_containerized | bool
 
   - name: Set openshift_version for containerized installation
-    include: set_version_containerized.yml
+    include_tasks: set_version_containerized.yml
     when: is_containerized | bool
 
   - block:

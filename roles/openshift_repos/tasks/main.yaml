@@ -35,7 +35,7 @@
   - when: r_openshift_repos_has_run is not defined
     block:
 
-    - include: centos_repos.yml
+    - include_tasks: centos_repos.yml
       when:
       - ansible_os_family == "RedHat"
       - ansible_distribution != "Fedora"

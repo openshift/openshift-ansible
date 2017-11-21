@@ -16,6 +16,6 @@
 
 # for with_fileglob Ansible resolves the path relative to the roles/<rolename>/files directory
 - name: Assign deprecated variables to correct counterparts
-  include: "{{ item }}"
+  include_tasks: "{{ item }}"
   with_fileglob:
   - "../tasks/__deprecations_*.yml"

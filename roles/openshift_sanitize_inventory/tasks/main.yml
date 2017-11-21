@@ -1,7 +1,7 @@
 ---
 # We should print out deprecations prior to any failures so that if a play does fail for other reasons
 # the user would also be aware of any deprecated variables they should note to adjust
-- include: deprecations.yml
+- include_tasks: deprecations.yml
 
 - name: Abort when conflicting deployment type variables are set
   when:
@@ -53,7 +53,7 @@
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
       Please set it to a version string like "3.4".
 
-- include: unsupported.yml
+- include_tasks: unsupported.yml
   when:
     - not openshift_enable_unsupported_configurations | default(false) | bool
 
