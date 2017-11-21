@@ -4,7 +4,7 @@
   when:
     - (not ansible_selinux or ansible_selinux.status != 'enabled')
     - deployment_type == 'openshift-enterprise'
-    - not openshift_use_crio | default(false)
+    - not openshift_use_crio
 
 - name: setup firewall
   include: firewall.yml
@@ -48,7 +48,7 @@
     name: cri-o
     enabled: yes
     state: restarted
-  when: openshift_use_crio | default(false)
+  when: openshift_use_crio
 
 - name: restart NetworkManager to ensure resolv.conf is present
   systemd:

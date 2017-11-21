@@ -36,6 +36,8 @@ openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container |
 containerized_svc_dir: "/usr/lib/systemd/system"
 ha_svc_template_path: "native-cluster"
 
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+
 # NOTE
 # r_openshift_master_*_default may be defined external to this role.
 # openshift_use_*, if defined, may affect other roles or play behavior.

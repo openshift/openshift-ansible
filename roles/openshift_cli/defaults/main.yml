@@ -1,1 +1,5 @@
 ---
+openshift_use_crio_only: False
+
+l_is_system_container_image: "{{ openshift_use_master_system_container | default(openshift_use_system_containers | default(False)) | bool }}"
+l_use_cli_atomic_image: "{{ openshift_use_crio_only or l_is_system_container_image }}"

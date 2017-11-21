@@ -5,4 +5,4 @@
   - role: cockpit-ui
     when:
     - openshift_hosted_manage_registry | default(true) | bool
-    - not openshift.docker.hosted_registry_insecure | default(false) | bool
+    - not (openshift_docker_hosted_registry_insecure | default(false)) | bool

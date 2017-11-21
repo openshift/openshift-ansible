@@ -16,7 +16,6 @@
       labels: "{{ openshift_node_labels | default(None) }}"
       registry_url: "{{ oreg_url_node | default(oreg_url) | default(None) }}"
       schedulable: "{{ openshift_schedulable | default(openshift_scheduleable) | default(None) }}"
-      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
       storage_plugin_deps: "{{ osn_storage_plugin_deps | default(None) }}"
       set_node_ip: "{{ openshift_set_node_ip | default(None) }}"
       node_image: "{{ osn_image | default(None) }}"
