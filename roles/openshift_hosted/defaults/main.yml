@@ -49,6 +49,7 @@ openshift_hosted_routers:
   images: "{{ openshift_hosted_router_image | default(None)  }}"
   edits: "{{ openshift_hosted_router_edits }}"
   stats_port: 1936
+  stats_password: "{{ openshift_hosted_router_stats_password | default(None) }}"
   ports:
   - 80:80
   - 443:443

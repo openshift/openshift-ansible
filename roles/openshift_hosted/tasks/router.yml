@@ -99,6 +99,7 @@
     edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
+    stats_password: "{{ item.stats_password }}"
   with_items: "{{ openshift_hosted_routers }}"
 
 - name: Wait for pod (Routers)
