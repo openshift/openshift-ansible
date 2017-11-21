@@ -70,7 +70,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_node': {
                 'title': 'Node Install',
-                'playbook': 'playbooks/byo/openshift-node/config.yml'
+                'playbook': 'playbooks/openshift-node/config.yml'
             },
             'installer_phase_glusterfs': {
                 'title': 'GlusterFS Install',

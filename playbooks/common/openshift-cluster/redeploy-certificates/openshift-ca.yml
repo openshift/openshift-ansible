@@ -272,7 +272,7 @@
       state: absent
     changed_when: false
 
-- include: ../../openshift-node/restart.yml
+- include: ../../../openshift-node/private/restart.yml
   # Do not restart nodes when node, master or etcd certificates were previously expired.
   when:
   # nodes

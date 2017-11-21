@@ -281,7 +281,7 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     global CFG
     if len(hosts_to_run_on) != len(hosts):
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
-                                          'playbooks/byo/openshift-node/scaleup.yml')
+                                          'playbooks/openshift-node/scaleup.yml')
     else:
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
                                           'playbooks/byo/openshift-cluster/config.yml')
