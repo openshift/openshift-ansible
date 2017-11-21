@@ -93,15 +93,15 @@
     state: "{{ 'present' if item.reg_fact_val != '' else 'absent'}}"
   with_items:
   - reg_conf_var: HTTP_PROXY
-    reg_fact_val: "{{ docker_http_proxy | default('') }}"
+    reg_fact_val: "{{ openshift_http_proxy | default('') }}"
   - reg_conf_var: HTTPS_PROXY
-    reg_fact_val: "{{ docker_https_proxy | default('') }}"
+    reg_fact_val: "{{ openshift_https_proxy | default('') }}"
   - reg_conf_var: NO_PROXY
-    reg_fact_val: "{{ docker_no_proxy | default('') }}"
+    reg_fact_val: "{{ openshift_no_proxy | default('') }}"
   notify:
   - restart docker
   when:
-  - docker_check.stat.isreg is defined and docker_check.stat.isreg and '"http_proxy" in openshift.common or "https_proxy" in openshift.common'
+  - docker_check.stat.isreg is defined and docker_check.stat.isreg and (openshift_http_proxy is defined or openshift_https_proxy is defined)
 
 - name: Set various Docker options
   lineinfile:

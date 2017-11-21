@@ -1,14 +1,14 @@
 # {{ ansible_managed }}
 
 [Service]
-{% if "http_proxy" in openshift.common %}
-Environment=HTTP_PROXY={{ docker_http_proxy }}
+{% if openshift_http_proxy is defined %}
+Environment=HTTP_PROXY={{ openshift_http_proxy }}
 {% endif -%}
-{% if "https_proxy" in openshift.common %}
-Environment=HTTPS_PROXY={{ docker_http_proxy }}
+{% if openshift_https_proxy is defined %}
+Environment=HTTPS_PROXY={{ openshift_https_proxy }}
 {% endif -%}
-{% if "no_proxy" in openshift.common %}
-Environment=NO_PROXY={{ docker_no_proxy }}
+{% if openshift_no_proxy is defined %}
+Environment=NO_PROXY={{ openshift_no_proxy }}
 {% endif %}
 {%- if os_firewall_use_firewalld|default(false) %}
 [Unit]

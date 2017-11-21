@@ -96,8 +96,8 @@
   when:
   - openshift.master.cluster_method == "native"
   - l_master_api_proxy.rc == 0
-  - "'http_proxy' not in openshift.common"
-  - "'https_proxy' not in openshift.common"
+  - openshift_http_proxy is not defined
+  - openshift_https_proxy is not defined
   lineinfile:
     dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
     line: "{{ item }}"
@@ -148,8 +148,8 @@
   when:
   - openshift.master.cluster_method == "native"
   - master_controllers_proxy.rc == 0
-  - "'http_proxy' not in openshift.common"
-  - "'https_proxy' not in openshift.common"
+  - openshift_http_proxy is not defined
+  - openshift_https_proxy is not defined
 
 - name: Restore Master Controllers AWS Options
   lineinfile:
