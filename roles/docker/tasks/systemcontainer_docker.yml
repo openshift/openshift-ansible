@@ -173,6 +173,10 @@
 - set_fact:
     docker_service_status_changed: "{{ r_docker_systemcontainer_docker_start_result | changed }}"
 
-- include: registry_auth.yml
-
 - meta: flush_handlers
+
+# Since docker is running as a system container, docker login will fail to create
+# credentials.  Use alternate method if requiring authenticated registries.
+- include: registry_auth.yml
+  vars:
+    openshift_docker_alternative_creds: True

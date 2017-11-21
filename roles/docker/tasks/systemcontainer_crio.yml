@@ -179,3 +179,9 @@
   register: start_result
 
 - meta: flush_handlers
+
+# If we are using crio only, docker.service might not be available for
+# 'docker login'
+- include: registry_auth.yml
+  vars:
+    openshift_docker_alternative_creds: "{{ l_use_crio_only }}"
