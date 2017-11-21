@@ -1,0 +1,3 @@
+---
+# TODO (rteague): Temporarily leaving this playbook to allow CI tests to operate until CI jobs are updated.
+- include: ../../openshift-node/network_manager.yml
