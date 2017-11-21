@@ -1,6 +1,0 @@
----
-- include: ../../init/main.yml
-
-- include: ../../common/openshift-etcd/ca.yml
-
-- include: ../../common/openshift-etcd/certificates.yml

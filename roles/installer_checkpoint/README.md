@@ -64,7 +64,7 @@ phase are stored in the `phase_attributes` variable.
             },
             'installer_phase_etcd': {
                 'title': 'etcd Install',
-                'playbook': 'playbooks/byo/openshift-etcd/config.yml'
+                'playbook': 'playbooks/openshift-etcd/config.yml'
             },
             'installer_phase_nfs': {
                 'title': 'NFS Install',

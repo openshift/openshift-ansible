@@ -1,0 +1,4 @@
+---
+- include: ../init/main.yml
+
+- include: private/embedded2external.yml

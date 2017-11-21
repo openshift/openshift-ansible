@@ -1,7 +1,7 @@
 ---
 - include: ../../openshift-checks/private/install.yml
 
-- include: ../openshift-etcd/config.yml
+- include: ../../openshift-etcd/private/config.yml
 
 - include: ../../openshift-nfs/private/config.yml
   when: groups.oo_nfs_to_config | default([]) | count > 0
