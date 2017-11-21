@@ -75,7 +75,7 @@ spec:
 
       - name: prometheus
         args:
-        - --storage.tsdb.retention=6h
+        - --storage.tsdb.retention={{ openshift_prometheus_tsdb_retention }}
         - --storage.tsdb.min-block-duration=2m
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.listen-address=localhost:9090
