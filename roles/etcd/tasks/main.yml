@@ -41,6 +41,12 @@
       state: directory
       mode: 0700
 
+  - name: Create configuration file in sysconfig
+    file:
+      path: /etc/sysconfig/etcd
+      state: touch
+    when: openshift.common.etcd_runtime == "host" or openshift.common.etcd_runtime == "docker"
+
   # TODO: retest with symlink to confirm it does or does not function
   - name: Copy service file for etcd instance
     copy:
