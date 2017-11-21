@@ -6,6 +6,12 @@ r_etcd_common_backup_sufix_name: ''
 r_etcd_common_etcd_runtime: "docker"
 r_etcd_common_embedded_etcd: false
 
+osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'
+etcd_image_dict:
+  origin: "registry.fedoraproject.org/f26/etcd"
+  openshift-enterprise: "{{ osm_etcd_image }}"
+etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }}"
+
 # etcd run on a host => use etcdctl command directly
 # etcd run as a docker container => use docker exec
 # etcd run as a runc container => use runc exec
