@@ -68,7 +68,7 @@ phase are stored in the `phase_attributes` variable.
             },
             'installer_phase_nfs': {
                 'title': 'NFS Install',
-                'playbook': 'playbooks/byo/openshift-nfs/config.yml'
+                'playbook': 'playbooks/openshift-nfs/config.yml'
             },
             #...
         }

@@ -25,7 +25,7 @@
   include: ../../common/openshift-etcd/config.yml
 
 - name: include nfs
-  include: ../../common/openshift-nfs/config.yml
+  include: ../../openshift-nfs/private/config.yml
   when: groups.oo_nfs_to_config | default([]) | count > 0
 
 - name: include loadbalancer
