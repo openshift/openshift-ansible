@@ -42,5 +42,5 @@
   include: ../../openshift-node/private/config.yml
 
 - name: include openshift-glusterfs
-  include: ../../common/openshift-glusterfs/config.yml
+  include: ../../openshift-glusterfs/private/config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
