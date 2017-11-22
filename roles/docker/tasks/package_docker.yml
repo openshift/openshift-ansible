@@ -33,9 +33,10 @@
 
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
+# Note: The curr_docker_version.stdout check can be removed when https://github.com/ansible/ansible/issues/33187 gets fixed.
 - name: Install Docker
   package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift.common.is_atomic | bool and not curr_docker_version | skipped and not curr_docker_version.stdout != ''
 
 - block:
   # Extend the default Docker service unit file when using iptables-services
