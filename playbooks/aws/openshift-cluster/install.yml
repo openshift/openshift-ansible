@@ -33,10 +33,10 @@
   when: groups.oo_lb_to_config | default([]) | count > 0
 
 - name: include openshift-master config
-  include: ../../common/openshift-master/config.yml
+  include: ../../openshift-master/private/config.yml
 
 - name: include master additional config
-  include: ../../common/openshift-master/additional_config.yml
+  include: ../../openshift-master/private/additional_config.yml
 
 - name: include master additional config
   include: ../../openshift-node/private/config.yml

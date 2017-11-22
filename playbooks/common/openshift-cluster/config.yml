@@ -9,9 +9,9 @@
 - include: ../../openshift-loadbalancer/private/config.yml
   when: groups.oo_lb_to_config | default([]) | count > 0
 
-- include: ../openshift-master/config.yml
+- include: ../../openshift-master/private/config.yml
 
-- include: ../openshift-master/additional_config.yml
+- include: ../../openshift-master/private/additional_config.yml
 
 - include: ../../openshift-node/private/config.yml
 

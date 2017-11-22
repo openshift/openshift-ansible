@@ -13,7 +13,7 @@
 
 - include: ../../common/openshift-cluster/redeploy-certificates/masters-backup.yml
 
-- include: ../../common/openshift-master/certificates.yml
+- include: ../../openshift-master/private/certificates.yml
   vars:
     openshift_certificates_redeploy: true
 
@@ -27,7 +27,7 @@
   vars:
     g_etcd_certificates_expired: "{{ ('expired' in (hostvars | oo_select_keys(groups['etcd']) | oo_collect('check_results.check_results.etcd') | oo_collect('health'))) | bool }}"
 
-- include: ../../common/openshift-master/restart.yml
+- include: ../../openshift-master/private/restart.yml
 
 - include: ../../openshift-node/private/restart.yml
 
@@ -37,6 +37,6 @@
 - include: ../../common/openshift-cluster/redeploy-certificates/registry.yml
   when: openshift_hosted_manage_registry | default(true) | bool
 
-- include: ../../common/openshift-master/revert-client-ca.yml
+- include: ../../openshift-master/private/revert-client-ca.yml
 
-- include: ../../common/openshift-master/restart.yml
+- include: ../../openshift-master/private/restart.yml

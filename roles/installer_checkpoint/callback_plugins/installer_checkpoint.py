@@ -62,11 +62,11 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_master': {
                 'title': 'Master Install',
-                'playbook': 'playbooks/byo/openshift-master/config.yml'
+                'playbook': 'playbooks/openshift-master/config.yml'
             },
             'installer_phase_master_additional': {
                 'title': 'Master Additional Install',
-                'playbook': 'playbooks/byo/openshift-master/additional_config.yml'
+                'playbook': 'playbooks/openshift-master/additional_config.yml'
             },
             'installer_phase_node': {
                 'title': 'Node Install',
