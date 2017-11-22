@@ -16,6 +16,7 @@ galaxy_info:
   - cloud
   - system
 dependencies:
+- role: lib_openshift
 - role: os_firewall
   os_firewall_allow:
   - service: etcd
