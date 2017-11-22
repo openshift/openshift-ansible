@@ -71,7 +71,7 @@
 
   - name: Make master schedulable
     command: oadm manage-node {{ openshift.common.hostname }} --schedulable
-    delegate_to: "{{ contrail_first_master }}
+    delegate_to: "{{ contrail_first_master }}"
 
   - name: Launch the installer
     command: oc create -f /tmp/contrail-installer.yaml
