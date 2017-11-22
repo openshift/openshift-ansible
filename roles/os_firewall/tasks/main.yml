@@ -8,12 +8,12 @@
   set_fact:
     r_os_firewall_is_atomic: "{{ r_os_firewall_ostree_booted.stat.exists }}"
 
-- include: firewalld.yml
+- include_tasks: firewalld.yml
   when:
   - os_firewall_enabled | bool
   - os_firewall_use_firewalld | bool
 
-- include: iptables.yml
+- include_tasks: iptables.yml
   when:
   - os_firewall_enabled | bool
   - not os_firewall_use_firewalld | bool
