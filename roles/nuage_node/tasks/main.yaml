@@ -31,7 +31,7 @@
     - nuage.key
     - nuage.kubeconfig
 
-- include: certificates.yml
+- include_tasks: certificates.yml
 
 - name: Add additional Docker mounts for Nuage for atomic hosts
   become: yes
@@ -44,8 +44,7 @@
     - restart node
   ignore_errors: true
 
-- include: iptables.yml
+- include_tasks: iptables.yml
 
 - name: setup firewall
-  include: firewall.yml
-  static: yes
+  import_tasks: firewall.yml

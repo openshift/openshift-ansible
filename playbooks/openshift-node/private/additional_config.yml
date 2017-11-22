@@ -24,7 +24,7 @@
       key: oo_nodes_use_{{ (openshift_use_kuryr | default(False)) | ternary('kuryr','nothing') }}
     changed_when: False
 
-- include: etcd_client_config.yml
+- import_playbook: etcd_client_config.yml
   vars:
     openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv:oo_nodes_use_kuryr"
 

@@ -7,8 +7,7 @@
     - not openshift_use_crio | default(false)
 
 - name: setup firewall
-  include: firewall.yml
-  static: yes
+  import_tasks: firewall.yml
 
 #### Disable SWAP #####
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
@@ -41,7 +40,7 @@
 #### End Disable Swap Block ####
 
 - name: include node installer
-  include: install.yml
+  include_tasks: install.yml
 
 - name: Restart cri-o
   systemd:
@@ -66,34 +65,34 @@
     sysctl_file: "/etc/sysctl.d/99-openshift.conf"
     reload: yes
 
-- include: registry_auth.yml
+- include_tasks: registry_auth.yml
 
 - name: include standard node config
-  include: config.yml
+  include_tasks: config.yml
 
 #### Storage class plugins here ####
 - name: NFS storage plugin configuration
-  include: storage_plugins/nfs.yml
+  include_tasks: storage_plugins/nfs.yml
   tags:
     - nfs
 
 - name: GlusterFS storage plugin configuration
-  include: storage_plugins/glusterfs.yml
+  include_tasks: storage_plugins/glusterfs.yml
   when: "'glusterfs' in openshift.node.storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
-  include: storage_plugins/ceph.yml
+  include_tasks: storage_plugins/ceph.yml
   when: "'ceph' in openshift.node.storage_plugin_deps"
 
 - name: iSCSI storage plugin configuration
-  include: storage_plugins/iscsi.yml
+  include_tasks: storage_plugins/iscsi.yml
   when: "'iscsi' in openshift.node.storage_plugin_deps"
 
 ##### END Storage #####
 
-- include: config/workaround-bz1331590-ovs-oom-fix.yml
+- include_tasks: config/workaround-bz1331590-ovs-oom-fix.yml
   when: openshift_node_use_openshift_sdn | default(true) | bool
 
 - name: include bootstrap node config
-  include: bootstrap.yml
+  include_tasks: bootstrap.yml
   when: openshift_node_bootstrap

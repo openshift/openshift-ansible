@@ -1,4 +1,4 @@
 ---
-- include: ../init/evaluate_groups.yml
+- import_playbook: ../init/evaluate_groups.yml
 
-- include: private/network_manager.yml
+- import_playbook: private/network_manager.yml

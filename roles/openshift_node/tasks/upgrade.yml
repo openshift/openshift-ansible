@@ -10,7 +10,7 @@
 
 # tasks file for openshift_node_upgrade
 
-- include: registry_auth.yml
+- include_tasks: registry_auth.yml
 
 - name: Stop node and openvswitch services
   service:
@@ -48,7 +48,7 @@
   - openshift.common.is_containerized | bool
   - openshift_use_openshift_sdn | bool
 
-- include: docker/upgrade.yml
+- include_tasks: docker/upgrade.yml
   vars:
     # We will restart Docker ourselves after everything is ready:
     skip_docker_restart: True
@@ -56,10 +56,10 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- include: "{{ node_config_hook }}"
+- include_tasks: "{{ node_config_hook }}"
   when: node_config_hook is defined
 
-- include: upgrade/rpm_upgrade.yml
+- include_tasks: upgrade/rpm_upgrade.yml
   vars:
     component: "node"
     openshift_version: "{{ openshift_pkg_version | default('') }}"
@@ -70,7 +70,7 @@
     path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
     state: absent
 
-- include: upgrade/containerized_node_upgrade.yml
+- include_tasks: upgrade/containerized_node_upgrade.yml
   when: openshift.common.is_containerized | bool
 
 - name: Ensure containerized services stopped before Docker restart
@@ -165,7 +165,7 @@
     value: "/etc/origin/node/resolv.conf"
 
 # Restart all services
-- include: upgrade/restart.yml
+- include_tasks: upgrade/restart.yml
 
 - name: Wait for node to be ready
   oc_obj:

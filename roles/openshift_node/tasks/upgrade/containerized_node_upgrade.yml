@@ -6,7 +6,7 @@
     skip_node_svc_handlers: True
 
 - name: Update systemd units
-  include: ../systemd_units.yml
+  include_tasks: ../systemd_units.yml
 
 # This is a no-op because of skip_node_svc_handlers, but lets us trigger it before end of
 # play when the node has already been marked schedulable again. (this would look strange

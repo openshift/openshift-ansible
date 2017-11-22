@@ -1,8 +1,8 @@
 ---
-- include: netplugin_firewalld.yml
+- include_tasks: netplugin_firewalld.yml
   when: has_firewalld
 
-- include: netplugin_iptables.yml
+- include_tasks: netplugin_iptables.yml
   when: has_iptables
 
 - name: Netplugin | Ensure localhost entry correct in /etc/hosts
@@ -19,7 +19,7 @@
     line: '::1 '
     state: absent
 
-- include: ovs.yml
+- include_tasks: ovs.yml
   when: netplugin_driver == "ovs"
 
 - name: Netplugin | Create Netplugin bin symlink
