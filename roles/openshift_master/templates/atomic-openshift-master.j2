@@ -21,7 +21,7 @@ AWS_SECRET_ACCESS_KEY={{ openshift_cloudprovider_aws_secret_key }}
 {% endif %}
 
 {% if 'api_env_vars' in openshift.master or 'controllers_env_vars' in openshift.master -%}
-{% for key, value in openshift.master.api_env_vars.items() | default([]) | union(openshift.master.controllers_env_vars.items() | default([])) -%}
+{% for key, value in (openshift.master.api_env_vars | default({})).items() | union((openshift.master.controllers_env_vars | default({})).items()) -%}
 {{ key }}={{ value }}
 {% endfor -%}
 {% endif -%}
