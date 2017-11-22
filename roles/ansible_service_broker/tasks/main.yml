@@ -1,8 +1,8 @@
 ---
 # do any asserts here
 
-- include: install.yml
+- include_tasks: install.yml
   when: ansible_service_broker_install | bool
 
-- include: remove.yml
+- include_tasks: remove.yml
   when: ansible_service_broker_remove | bool

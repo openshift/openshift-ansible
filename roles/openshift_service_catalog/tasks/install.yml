@@ -40,7 +40,7 @@
       command: >
         {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig adm pod-network make-projects-global kube-service-catalog
 
-- include: generate_certs.yml
+- include_tasks: generate_certs.yml
 
 - copy:
     src: kubeservicecatalog_roles_bindings.yml
@@ -252,7 +252,7 @@
     session_affinity: None
     service_type: ClusterIP
 
-- include: start_api_server.yml
+- include_tasks: start_api_server.yml
 
 - name: Delete temp directory
   file:
