@@ -94,7 +94,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_servicecatalog': {
                 'title': 'Service Catalog Install',
-                'playbook': 'playbooks/byo/openshift-cluster/service-catalog.yml'
+                'playbook': 'playbooks/openshift-service-catalog/config.yml'
             },
             'installer_phase_management': {
                 'title': 'Management Install',
