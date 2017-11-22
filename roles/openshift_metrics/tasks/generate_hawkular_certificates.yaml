@@ -1,13 +1,13 @@
 ---
 - name: generate hawkular-metrics certificates
-  include: setup_certificate.yaml
+  include_tasks: setup_certificate.yaml
   vars:
     component: hawkular-metrics
     hostnames: "hawkular-metrics,hawkular-metrics.{{ openshift_metrics_project }}.svc.cluster.local,{{ openshift_metrics_hawkular_hostname }}"
   changed_when: no
 
 - name: generate hawkular-cassandra certificates
-  include: setup_certificate.yaml
+  include_tasks: setup_certificate.yaml
   vars:
     component: hawkular-cassandra
     hostnames: hawkular-cassandra

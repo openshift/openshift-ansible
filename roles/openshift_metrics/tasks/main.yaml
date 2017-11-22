@@ -43,15 +43,15 @@
   check_mode: no
   tags: metrics_init
 
-- include: install_metrics.yaml
+- include_tasks: install_metrics.yaml
   when:
     - openshift_metrics_install_metrics | bool
 
-- include: uninstall_metrics.yaml
+- include_tasks: uninstall_metrics.yaml
   when:
     - not openshift_metrics_install_metrics | bool
 
-- include: uninstall_hosa.yaml
+- include_tasks: uninstall_hosa.yaml
   when: not openshift_metrics_install_hawkular_agent | bool
 
 - name: Delete temp directory
