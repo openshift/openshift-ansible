@@ -10,7 +10,7 @@
 - include: ../../common/openshift-cluster/service_catalog.yml
   when: openshift_enable_service_catalog | default(false) | bool
 
-- include: ../../common/openshift-management/config.yml
+- include: ../../openshift-management/private/config.yml
   when: openshift_management_install_management | default(false) | bool
 
 - name: Print deprecated variable warning message if necessary
