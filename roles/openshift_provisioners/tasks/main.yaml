@@ -12,10 +12,10 @@
   check_mode: no
   tags: provisioners_init
 
-- include: "{{ role_path }}/tasks/install_provisioners.yaml"
+- include_tasks: install_provisioners.yaml
   when: openshift_provisioners_install_provisioners | default(false) | bool
 
-- include: "{{ role_path }}/tasks/uninstall_provisioners.yaml"
+- include_tasks: uninstall_provisioners.yaml
   when: not openshift_provisioners_install_provisioners | default(false) | bool
 
 - name: Delete temp directory
