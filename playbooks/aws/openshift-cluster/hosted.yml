@@ -10,7 +10,7 @@
 - include: ../../openshift-prometheus/private/config.yml
   when: openshift_hosted_prometheus_deploy | default(false) | bool
 
-- include: ../../common/openshift-cluster/service_catalog.yml
+- include: ../../openshift-service-catalog/private/config.yml
   when: openshift_enable_service_catalog | default(false) | bool
 
 - include: ../../common/openshift-management/config.yml
