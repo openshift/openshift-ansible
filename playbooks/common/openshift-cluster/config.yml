@@ -6,7 +6,7 @@
 - include: ../../openshift-nfs/private/config.yml
   when: groups.oo_nfs_to_config | default([]) | count > 0
 
-- include: ../openshift-loadbalancer/config.yml
+- include: ../../openshift-loadbalancer/private/config.yml
   when: groups.oo_lb_to_config | default([]) | count > 0
 
 - include: ../openshift-master/config.yml
