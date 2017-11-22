@@ -5,10 +5,10 @@
     recurse: yes
     state: directory
 
-- include: download_bins.yml
+- include_tasks: download_bins.yml
 
-- include: netmaster.yml
+- include_tasks: netmaster.yml
   when: contiv_role == "netmaster"
 
-- include: netplugin.yml
+- include_tasks: netplugin.yml
   when: contiv_role == "netplugin"

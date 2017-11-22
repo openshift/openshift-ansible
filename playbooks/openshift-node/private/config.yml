@@ -11,19 +11,19 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- include: certificates.yml
+- import_playbook: certificates.yml
 
-- include: setup.yml
+- import_playbook: setup.yml
 
-- include: containerized_nodes.yml
+- import_playbook: containerized_nodes.yml
 
-- include: configure_nodes.yml
+- import_playbook: configure_nodes.yml
 
-- include: additional_config.yml
+- import_playbook: additional_config.yml
 
-- include: manage_node.yml
+- import_playbook: manage_node.yml
 
-- include: enable_excluders.yml
+- import_playbook: enable_excluders.yml
 
 - name: Node Install Checkpoint End
   hosts: all

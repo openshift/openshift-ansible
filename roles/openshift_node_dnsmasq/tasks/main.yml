@@ -59,9 +59,9 @@
     state: started
 
 # Dynamic NetworkManager based dispatcher
-- include: ./network-manager.yml
+- include_tasks: ./network-manager.yml
   when: network_manager_active | bool
 
 # Relies on ansible in order to configure static config
-- include: ./no-network-manager.yml
+- include_tasks: ./no-network-manager.yml
   when: not network_manager_active | bool

@@ -8,4 +8,4 @@
     state: present
   notify: restart NetworkManager
 
-- include: ./network-manager.yml
+- include_tasks: network-manager.yml

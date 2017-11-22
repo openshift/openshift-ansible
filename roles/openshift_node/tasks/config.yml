@@ -1,6 +1,6 @@
 ---
 - name: Install the systemd units
-  include: systemd_units.yml
+  include_tasks: systemd_units.yml
 
 - name: Start and enable openvswitch service
   systemd:
@@ -47,8 +47,7 @@
     - restart node
 
 - name: include aws provider credentials
-  include: aws.yml
-  static: yes
+  import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
 
 # Necessary because when you're on a node that's also a master the master will be

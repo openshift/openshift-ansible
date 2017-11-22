@@ -11,18 +11,18 @@
 - when: openshift.common.is_containerized | bool
   block:
   - name: include node deps docker service file
-    include: config/install-node-deps-docker-service-file.yml
+    include_tasks: config/install-node-deps-docker-service-file.yml
 
   - name: include ovs service environment file
-    include: config/install-ovs-service-env-file.yml
+    include_tasks: config/install-ovs-service-env-file.yml
 
   - name: Install Node system container
-    include: node_system_container.yml
+    include_tasks: node_system_container.yml
     when:
     - l_is_node_system_container | bool
 
   - name: Install OpenvSwitch system containers
-    include: openvswitch_system_container.yml
+    include_tasks: openvswitch_system_container.yml
     when:
     - openshift_node_use_openshift_sdn | bool
     - openshift.common.is_openvswitch_system_container | bool
@@ -34,11 +34,11 @@
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
 
-  - include: config/install-ovs-docker-service-file.yml
+  - include_tasks: config/install-ovs-docker-service-file.yml
   when:
   - openshift.common.is_containerized | bool
   - openshift_node_use_openshift_sdn | bool
   - not openshift.common.is_openvswitch_system_container | bool
 
-- include: config/configure-node-settings.yml
-- include: config/configure-proxy-settings.yml
+- include_tasks: config/configure-node-settings.yml
+- include_tasks: config/configure-proxy-settings.yml

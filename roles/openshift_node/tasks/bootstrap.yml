@@ -32,8 +32,7 @@
     regexp: "^CONFIG_FILE=.*"
 
 - name: include aws sysconfig credentials
-  include: aws.yml
-  static: yes
+  import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
 
 #- name: update the ExecStart to have bootstrap

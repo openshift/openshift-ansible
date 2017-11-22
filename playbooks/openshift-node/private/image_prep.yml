@@ -1,21 +1,21 @@
 ---
 - name: normalize groups
-  include: ../../init/evaluate_groups.yml
+  import_playbook: ../../init/evaluate_groups.yml
 
 - name: initialize the facts
-  include: ../../init/facts.yml
+  import_playbook: ../../init/facts.yml
 
 - name: initialize the repositories
-  include: ../../init/repos.yml
+  import_playbook: ../../init/repos.yml
 
 - name: run node config setup
-  include: setup.yml
+  import_playbook: setup.yml
 
 - name: run node config
-  include: configure_nodes.yml
+  import_playbook: configure_nodes.yml
 
 - name: Re-enable excluders
-  include: enable_excluders.yml
+  import_playbook: enable_excluders.yml
 
 - name: Remove any undesired artifacts from build
-  include: clean_image.yml
+  import_playbook: clean_image.yml
