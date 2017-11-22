@@ -20,10 +20,10 @@
     mode: 0755
   changed_when: False
 
-- include: install_prometheus.yaml
+- include_tasks: install_prometheus.yaml
   when: openshift_prometheus_state == 'present'
 
-- include: uninstall_prometheus.yaml
+- include_tasks: uninstall_prometheus.yaml
   when: openshift_prometheus_state == 'absent'
 
 - name: Delete temp directory
