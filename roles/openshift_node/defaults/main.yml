@@ -9,6 +9,12 @@ l_is_node_system_container: "{{ (openshift_use_node_system_container | default(o
 openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
 openshift_service_type: "{{ 'origin' if openshift_deployment_type == 'origin' else 'atomic-openshift' }}"
 
+system_images_registry_dict:
+  openshift-enterprise: "registry.access.redhat.com"
+  origin: "docker.io"
+
+system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
+
 openshift_image_tag: ''
 
 default_r_openshift_node_image_prep_packages:

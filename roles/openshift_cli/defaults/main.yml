@@ -1,1 +1,6 @@
 ---
+system_images_registry_dict:
+  openshift-enterprise: "registry.access.redhat.com"
+  origin: "docker.io"
+
+system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"

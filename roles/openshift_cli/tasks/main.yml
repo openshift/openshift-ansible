@@ -28,13 +28,13 @@
 - block:
   - name: Pull CLI Image
     command: >
-      atomic pull --storage ostree {{ 'docker:' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+      atomic pull --storage ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.common.cli_image }}:{{ openshift_image_tag }}
     register: pull_result
     changed_when: "'Pulling layer' in pull_result.stdout"
 
   - name: Copy client binaries/symlinks out of CLI image for use on the host
     openshift_container_binary_sync:
-      image: "{{ '' if openshift.common.system_images_registry == 'docker' else openshift.common.system_images_registry + '/' }}{{ openshift.common.cli_image }}"
+      image: "{{ '' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.common.cli_image }}"
       tag: "{{ openshift_image_tag }}"
       backend: "atomic"
   when:
