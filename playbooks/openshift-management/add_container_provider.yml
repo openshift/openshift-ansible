@@ -1,4 +1,4 @@
 ---
-- include: ../init/evaluate_groups.yml
+- import_playbook: ../init/evaluate_groups.yml
 
-- include: private/add_container_provider.yml
+- import_playbook: private/add_container_provider.yml
