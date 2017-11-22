@@ -114,7 +114,7 @@
     set_fact:
       r_etcd_migrate_success: true
 
-- include: ./scaleup.yml
+- import_playbook: scaleup.yml
 
 - name: Gate on etcd migration
   hosts: oo_masters_to_config

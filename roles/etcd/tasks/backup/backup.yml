@@ -1,5 +1,5 @@
 ---
-- include: vars.yml
+- include_tasks: vars.yml
 
 # TODO: replace shell module with command and update later checks
 - name: Check available disk space for etcd backup

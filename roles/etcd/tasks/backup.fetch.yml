@@ -1,3 +1,3 @@
 ---
-- include: backup/vars.yml
-- include: backup/fetch.yml
+- include_tasks: backup/vars.yml
+- include_tasks: backup/fetch.yml

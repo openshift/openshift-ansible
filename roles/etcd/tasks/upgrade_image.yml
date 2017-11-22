@@ -1,2 +1,2 @@
 ---
-- include: upgrade/upgrade_image.yml
+- include_tasks: upgrade/upgrade_image.yml

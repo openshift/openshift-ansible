@@ -1,8 +1,8 @@
 ---
-- include: backup/vars.yml
+- include_tasks: backup/vars.yml
 
-- include: backup/archive.yml
+- include_tasks: backup/archive.yml
 
-- include: backup/sync_backup.yml
+- include_tasks: backup/sync_backup.yml
 
-- include: backup/
+- include_tasks: backup/

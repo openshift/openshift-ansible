@@ -1,2 +1,2 @@
 ---
-- include: migration/add_ttls.yml
+- include_tasks: migration/add_ttls.yml
