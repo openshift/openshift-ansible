@@ -12,15 +12,15 @@ DEPLOYMENT_IMAGE_INFO = {
     "origin": {
         "namespace": "openshift",
         "name": "origin",
-        "registry_console_template": "${prefix}kubernetes:${version}",
         "registry_console_prefix": "cockpit/",
+        "registry_console_basename": "kubernetes",
         "registry_console_default_version": "latest",
     },
     "openshift-enterprise": {
         "namespace": "openshift3",
         "name": "ose",
-        "registry_console_template": "${prefix}registry-console:${version}",
-        "registry_console_prefix": "registry.access.redhat.com/openshift3/",
+        "registry_console_prefix": "openshift3/",
+        "registry_console_basename": "registry-console",
         "registry_console_default_version": "${short_version}",
     },
 }
@@ -156,7 +156,8 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         if 'oo_nodes_to_config' in host_groups:
             for suffix in NODE_IMAGE_SUFFIXES:
                 required.add(image_url.replace("${component}", suffix).replace("${version}", image_tag))
-            required.add(self._registry_console_image(image_tag, image_info))
+            if self.get_var("osm_use_cockpit", default=True, convert=bool):
+                required.add(self._registry_console_image(image_tag, image_info))
 
         # images for containerized components
         if self.get_var("openshift", "common", "is_containerized"):
@@ -180,6 +181,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             "openshift_cockpit_deployer_prefix",
             default=image_info["registry_console_prefix"],
         )
+        basename = self.get_var(
+            "openshift_cockpit_deployer_basename",
+            default=image_info["registry_console_basename"],
+        )
 
         # enterprise template just uses v3.6, v3.7, etc
         match = re.match(r'v\d+\.\d+', image_tag)
@@ -187,8 +192,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         version = image_info["registry_console_default_version"].replace("${short_version}", short_version)
         version = self.get_var("openshift_cockpit_deployer_version", default=version)
 
-        template = image_info["registry_console_template"]
-        return template.replace('${prefix}', prefix).replace('${version}', version)
+        return prefix + basename + ':' + version
 
     def local_images(self, images):
         """Filter a list of images and return those available locally."""

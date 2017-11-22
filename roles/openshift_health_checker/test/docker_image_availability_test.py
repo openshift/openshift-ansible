@@ -217,7 +217,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'foo.io/openshift3/ose-docker-registry:f13ac45',
             'foo.io/openshift3/ose-haproxy-router:f13ac45',
             # registry-console is not constructed/versioned the same as the others.
-            'registry.access.redhat.com/openshift3/registry-console:vtest',
+            'openshift3/registry-console:vtest',
             # containerized images aren't built from oreg_url
             'openshift3/node:vtest',
             'openshift3/openvswitch:vtest',
@@ -261,7 +261,7 @@ def test_required_images(deployment_type, is_containerized, groups, oreg_url, ex
             openshift_deployment_type="openshift-enterprise",
             openshift_image_tag="vtest",
         ),
-        "registry.access.redhat.com/openshift3/registry-console:vtest",
+        "openshift3/registry-console:vtest",
     ), (
         dict(
             openshift_deployment_type="openshift-enterprise",
