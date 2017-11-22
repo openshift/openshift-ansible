@@ -154,6 +154,7 @@
   - name: initialize_facts set_fact repoquery command
     set_fact:
       repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
+      repoquery_installed: "{{ 'dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins --installed' }}"
 
   - name: initialize_facts set_fact on openshift_docker_hosted_registry_network
     set_fact:

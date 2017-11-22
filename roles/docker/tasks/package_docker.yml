@@ -1,6 +1,6 @@
 ---
 - name: Get current installed Docker version
-  command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
+  command: "{{ repoquery_installed }} --qf '%{version}' docker"
   when: not openshift.common.is_atomic | bool
   register: curr_docker_version
   retries: 4

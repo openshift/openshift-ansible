@@ -16,7 +16,7 @@
   changed_when: no
 
 - name: Get current version of Docker
-  command: "{{ repoquery_cmd }} --installed --qf '%{version}' docker"
+  command: "{{ repoquery_installed }} --qf '%{version}' docker"
   register: curr_docker_version
   retries: 4
   until: curr_docker_version | succeeded
