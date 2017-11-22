@@ -1,5 +1,5 @@
 ---
-- include: config.yml
+- import_playbook: config.yml
 
 - name: Initialize GlusterFS registry PV and PVC vars
   hosts: oo_first_master
