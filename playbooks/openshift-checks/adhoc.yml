@@ -20,6 +20,6 @@
     action: openshift_health_check
     when: openshift_checks is undefined or not openshift_checks
 
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
-- include: private/adhoc.yml
+- import_playbook: private/adhoc.yml

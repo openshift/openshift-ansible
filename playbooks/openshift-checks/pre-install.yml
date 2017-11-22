@@ -1,4 +1,4 @@
 ---
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
-- include: private/pre-install.yml
+- import_playbook: private/pre-install.yml
