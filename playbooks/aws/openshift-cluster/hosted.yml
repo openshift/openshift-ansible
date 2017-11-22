@@ -1,11 +1,14 @@
 ---
-- include: ../../common/openshift-cluster/openshift_hosted.yml
+- include: ../../openshift-hosted/private/config.yml
 
 - include: ../../openshift-metrics/private/config.yml
   when: openshift_metrics_install_metrics | default(false) | bool
 
 - include: ../../common/openshift-cluster/openshift_logging.yml
   when: openshift_logging_install_logging | default(false) | bool
+
+- include: ../../openshift-prometheus/private/config.yml
+  when: openshift_hosted_prometheus_deploy | default(false) | bool
 
 - include: ../../common/openshift-cluster/service_catalog.yml
   when: openshift_enable_service_catalog | default(false) | bool
