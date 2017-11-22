@@ -1,7 +1,7 @@
 ---
 - include: ../../common/openshift-cluster/openshift_hosted.yml
 
-- include: ../../common/openshift-cluster/openshift_metrics.yml
+- include: ../../openshift-metrics/private/config.yml
   when: openshift_metrics_install_metrics | default(false) | bool
 
 - include: ../../common/openshift-cluster/openshift_logging.yml

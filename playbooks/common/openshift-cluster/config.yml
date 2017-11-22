@@ -20,7 +20,7 @@
 
 - include: openshift_hosted.yml
 
-- include: openshift_metrics.yml
+- include: ../../openshift-metrics/private/config.yml
   when: openshift_metrics_install_metrics | default(false) | bool
 
 - include: openshift_logging.yml
