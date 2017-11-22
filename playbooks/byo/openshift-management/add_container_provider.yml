@@ -1,4 +1,0 @@
----
-- include: ../../init/evaluate_groups.yml
-
-- include: ../../common/openshift-management/add_container_provider.yml
