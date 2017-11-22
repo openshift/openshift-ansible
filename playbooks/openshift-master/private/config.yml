@@ -11,7 +11,7 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- include: certificates.yml
+- import_playbook: certificates.yml
 
 - name: Disable excluders
   hosts: oo_masters_to_config
@@ -229,7 +229,7 @@
   hosts: oo_masters
   serial: 1
   tasks:
-  - include: tasks/wire_aggregator.yml
+  - include_tasks: tasks/wire_aggregator.yml
 
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config

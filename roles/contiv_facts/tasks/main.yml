@@ -81,8 +81,8 @@
     has_iptables: false
 
 # collect information about what packages are installed
-- include: rpm.yml
+- include_tasks: rpm.yml
   when: has_rpm
 
-- include: fedora-install.yml
+- include_tasks: fedora-install.yml
   when: not is_atomic and ansible_distribution == "Fedora"

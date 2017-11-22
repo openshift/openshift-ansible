@@ -1,7 +1,6 @@
 ---
 - name: setup firewall
-  include: firewall.yml
-  static: yes
+  import_tasks: firewall.yml
 
 - name: Set the Nuage certificate directory fact for Atomic hosts
   set_fact:
@@ -62,7 +61,7 @@
   become: yes
   file: path={{ nuage_mon_rest_server_logdir }} state=directory
 
-- include: serviceaccount.yml
+- include_tasks: serviceaccount.yml
 
 - name: Download the certs and keys
   become: yes
@@ -82,7 +81,7 @@
     - nuage.key
     - nuage.kubeconfig
 
-- include: certificates.yml
+- include_tasks: certificates.yml
 
 - name: Install Nuage VSD user certificate
   become: yes

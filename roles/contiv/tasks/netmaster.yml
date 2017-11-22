@@ -1,8 +1,8 @@
 ---
-- include: netmaster_firewalld.yml
+- include_tasks: netmaster_firewalld.yml
   when: has_firewalld
 
-- include: netmaster_iptables.yml
+- include_tasks: netmaster_iptables.yml
   when: not has_firewalld and has_iptables
 
 - name: Netmaster | Check is /etc/hosts file exists
@@ -70,8 +70,8 @@
     state: started
   register: netmaster_started
 
-- include: aci.yml
+- include_tasks: aci.yml
   when: contiv_fabric_mode == "aci"
 
-- include: default_network.yml
+- include_tasks: default_network.yml
   when: contiv_default_network == true

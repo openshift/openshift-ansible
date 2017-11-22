@@ -44,14 +44,14 @@
     delay: 1
     changed_when: false
 
-- include: set_network_facts.yml
+- import_playbook: set_network_facts.yml
 
-- include: ../../openshift-etcd/private/certificates.yml
+- import_playbook: ../../openshift-etcd/private/certificates.yml
 
-- include: config.yml
+- import_playbook: config.yml
 
-- include: ../../openshift-loadbalancer/private/config.yml
+- import_playbook: ../../openshift-loadbalancer/private/config.yml
 
-- include: ../../openshift-node/private/certificates.yml
+- import_playbook: ../../openshift-node/private/certificates.yml
 
-- include: ../../openshift-node/private/config.yml
+- import_playbook: ../../openshift-node/private/config.yml

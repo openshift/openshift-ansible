@@ -32,7 +32,7 @@
     - r_openshift_excluder_upgrade_target is not defined
 
   - name: Include main action task file
-    include: "{{ r_openshift_excluder_action }}.yml"
+    include_tasks: "{{ r_openshift_excluder_action }}.yml"
 
   when:
   - not ostree_booted.stat.exists | bool

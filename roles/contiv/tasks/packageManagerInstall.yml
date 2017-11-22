@@ -3,7 +3,7 @@
   set_fact:
     did_install: false
 
-- include: pkgMgrInstallers/centos-install.yml
+- include_tasks: pkgMgrInstallers/centos-install.yml
   when: (ansible_os_family == "RedHat") and
         not is_atomic
 
