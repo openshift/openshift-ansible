@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.8.0
-Release:        0.8.0%{?dist}
+Release:        0.9.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,24 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Nov 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.9.0
+- Fix node system container var (mgugino@redhat.com)
+- Add temporary playbook for CI test functionality (rteague@redhat.com)
+- Playbook Consolidation - openshift-node (rteague@redhat.com)
+- Fix logic for any sys containers (mgugino@redhat.com)
+- containerPort must be an int; correctly quote/brace replicas value
+  (rmeggins@redhat.com)
+- papr: use new PAPR_PULL_TARGET_BRANCH (jlebon@redhat.com)
+- Refactor etcd image (mgugino@redhat.com)
+- GlusterFS: Files and templates for 3.8 (jarrpa@redhat.com)
+- Only remove empty keys from env if env exists (sdodson@redhat.com)
+- Upgrade to etcd 3.2 (sdodson@redhat.com)
+- Allow modifying and adding prometheus application arguments
+  (zgalor@redhat.com)
+- Playbook Consolidation - openshift-nfs (rteague@redhat.com)
+- Playbook Consolidation - openshift-etcd (rteague@redhat.com)
+- Include Deprecation - Init Playbook Paths (rteague@redhat.com)
+
 * Mon Nov 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.8.0
 - 
 
