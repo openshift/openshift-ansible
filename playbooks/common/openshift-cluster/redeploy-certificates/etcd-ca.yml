@@ -41,7 +41,6 @@
       name: etcd
       tasks_from: distribute_ca
     vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
       etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
 
@@ -60,7 +59,6 @@
       tasks_from: retrieve_ca_certificates
     vars:
       etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
 
 - name: Distribute etcd CA to masters
   hosts: oo_masters_to_config

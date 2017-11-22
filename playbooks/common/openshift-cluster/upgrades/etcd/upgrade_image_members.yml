@@ -11,7 +11,6 @@
       tasks_from: upgrade_image
     vars:
       r_etcd_upgrade_version: "{{ etcd_upgrade_version }}"
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
       etcd_peer: "{{ openshift.common.hostname }}"
     when:
     - etcd_container_version | default('99') | version_compare(etcd_upgrade_version,'<')
