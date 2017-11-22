@@ -11,19 +11,19 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- include: create_persistent_volumes.yml
+- import_playbook: create_persistent_volumes.yml
 
-- include: openshift_default_storage_class.yml
+- import_playbook: openshift_default_storage_class.yml
 
-- include: openshift_hosted_create_projects.yml
+- import_playbook: openshift_hosted_create_projects.yml
 
-- include: openshift_hosted_router.yml
+- import_playbook: openshift_hosted_router.yml
 
-- include: openshift_hosted_registry.yml
+- import_playbook: openshift_hosted_registry.yml
 
-- include: cockpit-ui.yml
+- import_playbook: cockpit-ui.yml
 
-- include: install_docker_gc.yml
+- import_playbook: install_docker_gc.yml
   when:
   - openshift_use_crio | default(False) | bool
   - openshift_crio_enable_docker_gc | default(False) | bool
