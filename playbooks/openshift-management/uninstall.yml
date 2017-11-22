@@ -1,2 +1,2 @@
 ---
-- include: private/uninstall.yml
+- import_playbook: private/uninstall.yml
