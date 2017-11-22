@@ -1,2 +1,2 @@
 ---
-- include: migration/migrate.yml
+- include_tasks: migration/migrate.yml

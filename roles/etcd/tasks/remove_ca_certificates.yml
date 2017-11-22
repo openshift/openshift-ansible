@@ -1,2 +1,2 @@
 ---
-- include: certificates/remove_ca_certificates.yml
+- include_tasks: certificates/remove_ca_certificates.yml

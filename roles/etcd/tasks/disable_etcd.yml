@@ -1,2 +1,2 @@
 ---
-- include: auxiliary/disable_etcd.yml
+- include_tasks: auxiliary/disable_etcd.yml

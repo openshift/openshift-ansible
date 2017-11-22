@@ -1,5 +1,5 @@
 ---
-- include: backup/vars.yml
+- include_tasks: backup/vars.yml
 
 - name: Move content of etcd backup under the etcd data directory
   command: >
@@ -9,4 +9,4 @@
   command: >
     chown -R etcd:etcd "{{ etcd_data_dir }}"
 
-- include: auxiliary/force_new_cluster.yml
+- include_tasks: auxiliary/force_new_cluster.yml

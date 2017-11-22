@@ -49,9 +49,9 @@
       r_etcd_common_backup_sufix_name: "{{ embedded_etcd_backup_suffix }}"
 
 # 3. deploy certificates (for etcd and master)
-- include: ca.yml
+- import_playbook: ca.yml
 
-- include: server_certificates.yml
+- import_playbook: server_certificates.yml
 
 - name: Backup etcd client certificates for master host
   hosts: oo_first_master
@@ -61,12 +61,12 @@
       tasks_from: backup_master_etcd_certificates
 
 - name: Redeploy master etcd certificates
-  include: master_etcd_certificates.yml
+  import_playbook: master_etcd_certificates.yml
   vars:
     etcd_certificates_redeploy: "{{ true }}"
 
 # 4. deploy external etcd
-- include: config.yml
+- import_playbook: config.yml
 
 # 5. stop external etcd
 - name: Cleanse etcd

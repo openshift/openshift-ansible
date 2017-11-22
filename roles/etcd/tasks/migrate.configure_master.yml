@@ -1,2 +1,2 @@
 ---
-- include: migration/configure_master.yml
+- include_tasks: migration/configure_master.yml

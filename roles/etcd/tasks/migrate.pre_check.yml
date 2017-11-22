@@ -1,2 +1,2 @@
 ---
-- include: migration/check.yml
+- include_tasks: migration/check.yml

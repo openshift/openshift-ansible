@@ -1,2 +1,2 @@
 ---
-- include: auxiliary/drop_etcdctl.yml
+- include_tasks: auxiliary/drop_etcdctl.yml

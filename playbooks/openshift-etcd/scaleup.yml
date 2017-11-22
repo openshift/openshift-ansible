@@ -1,4 +1,4 @@
 ---
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
-- include: private/scaleup.yml
+- import_playbook: private/scaleup.yml

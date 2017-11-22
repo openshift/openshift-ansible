@@ -7,14 +7,13 @@
     etcd_ip: "{{ etcd_ip }}"
 
 - name: setup firewall
-  include: firewall.yml
-  static: yes
+  import_tasks: firewall.yml
 
 - name: Install etcd
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
 
-- include: drop_etcdctl.yml
+- include_tasks: drop_etcdctl.yml
   when:
   - openshift_etcd_etcdctl_profile | default(true) | bool
 
@@ -101,7 +100,7 @@
     when: not l_is_etcd_system_container | bool
 
   - name: Install Etcd system container
-    include: system_container.yml
+    include_tasks: system_container.yml
     when: l_is_etcd_system_container | bool
   when: etcd_is_containerized | bool
 

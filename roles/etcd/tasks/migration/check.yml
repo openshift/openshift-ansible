@@ -1,7 +1,7 @@
 ---
 
 # Check the cluster is healthy
-- include: check_cluster_health.yml
+- include_tasks: check_cluster_health.yml
 
 # Check if there is at least one v2 snapshot
 - name: Check if there is at least one v2 snapshot
@@ -39,7 +39,7 @@
 # - with_items not supported over block
 
 # Check the cluster status for the first time
-- include: check_cluster_status.yml
+- include_tasks: check_cluster_status.yml
 
 # Check the cluster status for the second time
 - block:
@@ -50,7 +50,7 @@
       seconds: 5
     when: not l_etcd_cluster_status_ok | bool
 
-  - include: check_cluster_status.yml
+  - include_tasks: check_cluster_status.yml
     when: not l_etcd_cluster_status_ok | bool
 
 
@@ -63,5 +63,5 @@
       seconds: 5
     when: not l_etcd_cluster_status_ok | bool
 
-  - include: check_cluster_status.yml
+  - include_tasks: check_cluster_status.yml
     when: not l_etcd_cluster_status_ok | bool

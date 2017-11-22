@@ -39,7 +39,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: distribute_ca
+      tasks_from: distribute_ca.yml
     vars:
       etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
       etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"

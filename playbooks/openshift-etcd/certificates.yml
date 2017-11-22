@@ -1,6 +1,6 @@
 ---
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
-- include: private/ca.yml
+- import_playbook: private/ca.yml
 
-- include: private/certificates.yml
+- import_playbook: private/certificates.yml

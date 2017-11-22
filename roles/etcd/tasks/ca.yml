@@ -1,2 +1,2 @@
 ---
-- include: certificates/deploy_ca.yml
+- include_tasks: certificates/deploy_ca.yml
