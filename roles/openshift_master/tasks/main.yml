@@ -31,8 +31,7 @@
   - openshift.common.is_containerized | bool
 
 - name: Open up firewall ports
-  include: firewall.yml
-  static: yes
+  import_tasks: firewall.yml
 
 - name: Install Master package
   package:
@@ -172,13 +171,13 @@
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
 - name: Update journald config
-  include: journald.yml
+  include_tasks: journald.yml
 
 - name: Install the systemd units
-  include: systemd_units.yml
+  include_tasks: systemd_units.yml
 
 - name: Install Master system container
-  include: system_container.yml
+  include_tasks: system_container.yml
   when:
   - openshift.common.is_containerized | bool
   - openshift.common.is_master_system_container | bool
@@ -212,10 +211,10 @@
   - restart master api
   - restart master controllers
 
-- include: bootstrap_settings.yml
+- include_tasks: bootstrap_settings.yml
   when: openshift_master_bootstrap_enabled | default(False)
 
-- include: set_loopback_context.yml
+- include_tasks: set_loopback_context.yml
 
 - name: Start and enable master api on first master
   systemd:
@@ -273,7 +272,7 @@
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
-- include: check_master_api_is_ready.yml
+- include_tasks: check_master_api_is_ready.yml
   when:
   - openshift.master.cluster_method == 'native'
   - master_api_service_status_changed | bool
@@ -323,5 +322,5 @@
   - l_install_result | changed
 
 - name: node bootstrap settings
-  include: bootstrap.yml
+  include_tasks: bootstrap.yml
   when: openshift_master_bootstrap_enabled | default(False)

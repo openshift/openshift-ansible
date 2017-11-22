@@ -1,16 +1,16 @@
 ---
-- include: upgrade/rpm_upgrade.yml
+- include_tasks: upgrade/rpm_upgrade.yml
   when: not openshift.common.is_containerized | bool
 
-- include: upgrade/upgrade_scheduler.yml
+- include_tasks: upgrade/upgrade_scheduler.yml
 
 # master_config_hook is passed in from upgrade play.
-- include: "upgrade/{{ master_config_hook }}"
+- include_tasks: "upgrade/{{ master_config_hook }}"
   when: master_config_hook is defined
 
-- include: journald.yml
+- include_tasks: journald.yml
 
-- include: systemd_units.yml
+- include_tasks: systemd_units.yml
 
 - name: Check for ca-bundle.crt
   stat:

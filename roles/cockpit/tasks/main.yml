@@ -1,7 +1,6 @@
 ---
 - name: setup firewall
-  include: firewall.yml
-  static: yes
+  import_tasks: firewall.yml
 
 - name: Install cockpit-ws
   package: name={{ item }} state=present

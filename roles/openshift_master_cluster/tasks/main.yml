@@ -10,5 +10,5 @@
   failed_when: false
   when: openshift.master.cluster_method == "pacemaker"
 
-- include: configure.yml
+- include_tasks: configure.yml
   when: "pcs_status | failed and 'Error: cluster is not currently running on this node' in pcs_status.stderr"

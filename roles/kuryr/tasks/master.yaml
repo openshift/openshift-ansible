@@ -1,6 +1,6 @@
 ---
-- name: Perform OpenShit ServiceAccount config
-  include: serviceaccount.yaml
+- name: Perform OpenShift ServiceAccount config
+  include_tasks: serviceaccount.yaml
 
 - name: Create kuryr manifests tempdir
   command: mktemp -d

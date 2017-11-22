@@ -1,5 +1,5 @@
 ---
-- include: ../init/evaluate_groups.yml
+- import_playbook: ../init/evaluate_groups.yml
 
 - name: Ensure there are new_masters or new_nodes
   hosts: localhost
@@ -18,6 +18,6 @@
 
 # Need a better way to do the above check for node without
 # running evaluate_groups and init/main.yml
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
-- include: private/scaleup.yml
+- import_playbook: private/scaleup.yml

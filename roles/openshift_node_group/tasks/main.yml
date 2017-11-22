@@ -1,6 +1,6 @@
 ---
 - name: Build node config maps
-  include: create_config.yml
+  include_tasks: create_config.yml
   vars:
     openshift_node_group_name: "{{ node_group.name }}"
     openshift_node_group_edits: "{{ node_group.edits | default([]) }}"
