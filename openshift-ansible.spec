@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.8.0
-Release:        0.9.0%{?dist}
+Release:        0.10.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,34 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Nov 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.10.0
+- tox.ini: simplify unit test reqs (lmeyer@redhat.com)
+- Remove unused task files (rteague@redhat.com)
+- Playbook Consolidation - openshift-provisioners (rteague@redhat.com)
+- Include Deprecation - openshift-prometheus (rteague@redhat.com)
+- Include Deprecation - openshift-node (rteague@redhat.com)
+- Include Deprecation - openshift-management (rteague@redhat.com)
+- Include Deprecation - openshift-glusterfs (rteague@redhat.com)
+- Include Deprecation - openshift-master (rteague@redhat.com)
+- Include Deprecation - openshift-hosted (rteague@redhat.com)
+- Playbook Consolidation - openshift-service-catalog (rteague@redhat.com)
+- Include Deprecation - openshift-nfs (rteague@redhat.com)
+- Include Deprecation - openshift-metrics (rteague@redhat.com)
+- Include Deprecation - openshift-etcd (rteague@redhat.com)
+- Fix system_images_registry variable (mgugino@redhat.com)
+- Include Deprecation - openshift-loadbalancer (rteague@redhat.com)
+- Include Deprecation - openshift-checks (rteague@redhat.com)
+- Playbook Consolidation - openshift-management (rteague@redhat.com)
+- Playbook Consolidation - openshift-master (rteague@redhat.com)
+- Playbook Consolidation - openshift-hosted (rteague@redhat.com)
+- Place-holder for prerequisites.yml (mgugino@redhat.com)
+- Cleanup etcd runtime variable. (mgugino@redhat.com)
+- Fix uninstall option for prometheus (zgalor@redhat.com)
+- Playbook Consolidation - openshift-glusterfs (rteague@redhat.com)
+- Playbook Consolidation - openshift-metrics (rteague@redhat.com)
+- Playbook Consolidation - openshift-loadbalancer (rteague@redhat.com)
+- hosted_registry: clean up tmp mount point and fstab (dusty@dustymabe.com)
+
 * Wed Nov 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.9.0
 - Fix node system container var (mgugino@redhat.com)
 - Add temporary playbook for CI test functionality (rteague@redhat.com)
