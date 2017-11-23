@@ -24,14 +24,6 @@ openshift_openstack_external_network_name: "public"
 # TODO: Allow the user to specify pre-existing subnets for pod and services
 #openshift_openstack_kuryr_service_subnet_cidr: "172.30.0.0/16"
 
-#
-## You can alter the port pooling defaults here
-#kuryr_openstack_enable_pools: True
-#kuryr_openstack_pool_max: 0
-#kuryr_openstack_pool_min: 1
-#kuryr_openstack_pool_batch: 5
-#kuryr_openstack_pool_update_frequency: 20
-#
 ## You should set the following if you want to use Kuryr/Neutron as your SDN
 #openshift_use_kuryr: True
 #openshift_use_openshift_sdn: False
@@ -62,6 +54,23 @@ openshift_openstack_external_network_name: "public"
 # If you VM images will name the ethernet device different than 'eth0',
 # override this
 #kuryr_cni_link_interface: eth0
+
+## To enable the ports pooling you need to enable the next
+#kuryr_openstack_enable_pools: True
+#
+## You can alter the port pooling defaults here
+#kuryr_openstack_pool_max: 0
+#kuryr_openstack_pool_min: 1
+#kuryr_openstack_pool_batch: 5
+#kuryr_openstack_pool_update_frequency: 20
+#
+## You can pre-populate the pools with subports by uncommenting the next line
+## and specifying the amount of subports you want to pre-create per
+## origin-node, e.g.: openshift_kuryr_precreate_subports: 5
+#openshift_kuryr_precreate_subports: false
+#
+## You can also change the default device owner for the precreated subports
+#openshift_kuryr_device_owner: compute:kuryr
 
 
 ## If you want to use a provider network, set its name here.
