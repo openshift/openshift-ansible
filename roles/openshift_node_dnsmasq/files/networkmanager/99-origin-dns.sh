@@ -114,6 +114,8 @@ EOF
       echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
       if ! grep -q 'search.*cluster.local' ${NEW_RESOLV_CONF}; then
         sed -i '/^search/ s/$/ cluster.local/' ${NEW_RESOLV_CONF}
+      else
+        echo 'search cluster.local' >> ${NEW_RESOLV_CONF}
       fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
