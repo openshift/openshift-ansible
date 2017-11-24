@@ -25,6 +25,7 @@ From this role:
 | openshift_master_console_port                     | UNDEF                 |                                                                               |
 | openshift_master_api_url                          | UNDEF                 |                                                                               |
 | openshift_master_console_url                      | UNDEF                 |                                                                               |
+| openshift_persistentlocalstorage_enabled          | false                 | Enable the persistent local storage                                           |
 | openshift_master_public_api_url                   | UNDEF                 |                                                                               |
 | openshift_master_public_console_url               | UNDEF                 |                                                                               |
 | openshift_master_saconfig_limit_secret_references | false                 |                                                                               |
