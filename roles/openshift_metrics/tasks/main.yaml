@@ -6,7 +6,7 @@
 - name: Check that python-passlib is available on the control host
   assert:
     that:
-      - "'not installed' not in passlib_result.stdout"
+      - "'not installed' in passlib_result.stdout"
     msg: "python-passlib rpm must be installed on control host"
 
 - name: Set default image variables based on deployment_type
