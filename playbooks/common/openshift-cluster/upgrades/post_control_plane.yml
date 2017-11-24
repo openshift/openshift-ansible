@@ -93,11 +93,11 @@
   # not already exist. We could have potentially done a replace --force to
   # create and update in one step.
   - role: openshift_examples
-    when: openshift_install_examples | default(true,true) | bool
+    when: openshift_install_examples | default(true) | bool
   - openshift_hosted_templates
   # Update the existing templates
   - role: openshift_examples
-    when: openshift_install_examples | default(true,true) | bool
+    when: openshift_install_examples | default(true) | bool
     registry_url: "{{ openshift.master.registry_url }}"
     openshift_examples_import_command: replace
   - role: openshift_hosted_templates
