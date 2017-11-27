@@ -4,13 +4,13 @@ metadata:
   name: {{obj_name}}
 {% if annotations is defined %}
   annotations:
-{% for key,value in annotations.iteritems() %}
+{% for key,value in annotations.items() %}
     {{key}}: {{value}}
 {% endfor %}
 {% endif %}
 {% if labels is defined%}
   labels:
-{% for key, value in labels.iteritems() %}
+{% for key, value in labels.items() %}
     {{key}}: {{value}}
 {% endfor %}
 {% endif %}

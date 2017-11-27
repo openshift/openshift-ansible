@@ -4,7 +4,7 @@ metadata:
   name: {{obj_name}}
 {% if labels is defined %}
   labels:
-{% for k, v in labels.iteritems() %}
+{% for k, v in labels.items() %}
     {{ k }}: {{ v }}
 {% endfor %}
 {% endif %}

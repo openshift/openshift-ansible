@@ -34,7 +34,7 @@ spec:
 {% endfor %}
 {% if es_node_selector is iterable and es_node_selector | length > 0 %}
       nodeSelector:
-{% for key, value in es_node_selector.iteritems() %}
+{% for key, value in es_node_selector.items() %}
         {{key}}: "{{value}}"
 {% endfor %}
 {% endif %}

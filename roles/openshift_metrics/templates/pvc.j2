@@ -7,13 +7,13 @@ metadata:
     metrics-infra: support
 {% elif labels %}
   labels:
-{% for key, value in labels.iteritems() %}
+{% for key, value in labels.items() %}
     {{ key }}: {{ value }}
 {% endfor %}
 {% endif %}
 {% if annotations is defined and annotations %}
   annotations:
-{% for key,value in annotations.iteritems() %}
+{% for key,value in annotations.items() %}
     {{key}}: {{value}}
 {% endfor %}
 {% endif %}
@@ -21,7 +21,7 @@ spec:
 {% if pv_selector is defined and pv_selector is mapping %}
   selector:
     matchLabels:
-{% for key,value in pv_selector.iteritems() %}
+{% for key,value in pv_selector.items() %}
       {{key}}: {{value}}
 {% endfor %}
 {% endif %}
