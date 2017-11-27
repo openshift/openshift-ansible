@@ -37,7 +37,7 @@
 - name: Set node schedulability
   oc_adm_manage_node:
     node: "{{ openshift.node.nodename | lower }}"
-    schedulable: "{{ 'true' if openshift.node.schedulable | bool else 'false' }}"
+    schedulable: "{{ 'true' if l_openshift_manage_schedulable | bool else 'false' }}"
   retries: 10
   delay: 5
   register: node_schedulable
