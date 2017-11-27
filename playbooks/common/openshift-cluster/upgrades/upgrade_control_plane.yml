@@ -344,6 +344,7 @@
   - name: Load lib_openshift modules
     include_role:
       name: lib_openshift
+    static: yes
 
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
