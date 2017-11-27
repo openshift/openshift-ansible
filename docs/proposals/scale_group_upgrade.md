@@ -100,6 +100,7 @@ Outline of a typical workflow for an upgrade.
 
   current_version=3.7.4.1
   new_version=3.7.4.2
+  ```
 
   For more information on which variables are available for provisioning, they can be
   found inside of roles/openshift_aws/defaults/main.yml
