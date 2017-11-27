@@ -1,6 +1,6 @@
 ---
 - name: Install clients
-  package: name={{ openshift.common.service_type }}-clients state=present
+  package: name={{ openshift_service_type }}-clients state=present
   when: not openshift.common.is_containerized | bool
   register: result
   until: result | success

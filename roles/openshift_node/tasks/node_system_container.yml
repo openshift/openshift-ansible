@@ -8,10 +8,10 @@
 
 - name: Install or Update node system container
   oc_atomic_container:
-    name: "{{ openshift.common.service_type }}-node"
+    name: "{{ openshift_service_type }}-node"
     image: "{{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift.node.node_system_image }}:{{ openshift_image_tag }}"
     values:
     - "DNS_DOMAIN={{ openshift.common.dns_domain }}"
     - "DOCKER_SERVICE={{ openshift_docker_service_name }}.service"
-    - "MASTER_SERVICE={{ openshift.common.service_type }}.service"
+    - "MASTER_SERVICE={{ openshift_service_type }}.service"
     state: latest

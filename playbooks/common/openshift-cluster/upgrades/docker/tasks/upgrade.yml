@@ -4,9 +4,9 @@
 - name: Stop containerized services
   service: name={{ item }} state=stopped
   with_items:
-    - "{{ openshift.common.service_type }}-master-api"
-    - "{{ openshift.common.service_type }}-master-controllers"
-    - "{{ openshift.common.service_type }}-node"
+    - "{{ openshift_service_type }}-master-api"
+    - "{{ openshift_service_type }}-master-controllers"
+    - "{{ openshift_service_type }}-node"
     - etcd_container
     - openvswitch
   failed_when: false

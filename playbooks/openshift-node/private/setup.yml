@@ -5,7 +5,6 @@
   roles:
   - role: openshift_excluder
     r_openshift_excluder_action: disable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - name: Evaluate node groups
   hosts: localhost

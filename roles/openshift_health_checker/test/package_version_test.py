@@ -4,9 +4,12 @@ from openshift_checks.package_version import PackageVersion, OpenShiftCheckExcep
 
 
 def task_vars_for(openshift_release, deployment_type):
+    service_type_dict = {'origin': 'origin',
+                         'openshift-enterprise': 'atomic-openshift'}
+    service_type = service_type_dict[deployment_type]
     return dict(
         ansible_pkg_mgr='yum',
-        openshift=dict(common=dict(service_type=deployment_type)),
+        openshift_service_type=service_type,
         openshift_release=openshift_release,
         openshift_image_tag='v' + openshift_release,
         openshift_deployment_type=deployment_type,
@@ -29,7 +32,7 @@ def test_openshift_version_not_supported():
 def test_invalid_openshift_release_format():
     task_vars = dict(
         ansible_pkg_mgr='yum',
-        openshift=dict(common=dict(service_type='origin')),
+        openshift_service_type='origin',
         openshift_image_tag='v0',
         openshift_deployment_type='origin',
     )

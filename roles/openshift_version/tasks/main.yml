@@ -101,13 +101,13 @@
     when: is_containerized | bool
 
   - block:
-    - name: Get available {{ openshift.common.service_type}} version
+    - name: Get available {{ openshift_service_type}} version
       repoquery:
-        name: "{{ openshift.common.service_type}}"
+        name: "{{ openshift_service_type}}"
         ignore_excluders: true
       register: rpm_results
     - fail:
-        msg: "Package {{ openshift.common.service_type}} not found"
+        msg: "Package {{ openshift_service_type}} not found"
       when: not rpm_results.results.package_found
     - set_fact:
         openshift_rpm_version: "{{ rpm_results.results.versions.available_versions.0 | default('0.0', True) }}"
@@ -196,7 +196,7 @@
       - openshift_version.startswith(openshift_release) | bool
       msg: |-
         You requested openshift_release {{ openshift_release }}, which is not matched by
-        the latest OpenShift RPM we detected as {{ openshift.common.service_type }}-{{ openshift_version }}
+        the latest OpenShift RPM we detected as {{ openshift_service_type }}-{{ openshift_version }}
         on host {{ inventory_hostname }}.
         We will only install the latest RPMs, so please ensure you are getting the release
         you expect. You may need to adjust your Ansible inventory, modify the repositories

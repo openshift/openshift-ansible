@@ -537,7 +537,7 @@ def set_aggregate_facts(facts):
 
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
-        includes common.service_type, master.registry_url, node.registry_url,
+        includes master.registry_url, node.registry_url,
         node.storage_plugin_deps
 
         Args:
@@ -549,14 +549,6 @@ def set_deployment_facts_if_unset(facts):
     # disabled to avoid breaking up facts related to deployment type into
     # multiple methods for now.
     # pylint: disable=too-many-statements, too-many-branches
-    if 'common' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if 'service_type' not in facts['common']:
-            service_type = 'atomic-openshift'
-            if deployment_type == 'origin':
-                service_type = 'origin'
-            facts['common']['service_type'] = service_type
-
     for role in ('master', 'node'):
         if role in facts:
             deployment_type = facts['common']['deployment_type']
@@ -1020,8 +1012,13 @@ def get_container_openshift_version(facts):
     If containerized, see if we can determine the installed version via the
     systemd environment files.
     """
+    deployment_type = facts['common']['deployment_type']
+    service_type_dict = {'origin': 'origin',
+                         'openshift-enterprise': 'atomic-openshift'}
+    service_type = service_type_dict[deployment_type]
+
     for filename in ['/etc/sysconfig/%s-master-controllers', '/etc/sysconfig/%s-node']:
-        env_path = filename % facts['common']['service_type']
+        env_path = filename % service_type
         if not os.path.exists(env_path):
             continue
 

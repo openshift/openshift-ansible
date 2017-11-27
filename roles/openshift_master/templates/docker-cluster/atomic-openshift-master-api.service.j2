@@ -3,18 +3,18 @@ Description=Atomic OpenShift Master API
 Documentation=https://github.com/openshift/origin
 After=etcd_container.service
 Wants=etcd_container.service
-Before={{ openshift.common.service_type }}-node.service
+Before={{ openshift_service_type }}-node.service
 After={{ openshift_docker_service_name }}.service
 PartOf={{ openshift_docker_service_name }}.service
 Requires={{ openshift_docker_service_name }}.service
 
 [Service]
-EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-api
+EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-master-api
 Environment=GOTRACEBACK=crash
-ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type}}-master-api
+ExecStartPre=-/usr/bin/docker rm -f {{ openshift_service_type}}-master-api
 ExecStart=/usr/bin/docker run --rm --privileged --net=host \
-  --name {{ openshift.common.service_type }}-master-api \
-  --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-master-api \
+  --name {{ openshift_service_type }}-master-api \
+  --env-file=/etc/sysconfig/{{ openshift_service_type }}-master-api \
   -v {{ r_openshift_master_data_dir }}:{{ r_openshift_master_data_dir }} \
   -v /var/log:/var/log -v /var/run/docker.sock:/var/run/docker.sock \
   -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} \
@@ -24,14 +24,14 @@ ExecStart=/usr/bin/docker run --rm --privileged --net=host \
   {{ openshift.master.master_image }}:${IMAGE_VERSION} start master api \
   --config=${CONFIG_FILE} $OPTIONS
 ExecStartPost=/usr/bin/sleep 10
-ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-master-api
+ExecStop=/usr/bin/docker stop {{ openshift_service_type }}-master-api
 LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ r_openshift_master_data_dir }}
-SyslogIdentifier={{ openshift.common.service_type }}-master-api
+SyslogIdentifier={{ openshift_service_type }}-master-api
 Restart=always
 RestartSec=5s
 
 [Install]
 WantedBy={{ openshift_docker_service_name }}.service
-WantedBy={{ openshift.common.service_type }}-node.service
+WantedBy={{ openshift_service_type }}-node.service

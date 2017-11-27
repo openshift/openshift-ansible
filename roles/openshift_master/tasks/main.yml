@@ -16,7 +16,7 @@
 
 - name: Install Master package
   package:
-    name: "{{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when:
   - not openshift.common.is_containerized | bool
@@ -141,7 +141,7 @@
 # The template file will stomp any other settings made.
 - block:
   - name: check whether our docker-registry setting exists in the env file
-    command: "awk '/^OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000/' /etc/sysconfig/{{ openshift.common.service_type }}-master"
+    command: "awk '/^OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000/' /etc/sysconfig/{{ openshift_service_type }}-master"
     failed_when: false
     changed_when: false
     register: l_already_set
@@ -203,7 +203,7 @@
 
 - name: Start and enable master api on first master
   systemd:
-    name: "{{ openshift.common.service_type }}-master-api"
+    name: "{{ openshift_service_type }}-master-api"
     enabled: yes
     state: started
   when:
@@ -214,7 +214,7 @@
   delay: 60
 
 - name: Dump logs from master-api if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-api
+  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
   when:
   - l_start_result | failed
 
@@ -230,7 +230,7 @@
 
 - name: Start and enable master api all masters
   systemd:
-    name: "{{ openshift.common.service_type }}-master-api"
+    name: "{{ openshift_service_type }}-master-api"
     enabled: yes
     state: started
   when:
@@ -241,7 +241,7 @@
   delay: 60
 
 - name: Dump logs from master-api if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-api
+  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
   when:
   - l_start_result | failed
 
@@ -258,7 +258,7 @@
 
 - name: Start and enable master controller service
   systemd:
-    name: "{{ openshift.common.service_type }}-master-controllers"
+    name: "{{ openshift_service_type }}-master-controllers"
     enabled: yes
     state: started
   register: l_start_result
@@ -267,7 +267,7 @@
   delay: 60
 
 - name: Dump logs from master-controllers if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-controllers
+  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-controllers
   when:
   - l_start_result | failed
 

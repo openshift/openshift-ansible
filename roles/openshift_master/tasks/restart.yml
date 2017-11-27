@@ -1,7 +1,7 @@
 ---
 - name: Restart master API
   service:
-    name: "{{ openshift.common.service_type }}-master-api"
+    name: "{{ openshift_service_type }}-master-api"
     state: restarted
   when: openshift_master_ha | bool
 - name: Wait for master API to come back online
@@ -14,7 +14,7 @@
   when: openshift_master_ha | bool
 - name: Restart master controllers
   service:
-    name: "{{ openshift.common.service_type }}-master-controllers"
+    name: "{{ openshift_service_type }}-master-controllers"
     state: restarted
   # Ignore errrors since it is possible that type != simple for
   # pre-3.1.1 installations.

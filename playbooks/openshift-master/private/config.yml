@@ -19,7 +19,6 @@
   roles:
   - role: openshift_excluder
     r_openshift_excluder_action: disable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - name: Gather and set facts for master hosts
   hosts: oo_masters_to_config
@@ -228,6 +227,8 @@
 - name: Configure API Aggregation on masters
   hosts: oo_masters
   serial: 1
+  roles:
+  - role: openshift_facts
   tasks:
   - include_tasks: tasks/wire_aggregator.yml
 
@@ -237,7 +238,6 @@
   roles:
   - role: openshift_excluder
     r_openshift_excluder_action: enable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 - name: Master Install Checkpoint End
   hosts: all

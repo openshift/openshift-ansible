@@ -1,6 +1,6 @@
 ---
 # input variables:
-# - openshift.common.service_type
+# - openshift_service_type
 # - openshift.common.is_containerized
 # - docker_upgrade_nuke_images
 # - docker_version

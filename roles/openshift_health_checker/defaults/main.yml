@@ -1,6 +1,4 @@
 ---
-openshift_protect_installed_version: True
-
 openshift_service_type_dict:
   origin: origin
   openshift-enterprise: atomic-openshift

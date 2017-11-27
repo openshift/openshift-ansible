@@ -1,5 +1,5 @@
 [Unit]
-After={{ openshift.common.service_type }}-master.service
+After={{ openshift_service_type }}-master.service
 After={{ openshift_docker_service_name }}.service
 After=openvswitch.service
 PartOf={{ openshift_docker_service_name }}.service
@@ -10,20 +10,20 @@ PartOf=openvswitch.service
 After=ovsdb-server.service
 After=ovs-vswitchd.service
 {% endif %}
-Wants={{ openshift.common.service_type }}-master.service
-Requires={{ openshift.common.service_type }}-node-dep.service
-After={{ openshift.common.service_type }}-node-dep.service
+Wants={{ openshift_service_type }}-master.service
+Requires={{ openshift_service_type }}-node-dep.service
+After={{ openshift_service_type }}-node-dep.service
 Requires=dnsmasq.service
 After=dnsmasq.service
 
 [Service]
-EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
-EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node-dep
-ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type }}-node
+EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-node
+EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-node-dep
+ExecStartPre=-/usr/bin/docker rm -f {{ openshift_service_type }}-node
 ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
 ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
-ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
-  --rm --privileged --net=host --pid=host --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-node \
+ExecStart=/usr/bin/docker run --name {{ openshift_service_type }}-node \
+  --rm --privileged --net=host --pid=host --env-file=/etc/sysconfig/{{ openshift_service_type }}-node \
   -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} \
   -e HOST=/rootfs -e HOST_ETC=/host-etc \
   -v {{ openshift_node_data_dir }}:{{ openshift_node_data_dir }}:rslave \
@@ -40,10 +40,10 @@ ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
   {% if l_bind_docker_reg_auth %} -v {{ oreg_auth_credentials_path }}:/root/.docker:ro{% endif %}\
   {{ openshift.node.node_image }}:${IMAGE_VERSION}
 ExecStartPost=/usr/bin/sleep 10
-ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-node
+ExecStop=/usr/bin/docker stop {{ openshift_service_type }}-node
 ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
 ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
-SyslogIdentifier={{ openshift.common.service_type }}-node
+SyslogIdentifier={{ openshift_service_type }}-node
 Restart=always
 RestartSec=5s
 

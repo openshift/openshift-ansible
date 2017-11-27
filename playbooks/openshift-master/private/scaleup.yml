@@ -20,11 +20,11 @@
     - restart master controllers
   handlers:
   - name: restart master api
-    service: name={{ openshift.common.service_type }}-master-controllers state=restarted
+    service: name={{ openshift_service_type }}-master-controllers state=restarted
     notify: verify api server
   # We retry the controllers because the API may not be 100% initialized yet.
   - name: restart master controllers
-    command: "systemctl restart {{ openshift.common.service_type }}-master-controllers"
+    command: "systemctl restart {{ openshift_service_type }}-master-controllers"
     retries: 3
     delay: 5
     register: result

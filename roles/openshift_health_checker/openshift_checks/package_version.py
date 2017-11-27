@@ -41,7 +41,9 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         return super(PackageVersion, self).is_active() and master_or_node
 
     def run(self):
-        rpm_prefix = self.get_var("openshift", "common", "service_type")
+        rpm_prefix = self.get_var("openshift_service_type")
+        if self._templar is not None:
+            rpm_prefix = self._templar.template(rpm_prefix)
         openshift_release = self.get_var("openshift_release", default='')
         deployment_type = self.get_var("openshift_deployment_type")
         check_multi_minor_release = deployment_type in ['openshift-enterprise']

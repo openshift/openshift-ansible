@@ -1,7 +1,7 @@
 ---
 - name: Install Node service file
   template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
     src: "{{ openshift.common.is_containerized | bool | ternary('openshift.docker.node.service', 'node.service.j2') }}"
   when: not l_is_node_system_container | bool
   notify:

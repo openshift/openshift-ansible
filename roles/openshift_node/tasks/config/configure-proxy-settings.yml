@@ -1,7 +1,7 @@
 ---
 - name: Configure Proxy Settings
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    dest: /etc/sysconfig/{{ openshift_service_type }}-node
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
     create: true

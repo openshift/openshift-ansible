@@ -8,12 +8,12 @@ def task_vars():
     return dict(
         openshift=dict(
             common=dict(
-                service_type='origin',
                 is_containerized=False,
                 is_atomic=False,
             ),
             docker=dict(),
         ),
+        openshift_service_type='origin',
         openshift_deployment_type='origin',
         openshift_image_tag='',
         group_names=['oo_nodes_to_config', 'oo_masters_to_config'],

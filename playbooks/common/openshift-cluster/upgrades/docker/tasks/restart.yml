@@ -11,9 +11,9 @@
   with_items:
     - etcd_container
     - openvswitch
-    - "{{ openshift.common.service_type }}-master-api"
-    - "{{ openshift.common.service_type }}-master-controllers"
-    - "{{ openshift.common.service_type }}-node"
+    - "{{ openshift_service_type }}-master-api"
+    - "{{ openshift_service_type }}-master-controllers"
+    - "{{ openshift_service_type }}-node"
   failed_when: false
   when: openshift.common.is_containerized | bool
 

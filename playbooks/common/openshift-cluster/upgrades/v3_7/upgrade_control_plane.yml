@@ -126,13 +126,13 @@
   hosts: oo_masters_to_config
   gather_facts: no
   tasks:
-  - name: Stop {{ openshift.common.service_type }}-master-controllers
+  - name: Stop {{ openshift_service_type }}-master-controllers
     systemd:
-      name: "{{ openshift.common.service_type }}-master-controllers"
+      name: "{{ openshift_service_type }}-master-controllers"
       state: stopped
-  - name: Start {{ openshift.common.service_type }}-master-controllers
+  - name: Start {{ openshift_service_type }}-master-controllers
     systemd:
-      name: "{{ openshift.common.service_type }}-master-controllers"
+      name: "{{ openshift_service_type }}-master-controllers"
       state: started
 
 - include: ../post_control_plane.yml

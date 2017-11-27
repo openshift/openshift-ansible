@@ -13,7 +13,7 @@
 
 - name: Disable the legacy master service if it exists
   systemd:
-    name: "{{ openshift.common.service_type }}-master"
+    name: "{{ openshift_service_type }}-master"
     state: stopped
     enabled: no
     masked: yes
@@ -21,7 +21,7 @@
 
 - name: Remove the legacy master service if it exists
   file:
-    path: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master.service"
+    path: "{{ containerized_svc_dir }}/{{ openshift_service_type }}-master.service"
     state: absent
   ignore_errors: true
   when:
@@ -40,7 +40,7 @@
 - name: Create the ha systemd unit files
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-{{ item }}.service.j2"
-    dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
+    dest: "{{ containerized_svc_dir }}/{{ openshift_service_type }}-master-{{ item }}.service"
   when:
   - not l_is_master_system_container | bool
   with_items:
@@ -55,7 +55,7 @@
 
 - name: enable master services
   systemd:
-    name: "{{ openshift.common.service_type }}-master-{{ item }}"
+    name: "{{ openshift_service_type }}-master-{{ item }}"
     enabled: yes
   with_items:
   - api
@@ -64,13 +64,13 @@
   - not l_is_master_system_container | bool
 
 - name: Preserve Master API Proxy Config options
-  command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+  command: grep PROXY /etc/sysconfig/{{ openshift_service_type }}-master-api
   register: l_master_api_proxy
   failed_when: false
   changed_when: false
 
 - name: Preserve Master API AWS options
-  command: grep AWS_ /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+  command: grep AWS_ /etc/sysconfig/{{ openshift_service_type }}-master-api
   register: master_api_aws
   failed_when: false
   changed_when: false
@@ -78,7 +78,7 @@
 - name: Create the master api service env file
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    dest: /etc/sysconfig/{{ openshift_service_type }}-master-api
     backup: true
   notify:
   - restart master api
@@ -89,7 +89,7 @@
   - "'http_proxy' not in openshift.common"
   - "'https_proxy' not in openshift.common"
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    dest: /etc/sysconfig/{{ openshift_service_type }}-master-api
     line: "{{ item }}"
   with_items: "{{ l_master_api_proxy.stdout_lines | default([]) }}"
 
@@ -98,19 +98,19 @@
   - master_api_aws.rc == 0
   - not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-api
+    dest: /etc/sysconfig/{{ openshift_service_type }}-master-api
     line: "{{ item }}"
   with_items: "{{ master_api_aws.stdout_lines | default([]) }}"
   no_log: True
 
 - name: Preserve Master Controllers Proxy Config options
-  command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+  command: grep PROXY /etc/sysconfig/{{ openshift_service_type }}-master-controllers
   register: master_controllers_proxy
   failed_when: false
   changed_when: false
 
 - name: Preserve Master Controllers AWS options
-  command: grep AWS_ /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+  command: grep AWS_ /etc/sysconfig/{{ openshift_service_type }}-master-controllers
   register: master_controllers_aws
   failed_when: false
   changed_when: false
@@ -118,14 +118,14 @@
 - name: Create the master controllers service env file
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-controllers.j2"
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    dest: /etc/sysconfig/{{ openshift_service_type }}-master-controllers
     backup: true
   notify:
   - restart master controllers
 
 - name: Restore Master Controllers Proxy Config Options
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    dest: /etc/sysconfig/{{ openshift_service_type }}-master-controllers
     line: "{{ item }}"
   with_items: "{{ master_controllers_proxy.stdout_lines | default([]) }}"
   when:
@@ -135,7 +135,7 @@
 
 - name: Restore Master Controllers AWS Options
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
+    dest: /etc/sysconfig/{{ openshift_service_type }}-master-controllers
     line: "{{ item }}"
   with_items: "{{ master_controllers_aws.stdout_lines | default([]) }}"
   when:

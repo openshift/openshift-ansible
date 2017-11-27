@@ -22,7 +22,7 @@
       name: openshift_master
       tasks_from: check_master_api_is_ready.yml
   - set_fact:
-      master_service: "{{ openshift.common.service_type + '-master' }}"
+      master_service: "{{ openshift_service_type + '-master' }}"
       embedded_etcd_backup_suffix: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   - debug:
       msg: "master service name: {{ master_service }}"
