@@ -12,7 +12,7 @@
 
 - name: Verify containers are available for upgrade
   command: >
-    docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
+    docker pull {{ openshift_cli_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift.common.is_containerized | bool

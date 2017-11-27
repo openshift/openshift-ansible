@@ -1,0 +1,6 @@
+---
+openshift_cli_image_dict:
+  origin: 'openshift/origin'
+  openshift-enterprise: 'openshift3/ose'
+
+openshift_cli_image: "{{ osm_image | default(openshift_cli_image_dict[openshift_deployment_type]) }}"
