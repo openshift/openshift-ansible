@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.78
+Version:        3.6.173.0.81
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Nov 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.81-1
+- Place-holder for prerequisites.yml (mgugino@redhat.com)
+- Only remove empty keys from env if env exists (sdodson@redhat.com)
+- Upgrade to etcd 3.2 (sdodson@redhat.com)
+- Avoid undefined variable in master sysconfig template (hansmi@vshn.ch)
+- Fix github auth validation (mgugino@redhat.com)
+- Enable oreg_auth credential replace during upgrades (mgugino@redhat.com)
+
 * Mon Nov 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.78-1
 - 
 
