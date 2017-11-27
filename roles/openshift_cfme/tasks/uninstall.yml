@@ -1,7 +1,4 @@
 ---
-- include_role:
-    name: lib_openshift
-
 - name: Uninstall CFME - ManageIQ
   debug:
     msg: Uninstalling Cloudforms Management Engine - ManageIQ
