@@ -896,6 +896,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Enable template service broker (requires service catalog to be enabled, above)
 #template_service_broker_install=true
 
+# Force a specific prefix (IE: registry) to use when pulling the service catalog image
+# NOTE: The registry all the way up to the start of the image name must be provided. Two examples
+# below are provided.
+#openshift_service_catalog_image_prefix=docker.io/openshift/origin-
+#openshift_service_catalog_image_prefix=registry.access.redhat.com/openshift3/ose-
+# Force a specific image version to use when pulling the service catalog image
+#openshift_service_catalog_image_version=v3.7
+
 # Configure one of more namespaces whose templates will be served by the TSB
 #openshift_template_service_broker_namespaces=['openshift']
 
