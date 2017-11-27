@@ -1,0 +1,7 @@
+---
+- name: Place holder for prerequisites
+  hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Debug placeholder
+    debug: msg="Prerequisites ran."
