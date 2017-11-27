@@ -25,7 +25,7 @@
     include_tasks: openvswitch_system_container.yml
     when:
     - openshift_node_use_openshift_sdn | bool
-    - openshift.common.is_openvswitch_system_container | bool
+    - l_is_openvswitch_system_container | bool
 
 - block:
   - name: Pre-pull openvswitch image
@@ -38,7 +38,7 @@
   when:
   - openshift.common.is_containerized | bool
   - openshift_node_use_openshift_sdn | bool
-  - not openshift.common.is_openvswitch_system_container | bool
+  - not l_is_openvswitch_system_container | bool
 
 - include_tasks: config/configure-node-settings.yml
 - include_tasks: config/configure-proxy-settings.yml
