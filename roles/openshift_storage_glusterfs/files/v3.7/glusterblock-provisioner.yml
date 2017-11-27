@@ -83,7 +83,6 @@ objects:
         containers:
         - name: glusterblock-provisioner
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
-          image: gluster/glusterblock-provisioner:latest
           imagePullPolicy: IfNotPresent
           env:
           - name: PROVISIONER_NAME
