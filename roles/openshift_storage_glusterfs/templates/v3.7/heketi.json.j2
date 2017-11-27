@@ -31,6 +31,12 @@
 			"port" : "{{ glusterfs_heketi_ssh_port }}",
 			"user" : "{{ glusterfs_heketi_ssh_user }}",
 			"sudo" : {{ glusterfs_heketi_ssh_sudo | lower }}
-		}
+		},
+
+		"_auto_create_block_hosting_volume": "Creates Block Hosting volumes automatically if not found or exsisting volume exhausted",
+		"auto_create_block_hosting_volume": {{ glusterfs_block_host_vol_create | lower }},
+
+		"_block_hosting_volume_size": "New block hosting volume will be created in size mentioned, This is considered only if auto-create is enabled.",
+		"block_hosting_volume_size": {{ glusterfs_block_host_vol_size }}
 	}
 }
