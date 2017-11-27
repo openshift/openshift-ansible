@@ -6,6 +6,8 @@
     - deployment_type == 'openshift-enterprise'
     - not openshift_use_crio | default(false)
 
+- include: dnsmasq.yml
+
 - name: setup firewall
   import_tasks: firewall.yml
 
