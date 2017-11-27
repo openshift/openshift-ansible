@@ -4,6 +4,12 @@
     msg: Verify OpenShift is already installed
   when: openshift.common.version is not defined
 
+- name: Update oreg_auth docker login credentials if necessary
+  include_role:
+    name: docker
+    tasks_from: registry_auth.yml
+  when: oreg_auth_user is defined
+
 - name: Verify containers are available for upgrade
   command: >
     docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
