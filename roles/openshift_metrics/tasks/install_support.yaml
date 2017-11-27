@@ -1,6 +1,6 @@
 ---
 - name: Check control node to see if htpasswd is installed
-  local_action: command which htpasswd
+  command: which htpasswd
   register: htpasswd_check
   failed_when: no
   changed_when: no
@@ -10,7 +10,7 @@
   when: htpasswd_check.rc  == 1
 
 - name: Check control node to see if keytool is installed
-  local_action: command which keytool
+  command: which keytool
   register: keytool_check
   failed_when: no
   changed_when: no
