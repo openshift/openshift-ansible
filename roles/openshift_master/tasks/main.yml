@@ -180,7 +180,7 @@
   include_tasks: system_container.yml
   when:
   - openshift.common.is_containerized | bool
-  - openshift.common.is_master_system_container | bool
+  - l_is_master_system_container | bool
 
 - name: Create session secrets file
   template:

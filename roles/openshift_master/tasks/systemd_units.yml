@@ -26,7 +26,7 @@
   ignore_errors: true
   when:
   - openshift.master.cluster_method == "native"
-  - not openshift.common.is_master_system_container | bool
+  - not l_is_master_system_container | bool
 
 # This is the image used for both HA and non-HA clusters:
 - name: Pre-pull master image
@@ -36,7 +36,7 @@
   changed_when: "'Downloaded newer image' in l_pull_result.stdout"
   when:
   - openshift.common.is_containerized | bool
-  - not openshift.common.is_master_system_container | bool
+  - not l_is_master_system_container | bool
 
 - name: Create the ha systemd unit files
   template:
@@ -44,7 +44,7 @@
     dest: "{{ containerized_svc_dir }}/{{ openshift.common.service_type }}-master-{{ item }}.service"
   when:
   - openshift.master.cluster_method == "native"
-  - not openshift.common.is_master_system_container | bool
+  - not l_is_master_system_container | bool
   with_items:
   - api
   - controllers
@@ -64,7 +64,7 @@
   - controllers
   when:
   - openshift.master.cluster_method == "native"
-  - not openshift.common.is_master_system_container | bool
+  - not l_is_master_system_container | bool
 
 - name: Preserve Master API Proxy Config options
   command: grep PROXY /etc/sysconfig/{{ openshift.common.service_type }}-master-api
