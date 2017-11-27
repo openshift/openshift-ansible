@@ -2287,14 +2287,27 @@ class OpenShiftFacts(object):
                 oo_env_facts = dict()
                 current_level = oo_env_facts
                 keys = self.split_openshift_env_fact_keys(fact, openshift_env_structures)[1:]
+
                 if len(keys) > 0 and keys[0] != self.role:
                     continue
-                for key in keys:
-                    if key == keys[-1]:
-                        current_level[key] = value
-                    elif key not in current_level:
-                        current_level[key] = dict()
-                        current_level = current_level[key]
+
+                # Build a dictionary from the split fact keys.
+                # After this loop oo_env_facts is the resultant dictionary.
+                # For example:
+                # fact = "openshift_metrics_install_metrics"
+                # value = 'true'
+                # keys = ['metrics', 'install', 'metrics']
+                # result = {'metrics': {'install': {'metrics': 'true'}}}
+                for i, _ in enumerate(keys):
+                    # This is the last key. Set the value.
+                    if i == (len(keys) - 1):
+                        current_level[keys[i]] = value
+                    # This is a key other than the last key. Set as
+                    # dictionary and continue.
+                    else:
+                        current_level[keys[i]] = dict()
+                        current_level = current_level[keys[i]]
+
                 facts_to_set = merge_facts(orig=facts_to_set,
                                            new=oo_env_facts,
                                            additive_facts_to_overwrite=[],
