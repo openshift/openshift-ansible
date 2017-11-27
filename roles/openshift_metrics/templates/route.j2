@@ -7,7 +7,7 @@ metadata:
 {% endif %}
 {% if labels is defined and labels %}
   labels:
-{% for k, v in labels.iteritems() %}
+{% for k, v in labels.items() %}
     {{ k }}: {{ v }}
 {% endfor %}
 {% endif %}

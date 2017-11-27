@@ -29,7 +29,7 @@ spec:
       serviceAccountName: aggregated-logging-kibana
 {% if kibana_node_selector is iterable and kibana_node_selector | length > 0 %}
       nodeSelector:
-{% for key, value in kibana_node_selector.iteritems() %}
+{% for key, value in kibana_node_selector.items() %}
         {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}

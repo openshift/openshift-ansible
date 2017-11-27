@@ -724,7 +724,7 @@ resources:
           type:        node
           subtype:     app
           node_labels:
-{% for k, v in openshift_openstack_cluster_node_labels.app.iteritems() %}
+{% for k, v in openshift_openstack_cluster_node_labels.app.items() %}
             {{ k|e }}: {{ v|e }}
 {% endfor %}
           image:       {{ openshift_openstack_node_image }}
@@ -788,7 +788,7 @@ resources:
           type:        node
           subtype:     infra
           node_labels:
-{% for k, v in openshift_openstack_cluster_node_labels.infra.iteritems() %}
+{% for k, v in openshift_openstack_cluster_node_labels.infra.items() %}
             {{ k|e }}: {{ v|e }}
 {% endfor %}
           image:       {{ openshift_openstack_infra_image }}
