@@ -48,10 +48,6 @@
 
   # Replace dc/docker-registry certificate secret contents if set.
   - block:
-    - name: Load lib_openshift modules
-      include_role:
-        name: lib_openshift
-
     - name: Retrieve registry service IP
       oc_service:
         namespace: default
