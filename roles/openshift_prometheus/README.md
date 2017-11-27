@@ -25,6 +25,10 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_args`: Modify or add arguments for prometheus application
 
+- `openshift_prometheus_hostname`: specify the hostname for the route to prometheus `prometheus-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
+
+- `openshift_prometheus_alerts_hostname`: specify the hostname for the route to prometheus-alerts `prometheus_alerts-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
+
 e.g
 ```
 openshift_prometheus_args=['--storage.tsdb.retention=6h', '--storage.tsdb.min-block-duration=5s', '--storage.tsdb.max-block-duration=6m']
