@@ -4,6 +4,8 @@
   when:
   - not openshift.common.is_atomic | bool
   - not glusterfs_heketi_is_native | bool
+  register: result
+  until: result | success
 
 - name: Verify heketi-cli is installed
   shell: "command -v {{ glusterfs_heketi_cli }} >/dev/null 2>&1 || { echo >&2 'ERROR: Make sure heketi-cli is available, then re-run the installer'; exit 1; }"
