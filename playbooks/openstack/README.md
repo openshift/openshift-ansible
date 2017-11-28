@@ -6,7 +6,7 @@ etc.). The result is an environment ready for OpenShift installation
 via [openshift-ansible].
 
 We provide everything necessary to be able to install OpenShift on
-OpenStack (including the DNS and load balancer servers when
+OpenStack (including the load balancer servers when
 necessary). In addition, we work on providing integration with the
 OpenStack-native services (storage, lbaas, baremetal as a service,
 dns, etc.).
@@ -38,18 +38,6 @@ Optional:
 * External Neutron network with a floating IP address pool
 
 
-## DNS Requirements
-
-OpenShift requires DNS to operate properly. OpenStack supports DNS-as-a-service
-in the form of the Designate project, but the playbooks here don't support it
-yet. Until we do, you will need to provide a DNS solution yourself (or in case
-you are not running Designate when we do).
-
-If your server supports nsupdate, we will use it to add the necessary records.
-
-TODO(shadower): describe how to build a sample DNS server and how to configure
-our playbooks for nsupdate.
-
 
 ## Installation
 
@@ -57,14 +45,13 @@ There are four main parts to the installation:
 
 1. [Preparing Ansible and dependencies](#1-preparing-ansible-and-dependencies)
 2. [Configuring the desired OpenStack environment and OpenShift cluster](#2-configuring-the-openstack-environment-and-openshift-cluster)
-3. [Creating the OpenStack resources (VMs, networking, etc.)](#3-creating-the-openstack-resources-vms-networking-etc)
-4. [Installing OpenShift](#4-installing-openshift)
+3. [Creating the OpenStack Resources and Installing OpenShift](#3-creating-the-openstack-resources-and-installing-openshift)
 
 This guide is going to install [OpenShift Origin][origin]
 with [CentOS 7][centos7] images with minimal customisation.
 
-We will create the VMs for running OpenShift, in a new Neutron
-network, assign Floating IP addresses and configure DNS.
+We will create the VMs for running OpenShift, in a new Neutron network and
+assign Floating IP addresses.
 
 The OpenShift cluster will have a single Master node that will run
 `etcd`, a single Infra node and two App nodes.
@@ -156,14 +143,6 @@ $ vi inventory/group_vars/all.yml
 4. Set the `openshift_openstack_default_flavor` to the flavor you want your
    OpenShift VMs to use.
    - See `openstack flavor list` for the list of available flavors.
-5. Set the `openshift_openstack_dns_nameservers` to the list of the IP addresses
-   of the DNS servers used for the **private** address resolution.
-
-**NOTE ON DNS**: at minimum, the OpenShift nodes need to be able to access each
-other by their hostname.  OpenStack doesn't provide this by default, so you
-need to provide a DNS server. Put the address of that DNS server in
-`openshift_openstack_dns_nameservers` variable.
-
 
 
 
@@ -191,7 +170,7 @@ the [Sample OpenShift Inventory][sample-openshift-inventory] and
 the [advanced configuration][advanced-configuration].
 
 
-### 3. Creating the OpenStack resources (VMs, networking, etc.)
+### 3. Creating the OpenStack Resources and Installing OpenShift
 
 We provide an `ansible.cfg` file which has some useful defaults -- you should
 copy it to the directory you're going to run `ansible-playbook` from.
@@ -200,11 +179,11 @@ copy it to the directory you're going to run `ansible-playbook` from.
 $ cp openshift-ansible/ansible.cfg ansible.cfg
 ```
 
-Then run the provisioning playbook -- this will create the OpenStack
+Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision.yaml
+$ ansible-playbook --user openshift -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml
 ```
 
 If you're using multiple inventories, make sure you pass the path to
@@ -213,15 +192,6 @@ the right one to `-i`.
 If your SSH private key is not in `~/.ssh/id_rsa` use the `--private-key`
 option to specify the correct path.
 
-
-### 4. Installing OpenShift
-
-Run the `byo/config.yml` playbook on top of the OpenStack nodes we have
-prepared.
-
-```bash
-$ ansible-playbook -i inventory openshift-ansible/playbooks/byo/config.yml
-```
 
 
 ### Next Steps
