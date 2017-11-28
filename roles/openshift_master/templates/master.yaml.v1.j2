@@ -65,7 +65,7 @@ disabledFeatures: {{ openshift.master.disabled_features | to_json }}
 {% endif %}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
-  bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}
+  bindAddress: {{ openshift.master.bind_addr }}:{{ openshift_master_dns_port }}
   bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:

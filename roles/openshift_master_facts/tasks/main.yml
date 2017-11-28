@@ -55,8 +55,6 @@
       embedded_etcd: "{{ openshift_master_embedded_etcd | default(None) }}"
       embedded_kube: "{{ openshift_master_embedded_kube | default(None) }}"
       embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
-      # defaults to 8053 when using dnsmasq in 1.2/3.2
-      dns_port: "{{ openshift_master_dns_port | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
       pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"

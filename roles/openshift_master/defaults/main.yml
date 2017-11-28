@@ -15,6 +15,8 @@ system_images_registry: "{{ system_images_registry_dict[openshift_deployment_typ
 
 l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
+openshift_master_dns_port: 8053
+
 openshift_node_ips: []
 r_openshift_master_clean_install: false
 r_openshift_master_etcd3_storage: false
@@ -26,9 +28,9 @@ default_r_openshift_master_os_firewall_allow:
 - service: api controllers https
   port: "{{ openshift.master.controllers_port }}/tcp"
 - service: skydns tcp
-  port: "{{ openshift.master.dns_port }}/tcp"
+  port: "{{ openshift_master_dns_port }}/tcp"
 - service: skydns udp
-  port: "{{ openshift.master.dns_port }}/udp"
+  port: "{{ openshift_master_dns_port }}/udp"
 - service: etcd embedded
   port: 4001/tcp
   cond: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
