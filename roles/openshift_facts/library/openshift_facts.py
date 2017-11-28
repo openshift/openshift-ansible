@@ -498,21 +498,6 @@ def set_selectors(facts):
     return facts
 
 
-def set_dnsmasq_facts_if_unset(facts):
-    """ Set dnsmasq facts if not already present in facts
-    Args:
-        facts (dict) existing facts
-    Returns:
-        facts (dict) updated facts with values set if not previously set
-    """
-
-    if 'common' in facts:
-        if 'master' in facts and 'dns_port' not in facts['master']:
-            facts['master']['dns_port'] = 8053
-
-    return facts
-
-
 def set_project_cfg_facts_if_unset(facts):
     """ Set Project Configuration facts if not already present in facts dict
             dict:
@@ -1825,7 +1810,6 @@ class OpenShiftFacts(object):
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
-        facts = set_dnsmasq_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_etcd_facts_if_unset(facts)
         facts = set_proxy_facts(facts)
