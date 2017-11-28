@@ -126,10 +126,14 @@
         - origin-sdn-ovs
         - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
+        register: result
+        until: result | success
 
       - name: Remove flannel package
         package: name=flannel state=absent
         when: openshift_use_flannel | default(false) | bool
+        register: result
+        until: result | success
       when: not is_atomic | bool
 
     - shell: systemctl reset-failed
@@ -382,6 +386,8 @@
     - origin-master
     - pacemaker
     - pcs
+    register: result
+    until: result | success
 
   - shell: systemctl reset-failed
     changed_when: False
@@ -497,6 +503,8 @@
     with_items:
     - etcd
     - etcd3
+    register: result
+    until: result | success
 
   - shell: systemctl reset-failed
     changed_when: False
@@ -554,6 +562,8 @@
     when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - haproxy
+    register: result
+    until: result | success
 
   - shell: systemctl reset-failed
     changed_when: False

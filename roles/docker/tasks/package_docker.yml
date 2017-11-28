@@ -37,6 +37,8 @@
 - name: Install Docker
   package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
   when: not openshift.common.is_atomic | bool and not curr_docker_version | skipped and not curr_docker_version.stdout != ''
+  register: result
+  until: result | success
 
 - block:
   # Extend the default Docker service unit file when using iptables-services

@@ -3,6 +3,8 @@
   become: yes
   package: name=flannel state=present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 - name: Set flannel etcd options
   become: yes

@@ -3,6 +3,8 @@
   yum:
     name: dnf
     state: installed
+  register: result
+  until: result | success
 
 - name: Update repo cache
   command: dnf update -y

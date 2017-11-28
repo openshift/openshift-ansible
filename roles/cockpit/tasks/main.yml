@@ -11,6 +11,8 @@
     - cockpit-docker
     - "{{ cockpit_plugins }}"
   when: not openshift.common.is_containerized | bool
+  register: result
+  until: result | success
 
 - name: Enable cockpit-ws
   systemd:

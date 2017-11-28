@@ -2,6 +2,8 @@
 - name: Install NFS server
   package: name=nfs-utils state=present
   when: not openshift.common.is_containerized | bool
+  register: result
+  until: result | success
 
 - name: Start rpcbind
   systemd:

@@ -13,6 +13,7 @@
     state: present
   when: not openshift.common.is_containerized | bool
   register: install_result
+  until: install_result | success
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
