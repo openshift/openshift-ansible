@@ -1,4 +1,15 @@
 ---
+- name: restart NetworkManager
+  systemd:
+    name: NetworkManager
+    state: restarted
+    enabled: True
+
+- name: restart dnsmasq
+  systemd:
+    name: dnsmasq
+    state: restarted
+
 - name: restart openvswitch
   systemd:
     name: openvswitch

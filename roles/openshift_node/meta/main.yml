@@ -22,6 +22,5 @@ dependencies:
 - role: openshift_docker
 - role: openshift_cloud_provider
   when: not (openshift_node_upgrade_in_progress | default(False))
-- role: openshift_node_dnsmasq
 - role: lib_utils
   when: openshift_node_upgrade_in_progress | default(False)

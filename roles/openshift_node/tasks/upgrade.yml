@@ -179,5 +179,4 @@
   retries: 24
   delay: 5
 
-- include_role:
-    name: openshift_node_dnsmasq
+- include_tasks: dnsmasq.yml
