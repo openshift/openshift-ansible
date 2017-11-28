@@ -20,6 +20,7 @@
   any_errors_fatal: true
   roles:
   - role: os_firewall
+  - role: openshift_clock
   - role: openshift_etcd
     etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
