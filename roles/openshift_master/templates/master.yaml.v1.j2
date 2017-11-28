@@ -196,13 +196,13 @@ policyConfig:
   openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
 projectConfig:
-  defaultNodeSelector: "{{ openshift.master.default_node_selector }}"
-  projectRequestMessage: "{{ openshift.master.project_request_message }}"
-  projectRequestTemplate: "{{ openshift.master.project_request_template }}"
+  defaultNodeSelector: "{{ osm_default_node_selector }}"
+  projectRequestMessage: "{{ osm_project_request_message }}"
+  projectRequestTemplate: "{{ osm_project_request_template }}"
   securityAllocator:
-    mcsAllocatorRange: "{{ openshift.master.mcs_allocator_range }}"
-    mcsLabelsPerProject: {{ openshift.master.mcs_labels_per_project }}
-    uidAllocatorRange: "{{ openshift.master.uid_allocator_range  }}"
+    mcsAllocatorRange: "{{ osm_mcs_allocator_range }}"
+    mcsLabelsPerProject: {{ osm_mcs_labels_per_project }}
+    uidAllocatorRange: "{{ osm_uid_allocator_range }}"
 routingConfig:
   subdomain:  "{{ openshift_master_default_subdomain | default("") }}"
 serviceAccountConfig:

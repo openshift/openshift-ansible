@@ -16,6 +16,12 @@ system_images_registry: "{{ system_images_registry_dict[openshift_deployment_typ
 l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
 openshift_master_dns_port: 8053
+osm_default_node_selector: ''
+osm_project_request_template: ''
+osm_mcs_allocator_range: 's0:/2'
+osm_mcs_labels_per_project: 5
+osm_uid_allocator_range: '1000000000-1999999999/10000'
+osm_project_request_message: ''
 
 openshift_node_ips: []
 r_openshift_master_clean_install: false
