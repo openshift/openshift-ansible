@@ -6,7 +6,7 @@
 
 - set_fact:
     accessTokenMaxAgeSeconds: "{{ (g_master_config_output.content|b64decode|from_yaml).oauthConfig.tokenConfig.accessTokenMaxAgeSeconds | default(86400) }}"
-    authroizeTokenMaxAgeSeconds: "{{ (g_master_config_output.content|b64decode|from_yaml).oauthConfig.tokenConfig.authroizeTokenMaxAgeSeconds | default(500) }}"
+    authorizeTokenMaxAgeSeconds: "{{ (g_master_config_output.content|b64decode|from_yaml).oauthConfig.tokenConfig.authorizeTokenMaxAgeSeconds | default(500) }}"
     controllerLeaseTTL: "{{ (g_master_config_output.content|b64decode|from_yaml).controllerLeaseTTL | default(30) }}"
 
 - name: Re-introduce leases (as a replacement for key TTLs)
@@ -29,6 +29,6 @@
     - keys: "/openshift.io/oauth/accesstokens"
       ttl: "{{ accessTokenMaxAgeSeconds }}s"
     - keys: "/openshift.io/oauth/authorizetokens"
-      ttl: "{{ authroizeTokenMaxAgeSeconds }}s"
+      ttl: "{{ authorizeTokenMaxAgeSeconds }}s"
     - keys: "/openshift.io/leases/controllers"
       ttl: "{{ controllerLeaseTTL }}s"
