@@ -40,7 +40,13 @@ UPGRADE_MAPPINGS = {
     '3.6': {
         'minor_version': '3.6',
         'minor_playbook': 'v3_6/upgrade.yml',
+        'major_version': '3.7',
+        'major_playbook': 'v3_7/upgrade.yml',
     },
+    '3.7': {
+        'minor_version': '3.7',
+        'minor_playbook': 'v3_7/upgrade.yml',
+    }
 }
 
 
