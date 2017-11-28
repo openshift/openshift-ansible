@@ -48,6 +48,10 @@
   - name: Add iptables rule to open Contrail-API service
     command: iptables -I INPUT 1 -p tcp --dport 8082 -j ACCEPT -m comment --comment "contrail-api"
     delegate_to: "{{ contrail_first_master }}"
+    
+  - name: Add iptables rule to open Contrail-Web-UI service
+    command: iptables -I INPUT 1 -p tcp --dport 8143 -j ACCEPT -m comment --comment "contrail-web-ui"
+    delegate_to: "{{ contrail_first_master }}"
   
   - name: Add contrail service account to privileged scc
     oc_adm_policy_user:
