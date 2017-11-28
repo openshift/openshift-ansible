@@ -1,8 +1,0 @@
----
-- include_tasks: backup/vars.yml
-
-- include_tasks: backup/archive.yml
-
-- include_tasks: backup/sync_backup.yml
-
-- include_tasks: backup/
