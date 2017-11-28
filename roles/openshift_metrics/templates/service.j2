@@ -4,13 +4,13 @@ metadata:
   name: "{{obj_name}}"
 {% if annotations is defined%}
   annotations:
-{% for key, value in annotations.iteritems() %}
+{% for key, value in annotations.items() %}
     {{key}}: {{value}}
 {% endfor %}
 {% endif %}
 {% if labels is defined%}
   labels:
-{% for key, value in labels.iteritems() %}
+{% for key, value in labels.items() %}
     {{key}}: {{value}}
 {% endfor %}
 {% endif %}
@@ -22,7 +22,7 @@ spec:
   ports:
 {% for port in ports %}
   -
-{% for key, value in port.iteritems() %}
+{% for key, value in port.items() %}
     {{key}}: {{value}}
 {% endfor %}
 {% if port.targetPort is undefined %}
@@ -33,6 +33,6 @@ spec:
     targetPort: {{service_targetPort}}
 {% endif %}
   selector:
-  {% for key, value in selector.iteritems() %}
+  {% for key, value in selector.items() %}
   {{key}}: {{value}}
   {% endfor %}

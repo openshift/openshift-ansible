@@ -22,7 +22,7 @@ spec:
       serviceAccountName: "{{deploy_serviceAccount}}"
 {% if node_selector is iterable and node_selector | length > 0 %}
       nodeSelector:
-{% for key, value in node_selector.iteritems() %}
+{% for key, value in node_selector.items() %}
         {{key}}: "{{value}}"
 {% endfor %}
 {% endif %}
