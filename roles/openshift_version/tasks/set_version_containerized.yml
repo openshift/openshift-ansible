@@ -20,7 +20,7 @@
 
 - name: Lookup latest containerized version if no version specified
   command: >
-    docker run --rm {{ openshift.common.cli_image }}:latest version
+    docker run --rm {{ openshift_cli_image }}:latest version
   register: cli_image_version
   when:
   - openshift_version is not defined
@@ -43,7 +43,7 @@
 # and use that value instead.
 - name: Set precise containerized version to configure if openshift_release specified
   command: >
-    docker run --rm {{ openshift.common.cli_image }}:v{{ openshift_version }} version
+    docker run --rm {{ openshift_cli_image }}:v{{ openshift_version }} version
   register: cli_image_version
   when:
   - openshift_version is defined

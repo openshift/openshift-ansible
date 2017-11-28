@@ -1628,7 +1628,6 @@ def set_container_facts_if_unset(facts):
     deployment_type = facts['common']['deployment_type']
     if deployment_type == 'openshift-enterprise':
         master_image = 'openshift3/ose'
-        cli_image = master_image
         node_image = 'openshift3/node'
         ovs_image = 'openshift3/openvswitch'
         pod_image = 'openshift3/ose-pod'
@@ -1637,7 +1636,6 @@ def set_container_facts_if_unset(facts):
         deployer_image = 'openshift3/ose-deployer'
     else:
         master_image = 'openshift/origin'
-        cli_image = master_image
         node_image = 'openshift/node'
         ovs_image = 'openshift/openvswitch'
         pod_image = 'openshift/origin-pod'
@@ -1656,8 +1654,6 @@ def set_container_facts_if_unset(facts):
 
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']
-    if 'cli_image' not in facts['common']:
-        facts['common']['cli_image'] = cli_image
     if 'pod_image' not in facts['common']:
         facts['common']['pod_image'] = pod_image
     if 'router_image' not in facts['common']:
