@@ -2,6 +2,8 @@
 - name: Install GlusterFS storage plugin dependencies
   package: name=glusterfs-fuse state=present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 - name: Check for existence of fusefs sebooleans
   command: getsebool {{ item }}

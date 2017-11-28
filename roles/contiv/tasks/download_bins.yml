@@ -8,6 +8,8 @@
   yum:
     name: bzip2
     state: installed
+  register: result
+  until: result | success
 
 - name: Download Bins | Download Contiv tar file
   get_url:

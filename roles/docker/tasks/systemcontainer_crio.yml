@@ -35,6 +35,8 @@
     name: container-selinux
     state: present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 - name: Check we are not using node as a Docker container with CRI-O
   fail: msg='Cannot use CRI-O with node configured as a Docker container'
@@ -48,6 +50,8 @@
     name: atomic
     state: present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 # At the time of writing the atomic command requires runc for it's own use. This
 # task is here in the even that the atomic package ever removes the dependency.
@@ -56,6 +60,8 @@
     name: runc
     state: present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 
 - name: Check that overlay is in the kernel

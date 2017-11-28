@@ -46,6 +46,8 @@
     state: present
   when:
   - not openshift.common.is_containerized | bool
+  register: result
+  until: result | success
 
 - name: Create r_openshift_master_data_dir
   file:
@@ -95,6 +97,8 @@
   - item.kind == 'HTPasswdPasswordIdentityProvider'
   - not openshift.common.is_atomic | bool
   with_items: "{{ openshift.master.identity_providers }}"
+  register: result
+  until: result | success
 
 - name: Ensure htpasswd directory exists
   file:
@@ -315,6 +319,7 @@
   - openshift.master.cluster_method == 'pacemaker'
   - not openshift.common.is_containerized | bool
   register: l_install_result
+  until: l_install_result | success
 
 - name: Start and enable cluster service
   systemd:

@@ -5,6 +5,8 @@
 
 - name: Install nfs-utils
   package: name=nfs-utils state=present
+  register: result
+  until: result | success
 
 - name: Configure NFS
   lineinfile:

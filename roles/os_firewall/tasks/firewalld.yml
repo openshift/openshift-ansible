@@ -8,6 +8,8 @@
   package:
     name: firewalld
     state: present
+  register: result
+  until: result | success
 
 - name: Ensure iptables services are not enabled
   systemd:

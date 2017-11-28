@@ -22,6 +22,8 @@
   when:
     - component == "master"
     - not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 - name: Upgrade node packages
   package: name={{ node_pkgs | join(',') }} state=present
@@ -36,3 +38,5 @@
   when:
     - component == "node"
     - not openshift.common.is_atomic | bool
+  register: result
+  until: result | success

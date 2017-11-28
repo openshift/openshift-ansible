@@ -109,6 +109,8 @@
     name: openvswitch
     state: latest
   when: not openshift.common.is_containerized | bool
+  register: result
+  until: result | success
 
 - name: Update oreg value
   yedit:
