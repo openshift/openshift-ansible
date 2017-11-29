@@ -49,14 +49,14 @@ Otherwise, even if there are differences between the two versions, installation 
 
 ### Configure DNS
 
-OpenShift requires two DNS records to function fully. The first one poinst to
+OpenShift requires two DNS records to function fully. The first one points to
 the master/load balancer and provides the UI/API access. The other one is a
 wildcard domain that resolves app route requests to the infra node.
 
 If you followed the default installation from the README section, there is no
-DNS configured.  We can add two entries to your `/etc/hosts` to do a quick
-validation. A real deployment will however require a DNS server with the
-following entries set.
+DNS configured. You should add two entries to the `/etc/hosts` file on the
+Ansible host (where you to do a quick validation. A real deployment will
+however require a DNS server with the following entries set.
 
 First, run the `openstack server list` command and note the floating IP
 addresses of the *master* and *infra* nodes (we will use `10.40.128.130` for
@@ -69,7 +69,7 @@ Then add the following entries to your `/etc/hosts`:
 10.40.128.134 cakephp-mysql-example-test.apps.openshift.example.com
 ```
 
-I.e. point the cluster domain (as defined in the
+This points the cluster domain (as defined in the
 `openshift_master_cluster_public_hostname` Ansible variable in `OSEv3`) to the
 master node and any routes for deployed apps to the infra node.
 

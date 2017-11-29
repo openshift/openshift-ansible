@@ -91,6 +91,7 @@ def build_inventory():
             # performance issues.
             hostvars['openshift_ip'] = server.private_v4
             hostvars['openshift_hostname'] = server.private_v4
+        hostvars['openshift_public_hostname'] = server.name
 
         node_labels = server.metadata.get('node_labels')
         if node_labels:
