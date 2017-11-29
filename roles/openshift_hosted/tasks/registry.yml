@@ -1,4 +1,10 @@
 ---
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-hosted-ansible-XXXXXX
+  register: mktempHosted
+  changed_when: False
+  check_mode: no
+
 - name: setup firewall
   include: firewall.yml
   vars:
@@ -36,13 +42,13 @@
       l_default_replicas: "{{ l_node_count if openshift.hosted.registry.storage.kind | default(none) is not none else 1 }}"
     when: l_node_count | int > 0
 
-
 - name: set openshift_hosted facts
   set_fact:
     openshift_hosted_registry_replicas: "{{ openshift.hosted.registry.replicas | default(l_default_replicas) }}"
     openshift_hosted_registry_namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
     openshift_hosted_registry_selector: "{{ openshift.hosted.registry.selector }}"
     openshift_hosted_registry_images: "{{ openshift.hosted.registry.registryurl | default('openshift3/ose-${component}:${version}')}}"
+    openshift_hosted_registry_storage_glusterfs_ips: "{%- set gluster_ips = [] %}{% if groups.glusterfs_registry is defined %}{% for node in groups.glusterfs_registry %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% elif groups.glusterfs is defined %}{% for node in groups.glusterfs %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% else %}{{ openshift.hosted.registry.storage.glusterfs.ips }}{% endif %}"
 
 - name: Update registry environment variables when pushing via dns
   set_fact:
@@ -113,6 +119,11 @@
   when:
   - openshift.hosted.registry.storage.kind | default(none) in ['nfs', 'openstack', 'glusterfs']
 
+- include: storage/glusterfs_endpoints.yml
+  when:
+  - openshift_hosted_registry_storage_glusterfs_ips|length > 0
+  - openshift.hosted.registry.storage.kind | default(none) in ['glusterfs']
+
 - name: Create OpenShift registry
   oc_adm_registry:
     name: "{{ openshift_hosted_registry_name }}"
@@ -141,3 +152,10 @@
 - include: storage/glusterfs.yml
   when:
   - openshift.hosted.registry.storage.kind | default(none) == 'glusterfs' or openshift.hosted.registry.storage.glusterfs.swap
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktempHosted.stdout }}"
+    state: absent
+  changed_when: False
+  check_mode: no

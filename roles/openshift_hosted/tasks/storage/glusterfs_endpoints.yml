@@ -1,0 +1,16 @@
+---
+- name: Generate GlusterFS registry endpoints
+  template:
+    src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-endpoints.yml.j2"
+    dest: "{{ mktempHosted.stdout }}/glusterfs-registry-endpoints.yml"
+
+- name: Generate GlusterFS registry service
+  template:
+    src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-service.yml.j2"
+    dest: "{{ mktempHosted.stdout }}/glusterfs-registry-service.yml"
+
+- name: Create GlusterFS registry service and endpoint
+  command: "{{ openshift.common.client_binary }} apply -f {{ item }} -n {{ openshift.hosted.registry.namespace | default('default') }}"
+  with_items:
+  - "{{ mktempHosted.stdout }}/glusterfs-registry-service.yml"
+  - "{{ mktempHosted.stdout }}/glusterfs-registry-endpoints.yml"

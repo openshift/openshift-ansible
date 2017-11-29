@@ -44,51 +44,12 @@
     glusterfs_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_registry_heketi_ssh_sudo | bool }}"
     glusterfs_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_registry_heketi_ssh_keyfile }}"
     glusterfs_heketi_fstab: "{{ openshift_storage_glusterfs_registry_heketi_fstab }}"
-    glusterfs_nodes: "{{ groups.glusterfs_registry | default(groups.glusterfs) }}"
+    glusterfs_nodes: "{% if groups.glusterfs_registry is defined %}{% set nodes = groups.glusterfs_registry %}{% elif 'groups.glusterfs' is defined %}{% set nodes = groups.glusterfs %}{% else %}{% set nodes = '[]' %}{% endif %}{{ nodes }}"
 
 - include: glusterfs_common.yml
   when:
   - glusterfs_nodes | default([]) | count > 0
   - "'glusterfs' not in groups or glusterfs_nodes != groups.glusterfs"
-
-- name: Delete pre-existing GlusterFS registry resources
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: "{{ item.kind }}"
-    name: "{{ item.name }}"
-    state: absent
-  with_items:
-  - kind: "svc"
-    name: "glusterfs-{{ glusterfs_name | default }}-endpoints"
-  failed_when: False
-
-- name: Generate GlusterFS registry endpoints
-  template:
-    src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-endpoints.yml.j2"
-    dest: "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
-
-- name: Copy GlusterFS registry service
-  template:
-    src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-service.yml.j2"
-    dest: "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
-
-- name: Create GlusterFS registry endpoints
-  oc_obj:
-    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
-    state: present
-    kind: endpoints
-    name: "glusterfs-{{ glusterfs_name }}-endpoints"
-    files:
-    - "{{ mktemp.stdout }}/glusterfs-registry-endpoints.yml"
-
-- name: Create GlusterFS registry service
-  oc_obj:
-    namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
-    state: present
-    kind: service
-    name: "glusterfs-{{ glusterfs_name }}-endpoints"
-    files:
-    - "{{ mktemp.stdout }}/glusterfs-registry-service.yml"
 
 - name: Check if GlusterFS registry volume exists
   command: "{{ glusterfs_heketi_client }} volume list"
