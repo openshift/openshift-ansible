@@ -26,6 +26,9 @@
   - name: Gather facts for the new nodes
     setup:
 
+- name: set common facts
+  include: ../../init/facts.yml
+
 
 # NOTE(shadower): the (internal) DNS must be functional at this point!!
 # That will have happened in provision.yml if nsupdate was configured.
@@ -47,6 +50,13 @@
   hosts: oo_all_hosts
   become: yes
   gather_facts: yes
+  roles:
+  - role: rhel_subscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(False, True), True)
+    - lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(False, True), True)
+
   tasks:
   - name: Install dependencies
     include_role:
