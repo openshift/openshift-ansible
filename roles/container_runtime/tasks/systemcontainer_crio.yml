@@ -4,7 +4,7 @@
   fail: msg='Cannot use CRI-O with node configured as a Docker container'
   when:
     - openshift.common.is_containerized | bool
-    - not openshift.common.is_node_system_container | bool
+    - not l_is_node_system_container | bool
 
 - include_tasks: common/pre.yml
 

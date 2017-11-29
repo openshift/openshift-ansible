@@ -81,6 +81,7 @@ l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure
 l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
 l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
 
+
 openshift_crio_image_tag_default: "latest"
 
 l_crt_crio_image_tag_dict:
@@ -127,3 +128,5 @@ l_docker_image_tag: "{{ l_crt_docker_image_tag_dict[openshift_deployment_type] }
 
 l_docker_image_default: "{{ l_docker_image_prepend }}/{{ openshift_docker_service_name }}:{{ l_docker_image_tag }}"
 l_docker_image: "{{ openshift_docker_systemcontainer_image_override | default(l_docker_image_default) }}"
+
+l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
