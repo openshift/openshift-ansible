@@ -11,14 +11,13 @@ import copy
 import errno
 import json
 import re
-import io
 import os
 import yaml
 import struct
 import socket
 from distutils.util import strtobool
 from distutils.version import LooseVersion
-from ansible.module_utils.six import string_types, text_type
+from ansible.module_utils.six import string_types
 from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
@@ -86,24 +85,6 @@ def migrate_node_facts(facts):
     return facts
 
 
-def migrate_hosted_facts(facts):
-    """ Apply migrations for master facts """
-    if 'master' in facts:
-        if 'router_selector' in facts['master']:
-            if 'hosted' not in facts:
-                facts['hosted'] = {}
-            if 'router' not in facts['hosted']:
-                facts['hosted']['router'] = {}
-            facts['hosted']['router']['selector'] = facts['master'].pop('router_selector')
-        if 'registry_selector' in facts['master']:
-            if 'hosted' not in facts:
-                facts['hosted'] = {}
-            if 'registry' not in facts['hosted']:
-                facts['hosted']['registry'] = {}
-            facts['hosted']['registry']['selector'] = facts['master'].pop('registry_selector')
-    return facts
-
-
 def migrate_admission_plugin_facts(facts):
     """ Apply migrations for admission plugin facts """
     if 'master' in facts:
@@ -125,7 +106,6 @@ def migrate_local_facts(facts):
     migrated_facts = copy.deepcopy(facts)
     migrated_facts = migrate_common_facts(migrated_facts)
     migrated_facts = migrate_node_facts(migrated_facts)
-    migrated_facts = migrate_hosted_facts(migrated_facts)
     migrated_facts = migrate_admission_plugin_facts(migrated_facts)
     return migrated_facts
 
@@ -412,58 +392,6 @@ def normalize_provider_facts(provider, metadata):
     return facts
 
 
-# pylint: disable=too-many-branches
-def set_selectors(facts):
-    """ Set selectors facts if not already present in facts dict
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated selectors
-            facts if they were not already present
-
-    """
-    selector = "region=infra"
-
-    if 'hosted' not in facts:
-        facts['hosted'] = {}
-    if 'router' not in facts['hosted']:
-        facts['hosted']['router'] = {}
-    if 'selector' not in facts['hosted']['router'] or facts['hosted']['router']['selector'] in [None, 'None']:
-        facts['hosted']['router']['selector'] = selector
-    if 'registry' not in facts['hosted']:
-        facts['hosted']['registry'] = {}
-    if 'selector' not in facts['hosted']['registry'] or facts['hosted']['registry']['selector'] in [None, 'None']:
-        facts['hosted']['registry']['selector'] = selector
-    if 'metrics' not in facts['hosted']:
-        facts['hosted']['metrics'] = {}
-    if 'selector' not in facts['hosted']['metrics'] or facts['hosted']['metrics']['selector'] in [None, 'None']:
-        facts['hosted']['metrics']['selector'] = None
-    if 'logging' not in facts or not isinstance(facts['logging'], dict):
-        facts['logging'] = {}
-    if 'selector' not in facts['logging'] or facts['logging']['selector'] in [None, 'None']:
-        facts['logging']['selector'] = None
-    if 'etcd' not in facts['hosted']:
-        facts['hosted']['etcd'] = {}
-    if 'selector' not in facts['hosted']['etcd'] or facts['hosted']['etcd']['selector'] in [None, 'None']:
-        facts['hosted']['etcd']['selector'] = None
-    if 'prometheus' not in facts:
-        facts['prometheus'] = {}
-    if 'selector' not in facts['prometheus'] or facts['prometheus']['selector'] in [None, 'None']:
-        facts['prometheus']['selector'] = None
-    if 'alertmanager' not in facts['prometheus']:
-        facts['prometheus']['alertmanager'] = {}
-    # pylint: disable=line-too-long
-    if 'selector' not in facts['prometheus']['alertmanager'] or facts['prometheus']['alertmanager']['selector'] in [None, 'None']:
-        facts['prometheus']['alertmanager']['selector'] = None
-    if 'alertbuffer' not in facts['prometheus']:
-        facts['prometheus']['alertbuffer'] = {}
-    # pylint: disable=line-too-long
-    if 'selector' not in facts['prometheus']['alertbuffer'] or facts['prometheus']['alertbuffer']['selector'] in [None, 'None']:
-        facts['prometheus']['alertbuffer']['selector'] = None
-
-    return facts
-
-
 def set_identity_providers_if_unset(facts):
     """ Set identity_providers fact if not already present in facts dict
 
@@ -604,60 +532,6 @@ def set_aggregate_facts(facts):
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
-
-    return facts
-
-
-def set_etcd_facts_if_unset(facts):
-    """
-    If using embedded etcd, loads the data directory from master-config.yaml.
-
-    If using standalone etcd, loads ETCD_DATA_DIR from etcd.conf.
-
-    If anything goes wrong parsing these, the fact will not be set.
-    """
-    if 'master' in facts and safe_get_bool(facts['master']['embedded_etcd']):
-        etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
-
-        if 'etcd_data_dir' not in etcd_facts:
-            try:
-                # Parse master config to find actual etcd data dir:
-                master_cfg_path = os.path.join(facts['common']['config_base'],
-                                               'master/master-config.yaml')
-                master_cfg_f = open(master_cfg_path, 'r')
-                config = yaml.safe_load(master_cfg_f.read())
-                master_cfg_f.close()
-
-                etcd_facts['etcd_data_dir'] = \
-                    config['etcdConfig']['storageDirectory']
-
-                facts['etcd'] = etcd_facts
-
-            # We don't want exceptions bubbling up here:
-            # pylint: disable=broad-except
-            except Exception:
-                pass
-    else:
-        etcd_facts = facts['etcd'] if 'etcd' in facts else dict()
-
-        # Read ETCD_DATA_DIR from /etc/etcd/etcd.conf:
-        try:
-            # Add a fake section for parsing:
-            ini_str = text_type('[root]\n' + open('/etc/etcd/etcd.conf', 'r').read(), 'utf-8')
-            ini_fp = io.StringIO(ini_str)
-            config = configparser.RawConfigParser()
-            config.readfp(ini_fp)
-            etcd_data_dir = config.get('root', 'ETCD_DATA_DIR')
-            if etcd_data_dir.startswith('"') and etcd_data_dir.endswith('"'):
-                etcd_data_dir = etcd_data_dir[1:-1]
-
-            etcd_facts['etcd_data_dir'] = etcd_data_dir
-            facts['etcd'] = etcd_facts
-
-        # We don't want exceptions bubbling up here:
-        # pylint: disable=broad-except
-        except Exception:
-            pass
 
     return facts
 
@@ -1631,13 +1505,8 @@ class OpenShiftFacts(object):
                    'cloudprovider',
                    'common',
                    'etcd',
-                   'hosted',
                    'master',
-                   'node',
-                   'logging',
-                   'loggingops',
-                   'metrics',
-                   'prometheus']
+                   'node']
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
@@ -1717,7 +1586,6 @@ class OpenShiftFacts(object):
         facts = migrate_oauth_template_facts(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
-        facts = set_selectors(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
@@ -1727,7 +1595,6 @@ class OpenShiftFacts(object):
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
-        facts = set_etcd_facts_if_unset(facts)
         facts = set_proxy_facts(facts)
         facts = set_builddefaults_facts(facts)
         facts = set_buildoverrides_facts(facts)
@@ -1792,178 +1659,6 @@ class OpenShiftFacts(object):
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
-
-        if 'hosted' in roles or self.role == 'hosted':
-            defaults['hosted'] = dict(
-                etcd=dict(
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='etcd',
-                            size='1Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'
-                        ),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteOnce']
-                        ),
-                        create_pv=True,
-                        create_pvc=False
-                    )
-                ),
-                registry=dict(
-                    storage=dict(
-                        kind=None,
-                        volume=dict(
-                            name='registry',
-                            size='5Gi'
-                        ),
-                        nfs=dict(
-                            directory='/exports',
-                            options='*(rw,root_squash)'),
-                        glusterfs=dict(
-                            endpoints='glusterfs-registry-endpoints',
-                            path='glusterfs-registry-volume',
-                            ips=[],
-                            readOnly=False,
-                            swap=False,
-                            swapcopy=True),
-                        host=None,
-                        access=dict(
-                            modes=['ReadWriteMany']
-                        ),
-                        create_pv=True,
-                        create_pvc=True
-                    )
-                ),
-                router=dict()
-            )
-
-            defaults['logging'] = dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='logging-es',
-                        size='10Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'
-                    ),
-                    host=None,
-                    access=dict(
-                        modes=['ReadWriteOnce']
-                    ),
-                    create_pv=True,
-                    create_pvc=False
-                )
-            )
-
-            defaults['loggingops'] = dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='logging-es-ops',
-                        size='10Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'
-                    ),
-                    host=None,
-                    access=dict(
-                        modes=['ReadWriteOnce']
-                    ),
-                    create_pv=True,
-                    create_pvc=False
-                )
-            )
-
-            defaults['metrics'] = dict(
-                deploy=False,
-                duration=7,
-                resolution='10s',
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='metrics',
-                        size='10Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'
-                    ),
-                    host=None,
-                    access=dict(
-                        modes=['ReadWriteOnce']
-                    ),
-                    create_pv=True,
-                    create_pvc=False
-                )
-            )
-
-            defaults['prometheus'] = dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='prometheus',
-                        size='10Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'
-                    ),
-                    host=None,
-                    access=dict(
-                        modes=['ReadWriteOnce']
-                    ),
-                    create_pv=True,
-                    create_pvc=False
-                )
-            )
-
-            defaults['prometheus']['alertmanager'] = dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='prometheus-alertmanager',
-                        size='10Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'
-                    ),
-                    host=None,
-                    access=dict(
-                        modes=['ReadWriteOnce']
-                    ),
-                    create_pv=True,
-                    create_pvc=False
-                )
-            )
-
-            defaults['prometheus']['alertbuffer'] = dict(
-                storage=dict(
-                    kind=None,
-                    volume=dict(
-                        name='prometheus-alertbuffer',
-                        size='10Gi'
-                    ),
-                    nfs=dict(
-                        directory='/exports',
-                        options='*(rw,root_squash)'
-                    ),
-                    host=None,
-                    access=dict(
-                        modes=['ReadWriteOnce']
-                    ),
-                    create_pv=True,
-                    create_pvc=False
-                )
-            )
 
         return defaults
 

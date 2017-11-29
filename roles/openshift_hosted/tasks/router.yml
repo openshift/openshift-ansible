@@ -11,16 +11,14 @@
   oc_obj:
     state: list
     kind: node
-    namespace: "{{ openshift.hosted.router.namespace | default('default') }}"
-    selector: "{{ openshift.hosted.router.selector | default(omit) }}"
+    namespace: "{{ openshift_hosted_router_namespace }}"
+    selector: "{{ openshift_hosted_router_selector }}"
   register: router_nodes
-  when: openshift.hosted.router.replicas | default(none) is none
+  when: openshift_hosted_router_replicas | default(none) is none
 
 - name: set_fact replicas
   set_fact:
-    replicas: "{{ openshift.hosted.router.replicas|default(None) | get_router_replicas(router_nodes) }}"
-    openshift_hosted_router_selector: "{{ openshift.hosted.router.selector | default(None) }}"
-    openshift_hosted_router_image: "{{ openshift.hosted.router.registryurl }}"
+    replicas: "{{ openshift_hosted_router_replicas | default(None) | get_router_replicas(router_nodes) }}"
 
 - name: Get the certificate contents for router
   copy:
@@ -42,8 +40,8 @@
       signer_key: "{{ openshift_master_config_dir }}/ca.key"
       signer_serial: "{{ openshift_master_config_dir }}/ca.serial.txt"
       hostnames:
-      - "{{ openshift_master_default_subdomain | default('router.default.svc.cluster.local') }}"
-      - "*.{{ openshift_master_default_subdomain | default('router.default.svc.cluster.local') }}"
+      - "{{ openshift_master_default_subdomain }}"
+      - "*.{{ openshift_master_default_subdomain }}"
       cert: "{{ openshift_master_config_dir ~ '/openshift-router.crt' }}"
       key: "{{ openshift_master_config_dir ~ '/openshift-router.key' }}"
     with_items: "{{ openshift_hosted_routers }}"
