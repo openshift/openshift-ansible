@@ -1,8 +1,4 @@
 ---
-- name: Ensure lib_openshift modules are available
-  include_role:
-    role: lib_openshift
-
 - name: Ensure OpenShift facts module is available
   include_role:
     role: openshift_facts

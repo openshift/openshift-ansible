@@ -14,7 +14,7 @@
       msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
 
   - name: bring lib_openshift into scope
-    include_role:
+    import_role:
       name: lib_openshift
 
   - name: fetch masters

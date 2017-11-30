@@ -14,8 +14,9 @@
 
   pre_tasks:
   - name: Load lib_openshift modules
-    include_role:
+    import_role:
       name: lib_openshift
+
   - name: Collect all routers
     oc_obj:
       state: list
