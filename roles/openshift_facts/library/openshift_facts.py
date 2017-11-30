@@ -761,16 +761,21 @@ def set_version_facts_if_unset(facts):
             version_gte_3_6 = version >= LooseVersion('3.6')
             version_gte_3_7 = version >= LooseVersion('3.7')
             version_gte_3_8 = version >= LooseVersion('3.8')
+            version_gte_3_9 = version >= LooseVersion('3.9')
         else:
             # 'Latest' version is set to True, 'Next' versions set to False
             version_gte_3_6 = True
             version_gte_3_7 = True
             version_gte_3_8 = False
+            version_gte_3_9 = False
         facts['common']['version_gte_3_6'] = version_gte_3_6
         facts['common']['version_gte_3_7'] = version_gte_3_7
         facts['common']['version_gte_3_8'] = version_gte_3_8
+        facts['common']['version_gte_3_9'] = version_gte_3_9
 
-        if version_gte_3_8:
+        if version_gte_3_9:
+            examples_content_version = 'v3.9'
+        elif version_gte_3_8:
             examples_content_version = 'v3.8'
         elif version_gte_3_7:
             examples_content_version = 'v3.7'
