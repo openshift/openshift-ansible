@@ -79,10 +79,19 @@ def build_inventory():
 
         public_v4 = server.public_v4 or server.private_v4
         if public_v4:
-            hostvars['public_v4'] = public_v4
+            hostvars['public_v4'] = server.public_v4
+            hostvars['openshift_public_ip'] = server.public_v4
         # TODO(shadower): what about multiple networks?
         if server.private_v4:
             hostvars['private_v4'] = server.private_v4
+            # NOTE(shadower): Yes, we set both hostname and IP to the private
+            # IP address for each node. OpenStack doesn't resolve nodes by
+            # name at all, so using a hostname here would require an internal
+            # DNS which would complicate the setup and potentially introduce
+            # performance issues.
+            hostvars['openshift_ip'] = server.private_v4
+            hostvars['openshift_hostname'] = server.private_v4
+        hostvars['openshift_public_hostname'] = server.name
 
         node_labels = server.metadata.get('node_labels')
         if node_labels:
