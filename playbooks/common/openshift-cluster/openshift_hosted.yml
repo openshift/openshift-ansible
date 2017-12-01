@@ -21,9 +21,6 @@
 
 - include: cockpit-ui.yml
 
-- include: openshift_prometheus.yml
-  when: openshift_hosted_prometheus_deploy | default(False) | bool
-
 - include: install_docker_gc.yml
   when:
   - openshift_use_crio | default(False) | bool
