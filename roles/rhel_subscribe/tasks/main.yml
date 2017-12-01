@@ -4,10 +4,10 @@
 #       to make it able to enable repositories
 
 - set_fact:
-    rhel_subscription_pool: "{{ lookup('env', 'rhel_subscription_pool') | default(rhsub_pool | default('Red Hat OpenShift Container Platform, Premium*'), True) }}"
-    rhel_subscription_user: "{{ lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(omit, True), True) }}"
-    rhel_subscription_pass: "{{ lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(omit, True), True) }}"
-    rhel_subscription_server: "{{ lookup('env', 'rhel_subscription_server') | default(rhsub_server | default(omit, True), True) }}"
+    rhel_subscription_pool: "{{ lookup('env', 'rhel_subscription_pool') | default(rhsub_pool | default('Red Hat OpenShift Container Platform, Premium*')) }}"
+    rhel_subscription_user: "{{ lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(omit, True)) }}"
+    rhel_subscription_pass: "{{ lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(omit, True)) }}"
+    rhel_subscription_server: "{{ lookup('env', 'rhel_subscription_server') | default(rhsub_server | default(omit, True)) }}"
 
 - fail:
     msg: "This role is only supported for Red Hat hosts"
