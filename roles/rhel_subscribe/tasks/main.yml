@@ -3,23 +3,17 @@
 #       to make it able to attach to a pool
 #       to make it able to enable repositories
 
-- set_fact:
-    rhel_subscription_pool: "{{ lookup('env', 'rhel_subscription_pool') | default(rhsub_pool | default('Red Hat OpenShift Container Platform, Premium*')) }}"
-    rhel_subscription_user: "{{ lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(omit, True)) }}"
-    rhel_subscription_pass: "{{ lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(omit, True)) }}"
-    rhel_subscription_server: "{{ lookup('env', 'rhel_subscription_server') | default(rhsub_server | default(omit, True)) }}"
-
 - fail:
     msg: "This role is only supported for Red Hat hosts"
   when: ansible_distribution != 'RedHat'
 
 - fail:
-    msg: Either rhsub_user or the rhel_subscription_user env variable are required for this role.
-  when: rhel_subscription_user is not defined
+    msg: The rhsub_user variable is required for this role.
+  when: rhsub_user is not defined or not rhsub_user
 
 - fail:
-    msg: Either rhsub_pass or the rhel_subscription_pass env variable are required for this role.
-  when: rhel_subscription_pass is not defined
+    msg: The rhsub_pass variable is required for this role.
+  when: rhsub_pass is not defined or not rhsub_pass
 
 - name: Detecting Atomic Host Operating System
   stat:
@@ -27,10 +21,10 @@
   register: ostree_booted
 
 - name: Satellite preparation
-  command: "rpm -Uvh http://{{ rhel_subscription_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+  command: "rpm -Uvh http://{{ rhsub_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
   args:
     creates: /etc/rhsm/ca/katello-server-ca.pem
-  when: rhel_subscription_server is defined and rhel_subscription_server
+  when: rhsub_server is defined and rhsub_server
 
 - name: Install Red Hat Subscription manager
   yum:
@@ -39,26 +33,26 @@
 
 - name: RedHat subscriptions
   redhat_subscription:
-    username: "{{ rhel_subscription_user }}"
-    password: "{{ rhel_subscription_pass }}"
+    username: "{{ rhsub_user }}"
+    password: "{{ rhsub_pass }}"
   register: rh_subscription
   until: rh_subscription | succeeded
 
 - name: Retrieve the OpenShift Pool ID
-  command: subscription-manager list --available --matches="{{ rhel_subscription_pool }}" --pool-only
+  command: subscription-manager list --available --matches="{{ rhsub_pool }}" --pool-only
   register: openshift_pool_id
   until: openshift_pool_id | succeeded
   changed_when: False
 
 - name: Determine if OpenShift Pool Already Attached
-  command: subscription-manager list --consumed --matches="{{ rhel_subscription_pool }}" --pool-only
+  command: subscription-manager list --consumed --matches="{{ rhsub_pool }}" --pool-only
   register: openshift_pool_attached
   until: openshift_pool_attached | succeeded
   changed_when: False
   when: openshift_pool_id.stdout == ''
 
 - fail:
-    msg: "Unable to find pool matching {{ rhel_subscription_pool }} in available or consumed pools"
+    msg: "Unable to find pool matching {{ rhsub_pool }} in available or consumed pools"
   when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
 
 - name: Attach to OpenShift Pool
