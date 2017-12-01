@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.10
+Version:        3.7.11
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Dec 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.11-1
+- papr: use new PAPR_PULL_TARGET_BRANCH (jlebon@redhat.com)
+- papr: auto-detect image tag to use and bump to f27 (jlebon@redhat.com)
+- Bug 1514417 - Adding correct advertise-client-urls (shawn.hurley21@gmail.com)
+- Bug 1512793- Fix idempotence issues in ASB deploy (fabian@fabianism.us)
+
 * Fri Dec 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.10-1
 - add nfs storage type (sdodson@redhat.com)
 - Update prometheus to 2.0.0 GA (zgalor@redhat.com)
