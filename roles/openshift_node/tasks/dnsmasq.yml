@@ -13,6 +13,8 @@
 - name: Install dnsmasq
   package: name=dnsmasq state=installed
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 - name: ensure origin/node directory exists
   file:

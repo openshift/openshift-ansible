@@ -6,6 +6,8 @@
   when: not etcd_is_atomic | bool
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  register: result
+  until: result | success
 
 - file:
     path: "{{ item }}"

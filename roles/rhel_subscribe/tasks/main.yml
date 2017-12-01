@@ -36,6 +36,8 @@
   yum:
     name: subscription-manager
     state: present
+  register: result
+  until: result | success
 
 - name: RedHat subscriptions
   redhat_subscription:

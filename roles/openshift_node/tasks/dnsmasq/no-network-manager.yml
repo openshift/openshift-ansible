@@ -7,5 +7,7 @@
     name: NetworkManager
     state: present
   notify: restart NetworkManager
+  register: result
+  until: result | success
 
 - include_tasks: network-manager.yml

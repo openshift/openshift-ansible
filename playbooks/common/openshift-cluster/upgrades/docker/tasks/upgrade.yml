@@ -41,6 +41,8 @@
 
 - name: Upgrade Docker
   package: name=docker{{ '-' + docker_version }} state=present
+  register: result
+  until: result | success
 
 - include: restart.yml
   when: not skip_docker_restart | default(False) | bool

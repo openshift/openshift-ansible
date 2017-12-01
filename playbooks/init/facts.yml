@@ -84,6 +84,8 @@
       - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - yum-utils
+      register: result
+      until: result | success
 
     - name: Ensure various deps for running system containers are installed
       package:
@@ -100,6 +102,8 @@
         or (openshift_use_openvswitch_system_container | default(False)) | bool
         or (openshift_use_node_system_container | default(False)) | bool
         or (openshift_use_master_system_container | default(False)) | bool
+      register: result
+      until: result | success
 
   - name: Gather Cluster facts and set is_containerized if needed
     openshift_facts:

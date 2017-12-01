@@ -4,6 +4,8 @@
     name: "etcd{{ '-' + etcd_version if etcd_version is defined else '' }}"
     state: present
   when: not etcd_is_containerized | bool
+  register: result
+  until: result | success
 
 - name: Check status of etcd certificates
   stat:
