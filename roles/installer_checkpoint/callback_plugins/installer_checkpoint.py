@@ -74,7 +74,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_glusterfs': {
                 'title': 'GlusterFS Install',
-                'playbook': 'playbooks/byo/openshift-glusterfs/config.yml'
+                'playbook': 'playbooks/openshift-glusterfs/config.yml'
             },
             'installer_phase_hosted': {
                 'title': 'Hosted Install',
