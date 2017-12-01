@@ -21,7 +21,7 @@
 
 - name: add new master to masters group
   add_host:
-    groups: "masters,etcd,nodes"
+    groups: "{{ openshift_aws_masters_groups }}"
     name: "{{ item.public_dns_name }}"
     hostname: "{{ openshift_aws_clusterid }}-master-{{ item.id[:-5] }}"
   with_items: "{{ instancesout.instances }}"

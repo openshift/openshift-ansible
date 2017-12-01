@@ -9,6 +9,7 @@
 
 - name: debug node config
   debug: var=configout
+  run_once: true
 
 - when:
   - configout.results.results.0 == {} or (configout.results.results.0 != {} and openshift_node_group_edits|length > 0)
@@ -24,6 +25,7 @@
       dest: "{{ mktempout.stdout }}/node-config.yaml"
     when:
     - configout.results.results.0 == {}
+    run_once: true
 
   - name: lay down the config from the existing configmap
     copy:
@@ -31,6 +33,7 @@
       dest: "{{ mktempout.stdout }}/node-config.yaml"
     when:
     - configout.results.results.0 != {}
+    run_once: true
 
   - name: "specialize the generated configs for {{ openshift_node_group_name }}"
     yedit:
@@ -42,6 +45,7 @@
     run_once: true
 
   - debug: var=yeditout
+    run_once: true
 
   - name: create node-config.yaml configmap
     oc_configmap:

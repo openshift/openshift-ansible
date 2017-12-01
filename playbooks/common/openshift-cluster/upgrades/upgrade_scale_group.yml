@@ -1,0 +1,59 @@
+---
+- name: create new scale group
+  hosts: localhost
+  tasks:
+  - name: build upgrade scale groups
+    include_role:
+      name: openshift_aws
+      tasks_from: upgrade_node_group.yml
+
+  - fail:
+      msg: "Ensure that new scale groups were provisioned before proceeding to update."
+    when:
+    - "'oo_sg_new_nodes' not in groups or groups.oo_sg_new_nodes|length == 0"
+
+- name: initialize upgrade bits
+  include: init.yml
+
+- name: Drain and upgrade nodes
+  hosts: oo_sg_current_nodes
+  # This var must be set with -e on invocation, as it is not a per-host inventory var
+  # and is evaluated early. Values such as "20%" can also be used.
+  serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
+  max_fail_percentage: "{{ openshift_upgrade_nodes_max_fail_percentage | default(0) }}"
+
+  pre_tasks:
+  - name: Load lib_openshift modules
+    include_role:
+      name: ../roles/lib_openshift
+
+  # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
+  # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
+  # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
+  - name: Mark node unschedulable
+    oc_adm_manage_node:
+      node: "{{ openshift.node.nodename | lower }}"
+      schedulable: False
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    retries: 10
+    delay: 5
+    register: node_unschedulable
+    until: node_unschedulable|succeeded
+
+  - name: Drain Node for Kubelet upgrade
+    command: >
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    register: l_upgrade_nodes_drain_result
+    until: not l_upgrade_nodes_drain_result | failed
+    retries: 60
+    delay: 60
+
+# Alright, let's clean up!
+- name: clean up the old scale group
+  hosts: localhost
+  tasks:
+  - name: clean up scale group
+    include_role:
+      name: openshift_aws
+      tasks_from: remove_scale_group.yml

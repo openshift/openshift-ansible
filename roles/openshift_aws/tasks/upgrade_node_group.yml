@@ -1,0 +1,16 @@
+---
+- fail:
+    msg: 'Please ensure the current_version and new_version variables are not the same.'
+  when:
+  - openshift_aws_current_version == openshift_aws_new_version
+
+- include: provision_nodes.yml
+
+- include: accept_nodes.yml
+
+- include: setup_scale_group_facts.yml
+
+- include: setup_master_group.yml
+  vars:
+    # we do not set etcd here as its limited to 1 or 3
+    openshift_aws_masters_groups: masters,nodes
