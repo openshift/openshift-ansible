@@ -14,26 +14,26 @@
 cluster:
   hosts:
     - name: ocp-master
-      distro: fedora/25/atomic
+      distro: fedora/27/atomic
+      specs:
+        ram: 4096
     - name: ocp-node1
-      distro: fedora/25/atomic
+      distro: fedora/27/atomic
     - name: ocp-node2
-      distro: fedora/25/atomic
+      distro: fedora/27/atomic
   container:
-    image: fedora:25
+    image: registry.fedoraproject.org/fedora:27
 
 packages:
   - gcc
+  - git
   - python-pip
   - python-devel
   - libffi-devel
   - openssl-devel
   - redhat-rpm-config
 
-context: 'fedora/25/atomic'
-
-env:
-  OPENSHIFT_IMAGE_TAG: v3.6.0-alpha.1
+context: 'fedora/27/atomic'
 
 tests:
   - ./.papr.sh
