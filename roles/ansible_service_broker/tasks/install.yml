@@ -147,64 +147,41 @@
 - set_fact:
     service_ca_crt: "{{ asb_client_secret.results.results.0.data['service-ca.crt'] }}"
 
-# Using oc_obj because oc_service doesn't seem to allow annotations
-# TODO: Extend oc_service to allow annotations
 - name: create ansible-service-broker service
-  oc_obj:
+  oc_service:
     name: asb
     namespace: openshift-ansible-service-broker
-    state: present
-    kind: Service
-    content:
-      path: /tmp/asbsvcout
-      data:
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: asb
-          namespace: openshift-ansible-service-broker
-          labels:
-            app: openshift-ansible-service-broker
-            service: asb
-          annotations:
-            service.alpha.openshift.io/serving-cert-secret-name: asb-tls
-        spec:
-          ports:
-            - name: port-1338
-              port: 1338
-              targetPort: 1338
-              protocol: TCP
-          selector:
-            app: openshift-ansible-service-broker
-            service: asb
+    labels:
+      app: openshift-ansible-service-broker
+      service: asb
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: asb-tls
+    ports:
+      - name: port-1338
+        port: 1338
+        targetPort: 1338
+        protocol: TCP
+    selector:
+      app: openshift-ansible-service-broker
+      service: asb
 
 - name: create asb-etcd service
-  oc_obj:
+  oc_service:
     name: asb-etcd
     namespace: openshift-ansible-service-broker
-    state: present
-    kind: Service
-    content:
-      path: /tmp/asbetcdsvcout
-      data:
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: asb-etcd
-          labels:
-            app: etcd
-            service: asb-etcd
-          annotations:
-            service.alpha.openshift.io/serving-cert-secret-name: etcd-tls
-        spec:
-          ports:
-            - name: port-2379
-              port: 2379
-              targetPort: 2379
-              protocol: TCP
-          selector:
-            app: etcd
-            service: asb-etcd
+    labels:
+      app: etcd
+      service: asb-etcd
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: etcd-tls
+    ports:
+      - name: port-2379
+        port: 2379
+        targetPort: 2379
+        protocol: TCP
+    selector:
+      app: etcd
+      service: asb-etcd
 
 - name: create route for ansible-service-broker service
   oc_route:
@@ -219,28 +196,25 @@
     tls_termination: Reencrypt
 
 - name: create persistent volume claim for etcd
-  oc_obj:
+  oc_pvc:
     name: etcd
     namespace: openshift-ansible-service-broker
-    state: present
-    kind: PersistentVolumeClaim
-    content:
-      path: /tmp/pvcout
-      data:
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: etcd
-          namespace: openshift-ansible-service-broker
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
+    access_modes:
+      - ReadWriteOnce
+    volume_capacity: 1G
+
+- name: Search for existing Ansible Service Broker deployment config
+  oc_obj:
+    name: asb
+    namespace: openshift-ansible-service-broker
+    kind: DeploymentConfig
+    state: list
+  register: asb_dc
 
 - name: Create Ansible Service Broker deployment config
+  when: asb_dc.results.results.0 | length == 0
   oc_obj:
+    force: yes
     name: asb
     namespace: openshift-ansible-service-broker
     state: present
@@ -315,9 +289,18 @@
                   secret:
                     secretName: broker-etcd-auth-secret
 
-- name: Create asb-etcd deployment config
+- name: Search for existing Ansible Service Broker etcd deployment config
   oc_obj:
-    name: etcd
+    name: asb-etcd
+    namespace: openshift-ansible-service-broker
+    kind: DeploymentConfig
+    state: list
+  register: asb_etcd_dc
+
+- name: Create asb-etcd deployment config
+  when: asb_etcd_dc.results.results.0 | length == 0
+  oc_obj:
+    name: asb-etcd
     namespace: openshift-ansible-service-broker
     state: present
     kind: DeploymentConfig

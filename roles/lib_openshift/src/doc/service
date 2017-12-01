@@ -39,6 +39,12 @@ options:
     required: false
     default: default
     aliases: []
+  annotations:
+    description:
+    - Annotations to apply to the object
+    required: false
+    default: None
+    aliases: []
   selector:
     description:
     - The selector to apply when filtering for services.
