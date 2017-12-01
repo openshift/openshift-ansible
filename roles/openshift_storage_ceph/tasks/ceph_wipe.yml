@@ -1,0 +1,140 @@
+---
+# The following two checks are handling the case where nothing is running but wipe is called
+# If there is a namespace we assume something is running already
+- name: check if the rook-ceph-system namespace already exists
+  oc_obj:
+    namespace: ""
+    kind: namespace
+    name: rook-ceph-system
+    state: list
+  register: rook_operator_ns
+  ignore_errors: true  # the failure might be valid during the initial deployment if the 'rook-ceph-system' namespace does not exist
+
+- name: check if the rook-ceph namespace already exists
+  oc_obj:
+    namespace: ""
+    kind: namespace
+    name: rook-ceph
+    state: list
+  register: rook_ceph_ns
+  ignore_errors: true  # the failure might be valid during the initial deployment if the 'rook-ceph' namespace does not exist
+
+# TODO improve this when openshift_storage_ceph_mon_count > 1
+- name: find out where ceph-mon pods are running
+  oc_obj:
+    namespace: rook-ceph
+    kind: deployment
+    name: rook-ceph-mon-a
+    state: list
+  register: ceph_mon
+  when: rook_ceph_ns.results.get('stderr', [])|length == 0
+
+- name: set_fact ceph_mon_host
+  set_fact:
+    ceph_mon_host: "{{ ceph_mon.results.results[0].spec.template.spec.nodeSelector['kubernetes.io/hostname'] }}"
+  when: rook_ceph_ns.results.get('stderr', [])|length == 0
+
+- name: delete ceph cluster
+  oc_obj:
+    namespace: rook-ceph
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    state: absent
+  with_items:
+    - kind: "serviceaccount"
+      name: "rook-ceph-osd"
+    - kind: "serviceaccount"
+      name: "rook-ceph-mgr"
+    - kind: "role.rbac.authorization.k8s.io"
+      name: "rook-ceph-osd"
+    - kind: "role.rbac.authorization.k8s.io"
+      name: "rook-ceph-mgr-system"
+    - kind: "role.rbac.authorization.k8s.io"
+      name: "rook-ceph-mgr"
+    - kind: "rolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-cluster-mgmt"
+    - kind: "rolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-osd"
+    - kind: "rolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-mgr"
+    - kind: "rolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-mgr-system"
+    - kind: "rolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-mgr-cluster"
+    - kind: "cephcluster.ceph.rook.io"
+      name: "rook-ceph"
+  when: rook_ceph_ns.results.get('stderr', [])|length == 0
+
+- name: delete rook-ceph namespace
+  oc_obj:
+    kind: namespace
+    name: rook-ceph
+    namespace: rook-ceph
+    state: absent
+
+- name: remove rook scc
+  oc_obj:
+    state: absent
+    namespace: rook-ceph
+    kind: SecurityContextConstraints
+    name: rook-ceph
+    files:
+      - "{{ tmpdir }}/rook-scc.yml"
+  delegate_to: "{{ groups.oo_masters_to_config.0 }}"
+  run_once: true
+  when: rook_ceph_ns.results.get('stderr', [])|length == 0
+
+- name: delete rook operator
+  oc_obj:
+    namespace: rook-ceph-system
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    state: absent
+  with_items:
+    - kind: "customresourcedefinition.apiextensions.k8s.io"
+      name: "cephclusters.ceph.rook.io"
+    - kind: "customresourcedefinition.apiextensions.k8s.io"
+      name: "cephfilesystems.ceph.rook.io"
+    - kind: "customresourcedefinition.apiextensions.k8s.io"
+      name: "cephobjectstores.ceph.rook.io"
+    - kind: "customresourcedefinition.apiextensions.k8s.io"
+      name: "cephobjectstoreusers.ceph.rook.io"
+    - kind: "customresourcedefinition.apiextensions.k8s.io"
+      name: "cephblockpools.ceph.rook.io"
+    - kind: "customresourcedefinition.apiextensions.k8s.io"
+      name: "volumes.rook.io"
+    - kind: "clusterrole.rbac.authorization.k8s.io"
+      name: "rook-ceph-cluster-mgmt"
+    - kind: "role.rbac.authorization.k8s.io"
+      name: "rook-ceph-system"
+    - kind: "clusterrole.rbac.authorization.k8s.io"
+      name: "rook-ceph-global"
+    - kind: "clusterrole.rbac.authorization.k8s.io"
+      name: "rook-ceph-mgr-cluster"
+    - kind: "serviceaccount"
+      name: "rook-ceph-system"
+    - kind: "rolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-system"
+    - kind: "clusterrolebinding.rbac.authorization.k8s.io"
+      name: "rook-ceph-global"
+    - kind: "deployment.apps"
+      name: "rook-ceph-operator"
+  when: rook_operator_ns.results.get('stderr', [])|length == 0
+
+- name: delete rook-ceph-system namespace
+  oc_obj:
+    kind: namespace
+    name: rook-ceph-system
+    namespace: rook-ceph-system
+    state: absent
+
+- name: delete pre-existing ceph config
+  file:
+    path: "{{ openshift_storage_ceph_dirs }}"
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ ceph_mon_host }}"
+  when: rook_ceph_ns.results.get('stderr', [])|length == 0
+
+# TODO remove fw rules

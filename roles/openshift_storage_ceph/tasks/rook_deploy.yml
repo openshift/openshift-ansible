@@ -1,0 +1,21 @@
+---
+- name: create rook operator
+  oc_obj:
+    namespace: rook-ceph-system
+    kind: deployment
+    name: rook-ceph-operator
+    state: present
+    files:
+      - "{{ tmpdir }}/rook-operator.yml"
+
+- name: wait for the rook operator to be ready
+  oc_obj:
+    namespace: rook-ceph-system
+    kind: deployment
+    name: rook-ceph-operator
+    state: list
+  register: rook_operator
+  until:
+    - (rook_operator.results.results[0].status.readyReplicas | default(0) == rook_operator.results.results[0].spec.replicas | default(-1))
+  delay: 10
+  retries: "{{ (openshift_storage_ceph_timeout | int / 30) | int }}"

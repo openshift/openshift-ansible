@@ -17,6 +17,9 @@
 - import_playbook: ../../openshift-glusterfs/private/new_install.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
+- import_playbook: ../../openshift-ceph/private/config.yml
+  when: openshift_storage_ceph_install | default(false) | bool
+
 - import_playbook: ../../openshift-hosted/private/config.yml
 
 - import_playbook: ../../openshift-monitoring/private/config.yml

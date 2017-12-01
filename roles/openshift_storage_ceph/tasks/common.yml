@@ -1,0 +1,13 @@
+---
+- name: copy rook operator and scc templates
+  copy:
+    src: "{{ item }}"
+    dest: "{{ tmpdir }}/{{ item }}"
+  with_items:
+    - rook-operator.yml
+    - rook-scc.yml
+
+- name: generate minimal ceph cluster crd
+  template:
+    src: "cluster.yml.j2"
+    dest: "{{ mktemp.stdout }}/cluster.yml"

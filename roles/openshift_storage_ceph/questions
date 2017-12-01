@@ -1,0 +1,7 @@
+- sequencing for the mon and the keys in configmap:
+
+1. ansible can create the keys and put them in configMap
+2. inside the container we fetch configmap for the keys
+
+selinux issues if we run the deployment of the rest of the mons via manager?
+not possible to run selinux command on the host so I think we need to deploy 3 mons and 1 mgr from the get go

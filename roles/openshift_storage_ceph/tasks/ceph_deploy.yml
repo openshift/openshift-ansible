@@ -1,0 +1,35 @@
+---
+- name: create minimal ceph cluster
+  oc_obj:
+    namespace: ""
+    kind: pod
+    name: rook-ceph
+    state: present
+    files:
+      - "{{ tmpdir }}/cluster.yml"
+
+- name: wait for the initial ceph-mon to be ready
+  oc_obj:
+    namespace: rook-ceph
+    kind: deployment
+    name: rook-ceph-mon-a
+    state: list
+  register: ceph_mon
+  until:
+    - ceph_mon.results.results[0].status|default({})
+    - (ceph_mon.results.results[0].status.availableReplicas | default(0) == ceph_mon.results.results[0].spec.replicas | default(openshift_storage_ceph_mon_count))
+  delay: 10
+  retries: "{{ (openshift_storage_ceph_timeout | int / 30) | int }}"
+
+- name: wait for the initial ceph-mgr to be ready
+  oc_obj:
+    namespace: rook-ceph
+    kind: deployment
+    name: rook-ceph-mgr-a
+    state: list
+  register: ceph_mgr
+  until:
+    - ceph_mgr.results.results[0].status|default({})
+    - (ceph_mgr.results.results[0].status.availableReplicas | default(0) == ceph_mgr.results.results[0].spec.replicas | default(openshift_storage_ceph_mon_count))
+  delay: 10
+  retries: "{{ (openshift_storage_ceph_timeout | int / 30) | int }}"

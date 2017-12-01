@@ -1,0 +1,69 @@
+---
+- name: create temp directory
+  command: mktemp -d /tmp/openshift-ceph-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+  check_mode: no
+
+- name: copy the admin client config
+  copy:
+    src: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    dest: "{{ mktemp.stdout }}/admin.kubeconfig"
+    remote_src: yes
+
+- name: include ceph_facts.yml
+  include_tasks: ceph_facts.yml
+
+- name: include common.yml
+  include_tasks: common.yml
+
+- name: include ceph_wipe.yml
+  include_tasks: ceph_wipe.yml
+  when: openshift_storage_ceph_wipe|default(False)
+
+- name: add rook scc
+  oc_obj:
+    state: present
+    namespace: ""
+    kind: SecurityContextConstraints
+    name: rook-ceph
+    files:
+      - "{{ tmpdir }}/rook-scc.yml"
+  delegate_to: "{{ groups.oo_masters_to_config.0 }}"
+  run_once: true
+
+# if there is a namespace we assume something is running already
+- name: check if the rook-ceph-system namespace already exists
+  oc_obj:
+    namespace: ""
+    kind: namespace
+    name: rook-ceph-system
+    state: list
+  register: rook_operator_ns
+  ignore_errors: true  # the failure might be valid during the initial deployment if the 'rook-ceph-system' namespace does not exist
+
+- name: include rook_deploy.yml
+  include_tasks: rook_deploy.yml
+  when:
+    - rook_operator_ns.results.get('stderr', [])|length > 0
+
+- name: check if the rook-ceph namespace already exists
+  oc_obj:
+    namespace: ""
+    kind: namespace
+    name: rook-ceph
+    state: list
+  register: rook_ceph_ns
+  ignore_errors: true  # the failure might be valid during the initial deployment if the 'rook-ceph' namespace does not exist
+
+- name: include ceph_deploy.yml
+  include_tasks: ceph_deploy.yml
+  when:
+    - rook_ceph_ns.results.get('stderr', [])|length > 0
+
+- name: delete temp directory
+  file:
+    name: "{{ tmpdir }}"
+    state: absent
+  changed_when: False
+  check_mode: no

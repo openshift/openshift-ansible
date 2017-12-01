@@ -1,0 +1,12 @@
+---
+openshift_storage_ceph_timeout: 600
+openshift_storage_ceph_mon_count: 1
+openshift_storage_ceph_use_host_network: False
+openshift_storage_ceph_dirs: "/var/lib/rook"
+openshift_storage_ceph_dashboard: True
+openshift_storage_ceph_dashboard_url_prefix: "/ceph-dashboard"
+openshift_storage_ceph_image: "{{ openshift_storage_ceph_image_dict[openshift_deployment_type] }}"
+openshift_storage_ceph_image_dict:
+  origin: "docker.io/ceph/ceph:v13"
+  openshift-enterprise: "{{ 'registry.redhat.io/rhceph/rhceph-3-rhel7:latest' | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
+openshift_storage_ceph_placement_role: "node-role.kubernetes.io/compute"

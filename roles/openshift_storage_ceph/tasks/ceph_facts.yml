@@ -1,0 +1,4 @@
+---
+- name: set_fact tmpdir
+  set_fact:
+    tmpdir: "{{ mktemp.stdout }}"
