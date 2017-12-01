@@ -1,0 +1,6 @@
+---
+- include: ../init/main.yml
+
+- include: private/redeploy-certificates.yml
+
+- include: private/restart.yml

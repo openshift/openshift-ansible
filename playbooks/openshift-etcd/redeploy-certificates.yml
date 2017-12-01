@@ -1,0 +1,10 @@
+---
+- include: ../init/main.yml
+
+- include: private/redeploy-certificates.yml
+
+- include: private/restart.yml
+  vars:
+    g_etcd_certificates_expired: "{{ ('expired' in (hostvars | oo_select_keys(groups['etcd']) | oo_collect('check_results.check_results.etcd') | oo_collect('health'))) | bool }}"
+
+- include: ../openshift-master/private/restart.yml
