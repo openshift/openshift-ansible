@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.9
+Version:        3.7.10
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,37 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Dec 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.10-1
+- add nfs storage type (sdodson@redhat.com)
+- Update prometheus to 2.0.0 GA (zgalor@redhat.com)
+- Fix openshift_env fact creation within openshift_facts. (abutcher@redhat.com)
+- fix type in authroize (jchaloup@redhat.com)
+- inventory: Add example for service catalog vars (smilner@redhat.com)
+- Add v3.7 a-o-i upgrade version mappings (sdodson@redhat.com)
+- 3.7 quick installer support (sdodson@redhat.com)
+- GlusterFS: Remove extraneous line from glusterblock template
+  (jarrpa@redhat.com)
+- Place-holder for prerequisites.yml (mgugino@redhat.com)
+- Refactor etcd image (mgugino@redhat.com)
+- Move openshift-prometheus out of openshift-hosted (rteague@redhat.com)
+- registry-console: align image and check (lmeyer@redhat.com)
+- registry-console template 3.7 consistency (lmeyer@redhat.com)
+- registry-console template 3.6 consistency (lmeyer@redhat.com)
+- Only remove empty keys from env if env exists (sdodson@redhat.com)
+- GlusterFS: Add configuration for auto creating block-hosting volumes
+  (jarrpa@redhat.com)
+- Upgrade to etcd 3.2 (sdodson@redhat.com)
+- Allow cluster IP for docker-registry service to be set (hansmi@vshn.ch)
+- Bug 1510496 - logging: honor ES PVC size (jwozniak@redhat.com)
+- Fixing islnk. (kwoodson@redhat.com)
+- Fix stale data in openshift_facts for logging (mgugino@redhat.com)
+- Run registry auth after docker restart (mgugino@redhat.com)
+- Alternative method to create docker registry auth creds (mgugino@redhat.com)
+- GlusterFS: Add gluster-s3 functionality (jarrpa@redhat.com)
+- GlusterFS: Add glusterblock functionality (jarrpa@redhat.com)
+- GlusterFS: Update heketi templates for latest version (jarrpa@redhat.com)
+- GlusterFS: Specify resource requests (jarrpa@redhat.com)
+
 * Wed Nov 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.9-1
 - 
 
