@@ -54,8 +54,8 @@
   - role: rhel_subscribe
     when:
     - ansible_distribution == "RedHat"
-    - lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(False, True), True)
-    - lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(False, True), True)
+    - rhsub_user | default(False)
+    - rhsub_pass | default(False)
 
   tasks:
   - name: Install dependencies
