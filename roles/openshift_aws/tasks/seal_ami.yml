@@ -1,6 +1,6 @@
 ---
 - name: fetch newly created instances
-  ec2_remote_facts:
+  ec2_instance_facts:
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:Name": "{{ openshift_aws_base_ami_name }}"
@@ -12,7 +12,7 @@
 
 - name: bundle ami
   ec2_ami:
-    instance_id: "{{ instancesout.instances.0.id }}"
+    instance_id: "{{ instancesout.instances.0.instance_id }}"
     region: "{{ openshift_aws_region }}"
     state: present
     description: "This was provisioned {{ ansible_date_time.iso8601 }}"
@@ -46,4 +46,4 @@
   ec2:
     state: absent
     region: "{{ openshift_aws_region }}"
-    instance_ids: "{{ instancesout.instances.0.id }}"
+    instance_ids: "{{ instancesout.instances.0.instance_id }}"
