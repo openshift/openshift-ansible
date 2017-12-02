@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.0
-Release:        0.13.0%{?dist}
+Version:        3.8.1
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,55 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Dec 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.1-1
+- Fix glusterfs checkpoint info (rteague@redhat.com)
+- storage_glusterfs: fix typo (lmeyer@redhat.com)
+- retry package operations (lmeyer@redhat.com)
+- Do not escalate privileges in jks generation tasks (iacopo.rozzo@amadeus.com)
+- Initial upgrade for scale groups. (kwoodson@redhat.com)
+- Update the doc text (tomas@sedovic.cz)
+- Fix no_log warnings for custom module (mgugino@redhat.com)
+- Remove openshift_facts project_cfg_facts (mgugino@redhat.com)
+- Remove dns_port fact (mgugino@redhat.com)
+- Bug 1512793- Fix idempotence issues in ASB deploy (fabian@fabianism.us)
+- Remove unused task file from etcd role (rteague@redhat.com)
+- fix type in authroize (jchaloup@redhat.com)
+- Use IP addresses for OpenStack nodes (tomas@sedovic.cz)
+- Update prometheus to 2.0.0 GA (zgalor@redhat.com)
+- remove schedulable from openshift_facts (mgugino@redhat.com)
+- inventory: Add example for service catalog vars (smilner@redhat.com)
+- Correct usage of include_role (rteague@redhat.com)
+- Remove openshift.common.cli_image (mgugino@redhat.com)
+- Fix openshift_env fact creation within openshift_facts. (abutcher@redhat.com)
+- Combine openshift_node and openshift_node_dnsmasq (mgugino@redhat.com)
+- GlusterFS: Remove extraneous line from glusterblock template
+  (jarrpa@redhat.com)
+- Remove openshift_clock from meta depends (mgugino@redhat.com)
+- Simplify is_master_system_container logic (mgugino@redhat.com)
+- dist.iteritems() no longer exists in Python 3. (jpazdziora@redhat.com)
+- Remove spurrious file committed by error (diego.abelenda@camptocamp.com)
+- Fix name of the service pointed to by hostname
+  (diego.abelenda@camptocamp.com)
+- Missed the default value after the variable name change...
+  (diego.abelenda@camptocamp.com)
+- Change the name of the variable and explicitely document the names
+  (diego.abelenda@camptocamp.com)
+- Allow to set the hostname for routes to prometheus and alertmanager
+  (diego.abelenda@camptocamp.com)
+- Allow openshift_install_examples to be false (michael.fraenkel@gmail.com)
+- Include Deprecation - openshift-service-catalog (rteague@redhat.com)
+- Remove is_openvswitch_system_container from facts (mgugino@redhat.com)
+- Workaround the fact that package state=present with dnf fails for already
+  installed but excluded packages. (jpazdziora@redhat.com)
+- With dnf repoquery and excluded packages, --disableexcludes=all is needed to
+  list the package with --installed. (jpazdziora@redhat.com)
+- Add support for external glusterfs as registry backend (m.judeikis@gmail.com)
+- cri-o: honor additional and insecure registries again (gscrivan@redhat.com)
+- docker: copy Docker metadata to the alternative storage path
+  (gscrivan@redhat.com)
+- Add check for gluterFS DS to stop restarts (m.judeikis@gmail.com)
+- Bug 1514417 - Adding correct advertise-client-urls (shawn.hurley21@gmail.com)
+
 * Thu Nov 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.13.0
 - 
 
