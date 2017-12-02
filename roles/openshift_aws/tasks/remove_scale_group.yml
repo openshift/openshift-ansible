@@ -1,10 +1,13 @@
 ---
+# FIGURE OUT HOW TO REMOVE SCALE GROUPS
+# use openshift_aws_current_asgs??
 - name: fetch the scale groups
   ec2_asg_facts:
     region: "{{ openshift_aws_region }}"
+    name: "^{{ item }}$"
     tags:
-      "{{ {'kubernetes.io/cluster/' ~ openshift_aws_clusterid: openshift_aws_clusterid,
-           'version': openshift_aws_current_version} }}"
+      "{{ {'kubernetes.io/cluster/' ~ openshift_aws_clusterid: openshift_aws_clusterid} }}"
+  with_items: "{{ openshift_aws_current_asgs if openshift_aws_current_asgs != [] else openshift_aws_asgs_to_remove }}"
   register: qasg
 
 - name: remove non-master scale groups
@@ -14,7 +17,7 @@
     name: "{{ item.auto_scaling_group_name }}"
   when: "'master'  not in item.auto_scaling_group_name"
   register: asg_results
-  with_items: "{{ qasg.results }}"
+  with_items: "{{ qasg | json_query('results[*]') | sum(attribute='results', start=[]) }}"
   async: 600
   poll: 0
 

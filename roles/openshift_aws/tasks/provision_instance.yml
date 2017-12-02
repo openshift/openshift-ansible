@@ -27,7 +27,7 @@
       Name: "{{ openshift_aws_base_ami_name }}"
 
 - name: fetch newly created instances
-  ec2_remote_facts:
+  ec2_instance_facts:
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:Name": "{{ openshift_aws_base_ami_name }}"
