@@ -1,0 +1,5 @@
+---
+#
+# Full Control Plane + Nodes Upgrade
+#
+- include: ../../../../common/openshift-cluster/upgrades/v3_9/upgrade.yml
