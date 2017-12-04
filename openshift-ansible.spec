@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.82
+Version:        3.6.173.0.83
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.83-1
+- Update papr on release-3.6 (sdodson@redhat.com)
+- dist.iteritems() no longer exists in Python 3. (jpazdziora@redhat.com)
+- Run registry auth after docker restart (mgugino@redhat.com)
+- Correct usage of include_role (rteague@redhat.com)
+- Add role to configure project request template (hansmi@vshn.ch)
+- Allow cluster IP for docker-registry service to be set (hansmi@vshn.ch)
+- disk_availability check: include submount storage (lmeyer@redhat.com)
+
 * Wed Nov 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.82-1
 - 
 
