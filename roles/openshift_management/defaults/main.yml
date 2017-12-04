@@ -3,6 +3,8 @@
 openshift_management_project: openshift-management
 # Namespace/project description
 openshift_management_project_description: CloudForms Management Engine
+# Number of retries when waiting for the app to start (retried every 30 seconds)
+openshift_management_pod_rollout_retries: 30
 
 ######################################################################
 # BASE TEMPLATE AND DATABASE OPTIONS
