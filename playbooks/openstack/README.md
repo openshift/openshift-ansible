@@ -24,7 +24,7 @@ The OpenStack release must be Newton (for Red Hat OpenStack this is
 version 10) or newer. It must also satisfy these requirements:
 
 * Heat (Orchestration) must be available
-* The deployment image (CentOS 7 or RHEL 7) must be loaded
+* The deployment image (CentOS 7.4 or RHEL 7) must be loaded
 * The deployment flavor must be available to your user
   - `m1.medium` / 4GB RAM + 40GB disk should be enough for testing
   - look at
