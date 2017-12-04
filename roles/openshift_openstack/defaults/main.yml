@@ -4,7 +4,6 @@ openshift_openstack_stack_state: 'present'
 openshift_openstack_ssh_ingress_cidr: 0.0.0.0/0
 openshift_openstack_node_ingress_cidr: 0.0.0.0/0
 openshift_openstack_lb_ingress_cidr: 0.0.0.0/0
-openshift_openstack_bastion_ingress_cidr: 0.0.0.0/0
 openshift_openstack_num_etcd: 0
 openshift_openstack_num_masters: 1
 openshift_openstack_num_nodes: 1
@@ -91,6 +90,4 @@ openshift_openstack_node_volume_size: "{{ openshift_openstack_docker_volume_size
 openshift_openstack_etcd_volume_size: 2
 openshift_openstack_dns_volume_size: 1
 openshift_openstack_lb_volume_size: 5
-openshift_openstack_use_bastion: false
-openshift_openstack_ui_ssh_tunnel: false
 openshift_openstack_ephemeral_volumes: false
