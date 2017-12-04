@@ -1,0 +1,8 @@
+---
+openshift_builddefaults_http_proxy: "{{ openshift_http_proxy | default('') }}"
+openshift_builddefaults_https_proxy: "{{ openshift_https_proxy | default('') }}"
+openshift_builddefaults_no_proxy: "{{ openshift_no_proxy | default('') }}"
+
+openshift_builddefaults_git_http_proxy: "{{ openshift_builddefaults_http_proxy }}"
+openshift_builddefaults_git_https_proxy: "{{ openshift_builddefaults_https_proxy }}"
+openshift_builddefaults_git_no_proxy: "{{ openshift_builddefaults_no_proxy }}"

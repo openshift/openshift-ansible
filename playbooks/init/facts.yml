@@ -117,9 +117,6 @@
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"
         portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
-        http_proxy: "{{ openshift_http_proxy | default(None) }}"
-        https_proxy: "{{ openshift_https_proxy | default(None) }}"
-        no_proxy: "{{ openshift_no_proxy | default(None) }}"
         generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
 
   - name: Set fact of no_proxy_internal_hostnames

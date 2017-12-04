@@ -1467,12 +1467,7 @@ def set_proxy_facts(facts):
 
 
 def set_builddefaults_facts(facts):
-    """ Set build defaults including setting proxy values from http_proxy, https_proxy,
-        no_proxy to the more specific builddefaults and builddefaults_git vars.
-           1. http_proxy, https_proxy, no_proxy
-           2. builddefaults_*
-           3. builddefaults_git_*
-
+    """ Set build defaults
         Args:
             facts(dict): existing facts
         Returns:
@@ -1481,23 +1476,7 @@ def set_builddefaults_facts(facts):
 
     if 'builddefaults' in facts:
         builddefaults = facts['builddefaults']
-        common = facts['common']
-        # Copy values from common to builddefaults
-        if 'http_proxy' not in builddefaults and 'http_proxy' in common:
-            builddefaults['http_proxy'] = common['http_proxy']
-        if 'https_proxy' not in builddefaults and 'https_proxy' in common:
-            builddefaults['https_proxy'] = common['https_proxy']
-        if 'no_proxy' not in builddefaults and 'no_proxy' in common:
-            builddefaults['no_proxy'] = common['no_proxy']
 
-        # Create git specific facts from generic values, if git specific values are
-        # not defined.
-        if 'git_http_proxy' not in builddefaults and 'http_proxy' in builddefaults:
-            builddefaults['git_http_proxy'] = builddefaults['http_proxy']
-        if 'git_https_proxy' not in builddefaults and 'https_proxy' in builddefaults:
-            builddefaults['git_https_proxy'] = builddefaults['https_proxy']
-        if 'git_no_proxy' not in builddefaults and 'no_proxy' in builddefaults:
-            builddefaults['git_no_proxy'] = builddefaults['no_proxy']
         # If we're actually defining a builddefaults config then create admission_plugin_config
         # then merge builddefaults[config] structure into admission_plugin_config
 

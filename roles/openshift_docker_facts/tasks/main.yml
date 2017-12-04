@@ -25,9 +25,6 @@
     docker_log_options: "{{ openshift.docker.log_options | default(omit) }}"
     docker_push_dockerhub: "{{ openshift.docker.disable_push_dockerhub
                                | default(omit) }}"
-    docker_http_proxy: "{{ openshift.common.http_proxy | default(omit) }}"
-    docker_https_proxy: "{{ openshift.common.https_proxy | default(omit) }}"
-    docker_no_proxy: "{{ openshift.common.no_proxy | default(omit) }}"
 
 - set_fact:
     docker_options: "--insecure-registry={{ openshift.docker.hosted_registry_network }} {{ openshift.docker.options | default ('') }}"

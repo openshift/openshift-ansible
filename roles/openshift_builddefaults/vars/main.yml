@@ -4,22 +4,22 @@ builddefaults_yaml:
     configuration:
       apiVersion: v1
       kind: BuildDefaultsConfig
-      gitHTTPProxy: "{{ openshift.builddefaults.git_http_proxy | default('', true) }}"
-      gitHTTPSProxy: "{{ openshift.builddefaults.git_https_proxy | default('', true) }}"
-      gitNoProxy: "{{ openshift.builddefaults.git_no_proxy | default('', true) }}"
+      gitHTTPProxy: "{{ openshift_builddefaults_git_http_proxy }}"
+      gitHTTPSProxy: "{{ openshift_builddefaults_git_https_proxy }}"
+      gitNoProxy: "{{ openshift_builddefaults_git_no_proxy }}"
       env:
       - name: HTTP_PROXY
-        value: "{{ openshift.builddefaults.http_proxy | default('', true) }}"
+        value: "{{ openshift_builddefaults_http_proxy }}"
       - name: HTTPS_PROXY
-        value: "{{ openshift.builddefaults.https_proxy | default('', true) }}"
+        value: "{{ openshift_builddefaults_https_proxy }}"
       - name: NO_PROXY
-        value: "{{ openshift.builddefaults.no_proxy | default('', true) }}"
+        value: "{{ openshift_builddefaults_no_proxy }}"
       - name: http_proxy
-        value: "{{ openshift.builddefaults.http_proxy | default('', true) }}"
+        value: "{{ openshift_builddefaults_http_proxy }}"
       - name: https_proxy
-        value: "{{ openshift.builddefaults.https_proxy | default('', true) }}"
+        value: "{{ openshift_builddefaults_https_proxy }}"
       - name: no_proxy
-        value: "{{ openshift.builddefaults.no_proxy | default('', true) }}"
+        value: "{{ openshift_builddefaults_no_proxy }}"
       imageLabels: "{{ openshift_builddefaults_image_labels | default(None) }}"
       nodeSelector: "{{ openshift_builddefaults_nodeselectors | default(None) }}"
       annotations: "{{ openshift_builddefaults_annotations | default(None) }}"

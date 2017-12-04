@@ -57,11 +57,11 @@
 
 - name: Update registry proxy settings for dc/docker-registry
   set_fact:
-    openshift_hosted_registry_env_vars: "{{ {'HTTPS_PROXY': (openshift.common.https_proxy | default('')),
-                                             'HTTP_PROXY':  (openshift.common.http_proxy  | default('')),
-                                             'NO_PROXY':    (openshift.common.no_proxy    | default(''))}
+    openshift_hosted_registry_env_vars: "{{ {'HTTPS_PROXY': (openshift_https_proxy | default('')),
+                                             'HTTP_PROXY':  (openshift_http_proxy  | default('')),
+                                             'NO_PROXY':    (openshift_no_proxy    | default(''))}
                                            | combine(openshift_hosted_registry_env_vars) }}"
-  when: (openshift.common.https_proxy | default(False)) or (openshift.common.http_proxy | default('')) != ''
+  when: (openshift_https_proxy | default(False)) or (openshift_http_proxy | default('')) != ''
 
 - name: Create the registry service account
   oc_serviceaccount:

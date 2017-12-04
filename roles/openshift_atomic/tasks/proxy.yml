@@ -8,25 +8,25 @@
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?http_proxy[:=]{1}"
-        line: "http_proxy: {{ openshift.common.http_proxy | default('') }}"
+        line: "http_proxy: {{ openshift_http_proxy | default('') }}"
       when:
-        - openshift.common.http_proxy is defined
-        - openshift.common.http_proxy != ''
+        - openshift_http_proxy is defined
+        - openshift_http_proxy != ''
 
     - name: Add https_proxy to /etc/atomic.conf
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?https_proxy[:=]{1}"
-        line: "https_proxy: {{ openshift.common.https_proxy | default('') }}"
+        line: "https_proxy: {{ openshift_https_proxy | default('') }}"
       when:
-        - openshift.common.https_proxy is defined
-        - openshift.common.https_proxy != ''
+        - openshift_https_proxy is defined
+        - openshift_https_proxy != ''
 
     - name: Add no_proxy to /etc/atomic.conf
       lineinfile:
         dest: /etc/atomic.conf
         regexp: "^#?no_proxy[:=]{1}"
-        line: "no_proxy: {{ openshift.common.no_proxy | default('') }}"
+        line: "no_proxy: {{ openshift_no_proxy | default('') }}"
       when:
-        - openshift.common.no_proxy is defined
-        - openshift.common.no_proxy != ''
+        - openshift_no_proxy is defined
+        - openshift_no_proxy != ''
