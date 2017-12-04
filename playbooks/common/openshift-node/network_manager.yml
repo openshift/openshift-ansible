@@ -9,6 +9,8 @@
     package:
       name: 'NetworkManager'
       state: present
+    register: result
+    until: result | success
 
   - name: configure NetworkManager
     lineinfile:

@@ -8,10 +8,14 @@
 # We verified latest rpm available is suitable, so just yum update.
 - name: Upgrade packages
   package: "name={{ openshift.common.service_type }}-{{ component }}{{ openshift_pkg_version }} state=present"
+  register: result
+  until: result | success
 
 - name: Ensure python-yaml present for config upgrade
   package: name=PyYAML state=present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
 
 - name: Install Node service file
   template:

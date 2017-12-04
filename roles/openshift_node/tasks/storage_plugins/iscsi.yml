@@ -2,3 +2,5 @@
 - name: Install iSCSI storage plugin dependencies
   package: name=iscsi-initiator-utils state=present
   when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success

@@ -6,6 +6,8 @@
 - name: Install haproxy
   package: name=haproxy state=present
   when: not openshift.common.is_containerized | bool
+  register: result
+  until: result | success
 
 - name: Pull haproxy image
   command: >

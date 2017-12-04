@@ -97,6 +97,8 @@
       - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - yum-utils
+      register: result
+      until: result | success
 
     - name: Ensure various deps for running system containers are installed
       package:
@@ -108,6 +110,8 @@
       - runc
       when:
       - l_any_system_container | bool
+      register: result
+      until: result | success
 
   - name: Default system_images_registry to a enterprise registry
     set_fact:

@@ -8,6 +8,8 @@
 - name: Install clients
   package: name={{ openshift.common.service_type }}-clients state=present
   when: not openshift.common.is_containerized | bool
+  register: result
+  until: result | success
 
 - block:
   - name: Pull CLI Image
@@ -47,3 +49,5 @@
 - name: Install bash completion for oc tools
   package: name=bash-completion state=present
   when: not openshift.common.is_containerized | bool
+  register: result
+  until: result | success

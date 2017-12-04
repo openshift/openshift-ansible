@@ -36,5 +36,7 @@
 
 - name: Upgrade Docker
   package: name=docker{{ '-' + docker_version }} state=present
+  register: result
+  until: result | success
 
 # starting docker happens back in ../main.yml where it calls ../restart.yml
