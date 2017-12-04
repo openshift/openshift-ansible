@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.11
+Version:        3.7.12
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.12-1
+- storage_glusterfs: fix typo (lmeyer@redhat.com)
+- retry package operations (lmeyer@redhat.com)
+- Add check for gluterFS DS to stop restarts (m.judeikis@gmail.com)
+- Add support for external glusterfs as registry backend (m.judeikis@gmail.com)
+- dist.iteritems() no longer exists in Python 3. (jpazdziora@redhat.com)
+- [3.7] Correct usage of include_role (rteague@redhat.com)
+- hosted_registry: clean up tmp mount point and fstab (dusty@dustymabe.com)
+- Add role to configure project request template (hansmi@vshn.ch)
+- Removing setting prefix and version facts in openshift_logging to let the
+  component roles set their defaults (ewolinet@redhat.com)
+- Fixing origin default for es proxy (ewolinet@redhat.com)
+- Addressing tox errors (ewolinet@redhat.com)
+- Addressing comments (ewolinet@redhat.com)
+- Updating logging components image defaulting pattern to match
+  openshift_logging pattern (ewolinet@redhat.com)
+
 * Fri Dec 01 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.11-1
 - papr: use new PAPR_PULL_TARGET_BRANCH (jlebon@redhat.com)
 - papr: auto-detect image tag to use and bump to f27 (jlebon@redhat.com)
