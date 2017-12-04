@@ -1,0 +1,6 @@
+---
+- include: certificates-backup.yml
+
+- include: certificates.yml
+  vars:
+    openshift_certificates_redeploy: true
