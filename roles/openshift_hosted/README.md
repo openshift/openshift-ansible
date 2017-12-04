@@ -34,13 +34,27 @@ variables also control configuration behavior:
 
 | Name                                         | Default value | Description                                                                  |
 |----------------------------------------------|---------------|------------------------------------------------------------------------------|
-| openshift_hosted_registry_glusterfs_swap     | False         | Whether to swap an existing registry's storage volume for a GlusterFS volume |
-| openshift_hosted_registry_glusterfs_swapcopy | True          | If swapping, also copy the current contents of the registry volume           |
+| openshift_hosted_registry_storage_glusterfs_endpoints | glusterfs-registry-endpoints | The name for the Endpoints resource that will point the registry to the GlusterFS nodes
+| openshift_hosted_registry_storage_glusterfs_path      | glusterfs-registry-volume    | The name for the GlusterFS volume that will provide registry storage
+| openshift_hosted_registry_storage_glusterfs_readonly  | False                        | Whether the GlusterFS volume should be read-only
+| openshift_hosted_registry_storage_glusterfs_swap      | False                        | Whether to swap an existing registry's storage volume for a GlusterFS volume
+| openshift_hosted_registry_storage_glusterfs_swapcopy  | True                         | If swapping, copy the contents of the pre-existing registry storage to the new GlusterFS volume
+| openshift_hosted_registry_storage_glusterfs_ips       | `[]`                         | A list of IP addresses of the nodes of the GlusterFS cluster to use for hosted registry storage
+
+**NOTE:** Configuring a value for
+`openshift_hosted_registry_storage_glusterfs_ips` with a `glusterfs_registry`
+host group is not allowed. Specifying a `glusterfs_registry` host group 
+indicates that a new GlusterFS cluster should be configured, whereas 
+specifying `openshift_hosted_registry_storage_glusterfs_ips` indicates wanting 
+to use a pre-configured GlusterFS cluster for the registry storage.
+
+_
 
 Dependencies
 ------------
 
 * openshift_hosted_facts
+* openshift_persistent_volumes
 
 Example Playbook
 ----------------
@@ -56,6 +70,10 @@ Example Playbook
       cafile: /path/to/my-router-ca.crt
     openshift_hosted_router_registryurl: 'registry.access.redhat.com/openshift3/ose-haproxy-router:v3.0.2.0'
     openshift_hosted_router_selector: 'type=infra'
+    openshift_hosted_registry_storage_kind=glusterfs
+    openshift_hosted_registry_storage_glusterfs_path=external_glusterfs_volume_name
+    openshift_hosted_registry_storage_glusterfs_ips=['192.168.20.239','192.168.20.96','192.168.20.114']
+
 ```
 
 License

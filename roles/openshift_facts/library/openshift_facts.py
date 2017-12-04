@@ -2003,6 +2003,7 @@ class OpenShiftFacts(object):
                         glusterfs=dict(
                             endpoints='glusterfs-registry-endpoints',
                             path='glusterfs-registry-volume',
+                            ips=[],
                             readOnly=False,
                             swap=False,
                             swapcopy=True),
