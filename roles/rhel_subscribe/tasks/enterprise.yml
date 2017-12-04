@@ -6,7 +6,7 @@
   command: subscription-manager repos \
                --enable="rhel-7-server-rpms" \
                --enable="rhel-7-server-extras-rpms" \
-               --enable="rhel-7-server-ose-{{ ose_version }}-rpms" \
+               --enable="rhel-7-server-ose-{{ openshift_release }}-rpms" \
                --enable="rhel-7-fast-datapath-rpms"
   register: subscribe_repos
   until: subscribe_repos | succeeded

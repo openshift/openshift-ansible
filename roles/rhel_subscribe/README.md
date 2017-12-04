@@ -22,7 +22,7 @@ Name of the pool to attach (optional).
 
 Custom hostname for the Satellite server (optional).
 
-### `ose_version`
+### `openshift_release`
 
 Version for the OpenShift Enterprise repositories.
 
