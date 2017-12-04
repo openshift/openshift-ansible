@@ -9,7 +9,7 @@ items:
     name: "{{ volume.name }}"
 {% if volume.labels is defined and volume.labels is mapping %}
     labels:
-{% for key,value in volume.labels.iteritems() %}
+{% for key,value in volume.labels.items() %}
       {{ key }}: {{ value }}
 {% endfor %}
 {% endif %}

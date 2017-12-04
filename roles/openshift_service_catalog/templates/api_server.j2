@@ -19,7 +19,7 @@ spec:
     spec:
       serviceAccountName: service-catalog-apiserver
       nodeSelector:
-{% for key, value in node_selector.iteritems() %}
+{% for key, value in node_selector.items() %}
           {{key}}: "{{value}}"
 {% endfor %}
       containers:
