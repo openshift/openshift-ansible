@@ -6,5 +6,8 @@ After=auditd.service systemd-user-sessions.service time-sync.target {{ openshift
 ExecStart={{ bin_dir }}/aci_gw.sh start
 ExecStop={{ bin_dir }}/aci_gw.sh stop
 KillMode=control-group
-Restart=on-failure
+Restart=always
 RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
