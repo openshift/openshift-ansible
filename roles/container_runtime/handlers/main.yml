@@ -1,8 +1,8 @@
 ---
 
-- name: restart docker
+- name: restart container runtime
   systemd:
-    name: "{{ openshift.docker.service_name }}"
+    name: "{{ openshift_docker_service_name }}"
     state: restarted
     daemon_reload: yes
   register: r_docker_restart_docker_result

@@ -26,6 +26,8 @@ r_openshift_loadbalancer_os_firewall_allow:
   port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
   cond: "{{ r_openshift_lb_use_nuage | bool }}"
 
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+
 # NOTE
 # r_openshift_lb_use_nuage_default may be defined external to this role.
 # openshift_use_nuage, if defined, may affect other roles or play behavior.

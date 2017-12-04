@@ -1,28 +1,5 @@
 ---
-
 # TODO: Much of this file is shared with container engine tasks
-- set_fact:
-    l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
-- set_fact:
-    l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
-- set_fact:
-    l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
-
-- set_fact:
-    l_openshift_image_tag: "{{ openshift_image_tag | string }}"
-  when: openshift_image_tag is defined
-
-- set_fact:
-    l_openshift_image_tag: "latest"
-  when:
-    - openshift_image_tag is not defined
-    - openshift_release == "latest"
-
-- set_fact:
-    l_openshift_image_tag: "{{ openshift_release | string }}"
-  when:
-    - openshift_image_tag is not defined
-    - openshift_release != "latest"
 
 - name: Ensure container-selinux is installed
   package:
@@ -184,4 +161,4 @@
 # 'docker login'
 - include_tasks: registry_auth.yml
   vars:
-    openshift_docker_alternative_creds: "{{ l_use_crio_only }}"
+    openshift_docker_alternative_creds: "{{ openshift_use_crio_only }}"

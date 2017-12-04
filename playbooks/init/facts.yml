@@ -135,11 +135,13 @@
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool
 
+  - name: Initialize openshift.node.sdn_mtu
+    openshift_facts:
+      role: node
+      local_facts:
+        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+
   - name: initialize_facts set_fact repoquery command
     set_fact:
       repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
       repoquery_installed: "{{ 'dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins --installed' }}"
-
-  - name: initialize_facts set_fact on openshift_docker_hosted_registry_network
-    set_fact:
-      openshift_docker_hosted_registry_network: "{{ '' if 'oo_first_master' not in groups else hostvars[groups.oo_first_master.0].openshift.common.portal_net }}"

@@ -1,7 +1,12 @@
 ---
-- name: Place holder for prerequisites
-  hosts: localhost
-  gather_facts: false
+- include: init/main.yml
+  vars:
+    skip_verison: True
+
+- hosts: "{{ l_containerized_host_groups }}"
+  vars:
+    l_chg_temp: "{{ openshift_containerized_host_groups | default([]) }}"
+    l_containerized_host_groups: "{{ (['oo_nodes_to_config'] | union(l_chg_temp)) | join(':') }}"
   tasks:
-  - name: Debug placeholder
-    debug: msg="Prerequisites ran."
+    - include_role:
+        name: container_runtime

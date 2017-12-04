@@ -52,7 +52,7 @@
       dest: "{{ docker_systemd_dir }}/custom.conf"
       src: custom.conf.j2
     notify:
-    - restart docker
+    - restart container runtime
   when: not (os_firewall_use_firewalld | default(False)) | bool
 
 - stat: path=/etc/sysconfig/docker
@@ -78,7 +78,7 @@
     reg_fact_val: "{{ l2_docker_insecure_registries }}"
     reg_flag: --insecure-registry
   notify:
-  - restart docker
+  - restart container runtime
 
 - name: Place additional/blocked/insecure registries in /etc/containers/registries.conf
   template:
@@ -86,7 +86,7 @@
     src: registries.conf
   when: openshift_docker_use_etc_containers | bool
   notify:
-  - restart docker
+  - restart container runtime
 
 - name: Set Proxy Settings
   lineinfile:
@@ -96,30 +96,34 @@
     state: "{{ 'present' if item.reg_fact_val != '' else 'absent'}}"
   with_items:
   - reg_conf_var: HTTP_PROXY
-    reg_fact_val: "{{ docker_http_proxy | default('') }}"
+    reg_fact_val: "{{ docker_http_proxy }}"
   - reg_conf_var: HTTPS_PROXY
-    reg_fact_val: "{{ docker_https_proxy | default('') }}"
+    reg_fact_val: "{{ docker_https_proxy }}"
   - reg_conf_var: NO_PROXY
-    reg_fact_val: "{{ docker_no_proxy | default('') }}"
+    reg_fact_val: "{{ docker_no_proxy }}"
   notify:
-  - restart docker
+  - restart container runtime
   when:
-  - docker_check.stat.isreg is defined and docker_check.stat.isreg and '"http_proxy" in openshift.common or "https_proxy" in openshift.common'
+  - docker_check.stat.isreg is defined
+  - docker_check.stat.isreg
+  - docker_http_proxy != '' or docker_https_proxy != ''
 
 - name: Set various Docker options
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='\
-      {% if ansible_selinux.status | default(None) == 'enabled' and docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %} \
-      {% if docker_log_driver is defined  %} --log-driver {{ docker_log_driver }}{% endif %} \
-      {% if docker_log_options is defined %} {{ docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %} \
+      {% if ansible_selinux.status | default(None) == 'enabled' and openshift_docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %} \
+      {% if openshift_docker_log_driver | bool %} --log-driver {{ openshift_docker_log_driver }}{% endif %} \
+      {% if l2_docker_log_options != [] %} {{ l2_docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %} \
+      {% if openshift_docker_hosted_registry_insecure and (openshift_docker_hosted_registry_network | bool) %} --insecure-registry={{ openshift_docker_hosted_registry_network }} {% endif %} \
       {% if docker_options is defined %} {{ docker_options }}{% endif %} \
-      {% if docker_disable_push_dockerhub is defined %} --confirm-def-push={{ docker_disable_push_dockerhub | bool }}{% endif %} \
+      {% if openshift_docker_options %} {{ openshift_docker_options }}{% endif %} \
+      {% if openshift_docker_disable_push_dockerhub %} --confirm-def-push={{ openshift_docker_disable_push_dockerhub | bool }}{% endif %} \
       --signature-verification={{ openshift_docker_signature_verification | bool }}'"
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
-  - restart docker
+  - restart container runtime
 
 - stat: path=/etc/sysconfig/docker-network
   register: sysconfig_docker_network_check
@@ -134,7 +138,7 @@
   - sysconfig_docker_network_check.stat.isreg is defined
   - sysconfig_docker_network_check.stat.isreg
   notify:
-  - restart docker
+  - restart container runtime
 
 # The following task is needed as the systemd module may report a change in
 # state even though docker is already running.
