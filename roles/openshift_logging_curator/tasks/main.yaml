@@ -1,4 +1,17 @@
 ---
+- name: Set default image variables based on deployment_type
+  include_vars: "{{ var_file_name }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+  loop_control:
+    loop_var: var_file_name
+
+- name: Set curator image facts
+  set_fact:
+    openshift_logging_curator_image_prefix: "{{ openshift_logging_curator_image_prefix | default(__openshift_logging_curator_image_prefix) }}"
+    openshift_logging_curator_image_version: "{{ openshift_logging_curator_image_version | default(__openshift_logging_curator_image_version) }}"
+
 - include: determine_version.yaml
 
 # allow passing in a tempdir
@@ -35,7 +48,7 @@
     name: "aggregated-logging-curator"
     namespace: "{{ openshift_logging_namespace }}"
   when:
-  - openshift_logging_image_pull_secret == ''
+    - openshift_logging_image_pull_secret == ''
 
 # configmap
 - copy:
@@ -65,12 +78,12 @@
     name: "logging-curator"
     namespace: "{{ openshift_logging_namespace }}"
     files:
-    - name: ca
-      path: "{{ generated_certs_dir }}/ca.crt"
-    - name: key
-      path: "{{ generated_certs_dir }}/system.logging.curator.key"
-    - name: cert
-      path: "{{ generated_certs_dir }}/system.logging.curator.crt"
+      - name: ca
+        path: "{{ generated_certs_dir }}/ca.crt"
+      - name: key
+        path: "{{ generated_certs_dir }}/system.logging.curator.key"
+      - name: cert
+        path: "{{ generated_certs_dir }}/system.logging.curator.crt"
 
 - set_fact:
     curator_name: "{{ 'logging-curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
@@ -104,7 +117,7 @@
     namespace: "{{ openshift_logging_namespace }}"
     kind: dc
     files:
-    - "{{ tempdir }}/templates/curator-dc.yaml"
+      - "{{ tempdir }}/templates/curator-dc.yaml"
     delete_after: true
 
 - name: Delete temp directory
