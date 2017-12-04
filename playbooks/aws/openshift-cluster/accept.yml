@@ -16,6 +16,7 @@
   - name: bring lib_openshift into scope
     include_role:
       name: lib_openshift
+    static: yes
 
   - name: fetch masters
     ec2_remote_facts:
