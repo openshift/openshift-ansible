@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.145
+Version:        3.5.146
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -276,6 +276,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.146-1
+- Do not escalate privileges in jks generation tasks (iacopo.rozzo@amadeus.com)
+- Place-holder for prerequisites.yml (mgugino@redhat.com)
+- Correct usage of include_role (rteague@redhat.com)
+- Add lib_openshift dependency for etcd role (rteague@redhat.com)
+- Only remove empty keys from env if env exists (sdodson@redhat.com)
+- Currently, docker login may fail if a proxy is added to the config but docker
+  is already running. (mgugino@redhat.com)
+- Fix github auth validation (mgugino@redhat.com)
+
 * Thu Nov 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.145-1
 - 
 
