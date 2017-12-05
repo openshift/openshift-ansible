@@ -9,7 +9,7 @@ etcd
 [OSEv3:vars]
 # SSH user, this user should allow ssh based auth without requiring a password
 ansible_ssh_user=centos
-openshift_release=v3.7
+openshift_release=v3.6.1
 
 openshift_giffgaff_environment="test"
 openshift_master_cluster_method=native
@@ -20,7 +20,7 @@ openshift_master_cluster_public_hostname=openshift.test.gaff.systems
 # If ansible_ssh_user is not root, ansible_become must be set to true
 ansible_become=true
 openshift_deployment_type=origin
-openshift_cloudprovider_kind=aws
+#openshift_cloudprovider_kind=aws
 deployment_type=origin
 
 openshift_use_dnsmasq=true
