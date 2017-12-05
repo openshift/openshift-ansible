@@ -1,0 +1,127 @@
+---
+
+################################################################################################
+################################################################################################
+# Locally generating SSH secrets to copy across the systems
+
+- name: Create heketi ssh keys
+  hosts: localhost
+  become: false
+
+  tasks:
+
+  - name: remove old heketi secrets
+    file: name="{{ item }}" state=absent
+    with_items:
+      - /tmp/heketi_id_rsa
+      - /tmp/heketi_id_rsa.pub
+
+  - name: generate ssh keys for heketi user
+    command: ssh-keygen -b 2048 -t rsa -f /tmp/heketi_id_rsa -q -P ""
+
+################################################################################################
+################################################################################################
+# Install heketi pub keys onto gluster hosts
+
+- hosts: glusterfs
+  become: true
+
+  tasks:
+
+  - name: copy public ssh key into gluster servers
+    copy:
+      src: /tmp/heketi_id_rsa.pub
+      dest: /tmp/heketi_id_rsa.pub
+
+  - name: Add heketi authorized key to root user
+    authorized_key: user={{ ansible_ssh_user }} key="{{ lookup('file', '/tmp/heketi_id_rsa.pub') }}"
+
+  - name: Remove tmp copied key
+    file: name=/tmp/heketi_id_rsa.pub state=absent
+
+################################################################################################
+################################################################################################
+# Install Heketi service on first gluster node
+
+- hosts: glusterfs[0]
+  become: true
+
+  tasks:
+
+  - include: tasks/gg_vagrant_requirements.yml
+    when: openshift_giffgaff_environment == "vagrant"
+
+  - name: Install firewalld
+    yum: name=firewalld state=latest
+
+  - name: start firewalld service
+    shell: systemctl start firewalld.service
+
+  - name: enable firewalld service
+    shell: systemctl enable firewalld.service
+
+  - name: Manage firewalld acces to enable glusterfs
+    shell: firewall-cmd --add-service=glusterfs --permanent && firewall-cmd --reload
+
+  # Allow write on mounted GlusterFS volume with SELinux
+  - name: Allow write on mounted GlusterFS volume with SELinux
+    shell: setsebool -P virt_sandbox_use_fusefs on
+
+  # Install and configure Heketi
+  - name: Install heketi
+    yum:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+      - heketi
+      - heketi-client
+
+  - name: create heketi ssh directory
+    file:
+      path: /var/lib/heketi/.ssh/
+      state: directory
+      owner: heketi
+      group: heketi
+      mode: 0700
+
+  - name: copy private ssh key into heketi server
+    copy:
+      src: /tmp/heketi_id_rsa
+      dest: /var/lib/heketi/.ssh/id_rsa
+      owner: heketi
+      group: heketi
+      mode: 0600
+
+  ##########################################################
+  # Copy heketi JSON configuration
+  - name: Copy heketi config file
+    copy:
+      src: "files/heketi/{{ openshift_giffgaff_environment }}/heketi-config.json"
+      dest: /etc/heketi/heketi.json
+      mode: 0644
+  ##########################################################
+
+  - name: restart heketi service
+    shell: systemctl restart heketi.service
+
+  ##########################################################
+  # Install heketi topology
+  - name: Copy heketi topology file
+    copy:
+      src: "files/heketi/{{ openshift_giffgaff_environment }}/topology.json"
+      dest: /etc/heketi/topology.json
+      mode: 0644
+  ##########################################################
+
+
+  ##########################################################
+  # Include heketi CLI vars
+  - name: Include heketi-cli-vars
+    include_vars: "files/heketi/{{ openshift_giffgaff_environment }}/vars.yaml"
+  ##########################################################
+
+  #TODO: Improve this command making sure it succeeded
+  # Add a conditional in case this configuration as been already applied to avoid to overwrite the topology with working disks
+
+  - name: loading topology file
+    shell: heketi-cli --server="{{ HEKETI_CLI_SERVER }}" --user "{{ HEKETI_CLI_USER }}" --secret "{{ HEKETI_CLI_KEY }}" topology load --json=/etc/heketi/topology.json

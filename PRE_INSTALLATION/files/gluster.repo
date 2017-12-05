@@ -1,0 +1,5 @@
+[gluster3.10]
+name=Gluster 3.10
+baseurl=http://mirror.rackspace.com/centos/7/storage/$basearch/gluster-3.10/
+gpgcheck=0
+enabled=1

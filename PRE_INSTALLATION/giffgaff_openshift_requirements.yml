@@ -1,0 +1,121 @@
+---
+# Openshift Cluster
+- hosts: OSEv3
+  become: true
+
+  tasks:
+
+  - include: tasks/gg_rackspace_requirements.yml
+    when: (openshift_giffgaff_environment == "production") or (openshift_giffgaff_environment == "staging")
+
+  - include: tasks/gg_vagrant_requirements.yml
+    when: openshift_giffgaff_environment == "vagrant"
+
+  - include: tasks/gg_aws_requirements.yml
+    when: openshift_giffgaff_environment == "test"
+
+  - name: Install wget
+    yum: name=wget state=latest
+
+  - name: Install git
+    yum: name=git state=latest
+
+  - name: Install binutils
+    yum: name=binutils state=latest
+
+  - name: Install net-tools
+    yum: name=net-tools state=latest
+
+  - name: Install bind-utils
+    yum: name=bind-utils state=latest
+
+  - name: Install iptables-services
+    yum: name=iptables-services state=latest
+
+  - name: Install bridge-utils
+    yum: name=bridge-utils state=latest
+
+  - name: Install bash-completion
+    yum: name=bash-completion state=latest
+
+  - name: Install kexec-tools
+    yum: name=kexec-tools state=latest
+
+  - name: Install sos
+    yum: name=sos state=latest
+
+  - name: Install psacct
+    yum: name=psacct state=latest
+
+  - name: Install htop
+    yum: name=htop state=latest
+
+  - name: Install ansible
+    yum: name=ansible state=latest
+
+  - name: Install vim
+    yum: name=vim state=latest
+
+  - name: Install NetworkManager
+    yum: name=NetworkManager state=latest
+
+  # Yum installs older version from rackspace repo, this make the config file syntax follows what systemd is looking for
+  - name: Add Extra Repo file for Openshift and docker
+    copy:
+      src: ./files/NetworkManager-rackspace.conf
+      dest: /etc/NetworkManager/conf.d/rackspace.conf
+      mode: 0644
+    when: (openshift_giffgaff_environment == "production") or (openshift_giffgaff_environment == "staging")
+
+  - name: Install pyOpenSSL
+    yum: name=pyOpenSSL state=latest
+
+  - name: Install python-lxml
+    yum: name=python-lxml state=latest
+
+  - name: start NetworkManager
+    shell: systemctl start NetworkManager
+
+  - name: Install DOCKER
+    yum: name=docker state=latest update_cache=yes
+
+  - name: Make sure docker is running
+    systemd:
+      name: docker
+      state: started
+
+  - name: Make sure docker is enabled
+    systemd:
+      name: docker
+      enabled: yes
+
+  - name: Printing Docker version, info
+    shell: docker version; docker info
+
+  - name: Install python-docker-py needed for docker run by ansible
+    yum: name=python-docker-py state=latest
+
+  - name: create directory where fluentd will wirte persistent log to be shipped to appDynamics
+    file:
+      path: /var/log/efk-fluentd
+      state: directory
+      owner: root
+      group: root
+      mode: 0750
+      
+  - name: logrotate fluentd logs 
+    copy:
+      src: "./files/fluentd-log"
+      dest: /etc/logrotate.d/fluentd-log
+      mode: 0644
+
+
+  ## TODO: Find a proper way instead of hardcoding /etc/hosts
+
+  #Production hosts
+  - name: Copy hosts file
+    copy:
+      src: "./files/{{ openshift_giffgaff_environment }}_hosts"
+      dest: /etc/hosts
+      mode: 0644
+    when: (openshift_giffgaff_environment == "production") or (openshift_giffgaff_environment == "staging")

@@ -1,0 +1,17 @@
+## Required for openvswitch
+[rackspace-openshift-origin]
+name=CentOS OpenShift Origin
+baseurl=http://mirror.rackspace.com/centos/7/paas/x86_64/openshift-origin/
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/openshift-ansible-CentOS-SIG-PaaS
+
+
+## Required for docker
+[rackspace-openshift-docker-extra]
+name=CentOS Extra
+baseurl=http://mirror.rackspace.com/centos/7/extras/x86_64/
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/openshift-ansible-CentOS-SIG-PaaS
+################################################

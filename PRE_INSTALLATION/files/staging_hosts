@@ -1,0 +1,11 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+172.29.75.226 879130-stg-openshift-mstr-01.giffgaff.co.uk 879130-stg-openshift-mstr-01
+172.29.75.227 879131-stg-openshift-mstr-02.giffgaff.co.uk 879131-stg-openshift-mstr-02
+172.29.75.228 879132-stg-openshift-mstr-03.giffgaff.co.uk 879132-stg-openshift-mstr-03
+172.29.71.228 879133-stg-openshift-be-01.giffgaff.co.uk 879133-stg-openshift-be-01
+172.29.71.231 879134-stg-openshift-be-02.giffgaff.co.uk 879134-stg-openshift-be-02
+
+
+172.29.71.221   stg-gluster-node-1
+172.29.71.222   stg-gluster-node-2

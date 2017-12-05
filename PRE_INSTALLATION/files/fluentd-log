@@ -1,0 +1,13 @@
+/var/log/efk-fluentd/*.log {
+    daily
+    rotate  1
+    copytruncate
+    compress
+    missingok
+    maxage   1
+    size 5M
+    dateext
+    postrotate
+        /usr/bin/find /var/log/efk-fluentd/ -name "openshift-systemlog-json.*.log" -type f -mtime +0 -exec rm {} \;
+    endscript
+}

@@ -1,0 +1,55 @@
+# The following options are not yet supported but will replace the direct import of the extra plays below asap
+#  - import_plays: tasks/gg_glusterfs.yml
+#  - import_plays: tasks/gg_heketi.yml
+
+# Glusterfs Cluster Installation
+- hosts: glusterfs
+  become: true
+
+  tasks:
+
+  - include: tasks/gg_vagrant_requirements.yml
+    when: openshift_giffgaff_environment == "vagrant"
+
+  - name: install rackspace glusterfs repo
+    copy:
+      src: files/gluster.repo
+      dest: /etc/yum.repos.d/gluster.repo
+    when: (openshift_giffgaff_environment == "production") or (openshift_giffgaff_environment == "staging")
+
+  - name: Install wget
+    yum: name=wget state=latest
+
+  - name: Install git
+    yum: name=git state=latest
+
+  - name: Install binutils
+    yum: name=binutils state=latest
+
+  - name: Install iptables-services
+    yum: name=iptables-services state=latest
+
+  - name: Install bridge-utils
+    yum: name=bridge-utils state=latest
+
+  - name: Install bash-completion
+    yum: name=bash-completion state=latest
+
+  - name: Install htop
+    yum: name=htop state=latest
+
+  - name: Install ansible
+    yum: name=ansible state=latest
+
+  - name: Install vim
+    yum: name=vim state=latest
+
+  - name: Install NetworkManager
+    yum: name=NetworkManager state=latest
+
+  - name: install gluster service
+    yum: name=glusterfs-server state=latest
+
+  - shell: systemctl enable glusterd.service
+
+  - shell: systemctl start glusterd.service

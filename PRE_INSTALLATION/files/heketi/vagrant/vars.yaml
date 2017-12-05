@@ -1,0 +1,3 @@
+HEKETI_CLI_KEY: adminpassword
+HEKETI_CLI_SERVER: http://127.0.0.1:8080
+HEKETI_CLI_USER: admin
