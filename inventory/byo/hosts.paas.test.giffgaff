@@ -1,0 +1,72 @@
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+#infras
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# SSH user, this user should allow ssh based auth without requiring a password
+ansible_ssh_user=centos
+openshift_release=v3.7
+
+openshift_giffgaff_environment="test"
+openshift_master_cluster_method=native
+openshift_master_cluster_public_hostname=openshift.test.gaff.systems
+#openshift_master_cluster_hostname=openshift-internal.test.gaff.systems
+
+
+# If ansible_ssh_user is not root, ansible_become must be set to true
+ansible_become=true
+openshift_deployment_type=origin
+openshift_cloudprovider_kind=aws
+deployment_type=origin
+
+openshift_use_dnsmasq=true
+
+#master vars
+openshift_master_api_url=
+openshift_master_public_console_url="https://openshift.test.gaff.systems/console"
+openshift_master_public_api_url="https://openshift.test.gaff.systems"
+openshift_master_default_subdomain=openshift.test.gaff.systems
+
+#logging vars
+openshift_hosted_logging_deploy=true
+openshift_hosted_logging_elasticsearch_cluster_size=1
+openshift_logging_namespace=openshift-infra
+openshift_logging_master_public_url="https://openshift.test.gaff.systems"
+
+openshift_clock_enabled=true
+
+openshift_hosted_logging_deployer_prefix=docker.io/openshift/origin-
+openshift_hosted_logging_deployer_version=v1.5.1
+
+# uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
+openshift_master_identity_providers='[{"name": "giffgaffokta_test", "login": "true", "challenge": "false", "mappingMethod": "claim", "kind": "OpenIDIdentityProvider", "client_id": "0oa1hmij3ygRPX6Sj0i7", "client_secret": "jB3P7pi0PaPyOl2RNV80GkkcDYfKVz9Ktzi_NcVg", "extraScopes": ["email", "profile"], "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {"authorize": "https://ggauth.okta-emea.com/oauth2/v1/authorize", "token": "https://ggauth.okta-emea.com/oauth2/v1/token", "userInfo": "https://ggauth.okta-emea.com/oauth2/v1/userinfo"} }]'
+
+
+
+# host group for masters
+[masters]
+master01.test.gaff.systems
+master02.test.gaff.systems
+master03.test.gaff.systems
+
+# host group for etcd
+[etcd]
+master01.test.gaff.systems
+master02.test.gaff.systems
+master03.test.gaff.systems
+
+# host group for nodes, includes region info
+[nodes]
+node01.test.gaff.systems openshift_node_labels="{'region': 'primary', 'logging-infra-fluentd': 'true'}"
+node02.test.gaff.systems openshift_node_labels="{'region': 'primary', 'logging-infra-fluentd': 'true'}"
+node03.test.gaff.systems openshift_node_labels="{'region': 'primary', 'logging-infra-fluentd': 'true'}"
+
+infra01.test.gaff.systems openshift_node_labels="{'region': 'infra', 'logging-infra-fluentd': 'true'}"
+infra02.test.gaff.systems openshift_node_labels="{'region': 'infra', 'logging-infra-fluentd': 'true'}"
+infra03.test.gaff.systems openshift_node_labels="{'region': 'infra', 'logging-infra-fluentd': 'true'}"
+
+
