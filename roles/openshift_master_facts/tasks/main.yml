@@ -1,14 +1,8 @@
 ---
-# Ensure the default sub-domain is set:
-- name: Migrate legacy osm_default_subdomain fact
-  set_fact:
-    openshift_master_default_subdomain: "{{ osm_default_subdomain | default(None) }}"
-  when: openshift_master_default_subdomain is not defined
-
 - name: Verify required variables are set
   fail:
     msg: openshift_master_default_subdomain must be set to deploy metrics
-  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain | default("") == ""
+  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain == ""
 
 # NOTE: These metrics variables are unfortunately needed by both the master and the metrics roles
 # to properly configure the master-config.yaml file.
@@ -20,7 +14,7 @@
 - name: Set g_metrics_hostname
   set_fact:
     g_metrics_hostname: "{{ openshift_hosted_metrics_public_url
-                        | default('hawkular-metrics.' ~ (openshift_master_default_subdomain))
+                        | default('hawkular-metrics.' ~ openshift_master_default_subdomain)
                         | oo_hostname_from_url }}"
 
 - set_fact:

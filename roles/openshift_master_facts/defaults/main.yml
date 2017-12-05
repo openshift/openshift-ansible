@@ -1,5 +1,4 @@
 ---
-openshift_master_default_subdomain: "router.default.svc.cluster.local"
 openshift_master_admission_plugin_config:
   openshift.io/ImagePolicy:
     configuration:

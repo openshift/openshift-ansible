@@ -20,25 +20,25 @@
 
 - name: Ensure exports directory exists
   file:
-    path: "{{ openshift.hosted.registry.storage.nfs.directory }}"
+    path: "{{ openshift_hosted_registry_storage_nfs_directory }}"
     state: directory
 
 - name: Ensure export directories exist
   file:
-    path: "{{ item.storage.nfs.directory }}/{{ item.storage.volume.name }}"
+    path: "{{ item }}"
     state: directory
     mode: 0777
     owner: nfsnobody
     group: nfsnobody
   with_items:
-    - "{{ openshift.hosted.registry }}"
-    - "{{ openshift.metrics }}"
-    - "{{ openshift.logging }}"
-    - "{{ openshift.loggingops }}"
-    - "{{ openshift.hosted.etcd }}"
-    - "{{ openshift.prometheus }}"
-    - "{{ openshift.prometheus.alertmanager }}"
-    - "{{ openshift.prometheus.alertbuffer }}"
+    - "{{ openshift_hosted_registry_storage_nfs_directory }}/{{ openshift_hosted_registry_storage_volume_name }}"
+    - "{{ openshift_metrics_storage_nfs_directory }}/{{ openshift_metrics_storage_volume_name }}"
+    - "{{ openshift_logging_storage_nfs_directory }}/{{ openshift_logging_storage_volume_name }}"
+    - "{{ openshift_loggingops_storage_nfs_directory }}/{{ openshift_loggingops_storage_volume_name }}"
+    - "{{ openshift_hosted_etcd_storage_nfs_directory }}/{{ openshift_hosted_etcd_storage_volume_name }}"
+    - "{{ openshift_prometheus_storage_nfs_directory }}/{{ openshift_prometheus_storage_volume_name }}"
+    - "{{ openshift_prometheus_alertmanager_storage_nfs_directory }}/{{ openshift_prometheus_alertmanager_storage_volume_name }}"
+    - "{{ openshift_prometheus_alertbuffer_storage_nfs_directory }}/{{ openshift_prometheus_alertbuffer_storage_volume_name }}"
 
 - name: Configure exports
   template:

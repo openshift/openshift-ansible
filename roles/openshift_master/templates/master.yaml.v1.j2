@@ -204,7 +204,7 @@ projectConfig:
     mcsLabelsPerProject: {{ osm_mcs_labels_per_project }}
     uidAllocatorRange: "{{ osm_uid_allocator_range }}"
 routingConfig:
-  subdomain:  "{{ openshift_master_default_subdomain | default("") }}"
+  subdomain:  "{{ openshift_master_default_subdomain }}"
 serviceAccountConfig:
   limitSecretReferences: {{ openshift_master_saconfig_limitsecretreferences | default(false) }}
   managedNames:

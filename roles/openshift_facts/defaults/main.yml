@@ -3,4 +3,98 @@ openshift_cli_image_dict:
   origin: 'openshift/origin'
   openshift-enterprise: 'openshift3/ose'
 
+openshift_hosted_images_dict:
+  origin: 'openshift/origin-${component}:${version}'
+  openshift-enterprise: 'openshift3/ose-${component}:${version}'
+
 openshift_cli_image: "{{ osm_image | default(openshift_cli_image_dict[openshift_deployment_type]) }}"
+
+# osm_default_subdomain is an old migrated fact, can probably be removed.
+osm_default_subdomain: "router.default.svc.cluster.local"
+openshift_master_default_subdomain: "{{ osm_default_subdomain }}"
+
+openshift_hosted_etcd_storage_nfs_directory: '/exports'
+openshift_hosted_etcd_storage_nfs_options: '*(rw,root_squash)'
+openshift_hosted_etcd_storage_volume_name: 'etcd'
+openshift_hosted_etcd_storage_volume_size: '1Gi'
+openshift_hosted_etcd_storage_create_pv: True
+openshift_hosted_etcd_storage_create_pvc: False
+openshift_hosted_etcd_storage_access_modes:
+  - 'ReadWriteOnce'
+
+openshift_hosted_registry_namespace: 'default'
+openshift_hosted_registry_storage_volume_name: 'registry'
+openshift_hosted_registry_storage_volume_size: '5Gi'
+openshift_hosted_registry_storage_create_pv: True
+openshift_hosted_registry_storage_create_pvc: True
+openshift_hosted_registry_storage_nfs_directory: '/exports'
+openshift_hosted_registry_storage_nfs_options: '*(rw,root_squash)'
+openshift_hosted_registry_storage_glusterfs_endpoints: 'glusterfs-registry-endpoints'
+openshift_hosted_registry_storage_glusterfs_path: glusterfs-registry-volume
+openshift_hosted_registry_storage_glusterfs_readOnly: False
+openshift_hosted_registry_storage_glusterfs_swap: False
+openshift_hosted_registry_storage_glusterfs_swapcopy: True
+openshift_hosted_registry_storage_glusterfs_ips: []
+openshift_hosted_registry_storage_access_modes:
+  - 'ReadWriteMany'
+
+openshift_logging_storage_nfs_directory: '/exports'
+openshift_logging_storage_nfs_options: '*(rw,root_squash)'
+openshift_logging_storage_volume_name: 'logging-es'
+openshift_logging_storage_create_pv: True
+openshift_logging_storage_create_pvc: False
+openshift_logging_storage_access_modes:
+  - ['ReadWriteOnce']
+
+openshift_loggingops_storage_volume_name: 'logging-es-ops'
+openshift_loggingops_storage_volume_size: '10Gi'
+openshift_loggingops_storage_create_pv: True
+openshift_loggingops_storage_create_pvc: False
+openshift_loggingops_storage_nfs_directory: '/exports'
+openshift_loggingops_storage_nfs_options: '*(rw,root_squash)'
+openshift_loggingops_storage_access_modes:
+  - 'ReadWriteOnce'
+
+openshift_metrics_deploy: False
+openshift_metrics_duration: 7
+openshift_metrics_resolution: '10s'
+openshift_metrics_storage_volume_name: 'metrics'
+openshift_metrics_storage_volume_size: '10Gi'
+openshift_metrics_storage_create_pv: True
+openshift_metrics_storage_create_pvc: False
+openshift_metrics_storage_nfs_directory: '/exports'
+openshift_metrics_storage_nfs_options: '*(rw,root_squash)'
+openshift_metrics_storage_access_modes:
+  - 'ReadWriteOnce'
+
+openshift_prometheus_storage_volume_name: 'prometheus'
+openshift_prometheus_storage_volume_size: '10Gi'
+openshift_prometheus_storage_nfs_directory: '/exports'
+openshift_prometheus_storage_nfs_options: '*(rw,root_squash)'
+openshift_prometheus_storage_access_modes:
+  - 'ReadWriteOnce'
+openshift_prometheus_storage_create_pv: True
+openshift_prometheus_storage_create_pvc: False
+
+openshift_prometheus_alertmanager_storage_volume_name: 'prometheus-alertmanager'
+openshift_prometheus_alertmanager_storage_volume_size: '10Gi'
+openshift_prometheus_alertmanager_storage_nfs_directory: '/exports'
+openshift_prometheus_alertmanager_storage_nfs_options: '*(rw,root_squash)'
+openshift_prometheus_alertmanager_storage_access_modes:
+  - 'ReadWriteOnce'
+openshift_prometheus_alertmanager_storage_create_pv: True
+openshift_prometheus_alertmanager_storage_create_pvc: False
+
+openshift_prometheus_alertbuffer_storage_volume_name: 'prometheus-alertbuffer'
+openshift_prometheus_alertbuffer_storage_volume_size: '10Gi'
+openshift_prometheus_alertbuffer_storage_nfs_directory: '/exports'
+openshift_prometheus_alertbuffer_storage_nfs_options: '*(rw,root_squash)'
+openshift_prometheus_alertbuffer_storage_access_modes:
+  - 'ReadWriteOnce'
+openshift_prometheus_alertbuffer_storage_create_pv: True
+openshift_prometheus_alertbuffer_storage_create_pvc: False
+
+
+openshift_router_selector: "region=infra"
+openshift_hosted_router_selector: "{{ openshift_router_selector }}"
+openshift_hosted_registry_selector: "{{ openshift_router_selector }}"
