@@ -44,13 +44,6 @@
 - name: include node installer
   include_tasks: install.yml
 
-- name: Restart cri-o
-  systemd:
-    name: cri-o
-    enabled: yes
-    state: restarted
-  when: openshift_use_crio
-
 - name: restart NetworkManager to ensure resolv.conf is present
   systemd:
     name: NetworkManager

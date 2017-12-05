@@ -1,4 +1,6 @@
 ---
+- include_tasks: common/pre.yml
+
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"
   when: not openshift.common.is_atomic | bool
@@ -7,35 +9,16 @@
   until: curr_docker_version | succeeded
   changed_when: false
 
-- name: Error out if Docker pre-installed but too old
-  fail:
-    msg: "Docker {{ curr_docker_version.stdout }} is installed, but >= 1.9.1 is required."
-  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.9.1', '<') and not docker_version is defined
-
-- name: Error out if requested Docker is too old
-  fail:
-    msg: "Docker {{ docker_version }} requested, but >= 1.9.1 is required."
-  when: docker_version is defined and docker_version | version_compare('1.9.1', '<')
-
-# If a docker_version was requested, sanity check that we can install or upgrade to it, and
-# no downgrade is required.
-- name: Fail if Docker version requested but downgrade is required
-  fail:
-    msg: "Docker {{ curr_docker_version.stdout }} is installed, but version {{ docker_version }} was requested."
-  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and docker_version is defined and curr_docker_version.stdout | version_compare(docker_version, '>')
-
-# This involves an extremely slow migration process, users should instead run the
-# Docker 1.10 upgrade playbook to accomplish this.
-- name: Error out if attempting to upgrade Docker across the 1.10 boundary
-  fail:
-    msg: "Cannot upgrade Docker to >= 1.10, please upgrade or remove Docker manually, or use the Docker upgrade playbook if OpenShift is already installed."
-  when: not curr_docker_version | skipped and curr_docker_version.stdout != '' and curr_docker_version.stdout | version_compare('1.10', '<') and docker_version is defined and docker_version | version_compare('1.10', '>=')
+# Some basic checks to ensure the role will complete
+- include_tasks: docker_sanity.yml
 
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 # Note: The curr_docker_version.stdout check can be removed when https://github.com/ansible/ansible/issues/33187 gets fixed.
 - name: Install Docker
-  package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
+  package:
+    name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
+    state: present
   when: not openshift.common.is_atomic | bool and not curr_docker_version | skipped and not curr_docker_version.stdout != ''
   register: result
   until: result | success
@@ -161,7 +144,4 @@
 - set_fact:
     docker_service_status_changed: "{{ (r_docker_package_docker_start_result | changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
 
-- meta: flush_handlers
-
-# This needs to run after docker is restarted to account for proxy settings.
-- include_tasks: registry_auth.yml
+- include_tasks: common/post.yml

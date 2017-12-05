@@ -1,8 +1,4 @@
 ---
-- name: Ensure proxies are in the atomic.conf
-  include_role:
-    name: openshift_atomic
-    tasks_from: proxy
 
 - name: Pre-pull node system container image
   command: >
