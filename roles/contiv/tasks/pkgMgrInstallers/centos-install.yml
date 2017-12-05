@@ -12,9 +12,9 @@
     dest: /tmp/rdo-release-ocata-2.noarch.rpm
     validate_certs: False
   environment:
-    http_proxy: "{{ http_proxy|default('') }}"
-    https_proxy: "{{ https_proxy|default('') }}"
-    no_proxy: "{{ no_proxy|default('') }}"
+    http_proxy: "{{ contiv_http_proxy|default('') }}"
+    https_proxy: "{{ contiv_https_proxy|default('') }}"
+    no_proxy: "{{ contiv_no_proxy|default('') }}"
   tags:
     - ovs_install
 
@@ -30,9 +30,9 @@
     pkg=openvswitch
     state=present
   environment:
-    http_proxy: "{{ http_proxy|default('') }}"
-    https_proxy: "{{ https_proxy|default('') }}"
-    no_proxy: "{{ no_proxy|default('') }}"
+    http_proxy: "{{ contiv_http_proxy|default('') }}"
+    https_proxy: "{{ contiv_https_proxy|default('') }}"
+    no_proxy: "{{ contiv_no_proxy|default('') }}"
   tags:
     - ovs_install
   register: result
