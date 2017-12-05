@@ -4,9 +4,7 @@ openshift_deployment_type: origin
 #openshift_repos_enable_testing: true
 #openshift_deployment_type: openshift-enterprise
 #openshift_release: v3.5
-openshift_master_default_subdomain: "apps.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
 
-openshift_master_cluster_public_hostname: "console.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
 
 osm_default_node_selector: 'region=primary'
 

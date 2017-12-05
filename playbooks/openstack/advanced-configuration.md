@@ -165,6 +165,14 @@ your servers will be under. With the default values, this will be
 That sudomain can be set as well by the `openshift_openstack_app_subdomain` variable in
 the inventory.
 
+If you want to use different public and private DNS records for your externally
+managed servers, specify `openshift_openstack_public_hostname_suffix` and/or
+`openshift_openstack_private_hostname_suffix`. These suffixes default to the
+`openshift_openstack_clusterid` subdomain. Or you may want to specify another
+private domain with `openshift_openstack_private_dns_domain`. Note that
+the servers' hostnames will not be updated. The deployment may be done on the
+arbitrary named hosts.
+
 The `openstack_<role name>_hostname` is a set of variables used for customising
 public names of Nova servers provisioned with a given role. When such a variable stays commented,
 default value (usually the role name) is used.
@@ -196,6 +204,16 @@ optional `key_name`, which normally defaults to the cluster's DNS domain.
 This just illustrates a compatibility mode with a DNS service deployed
 by OpenShift on OSP10 reference architecture, and used in a mixed mode with
 another external DNS server.
+
+If you manage an external DNS server deployed elsewhere (or a separate view)
+for private FQDNs, you may want to define
+`openshift_openstack_external_nsupdate_keys` like this:
+
+    openshift_openstack_external_nsupdate_keys:
+      private:
+        key_secret: <some nsupdate key 2>
+        key_algorithm: 'hmac-sha256'
+        server: <private DNS server IP>
 
 ## Flannel networking
 
