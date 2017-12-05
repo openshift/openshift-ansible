@@ -17,6 +17,7 @@ spec:
     logging-infra: "{{logging_component}}"
   strategy:
     type: Recreate
+  triggers: []
   template:
     metadata:
       name: "{{deploy_name}}"
