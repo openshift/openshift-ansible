@@ -32,7 +32,7 @@
     - openshift_docker_alternative_creds | bool
     - oreg_auth_user is defined
     - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-  register: node_oreg_auth_credentials_create
+  register: node_oreg_auth_credentials_create_alt
   notify:
     - restart node
 
@@ -43,4 +43,8 @@
   when:
     - openshift.common.is_containerized | bool
     - oreg_auth_user is defined
-    - (node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace or node_oreg_auth_credentials_create.changed) | bool
+    - >
+        (node_oreg_auth_credentials_stat.stat.exists
+        or oreg_auth_credentials_replace
+        or node_oreg_auth_credentials_create.changed
+        or node_oreg_auth_credentials_create_alt.changed) | bool
