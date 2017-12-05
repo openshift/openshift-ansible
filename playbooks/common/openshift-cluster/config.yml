@@ -23,7 +23,7 @@
 - include: ../../openshift-metrics/private/config.yml
   when: openshift_metrics_install_metrics | default(false) | bool
 
-- include: openshift_logging.yml
+- include: ../../openshift-logging/private/config.yml
   when: openshift_logging_install_logging | default(false) | bool
 
 - include: ../../openshift-prometheus/private/config.yml
