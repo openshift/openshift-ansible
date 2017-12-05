@@ -31,3 +31,4 @@
   local_action: file path="{{local_tmp.stdout}}" state=absent
   tags: logging_cleanup
   changed_when: False
+  become: no
