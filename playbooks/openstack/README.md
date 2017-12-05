@@ -24,7 +24,7 @@ The OpenStack release must be Newton (for Red Hat OpenStack this is
 version 10) or newer. It must also satisfy these requirements:
 
 * Heat (Orchestration) must be available
-* The deployment image (CentOS 7 or RHEL 7) must be loaded
+* The deployment image (CentOS 7.4 or RHEL 7) must be loaded
 * The deployment flavor must be available to your user
   - `m1.medium` / 4GB RAM + 40GB disk should be enough for testing
   - look at
@@ -183,8 +183,13 @@ Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml
+$ ansible-playbook --user openshift -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml \
+  -e openshift_repos_enable_testing=true
 ```
+
+Note, you may want to use the testing repo for development purposes only.
+Normally, `openshift_repos_enable_testing` should not be specified.
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
