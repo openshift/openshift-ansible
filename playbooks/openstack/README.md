@@ -183,8 +183,13 @@ Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml
+$ ansible-playbook --user openshift -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml \
+  -e openshift_repos_enable_testing=true
 ```
+
+Note, you may want to use the testing repo for development purposes only.
+Normally, `openshift_repos_enable_testing` should not be specified.
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
