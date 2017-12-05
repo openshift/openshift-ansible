@@ -1486,9 +1486,7 @@ class OpenShiftFacts(object):
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
     def __init__(self, role, filename, local_facts,
-                 additive_facts_to_overwrite=None,
-                 openshift_env=None,
-                 openshift_env_structures=None):
+                 additive_facts_to_overwrite=None):
         self.changed = False
         self.filename = filename
         if role not in self.known_roles:
@@ -1510,29 +1508,23 @@ class OpenShiftFacts(object):
             self.system_facts = get_all_facts(module)['ansible_facts']  # noqa: F405
 
         self.facts = self.generate_facts(local_facts,
-                                         additive_facts_to_overwrite,
-                                         openshift_env,
-                                         openshift_env_structures)
+                                         additive_facts_to_overwrite)
 
     def generate_facts(self,
                        local_facts,
-                       additive_facts_to_overwrite,
-                       openshift_env,
-                       openshift_env_structures):
+                       additive_facts_to_overwrite):
         """ Generate facts
 
             Args:
                 local_facts (dict): local_facts for overriding generated defaults
                 additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                     '.' notation ex: ['master.named_certificates']
-                openshift_env (dict): openshift_env facts for overriding generated defaults
             Returns:
                 dict: The generated facts
         """
+
         local_facts = self.init_local_facts(local_facts,
-                                            additive_facts_to_overwrite,
-                                            openshift_env,
-                                            openshift_env_structures)
+                                            additive_facts_to_overwrite)
         roles = local_facts.keys()
 
         if 'common' in local_facts and 'deployment_type' in local_facts['common']:
@@ -1700,62 +1692,17 @@ class OpenShiftFacts(object):
         )
         return provider_facts
 
-    @staticmethod
-    def split_openshift_env_fact_keys(openshift_env_fact, openshift_env_structures):
-        """ Split openshift_env facts based on openshift_env structures.
-
-            Args:
-                openshift_env_fact (string): the openshift_env fact to split
-                                             ex: 'openshift_cloudprovider_openstack_auth_url'
-                openshift_env_structures (list): a list of structures to determine fact keys
-                                                 ex: ['openshift.cloudprovider.openstack.*']
-            Returns:
-                list: a list of keys that represent the fact
-                      ex: ['openshift', 'cloudprovider', 'openstack', 'auth_url']
-        """
-        # By default, we'll split an openshift_env fact by underscores.
-        fact_keys = openshift_env_fact.split('_')
-
-        # Determine if any of the provided variable structures match the fact.
-        matching_structure = None
-        if openshift_env_structures is not None:
-            for structure in openshift_env_structures:
-                if re.match(structure, openshift_env_fact):
-                    matching_structure = structure
-        # Fact didn't match any variable structures so return the default fact keys.
-        if matching_structure is None:
-            return fact_keys
-
-        final_keys = []
-        structure_keys = matching_structure.split('.')
-        for structure_key in structure_keys:
-            # Matched current key. Add to final keys.
-            if structure_key == fact_keys[structure_keys.index(structure_key)]:
-                final_keys.append(structure_key)
-            # Wildcard means we will be taking everything from here to the end of the fact.
-            elif structure_key == '*':
-                final_keys.append('_'.join(fact_keys[structure_keys.index(structure_key):]))
-            # Shouldn't have gotten here, return the fact keys.
-            else:
-                return fact_keys
-        return final_keys
-
     # Disabling too-many-branches and too-many-locals.
     # This should be cleaned up as a TODO item.
     # pylint: disable=too-many-branches, too-many-locals
     def init_local_facts(self, facts=None,
-                         additive_facts_to_overwrite=None,
-                         openshift_env=None,
-                         openshift_env_structures=None):
+                         additive_facts_to_overwrite=None):
         """ Initialize the local facts
 
             Args:
                 facts (dict): local facts to set
                 additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                     '.' notation ex: ['master.named_certificates']
-                openshift_env (dict): openshift env facts to set
-
-
             Returns:
                 dict: The result of merging the provided facts with existing
                       local facts
@@ -1766,36 +1713,6 @@ class OpenShiftFacts(object):
 
         if facts is not None:
             facts_to_set[self.role] = facts
-
-        if openshift_env != {} and openshift_env is not None:
-            for fact, value in iteritems(openshift_env):
-                oo_env_facts = dict()
-                current_level = oo_env_facts
-                keys = self.split_openshift_env_fact_keys(fact, openshift_env_structures)[1:]
-
-                if len(keys) > 0 and keys[0] != self.role:
-                    continue
-
-                # Build a dictionary from the split fact keys.
-                # After this loop oo_env_facts is the resultant dictionary.
-                # For example:
-                # fact = "openshift_metrics_install_metrics"
-                # value = 'true'
-                # keys = ['metrics', 'install', 'metrics']
-                # result = {'metrics': {'install': {'metrics': 'true'}}}
-                for i, _ in enumerate(keys):
-                    # This is the last key. Set the value.
-                    if i == (len(keys) - 1):
-                        current_level[keys[i]] = value
-                    # This is a key other than the last key. Set as
-                    # dictionary and continue.
-                    else:
-                        current_level[keys[i]] = dict()
-                        current_level = current_level[keys[i]]
-
-                facts_to_set = merge_facts(orig=facts_to_set,
-                                           new=oo_env_facts,
-                                           additive_facts_to_overwrite=[])
 
         local_facts = get_local_facts_from_file(self.filename)
 
@@ -1911,8 +1828,6 @@ def main():
                       choices=OpenShiftFacts.known_roles),
             local_facts=dict(default=None, type='dict', required=False),
             additive_facts_to_overwrite=dict(default=[], type='list', required=False),
-            openshift_env=dict(default={}, type='dict', required=False),
-            openshift_env_structures=dict(default=[], type='list', required=False)
         ),
         supports_check_mode=True,
         add_file_common_args=True,
@@ -1928,17 +1843,13 @@ def main():
     role = module.params['role']  # noqa: F405
     local_facts = module.params['local_facts']  # noqa: F405
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']  # noqa: F405
-    openshift_env = module.params['openshift_env']  # noqa: F405
-    openshift_env_structures = module.params['openshift_env_structures']  # noqa: F405
 
     fact_file = '/etc/ansible/facts.d/openshift.fact'
 
     openshift_facts = OpenShiftFacts(role,
                                      fact_file,
                                      local_facts,
-                                     additive_facts_to_overwrite,
-                                     openshift_env,
-                                     openshift_env_structures)
+                                     additive_facts_to_overwrite)
 
     file_params = module.params.copy()  # noqa: F405
     file_params['path'] = fact_file
