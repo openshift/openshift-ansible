@@ -1,9 +1,9 @@
 ---
 - include_tasks: netplugin_firewalld.yml
-  when: has_firewalld
+  when: contiv_has_firewalld
 
 - include_tasks: netplugin_iptables.yml
-  when: has_iptables
+  when: not contiv_has_firewalld and contiv_has_iptables
 
 - name: Netplugin | Ensure localhost entry correct in /etc/hosts
   lineinfile:
@@ -20,41 +20,40 @@
     state: absent
 
 - include_tasks: ovs.yml
-  when: netplugin_driver == "ovs"
+  when: contiv_netplugin_driver == "ovs"
 
 - name: Netplugin | Create Netplugin bin symlink
   file:
     src: "{{ contiv_current_release_directory }}/netplugin"
-    dest: "{{ bin_dir }}/netplugin"
+    dest: "{{ contiv_bin_dir }}/netplugin"
     state: link
 
-
-- name: Netplugin | Ensure cni_bin_dir exists
+- name: Netplugin | Ensure contiv_cni_bin_dir exists
   file:
-    path: "{{ cni_bin_dir }}"
+    path: "{{ contiv_cni_bin_dir }}"
     recurse: yes
     state: directory
 
 - name: Netplugin | Create CNI bin symlink
   file:
     src: "{{ contiv_current_release_directory }}/contivk8s"
-    dest: "{{ cni_bin_dir }}/contivk8s"
+    dest: "{{ contiv_cni_bin_dir }}/contivk8s"
     state: link
 
 - name: Netplugin | Copy CNI loopback bin
   copy:
-    src: "{{ cni_download_dir }}/loopback"
-    dest: "{{ cni_bin_dir }}/loopback"
+    src: "{{ contiv_cni_download_dir }}/loopback"
+    dest: "{{ contiv_cni_bin_dir }}/loopback"
     remote_src: True
     mode: 0755
 
-- name: Netplugin | Ensure kube_plugin_dir and cni/net.d directories exist
+- name: Netplugin | Ensure contiv_kube_plugin_dir and cni/net.d directories exist
   file:
     path: "{{ item }}"
     recurse: yes
     state: directory
   with_items:
-    - "{{ kube_plugin_dir }}"
+    - "{{ contiv_kube_plugin_dir }}"
     - "/etc/cni/net.d"
 
 - name: Netplugin | Ensure contiv_config_dir exists
@@ -68,7 +67,7 @@
     src: contiv_cni.conf
     dest: "{{ item }}"
   with_items:
-    - "{{ kube_plugin_dir }}/contiv_cni.conf"
+    - "{{ contiv_kube_plugin_dir }}/contiv_cni.conf"
     - "/etc/cni/net.d"
 # notify: restart kubelet
 
@@ -85,11 +84,11 @@
     mode: 0644
   notify: restart netplugin
 
-- name: Docker | Make sure proxy setting exists
+- name: Netplugin | Make sure docker proxy setting exists
   lineinfile:
     dest: /etc/sysconfig/docker-network
     regexp: '^https_proxy.*'
-    line: 'https_proxy={{ https_proxy }}'
+    line: 'https_proxy={{ contiv_https_proxy }}'
     state: present
   register: docker_updated
 
@@ -103,9 +102,9 @@
   command: systemctl daemon-reload
   when: docker_updated is changed
 
-- name: Docker | Restart docker
+- name: Netplugin | Restart docker
   service:
-    name: "{{ openshift_docker_service_name }}"
+    name: "{{ contiv_openshift_docker_service_name }}"
     state: restarted
   when: docker_updated is changed
   register: l_docker_restart_docker_in_contiv_result

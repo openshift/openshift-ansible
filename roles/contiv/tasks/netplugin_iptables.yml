@@ -1,58 +1,52 @@
 ---
-- name: Netplugin IPtables | Get iptables rules
-  command: iptables -L --wait
-  register: iptablesrules
-  check_mode: no
+- name: Netplugin IPtables | Add internal rules
+  iptables:
+    action: insert
+    chain: INPUT
+    protocol: "{{ item[0].split('/')[1] }}"
+    match: "{{ item[0].split('/')[1] }}"
+    destination_port: "{{ item[0].split('/')[0] }}"
+    source: "{{ item[1] }}"
+    jump: ACCEPT
+    comment: contiv
+  with_nested:
+    - "{{ contiv_netplugin_internal }}"
+    - "{{ groups.oo_nodes_to_config|difference(hostvars[inventory_hostname]['ansible_' + contiv_netmaster_interface].ipv4.address)|list }}"
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Add [in] forward rules
+  iptables:
+    action: insert
+    chain: FORWARD
+    in_interface: "{{ item }}"
+    jump: ACCEPT
+    comment: contiv
+  with_items: "{{ contiv_netplugin_forward_interfaces }}"
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Add [out] forward rules
+  iptables:
+    action: insert
+    chain: FORWARD
+    out_interface: "{{ item }}"
+    jump: ACCEPT
+    comment: contiv
+  with_items: "{{ contiv_netplugin_forward_interfaces }}"
+  notify: Save iptables rules
+
+- name: Netplugin IPtables | Add dns rule
+  iptables:
+    action: insert
+    chain: INPUT
+    protocol: udp
+    match: udp
+    destination_port: 53
+    in_interface: contivh0
+    jump: ACCEPT
+    comment: contiv
+  notify: Save iptables rules
 
 - name: Netplugin IPtables | Enable iptables at boot
   service:
     name: iptables
     enabled: yes
-    state: started
-
-- name: Netplugin IPtables | Open Netmaster with iptables
-  command: /sbin/iptables -I INPUT 1 -p tcp --dport {{ item }} -j ACCEPT -m comment --comment "contiv"
-  with_items:
-  - "{{ netmaster_port }}"
-  - "{{ contiv_rpc_port1 }}"
-  - "{{ contiv_rpc_port2 }}"
-  - "{{ contiv_rpc_port3 }}"
-  - "{{ contiv_etcd_port }}"
-  - "{{ kube_master_api_port }}"
-  when: iptablesrules.stdout.find("contiv") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Open vxlan port with iptables
-  command: /sbin/iptables -I INPUT 1 -p udp --dport 8472 -j ACCEPT -m comment --comment "netplugin vxlan 8472"
-  when: iptablesrules.stdout.find("netplugin vxlan 8472") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Open vxlan port with iptables
-  command: /sbin/iptables -I INPUT 1 -p udp --dport 4789 -j ACCEPT -m comment --comment "netplugin vxlan 4789"
-  when: iptablesrules.stdout.find("netplugin vxlan 4789") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Allow from contivh0
-  command: /sbin/iptables -I FORWARD 1 -i contivh0 -j ACCEPT -m comment --comment "contivh0 FORWARD input"
-  when: iptablesrules.stdout.find("contivh0 FORWARD input") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Allow to contivh0
-  command: /sbin/iptables -I FORWARD 1 -o contivh0 -j ACCEPT -m comment --comment "contivh0 FORWARD output"
-  when: iptablesrules.stdout.find("contivh0 FORWARD output") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Allow from contivh1
-  command: /sbin/iptables -I FORWARD 1 -i contivh1 -j ACCEPT -m comment --comment "contivh1 FORWARD input"
-  when: iptablesrules.stdout.find("contivh1 FORWARD input") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Allow to contivh1
-  command: /sbin/iptables -I FORWARD 1 -o contivh1 -j ACCEPT -m comment --comment "contivh1 FORWARD output"
-  when: iptablesrules.stdout.find("contivh1 FORWARD output") == -1
-  notify: Save iptables rules
-
-- name: Netplugin IPtables | Allow dns
-  command: /sbin/iptables -I INPUT 1 -p udp --dport 53 -j ACCEPT -m comment --comment "contiv dns"
-  when: iptablesrules.stdout.find("contiv dns") == -1
-  notify: Save iptables rules
