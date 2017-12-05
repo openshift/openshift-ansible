@@ -63,5 +63,4 @@
 
 - include: enterprise.yml
   when:
-  - deployment_type == 'openshift-enterprise'
   - not ostree_booted.stat.exists | bool
