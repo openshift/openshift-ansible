@@ -7,6 +7,12 @@
     msg: Verify the correct version was found
   when: verify_upgrade_version is defined and openshift_version != verify_upgrade_version
 
+- name: Update oreg_auth docker login credentials if necessary
+  include_role:
+    name: docker
+    tasks_from: registry_auth.yml
+  when: oreg_auth_user is defined
+
 - name: Verify containers are available for upgrade
   command: >
     docker pull {{ openshift.common.cli_image }}:{{ openshift_image_tag }}
