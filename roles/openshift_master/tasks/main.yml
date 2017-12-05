@@ -11,25 +11,6 @@
   - openshift_master_oauth_grant_method is defined
   - openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
-# HA Variable Validation
-- fail:
-    msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
-  when:
-  - openshift.master.ha | bool
-  - (openshift.master.cluster_method is not defined) or (openshift.master.cluster_method is defined and openshift.master.cluster_method not in ["native", "pacemaker"])
-- fail:
-    msg: "openshift_master_cluster_password must be set for multi-master installations"
-  when:
-  - openshift.master.ha | bool
-  - openshift.master.cluster_method == "pacemaker"
-  - openshift_master_cluster_password is not defined or not openshift_master_cluster_password
-- fail:
-    msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
-  when:
-  - openshift.master.ha | bool
-  - openshift.master.cluster_method == "pacemaker"
-  - openshift.common.is_containerized | bool
-
 - name: Open up firewall ports
   import_tasks: firewall.yml
 
@@ -226,7 +207,6 @@
     enabled: yes
     state: started
   when:
-  - openshift.master.cluster_method == 'native'
   - inventory_hostname == openshift_master_hosts[0]
   register: l_start_result
   until: not l_start_result | failed
@@ -241,14 +221,12 @@
 - set_fact:
     master_api_service_status_changed: "{{ l_start_result | changed }}"
   when:
-  - openshift.master.cluster_method == 'native'
   - inventory_hostname == openshift_master_hosts[0]
 
 - pause:
     seconds: 15
   when:
   - openshift.master.ha | bool
-  - openshift.master.cluster_method == 'native'
 
 - name: Start and enable master api all masters
   systemd:
@@ -256,7 +234,6 @@
     enabled: yes
     state: started
   when:
-  - openshift.master.cluster_method == 'native'
   - inventory_hostname != openshift_master_hosts[0]
   register: l_start_result
   until: not l_start_result | failed
@@ -271,14 +248,12 @@
 - set_fact:
     master_api_service_status_changed: "{{ l_start_result | changed }}"
   when:
-  - openshift.master.cluster_method == 'native'
   - inventory_hostname != openshift_master_hosts[0]
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
 - include_tasks: check_master_api_is_ready.yml
   when:
-  - openshift.master.cluster_method == 'native'
   - master_api_service_status_changed | bool
 
 - name: Start and enable master controller service
@@ -286,8 +261,6 @@
     name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
-  when:
-  - openshift.master.cluster_method == 'native'
   register: l_start_result
   until: not l_start_result | failed
   retries: 1
@@ -301,30 +274,6 @@
 - name: Set fact master_controllers_service_status_changed
   set_fact:
     master_controllers_service_status_changed: "{{ l_start_result | changed }}"
-  when:
-  - openshift.master.cluster_method == 'native'
-
-- name: Install cluster packages
-  package: name=pcs state=present
-  when:
-  - openshift.master.cluster_method == 'pacemaker'
-  - not openshift.common.is_containerized | bool
-  register: l_install_result
-  until: l_install_result | success
-
-- name: Start and enable cluster service
-  systemd:
-    name: pcsd
-    enabled: yes
-    state: started
-  when:
-  - openshift.master.cluster_method == 'pacemaker'
-  - not openshift.common.is_containerized | bool
-
-- name: Set the cluster user password
-  shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
-  when:
-  - l_install_result | changed
 
 - name: node bootstrap settings
   include_tasks: bootstrap.yml

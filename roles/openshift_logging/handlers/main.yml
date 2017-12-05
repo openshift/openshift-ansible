@@ -1,7 +1,7 @@
 ---
 - name: restart master api
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
-  when: (not (master_api_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  when: (not (master_api_service_status_changed | default(false) | bool))
   notify: Verify API Server
 
 # We retry the controllers because the API may not be 100% initialized yet.
@@ -11,7 +11,7 @@
   delay: 5
   register: result
   until: result.rc == 0
-  when: (not (master_controllers_service_status_changed | default(false) | bool)) and openshift.master.cluster_method == 'native'
+  when: (not (master_controllers_service_status_changed | default(false) | bool))
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and

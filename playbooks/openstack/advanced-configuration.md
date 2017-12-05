@@ -337,7 +337,6 @@ variables](https://docs.openshift.com/container-platform/3.6/install_config/inst
 in `inventory/group_vars/OSEv3.yml`. For example, given a load balancer node
 under the ansible group named `ext_lb`:
 
-    openshift_master_cluster_method: native
     openshift_master_cluster_hostname: "{{ groups.ext_lb.0 }}"
     openshift_master_cluster_public_hostname: "{{ groups.ext_lb.0 }}"
 

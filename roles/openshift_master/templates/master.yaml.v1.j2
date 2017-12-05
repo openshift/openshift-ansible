@@ -120,7 +120,7 @@ kubernetesMasterConfig:
     - application/vnd.kubernetes.protobuf
 {% endif %}
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
-  masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
+  masterCount: {{ openshift.master.master_count }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
   proxyClientInfo:

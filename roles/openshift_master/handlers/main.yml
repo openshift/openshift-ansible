@@ -5,7 +5,6 @@
     state: restarted
   when:
   - not (master_api_service_status_changed | default(false) | bool)
-  - openshift.master.cluster_method == 'native'
   notify:
   - Verify API Server
 
@@ -18,7 +17,6 @@
   until: result.rc == 0
   when:
   - not (master_controllers_service_status_changed | default(false) | bool)
-  - openshift.master.cluster_method == 'native'
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
