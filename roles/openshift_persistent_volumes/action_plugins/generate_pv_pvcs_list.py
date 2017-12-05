@@ -90,21 +90,19 @@ class ActionModule(ActionBase):
             create_pv = self.task_vars.get(str(varname) + '_create_pv')
             if create_pv and self._templar.template(create_pv):
                 if kind == 'nfs':
-                    persistent_volume = self.build_pv_nfs(varname=varname)
+                    return self.build_pv_nfs(varname=varname)
 
                 elif kind == 'openstack':
-                    persistent_volume = self.build_pv_openstack(varname=varname)
+                    return self.build_pv_openstack(varname=varname)
 
                 elif kind == 'glusterfs':
-                    persistent_volume = self.build_pv_glusterfs(varname=varname)
+                    return self.build_pv_glusterfs(varname=varname)
 
                 elif not (kind == 'object' or kind == 'dynamic'):
                     msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                         kind,
                         varname)
                     raise errors.AnsibleModuleError(msg)
-
-                return persistent_volume
         return None
 
     def build_pvc_dict(self, varname=None):
