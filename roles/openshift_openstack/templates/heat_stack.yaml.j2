@@ -72,7 +72,7 @@ outputs:
 {% endif %}
 
 conditions:
-  no_floating: {% if openshift_openstack_provider_network_name or openshift_openstack_use_bastion|bool %}true{% else %}false{% endif %}
+  no_floating: {% if openshift_openstack_provider_network_name %}true{% else %}false{% endif %}
 
 resources:
 
@@ -180,13 +180,6 @@ resources:
           port_range_min: 22
           port_range_max: 22
           remote_ip_prefix: {{ openshift_openstack_ssh_ingress_cidr }}
-{% if openshift_openstack_use_bastion|bool %}
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-          remote_ip_prefix: {{ openshift_openstack_bastion_ingress_cidr }}
-{% endif %}
         - direction: ingress
           protocol: icmp
           remote_ip_prefix: {{ openshift_openstack_ssh_ingress_cidr }}
@@ -480,7 +473,7 @@ resources:
           remote_ip_prefix: "{{ openshift_openstack_subnet_prefix }}.0/24"
 {% endif %}
 
-{% if openshift_openstack_num_masters|int > 1 or openshift_openstack_ui_ssh_tunnel|bool %}
+{% if openshift_openstack_num_masters|int > 1 %}
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -491,20 +484,13 @@ resources:
         protocol: tcp
         port_range_min: {{ openshift_master_api_port | default(8443) }}
         port_range_max: {{ openshift_master_api_port | default(8443) }}
-        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr | default(openshift_openstack_bastion_ingress_cidr) }}
-{% if openshift_openstack_ui_ssh_tunnel|bool %}
-      - direction: ingress
-        protocol: tcp
-        port_range_min: {{ openshift_master_api_port | default(8443) }}
-        port_range_max: {{ openshift_master_api_port | default(8443) }}
-        remote_ip_prefix: {{ openshift_openstack_ssh_ingress_cidr }}
-{% endif %}
+        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr }}
 {% if openshift_master_console_port is defined and openshift_master_console_port != openshift_master_api_port %}
       - direction: ingress
         protocol: tcp
         port_range_min: {{ openshift_master_console_port | default(8443) }}
         port_range_max: {{ openshift_master_console_port | default(8443) }}
-        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr | default(openshift_openstack_bastion_ingress_cidr) }}
+        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr }}
 {% endif %}
 {% endif %}
 
@@ -553,7 +539,7 @@ resources:
               - no_floating
               - null
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_use_bastion|bool or openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_etcd_volume_size }}
@@ -685,7 +671,7 @@ resources:
               - no_floating
               - null
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_use_bastion|bool or openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_master_volume_size }}
@@ -755,7 +741,7 @@ resources:
               - no_floating
               - null
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_use_bastion|bool or openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_node_volume_size }}
@@ -817,9 +803,6 @@ resources:
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: node-secgrp }
-{% endif %}
-{% if openshift_openstack_ui_ssh_tunnel|bool and openshift_openstack_num_masters|int < 2 %}
-            - { get_resource: lb-secgrp }
 {% endif %}
             - { get_resource: infra-secgrp }
             - { get_resource: common-secgrp }

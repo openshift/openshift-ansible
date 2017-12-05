@@ -63,15 +63,6 @@
   when:
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
     - openshift_openstack_num_masters == 1
-    - not openshift_openstack_use_bastion|bool
-
-- name: "Add public master cluster hostname records to the public A records (single master behind a bastion)"
-  set_fact:
-    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(openshift_openstack_full_dns_domain, ''))[:-1], 'ip': hostvars[groups.bastions[0]].public_v4 } ] }}"
-  when:
-    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
-    - openshift_openstack_num_masters == 1
-    - openshift_openstack_use_bastion|bool
 
 - name: "Add public master cluster hostname records to the public A records (multi-master)"
   set_fact:

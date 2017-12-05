@@ -328,14 +328,6 @@ The `openshift_openstack_required_packages` variable also provides a list of the
 prerequisite packages to be installed before to deploy an OpenShift cluster.
 Those are ignored though, if the `manage_packages: False`.
 
-The `openstack_inventory` controls either a static inventory will be created after the
-cluster nodes provisioned on OpenStack cloud. Note, the fully dynamic inventory
-is yet to be supported, so the static inventory will be created anyway.
-
-The `openstack_inventory_path` points the directory to host the generated static inventory.
-It should point to the copied example inventory directory, otherwise ti creates
-a new one for you.
-
 ## Multi-master configuration
 
 Please refer to the official documentation for the
@@ -538,43 +530,6 @@ You can also run the registry setup playbook directly:
 
 
 
-## Configure static inventory and access via a bastion node
-
-Example inventory variables:
-
-    openshift_openstack_use_bastion: true
-    openshift_openstack_bastion_ingress_cidr: "{{openshift_openstack_subnet_prefix}}.0/24"
-    openstack_private_ssh_key: ~/.ssh/id_rsa
-    openstack_inventory: static
-    openstack_inventory_path: ../../../../inventory
-    openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.openshift.example.com
-
-The `openshift_openstack_subnet_prefix` is the openstack private network for your cluster.
-And the `openshift_openstack_bastion_ingress_cidr` defines accepted range for SSH connections to nodes
-additionally to the `openshift_openstack_ssh_ingress_cidr`` (see the security notes above).
-
-The SSH config will be stored on the ansible control node by the
-gitven path. Ansible uses it automatically. To access the cluster nodes with
-that ssh config, use the `-F` prefix, f.e.:
-
-    ssh -F /tmp/ssh.config.openshift.ansible.openshift.example.com master-0.openshift.example.com echo OK
-
-Note, relative paths will not work for the `openstack_ssh_config_path`, but it
-works for the `openstack_private_ssh_key` and `openstack_inventory_path`. In this
-guide, the latter points to the current directory, where you run ansible commands
-from.
-
-To verify nodes connectivity, use the command:
-
-    ansible -v -i inventory/hosts -m ping all
-
-If something is broken, double-check the inventory variables, paths and the
-generated `<openstack_inventory_path>/hosts` and `openstack_ssh_config_path` files.
-
-The `inventory: dynamic` can be used instead to access cluster nodes directly via
-floating IPs. In this mode you can not use a bastion node and should specify
-the dynamic inventory file in your ansible commands , like `-i openstack.py`.
-
 ## Using Docker on the Ansible host
 
 If you don't want to worry about the dependencies, you can use the
@@ -602,28 +557,6 @@ the playbooks:
 
     cd openshift
     ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
-
-
-### Run the playbook
-
-Assuming your OpenStack (Keystone) credentials are in the `keystonerc`
-this is how you stat the provisioning process from your ansible control node:
-
-    . keystonerc
-    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
-
-Note, here you start with an empty inventory. The static inventory will be populated
-with data so you can omit providing additional arguments for future ansible commands.
-
-If bastion enabled, the generates SSH config must be applied for ansible.
-Otherwise, it is auto included by the previous step. In order to execute it
-as a separate playbook, use the following command:
-
-    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-provision-openstack.yml
-
-The first infra node then becomes a bastion node as well and proxies access
-for future ansible commands. The post-provision step also configures Satellite,
-if requested, and DNS server, and ensures other OpenShift requirements to be met.
 
 
 ## Running Custom Post-Provision Actions
@@ -733,21 +666,6 @@ Once it succeeds, you can install openshift by running:
 
 OpenShift UI may be accessed via the 1st master node FQDN, port 8443.
 
-When using a bastion, you may want to make an SSH tunnel from your control node
-to access UI on the `https://localhost:8443`, with this inventory variable:
-
-   openshift_openstack_ui_ssh_tunnel: True
-
-Note, this requires sudo rights on the ansible control node and an absolute path
-for the `openstack_private_ssh_key`. You should also update the control node's
-`/etc/hosts`:
-
-    127.0.0.1 master-0.openshift.example.com
-
-In order to access UI, the ssh-tunnel service will be created and started on the
-control node. Make sure to remove these changes and the service manually, when not
-needed anymore.
-
 ## Scale Deployment up/down
 
 ### Scaling up
@@ -766,5 +684,3 @@ Usage:
 ```
 ansible-playbook -i <path to inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/scale-up.yaml` [-e increment_by=<number>] [-e openshift_ansible_dir=<path to openshift-ansible>]
 ```
-
-Note: This playbook works only without a bastion node (`openshift_openstack_use_bastion: False`).

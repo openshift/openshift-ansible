@@ -215,7 +215,6 @@ advanced configuration:
 * [External Dns][external-dns]
 * Multiple Clusters (TODO)
 * [Cinder Registry][cinder-registry]
-* [Bastion Node][bastion]
 
 
 [ansible]: https://www.ansible.com/
@@ -234,4 +233,3 @@ advanced configuration:
 [loadbalancer]: ./advanced-configuration.md#multi-master-configuration
 [external-dns]: ./advanced-configuration.md#dns-configuration-variables
 [cinder-registry]: ./advanced-configuration.md#creating-and-using-a-cinder-volume-for-the-openshift-registry
-[bastion]: ./advanced-configuration.md#configure-static-inventory-and-access-via-a-bastion-node
