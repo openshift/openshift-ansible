@@ -1,0 +1,35 @@
+---
+## get all pods for the cluster
+- command: >
+    oc get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+  register: _cluster_pods
+
+- name: "Disable shard balancing for logging-{{ _cluster_component }} cluster"
+  command: >
+    oc exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_cluster/settings' -d '{ "transient": { "cluster.routing.allocation.enable" : "none" } }'
+  register: _disable_output
+  changed_when: "'\"acknowledged\":true' in _disable_output.stdout"
+  when: _cluster_pods.stdout_lines | count > 0
+
+- command: >
+    oc get dc -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+  register: _cluster_dcs
+
+## restart the node if it's dc is in the list of nodes to restart?
+- name: "Restart ES node {{ _es_node }}"
+  include_tasks: restart_es_node.yml
+  with_items: "{{ _restart_logging_nodes }}"
+  loop_control:
+    loop_var: _es_node
+  when: _es_node in _cluster_dcs.stdout
+
+## we may need a new first pod to run against -- fetch them all again
+- command: >
+    oc get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+  register: _cluster_pods
+
+- name: "Enable shard balancing for logging-{{ _cluster_component }} cluster"
+  command: >
+    oc exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_cluster/settings' -d '{ "transient": { "cluster.routing.allocation.enable" : "all" } }'
+  register: _enable_output
+  changed_when: "'\"acknowledged\":true' in _enable_output.stdout"
