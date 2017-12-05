@@ -16,8 +16,8 @@
       local_facts:
         embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 
-- name: Upgrade and backup etcd
-  include: ./etcd/main.yml
+- name: Backup and upgrade etcd
+  include: ../../../openshift-etcd/private/upgrade_main.yml
 
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master_config_upgrade hook.
