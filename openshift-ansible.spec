@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.1
+Version:        3.8.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Dec 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.2-1
+- 
+
 * Sat Dec 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.1-1
 - Fix glusterfs checkpoint info (rteague@redhat.com)
 - storage_glusterfs: fix typo (lmeyer@redhat.com)
