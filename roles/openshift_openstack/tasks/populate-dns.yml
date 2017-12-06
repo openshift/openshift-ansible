@@ -30,7 +30,6 @@
     nsupdate_key_algorithm_private: "{{ openshift_openstack_external_nsupdate_keys['private']['key_algorithm'] }}"
     nsupdate_private_key_name: "{{ openshift_openstack_external_nsupdate_keys['private']['key_name']|default('private-' + openshift_openstack_full_dns_domain) }}"
   when:
-    - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys['private'] is defined
 
 
@@ -44,6 +43,8 @@
         key_secret: "{{ nsupdate_key_secret_private }}"
         key_algorithm: "{{ nsupdate_key_algorithm_private | lower }}"
         entries: "{{ private_records }}"
+  when:
+    - openshift_openstack_external_nsupdate_keys['private'] is defined
 
 - name: "Generate list of public A records"
   set_fact:
@@ -78,7 +79,6 @@
     nsupdate_key_algorithm_public: "{{ openshift_openstack_external_nsupdate_keys['public']['key_algorithm'] }}"
     nsupdate_public_key_name: "{{ openshift_openstack_external_nsupdate_keys['public']['key_name']|default('public-' + openshift_openstack_full_dns_domain) }}"
   when:
-    - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys['public'] is defined
 
 - name: "Generate the public Add section for DNS"
@@ -91,11 +91,13 @@
         key_secret: "{{ nsupdate_key_secret_public }}"
         key_algorithm: "{{ nsupdate_key_algorithm_public | lower }}"
         entries: "{{ public_records }}"
+  when:
+    - openshift_openstack_external_nsupdate_keys['public'] is defined
 
 
 - name: "Generate the final openshift_openstack_dns_records_add"
   set_fact:
-    openshift_openstack_dns_records_add: "{{ private_named_records + public_named_records }}"
+    openshift_openstack_dns_records_add: "{{ private_named_records|default([]) + public_named_records|default([]) }}"
 
 
 - name: "Add DNS A records"
@@ -111,7 +113,7 @@
     # TODO(shadower): add a cleanup playbook that removes these records, too!
     state: present
   with_subelements:
-    - "{{ openshift_openstack_dns_records_add | default({}) }}"
+    - "{{ openshift_openstack_dns_records_add | default([]) }}"
     - entries
   register: nsupdate_add_result
   until: nsupdate_add_result|succeeded

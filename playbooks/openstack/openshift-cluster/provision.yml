@@ -27,9 +27,6 @@
     setup:
 
 
-# NOTE(shadower): the (internal) DNS must be functional at this point!!
-# That will have happened in provision.yml if nsupdate was configured.
-
 # TODO(shadower): consider splitting this up so people can stop here
 # and configure their DNS if they have to.
 - name: Populate the DNS entries

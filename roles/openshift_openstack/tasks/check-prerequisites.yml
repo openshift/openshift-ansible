@@ -32,10 +32,12 @@
   command: python -c "import dns"
   ignore_errors: yes
   register: pythondns_result
+  when: openshift_openstack_external_nsupdate_keys is defined
 - name: Check if python-dns is installed
   assert:
     that: 'pythondns_result.rc == 0'
     msg: "Python module python-dns is not installed"
+  when: openshift_openstack_external_nsupdate_keys is defined
 
 # Check jinja2
 - name: Try to import jinja2 module
@@ -92,7 +94,6 @@
   - "{{ openshift_openstack_node_image }}"
   - "{{ openshift_openstack_lb_image }}"
   - "{{ openshift_openstack_etcd_image }}"
-  - "{{ openshift_openstack_dns_image }}"
 
 # Check that custom flavors are available
 - include: custom_flavor_check.yaml
@@ -102,4 +103,3 @@
   - "{{ openshift_openstack_node_flavor }}"
   - "{{ openshift_openstack_lb_flavor }}"
   - "{{ openshift_openstack_etcd_flavor }}"
-  - "{{ openshift_openstack_dns_flavor }}"

@@ -7,7 +7,6 @@ openshift_openstack_lb_ingress_cidr: 0.0.0.0/0
 openshift_openstack_num_etcd: 0
 openshift_openstack_num_masters: 1
 openshift_openstack_num_nodes: 1
-openshift_openstack_num_dns: 0
 openshift_openstack_num_infra: 1
 openshift_openstack_dns_nameservers: []
 openshift_openstack_nodes_to_remove: []
@@ -44,7 +43,6 @@ openshift_openstack_container_storage_setup:
 
 # populate-dns
 openshift_openstack_dns_records_add: []
-openshift_openstack_external_nsupdate_keys: {}
 
 openshift_openstack_full_dns_domain: "{{ (openshift_openstack_clusterid|trim == '') | ternary(openshift_openstack_public_dns_domain, openshift_openstack_clusterid + '.' + openshift_openstack_public_dns_domain) }}"
 openshift_openstack_app_subdomain: "apps"
@@ -59,20 +57,17 @@ openshift_openstack_infra_hostname: infra-node
 openshift_openstack_node_hostname: app-node
 openshift_openstack_lb_hostname: lb
 openshift_openstack_etcd_hostname: etcd
-openshift_openstack_dns_hostname: dns
 openshift_openstack_keypair_name: openshift
 openshift_openstack_lb_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_etcd_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_master_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_node_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_infra_flavor: "{{ openshift_openstack_default_flavor }}"
-openshift_openstack_dns_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_master_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_infra_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_node_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_lb_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_etcd_image: "{{ openshift_openstack_default_image_name }}"
-openshift_openstack_dns_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_provider_network_name: null
 openshift_openstack_external_network_name: null
 openshift_openstack_private_network: >-
@@ -88,6 +83,5 @@ openshift_openstack_master_volume_size: "{{ openshift_openstack_docker_volume_si
 openshift_openstack_infra_volume_size: "{{ openshift_openstack_docker_volume_size }}"
 openshift_openstack_node_volume_size: "{{ openshift_openstack_docker_volume_size }}"
 openshift_openstack_etcd_volume_size: 2
-openshift_openstack_dns_volume_size: 1
 openshift_openstack_lb_volume_size: 5
 openshift_openstack_ephemeral_volumes: false

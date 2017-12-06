@@ -23,35 +23,14 @@ There are no additional dependencies for the cluster nodes. Required
 configuration steps are done by Heat given a specific user data config
 that normally should not be changed.
 
-## Required galaxy modules
-
-In order to pull in external dependencies for DNS configuration steps,
-the following commads need to be executed:
-
-    ansible-galaxy install \
-      -r openshift-ansible-contrib/playbooks/provisioning/openstack/galaxy-requirements.yaml \
-      -p openshift-ansible-contrib/roles
-
-Alternatively you can install directly from github:
-
-    ansible-galaxy install git+https://github.com/redhat-cop/infra-ansible,master \
-      -p openshift-ansible-contrib/roles
-
-Notes:
-* This assumes we're in the directory that contains the clonned
-openshift-ansible-contrib repo in its root path.
-* When trying to install a different version, the previous one must be removed first
-(`infra-ansible` directory from [roles](https://github.com/openshift/openshift-ansible-contrib/tree/master/roles)).
-Otherwise, even if there are differences between the two versions, installation of the newer version is skipped.
-
-
 ## Accessing the OpenShift Cluster
 
 ### Configure DNS
 
-OpenShift requires two DNS records to function fully. The first one points to
+OpenShift requires a two public DNS records to function fully. The first one points to
 the master/load balancer and provides the UI/API access. The other one is a
-wildcard domain that resolves app route requests to the infra node.
+wildcard domain that resolves app route requests to the infra node. A private DNS
+server and records are not required and not managed here.
 
 If you followed the default installation from the README section, there is no
 DNS configured. You should add two entries to the `/etc/hosts` file on the
@@ -187,8 +166,8 @@ That sudomain can be set as well by the `openshift_openstack_app_subdomain` vari
 the inventory.
 
 The `openstack_<role name>_hostname` is a set of variables used for customising
-hostnames of servers with a given role. When such a variable stays commented,
-default hostname (usually the role name) is used.
+public names of Nova servers provisioned with a given role. When such a variable stays commented,
+default value (usually the role name) is used.
 
 The `openshift_openstack_dns_nameservers` is a list of DNS servers accessible from all
 the created Nova servers. These will provide the internal name resolution for
@@ -203,7 +182,7 @@ When Network Manager is enabled for provisioned cluster nodes, which is
 normally the case, you should not change the defaults and always deploy dnsmasq.
 
 `openshift_openstack_external_nsupdate_keys` describes an external authoritative DNS server(s)
-processing dynamic records updates in the public and private cluster views:
+processing dynamic records updates in the public only cluster view:
 
     openshift_openstack_external_nsupdate_keys:
       public:
@@ -211,34 +190,12 @@ processing dynamic records updates in the public and private cluster views:
         key_algorithm: 'hmac-md5'
         key_name: 'update-key'
         server: <public DNS server IP>
-      private:
-        key_secret: <some nsupdate key 2>
-        key_algorithm: 'hmac-sha256'
-        server: <public or private DNS server IP>
 
 Here, for the public view section, we specified another key algorithm and
 optional `key_name`, which normally defaults to the cluster's DNS domain.
 This just illustrates a compatibility mode with a DNS service deployed
 by OpenShift on OSP10 reference architecture, and used in a mixed mode with
 another external DNS server.
-
-Another example defines an external DNS server for the public view
-additionally to the in-stack DNS server used for the private view only:
-
-    openshift_openstack_external_nsupdate_keys:
-      public:
-        key_secret: <some nsupdate key>
-        key_algorithm: 'hmac-sha256'
-        server: <public DNS server IP>
-
-Here, updates matching the public view will be hitting the given public
-server IP. While updates matching the private view will be sent to the
-auto evaluated in-stack DNS server's **public** IP.
-
-Note, for the in-stack DNS server, private view updates may be sent only
-via the public IP of the server. You can not send updates via the private
-IP yet. This forces the in-stack private server to have a floating IP.
-See also the [security notes](#security-notes)
 
 ## Flannel networking
 
@@ -374,18 +331,6 @@ may want to turn off in order to speed up the provisioning tasks. This may
 be the case for development environments. When turned off, the servers will
 be provisioned omitting the ``yum update`` command. This brings security
 implications though, and is not recommended for production deployments.
-
-### DNS servers security options
-
-Aside from `openshift_openstack_node_ingress_cidr` restricting public access to in-stack DNS
-servers, there are following (bind/named specific) DNS security
-options available:
-
-    named_public_recursion: 'no'
-    named_private_recursion: 'yes'
-
-External DNS servers, which is not included in the 'dns' hosts group,
-are not managed. It is up to you to configure such ones.
 
 ## Configure the OpenShift parameters
 
