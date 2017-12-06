@@ -207,7 +207,7 @@
       group: "{{ 'root' if item == 'root' else _ansible_ssh_user_gid.stdout  }}"
     with_items: "{{ client_users }}"
 
-- include: restart.yml
+- import_playbook: restart.yml
   # Do not restart masters when master or etcd certificates were previously expired.
   when:
   # masters
@@ -272,7 +272,7 @@
       state: absent
     changed_when: false
 
-- include: ../../openshift-node/private/restart.yml
+- import_playbook: ../../openshift-node/private/restart.yml
   # Do not restart nodes when node, master or etcd certificates were previously expired.
   when:
   # nodes

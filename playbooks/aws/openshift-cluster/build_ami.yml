@@ -17,7 +17,7 @@
     - name: openshift_aws_region
       msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
 
-- include: provision_instance.yml
+- import_playbook: provision_instance.yml
   vars:
     openshift_aws_node_group_type: compute
 
@@ -33,8 +33,8 @@
 
 # This is the part that installs all of the software and configs for the instance
 # to become a node.
-- include: ../../openshift-node/private/image_prep.yml
+- import_playbook: ../../openshift-node/private/image_prep.yml
 
-- include: seal_ami.yml
+- import_playbook: seal_ami.yml
   vars:
     openshift_aws_ami_name: "openshift-gi-{{ lookup('pipe', 'date +%Y%m%d%H%M')}}"

@@ -1,5 +1,5 @@
 ---
-- include: ../init/evaluate_groups.yml
+- import_playbook: ../init/evaluate_groups.yml
 
 - name: Subscribe hosts, update repos and update OS packages
   hosts: oo_all_hosts

@@ -1,5 +1,5 @@
 ---
-- include: init/main.yml
+- import_playbook: init/main.yml
   vars:
     skip_verison: True
 
