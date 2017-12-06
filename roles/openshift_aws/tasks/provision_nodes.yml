@@ -27,17 +27,17 @@
   set_fact:
     openshift_aws_launch_config_bootstrap_token: "{{ bootstrap['content'] | b64decode }}"
 
-- include: vpc_and_subnet_id.yml
+- include_tasks: vpc_and_subnet_id.yml
 
 - name: include build compute and infra node groups
-  include: build_node_group.yml
+  include_tasks: build_node_group.yml
   vars:
     l_nodes_to_build: "{{ openshift_aws_node_group_config }}"
     l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups }}"
     l_aws_ami_map: "{{ openshift_aws_ami_map }}"
 
 - name: include build node group for extra nodes
-  include: build_node_group.yml
+  include_tasks: build_node_group.yml
   when: openshift_aws_node_group_config_extra is defined
   vars:
     l_nodes_to_build: "{{ openshift_aws_node_group_config_extra | default({}) }}"
@@ -47,4 +47,4 @@
 # instances aren't scaling fast enough here, we need to wait for them
 - when: openshift_aws_wait_for_ssh | bool
   name: wait for our new nodes to come up
-  include: wait_for_groups.yml
+  include_tasks: wait_for_groups.yml

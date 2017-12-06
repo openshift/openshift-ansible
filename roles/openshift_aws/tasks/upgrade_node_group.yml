@@ -4,13 +4,13 @@
   when:
   - openshift_aws_current_version == openshift_aws_new_version
 
-- include: provision_nodes.yml
+- include_tasks: provision_nodes.yml
 
-- include: accept_nodes.yml
+- include_tasks: accept_nodes.yml
 
-- include: setup_scale_group_facts.yml
+- include_tasks: setup_scale_group_facts.yml
 
-- include: setup_master_group.yml
+- include_tasks: setup_master_group.yml
   vars:
     # we do not set etcd here as its limited to 1 or 3
     openshift_aws_masters_groups: masters,nodes

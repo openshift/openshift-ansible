@@ -139,8 +139,7 @@
     state: directory
 
 - name: setup firewall for CRI-O
-  include_tasks: crio_firewall.yml
-  static: yes
+  import_tasks: crio_firewall.yml
 
 - name: Configure the CNI network
   template:

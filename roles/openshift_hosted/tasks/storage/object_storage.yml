@@ -1,5 +1,5 @@
 ---
-- include: s3.yml
+- include_tasks: s3.yml
   when: openshift_hosted_registry_storage_provider == 's3'
 
 - name: Ensure the registry secret exists

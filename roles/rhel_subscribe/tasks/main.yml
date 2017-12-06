@@ -69,7 +69,7 @@
   until: subscribe_pool | succeeded
   when: openshift_pool_id.stdout != ''
 
-- include: enterprise.yml
+- include_tasks: enterprise.yml
   when:
   - deployment_type == 'openshift-enterprise'
   - not ostree_booted.stat.exists | bool

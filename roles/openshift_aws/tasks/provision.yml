@@ -1,16 +1,16 @@
 ---
 - when: openshift_aws_create_iam_cert | bool
   name: create the iam_cert for elb certificate
-  include: iam_cert.yml
+  include_tasks: iam_cert.yml
 
 - when: openshift_aws_create_s3 | bool
   name: create s3 bucket for registry
-  include: s3.yml
+  include_tasks: s3.yml
 
-- include: vpc_and_subnet_id.yml
+- include_tasks: vpc_and_subnet_id.yml
 
 - name: create elbs
-  include: elb.yml
+  include_tasks: elb.yml
   with_dict: "{{ openshift_aws_elb_dict }}"
   vars:
     l_elb_security_groups: "{{ openshift_aws_elb_security_groups }}"
@@ -19,7 +19,7 @@
     loop_var: l_elb_dict_item
 
 - name: include scale group creation for master
-  include: build_node_group.yml
+  include_tasks: build_node_group.yml
   vars:
     l_nodes_to_build: "{{ openshift_aws_master_group_config }}"
     l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups }}"

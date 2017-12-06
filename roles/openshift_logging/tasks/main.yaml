@@ -19,11 +19,11 @@
   check_mode: no
   become: no
 
-- include: install_logging.yaml
+- include_tasks: install_logging.yaml
   when:
     - openshift_logging_install_logging | default(false) | bool
 
-- include: delete_logging.yaml
+- include_tasks: delete_logging.yaml
   when:
     - not openshift_logging_install_logging | default(false) | bool
 

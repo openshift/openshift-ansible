@@ -20,7 +20,7 @@
   file: path={{osnl_mount_dir}}/{{ item }} owner=nfsnobody group=nfsnobody mode=0700
   with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
 
-- include: nfs.yml
+- include_tasks: nfs.yml
 
 - name: Create volume json file
   template: src=../templates/nfs.json.j2 dest=/root/persistent-volume.{{ item }}.json

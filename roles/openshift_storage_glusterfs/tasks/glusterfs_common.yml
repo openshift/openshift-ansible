@@ -82,7 +82,7 @@
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when: glusterfs_heketi_wipe
 
-- include: glusterfs_deploy.yml
+- include_tasks: glusterfs_deploy.yml
   when: glusterfs_is_native
 
 - name: Create heketi service account
@@ -212,7 +212,7 @@
   when:
   - glusterfs_heketi_is_native
 
-- include: heketi_deploy_part1.yml
+- include_tasks: heketi_deploy_part1.yml
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_deploy_is_missing
@@ -256,7 +256,7 @@
   when:
   - glusterfs_heketi_topology_load
 
-- include: heketi_deploy_part2.yml
+- include_tasks: heketi_deploy_part2.yml
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_is_missing
@@ -312,8 +312,8 @@
   when:
   - glusterfs_storageclass or glusterfs_s3_deploy
 
-- include: glusterblock_deploy.yml
+- include_tasks: glusterblock_deploy.yml
   when: glusterfs_block_deploy
 
-- include: gluster_s3_deploy.yml
+- include_tasks: gluster_s3_deploy.yml
   when: glusterfs_s3_deploy

@@ -46,7 +46,7 @@
     glusterfs_heketi_fstab: "{{ openshift_storage_glusterfs_registry_heketi_fstab }}"
     glusterfs_nodes: "{% if groups.glusterfs_registry is defined %}{% set nodes = groups.glusterfs_registry %}{% elif 'groups.glusterfs' is defined %}{% set nodes = groups.glusterfs %}{% else %}{% set nodes = '[]' %}{% endif %}{{ nodes }}"
 
-- include: glusterfs_common.yml
+- include_tasks: glusterfs_common.yml
   when:
   - glusterfs_nodes | default([]) | count > 0
   - "'glusterfs' not in groups or glusterfs_nodes != groups.glusterfs"

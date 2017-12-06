@@ -31,7 +31,7 @@
         source-ami: "{{ amioutput.image_id }}"
 
   - name: copy the ami for encrypted disks
-    include: ami_copy.yml
+    include_tasks: ami_copy.yml
     vars:
       openshift_aws_ami_copy_name: "{{ openshift_aws_ami_name }}-encrypted"
       openshift_aws_ami_copy_src_ami: "{{ amioutput.image_id }}"

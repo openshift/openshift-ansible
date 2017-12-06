@@ -47,7 +47,7 @@
     openshift_logging_fluentd_image_prefix: "{{ openshift_logging_fluentd_image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
     openshift_logging_fluentd_image_version: "{{ openshift_logging_fluentd_image_version | default(__openshift_logging_fluentd_image_version) }}"
 
-- include: determine_version.yaml
+- include_tasks: determine_version.yaml
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -216,7 +216,7 @@
     openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   when: "'--all' in openshift_logging_fluentd_hosts"
 
-- include: label_and_wait.yaml
+- include_tasks: label_and_wait.yaml
   vars:
     node: "{{ fluentd_host }}"
   with_items: "{{ openshift_logging_fluentd_hosts }}"

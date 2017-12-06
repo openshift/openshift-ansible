@@ -3,7 +3,7 @@
 # Users, projects, and privileges
 
 - name: Run pre-install Management validation checks
-  include: validate.yml
+  include_tasks: validate.yml
 
 # This creates a service account allowing Container Provider
 # integration (managing OCP/Origin via MIQ/Management)
@@ -18,18 +18,18 @@
     display_name: "{{ openshift_management_project_description }}"
 
 - name: Create and Authorize Management Accounts
-  include: accounts.yml
+  include_tasks: accounts.yml
 
 ######################################################################
 # STORAGE - Initialize basic storage class
 - name: Determine the correct NFS host if required
-  include: storage/nfs_server.yml
+  include_tasks: storage/nfs_server.yml
   when: openshift_management_storage_class in ['nfs', 'nfs_external']
 
 #---------------------------------------------------------------------
 # * nfs - set up NFS shares on the first master for a proof of concept
 - name: Create required NFS exports for Management app storage
-  include: storage/nfs.yml
+  include_tasks: storage/nfs.yml
   when: openshift_management_storage_class == 'nfs'
 
 #---------------------------------------------------------------------
@@ -56,14 +56,14 @@
 ######################################################################
 # APPLICATION TEMPLATE
 - name: Install the Management app and PV templates
-  include: template.yml
+  include_tasks: template.yml
 
 ######################################################################
 # APP & DB Storage
 
 # For local/external NFS backed installations
 - name: "Create the required App and DB PVs using {{ openshift_management_storage_class }}"
-  include: storage/create_nfs_pvs.yml
+  include_tasks: storage/create_nfs_pvs.yml
   when:
     - openshift_management_storage_class in ['nfs', 'nfs_external']
 

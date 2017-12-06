@@ -9,7 +9,7 @@
   when:
   - openshift_deployment_type is undefined
 
-- include: launch_config_create.yml
+- include_tasks: launch_config_create.yml
   with_dict: "{{ l_nodes_to_build }}"
   loop_control:
     loop_var: launch_config_item
