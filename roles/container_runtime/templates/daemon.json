@@ -5,7 +5,7 @@
     "disable-legacy-registry": false,
     "exec-opts": ["native.cgroupdriver=systemd"],
     "insecure-registries": {{ l_docker_insecure_registries }},
-{% if openshift_docker_log_driver is defined  %}
+{% if openshift_docker_log_driver  %}
     "log-driver": "{{ openshift_docker_log_driver }}",
 {%- endif %}
     "log-opts": {{ l_docker_log_options_dict }},
