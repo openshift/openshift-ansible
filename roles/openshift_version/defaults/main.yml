@@ -1,2 +1,3 @@
 ---
 openshift_protect_installed_version: True
+openshift_use_crio_only: False
