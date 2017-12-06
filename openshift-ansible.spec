@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.146
+Version:        3.5.147
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -276,6 +276,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Dec 06 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.147-1
+- Enable oreg_auth credential replace during upgrades (mgugino@redhat.com)
+
 * Mon Dec 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.146-1
 - Do not escalate privileges in jks generation tasks (iacopo.rozzo@amadeus.com)
 - Place-holder for prerequisites.yml (mgugino@redhat.com)
