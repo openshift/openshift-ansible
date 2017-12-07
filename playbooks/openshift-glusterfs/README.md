@@ -26,6 +26,9 @@ file. The hosts in this group are the nodes of the GlusterFS cluster.
    devices but you must specify the following variables in `[OSEv3:vars]`:
    * `openshift_storage_glusterfs_is_missing=False`
    * `openshift_storage_glusterfs_heketi_is_missing=False`
+ * If GlusterFS will be running natively, the target hosts must also be listed
+   in the `nodes` group. They must also already be configured as OpenShift
+   nodes before this playbook runs.
 
 By default, pods for a native GlusterFS cluster will be created in the
 `default` namespace. To change this, specify
