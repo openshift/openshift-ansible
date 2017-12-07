@@ -1,6 +1,6 @@
 ---
 - name: create the node group sgs
-  ec2_group:
+  oo_ec2_group:
     name: "{{ item.value.name}}"
     description: "{{ item.value.desc }}"
     rules: "{{ item.value.rules if 'rules' in item.value else [] }}"
@@ -9,7 +9,7 @@
   with_dict: "{{ l_security_groups }}"
 
 - name: create the k8s sgs for the node group
-  ec2_group:
+  oo_ec2_group:
     name: "{{ item.value.name }}_k8s"
     description: "{{ item.value.desc }} for k8s"
     region: "{{ openshift_aws_region }}"
