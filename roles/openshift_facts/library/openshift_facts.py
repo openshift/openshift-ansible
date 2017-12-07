@@ -1433,7 +1433,6 @@ def set_container_facts_if_unset(facts):
             facts['node']['ovs_system_image'] = ovs_image
 
     if safe_get_bool(facts['common']['is_containerized']):
-        facts['common']['admin_binary'] = '/usr/local/bin/oadm'
         facts['common']['client_binary'] = '/usr/local/bin/oc'
 
     return facts
@@ -1627,7 +1626,7 @@ class OpenShiftFacts(object):
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
-                                  client_binary='oc', admin_binary='oadm',
+                                  client_binary='oc',
                                   dns_domain='cluster.local',
                                   config_base='/etc/origin')
 

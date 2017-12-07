@@ -262,7 +262,7 @@ dependencies:
 
 - name: "Create logging project"
   command: >
-    {{ openshift.common.admin_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig new-project {{openshift_logging_namespace}}
+    {{ openshift.common.client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig new-project {{openshift_logging_namespace}}
   when: not ansible_check_mode and "not found" in logging_project_result.stderr
 
 - name: Create logging cert directory
