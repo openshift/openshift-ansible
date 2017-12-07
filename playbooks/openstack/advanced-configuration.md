@@ -159,11 +159,22 @@ So the provisioned cluster nodes will start using those natively as
 default nameservers. Technically, this allows to deploy OpenShift clusters
 without dnsmasq proxies.
 
-The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain` will form the cluster's DNS domain all
-your servers will be under. With the default values, this will be
-`openshift.example.com`. For workloads, the default subdomain is 'apps'.
-That sudomain can be set as well by the `openshift_openstack_app_subdomain` variable in
-the inventory.
+The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain`
+will form the cluster's public DNS domain all your servers will be under. With
+the default values, this will be `openshift.example.com`. For workloads, the
+default subdomain is 'apps'. That sudomain can be set as well by the
+`openshift_openstack_app_subdomain` variable in the inventory.
+
+If you want to use a two sets of hostnames for public and private/prefixed DNS
+records for your externally managed public DNS server, you can specify
+`openshift_openstack_public_hostname_suffix` and/or
+`openshift_openstack_private_hostname_suffix`. The suffixes will be added
+to the nsupdate records sent to the external DNS server. Those are empty by default.
+
+**Note** the real hostnames, Nova servers' or ansible hostnames and inventory
+variables will not be updated. The deployment may be done on arbitrary named
+hosts with the hostnames managed by cloud-init. Inventory hostnames will ignore
+the suffixes.
 
 The `openstack_<role name>_hostname` is a set of variables used for customising
 public names of Nova servers provisioned with a given role. When such a variable stays commented,
