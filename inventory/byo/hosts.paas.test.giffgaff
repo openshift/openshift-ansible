@@ -17,7 +17,7 @@ openshift_master_cluster_public_hostname=openshift.test.gaff.systems
 #openshift_master_cluster_hostname=openshift-internal.test.gaff.systems
 
 
-openshift_disable_check=docker_storage,memory_availability
+openshift_disable_check=memory_availability
 
 
 # Disable service catalog

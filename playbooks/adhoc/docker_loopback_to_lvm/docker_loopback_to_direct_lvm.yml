@@ -21,8 +21,8 @@
 #
 
 - name: Fix docker to have a provisioned iops drive
-  hosts: "tag_Name_{{ cli_tag_name }}"
-  user: root
+  hosts: nodes
+ # user: root
   connection: ssh
   gather_facts: no
 
@@ -82,43 +82,43 @@
   - name: remove /var/lib/docker
     command: rm -rf /var/lib/docker
 
-  - name: check to see if /dev/xvdb exists
-    command: test -e /dev/xvdb
-    register: xvdb_check
-    ignore_errors: yes
+  # - name: check to see if /dev/xvdb exists
+  #   command: test -e /dev/xvdb
+  #   register: xvdb_check
+  #   ignore_errors: yes
 
-  - debug: var=xvdb_check
+  # - debug: var=xvdb_check
 
-  - name: fail if /dev/xvdb already exists
-    fail:
-      msg: /dev/xvdb already exists.  Please investigate
-    when: xvdb_check.rc == 0
+  # - name: fail if /dev/xvdb already exists
+  #   fail:
+  #     msg: /dev/xvdb already exists.  Please investigate
+  #   when: xvdb_check.rc == 0
 
-  - name: Create a volume and attach it
-    delegate_to: localhost
-    ec2_vol:
-      state: present
-      instance: "{{ ec2_id }}"
-      region: "{{ ec2_region }}"
-      volume_size: "{{ cli_volume_size | default(30, True)}}"
-      volume_type: "{{ cli_volume_type }}"
-      device_name: /dev/xvdb
-    register: vol
+  # - name: Create a volume and attach it
+  #   delegate_to: localhost
+  #   ec2_vol:
+  #     state: present
+  #     instance: "{{ ec2_id }}"
+  #     region: "{{ ec2_region }}"
+  #     volume_size: "{{ cli_volume_size | default(30, True)}}"
+  #     volume_type: "{{ cli_volume_type }}"
+  #     device_name: /dev/xvdb
+  #   register: vol
 
-  - debug: var=vol
+  # - debug: var=vol
 
-  - name: tag the vol with a name
-    delegate_to: localhost
-    ec2_tag: region={{ ec2_region }} resource={{ vol.volume_id }}
-    args:
-      tags:
-        Name: "{{ ec2_tag_Name }}"
-        clusterid: "{{ ec2_tag_clusterid }}"
-    register: voltags
+  # - name: tag the vol with a name
+  #   delegate_to: localhost
+  #   ec2_tag: region={{ ec2_region }} resource={{ vol.volume_id }}
+  #   args:
+  #     tags:
+  #       Name: "{{ ec2_tag_Name }}"
+  #       clusterid: "{{ ec2_tag_clusterid }}"
+  #   register: voltags
 
-  - name: Wait for volume to attach
-    pause:
-      seconds: 30
+  # - name: Wait for volume to attach
+  #   pause:
+  #     seconds: 30
 
   - name: copy the docker-storage-setup config file
     copy:
