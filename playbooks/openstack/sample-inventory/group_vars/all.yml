@@ -82,27 +82,10 @@ openshift_openstack_docker_volume_size: "15"
 
 openshift_openstack_subnet_prefix: "192.168.99"
 
-## Red Hat subscription defaults to false which means we will not attempt to
-## subscribe the nodes
-#rhsm_register: False
-
-# # Using Red Hat Satellite:
-#rhsm_register: True
-#rhsm_satellite: 'sat-6.example.com'
-#rhsm_org: 'OPENSHIFT_ORG'
-#rhsm_activationkey: '<activation-key>'
-
-# # Or using RHN username, password and optionally pool:
-#rhsm_register: True
-#rhsm_username: '<username>'
-#rhsm_password: '<password>'
-#rhsm_pool: '<pool id>'
-
-#rhsm_repos:
-# - "rhel-7-server-rpms"
-# - "rhel-7-server-ose-3.5-rpms"
-# - "rhel-7-server-extras-rpms"
-# - "rhel-7-fast-datapath-rpms"
+## Red Hat subscription:
+#rhsub_user: '<username>'
+#rhsub_pass: '<password>'
+#rhsub_pool: '<pool name>'
 
 
 # # Roll-your-own DNS

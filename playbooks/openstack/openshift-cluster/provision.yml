@@ -26,6 +26,9 @@
   - name: Gather facts for the new nodes
     setup:
 
+- name: set common facts
+  include: ../../init/facts.yml
+
 
 # TODO(shadower): consider splitting this up so people can stop here
 # and configure their DNS if they have to.
@@ -44,6 +47,13 @@
   hosts: oo_all_hosts
   become: yes
   gather_facts: yes
+  roles:
+  - role: rhel_subscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - rhsub_user | default(False)
+    - rhsub_pass | default(False)
+
   tasks:
   - name: Install dependencies
     include_role:
