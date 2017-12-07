@@ -27,7 +27,7 @@ class BinarySyncError(Exception):
 # pylint: disable=too-few-public-methods,too-many-instance-attributes
 class BinarySyncer(object):
     """
-    Syncs the openshift, oc, oadm, and kubectl binaries/symlinks out of
+    Syncs the openshift, oc, and kubectl binaries/symlinks out of
     a container onto the host system.
     """
 
@@ -108,7 +108,10 @@ class BinarySyncer(object):
 
         # Ensure correct symlinks created:
         self._sync_symlink('kubectl', 'openshift')
-        self._sync_symlink('oadm', 'openshift')
+
+        # Remove old oadm binary
+        if os.path.exists(os.path.join(self.bin_dir, 'oadm')):
+            os.remove(os.path.join(self.bin_dir, 'oadm'))
 
     def _sync_symlink(self, binary_name, link_to):
         """ Ensure the given binary name exists and links to the expected binary. """

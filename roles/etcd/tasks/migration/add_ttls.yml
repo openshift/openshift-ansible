@@ -11,7 +11,7 @@
 
 - name: Re-introduce leases (as a replacement for key TTLs)
   command: >
-    oadm migrate etcd-ttl \
+    {{ openshift.common.client_binary }} adm migrate etcd-ttl \
     --cert {{ r_etcd_common_master_peer_cert_file }} \
     --key {{ r_etcd_common_master_peer_key_file }} \
     --cacert {{ r_etcd_common_master_peer_ca_file }} \
