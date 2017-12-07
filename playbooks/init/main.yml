@@ -18,8 +18,10 @@
 - import_playbook: facts.yml
 
 - import_playbook: sanity_checks.yml
+  when: not (skip_sanity_checks | default(False))
 
 - import_playbook: validate_hostnames.yml
+  when: not (skip_validate_hostnames | default(False))
 
 - import_playbook: repos.yml
 
