@@ -44,6 +44,9 @@ openshift_openstack_container_storage_setup:
 # populate-dns
 openshift_openstack_dns_records_add: []
 
+openshift_openstack_public_hostname_suffix: ""
+openshift_openstack_private_hostname_suffix: ""
+openshift_openstack_public_dns_domain: "example.com"
 openshift_openstack_full_dns_domain: "{{ (openshift_openstack_clusterid|trim == '') | ternary(openshift_openstack_public_dns_domain, openshift_openstack_clusterid + '.' + openshift_openstack_public_dns_domain) }}"
 openshift_openstack_app_subdomain: "apps"
 
