@@ -1,18 +1,23 @@
-Docker
+Container Runtime
 =========
 
 Ensures docker package or system container is installed, and optionally raises timeout for systemd-udevd.service to 5 minutes.
 
 container-daemon.json items may be found at https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 
+This role is designed to be used with include_role and tasks_from.
+
+Entry points
+------------
+* package_docker.yml - install and setup docker container runtime.
+* systemcontainer_docker.yml - utilize docker + systemcontainer
+* systemcontainer_crio.yml - utilize crio + systemcontainer
+* registry_auth.yml - place docker login credentials.
+
 Requirements
 ------------
 
-Ansible 2.2
-
-Mandator Role Variables
---------------
-
+Ansible 2.4
 
 
 Dependencies
@@ -24,9 +29,9 @@ Example Playbook
 ----------------
 
     - hosts: servers
-      roles:
-      - role: container_runtime
-        docker_udev_workaround: "true"
+      tasks:
+      - include_role: container_runtime
+        tasks_from: package_docker.yml
 
 License
 -------
@@ -36,4 +41,4 @@ ASL 2.0
 Author Information
 ------------------
 
-OpenShift operations, Red Hat, Inc
+Red Hat, Inc

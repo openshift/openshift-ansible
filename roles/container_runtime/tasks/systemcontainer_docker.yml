@@ -11,32 +11,9 @@
       traditional docker package install. Otherwise, comment out openshift_docker_options
       in your inventory file.
 
-- name: Ensure container-selinux is installed
-  package:
-    name: container-selinux
-    state: present
-  when: not openshift.common.is_atomic | bool
-  register: result
-  until: result | success
+- include_tasks: common/pre.yml
 
-# Used to pull and install the system container
-- name: Ensure atomic is installed
-  package:
-    name: atomic
-    state: present
-  when: not openshift.common.is_atomic | bool
-  register: result
-  until: result | success
-
-# At the time of writing the atomic command requires runc for it's own use. This
-# task is here in the even that the atomic package ever removes the dependency.
-- name: Ensure runc is installed
-  package:
-    name: runc
-    state: present
-  when: not openshift.common.is_atomic | bool
-  register: result
-  until: result | success
+- include_tasks: common/syscontainer_packages.yml
 
 # Make sure Docker is installed so we are able to use the client
 - name: Install Docker so we can use the client
@@ -59,48 +36,11 @@
   delay: 30
 
 - name: Ensure proxies are in the atomic.conf
-  include_role:
-    name: openshift_atomic
-    tasks_from: proxy
+  include_tasks: common/atomic_proxy.yml
 
-- block:
-
-    - name: Set to default prepend
-      set_fact:
-        l_docker_image_prepend: "gscrivano"
-        l_docker_image_tag: "latest"
-
-    - name: Set container engine image tag
-      set_fact:
-        l_docker_image_tag: "{{ l_openshift_image_tag }}"
-      when:
-        - openshift_deployment_type == 'openshift-enterprise'
-
-    - name: Use Red Hat Registry for image when distribution is Red Hat
-      set_fact:
-        l_docker_image_prepend: "registry.access.redhat.com/openshift3"
-      when: ansible_distribution == 'RedHat'
-
-    - name: Use Fedora Registry for image when distribution is Fedora
-      set_fact:
-        l_docker_image_prepend: "registry.fedoraproject.org/f25"
-      when: ansible_distribution == 'Fedora'
-
-    - name: Set the full image name
-      set_fact:
-        l_docker_image: "{{ l_docker_image_prepend }}/{{ openshift_docker_service_name }}:{{ l_docker_image_tag }}"
-
-    # For https://github.com/openshift/openshift-ansible/pull/5354#issuecomment-328552959
-    - name: Use a specific image if requested
-      set_fact:
-        l_docker_image: "{{ openshift_docker_systemcontainer_image_override }}"
-      when:
-        - openshift_docker_systemcontainer_image_override is defined
-        - openshift_docker_systemcontainer_image_override != ""
-
-    # Be nice and let the user see the variable result
-    - debug:
-        var: l_docker_image
+# Be nice and let the user see the variable result
+- debug:
+    var: l_docker_image
 
 # NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
 - name: Pre-pull Container Engine System Container image
@@ -154,10 +94,8 @@
 - set_fact:
     docker_service_status_changed: "{{ r_docker_systemcontainer_docker_start_result | changed }}"
 
-- meta: flush_handlers
-
 # Since docker is running as a system container, docker login will fail to create
 # credentials.  Use alternate method if requiring authenticated registries.
-- include_tasks: registry_auth.yml
+- include_tasks: common/post.yml
   vars:
     openshift_docker_alternative_creds: True
