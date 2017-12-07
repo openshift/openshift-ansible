@@ -229,6 +229,7 @@ data:
     # TODO (apuimedo): Remove the duplicated line just after this one once the
     # RDO packaging contains the upstream patch
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
+    external_svc_subnet = {{ kuryr_openstack_external_svc_subnet_id }}
 
     [pod_vif_nested]
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
