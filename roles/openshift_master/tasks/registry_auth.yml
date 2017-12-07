@@ -32,7 +32,7 @@
   when:
   - openshift_docker_alternative_creds | default(False) | bool
   - oreg_auth_user is defined
-  - (not docker_cli_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
+  - (not master_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
   register: master_oreg_auth_credentials_create_alt
   notify:
   - restart master api
