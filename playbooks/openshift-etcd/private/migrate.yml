@@ -17,7 +17,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: migrate.pre_check
+      tasks_from: migrate.pre_check.yml
     vars:
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ ansible_default_ipv4.address }}"
@@ -46,7 +46,7 @@
   post_tasks:
   - include_role:
       name: etcd
-      tasks_from: backup
+      tasks_from: backup.yml
     vars:
       r_etcd_common_backup_tag: pre-migration
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
@@ -74,7 +74,7 @@
   pre_tasks:
   - include_role:
       name: etcd
-      tasks_from: disable_etcd
+      tasks_from: disable_etcd.yml
 
 - name: Migrate data on first etcd
   hosts: oo_etcd_to_migrate[0]
@@ -82,7 +82,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: migrate
+      tasks_from: migrate.yml
     vars:
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ openshift.common.ip }}"
@@ -95,7 +95,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: clean_data
+      tasks_from: clean_data.yml
     vars:
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ openshift.common.ip }}"
@@ -132,7 +132,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: migrate.add_ttls
+      tasks_from: migrate.add_ttls.yml
     vars:
       etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].openshift.common.ip }}"
       etcd_url_scheme: "https"
@@ -144,7 +144,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: migrate.configure_master
+      tasks_from: migrate.configure_master.yml
     when: etcd_migration_failed | length == 0
   - debug:
       msg: "Skipping master re-configuration since migration failed."

@@ -6,47 +6,47 @@
       name: etcd
       tasks_from: version_detect.yml
 
-- include: upgrade_rpm_members.yml
+- import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '2.1'
 
-- include: upgrade_rpm_members.yml
+- import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '2.2'
 
-- include: upgrade_image_members.yml
+- import_playbook: upgrade_image_members.yml
   vars:
     etcd_upgrade_version: '2.2.5'
 
-- include: upgrade_rpm_members.yml
+- import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '2.3'
 
-- include: upgrade_image_members.yml
+- import_playbook: upgrade_image_members.yml
   vars:
     etcd_upgrade_version: '2.3.7'
 
-- include: upgrade_rpm_members.yml
+- import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '3.0'
 
-- include: upgrade_image_members.yml
+- import_playbook: upgrade_image_members.yml
   vars:
     etcd_upgrade_version: '3.0.15'
 
-- include: upgrade_rpm_members.yml
+- import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '3.1'
 
-- include: upgrade_image_members.yml
+- import_playbook: upgrade_image_members.yml
   vars:
     etcd_upgrade_version: '3.1.3'
 
-- include: upgrade_rpm_members.yml
+- import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '3.2'
 
-- include: upgrade_image_members.yml
+- import_playbook: upgrade_image_members.yml
   vars:
     etcd_upgrade_version: '3.2.7'
 
@@ -56,7 +56,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: upgrade_image
+      tasks_from: upgrade_image.yml
     vars:
       etcd_peer: "{{ openshift.common.hostname }}"
     when:

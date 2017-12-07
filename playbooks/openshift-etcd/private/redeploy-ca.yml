@@ -16,12 +16,12 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: backup_ca_certificates
+      tasks_from: backup_ca_certificates.yml
   - include_role:
       name: etcd
-      tasks_from: remove_ca_certificates
+      tasks_from: remove_ca_certificates.yml
 
-- include: ca.yml
+- import_playbook: ca.yml
 
 - name: Create temp directory for syncing certs
   hosts: localhost
@@ -44,7 +44,7 @@
       etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
       etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
 
-- include: restart.yml
+- import_playbook: restart.yml
   # Do not restart etcd when etcd certificates were previously expired.
   when: ('expired' not in (hostvars
                            | oo_select_keys(groups['etcd'])
@@ -56,7 +56,7 @@
   tasks:
   - include_role:
       name: etcd
-      tasks_from: retrieve_ca_certificates
+      tasks_from: retrieve_ca_certificates.yml
     vars:
       etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
 
@@ -82,7 +82,7 @@
       state: absent
     changed_when: false
 
-- include: ../../openshift-master/private/restart.yml
+- import_playbook: ../../openshift-master/private/restart.yml
   # Do not restart masters when master or etcd certificates were previously expired.
   when:
   # masters

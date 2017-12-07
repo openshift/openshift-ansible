@@ -7,7 +7,7 @@
   post_tasks:
     - include_role:
         name: etcd
-        tasks_from: server_certificates
+        tasks_from: server_certificates.yml
       vars:
         etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
         etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"

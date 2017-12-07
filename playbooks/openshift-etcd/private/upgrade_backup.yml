@@ -6,7 +6,7 @@
   post_tasks:
   - include_role:
       name: etcd
-      tasks_from: backup
+      tasks_from: backup.yml
     vars:
       r_etcd_common_backup_tag: "{{ etcd_backup_tag }}"
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
