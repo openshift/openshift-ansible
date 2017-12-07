@@ -46,13 +46,15 @@ openshift_openstack_container_storage_setup:
 openshift_openstack_dns_records_add: []
 
 openshift_openstack_app_subdomain: 'apps'
-openshift_openstack_public_hostname_suffix: "{{ openshift_openstack_clusterid|trim }}"
-openshift_openstack_private_hostname_suffix: "{{ openshift_openstack_clusterid|trim }}"
+openshift_openstack_public_hostname_suffix: ''
+openshift_openstack_private_hostname_suffix: ''
 openshift_openstack_public_dns_domain: 'example.com'
 
 openshift_openstack_private_dns_domain: "{{ openshift_openstack_public_dns_domain }}"
-openshift_openstack_full_public_dns_domain: "{{ (openshift_openstack_public_hostname_suffix == '') | ternary(openshift_openstack_public_dns_domain, openshift_openstack_public_hostname_suffix + '.' + openshift_openstack_public_dns_domain) }}"
-openshift_openstack_full_private_dns_domain: "{{ (openshift_openstack_private_hostname_suffix == '') | ternary(openshift_openstack_private_dns_domain, openshift_openstack_private_hostname_suffix + '.' + openshift_openstack_private_dns_domain) }}"
+openshift_openstack_public_subdomain: "{{ openshift_openstack_clusterid|trim + '.' + openshift_openstack_public_dns_domain }}"
+openshift_openstack_private_subdomain: "{{ openshift_openstack_clusterid|trim + '.' + openshift_openstack_private_dns_domain }}"
+openshift_openstack_full_public_dns_domain: "{{ (openshift_openstack_public_hostname_suffix|trim == '') | ternary(openshift_openstack_public_subdomain, openshift_openstack_public_hostname_suffix + '.' + openshift_openstack_public_subdomain) }}"
+openshift_openstack_full_private_dns_domain: "{{ (openshift_openstack_private_hostname_suffix|trim == '') | ternary(openshift_openstack_private_subdomain, openshift_openstack_private_hostname_suffix + '.' + openshift_openstack_private_subdomain) }}"
 openshift_master_default_subdomain: "{{ openshift_openstack_app_subdomain }}.{{ openshift_openstack_full_public_dns_domain }}"
 openshift_master_cluster_public_hostname: "console.{{ openshift_openstack_full_public_dns_domain }}"
 openshift_master_cluster_hostname: "console.{{ openshift_openstack_full_private_dns_domain }}"
