@@ -11,7 +11,7 @@
 #
 # You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
 #
-- include: ../init.yml
+- import_playbook: ../init.yml
   tags:
   - pre_upgrade
 
@@ -25,7 +25,7 @@
       openshift_upgrade_min: "{{ '1.5' if deployment_type == 'origin' else '3.5' }}"
 
 # Pre-upgrade
-- include: ../initialize_nodes_to_upgrade.yml
+- import_playbook: ../initialize_nodes_to_upgrade.yml
   tags:
   - pre_upgrade
 
@@ -51,23 +51,23 @@
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool
 
-- include: ../pre/verify_inventory_vars.yml
+- import_playbook: ../pre/verify_inventory_vars.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_health_checks.yml
+- import_playbook: ../pre/verify_health_checks.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_control_plane_running.yml
+- import_playbook: ../pre/verify_control_plane_running.yml
   tags:
   - pre_upgrade
 
-- include: ../disable_master_excluders.yml
+- import_playbook: ../disable_master_excluders.yml
   tags:
   - pre_upgrade
 
-- include: ../../../../init/version.yml
+- import_playbook: ../../../../init/version.yml
   tags:
   - pre_upgrade
   vars:
@@ -77,29 +77,29 @@
     openshift_release: "{{ openshift_upgrade_target }}"
     openshift_protect_installed_version: False
 
-- include: ../../../../openshift-master/private/validate_restart.yml
+- import_playbook: ../../../../openshift-master/private/validate_restart.yml
   tags:
   - pre_upgrade
 
 - name: Verify upgrade targets
   hosts: oo_masters_to_config
   tasks:
-  - include: ../pre/verify_upgrade_targets.yml
+  - include_tasks: ../pre/verify_upgrade_targets.yml
   tags:
   - pre_upgrade
 
 - name: Verify docker upgrade targets
   hosts: oo_masters_to_config:oo_etcd_to_config
   tasks:
-  - include: ../pre/tasks/verify_docker_upgrade_targets.yml
+  - include_tasks: ../pre/tasks/verify_docker_upgrade_targets.yml
   tags:
   - pre_upgrade
 
-- include: validator.yml
+- import_playbook: validator.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/gate_checks.yml
+- import_playbook: ../pre/gate_checks.yml
   tags:
   - pre_upgrade
 
@@ -111,10 +111,10 @@
 - name: Cleanup unused Docker images
   hosts: oo_masters_to_config:oo_etcd_to_config
   tasks:
-  - include: ../cleanup_unused_images.yml
+  - include_tasks: ../cleanup_unused_images.yml
 
-- include: ../upgrade_control_plane.yml
+- import_playbook: ../upgrade_control_plane.yml
   vars:
     master_config_hook: "v3_6/master_config_upgrade.yml"
 
-- include: ../post_control_plane.yml
+- import_playbook: ../post_control_plane.yml

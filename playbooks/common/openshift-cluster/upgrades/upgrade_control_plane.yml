@@ -17,7 +17,7 @@
         embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 
 - name: Backup and upgrade etcd
-  include: ../../../openshift-etcd/private/upgrade_main.yml
+  import_playbook: ../../../openshift-etcd/private/upgrade_main.yml
 
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master_config_upgrade hook.
@@ -30,7 +30,7 @@
     register: service_signer_cert_stat
     changed_when: false
 
-- include: create_service_signer_cert.yml
+- import_playbook: create_service_signer_cert.yml
 
 # oc adm migrate storage should be run prior to etcd v3 upgrade
 # See: https://github.com/openshift/origin/pull/14625#issuecomment-308467060
@@ -71,7 +71,7 @@
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
 
-  - include: "{{ openshift_master_upgrade_pre_hook }}"
+  - include_tasks: "{{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
 
   - include_role:
@@ -82,20 +82,20 @@
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
 
-  - include: "{{ openshift_master_upgrade_hook }}"
+  - include_tasks: "{{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
 
-  - include: ../../../openshift-master/private/tasks/restart_hosts.yml
+  - include_tasks: ../../../openshift-master/private/tasks/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
 
-  - include: ../../../openshift-master/private/tasks/restart_services.yml
+  - include_tasks: ../../../openshift-master/private/tasks/restart_services.yml
     when: openshift.common.rolling_restart_mode == 'services'
 
   # Run the post-upgrade hook if defined:
   - debug: msg="Running master post-upgrade hook {{ openshift_master_upgrade_post_hook }}"
     when: openshift_master_upgrade_post_hook is defined
 
-  - include: "{{ openshift_master_upgrade_post_hook }}"
+  - include_tasks: "{{ openshift_master_upgrade_post_hook }}"
     when: openshift_master_upgrade_post_hook is defined
 
   - name: Post master upgrade - Upgrade clusterpolicies storage
@@ -275,7 +275,7 @@
   roles:
   - openshift_facts
   tasks:
-  - include: docker/tasks/upgrade.yml
+  - include_tasks: docker/tasks/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
 
 - name: Drain and upgrade master nodes

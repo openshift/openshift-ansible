@@ -9,4 +9,4 @@
 # some logic here?
 
 - name: run the cluster deploy
-  include: ../../deploy_cluster.yml
+  import_playbook: ../../deploy_cluster.yml

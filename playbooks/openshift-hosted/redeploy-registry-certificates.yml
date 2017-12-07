@@ -1,4 +1,4 @@
 ---
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
-- include: private/redeploy-registry-certificates.yml
+- import_playbook: private/redeploy-registry-certificates.yml

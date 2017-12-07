@@ -13,7 +13,7 @@
     - "'oo_sg_new_nodes' not in groups or groups.oo_sg_new_nodes|length == 0"
 
 - name: initialize upgrade bits
-  include: init.yml
+  import_playbook: init.yml
 
 - name: Drain and upgrade nodes
   hosts: oo_sg_current_nodes

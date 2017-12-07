@@ -4,7 +4,7 @@
 #
 # Upgrades nodes only, but requires the control plane to have already been upgraded.
 #
-- include: ../init.yml
+- import_playbook: ../init.yml
   tags:
   - pre_upgrade
 
@@ -18,7 +18,7 @@
       openshift_upgrade_min: '3.7'
 
 # Pre-upgrade
-- include: ../initialize_nodes_to_upgrade.yml
+- import_playbook: ../initialize_nodes_to_upgrade.yml
   tags:
   - pre_upgrade
 
@@ -44,19 +44,19 @@
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool
 
-- include: ../pre/verify_inventory_vars.yml
+- import_playbook: ../pre/verify_inventory_vars.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/verify_health_checks.yml
+- import_playbook: ../pre/verify_health_checks.yml
   tags:
   - pre_upgrade
 
-- include: ../disable_node_excluders.yml
+- import_playbook: ../disable_node_excluders.yml
   tags:
   - pre_upgrade
 
-- include: ../../../../init/version.yml
+- import_playbook: ../../../../init/version.yml
   tags:
   - pre_upgrade
   vars:
@@ -74,25 +74,25 @@
   - fail: msg="Master running {{ openshift.common.version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
     when: openshift.common.version != openshift_version
 
-- include: ../pre/verify_control_plane_running.yml
+- import_playbook: ../pre/verify_control_plane_running.yml
   tags:
   - pre_upgrade
 
 - name: Verify upgrade targets
   hosts: oo_nodes_to_upgrade
   tasks:
-  - include: ../pre/verify_upgrade_targets.yml
+  - include_tasks: ../pre/verify_upgrade_targets.yml
   tags:
   - pre_upgrade
 
 - name: Verify docker upgrade targets
   hosts: oo_nodes_to_upgrade
   tasks:
-  - include: ../pre/tasks/verify_docker_upgrade_targets.yml
+  - include_tasks: ../pre/tasks/verify_docker_upgrade_targets.yml
   tags:
   - pre_upgrade
 
-- include: ../pre/gate_checks.yml
+- import_playbook: ../pre/gate_checks.yml
   tags:
   - pre_upgrade
 
@@ -104,6 +104,6 @@
 - name: Cleanup unused Docker images
   hosts: oo_nodes_to_upgrade
   tasks:
-  - include: ../cleanup_unused_images.yml
+  - include_tasks: ../cleanup_unused_images.yml
 
-- include: ../upgrade_nodes.yml
+- import_playbook: ../upgrade_nodes.yml

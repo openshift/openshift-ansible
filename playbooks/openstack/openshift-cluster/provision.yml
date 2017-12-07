@@ -10,7 +10,7 @@
 
 # NOTE(shadower): Bring in the host groups:
 - name: evaluate groups
-  include: ../../init/evaluate_groups.yml
+  import_playbook: ../../init/evaluate_groups.yml
 
 
 - name: Wait for the nodes and gather their facts
@@ -27,7 +27,7 @@
     setup:
 
 - name: set common facts
-  include: ../../init/facts.yml
+  import_playbook: ../../init/facts.yml
 
 
 # TODO(shadower): consider splitting this up so people can stop here

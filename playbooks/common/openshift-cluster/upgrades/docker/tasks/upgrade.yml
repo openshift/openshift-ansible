@@ -44,5 +44,5 @@
   register: result
   until: result | success
 
-- include: restart.yml
+- include_tasks: restart.yml
   when: not skip_docker_restart | default(False) | bool

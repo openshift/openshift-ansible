@@ -16,31 +16,31 @@
       tasks_from: master_facts.yml
 
 - name: run the init
-  include: ../../init/main.yml
+  import_playbook: ../../init/main.yml
 
 - name: perform the installer openshift-checks
-  include: ../../openshift-checks/private/install.yml
+  import_playbook: ../../openshift-checks/private/install.yml
 
 - name: etcd install
-  include: ../../openshift-etcd/private/config.yml
+  import_playbook: ../../openshift-etcd/private/config.yml
 
 - name: include nfs
-  include: ../../openshift-nfs/private/config.yml
+  import_playbook: ../../openshift-nfs/private/config.yml
   when: groups.oo_nfs_to_config | default([]) | count > 0
 
 - name: include loadbalancer
-  include: ../../openshift-loadbalancer/private/config.yml
+  import_playbook: ../../openshift-loadbalancer/private/config.yml
   when: groups.oo_lb_to_config | default([]) | count > 0
 
 - name: include openshift-master config
-  include: ../../openshift-master/private/config.yml
+  import_playbook: ../../openshift-master/private/config.yml
 
 - name: include master additional config
-  include: ../../openshift-master/private/additional_config.yml
+  import_playbook: ../../openshift-master/private/additional_config.yml
 
 - name: include master additional config
-  include: ../../openshift-node/private/config.yml
+  import_playbook: ../../openshift-node/private/config.yml
 
 - name: include openshift-glusterfs
-  include: ../../openshift-glusterfs/private/config.yml
+  import_playbook: ../../openshift-glusterfs/private/config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0

@@ -11,4 +11,4 @@
 #
 # You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
 #
-- include: ../../../../common/openshift-cluster/upgrades/v3_7/upgrade_control_plane.yml
+- import_playbook: ../../../../common/openshift-cluster/upgrades/v3_7/upgrade_control_plane.yml
