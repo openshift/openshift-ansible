@@ -309,7 +309,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
     until: not l_upgrade_control_plane_drain_result | failed
