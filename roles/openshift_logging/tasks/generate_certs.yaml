@@ -36,7 +36,7 @@
     - top_dir: '{{generated_certs_dir}}'
   when: not signing_conf_file.stat.exists
 
-- include: procure_server_certs.yaml
+- include_tasks: procure_server_certs.yaml
   loop_control:
     loop_var: cert_info
   with_items:
@@ -45,7 +45,7 @@
     - procure_component: kibana-internal
       hostnames: "kibana, kibana-ops, {{openshift_logging_kibana_hostname}}, {{openshift_logging_kibana_ops_hostname}}"
 
-- include: procure_server_certs.yaml
+- include_tasks: procure_server_certs.yaml
   loop_control:
     loop_var: cert_info
   with_items:
@@ -53,14 +53,14 @@
       hostnames: "logging-mux, {{openshift_logging_mux_hostname}}"
   when: openshift_logging_use_mux | bool
 
-- include: procure_shared_key.yaml
+- include_tasks: procure_shared_key.yaml
   loop_control:
     loop_var: shared_key_info
   with_items:
     - procure_component: mux
   when: openshift_logging_use_mux | bool
 
-- include: procure_server_certs.yaml
+- include_tasks: procure_server_certs.yaml
   loop_control:
     loop_var: cert_info
   with_items:
@@ -68,7 +68,7 @@
       hostnames: "es, {{openshift_logging_es_hostname}}"
   when: openshift_logging_es_allow_external | bool
 
-- include: procure_server_certs.yaml
+- include_tasks: procure_server_certs.yaml
   loop_control:
     loop_var: cert_info
   with_items:
@@ -109,7 +109,7 @@
     - not ca_cert_srl_file.stat.exists
 
 - name: Generate PEM certs
-  include: generate_pems.yaml component={{node_name}}
+  include_tasks: generate_pems.yaml component={{node_name}}
   with_items:
     - system.logging.fluentd
     - system.logging.kibana
@@ -119,7 +119,7 @@
     loop_var: node_name
 
 - name: Generate PEM cert for mux
-  include: generate_pems.yaml component={{node_name}}
+  include_tasks: generate_pems.yaml component={{node_name}}
   with_items:
     - system.logging.mux
   loop_control:
@@ -127,7 +127,7 @@
   when: openshift_logging_use_mux | bool
 
 - name: Generate PEM cert for Elasticsearch external route
-  include: generate_pems.yaml component={{node_name}}
+  include_tasks: generate_pems.yaml component={{node_name}}
   with_items:
     - system.logging.es
   loop_control:
@@ -135,7 +135,7 @@
   when: openshift_logging_es_allow_external | bool
 
 - name: Creating necessary JKS certs
-  include: generate_jks.yaml
+  include_tasks: generate_jks.yaml
 
 # TODO: make idempotent
 - name: Generate proxy session

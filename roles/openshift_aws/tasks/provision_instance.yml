@@ -3,7 +3,7 @@
   set_fact:
     openshift_node_bootstrap: True
 
-- include: vpc_and_subnet_id.yml
+- include_tasks: vpc_and_subnet_id.yml
 
 - name: create instance for ami creation
   ec2:

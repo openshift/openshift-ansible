@@ -28,10 +28,10 @@
     l_epoch_time: "{{ ansible_date_time.epoch }}"
 
 - when: openshift_aws_create_iam_role
-  include: iam_role.yml
+  include_tasks: iam_role.yml
 
 - when: openshift_aws_create_launch_config
-  include: launch_config.yml
+  include_tasks: launch_config.yml
 
 - when: openshift_aws_create_scale_group
-  include: scale_group.yml
+  include_tasks: scale_group.yml

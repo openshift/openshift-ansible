@@ -1,12 +1,10 @@
 ---
 - name: Include reencrypt route configuration
-  include: secure/reencrypt.yml
-  static: no
+  include_tasks: secure/reencrypt.yml
   when: openshift_hosted_registry_routetermination == 'reencrypt'
 
 - name: Include passthrough route configuration
-  include: secure/passthrough.yml
-  static: no
+  include_tasks: secure/passthrough.yml
   when: openshift_hosted_registry_routetermination == 'passthrough'
 
 - name: Fetch the docker-registry route
