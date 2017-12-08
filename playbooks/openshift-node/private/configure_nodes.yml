@@ -10,7 +10,6 @@
                                                 | oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
   roles:
-  - role: os_firewall
   - role: openshift_clock
   - role: openshift_node
   - role: tuned
