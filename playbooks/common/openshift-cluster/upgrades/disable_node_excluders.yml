@@ -5,7 +5,6 @@
   roles:
   - role: openshift_excluder
     r_openshift_excluder_action: disable
-    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
     r_openshift_excluder_verify_upgrade: true
     r_openshift_excluder_upgrade_target: "{{ openshift_upgrade_target }}"
     r_openshift_excluder_package_state: latest

@@ -13,21 +13,21 @@
     block:
     - set_fact:
         master_services:
-        - "{{ openshift.common.service_type }}-master"
+        - "{{ openshift_service_type }}-master"
 
     # In case of the non-ha to ha upgrade.
-    - name: Check if the {{ openshift.common.service_type }}-master-api.service exists
+    - name: Check if the {{ openshift_service_type }}-master-api.service exists
       command: >
-        systemctl list-units {{ openshift.common.service_type }}-master-api.service --no-legend
+        systemctl list-units {{ openshift_service_type }}-master-api.service --no-legend
       register: master_api_service_status
 
     - set_fact:
         master_services:
-        - "{{ openshift.common.service_type }}-master-api"
-        - "{{ openshift.common.service_type }}-master-controllers"
+        - "{{ openshift_service_type }}-master-api"
+        - "{{ openshift_service_type }}-master-controllers"
       when:
       - master_api_service_status.stdout_lines | length > 0
-      - (openshift.common.service_type + '-master-api.service') in master_api_service_status.stdout_lines[0]
+      - (openshift_service_type + '-master-api.service') in master_api_service_status.stdout_lines[0]
 
     - name: Ensure Master is running
       service:

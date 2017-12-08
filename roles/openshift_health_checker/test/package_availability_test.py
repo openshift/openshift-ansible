@@ -19,13 +19,13 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
 
 @pytest.mark.parametrize('task_vars,must_have_packages,must_not_have_packages', [
     (
-        dict(openshift=dict(common=dict(service_type='openshift'))),
+        dict(openshift_service_type='origin'),
         set(),
         set(['openshift-master', 'openshift-node']),
     ),
     (
         dict(
-            openshift=dict(common=dict(service_type='origin')),
+            openshift_service_type='origin',
             group_names=['oo_masters_to_config'],
         ),
         set(['origin-master']),
@@ -33,7 +33,7 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
     ),
     (
         dict(
-            openshift=dict(common=dict(service_type='atomic-openshift')),
+            openshift_service_type='atomic-openshift',
             group_names=['oo_nodes_to_config'],
         ),
         set(['atomic-openshift-node']),
@@ -41,7 +41,7 @@ def test_is_active(pkg_mgr, is_containerized, is_active):
     ),
     (
         dict(
-            openshift=dict(common=dict(service_type='atomic-openshift')),
+            openshift_service_type='atomic-openshift',
             group_names=['oo_masters_to_config', 'oo_nodes_to_config'],
         ),
         set(['atomic-openshift-master', 'atomic-openshift-node']),

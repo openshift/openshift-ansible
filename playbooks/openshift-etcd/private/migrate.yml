@@ -28,8 +28,8 @@
   tasks:
   - set_fact:
       master_services:
-      - "{{ openshift.common.service_type + '-master-controllers' }}"
-      - "{{ openshift.common.service_type + '-master-api' }}"
+      - "{{ openshift_service_type + '-master-controllers' }}"
+      - "{{ openshift_service_type + '-master-api' }}"
   - debug:
       msg: "master service name: {{ master_services }}"
   - name: Stop masters

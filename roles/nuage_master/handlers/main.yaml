@@ -1,6 +1,6 @@
 ---
 - name: restart master api
-  systemd: name={{ openshift.common.service_type }}-master-api state=restarted
+  systemd: name={{ openshift_service_type }}-master-api state=restarted
   when: >
     (openshift_master_ha | bool) and
     (not master_api_service_status_changed | default(false))
@@ -8,7 +8,7 @@
 # TODO: need to fix up ignore_errors here
 # We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
-  command: "systemctl restart {{ openshift.common.service_type }}-master-controllers"
+  command: "systemctl restart {{ openshift_service_type }}-master-controllers"
   retries: 3
   delay: 5
   register: result

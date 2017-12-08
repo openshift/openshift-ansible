@@ -46,7 +46,6 @@
 
 - hosts: all
   tasks:
-
     # run before openshift_version to prevent it breaking
     - include: preflight/playbooks/tasks/enable_repo.yml
       vars: { repo_name: "ose-3.2" }

@@ -180,13 +180,13 @@
 
 #restart master serially here
 - name: restart master api
-  systemd: name={{ openshift.common.service_type }}-master-api state=restarted
+  systemd: name={{ openshift_service_type }}-master-api state=restarted
   when:
   - yedit_output.changed
 
 # We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
-  command: "systemctl restart {{ openshift.common.service_type }}-master-controllers"
+  command: "systemctl restart {{ openshift_service_type }}-master-controllers"
   retries: 3
   delay: 5
   register: result

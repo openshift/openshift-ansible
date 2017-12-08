@@ -14,7 +14,11 @@ r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }
 l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
 openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
-openshift_service_type: "{{ 'origin' if openshift_deployment_type == 'origin' else 'atomic-openshift' }}"
+openshift_service_type_dict:
+  origin: origin
+  openshift-enterprise: atomic-openshift
+
+openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
 
 system_images_registry_dict:
   openshift-enterprise: "registry.access.redhat.com"
