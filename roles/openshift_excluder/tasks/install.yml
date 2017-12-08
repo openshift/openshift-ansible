@@ -5,10 +5,9 @@
   - r_openshift_excluder_install_ran is not defined
 
   block:
-
   - name: Install docker excluder - yum
     package:
-      name: "{{ r_openshift_excluder_service_type }}-docker-excluder{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) +  '*' }}"
+      name: "{{ r_openshift_excluder_service_type }}-docker-excluder"
       state: "{{ r_openshift_excluder_docker_package_state }}"
     when:
     - r_openshift_excluder_enable_docker_excluder | bool
@@ -33,7 +32,7 @@
 
   - name: Install openshift excluder - yum
     package:
-      name: "{{ r_openshift_excluder_service_type }}-excluder{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) + '*' }}"
+      name: "{{ r_openshift_excluder_service_type }}-docker-excluder"
       state: "{{ r_openshift_excluder_package_state }}"
     when:
     - r_openshift_excluder_enable_openshift_excluder | bool
