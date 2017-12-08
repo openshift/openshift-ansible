@@ -1,6 +1,7 @@
 ---
 - name: Setup yum repositories for all hosts
   hosts: oo_all_hosts
+  become: true
   gather_facts: no
   tasks:
   - name: initialize openshift repos

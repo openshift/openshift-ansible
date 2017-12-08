@@ -1,6 +1,7 @@
 ---
 - name: Disable excluders
   hosts: oo_nodes_to_config
+  become: true
   gather_facts: no
   roles:
   - role: openshift_excluder
