@@ -334,9 +334,9 @@ class OpenShiftAnsibleSyntaxCheck(Command):
                 result = self.deprecate_jinja2_in_when(yaml_contents, yaml_file)
                 has_errors = result or has_errors
 
-                # TODO (rteague): This test will be enabled once we move to Ansible 2.4
-                # result = self.deprecate_include(yaml_contents, yaml_file)
-                # has_errors = result or has_errors
+                # Check for usage of include: directive
+                result = self.deprecate_include(yaml_contents, yaml_file)
+                has_errors = result or has_errors
 
         if not has_errors:
             print('...PASSED')
