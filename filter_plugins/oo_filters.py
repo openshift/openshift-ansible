@@ -690,26 +690,6 @@ def to_padded_yaml(data, level=0, indent=2, **kw):
         raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
 
-def oo_openshift_env(hostvars):
-    ''' Return facts which begin with "openshift_" and translate
-        legacy facts to their openshift_env counterparts.
-
-        Ex: hostvars = {'openshift_fact': 42,
-                        'theyre_taking_the_hobbits_to': 'isengard'}
-            returns  = {'openshift_fact': 42}
-    '''
-    if not issubclass(type(hostvars), dict):
-        raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-
-    facts = {}
-    regex = re.compile('^openshift_.*')
-    for key in hostvars:
-        if regex.match(key):
-            facts[key] = hostvars[key]
-
-    return facts
-
-
 def oo_31_rpm_rename_conversion(rpms, openshift_version=None):
     """ Filters a list of 3.0 rpms and return the corresponding 3.1 rpms
         names with proper version (if provided)
@@ -996,7 +976,6 @@ class FilterModule(object):
             "oo_pretty_print_cluster": oo_pretty_print_cluster,
             "oo_generate_secret": oo_generate_secret,
             "oo_nodes_with_label": oo_nodes_with_label,
-            "oo_openshift_env": oo_openshift_env,
             "oo_31_rpm_rename_conversion": oo_31_rpm_rename_conversion,
             "oo_pods_match_component": oo_pods_match_component,
             "oo_get_hosts_from_hostvars": oo_get_hosts_from_hostvars,
