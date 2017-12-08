@@ -34,7 +34,7 @@ openshift_use_dnsmasq=true
 openshift_master_api_url=
 openshift_master_public_console_url="https://openshift.test.gaff.systems/console"
 openshift_master_public_api_url="https://openshift.test.gaff.systems"
-openshift_master_default_subdomain=openshift.test.gaff.systems
+openshift_master_default_subdomain=test.gaff.systems
 
 #logging vars
 openshift_hosted_logging_deploy=true
