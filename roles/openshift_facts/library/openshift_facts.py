@@ -458,7 +458,6 @@ def set_url_facts_if_unset(facts):
         etcd_urls = []
         if etcd_hosts != '':
             facts['master']['etcd_port'] = ports['etcd']
-            facts['master']['embedded_etcd'] = False
             for host in etcd_hosts:
                 etcd_urls.append(format_url(use_ssl['etcd'], host,
                                             ports['etcd']))
@@ -1595,7 +1594,7 @@ class OpenShiftFacts(object):
                                       console_port='8443', etcd_use_ssl=True,
                                       etcd_hosts='', etcd_port='4001',
                                       portal_net='172.30.0.0/16',
-                                      embedded_etcd=True, embedded_kube=True,
+                                      embedded_kube=True,
                                       embedded_dns=True,
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,

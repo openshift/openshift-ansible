@@ -2,20 +2,6 @@
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
-
-# If facts cache were for some reason deleted, this fact may not be set, and if not set
-# it will always default to true. This causes problems for the etcd data dir fact detection
-# so we must first make sure this is set correctly before attempting the backup.
-- name: Set master embedded_etcd fact
-  hosts: oo_masters_to_config
-  roles:
-  - openshift_facts
-  tasks:
-  - openshift_facts:
-      role: master
-      local_facts:
-        embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-
 - name: Backup and upgrade etcd
   import_playbook: ../../../openshift-etcd/private/upgrade_main.yml
 

@@ -45,7 +45,6 @@
       etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
       etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
       etcd_urls: "{{ openshift_master_etcd_urls | default(None) }}"
-      embedded_etcd: "{{ openshift_master_embedded_etcd | default(None) }}"
       embedded_kube: "{{ openshift_master_embedded_kube | default(None) }}"
       embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"

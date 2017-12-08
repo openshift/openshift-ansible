@@ -19,7 +19,6 @@
       name: etcd
       tasks_from: migrate.pre_check.yml
     vars:
-      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ ansible_default_ipv4.address }}"
 
 # TODO: This will be different for release-3.6 branch
@@ -49,7 +48,6 @@
       tasks_from: backup.yml
     vars:
       r_etcd_common_backup_tag: pre-migration
-      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
 
 - name: Gate on etcd backup
@@ -84,7 +82,6 @@
       name: etcd
       tasks_from: migrate.yml
     vars:
-      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
       etcd_peer_url_scheme: "https"
@@ -97,7 +94,6 @@
       name: etcd
       tasks_from: clean_data.yml
     vars:
-      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
       etcd_peer_url_scheme: "https"
