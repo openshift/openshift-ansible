@@ -1,6 +1,0 @@
----
-- name: Flag pre-upgrade checks complete for hosts without errors
-  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
-  tasks:
-  - set_fact:
-      pre_upgrade_complete: True
