@@ -375,6 +375,13 @@ def oo_split(string, separator=','):
     return string.split(separator)
 
 
+def oo_list_to_dict(lst, separator='='):
+    """ This converts a list of ["k=v"] to a dictionary {k: v}.
+    """
+    kvs = [i.split(separator) for i in lst]
+    return {k: v for k, v in kvs}
+
+
 def oo_haproxy_backend_masters(hosts, port):
     """ This takes an array of dicts and returns an array of dicts
         to be used as a backend for the haproxy role
@@ -989,6 +996,7 @@ class FilterModule(object):
             "oo_combine_dict": oo_combine_dict,
             "oo_dict_to_list_of_dict": oo_dict_to_list_of_dict,
             "oo_split": oo_split,
+            "oo_list_to_dict": oo_list_to_dict,
             "oo_filter_list": oo_filter_list,
             "oo_parse_heat_stack_outputs": oo_parse_heat_stack_outputs,
             "oo_parse_named_certificates": oo_parse_named_certificates,
