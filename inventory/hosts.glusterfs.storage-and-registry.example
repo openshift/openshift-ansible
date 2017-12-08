@@ -1,12 +1,12 @@
-# This is an example of a bring your own (byo) host inventory for a cluster
-# with natively hosted, containerized GlusterFS storage for exclusive use
-# as storage for a natively hosted Docker registry.
+# This is an example of an OpenShift-Ansible host inventory for a cluster
+# with natively hosted, containerized GlusterFS storage for both general
+# application use and a natively hosted Docker registry. It will also create a
+# StorageClass for the general storage.
 #
-# This inventory may be used with the byo/config.yml playbook to deploy a new
-# cluster with GlusterFS storage, which will use that storage to create a
-# volume that will provide backend storage for a hosted Docker registry.
+# This inventory may be used with the deploy_cluster.yml playbook to deploy a new
+# cluster with GlusterFS storage.
 #
-# This inventory may also be used with byo/openshift-glusterfs/registry.yml to
+# This inventory may also be used with openshift-glusterfs/config.yml to
 # deploy GlusterFS storage on an existing cluster. With this playbook, the
 # registry backend volume will be created but the administrator must then
 # either deploy a hosted registry or change an existing hosted registry to use
@@ -14,7 +14,7 @@
 #
 # There are additional configuration parameters that can be specified to
 # control the deployment and state of a GlusterFS cluster. Please see the
-# documentation in playbooks/byo/openshift-glusterfs/README.md and
+# documentation in playbooks/openshift-glusterfs/README.md and
 # roles/openshift_storage_glusterfs/README.md for additional details.
 
 [OSEv3:children]
@@ -22,6 +22,7 @@ masters
 nodes
 etcd
 # Specify there will be GlusterFS nodes
+glusterfs
 glusterfs_registry
 
 [OSEv3:vars]
@@ -35,11 +36,16 @@ master
 
 [nodes]
 master  openshift_schedulable=False
+# It is recommended to not use a single cluster for both general and registry
+# storage, so two three-node clusters will be required.
+node0   openshift_schedulable=True
+node1   openshift_schedulable=True
+node2   openshift_schedulable=True
 # A hosted registry, by default, will only be deployed on nodes labeled
 # "region=infra".
-node0   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
-node1   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
-node2   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+node3   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+node4   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
+node5   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
 
 [etcd]
 master
@@ -50,7 +56,12 @@ master
 # devices the node will have access to that is intended solely for use as
 # GlusterFS storage. These block devices must be bare (e.g. have no data, not
 # be marked as LVM PVs), and will be formatted.
-[glusterfs_registry]
+[glusterfs]
 node0  glusterfs_devices='[ "/dev/vdb", "/dev/vdc", "/dev/vdd" ]'
 node1  glusterfs_devices='[ "/dev/vdb", "/dev/vdc", "/dev/vdd" ]'
 node2  glusterfs_devices='[ "/dev/vdb", "/dev/vdc", "/dev/vdd" ]'
+
+[glusterfs_registry]
+node3  glusterfs_devices='[ "/dev/vdb", "/dev/vdc", "/dev/vdd" ]'
+node4  glusterfs_devices='[ "/dev/vdb", "/dev/vdc", "/dev/vdd" ]'
+node5  glusterfs_devices='[ "/dev/vdb", "/dev/vdc", "/dev/vdd" ]'

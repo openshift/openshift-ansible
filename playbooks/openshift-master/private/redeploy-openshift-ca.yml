@@ -56,7 +56,7 @@
     - groups.oo_etcd_to_config | default([]) | length == 0
     - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.servingInfo.clientCA != 'ca-bundle.crt'
   # Set servingInfo.clientCA to client-ca-bundle.crt in order to roll the CA certificate.
-  # This change will be reverted in playbooks/byo/openshift-cluster/redeploy-certificates.yml
+  # This change will be reverted in playbooks/redeploy-certificates.yml
   - modify_yaml:
       dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
       yaml_key: servingInfo.clientCA
