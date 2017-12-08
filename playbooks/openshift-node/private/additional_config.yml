@@ -33,7 +33,6 @@
   roles:
   - role: flannel
     etcd_urls: "{{ hostvars[groups.oo_first_master.0].openshift.master.etcd_urls }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
     when: openshift_use_flannel | default(false) | bool
 
 - name: Additional node config
