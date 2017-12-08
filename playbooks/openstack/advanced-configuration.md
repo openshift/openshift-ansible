@@ -159,11 +159,23 @@ So the provisioned cluster nodes will start using those natively as
 default nameservers. Technically, this allows to deploy OpenShift clusters
 without dnsmasq proxies.
 
-The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain` will form the cluster's DNS domain all
-your servers will be under. With the default values, this will be
-`openshift.example.com`. For workloads, the default subdomain is 'apps'.
-That sudomain can be set as well by the `openshift_openstack_app_subdomain` variable in
-the inventory.
+The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain`
+will form the cluster's public DNS domain all your servers will be under. With
+the default values, this will be `openshift.example.com`. For workloads, the
+default subdomain is 'apps'. That sudomain can be set as well by the
+`openshift_openstack_app_subdomain` variable in the inventory.
+
+If you want to use different public and private DNS records for your externally
+managed DNS server(s), you can alter the private domain name with
+`openshift_openstack_private_dns_domain`. Then full domain names will be formed
+as ``{{ openshift_openstack_clusterid }}.{{ openshift_openstack_private_dns_domain }}``.
+
+If you specify `openshift_openstack_public_hostname_suffix` and/or
+`openshift_openstack_private_hostname_suffix`, the suffixes will become subdomains
+of the corresponding public/private domain. Those are empty by default.
+
+**Note** the servers' hostnames will not be updated. The deployment may be done on
+arbitrary named hosts with the hostnames managed by cloud-init.
 
 The `openstack_<role name>_hostname` is a set of variables used for customising
 public names of Nova servers provisioned with a given role. When such a variable stays commented,
@@ -181,6 +193,8 @@ daemon that in turn proxies DNS requests to the authoritative DNS server.
 When Network Manager is enabled for provisioned cluster nodes, which is
 normally the case, you should not change the defaults and always deploy dnsmasq.
 
+### External DNS configuration
+
 `openshift_openstack_external_nsupdate_keys` describes an external authoritative DNS server(s)
 processing dynamic records updates in the public only cluster view:
 
@@ -196,6 +210,182 @@ optional `key_name`, which normally defaults to the cluster's DNS domain.
 This just illustrates a compatibility mode with a DNS service deployed
 by OpenShift on OSP10 reference architecture, and used in a mixed mode with
 another external DNS server.
+
+If you manage an external DNS server deployed elsewhere (or a separate view)
+for private FQDNs, you may want to define
+`openshift_openstack_external_nsupdate_keys` like this:
+
+    openshift_openstack_external_nsupdate_keys:
+      private:
+        key_secret: <some nsupdate key 2>
+        key_algorithm: 'hmac-sha256'
+        server: <private DNS server IP>
+
+#### A public DNS service
+
+Here is an example external DNS configuration scenario, which automates
+configuration of a public DNS service according to
+[Red Hat OpenStack 10 reference architecture for Openshift Container Platform 3.6](https://access.redhat.com/documentation/en-us/reference_architectures/2017/html-single/deploying_and_managing_red_hat_openshift_container_platform_3.6_on_red_hat_openstack_platform_10/index#creating_dns):
+
+* Clone automation playbooks:
+
+  ```bash
+  $ git clone https://github.com/openshift/openshift-ansible-contrib
+  $ cd openshift-ansible-contrib/reference-architecture/osp-dns
+  ```
+
+* Configure inventory variables for DNS service (substitute with your `<values>`):
+
+  ```bash
+  $ cat > vars.yaml << EOF_CAT
+  ---
+  domain_name: openshift.example.com
+  dns_forwarders: []
+  external_network: <your_public_access_network>
+  image: <centos7-image>
+  ssh_user: centos
+  ssh_key_name: <your_key_pair_name>
+  update_key: <your_secret_key>
+  stack_name: osp10-refarch-dns-service
+  slave_count: 0
+  flavor: m1.small
+  contact: <your_email>
+  EOF_CAT
+  ```
+
+  Do not specify DNS forwarders as we have no DNSSEC enabled servers available
+  for this example guide.
+  **Note** `update_key` can be generated with the commands like:
+
+  ```bash
+  $ ddns-confgen -r /dev/urandom
+  $ rndc-confgen -a -c update.key -k update-key -r /dev/urandom
+  ```
+
+* Deploy DNS service:
+
+  ```bash
+  $ ansible-playbook deploy-dns.yaml -e@vars.yaml -e ansible_ssh_common_args=''
+  ```
+
+  And note the provisioned DNS server's public/floating IP.
+
+* Go back to the dir with cloned openshift-ansible repo and inventory dir and
+  configure external nsupdates key and openstack dns servers:
+
+  ```bash
+  $ cd -
+  $ cat > inventory/external_dns.yaml << EOF_CAT
+  ---
+  ext_dns_ip: <provisioned_dns_ip>
+  openshift_openstack_external_nsupdate_keys:
+    public:
+      key_secret: <your_secret_key>
+      key_name: 'update-key'
+      key_algorithm: 'hmac-md5'
+      server: "{{ ext_dns_ip }}"
+  openshift_openstack_dns_nameservers:
+    - "{{ ext_dns_ip }}"
+    - 208.67.222.220
+    - 130.255.73.90
+  EOF_CAT
+  ```
+
+  Feel free to specify another public DNS servers. Those are required as we do
+  not configure our external DNS services to forward requests.
+
+* Deploy an openshift cluster as usual, yet added ``-e@inventory/external_dns.yaml``.
+
+In the end, your cluster nodes and external clients should resolve names like
+`master-0.openshift.example.com` into the public/floating IPs of the provisioned Nova
+servers.
+
+#### DNS services for private and public domains
+
+You can alter a full domain name (here 'openshift.private.lc') for the private domain
+records to be hosted on another DNS server.
+
+**Note** you can use multiple views of a single DNS server as well. Osp-dns playbooks
+do not support this though. See [CASL automation
+playbooks](https://github.com/redhat-cop/infra-ansible/blob/master/playbooks/provision-dns-server.yml),
+which provide an alternative deployment method.
+
+This can be done with the steps above given a small adjustment:
+
+* Provision additional DNS service:
+
+  ```bash
+  $ ansible-playbook deploy-dns.yaml -e@vars.yaml -e ansible_ssh_common_args='' \
+    -e domain_name=openshift.private.lc -e update_key=<antoher_key> \
+    -e stack_name=osp10-refarch-dns-service2
+  ```
+
+* Add the 'private' dictionary into `openshift_openstack_external_nsupdate_keys` in
+  `inventory/external_dns.yaml`:
+
+  ```
+  ---
+  ext_dns_ip: <provisioned_dns_ip>
+  ext_dns_ip2: <provisioned_dns_ip2>
+  openshift_openstack_external_nsupdate_keys:
+    public:
+      key_secret: <your_secret_key>
+      key_name: 'update-key'
+      key_algorithm: 'hmac-md5'
+      server: "{{ ext_dns_ip }}"
+    private:
+      key_secret: <your_secret_key2>
+      key_name: 'update-key'
+      key_algorithm: 'hmac-md5'
+      server: "{{ ext_dns_ip2 }}"
+  openshift_openstack_dns_nameservers:
+    - "{{ ext_dns_ip }}"
+    - "{{ ext_dns_ip2 }}"
+    - 130.255.73.90
+  ```
+
+  **Note** for a multi-view server, 'ip' and 'ip2' will be the same, so you can squash
+  the records in `openshift_openstack_dns_nameservers`.
+
+* Alter the openshift deployment command like:
+
+  ```bash
+  $ <deploy_command> -e@inventory/external_dns.yaml \
+    -e openshift_openstack_private_dns_domain=private.lc
+  ```
+
+In the end, your cluster nodes should resolve names like
+`master-0.openshift.private.lc` into the private IPs and names like
+`master-0.openshift.example.com` into the public/floating IPs of the provisioned Nova
+servers.
+
+#### DNS service for private subdomain of public domain
+
+Alternatively, custom private DNS records may be placed into a subdomain (here
+'private.openshift.example.com'). Repeat the steps above with a small configuration change:
+
+* Alter the private DNS service deployment command like:
+
+  ```bash
+  $ ansible-playbook deploy-dns.yaml -e@vars.yaml -e ansible_ssh_common_args='' \
+    -e domain_name=private.openshift.example.com
+  ```
+
+* Alter the openshift deployment command like:
+
+  ```bash
+  $ <deploy_command> -e@inventory/external_dns.yaml \
+    -e openshift_openstack_private_hostname_suffix=private \
+  ```
+
+As a result, your cluster nodes should resolve names like
+`master-0.private.openshift.example.com` into the private IPs and names like
+`master-0.openshift.example.com` into the public/floating IPs of the provisioned Nova
+servers.
+
+**Note** To resolve names `master-0.private`, `master-0`, make sure there is
+an appropriate search domains and ndots placed into the hosts' /etc/resolv.conf.
+This stays out of scope for this guide though.
 
 ## Flannel networking
 
