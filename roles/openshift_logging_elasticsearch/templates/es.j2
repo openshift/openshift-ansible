@@ -9,6 +9,7 @@ metadata:
     logging-infra: "{{logging_component}}"
 spec:
   replicas: {{es_replicas|default(1)}}
+  revisionHistoryLimit: 0
   selector:
     provider: openshift
     component: "{{component}}"
