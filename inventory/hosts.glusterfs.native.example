@@ -1,16 +1,16 @@
-# This is an example of a bring your own (byo) host inventory for a cluster
+# This is an example of an OpenShift-Ansible host inventory for a cluster
 # with natively hosted, containerized GlusterFS storage for applications. It
-# will also autmatically create a StorageClass for this purpose.
+# will also automatically create a StorageClass for this purpose.
 #
-# This inventory may be used with the byo/config.yml playbook to deploy a new
+# This inventory may be used with the deploy_cluster.yml playbook to deploy a new
 # cluster with GlusterFS storage.
 #
-# This inventory may also be used with byo/openshift-glusterfs/config.yml to
+# This inventory may also be used with openshift-glusterfs/config.yml to
 # deploy GlusterFS storage on an existing cluster.
 #
 # There are additional configuration parameters that can be specified to
 # control the deployment and state of a GlusterFS cluster. Please see the
-# documentation in playbooks/byo/openshift-glusterfs/README.md and
+# documentation in playbooks/openshift-glusterfs/README.md and
 # roles/openshift_storage_glusterfs/README.md for additional details.
 
 [OSEv3:children]

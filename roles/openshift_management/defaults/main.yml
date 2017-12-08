@@ -88,7 +88,7 @@ openshift_management_storage_nfs_local_hostname: false
 # name and password AND are trying to use integration scripts.
 #
 # For example, adding this cluster as a container provider,
-# playbooks/byo/openshift-management/add_container_provider.yml
+# playbooks/openshift-management/add_container_provider.yml
 openshift_management_username: admin
 openshift_management_password: smartvm
 

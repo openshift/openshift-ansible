@@ -343,7 +343,7 @@ installation for example by specifying the authentication.
 
 The full list of options is available in this sample inventory:
 
-https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.ose.example
+https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
 
 Note, that in order to deploy OpenShift origin, you should update the following
 variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
@@ -604,7 +604,7 @@ A library of custom post-provision actions exists in `openshift-ansible-contrib/
 
 Once it succeeds, you can install openshift by running:
 
-    ansible-playbook openshift-ansible/playbooks/byo/config.yml
+    ansible-playbook openshift-ansible/playbooks/deploy_cluster.yml
 
 ## Access UI
 
