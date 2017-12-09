@@ -36,11 +36,35 @@ openshift_master_public_console_url="https://openshift.test.gaff.systems/console
 openshift_master_public_api_url="https://openshift.test.gaff.systems"
 openshift_master_default_subdomain=test.gaff.systems
 
-#logging vars
-openshift_hosted_logging_deploy=true
+# default project node selector
+osm_default_node_selector='region=primary'
+
+# OpenShift Router Options
+openshift_hosted_router_selector='region=infra'
+openshift_registry_selector='region=infra'
+openshift_hosted_router_force_subdomain='${name}${namespace}.test.gaff.systems'
+
+# Enable API service auditing, available as of 3.2
+openshift_master_audit_config='{"enabled": true}'
+
+# logging vars
+openshift_logging_install_logging=true
+
+#openshift_hosted_logging_deploy=true
 openshift_hosted_logging_elasticsearch_cluster_size=1
-openshift_logging_namespace=openshift-infra
-openshift_logging_master_public_url="https://openshift.test.gaff.systems"
+openshift_logging_namespace=logging
+
+#openshift_logging_image_version=v3.6
+openshift_logging_master_public_url=https://openshift.test.gaff.systems
+openshift_logging_curator_default_days=7
+openshift_logging_curator_nodeselector={"region":"infra"}
+openshift_logging_kibana_nodeselector={"region":"infra"}
+openshift_logging_es_nodeselector={"region":"infra"}
+openshift_logging_fluentd_nodeselector={"region":"infra"}
+openshift_logging_kibana_replica_count=1
+openshift_logging_es_allows_cluster_reader=true
+
+
 
 openshift_clock_enabled=true
 
