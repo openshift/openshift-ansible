@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.0.0%{?dist}
+Release:        0.1.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,120 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Dec 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.1.0
+- Cleanup byo references (rteague@redhat.com)
+- openshift_node: reintroduce restart of CRI-O. (gscrivan@redhat.com)
+- container-engine: skip openshift_docker_log_driver when it is False
+  (gscrivan@redhat.com)
+- container-engine: log-opts is a dictionary in the daemon.json file
+  (gscrivan@redhat.com)
+- openshift_version: add dependency to openshift_facts (gscrivan@redhat.com)
+- openshift_version: define openshift_use_crio_only (gscrivan@redhat.com)
+- openshift_version: add dependency to container_runtime (gscrivan@redhat.com)
+- crio: define and use l_is_node_system_container (gscrivan@redhat.com)
+- Update deprecation checks - include: (rteague@redhat.com)
+- Add os_firewall to prerequisites.yml (mgugino@redhat.com)
+- add 3.8 templates for gluster ep and svc (lmeyer@redhat.com)
+- Remove openshift.common.service_type (mgugino@redhat.com)
+- Remove unused openshift_env_structures and openshift_env (mgugino@redhat.com)
+- Fix incorrect register name master registry auth (mgugino@redhat.com)
+- Include Deprecation: Convert to import_playbook (rteague@redhat.com)
+- add 3.8 templates for gluster ep and svc (m.judeikis@gmail.com)
+- Remove all uses of openshift.common.admin_binary (sdodson@redhat.com)
+- Implement container_runtime playbooks and changes (mgugino@redhat.com)
+- Playbook Consolidation - byo/config.yml (rteague@redhat.com)
+- openshift_logging_kibana: fix mixing paren (lmeyer@redhat.com)
+- Fix ami building. (kwoodson@redhat.com)
+- Include Deprecation: Convert to include_tasks (rteague@redhat.com)
+- Add missing symlinks in openshift-logging (rteague@redhat.com)
+- Fix generate_pv_pvcs_list plugin undef (mgugino@redhat.com)
+- Playbook Consolidation - etcd Upgrade (rteague@redhat.com)
+- bug 1519622. Disable rollback of ES DCs (jcantril@redhat.com)
+- Remove all references to pacemaker (pcs, pcsd) and
+  openshift.master.cluster_method. (abutcher@redhat.com)
+- Remove entry point files no longer needed by CI (rteague@redhat.com)
+- Don't check for the deployment_type (tomas@sedovic.cz)
+- Get the correct value out of openshift_release (tomas@sedovic.cz)
+- Fix oreg_auth_credentials_create register var (mgugino@redhat.com)
+- Fix and cleanup not required dns bits (bdobreli@redhat.com)
+- Fix hosted vars (mgugino@redhat.com)
+- Remove duplicate init import in network_manager.yml (rteague@redhat.com)
+- Document testing repos for dev purposes (bdobreli@redhat.com)
+- Remove unused protected_facts_to_overwrite (mgugino@redhat.com)
+- Use openshift testing repos for openstack (bdobreli@redhat.com)
+- Use openshift_release instead of ose_version (tomas@sedovic.cz)
+- Remove the ose_version check (tomas@sedovic.cz)
+- Allow number of retries in openshift_management to be configurable
+  (ealfassa@redhat.com)
+- Bumping to 3.9 (smunilla@redhat.com)
+- Cleanup unused openstack provider code (bdobreli@redhat.com)
+- Adding 3.9 tito releaser (smunilla@redhat.com)
+- Implement container runtime role (mgugino@redhat.com)
+- Fix glusterfs checkpoint info (rteague@redhat.com)
+- storage_glusterfs: fix typo (lmeyer@redhat.com)
+- Playbook Consolidation - Redeploy Certificates (rteague@redhat.com)
+- Fix tox (tomas@sedovic.cz)
+- Remove shell environment lookup (tomas@sedovic.cz)
+- Revert "Fix syntax error caused by an extra paren" (tomas@sedovic.cz)
+- Revert "Fix the env lookup fallback in rhel_subscribe" (tomas@sedovic.cz)
+- Remove reading shell environment in rhel_subscribe (tomas@sedovic.cz)
+- retry package operations (lmeyer@redhat.com)
+- Add v3.9 support (sdodson@redhat.com)
+- Playbook Consolidation - openshift-logging (rteague@redhat.com)
+- Do not escalate privileges in jks generation tasks (iacopo.rozzo@amadeus.com)
+- Fix inventory symlinks in origin-ansible container. (dgoodwin@redhat.com)
+- Initial upgrade for scale groups. (kwoodson@redhat.com)
+- Update the doc text (tomas@sedovic.cz)
+- Optionally subscribe OpenStack RHEL nodes (tomas@sedovic.cz)
+- Fix the env lookup fallback in rhel_subscribe (tomas@sedovic.cz)
+- Fix syntax error caused by an extra paren (tomas@sedovic.cz)
+- Fix no_log warnings for custom module (mgugino@redhat.com)
+- Add external_svc_subnet for k8s loadbalancer type service
+  (jihoon.o@samsung.com)
+- Remove openshift_facts project_cfg_facts (mgugino@redhat.com)
+- Remove dns_port fact (mgugino@redhat.com)
+- Bug 1512793- Fix idempotence issues in ASB deploy (fabian@fabianism.us)
+- Remove unused task file from etcd role (rteague@redhat.com)
+- fix type in authroize (jchaloup@redhat.com)
+- Use IP addresses for OpenStack nodes (tomas@sedovic.cz)
+- Update prometheus to 2.0.0 GA (zgalor@redhat.com)
+- remove schedulable from openshift_facts (mgugino@redhat.com)
+- inventory: Add example for service catalog vars (smilner@redhat.com)
+- Correct usage of include_role (rteague@redhat.com)
+- Remove openshift.common.cli_image (mgugino@redhat.com)
+- Fix openshift_env fact creation within openshift_facts. (abutcher@redhat.com)
+- Combine openshift_node and openshift_node_dnsmasq (mgugino@redhat.com)
+- GlusterFS: Remove extraneous line from glusterblock template
+  (jarrpa@redhat.com)
+- Remove openshift_clock from meta depends (mgugino@redhat.com)
+- Simplify is_master_system_container logic (mgugino@redhat.com)
+- dist.iteritems() no longer exists in Python 3. (jpazdziora@redhat.com)
+- Remove spurrious file committed by error (diego.abelenda@camptocamp.com)
+- Fix name of the service pointed to by hostname
+  (diego.abelenda@camptocamp.com)
+- Missed the default value after the variable name change...
+  (diego.abelenda@camptocamp.com)
+- Change the name of the variable and explicitely document the names
+  (diego.abelenda@camptocamp.com)
+- Allow to set the hostname for routes to prometheus and alertmanager
+  (diego.abelenda@camptocamp.com)
+- Allow openshift_install_examples to be false (michael.fraenkel@gmail.com)
+- Include Deprecation - openshift-service-catalog (rteague@redhat.com)
+- Remove is_openvswitch_system_container from facts (mgugino@redhat.com)
+- Workaround the fact that package state=present with dnf fails for already
+  installed but excluded packages. (jpazdziora@redhat.com)
+- With dnf repoquery and excluded packages, --disableexcludes=all is needed to
+  list the package with --installed. (jpazdziora@redhat.com)
+- Add support for external glusterfs as registry backend (m.judeikis@gmail.com)
+- cri-o: honor additional and insecure registries again (gscrivan@redhat.com)
+- docker: copy Docker metadata to the alternative storage path
+  (gscrivan@redhat.com)
+- Add check for gluterFS DS to stop restarts (m.judeikis@gmail.com)
+- Bug 1514417 - Adding correct advertise-client-urls (shawn.hurley21@gmail.com)
+- Uninstall tuned-profiles-atomic-openshift-node as defined in origin.spec
+  (jmencak@redhat.com)
+- Mod startup script to publish all frontend binds (cwilkers@redhat.com)
+
 * Thu Nov 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.0-0.13.0
 -
 
