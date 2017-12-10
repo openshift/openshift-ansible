@@ -54,8 +54,7 @@ openshift_logging_install_logging=true
 openshift_hosted_logging_elasticsearch_cluster_size=1
 openshift_logging_namespace=logging
 openshift_logging_master_public_url=https://openshift.test.gaff.systems
-
-openshift_logging_image_version=v3.6
+openshift_logging_image_version=v3.6.1
 
 openshift_logging_curator_default_days=7
 openshift_logging_curator_nodeselector={"region":"infra"}
@@ -70,7 +69,7 @@ openshift_logging_es_allows_cluster_reader=true
 openshift_clock_enabled=true
 
 openshift_hosted_logging_deployer_prefix=docker.io/openshift/origin-
-openshift_hosted_logging_deployer_version=v1.5.1
+openshift_hosted_logging_deployer_version=v3.6.1
 
 # uncomment the following to enable htpasswd authentication; defaults to DenyAllPasswordIdentityProvider
 openshift_master_identity_providers='[{"name": "giffgaffokta_test", "login": "true", "challenge": "false", "mappingMethod": "claim", "kind": "OpenIDIdentityProvider", "client_id": "0oa1hmij3ygRPX6Sj0i7", "client_secret": "jB3P7pi0PaPyOl2RNV80GkkcDYfKVz9Ktzi_NcVg", "extraScopes": ["email", "profile"], "claims": {"id": ["sub"], "preferredUsername": ["preferred_username"], "name": ["name"], "email": ["email"]}, "urls": {"authorize": "https://ggauth.okta-emea.com/oauth2/v1/authorize", "token": "https://ggauth.okta-emea.com/oauth2/v1/token", "userInfo": "https://ggauth.okta-emea.com/oauth2/v1/userinfo"} }]'
