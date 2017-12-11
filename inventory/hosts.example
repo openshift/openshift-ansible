@@ -281,6 +281,16 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # GCE
 #openshift_cloudprovider_kind=gce
+#
+# vSphere
+#openshift_cloudprovider_kind=vsphere
+#openshift_cloudprovider_vsphere_username=username
+#openshift_cloudprovider_vsphere_password=password
+#openshift_cloudprovider_vsphere_host=vcenter_host or vsphere_host
+#openshift_cloudprovider_vsphere_datacenter=datacenter
+#openshift_cloudprovider_vsphere_datastore=datastore
+#openshift_cloudprovider_vsphere_folder=optional_folder_name
+
 
 # Project Configuration
 #osm_project_request_message=''
