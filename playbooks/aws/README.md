@@ -134,7 +134,7 @@ At this point we have successfully created the infrastructure including the mast
 Now it is time to install Openshift using the openshift-ansible installer.  This can be achieved by running the following playbook:
 
 ```
-$ ansible-playbook -i inventory.yml install.yml @provisioning_vars.yml
+$ ansible-playbook -i inventory.yml install.yml -e @provisioning_vars.yml
 ```
 This playbook accomplishes the following:
 1. Builds a dynamic inventory file by querying AWS.
