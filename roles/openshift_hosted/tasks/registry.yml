@@ -126,7 +126,7 @@
     selector: "{{ openshift_hosted_registry_selector }}"
     replicas: "{{ openshift_hosted_registry_replicas | default(l_default_replicas) }}"
     service_account: "{{ openshift_hosted_registry_serviceaccount }}"
-    images: "{{ penshift_hosted_registry_registryurl }}"
+    images: "{{ openshift_hosted_registry_registryurl }}"
     env_vars: "{{ openshift_hosted_registry_env_vars }}"
     volume_mounts: "{{ openshift_hosted_registry_volumes }}"
     edits: "{{ openshift_hosted_registry_edits }}"
