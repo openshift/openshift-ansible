@@ -19,3 +19,4 @@ dependencies:
 - role: lib_openshift
 - role: lib_os_firewall
 - role: lib_utils
+- role: openshift_facts
