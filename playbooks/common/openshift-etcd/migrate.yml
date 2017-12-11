@@ -22,14 +22,18 @@
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ ansible_default_ipv4.address }}"
 
-# TODO: This will be different for release-3.6 branch
 - name: Prepare masters for etcd data migration
   hosts: oo_masters_to_config
   tasks:
   - set_fact:
       master_services:
+      - "{{ openshift.common.service_type + '-master' }}"
+  - set_fact:
+      master_services:
       - "{{ openshift.common.service_type + '-master-controllers' }}"
       - "{{ openshift.common.service_type + '-master-api' }}"
+    when:
+    - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
   - debug:
       msg: "master service name: {{ master_services }}"
   - name: Stop masters
