@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.1.0%{?dist}
+Release:        0.2.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.2.0
+- GlusterFS: Add playbook doc note (jarrpa@redhat.com)
+- Fix openshift hosted registry rollout (rteague@redhat.com)
+- Remove container_runtime from the openshift_version (sdodson@redhat.com)
+
 * Fri Dec 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.1.0
 - Cleanup byo references (rteague@redhat.com)
 - openshift_node: reintroduce restart of CRI-O. (gscrivan@redhat.com)
