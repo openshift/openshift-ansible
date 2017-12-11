@@ -7,6 +7,12 @@
 
 - include_tasks: registry_auth.yml
 
+- name: update package meta data to speed install later.
+  command: "{{ ansible_pkg_mgr }} makecache"
+  register: result
+  until: result | success
+  when: not openshift.common.is_containerized | bool
+
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
   register: docker_image_count
@@ -19,58 +25,22 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- name: Upgrade Docker
-  package: name=docker{{ '-' + docker_version }} state=present
+- include_tasks: upgrade/containerized_upgrade_pull.yml
+  when: openshift.common.is_containerized | bool
+
+# Prepull the rpms for docker upgrade, but don't install
+- name: download docker upgrade rpm
+  command: "{{ ansible_pkg_mgr }} install -y --downloadonly docker{{ '-' + docker_version }}"
   register: result
   until: result | success
   when:
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- name: Pre-pull node image
-  command: >
-    docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool
-
-- name: Pre-pull openvswitch image
-  command: >
-    docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when:
-  - openshift.common.is_containerized | bool
-  - openshift_use_openshift_sdn | bool
-
 - include_tasks: upgrade/rpm_upgrade.yml
   vars:
-    component: "node"
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift.common.is_containerized | bool
-
-- name: Remove obsolete docker-sdn-ovs.conf
-  file:
-    path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
-    state: absent
-
-- include_tasks: upgrade/containerized_node_upgrade.yml
-  when: openshift.common.is_containerized | bool
-
-- name: Upgrade openvswitch
-  package:
-    name: openvswitch
-    state: latest
-  when: not openshift.common.is_containerized | bool
-  register: result
-  until: result | success
-
-- name: Update oreg value
-  yedit:
-    src: "{{ openshift.common.config_base }}/node/node-config.yaml"
-    key: 'imageConfig.format'
-    value: "{{ oreg_url | default(oreg_url_node) }}"
-  when: oreg_url is defined or oreg_url_node is defined
 
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
 - name: Check for swap usage
@@ -84,35 +54,3 @@
 - name: set_fact swap_result
   set_fact:
     openshift_node_upgrade_swap_result: "{{ swap_result.stdout_lines | length > 0 | bool }}"
-
-# Disable Swap Block (pre)
-- block:
-  - name: Remove swap entries from /etc/fstab
-    replace:
-      dest: /etc/fstab
-      regexp: '(^[^#].*swap.*)'
-      replace: '# \1'
-      backup: yes
-
-  - name: Add notice about disabling swap
-    lineinfile:
-      dest: /etc/fstab
-      line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
-      state: present
-  when:
-  - openshift_node_upgrade_swap_result | default(False) | bool
-  - openshift_disable_swap | default(true) | bool
-  # End Disable Swap Block
-
-- name: Apply 3.6 dns config changes
-  yedit:
-    src: /etc/origin/node/node-config.yaml
-    key: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_items:
-  - key: "dnsBindAddress"
-    value: "127.0.0.1:53"
-  - key: "dnsRecursiveResolvConf"
-    value: "/etc/origin/node/resolv.conf"
-
-- include_tasks: dnsmasq_install.yml
