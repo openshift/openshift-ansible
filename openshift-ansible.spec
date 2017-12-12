@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.86
+Version:        3.6.173.0.87
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.87-1
+- 
+
 * Thu Dec 07 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.86-1
 - 
 
