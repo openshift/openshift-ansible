@@ -12,6 +12,11 @@
         installer_phase_initialize:
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+  - name: Ensure Ansible facts directory exists
+    file:
+      path: /etc/ansible/facts.d
+      recurse: true
+      state: directory
 
 - import_playbook: evaluate_groups.yml
 
