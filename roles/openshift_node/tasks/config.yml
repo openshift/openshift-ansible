@@ -24,9 +24,9 @@
     ovs_service_status_changed: "{{ ovs_start_result | changed }}"
 
 - file:
-    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
+    dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
     state: directory
-  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
+  when: ('config' in l2_openshift_node_kubelet_args) | bool
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
