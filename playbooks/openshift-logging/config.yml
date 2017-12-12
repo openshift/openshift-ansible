@@ -1,0 +1,9 @@
+---
+#
+# This playbook is a preview of upcoming changes for installing
+# Hosted logging on.  See inventory/byo/hosts.*.example for the
+# currently supported method.
+#
+- include: ../init/main.yml
+
+- include: private/config.yml
