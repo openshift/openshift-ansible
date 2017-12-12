@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.4.0%{?dist}
+Release:        0.5.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.5.0
+- Remove unneeded embedded etcd logic (mgugino@redhat.com)
+
 * Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.4.0
 - Copying upstream fix for ansible 2.4 ec2_group module. (kwoodson@redhat.com)
 - Add missing dependencies on openshift_facts role (sdodson@redhat.com)
