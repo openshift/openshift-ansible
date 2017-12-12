@@ -6,11 +6,13 @@ openshift_node_groups:
   edits: []
 - name: node-config-infra
   labels:
-  - 'type=infra'
+  - 'type=node'
+  - 'sub-host-type=infra'
   edits: []
 - name: node-config-compute
   labels:
-  - 'type=compute'
+  - 'type=node'
+  - 'sub-host-type=compute'
   edits: []
 
 openshift_node_group_edits: []
