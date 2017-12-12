@@ -1,2 +1,3 @@
 ---
-- include: openshift-cluster/config.yml
+# TODO (rteague): Temporarily leaving this playbook to allow CI tests to operate until CI jobs are updated.
+- import_playbook: ../deploy_cluster.yml
