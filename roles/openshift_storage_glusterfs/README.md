@@ -147,7 +147,6 @@ Dependencies
 ------------
 
 * os_firewall
-* openshift_hosted_facts
 * openshift_repos
 * lib_openshift
 
