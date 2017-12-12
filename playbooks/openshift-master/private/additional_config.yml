@@ -19,8 +19,6 @@
     openshift_master_ha: "{{ groups.oo_masters | length > 1 }}"
     omc_cluster_hosts: "{{ groups.oo_masters | join(' ')}}"
   roles:
-  - role: openshift_master_cluster
-    when: openshift_master_ha | bool and openshift.master.cluster_method == "pacemaker"
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
   - role: openshift_examples

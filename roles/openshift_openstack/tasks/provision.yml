@@ -1,6 +1,6 @@
 ---
 - name: Generate the templates
-  include: generate-templates.yml
+  include_tasks: generate-templates.yml
   when:
   - openshift_openstack_stack_state == 'present'
 
@@ -17,7 +17,7 @@
   meta: refresh_inventory
 
 - name: CleanUp
-  include: cleanup.yml
+  include_tasks: cleanup.yml
   when:
   - openshift_openstack_stack_state == 'present'
 

@@ -12,8 +12,8 @@
     openshift_logging_eventrouter_image_prefix: "{{ openshift_logging_eventrouter_image_prefix | default(__openshift_logging_eventrouter_image_prefix) }}"
     openshift_logging_eventrouter_image_version: "{{ openshift_logging_eventrouter_image_version | default(__openshift_logging_eventrouter_image_version) }}"
 
-- include: "{{ role_path }}/tasks/install_eventrouter.yaml"
+- include_tasks: install_eventrouter.yaml
   when: openshift_logging_install_eventrouter | default(false) | bool
 
-- include: "{{ role_path }}/tasks/delete_eventrouter.yaml"
+- include_tasks: delete_eventrouter.yaml
   when: not openshift_logging_install_eventrouter | default(false) | bool

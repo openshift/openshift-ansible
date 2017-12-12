@@ -1,13 +1,13 @@
 ---
 # input variables:
-# - openshift.common.service_type
+# - openshift_service_type
 # - component
 # - openshift_pkg_version
 # - openshift.common.is_atomic
 
 # We verified latest rpm available is suitable, so just yum update.
 - name: Upgrade packages
-  package: "name={{ openshift.common.service_type }}-{{ component }}{{ openshift_pkg_version }} state=present"
+  package: "name={{ openshift_service_type }}-{{ component }}{{ openshift_pkg_version }} state=present"
   register: result
   until: result | success
 
@@ -19,7 +19,7 @@
 
 - name: Install Node service file
   template:
-    dest: "/etc/systemd/system/{{ openshift.common.service_type }}-node.service"
+    dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
     src: "node.service.j2"
   register: l_node_unit
 

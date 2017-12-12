@@ -1,12 +1,10 @@
 ---
 - name: normalize groups
-  import_playbook: ../../init/evaluate_groups.yml
-
-- name: initialize the facts
-  import_playbook: ../../init/facts.yml
-
-- name: initialize the repositories
-  import_playbook: ../../init/repos.yml
+  import_playbook: ../../prerequisites.yml
+  vars:
+    skip_version: True
+    skip_sanity_checks: True
+    skip_validate_hostnames: True
 
 - name: run node config setup
   import_playbook: setup.yml

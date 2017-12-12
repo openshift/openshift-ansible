@@ -1,18 +1,10 @@
 ---
-- name: Configure facts for docker-registry
-  set_fact:
-    openshift_hosted_registry_routecertificates: "{{ ('routecertificates' in openshift.hosted.registry.keys()) | ternary(openshift_hosted_registry_routecertificates, {}) }}"
-    openshift_hosted_registry_routehost: "{{ ('routehost' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routehost, False) }}"
-    openshift_hosted_registry_routetermination: "{{ ('routetermination' in openshift.hosted.registry.keys()) | ternary(openshift.hosted.registry.routetermination, 'passthrough') }}"
-
 - name: Include reencrypt route configuration
-  include: secure/reencrypt.yml
-  static: no
+  include_tasks: secure/reencrypt.yml
   when: openshift_hosted_registry_routetermination == 'reencrypt'
 
 - name: Include passthrough route configuration
-  include: secure/passthrough.yml
-  static: no
+  include_tasks: secure/passthrough.yml
   when: openshift_hosted_registry_routetermination == 'passthrough'
 
 - name: Fetch the docker-registry route
@@ -39,7 +31,7 @@
     - "{{ docker_registry_route.results[0].spec.host }}"
     - "{{ openshift_hosted_registry_name }}.default.svc"
     - "{{ openshift_hosted_registry_name }}.default.svc.{{ openshift_cluster_domain }}"
-    - "{{ openshift_hosted_registry_routehost }}"
+    - "{{ openshift_hosted_registry_routehost | default(omit) }}"
     cert: "{{ docker_registry_cert_path }}"
     key: "{{ docker_registry_key_path }}"
     expire_days: "{{ openshift_hosted_registry_cert_expire_days }}"

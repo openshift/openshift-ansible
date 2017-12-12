@@ -31,7 +31,7 @@
     type: role
     name: "{{ openshift_cluster_autoscaler_name }}"
 
-- include: aws.yml
+- include_tasks: aws.yml
   when: openshift_cluster_autoscaler_cloud_provider == 'aws'
 
 - name: create the policies

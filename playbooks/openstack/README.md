@@ -24,7 +24,7 @@ The OpenStack release must be Newton (for Red Hat OpenStack this is
 version 10) or newer. It must also satisfy these requirements:
 
 * Heat (Orchestration) must be available
-* The deployment image (CentOS 7 or RHEL 7) must be loaded
+* The deployment image (CentOS 7.4 or RHEL 7) must be loaded
 * The deployment flavor must be available to your user
   - `m1.medium` / 4GB RAM + 40GB disk should be enough for testing
   - look at
@@ -183,8 +183,13 @@ Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml
+$ ansible-playbook --user openshift -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml \
+  -e openshift_repos_enable_testing=true
 ```
+
+Note, you may want to use the testing repo for development purposes only.
+Normally, `openshift_repos_enable_testing` should not be specified.
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
@@ -210,7 +215,6 @@ advanced configuration:
 * [External Dns][external-dns]
 * Multiple Clusters (TODO)
 * [Cinder Registry][cinder-registry]
-* [Bastion Node][bastion]
 
 
 [ansible]: https://www.ansible.com/
@@ -222,11 +226,10 @@ advanced configuration:
 [hardware-requirements]: https://docs.openshift.org/latest/install_config/install/prerequisites.html#hardware
 [origin]: https://www.openshift.org/
 [centos7]: https://www.centos.org/
-[sample-openshift-inventory]: https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.example
+[sample-openshift-inventory]: https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
 [advanced-configuration]: ./advanced-configuration.md
 [accessing-openshift]: ./advanced-configuration.md#accessing-the-openshift-cluster
 [uninstall-openshift]: ./advanced-configuration.md#removing-the-openshift-cluster
 [loadbalancer]: ./advanced-configuration.md#multi-master-configuration
 [external-dns]: ./advanced-configuration.md#dns-configuration-variables
 [cinder-registry]: ./advanced-configuration.md#creating-and-using-a-cinder-volume-for-the-openshift-registry
-[bastion]: ./advanced-configuration.md#configure-static-inventory-and-access-via-a-bastion-node

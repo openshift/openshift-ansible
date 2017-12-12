@@ -35,7 +35,7 @@ trap upload_journals ERR
 # run the actual installer
 # FIXME: override openshift_image_tag defined in the inventory until
 # https://github.com/openshift/openshift-ansible/issues/4478 is fixed.
-ansible-playbook -vvv -i .papr.inventory playbooks/byo/config.yml -e "openshift_image_tag=$OPENSHIFT_IMAGE_TAG"
+ansible-playbook -vvv -i .papr.inventory playbooks/deploy_cluster.yml -e "openshift_image_tag=$OPENSHIFT_IMAGE_TAG"
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132

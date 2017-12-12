@@ -17,7 +17,7 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - "{{ openshift.common.service_type }}-node"
+  - "{{ openshift_service_type }}-node"
   - openvswitch
   failed_when: false
 
@@ -26,8 +26,8 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - "{{ openshift.common.service_type }}-master-controllers"
-  - "{{ openshift.common.service_type }}-master-api"
+  - "{{ openshift_service_type }}-master-controllers"
+  - "{{ openshift_service_type }}-master-api"
   - etcd_container
   failed_when: false
   when: openshift.common.is_containerized | bool
@@ -80,9 +80,9 @@
   with_items:
   - etcd_container
   - openvswitch
-  - "{{ openshift.common.service_type }}-master-api"
-  - "{{ openshift.common.service_type }}-master-controllers"
-  - "{{ openshift.common.service_type }}-node"
+  - "{{ openshift_service_type }}-master-api"
+  - "{{ openshift_service_type }}-master-controllers"
+  - "{{ openshift_service_type }}-node"
   failed_when: false
   when: openshift.common.is_containerized | bool
 
@@ -91,7 +91,7 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - "{{ openshift.common.service_type }}-node"
+  - "{{ openshift_service_type }}-node"
   - openvswitch
   failed_when: false
   when: not openshift.common.is_containerized | bool

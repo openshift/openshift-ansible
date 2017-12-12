@@ -1,7 +1,7 @@
 ---
 - name: "Generate list of private A records"
   set_fact:
-    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'], 'ip': hostvars[item]['private_v4'] } ] }}"
+    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'] + openshift_openstack_private_hostname_suffix, 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
 
 - name: "Add wildcard records to the private A records for infrahosts"
@@ -30,7 +30,6 @@
     nsupdate_key_algorithm_private: "{{ openshift_openstack_external_nsupdate_keys['private']['key_algorithm'] }}"
     nsupdate_private_key_name: "{{ openshift_openstack_external_nsupdate_keys['private']['key_name']|default('private-' + openshift_openstack_full_dns_domain) }}"
   when:
-    - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys['private'] is defined
 
 
@@ -44,10 +43,12 @@
         key_secret: "{{ nsupdate_key_secret_private }}"
         key_algorithm: "{{ nsupdate_key_algorithm_private | lower }}"
         entries: "{{ private_records }}"
+  when:
+    - openshift_openstack_external_nsupdate_keys['private'] is defined
 
 - name: "Generate list of public A records"
   set_fact:
-    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'], 'ip': hostvars[item]['public_v4'] } ] }}"
+    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': hostvars[item]['ansible_hostname'] + openshift_openstack_public_hostname_suffix, 'ip': hostvars[item]['public_v4'] } ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
   when: hostvars[item]['public_v4'] is defined
 
@@ -63,15 +64,6 @@
   when:
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
     - openshift_openstack_num_masters == 1
-    - not openshift_openstack_use_bastion|bool
-
-- name: "Add public master cluster hostname records to the public A records (single master behind a bastion)"
-  set_fact:
-    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(openshift_openstack_full_dns_domain, ''))[:-1], 'ip': hostvars[groups.bastions[0]].public_v4 } ] }}"
-  when:
-    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
-    - openshift_openstack_num_masters == 1
-    - openshift_openstack_use_bastion|bool
 
 - name: "Add public master cluster hostname records to the public A records (multi-master)"
   set_fact:
@@ -87,7 +79,6 @@
     nsupdate_key_algorithm_public: "{{ openshift_openstack_external_nsupdate_keys['public']['key_algorithm'] }}"
     nsupdate_public_key_name: "{{ openshift_openstack_external_nsupdate_keys['public']['key_name']|default('public-' + openshift_openstack_full_dns_domain) }}"
   when:
-    - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys['public'] is defined
 
 - name: "Generate the public Add section for DNS"
@@ -100,11 +91,13 @@
         key_secret: "{{ nsupdate_key_secret_public }}"
         key_algorithm: "{{ nsupdate_key_algorithm_public | lower }}"
         entries: "{{ public_records }}"
+  when:
+    - openshift_openstack_external_nsupdate_keys['public'] is defined
 
 
 - name: "Generate the final openshift_openstack_dns_records_add"
   set_fact:
-    openshift_openstack_dns_records_add: "{{ private_named_records + public_named_records }}"
+    openshift_openstack_dns_records_add: "{{ private_named_records|default([]) + public_named_records|default([]) }}"
 
 
 - name: "Add DNS A records"
@@ -120,7 +113,7 @@
     # TODO(shadower): add a cleanup playbook that removes these records, too!
     state: present
   with_subelements:
-    - "{{ openshift_openstack_dns_records_add | default({}) }}"
+    - "{{ openshift_openstack_dns_records_add | default([]) }}"
     - entries
   register: nsupdate_add_result
   until: nsupdate_add_result|succeeded

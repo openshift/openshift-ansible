@@ -1,0 +1,9 @@
+---
+#
+# This playbook is a preview of upcoming changes for installing
+# Hosted logging on.  See inventory/hosts.example for the
+# currently supported method.
+#
+- import_playbook: ../init/main.yml
+
+- import_playbook: private/config.yml

@@ -1,9 +1,4 @@
 ---
-- name: Ensure proxies are in the atomic.conf
-  include_role:
-    name: openshift_atomic
-    tasks_from: proxy
-
 - name: Pull etcd system container
   command: atomic pull --storage=ostree {{ etcd_image }}
   register: pull_result

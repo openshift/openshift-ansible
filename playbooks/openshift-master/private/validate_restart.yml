@@ -14,9 +14,6 @@
     - role: common
       local_facts:
         rolling_restart_mode: "{{ openshift_rolling_restart_mode | default('services') }}"
-    - role: master
-      local_facts:
-        cluster_method: "{{ openshift_master_cluster_method | default(None) }}"
 
 # Creating a temp file on localhost, we then check each system that will
 # be rebooted to see if that file exists, if so we know we're running

@@ -67,7 +67,7 @@ rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
 # openshift-ansible-docs install
 # Install example inventory into docs/examples
 mkdir -p docs/example-inventories
-cp inventory/byo/* docs/example-inventories/
+cp inventory/* docs/example-inventories/
 
 # openshift-ansible-files install
 cp -rp files %{buildroot}%{_datadir}/ansible/%{name}/

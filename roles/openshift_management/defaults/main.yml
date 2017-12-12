@@ -3,6 +3,8 @@
 openshift_management_project: openshift-management
 # Namespace/project description
 openshift_management_project_description: CloudForms Management Engine
+# Number of retries when waiting for the app to start (retried every 30 seconds)
+openshift_management_pod_rollout_retries: 30
 
 ######################################################################
 # BASE TEMPLATE AND DATABASE OPTIONS
@@ -86,7 +88,7 @@ openshift_management_storage_nfs_local_hostname: false
 # name and password AND are trying to use integration scripts.
 #
 # For example, adding this cluster as a container provider,
-# playbooks/byo/openshift-management/add_container_provider.yml
+# playbooks/openshift-management/add_container_provider.yml
 openshift_management_username: admin
 openshift_management_password: smartvm
 

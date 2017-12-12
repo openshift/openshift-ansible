@@ -4,4 +4,4 @@
 #
 # Upgrades scale group nodes only.
 #
-- include: ../../../../common/openshift-cluster/upgrades/upgrade_scale_group.yml
+- import_playbook: ../../../../common/openshift-cluster/upgrades/upgrade_scale_group.yml

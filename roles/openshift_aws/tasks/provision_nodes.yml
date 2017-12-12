@@ -3,7 +3,7 @@
 # bootstrap should be created on first master
 # need to fetch it and shove it into cloud data
 - name: fetch master instances
-  ec2_remote_facts:
+  ec2_instance_facts:
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:clusterid": "{{ openshift_aws_clusterid }}"
@@ -27,24 +27,19 @@
   set_fact:
     openshift_aws_launch_config_bootstrap_token: "{{ bootstrap['content'] | b64decode }}"
 
-- include: vpc_and_subnet_id.yml
+- include_tasks: vpc_and_subnet_id.yml
 
 - name: include build compute and infra node groups
-  include: build_node_group.yml
+  include_tasks: build_node_group.yml
+  with_items: "{{ openshift_aws_node_groups }}"
   vars:
-    l_nodes_to_build: "{{ openshift_aws_node_group_config }}"
-    l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups }}"
-    l_aws_ami_map: "{{ openshift_aws_ami_map }}"
-
-- name: include build node group for extra nodes
-  include: build_node_group.yml
-  when: openshift_aws_node_group_config_extra is defined
-  vars:
-    l_nodes_to_build: "{{ openshift_aws_node_group_config_extra | default({}) }}"
-    l_launch_config_security_groups: "{{ openshift_aws_launch_config_security_groups_extra }}"
-    l_aws_ami_map: "{{ openshift_aws_ami_map_extra }}"
+    l_node_group_config: "{{ openshift_aws_node_group_config }}"
+  loop_control:
+    loop_var: openshift_aws_node_group
 
 # instances aren't scaling fast enough here, we need to wait for them
 - when: openshift_aws_wait_for_ssh | bool
   name: wait for our new nodes to come up
-  include: wait_for_groups.yml
+  include_tasks: wait_for_groups.yml
+  vars:
+    created_asgs: "{{ openshift_aws_created_asgs }}"

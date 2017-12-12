@@ -86,7 +86,7 @@ class CallbackModule(CallbackBase):
             },
             'installer_phase_logging': {
                 'title': 'Logging Install',
-                'playbook': 'playbooks/byo/openshift-cluster/openshift-logging.yml'
+                'playbook': 'playbooks/openshift-logging/config.yml'
             },
             'installer_phase_prometheus': {
                 'title': 'Prometheus Install',

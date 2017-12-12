@@ -45,7 +45,7 @@ openshift_storage_glusterfs_heketi_fstab: "{{ '/var/lib/heketi/fstab' | quote if
 openshift_storage_glusterfs_namespace: "{{ 'glusterfs' | quote if openshift_storage_glusterfs_is_native or openshift_storage_glusterfs_heketi_is_native else 'default' | quote }}"
 
 openshift_storage_glusterfs_registry_timeout: "{{ openshift_storage_glusterfs_timeout }}"
-openshift_storage_glusterfs_registry_namespace: "{{ openshift.hosted.registry.namespace | default(openshift_storage_glusterfs_namespace) }}"
+openshift_storage_glusterfs_registry_namespace: "{{ openshift_hosted_registry_namespace | default(openshift_storage_glusterfs_namespace) }}"
 openshift_storage_glusterfs_registry_is_native: "{{ openshift_storage_glusterfs_is_native }}"
 openshift_storage_glusterfs_registry_name: 'registry'
 openshift_storage_glusterfs_registry_nodeselector: "glusterfs={{ openshift_storage_glusterfs_registry_name }}-host"

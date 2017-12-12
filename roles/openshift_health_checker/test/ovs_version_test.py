@@ -10,10 +10,11 @@ def test_openshift_version_not_supported():
     openshift_release = '111.7.0'
 
     task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
+        openshift=dict(common=dict()),
         openshift_release=openshift_release,
         openshift_image_tag='v' + openshift_release,
         openshift_deployment_type='origin',
+        openshift_service_type='origin'
     )
 
     with pytest.raises(OpenShiftCheckException) as excinfo:
@@ -27,9 +28,10 @@ def test_invalid_openshift_release_format():
         return {}
 
     task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
+        openshift=dict(common=dict()),
         openshift_image_tag='v0',
         openshift_deployment_type='origin',
+        openshift_service_type='origin'
     )
 
     with pytest.raises(OpenShiftCheckException) as excinfo:
@@ -47,9 +49,10 @@ def test_invalid_openshift_release_format():
 ])
 def test_ovs_package_version(openshift_release, expected_ovs_version):
     task_vars = dict(
-        openshift=dict(common=dict(service_type='origin')),
+        openshift=dict(common=dict()),
         openshift_release=openshift_release,
         openshift_image_tag='v' + openshift_release,
+        openshift_service_type='origin'
     )
     return_value = {}  # note: check.execute_module modifies return hash contents
 

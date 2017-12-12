@@ -1,4 +1,4 @@
-# v3.6 Major and Minor Upgrade Playbook
+# v3.8 Major and Minor Upgrade Playbook
 
 ## Overview
 This playbook currently performs the following steps.

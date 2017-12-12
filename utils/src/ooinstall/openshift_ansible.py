@@ -125,7 +125,6 @@ def write_inventory_vars(base_inventory, lb):
     base_inventory.write('openshift_override_hostname_check=true\n')
 
     if lb is not None:
-        base_inventory.write('openshift_master_cluster_method=native\n')
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(lb.hostname))
         base_inventory.write(
             "openshift_master_cluster_public_hostname={}\n".format(lb.public_hostname))
@@ -266,7 +265,6 @@ def default_facts(hosts, verbose=False):
     facts_env = os.environ.copy()
     facts_env["OO_INSTALL_CALLBACK_FACTS_YAML"] = CFG.settings['ansible_callback_facts_yaml']
     facts_env["ANSIBLE_CALLBACK_PLUGINS"] = CFG.settings['ansible_plugins_directory']
-    facts_env["OPENSHIFT_MASTER_CLUSTER_METHOD"] = 'native'
     if 'ansible_log_path' in CFG.settings:
         facts_env["ANSIBLE_LOG_PATH"] = CFG.settings['ansible_log_path']
     if 'ansible_config' in CFG.settings:

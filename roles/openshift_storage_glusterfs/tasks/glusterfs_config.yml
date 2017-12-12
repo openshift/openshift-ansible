@@ -46,4 +46,4 @@
     glusterfs_heketi_fstab: "{{ openshift_storage_glusterfs_heketi_fstab }}"
     glusterfs_nodes: "{{ groups.glusterfs | default([]) }}"
 
-- include: glusterfs_common.yml
+- include_tasks: glusterfs_common.yml
