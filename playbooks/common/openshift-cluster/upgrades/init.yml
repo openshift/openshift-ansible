@@ -1,14 +1,14 @@
 ---
-- include: ../../../init/evaluate_groups.yml
+- import_playbook: ../../../init/evaluate_groups.yml
   vars:
     # Do not allow adding hosts during upgrade.
     g_new_master_hosts: []
     g_new_node_hosts: []
 
-- include: ../../../init/facts.yml
+- import_playbook: ../../../init/facts.yml
 
 - name: Ensure firewall is not switched during upgrade
-  hosts: oo_all_hosts
+  hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"
   vars:
     openshift_master_installed_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
   tasks:

@@ -69,29 +69,13 @@ dnsConfig:
   bindNetwork: tcp4
 {% endif %}
 etcdClientInfo:
-  ca: {{ "ca-bundle.crt" if (openshift.master.embedded_etcd | bool) else "master.etcd-ca.crt" }}
+  ca: master.etcd-ca.crt
   certFile: master.etcd-client.crt
   keyFile: master.etcd-client.key
   urls:
 {% for etcd_url in openshift.master.etcd_urls %}
     - {{ etcd_url }}
 {% endfor %}
-{% if openshift.master.embedded_etcd | bool %}
-etcdConfig:
-  address: {{ openshift.common.hostname }}:{{ openshift.master.etcd_port }}
-  peerAddress: {{ openshift.common.hostname }}:7001
-  peerServingInfo:
-    bindAddress: {{ openshift.master.bind_addr }}:7001
-    certFile: etcd.server.crt
-    clientCA: ca-bundle.crt
-    keyFile: etcd.server.key
-  servingInfo:
-    bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.etcd_port }}
-    certFile: etcd.server.crt
-    clientCA: ca-bundle.crt
-    keyFile: etcd.server.key
-  storageDirectory: {{ r_openshift_master_data_dir }}/openshift.local.etcd
-{% endif %}
 etcdStorageConfig:
   kubernetesStoragePrefix: kubernetes.io
   kubernetesStorageVersion: v1
@@ -120,7 +104,7 @@ kubernetesMasterConfig:
     - application/vnd.kubernetes.protobuf
 {% endif %}
   controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
-  masterCount: {{ openshift.master.master_count if openshift.master.cluster_method | default(None) == 'native' else 1 }}
+  masterCount: {{ openshift.master.master_count }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
   proxyClientInfo:
@@ -204,7 +188,7 @@ projectConfig:
     mcsLabelsPerProject: {{ osm_mcs_labels_per_project }}
     uidAllocatorRange: "{{ osm_uid_allocator_range }}"
 routingConfig:
-  subdomain:  "{{ openshift_master_default_subdomain | default("") }}"
+  subdomain:  "{{ openshift_master_default_subdomain }}"
 serviceAccountConfig:
   limitSecretReferences: {{ openshift_master_saconfig_limitsecretreferences | default(false) }}
   managedNames:

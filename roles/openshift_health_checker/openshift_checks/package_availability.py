@@ -15,7 +15,9 @@ class PackageAvailability(NotContainerizedMixin, OpenShiftCheck):
         return super(PackageAvailability, self).is_active() and self.get_var("ansible_pkg_mgr") == "yum"
 
     def run(self):
-        rpm_prefix = self.get_var("openshift", "common", "service_type")
+        rpm_prefix = self.get_var("openshift_service_type")
+        if self._templar is not None:
+            rpm_prefix = self._templar.template(rpm_prefix)
         group_names = self.get_var("group_names", default=[])
 
         packages = set()

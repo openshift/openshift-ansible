@@ -12,7 +12,5 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: openshift_docker_facts
-- role: docker
-  when: openshift.common.is_containerized | default(False) | bool and not skip_docker_role | default(False) | bool
 - role: lib_utils
+- role: openshift_facts

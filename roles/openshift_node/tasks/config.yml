@@ -38,7 +38,7 @@
 
 - name: Configure Node Environment Variables
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
+    dest: /etc/sysconfig/{{ openshift_service_type }}-node
     regexp: "^{{ item.key }}="
     line: "{{ item.key }}={{ item.value }}"
     create: true
@@ -76,7 +76,7 @@
     - name: Start and enable node dep
       systemd:
         daemon_reload: yes
-        name: "{{ openshift.common.service_type }}-node-dep"
+        name: "{{ openshift_service_type }}-node-dep"
         enabled: yes
         state: started
 
@@ -84,7 +84,7 @@
   block:
     - name: Start and enable node
       systemd:
-        name: "{{ openshift.common.service_type }}-node"
+        name: "{{ openshift_service_type }}-node"
         enabled: yes
         state: started
         daemon_reload: yes
@@ -95,7 +95,7 @@
       ignore_errors: true
 
     - name: Dump logs from node service if it failed
-      command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-node
+      command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-node
       when: node_start_result | failed
 
     - name: Abort if node failed to start

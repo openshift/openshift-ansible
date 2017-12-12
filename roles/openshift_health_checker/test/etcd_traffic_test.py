@@ -37,8 +37,9 @@ def test_log_matches_high_traffic_msg(group_names, matched, failed, extra_words)
     task_vars = dict(
         group_names=group_names,
         openshift=dict(
-            common=dict(service_type="origin", is_containerized=False),
-        )
+            common=dict(is_containerized=False),
+        ),
+        openshift_service_type="origin"
     )
 
     result = EtcdTraffic(execute_module, task_vars).run()

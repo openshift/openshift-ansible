@@ -1,5 +1,5 @@
 ---
-- include: ../../setup_container.yml
+- import_playbook: ../../setup_container.yml
   vars:
     image: preflight-aos-package-checks
     l_host_vars:
@@ -14,11 +14,11 @@
     - block:
 
         # enable repo with extra minor version available
-        - include: tasks/enable_repo.yml
+        - include_tasks: tasks/enable_repo.yml
           vars: { repo_name: "ose-3.3" }
 
         # disable extras so we control docker version
-        - include: tasks/enable_repo.yml
+        - include_tasks: tasks/enable_repo.yml
           vars: { repo_file: "CentOS-Base", repo_name: "extras", repo_enabled: 0 }
 
         - action: openshift_health_check
@@ -26,4 +26,4 @@
             checks: [ 'package_version' ]
 
       always:  # destroy the container whether check passed or not
-        - include: ../../teardown_container.yml
+        - include_tasks: ../../teardown_container.yml

@@ -334,9 +334,9 @@ class OpenShiftAnsibleSyntaxCheck(Command):
                 result = self.deprecate_jinja2_in_when(yaml_contents, yaml_file)
                 has_errors = result or has_errors
 
-                # TODO (rteague): This test will be enabled once we move to Ansible 2.4
-                # result = self.deprecate_include(yaml_contents, yaml_file)
-                # has_errors = result or has_errors
+                # Check for usage of include: directive
+                result = self.deprecate_include(yaml_contents, yaml_file)
+                has_errors = result or has_errors
 
         if not has_errors:
             print('...PASSED')
@@ -345,35 +345,29 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             print('-' * 60)
             print('Syntax checking playbook: {}'.format(playbook))
 
-            # Error on any entry points in 'common'
-            if 'common' in playbook:
-                print('{}Invalid entry point playbook. All playbooks must'
-                      ' start in playbooks/byo{}'.format(self.FAIL, self.ENDC))
-                has_errors = True
             # --syntax-check each entry point playbook
-            else:
-                try:
-                    # Create a host group list to avoid WARNING on unmatched host patterns
-                    host_group_list = [
-                        'etcd,masters,nodes,OSEv3',
-                        'oo_all_hosts',
-                        'oo_etcd_to_config,oo_new_etcd_to_config,oo_first_etcd,oo_etcd_hosts_to_backup,'
-                        'oo_etcd_hosts_to_upgrade,oo_etcd_to_migrate',
-                        'oo_masters,oo_masters_to_config,oo_first_master,oo_containerized_master_nodes',
-                        'oo_nodes_to_config,oo_nodes_to_upgrade',
-                        'oo_nodes_use_kuryr,oo_nodes_use_flannel',
-                        'oo_nodes_use_calico,oo_nodes_use_nuage,oo_nodes_use_contiv',
-                        'oo_lb_to_config',
-                        'oo_nfs_to_config',
-                        'glusterfs,glusterfs_registry,']
-                    subprocess.check_output(
-                        ['ansible-playbook', '-i ' + ','.join(host_group_list),
-                         '--syntax-check', playbook]
-                    )
-                except subprocess.CalledProcessError as cpe:
-                    print('{}Execution failed: {}{}'.format(
-                        self.FAIL, cpe, self.ENDC))
-                    has_errors = True
+            try:
+                # Create a host group list to avoid WARNING on unmatched host patterns
+                host_group_list = [
+                    'etcd,masters,nodes,OSEv3',
+                    'oo_all_hosts',
+                    'oo_etcd_to_config,oo_new_etcd_to_config,oo_first_etcd,oo_etcd_hosts_to_backup,'
+                    'oo_etcd_hosts_to_upgrade,oo_etcd_to_migrate',
+                    'oo_masters,oo_masters_to_config,oo_first_master,oo_containerized_master_nodes',
+                    'oo_nodes_to_config,oo_nodes_to_upgrade',
+                    'oo_nodes_use_kuryr,oo_nodes_use_flannel',
+                    'oo_nodes_use_calico,oo_nodes_use_nuage,oo_nodes_use_contiv',
+                    'oo_lb_to_config',
+                    'oo_nfs_to_config',
+                    'glusterfs,glusterfs_registry,']
+                subprocess.check_output(
+                    ['ansible-playbook', '-i ' + ','.join(host_group_list),
+                     '--syntax-check', playbook]
+                )
+            except subprocess.CalledProcessError as cpe:
+                print('{}Execution failed: {}{}'.format(
+                    self.FAIL, cpe, self.ENDC))
+                has_errors = True
 
         if has_errors:
             raise SystemExit(1)

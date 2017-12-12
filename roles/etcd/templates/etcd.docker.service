@@ -1,8 +1,8 @@
 [Unit]
 Description=The Etcd Server container
-After={{ openshift.docker.service_name }}.service
-Requires={{ openshift.docker.service_name }}.service
-PartOf={{ openshift.docker.service_name }}.service
+After={{ openshift_docker_service_name }}.service
+Requires={{ openshift_docker_service_name }}.service
+PartOf={{ openshift_docker_service_name }}.service
 
 [Service]
 EnvironmentFile={{ etcd_conf_file }}
@@ -14,4 +14,4 @@ Restart=always
 RestartSec=5s
 
 [Install]
-WantedBy={{ openshift.docker.service_name }}.service
+WantedBy={{ openshift_docker_service_name }}.service

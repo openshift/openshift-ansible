@@ -97,3 +97,5 @@ r_etcd_os_firewall_allow:
 
 # set the backend quota to 4GB by default
 etcd_quota_backend_bytes: 4294967296
+
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"

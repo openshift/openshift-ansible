@@ -44,7 +44,7 @@ DEFAULT_PRIORITIES_1_5 = [
 
 DEFAULT_PRIORITIES_3_6 = DEFAULT_PRIORITIES_1_5
 
-DEFAULT_PRIORITIES_3_7 = DEFAULT_PRIORITIES_3_6
+DEFAULT_PRIORITIES_3_9 = DEFAULT_PRIORITIES_3_8 = DEFAULT_PRIORITIES_3_7 = DEFAULT_PRIORITIES_3_6
 
 ZONE_PRIORITY = {
     'name': 'Zone',
@@ -71,6 +71,10 @@ TEST_VARS = [
     ('3.6', 'openshift-enterprise', DEFAULT_PRIORITIES_3_6),
     ('3.7', 'origin', DEFAULT_PRIORITIES_3_7),
     ('3.7', 'openshift-enterprise', DEFAULT_PRIORITIES_3_7),
+    ('3.8', 'origin', DEFAULT_PRIORITIES_3_8),
+    ('3.8', 'openshift-enterprise', DEFAULT_PRIORITIES_3_8),
+    ('3.9', 'origin', DEFAULT_PRIORITIES_3_9),
+    ('3.9', 'openshift-enterprise', DEFAULT_PRIORITIES_3_9),
 ]
 
 

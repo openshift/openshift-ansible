@@ -10,7 +10,7 @@
 
 # NOTE(shadower): Bring in the host groups:
 - name: evaluate groups
-  include: ../../init/evaluate_groups.yml
+  import_playbook: ../../init/evaluate_groups.yml
 
 
 - name: Wait for the nodes and gather their facts
@@ -26,9 +26,9 @@
   - name: Gather facts for the new nodes
     setup:
 
+- name: set common facts
+  import_playbook: ../../init/facts.yml
 
-# NOTE(shadower): the (internal) DNS must be functional at this point!!
-# That will have happened in provision.yml if nsupdate was configured.
 
 # TODO(shadower): consider splitting this up so people can stop here
 # and configure their DNS if they have to.
@@ -47,6 +47,13 @@
   hosts: oo_all_hosts
   become: yes
   gather_facts: yes
+  roles:
+  - role: rhel_subscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - rhsub_user | default(False)
+    - rhsub_pass | default(False)
+
   tasks:
   - name: Install dependencies
     include_role:

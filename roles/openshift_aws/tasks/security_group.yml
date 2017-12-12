@@ -6,11 +6,27 @@
       "tag:Name": "{{ openshift_aws_clusterid }}"
   register: vpcout
 
-- include: security_group_create.yml
-  vars:
-    l_security_groups: "{{ openshift_aws_node_security_groups }}"
+- name: create the node group sgs
+  oo_ec2_group:
+    name: "{{ item.value.name}}"
+    description: "{{ item.value.desc }}"
+    rules: "{{ item.value.rules if 'rules' in item.value else [] }}"
+    region: "{{ openshift_aws_region }}"
+    vpc_id: "{{ vpcout.vpcs[0].id }}"
+  with_dict: "{{ openshift_aws_node_security_groups }}"
 
-- include: security_group_create.yml
-  when: openshift_aws_node_security_groups_extra is defined
-  vars:
-    l_security_groups: "{{ openshift_aws_node_security_groups_extra | default({}) }}"
+- name: create the k8s sgs for the node group
+  oo_ec2_group:
+    name: "{{ item.value.name }}_k8s"
+    description: "{{ item.value.desc }} for k8s"
+    region: "{{ openshift_aws_region }}"
+    vpc_id: "{{ vpcout.vpcs[0].id }}"
+  with_dict: "{{ openshift_aws_node_security_groups }}"
+  register: k8s_sg_create
+
+- name: tag sg groups with proper tags
+  ec2_tag:
+    tags: "{{ openshift_aws_security_groups_tags }}"
+    resource: "{{ item.group_id }}"
+    region: "{{ openshift_aws_region }}"
+  with_items: "{{ k8s_sg_create.results }}"

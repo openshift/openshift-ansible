@@ -18,7 +18,7 @@ INVENTORY="$(mktemp)"
 if [[ -v INVENTORY_FILE ]]; then
   # Make a copy so that ALLOW_ANSIBLE_CONNECTION_LOCAL below
   # does not attempt to modify the original
-  cp -a ${INVENTORY_FILE} ${INVENTORY}
+  cp ${INVENTORY_FILE} ${INVENTORY}
 elif [[ -v INVENTORY_DIR ]]; then
   INVENTORY="$(mktemp -d)"
   cp -R ${INVENTORY_DIR}/* ${INVENTORY}

@@ -45,7 +45,6 @@
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable
-      r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"

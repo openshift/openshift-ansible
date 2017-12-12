@@ -1,13 +1,12 @@
 ---
-- include: ../init/main.yml
+- import_playbook: ../init/main.yml
 
 - name: Gather Cluster facts
   hosts: oo_all_hosts
   roles:
   - openshift_facts
   tasks:
-  - openshift_facts:
-      openshift_env: "{{ hostvars[inventory_hostname] | oo_openshift_env }}"
+  - openshift_facts: {}
     register: result
   - debug:
       var: result

@@ -1,6 +1,4 @@
 ---
-- import_playbook: ../../init/evaluate_groups.yml
-
 - name: Install and configure NetworkManager
   hosts: oo_all_hosts
   become: yes

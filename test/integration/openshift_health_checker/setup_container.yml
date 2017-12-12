@@ -46,16 +46,15 @@
 
 - hosts: all
   tasks:
-
     # run before openshift_version to prevent it breaking
-    - include: preflight/playbooks/tasks/enable_repo.yml
+    - include_tasks: preflight/playbooks/tasks/enable_repo.yml
       vars: { repo_name: "ose-3.2" }
 
-- include: ../../../playbooks/init/main.yml
+- import_playbook: ../../../playbooks/init/main.yml
 
 - hosts: all
   tasks:
 
     # put it back like it was for the tests
-    - include: preflight/playbooks/tasks/enable_repo.yml
+    - include_tasks: preflight/playbooks/tasks/enable_repo.yml
       vars: { repo_name: "ose-3.2", enabled: False }

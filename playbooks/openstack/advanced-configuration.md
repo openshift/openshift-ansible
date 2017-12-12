@@ -23,35 +23,14 @@ There are no additional dependencies for the cluster nodes. Required
 configuration steps are done by Heat given a specific user data config
 that normally should not be changed.
 
-## Required galaxy modules
-
-In order to pull in external dependencies for DNS configuration steps,
-the following commads need to be executed:
-
-    ansible-galaxy install \
-      -r openshift-ansible-contrib/playbooks/provisioning/openstack/galaxy-requirements.yaml \
-      -p openshift-ansible-contrib/roles
-
-Alternatively you can install directly from github:
-
-    ansible-galaxy install git+https://github.com/redhat-cop/infra-ansible,master \
-      -p openshift-ansible-contrib/roles
-
-Notes:
-* This assumes we're in the directory that contains the clonned
-openshift-ansible-contrib repo in its root path.
-* When trying to install a different version, the previous one must be removed first
-(`infra-ansible` directory from [roles](https://github.com/openshift/openshift-ansible-contrib/tree/master/roles)).
-Otherwise, even if there are differences between the two versions, installation of the newer version is skipped.
-
-
 ## Accessing the OpenShift Cluster
 
 ### Configure DNS
 
-OpenShift requires two DNS records to function fully. The first one points to
+OpenShift requires a two public DNS records to function fully. The first one points to
 the master/load balancer and provides the UI/API access. The other one is a
-wildcard domain that resolves app route requests to the infra node.
+wildcard domain that resolves app route requests to the infra node. A private DNS
+server and records are not required and not managed here.
 
 If you followed the default installation from the README section, there is no
 DNS configured. You should add two entries to the `/etc/hosts` file on the
@@ -180,15 +159,26 @@ So the provisioned cluster nodes will start using those natively as
 default nameservers. Technically, this allows to deploy OpenShift clusters
 without dnsmasq proxies.
 
-The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain` will form the cluster's DNS domain all
-your servers will be under. With the default values, this will be
-`openshift.example.com`. For workloads, the default subdomain is 'apps'.
-That sudomain can be set as well by the `openshift_openstack_app_subdomain` variable in
-the inventory.
+The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain`
+will form the cluster's public DNS domain all your servers will be under. With
+the default values, this will be `openshift.example.com`. For workloads, the
+default subdomain is 'apps'. That sudomain can be set as well by the
+`openshift_openstack_app_subdomain` variable in the inventory.
+
+If you want to use a two sets of hostnames for public and private/prefixed DNS
+records for your externally managed public DNS server, you can specify
+`openshift_openstack_public_hostname_suffix` and/or
+`openshift_openstack_private_hostname_suffix`. The suffixes will be added
+to the nsupdate records sent to the external DNS server. Those are empty by default.
+
+**Note** the real hostnames, Nova servers' or ansible hostnames and inventory
+variables will not be updated. The deployment may be done on arbitrary named
+hosts with the hostnames managed by cloud-init. Inventory hostnames will ignore
+the suffixes.
 
 The `openstack_<role name>_hostname` is a set of variables used for customising
-hostnames of servers with a given role. When such a variable stays commented,
-default hostname (usually the role name) is used.
+public names of Nova servers provisioned with a given role. When such a variable stays commented,
+default value (usually the role name) is used.
 
 The `openshift_openstack_dns_nameservers` is a list of DNS servers accessible from all
 the created Nova servers. These will provide the internal name resolution for
@@ -203,7 +193,7 @@ When Network Manager is enabled for provisioned cluster nodes, which is
 normally the case, you should not change the defaults and always deploy dnsmasq.
 
 `openshift_openstack_external_nsupdate_keys` describes an external authoritative DNS server(s)
-processing dynamic records updates in the public and private cluster views:
+processing dynamic records updates in the public only cluster view:
 
     openshift_openstack_external_nsupdate_keys:
       public:
@@ -211,34 +201,12 @@ processing dynamic records updates in the public and private cluster views:
         key_algorithm: 'hmac-md5'
         key_name: 'update-key'
         server: <public DNS server IP>
-      private:
-        key_secret: <some nsupdate key 2>
-        key_algorithm: 'hmac-sha256'
-        server: <public or private DNS server IP>
 
 Here, for the public view section, we specified another key algorithm and
 optional `key_name`, which normally defaults to the cluster's DNS domain.
 This just illustrates a compatibility mode with a DNS service deployed
 by OpenShift on OSP10 reference architecture, and used in a mixed mode with
 another external DNS server.
-
-Another example defines an external DNS server for the public view
-additionally to the in-stack DNS server used for the private view only:
-
-    openshift_openstack_external_nsupdate_keys:
-      public:
-        key_secret: <some nsupdate key>
-        key_algorithm: 'hmac-sha256'
-        server: <public DNS server IP>
-
-Here, updates matching the public view will be hitting the given public
-server IP. While updates matching the private view will be sent to the
-auto evaluated in-stack DNS server's **public** IP.
-
-Note, for the in-stack DNS server, private view updates may be sent only
-via the public IP of the server. You can not send updates via the private
-IP yet. This forces the in-stack private server to have a floating IP.
-See also the [security notes](#security-notes)
 
 ## Flannel networking
 
@@ -328,14 +296,6 @@ The `openshift_openstack_required_packages` variable also provides a list of the
 prerequisite packages to be installed before to deploy an OpenShift cluster.
 Those are ignored though, if the `manage_packages: False`.
 
-The `openstack_inventory` controls either a static inventory will be created after the
-cluster nodes provisioned on OpenStack cloud. Note, the fully dynamic inventory
-is yet to be supported, so the static inventory will be created anyway.
-
-The `openstack_inventory_path` points the directory to host the generated static inventory.
-It should point to the copied example inventory directory, otherwise ti creates
-a new one for you.
-
 ## Multi-master configuration
 
 Please refer to the official documentation for the
@@ -345,7 +305,6 @@ variables](https://docs.openshift.com/container-platform/3.6/install_config/inst
 in `inventory/group_vars/OSEv3.yml`. For example, given a load balancer node
 under the ansible group named `ext_lb`:
 
-    openshift_master_cluster_method: native
     openshift_master_cluster_hostname: "{{ groups.ext_lb.0 }}"
     openshift_master_cluster_public_hostname: "{{ groups.ext_lb.0 }}"
 
@@ -384,18 +343,6 @@ be the case for development environments. When turned off, the servers will
 be provisioned omitting the ``yum update`` command. This brings security
 implications though, and is not recommended for production deployments.
 
-### DNS servers security options
-
-Aside from `openshift_openstack_node_ingress_cidr` restricting public access to in-stack DNS
-servers, there are following (bind/named specific) DNS security
-options available:
-
-    named_public_recursion: 'no'
-    named_private_recursion: 'yes'
-
-External DNS servers, which is not included in the 'dns' hosts group,
-are not managed. It is up to you to configure such ones.
-
 ## Configure the OpenShift parameters
 
 Finally, you need to update the DNS entry in
@@ -407,7 +354,7 @@ installation for example by specifying the authentication.
 
 The full list of options is available in this sample inventory:
 
-https://github.com/openshift/openshift-ansible/blob/master/inventory/byo/hosts.ose.example
+https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
 
 Note, that in order to deploy OpenShift origin, you should update the following
 variables for the `inventory/group_vars/OSEv3.yml`, `all.yml`:
@@ -538,43 +485,6 @@ You can also run the registry setup playbook directly:
 
 
 
-## Configure static inventory and access via a bastion node
-
-Example inventory variables:
-
-    openshift_openstack_use_bastion: true
-    openshift_openstack_bastion_ingress_cidr: "{{openshift_openstack_subnet_prefix}}.0/24"
-    openstack_private_ssh_key: ~/.ssh/id_rsa
-    openstack_inventory: static
-    openstack_inventory_path: ../../../../inventory
-    openstack_ssh_config_path: /tmp/ssh.config.openshift.ansible.openshift.example.com
-
-The `openshift_openstack_subnet_prefix` is the openstack private network for your cluster.
-And the `openshift_openstack_bastion_ingress_cidr` defines accepted range for SSH connections to nodes
-additionally to the `openshift_openstack_ssh_ingress_cidr`` (see the security notes above).
-
-The SSH config will be stored on the ansible control node by the
-gitven path. Ansible uses it automatically. To access the cluster nodes with
-that ssh config, use the `-F` prefix, f.e.:
-
-    ssh -F /tmp/ssh.config.openshift.ansible.openshift.example.com master-0.openshift.example.com echo OK
-
-Note, relative paths will not work for the `openstack_ssh_config_path`, but it
-works for the `openstack_private_ssh_key` and `openstack_inventory_path`. In this
-guide, the latter points to the current directory, where you run ansible commands
-from.
-
-To verify nodes connectivity, use the command:
-
-    ansible -v -i inventory/hosts -m ping all
-
-If something is broken, double-check the inventory variables, paths and the
-generated `<openstack_inventory_path>/hosts` and `openstack_ssh_config_path` files.
-
-The `inventory: dynamic` can be used instead to access cluster nodes directly via
-floating IPs. In this mode you can not use a bastion node and should specify
-the dynamic inventory file in your ansible commands , like `-i openstack.py`.
-
 ## Using Docker on the Ansible host
 
 If you don't want to worry about the dependencies, you can use the
@@ -602,28 +512,6 @@ the playbooks:
 
     cd openshift
     ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
-
-
-### Run the playbook
-
-Assuming your OpenStack (Keystone) credentials are in the `keystonerc`
-this is how you stat the provisioning process from your ansible control node:
-
-    . keystonerc
-    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/provision.yaml
-
-Note, here you start with an empty inventory. The static inventory will be populated
-with data so you can omit providing additional arguments for future ansible commands.
-
-If bastion enabled, the generates SSH config must be applied for ansible.
-Otherwise, it is auto included by the previous step. In order to execute it
-as a separate playbook, use the following command:
-
-    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-provision-openstack.yml
-
-The first infra node then becomes a bastion node as well and proxies access
-for future ansible commands. The post-provision step also configures Satellite,
-if requested, and DNS server, and ensures other OpenShift requirements to be met.
 
 
 ## Running Custom Post-Provision Actions
@@ -727,26 +615,11 @@ A library of custom post-provision actions exists in `openshift-ansible-contrib/
 
 Once it succeeds, you can install openshift by running:
 
-    ansible-playbook openshift-ansible/playbooks/byo/config.yml
+    ansible-playbook openshift-ansible/playbooks/deploy_cluster.yml
 
 ## Access UI
 
 OpenShift UI may be accessed via the 1st master node FQDN, port 8443.
-
-When using a bastion, you may want to make an SSH tunnel from your control node
-to access UI on the `https://localhost:8443`, with this inventory variable:
-
-   openshift_openstack_ui_ssh_tunnel: True
-
-Note, this requires sudo rights on the ansible control node and an absolute path
-for the `openstack_private_ssh_key`. You should also update the control node's
-`/etc/hosts`:
-
-    127.0.0.1 master-0.openshift.example.com
-
-In order to access UI, the ssh-tunnel service will be created and started on the
-control node. Make sure to remove these changes and the service manually, when not
-needed anymore.
 
 ## Scale Deployment up/down
 
@@ -766,5 +639,3 @@ Usage:
 ```
 ansible-playbook -i <path to inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/scale-up.yaml` [-e increment_by=<number>] [-e openshift_ansible_dir=<path to openshift-ansible>]
 ```
-
-Note: This playbook works only without a bastion node (`openshift_openstack_use_bastion: False`).

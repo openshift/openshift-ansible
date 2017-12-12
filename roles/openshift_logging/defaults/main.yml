@@ -28,7 +28,7 @@ openshift_logging_curator_ops_memory_limit: 256Mi
 openshift_logging_curator_ops_cpu_request: 100m
 openshift_logging_curator_ops_nodeselector: {}
 
-openshift_logging_kibana_hostname: "{{ 'kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+openshift_logging_kibana_hostname: "{{ 'kibana.' ~ openshift_master_default_subdomain }}"
 openshift_logging_kibana_cpu_limit: null
 openshift_logging_kibana_memory_limit: 736Mi
 openshift_logging_kibana_cpu_request: 100m
@@ -54,7 +54,7 @@ openshift_logging_kibana_key: ""
 #for the public facing kibana certs
 openshift_logging_kibana_ca: ""
 
-openshift_logging_kibana_ops_hostname: "{{ 'kibana-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+openshift_logging_kibana_ops_hostname: "{{ 'kibana-ops.' ~ openshift_master_default_subdomain }}"
 openshift_logging_kibana_ops_cpu_limit: null
 openshift_logging_kibana_ops_memory_limit: 736Mi
 openshift_logging_kibana_ops_cpu_request: 100m
@@ -109,7 +109,7 @@ openshift_logging_es_config: {}
 
 # for exposing es to external (outside of the cluster) clients
 openshift_logging_es_allow_external: False
-openshift_logging_es_hostname: "{{ 'es.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+openshift_logging_es_hostname: "{{ 'es.' ~ openshift_master_default_subdomain }}"
 
 #The absolute path on the control node to the cert file to use
 #for the public facing es certs
@@ -145,7 +145,7 @@ openshift_logging_es_ops_nodeselector: {}
 
 # for exposing es-ops to external (outside of the cluster) clients
 openshift_logging_es_ops_allow_external: False
-openshift_logging_es_ops_hostname: "{{ 'es-ops.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+openshift_logging_es_ops_hostname: "{{ 'es-ops.' ~ openshift_master_default_subdomain }}"
 
 #The absolute path on the control node to the cert file to use
 #for the public facing es-ops certs
@@ -165,7 +165,7 @@ openshift_logging_storage_access_modes: ['ReadWriteOnce']
 # mux - secure_forward listener service
 openshift_logging_mux_allow_external: False
 openshift_logging_use_mux: "{{ openshift_logging_mux_allow_external | default(False) }}"
-openshift_logging_mux_hostname: "{{ 'mux.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+openshift_logging_mux_hostname: "{{ 'mux.' ~ openshift_master_default_subdomain}}"
 openshift_logging_mux_port: 24284
 openshift_logging_mux_cpu_limit: null
 openshift_logging_mux_memory_limit: 512Mi

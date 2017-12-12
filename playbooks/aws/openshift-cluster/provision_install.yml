@@ -4,16 +4,16 @@
 # this playbook is run with the following parameters:
 # ansible-playbook -i openshift-ansible-inventory provision_install.yml
 - name: Include the provision.yml playbook to create cluster
-  include: provision.yml
+  import_playbook: provision.yml
 
 - name: Include the install.yml playbook to install cluster on masters
-  include: install.yml
+  import_playbook: install.yml
 
 - name: provision the infra/compute playbook to install node resources
-  include: provision_nodes.yml
+  import_playbook: provision_nodes.yml
 
 - name: Include the accept.yml playbook to accept nodes into the cluster
-  include: accept.yml
+  import_playbook: accept.yml
 
 - name: Include the hosted.yml playbook to finish the hosted configuration
-  include: hosted.yml
+  import_playbook: hosted.yml

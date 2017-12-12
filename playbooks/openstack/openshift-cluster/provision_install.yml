@@ -1,9 +1,9 @@
 ---
 - name: Check the prerequisites for cluster provisioning in OpenStack
-  include: prerequisites.yml
+  import_playbook: prerequisites.yml
 
 - name: Include the provision.yml playbook to create cluster
-  include: provision.yml
+  import_playbook: provision.yml
 
 - name: Include the install.yml playbook to install cluster
-  include: install.yml
+  import_playbook: install.yml

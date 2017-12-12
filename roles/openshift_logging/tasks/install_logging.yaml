@@ -52,7 +52,7 @@
   changed_when: False
   check_mode: no
 
-- include: generate_certs.yaml
+- include_tasks: generate_certs.yaml
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
 
@@ -250,7 +250,7 @@
   when:
   - openshift_logging_use_ops | bool
 
-- include: annotate_ops_projects.yaml
+- include_tasks: annotate_ops_projects.yaml
 
 ## Curator
 - include_role:
@@ -311,4 +311,4 @@
     openshift_logging_install_eventrouter | default(false) | bool
 
 
-- include: update_master_config.yaml
+- include_tasks: update_master_config.yaml

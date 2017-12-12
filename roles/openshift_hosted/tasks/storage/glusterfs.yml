@@ -17,7 +17,7 @@
   until:
   - "registry_pods.results.results[0]['items'] | count > 0"
   # There must be as many matching pods with 'Ready' status True as there are expected replicas
-  - "registry_pods.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == openshift_hosted_registry_replicas | int"
+  - "registry_pods.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == openshift_hosted_registry_replicas | default(l_default_replicas) | int"
   delay: 10
   retries: "{{ (600 / 10) | int }}"
 
@@ -35,7 +35,7 @@
   mount:
     state: mounted
     fstype: glusterfs
-    src: "{% if 'glusterfs_registry' in groups %}{% set node = groups.glusterfs_registry[0] %}{% elif 'glusterfs' in groups %}{% set node = groups.glusterfs[0] %}{% endif %}{% if openshift_hosted_registry_storage_glusterfs_ips is defined and openshift_hosted_registry_storage_glusterfs_ips|length > 0 %}{{ openshift_hosted_registry_storage_glusterfs_ips[0] }}{% elif 'glusterfs_hostname' in hostvars[node] %}{{ hostvars[node].glusterfs_hostname }}{% elif 'openshift' in hostvars[node] %}{{ hostvars[node].openshift.node.nodename }}{% else %}{{ node }}{% endif %}:/{{ openshift.hosted.registry.storage.glusterfs.path }}"
+    src: "{% if 'glusterfs_registry' in groups %}{% set node = groups.glusterfs_registry[0] %}{% elif 'glusterfs' in groups %}{% set node = groups.glusterfs[0] %}{% endif %}{% if openshift_hosted_registry_storage_glusterfs_ips is defined and openshift_hosted_registry_storage_glusterfs_ips|length > 0 %}{{ openshift_hosted_registry_storage_glusterfs_ips[0] }}{% elif 'glusterfs_hostname' in hostvars[node] %}{{ hostvars[node].glusterfs_hostname }}{% elif 'openshift' in hostvars[node] %}{{ hostvars[node].openshift.node.nodename }}{% else %}{{ node }}{% endif %}:/{{ openshift_hosted_registry_storage_glusterfs_path }}"
     name: "{{ mktemp.stdout }}"
 
 - name: Set registry volume permissions
@@ -60,7 +60,7 @@
 
   - name: Copy current registry contents to new GlusterFS volume
     command: "oc rsync {{ registry_pod_name }}:/registry/ {{ mktemp.stdout }}/"
-    when: openshift.hosted.registry.storage.glusterfs.swapcopy
+    when: openshift_hosted_registry_storage_glusterfs_swapcopy
 
   - name: Swap new GlusterFS registry volume
     oc_volume:
@@ -68,7 +68,7 @@
       name: "{{ openshift_hosted_registry_name }}"
       vol_name: registry-storage
       mount_type: pvc
-      claim_name: "{{ openshift.hosted.registry.storage.volume.name }}-glusterfs-claim"
+      claim_name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs-claim"
 
   - name: Deactivate registry maintenance mode
     oc_env:
@@ -77,7 +77,7 @@
       state: absent
       env_vars:
       - REGISTRY_STORAGE_MAINTENANCE_READONLY_ENABLED: 'true'
-  when: openshift.hosted.registry.storage.glusterfs.swap
+  when: openshift_hosted_registry_storage_glusterfs_swap
 
 - name: Unmount registry volume and clean up mount point/fstab
   mount:
