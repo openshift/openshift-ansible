@@ -1,0 +1,9 @@
+  # Openshift Cluster Preinstallation Requirements for Rackspace
+
+  # Install required repositories
+
+  - name: install epel-release
+    yum: name=epel-release state=latest
+
+  - name: install centos repo
+    yum: name=centos-release-gluster310 state=latest
