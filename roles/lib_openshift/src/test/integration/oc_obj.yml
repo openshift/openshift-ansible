@@ -49,7 +49,7 @@
                   - name: MYSQL_ROOT_PASSWORD
                     value: mysql
                   image: openshift/mysql-55-centos7:latest
-                  imagePullPolicy: Always
+                  imagePullPolicy: IfNotPresent
                   name: mysql
                   ports:
                   - containerPort: 3306
@@ -155,7 +155,7 @@
                   - name: MYSQL_ROOT_PASSWORD
                     value: mysql
                   image: openshift/mysql-55-centos7:latest
-                  imagePullPolicy: Always
+                  imagePullPolicy: IfNotPresent
                   name: mysql
                   ports:
                   - containerPort: 3306
