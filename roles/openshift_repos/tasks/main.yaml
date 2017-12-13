@@ -37,6 +37,13 @@
   - when: r_openshift_repos_has_run is not defined
     block:
 
+    - include_tasks: rhel_repos.yml
+      when:
+      - ansible_distribution == 'RedHat'
+      - deployment_type == 'openshift-enterprise'
+      - (rhel_subscription_user or rhsub_user) is defined
+      - (rhel_subscription_password or rhsub_pass) is defined
+
     - include_tasks: centos_repos.yml
       when:
       - ansible_os_family == "RedHat"
