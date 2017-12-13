@@ -88,9 +88,9 @@
     create: True
     params: "{{ openshift_management_template_parameters }}"
 
-- name: Wait for the app to come up. May take several minutes, 30s check intervals, 10m max
+- name: Wait for the app to come up. May take several minutes, 30s check intervals, {{ openshift_management_pod_rollout_retries }} retries
   command: "oc logs {{ openshift_management_flavor }}-0 -n {{ openshift_management_project }}"
   register: app_seeding_logs
   until: app_seeding_logs.stdout.find('Server starting complete') != -1
   delay: 30
-  retries: 20
+  retries: "{{ openshift_management_pod_rollout_retries }}"
