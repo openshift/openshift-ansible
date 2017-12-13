@@ -180,7 +180,6 @@
                                                 }}"
   roles:
   - role: openshift_master_facts
-  - role: openshift_hosted_facts
   - role: openshift_clock
   - role: openshift_cloud_provider
   - role: openshift_builddefaults

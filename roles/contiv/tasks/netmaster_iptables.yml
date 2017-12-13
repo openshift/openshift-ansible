@@ -13,9 +13,15 @@
 - name: Netmaster IPtables | Open Netmaster with iptables
   command: /sbin/iptables -I INPUT 1 -p tcp --dport {{ item }} -j ACCEPT -m comment --comment "contiv"
   with_items:
-    - "{{ netmaster_port }}"
     - "{{ contiv_rpc_port1 }}"
     - "{{ contiv_rpc_port2 }}"
     - "{{ contiv_rpc_port3 }}"
+  when: iptablesrules.stdout.find("contiv") == -1
+  notify: Save iptables rules
+
+- name: Netmaster IPtables | Open netmaster main port
+  command: /sbin/iptables -I INPUT 1 -p tcp -s {{ item }} --dport {{ netmaster_port }} -j ACCEPT -m comment --comment "contiv"
+  with_items:
+    - "{{ groups.oo_nodes_to_config|difference(hostvars[inventory_hostname]['ansible_' + netmaster_interface].ipv4.address)|list }}"
   when: iptablesrules.stdout.find("contiv") == -1
   notify: Save iptables rules
