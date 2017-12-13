@@ -1,17 +1,20 @@
 ---
-- oc_obj:
-    state: list
-    kind: project
-    name: "{{ item }}"
-  with_items: "{{ __default_logging_ops_projects }}"
+- command: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    get namespaces -o jsonpath={.items[*].metadata.name} {{ __default_logging_ops_projects | join(' ') }}
   register: __logging_ops_projects
 
 - name: Annotate Operations Projects
   oc_edit:
     kind: ns
-    name: "{{ item.item }}"
+    name: "{{ project }}"
     separator: '#'
     content:
       metadata#annotations#openshift.io/logging.ui.hostname: "{{ openshift_logging_kibana_ops_hostname }}"
-  with_items: "{{ __logging_ops_projects.results }}"
-  when: item.results.stderr is not defined
+  with_items: "{{ __logging_ops_projects.stdout.split(' ') }}"
+  loop_control:
+    loop_var: project
+  when:
+  - __logging_ops_projects.stderr | length == 0
+  - openshift_logging_use_ops | default(false) | bool
