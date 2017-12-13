@@ -10,161 +10,29 @@
 
 # tasks file for openshift_node_upgrade
 
-- include_tasks: registry_auth.yml
+- name: stop services for upgrade
+  include_tasks: upgrade/stop_services.yml
 
-- name: Stop node and openvswitch services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-node"
-  - openvswitch
-  failed_when: false
-
-- name: Stop additional containerized services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-master-controllers"
-  - "{{ openshift_service_type }}-master-api"
-  - etcd_container
-  failed_when: false
-  when: openshift.common.is_containerized | bool
-
-- name: Pre-pull node image
-  command: >
-    docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift.common.is_containerized | bool
-
-- name: Pre-pull openvswitch image
-  command: >
-    docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-  register: pull_result
-  changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when:
-  - openshift.common.is_containerized | bool
-  - openshift_use_openshift_sdn | bool
-
-- include_tasks: docker/upgrade.yml
-  vars:
-    # We will restart Docker ourselves after everything is ready:
-    skip_docker_restart: True
+# Ensure actually install latest package.
+- name: download docker upgrade rpm
+  command: "{{ ansible_pkg_mgr }} install -C -y docker{{ '-' + docker_version }}"
+  register: result
+  until: result | success
   when:
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- include_tasks: "{{ node_config_hook }}"
-  when: node_config_hook is defined
-
-- include_tasks: upgrade/rpm_upgrade.yml
+- name: install pre-pulled rpms.
+  include_tasks: upgrade/rpm_upgrade_install.yml
   vars:
-    component: "node"
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift.common.is_containerized | bool
 
-- name: Remove obsolete docker-sdn-ovs.conf
-  file:
-    path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
-    state: absent
 
-- include_tasks: upgrade/containerized_node_upgrade.yml
-  when: openshift.common.is_containerized | bool
+- include_tasks: "{{ node_config_hook }}"
+  when: node_config_hook is defined
 
-- name: Ensure containerized services stopped before Docker restart
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - etcd_container
-  - openvswitch
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
-  - "{{ openshift_service_type }}-node"
-  failed_when: false
-  when: openshift.common.is_containerized | bool
-
-- name: Stop rpm based services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-node"
-  - openvswitch
-  failed_when: false
-  when: not openshift.common.is_containerized | bool
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1513054
-- name: Clean up dockershim data
-  file:
-    path: "/var/lib/dockershim/sandbox/"
-    state: absent
-
-- name: Upgrade openvswitch
-  package:
-    name: openvswitch
-    state: latest
-  when: not openshift.common.is_containerized | bool
-  register: result
-  until: result | success
-
-- name: Update oreg value
-  yedit:
-    src: "{{ openshift.common.config_base }}/node/node-config.yaml"
-    key: 'imageConfig.format'
-    value: "{{ oreg_url | default(oreg_url_node) }}"
-  when: oreg_url is defined or oreg_url_node is defined
-
-# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-- name: Check for swap usage
-  command: grep "^[^#].*swap" /etc/fstab
-  # grep: match any lines which don't begin with '#' and contain 'swap'
-  changed_when: false
-  failed_when: false
-  register: swap_result
-
-  # Disable Swap Block
-- block:
-
-  - name: Disable swap
-    command: swapoff --all
-
-  - name: Remove swap entries from /etc/fstab
-    replace:
-      dest: /etc/fstab
-      regexp: '(^[^#].*swap.*)'
-      replace: '# \1'
-      backup: yes
-
-  - name: Add notice about disabling swap
-    lineinfile:
-      dest: /etc/fstab
-      line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
-      state: present
-
-  when:
-  - swap_result.stdout_lines | length > 0
-  - openshift_disable_swap | default(true) | bool
-  # End Disable Swap Block
-
-- name: Reset selinux context
-  command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
-  when:
-  - ansible_selinux is defined
-  - ansible_selinux.status == 'enabled'
-
-- name: Apply 3.6 dns config changes
-  yedit:
-    src: /etc/origin/node/node-config.yaml
-    key: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_items:
-  - key: "dnsBindAddress"
-    value: "127.0.0.1:53"
-  - key: "dnsRecursiveResolvConf"
-    value: "/etc/origin/node/resolv.conf"
+- include_tasks: upgrade/config_changes.yml
 
 # Restart all services
 - include_tasks: upgrade/restart.yml
@@ -181,4 +49,7 @@
   retries: 24
   delay: 5
 
+- include_tasks: dnsmasq_install.yml
 - include_tasks: dnsmasq.yml
+
+- meta: flush_handlers
