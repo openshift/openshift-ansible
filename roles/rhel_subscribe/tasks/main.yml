@@ -1,30 +1,21 @@
 ---
-# TODO: Enhance redhat_subscription module
-#       to make it able to attach to a pool
-#       to make it able to enable repositories
+- set_fact:
+    rhel_subscription_pass: "{{ lookup('env', 'rhel_subscription_pass') | default(rhsub_pass | default(omit, True)) }}"
+    rhel_subscription_pool: "{{ lookup('env', 'rhel_subscription_pool') | default(rhsub_pool | default('Red Hat OpenShift Container Platform, Premium*')) }}"
+    rhel_subscription_user: "{{ lookup('env', 'rhel_subscription_user') | default(rhsub_user | default(omit, True)) }}"
+    rhel_subscription_server: "{{ lookup('env', 'rhel_subscription_server') | default(rhsub_server | default(omit, True)) }}"
 
 - fail:
     msg: "This role is only supported for Red Hat hosts"
   when: ansible_distribution != 'RedHat'
 
 - fail:
-    msg: The rhsub_user variable is required for this role.
-  when: rhsub_user is not defined or not rhsub_user
+    msg: The rhel_subscription_user variable is required for this role.
+  when: rhel_subscription_user is not defined or not rhsub_user is not defined
 
 - fail:
-    msg: The rhsub_pass variable is required for this role.
-  when: rhsub_pass is not defined or not rhsub_pass
-
-- name: Detecting Atomic Host Operating System
-  stat:
-    path: /run/ostree-booted
-  register: ostree_booted
-
-- name: Satellite preparation
-  command: "rpm -Uvh http://{{ rhsub_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
-  args:
-    creates: /etc/rhsm/ca/katello-server-ca.pem
-  when: rhsub_server is defined and rhsub_server
+    msg: The rhel_subscription_pass variable is required for this role.
+  when: rhel_subscription_pass is not defined or not rhsub_pass is not defined
 
 - name: Install Red Hat Subscription manager
   yum:
@@ -33,36 +24,58 @@
   register: result
   until: result | success
 
-- name: RedHat subscriptions
+- name: Is host already registered?
+  command: bash -c "subscription-manager version"
+  register: rh_subscribed
+  changed_when: "'not registered' in rh_subscribed.stdout"
+  ignore_errors: yes
+
+- name: Register host
   redhat_subscription:
-    username: "{{ rhsub_user }}"
-    password: "{{ rhsub_pass }}"
+    username: "{{ rhel_subscription_user }}"
+    password: "{{ rhel_subscription_pass }}"
   register: rh_subscription
   until: rh_subscription | succeeded
-
-- name: Retrieve the OpenShift Pool ID
-  command: subscription-manager list --available --matches="{{ rhsub_pool }}" --pool-only
-  register: openshift_pool_id
-  until: openshift_pool_id | succeeded
-  changed_when: False
-
-- name: Determine if OpenShift Pool Already Attached
-  command: subscription-manager list --consumed --matches="{{ rhsub_pool }}" --pool-only
-  register: openshift_pool_attached
-  until: openshift_pool_attached | succeeded
-  changed_when: False
-  when: openshift_pool_id.stdout == ''
+  when:
+    - "'not registered' in rh_subscribed.stdout"
+    - rhel_subscription_user is defined
+    - rhel_subscription_pass is defined
 
 - fail:
-    msg: "Unable to find pool matching {{ rhsub_pool }} in available or consumed pools"
-  when: openshift_pool_id.stdout == '' and openshift_pool_attached is defined and openshift_pool_attached.stdout == ''
+    msg: 'Unable to register host with Red Hat Subscription Manager'
+  when:
+    - "'not registered' in rh_subscribed.stdout"
+    - rh_subscription.failed
+
+- name: Determine if OpenShift Pool Already Attached
+  command: bash -c "subscription-manager list --consumed --pool-only --matches '*OpenShift*' | grep {{ rhel_subscription_pool }}"
+  register: openshift_pool_attached
+  changed_when: rhel_subscription_pool not in openshift_pool_attached.stdout
+  failed_when: openshift_pool_attached.rc == 2
+  ignore_errors: yes
+
+- name: Retrieve the OpenShift Pool ID
+  command: bash -c "subscription-manager list --available --pool-only --matches '*OpenShift*' | grep {{ rhel_subscription_pool }}"
+  register: openshift_pool_retrieve
+  changed_when: rhel_subscription_pool in openshift_pool_retrieve.stdout
+  when: rhel_subscription_pool not in openshift_pool_attached.stdout
+  ignore_errors: yes
+
+- fail:
+    msg: "Unable to find pool matching {{ rhel_subscription_pool }} in available pools"
+  when:
+    - rhel_subscription_pool not in openshift_pool_attached.stdout
+    - rhel_subscription_pool not in openshift_pool_retrieve.stdout
 
 - name: Attach to OpenShift Pool
-  command: subscription-manager attach --pool {{ openshift_pool_id.stdout_lines[0] }}
-  register: subscribe_pool
-  until: subscribe_pool | succeeded
-  when: openshift_pool_id.stdout != ''
+  command: bash -c "subscription-manager attach --pool {{ rhel_subscription_pool }}"
+  register: openshift_pool_attached
+  changed_when: "'Successfully attached a subscription' in openshift_pool_attached.stdout"
+  when: rhel_subscription_pool not in openshift_pool_attached.stdout
 
-- include_tasks: enterprise.yml
+- include_role:
+    role: rhel_subscribe
+    tasks_from: satellite
   when:
-  - not ostree_booted.stat.exists | bool
+    - (rhel_subscription_server or rhsub_server) is defined
+    - (rhel_subscription_server or rhsub_server)
