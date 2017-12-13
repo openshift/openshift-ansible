@@ -157,6 +157,7 @@
 
 - name: Update journald config
   include_tasks: journald.yml
+  when: openshift_manage_journald | default(true)
 
 - name: Install the systemd units
   include_tasks: systemd_units.yml

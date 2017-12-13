@@ -9,6 +9,7 @@
   when: master_config_hook is defined
 
 - include_tasks: journald.yml
+  when: openshift_manage_journald | default(true)
 
 - include_tasks: systemd_units.yml
 
