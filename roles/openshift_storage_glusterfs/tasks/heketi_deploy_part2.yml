@@ -28,14 +28,14 @@
   until:
   - "'results' in heketi_job.results and heketi_job.results.results | count > 0"
   # Pod's 'Complete' status must be True
-  - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
+  - "heketi_job.results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   failed_when:
   - "'results' in heketi_job.results"
   - "heketi_job.results.results | count > 0"
   # Fail when pod's 'Failed' status is True
-  - "heketi_job.results.results | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Failed'}) | map('bool') | select | list | count == 1"
+  - "heketi_job.results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Failed'}) | map('bool') | select | list | count == 1"
   when: setup_storage.rc == 0
 
 - name: Delete deploy resources
@@ -120,7 +120,7 @@
   until:
   - "heketi_pod.results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
-  - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  - "heketi_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 

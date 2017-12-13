@@ -64,7 +64,7 @@ spec:
         - name: MASTER_URL
           value: "{{ openshift_metrics_master_url }}"
         - name: JGROUPS_PASSWORD
-          value: "{{ 17 | oo_random_word }}"
+          value: "{{ 17 | lib_utils_oo_random_word }}"
         - name: TRUSTSTORE_AUTHORITIES
           value: "/hawkular-metrics-certs/tls.truststore.crt"
         - name: ENABLE_PROMETHEUS_ENDPOINT

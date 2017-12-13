@@ -62,4 +62,4 @@
 # dangly +c0mm1t-offset tags in the version. See also,
 # openshift_facts.py
 - set_fact:
-    openshift_version: "{{ openshift_version | oo_chomp_commit_offset }}"
+    openshift_version: "{{ openshift_version | lib_utils_oo_chomp_commit_offset }}"

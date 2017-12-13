@@ -50,7 +50,7 @@
     name: "{{ openshift.node.nodename }}"
     kind: node
     state: add
-    labels: "{{ openshift_node_labels | oo_dict_to_list_of_dict }}"
+    labels: "{{ openshift_node_labels | lib_utils_oo_dict_to_list_of_dict }}"
     namespace: default
   when:
     - "'nodename' in openshift.node"

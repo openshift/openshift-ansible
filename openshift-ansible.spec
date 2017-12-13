@@ -24,9 +24,6 @@ Requires:      tar
 Requires:      %{name}-docs = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
-Requires:      %{name}-filter-plugins = %{version}-%{release}
-Requires:      %{name}-lookup-plugins = %{version}-%{release}
-Requires:      %{name}-callback-plugins = %{version}-%{release}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
@@ -52,8 +49,6 @@ popd
 # Base openshift-ansible install
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
-mkdir -p %{buildroot}%{_datadir}/ansible_plugins
-cp -rp library %{buildroot}%{_datadir}/ansible/%{name}/
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -88,31 +83,6 @@ rm -rf %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/*
 # touch a file in contiv so that it can be added to SCM's
 touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
 
-# openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
-pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
-ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
-popd
-
-# openshift-ansible-filter-plugins install
-cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# openshift-ansible-lookup-plugins install
-cp -rp lookup_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# openshift-ansible-callback-plugins install
-cp -rp callback_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# create symlinks from /usr/share/ansible/plugins/lookup ->
-# /usr/share/ansible_plugins/lookup_plugins
-pushd %{buildroot}%{_datadir}
-mkdir -p ansible/plugins
-pushd ansible/plugins
-ln -s ../../ansible_plugins/lookup_plugins lookup
-ln -s ../../ansible_plugins/filter_plugins filter
-ln -s ../../ansible_plugins/callback_plugins callback
-popd
-popd
-
 # atomic-openshift-utils install
 pushd utils
 %{__python} setup.py install --skip-build --root %{buildroot}
@@ -131,7 +101,6 @@ popd
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
 %{_datadir}/ansible/%{name}/files
-%{_datadir}/ansible/%{name}/library
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
 # ----------------------------------------------------------------------------------
@@ -155,9 +124,6 @@ BuildArch:     noarch
 Summary:       Openshift and Atomic Enterprise Ansible Playbooks
 Requires:      %{name} = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
-Requires:      %{name}-lookup-plugins = %{version}-%{release}
-Requires:      %{name}-filter-plugins = %{version}-%{release}
-Requires:      %{name}-callback-plugins = %{version}-%{release}
 BuildArch:     noarch
 
 %description playbooks
@@ -198,9 +164,9 @@ end
 # ----------------------------------------------------------------------------------
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name} = %{version}-%{release}
-Requires:      %{name}-lookup-plugins = %{version}-%{release}
-Requires:      %{name}-filter-plugins = %{version}-%{release}
-Requires:      %{name}-callback-plugins = %{version}-%{release}
+Obsoletes:      %{name}-lookup-plugins
+Obsoletes:      %{name}-filter-plugins
+Obsoletes:      %{name}-callback-plugins
 BuildArch:     noarch
 
 %description roles
@@ -208,55 +174,6 @@ BuildArch:     noarch
 
 %files roles
 %{_datadir}/ansible/%{name}/roles
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-filter-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package filter-plugins
-Summary:       Openshift and Atomic Enterprise Ansible filter plugins
-Requires:      %{name} = %{version}-%{release}
-BuildArch:     noarch
-Requires:      pyOpenSSL
-
-%description filter-plugins
-%{summary}.
-
-%files filter-plugins
-%{_datadir}/ansible_plugins/filter_plugins
-%{_datadir}/ansible/plugins/filter
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-lookup-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package lookup-plugins
-Summary:       Openshift and Atomic Enterprise Ansible lookup plugins
-Requires:      %{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description lookup-plugins
-%{summary}.
-
-%files lookup-plugins
-%{_datadir}/ansible_plugins/lookup_plugins
-%{_datadir}/ansible/plugins/lookup
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-callback-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package callback-plugins
-Summary:       Openshift and Atomic Enterprise Ansible callback plugins
-Requires:      %{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description callback-plugins
-%{summary}.
-
-%files callback-plugins
-%{_datadir}/ansible_plugins/callback_plugins
-%{_datadir}/ansible/plugins/callback
 
 # ----------------------------------------------------------------------------------
 # atomic-openshift-utils subpackage
