@@ -3,7 +3,7 @@
   package: name=logrotate state=present
   when: not openshift.common.is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: nickhammond.logrotate | Setup logrotate.d scripts
   template:

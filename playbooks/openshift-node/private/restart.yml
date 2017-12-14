@@ -13,7 +13,7 @@
       name: docker
       state: restarted
     register: l_docker_restart_docker_in_node_result
-    until: not l_docker_restart_docker_in_node_result | failed
+    until: not (l_docker_restart_docker_in_node_result is failed)
     retries: 3
     delay: 30
 

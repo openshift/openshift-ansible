@@ -69,7 +69,7 @@
     - name: assert atomic host docker version is 1.12 or later
       assert:
         that:
-        - l_atomic_docker_version.stdout | replace('"', '') | version_compare('1.12','>=')
+        - l_atomic_docker_version.stdout | replace('"', '') is version_compare('1.12','>=')
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
   - when:
@@ -85,7 +85,7 @@
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - yum-utils
       register: result
-      until: result | success
+      until: result is succeeded
 
     - name: Ensure various deps for running system containers are installed
       package:
@@ -103,7 +103,7 @@
         or (openshift_use_node_system_container | default(False)) | bool
         or (openshift_use_master_system_container | default(False)) | bool
       register: result
-      until: result | success
+      until: result is succeeded
 
   - name: Gather Cluster facts and set is_containerized if needed
     openshift_facts:

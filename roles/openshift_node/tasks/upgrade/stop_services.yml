@@ -25,7 +25,7 @@
     name: docker
     state: stopped
   register: l_openshift_node_upgrade_docker_stop_result
-  until: not l_openshift_node_upgrade_docker_stop_result | failed
+  until: not (l_openshift_node_upgrade_docker_stop_result is failed)
   retries: 3
   delay: 30
   when:

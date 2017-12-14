@@ -14,7 +14,7 @@
     - r_openshift_excluder_enable_docker_excluder | bool
     - ansible_pkg_mgr == "yum"
     register: result
-    until: result | success
+    until: result is succeeded
 
 
   # For DNF we do not need the "*" and if we add it, it causes an error because
@@ -29,7 +29,7 @@
     - r_openshift_excluder_enable_docker_excluder | bool
     - ansible_pkg_mgr == "dnf"
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Install openshift excluder - yum
     package:
@@ -39,7 +39,7 @@
     - r_openshift_excluder_enable_openshift_excluder | bool
     - ansible_pkg_mgr == "yum"
     register: result
-    until: result | success
+    until: result is succeeded
 
   # For DNF we do not need the "*" and if we add it, it causes an error because
   # it's not a valid pkg_spec
@@ -53,7 +53,7 @@
     - r_openshift_excluder_enable_openshift_excluder | bool
     - ansible_pkg_mgr == "dnf"
     register: result
-    until: result | success
+    until: result is succeeded
 
   - set_fact:
       r_openshift_excluder_install_ran: True

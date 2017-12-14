@@ -52,7 +52,9 @@
     state: restarted
   when: openshift_use_crio
   register: task_result
-  failed_when: task_result|failed and 'could not find the requested service' not in task_result.msg|lower
+  failed_when:
+    - task_result is failed
+    - ('could not find the requested service' not in task_result.msg|lower)
 
 - name: restart NetworkManager to ensure resolv.conf is present
   systemd:
