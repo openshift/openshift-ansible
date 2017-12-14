@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.9.0%{?dist}
+Release:        0.10.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.10.0
+- Bump requirements.txt to Ansible 2.4.1 (rteague@redhat.com)
+- Commit to stabalize RHSM operations.  This code is derived from contrib
+  (mazzystr@gmail.com)
+- Contiv systemd fixes (flamingo@2thebatcave.com)
+- Combine openshift_master/vars with defaults (mgugino@redhat.com)
+- crio: change socket path to /var/run/crio/crio.sock (gscrivan@redhat.com)
+- Remove version requirement from openvswitch package, since listed version got
+  removed from repo (riffraff@hobbes.alephone.org)
+
 * Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.9.0
 - etcd: use Fedora /latest/ instead of hardcoding the version
   (gscrivan@redhat.com)
