@@ -9,8 +9,8 @@
     when:
     - ansible_distribution == 'RedHat'
     - deployment_type == 'openshift-enterprise'
-    - (rhel_subscription_user or rhsub_user) is defined
-    - (rhel_subscription_password or rhsub_pass) is defined
+    - rhsub_user | default(False)
+    - rhsub_pass | default(False)
   - name: initialize openshift repos
     include_role:
       name: openshift_repos
