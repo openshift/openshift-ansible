@@ -3,6 +3,8 @@
   vars:
     skip_verison: True
 
+- import_playbook: init/repos.yml
+
 # This is required for container runtime for crio, only needs to run once.
 - name: Configure os_firewall
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config:oo_nodes_to_config
