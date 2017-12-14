@@ -6,7 +6,7 @@
   when: not openshift.common.is_atomic | bool
   register: curr_docker_version
   retries: 4
-  until: curr_docker_version | succeeded
+  until: curr_docker_version is succeeded
   changed_when: false
 
 # Some basic checks to ensure the role will complete
@@ -19,9 +19,12 @@
   package:
     name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
     state: present
-  when: not openshift.common.is_atomic | bool and not curr_docker_version | skipped and not curr_docker_version.stdout != ''
+  when:
+  - not (openshift.common.is_atomic | bool)
+  - not (curr_docker_version is skipped)
+  - not (curr_docker_version.stdout != '')
   register: result
-  until: result | success
+  until: result is succeeded
 
 - block:
   # Extend the default Docker service unit file when using iptables-services
@@ -137,11 +140,11 @@
     state: started
     daemon_reload: yes
   register: r_docker_package_docker_start_result
-  until: not r_docker_package_docker_start_result | failed
+  until: not (r_docker_package_docker_start_result is failed)
   retries: 3
   delay: 30
 
 - set_fact:
-    docker_service_status_changed: "{{ (r_docker_package_docker_start_result | changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
+    docker_service_status_changed: "{{ (r_docker_package_docker_start_result is changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
 
 - include_tasks: common/post.yml

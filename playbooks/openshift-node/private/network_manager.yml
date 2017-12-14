@@ -8,7 +8,7 @@
       name: 'NetworkManager'
       state: present
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: configure NetworkManager
     lineinfile:

@@ -17,7 +17,7 @@
 - name: download docker upgrade rpm
   command: "{{ ansible_pkg_mgr }} install -C -y docker{{ '-' + docker_version }}"
   register: result
-  until: result | success
+  until: result is succeeded
   when:
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool

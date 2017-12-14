@@ -116,6 +116,6 @@
     - "{{ openshift_openstack_dns_records_add | default([]) }}"
     - entries
   register: nsupdate_add_result
-  until: nsupdate_add_result|succeeded
+  until: nsupdate_add_result is succeeded
   retries: 10
   delay: 1

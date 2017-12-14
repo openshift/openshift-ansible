@@ -10,7 +10,7 @@
     - openshift_clock_enabled | bool
     - chrony_installed.rc != 0
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Start and enable ntpd/chronyd
   command: timedatectl set-ntp true

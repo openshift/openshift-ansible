@@ -13,7 +13,7 @@
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - include_tasks: drop_etcdctl.yml
   when:
@@ -93,7 +93,9 @@
       daemon_reload: yes
     when: not l_is_etcd_system_container | bool
     register: task_result
-    failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+    failed_when:
+    - task_result is failed
+    - ('could not' not in task_result.msg|lower)
 
   - name: Install etcd container service file
     template:
@@ -131,4 +133,4 @@
 
 - name: Set fact etcd_service_status_changed
   set_fact:
-    etcd_service_status_changed: "{{ start_result | changed }}"
+    etcd_service_status_changed: "{{ start_result is changed }}"

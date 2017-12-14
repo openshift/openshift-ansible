@@ -22,7 +22,7 @@
     name: subscription-manager
     state: present
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Is host already registered?
   command: bash -c "subscription-manager version"
@@ -35,7 +35,7 @@
     username: "{{ rhel_subscription_user }}"
     password: "{{ rhel_subscription_pass }}"
   register: rh_subscription
-  until: rh_subscription | succeeded
+  until: rh_subscription is succeeded
   when:
     - "'not registered' in rh_subscribed.stdout"
     - rhel_subscription_user is defined

@@ -9,6 +9,6 @@
     name: "{{ openshift_docker_service_name }}"
     state: restarted
   register: l_docker_restart_docker_in_calico_result
-  until: not l_docker_restart_docker_in_calico_result | failed
+  until: not (l_docker_restart_docker_in_calico_result is failed)
   retries: 3
   delay: 30
