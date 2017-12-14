@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.8.0%{?dist}
+Release:        0.9.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -285,6 +285,25 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.9.0
+- etcd: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- docker: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- upgrade node mark 2 (mgugino@redhat.com)
+- Refactor node upgrade to include less serial tasks (mgugino@redhat.com)
+- fix 1519808. Only annotate ops projects when openshift_logging_use_ops=true
+  (jcantril@redhat.com)
+- Ensure that clients are version bound (sdodson@redhat.com)
+- Support for making glusterfs storage class a default one.
+  (jmencak@redhat.com)
+- Add support for storage classes to openshift_prometheus role.
+  (jmencak@redhat.com)
+- Do not escalate privileges in logging stack deployment task
+  (iacopo.rozzo@amadeus.com)
+- Multimaster openshift+contiv fixes (landillo@cisco.com)
+- Sync latest image-streams and templates (alexandre.lossent@cern.ch)
+
 * Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.8.0
 - Remove empty openshift_hosted_facts role (mgugino@redhat.com)
 - Refactor upgrade codepaths step 1 (mgugino@redhat.com)
