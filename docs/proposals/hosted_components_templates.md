@@ -1,9 +1,9 @@
-# Use [OCP templates and] ABPs to install hosted components
+# Use [OCP templates and] APBs to install hosted components
 
 ## Description
 Currently most of our hosted components have their own repositories where they
 maintain changes and then need to synchronize those changes within their
-respective roles. This can cause cause delays and times where features don't
+respective roles. This can cause delays and times where features don't
 match up with what is installed or can be configured.
 
 There is also a concern that copying files from one location to another can
@@ -35,7 +35,7 @@ the component.
 
 ## Design
 We should describe a way to create a containerized playbook and role to mirror
-what is done with ABPs for hosted components so that the openshift-ansible roles
+what is done with APBs for hosted components so that the openshift-ansible roles
 would reuse these containers to install/uninstall these components.
 
 The containerized role could follow the pattern used by the TSB within its
@@ -55,7 +55,7 @@ components after an OCP installation is completed.
 
 ## User Story
 As a developer on OpenShift-Ansible,
-I want to roles for hosted components to run the APB container that is provided
+I want roles for hosted components to run the APB container that is provided
   by the developer of the component
 so that the majority of on-boarding and supporting a hosted component be the
   responsibility of the developer of the component, reducing the amount of
