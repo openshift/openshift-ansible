@@ -130,7 +130,7 @@ spec:
               containerName: "{{ daemonset_container_name }}"
               resource: limits.memory
         - name: "FILE_BUFFER_LIMIT"
-          value: "{{ openshift_logging_fluentd_file_buffer_limit | default('256i') }}"
+          value: "{{ openshift_logging_fluentd_file_buffer_limit | default('256Mi') }}"
 {% if openshift_logging_mux_client_mode is defined and
      ((openshift_logging_mux_allow_external is defined and openshift_logging_mux_allow_external | bool) or
       (openshift_logging_use_mux is defined and openshift_logging_use_mux | bool)) %}

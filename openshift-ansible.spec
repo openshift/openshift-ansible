@@ -10,14 +10,14 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.1.0%{?dist}
+Release:        0.10.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 2.3
+Requires:      ansible >= 2.4.1
 Requires:      python2
 Requires:      python-six
 Requires:      tar
@@ -285,6 +285,68 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.10.0
+- Bump requirements.txt to Ansible 2.4.1 (rteague@redhat.com)
+- Commit to stabalize RHSM operations.  This code is derived from contrib
+  (mazzystr@gmail.com)
+- Contiv systemd fixes (flamingo@2thebatcave.com)
+- Combine openshift_master/vars with defaults (mgugino@redhat.com)
+- crio: change socket path to /var/run/crio/crio.sock (gscrivan@redhat.com)
+- Remove version requirement from openvswitch package, since listed version got
+  removed from repo (riffraff@hobbes.alephone.org)
+
+* Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.9.0
+- etcd: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- docker: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- upgrade node mark 2 (mgugino@redhat.com)
+- Refactor node upgrade to include less serial tasks (mgugino@redhat.com)
+- fix 1519808. Only annotate ops projects when openshift_logging_use_ops=true
+  (jcantril@redhat.com)
+- Ensure that clients are version bound (sdodson@redhat.com)
+- Support for making glusterfs storage class a default one.
+  (jmencak@redhat.com)
+- Add support for storage classes to openshift_prometheus role.
+  (jmencak@redhat.com)
+- Do not escalate privileges in logging stack deployment task
+  (iacopo.rozzo@amadeus.com)
+- Multimaster openshift+contiv fixes (landillo@cisco.com)
+- Sync latest image-streams and templates (alexandre.lossent@cern.ch)
+
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.8.0
+- Remove empty openshift_hosted_facts role (mgugino@redhat.com)
+- Refactor upgrade codepaths step 1 (mgugino@redhat.com)
+
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.7.0
+- Remove bad openshift_examples symlink (rteague@redhat.com)
+- Changing the node group format to a list. (kwoodson@redhat.com)
+- Bump RPM version requirement (sdodson@redhat.com)
+- Clarify version selection in README (mgugino@redhat.com)
+
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.6.0
+- add openshift_master_api_port var to example inventory (jdiaz@redhat.com)
+- Allow 2 sets of hostnames for openstack provider (bdobreli@redhat.com)
+
+* Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.5.0
+- Remove unneeded embedded etcd logic (mgugino@redhat.com)
+
+* Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.4.0
+- Copying upstream fix for ansible 2.4 ec2_group module. (kwoodson@redhat.com)
+- Add missing dependencies on openshift_facts role (sdodson@redhat.com)
+
+* Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.3.0
+- remove integration tests from tox (lmeyer@redhat.com)
+- correct ansible-playbook command syntax (jdiaz@redhat.com)
+- Add openshift_facts to upgrade plays for service_type (mgugino@redhat.com)
+- Check for openshift attribute before using it during CNS install.
+  (jmencak@redhat.com)
+
+* Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.2.0
+- GlusterFS: Add playbook doc note (jarrpa@redhat.com)
+- Fix openshift hosted registry rollout (rteague@redhat.com)
+- Remove container_runtime from the openshift_version (sdodson@redhat.com)
+
 * Fri Dec 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.1.0
 - Cleanup byo references (rteague@redhat.com)
 - openshift_node: reintroduce restart of CRI-O. (gscrivan@redhat.com)

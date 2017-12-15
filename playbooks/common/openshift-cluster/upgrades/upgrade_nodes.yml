@@ -1,16 +1,25 @@
 ---
+- name: Prepull images and rpms before doing rolling restart
+  hosts: oo_nodes_to_upgrade:!oo_masters_to_config
+  roles:
+  - role: openshift_facts
+  tasks:
+  - include_role:
+      name: openshift_node
+      tasks_from: upgrade_pre.yml
+    vars:
+      openshift_node_upgrade_in_progress: True
+
 - name: Drain and upgrade nodes
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   # This var must be set with -e on invocation, as it is not a per-host inventory var
   # and is evaluated early. Values such as "20%" can also be used.
   serial: "{{ openshift_upgrade_nodes_serial | default(1) }}"
   max_fail_percentage: "{{ openshift_upgrade_nodes_max_fail_percentage | default(0) }}"
-
+  roles:
+  - lib_openshift
+  - openshift_facts
   pre_tasks:
-  - name: Load lib_openshift modules
-    import_role:
-      name: lib_openshift
-
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
@@ -22,29 +31,23 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable|succeeded
+    until: node_unschedulable is succeeded
 
   - name: Drain Node for Kubelet upgrade
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
-    until: not l_upgrade_nodes_drain_result | failed
+    until: not (l_upgrade_nodes_drain_result is failed)
     retries: 60
     delay: 60
 
-  roles:
-  - openshift_facts
   post_tasks:
   - include_role:
       name: openshift_node
       tasks_from: upgrade.yml
     vars:
       openshift_node_upgrade_in_progress: True
-  - include_role:
-      name: openshift_excluder
-    vars:
-      r_openshift_excluder_action: enable
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
@@ -53,5 +56,13 @@
     retries: 10
     delay: 5
     register: node_schedulable
-    until: node_schedulable|succeeded
-    when: node_unschedulable|changed
+    until: node_schedulable is succeeded
+    when: node_unschedulable is changed
+
+- name: Re-enable excluders
+  hosts: oo_nodes_to_upgrade:!oo_masters_to_config
+  tasks:
+  - include_role:
+      name: openshift_excluder
+    vars:
+      r_openshift_excluder_action: enable

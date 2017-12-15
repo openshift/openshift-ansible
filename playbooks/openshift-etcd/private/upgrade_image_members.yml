@@ -13,5 +13,5 @@
       r_etcd_upgrade_version: "{{ etcd_upgrade_version }}"
       etcd_peer: "{{ openshift.common.hostname }}"
     when:
-    - etcd_container_version | default('99') | version_compare(etcd_upgrade_version,'<')
+    - etcd_container_version | default('99') is version_compare(etcd_upgrade_version,'<')
     - openshift.common.is_containerized | bool

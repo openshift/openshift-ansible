@@ -10,7 +10,7 @@ r_etcd_common_embedded_etcd: false
 
 osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'
 etcd_image_dict:
-  origin: "registry.fedoraproject.org/f26/etcd"
+  origin: "registry.fedoraproject.org/latest/etcd"
   openshift-enterprise: "{{ osm_etcd_image }}"
 etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }}"
 

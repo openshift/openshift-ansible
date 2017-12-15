@@ -6,7 +6,7 @@
       name: "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Install sdn-ovs package
     package:
@@ -15,14 +15,14 @@
     when:
     - openshift_node_use_openshift_sdn | bool
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Install conntrack-tools package
     package:
       name: "conntrack-tools"
       state: present
     register: result
-    until: result | success
+    until: result is succeeded
 
 - when:
   - openshift.common.is_containerized | bool

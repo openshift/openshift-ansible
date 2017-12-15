@@ -8,6 +8,7 @@
     when:
     - deployment_type == 'openshift-enterprise'
     - ansible_distribution == "RedHat"
-    - lookup('env', 'rhel_skip_subscription') | default(rhsub_skip, True) | default('no', True) | lower in ['no', 'false']
+    - rhsub_user | default(False)
+    - rhsub_pass | default(False)
   - role: openshift_repos
   - role: os_update_latest

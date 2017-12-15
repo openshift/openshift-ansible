@@ -45,7 +45,7 @@
     state: latest
   when: not l_ostree_booted.stat.exists | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Verify cluster is healthy
   command: "{{ etcdctlv2 }} cluster-health"

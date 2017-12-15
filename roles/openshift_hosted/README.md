@@ -43,9 +43,9 @@ variables also control configuration behavior:
 
 **NOTE:** Configuring a value for
 `openshift_hosted_registry_storage_glusterfs_ips` with a `glusterfs_registry`
-host group is not allowed. Specifying a `glusterfs_registry` host group 
-indicates that a new GlusterFS cluster should be configured, whereas 
-specifying `openshift_hosted_registry_storage_glusterfs_ips` indicates wanting 
+host group is not allowed. Specifying a `glusterfs_registry` host group
+indicates that a new GlusterFS cluster should be configured, whereas
+specifying `openshift_hosted_registry_storage_glusterfs_ips` indicates wanting
 to use a pre-configured GlusterFS cluster for the registry storage.
 
 _
@@ -53,7 +53,6 @@ _
 Dependencies
 ------------
 
-* openshift_hosted_facts
 * openshift_persistent_volumes
 
 Example Playbook

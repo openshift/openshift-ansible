@@ -6,7 +6,7 @@
   package: name=haproxy state=present
   when: not openshift.common.is_containerized | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Pull haproxy image
   command: >
@@ -70,4 +70,4 @@
   register: start_result
 
 - set_fact:
-    haproxy_start_result_changed: "{{ start_result | changed }}"
+    haproxy_start_result_changed: "{{ start_result is changed }}"

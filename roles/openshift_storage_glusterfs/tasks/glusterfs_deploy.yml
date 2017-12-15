@@ -23,7 +23,7 @@
     state: absent
     labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
   with_items: "{{ groups.all }}"
-  when: glusterfs_wipe
+  when: "'openshift' in hostvars[item] and glusterfs_wipe"
 
 - name: Delete pre-existing GlusterFS config
   file:

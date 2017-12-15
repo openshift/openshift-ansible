@@ -115,7 +115,7 @@ l_crio_image: "{{ openshift_crio_systemcontainer_image_override | default(l_crio
 # systemcontainers_docker #
 # ----------------------- #
 l_crt_docker_image_prepend_dict:
-  Fedora: "registry.fedoraproject.org/f25"
+  Fedora: "registry.fedoraproject.org/latest"
   Centos: "docker.io/gscrivano"
   RedHat: "registry.access.redhat.com/openshift3"
 

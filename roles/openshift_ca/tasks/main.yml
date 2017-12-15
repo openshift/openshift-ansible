@@ -13,13 +13,13 @@
     state: present
   when: not openshift.common.is_containerized | bool
   register: install_result
-  until: install_result | success
+  until: install_result is succeeded
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
 - name: Reload generated facts
   openshift_facts:
-  when: hostvars[openshift_ca_host].install_result | changed
+  when: hostvars[openshift_ca_host].install_result is changed
 
 - name: Create openshift_ca_config_dir if it does not exist
   file:

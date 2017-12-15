@@ -6,5 +6,8 @@ After=auditd.service systemd-user-sessions.service contiv-etcd.service
 EnvironmentFile=/etc/default/netmaster
 ExecStart={{ bin_dir }}/netmaster $NETMASTER_ARGS
 KillMode=control-group
-Restart=on-failure
+Restart=always
 RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

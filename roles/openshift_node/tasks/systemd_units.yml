@@ -16,29 +16,10 @@
   - name: include ovs service environment file
     include_tasks: config/install-ovs-service-env-file.yml
 
-  - name: Install Node system container
-    include_tasks: node_system_container.yml
-    when:
-    - l_is_node_system_container | bool
-
-  - name: Install OpenvSwitch system containers
-    include_tasks: openvswitch_system_container.yml
+  - include_tasks: config/install-ovs-docker-service-file.yml
     when:
     - openshift_node_use_openshift_sdn | bool
-    - l_is_openvswitch_system_container | bool
-
-- block:
-  - name: Pre-pull openvswitch image
-    command: >
-      docker pull {{ openshift.node.ovs_image }}:{{ openshift_image_tag }}
-    register: pull_result
-    changed_when: "'Downloaded newer image' in pull_result.stdout"
-
-  - include_tasks: config/install-ovs-docker-service-file.yml
-  when:
-  - openshift.common.is_containerized | bool
-  - openshift_node_use_openshift_sdn | bool
-  - not l_is_openvswitch_system_container | bool
+    - not l_is_openvswitch_system_container | bool
 
 - include_tasks: config/configure-node-settings.yml
 - include_tasks: config/configure-proxy-settings.yml

@@ -41,7 +41,7 @@
   retries: 10
   delay: 5
   register: node_schedulable
-  until: node_schedulable|succeeded
+  until: node_schedulable is succeeded
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
 

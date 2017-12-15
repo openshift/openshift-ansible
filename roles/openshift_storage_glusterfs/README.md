@@ -82,6 +82,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_nodeselector         | 'glusterfs=storage-host'| Selector to determine which nodes will host GlusterFS pods in native mode. **NOTE:** The label value is taken from the cluster name
 | openshift_storage_glusterfs_use_default_selector | False                   | Whether to use a default node selector for the GlusterFS namespace/project. If False, the namespace/project will have no restricting node selector. If True, uses pre-existing or default (e.g. osm_default_node_selector) node selectors. **NOTE:** If True, nodes which will host GlusterFS pods must already have the additional labels.
 | openshift_storage_glusterfs_storageclass         | True                    | Automatically create a StorageClass for each GlusterFS cluster
+| openshift_storage_glusterfs_storageclass_default | False                   | Sets the StorageClass for each GlusterFS cluster as default
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
 | openshift_storage_glusterfs_block_deploy         | True                    | Deploy glusterblock provisioner service
@@ -125,13 +126,14 @@ registry. These variables start with the prefix
 values in their corresponding non-registry variables. The following variables
 are an exception:
 
-| Name                                                  | Default value         | Description                             |
-|-------------------------------------------------------|-----------------------|-----------------------------------------|
-| openshift_storage_glusterfs_registry_namespace        | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'glusterfs'
-| openshift_storage_glusterfs_registry_name             | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
-| openshift_storage_glusterfs_registry_storageclass     | False                 | It is recommended to not create a StorageClass for GlusterFS clusters serving registry storage, so as to avoid performance penalties
-| openshift_storage_glusterfs_registry_heketi_admin_key | auto-generated        | Separate from the above
-| openshift_storage_glusterfs_registry_heketi_user_key  | auto-generated        | Separate from the above
+| Name                                                      | Default value         | Description                             |
+|-----------------------------------------------------------|-----------------------|-----------------------------------------|
+| openshift_storage_glusterfs_registry_namespace            | registry namespace    | Default is to use the hosted registry's namespace, otherwise 'glusterfs'
+| openshift_storage_glusterfs_registry_name                 | 'registry'            | This allows for the logical separation of the registry GlusterFS cluster from other GlusterFS clusters
+| openshift_storage_glusterfs_registry_storageclass         | False                 | It is recommended to not create a StorageClass for GlusterFS clusters serving registry storage, so as to avoid performance penalties
+| openshift_storage_glusterfs_registry_storageclass_default | False                 | Sets the StorageClass for each GlusterFS cluster as default
+| openshift_storage_glusterfs_registry_heketi_admin_key     | auto-generated        | Separate from the above
+| openshift_storage_glusterfs_registry_heketi_user_key      | auto-generated        | Separate from the above
 
 Additionally, this role's behavior responds to several registry-specific variables in the [openshift_hosted role](../openshift_hosted/README.md):
 
@@ -147,7 +149,6 @@ Dependencies
 ------------
 
 * os_firewall
-* openshift_hosted_facts
 * openshift_repos
 * lib_openshift
 

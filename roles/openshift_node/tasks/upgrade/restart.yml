@@ -13,12 +13,21 @@
 - name: Reload systemd to ensure latest unit files
   command: systemctl daemon-reload
 
+- name: Restart support services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: True
+  with_items:
+    - NetworkManager
+    - dnsmasq
+
 - name: Restart container runtime
   service:
     name: "{{ openshift_docker_service_name }}"
     state: started
   register: docker_start_result
-  until: not docker_start_result | failed
+  until: not (docker_start_result is failed)
   retries: 3
   delay: 30
 

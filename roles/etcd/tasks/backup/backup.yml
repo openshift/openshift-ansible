@@ -44,7 +44,7 @@
   - r_etcd_common_embedded_etcd | bool
   - not l_ostree_booted.stat.exists | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Check selinux label of '{{ etcd_data_dir }}'
   command: >
