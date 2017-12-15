@@ -27,7 +27,7 @@
 
 - name: Default network | Create host access infra network for VxLan routing case
   command: 'netctl --netmaster "http://{{ inventory_hostname }}:{{ contiv_netmaster_port }}" net create --subnet={{ contiv_h1_subnet_default }} --gateway={{ contiv_h1_gw_default }} --nw-type="infra" contivh1'
-  when: (contiv_encap_mode == "vxlan") and (contiv_netplugin_fwd_mode == "routing")
+  when: (contiv_encap_mode == "vxlan") and (contiv_netplugin_fwd_mode == "routing") and (net_result.stdout.find("contivh1") == -1)
   run_once: true
 
 #- name: Default network | Create an allow-all policy for the default-group
