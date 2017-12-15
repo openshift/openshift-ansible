@@ -42,7 +42,7 @@
       - ansible_distribution == 'RedHat'
       - deployment_type == 'openshift-enterprise'
       - rhsub_user is defined
-      - rhsub_password is defined
+      - rhsub_pass is defined
 
     - include_tasks: centos_repos.yml
       when:
