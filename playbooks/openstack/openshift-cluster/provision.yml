@@ -51,8 +51,8 @@
   - role: rhel_subscribe
     when:
     - ansible_distribution == "RedHat"
-    - rhsub_user | default(False)
-    - rhsub_pass | default(False)
+    - rhsub_user is defined
+    - rhsub_pass is defined
 
   tasks:
   - name: Install dependencies
