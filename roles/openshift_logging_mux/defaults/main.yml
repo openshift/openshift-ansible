@@ -63,4 +63,4 @@ openshift_logging_mux_file_buffer_pvc_access_modes: ['ReadWriteOnce']
 openshift_logging_mux_file_buffer_storage_group: '65534'
 
 openshift_logging_mux_file_buffer_pvc_prefix: "logging-mux"
-openshift_logging_mux_file_buffer_limit: 256Mi
+openshift_logging_mux_file_buffer_limit: 2Gi
