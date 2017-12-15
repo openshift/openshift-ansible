@@ -38,11 +38,6 @@ We should describe a way to create a containerized playbook and role to mirror
 what is done with APBs for hosted components so that the openshift-ansible roles
 would reuse these containers to install/uninstall these components.
 
-The containerized role could follow the pattern used by the TSB within its
-openshift-ansible role `template_service_broker` to maintain a lower learning
-curve for those not familiar with ansible as well as decrease duplication of work
-in cases where the component provides OCP templates already.
-
 Within the openshift-ansible role, installing in a way similar to APBs would
 create an interface that would not need to change once the role is created,
 with the exception being if new information need be passed into the container.
@@ -52,6 +47,10 @@ to provision/deprovision bind/unbind it allows us to also open up the possibilit
 to set up these components through the UI. This could further lighten the load
 placed on openshift-ansible and provide an alternative means to install hosted
 components after an OCP installation is completed.
+
+For teams that already provide OCP templates, the containerized role could follow
+the pattern used by the TSB within its openshift-ansible role `template_service_broker`
+to decrease duplication of work.
 
 ## User Story
 As a developer on OpenShift-Ansible,
@@ -72,9 +71,9 @@ so that the majority of on-boarding and supporting a hosted component be the
 * Verify that APB container roles are idempotent (side effects only when necessary)
 
 ## References
-* https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/
 * https://github.com/ansibleplaybookbundle/manageiq-apb
 * https://github.com/ansibleplaybookbundle/ansible-playbook-bundle
+* https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/
 
 ### proposed example role snippets
 
@@ -89,103 +88,6 @@ so that the majority of on-boarding and supporting a hosted component be the
 
 ## We may also want to pull the logs from the container in the case where we did
 ##   not complete successfully, otherwise we would only see it was successful
-```
-
-### template_service_broker role snippets
-
-[template_service_broker/tasks/install.yml](https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/tasks/install.yml#L24-L85)
-```yaml
-## This is copying the files we use from openshift-ansible/files/origin-components/ to the host
-- copy:
-    src: "{{ __tsb_files_location }}/{{ item }}"
-    dest: "{{ mktemp.stdout }}/{{ item }}"
-  with_items:
-    - "{{ __tsb_template_file }}"
-    - "{{ __tsb_rbac_file }}"
-    - "{{ __tsb_broker_file }}"
-    - "{{ __tsb_config_file }}"
-
-## This shouldn't be common for most our other roles, here we are modifying an upstream
-##  config file that we have copied to the host to add additional namespaces since the
-##  default doesn't suffice.
-- yedit:
-    src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
-    key: templateNamespaces
-    value: "{{ openshift_template_service_broker_namespaces }}"
-    value_type: list
-
-## Since the contents of the config file we've updated needs to be provided as a
-##  param value, we use slurp to get them
-- slurp:
-    src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
-  register: config
-
-## Here we are using oc process and piping to kubectl apply, providing values for
-##  params that we should configure based on values provided in the inventory.
-##  We use --param so we can consume the template from origin without modifying it,
-##  removing the risk of adding stale configurations through editing.
-- name: Apply template file
-  shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
-    --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
-    --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
-    | kubectl apply -f -
-
-## Similar to the above, we are using oc process to create a list of api objects
-##  which we then pipe to different oc commands. In this case we need to reconcile
-##  auth settings so we're piping to oc auth reconcile
-# reconcile with rbac
-- name: Reconcile with RBAC file
-  shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | oc auth reconcile -f -
-
-## As part of setting up the TSB we need to also update the extension file used
-##  by the console
-- name: copy tech preview extension file for service console UI
-  copy:
-    src: openshift-ansible-catalog-console.js
-    dest: /etc/origin/master/openshift-ansible-catalog-console.js
-
-# Check that the TSB is running
-- name: Verify that TSB is running
-  command: >
-    curl -k https://apiserver.openshift-template-service-broker.svc/healthz
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
-  register: api_health
-  until: api_health.stdout == 'ok'
-  retries: 120
-  delay: 1
-  changed_when: false
-
-- set_fact:
-    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
-  when: openshift_master_config_dir is undefined
-
-- slurp:
-    src: "{{ openshift_master_config_dir }}/service-signer.crt"
-  register: __ca_bundle
-
-## The final part of the TSB is to make sure we have a broker object created with
-##  the correct CA bundle, so we make sure to pass that as a param and then
-##  pipe the resulting object list to oc apply to be created idempotently
-# Register with broker
-- name: Register TSB with broker
-  shell: >
-    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | oc apply -f -
-```
-
-[template_service_broker/vars/main.yml](https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/vars/main.yml)
-```yaml
----
-__tsb_files_location: "../../../files/origin-components/"
-
-__tsb_template_file: "apiserver-template.yaml"
-__tsb_config_file: "apiserver-config.yaml"
-__tsb_rbac_file: "rbac-template.yaml"
-__tsb_broker_file: "template-service-broker-registration.yaml"
 ```
 
 ### manageiq-apb snippets
@@ -556,4 +458,107 @@ plans:
         type: string
         default: admin
 #
+```
+
+
+### template_service_broker role snippets
+These examples are not required as part of the proposed end deliverable. However,
+for teams that are already providing OCP template objects, following the approach
+that TSB took can help to minimize duplication of code within the APB roles
+when it comes to creating and maintaining API objects that may already be defined
+within a template.
+
+[template_service_broker/tasks/install.yml](https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/tasks/install.yml#L24-L85)
+```yaml
+## This is copying the files we use from openshift-ansible/files/origin-components/ to the host
+- copy:
+    src: "{{ __tsb_files_location }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+    - "{{ __tsb_template_file }}"
+    - "{{ __tsb_rbac_file }}"
+    - "{{ __tsb_broker_file }}"
+    - "{{ __tsb_config_file }}"
+
+## This shouldn't be common for most our other roles, here we are modifying an upstream
+##  config file that we have copied to the host to add additional namespaces since the
+##  default doesn't suffice.
+- yedit:
+    src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
+    key: templateNamespaces
+    value: "{{ openshift_template_service_broker_namespaces }}"
+    value_type: list
+
+## Since the contents of the config file we've updated needs to be provided as a
+##  param value, we use slurp to get them
+- slurp:
+    src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
+  register: config
+
+## Here we are using oc process and piping to kubectl apply, providing values for
+##  params that we should configure based on values provided in the inventory.
+##  We use --param so we can consume the template from origin without modifying it,
+##  removing the risk of adding stale configurations through editing.
+- name: Apply template file
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
+    --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
+    --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
+    | kubectl apply -f -
+
+## Similar to the above, we are using oc process to create a list of api objects
+##  which we then pipe to different oc commands. In this case we need to reconcile
+##  auth settings so we're piping to oc auth reconcile
+# reconcile with rbac
+- name: Reconcile with RBAC file
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | oc auth reconcile -f -
+
+## As part of setting up the TSB we need to also update the extension file used
+##  by the console
+- name: copy tech preview extension file for service console UI
+  copy:
+    src: openshift-ansible-catalog-console.js
+    dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
+# Check that the TSB is running
+- name: Verify that TSB is running
+  command: >
+    curl -k https://apiserver.openshift-template-service-broker.svc/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: api_health
+  until: api_health.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+
+- set_fact:
+    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+  when: openshift_master_config_dir is undefined
+
+- slurp:
+    src: "{{ openshift_master_config_dir }}/service-signer.crt"
+  register: __ca_bundle
+
+## The final part of the TSB is to make sure we have a broker object created with
+##  the correct CA bundle, so we make sure to pass that as a param and then
+##  pipe the resulting object list to oc apply to be created idempotently
+# Register with broker
+- name: Register TSB with broker
+  shell: >
+    oc process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | oc apply -f -
+```
+
+[template_service_broker/vars/main.yml](https://github.com/openshift/openshift-ansible/blob/master/roles/template_service_broker/vars/main.yml)
+```yaml
+---
+__tsb_files_location: "../../../files/origin-components/"
+
+__tsb_template_file: "apiserver-template.yaml"
+__tsb_config_file: "apiserver-config.yaml"
+__tsb_rbac_file: "rbac-template.yaml"
+__tsb_broker_file: "template-service-broker-registration.yaml"
 ```
