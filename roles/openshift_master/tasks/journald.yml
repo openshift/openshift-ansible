@@ -26,4 +26,4 @@
   delay: 5
   register: result
   until: result.rc == 0
-  when: journald_update | changed
+  when: journald_update is changed

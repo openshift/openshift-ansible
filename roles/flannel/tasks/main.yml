@@ -4,7 +4,7 @@
   package: name=flannel state=present
   when: not openshift.common.is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Set flannel etcd options
   become: yes

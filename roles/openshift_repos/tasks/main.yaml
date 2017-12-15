@@ -10,7 +10,7 @@
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Remove openshift_additional.repo file
     file:

@@ -3,7 +3,7 @@
   package: name=openssl state=present
   when: not openshift.common.is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Create CA directory
   file: path="{{ nuage_ca_dir }}" state=directory

@@ -8,7 +8,7 @@
     name: subscription-manager
     state: present
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Is host already registered?
   command: "subscription-manager version"
@@ -20,7 +20,7 @@
     username: "{{ rhsub_user }}"
     password: "{{ rhsub_pass }}"
   register: rh_subscription
-  until: rh_subscription | succeeded
+  until: rh_subscription is succeeded
   when:
     - "'not registered' in rh_subscribed.stdout"
 

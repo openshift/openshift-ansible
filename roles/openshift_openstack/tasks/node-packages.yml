@@ -7,7 +7,7 @@
     state: latest
   with_items: "{{ openshift_openstack_required_packages }}"
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Install debug packages (optional)
   yum:
@@ -16,4 +16,4 @@
   with_items: "{{ openshift_openstack_debug_packages }}"
   when: openshift_openstack_install_debug_packages|bool
   register: result
-  until: result | success
+  until: result is succeeded

@@ -3,7 +3,7 @@
   package: name=nfs-utils state=present
   when: not openshift.common.is_containerized | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Start rpcbind
   systemd:

@@ -32,7 +32,7 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable|succeeded
+    until: node_unschedulable is succeeded
 
 - name: Drain nodes
   hosts: oo_sg_current_nodes
@@ -49,11 +49,11 @@
       --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
-    until: not l_upgrade_nodes_drain_result | failed
+    until: not (l_upgrade_nodes_drain_result is failed)
     retries: "{{ 1 if openshift_upgrade_nodes_drain_timeout | default(0) == '0' else 0  | int }}"
     delay: 5
     failed_when:
-    - l_upgrade_nodes_drain_result | failed
+    - l_upgrade_nodes_drain_result is failed
     - openshift_upgrade_nodes_drain_timeout | default(0) == '0'
 
 # Alright, let's clean up!

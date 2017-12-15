@@ -50,7 +50,7 @@
 
 - command: systemctl daemon-reload
   when:
-  - l_create_ha_unit_files | changed
+  - l_create_ha_unit_files is changed
 # end workaround for missing systemd unit files
 
 - name: enable master services

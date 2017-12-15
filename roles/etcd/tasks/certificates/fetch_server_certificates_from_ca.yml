@@ -5,7 +5,7 @@
     state: present
   when: not etcd_is_containerized | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Check status of etcd certificates
   stat:
