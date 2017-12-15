@@ -30,13 +30,15 @@ version 10) or newer. It must also satisfy these requirements:
   - look at
     the [Minimum Hardware Requirements page][hardware-requirements]
     for production
-* The keypair for SSH must be available in openstack
-* `keystonerc` file that lets you talk to the openstack services
+* The keypair for SSH must be available in OpenStack
+* `keystonerc` file that lets you talk to the OpenStack services
    * NOTE: only Keystone V2 is currently supported
+* A host with the supported version of [Ansible][ansible] installed, see the
+  [Setup section of the openshift-ansible README][openshift-ansible-setup]
+  for details on the requirements.
 
 Optional:
 * External Neutron network with a floating IP address pool
-
 
 
 ## Installation
@@ -68,12 +70,11 @@ First, you need to select where to run [Ansible][ansible] from (the
 *Ansible host*). This can be the computer you read this guide on or an
 OpenStack VM you'll create specifically for this purpose.
 
-We will use
-a
+This guide will use a
 [Docker image that has all the dependencies installed][control-host-image] to
 make things easier. If you don't want to use Docker, take a look at
 the [Ansible host dependencies][ansible-dependencies] and make sure
-they're installed.
+they are installed.
 
 Your *Ansible host* needs to have the following:
 
@@ -184,7 +185,7 @@ resources:
 
 ```bash
 $ ansible-playbook --user openshift -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml \
   -e openshift_repos_enable_testing=true
 ```
 
@@ -219,6 +220,7 @@ advanced configuration:
 
 [ansible]: https://www.ansible.com/
 [openshift-ansible]: https://github.com/openshift/openshift-ansible
+[openshift-ansible-setup]: https://github.com/openshift/openshift-ansible#setup
 [devstack]: https://docs.openstack.org/devstack/
 [tripleo]: http://tripleo.org/
 [ansible-dependencies]: ./advanced-configuration.md#dependencies-for-localhost-ansible-controladmin-node
