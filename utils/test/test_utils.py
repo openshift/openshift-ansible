@@ -29,7 +29,6 @@ class TestUtils(unittest.TestCase):
             mock.call('OO_FOO: bar'),
         ]
 
-
     ######################################################################
     # Validate ooinstall.utils.debug_env functionality
 

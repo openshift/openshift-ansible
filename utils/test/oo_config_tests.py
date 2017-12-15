@@ -107,6 +107,7 @@ deployment:
         node:
 """
 
+
 class OOInstallFixture(unittest.TestCase):
 
     def setUp(self):
@@ -133,13 +134,12 @@ class OOInstallFixture(unittest.TestCase):
         return path
 
 
-
 class OOConfigTests(OOInstallFixture):
 
     def test_load_config(self):
 
-        cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), SAMPLE_CONFIG)
+        cfg_path = self.write_config(
+            os.path.join(self.work_dir, 'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
 
         self.assertEquals(3, len(ooconfig.deployment.hosts))
@@ -155,26 +155,25 @@ class OOConfigTests(OOInstallFixture):
 
     def test_load_bad_config(self):
 
-        cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), CONFIG_BAD)
+        cfg_path = self.write_config(
+            os.path.join(self.work_dir, 'ooinstall.conf'), CONFIG_BAD)
         try:
             OOConfig(cfg_path)
             assert False
         except OOConfigInvalidHostError:
             assert True
 
-
     def test_load_complete_facts(self):
-        cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), SAMPLE_CONFIG)
+        cfg_path = self.write_config(
+            os.path.join(self.work_dir, 'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
         missing_host_facts = ooconfig.calc_missing_facts()
         self.assertEquals(0, len(missing_host_facts))
 
     # Test missing optional facts the user must confirm:
     def test_load_host_incomplete_facts(self):
-        cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), CONFIG_INCOMPLETE_FACTS)
+        cfg_path = self.write_config(
+            os.path.join(self.work_dir, 'ooinstall.conf'), CONFIG_INCOMPLETE_FACTS)
         ooconfig = OOConfig(cfg_path)
         missing_host_facts = ooconfig.calc_missing_facts()
         self.assertEquals(2, len(missing_host_facts))
@@ -182,16 +181,14 @@ class OOConfigTests(OOInstallFixture):
         self.assertEquals(3, len(missing_host_facts['10.0.0.3']))
 
     def test_write_config(self):
-        cfg_path = self.write_config(os.path.join(self.work_dir,
-            'ooinstall.conf'), SAMPLE_CONFIG)
+        cfg_path = self.write_config(
+            os.path.join(self.work_dir, 'ooinstall.conf'), SAMPLE_CONFIG)
         ooconfig = OOConfig(cfg_path)
         ooconfig.save_to_disk()
 
         f = open(cfg_path, 'r')
         written_config = yaml.safe_load(f.read())
         f.close()
-
-
 
         self.assertEquals(3, len(written_config['deployment']['hosts']))
         for h in written_config['deployment']['hosts']:
@@ -259,8 +256,10 @@ class HostTests(OOInstallFixture):
 
         # Given the `yaml_props` above we should see a line like this:
         #     openshift_node_labels="{'region': 'infra'}"
-        node_labels_expected = '''openshift_node_labels="{'region': 'infra'}"'''  # Quotes around the hash
-        node_labels_bad = '''openshift_node_labels={'region': 'infra'}'''  # No quotes around the hash
+        # Quotes around the hash
+        node_labels_expected = '''openshift_node_labels="{'region': 'infra'}"'''
+        # No quotes around the hash
+        node_labels_bad = '''openshift_node_labels={'region': 'infra'}'''
 
         # The good line is present in the written inventory line
         self.assertIn(node_labels_expected, legacy_inventory_line)
