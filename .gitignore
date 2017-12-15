@@ -21,6 +21,8 @@ multi_ec2.yaml
 .cache
 .tox/
 .coverage
+.coverage.*
 *.egg-info
 .eggs
 cover/
+cover-*/
