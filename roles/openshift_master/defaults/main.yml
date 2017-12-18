@@ -7,6 +7,12 @@ openshift_master_debug_level: "{{ debug_level | default(2) }}"
 r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
+osm_image_default_dict:
+  origin: 'openshift/origin'
+  openshift-enterprise: 'openshift3/ose'
+osm_image_default: "{{ osm_image_default_dict[openshift_deployment_type] }}"
+osm_image: "{{ osm_image_default }}"
+
 system_images_registry_dict:
   openshift-enterprise: "registry.access.redhat.com"
   origin: "docker.io"

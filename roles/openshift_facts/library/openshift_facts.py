@@ -1278,35 +1278,10 @@ def set_container_facts_if_unset(facts):
             dict: the facts dict updated with the generated containerization
             facts
     """
-    deployment_type = facts['common']['deployment_type']
-    if deployment_type == 'openshift-enterprise':
-        master_image = 'openshift3/ose'
-        pod_image = 'openshift3/ose-pod'
-        router_image = 'openshift3/ose-haproxy-router'
-        registry_image = 'openshift3/ose-docker-registry'
-        deployer_image = 'openshift3/ose-deployer'
-    else:
-        master_image = 'openshift/origin'
-        pod_image = 'openshift/origin-pod'
-        router_image = 'openshift/origin-haproxy-router'
-        registry_image = 'openshift/origin-docker-registry'
-        deployer_image = 'openshift/origin-deployer'
-
     facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
 
     if 'is_containerized' not in facts['common']:
         facts['common']['is_containerized'] = facts['common']['is_atomic']
-    if 'pod_image' not in facts['common']:
-        facts['common']['pod_image'] = pod_image
-    if 'router_image' not in facts['common']:
-        facts['common']['router_image'] = router_image
-    if 'registry_image' not in facts['common']:
-        facts['common']['registry_image'] = registry_image
-    if 'deployer_image' not in facts['common']:
-        facts['common']['deployer_image'] = deployer_image
-    if 'master' in facts and 'master_image' not in facts['master']:
-        facts['master']['master_image'] = master_image
-        facts['master']['master_system_image'] = master_image
 
     if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['client_binary'] = '/usr/local/bin/oc'
