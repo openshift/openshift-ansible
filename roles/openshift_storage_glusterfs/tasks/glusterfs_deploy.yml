@@ -55,16 +55,6 @@
   - glusterfs_wipe
   - item.stdout_lines | count > 0
 
-- name: Add service accounts to privileged SCC
-  oc_adm_policy_user:
-    user: "system:serviceaccount:{{ glusterfs_namespace }}:{{ item }}"
-    resource_kind: scc
-    resource_name: privileged
-    state: present
-  with_items:
-  - 'default'
-  - 'router'
-
 - name: Label GlusterFS nodes
   oc_label:
     name: "{{ hostvars[item].openshift.node.nodename }}"
@@ -87,6 +77,14 @@
     files:
     - "{{ mktemp.stdout }}/glusterfs-template.yml"
 
+- name: Check GlusterFS DaemonSet status
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: daemonset
+    name: glusterfs-{{ glusterfs_name }}
+    state: list
+  register: glusterfs_ds
+
 - name: Deploy GlusterFS pods
   oc_process:
     namespace: "{{ glusterfs_namespace }}"
@@ -97,6 +95,9 @@
       IMAGE_VERSION: "{{ glusterfs_version }}"
       NODE_LABELS: "{{ glusterfs_nodeselector }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
+      GB_GLFS_LRU_COUNT: "{{ glusterfs_block_host_vol_max }}"
+  when: (glusterfs_ds.results.results[0].status is not defined) or
+        (glusterfs_ds.results.results[0].status.numberReady | default(0) < glusterfs_ds.results.results[0].status.desiredNumberScheduled | default(glusterfs_nodes | count))
 
 - name: Wait for GlusterFS pods
   oc_obj:

@@ -55,7 +55,7 @@ defined:
 
 | Name              | Default value | Description                             |
 |-------------------|---------------|-----------------------------------------|
-| glusterfs_devices | None          | A list of block devices that will be completely managed as part of a GlusterFS cluster. There must be at least one device listed. Each device must be bare, e.g. no partitions or LVM PVs. **Example:** '[ "/dev/sdb" ]'
+| glusterfs_devices | None          | A list of block devices that will be completely managed as part of a GlusterFS cluster. There must be at least one device listed. Each device must be bare, e.g. no partitions or LVM PVs. **Example:** '[ "/dev/sdb" ]' **NOTE:** You MUST set this as a host variable on each node host. For some reason, if you set this as a group variable it gets interpreted as a string rather than an array. See https://github.com/openshift/openshift-ansible/issues/5071
 
 In addition, each host may specify the following variables to further control
 their configuration as GlusterFS nodes:
@@ -84,6 +84,22 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_storageclass         | True                    | Automatically create a StorageClass for each GlusterFS cluster
 | openshift_storage_glusterfs_image                | 'gluster/gluster-centos'| Container image to use for GlusterFS pods, enterprise default is 'rhgs3/rhgs-server-rhel7'
 | openshift_storage_glusterfs_version              | 'latest'                | Container image version to use for GlusterFS pods
+| openshift_storage_glusterfs_block_deploy         | True                    | Deploy glusterblock provisioner service
+| openshift_storage_glusterfs_block_image          | 'gluster/glusterblock-provisioner'| Container image to use for glusterblock-provisioner pod, enterprise default is 'rhgs3/rhgs-gluster-block-prov-rhel7'
+| openshift_storage_glusterfs_block_version        | 'latest'                | Container image version to use for glusterblock-provisioner pod
+| openshift_storage_glusterfs_block_host_vol_create| True                    | Automatically create GlusterFS volumes to host glusterblock volumes. **NOTE:** If this is False, block-hosting volumes will need to be manually created before glusterblock volumes can be provisioned
+| openshift_storage_glusterfs_block_host_vol_size  | 100                     | Size, in GB, of GlusterFS volumes that will be automatically create to host glusterblock volumes if not enough space is available for a glusterblock volume create request. **NOTE:** This value is effectively an upper limit on the size of glusterblock volumes unless you manually create larger GlusterFS block-hosting volumes
+| openshift_storage_glusterfs_block_host_vol_max   | 15                      | Max number of GlusterFS volumes to host glusterblock volumes
+| openshift_storage_glusterfs_s3_deploy            | True                    | Deploy gluster-s3 service
+| openshift_storage_glusterfs_s3_image             | 'gluster/gluster-object'| Container image to use for gluster-s3 pod, enterprise default is 'rhgs3/rhgs-gluster-s3-server-rhel7'
+| openshift_storage_glusterfs_s3_version           | 'latest'                | Container image version to use for gluster=s3 pod
+| openshift_storage_glusterfs_s3_account           | Undefined               | S3 account name for the S3 service, required for S3 service deployment
+| openshift_storage_glusterfs_s3_user              | Undefined               | S3 user name for the S3 service, required for S3 service deployment
+| openshift_storage_glusterfs_s3_password          | Undefined               | S3 user password for the S3 service, required for S3 service deployment
+| openshift_storage_glusterfs_s3_pvc               | Dynamic                 | Name of the GlusterFS-backed PVC which will be used for S3 object data storage, generated from the cluster name and S3 account by default
+| openshift_storage_glusterfs_s3_pvc_size          | "2Gi"                   | Size, in Gi, of the GlusterFS-backed PVC which will be used for S3 object data storage
+| openshift_storage_glusterfs_s3_meta_pvc          | Dynamic                 | Name of the GlusterFS-backed PVC which will be used for S3 object metadata storage, generated from the cluster name and S3 account by default
+| openshift_storage_glusterfs_s3_meta_pvc_size     | "1Gi"                   | Size, in Gi, of the GlusterFS-backed PVC which will be used for S3 object metadata storage
 | openshift_storage_glusterfs_wipe                 | False                   | Destroy any existing GlusterFS resources and wipe storage devices. **WARNING: THIS WILL DESTROY ANY DATA ON THOSE DEVICES.**
 | openshift_storage_glusterfs_heketi_is_native     | True                    | heketi should be containerized
 | openshift_storage_glusterfs_heketi_cli           | 'heketi-cli'            | Command/Path to invoke the heketi-cli tool **NOTE:** Change this only for **non-native heketi** if heketi-cli is not in the global `$PATH` of the machine running openshift-ansible
@@ -92,13 +108,14 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_heketi_admin_key     | auto-generated          | String to use as secret key for performing heketi commands as admin
 | openshift_storage_glusterfs_heketi_user_key      | auto-generated          | String to use as secret key for performing heketi commands as user that can only view or modify volumes
 | openshift_storage_glusterfs_heketi_topology_load | True                    | Load the GlusterFS topology information into heketi
-| openshift_storage_glusterfs_heketi_url           | Undefined               | When heketi is native, this sets the hostname portion of the final heketi route URL. When heketi is external, this is the full URL to the heketi service.
+| openshift_storage_glusterfs_heketi_url           | Undefined               | When heketi is native, this sets the hostname portion of the final heketi route URL. When heketi is external, this is the FQDN or IP address to the heketi service.
 | openshift_storage_glusterfs_heketi_port          | 8080                    | TCP port for external heketi service **NOTE:** This has no effect in native mode
 | openshift_storage_glusterfs_heketi_executor      | 'kubernetes'            | Selects how a native heketi service will manage GlusterFS nodes: 'kubernetes' for native nodes, 'ssh' for external nodes
 | openshift_storage_glusterfs_heketi_ssh_port      | 22                      | SSH port for external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_user      | 'root'                  | SSH user for external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_sudo      | False                   | Whether to sudo (if non-root user) for SSH to external GlusterFS nodes via native heketi
 | openshift_storage_glusterfs_heketi_ssh_keyfile   | Undefined               | Path to a private key file for use with SSH connections to external GlusterFS nodes via native heketi **NOTE:** This must be an absolute path
+| openshift_storage_glusterfs_heketi_fstab         | '/var/lib/heketi/fstab' | When heketi is native, sets the path to the fstab file on the GlusterFS nodes to update on LVM volume mounts, changes to '/etc/fstab/' when the heketi executor is 'ssh' **NOTE:** This should not need to be changed
 | openshift_storage_glusterfs_heketi_wipe          | False                   | Destroy any existing heketi resources, defaults to the value of `openshift_storage_glusterfs_wipe`
 
 Each role variable also has a corresponding variable to optionally configure a
@@ -119,13 +136,13 @@ are an exception:
 Additionally, this role's behavior responds to the following registry-specific
 variables:
 
-| Name                                          | Default value                | Description                             |
-|-----------------------------------------------|------------------------------|-----------------------------------------|
-| openshift_hosted_registry_glusterfs_endpoints | glusterfs-registry-endpoints | The name for the Endpoints resource that will point the registry to the GlusterFS nodes
-| openshift_hosted_registry_glusterfs_path      | glusterfs-registry-volume    | The name for the GlusterFS volume that will provide registry storage
-| openshift_hosted_registry_glusterfs_readonly  | False                        | Whether the GlusterFS volume should be read-only
-| openshift_hosted_registry_glusterfs_swap      | False                        | Whether to swap an existing registry's storage volume for a GlusterFS volume
-| openshift_hosted_registry_glusterfs_swapcopy  | True                         | If swapping, copy the contents of the pre-existing registry storage to the new GlusterFS volume
+| Name                                                  | Default value                | Description                             |
+|-------------------------------------------------------|------------------------------|-----------------------------------------|
+| openshift_hosted_registry_storage_glusterfs_endpoints | glusterfs-registry-endpoints | The name for the Endpoints resource that will point the registry to the GlusterFS nodes
+| openshift_hosted_registry_storage_glusterfs_path      | glusterfs-registry-volume    | The name for the GlusterFS volume that will provide registry storage
+| openshift_hosted_registry_storage_glusterfs_readonly  | False                        | Whether the GlusterFS volume should be read-only
+| openshift_hosted_registry_storage_glusterfs_swap      | False                        | Whether to swap an existing registry's storage volume for a GlusterFS volume
+| openshift_hosted_registry_storage_glusterfs_swapcopy  | True                         | If swapping, copy the contents of the pre-existing registry storage to the new GlusterFS volume
 
 Dependencies
 ------------
