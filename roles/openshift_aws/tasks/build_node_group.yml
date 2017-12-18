@@ -30,7 +30,7 @@
 - name: query all asg's for this cluster
   ec2_asg_facts:
     region: "{{ openshift_aws_region }}"
-    tags: "{{ {'kubernetes.io/cluster/' ~ openshift_aws_clusterid: openshift_aws_clusterid} | combine(l_node_group_config[openshift_aws_node_group.group].tags) }}"
+    tags: "{{ {'kubernetes.io/cluster/' ~ openshift_aws_clusterid: openshift_aws_clusterid} | combine(openshift_aws_node_group.tags) }}"
   register: asgs
 
 - fail:
