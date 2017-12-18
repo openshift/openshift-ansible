@@ -1,0 +1,12 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+# New OC Cluster
+172.16.75.80   889910-live-openshift-mstr-01 889910-live-openshift-mstr-01.giffgaff.co.uk
+172.16.75.81   889911-live-openshift-mstr-02 889911-live-openshift-mstr-02.giffgaff.co.uk
+172.16.75.82   889912-live-openshift-mstr-03 889912-live-openshift-mstr-03.giffgaff.co.uk
+172.16.71.83   889913-live-openshift-be-01 889913-live-openshift-be-01.giffgaff.co.uk
+172.16.71.84   889914-live-openshift-be-02 889914-live-openshift-be-02.giffgaff.co.uk
+
+172.16.71.85    889915-live-openshift-glusterfs-01  889915-live-openshift-glusterfs-01.giffgaff.co.uk
+172.16.71.86    889916-live-openshift-glusterfs-02  889916-live-openshift-glusterfs-02.giffgaff.co.uk

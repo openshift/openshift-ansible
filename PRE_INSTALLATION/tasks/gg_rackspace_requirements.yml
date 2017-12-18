@@ -1,0 +1,27 @@
+  # Openshift Cluster Preinstallation Requirements for Rackspace
+
+  # Install required repositories
+
+  - name: Enable RedHat Selected Repos
+    shell: subscription-manager repos --disable="*" --enable="rhel-7-server-ose-3.5-rpms"
+
+  - name: Install YUM priority plugin
+    yum: name=yum-plugin-priorities state=latest
+
+  - name: set rackspace repo priority
+    shell: yum-config-manager --enable rackspace --setopt="rackspace.priority=1"
+
+  - name: set epel priority
+    shell: yum-config-manager --enable rs-epel --setopt="rs-epel.priority=1"
+
+  - name: Add Extra Repo file for Openshift and docker
+    copy:
+      src: ./files/centos-extra.repo
+      dest: /etc/yum.repos.d/centos-extra.repo
+      mode: 0644
+
+  - name: Add Rackspace Repo file as part of yum priority plugin
+    copy:
+      src: ./files/rhnplugin.conf
+      dest: /etc/yum/pluginconf.d/rhnplugin.conf
+      mode: 0644
