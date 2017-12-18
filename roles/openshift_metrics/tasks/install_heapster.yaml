@@ -1,6 +1,6 @@
 ---
 - command: >
-    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
+    {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
     get rc heapster -o jsonpath='{.spec.replicas}'
   register: heapster_replica_count

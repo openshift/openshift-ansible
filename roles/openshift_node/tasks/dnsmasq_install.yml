@@ -12,7 +12,7 @@
 
 - name: Install dnsmasq
   package: name=dnsmasq state=installed
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 

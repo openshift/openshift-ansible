@@ -1,7 +1,7 @@
 ---
 - name: Gather OpenShift Logging Facts
   openshift_logging_facts:
-    oc_bin: "{{openshift.common.client_binary}}"
+    oc_bin: "{{openshift_client_binary}}"
     openshift_logging_namespace: "{{openshift_logging_namespace}}"
 
 - name: Set logging project

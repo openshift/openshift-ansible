@@ -19,7 +19,7 @@
   - "{{ openshift_service_type }}-master-controllers"
   - "{{ openshift_service_type }}-node"
   failed_when: false
-  when: openshift.common.is_containerized | bool
+  when: openshift_is_containerized | bool
 
 - service:
     name: docker
@@ -40,4 +40,4 @@
   - "{{ openshift_service_type }}-node"
   - openvswitch
   failed_when: false
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool

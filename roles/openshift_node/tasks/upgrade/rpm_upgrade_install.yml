@@ -3,7 +3,7 @@
 # - openshift_service_type
 # - component
 # - openshift_pkg_version
-# - openshift.common.is_atomic
+# - openshift_is_atomic
 
 # Install the pre-pulled RPM
 # Note: dnsmasq is covered in it's own play.  openvswitch is included here

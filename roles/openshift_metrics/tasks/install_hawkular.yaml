@@ -1,6 +1,6 @@
 ---
 - command: >
-    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
+    {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
     get rc hawkular-metrics -o jsonpath='{.spec.replicas}'
   register: hawkular_metrics_replica_count

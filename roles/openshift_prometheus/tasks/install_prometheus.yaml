@@ -39,7 +39,7 @@
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
   command: >
-    {{ openshift.common.client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
+    {{ openshift_client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
     serviceaccount prometheus
     serviceaccounts.openshift.io/oauth-redirectreference.prom='{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"prometheus"}}'
     serviceaccounts.openshift.io/oauth-redirectreference.alerts='{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"alerts"}}'
@@ -97,7 +97,7 @@
 # TODO remove this when annotations are supported by oc_service
 - name: annotate prometheus service
   command: >
-    {{ openshift.common.client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
+    {{ openshift_client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
     service prometheus
     prometheus.io/scrape='true'
     prometheus.io/scheme=https
@@ -105,7 +105,7 @@
 
 - name: annotate alerts service
   command: >
-    {{ openshift.common.client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
+    {{ openshift_client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
     service alerts 'service.alpha.openshift.io/serving-cert-secret-name=prometheus-alerts-tls'
 
 # create prometheus and alerts routes

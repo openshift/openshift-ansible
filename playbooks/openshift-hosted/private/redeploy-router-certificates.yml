@@ -17,7 +17,7 @@
 
   - name: Determine if router exists
     command: >
-      {{ openshift.common.client_binary }} get dc/router -o json
+      {{ openshift_client_binary }} get dc/router -o json
       --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
     register: l_router_dc
@@ -26,7 +26,7 @@
 
   - name: Determine if router service exists
     command: >
-      {{ openshift.common.client_binary }} get svc/router -o json
+      {{ openshift_client_binary }} get svc/router -o json
       --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
     register: l_router_svc
@@ -52,7 +52,7 @@
 
   - name: Update router environment variables
     shell: >
-      {{ openshift.common.client_binary }} env dc/router
+      {{ openshift_client_binary }} env dc/router
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-router.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-router.key)"
@@ -78,7 +78,7 @@
 
     - name: Remove router service annotations
       command: >
-        {{ openshift.common.client_binary }} annotate service/router
+        {{ openshift_client_binary }} annotate service/router
         service.alpha.openshift.io/serving-cert-secret-name-
         service.alpha.openshift.io/serving-cert-signed-by-
         --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
@@ -86,7 +86,7 @@
 
     - name: Add serving-cert-secret annotation to router service
       command: >
-        {{ openshift.common.client_binary }} annotate service/router
+        {{ openshift_client_binary }} annotate service/router
         service.alpha.openshift.io/serving-cert-secret-name=router-certs
         --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
         -n default
@@ -129,7 +129,7 @@
 
   - name: Redeploy router
     command: >
-      {{ openshift.common.client_binary }} deploy dc/router
+      {{ openshift_client_binary }} deploy dc/router
       --latest
       --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default

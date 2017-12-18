@@ -1,5 +1,5 @@
 ---
-- when: not openshift.common.is_containerized | bool
+- when: not openshift_is_containerized | bool
   block:
   - name: Install Node package
     package:
@@ -25,7 +25,7 @@
     until: result is succeeded
 
 - when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
   - not l_is_node_system_container | bool
   block:
   - name: Pre-pull node image when containerized

@@ -11,7 +11,7 @@
   package:
     name: "{{ openshift_service_type }}{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
   register: install_result
   until: install_result is succeeded
   delegate_to: "{{ openshift_ca_host }}"
@@ -87,7 +87,7 @@
 # This should NOT replace the CA due to --overwrite=false when a CA already exists.
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-master-certs
+    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm ca create-master-certs
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
@@ -137,7 +137,7 @@
 
 - name: Test local loopback context
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} config view
+    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} config view
     --config={{ openshift_master_loopback_config }}
   changed_when: false
   register: loopback_config
@@ -154,7 +154,7 @@
     register: openshift_ca_loopback_tmpdir
   - name: Generate the loopback master client config
     command: >
-      {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
+      {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm create-api-client-config
         --certificate-authority={{ openshift_ca_cert }}
         {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
         --certificate-authority {{ named_ca_certificate }}

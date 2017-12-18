@@ -12,7 +12,7 @@
   - debug:
       msg: "Etcd rpm version {{ etcd_rpm_version.stdout }} detected"
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift_is_containerized | bool
 
 - block:
   - name: Record containerized etcd version (docker)
@@ -52,4 +52,4 @@
   - debug:
       msg: "Etcd containerized version {{ etcd_container_version }} detected"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool

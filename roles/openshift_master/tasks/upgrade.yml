@@ -1,6 +1,6 @@
 ---
 - include_tasks: upgrade/rpm_upgrade.yml
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
 
 - include_tasks: upgrade/upgrade_scheduler.yml
 

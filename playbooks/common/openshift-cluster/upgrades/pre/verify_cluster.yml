@@ -71,7 +71,7 @@
       local_facts:
         ha: "{{ groups.oo_masters_to_config | length > 1 }}"
 
-  - when: openshift.common.is_containerized | bool
+  - when: openshift_is_containerized | bool
     block:
     - set_fact:
         master_services:
