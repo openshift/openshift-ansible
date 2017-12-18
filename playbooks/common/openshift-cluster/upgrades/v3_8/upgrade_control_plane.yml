@@ -14,7 +14,7 @@
 - import_playbook: ../init.yml
   vars:
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
-    l_upgrade_non_node_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+  when: not skip_version_info | default(false)
 
 - name: Configure the upgrade target for the common upgrade tasks
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
