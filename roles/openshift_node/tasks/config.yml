@@ -46,7 +46,7 @@
     regexp: "^{{ item.key }}="
     line: "{{ item.key }}={{ item.value }}"
     create: true
-  with_dict: "{{ openshift.node.env_vars | default({}) }}"
+  with_dict: "{{ openshift_node_env_vars }}"
   notify:
     - restart node
 

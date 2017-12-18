@@ -69,22 +69,6 @@ def migrate_common_facts(facts):
     return facts
 
 
-def migrate_node_facts(facts):
-    """ Migrate facts from various roles into node """
-    params = {
-        'common': ('dns_ip'),
-    }
-    if 'node' not in facts:
-        facts['node'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                if param in facts[role]:
-                    facts['node'][param] = facts[role].pop(param)
-    return facts
-
-
 def migrate_admission_plugin_facts(facts):
     """ Apply migrations for admission plugin facts """
     if 'master' in facts:
@@ -104,7 +88,6 @@ def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
     migrated_facts = migrate_common_facts(migrated_facts)
-    migrated_facts = migrate_node_facts(migrated_facts)
     migrated_facts = migrate_admission_plugin_facts(migrated_facts)
     return migrated_facts
 
@@ -536,7 +519,7 @@ def set_aggregate_facts(facts):
 
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
-        includes master.registry_url, node.registry_url
+        includes master.registry_url
 
         Args:
             facts (dict): existing facts
@@ -544,24 +527,17 @@ def set_deployment_facts_if_unset(facts):
             dict: the facts dict updated with the generated deployment_type
             facts
     """
-    # disabled to avoid breaking up facts related to deployment type into
-    # multiple methods for now.
-    # pylint: disable=too-many-statements, too-many-branches
-    for role in ('master', 'node'):
-        if role in facts:
-            deployment_type = facts['common']['deployment_type']
-            if 'registry_url' not in facts[role]:
-                registry_url = 'openshift/origin-${component}:${version}'
-                if deployment_type == 'openshift-enterprise':
-                    registry_url = 'openshift3/ose-${component}:${version}'
-                facts[role]['registry_url'] = registry_url
-
     if 'master' in facts:
         deployment_type = facts['common']['deployment_type']
         openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
         if 'disabled_features' not in facts['master']:
             if facts['common']['deployment_subtype'] == 'registry':
                 facts['master']['disabled_features'] = openshift_features
+        if 'registry_url' not in facts['master']:
+            registry_url = 'openshift/origin-${component}:${version}'
+            if deployment_type == 'openshift-enterprise':
+                registry_url = 'openshift3/ose-${component}:${version}'
+            facts['master']['registry_url'] = registry_url
 
     return facts
 
@@ -1305,14 +1281,12 @@ def set_container_facts_if_unset(facts):
     deployment_type = facts['common']['deployment_type']
     if deployment_type == 'openshift-enterprise':
         master_image = 'openshift3/ose'
-        ovs_image = 'openshift3/openvswitch'
         pod_image = 'openshift3/ose-pod'
         router_image = 'openshift3/ose-haproxy-router'
         registry_image = 'openshift3/ose-docker-registry'
         deployer_image = 'openshift3/ose-deployer'
     else:
         master_image = 'openshift/origin'
-        ovs_image = 'openshift/openvswitch'
         pod_image = 'openshift/origin-pod'
         router_image = 'openshift/origin-haproxy-router'
         registry_image = 'openshift/origin-docker-registry'
@@ -1333,10 +1307,6 @@ def set_container_facts_if_unset(facts):
     if 'master' in facts and 'master_image' not in facts['master']:
         facts['master']['master_image'] = master_image
         facts['master']['master_system_image'] = master_image
-    if 'node' in facts:
-        if 'ovs_image' not in facts['node']:
-            facts['node']['ovs_image'] = ovs_image
-            facts['node']['ovs_system_image'] = ovs_image
 
     if safe_get_bool(facts['common']['is_containerized']):
         facts['common']['client_binary'] = '/usr/local/bin/oc'
@@ -1539,7 +1509,7 @@ class OpenShiftFacts(object):
                                       max_requests_inflight=500)
 
         if 'node' in roles:
-            defaults['node'] = dict(labels={}, annotations={})
+            defaults['node'] = dict(labels={})
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)

@@ -5,14 +5,12 @@ dnsBindAddress: 127.0.0.1:53
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
 {% endif %}
 dnsDomain: {{ openshift.common.dns_domain }}
-{% if 'dns_ip' in openshift.node %}
-dnsIP: {{ openshift.node.dns_ip }}
-{% endif %}
+dnsIP: {{ openshift_dns_ip }}
 dockerConfig:
   execHandlerName: ""
 iptablesSyncPeriod: "{{ openshift_node_iptables_sync_period }}"
 imageConfig:
-  format: {{ openshift.node.registry_url }}
+  format: {{ oreg_url_node }}
   latest: {{ openshift_node_image_config_latest }}
 kind: NodeConfig
 kubeletArguments: {{ l2_openshift_node_kubelet_args | default(None) | to_padded_yaml(level=1) }}
