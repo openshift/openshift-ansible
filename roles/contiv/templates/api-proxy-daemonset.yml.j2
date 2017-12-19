@@ -42,6 +42,7 @@ spec:
             - --tls-key-file=/var/contiv/api_proxy_key.pem
             - --tls-certificate=/var/contiv/api_proxy_cert.pem
             - "--data-store-address={{ etcd_host }}"
+            - --data-store-driver=etcd
             - "--netmaster-address=127.0.0.1:{{ contiv_netmaster_port }}"
           ports:
             - containerPort: "{{ contiv_api_proxy_port }}"
