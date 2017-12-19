@@ -1,5 +1,5 @@
 ---
-- name: Set default image variables based on deployment_type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ item }}"
   with_first_found:
     - "{{ openshift_deployment_type }}.yml"

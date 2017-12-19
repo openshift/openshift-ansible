@@ -5,6 +5,9 @@ appropriately and no conflicting options have been provided.
 from ansible.plugins.action import ActionBase
 from ansible import errors
 
+# Valid values for openshift_deployment_type
+VALID_DEPLOYMENT_TYPES = ('origin', 'openshift-enterprise')
+
 # Tuple of variable names and default values if undefined.
 NET_PLUGIN_LIST = (('openshift_use_openshift_sdn', True),
                    ('openshift_use_flannel', False),
@@ -16,7 +19,10 @@ NET_PLUGIN_LIST = (('openshift_use_openshift_sdn', True),
 def to_bool(var_to_check):
     """Determine a boolean value given the multiple
        ways bools can be specified in ansible."""
-    yes_list = (True, 1, "True", "1", "true", "Yes", "yes")
+    # http://yaml.org/type/bool.html
+    yes_list = (True, 1, "True", "1", "true", "TRUE",
+                "Yes", "yes", "Y", "y", "YES",
+                "on", "ON", "On")
     return var_to_check in yes_list
 
 
@@ -29,6 +35,15 @@ class ActionModule(ActionBase):
         if res is None:
             return None
         return self._templar.template(res)
+
+    def check_openshift_deployment_type(self, hostvars, host):
+        """Ensure a valid openshift_deployment_type is set"""
+        openshift_deployment_type = self.template_var(hostvars, host,
+                                                      'openshift_deployment_type')
+        if openshift_deployment_type not in VALID_DEPLOYMENT_TYPES:
+            type_strings = ", ".join(VALID_DEPLOYMENT_TYPES)
+            msg = "openshift_deployment_type must be defined and one of {}".format(type_strings)
+            raise errors.AnsibleModuleError(msg)
 
     def check_python_version(self, hostvars, host, distro):
         """Ensure python version is 3 for Fedora and python 2 for others"""
@@ -73,6 +88,7 @@ class ActionModule(ActionBase):
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
+        self.check_openshift_deployment_type(hostvars, host)
         self.check_python_version(hostvars, host, distro)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)

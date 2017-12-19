@@ -5,8 +5,8 @@ openshift_cli_image_dict:
   origin: 'openshift/origin'
   openshift-enterprise: 'openshift3/ose'
 
-repoquery_cmd: "{{ ansible_pkg_mgr == 'dnf' | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
-repoquery_installed: "{{ ansible_pkg_mgr == 'dnf' | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
+repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
+repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
 
 openshift_hosted_images_dict:
   origin: 'openshift/origin-${component}:${version}'

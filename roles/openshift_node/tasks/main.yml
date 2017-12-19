@@ -3,7 +3,7 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
     - (not ansible_selinux or ansible_selinux.status != 'enabled')
-    - deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     - not openshift_use_crio
 
 - include_tasks: dnsmasq_install.yml

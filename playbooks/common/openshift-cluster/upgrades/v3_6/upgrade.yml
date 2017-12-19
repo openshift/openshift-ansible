@@ -13,7 +13,7 @@
   tasks:
   - set_fact:
       openshift_upgrade_target: '3.6'
-      openshift_upgrade_min: "{{ '1.5' if deployment_type == 'origin' else '3.5' }}"
+      openshift_upgrade_min: "{{ '1.5' if openshift_deployment_type == 'origin' else '3.5' }}"
 
 - import_playbook: ../pre/config.yml
   vars:

@@ -8,7 +8,7 @@
       name: rhel_subscribe
     when:
     - ansible_distribution == 'RedHat'
-    - deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     - rhsub_user is defined
     - rhsub_pass is defined
   - name: initialize openshift repos

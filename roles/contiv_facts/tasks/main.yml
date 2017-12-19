@@ -70,4 +70,4 @@
   when: has_rpm
 
 - include_tasks: fedora-install.yml
-  when: not is_atomic and ansible_distribution == "Fedora"
+  when: not openshift_is_atomic and ansible_distribution == "Fedora"
