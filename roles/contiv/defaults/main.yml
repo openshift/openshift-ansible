@@ -1,6 +1,6 @@
 ---
 # The version of Contiv binaries to use
-contiv_version: 1.1.1
+contiv_version: 1.2.0
 
 # The version of cni binaries
 contiv_cni_version: v0.4.0
@@ -42,6 +42,10 @@ contiv_netplugin_vtep_ip: "{{ hostvars[inventory_hostname]['ansible_' + contiv_n
 # Interface used to bind Netmaster service
 contiv_netmaster_interface: "{{ contiv_netplugin_interface }}"
 
+# IP address of the interface used for control communication within the cluster
+# It needs to be reachable from all nodes in the cluster.
+contiv_netmaster_ctrl_ip: "{{ hostvars[inventory_hostname]['ansible_' + contiv_netmaster_interface].ipv4.address }}"
+
 # Path to the contiv binaries
 contiv_bin_dir: /usr/bin
 
@@ -72,7 +76,7 @@ contiv_kube_plugin_dir: /usr/libexec/kubernetes/kubelet-plugins/net/exec
 
 # Specifies routed mode vs bridged mode for networking (bridge | routing)
 # if you are using an external router for all routing, you should select bridge here
-contiv_netplugin_fwd_mode: bridge
+contiv_netplugin_fwd_mode: routing
 
 # Contiv fabric mode aci|default
 contiv_fabric_mode: default
@@ -81,7 +85,7 @@ contiv_fabric_mode: default
 contiv_vlan_range: "2900-3000"
 
 # Encapsulation type vlan|vxlan to use for instantiating container networks
-contiv_encap_mode: vlan
+contiv_encap_mode: vxlan
 
 # Backend used by Netplugin for instantiating container networks
 contiv_netplugin_driver: ovs
@@ -128,6 +132,7 @@ contiv_openshift_docker_service_name: "{{ 'container-engine' if (openshift_docke
 contiv_api_proxy_port: 10000
 contiv_api_proxy_port_proto: tcp
 contiv_api_proxy_image_repo: contiv/auth_proxy
+contiv_api_proxy_ip: "{{ hostvars[inventory_hostname]['ansible_' + contiv_netmaster_interface].ipv4.address }}"
 
 contiv_etcd_system_user: contivetcd
 contiv_etcd_system_uid: 823
@@ -137,7 +142,7 @@ contiv_etcd_port: 22379
 contiv_etcd_port_proto: tcp
 contiv_etcd_peer_port: 22380
 contiv_etcd_peer_port_proto: tcp
-contiv_etcd_url: "etcd://127.0.0.1:{{ contiv_etcd_port }}"
+contiv_etcd_url: "http://127.0.0.1:{{ contiv_etcd_port }}"
 contiv_etcd_init_image_repo: ferest/etcd-initer
 contiv_etcd_init_image_tag: latest
 contiv_etcd_image_repo: quay.io/coreos/etcd
