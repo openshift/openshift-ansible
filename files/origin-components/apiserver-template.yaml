@@ -61,7 +61,8 @@ objects:
               path: /healthz
               port: 8443
               scheme: HTTPS
-        nodeSelector: "${{NODE_SELECTOR}}"
+        nodeSelector: 
+          "${{NODE_SELECTOR}}"
         volumes:
         - name: serving-cert
           secret:
