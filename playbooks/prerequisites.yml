@@ -3,6 +3,9 @@
   vars:
     skip_verison: True
 
+- import_playbook: validate_hostnames.yml
+  when: not (skip_validate_hostnames | default(False))
+
 - import_playbook: init/repos.yml
 
 # This is required for container runtime for crio, only needs to run once.

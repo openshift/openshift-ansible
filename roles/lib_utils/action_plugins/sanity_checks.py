@@ -30,6 +30,19 @@ class ActionModule(ActionBase):
             return None
         return self._templar.template(res)
 
+    def check_python_version(self, hostvars, host, distro):
+        """Ensure python version is 3 for Fedora and python 2 for others"""
+        ansible_python = self.template_var(hostvars, host, 'ansible_python')
+        if distro == "Fedora":
+            if ansible_python['version']['major'] != 3:
+                msg = "openshift-ansible requires Python 3 for {};".format(distro)
+                msg += " For information on enabling Python 3 with Ansible,"
+                msg += " see https://docs.ansible.com/ansible/python_3_support.html"
+                raise errors.AnsibleModuleError(msg)
+        else:
+            if ansible_python['version']['major'] != 2:
+                msg = "openshift-ansible requires Python 2 for {};".format(distro)
+
     def network_plugin_check(self, hostvars, host):
         """Ensure only one type of network plugin is enabled"""
         res = []
@@ -59,7 +72,8 @@ class ActionModule(ActionBase):
 
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
-        # msg = hostvars[host]['ansible_default_ipv4']
+        distro = self.template_var(hostvars, host, 'ansible_distribution')
+        self.check_python_version(hostvars, host, distro)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
 

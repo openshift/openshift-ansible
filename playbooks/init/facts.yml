@@ -28,26 +28,6 @@
 
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
-  - name: Validate python version - ans_dist is fedora and python is v3
-    fail:
-      msg: |
-        openshift-ansible requires Python 3 for {{ ansible_distribution }};
-        For information on enabling Python 3 with Ansible, see https://docs.ansible.com/ansible/python_3_support.html
-    when:
-    - ansible_distribution == 'Fedora'
-    - ansible_python['version']['major'] != 3
-
-  # TODO: Should this be moved into health checks??
-  # Seems as though any check that happens with a corresponding fail should move into health_checks
-  - name: Validate python version - ans_dist not Fedora and python must be v2
-    fail:
-      msg: "openshift-ansible requires Python 2 for {{ ansible_distribution }}"
-    when:
-    - ansible_distribution != 'Fedora'
-    - ansible_python['version']['major'] != 2
-
-  # TODO: Should this be moved into health checks??
-  # Seems as though any check that happens with a corresponding fail should move into health_checks
   # Fail as early as possible if Atomic and old version of Docker
   - when:
     - openshift_is_atomic | bool
@@ -135,11 +115,6 @@
       role: node
       local_facts:
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
-
-  - name: initialize_facts set_fact repoquery command
-    set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-      repoquery_installed: "{{ 'dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins --installed' }}"
 
 - name: Initialize special first-master variables
   hosts: oo_first_master

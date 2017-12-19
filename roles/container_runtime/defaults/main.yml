@@ -2,8 +2,6 @@
 docker_cli_auth_config_path: '/root/.docker'
 openshift_docker_signature_verification: False
 
-repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-
 openshift_docker_alternative_creds: False
 
 # oreg_url is defined by user input.
