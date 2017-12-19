@@ -18,7 +18,7 @@
 
 - name: Netmaster | Copy environment file for netmaster
   template:
-    src: netmaster.env.j2
+    src: netmaster.j2
     dest: /etc/default/netmaster
     mode: 0644
   notify: restart netmaster
