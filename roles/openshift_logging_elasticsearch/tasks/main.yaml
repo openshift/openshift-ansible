@@ -352,7 +352,7 @@
         delete_after: true
 
 - set_fact:
-    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
+    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | lib_utils_oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
   when: openshift_logging_elasticsearch_deployment_name == ""
 
 - set_fact:

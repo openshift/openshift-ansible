@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: OpenShift Red Hat
-  description: OpenShift Aggregated Logging
+  description: OpenShift Aggregated Logging Eventrouter
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 2.2

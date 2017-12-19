@@ -13,6 +13,7 @@ galaxy_info:
   - cloud
   - system
 dependencies:
+- role: lib_utils
 - role: contiv_facts
 - role: etcd
   etcd_service: contiv-etcd
