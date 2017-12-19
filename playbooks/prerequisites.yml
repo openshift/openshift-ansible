@@ -9,4 +9,6 @@
   roles:
   - role: os_firewall
 
+- import_playbook: container-runtime/private/setup_storage.yml
+
 - import_playbook: container-runtime/private/config.yml
