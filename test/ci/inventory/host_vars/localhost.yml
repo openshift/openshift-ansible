@@ -1,0 +1,8 @@
+---
+openshift_node_labels:
+  region: infra
+  zone: default
+openshift_schedulable: True
+ansible_become: True
+ansible_become_user: root
+ansible_connection: local
