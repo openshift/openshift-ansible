@@ -249,7 +249,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
     def facts_for_sccs(self):
         ''' Gathers facts for SCCs used with logging '''
         self.default_keys_for("sccs")
-        scc = self.oc_command("get", "scc", name="privileged")
+        scc = self.oc_command("get", "securitycontextconstraints", name="privileged")
         if len(scc["users"]) == 0:
             return
         for item in scc["users"]:
