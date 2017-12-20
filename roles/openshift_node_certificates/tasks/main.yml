@@ -51,7 +51,7 @@
 
 - name: Generate the node client config
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
+    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm create-api-client-config
     {% for named_ca_certificate in hostvars[openshift_ca_host].openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
@@ -77,7 +77,7 @@
 
 - name: Generate the node server certificate
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-server-cert
+    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm ca create-server-cert
     --cert={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.crt
     --key={{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname }}/server.key
     --expire-days={{ openshift_node_cert_expire_days }}

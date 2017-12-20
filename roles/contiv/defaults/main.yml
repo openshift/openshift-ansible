@@ -101,7 +101,6 @@ apic_epg_bridge_domain: not_specified
 apic_configure_default_policy: false
 apic_default_external_contract: "uni/tn-common/brc-default"
 apic_default_app_profile: "contiv-infra-app-profile"
-is_atomic: False
 kube_cert_dir: "/data/src/github.com/openshift/origin/openshift.local.config/master"
 master_name: "{{ groups['masters'][0] }}"
 contiv_etcd_port: 22379

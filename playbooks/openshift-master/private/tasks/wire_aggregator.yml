@@ -21,7 +21,7 @@
 # TODO: this currently has a bug where hostnames are required
 - name: Creating First Master Aggregator signer certs
   command: >
-    {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm ca create-signer-cert
+    {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm ca create-signer-cert
     --cert=/etc/origin/master/front-proxy-ca.crt
     --key=/etc/origin/master/front-proxy-ca.key
     --serial=/etc/origin/master/ca.serial.txt
@@ -84,7 +84,7 @@
 - block:
   - name: Create first master api-client config for Aggregator
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm create-api-client-config
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm create-api-client-config
       --certificate-authority=/etc/origin/master/front-proxy-ca.crt
       --signer-cert=/etc/origin/master/front-proxy-ca.crt
       --signer-key=/etc/origin/master/front-proxy-ca.key

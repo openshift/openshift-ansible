@@ -17,7 +17,7 @@
 
   - fail:
       msg: Cannot upgrade Docker on Atomic operating systems.
-    when: openshift.common.is_atomic | bool
+    when: openshift_is_atomic | bool
 
   - include_role:
       name: container_runtime
@@ -54,7 +54,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.client_binary }} adm drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ openshift_client_binary }} adm drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result

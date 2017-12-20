@@ -887,7 +887,7 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])  # noqa: F405
         version = parse_openshift_version(output)
-    elif 'common' in facts and 'is_containerized' in facts['common']:
+    else:
         version = get_container_openshift_version(facts)
 
     # Handle containerized masters that have not yet been configured as a node.
@@ -1278,36 +1278,7 @@ def set_container_facts_if_unset(facts):
             dict: the facts dict updated with the generated containerization
             facts
     """
-    facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
 
-    if 'is_containerized' not in facts['common']:
-        facts['common']['is_containerized'] = facts['common']['is_atomic']
-
-    if safe_get_bool(facts['common']['is_containerized']):
-        facts['common']['client_binary'] = '/usr/local/bin/oc'
-
-    return facts
-
-
-def set_installed_variant_rpm_facts(facts):
-    """ Set RPM facts of installed variant
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with installed_variant_rpms
-                          """
-    installed_rpms = []
-    for base_rpm in ['openshift', 'atomic-openshift', 'origin']:
-        optional_rpms = ['master', 'node', 'clients', 'sdn-ovs']
-        variant_rpms = [base_rpm] + \
-                       ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms] + \
-                       ['tuned-profiles-%s-node' % base_rpm]
-        for rpm in variant_rpms:
-            exit_code, _, _ = module.run_command(['rpm', '-q', rpm])  # noqa: F405
-            if exit_code == 0:
-                installed_rpms.append(rpm)
-
-    facts['common']['installed_variant_rpms'] = installed_rpms
     return facts
 
 
@@ -1430,8 +1401,6 @@ class OpenShiftFacts(object):
         facts = set_proxy_facts(facts)
         facts = set_builddefaults_facts(facts)
         facts = set_buildoverrides_facts(facts)
-        if not safe_get_bool(facts['common']['is_containerized']):
-            facts = set_installed_variant_rpm_facts(facts)
         facts = set_nodename(facts)
         return dict(openshift=facts)
 
@@ -1459,7 +1428,6 @@ class OpenShiftFacts(object):
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
-                                  client_binary='oc',
                                   dns_domain='cluster.local',
                                   config_base='/etc/origin')
 

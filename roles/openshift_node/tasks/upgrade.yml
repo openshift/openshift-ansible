@@ -1,10 +1,10 @@
 ---
 # input variables:
 # - l_docker_upgrade
-# - openshift.common.is_atomic
+# - openshift_is_atomic
 # - node_config_hook
 # - openshift_pkg_version
-# - openshift.common.is_containerized
+# - openshift_is_containerized
 # - deployment_type
 # - openshift_release
 
@@ -26,7 +26,7 @@
   include_tasks: upgrade/rpm_upgrade_install.yml
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
 
 
 - include_tasks: "{{ node_config_hook }}"
