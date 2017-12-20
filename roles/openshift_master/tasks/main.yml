@@ -16,7 +16,7 @@
 
 - name: Install Master package
   package:
-    name: "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when:
   - not openshift.common.is_containerized | bool

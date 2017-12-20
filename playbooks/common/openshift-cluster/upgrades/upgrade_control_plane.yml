@@ -112,8 +112,8 @@
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
+                                 | lib_utils_oo_select_keys(groups.oo_masters_to_config)
+                                 | lib_utils_oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
   - set_fact:
       master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) | list }}"
   - fail:
@@ -246,8 +246,8 @@
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+                                 | lib_utils_oo_select_keys(groups.oo_masters_to_config)
+                                 | lib_utils_oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
   - set_fact:
       reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) | list }}"
   - fail:

@@ -4,7 +4,6 @@
 """
 Custom filters for use in openshift-ansible
 """
-import json
 import os
 import pdb
 import random
@@ -15,10 +14,8 @@ from collections import Mapping
 # pylint no-name-in-module and import-error disabled here because pylint
 # fails to properly detect the packages when installed in a virtualenv
 from distutils.util import strtobool  # pylint:disable=no-name-in-module,import-error
-from distutils.version import LooseVersion  # pylint:disable=no-name-in-module,import-error
 from operator import itemgetter
 
-import pkg_resources
 import yaml
 
 from ansible import errors
@@ -40,10 +37,12 @@ except ImportError:
     pass
 
 
-def oo_pdb(arg):
+# pylint: disable=C0103
+
+def lib_utils_oo_pdb(arg):
     """ This pops you into a pdb instance where arg is the data passed in
         from the filter.
-        Ex: "{{ hostvars | oo_pdb }}"
+        Ex: "{{ hostvars | lib_utils_oo_pdb }}"
     """
     pdb.set_trace()
     return arg
@@ -81,55 +80,7 @@ def oo_flatten(data):
     return [item for sublist in data for item in sublist]
 
 
-def oo_merge_dicts(first_dict, second_dict):
-    """ Merge two dictionaries where second_dict values take precedence.
-        Ex: first_dict={'a': 1, 'b': 2}
-            second_dict={'b': 3, 'c': 4}
-            returns {'a': 1, 'b': 3, 'c': 4}
-    """
-    if not isinstance(first_dict, dict) or not isinstance(second_dict, dict):
-        raise errors.AnsibleFilterError("|failed expects to merge two dicts")
-    merged = first_dict.copy()
-    merged.update(second_dict)
-    return merged
-
-
-def oo_merge_hostvars(hostvars, variables, inventory_hostname):
-    """ Merge host and play variables.
-
-        When ansible version is greater than or equal to 2.0.0,
-        merge hostvars[inventory_hostname] with variables (ansible vars)
-        otherwise merge hostvars with hostvars['inventory_hostname'].
-
-        Ex: hostvars={'master1.example.com': {'openshift_variable': '3'},
-                      'openshift_other_variable': '7'}
-            variables={'openshift_other_variable': '6'}
-            inventory_hostname='master1.example.com'
-            returns {'openshift_variable': '3', 'openshift_other_variable': '7'}
-
-            hostvars=<ansible.vars.hostvars.HostVars object> (Mapping)
-            variables={'openshift_other_variable': '6'}
-            inventory_hostname='master1.example.com'
-            returns {'openshift_variable': '3', 'openshift_other_variable': '6'}
-    """
-    if not isinstance(hostvars, Mapping):
-        raise errors.AnsibleFilterError("|failed expects hostvars is dictionary or object")
-    if not isinstance(variables, dict):
-        raise errors.AnsibleFilterError("|failed expects variables is a dictionary")
-    if not isinstance(inventory_hostname, string_types):
-        raise errors.AnsibleFilterError("|failed expects inventory_hostname is a string")
-    ansible_version = pkg_resources.get_distribution("ansible").version  # pylint: disable=maybe-no-member
-    merged_hostvars = {}
-    if LooseVersion(ansible_version) >= LooseVersion('2.0.0'):
-        merged_hostvars = oo_merge_dicts(
-            hostvars[inventory_hostname], variables)
-    else:
-        merged_hostvars = oo_merge_dicts(
-            hostvars[inventory_hostname], hostvars)
-    return merged_hostvars
-
-
-def oo_collect(data_list, attribute=None, filters=None):
+def lib_utils_oo_collect(data_list, attribute=None, filters=None):
     """ This takes a list of dict and collects all attributes specified into a
         list. If filter is specified then we will include all items that
         match _ALL_ of filters.  If a dict entry is missing the key in a
@@ -158,24 +109,24 @@ def oo_collect(data_list, attribute=None, filters=None):
             returns [1, 2, 3, 5]
     """
     if not isinstance(data_list, list):
-        raise errors.AnsibleFilterError("oo_collect expects to filter on a List")
+        raise errors.AnsibleFilterError("lib_utils_oo_collect expects to filter on a List")
 
     if not attribute:
-        raise errors.AnsibleFilterError("oo_collect expects attribute to be set")
+        raise errors.AnsibleFilterError("lib_utils_oo_collect expects attribute to be set")
 
     data = []
     retval = []
 
     for item in data_list:
         if isinstance(item, list):
-            retval.extend(oo_collect(item, attribute, filters))
+            retval.extend(lib_utils_oo_collect(item, attribute, filters))
         else:
             data.append(item)
 
     if filters is not None:
         if not isinstance(filters, dict):
             raise errors.AnsibleFilterError(
-                "oo_collect expects filter to be a dict")
+                "lib_utils_oo_collect expects filter to be a dict")
         retval.extend([get_attr(d, attribute) for d in data if (
             all([d.get(key, None) == filters[key] for key in filters]))])
     else:
@@ -186,7 +137,7 @@ def oo_collect(data_list, attribute=None, filters=None):
     return retval
 
 
-def oo_select_keys_from_list(data, keys):
+def lib_utils_oo_select_keys_from_list(data, keys):
     """ This returns a list, which contains the value portions for the keys
         Ex: data = { 'a':1, 'b':2, 'c':3 }
             keys = ['a', 'c']
@@ -194,18 +145,18 @@ def oo_select_keys_from_list(data, keys):
     """
 
     if not isinstance(data, list):
-        raise errors.AnsibleFilterError("|oo_select_keys_from_list failed expects to filter on a list")
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys_from_list failed expects to filter on a list")
 
     if not isinstance(keys, list):
-        raise errors.AnsibleFilterError("|oo_select_keys_from_list failed expects first param is a list")
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys_from_list failed expects first param is a list")
 
     # Gather up the values for the list of keys passed in
-    retval = [oo_select_keys(item, keys) for item in data]
+    retval = [lib_utils_oo_select_keys(item, keys) for item in data]
 
     return oo_flatten(retval)
 
 
-def oo_select_keys(data, keys):
+def lib_utils_oo_select_keys(data, keys):
     """ This returns a list, which contains the value portions for the keys
         Ex: data = { 'a':1, 'b':2, 'c':3 }
             keys = ['a', 'c']
@@ -213,10 +164,10 @@ def oo_select_keys(data, keys):
     """
 
     if not isinstance(data, Mapping):
-        raise errors.AnsibleFilterError("|oo_select_keys failed expects to filter on a dict or object")
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys failed expects to filter on a dict or object")
 
     if not isinstance(keys, list):
-        raise errors.AnsibleFilterError("|oo_select_keys failed expects first param is a list")
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys failed expects first param is a list")
 
     # Gather up the values for the list of keys passed in
     retval = [data[key] for key in keys if key in data]
@@ -224,7 +175,7 @@ def oo_select_keys(data, keys):
     return retval
 
 
-def oo_prepend_strings_in_list(data, prepend):
+def lib_utils_oo_prepend_strings_in_list(data, prepend):
     """ This takes a list of strings and prepends a string to each item in the
         list
         Ex: data = ['cart', 'tree']
@@ -240,44 +191,7 @@ def oo_prepend_strings_in_list(data, prepend):
     return retval
 
 
-def oo_combine_key_value(data, joiner='='):
-    """Take a list of dict in the form of { 'key': 'value'} and
-       arrange them as a list of strings ['key=value']
-    """
-    if not isinstance(data, list):
-        raise errors.AnsibleFilterError("|failed expects first param is a list")
-
-    rval = []
-    for item in data:
-        rval.append("%s%s%s" % (item['key'], joiner, item['value']))
-
-    return rval
-
-
-def oo_combine_dict(data, in_joiner='=', out_joiner=' '):
-    """Take a dict in the form of { 'key': 'value', 'key': 'value' } and
-       arrange them as a string 'key=value key=value'
-    """
-    if not isinstance(data, dict):
-        # pylint: disable=line-too-long
-        raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_combine_dict]. Got %s. Type: %s" % (str(data), str(type(data))))
-
-    return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
-
-
-def oo_dict_to_keqv_list(data):
-    """Take a dict and return a list of k=v pairs
-
-        Input data:
-        {'a': 1, 'b': 2}
-
-        Return data:
-        ['a=1', 'b=2']
-    """
-    return ['='.join(str(e) for e in x) for x in data.items()]
-
-
-def oo_dict_to_list_of_dict(data, key_title='key', value_title='value'):
+def lib_utils_oo_dict_to_list_of_dict(data, key_title='key', value_title='value'):
     """Take a dict and arrange them as a list of dicts
 
        Input data:
@@ -318,67 +232,7 @@ def oo_ami_selector(data, image_name):
             return ami['ami_id']
 
 
-def oo_ec2_volume_definition(data, host_type, docker_ephemeral=False):
-    """ This takes a dictionary of volume definitions and returns a valid ec2
-        volume definition based on the host_type and the values in the
-        dictionary.
-        The dictionary should look similar to this:
-            { 'master':
-                { 'root':
-                    { 'volume_size': 10, 'device_type': 'gp2',
-                      'iops': 500
-                    },
-                    'docker':
-                      { 'volume_size': 40, 'device_type': 'gp2',
-                        'iops': 500, 'ephemeral': 'true'
-                      }
-                },
-              'node':
-                { 'root':
-                    { 'volume_size': 10, 'device_type': 'io1',
-                      'iops': 1000
-                    },
-                  'docker':
-                    { 'volume_size': 40, 'device_type': 'gp2',
-                      'iops': 500, 'ephemeral': 'true'
-                    }
-                }
-            }
-    """
-    if not isinstance(data, dict):
-        # pylint: disable=line-too-long
-        raise errors.AnsibleFilterError("|failed expects first param is a dict [oo_ec2_volume_def]. Got %s. Type: %s" % (str(data), str(type(data))))
-    if host_type not in ['master', 'node', 'etcd']:
-        raise errors.AnsibleFilterError("|failed expects etcd, master or node"
-                                        " as the host type")
-
-    root_vol = data[host_type]['root']
-    root_vol['device_name'] = '/dev/sda1'
-    root_vol['delete_on_termination'] = True
-    if root_vol['device_type'] != 'io1':
-        root_vol.pop('iops', None)
-    if host_type in ['master', 'node'] and 'docker' in data[host_type]:
-        docker_vol = data[host_type]['docker']
-        docker_vol['device_name'] = '/dev/xvdb'
-        docker_vol['delete_on_termination'] = True
-        if docker_vol['device_type'] != 'io1':
-            docker_vol.pop('iops', None)
-        if docker_ephemeral:
-            docker_vol.pop('device_type', None)
-            docker_vol.pop('delete_on_termination', None)
-            docker_vol['ephemeral'] = 'ephemeral0'
-        return [root_vol, docker_vol]
-    elif host_type == 'etcd' and 'etcd' in data[host_type]:
-        etcd_vol = data[host_type]['etcd']
-        etcd_vol['device_name'] = '/dev/xvdb'
-        etcd_vol['delete_on_termination'] = True
-        if etcd_vol['device_type'] != 'io1':
-            etcd_vol.pop('iops', None)
-        return [root_vol, etcd_vol]
-    return [root_vol]
-
-
-def oo_split(string, separator=','):
+def lib_utils_oo_split(string, separator=','):
     """ This splits the input string into a list. If the input string is
     already a list we will return it as is.
     """
@@ -387,14 +241,26 @@ def oo_split(string, separator=','):
     return string.split(separator)
 
 
-def oo_list_to_dict(lst, separator='='):
+def lib_utils_oo_dict_to_keqv_list(data):
+    """Take a dict and return a list of k=v pairs
+
+        Input data:
+        {'a': 1, 'b': 2}
+
+        Return data:
+        ['a=1', 'b=2']
+    """
+    return ['='.join(str(e) for e in x) for x in data.items()]
+
+
+def lib_utils_oo_list_to_dict(lst, separator='='):
     """ This converts a list of ["k=v"] to a dictionary {k: v}.
     """
     kvs = [i.split(separator) for i in lst]
     return {k: v for k, v in kvs}
 
 
-def oo_haproxy_backend_masters(hosts, port):
+def haproxy_backend_masters(hosts, port):
     """ This takes an array of dicts and returns an array of dicts
         to be used as a backend for the haproxy role
     """
@@ -408,95 +274,8 @@ def oo_haproxy_backend_masters(hosts, port):
     return servers
 
 
-def oo_filter_list(data, filter_attr=None):
-    """ This returns a list, which contains all items where filter_attr
-        evaluates to true
-        Ex: data = [ { a: 1, b: True },
-                     { a: 3, b: False },
-                     { a: 5, b: True } ]
-            filter_attr = 'b'
-            returns [ { a: 1, b: True },
-                      { a: 5, b: True } ]
-    """
-    if not isinstance(data, list):
-        raise errors.AnsibleFilterError("|failed expects to filter on a list")
-
-    if not isinstance(filter_attr, string_types):
-        raise errors.AnsibleFilterError("|failed expects filter_attr is a str or unicode")
-
-    # Gather up the values for the list of keys passed in
-    return [x for x in data if filter_attr in x and x[filter_attr]]
-
-
-def oo_parse_heat_stack_outputs(data):
-    """ Formats the HEAT stack output into a usable form
-
-        The goal is to transform something like this:
-
-        +---------------+-------------------------------------------------+
-        | Property      | Value                                           |
-        +---------------+-------------------------------------------------+
-        | capabilities  | [] |                                            |
-        | creation_time | 2015-06-26T12:26:26Z |                          |
-        | description   | OpenShift cluster |                             |
-        | …             | …                                               |
-        | outputs       | [                                               |
-        |               |   {                                             |
-        |               |     "output_value": "value_A"                   |
-        |               |     "description": "This is the value of Key_A" |
-        |               |     "output_key": "Key_A"                       |
-        |               |   },                                            |
-        |               |   {                                             |
-        |               |     "output_value": [                           |
-        |               |       "value_B1",                               |
-        |               |       "value_B2"                                |
-        |               |     ],                                          |
-        |               |     "description": "This is the value of Key_B" |
-        |               |     "output_key": "Key_B"                       |
-        |               |   },                                            |
-        |               | ]                                               |
-        | parameters    | {                                               |
-        | …             | …                                               |
-        +---------------+-------------------------------------------------+
-
-        into something like this:
-
-        {
-          "Key_A": "value_A",
-          "Key_B": [
-            "value_B1",
-            "value_B2"
-          ]
-        }
-    """
-
-    # Extract the “outputs” JSON snippet from the pretty-printed array
-    in_outputs = False
-    outputs = ''
-
-    line_regex = re.compile(r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|')
-    for line in data['stdout_lines']:
-        match = line_regex.match(line)
-        if match:
-            if match.group(1) == 'outputs':
-                in_outputs = True
-            elif match.group(1) != '':
-                in_outputs = False
-            if in_outputs:
-                outputs += match.group(2)
-
-    outputs = json.loads(outputs)
-
-    # Revamp the “outputs” to put it in the form of a “Key: value” map
-    revamped_outputs = {}
-    for output in outputs:
-        revamped_outputs[output['output_key']] = output['output_value']
-
-    return revamped_outputs
-
-
 # pylint: disable=too-many-branches
-def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
+def lib_utils_oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
     """ Parses names from list of certificate hashes.
 
         Ex: certificates = [{ "certfile": "/root/custom1.crt",
@@ -564,67 +343,7 @@ def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostname
     return certificates
 
 
-def oo_pretty_print_cluster(data, prefix='tag_'):
-    """ Read a subset of hostvars and build a summary of the cluster
-        in the following layout:
-
-"c_id": {
-"master": {
-"default": [
-  { "name": "c_id-master-12345",       "public IP": "172.16.0.1", "private IP": "192.168.0.1" }
-]
-"node": {
-"infra": [
-  { "name": "c_id-node-infra-23456",   "public IP": "172.16.0.2", "private IP": "192.168.0.2" }
-],
-"compute": [
-  { "name": "c_id-node-compute-23456", "public IP": "172.16.0.3", "private IP": "192.168.0.3" },
-...
-]
-}
-    """
-
-    def _get_tag_value(tags, key):
-        """ Extract values of a map implemented as a set.
-            Ex: tags = { 'tag_foo_value1', 'tag_bar_value2', 'tag_baz_value3' }
-                key = 'bar'
-                returns 'value2'
-        """
-        for tag in tags:
-            if tag[:len(prefix) + len(key)] == prefix + key:
-                return tag[len(prefix) + len(key) + 1:]
-        raise KeyError(key)
-
-    def _add_host(clusters,
-                  clusterid,
-                  host_type,
-                  sub_host_type,
-                  host):
-        """ Add a new host in the clusters data structure """
-        if clusterid not in clusters:
-            clusters[clusterid] = {}
-        if host_type not in clusters[clusterid]:
-            clusters[clusterid][host_type] = {}
-        if sub_host_type not in clusters[clusterid][host_type]:
-            clusters[clusterid][host_type][sub_host_type] = []
-        clusters[clusterid][host_type][sub_host_type].append(host)
-
-    clusters = {}
-    for host in data:
-        try:
-            _add_host(clusters=clusters,
-                      clusterid=_get_tag_value(host['group_names'], 'clusterid'),
-                      host_type=_get_tag_value(host['group_names'], 'host-type'),
-                      sub_host_type=_get_tag_value(host['group_names'], 'sub-host-type'),
-                      host={'name': host['inventory_hostname'],
-                            'public IP': host['oo_public_ipv4'],
-                            'private IP': host['oo_private_ipv4']})
-        except KeyError:
-            pass
-    return clusters
-
-
-def oo_generate_secret(num_bytes):
+def lib_utils_oo_generate_secret(num_bytes):
     """ generate a session secret """
 
     if not isinstance(num_bytes, int):
@@ -633,7 +352,7 @@ def oo_generate_secret(num_bytes):
     return b64encode(os.urandom(num_bytes)).decode('utf-8')
 
 
-def to_padded_yaml(data, level=0, indent=2, **kw):
+def lib_utils_to_padded_yaml(data, level=0, indent=2, **kw):
     """ returns a yaml snippet padded to match the indent level you specify """
     if data in [None, ""]:
         return ""
@@ -648,31 +367,7 @@ def to_padded_yaml(data, level=0, indent=2, **kw):
         raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
 
-def oo_31_rpm_rename_conversion(rpms, openshift_version=None):
-    """ Filters a list of 3.0 rpms and return the corresponding 3.1 rpms
-        names with proper version (if provided)
-
-        If 3.1 rpms are passed in they will only be augmented with the
-        correct version.  This is important for hosts that are running both
-        Masters and Nodes.
-    """
-    if not isinstance(rpms, list):
-        raise errors.AnsibleFilterError("failed expects to filter on a list")
-    if openshift_version is not None and not isinstance(openshift_version, string_types):
-        raise errors.AnsibleFilterError("failed expects openshift_version to be a string")
-
-    rpms_31 = []
-    for rpm in rpms:
-        if 'atomic' not in rpm:
-            rpm = rpm.replace("openshift", "atomic-openshift")
-        if openshift_version:
-            rpm = rpm + openshift_version
-        rpms_31.append(rpm)
-
-    return rpms_31
-
-
-def oo_pods_match_component(pods, deployment_type, component):
+def lib_utils_oo_pods_match_component(pods, deployment_type, component):
     """ Filters a list of Pods and returns the ones matching the deployment_type and component
     """
     if not isinstance(pods, list):
@@ -697,20 +392,7 @@ def oo_pods_match_component(pods, deployment_type, component):
     return matching_pods
 
 
-def oo_get_hosts_from_hostvars(hostvars, hosts):
-    """ Return a list of hosts from hostvars """
-    retval = []
-    for host in hosts:
-        try:
-            retval.append(hostvars[host])
-        except errors.AnsibleError:
-            # host does not exist
-            pass
-
-    return retval
-
-
-def oo_image_tag_to_rpm_version(version, include_dash=False):
+def lib_utils_oo_image_tag_to_rpm_version(version, include_dash=False):
     """ Convert an image tag string to an RPM version if necessary
         Empty strings and strings that are already in rpm version format
         are ignored. Also remove non semantic version components.
@@ -731,7 +413,7 @@ def oo_image_tag_to_rpm_version(version, include_dash=False):
     return version
 
 
-def oo_hostname_from_url(url):
+def lib_utils_oo_hostname_from_url(url):
     """ Returns the hostname contained in a URL
 
         Ex: https://ose3-master.example.com/v1/api -> ose3-master.example.com
@@ -747,7 +429,7 @@ def oo_hostname_from_url(url):
 
 
 # pylint: disable=invalid-name, unused-argument
-def oo_openshift_loadbalancer_frontends(
+def lib_utils_oo_loadbalancer_frontends(
         api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
     """TODO: Document me."""
     loadbalancer_frontends = [{'name': 'atomic-openshift-api',
@@ -765,25 +447,25 @@ def oo_openshift_loadbalancer_frontends(
 
 
 # pylint: disable=invalid-name
-def oo_openshift_loadbalancer_backends(
+def lib_utils_oo_loadbalancer_backends(
         api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
     """TODO: Document me."""
     loadbalancer_backends = [{'name': 'atomic-openshift-api',
                               'mode': 'tcp',
                               'option': 'tcplog',
                               'balance': 'source',
-                              'servers': oo_haproxy_backend_masters(servers_hostvars, api_port)}]
+                              'servers': haproxy_backend_masters(servers_hostvars, api_port)}]
     if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
         # pylint: disable=line-too-long
         loadbalancer_backends.append({'name': 'nuage-monitor',
                                       'mode': 'tcp',
                                       'option': 'tcplog',
                                       'balance': 'source',
-                                      'servers': oo_haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
+                                      'servers': haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
     return loadbalancer_backends
 
 
-def oo_chomp_commit_offset(version):
+def lib_utils_oo_chomp_commit_offset(version):
     """Chomp any "+git.foo" commit offset string from the given `version`
     and return the modified version string.
 
@@ -803,17 +485,17 @@ Ex:
         return str(version).split('+')[0]
 
 
-def oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
+def lib_utils_oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
     """Generates a random string of given length from a set of alphanumeric characters.
        The default source uses [a-z][A-Z][0-9]
        Ex:
-       - oo_random_word(3)                => aB9
-       - oo_random_word(4, source='012')  => 0123
+       - lib_utils_oo_random_word(3)                => aB9
+       - lib_utils_oo_random_word(4, source='012')  => 0123
     """
     return ''.join(random.choice(source) for i in range(length))
 
 
-def oo_contains_rule(source, apiGroups, resources, verbs):
+def lib_utils_oo_contains_rule(source, apiGroups, resources, verbs):
     '''Return true if the specified rule is contained within the provided source'''
 
     rules = source['rules']
@@ -828,7 +510,7 @@ def oo_contains_rule(source, apiGroups, resources, verbs):
     return False
 
 
-def oo_selector_to_string_list(user_dict):
+def lib_utils_oo_selector_to_string_list(user_dict):
     """Convert a dict of selectors to a key=value list of strings
 
 Given input of {'region': 'infra', 'zone': 'primary'} returns a list
@@ -840,7 +522,7 @@ of items as ['region=infra', 'zone=primary']
     return selectors
 
 
-def oo_filter_sa_secrets(sa_secrets, secret_hint='-token-'):
+def lib_utils_oo_filter_sa_secrets(sa_secrets, secret_hint='-token-'):
     """Parse the Service Account Secrets list, `sa_secrets`, (as from
 oc_serviceaccount_secret:state=list) and return the name of the secret
 containing the `secret_hint` string. For example, by default this will
@@ -879,7 +561,7 @@ that result to this filter plugin.
 
     - name: Save the SA bearer token secret name
       set_fact:
-        management_token: "{{ sa.results | oo_filter_sa_secrets }}"
+        management_token: "{{ sa.results | lib_utils_oo_filter_sa_secrets }}"
 
     - name: Get the SA bearer token value
       oc_secret:
@@ -914,39 +596,26 @@ class FilterModule(object):
     def filters(self):
         """ returns a mapping of filters to methods """
         return {
-            "oo_select_keys": oo_select_keys,
-            "oo_select_keys_from_list": oo_select_keys_from_list,
-            "oo_chomp_commit_offset": oo_chomp_commit_offset,
-            "oo_collect": oo_collect,
-            "oo_flatten": oo_flatten,
-            "oo_pdb": oo_pdb,
-            "oo_prepend_strings_in_list": oo_prepend_strings_in_list,
-            "oo_ami_selector": oo_ami_selector,
-            "oo_ec2_volume_definition": oo_ec2_volume_definition,
-            "oo_combine_key_value": oo_combine_key_value,
-            "oo_combine_dict": oo_combine_dict,
-            "oo_dict_to_keqv_list": oo_dict_to_keqv_list,
-            "oo_dict_to_list_of_dict": oo_dict_to_list_of_dict,
-            "oo_split": oo_split,
-            "oo_list_to_dict": oo_list_to_dict,
-            "oo_filter_list": oo_filter_list,
-            "oo_parse_heat_stack_outputs": oo_parse_heat_stack_outputs,
-            "oo_parse_named_certificates": oo_parse_named_certificates,
-            "oo_haproxy_backend_masters": oo_haproxy_backend_masters,
-            "oo_pretty_print_cluster": oo_pretty_print_cluster,
-            "oo_generate_secret": oo_generate_secret,
-            "oo_31_rpm_rename_conversion": oo_31_rpm_rename_conversion,
-            "oo_pods_match_component": oo_pods_match_component,
-            "oo_get_hosts_from_hostvars": oo_get_hosts_from_hostvars,
-            "oo_image_tag_to_rpm_version": oo_image_tag_to_rpm_version,
-            "oo_merge_dicts": oo_merge_dicts,
-            "oo_hostname_from_url": oo_hostname_from_url,
-            "oo_merge_hostvars": oo_merge_hostvars,
-            "oo_openshift_loadbalancer_frontends": oo_openshift_loadbalancer_frontends,
-            "oo_openshift_loadbalancer_backends": oo_openshift_loadbalancer_backends,
-            "to_padded_yaml": to_padded_yaml,
-            "oo_random_word": oo_random_word,
-            "oo_contains_rule": oo_contains_rule,
-            "oo_selector_to_string_list": oo_selector_to_string_list,
-            "oo_filter_sa_secrets": oo_filter_sa_secrets,
+            "lib_utils_oo_select_keys": lib_utils_oo_select_keys,
+            "lib_utils_oo_select_keys_from_list": lib_utils_oo_select_keys_from_list,
+            "lib_utils_oo_chomp_commit_offset": lib_utils_oo_chomp_commit_offset,
+            "lib_utils_oo_collect": lib_utils_oo_collect,
+            "lib_utils_oo_pdb": lib_utils_oo_pdb,
+            "lib_utils_oo_prepend_strings_in_list": lib_utils_oo_prepend_strings_in_list,
+            "lib_utils_oo_dict_to_list_of_dict": lib_utils_oo_dict_to_list_of_dict,
+            "lib_utils_oo_split": lib_utils_oo_split,
+            "lib_utils_oo_dict_to_keqv_list": lib_utils_oo_dict_to_keqv_list,
+            "lib_utils_oo_list_to_dict": lib_utils_oo_list_to_dict,
+            "lib_utils_oo_parse_named_certificates": lib_utils_oo_parse_named_certificates,
+            "lib_utils_oo_generate_secret": lib_utils_oo_generate_secret,
+            "lib_utils_oo_pods_match_component": lib_utils_oo_pods_match_component,
+            "lib_utils_oo_image_tag_to_rpm_version": lib_utils_oo_image_tag_to_rpm_version,
+            "lib_utils_oo_hostname_from_url": lib_utils_oo_hostname_from_url,
+            "lib_utils_oo_loadbalancer_frontends": lib_utils_oo_loadbalancer_frontends,
+            "lib_utils_oo_loadbalancer_backends": lib_utils_oo_loadbalancer_backends,
+            "lib_utils_to_padded_yaml": lib_utils_to_padded_yaml,
+            "lib_utils_oo_random_word": lib_utils_oo_random_word,
+            "lib_utils_oo_contains_rule": lib_utils_oo_contains_rule,
+            "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
+            "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
         }

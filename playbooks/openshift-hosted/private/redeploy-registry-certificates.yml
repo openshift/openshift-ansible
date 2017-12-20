@@ -26,11 +26,11 @@
 
   - set_fact:
       docker_registry_env_vars: "{{ ((l_docker_registry_dc.stdout | from_json)['spec']['template']['spec']['containers'][0]['env']
-                                      | oo_collect('name'))
+                                      | lib_utils_oo_collect('name'))
                                       | default([]) }}"
       docker_registry_secrets: "{{ ((l_docker_registry_dc.stdout | from_json)['spec']['template']['spec']['volumes']
-                                     | oo_collect('secret')
-                                     | oo_collect('secretName'))
+                                     | lib_utils_oo_collect('secret')
+                                     | lib_utils_oo_collect('secretName'))
                                      | default([]) }}"
     changed_when: false
     when: l_docker_registry_dc.rc == 0

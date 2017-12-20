@@ -16,6 +16,6 @@ items:
   spec:
     capacity:
       storage: "{{ volume.capacity }}"
-    accessModes: {{ volume.access_modes | to_padded_yaml(2, 2) }}
-    {{ (volume.storage.keys() | list)[0] }}: {{ volume.storage[(volume.storage.keys() | list)[0]] | to_padded_yaml(3, 2) }}
+    accessModes: {{ volume.access_modes | lib_utils_to_padded_yaml(2, 2) }}
+    {{ (volume.storage.keys() | list)[0] }}: {{ volume.storage[(volume.storage.keys() | list)[0]] | lib_utils_to_padded_yaml(3, 2) }}
 {% endfor %}

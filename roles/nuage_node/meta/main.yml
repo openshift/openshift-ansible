@@ -15,4 +15,4 @@ galaxy_info:
 dependencies:
 - role: nuage_common
 - role: nuage_ca
-- role: lib_os_firewall
+- role: lib_utils

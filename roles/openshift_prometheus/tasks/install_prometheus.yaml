@@ -5,7 +5,7 @@
   oc_project:
     state: present
     name: "{{ openshift_prometheus_namespace }}"
-    node_selector: "{{ openshift_prometheus_node_selector | oo_selector_to_string_list() }}"
+    node_selector: "{{ openshift_prometheus_node_selector | lib_utils_oo_selector_to_string_list() }}"
     description: Prometheus
 
 # secrets
@@ -16,7 +16,7 @@
     namespace: "{{ openshift_prometheus_namespace }}"
     contents:
       - path: session_secret
-        data: "{{ 43 | oo_random_word }}="
+        data: "{{ 43 | lib_utils_oo_random_word }}="
   with_items:
     - prometheus
     - alerts
