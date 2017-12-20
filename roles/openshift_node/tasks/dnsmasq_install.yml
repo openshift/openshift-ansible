@@ -14,7 +14,7 @@
   package: name=dnsmasq state=installed
   when: not openshift.common.is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: ensure origin/node directory exists
   file:

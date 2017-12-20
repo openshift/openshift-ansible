@@ -5,7 +5,7 @@
     state: present
   with_items: "{{ r_openshift_node_image_prep_packages }}"
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: create the directory for node
   file:

@@ -94,11 +94,6 @@ openshift_prometheus_alertbuffer_storage_access_modes:
 openshift_prometheus_alertbuffer_storage_create_pv: True
 openshift_prometheus_alertbuffer_storage_create_pvc: False
 
-
-openshift_router_selector: "region=infra"
-openshift_hosted_router_selector: "{{ openshift_router_selector }}"
-openshift_hosted_registry_selector: "{{ openshift_router_selector }}"
-
 openshift_service_type_dict:
   origin: origin
   openshift-enterprise: atomic-openshift

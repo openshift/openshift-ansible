@@ -5,7 +5,7 @@
   - not openshift.common.is_atomic | bool
   - not glusterfs_heketi_is_native | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Verify heketi-cli is installed
   shell: "command -v {{ glusterfs_heketi_cli }} >/dev/null 2>&1 || { echo >&2 'ERROR: Make sure heketi-cli is available, then re-run the installer'; exit 1; }"
@@ -126,7 +126,7 @@
   - "glusterfs_heketi_is_native"
   - "deploy_heketi_pod.results.results[0]['items'] | count > 0"
   # deploy-heketi is not missing when there are one or more pods with matching labels whose 'Ready' status is True
-  - "deploy_heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
+  - "deploy_heketi_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
 
 - name: Check for existing heketi pod
   oc_obj:
@@ -144,7 +144,7 @@
   - "glusterfs_heketi_is_native"
   - "heketi_pod.results.results[0]['items'] | count > 0"
   # heketi is not missing when there are one or more pods with matching labels whose 'Ready' status is True
-  - "heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
+  - "heketi_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count > 0"
 
 - name: Generate topology file
   template:
@@ -177,14 +177,14 @@
 
 - name: Generate heketi admin key
   set_fact:
-    glusterfs_heketi_admin_key: "{{ 32 | oo_generate_secret }}"
+    glusterfs_heketi_admin_key: "{{ 32 | lib_utils_oo_generate_secret }}"
   when:
   - glusterfs_heketi_is_native
   - glusterfs_heketi_admin_key is undefined
 
 - name: Generate heketi user key
   set_fact:
-    glusterfs_heketi_user_key: "{{ 32 | oo_generate_secret }}"
+    glusterfs_heketi_user_key: "{{ 32 | lib_utils_oo_generate_secret }}"
   until: "glusterfs_heketi_user_key != glusterfs_heketi_admin_key"
   delay: 1
   retries: 10
@@ -228,7 +228,7 @@
   until:
   - "deploy_heketi_pod.results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
-  - "deploy_heketi_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  - "deploy_heketi_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
   when:

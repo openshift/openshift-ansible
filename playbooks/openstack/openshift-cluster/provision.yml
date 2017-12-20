@@ -47,14 +47,22 @@
   hosts: oo_all_hosts
   become: yes
   gather_facts: yes
-  roles:
-  - role: rhel_subscribe
+  tasks:
+  - name: Subscribe RHEL instances
+    include_role:
+      name: rhel_subscribe
     when:
     - ansible_distribution == "RedHat"
-    - rhsub_user | default(False)
-    - rhsub_pass | default(False)
+    - rhsub_user is defined
+    - rhsub_pass is defined
 
-  tasks:
+  - name: Enable required YUM repositories
+    include_role:
+      name: openshift_repos
+    when:
+    - ansible_distribution == "RedHat"
+    - rh_subscribed is defined
+
   - name: Install dependencies
     include_role:
       name: openshift_openstack

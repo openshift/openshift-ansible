@@ -6,3 +6,8 @@ After=auditd.service systemd-user-sessions.service contiv-etcd.service
 EnvironmentFile=/etc/default/netplugin
 ExecStart={{ bin_dir }}/netplugin $NETPLUGIN_ARGS
 KillMode=control-group
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

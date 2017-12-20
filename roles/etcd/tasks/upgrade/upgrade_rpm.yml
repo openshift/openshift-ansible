@@ -19,7 +19,7 @@
     name: "{{ l_etcd_target_package }}"
     state: latest
   register: result
-  until: result | success
+  until: result is succeeded
 
 - lineinfile:
     destfile: "{{ etcd_conf_file }}"

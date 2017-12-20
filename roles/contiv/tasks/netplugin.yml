@@ -101,15 +101,15 @@
 
 - name: systemd reload
   command: systemctl daemon-reload
-  when: docker_updated|changed
+  when: docker_updated is changed
 
 - name: Docker | Restart docker
   service:
     name: "{{ openshift_docker_service_name }}"
     state: restarted
-  when: docker_updated|changed
+  when: docker_updated is changed
   register: l_docker_restart_docker_in_contiv_result
-  until: not l_docker_restart_docker_in_contiv_result | failed
+  until: not (l_docker_restart_docker_in_contiv_result is failed)
   retries: 3
   delay: 30
 

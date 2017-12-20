@@ -41,7 +41,7 @@
   retries: 10
   delay: 5
   register: node_schedulable
-  until: node_schedulable|succeeded
+  until: node_schedulable is succeeded
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
 
@@ -50,10 +50,9 @@
     name: "{{ openshift.node.nodename }}"
     kind: node
     state: add
-    labels: "{{ openshift.node.labels | oo_dict_to_list_of_dict }}"
+    labels: "{{ openshift_node_labels | lib_utils_oo_dict_to_list_of_dict }}"
     namespace: default
   when:
     - "'nodename' in openshift.node"
-    - "'labels' in openshift.node"
-    - openshift.node.labels != {}
+    - openshift_node_labels | default({}) != {}
   delegate_to: "{{ openshift_master_host }}"

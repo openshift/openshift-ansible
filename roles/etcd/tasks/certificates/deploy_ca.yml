@@ -7,7 +7,7 @@
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
   register: result
-  until: result | success
+  until: result is succeeded
 
 - file:
     path: "{{ item }}"

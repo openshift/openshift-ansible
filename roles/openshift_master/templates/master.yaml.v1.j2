@@ -1,6 +1,6 @@
 admissionConfig:
 {% if 'admission_plugin_config' in openshift.master %}
-  pluginConfig:{{ openshift.master.admission_plugin_config | to_padded_yaml(level=2) }}
+  pluginConfig:{{ openshift.master.admission_plugin_config | lib_utils_to_padded_yaml(level=2) }}
 {% endif %}
 apiLevels:
 - v1
@@ -16,13 +16,13 @@ assetConfig:
   metricsPublicURL: {{ openshift_hosted_metrics_deploy_url }}
 {% endif %}
 {% if 'extension_scripts' in openshift.master %}
-  extensionScripts: {{ openshift.master.extension_scripts | to_padded_yaml(1, 2) }}
+  extensionScripts: {{ openshift.master.extension_scripts | lib_utils_to_padded_yaml(1, 2) }}
 {% endif %}
 {% if 'extension_stylesheets' in openshift.master %}
-  extensionStylesheets: {{ openshift.master.extension_stylesheets | to_padded_yaml(1, 2) }}
+  extensionStylesheets: {{ openshift.master.extension_stylesheets | lib_utils_to_padded_yaml(1, 2) }}
 {% endif %}
 {% if 'extensions' in openshift.master %}
-  extensions: {{ openshift.master.extensions | to_padded_yaml(1, 2) }}
+  extensions: {{ openshift.master.extensions | lib_utils_to_padded_yaml(1, 2) }}
 {% endif %}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
@@ -42,7 +42,7 @@ assetConfig:
 {% endfor %}
 {% endif %}
 {% if openshift.master.audit_config | default(none) is not none %}
-auditConfig:{{ openshift.master.audit_config | to_padded_yaml(level=1) }}
+auditConfig:{{ openshift.master.audit_config | lib_utils_to_padded_yaml(level=1) }}
 {% endif %}
 controllerConfig:
   election:
@@ -85,7 +85,7 @@ imageConfig:
   format: {{ openshift.master.registry_url }}
   latest: {{ openshift_master_image_config_latest }}
 {% if 'image_policy_config' in openshift.master %}
-imagePolicyConfig:{{ openshift.master.image_policy_config | to_padded_yaml(level=1) }}
+imagePolicyConfig:{{ openshift.master.image_policy_config | lib_utils_to_padded_yaml(level=1) }}
 {% endif %}
 kind: MasterConfig
 kubeletClientInfo:
@@ -96,21 +96,21 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
-  apiServerArguments: {{ openshift.master.api_server_args | default(None) | to_padded_yaml( level=2 ) }}
+  apiServerArguments: {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
 {% if r_openshift_master_etcd3_storage or ( r_openshift_master_clean_install and openshift.common.version_gte_3_6 ) %}
     storage-backend:
     - etcd3
     storage-media-type:
     - application/vnd.kubernetes.protobuf
 {% endif %}
-  controllerArguments: {{ openshift.master.controller_args | default(None) | to_padded_yaml( level=2 ) }}
+  controllerArguments: {{ openshift.master.controller_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
   masterCount: {{ openshift.master.master_count }}
   masterIP: {{ openshift.common.ip }}
   podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
-  schedulerArguments: {{ openshift_master_scheduler_args | default(None) | to_padded_yaml( level=3 ) }}
+  schedulerArguments: {{ openshift_master_scheduler_args | default(None) | lib_utils_to_padded_yaml( level=3 ) }}
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: "{{ openshift_node_port_range | default("") }}"
   servicesSubnet: {{ openshift.common.portal_net }}
@@ -144,7 +144,7 @@ networkConfig:
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
   serviceNetworkCIDR: {{ openshift.common.portal_net }}
-  externalIPNetworkCIDRs: {{ openshift_master_external_ip_network_cidrs | default(["0.0.0.0/0"]) | to_padded_yaml(1,2) }}
+  externalIPNetworkCIDRs: {{ openshift_master_external_ip_network_cidrs | default(["0.0.0.0/0"]) | lib_utils_to_padded_yaml(1,2) }}
 {% if openshift_master_ingress_ip_network_cidr is defined %}
   ingressIPNetworkCIDR: {{ openshift_master_ingress_ip_network_cidr }}
 {% endif %}
@@ -153,7 +153,7 @@ oauthConfig:
   alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
 {% endif %}
 {% if 'oauth_templates' in openshift.master %}
-  templates:{{ openshift.master.oauth_templates | to_padded_yaml(level=2) }}
+  templates:{{ openshift.master.oauth_templates | lib_utils_to_padded_yaml(level=2) }}
 {% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:

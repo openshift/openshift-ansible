@@ -15,7 +15,7 @@
   set_fact:
     g_metrics_hostname: "{{ openshift_hosted_metrics_public_url
                         | default('hawkular-metrics.' ~ openshift_master_default_subdomain)
-                        | oo_hostname_from_url }}"
+                        | lib_utils_oo_hostname_from_url }}"
 
 - set_fact:
     openshift_hosted_metrics_deploy_url: "https://{{ g_metrics_hostname }}/hawkular/metrics"
@@ -72,7 +72,6 @@
       controller_args: "{{ osm_controller_args | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
-      master_image: "{{ osm_image | default(None) }}"
       admission_plugin_config: "{{openshift_master_admission_plugin_config }}"
       kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"  # deprecated, merged with admission_plugin_config
       oauth_template: "{{ openshift_master_oauth_template | default(None) }}"  # deprecated in origin 1.2 / OSE 3.2

@@ -91,7 +91,7 @@
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when:
     - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
-    - openshift_version | version_compare('3.7','<')
+    - openshift_version is version_compare('3.7','<')
     failed_when:
     - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
@@ -112,8 +112,8 @@
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
+                                 | lib_utils_oo_select_keys(groups.oo_masters_to_config)
+                                 | lib_utils_oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
   - set_fact:
       master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) | list }}"
   - fail:
@@ -136,7 +136,7 @@
       {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       policy reconcile-cluster-roles --additive-only=true --confirm -o name
     register: reconcile_cluster_role_result
-    when: openshift_version | version_compare('3.7','<')
+    when: openshift_version is version_compare('3.7','<')
     changed_when:
     - reconcile_cluster_role_result.stdout != ''
     - reconcile_cluster_role_result.rc == 0
@@ -151,7 +151,7 @@
       --exclude-groups=system:unauthenticated
       --exclude-users=system:anonymous
       --additive-only=true --confirm -o name
-    when: openshift_version | version_compare('3.7','<')
+    when: openshift_version is version_compare('3.7','<')
     register: reconcile_bindings_result
     changed_when:
     - reconcile_bindings_result.stdout != ''
@@ -167,9 +167,9 @@
     - reconcile_jenkins_role_binding_result.stdout != ''
     - reconcile_jenkins_role_binding_result.rc == 0
     when:
-    - openshift_version | version_compare('3.7','<')
+    - openshift_version is version_compare('3.7','<')
 
-  - when: openshift_upgrade_target | version_compare('3.7','<')
+  - when: openshift_upgrade_target is version_compare('3.7','<')
     block:
     - name: Retrieve shared-resource-viewer
       oc_obj:
@@ -246,8 +246,8 @@
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+                                 | lib_utils_oo_select_keys(groups.oo_masters_to_config)
+                                 | lib_utils_oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
   - set_fact:
       reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) | list }}"
   - fail:
@@ -287,14 +287,14 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable|succeeded
+    until: node_unschedulable is succeeded
 
   - name: Drain Node for Kubelet upgrade
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
-    until: not l_upgrade_control_plane_drain_result | failed
+    until: not (l_upgrade_control_plane_drain_result is failed)
     retries: 60
     delay: 60
 
@@ -314,5 +314,5 @@
     retries: 10
     delay: 5
     register: node_schedulable
-    until: node_schedulable|succeeded
-    when: node_unschedulable|changed
+    until: node_schedulable is succeeded
+    when: node_unschedulable is changed

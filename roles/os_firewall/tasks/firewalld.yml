@@ -9,7 +9,7 @@
     name: firewalld
     state: present
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Ensure iptables services are not enabled
   systemd:
@@ -21,12 +21,14 @@
     - iptables
     - ip6tables
   register: task_result
-  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
+  failed_when:
+    - task_result is failed
+    - ('could not' not in task_result.msg|lower)
 
 - name: Wait 10 seconds after disabling iptables
   pause:
     seconds: 10
-  when: task_result | changed
+  when: task_result is changed
 
 - name: Start and enable firewalld service
   systemd:
@@ -40,13 +42,13 @@
 - name: need to pause here, otherwise the firewalld service starting can sometimes cause ssh to fail
   pause:
     seconds: 10
-  when: result | changed
+  when: result is changed
 
 - name: Restart polkitd
   systemd:
     name: polkit
     state: restarted
-  when: result | changed
+  when: result is changed
 
 # Fix suspected race between firewalld and polkit BZ1436964
 - name: Wait for polkit action to have been created

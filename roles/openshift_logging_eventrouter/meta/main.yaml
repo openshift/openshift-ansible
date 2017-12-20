@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: Andrew Butcher
-  description: OpenShift Node Facts
+  author: OpenShift Red Hat
+  description: OpenShift Aggregated Logging Eventrouter
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.9
+  min_ansible_version: 2.2
   platforms:
   - name: EL
     versions:
@@ -12,4 +12,6 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
+- role: lib_openshift
 - role: openshift_facts
+- role: lib_utils

@@ -122,12 +122,25 @@ openshift_aws_ami_map:
 openshift_aws_master_group:
 - name: "{{ openshift_aws_clusterid }} master group"
   group: master
+  tags:
+    host-type: master
+    sub-host-type: default
+    runtime: docker
 
 openshift_aws_node_groups:
 - name: "{{ openshift_aws_clusterid }} compute group"
   group: compute
+  tags:
+    host-type: node
+    sub-host-type: compute
+    runtime: docker
+
 - name: "{{ openshift_aws_clusterid }} infra group"
   group: infra
+  tags:
+    host-type: node
+    sub-host-type: infra
+    runtime: docker
 
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
@@ -144,10 +157,6 @@ openshift_aws_master_group_config:
     min_size: 3
     max_size: 3
     desired_size: 3
-    tags:
-      host-type: master
-      sub-host-type: default
-      runtime: docker
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
@@ -167,10 +176,6 @@ openshift_aws_node_group_config:
     min_size: 3
     max_size: 100
     desired_size: 3
-    tags:
-      host-type: node
-      sub-host-type: compute
-      runtime: docker
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
@@ -186,10 +191,6 @@ openshift_aws_node_group_config:
     min_size: 2
     max_size: 20
     desired_size: 2
-    tags:
-      host-type: node
-      sub-host-type: infra
-      runtime: docker
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"

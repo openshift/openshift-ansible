@@ -24,7 +24,7 @@
   - openshift_node_use_openshift_sdn | bool
   - not openshift_node_bootstrap
   register: l_openshift_node_stop_openvswitch_result
-  until: not l_openshift_node_stop_openvswitch_result | failed
+  until: not (l_openshift_node_stop_openvswitch_result is failed)
   retries: 3
   delay: 30
   notify:
@@ -41,7 +41,7 @@
     name: "{{ openshift_service_type }}-node"
     state: restarted
   register: l_openshift_node_restart_node_result
-  until: not l_openshift_node_restart_node_result | failed
+  until: not (l_openshift_node_restart_node_result is failed)
   retries: 3
   delay: 30
   when:

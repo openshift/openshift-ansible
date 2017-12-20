@@ -3,26 +3,26 @@
   block:
   - name: Install Node package
     package:
-      name: "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | oo_image_tag_to_rpm_version(include_dash=True) }}"
+      name: "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Install sdn-ovs package
     package:
-      name: "{{ openshift_service_type }}-sdn-ovs{{ (openshift_pkg_version | default('')) | oo_image_tag_to_rpm_version(include_dash=True) }}"
+      name: "{{ openshift_service_type }}-sdn-ovs{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
       state: present
     when:
     - openshift_node_use_openshift_sdn | bool
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Install conntrack-tools package
     package:
       name: "conntrack-tools"
       state: present
     register: result
-    until: result | success
+    until: result is succeeded
 
 - when:
   - openshift.common.is_containerized | bool
@@ -30,6 +30,6 @@
   block:
   - name: Pre-pull node image when containerized
     command: >
-      docker pull {{ openshift.node.node_image }}:{{ openshift_image_tag }}
+      docker pull {{ osn_image }}:{{ openshift_image_tag }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"

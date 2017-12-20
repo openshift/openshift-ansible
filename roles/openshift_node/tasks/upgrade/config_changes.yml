@@ -74,4 +74,4 @@
 #       require a service to be part of the call.
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: l_node_unit | changed
+  when: l_node_unit is changed

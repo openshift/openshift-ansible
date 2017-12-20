@@ -36,11 +36,11 @@
   - name: Collect router environment variables and secrets
     set_fact:
       router_env_vars: "{{ ((l_router_dc.stdout | from_json)['spec']['template']['spec']['containers'][0]['env']
-                             | oo_collect('name'))
+                             | lib_utils_oo_collect('name'))
                              | default([]) }}"
       router_secrets: "{{ ((l_router_dc.stdout | from_json)['spec']['template']['spec']['volumes']
-                            | oo_collect('secret')
-                            | oo_collect('secretName'))
+                            | lib_utils_oo_collect('secret')
+                            | lib_utils_oo_collect('secretName'))
                             | default([]) }}"
     changed_when: false
     when: l_router_dc.rc == 0
