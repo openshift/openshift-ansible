@@ -52,7 +52,9 @@
     state: restarted
   when: openshift_use_crio
   register: task_result
-  failed_when: task_result|failed and 'could not find the requested service' not in task_result.msg|lower
+  failed_when:
+    - task_result is failed
+    - ('could not find the requested service' not in task_result.msg|lower)
 
 - name: restart NetworkManager to ensure resolv.conf is present
   systemd:
@@ -83,15 +85,15 @@
 
 - name: GlusterFS storage plugin configuration
   include_tasks: storage_plugins/glusterfs.yml
-  when: "'glusterfs' in openshift.node.storage_plugin_deps"
+  when: "'glusterfs' in osn_storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
   include_tasks: storage_plugins/ceph.yml
-  when: "'ceph' in openshift.node.storage_plugin_deps"
+  when: "'ceph' in osn_storage_plugin_deps"
 
 - name: iSCSI storage plugin configuration
   include_tasks: storage_plugins/iscsi.yml
-  when: "'iscsi' in openshift.node.storage_plugin_deps"
+  when: "'iscsi' in osn_storage_plugin_deps"
 
 ##### END Storage #####
 

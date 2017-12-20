@@ -46,7 +46,7 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable|succeeded
+    until: node_unschedulable is succeeded
     when:
     - l_docker_upgrade is defined
     - l_docker_upgrade | bool
@@ -58,7 +58,7 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result
-    until: not l_docker_upgrade_drain_result | failed
+    until: not (l_docker_upgrade_drain_result is failed)
     retries: 60
     delay: 60
 
@@ -73,5 +73,5 @@
     retries: 10
     delay: 5
     register: node_schedulable
-    until: node_schedulable|succeeded
-    when: node_unschedulable|changed
+    until: node_schedulable is succeeded
+    when: node_unschedulable is changed

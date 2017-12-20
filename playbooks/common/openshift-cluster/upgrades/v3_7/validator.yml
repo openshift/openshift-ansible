@@ -16,7 +16,7 @@
     command: >
       {{ openshift.common.client_binary }} adm migrate authorization
     when:
-    - openshift_currently_installed_version | version_compare('3.7','<')
+    - openshift_currently_installed_version is version_compare('3.7','<')
     - openshift_upgrade_pre_authorization_migration_enabled | default(true) | bool
     changed_when: false
     register: l_oc_result

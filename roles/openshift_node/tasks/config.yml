@@ -16,17 +16,17 @@
     - openshift.common.is_containerized | bool
     - openshift_node_use_openshift_sdn | default(true) | bool
   register: ovs_start_result
-  until: not ovs_start_result | failed
+  until: not (ovs_start_result is failed)
   retries: 3
   delay: 30
 
 - set_fact:
-    ovs_service_status_changed: "{{ ovs_start_result | changed }}"
+    ovs_service_status_changed: "{{ ovs_start_result is changed }}"
 
 - file:
-    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
+    dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
     state: directory
-  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
+  when: ('config' in l2_openshift_node_kubelet_args) | bool
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -46,7 +46,7 @@
     regexp: "^{{ item.key }}="
     line: "{{ item.key }}={{ item.value }}"
     create: true
-  with_dict: "{{ openshift.node.env_vars | default({}) }}"
+  with_dict: "{{ openshift_node_env_vars }}"
   notify:
     - restart node
 
@@ -93,19 +93,19 @@
         state: started
         daemon_reload: yes
       register: node_start_result
-      until: not node_start_result | failed
+      until: not node_start_result is failed
       retries: 1
       delay: 30
       ignore_errors: true
 
     - name: Dump logs from node service if it failed
       command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-node
-      when: node_start_result | failed
+      when: node_start_result is failed
 
     - name: Abort if node failed to start
       fail:
         msg: Node failed to start please inspect the logs and try again
-      when: node_start_result | failed
+      when: node_start_result is failed
 
     - set_fact:
-        node_service_status_changed: "{{ node_start_result | changed }}"
+        node_service_status_changed: "{{ node_start_result is changed }}"

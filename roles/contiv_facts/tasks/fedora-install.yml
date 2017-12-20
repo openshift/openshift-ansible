@@ -4,7 +4,7 @@
     name: dnf
     state: installed
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Update repo cache
   command: dnf update -y

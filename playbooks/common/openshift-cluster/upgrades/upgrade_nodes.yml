@@ -31,14 +31,14 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable|succeeded
+    until: node_unschedulable is succeeded
 
   - name: Drain Node for Kubelet upgrade
     command: >
       {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
-    until: not l_upgrade_nodes_drain_result | failed
+    until: not (l_upgrade_nodes_drain_result is failed)
     retries: 60
     delay: 60
 
@@ -56,8 +56,8 @@
     retries: 10
     delay: 5
     register: node_schedulable
-    until: node_schedulable|succeeded
-    when: node_unschedulable|changed
+    until: node_schedulable is succeeded
+    when: node_unschedulable is changed
 
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config

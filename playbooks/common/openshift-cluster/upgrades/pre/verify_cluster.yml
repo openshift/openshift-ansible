@@ -20,13 +20,17 @@
       msg: >
         openshift_pkg_version is {{ openshift_pkg_version }} which is not a
         valid version for a {{ openshift_upgrade_target }} upgrade
-    when: openshift_pkg_version is defined and openshift_pkg_version.split('-',1).1 | version_compare(openshift_upgrade_target ,'<')
+    when:
+    - openshift_pkg_version is defined
+    - openshift_pkg_version.split('-',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - fail:
       msg: >
         openshift_image_tag is {{ openshift_image_tag }} which is not a
         valid version for a {{ openshift_upgrade_target }} upgrade
-    when: openshift_image_tag is defined and openshift_image_tag.split('v',1).1 | version_compare(openshift_upgrade_target ,'<')
+    when:
+    - openshift_image_tag is defined
+    - openshift_image_tag.split('v',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - set_fact:
       openshift_release: "{{ openshift_release[1:] }}"
@@ -36,7 +40,9 @@
       msg: >
         openshift_release is {{ openshift_release }} which is not a
         valid release for a {{ openshift_upgrade_target }} upgrade
-    when: openshift_release is defined and not openshift_release | version_compare(openshift_upgrade_target ,'=')
+    when:
+    - openshift_release is defined
+    - not (openshift_release is version_compare(openshift_upgrade_target ,'='))
 
 - name: Verify master processes
   hosts: oo_masters_to_config

@@ -3,7 +3,7 @@
   package: name=cloud-utils-growpart state=present
   when: not openshift.common.is_containerized | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Determine if growpart is installed
   command: "rpm -q cloud-utils-growpart"

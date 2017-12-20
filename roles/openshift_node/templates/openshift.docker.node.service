@@ -38,7 +38,7 @@ ExecStart=/usr/bin/docker run --name {{ openshift_service_type }}-node \
   {% if openshift_use_nuage | default(false) -%} $NUAGE_ADDTL_BIND_MOUNTS {% endif -%} \
   -v /dev:/dev $DOCKER_ADDTL_BIND_MOUNTS -v /etc/pki:/etc/pki:ro \
   {% if l_bind_docker_reg_auth %} -v {{ oreg_auth_credentials_path }}:/root/.docker:ro{% endif %}\
-  {{ openshift.node.node_image }}:${IMAGE_VERSION}
+  {{ osn_image }}:${IMAGE_VERSION}
 ExecStartPost=/usr/bin/sleep 10
 ExecStop=/usr/bin/docker stop {{ openshift_service_type }}-node
 ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf

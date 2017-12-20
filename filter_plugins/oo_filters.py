@@ -265,6 +265,18 @@ def oo_combine_dict(data, in_joiner='=', out_joiner=' '):
     return out_joiner.join([in_joiner.join([k, str(v)]) for k, v in data.items()])
 
 
+def oo_dict_to_keqv_list(data):
+    """Take a dict and return a list of k=v pairs
+
+        Input data:
+        {'a': 1, 'b': 2}
+
+        Return data:
+        ['a=1', 'b=2']
+    """
+    return ['='.join(str(e) for e in x) for x in data.items()]
+
+
 def oo_dict_to_list_of_dict(data, key_title='key', value_title='value'):
     """Take a dict and arrange them as a list of dicts
 
@@ -414,67 +426,6 @@ def oo_filter_list(data, filter_attr=None):
 
     # Gather up the values for the list of keys passed in
     return [x for x in data if filter_attr in x and x[filter_attr]]
-
-
-def oo_nodes_with_label(nodes, label, value=None):
-    """ Filters a list of nodes by label and value (if provided)
-
-        It handles labels that are in the following variables by priority:
-        openshift_node_labels, cli_openshift_node_labels, openshift['node']['labels']
-
-        Examples:
-            data = ['a': {'openshift_node_labels': {'color': 'blue', 'size': 'M'}},
-                    'b': {'openshift_node_labels': {'color': 'green', 'size': 'L'}},
-                    'c': {'openshift_node_labels': {'size': 'S'}}]
-            label = 'color'
-            returns = ['a': {'openshift_node_labels': {'color': 'blue', 'size': 'M'}},
-                       'b': {'openshift_node_labels': {'color': 'green', 'size': 'L'}}]
-
-            data = ['a': {'openshift_node_labels': {'color': 'blue', 'size': 'M'}},
-                    'b': {'openshift_node_labels': {'color': 'green', 'size': 'L'}},
-                    'c': {'openshift_node_labels': {'size': 'S'}}]
-            label = 'color'
-            value = 'green'
-            returns = ['b': {'labels': {'color': 'green', 'size': 'L'}}]
-
-        Args:
-            nodes (list[dict]): list of node to node variables
-            label (str): label to filter `nodes` by
-            value (Optional[str]): value of `label` to filter by Defaults
-                                   to None.
-
-        Returns:
-            list[dict]: nodes filtered by label and value (if provided)
-    """
-    if not isinstance(nodes, list):
-        raise errors.AnsibleFilterError("failed expects to filter on a list")
-    if not isinstance(label, string_types):
-        raise errors.AnsibleFilterError("failed expects label to be a string")
-    if value is not None and not isinstance(value, string_types):
-        raise errors.AnsibleFilterError("failed expects value to be a string")
-
-    def label_filter(node):
-        """ filter function for testing if node should be returned """
-        if not isinstance(node, dict):
-            raise errors.AnsibleFilterError("failed expects to filter on a list of dicts")
-        if 'openshift_node_labels' in node:
-            labels = node['openshift_node_labels']
-        elif 'cli_openshift_node_labels' in node:
-            labels = node['cli_openshift_node_labels']
-        elif 'openshift' in node and 'node' in node['openshift'] and 'labels' in node['openshift']['node']:
-            labels = node['openshift']['node']['labels']
-        else:
-            return False
-
-        if isinstance(labels, string_types):
-            labels = yaml.safe_load(labels)
-        if not isinstance(labels, dict):
-            raise errors.AnsibleFilterError(
-                "failed expected node labels to be a dict or serializable to a dict"
-            )
-        return label in labels and (value is None or labels[label] == value)
-
-    return [n for n in nodes if label_filter(n)]
 
 
 def oo_parse_heat_stack_outputs(data):
@@ -974,6 +925,7 @@ class FilterModule(object):
             "oo_ec2_volume_definition": oo_ec2_volume_definition,
             "oo_combine_key_value": oo_combine_key_value,
             "oo_combine_dict": oo_combine_dict,
+            "oo_dict_to_keqv_list": oo_dict_to_keqv_list,
             "oo_dict_to_list_of_dict": oo_dict_to_list_of_dict,
             "oo_split": oo_split,
             "oo_list_to_dict": oo_list_to_dict,
@@ -983,7 +935,6 @@ class FilterModule(object):
             "oo_haproxy_backend_masters": oo_haproxy_backend_masters,
             "oo_pretty_print_cluster": oo_pretty_print_cluster,
             "oo_generate_secret": oo_generate_secret,
-            "oo_nodes_with_label": oo_nodes_with_label,
             "oo_31_rpm_rename_conversion": oo_31_rpm_rename_conversion,
             "oo_pods_match_component": oo_pods_match_component,
             "oo_get_hosts_from_hostvars": oo_get_hosts_from_hostvars,
