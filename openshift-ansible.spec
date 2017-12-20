@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.89
+Version:        3.6.173.0.90
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,33 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Dec 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.90-1
+- GlusterFS: Move v3.7 files/templates to v3.6 (jarrpa@redhat.com)
+- GlusterFS: Add playbook doc note (jarrpa@redhat.com)
+- retry package operations (lmeyer@redhat.com)
+- Add check for gluterFS DS to stop restarts (m.judeikis@gmail.com)
+- GlusterFS: Remove extraneous line from glusterblock template
+  (jarrpa@redhat.com)
+- GlusterFS: Add configuration for auto creating block-hosting volumes
+  (jarrpa@redhat.com)
+- GlusterFS: Add gluster-s3 functionality (jarrpa@redhat.com)
+- GlusterFS: Add glusterblock functionality (jarrpa@redhat.com)
+- GlusterFS: Update heketi templates for latest version (jarrpa@redhat.com)
+- GlusterFS: Specify resource requests (jarrpa@redhat.com)
+- Add dm_thin_pool for gluster use (sdodson@redhat.com)
+- GlusterFS: Remove image option from heketi command (jarrpa@redhat.com)
+- GlusterFS: Fix registry storage documentation (jarrpa@redhat.com)
+- GlusterFS: remove topology reference from deploy-heketi (jarrpa@redhat.com)
+- GlusterFS: make ServiceAccounts privileged when either glusterfs or heketi is
+  native (jarrpa@redhat.com)
+- OpenShift-Ansible Installer Checkpointing (rteague@redhat.com)
+- GlusterFS can now be run more than once. Ability to add devices to nodes
+  (ttindell@isenpai.com)
+- GlusterFS: Clarify heketi URL documentation (jarrpa@redhat.com)
+- GlusterFS: Add files/templates for v3.7 (jarrpa@redhat.com)
+- GlusterFS: add minor README note for #5071 (jarrpa@redhat.com)
+- lib/base: Allow for empty option value (jarrpa@redhat.com)
+
 * Fri Dec 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.89-1
 - 
 
