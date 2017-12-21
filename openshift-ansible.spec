@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.15
+Version:        3.7.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Dec 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.16-1
+- Add CentOS-OpenShift-Origin37 repo template. (abutcher@redhat.com)
+- openshift_logging_{fluentd,mux}_file_buffer_limit mismatch
+  (nhosoi@redhat.com)
+- Removing config trigger for ES DC, updating to use a handler to rollout ES at
+  the end of a deployment, allowing for override with variable
+  (ewolinet@redhat.com)
+- prevent TSB pods from spinning on inappropriate nodes (jminter@redhat.com)
+- Ensure that clients are version bound (sdodson@redhat.com)
+- For 3.6 to 3.7 upgrades stop all API and Controllers before upgrading
+  (sdodson@redhat.com)
+- Fix bz1523814 (sdodson@redhat.com)
+- bug 1519622. Disable rollback of ES DCs (jcantril@redhat.com)
+- GlusterFS: Add playbook doc note (jarrpa@redhat.com)
+- Allow number of retries in openshift_management to be configurable
+  (ealfassa@redhat.com)
+
 * Fri Dec 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.15-1
 - Fix incorrect register name master registry auth (mgugino@redhat.com)
 
