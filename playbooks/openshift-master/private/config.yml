@@ -47,7 +47,7 @@
       state: absent
     when:
     - rpmgenerated_config.stat.exists == true
-    - deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     with_items:
     - master
     - node

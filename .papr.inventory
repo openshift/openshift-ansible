@@ -6,7 +6,7 @@ etcd
 [OSEv3:vars]
 ansible_ssh_user=root
 ansible_python_interpreter=/usr/bin/python3
-deployment_type=origin
+openshift_deployment_type=origin
 openshift_image_tag="{{ lookup('env', 'OPENSHIFT_IMAGE_TAG') }}"
 openshift_master_default_subdomain="{{ lookup('env', 'RHCI_ocp_node1_IP') }}.xip.io"
 openshift_check_min_host_disk_gb=1.5

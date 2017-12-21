@@ -15,10 +15,10 @@
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
-- name: Set default image variables based on deployment_type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "{{ openshift_deployment_type }}.yml"
     - "default_images.yml"
   loop_control:
     loop_var: var_file_name

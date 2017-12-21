@@ -40,7 +40,7 @@
     - include_tasks: rhel_repos.yml
       when:
       - ansible_distribution == 'RedHat'
-      - deployment_type == 'openshift-enterprise'
+      - openshift_deployment_type == 'openshift-enterprise'
       - rhsub_user is defined
       - rhsub_pass is defined
 
