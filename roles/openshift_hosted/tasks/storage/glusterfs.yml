@@ -25,6 +25,18 @@
   set_fact:
     openshift_hosted_registry_fsgroup: "{{ registry_pods.results.results[0]['items'][0].spec.securityContext.fsGroup }}"
 
+- name: Get registry PersistentVolume
+  oc_obj:
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    state: list
+    kind: pv
+    name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs-volume"
+  register: registry_pv
+
+- name: Determine registry volume path
+  set_fact:
+    openshift_hosted_registry_storage_glusterfs_path: "{{ openshift_hosted_registry_storage_glusterfs_path | default(registry_pv.results.results[0].spec.glusterfs.path) }}"
+
 - name: Create temp mount directory
   command: mktemp -d /tmp/openshift-glusterfs-registry-XXXXXX
   register: mktemp
