@@ -1,0 +1,11 @@
+{% set storagedriver = provision_gce_docker_storage_driver | default('overlay2') %}
+STORAGE_DRIVER="{{ storagedriver }}"
+{% if storagedriver == 'devicemapper' %}
+DEVS=/dev/sda
+VG=docker-vol
+DATA_SIZE=95%VG
+EXTRA_DOCKER_STORAGE_OPTIONS="--storage-opt dm.basesize=3G"
+{% endif %}
+{% if storagedriver == 'overlay2' %}
+DOCKER_ROOT_VOLUME=yes
+{% endif %}

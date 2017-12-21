@@ -48,7 +48,8 @@ popd
 %install
 # Base openshift-ansible install
 mkdir -p %{buildroot}%{_datadir}/%{name}
-mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
+mkdir -p %{buildroot}%{_datadir}/ansible/%{name}/inventory
+cp -rp inventory/dynamic %{buildroot}%{_datadir}/ansible/%{name}/inventory
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -62,7 +63,7 @@ rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
 # openshift-ansible-docs install
 # Install example inventory into docs/examples
 mkdir -p docs/example-inventories
-cp inventory/* docs/example-inventories/
+cp inventory/hosts.* inventory/README.md docs/example-inventories/
 
 # openshift-ansible-files install
 cp -rp files %{buildroot}%{_datadir}/ansible/%{name}/
@@ -101,6 +102,7 @@ popd
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
 %{_datadir}/ansible/%{name}/files
+%{_datadir}/ansible/%{name}/inventory/dynamic
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
 # ----------------------------------------------------------------------------------
