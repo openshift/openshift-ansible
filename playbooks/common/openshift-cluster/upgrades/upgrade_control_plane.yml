@@ -304,8 +304,6 @@
   - include_role:
       name: openshift_node
       tasks_from: upgrade.yml
-    vars:
-      openshift_node_upgrade_in_progress: True
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
