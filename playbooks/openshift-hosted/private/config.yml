@@ -21,6 +21,10 @@
 
 - import_playbook: openshift_hosted_registry.yml
 
+- import_playbook: openshift_hosted_wait_for_pods.yml
+
+- import_playbook: openshift_hosted_registry_storage.yml
+
 - import_playbook: cockpit-ui.yml
 
 - import_playbook: install_docker_gc.yml
