@@ -42,12 +42,27 @@
     retries: 60
     delay: 60
 
+    # Run the pre-upgrade hook if defined:
+  - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
   post_tasks:
   - include_role:
       name: openshift_node
       tasks_from: upgrade.yml
     vars:
       openshift_node_upgrade_in_progress: True
+  
+   # Run the upgrade hook prior to make the node schedulable again.
+  - debug: msg="Running node upgrade hook {{ openshift_node_upgrade_hook }}"
+    when: openshift_node_upgrade_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_hook }}"
+    when: openshift_node_upgrade_hook is defined
+
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
@@ -66,3 +81,10 @@
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable
+
+  # Run the post-upgrade hook if defined:
+  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
