@@ -231,8 +231,7 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('nested', 'noop') }}
-
+    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('multi', 'noop') }}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -286,6 +285,7 @@ data:
 
     [neutron_defaults]
 
+    ovs_bridge = br-int
     pod_security_groups = {{ kuryr_openstack_pod_sg_id }}
     pod_subnet = {{ kuryr_openstack_pod_subnet_id }}
     service_subnet = {{ kuryr_openstack_service_subnet_id }}
@@ -328,6 +328,9 @@ data:
 
     # Minimun interval (in seconds) between pool updates (integer value)
     ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
+
+    # Pod VIF drivers vs Pool Drivers mapping allowed
+    pools_vif_drivers = nested:nested-vlan,neutron:neutron-vif
 
   kuryr-cni.conf: |+
     [DEFAULT]
@@ -604,6 +607,7 @@ data:
 
     [neutron_defaults]
 
+    ovs_bridge = br-int
     pod_security_groups = {{ kuryr_openstack_pod_sg_id }}
     pod_subnet = {{ kuryr_openstack_pod_subnet_id }}
     service_subnet = {{ kuryr_openstack_service_subnet_id }}
