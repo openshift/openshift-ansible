@@ -1,0 +1,56 @@
+# all groups/peers need libreswan
+- name: "Install libreswan"
+  package:
+    name: libreswan
+
+# get libreswan version
+- name: "Get libreswan version to decide on opportunistic or point-to-point encryption"
+  command: "rpm -q libreswan --queryformat '%{VERSION}'"
+  args:
+    warn: false
+  changed_when: false
+  register: libreswan_command
+
+- name: "Save libreswan version"
+  set_fact:
+    libreswan_version: "{{ libreswan_command.stdout }}"
+
+# determine SDN MTU by looking in a few locations for openshift's already defined values
+- name: "Determine SDN MTU"
+  set_fact:
+    sdn_mtu: "{% if openshift_node_sdn_mtu is defined %}{{ openshift_node_sdn_mtu }}{% elif openshift.node.sdn_mtu is defined %}{{ openshift.node.sdn_mtu }}{% elif node is defined and node.sdn_mtu is defined %}{{ node.sdn_mtu }}{% elif sdn_mtu is defined %}{{ sdn_mtu }}{% else %}{{ default_sdn_mtu }}{% endif %}"
+
+# use determined sdn_mtu to set mtu value, subtract 50 bytes for openshift and 62 for ipsec
+- name: "Set MTU for SDN to allow additional space for IPSec header (subtract 50 bytes for openshift and 62 bytes for ipsec)"
+  lineinfile:
+    path: "/etc/origin/node/node-config.yaml"
+    state: present
+    regexp: '^(.*)mtu:.*$'
+    line: "\\1mtu: {{ sdn_mtu | int - default_openshift_overhead | int - default_ipsec_overhead | int }}"
+    backrefs: yes
+  register: mtu_changed
+
+# stop ipsec service if it exists (otherwise bridge removal can hang)
+- name: "Stop ipsec service if it exists when MTU is changed"
+  service:
+    name: "ipsec"
+    state: stopped
+  failed_when: false
+  when: mtu_changed.changed
+
+# according to the documentation we need to in-line stop and start the atomic-openshift-node service
+- name: "Stop openshift node service when MTU is changed"
+  service:
+    name: "atomic-openshift-node"
+    state: stopped
+  when: mtu_changed.changed
+
+- name: "Remove br0 (so that it can be re-added with propper mtu)"
+  command: "ovs-vsctl del-br br0"
+  when: mtu_changed.changed
+
+- name: "Start openshift node service when MTU is changed"
+  service:
+    name: "atomic-openshift-node"
+    state: started
+  when: mtu_changed.changed

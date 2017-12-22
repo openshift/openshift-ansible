@@ -1,0 +1,5 @@
+- name: "Set up ipsec service"
+  service:
+    name: "ipsec"
+    enabled: true
+    state: started

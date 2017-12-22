@@ -1,0 +1,23 @@
+- name: "Place opportunistic group configuration file"
+  template:
+    src: "group_openshift-cluster.conf.j2"
+    dest: "/etc/ipsec.d/openshift-cluster.conf"
+  notify:
+    - ipsec
+
+- name: "Place policy templates"
+  template:
+    src: "group_{{ item }}_policy.j2"
+    dest: "/etc/ipsec.d/policies/{{ item }}"
+  with_items:
+    - clear
+    - private
+  notify:
+    - ipsec
+
+- name: "Place secret for ipsec cluster configuration"
+  file:
+    path: "/etc/ipsec.d/openshift-cluster.secrets"
+    state: absent    
+  notify:
+    - ipsec

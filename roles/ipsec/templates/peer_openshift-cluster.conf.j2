@@ -1,0 +1,14 @@
+{% for host in groups['nodes'] %}
+{% if host != inventory_hostname %}
+conn {{ hostvars[host].inventory_hostname }}
+    left={{ ansible_default_ipv4.address }}
+    leftid="CN={{ server_nick }}"
+    leftrsasigkey=%cert
+    leftcert={{ server_nick }}
+    right={{ hostvars[host].ansible_default_ipv4.address }}
+    rightid="CN={{ hostvars[host].server_nick }}"
+    rightrsasigkey=%cert
+    auto=start
+    keyingtries=%forever
+{% endif %}
+{% endfor %}

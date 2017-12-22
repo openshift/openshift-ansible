@@ -1,0 +1,21 @@
+# handle prerequisite tasks
+- name: "Perform prerequisite actions"
+  import_tasks: pre.yml
+
+# set up certificates
+- name: "Certificate configuration and distribution"
+  import_tasks: certs.yml
+
+- name: "Configure IPSec Group Encryption"
+  include_tasks: ipsec-group.yml
+  when: libreswan_version | version_compare('3.19', '>=')
+
+- name: "Configure IPSec Peer-to-Peer Encryption"
+  include_tasks: ipsec-peer.yml
+  when: libreswan_version | version_compare('3.19', '<')
+
+- name: "Configure firewall"
+  import_tasks: firewall.yml
+
+- name: "Finalize service configuration"
+  import_tasks: finalize.yml

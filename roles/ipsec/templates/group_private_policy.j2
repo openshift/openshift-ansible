@@ -1,0 +1,5 @@
+{% for host in groups['nodes'] %}
+{% if host != inventory_hostname %}
+{{ hostvars[host].ansible_default_ipv4.address }}
+{% endif %}
+{% endfor %}

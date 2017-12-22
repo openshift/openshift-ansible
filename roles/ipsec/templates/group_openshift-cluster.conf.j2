@@ -1,0 +1,22 @@
+conn private
+	left=%defaultroute
+	leftid=%fromcert
+	# our certificate
+	leftcert="NSS Certificate DB:{{ server_nick }}"
+	right=%opportunisticgroup
+	rightid=%fromcert
+	# their certificate transmitted via IKE
+	rightca=%same
+	ikev2=insist
+	authby=rsasig
+	failureshunt=drop
+	negotiationshunt=hold
+	auto=ondemand
+
+conn clear
+	left=%defaultroute
+	right=%group
+	authby=never
+	type=passthrough
+	auto=route
+	priority=100
