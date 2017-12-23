@@ -6,7 +6,9 @@
   fail:
     msg: "openshift_release or openshift_image_tag must be specified for enterprise version of containerized installation."
   when:
-  - (openshift_release is not defined and openshift_image_tag is not defined | bool) and deployment_type == 'openshift-enterprise'
+  - openshift_release is not defined
+  - openshift_image_tag is not defined
+  - deployment_type == 'openshift-enterprise'
 
 - name: Set containerized version to configure if openshift_image_tag specified
   set_fact:
