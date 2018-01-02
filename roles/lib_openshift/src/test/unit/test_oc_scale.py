@@ -27,7 +27,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
     def test_state_list(self, mock_openshift_cmd, mock_tmpfile_copy):
-        ''' Testing a get '''
+        ''' Testing a list '''
         params = {'name': 'router',
                   'namespace': 'default',
                   'replicas': 2,
@@ -72,7 +72,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
     def test_scale(self, mock_openshift_cmd, mock_tmpfile_copy):
-        ''' Testing a get '''
+        ''' Testing scale '''
         params = {'name': 'router',
                   'namespace': 'default',
                   'replicas': 3,
@@ -121,7 +121,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
     def test_no_dc_scale(self, mock_openshift_cmd, mock_tmpfile_copy):
-        ''' Testing a get '''
+        ''' Testing scale for inexisting dc '''
         params = {'name': 'not_there',
                   'namespace': 'default',
                   'replicas': 3,
@@ -205,7 +205,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup fallback '''
+        ''' Testing binary lookup fallback in py3 '''
 
         mock_env_get.side_effect = lambda _v, _d: ''
 
@@ -217,7 +217,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup in path '''
+        ''' Testing binary lookup in path in py3 '''
 
         oc_bin = '/usr/bin/oc'
 
@@ -231,7 +231,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup in /usr/local/bin '''
+        ''' Testing binary lookup in /usr/local/bin in py3 '''
 
         oc_bin = '/usr/local/bin/oc'
 
@@ -245,7 +245,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup in ~/bin '''
+        ''' Testing binary lookup in ~/bin in py3 '''
 
         oc_bin = os.path.expanduser('~/bin/oc')
 
