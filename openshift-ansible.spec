@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.11.0%{?dist}
+Release:        0.12.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.12.0
+- 
+
 * Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.11.0
 - aws: Fix misnamed variable in provisioning_vars.yml.example
   (mbarnes@fedoraproject.org)
