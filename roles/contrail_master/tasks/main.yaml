@@ -1,0 +1,55 @@
+---
+- when:
+  - inventory_hostname == contrail_master
+
+  block:
+  - name: Stat for Contrail docker images
+    stat:
+      path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+    register: image
+    with_items:
+    - contrail-controller
+    - contrail-analytics
+    - contrail-analyticsdb
+    - contrail-kube-manager
+
+  - name: Copy Contrail docker images file to remote host if not present
+    copy:
+      src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+      dest: "/tmp"
+    when: item.stat.exists == False
+    with_items: "{{ image.results }}"
+
+  - name: Untar Contrail docker images file
+    unarchive:
+      src: "/tmp/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+      dest: "/tmp"
+      remote_src: yes
+    when: item.stat.exists == False
+    with_items: "{{ image.results }}"
+
+  - name: Load Contrail docker images
+    docker_image:
+      name: "{{ item }}"
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+    with_items: "{{ image.results }}"
+    
+  - name: Add iptable rules to open ports used by Contrail services
+    command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
+    with_items:
+      - { port: '8082', service: 'contrail-config-api' }
+      - { port: '8143', service: 'contrail-web-ui' }
+      - { port: '5269', service: 'contrail-control-xmpp' }
+      - { port: '8082', service: 'contrail-control-dns-introspect' }
+      - { port: '8093', service: 'contrail-control-dns-xmpp' }
+      - { port: '8093', service: 'contrail-control-introspect' }
+      - { port: '8086', service: 'contrail-analytics-collector' }
+
+  - name: Create Contrail single YAML file
+    template:
+      src: contrail-installer.j2
+      dest: /tmp/contrail-installer.yaml
+      owner: root
+      mode: 0644
