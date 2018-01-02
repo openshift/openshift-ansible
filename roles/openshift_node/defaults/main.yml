@@ -40,7 +40,7 @@ openshift_node_kubelet_args_dict:
     cloud-provider:
     - openstack
     cloud-config:
-    - "{{ openshift_config_base ~ '/openstack.conf' }}"
+    - "{{ openshift_config_base ~ '/cloudprovider/openstack.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
   gce:
     cloud-provider:
