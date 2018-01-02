@@ -34,7 +34,7 @@ variables also control configuration behavior:
 
 | Name                                         | Default value | Description                                                                  |
 |----------------------------------------------|---------------|------------------------------------------------------------------------------|
-| openshift_hosted_registry_storage_glusterfs_discover  | False                        | Whether to get the registry volume information from the cluster instead of using defaults
+| openshift_hosted_registry_discover_glusterfs_path     | False                        | Whether to get the registry volume information from the cluster instead of using defaults
 | openshift_hosted_registry_storage_glusterfs_endpoints | glusterfs-registry-endpoints | The name for the Endpoints resource that will point the registry to the GlusterFS nodes
 | openshift_hosted_registry_storage_glusterfs_path      | glusterfs-registry-volume    | The name for the GlusterFS volume that will provide registry storage
 | openshift_hosted_registry_storage_glusterfs_readonly  | False                        | Whether the GlusterFS volume should be read-only
