@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.10.0%{?dist}
+Release:        0.11.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,45 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.11.0
+- aws: Fix misnamed variable in provisioning_vars.yml.example
+  (mbarnes@fedoraproject.org)
+- Fix container_runtime openshift_containerized_host_groups
+  (mgugino@redhat.com)
+- Remove references to deployment_type (mgugino@redhat.com)
+- Must directly specify google-cloud-sdk version (ccoleman@redhat.com)
+- daemonset config role. (kwoodson@redhat.com)
+- Move validate_hosts to prerequisites.yml (mgugino@redhat.com)
+- Move sanity_checks into custom action plugin (mgugino@redhat.com)
+- Remove openshift.common.{is_atomic|is_containerized} (mgugino@redhat.com)
+- Adding support for docker-storage-setup on overlay (kwoodson@redhat.com)
+- Add gcloud to the installer image (ccoleman@redhat.com)
+- Remove some small items from openshift_facts (mgugino@redhat.com)
+- Relocate filter plugins to lib_utils (mgugino@redhat.com)
+- Fix hosted_reg_router selectors (mgugino@redhat.com)
+- set repos after registration: convert to match task -> import_role model.
+  (markllama@gmail.com)
+- Remove openshift_node_facts role (mgugino@redhat.com)
+- Move node group tags to openshift_aws_{master,node}_group.
+  (abutcher@redhat.com)
+- Add CentOS-OpenShift-Origin37 repo template. (abutcher@redhat.com)
+- Adding no_log to registry_auth. (kwoodson@redhat.com)
+- Fix rhel_repos disable command (mazzystr@gmail.com)
+- Fix rhel_subscribe boolean (mgugino@redhat.com)
+- Move repo and subscribe to prerequisites (mgugino@redhat.com)
+- Deprecate using Ansible tests as filters (rteague@redhat.com)
+- Removing config trigger for ES DC, updating to use a handler to rollout ES at
+  the end of a deployment, allowing for override with variable
+  (ewolinet@redhat.com)
+- openshift_logging_{fluentd,mux}_file_buffer_limit mismatch
+  (nhosoi@redhat.com)
+- Update version check to Ansible 2.4.1 (rteague@redhat.com)
+- Remove openshift_node_facts part 1 (mgugino@redhat.com)
+- Validate node hostname and IP address (rteague@redhat.com)
+- Add missing openshift_service_type (mgugino@redhat.com)
+- prevent TSB pods from spinning on inappropriate nodes (jminter@redhat.com)
+- Add readiness probe to kuryr controller pod (ltomasbo@redhat.com)
+
 * Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.10.0
 - Bump requirements.txt to Ansible 2.4.1 (rteague@redhat.com)
 - Commit to stabalize RHSM operations.  This code is derived from contrib
