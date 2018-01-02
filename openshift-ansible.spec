@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.12.0%{?dist}
+Release:        0.13.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.13.0
+- Bug 1527178 - installation of logging stack failed: Invalid version specified
+  for Elasticsearch (nhosoi@redhat.com)
+- Remove bootstrap.yml from main.yml in openshift_node role
+  (mgugino@redhat.com)
+
 * Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.12.0
 - 
 
