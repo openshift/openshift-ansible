@@ -12,6 +12,11 @@
       name: openshift_facts
     static: yes
 
+  - name: load os_firewall module
+    include_role:
+      name: os_firewall
+    static: yes
+
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
     include_role:
