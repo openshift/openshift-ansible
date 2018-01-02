@@ -32,7 +32,7 @@
     kind: pv
     name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs-volume"
   register: l_registry_storage_glusterfs_path_discover
-  when: openshift_hosted_registry_storage_glusterfs_path_discover
+  when: openshift_hosted_registry_discover_glusterfs_path
 
 - name: Create temp mount directory
   command: mktemp -d /tmp/openshift-glusterfs-registry-XXXXXX
