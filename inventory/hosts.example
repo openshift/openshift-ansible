@@ -899,6 +899,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_buildoverrides_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
 #openshift_buildoverrides_nodeselectors={'nodelabel1':'nodelabelvalue1'}
 #openshift_buildoverrides_annotations={'annotationkey1':'annotationvalue1'}
+#openshift_buildoverrides_tolerations=[{'key':'mykey1','value':'myvalue1','effect':'NoSchedule','operator':'Equal'}]
 
 # Or you may optionally define your own build overrides configuration serialized as json
 #openshift_buildoverrides_json='{"BuildOverrides":{"configuration":{"apiVersion":"v1","kind":"BuildDefaultsConfig","forcePull":"true"}}}'
