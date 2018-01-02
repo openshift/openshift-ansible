@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.22
+Version:        3.8.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,53 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.23-1
+- Revert "crio: change socket path to /var/run/crio/crio.sock"
+  (sdodson@redhat.com)
+- Adding support for docker-storage-setup on overlay (kwoodson@redhat.com)
+- Remove some small items from openshift_facts (mgugino@redhat.com)
+- Relocate filter plugins to lib_utils (mgugino@redhat.com)
+- Fix hosted_reg_router selectors (mgugino@redhat.com)
+- set repos after registration: convert to match task -> import_role model.
+  (markllama@gmail.com)
+- Remove openshift_node_facts role (mgugino@redhat.com)
+- Move node group tags to openshift_aws_{master,node}_group.
+  (abutcher@redhat.com)
+- Add CentOS-OpenShift-Origin37 repo template. (abutcher@redhat.com)
+- Fix rhel_repos disable command (mazzystr@gmail.com)
+- Fix rhel_subscribe boolean (mgugino@redhat.com)
+- Move repo and subscribe to prerequisites (mgugino@redhat.com)
+- Deprecate using Ansible tests as filters (rteague@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.10.0].
+  (smunilla@redhat.com)
+- Removing config trigger for ES DC, updating to use a handler to rollout ES at
+  the end of a deployment, allowing for override with variable
+  (ewolinet@redhat.com)
+- openshift_logging_{fluentd,mux}_file_buffer_limit mismatch
+  (nhosoi@redhat.com)
+- Update version check to Ansible 2.4.1 (rteague@redhat.com)
+- Bump requirements.txt to Ansible 2.4.1 (rteague@redhat.com)
+- Remove openshift_node_facts part 1 (mgugino@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.9.0].
+  (smunilla@redhat.com)
+- Commit to stabalize RHSM operations.  This code is derived from contrib
+  (mazzystr@gmail.com)
+- Contiv systemd fixes (flamingo@2thebatcave.com)
+- Validate node hostname and IP address (rteague@redhat.com)
+- etcd: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- docker: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- Combine openshift_master/vars with defaults (mgugino@redhat.com)
+- Add missing openshift_service_type (mgugino@redhat.com)
+- fix 1519808. Only annotate ops projects when openshift_logging_use_ops=true
+  (jcantril@redhat.com)
+- crio: change socket path to /var/run/crio/crio.sock (gscrivan@redhat.com)
+- prevent TSB pods from spinning on inappropriate nodes (jminter@redhat.com)
+- Remove version requirement from openvswitch package, since listed version got
+  removed from repo (riffraff@hobbes.alephone.org)
+- Add readiness probe to kuryr controller pod (ltomasbo@redhat.com)
+
 * Sat Dec 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.22-1
 - 
 
