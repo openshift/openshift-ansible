@@ -56,7 +56,7 @@ openshift_logging_mux_file_buffer_storage_type: "emptydir"
 openshift_logging_mux_file_buffer_pvc_name: "logging-mux-pvc"
 
 # required if the PVC does not already exist
-openshift_logging_mux_file_buffer_pvc_size: 1Gi
+openshift_logging_mux_file_buffer_pvc_size: 2Gi
 openshift_logging_mux_file_buffer_pvc_dynamic: false
 openshift_logging_mux_file_buffer_pvc_pv_selector: {}
 openshift_logging_mux_file_buffer_pvc_access_modes: ['ReadWriteOnce']
