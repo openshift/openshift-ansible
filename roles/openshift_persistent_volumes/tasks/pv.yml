@@ -8,7 +8,7 @@
 
 - name: Create PersistentVolumes
   command: >
-    {{ openshift.common.client_binary }} create
+    {{ openshift_client_binary }} create
     -f {{ mktemp.stdout }}/persistent-volumes.yml
     --config={{ mktemp.stdout }}/admin.kubeconfig
   register: pv_create_output

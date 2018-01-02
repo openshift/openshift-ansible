@@ -3,7 +3,7 @@
 
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: curr_docker_version
   retries: 4
   until: curr_docker_version is succeeded
@@ -20,7 +20,7 @@
     name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
     state: present
   when:
-  - not (openshift.common.is_atomic | bool)
+  - not (openshift_is_atomic | bool)
   - not (curr_docker_version is skipped)
   - not (curr_docker_version.stdout != '')
   register: result

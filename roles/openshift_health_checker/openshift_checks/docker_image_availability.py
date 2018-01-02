@@ -160,7 +160,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 required.add(self._registry_console_image(image_tag, image_info))
 
         # images for containerized components
-        if self.get_var("openshift", "common", "is_containerized"):
+        if self.get_var("openshift_is_containerized"):
             components = set()
             if 'oo_nodes_to_config' in host_groups:
                 components.update(["node", "openvswitch"])

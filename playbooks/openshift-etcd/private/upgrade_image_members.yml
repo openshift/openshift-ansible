@@ -1,7 +1,7 @@
 ---
 # INPUT etcd_upgrade_version
 # INPUT etcd_container_version
-# INPUT openshift.common.is_containerized
+# INPUT openshift_is_containerized
 - name: Upgrade containerized hosts to {{ etcd_upgrade_version }}
   hosts: oo_etcd_hosts_to_upgrade
   serial: 1
@@ -14,4 +14,4 @@
       etcd_peer: "{{ openshift.common.hostname }}"
     when:
     - etcd_container_version | default('99') is version_compare(etcd_upgrade_version,'<')
-    - openshift.common.is_containerized | bool
+    - openshift_is_containerized | bool

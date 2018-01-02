@@ -17,7 +17,7 @@
 
   - name: Determine if docker-registry exists
     command: >
-      {{ openshift.common.client_binary }} get dc/docker-registry -o json
+      {{ openshift_client_binary }} get dc/docker-registry -o json
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default
     register: l_docker_registry_dc
@@ -38,7 +38,7 @@
   # Replace dc/docker-registry environment variable certificate data if set.
   - name: Update docker-registry environment variables
     shell: >
-      {{ openshift.common.client_binary }} env dc/docker-registry
+      {{ openshift_client_binary }} env dc/docker-registry
       OPENSHIFT_CA_DATA="$(cat /etc/origin/master/ca.crt)"
       OPENSHIFT_CERT_DATA="$(cat /etc/origin/master/openshift-registry.crt)"
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-registry.key)"
@@ -62,7 +62,7 @@
 
     - name: Generate registry certificate
       command: >
-        {{ openshift.common.client_binary }} adm ca create-server-cert
+        {{ openshift_client_binary }} adm ca create-server-cert
         --signer-cert={{ openshift.common.config_base }}/master/ca.crt
         --signer-key={{ openshift.common.config_base }}/master/ca.key
         --signer-serial={{ openshift.common.config_base }}/master/ca.serial.txt
@@ -88,7 +88,7 @@
 
   - name: Redeploy docker registry
     command: >
-      {{ openshift.common.client_binary }} deploy dc/docker-registry
+      {{ openshift_client_binary }} deploy dc/docker-registry
       --latest
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default

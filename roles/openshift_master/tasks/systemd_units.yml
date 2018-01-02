@@ -7,7 +7,7 @@
     containerized_svc_dir: "/etc/systemd/system"
     ha_svc_template_path: "docker-cluster"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
 
 - include_tasks: registry_auth.yml
 
@@ -34,7 +34,7 @@
   register: l_pull_result
   changed_when: "'Downloaded newer image' in l_pull_result.stdout"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
   - not l_is_master_system_container | bool
 
 - name: Create the ha systemd unit files

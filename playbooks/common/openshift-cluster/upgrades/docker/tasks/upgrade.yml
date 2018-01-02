@@ -10,7 +10,7 @@
     - etcd_container
     - openvswitch
   failed_when: false
-  when: openshift.common.is_containerized | bool
+  when: openshift_is_containerized | bool
 
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"

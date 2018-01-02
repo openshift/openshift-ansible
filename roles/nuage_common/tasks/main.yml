@@ -2,17 +2,17 @@
 - name: Set the Nuage plugin openshift directory fact to handle Atomic host install
   set_fact:
     nuage_node_plugin_dir: /var/usr/share/vsp-openshift
-  when: openshift.common.is_atomic | bool
+  when: openshift_is_atomic | bool
 
 - name: Set the Nuage CNI network config directory fact to handle Atomic host install
   set_fact:
     nuage_node_cni_netconf_dir: /var/etc/cni/net.d/
-  when: openshift.common.is_atomic | bool
+  when: openshift_is_atomic | bool
 
 - name: Set the Nuage CNI binary directory fact to handle Atomic host install
   set_fact:
     nuage_node_cni_bin_dir: /var/opt/cni/bin/
-  when: openshift.common.is_atomic | bool
+  when: openshift_is_atomic | bool
 
 - name: Assure CNI plugin config dir exists before daemon set install
   become: yes

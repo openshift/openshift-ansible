@@ -18,9 +18,8 @@
 
   # Since we're not calling openshift_facts we'll do this for now
   - set_fact:
-      is_atomic: "{{ ostree_output.rc == 0 }}"
-  - set_fact:
-      is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
+      openshift_is_atomic: "{{ ostree_output.rc == 0 }}"
+      openshift_is_containerized: "{{ ostree_output.rc == 0 or containerized | default(false) | bool }}"
 
 # Stop services on all hosts prior to removing files.
 - hosts: nodes
@@ -133,7 +132,7 @@
         when: openshift_use_flannel | default(false) | bool
         register: result
         until: result is succeeded
-      when: not is_atomic | bool
+      when: not openshift_is_atomic | bool
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -363,7 +362,7 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not is_atomic | bool and openshift_remove_all | default(True) | bool
+    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - atomic-openshift
     - atomic-openshift-clients
@@ -487,14 +486,14 @@
 
   - name: Stop additional atomic services
     service: name={{ item }} state=stopped
-    when: is_containerized | bool
+    when: openshift_is_containerized | bool
     with_items:
     - etcd_container
     failed_when: false
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not is_atomic | bool and openshift_remove_all | default(True) | bool
+    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - etcd
     - etcd3
@@ -554,7 +553,7 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not is_atomic | bool and openshift_remove_all | default(True) | bool
+    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - haproxy
     register: result
