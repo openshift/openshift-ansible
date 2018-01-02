@@ -11,7 +11,7 @@ oreg_auth_credentials_replace: False
 openshift_docker_use_system_container: False
 openshift_docker_disable_push_dockerhub: False  # bool
 openshift_docker_selinux_enabled: True
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
 
 openshift_docker_hosted_registry_insecure: False  # bool
 
