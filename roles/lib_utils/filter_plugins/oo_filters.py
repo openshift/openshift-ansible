@@ -21,13 +21,10 @@ import yaml
 from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
-# ansible.compat.six goes away with Ansible 2.4
-try:
-    from ansible.compat.six import string_types, u
-    from ansible.compat.six.moves.urllib.parse import urlparse
-except ImportError:
-    from ansible.module_utils.six import string_types, u
-    from ansible.module_utils.six.moves.urllib.parse import urlparse
+# pylint: disable=import-error,no-name-in-module
+from ansible.module_utils.six import string_types, u
+# pylint: disable=import-error,no-name-in-module
+from ansible.module_utils.six.moves.urllib.parse import urlparse
 
 HAS_OPENSSL = False
 try:
