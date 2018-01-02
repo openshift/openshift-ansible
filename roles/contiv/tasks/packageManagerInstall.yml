@@ -5,7 +5,7 @@
 
 - include_tasks: pkgMgrInstallers/centos-install.yml
   when: (ansible_os_family == "RedHat") and
-        not is_atomic
+        not openshift_is_atomic
 
 - name: Package Manager | Set fact saying we did CentOS package install
   set_fact:

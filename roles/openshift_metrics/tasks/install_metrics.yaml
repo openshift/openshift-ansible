@@ -70,7 +70,7 @@
 - include_tasks: update_master_config.yaml
 
 - command: >
-    {{openshift.common.client_binary}}
+    {{openshift_client_binary}}
     --config={{mktemp.stdout}}/admin.kubeconfig
     get rc
     -l metrics-infra

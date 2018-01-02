@@ -14,7 +14,7 @@
   # DO NOT DISABLE THIS, YOUR UPGRADE WILL FAIL IF YOU DO SO
   - name: Confirm OpenShift authorization objects are in sync
     command: >
-      {{ openshift.common.client_binary }} adm migrate authorization
+      {{ openshift_client_binary }} adm migrate authorization
     when:
     - openshift_currently_installed_version is version_compare('3.7','<')
     - openshift_upgrade_pre_authorization_migration_enabled | default(true) | bool

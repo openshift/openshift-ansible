@@ -10,7 +10,14 @@ COPY images/installer/origin-extra-root /
 # install ansible and deps
 RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless python2-passlib httpd-tools openssh-clients origin-clients" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
- && EPEL_PKGS="ansible python2-boto" \
+ && echo '[google-cloud-sdk]' > /etc/yum.repos.d/google-cloud-sdk.repo \
+ && echo 'baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64' >> /etc/yum.repos.d/google-cloud-sdk.repo \
+ && echo 'enabled=1' >> /etc/yum.repos.d/google-cloud-sdk.repo \
+ && echo 'gpgcheck=1' >> /etc/yum.repos.d/google-cloud-sdk.repo \
+ && echo 'repo_gpgcheck=1' >> /etc/yum.repos.d/google-cloud-sdk.repo \
+ && echo 'gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg' >> /etc/yum.repos.d/google-cloud-sdk.repo \
+ && echo '       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg' >> /etc/yum.repos.d/google-cloud-sdk.repo \
+ && EPEL_PKGS="ansible python2-boto google-cloud-cdk" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
  && rpm -V $INSTALL_PKGS $EPEL_PKGS \

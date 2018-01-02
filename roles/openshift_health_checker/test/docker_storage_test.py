@@ -4,21 +4,21 @@ from openshift_checks import OpenShiftCheckException
 from openshift_checks.docker_storage import DockerStorage
 
 
-@pytest.mark.parametrize('is_containerized, group_names, is_active', [
+@pytest.mark.parametrize('openshift_is_containerized, group_names, is_active', [
     (False, ["oo_masters_to_config", "oo_etcd_to_config"], False),
     (False, ["oo_masters_to_config", "oo_nodes_to_config"], True),
     (True, ["oo_etcd_to_config"], True),
 ])
-def test_is_active(is_containerized, group_names, is_active):
+def test_is_active(openshift_is_containerized, group_names, is_active):
     task_vars = dict(
-        openshift=dict(common=dict(is_containerized=is_containerized)),
+        openshift_is_containerized=openshift_is_containerized,
         group_names=group_names,
     )
     assert DockerStorage(None, task_vars).is_active() == is_active
 
 
 def non_atomic_task_vars():
-    return {"openshift": {"common": {"is_atomic": False}}}
+    return {"openshift_is_atomic": False}
 
 
 @pytest.mark.parametrize('docker_info, failed, expect_msg', [

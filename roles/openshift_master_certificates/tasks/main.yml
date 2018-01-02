@@ -47,7 +47,7 @@
 
 - name: Create the master server certificate
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-server-cert
+    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm ca create-server-cert
     {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
@@ -71,7 +71,7 @@
 
 - name: Generate the loopback master client config
   command: >
-    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
+    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm create-api-client-config
       --certificate-authority={{ openshift_ca_cert }}
       {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}

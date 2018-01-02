@@ -21,14 +21,10 @@
       path: /run/ostree-booted
     register: ostree_booted
 
-  # Locally setup containerized facts for now
-  - name: initialize_facts set fact l_is_atomic
+  - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
     set_fact:
-      l_is_atomic: "{{ ostree_booted.stat.exists }}"
-
-  - name: initialize_facts set fact for containerized and l_is_*_system_container
-    set_fact:
-      l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
+      openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
+      openshift_is_containerized: "{{ ostree_booted.stat.exists or (containerized | default(false) | bool) }}"
 
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
@@ -54,7 +50,7 @@
   # Seems as though any check that happens with a corresponding fail should move into health_checks
   # Fail as early as possible if Atomic and old version of Docker
   - when:
-    - l_is_atomic | bool
+    - openshift_is_atomic | bool
     block:
 
     # See https://access.redhat.com/articles/2317361
@@ -73,7 +69,7 @@
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
   - when:
-    - not l_is_atomic | bool
+    - not openshift_is_atomic | bool
     block:
     - name: Ensure openshift-ansible installer package deps are installed
       package:
@@ -105,7 +101,7 @@
       register: result
       until: result is succeeded
 
-  - name: Gather Cluster facts and set is_containerized if needed
+  - name: Gather Cluster facts
     openshift_facts:
       role: common
       local_facts:
@@ -113,7 +109,6 @@
         deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
         hostname: "{{ openshift_hostname | default(None) }}"
         ip: "{{ openshift_ip | default(None) }}"
-        is_containerized: "{{ l_is_containerized | default(None) }}"
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"
         portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
@@ -145,3 +140,13 @@
     set_fact:
       repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
       repoquery_installed: "{{ 'dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins --installed' }}"
+
+- name: Initialize special first-master variables
+  hosts: oo_first_master
+  roles:
+  - role: openshift_facts
+  tasks:
+  - set_fact:
+      # We need to setup openshift_client_binary here for special uses of delegate_to in
+      # later roles and plays.
+      first_master_client_binary: "{{  openshift_client_binary }}"

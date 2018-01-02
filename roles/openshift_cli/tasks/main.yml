@@ -1,7 +1,7 @@
 ---
 - name: Install clients
   package: name={{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }} state=present
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
   register: result
   until: result is succeeded
 
@@ -18,7 +18,7 @@
       tag: "{{ openshift_image_tag }}"
       backend: "docker"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
   - not l_use_cli_atomic_image | bool
 
 - block:
@@ -34,7 +34,7 @@
       tag: "{{ openshift_image_tag }}"
       backend: "atomic"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
   - l_use_cli_atomic_image | bool
 
 - name: Reload facts to pick up installed OpenShift version
@@ -42,6 +42,6 @@
 
 - name: Install bash completion for oc tools
   package: name=bash-completion state=present
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
   register: result
   until: result is succeeded

@@ -39,7 +39,7 @@
 
   - name: Deploy registry-console
     command: >
-      {{ openshift.common.client_binary }} new-app --template=registry-console
+      {{ openshift_client_binary }} new-app --template=registry-console
       {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
       {% if openshift_cockpit_deployer_basename is defined  %}-p IMAGE_BASENAME="{{ openshift_cockpit_deployer_basename }}"{% endif %}
       {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}

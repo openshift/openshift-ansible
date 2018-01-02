@@ -18,7 +18,7 @@
 # Make sure Docker is installed so we are able to use the client
 - name: Install Docker so we can use the client
   package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 

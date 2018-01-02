@@ -61,4 +61,4 @@
       etcd_peer: "{{ openshift.common.hostname }}"
     when:
     - ansible_distribution == 'Fedora'
-    - not openshift.common.is_containerized | bool
+    - not openshift_is_containerized | bool

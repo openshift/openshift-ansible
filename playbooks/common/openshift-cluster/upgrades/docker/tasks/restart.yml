@@ -15,7 +15,7 @@
     - "{{ openshift_service_type }}-master-controllers"
     - "{{ openshift_service_type }}-node"
   failed_when: false
-  when: openshift.common.is_containerized | bool
+  when: openshift_is_containerized | bool
 
 - name: Wait for master API to come back online
   wait_for:
