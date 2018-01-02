@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.23
+Version:        3.8.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.24-1
+- Remove openshift.common.{is_atomic|is_containerized} (mgugino@redhat.com)
+- Add gcloud to the installer image (ccoleman@redhat.com)
+
 * Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.23-1
 - Revert "crio: change socket path to /var/run/crio/crio.sock"
   (sdodson@redhat.com)
