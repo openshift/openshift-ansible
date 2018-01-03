@@ -32,6 +32,20 @@
 
 - include: determine_version.yaml
 
+- set_fact:
+    full_restart_cluster: True
+  when:
+    - _es_installed_version is defined
+    - __es_version.split('.')[0] | int >= 5
+    - _es_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+
+- set_fact:
+    full_restart_cluster: True
+  when:
+    - _es_ops_installed_version is defined
+    - __es_version.split('.')[0] | int >= 5
+    - _es_ops_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX

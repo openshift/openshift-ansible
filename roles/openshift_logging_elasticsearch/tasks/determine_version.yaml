@@ -15,3 +15,5 @@
 - fail:
     msg: Invalid version specified for Elasticsearch
   when: es_version not in __allowed_es_versions
+
+- include_tasks: get_es_version.yml

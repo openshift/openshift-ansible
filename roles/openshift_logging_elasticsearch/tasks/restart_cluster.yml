@@ -11,9 +11,28 @@
   changed_when: "'\"acknowledged\":true' in _disable_output.stdout"
   when: _cluster_pods.stdout_lines | count > 0
 
+# Flush ES
+- name: "Flushing for logging-{{ _cluster_component }} cluster"
+  command: >
+    oc exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_flush/synced'
+  register: _flush_output
+  changed_when: "'\"acknowledged\":true' in _flush_output.stdout"
+  when:
+    - _cluster_pods.stdout_lines | count > 0
+    - full_restart_cluster | bool
+
 - command: >
     oc get dc -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
   register: _cluster_dcs
+
+## restart all dcs for full restart
+- name: "Restart ES node {{ _es_node }}"
+  include_tasks: restart_es_node.yml
+  with_items: "{{ _cluster_dcs }}"
+  loop_control:
+    loop_var: _es_node
+  when:
+    - full_restart_cluster | bool
 
 ## restart the node if it's dc is in the list of nodes to restart?
 - name: "Restart ES node {{ _es_node }}"
@@ -21,7 +40,9 @@
   with_items: "{{ _restart_logging_nodes }}"
   loop_control:
     loop_var: _es_node
-  when: _es_node in _cluster_dcs.stdout
+  when:
+    - not full_restart_cluster | bool
+    - _es_node in _cluster_dcs.stdout
 
 ## we may need a new first pod to run against -- fetch them all again
 - command: >
