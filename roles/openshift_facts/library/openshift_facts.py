@@ -656,26 +656,6 @@ def set_nodename(facts):
     return facts
 
 
-def migrate_oauth_template_facts(facts):
-    """
-    Migrate an old oauth template fact to a newer format if it's present.
-
-    The legacy 'oauth_template' fact was just a filename, and assumed you were
-    setting the 'login' template.
-
-    The new pluralized 'oauth_templates' fact is a dict mapping the template
-    name to a filename.
-
-    Simplify the code after this by merging the old fact into the new.
-    """
-    if 'master' in facts and 'oauth_template' in facts['master']:
-        if 'oauth_templates' not in facts['master']:
-            facts['master']['oauth_templates'] = {"login": facts['master']['oauth_template']}
-        elif 'login' not in facts['master']['oauth_templates']:
-            facts['master']['oauth_templates']['login'] = facts['master']['oauth_template']
-    return facts
-
-
 def format_url(use_ssl, hostname, port, path=''):
     """ Format url based on ssl flag, hostname, port and path
 
@@ -1387,7 +1367,6 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts,
                             local_facts,
                             additive_facts_to_overwrite)
-        facts = migrate_oauth_template_facts(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
