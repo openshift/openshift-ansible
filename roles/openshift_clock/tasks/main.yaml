@@ -12,6 +12,11 @@
   register: result
   until: result is succeeded
 
+- name: detect network time status
+  shell: "timedatectl | grep -oP '(?<=NTP synchronized: )(yes|no)'"
+  register: ntp_sync_output
+  changed_when: false
+
 - name: Start and enable ntpd/chronyd
   command: timedatectl set-ntp true
-  when: openshift_clock_enabled | bool
+  when: openshift_clock_enabled | bool and ntp_sync_output.get('rc') == 0 and (ntp_sync_output|trim) == "yes"
