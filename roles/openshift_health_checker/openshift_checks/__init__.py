@@ -95,6 +95,13 @@ class OpenShiftCheck(object):
         # These are intended to be a sequential record of what the check observed and determined.
         self.logs = []
 
+    def template_var(self, var_to_template):
+        """Return a templated variable if self._templar is not None, else
+           just return the variable as-is"""
+        if self._templar is not None:
+            return self._templar.template(var_to_template)
+        return var_to_template
+
     @abstractproperty
     def name(self):
         """The name of this check, usually derived from the class name."""
