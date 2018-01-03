@@ -77,6 +77,7 @@
 # We don't allow scaling down of ES nodes currently
 - include_role:
     name: openshift_logging_elasticsearch
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
@@ -105,6 +106,7 @@
 # Create any new DC that may be required
 - include_role:
     name: openshift_logging_elasticsearch
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
@@ -139,6 +141,7 @@
 
 - include_role:
     name: openshift_logging_elasticsearch
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
@@ -182,6 +185,7 @@
 # Create any new DC that may be required
 - include_role:
     name: openshift_logging_elasticsearch
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
@@ -215,6 +219,7 @@
 ## Kibana
 - include_role:
     name: openshift_logging_kibana
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_kibana_namespace: "{{ openshift_logging_namespace }}"
@@ -228,6 +233,7 @@
 
 - include_role:
     name: openshift_logging_kibana
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_kibana_ops_deployment: true
@@ -258,6 +264,7 @@
 ## Curator
 - include_role:
     name: openshift_logging_curator
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_curator_namespace: "{{ openshift_logging_namespace }}"
@@ -268,6 +275,7 @@
 
 - include_role:
     name: openshift_logging_curator
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_curator_ops_deployment: true
@@ -286,6 +294,7 @@
 ## Mux
 - include_role:
     name: openshift_logging_mux
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_mux_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
@@ -299,6 +308,7 @@
 ## Fluentd
 - include_role:
     name: openshift_logging_fluentd
+  static: true
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
     openshift_logging_fluentd_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
@@ -310,6 +320,7 @@
 ## EventRouter
 - include_role:
     name: openshift_logging_eventrouter
+  static: true
   when:
     openshift_logging_install_eventrouter | default(false) | bool
 

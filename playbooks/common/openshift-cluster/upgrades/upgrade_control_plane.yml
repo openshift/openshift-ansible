@@ -52,6 +52,7 @@
   tasks:
   - include_role:
       name: openshift_facts
+    static: true
 
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
@@ -63,6 +64,7 @@
   - include_role:
       name: openshift_master
       tasks_from: upgrade.yml
+    static: true
 
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
@@ -304,6 +306,7 @@
   - include_role:
       name: openshift_node
       tasks_from: upgrade.yml
+    static: true
     vars:
       openshift_node_upgrade_in_progress: True
   - name: Set node schedulability

@@ -5,3 +5,4 @@
   - include_role:
       name: openshift_hosted
       tasks_from: create_projects.yml
+    static: true

@@ -7,6 +7,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.yml
+    static: true
     vars:
       r_etcd_common_backup_tag: "{{ etcd_backup_tag }}"
       r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"

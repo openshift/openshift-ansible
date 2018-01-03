@@ -7,6 +7,7 @@
   - include_role:
       name: openshift_node
       tasks_from: upgrade_pre.yml
+    static: true
     vars:
       openshift_node_upgrade_in_progress: True
 
@@ -46,6 +47,7 @@
   - include_role:
       name: openshift_node
       tasks_from: upgrade.yml
+    static: true
     vars:
       openshift_node_upgrade_in_progress: True
   - name: Set node schedulability
@@ -64,5 +66,6 @@
   tasks:
   - include_role:
       name: openshift_excluder
+    static: true
     vars:
       r_openshift_excluder_action: enable

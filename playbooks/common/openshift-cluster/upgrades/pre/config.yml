@@ -75,3 +75,4 @@
   - include_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml
+    static: true

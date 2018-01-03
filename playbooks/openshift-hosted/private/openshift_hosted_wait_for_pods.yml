@@ -8,6 +8,7 @@
   - include_role:
       name: openshift_hosted
       tasks_from: wait_for_pod.yml
+    static: true
     vars:
       l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
       l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"
@@ -18,6 +19,7 @@
   - include_role:
       name: openshift_hosted
       tasks_from: wait_for_pod.yml
+    static: true
     vars:
       l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_registry_wait }}"
       l_openshift_hosted_wfp_items: "{{ r_openshift_hosted_registry_list }}"

@@ -6,6 +6,7 @@
   - name: subscribe instances to Red Hat Subscription Manager
     include_role:
       name: rhel_subscribe
+    static: true
     when:
     - ansible_distribution == 'RedHat'
     - openshift_deployment_type == 'openshift-enterprise'
@@ -14,3 +15,4 @@
   - name: initialize openshift repos
     include_role:
       name: openshift_repos
+    static: true

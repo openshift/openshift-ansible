@@ -10,6 +10,7 @@
 - name: Enable Container Provider Integration
   include_role:
     role: openshift_manageiq
+  static: true
 
 - name: "Ensure the Management '{{ openshift_management_project }}' namespace exists"
   oc_project:

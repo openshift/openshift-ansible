@@ -6,6 +6,7 @@
     - include_role:
         name: etcd
         tasks_from: restart.yml
+      static: true
       when:
         - not g_etcd_certificates_expired | default(false) | bool
 
@@ -15,5 +16,6 @@
     - include_role:
         name: etcd
         tasks_from: restart.yml
+      static: true
       when:
         - g_etcd_certificates_expired | default(false) | bool

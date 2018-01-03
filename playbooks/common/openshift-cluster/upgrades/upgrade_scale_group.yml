@@ -6,6 +6,7 @@
     include_role:
       name: openshift_aws
       tasks_from: upgrade_node_group.yml
+    static: true
 
   - fail:
       msg: "Ensure that new scale groups were provisioned before proceeding to update."
@@ -64,3 +65,4 @@
     include_role:
       name: openshift_aws
       tasks_from: remove_scale_group.yml
+    static: true

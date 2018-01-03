@@ -11,18 +11,21 @@
     - include_role:
         name: container_runtime
         tasks_from: package_docker.yml
+      static: true
       when:
         - not openshift_docker_use_system_container | bool
         - not openshift_use_crio_only | bool
     - include_role:
         name: container_runtime
         tasks_from: systemcontainer_docker.yml
+      static: true
       when:
         - openshift_docker_use_system_container | bool
         - not openshift_use_crio_only | bool
     - include_role:
         name: container_runtime
         tasks_from: systemcontainer_crio.yml
+      static: true
       when:
         - openshift_use_crio | bool
         - openshift_docker_is_node_or_master | bool

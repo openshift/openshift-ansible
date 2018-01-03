@@ -10,4 +10,5 @@
     include_role:
       name: openshift_aws
       tasks_from: security_group.yml
+    static: true
     when: openshift_aws_create_security_groups | default(True) | bool

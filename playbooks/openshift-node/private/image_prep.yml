@@ -18,6 +18,7 @@
     - include_role:
         name: openshift_node
         tasks_from: bootstrap.yml
+      static: true
 
 - name: Re-enable excluders
   import_playbook: enable_excluders.yml
