@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.13.0%{?dist}
+Release:        0.14.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.14.0
+- Cast openshift_docker_use_system_container to bool (mgugino@redhat.com)
+- Correct kublet_args cloud-provider directories (mgugino@redhat.com)
+- Updating logging_facts to be able to pull values from config maps yaml files,
+  use diffs to keep custom changes, white list certain settings when creating
+  diffs (ewolinet@redhat.com)
+- Add docker auth credentials to system container install (mgugino@redhat.com)
+- Move wait_for_pods to it's own play openshift_hosted (mgugino@redhat.com)
+- Remove oauth_template bits from openshift_facts (mgugino@redhat.com)
+
 * Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.13.0
 - Bug 1527178 - installation of logging stack failed: Invalid version specified
   for Elasticsearch (nhosoi@redhat.com)
