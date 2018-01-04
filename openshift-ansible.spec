@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.17
+Version:        3.7.18
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 04 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.18-1
+- Add docker auth credentials to system container install (mgugino@redhat.com)
+
 * Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.17-1
 - 
 
