@@ -150,7 +150,7 @@
         port: "{{ openshift_logging_mux_port }}"
         targetPort: "mux-forward"
     external_ips:
-      - "{{ ansible_eth0.ipv4.address }}"
+      - "{{ openshift_logging_mux_external_address }}"
   when: openshift_logging_mux_allow_external | bool
 
 - name: Set logging-mux service for internal communication
