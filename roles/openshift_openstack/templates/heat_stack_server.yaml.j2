@@ -212,6 +212,9 @@ resources:
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
         node_labels: { get_param: node_labels }
+{% if openshift_openstack_dns_nameservers %}
+        openshift_hostname: { get_param: name }
+{% endif %}
       scheduler_hints: { get_param: scheduler_hints }
 
 {% if use_trunk_ports|default(false)|bool %}
