@@ -177,6 +177,9 @@ Elasticsearch OPS too, if using an OPS cluster:
   clients will use to connect to mux, and will be used in the TLS server cert
   subject.
 - `openshift_logging_mux_port`: 24284
+- `openshift_logging_mux_external_address`: The IP address that mux will listen
+ on for connections from *external* clients.  Default is the default ipv4
+ interface as reported by the `ansible_default_ipv4` fact.
 - `openshift_logging_mux_cpu_request`: 100m
 - `openshift_logging_mux_memory_limit`: 512Mi
 - `openshift_logging_mux_default_namespaces`: Default `["mux-undefined"]` - the
