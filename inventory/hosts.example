@@ -197,6 +197,10 @@ openshift_release=v3.7
 #openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 #openshift_repos_enable_testing=false
 
+# If the image for etcd needs to be pulled from anywhere else than registry.access.redhat.com, e.g. in
+# a disconnected and containerized installation, use osm_etcd_image to specify the image to use:
+#osm_etcd_image=rhel7/etcd
+
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 # Defining htpasswd users
