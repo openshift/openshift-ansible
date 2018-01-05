@@ -5,6 +5,7 @@
   - include_role:
       name: openshift_aws
       tasks_from: setup_master_group.yml
+    static: true
 
 - name: set the master facts for hostname to elb
   hosts: masters
@@ -14,6 +15,7 @@
   - include_role:
       name: openshift_aws
       tasks_from: master_facts.yml
+    static: true
 
 - name: normalize groups
   include: ../../byo/openshift-cluster/initialize_groups.yml

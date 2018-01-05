@@ -3,6 +3,7 @@
   include_role:
     name: openshift_atomic
     tasks_from: proxy
+  static: true
 
 - name: Pull etcd system container
   command: atomic pull --storage=ostree {{ etcd_image }}

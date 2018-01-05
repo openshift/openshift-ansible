@@ -10,3 +10,4 @@
     include_role:
       name: openshift_aws
       tasks_from: seal_ami.yml
+    static: true

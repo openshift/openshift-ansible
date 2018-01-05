@@ -6,3 +6,4 @@
     include_role:
       name: openshift_management
       tasks_from: add_container_provider
+    static: true

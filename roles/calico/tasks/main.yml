@@ -17,6 +17,7 @@
     embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-calico-{{ openshift.common.hostname }}"
+  static: true
 
 - name: Calico Node | Set etcd cert location facts
   when: calico_etcd_ca_cert_file is not defined or calico_etcd_cert_file is not defined or calico_etcd_key_file is not defined or calico_etcd_endpoints is not defined or calico_etcd_cert_dir is not defined

@@ -21,6 +21,7 @@
     include_role:
       name: openshift_master
       tasks_from: check_master_api_is_ready
+    static: true
   - set_fact:
       master_service: "{{ openshift.common.service_type + '-master' }}"
       embedded_etcd_backup_suffix: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
@@ -40,6 +41,7 @@
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
       r_etcd_common_backup_sufix_name: "{{ embedded_etcd_backup_suffix }}"
+    static: true
 
   - include_role:
       name: etcd
@@ -49,6 +51,7 @@
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
       r_etcd_common_backup_sufix_name: "{{ embedded_etcd_backup_suffix }}"
+    static: true
 
 # 3. deploy certificates (for etcd and master)
 - include: ca.yml
@@ -61,6 +64,7 @@
   - include_role:
       name: etcd
       tasks_from: backup_master_etcd_certificates
+    static: true
 
 - name: Redeploy master etcd certificates
   include: master_etcd_certificates.yml
@@ -80,11 +84,13 @@
       tasks_from: disable_etcd
     vars:
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    static: true
   - include_role:
       name: etcd
       tasks_from: clean_data
     vars:
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    static: true
 
 # 6. copy the embedded etcd backup to the external host
 # TODO(jchaloup): if the etcd and first master are on the same host, just copy the directory
@@ -107,6 +113,7 @@
       r_etcd_common_embedded_etcd: "{{ true }}"
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
     delegate_to: "{{ groups.oo_first_master[0] }}"
+    static: true
 
   - include_role:
       name: etcd
@@ -117,6 +124,7 @@
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
     delegate_to: "{{ groups.oo_etcd_to_config[0] }}"
+    static: true
 
   - debug:
       msg: "etcd_backup_dest_directory: {{ g_etcd_client_mktemp.stdout }}"
@@ -148,6 +156,7 @@
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
       etcd_peer_url_scheme: "https"
+    static: true
 
 # 8. re-configure master to use the external etcd
 - name: Configure master to use external etcd
@@ -160,6 +169,7 @@
       etcd_peer_url_scheme: "https"
       etcd_ip: "{{ hostvars[groups.oo_etcd_to_config.0].openshift.common.ip }}"
       etcd_peer_port: 2379
+    static: true
 
   # 9. start the master
   - name: Start master

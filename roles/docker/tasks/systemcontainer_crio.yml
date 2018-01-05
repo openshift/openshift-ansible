@@ -92,6 +92,7 @@
   include_role:
     name: openshift_atomic
     tasks_from: proxy
+  static: true
 
 - block:
 

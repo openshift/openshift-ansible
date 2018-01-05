@@ -6,3 +6,4 @@
   - name: initialize openshift repos
     include_role:
       name: openshift_repos
+    static: true

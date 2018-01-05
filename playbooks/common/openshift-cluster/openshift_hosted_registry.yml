@@ -11,3 +11,4 @@
     when:
     - openshift_hosted_manage_registry | default(True) | bool
     - openshift_hosted_registry_registryurl is defined
+    static: true

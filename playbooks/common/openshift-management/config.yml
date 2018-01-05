@@ -23,6 +23,7 @@
       name: openshift_management
     vars:
       template_dir: "{{ hostvars[groups.masters.0].r_openshift_management_mktemp.stdout }}"
+    static: true
 
 - name: Management Install Checkpoint End
   hosts: oo_all_hosts
