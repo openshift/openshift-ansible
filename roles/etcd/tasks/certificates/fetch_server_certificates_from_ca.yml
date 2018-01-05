@@ -50,6 +50,7 @@
 
 # Certificates must be signed serially in order to avoid competing
 # for the serial file.
+# delegated_serial_command is a custom module in lib_utils
 - name: Sign and create the server crt
   delegated_serial_command:
     command: >
@@ -83,6 +84,7 @@
 
 # Certificates must be signed serially in order to avoid competing
 # for the serial file.
+# delegated_serial_command is a custom module in lib_utils
 - name: Sign and create the peer crt
   delegated_serial_command:
     command: >
