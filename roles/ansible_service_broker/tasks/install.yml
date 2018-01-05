@@ -78,6 +78,9 @@
       - apiGroups: ["network.openshift.io"]
         resources: ["netnamespaces"]
         verbs: ["update"]
+      - apiGroups: ["networking.k8s.io"]
+        resources: ["networkpolicies"]
+        verbs: ["create", "delete"]
 
 - name: Create asb-access cluster role
   oc_clusterrole:
