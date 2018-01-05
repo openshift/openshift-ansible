@@ -31,7 +31,7 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 e.g
 ```
-openshift_prometheus_args=['--storage.tsdb.retention=6h', '--storage.tsdb.min-block-duration=5s', '--storage.tsdb.max-block-duration=6m']
+openshift_prometheus_args=['--storage.tsdb.retention=6h', '--query.timeout=2m']
 ```
 
 ## PVC related variables
