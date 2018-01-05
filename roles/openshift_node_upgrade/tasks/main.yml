@@ -177,3 +177,4 @@
 
 - include_role:
     name: openshift_node_dnsmasq
+  static: true

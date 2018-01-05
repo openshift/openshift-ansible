@@ -18,6 +18,7 @@
       name: etcd_common
     vars:
       r_etcd_common_action: drop_etcdctl
+    static: true
 
 - name: Perform etcd upgrade
   include: ./upgrade.yml

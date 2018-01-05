@@ -22,6 +22,7 @@
     include_role:
       name: openshift_cfme
       tasks_from: tune_masters
+    static: true
 
 - name: Setup CFME
   hosts: oo_first_master
@@ -42,3 +43,4 @@
       name: openshift_cfme
     vars:
       template_dir: "{{ hostvars[groups.masters.0].r_openshift_cfme_mktemp.stdout }}"
+    static: true
