@@ -13,4 +13,5 @@
     - include_role:
         name: openshift_metrics
         tasks_from: update_master_config
+      static: true
     when: openshift_metrics_install_metrics | default(false) | bool
