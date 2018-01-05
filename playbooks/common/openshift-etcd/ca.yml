@@ -13,3 +13,4 @@
       etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
     when:
     - etcd_ca_setup | default(True) | bool
+    static: true

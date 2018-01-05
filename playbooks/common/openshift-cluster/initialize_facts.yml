@@ -16,6 +16,7 @@
   - name: Run openshift_sanitize_inventory to set variables
     include_role:
       name: openshift_sanitize_inventory
+    static: true
 
   - name: Detecting Operating System from ostree_booted
     stat:

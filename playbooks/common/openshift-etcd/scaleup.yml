@@ -37,6 +37,7 @@
       etcd_peers: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    static: true
   roles:
   - role: os_firewall
     when: etcd_add_check.rc == 0
@@ -81,3 +82,4 @@
   - include_role:
       name: openshift_master
       tasks_from: update_etcd_client_urls
+    static: true

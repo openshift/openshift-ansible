@@ -21,6 +21,7 @@
     vars:
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ ansible_default_ipv4.address }}"
+    static: true
 
 - name: Prepare masters for etcd data migration
   hosts: oo_masters_to_config
@@ -56,6 +57,7 @@
       r_etcd_common_backup_tag: pre-migration
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    static: true
 
 - name: Gate on etcd backup
   hosts: localhost
@@ -82,6 +84,7 @@
       tasks_from: disable_etcd
     vars:
       r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    static: true
 
 - name: Migrate data on first etcd
   hosts: oo_etcd_to_migrate[0]
@@ -95,6 +98,7 @@
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
       etcd_peer_url_scheme: "https"
+    static: true
 
 - name: Clean data stores on remaining etcd hosts
   hosts: oo_etcd_to_migrate[1:]
@@ -108,6 +112,7 @@
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
       etcd_peer_url_scheme: "https"
+    static: true
   - name: Add etcd hosts
     delegate_to: localhost
     add_host:
@@ -145,6 +150,7 @@
       etcd_url_scheme: "https"
       etcd_peer_url_scheme: "https"
     when: etcd_migration_failed | length == 0
+    static: true
 
 - name: Configure masters if etcd data migration is succesfull
   hosts: oo_masters_to_config
@@ -153,6 +159,7 @@
       name: etcd
       tasks_from: migrate.configure_master
     when: etcd_migration_failed | length == 0
+    static: true
   - debug:
       msg: "Skipping master re-configuration since migration failed."
     when:

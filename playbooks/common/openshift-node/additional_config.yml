@@ -62,3 +62,4 @@
       name: kuryr
       tasks_from: node
     when: openshift_use_kuryr | default(false) | bool
+    static: true

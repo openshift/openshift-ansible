@@ -10,3 +10,4 @@
     vars:
       openshift_aws_node_group_type: compute
     when: openshift_aws_users | default([]) | length  > 0
+    static: true
