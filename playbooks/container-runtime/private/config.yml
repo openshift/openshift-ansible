@@ -8,19 +8,19 @@
   roles:
     - role: container_runtime
   tasks:
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: package_docker.yml
       when:
         - not openshift_docker_use_system_container | bool
         - not openshift_use_crio_only | bool
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: systemcontainer_docker.yml
       when:
         - openshift_docker_use_system_container | bool
         - not openshift_use_crio_only | bool
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: systemcontainer_crio.yml
       when:

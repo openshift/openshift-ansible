@@ -13,7 +13,7 @@
 
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
-    include_role:
+    import_role:
       name: openshift_sanitize_inventory
 
   - name: Detecting Operating System from ostree_booted

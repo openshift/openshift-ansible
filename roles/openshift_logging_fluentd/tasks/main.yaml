@@ -117,7 +117,7 @@
     src: secure-forward.conf
     dest: "{{ tempdir }}/secure-forward.conf"
 
-- include_role:
+- import_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
   vars:

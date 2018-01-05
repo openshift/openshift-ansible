@@ -30,7 +30,7 @@ configure, restart, or change the container runtime as much as feasible.
 ## Design
 
 The container_runtime role should be comprised of 3 'pseudo-roles' which will be
-consumed using include_role; each component area should be enabled/disabled with
+consumed using import_role; each component area should be enabled/disabled with
 a boolean value, defaulting to true.
 
 I call them 'pseudo-roles' because they are more or less independent functional
@@ -46,15 +46,15 @@ an abundance of roles), and make things as modular as possible.
 # container_runtime_setup.yml
 - hosts: "{{ openshift_runtime_manage_hosts | default('oo_nodes_to_config') }}"
   tasks:
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: install.yml
       when: openshift_container_runtime_install | default(True) | bool
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: storage.yml
       when: openshift_container_runtime_storage | default(True) | bool
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: configure.yml
       when: openshift_container_runtime_configure | default(True) | bool

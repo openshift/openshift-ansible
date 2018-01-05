@@ -1,6 +1,6 @@
 ---
 - name: Ensure OpenShift facts module is available
-  include_role:
+  import_role:
     role: openshift_facts
 
 - name: Ensure OpenShift facts are loaded

@@ -2,7 +2,7 @@
 - name: Determine etcd version
   hosts: oo_etcd_hosts_to_upgrade
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: version_detect.yml
 
@@ -54,7 +54,7 @@
   hosts: oo_etcd_hosts_to_upgrade
   serial: 1
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: upgrade_image.yml
     vars:

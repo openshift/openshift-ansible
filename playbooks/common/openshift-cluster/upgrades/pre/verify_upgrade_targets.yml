@@ -5,7 +5,7 @@
   when: openshift.common.version is not defined
 
 - name: Update oreg_auth docker login credentials if necessary
-  include_role:
+  import_role:
     name: container_runtime
     tasks_from: registry_auth.yml
   when: oreg_auth_user is defined

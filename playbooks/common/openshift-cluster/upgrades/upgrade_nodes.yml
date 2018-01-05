@@ -4,7 +4,7 @@
   roles:
   - role: openshift_facts
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade_pre.yml
     vars:
@@ -43,7 +43,7 @@
     delay: 60
 
   post_tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
     vars:
@@ -62,7 +62,7 @@
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable

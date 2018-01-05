@@ -5,14 +5,14 @@
 - name: Setting up NFS storage
   block:
     - name: Include the NFS Setup role tasks
-      include_role:
+      import_role:
         role: openshift_nfs
         tasks_from: setup
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
 
     - name: Create the App export
-      include_role:
+      import_role:
         role: openshift_nfs
         tasks_from: create_export
       vars:
@@ -22,7 +22,7 @@
         l_nfs_options: "*(rw,no_root_squash,no_wdelay)"
 
     - name: Create the DB export
-      include_role:
+      import_role:
         role: openshift_nfs
         tasks_from: create_export
       vars:

@@ -3,7 +3,7 @@
   hosts: localhost
   tasks:
   - name: build upgrade scale groups
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: upgrade_node_group.yml
 
@@ -61,6 +61,6 @@
   hosts: localhost
   tasks:
   - name: clean up scale group
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: remove_scale_group.yml

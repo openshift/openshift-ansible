@@ -8,7 +8,7 @@
   roles:
     - role: container_runtime
   tasks:
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: docker_storage_setup_overlay.yml
       when:

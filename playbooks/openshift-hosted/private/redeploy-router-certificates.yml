@@ -115,7 +115,7 @@
     - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
     - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
 
-  - include_role:
+  - import_role:
       name: openshift_hosted
       tasks_from: main
     vars:

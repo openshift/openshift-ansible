@@ -50,7 +50,7 @@
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_facts
 
   # Run the pre-upgrade hook if defined:
@@ -60,7 +60,7 @@
   - include_tasks: "{{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
 
-  - include_role:
+  - import_role:
       name: openshift_master
       tasks_from: upgrade.yml
 
@@ -301,7 +301,7 @@
   roles:
   - openshift_facts
   post_tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
     vars:
