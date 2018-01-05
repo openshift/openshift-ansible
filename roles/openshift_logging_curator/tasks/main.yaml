@@ -56,7 +56,7 @@
     dest: "{{ tempdir }}/curator.yml"
   changed_when: no
 
-- include_role:
+- import_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
   vars:

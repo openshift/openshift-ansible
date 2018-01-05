@@ -5,7 +5,7 @@
 - name: Poll for hosted pod deployments
   hosts: oo_first_master
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_hosted
       tasks_from: wait_for_pod.yml
     vars:
@@ -15,7 +15,7 @@
     - openshift_hosted_manage_router | default(True) | bool
     - openshift_hosted_router_registryurl is defined
 
-  - include_role:
+  - import_role:
       name: openshift_hosted
       tasks_from: wait_for_pod.yml
     vars:

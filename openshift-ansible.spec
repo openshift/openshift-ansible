@@ -408,7 +408,7 @@ Atomic OpenShift Utilities includes
 - Update prometheus to 2.0.0 GA (zgalor@redhat.com)
 - remove schedulable from openshift_facts (mgugino@redhat.com)
 - inventory: Add example for service catalog vars (smilner@redhat.com)
-- Correct usage of include_role (rteague@redhat.com)
+- Correct usage of import_role (rteague@redhat.com)
 - Remove openshift.common.cli_image (mgugino@redhat.com)
 - Fix openshift_env fact creation within openshift_facts. (abutcher@redhat.com)
 - Combine openshift_node and openshift_node_dnsmasq (mgugino@redhat.com)
@@ -1001,7 +1001,7 @@ Atomic OpenShift Utilities includes
 - Renaming csr to bootstrap for consistency. (kwoodson@redhat.com)
 - Add master config upgrade hook to upgrade-all plays (mgugino@redhat.com)
 - Remove 'Not Started' status from playbook checkpoint (rteague@redhat.com)
-- Force include_role to static for loading openshift_facts module
+- Force import_role to static for loading openshift_facts module
   (rteague@redhat.com)
 - Make openshift-ansible depend on all subpackages (sdodson@redhat.com)
 - Refactor health check playbooks (rteague@redhat.com)
@@ -3729,9 +3729,9 @@ Atomic OpenShift Utilities includes
 - run node upgrade if master is node as part of the control plan upgrade only
   (jchaloup@redhat.com)
 - Appease yamllint (sdodson@redhat.com)
-- Adding include_role to block to resolve when eval (ewolinet@redhat.com)
+- Adding import_role to block to resolve when eval (ewolinet@redhat.com)
 - Updating oc_apply to use command instead of shell (ewolinet@redhat.com)
-- Wrap openshift_hosted_logging include_role within a block.
+- Wrap openshift_hosted_logging import_role within a block.
   (abutcher@redhat.com)
 - Adding unit test.  Fixed redudant calls to get. (kwoodson@redhat.com)
 - Fixing doc and generating new label with updated base. (kwoodson@redhat.com)

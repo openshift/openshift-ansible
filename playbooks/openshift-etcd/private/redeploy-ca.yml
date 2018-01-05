@@ -14,10 +14,10 @@
 - name: Backup existing etcd CA certificate directories
   hosts: oo_etcd_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup_ca_certificates.yml
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: remove_ca_certificates.yml
 
@@ -37,7 +37,7 @@
 - name: Distribute etcd CA to etcd hosts
   hosts: oo_etcd_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: distribute_ca.yml
     vars:
@@ -54,7 +54,7 @@
 - name: Retrieve etcd CA certificate
   hosts: oo_first_etcd
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: retrieve_ca_certificates.yml
     vars:

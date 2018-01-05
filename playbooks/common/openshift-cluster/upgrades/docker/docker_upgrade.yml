@@ -16,7 +16,7 @@
       msg: Cannot upgrade Docker on Atomic operating systems.
     when: openshift_is_atomic | bool
 
-  - include_role:
+  - import_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml
     when: docker_upgrade is not defined or docker_upgrade | bool

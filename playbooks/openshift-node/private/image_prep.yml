@@ -15,7 +15,7 @@
 - name: node bootstrap config
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
   tasks:
-    - include_role:
+    - import_role:
         name: openshift_node
         tasks_from: bootstrap.yml
 

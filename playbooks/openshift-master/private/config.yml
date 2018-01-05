@@ -206,13 +206,13 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   tasks:
-  - include_role:
+  - import_role:
       name: kuryr
       tasks_from: master
     when: openshift_use_kuryr | default(false) | bool
 
   - name: Setup the node group config maps
-    include_role:
+    import_role:
       name: openshift_node_group
     when: openshift_master_bootstrap_enabled | default(false) | bool
     run_once: True

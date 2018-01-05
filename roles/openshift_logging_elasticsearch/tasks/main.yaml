@@ -181,7 +181,7 @@
   changed_when: no
 
 # create diff between current configmap files and our current files
-- include_role:
+- import_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
   vars:

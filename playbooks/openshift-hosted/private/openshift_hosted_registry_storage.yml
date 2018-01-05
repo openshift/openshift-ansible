@@ -5,7 +5,7 @@
 - name: Poll for hosted pod deployments
   hosts: oo_first_master
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_hosted
       tasks_from: registry_storage.yml
     when:
