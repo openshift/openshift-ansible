@@ -1,0 +1,90 @@
+---
+- name: Stat for Contrail docker images
+  stat:
+    path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+  register: image
+  with_items:
+  - contrail-agent
+  - contrail-kubernetes-agent
+
+- name: Stat for loopback plugin
+  stat:
+    path: "/opt/cni/bin/loopback"
+  register: loopback
+
+- name: Copy Contrail docker images file to remote host if not present
+  copy:
+    src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+    dest: "/tmp"
+  when: item.stat.exists == False
+  with_items: "{{ image.results }}"
+
+- name: Untar Contrail docker images file
+  unarchive:
+    src: "/tmp/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+    dest: "/tmp"
+    remote_src: yes
+  when: item.stat.exists == False
+  with_items: "{{ image.results }}"
+
+- name: Load Contrail docker images
+  docker_image:
+    name: "{{ item }}"
+    tag: "{{ contrail_version }}"
+    timeout: 300
+    load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+  with_items: "{{ image.results }}"
+  
+- name: Add iptable rules to open ports used by Contrail services
+  command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
+  with_items:
+    - { port: '8085', service: 'contrail-vrouter-agent-introspect' }
+
+- when:
+  - loopback.stat.exists == False
+  
+  block:
+  - name: Ensure CNI bin path exists
+    file:
+      path: "/opt/cni/bin"
+      recurse: yes
+      state: directory
+      
+  - name: Download & extract loopback CNI binary
+    unarchive:
+      src: "https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ cni_version }}.tgz"
+      dest: "/opt/cni/bin"
+      mode: a+x
+      remote_src: yes
+
+- when:
+  - inventory_hostname == contrail_master
+
+  block:
+  - name: Add Contrail service account to privileged scc
+    oc_adm_policy_user:
+      user: system:serviceaccount:kube-system:contrail
+      resource_kind: scc
+      resource_name: privileged
+      state: present
+    delegate_to: "{{ contrail_master }}"
+
+  - name: Add the daemonset-controller service account to privileged scc
+    oc_adm_policy_user:
+      user: system:serviceaccount:kube-system:daemon-set-controller
+      resource_kind: scc
+      resource_name: privileged
+      state: present
+    delegate_to: "{{ contrail_master }}"
+
+  - name: Label master nodes with opencontrail.org/controller=true
+    command: oc label nodes {{ openshift.common.hostname }} opencontrail.org/controller=true --overwrite=true
+    delegate_to: "{{ contrail_master }}"
+
+  - name: Make master schedulable
+    command: oadm manage-node {{ openshift.common.hostname }} --schedulable
+    delegate_to: "{{ contrail_master }}"
+
+  - name: Launch the Contrail installer
+    command: oc create -f /tmp/contrail-installer.yaml
+    delegate_to: "{{ contrail_master }}"
