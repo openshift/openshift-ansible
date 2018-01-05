@@ -4,7 +4,7 @@
   gather_facts: no
   tasks:
   - name: create a vpc
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: vpc.yml
     when: openshift_aws_create_vpc | default(True) | bool

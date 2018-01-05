@@ -1,0 +1,4 @@
+---
+- include_tasks: storage/glusterfs.yml
+  when:
+  - openshift_hosted_registry_storage_kind | default(none) == 'glusterfs' or openshift_hosted_registry_storage_glusterfs_swap

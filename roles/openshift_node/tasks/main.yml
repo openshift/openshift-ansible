@@ -3,7 +3,7 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
     - (not ansible_selinux or ansible_selinux.status != 'enabled')
-    - deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     - not openshift_use_crio
 
 - include_tasks: dnsmasq_install.yml
@@ -99,7 +99,3 @@
 
 - include_tasks: config/workaround-bz1331590-ovs-oom-fix.yml
   when: openshift_node_use_openshift_sdn | default(true) | bool
-
-- name: include bootstrap node config
-  include_tasks: bootstrap.yml
-  when: openshift_node_bootstrap

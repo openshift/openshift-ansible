@@ -1,0 +1,37 @@
+---
+openshift_logging_use_mux: false
+openshift_logging_use_ops: true
+openshift_logging_es_log_appenders:
+  - "console"
+openshift_logging_fluentd_journal_read_from_head: false
+openshift_logging_fluentd_audit_container_engine: true
+
+openshift_logging_curator_cpu_request: "100m"
+openshift_logging_curator_memory_limit: "32Mi"
+openshift_logging_curator_ops_cpu_request: "100m"
+openshift_logging_curator_ops_memory_limit: "32Mi"
+openshift_logging_elasticsearch_proxy_cpu_request: "100m"
+openshift_logging_elasticsearch_proxy_memory_limit: "32Mi"
+openshift_logging_es_cpu_request: "400m"
+openshift_logging_es_memory_limit: "4Gi"
+openshift_logging_es_ops_cpu_request: "400m"
+openshift_logging_es_ops_memory_limit: "4Gi"
+openshift_logging_eventrouter_cpu_request: "100m"
+openshift_logging_eventrouter_memory_limit: "64Mi"
+openshift_logging_fluentd_cpu_request: "100m"
+openshift_logging_fluentd_memory_limit: "256Mi"
+openshift_logging_kibana_cpu_request: "100m"
+openshift_logging_kibana_memory_limit: "128Mi"
+openshift_logging_kibana_ops_cpu_request: "100m"
+openshift_logging_kibana_ops_memory_limit: "128Mi"
+openshift_logging_kibana_ops_proxy_cpu_request: "100m"
+openshift_logging_kibana_ops_proxy_memory_limit: "64Mi"
+openshift_logging_kibana_proxy_cpu_request: "100m"
+openshift_logging_kibana_proxy_memory_limit: "64Mi"
+openshift_logging_mux_cpu_request: "400m"
+openshift_logging_mux_memory_limit: "256Mi"
+
+# TODO: remove this once we have oauth-proxy images built that are in step
+#       with the logging images (version and prefix)
+openshift_logging_elasticsearch_proxy_image_prefix: "docker.io/openshift/"
+openshift_logging_elasticsearch_proxy_image_version: "v1.0.0"

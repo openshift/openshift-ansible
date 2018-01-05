@@ -15,10 +15,10 @@
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
-- name: Set default image variables based on deployment_type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "{{ openshift_deployment_type }}.yml"
     - "default_images.yml"
   loop_control:
     loop_var: var_file_name
@@ -168,33 +168,31 @@
   when: es_logging_contents is undefined
   changed_when: no
 
-- set_fact:
-    __es_num_of_shards: "{{ _es_configmap | default({}) | walk('index.number_of_shards', '1') }}"
-    __es_num_of_replicas: "{{ _es_configmap | default({}) | walk('index.number_of_replicas', '0') }}"
-
 - template:
     src: elasticsearch.yml.j2
     dest: "{{ tempdir }}/elasticsearch.yml"
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
-    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(None) or __es_num_of_shards }}"
-    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas | default(None) or __es_num_of_replicas }}"
+    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
 
   when: es_config_contents is undefined
   changed_when: no
 
-- copy:
-    content: "{{ es_logging_contents }}"
-    dest: "{{ tempdir }}/elasticsearch-logging.yml"
-  when: es_logging_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ es_config_contents }}"
-    dest: "{{ tempdir }}/elasticsearch.yml"
-  when: es_config_contents is defined
-  changed_when: no
+# create diff between current configmap files and our current files
+- import_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-elasticsearch"
+    configmap_namespace: "logging"
+    configmap_file_names:
+      - current_file: "elasticsearch.yml"
+        new_file: "{{ tempdir }}/elasticsearch.yml"
+        protected_lines: ["number_of_shards", "number_of_replicas"]
+      - current_file: "logging.yml"
+        new_file: "{{ tempdir }}/elasticsearch-logging.yml"
 
 - name: Set ES configmap
   oc_configmap:

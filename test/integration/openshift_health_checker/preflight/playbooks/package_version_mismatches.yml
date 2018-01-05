@@ -4,7 +4,7 @@
   vars:
     image: preflight-aos-package-checks
     l_host_vars:
-      deployment_type: openshift-enterprise
+      openshift_deployment_type: openshift-enterprise
       openshift_release: 3.2
 
 - name: Failure when AOS version doesn't match openshift_release

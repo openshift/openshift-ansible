@@ -28,7 +28,7 @@ Example Playbook
   remote_user: root
   tasks:
   - name: include role autoscaler
-    include_role:
+    import_role:
       name: openshift_cluster_autoscaler
     vars:
       openshift_clusterid: opstest

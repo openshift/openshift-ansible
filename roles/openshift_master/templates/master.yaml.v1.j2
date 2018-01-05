@@ -152,8 +152,8 @@ oauthConfig:
 {% if 'oauth_always_show_provider_selection' in openshift.master %}
   alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
 {% endif %}
-{% if 'oauth_templates' in openshift.master %}
-  templates:{{ openshift.master.oauth_templates | lib_utils_to_padded_yaml(level=2) }}
+{% if l_openshift_master_oauth_templates %}
+  templates:{{ l_openshift_master_oauth_templates | lib_utils_to_padded_yaml(level=2) }}
 {% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:

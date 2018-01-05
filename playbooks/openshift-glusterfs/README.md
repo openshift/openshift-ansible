@@ -63,7 +63,7 @@ glusterfs
 
 [OSEv3:vars]
 ansible_ssh_user=root
-deployment_type=origin
+openshift_deployment_type=origin
 
 [masters]
 master

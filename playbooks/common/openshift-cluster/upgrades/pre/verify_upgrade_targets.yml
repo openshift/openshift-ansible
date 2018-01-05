@@ -5,7 +5,7 @@
   when: openshift.common.version is not defined
 
 - name: Update oreg_auth docker login credentials if necessary
-  include_role:
+  import_role:
     name: container_runtime
     tasks_from: registry_auth.yml
   when: oreg_auth_user is defined
@@ -49,5 +49,5 @@
   fail:
     msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
   when:
-  - deployment_type == 'origin'
+  - openshift_deployment_type == 'origin'
   - openshift.common.version is version_compare(openshift_upgrade_min,'<')

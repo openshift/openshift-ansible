@@ -8,6 +8,7 @@ openshift_openstack_num_etcd: 0
 openshift_openstack_num_masters: 1
 openshift_openstack_num_nodes: 1
 openshift_openstack_num_infra: 1
+openshift_openstack_num_cns: 0
 openshift_openstack_dns_nameservers: []
 openshift_openstack_nodes_to_remove: []
 
@@ -57,6 +58,7 @@ openshift_openstack_stack_name: "{{ openshift_openstack_clusterid }}.{{ openshif
 openshift_openstack_subnet_prefix: "192.168.99"
 openshift_openstack_master_hostname: master
 openshift_openstack_infra_hostname: infra-node
+openshift_openstack_cns_hostname: cns
 openshift_openstack_node_hostname: app-node
 openshift_openstack_lb_hostname: lb
 openshift_openstack_etcd_hostname: etcd
@@ -66,8 +68,10 @@ openshift_openstack_etcd_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_master_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_node_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_infra_flavor: "{{ openshift_openstack_default_flavor }}"
+openshift_openstack_cns_flavor: "{{ openshift_openstack_default_flavor }}"
 openshift_openstack_master_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_infra_image: "{{ openshift_openstack_default_image_name }}"
+openshift_openstack_cns_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_node_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_lb_image: "{{ openshift_openstack_default_image_name }}"
 openshift_openstack_etcd_image: "{{ openshift_openstack_default_image_name }}"
@@ -84,6 +88,7 @@ openshift_openstack_infra_server_group_policies: []
 openshift_openstack_docker_volume_size: 15
 openshift_openstack_master_volume_size: "{{ openshift_openstack_docker_volume_size }}"
 openshift_openstack_infra_volume_size: "{{ openshift_openstack_docker_volume_size }}"
+openshift_openstack_cns_volume_size: "{{ openshift_openstack_docker_volume_size }}"
 openshift_openstack_node_volume_size: "{{ openshift_openstack_docker_volume_size }}"
 openshift_openstack_etcd_volume_size: 2
 openshift_openstack_lb_volume_size: 5

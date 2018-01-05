@@ -192,7 +192,7 @@ The only thing we change here is adding `log_only=True` to the
         """
         delegated_vars = result._result.get('_ansible_delegated_vars', None)
         self._clean_results(result._result, result._task.action)
-        if result._task.action in ('include', 'include_role'):
+        if result._task.action in ('include', 'import_role'):
             return
         elif result._result.get('changed', False):
             if delegated_vars:
@@ -220,7 +220,7 @@ The only thing we change here is adding `log_only=True` to the
     def v2_runner_item_on_ok(self, result):
         """Print out task results for items you're iterating over"""
         delegated_vars = result._result.get('_ansible_delegated_vars', None)
-        if result._task.action in ('include', 'include_role'):
+        if result._task.action in ('include', 'import_role'):
             return
         elif result._result.get('changed', False):
             msg = 'changed'

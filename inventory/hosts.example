@@ -84,6 +84,9 @@ openshift_release=v3.7
 
 # Configure extensions in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
+#openshift_master_oauth_templates:
+#  login: /path/to/login-template.html
+# openshift_master_oauth_template is deprecated.  Use openshift_master_oauth_templates instead.
 #openshift_master_oauth_template=/path/to/login-template.html
 
 # Configure imagePolicyConfig in the master config
@@ -941,7 +944,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/log/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}
 
 # Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
-# by deployment_type=origin
+# by openshift_deployment_type=origin
 #openshift_enable_origin_repo=false
 
 # Validity of the auto-generated OpenShift certificates in days.

@@ -3,5 +3,5 @@
   hosts: oo_first_master
   gather_facts: false
   tasks:
-    - include_role:
+    - import_role:
         name: openshift_docker_gc
