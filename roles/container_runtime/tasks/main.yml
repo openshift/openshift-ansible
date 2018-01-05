@@ -1,2 +1,2 @@
 ---
-# This role is meant to be used with include_role and tasks_from.
+# This role is meant to be used with import_role and tasks_from.

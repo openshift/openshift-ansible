@@ -21,7 +21,7 @@
   serial: 1
   tasks:
   - name: Setup the non-first masters configs
-    include_role:
+    import_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
 

@@ -5,7 +5,7 @@
   - set_fact:
       openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
     when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
-  - include_role:
+  - import_role:
       name: openshift_hosted
       tasks_from: router.yml
     when:

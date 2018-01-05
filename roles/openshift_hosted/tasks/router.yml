@@ -98,9 +98,3 @@
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
-
-- name: Wait for pod (Routers)
-  include_tasks: wait_for_pod.yml
-  vars:
-    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
-    l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"

@@ -348,21 +348,10 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             # --syntax-check each entry point playbook
             try:
                 # Create a host group list to avoid WARNING on unmatched host patterns
-                host_group_list = [
-                    'etcd,masters,nodes,OSEv3',
-                    'oo_all_hosts',
-                    'oo_etcd_to_config,oo_new_etcd_to_config,oo_first_etcd,oo_etcd_hosts_to_backup,'
-                    'oo_etcd_hosts_to_upgrade,oo_etcd_to_migrate',
-                    'oo_masters,oo_masters_to_config,oo_first_master,oo_containerized_master_nodes',
-                    'oo_nodes_to_config,oo_nodes_to_upgrade',
-                    'oo_nodes_use_kuryr,oo_nodes_use_flannel',
-                    'oo_nodes_use_calico,oo_nodes_use_nuage,oo_nodes_use_contiv',
-                    'oo_lb_to_config',
-                    'oo_nfs_to_config',
-                    'glusterfs,glusterfs_registry,']
+                tox_ansible_inv = os.environ['TOX_ANSIBLE_INV_PATH']
                 subprocess.check_output(
-                    ['ansible-playbook', '-i ' + ','.join(host_group_list),
-                     '--syntax-check', playbook]
+                    ['ansible-playbook', '-i', tox_ansible_inv,
+                     '--syntax-check', playbook, '-e', '@{}_extras'.format(tox_ansible_inv)]
                 )
             except subprocess.CalledProcessError as cpe:
                 print('{}Execution failed: {}{}'.format(

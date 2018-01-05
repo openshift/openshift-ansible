@@ -1,0 +1,4 @@
+---
+openshift_check_min_host_disk_gb: 10
+openshift_check_min_host_memory_gb: 8
+openshift_disable_check: package_update,package_availability

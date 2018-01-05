@@ -42,7 +42,10 @@ def build_inventory():
            if server.metadata['host-type'] == 'node' and
            server.metadata['sub-host-type'] == 'app']
 
-    nodes = list(set(masters + infra_hosts + app))
+    cns = [server.name for server in cluster_hosts
+           if server.metadata['host-type'] == 'cns']
+
+    nodes = list(set(masters + infra_hosts + app + cns))
 
     dns = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'dns']
@@ -59,6 +62,7 @@ def build_inventory():
     inventory['nodes'] = {'hosts': nodes}
     inventory['infra_hosts'] = {'hosts': infra_hosts}
     inventory['app'] = {'hosts': app}
+    inventory['glusterfs'] = {'hosts': cns}
     inventory['dns'] = {'hosts': dns}
     inventory['lb'] = {'hosts': load_balancers}
 
@@ -92,6 +96,9 @@ def build_inventory():
             hostvars['openshift_ip'] = server.private_v4
             hostvars['openshift_hostname'] = server.private_v4
         hostvars['openshift_public_hostname'] = server.name
+
+        if server.metadata['host-type'] == 'cns':
+            hostvars['glusterfs_devices'] = ['/dev/nvme0n1']
 
         node_labels = server.metadata.get('node_labels')
         if node_labels:

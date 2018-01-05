@@ -1,0 +1,4 @@
+---
+# Using extra_vars is typically not ideal.  Please don't use extra_vars
+# unless there is no other way to accomplish a task.
+openshift_this_var_is_not_used: True

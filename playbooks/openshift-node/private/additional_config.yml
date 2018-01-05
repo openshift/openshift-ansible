@@ -57,7 +57,7 @@
 - name: Configure Kuryr node
   hosts: oo_nodes_use_kuryr
   tasks:
-  - include_role:
+  - import_role:
       name: kuryr
       tasks_from: node
     when: openshift_use_kuryr | default(false) | bool

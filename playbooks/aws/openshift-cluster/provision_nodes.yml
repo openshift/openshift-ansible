@@ -13,6 +13,6 @@
       msg: "openshift_aws_region={{ openshift_aws_region | default('us-east-1') }}"
 
   - name: create the node groups
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: provision_nodes.yml

@@ -20,7 +20,7 @@
   hosts: oo_masters:!oo_first_master
   tasks:
   - block:
-    - include_role:
+    - import_role:
         name: openshift_logging
         tasks_from: update_master_config
 

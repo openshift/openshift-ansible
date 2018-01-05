@@ -7,6 +7,6 @@
   become: no
   tasks:
   - name: seal the ami
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: seal_ami.yml

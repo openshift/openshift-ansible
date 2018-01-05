@@ -5,7 +5,6 @@
 # - node_config_hook
 # - openshift_pkg_version
 # - openshift_is_containerized
-# - deployment_type
 # - openshift_release
 
 # tasks file for openshift_node_upgrade

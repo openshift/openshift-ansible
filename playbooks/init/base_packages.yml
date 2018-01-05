@@ -1,0 +1,37 @@
+---
+- name: Ensure that all non-node hosts are accessible
+  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config
+  any_errors_fatal: true
+  tasks:
+  - when:
+    - not openshift_is_atomic | bool
+    block:
+    - name: Ensure openshift-ansible installer package deps are installed
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+      - iproute
+      - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
+      - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
+      - yum-utils
+      register: result
+      until: result is succeeded
+
+    - name: Ensure various deps for running system containers are installed
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+      - atomic
+      - ostree
+      - runc
+      when:
+      - >
+        (openshift_use_system_containers | default(False)) | bool
+        or (openshift_use_etcd_system_container | default(False)) | bool
+        or (openshift_use_openvswitch_system_container | default(False)) | bool
+        or (openshift_use_node_system_container | default(False)) | bool
+        or (openshift_use_master_system_container | default(False)) | bool
+      register: result
+      until: result is succeeded
