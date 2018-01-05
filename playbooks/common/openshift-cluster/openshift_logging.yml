@@ -13,4 +13,5 @@
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
+      static: true
     when: openshift_logging_install_logging | default(false) | bool

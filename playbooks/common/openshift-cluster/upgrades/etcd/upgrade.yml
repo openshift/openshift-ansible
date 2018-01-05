@@ -110,3 +110,4 @@
     when:
     - ansible_distribution == 'Fedora'
     - not openshift.common.is_containerized | bool
+    static: true

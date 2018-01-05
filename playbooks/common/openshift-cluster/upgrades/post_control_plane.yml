@@ -16,7 +16,7 @@
   - name: Load lib_openshift modules
     include_role:
       name: lib_openshift
-    static: yes
+    static: true
 
   - name: Collect all routers
     oc_obj:

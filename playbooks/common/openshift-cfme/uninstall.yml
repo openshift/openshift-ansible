@@ -6,3 +6,4 @@
     include_role:
       name: openshift_cfme
       tasks_from: uninstall
+    static: true

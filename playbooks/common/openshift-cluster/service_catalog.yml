@@ -11,6 +11,7 @@
         tasks_from: wire_aggregator
       vars:
         first_master: "{{ groups.oo_first_master[0] }}"
+      static: true
 
 - name: Service Catalog
   hosts: oo_first_master

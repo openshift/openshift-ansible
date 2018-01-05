@@ -9,6 +9,7 @@
     name: docker
     tasks_from: registry_auth.yml
   when: oreg_auth_user is defined
+  static: true
 
 - name: Verify containers are available for upgrade
   command: >

@@ -63,10 +63,12 @@
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
+      static: true
     when: openshift_hosted_logging_deploy | default(false) | bool
 
   - block:
     - include_role:
         name: openshift_metrics
         tasks_from: update_master_config
+      static: true
     when: openshift_hosted_metrics_deploy | default(false) | bool
