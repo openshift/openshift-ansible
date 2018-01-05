@@ -98,6 +98,7 @@
 - include_role:
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
+  static: true
   vars:
     configmap_name: "logging-mux"
     configmap_namespace: "{{ openshift_logging_mux_namespace }}"

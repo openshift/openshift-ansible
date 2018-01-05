@@ -8,6 +8,7 @@
   - include_role:
       name: openshift_hosted
       tasks_from: registry_storage.yml
+    static: true
     when:
     - openshift_hosted_manage_registry | default(True) | bool
     - openshift_hosted_registry_registryurl is defined

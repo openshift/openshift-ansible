@@ -23,6 +23,7 @@
     - include_role:
         name: openshift_logging
         tasks_from: update_master_config
+      static: true
 
 - name: Logging Install Checkpoint End
   hosts: all

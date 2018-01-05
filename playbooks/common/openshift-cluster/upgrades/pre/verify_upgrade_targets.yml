@@ -8,6 +8,7 @@
   include_role:
     name: container_runtime
     tasks_from: registry_auth.yml
+  static: true
   when: oreg_auth_user is defined
 
 - name: Verify containers are available for upgrade

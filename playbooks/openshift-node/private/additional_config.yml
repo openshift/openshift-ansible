@@ -60,4 +60,5 @@
   - include_role:
       name: kuryr
       tasks_from: node
+    static: true
     when: openshift_use_kuryr | default(false) | bool

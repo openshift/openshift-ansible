@@ -24,6 +24,7 @@
     include_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
+    static: true
 
 - name: Metrics Install Checkpoint End
   hosts: all

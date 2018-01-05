@@ -8,6 +8,7 @@
   - include_role:
       name: etcd
       tasks_from: ca.yml
+    static: true
     vars:
       etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
       etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"

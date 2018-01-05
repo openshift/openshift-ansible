@@ -2,6 +2,7 @@
 - name: Ensure OpenShift facts module is available
   include_role:
     role: openshift_facts
+  static: true
 
 - name: Ensure OpenShift facts are loaded
   openshift_facts:

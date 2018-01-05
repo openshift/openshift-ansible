@@ -209,11 +209,13 @@
   - include_role:
       name: kuryr
       tasks_from: master
+    static: true
     when: openshift_use_kuryr | default(false) | bool
 
   - name: Setup the node group config maps
     include_role:
       name: openshift_node_group
+    static: true
     when: openshift_master_bootstrap_enabled | default(false) | bool
     run_once: True
 

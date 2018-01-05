@@ -9,6 +9,7 @@
   - include_role:
       name: etcd
       tasks_from: upgrade_image.yml
+    static: true
     vars:
       r_etcd_upgrade_version: "{{ etcd_upgrade_version }}"
       etcd_peer: "{{ openshift.common.hostname }}"

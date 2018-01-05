@@ -10,3 +10,4 @@
     include_role:
       name: openshift_aws
       tasks_from: provision_instance.yml
+    static: true

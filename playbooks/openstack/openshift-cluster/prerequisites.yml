@@ -5,8 +5,10 @@
     include_role:
       name: openshift_openstack
       tasks_from: check-prerequisites.yml
+    static: true
 
   - name: Check network configuration
     include_role:
       name: openshift_openstack
       tasks_from: net_vars_check.yaml
+    static: true

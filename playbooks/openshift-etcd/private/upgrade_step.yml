@@ -5,6 +5,7 @@
   - include_role:
       name: etcd
       tasks_from: version_detect.yml
+    static: true
 
 - import_playbook: upgrade_rpm_members.yml
   vars:
@@ -57,6 +58,7 @@
   - include_role:
       name: etcd
       tasks_from: upgrade_image.yml
+    static: true
     vars:
       etcd_peer: "{{ openshift.common.hostname }}"
     when:

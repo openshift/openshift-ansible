@@ -118,6 +118,7 @@
   - include_role:
       name: openshift_hosted
       tasks_from: main
+    static: true
     vars:
       openshift_hosted_manage_registry: false
     when:

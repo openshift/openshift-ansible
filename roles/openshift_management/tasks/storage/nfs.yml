@@ -8,6 +8,7 @@
       include_role:
         role: openshift_nfs
         tasks_from: setup
+      static: true
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
 
@@ -15,6 +16,7 @@
       include_role:
         role: openshift_nfs
         tasks_from: create_export
+      static: true
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
         l_nfs_export_config: "{{ openshift_management_flavor_short }}"
@@ -25,6 +27,7 @@
       include_role:
         role: openshift_nfs
         tasks_from: create_export
+      static: true
       vars:
         l_nfs_base_dir: "{{ openshift_management_storage_nfs_base_dir }}"
         l_nfs_export_config: "{{ openshift_management_flavor_short }}"

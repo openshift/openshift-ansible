@@ -33,6 +33,7 @@
   - include_role:
       name: etcd
       tasks_from: server_certificates.yml
+    static: true
     vars:
       etcd_peers: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
@@ -79,3 +80,4 @@
   - include_role:
       name: openshift_master
       tasks_from: update_etcd_client_urls.yml
+    static: true

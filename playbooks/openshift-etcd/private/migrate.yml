@@ -18,6 +18,7 @@
   - include_role:
       name: etcd
       tasks_from: migrate.pre_check.yml
+    static: true
     vars:
       etcd_peer: "{{ ansible_default_ipv4.address }}"
 
@@ -46,6 +47,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.yml
+    static: true
     vars:
       r_etcd_common_backup_tag: pre-migration
       r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
@@ -73,6 +75,7 @@
   - include_role:
       name: etcd
       tasks_from: disable_etcd.yml
+    static: true
 
 - name: Migrate data on first etcd
   hosts: oo_etcd_to_migrate[0]
@@ -81,6 +84,7 @@
   - include_role:
       name: etcd
       tasks_from: migrate.yml
+    static: true
     vars:
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
@@ -93,6 +97,7 @@
   - include_role:
       name: etcd
       tasks_from: clean_data.yml
+    static: true
     vars:
       etcd_peer: "{{ openshift.common.ip }}"
       etcd_url_scheme: "https"
@@ -129,6 +134,7 @@
   - include_role:
       name: etcd
       tasks_from: migrate.add_ttls.yml
+    static: true
     vars:
       etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].openshift.common.ip }}"
       etcd_url_scheme: "https"
@@ -141,6 +147,7 @@
   - include_role:
       name: etcd
       tasks_from: migrate.configure_master.yml
+    static: true
     when: etcd_migration_failed | length == 0
   - debug:
       msg: "Skipping master re-configuration since migration failed."

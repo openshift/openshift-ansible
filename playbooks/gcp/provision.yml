@@ -8,6 +8,7 @@
   - name: provision a GCP cluster in the specified project
     include_role:
       name: openshift_gcp
+    static: true
 
 - name: run the cluster deploy
   import_playbook: ../deploy_cluster.yml

@@ -21,6 +21,7 @@
     include_role:
       name: openshift_master
       tasks_from: check_master_api_is_ready.yml
+    static: true
   - set_fact:
       master_service: "{{ openshift_service_type + '-master' }}"
       embedded_etcd_backup_suffix: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
@@ -35,6 +36,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.yml
+    static: true
     vars:
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
@@ -43,6 +45,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.archive.yml
+    static: true
     vars:
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_embedded_etcd: "{{ true }}"
@@ -59,6 +62,7 @@
   - include_role:
       name: etcd
       tasks_from: backup_master_etcd_certificates.yml
+    static: true
 
 - name: Redeploy master etcd certificates
   import_playbook: master_etcd_certificates.yml
@@ -76,9 +80,11 @@
   - include_role:
       name: etcd
       tasks_from: disable_etcd.yml
+    static: true
   - include_role:
       name: etcd
       tasks_from: clean_data.yml
+    static: true
 
 # 6. copy the embedded etcd backup to the external host
 # TODO(jchaloup): if the etcd and first master are on the same host, just copy the directory
@@ -94,6 +100,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.fetch.yml
+    static: true
     vars:
       etcd_backup_sync_directory: "{{ g_etcd_client_mktemp.stdout }}"
       r_etcd_common_backup_tag: pre-migrate
@@ -104,6 +111,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.copy.yml
+    static: true
     vars:
       etcd_backup_sync_directory: "{{ g_etcd_client_mktemp.stdout }}"
       r_etcd_common_backup_tag: pre-migrate
@@ -125,6 +133,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.unarchive.yml
+    static: true
     vars:
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
@@ -132,6 +141,7 @@
   - include_role:
       name: etcd
       tasks_from: backup.force_new_cluster.yml
+    static: true
     vars:
       r_etcd_common_backup_tag: pre-migrate
       r_etcd_common_backup_sufix_name: "{{ hostvars[groups.oo_first_master.0].embedded_etcd_backup_suffix }}"
@@ -146,6 +156,7 @@
   - include_role:
       name: openshift_master
       tasks_from: configure_external_etcd.yml
+    static: true
     vars:
       etcd_peer_url_scheme: "https"
       etcd_ip: "{{ hostvars[groups.oo_etcd_to_config.0].openshift.common.ip }}"

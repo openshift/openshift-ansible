@@ -11,6 +11,7 @@
     - include_role:
         name: container_runtime
         tasks_from: docker_storage_setup_overlay.yml
+      static: true
       when:
         - container_runtime_docker_storage_type|default('') == "overlay2"
         - openshift_docker_is_node_or_master | bool
