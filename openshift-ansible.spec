@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.26
+Version:        3.8.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,49 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jan 06 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.27-1
+- Migrate to import_role for static role inclusion (sdodson@redhat.com)
+- crio: create /etc/sysconfig/crio-storage (gscrivan@redhat.com)
+- crio: configure proxy variables (gscrivan@redhat.com)
+- Removing dependency on gcloud sdk (jupierce@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.16.0].
+  (smunilla@redhat.com)
+- Add gluster 3.9 templates (sdodson@redhat.com)
+- Add in-tree CI scripts (mgugino@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.15.0].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.14.0].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.13.0].
+  (smunilla@redhat.com)
+- Cast openshift_docker_use_system_container to bool (mgugino@redhat.com)
+- Correct kublet_args cloud-provider directories (mgugino@redhat.com)
+- Updating logging_facts to be able to pull values from config maps yaml files,
+  use diffs to keep custom changes, white list certain settings when creating
+  diffs (ewolinet@redhat.com)
+- Add docker auth credentials to system container install (mgugino@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.12.0].
+  (smunilla@redhat.com)
+- OpenStack provisioning -- support cns. (jmencak@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.11.0].
+  (smunilla@redhat.com)
+- Bug 1527178 - installation of logging stack failed: Invalid version specified
+  for Elasticsearch (nhosoi@redhat.com)
+- Move wait_for_pods to it's own play openshift_hosted (mgugino@redhat.com)
+- Remove bootstrap.yml from main.yml in openshift_node role
+  (mgugino@redhat.com)
+- aws: Fix misnamed variable in provisioning_vars.yml.example
+  (mbarnes@fedoraproject.org)
+- Fix container_runtime openshift_containerized_host_groups
+  (mgugino@redhat.com)
+- Remove references to deployment_type (mgugino@redhat.com)
+- Must directly specify google-cloud-sdk version (ccoleman@redhat.com)
+- daemonset config role. (kwoodson@redhat.com)
+- Remove oauth_template bits from openshift_facts (mgugino@redhat.com)
+- Move validate_hosts to prerequisites.yml (mgugino@redhat.com)
+- Move sanity_checks into custom action plugin (mgugino@redhat.com)
+- Adding no_log to registry_auth. (kwoodson@redhat.com)
+
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.26-1
 - 
 
