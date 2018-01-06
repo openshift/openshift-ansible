@@ -1,9 +1,9 @@
 ---
 - name: Install etcd for etcdctl
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Configure etcd profile.d aliases
   template:

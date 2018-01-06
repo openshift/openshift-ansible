@@ -10,7 +10,7 @@
   - name: Ensure libselinux-python is installed
     package: name=libselinux-python state=present
     register: result
-    until: result | success
+    until: result is succeeded
 
   - name: Remove openshift_additional.repo file
     file:
@@ -36,6 +36,13 @@
   # Singleton block
   - when: r_openshift_repos_has_run is not defined
     block:
+
+    - include_tasks: rhel_repos.yml
+      when:
+      - ansible_distribution == 'RedHat'
+      - openshift_deployment_type == 'openshift-enterprise'
+      - rhsub_user is defined
+      - rhsub_pass is defined
 
     - include_tasks: centos_repos.yml
       when:

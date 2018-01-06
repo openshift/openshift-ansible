@@ -17,6 +17,7 @@ spec:
     logging-infra: "{{logging_component}}"
   strategy:
     type: Recreate
+  triggers: []
   template:
     metadata:
       name: "{{deploy_name}}"
@@ -49,7 +50,7 @@ spec:
            - -provider=openshift
            - -client-id={{openshift_logging_elasticsearch_prometheus_sa}}
            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
-           - -cookie-secret={{ 16 | oo_random_word | b64encode }}
+           - -cookie-secret={{ 16 | lib_utils_oo_random_word | b64encode }}
            - -upstream=https://localhost:9200
            - '-openshift-sar={"namespace": "{{ openshift_logging_elasticsearch_namespace}}", "verb": "view", "resource": "prometheus", "group": "metrics.openshift.io"}'
            - '-openshift-delegate-urls={"/": {"resource": "prometheus", "verb": "view", "group": "metrics.openshift.io", "namespace": "{{ openshift_logging_elasticsearch_namespace}}"}}'

@@ -12,4 +12,6 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
+- role: lib_utils
 - role: lib_openshift
+- role: openshift_facts

@@ -1,0 +1,43 @@
+---
+- name: Stop node and openvswitch services
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+  - "{{ openshift_service_type }}-node"
+  - openvswitch
+  failed_when: false
+
+- name: Ensure containerized services stopped before Docker restart
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+  - etcd_container
+  - openvswitch
+  - "{{ openshift_service_type }}-master-api"
+  - "{{ openshift_service_type }}-master-controllers"
+  - "{{ openshift_service_type }}-node"
+  failed_when: false
+  when: openshift_is_containerized | bool
+
+- service:
+    name: docker
+    state: stopped
+  register: l_openshift_node_upgrade_docker_stop_result
+  until: not (l_openshift_node_upgrade_docker_stop_result is failed)
+  retries: 3
+  delay: 30
+  when:
+  - l_docker_upgrade is defined
+  - l_docker_upgrade | bool
+
+- name: Stop rpm based services
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+  - "{{ openshift_service_type }}-node"
+  - openvswitch
+  failed_when: false
+  when: not openshift_is_containerized | bool

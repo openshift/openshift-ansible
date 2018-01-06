@@ -14,3 +14,4 @@ galaxy_info:
 dependencies:
 - role: lib_openshift
 - role: openshift_facts
+- role: lib_utils

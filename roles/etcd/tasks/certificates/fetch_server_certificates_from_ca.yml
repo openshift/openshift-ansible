@@ -5,7 +5,7 @@
     state: present
   when: not etcd_is_containerized | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: Check status of etcd certificates
   stat:
@@ -21,7 +21,7 @@
     etcd_server_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
                                    else (False in (g_etcd_server_cert_stat_result.results
                                                    | default({})
-                                                   | oo_collect(attribute='stat.exists')
+                                                   | lib_utils_oo_collect(attribute='stat.exists')
                                                    | list)) }}"
 
 - name: Ensure generated_certs directory present
@@ -105,13 +105,6 @@
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
-- name: Create local temp directory for syncing certs
-  local_action: command mktemp -d /tmp/etcd_certificates-XXXXXXX
-  become: no
-  register: g_etcd_server_mktemp
-  changed_when: False
-  when: etcd_server_certs_missing | bool
-
 - name: Create a tarball of the etcd certs
   command: >
     tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
@@ -127,8 +120,7 @@
 - name: Retrieve etcd cert tarball
   fetch:
     src: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
-    dest: "{{ g_etcd_server_mktemp.stdout }}/"
-    flat: yes
+    dest: "/tmp"
     fail_on_missing: yes
     validate_checksum: yes
   when: etcd_server_certs_missing | bool
@@ -144,7 +136,7 @@
 
 - name: Unarchive cert tarball
   unarchive:
-    src: "{{ g_etcd_server_mktemp.stdout }}/{{ etcd_cert_subdir }}.tgz"
+    src: "/tmp/{{ inventory_hostname }}/{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
   when: etcd_server_certs_missing | bool
 
@@ -161,8 +153,7 @@
 - name: Retrieve etcd ca cert tarball
   fetch:
     src: "{{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz"
-    dest: "{{ g_etcd_server_mktemp.stdout }}/"
-    flat: yes
+    dest: "/tmp"
     fail_on_missing: yes
     validate_checksum: yes
   when: etcd_server_certs_missing | bool
@@ -177,8 +168,7 @@
   when: etcd_server_certs_missing | bool
 
 - name: Delete temporary directory
-  local_action: file path="{{ g_etcd_server_mktemp.stdout }}" state=absent
-  become: no
+  local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
   changed_when: False
   when: etcd_server_certs_missing | bool
 

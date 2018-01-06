@@ -1,6 +1,6 @@
 ---
 - name: Ensure OpenShift facts module is available
-  include_role:
+  import_role:
     role: openshift_facts
 
 - name: Ensure OpenShift facts are loaded
@@ -27,7 +27,7 @@
 
 - name: Ensure the management SA bearer token is identified
   set_fact:
-    management_token: "{{ sa.results | oo_filter_sa_secrets }}"
+    management_token: "{{ sa.results | lib_utils_oo_filter_sa_secrets }}"
 
 - name: Ensure the SA bearer token value is read
   oc_secret:

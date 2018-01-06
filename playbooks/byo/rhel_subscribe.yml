@@ -6,8 +6,9 @@
   roles:
   - role: rhel_subscribe
     when:
-    - deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     - ansible_distribution == "RedHat"
-    - lookup('env', 'rhel_skip_subscription') | default(rhsub_skip, True) | default('no', True) | lower in ['no', 'false']
+    - rhsub_user is defined
+    - rhsub_pass is defined
   - role: openshift_repos
   - role: os_update_latest

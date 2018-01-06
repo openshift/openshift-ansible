@@ -1,7 +1,7 @@
 ---
 - name: Checking generation of {{file_content.kind}} {{file_content.metadata.name}}
   command: >
-    {{ openshift.common.client_binary }}
+    {{ openshift_client_binary }}
     --config={{ kubeconfig }}
     get {{file_content.kind}} {{file_content.metadata.name}}
     -o jsonpath='{.metadata.resourceVersion}'
@@ -12,7 +12,7 @@
 
 - name: Applying {{file_name}}
   command: >
-    {{ openshift.common.client_binary }} --config={{ kubeconfig }}
+    {{ openshift_client_binary }} --config={{ kubeconfig }}
     apply -f {{ file_name }}
     -n {{namespace}}
   register: generation_apply
@@ -21,7 +21,7 @@
 
 - name: Determine change status of {{file_content.kind}} {{file_content.metadata.name}}
   command: >
-    {{ openshift.common.client_binary }} --config={{ kubeconfig }}
+    {{ openshift_client_binary }} --config={{ kubeconfig }}
     get {{file_content.kind}} {{file_content.metadata.name}}
     -o jsonpath='{.metadata.resourceVersion}'
     -n {{namespace}}

@@ -1,7 +1,4 @@
 ---
-# origin uses community packages named 'origin'
-# openshift-enterprise uses Red Hat packages named 'atomic-openshift'
-known_openshift_deployment_types: ['origin', 'openshift-enterprise']
 
 __deprecation_header: "[DEPRECATION WARNING]:"
 

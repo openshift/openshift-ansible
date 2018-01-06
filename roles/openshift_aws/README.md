@@ -7,9 +7,9 @@ This role contains many task-areas to provision resources and perform actions
 against an AWS account for the purposes of dynamically building an openshift
 cluster.
 
-This role is primarily intended to be used with "include_role" and "tasks_from".
+This role is primarily intended to be used with "import_role" and "tasks_from".
 
-include_role can be called from the tasks section in a play.  See example
+import_role can be called from the tasks section in a play.  See example
 playbook below for reference.
 
 These task-areas are:
@@ -40,7 +40,7 @@ Example Playbook
 ----------------
 
 ```yaml
-- include_role:
+- import_role:
     name: openshift_aws
     tasks_from: vpc.yml
   vars:

@@ -3,7 +3,7 @@
 - name: Check we are not using node as a Docker container with CRI-O
   fail: msg='Cannot use CRI-O with node configured as a Docker container'
   when:
-    - openshift.common.is_containerized | bool
+    - openshift_is_containerized | bool
     - not l_is_node_system_container | bool
 
 - include_tasks: common/pre.yml
@@ -80,6 +80,17 @@
   template:
     dest: /etc/cni/net.d/openshift-sdn.conf
     src: 80-openshift-sdn.conf.j2
+
+- name: Create /etc/sysconfig/crio-storage
+  copy:
+    content: ""
+    dest: /etc/sysconfig/crio-storage
+    force: no
+
+- name: Create /etc/sysconfig/crio-network
+  template:
+    dest: /etc/sysconfig/crio-network
+    src: crio-network.j2
 
 - name: Start the CRI-O service
   systemd:

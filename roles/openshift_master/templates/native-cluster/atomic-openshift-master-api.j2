@@ -6,7 +6,7 @@ CONFIG_FILE={{ openshift_master_config_file }}
 {% elif openshift_push_via_dns | default(false) %}
 OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000
 {% endif %}
-{% if openshift.common.is_containerized | bool %}
+{% if openshift_is_containerized | bool %}
 IMAGE_VERSION={{ openshift_image_tag }}
 {% endif %}
 

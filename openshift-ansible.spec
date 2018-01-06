@@ -10,23 +10,20 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.5.0%{?dist}
+Release:        0.16.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
 Source0:        https://github.com/openshift/openshift-ansible/archive/%{commit}/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:      ansible >= 2.3
+Requires:      ansible >= 2.4.1
 Requires:      python2
 Requires:      python-six
 Requires:      tar
 Requires:      %{name}-docs = %{version}-%{release}
 Requires:      %{name}-playbooks = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
-Requires:      %{name}-filter-plugins = %{version}-%{release}
-Requires:      %{name}-lookup-plugins = %{version}-%{release}
-Requires:      %{name}-callback-plugins = %{version}-%{release}
 Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
@@ -52,8 +49,6 @@ popd
 # Base openshift-ansible install
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
-mkdir -p %{buildroot}%{_datadir}/ansible_plugins
-cp -rp library %{buildroot}%{_datadir}/ansible/%{name}/
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -88,31 +83,6 @@ rm -rf %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/*
 # touch a file in contiv so that it can be added to SCM's
 touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
 
-# openshift_master_facts symlinks filter_plugins/oo_filters.py from ansible_plugins/filter_plugins
-pushd %{buildroot}%{_datadir}/ansible/%{name}/roles/openshift_master_facts/filter_plugins
-ln -sf ../../../../../ansible_plugins/filter_plugins/oo_filters.py oo_filters.py
-popd
-
-# openshift-ansible-filter-plugins install
-cp -rp filter_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# openshift-ansible-lookup-plugins install
-cp -rp lookup_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# openshift-ansible-callback-plugins install
-cp -rp callback_plugins %{buildroot}%{_datadir}/ansible_plugins/
-
-# create symlinks from /usr/share/ansible/plugins/lookup ->
-# /usr/share/ansible_plugins/lookup_plugins
-pushd %{buildroot}%{_datadir}
-mkdir -p ansible/plugins
-pushd ansible/plugins
-ln -s ../../ansible_plugins/lookup_plugins lookup
-ln -s ../../ansible_plugins/filter_plugins filter
-ln -s ../../ansible_plugins/callback_plugins callback
-popd
-popd
-
 # atomic-openshift-utils install
 pushd utils
 %{__python} setup.py install --skip-build --root %{buildroot}
@@ -131,7 +101,6 @@ popd
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
 %{_datadir}/ansible/%{name}/files
-%{_datadir}/ansible/%{name}/library
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
 # ----------------------------------------------------------------------------------
@@ -155,9 +124,6 @@ BuildArch:     noarch
 Summary:       Openshift and Atomic Enterprise Ansible Playbooks
 Requires:      %{name} = %{version}-%{release}
 Requires:      %{name}-roles = %{version}-%{release}
-Requires:      %{name}-lookup-plugins = %{version}-%{release}
-Requires:      %{name}-filter-plugins = %{version}-%{release}
-Requires:      %{name}-callback-plugins = %{version}-%{release}
 BuildArch:     noarch
 
 %description playbooks
@@ -198,9 +164,9 @@ end
 # ----------------------------------------------------------------------------------
 Summary:       Openshift and Atomic Enterprise Ansible roles
 Requires:      %{name} = %{version}-%{release}
-Requires:      %{name}-lookup-plugins = %{version}-%{release}
-Requires:      %{name}-filter-plugins = %{version}-%{release}
-Requires:      %{name}-callback-plugins = %{version}-%{release}
+Obsoletes:      %{name}-lookup-plugins
+Obsoletes:      %{name}-filter-plugins
+Obsoletes:      %{name}-callback-plugins
 BuildArch:     noarch
 
 %description roles
@@ -208,55 +174,6 @@ BuildArch:     noarch
 
 %files roles
 %{_datadir}/ansible/%{name}/roles
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-filter-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package filter-plugins
-Summary:       Openshift and Atomic Enterprise Ansible filter plugins
-Requires:      %{name} = %{version}-%{release}
-BuildArch:     noarch
-Requires:      pyOpenSSL
-
-%description filter-plugins
-%{summary}.
-
-%files filter-plugins
-%{_datadir}/ansible_plugins/filter_plugins
-%{_datadir}/ansible/plugins/filter
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-lookup-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package lookup-plugins
-Summary:       Openshift and Atomic Enterprise Ansible lookup plugins
-Requires:      %{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description lookup-plugins
-%{summary}.
-
-%files lookup-plugins
-%{_datadir}/ansible_plugins/lookup_plugins
-%{_datadir}/ansible/plugins/lookup
-
-
-# ----------------------------------------------------------------------------------
-# openshift-ansible-callback-plugins subpackage
-# ----------------------------------------------------------------------------------
-%package callback-plugins
-Summary:       Openshift and Atomic Enterprise Ansible callback plugins
-Requires:      %{name} = %{version}-%{release}
-BuildArch:     noarch
-
-%description callback-plugins
-%{summary}.
-
-%files callback-plugins
-%{_datadir}/ansible_plugins/callback_plugins
-%{_datadir}/ansible/plugins/callback
 
 # ----------------------------------------------------------------------------------
 # atomic-openshift-utils subpackage
@@ -285,6 +202,114 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.16.0
+- Add gluster 3.9 templates (sdodson@redhat.com)
+- Add in-tree CI scripts (mgugino@redhat.com)
+
+* Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.15.0
+- 
+
+* Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.14.0
+- Cast openshift_docker_use_system_container to bool (mgugino@redhat.com)
+- Correct kublet_args cloud-provider directories (mgugino@redhat.com)
+- Updating logging_facts to be able to pull values from config maps yaml files,
+  use diffs to keep custom changes, white list certain settings when creating
+  diffs (ewolinet@redhat.com)
+- Add docker auth credentials to system container install (mgugino@redhat.com)
+- Move wait_for_pods to it's own play openshift_hosted (mgugino@redhat.com)
+- Remove oauth_template bits from openshift_facts (mgugino@redhat.com)
+
+* Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.13.0
+- Bug 1527178 - installation of logging stack failed: Invalid version specified
+  for Elasticsearch (nhosoi@redhat.com)
+- Remove bootstrap.yml from main.yml in openshift_node role
+  (mgugino@redhat.com)
+
+* Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.12.0
+- 
+
+* Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.11.0
+- aws: Fix misnamed variable in provisioning_vars.yml.example
+  (mbarnes@fedoraproject.org)
+- Fix container_runtime openshift_containerized_host_groups
+  (mgugino@redhat.com)
+- Remove references to deployment_type (mgugino@redhat.com)
+- Must directly specify google-cloud-sdk version (ccoleman@redhat.com)
+- daemonset config role. (kwoodson@redhat.com)
+- Move validate_hosts to prerequisites.yml (mgugino@redhat.com)
+- Move sanity_checks into custom action plugin (mgugino@redhat.com)
+- Remove openshift.common.{is_atomic|is_containerized} (mgugino@redhat.com)
+- Adding support for docker-storage-setup on overlay (kwoodson@redhat.com)
+- Add gcloud to the installer image (ccoleman@redhat.com)
+- Remove some small items from openshift_facts (mgugino@redhat.com)
+- Relocate filter plugins to lib_utils (mgugino@redhat.com)
+- Fix hosted_reg_router selectors (mgugino@redhat.com)
+- set repos after registration: convert to match task -> import_role model.
+  (markllama@gmail.com)
+- Remove openshift_node_facts role (mgugino@redhat.com)
+- Move node group tags to openshift_aws_{master,node}_group.
+  (abutcher@redhat.com)
+- Add CentOS-OpenShift-Origin37 repo template. (abutcher@redhat.com)
+- Adding no_log to registry_auth. (kwoodson@redhat.com)
+- Fix rhel_repos disable command (mazzystr@gmail.com)
+- Fix rhel_subscribe boolean (mgugino@redhat.com)
+- Move repo and subscribe to prerequisites (mgugino@redhat.com)
+- Deprecate using Ansible tests as filters (rteague@redhat.com)
+- Removing config trigger for ES DC, updating to use a handler to rollout ES at
+  the end of a deployment, allowing for override with variable
+  (ewolinet@redhat.com)
+- openshift_logging_{fluentd,mux}_file_buffer_limit mismatch
+  (nhosoi@redhat.com)
+- Update version check to Ansible 2.4.1 (rteague@redhat.com)
+- Remove openshift_node_facts part 1 (mgugino@redhat.com)
+- Validate node hostname and IP address (rteague@redhat.com)
+- Add missing openshift_service_type (mgugino@redhat.com)
+- prevent TSB pods from spinning on inappropriate nodes (jminter@redhat.com)
+- Add readiness probe to kuryr controller pod (ltomasbo@redhat.com)
+
+* Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.10.0
+- Bump requirements.txt to Ansible 2.4.1 (rteague@redhat.com)
+- Commit to stabalize RHSM operations.  This code is derived from contrib
+  (mazzystr@gmail.com)
+- Contiv systemd fixes (flamingo@2thebatcave.com)
+- Combine openshift_master/vars with defaults (mgugino@redhat.com)
+- crio: change socket path to /var/run/crio/crio.sock (gscrivan@redhat.com)
+- Remove version requirement from openvswitch package, since listed version got
+  removed from repo (riffraff@hobbes.alephone.org)
+
+* Thu Dec 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.9.0
+- etcd: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- docker: use Fedora /latest/ instead of hardcoding the version
+  (gscrivan@redhat.com)
+- upgrade node mark 2 (mgugino@redhat.com)
+- Refactor node upgrade to include less serial tasks (mgugino@redhat.com)
+- fix 1519808. Only annotate ops projects when openshift_logging_use_ops=true
+  (jcantril@redhat.com)
+- Ensure that clients are version bound (sdodson@redhat.com)
+- Support for making glusterfs storage class a default one.
+  (jmencak@redhat.com)
+- Add support for storage classes to openshift_prometheus role.
+  (jmencak@redhat.com)
+- Do not escalate privileges in logging stack deployment task
+  (iacopo.rozzo@amadeus.com)
+- Multimaster openshift+contiv fixes (landillo@cisco.com)
+- Sync latest image-streams and templates (alexandre.lossent@cern.ch)
+
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.8.0
+- Remove empty openshift_hosted_facts role (mgugino@redhat.com)
+- Refactor upgrade codepaths step 1 (mgugino@redhat.com)
+
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.7.0
+- Remove bad openshift_examples symlink (rteague@redhat.com)
+- Changing the node group format to a list. (kwoodson@redhat.com)
+- Bump RPM version requirement (sdodson@redhat.com)
+- Clarify version selection in README (mgugino@redhat.com)
+
+* Tue Dec 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.6.0
+- add openshift_master_api_port var to example inventory (jdiaz@redhat.com)
+- Allow 2 sets of hostnames for openstack provider (bdobreli@redhat.com)
+
 * Mon Dec 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.5.0
 - Remove unneeded embedded etcd logic (mgugino@redhat.com)
 
@@ -383,7 +408,7 @@ Atomic OpenShift Utilities includes
 - Update prometheus to 2.0.0 GA (zgalor@redhat.com)
 - remove schedulable from openshift_facts (mgugino@redhat.com)
 - inventory: Add example for service catalog vars (smilner@redhat.com)
-- Correct usage of include_role (rteague@redhat.com)
+- Correct usage of import_role (rteague@redhat.com)
 - Remove openshift.common.cli_image (mgugino@redhat.com)
 - Fix openshift_env fact creation within openshift_facts. (abutcher@redhat.com)
 - Combine openshift_node and openshift_node_dnsmasq (mgugino@redhat.com)
@@ -976,7 +1001,7 @@ Atomic OpenShift Utilities includes
 - Renaming csr to bootstrap for consistency. (kwoodson@redhat.com)
 - Add master config upgrade hook to upgrade-all plays (mgugino@redhat.com)
 - Remove 'Not Started' status from playbook checkpoint (rteague@redhat.com)
-- Force include_role to static for loading openshift_facts module
+- Force import_role to static for loading openshift_facts module
   (rteague@redhat.com)
 - Make openshift-ansible depend on all subpackages (sdodson@redhat.com)
 - Refactor health check playbooks (rteague@redhat.com)
@@ -3704,9 +3729,9 @@ Atomic OpenShift Utilities includes
 - run node upgrade if master is node as part of the control plan upgrade only
   (jchaloup@redhat.com)
 - Appease yamllint (sdodson@redhat.com)
-- Adding include_role to block to resolve when eval (ewolinet@redhat.com)
+- Adding import_role to block to resolve when eval (ewolinet@redhat.com)
 - Updating oc_apply to use command instead of shell (ewolinet@redhat.com)
-- Wrap openshift_hosted_logging include_role within a block.
+- Wrap openshift_hosted_logging import_role within a block.
   (abutcher@redhat.com)
 - Adding unit test.  Fixed redudant calls to get. (kwoodson@redhat.com)
 - Fixing doc and generating new label with updated base. (kwoodson@redhat.com)

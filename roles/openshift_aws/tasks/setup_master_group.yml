@@ -8,7 +8,7 @@
     msg: "openshift_aws_region={{ openshift_aws_region }}"
 
 - name: fetch newly created instances
-  ec2_remote_facts:
+  ec2_instance_facts:
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:clusterid": "{{ openshift_aws_clusterid }}"
@@ -19,11 +19,13 @@
   delay: 3
   until: instancesout.instances|length > 0
 
+- debug: var=instancesout
+
 - name: add new master to masters group
   add_host:
     groups: "{{ openshift_aws_masters_groups }}"
     name: "{{ item.public_dns_name }}"
-    hostname: "{{ openshift_aws_clusterid }}-master-{{ item.id[:-5] }}"
+    hostname: "{{ openshift_aws_clusterid }}-master-{{ item.instance_id[:-5] }}"
   with_items: "{{ instancesout.instances }}"
 
 - name: wait for ssh to become available

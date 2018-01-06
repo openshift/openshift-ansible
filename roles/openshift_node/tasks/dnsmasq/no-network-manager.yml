@@ -8,6 +8,6 @@
     state: present
   notify: restart NetworkManager
   register: result
-  until: result | success
+  until: result is succeeded
 
 - include_tasks: network-manager.yml

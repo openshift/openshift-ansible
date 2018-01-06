@@ -2,8 +2,6 @@
 docker_cli_auth_config_path: '/root/.docker'
 openshift_docker_signature_verification: False
 
-repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-
 openshift_docker_alternative_creds: False
 
 # oreg_url is defined by user input.
@@ -13,7 +11,7 @@ oreg_auth_credentials_replace: False
 openshift_docker_use_system_container: False
 openshift_docker_disable_push_dockerhub: False  # bool
 openshift_docker_selinux_enabled: True
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
 
 openshift_docker_hosted_registry_insecure: False  # bool
 
@@ -55,11 +53,25 @@ openshift_docker_is_node_or_master: "{{ True if inventory_hostname in (groups['o
 
 docker_alt_storage_path: /var/lib/containers/docker
 docker_default_storage_path: /var/lib/docker
+docker_storage_path: "{{ docker_default_storage_path }}"
+docker_storage_size: 40G
+docker_storage_setup_options:
+  vg: docker_vg
+  data_size: 99%VG
+  storage_driver: overlay2
+  root_lv_name: docker-root-lv
+  root_lv_size: 100%FREE
+  root_lv_mount_path: "{{ docker_storage_path }}"
+docker_storage_extra_options:
+- "--storage-opt overlay2.override_kernel_check=true"
+- "--storage-opt overlay2.size={{ docker_storage_size }}"
+- "--graph={{ docker_storage_path}}"
+
 
 # Set local versions of facts that must be in json format for container-daemon.json
 # NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
 l_docker_log_options: "{{ l2_docker_log_options | to_json }}"
-l_docker_log_options_dict: "{{ l2_docker_log_options | oo_list_to_dict | to_json }}"
+l_docker_log_options_dict: "{{ l2_docker_log_options | lib_utils_oo_list_to_dict | to_json }}"
 l_docker_additional_registries: "{{ l2_docker_additional_registries | to_json }}"
 l_docker_blocked_registries: "{{ l2_docker_blocked_registries | to_json }}"
 l_docker_insecure_registries: "{{ l2_docker_insecure_registries | to_json }}"
@@ -115,7 +127,7 @@ l_crio_image: "{{ openshift_crio_systemcontainer_image_override | default(l_crio
 # systemcontainers_docker #
 # ----------------------- #
 l_crt_docker_image_prepend_dict:
-  Fedora: "registry.fedoraproject.org/f25"
+  Fedora: "registry.fedoraproject.org/latest"
   Centos: "docker.io/gscrivano"
   RedHat: "registry.access.redhat.com/openshift3"
 

@@ -19,4 +19,4 @@
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version }}"
       - "tuned-profiles-{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
   register: result
-  until: result | success
+  until: result is succeeded

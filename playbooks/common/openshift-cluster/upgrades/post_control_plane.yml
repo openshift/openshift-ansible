@@ -27,8 +27,8 @@
 
   - set_fact:
       haproxy_routers: "{{ all_routers.results.results[0]['items'] |
-                           oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
-                           oo_select_keys_from_list(['metadata']) }}"
+                           lib_utils_oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
+                           lib_utils_oo_select_keys_from_list(['metadata']) }}"
     when:
     - all_routers.results.returncode == 0
 
@@ -126,7 +126,7 @@
     debug:
       msg: "WARNING pluginOrderOverride is being deprecated in master-config.yaml, please see https://docs.openshift.com/enterprise/latest/architecture/additional_concepts/admission_controllers.html for more information."
     when:
-    - not grep_plugin_order_override | skipped
+    - not (grep_plugin_order_override is skipped)
     - grep_plugin_order_override.rc == 0
 
   - name: Warn if shared-resource-viewer could not be updated

@@ -18,9 +18,9 @@
 # Make sure Docker is installed so we are able to use the client
 - name: Install Docker so we can use the client
   package: name=docker{{ '-' + docker_version if docker_version is defined else '' }} state=present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
 
 # Make sure docker is disabled. Errors are ignored.
 - name: Disable Docker
@@ -31,7 +31,7 @@
     daemon_reload: yes
   ignore_errors: True
   register: r_docker_systemcontainer_docker_stop_result
-  until: not r_docker_systemcontainer_docker_stop_result | failed
+  until: not (r_docker_systemcontainer_docker_stop_result is failed)
   retries: 3
   delay: 30
 
@@ -87,12 +87,12 @@
     state: started
     daemon_reload: yes
   register: r_docker_systemcontainer_docker_start_result
-  until: not r_docker_systemcontainer_docker_start_result | failed
+  until: not (r_docker_systemcontainer_docker_start_result is failed)
   retries: 3
   delay: 30
 
 - set_fact:
-    docker_service_status_changed: "{{ r_docker_systemcontainer_docker_start_result | changed }}"
+    docker_service_status_changed: "{{ r_docker_systemcontainer_docker_start_result is changed }}"
 
 # Since docker is running as a system container, docker login will fail to create
 # credentials.  Use alternate method if requiring authenticated registries.

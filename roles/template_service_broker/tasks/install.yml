@@ -1,9 +1,9 @@
 ---
 # Fact setting
-- name: Set default image variables based on deployment type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "{{ openshift_deployment_type }}.yml"
     - "default_images.yml"
 
 - name: set template_service_broker facts
@@ -15,6 +15,8 @@
 - oc_project:
     name: openshift-template-service-broker
     state: present
+    node_selector:
+      - ""
 
 - command: mktemp -d /tmp/tsb-ansible-XXXXXX
   register: mktemp
@@ -42,15 +44,16 @@
 
 - name: Apply template file
   shell: >
-    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
     --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
     --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
-    | {{ openshift.common.client_binary }} apply -f -
+    --param NODE_SELECTOR={{ template_service_broker_selector | to_json | quote }}
+    | {{ openshift_client_binary }} apply -f -
 
 # reconcile with rbac
 - name: Reconcile with RBAC file
   shell: >
-    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | {{ openshift.common.client_binary }} auth reconcile -f -
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}" | {{ openshift_client_binary }} auth reconcile -f -
 
 # Check that the TSB is running
 - name: Verify that TSB is running
@@ -77,7 +80,7 @@
 # Register with broker
 - name: Register TSB with broker
   shell: >
-    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | {{ openshift.common.client_binary }} apply -f -
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" --param CA_BUNDLE="{{ __ca_bundle.content }}" | {{ openshift_client_binary }} apply -f -
 
 - file:
     state: absent

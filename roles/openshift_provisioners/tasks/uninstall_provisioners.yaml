@@ -5,7 +5,7 @@
 # delete the deployment objects that we had created
 - name: delete provisioner api objects
   command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
     delete {{ item }} --selector provisioners-infra -n {{ openshift_provisioners_project }} --ignore-not-found=true
   with_items:
     - dc
@@ -15,7 +15,7 @@
 # delete our old secrets
 - name: delete provisioner secrets
   command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
     delete secret {{ item }} -n {{ openshift_provisioners_project }} --ignore-not-found=true
   with_items:
     - provisioners-efs
@@ -26,7 +26,7 @@
 # delete cluster role bindings
 - name: delete cluster role bindings
   command: >
-    {{ openshift.common.client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
     delete clusterrolebindings {{ item }} -n {{ openshift_provisioners_project }} --ignore-not-found=true
   with_items:
     - run-provisioners-efs

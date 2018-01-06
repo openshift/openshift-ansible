@@ -9,10 +9,10 @@
       - "'not installed' not in passlib_result.stdout"
     msg: "python-passlib rpm must be installed on control host"
 
-- name: Set default image variables based on deployment_type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "{{ openshift_deployment_type }}.yml"
     - "default_images.yml"
 
 - name: Set metrics image facts

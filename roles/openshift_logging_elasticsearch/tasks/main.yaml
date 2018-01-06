@@ -15,10 +15,10 @@
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
-- name: Set default image variables based on deployment_type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "{{ openshift_deployment_type }}.yml"
     - "default_images.yml"
   loop_control:
     loop_var: var_file_name
@@ -111,7 +111,7 @@
 
 - name: Create logging-metrics-reader-role
   command: >
-    {{ openshift.common.client_binary }}
+    {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     -n "{{ openshift_logging_elasticsearch_namespace }}"
     create -f "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
@@ -168,33 +168,31 @@
   when: es_logging_contents is undefined
   changed_when: no
 
-- set_fact:
-    __es_num_of_shards: "{{ _es_configmap | default({}) | walk('index.number_of_shards', '1') }}"
-    __es_num_of_replicas: "{{ _es_configmap | default({}) | walk('index.number_of_replicas', '0') }}"
-
 - template:
     src: elasticsearch.yml.j2
     dest: "{{ tempdir }}/elasticsearch.yml"
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
-    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(None) or __es_num_of_shards }}"
-    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas | default(None) or __es_num_of_replicas }}"
+    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
 
   when: es_config_contents is undefined
   changed_when: no
 
-- copy:
-    content: "{{ es_logging_contents }}"
-    dest: "{{ tempdir }}/elasticsearch-logging.yml"
-  when: es_logging_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ es_config_contents }}"
-    dest: "{{ tempdir }}/elasticsearch.yml"
-  when: es_config_contents is defined
-  changed_when: no
+# create diff between current configmap files and our current files
+- import_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-elasticsearch"
+    configmap_namespace: "logging"
+    configmap_file_names:
+      - current_file: "elasticsearch.yml"
+        new_file: "{{ tempdir }}/elasticsearch.yml"
+        protected_lines: ["number_of_shards", "number_of_replicas"]
+      - current_file: "logging.yml"
+        new_file: "{{ tempdir }}/elasticsearch-logging.yml"
 
 - name: Set ES configmap
   oc_configmap:
@@ -204,7 +202,21 @@
     from_file:
       elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
       logging.yml: "{{ tempdir }}/elasticsearch-logging.yml"
+  register: es_config_creation
+  notify: "restart elasticsearch"
 
+- when: es_config_creation.changed | bool
+  block:
+    - set_fact:
+        _restart_logging_components: "{{ _restart_logging_components | default([]) + [es_component] | unique }}"
+
+    - shell: >
+        oc get dc -l component="{{ es_component }}" -n "{{ openshift_logging_elasticsearch_namespace }}" -o name | cut -d'/' -f2
+      register: _es_dcs
+
+    - set_fact:
+        _restart_logging_nodes: "{{ _restart_logging_nodes | default([]) + [_es_dcs.stdout] | unique }}"
+      when: _es_dcs.stdout != ""
 
 # secret
 - name: Set ES secret
@@ -338,7 +350,7 @@
         delete_after: true
 
 - set_fact:
-    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
+    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | lib_utils_oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
   when: openshift_logging_elasticsearch_deployment_name == ""
 
 - set_fact:
@@ -375,6 +387,13 @@
     files:
       - "{{ tempdir }}/templates/logging-es-dc.yml"
     delete_after: true
+  register: es_dc_creation
+  notify: "restart elasticsearch"
+
+- set_fact:
+    _restart_logging_components: "{{ _restart_logging_components | default([]) + [es_component] | unique }}"
+    _restart_logging_nodes: "{{ _restart_logging_nodes | default([]) + [es_deploy_name] | unique }}"
+  when: es_dc_creation.changed | bool
 
 - name: Retrieving the cert to use when generating secrets for the {{ es_component }} component
   slurp:

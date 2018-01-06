@@ -19,7 +19,7 @@
 
 - name: Calico Master | Launch Calico Policy Controller
   command: >
-    {{ openshift.common.client_binary }} create
+    {{ openshift_client_binary }} create
     -f {{ mktemp.stdout }}/calico-policy-controller.yml
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
   register: calico_create_output

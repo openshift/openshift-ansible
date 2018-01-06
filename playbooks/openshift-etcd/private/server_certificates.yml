@@ -5,7 +5,7 @@
   roles:
     - role: openshift_etcd_facts
   post_tasks:
-    - include_role:
+    - import_role:
         name: etcd
         tasks_from: server_certificates.yml
       vars:

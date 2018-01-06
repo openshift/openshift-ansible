@@ -12,14 +12,13 @@
   roles:
   - openshift_facts
   tasks:
-  - set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-
   - fail:
       msg: Cannot upgrade Docker on Atomic operating systems.
-    when: openshift.common.is_atomic | bool
+    when: openshift_is_atomic | bool
 
-  - include_tasks: upgrade_check.yml
+  - import_role:
+      name: container_runtime
+      tasks_from: docker_upgrade_check.yml
     when: docker_upgrade is not defined or docker_upgrade | bool
 
 
@@ -44,7 +43,7 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable|succeeded
+    until: node_unschedulable is succeeded
     when:
     - l_docker_upgrade is defined
     - l_docker_upgrade | bool
@@ -52,11 +51,11 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift.common.client_binary }} adm drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ openshift_client_binary }} adm drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result
-    until: not l_docker_upgrade_drain_result | failed
+    until: not (l_docker_upgrade_drain_result is failed)
     retries: 60
     delay: 60
 
@@ -71,5 +70,5 @@
     retries: 10
     delay: 5
     register: node_schedulable
-    until: node_schedulable|succeeded
-    when: node_unschedulable|changed
+    until: node_schedulable is succeeded
+    when: node_unschedulable is changed

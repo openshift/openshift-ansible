@@ -1,1 +1,0 @@
-openshift-ansible lookup plugins.

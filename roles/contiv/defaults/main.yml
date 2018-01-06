@@ -101,7 +101,6 @@ apic_epg_bridge_domain: not_specified
 apic_configure_default_policy: false
 apic_default_external_contract: "uni/tn-common/brc-default"
 apic_default_app_profile: "contiv-infra-app-profile"
-is_atomic: False
 kube_cert_dir: "/data/src/github.com/openshift/origin/openshift.local.config/master"
 master_name: "{{ groups['masters'][0] }}"
 contiv_etcd_port: 22379
@@ -120,4 +119,4 @@ contiv_h1_gw_default: "10.129.0.1"
 # contiv default private subnet for ext access
 contiv_private_ext_subnet: "10.130.0.0/16"
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"

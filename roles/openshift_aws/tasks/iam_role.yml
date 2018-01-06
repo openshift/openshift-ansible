@@ -13,11 +13,10 @@
 #####
 - name: Create an iam role
   iam_role:
-    name: "{{ item.value.iam_role }}"
+    name: "{{ l_node_group_config[openshift_aws_node_group.group].iam_role }}"
     assume_role_policy_document: "{{ lookup('file','trustpolicy.json') }}"
     state: "{{ openshift_aws_iam_role_state | default('present') }}"
-  when: item.value.iam_role is defined
-  with_dict: "{{ l_nodes_to_build }}"
+  when: l_node_group_config[openshift_aws_node_group.group].iam_role is defined
 
 #####
 # The second part of this task file is linking the role to a policy
@@ -28,9 +27,8 @@
 - name: create an iam policy
   iam_policy:
     iam_type: role
-    iam_name: "{{ item.value.iam_role }}"
-    policy_json: "{{ item.value.policy_json }}"
-    policy_name: "{{ item.value.policy_name }}"
+    iam_name: "{{ l_node_group_config[openshift_aws_node_group.group].iam_role }}"
+    policy_json: "{{ l_node_group_config[openshift_aws_node_group.group].policy_json }}"
+    policy_name: "{{ l_node_group_config[openshift_aws_node_group.group].policy_name }}"
     state: "{{ openshift_aws_iam_role_state | default('present') }}"
-  when: item.value.iam_role is defined
-  with_dict: "{{ l_nodes_to_build }}"
+  when: "'iam_role' in l_node_group_config[openshift_aws_node_group.group]"

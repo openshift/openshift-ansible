@@ -1,0 +1,20 @@
+---
+- name: Install Node system container
+  include_tasks: node_system_container.yml
+  when:
+  - l_is_node_system_container | bool
+
+- name: Install OpenvSwitch system containers
+  include_tasks: openvswitch_system_container.yml
+  when:
+  - openshift_node_use_openshift_sdn | bool
+  - l_is_openvswitch_system_container | bool
+
+- name: Pre-pull openvswitch image
+  command: >
+    docker pull {{ osn_ovs_image }}:{{ openshift_image_tag }}
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout"
+  when:
+  - openshift_node_use_openshift_sdn | bool
+  - not l_is_openvswitch_system_container | bool

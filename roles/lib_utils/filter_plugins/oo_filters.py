@@ -1,0 +1,621 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# pylint: disable=too-many-lines
+"""
+Custom filters for use in openshift-ansible
+"""
+import os
+import pdb
+import random
+import re
+
+from base64 import b64encode
+from collections import Mapping
+# pylint no-name-in-module and import-error disabled here because pylint
+# fails to properly detect the packages when installed in a virtualenv
+from distutils.util import strtobool  # pylint:disable=no-name-in-module,import-error
+from operator import itemgetter
+
+import yaml
+
+from ansible import errors
+from ansible.parsing.yaml.dumper import AnsibleDumper
+
+# ansible.compat.six goes away with Ansible 2.4
+try:
+    from ansible.compat.six import string_types, u
+    from ansible.compat.six.moves.urllib.parse import urlparse
+except ImportError:
+    from ansible.module_utils.six import string_types, u
+    from ansible.module_utils.six.moves.urllib.parse import urlparse
+
+HAS_OPENSSL = False
+try:
+    import OpenSSL.crypto
+    HAS_OPENSSL = True
+except ImportError:
+    pass
+
+
+# pylint: disable=C0103
+
+def lib_utils_oo_pdb(arg):
+    """ This pops you into a pdb instance where arg is the data passed in
+        from the filter.
+        Ex: "{{ hostvars | lib_utils_oo_pdb }}"
+    """
+    pdb.set_trace()
+    return arg
+
+
+def get_attr(data, attribute=None):
+    """ This looks up dictionary attributes of the form a.b.c and returns
+        the value.
+
+        If the key isn't present, None is returned.
+        Ex: data = {'a': {'b': {'c': 5}}}
+            attribute = "a.b.c"
+            returns 5
+    """
+    if not attribute:
+        raise errors.AnsibleFilterError("|failed expects attribute to be set")
+
+    ptr = data
+    for attr in attribute.split('.'):
+        if attr in ptr:
+            ptr = ptr[attr]
+        else:
+            ptr = None
+            break
+
+    return ptr
+
+
+def oo_flatten(data):
+    """ This filter plugin will flatten a list of lists
+    """
+    if not isinstance(data, list):
+        raise errors.AnsibleFilterError("|failed expects to flatten a List")
+
+    return [item for sublist in data for item in sublist]
+
+
+def lib_utils_oo_collect(data_list, attribute=None, filters=None):
+    """ This takes a list of dict and collects all attributes specified into a
+        list. If filter is specified then we will include all items that
+        match _ALL_ of filters.  If a dict entry is missing the key in a
+        filter it will be excluded from the match.
+        Ex: data_list = [ {'a':1, 'b':5, 'z': 'z'}, # True, return
+                          {'a':2, 'z': 'z'},        # True, return
+                          {'a':3, 'z': 'z'},        # True, return
+                          {'a':4, 'z': 'b'},        # FAILED, obj['z'] != obj['z']
+                        ]
+            attribute = 'a'
+            filters   = {'z': 'z'}
+            returns [1, 2, 3]
+
+        This also deals with lists of lists with dict as elements.
+        Ex: data_list = [
+                          [ {'a':1, 'b':5, 'z': 'z'}, # True, return
+                            {'a':2, 'b':6, 'z': 'z'}  # True, return
+                          ],
+                          [ {'a':3, 'z': 'z'},        # True, return
+                            {'a':4, 'z': 'b'}         # FAILED, obj['z'] != obj['z']
+                          ],
+                          {'a':5, 'z': 'z'},          # True, return
+                        ]
+            attribute = 'a'
+            filters   = {'z': 'z'}
+            returns [1, 2, 3, 5]
+    """
+    if not isinstance(data_list, list):
+        raise errors.AnsibleFilterError("lib_utils_oo_collect expects to filter on a List")
+
+    if not attribute:
+        raise errors.AnsibleFilterError("lib_utils_oo_collect expects attribute to be set")
+
+    data = []
+    retval = []
+
+    for item in data_list:
+        if isinstance(item, list):
+            retval.extend(lib_utils_oo_collect(item, attribute, filters))
+        else:
+            data.append(item)
+
+    if filters is not None:
+        if not isinstance(filters, dict):
+            raise errors.AnsibleFilterError(
+                "lib_utils_oo_collect expects filter to be a dict")
+        retval.extend([get_attr(d, attribute) for d in data if (
+            all([d.get(key, None) == filters[key] for key in filters]))])
+    else:
+        retval.extend([get_attr(d, attribute) for d in data])
+
+    retval = [val for val in retval if val is not None]
+
+    return retval
+
+
+def lib_utils_oo_select_keys_from_list(data, keys):
+    """ This returns a list, which contains the value portions for the keys
+        Ex: data = { 'a':1, 'b':2, 'c':3 }
+            keys = ['a', 'c']
+            returns [1, 3]
+    """
+
+    if not isinstance(data, list):
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys_from_list failed expects to filter on a list")
+
+    if not isinstance(keys, list):
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys_from_list failed expects first param is a list")
+
+    # Gather up the values for the list of keys passed in
+    retval = [lib_utils_oo_select_keys(item, keys) for item in data]
+
+    return oo_flatten(retval)
+
+
+def lib_utils_oo_select_keys(data, keys):
+    """ This returns a list, which contains the value portions for the keys
+        Ex: data = { 'a':1, 'b':2, 'c':3 }
+            keys = ['a', 'c']
+            returns [1, 3]
+    """
+
+    if not isinstance(data, Mapping):
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys failed expects to filter on a dict or object")
+
+    if not isinstance(keys, list):
+        raise errors.AnsibleFilterError("|lib_utils_oo_select_keys failed expects first param is a list")
+
+    # Gather up the values for the list of keys passed in
+    retval = [data[key] for key in keys if key in data]
+
+    return retval
+
+
+def lib_utils_oo_prepend_strings_in_list(data, prepend):
+    """ This takes a list of strings and prepends a string to each item in the
+        list
+        Ex: data = ['cart', 'tree']
+            prepend = 'apple-'
+            returns ['apple-cart', 'apple-tree']
+    """
+    if not isinstance(data, list):
+        raise errors.AnsibleFilterError("|failed expects first param is a list")
+    if not all(isinstance(x, string_types) for x in data):
+        raise errors.AnsibleFilterError("|failed expects first param is a list"
+                                        " of strings")
+    retval = [prepend + s for s in data]
+    return retval
+
+
+def lib_utils_oo_dict_to_list_of_dict(data, key_title='key', value_title='value'):
+    """Take a dict and arrange them as a list of dicts
+
+       Input data:
+       {'region': 'infra', 'test_k': 'test_v'}
+
+       Return data:
+       [{'key': 'region', 'value': 'infra'}, {'key': 'test_k', 'value': 'test_v'}]
+
+       Written for use of the oc_label module
+    """
+    if not isinstance(data, dict):
+        # pylint: disable=line-too-long
+        raise errors.AnsibleFilterError("|failed expects first param is a dict. Got %s. Type: %s" % (str(data), str(type(data))))
+
+    rval = []
+    for label in data.items():
+        rval.append({key_title: label[0], value_title: label[1]})
+
+    return rval
+
+
+def oo_ami_selector(data, image_name):
+    """ This takes a list of amis and an image name and attempts to return
+        the latest ami.
+    """
+    if not isinstance(data, list):
+        raise errors.AnsibleFilterError("|failed expects first param is a list")
+
+    if not data:
+        return None
+    else:
+        if image_name is None or not image_name.endswith('_*'):
+            ami = sorted(data, key=itemgetter('name'), reverse=True)[0]
+            return ami['ami_id']
+        else:
+            ami_info = [(ami, ami['name'].split('_')[-1]) for ami in data]
+            ami = sorted(ami_info, key=itemgetter(1), reverse=True)[0][0]
+            return ami['ami_id']
+
+
+def lib_utils_oo_split(string, separator=','):
+    """ This splits the input string into a list. If the input string is
+    already a list we will return it as is.
+    """
+    if isinstance(string, list):
+        return string
+    return string.split(separator)
+
+
+def lib_utils_oo_dict_to_keqv_list(data):
+    """Take a dict and return a list of k=v pairs
+
+        Input data:
+        {'a': 1, 'b': 2}
+
+        Return data:
+        ['a=1', 'b=2']
+    """
+    return ['='.join(str(e) for e in x) for x in data.items()]
+
+
+def lib_utils_oo_list_to_dict(lst, separator='='):
+    """ This converts a list of ["k=v"] to a dictionary {k: v}.
+    """
+    kvs = [i.split(separator) for i in lst]
+    return {k: v for k, v in kvs}
+
+
+def haproxy_backend_masters(hosts, port):
+    """ This takes an array of dicts and returns an array of dicts
+        to be used as a backend for the haproxy role
+    """
+    servers = []
+    for idx, host_info in enumerate(hosts):
+        server = dict(name="master%s" % idx)
+        server_ip = host_info['openshift']['common']['ip']
+        server['address'] = "%s:%s" % (server_ip, port)
+        server['opts'] = 'check'
+        servers.append(server)
+    return servers
+
+
+# pylint: disable=too-many-branches
+def lib_utils_oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
+    """ Parses names from list of certificate hashes.
+
+        Ex: certificates = [{ "certfile": "/root/custom1.crt",
+                              "keyfile": "/root/custom1.key",
+                               "cafile": "/root/custom-ca1.crt" },
+                            { "certfile": "custom2.crt",
+                              "keyfile": "custom2.key",
+                              "cafile": "custom-ca2.crt" }]
+
+            returns [{ "certfile": "/etc/origin/master/named_certificates/custom1.crt",
+                       "keyfile": "/etc/origin/master/named_certificates/custom1.key",
+                       "cafile": "/etc/origin/master/named_certificates/custom-ca1.crt",
+                       "names": [ "public-master-host.com",
+                                  "other-master-host.com" ] },
+                     { "certfile": "/etc/origin/master/named_certificates/custom2.crt",
+                       "keyfile": "/etc/origin/master/named_certificates/custom2.key",
+                       "cafile": "/etc/origin/master/named_certificates/custom-ca-2.crt",
+                       "names": [ "some-hostname.com" ] }]
+    """
+    if not isinstance(named_certs_dir, string_types):
+        raise errors.AnsibleFilterError("|failed expects named_certs_dir is str or unicode")
+
+    if not isinstance(internal_hostnames, list):
+        raise errors.AnsibleFilterError("|failed expects internal_hostnames is list")
+
+    if not HAS_OPENSSL:
+        raise errors.AnsibleFilterError("|missing OpenSSL python bindings")
+
+    for certificate in certificates:
+        if 'names' in certificate.keys():
+            continue
+        else:
+            certificate['names'] = []
+
+        if not os.path.isfile(certificate['certfile']) or not os.path.isfile(certificate['keyfile']):
+            raise errors.AnsibleFilterError("|certificate and/or key does not exist '%s', '%s'" %
+                                            (certificate['certfile'], certificate['keyfile']))
+
+        try:
+            st_cert = open(certificate['certfile'], 'rt').read()
+            cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, st_cert)
+            certificate['names'].append(str(cert.get_subject().commonName.decode()))
+            for i in range(cert.get_extension_count()):
+                if cert.get_extension(i).get_short_name() == 'subjectAltName':
+                    for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
+                        certificate['names'].append(name)
+        except Exception:
+            raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
+                                             "please specify certificate names in host inventory"))
+
+        certificate['names'] = list(set(certificate['names']))
+        if 'cafile' not in certificate:
+            certificate['names'] = [name for name in certificate['names'] if name not in internal_hostnames]
+            if not certificate['names']:
+                raise errors.AnsibleFilterError(("|failed to parse certificate '%s' or " % certificate['certfile'] +
+                                                 "detected a collision with internal hostname, please specify " +
+                                                 "certificate names in host inventory"))
+
+    for certificate in certificates:
+        # Update paths for configuration
+        certificate['certfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['certfile']))
+        certificate['keyfile'] = os.path.join(named_certs_dir, os.path.basename(certificate['keyfile']))
+        if 'cafile' in certificate:
+            certificate['cafile'] = os.path.join(named_certs_dir, os.path.basename(certificate['cafile']))
+    return certificates
+
+
+def lib_utils_oo_generate_secret(num_bytes):
+    """ generate a session secret """
+
+    if not isinstance(num_bytes, int):
+        raise errors.AnsibleFilterError("|failed expects num_bytes is int")
+
+    return b64encode(os.urandom(num_bytes)).decode('utf-8')
+
+
+def lib_utils_to_padded_yaml(data, level=0, indent=2, **kw):
+    """ returns a yaml snippet padded to match the indent level you specify """
+    if data in [None, ""]:
+        return ""
+
+    try:
+        transformed = u(yaml.dump(data, indent=indent, allow_unicode=True,
+                                  default_flow_style=False,
+                                  Dumper=AnsibleDumper, **kw))
+        padded = "\n".join([" " * level * indent + line for line in transformed.splitlines()])
+        return "\n{0}".format(padded)
+    except Exception as my_e:
+        raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
+
+
+def lib_utils_oo_pods_match_component(pods, deployment_type, component):
+    """ Filters a list of Pods and returns the ones matching the deployment_type and component
+    """
+    if not isinstance(pods, list):
+        raise errors.AnsibleFilterError("failed expects to filter on a list")
+    if not isinstance(deployment_type, string_types):
+        raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
+    if not isinstance(component, string_types):
+        raise errors.AnsibleFilterError("failed expects component to be a string")
+
+    image_prefix = 'openshift/origin-'
+    if deployment_type == 'openshift-enterprise':
+        image_prefix = 'openshift3/ose-'
+
+    matching_pods = []
+    image_regex = image_prefix + component + r'.*'
+    for pod in pods:
+        for container in pod['spec']['containers']:
+            if re.search(image_regex, container['image']):
+                matching_pods.append(pod)
+                break  # stop here, don't add a pod more than once
+
+    return matching_pods
+
+
+def lib_utils_oo_image_tag_to_rpm_version(version, include_dash=False):
+    """ Convert an image tag string to an RPM version if necessary
+        Empty strings and strings that are already in rpm version format
+        are ignored. Also remove non semantic version components.
+
+        Ex. v3.2.0.10 -> -3.2.0.10
+            v1.2.0-rc1 -> -1.2.0
+    """
+    if not isinstance(version, string_types):
+        raise errors.AnsibleFilterError("|failed expects a string or unicode")
+    if version.startswith("v"):
+        version = version[1:]
+        # Strip release from requested version, we no longer support this.
+        version = version.split('-')[0]
+
+    if include_dash and version and not version.startswith("-"):
+        version = "-" + version
+
+    return version
+
+
+def lib_utils_oo_hostname_from_url(url):
+    """ Returns the hostname contained in a URL
+
+        Ex: https://ose3-master.example.com/v1/api -> ose3-master.example.com
+    """
+    if not isinstance(url, string_types):
+        raise errors.AnsibleFilterError("|failed expects a string or unicode")
+    parse_result = urlparse(url)
+    if parse_result.netloc != '':
+        return parse_result.netloc
+    else:
+        # netloc wasn't parsed, assume url was missing scheme and path
+        return parse_result.path
+
+
+# pylint: disable=invalid-name, unused-argument
+def lib_utils_oo_loadbalancer_frontends(
+        api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
+    """TODO: Document me."""
+    loadbalancer_frontends = [{'name': 'atomic-openshift-api',
+                               'mode': 'tcp',
+                               'options': ['tcplog'],
+                               'binds': ["*:{0}".format(api_port)],
+                               'default_backend': 'atomic-openshift-api'}]
+    if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+        loadbalancer_frontends.append({'name': 'nuage-monitor',
+                                       'mode': 'tcp',
+                                       'options': ['tcplog'],
+                                       'binds': ["*:{0}".format(nuage_rest_port)],
+                                       'default_backend': 'nuage-monitor'})
+    return loadbalancer_frontends
+
+
+# pylint: disable=invalid-name
+def lib_utils_oo_loadbalancer_backends(
+        api_port, servers_hostvars, use_nuage=False, nuage_rest_port=None):
+    """TODO: Document me."""
+    loadbalancer_backends = [{'name': 'atomic-openshift-api',
+                              'mode': 'tcp',
+                              'option': 'tcplog',
+                              'balance': 'source',
+                              'servers': haproxy_backend_masters(servers_hostvars, api_port)}]
+    if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
+        # pylint: disable=line-too-long
+        loadbalancer_backends.append({'name': 'nuage-monitor',
+                                      'mode': 'tcp',
+                                      'option': 'tcplog',
+                                      'balance': 'source',
+                                      'servers': haproxy_backend_masters(servers_hostvars, nuage_rest_port)})
+    return loadbalancer_backends
+
+
+def lib_utils_oo_chomp_commit_offset(version):
+    """Chomp any "+git.foo" commit offset string from the given `version`
+    and return the modified version string.
+
+Ex:
+- chomp_commit_offset(None)                 => None
+- chomp_commit_offset(1337)                 => "1337"
+- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
+- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
+- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
+    """
+    if version is None:
+        return version
+    else:
+        # Stringify, just in case it's a Number type. Split by '+' and
+        # return the first split. No concerns about strings without a
+        # '+', .split() returns an array of the original string.
+        return str(version).split('+')[0]
+
+
+def lib_utils_oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
+    """Generates a random string of given length from a set of alphanumeric characters.
+       The default source uses [a-z][A-Z][0-9]
+       Ex:
+       - lib_utils_oo_random_word(3)                => aB9
+       - lib_utils_oo_random_word(4, source='012')  => 0123
+    """
+    return ''.join(random.choice(source) for i in range(length))
+
+
+def lib_utils_oo_contains_rule(source, apiGroups, resources, verbs):
+    '''Return true if the specified rule is contained within the provided source'''
+
+    rules = source['rules']
+
+    if rules:
+        for rule in rules:
+            if set(rule['apiGroups']) == set(apiGroups):
+                if set(rule['resources']) == set(resources):
+                    if set(rule['verbs']) == set(verbs):
+                        return True
+
+    return False
+
+
+def lib_utils_oo_selector_to_string_list(user_dict):
+    """Convert a dict of selectors to a key=value list of strings
+
+Given input of {'region': 'infra', 'zone': 'primary'} returns a list
+of items as ['region=infra', 'zone=primary']
+    """
+    selectors = []
+    for key in user_dict:
+        selectors.append("{}={}".format(key, user_dict[key]))
+    return selectors
+
+
+def lib_utils_oo_filter_sa_secrets(sa_secrets, secret_hint='-token-'):
+    """Parse the Service Account Secrets list, `sa_secrets`, (as from
+oc_serviceaccount_secret:state=list) and return the name of the secret
+containing the `secret_hint` string. For example, by default this will
+return the name of the secret holding the SA bearer token.
+
+Only provide the 'results' object to this filter. This filter expects
+to receive a list like this:
+
+    [
+        {
+            "name": "management-admin-dockercfg-p31s2"
+        },
+        {
+            "name": "management-admin-token-bnqsh"
+        }
+    ]
+
+
+Returns:
+
+* `secret_name` [string] - The name of the secret matching the
+  `secret_hint` parameter. By default this is the secret holding the
+  SA's bearer token.
+
+Example playbook usage:
+
+Register a return value from oc_serviceaccount_secret with and pass
+that result to this filter plugin.
+
+    - name: Get all SA Secrets
+      oc_serviceaccount_secret:
+        state: list
+        service_account: management-admin
+        namespace: management-infra
+      register: sa
+
+    - name: Save the SA bearer token secret name
+      set_fact:
+        management_token: "{{ sa.results | lib_utils_oo_filter_sa_secrets }}"
+
+    - name: Get the SA bearer token value
+      oc_secret:
+        state: list
+        name: "{{ management_token }}"
+        namespace: management-infra
+        decode: true
+      register: sa_secret
+
+    - name: Print the bearer token value
+      debug:
+        var: sa_secret.results.decoded.token
+
+    """
+    secret_name = None
+
+    for secret in sa_secrets:
+        # each secret is a hash
+        if secret['name'].find(secret_hint) == -1:
+            continue
+        else:
+            secret_name = secret['name']
+            break
+
+    return secret_name
+
+
+class FilterModule(object):
+    """ Custom ansible filter mapping """
+
+    # pylint: disable=no-self-use, too-few-public-methods
+    def filters(self):
+        """ returns a mapping of filters to methods """
+        return {
+            "lib_utils_oo_select_keys": lib_utils_oo_select_keys,
+            "lib_utils_oo_select_keys_from_list": lib_utils_oo_select_keys_from_list,
+            "lib_utils_oo_chomp_commit_offset": lib_utils_oo_chomp_commit_offset,
+            "lib_utils_oo_collect": lib_utils_oo_collect,
+            "lib_utils_oo_pdb": lib_utils_oo_pdb,
+            "lib_utils_oo_prepend_strings_in_list": lib_utils_oo_prepend_strings_in_list,
+            "lib_utils_oo_dict_to_list_of_dict": lib_utils_oo_dict_to_list_of_dict,
+            "lib_utils_oo_split": lib_utils_oo_split,
+            "lib_utils_oo_dict_to_keqv_list": lib_utils_oo_dict_to_keqv_list,
+            "lib_utils_oo_list_to_dict": lib_utils_oo_list_to_dict,
+            "lib_utils_oo_parse_named_certificates": lib_utils_oo_parse_named_certificates,
+            "lib_utils_oo_generate_secret": lib_utils_oo_generate_secret,
+            "lib_utils_oo_pods_match_component": lib_utils_oo_pods_match_component,
+            "lib_utils_oo_image_tag_to_rpm_version": lib_utils_oo_image_tag_to_rpm_version,
+            "lib_utils_oo_hostname_from_url": lib_utils_oo_hostname_from_url,
+            "lib_utils_oo_loadbalancer_frontends": lib_utils_oo_loadbalancer_frontends,
+            "lib_utils_oo_loadbalancer_backends": lib_utils_oo_loadbalancer_backends,
+            "lib_utils_to_padded_yaml": lib_utils_to_padded_yaml,
+            "lib_utils_oo_random_word": lib_utils_oo_random_word,
+            "lib_utils_oo_contains_rule": lib_utils_oo_contains_rule,
+            "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
+            "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
+        }

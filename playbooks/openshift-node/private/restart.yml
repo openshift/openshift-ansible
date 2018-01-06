@@ -5,6 +5,7 @@
 
   roles:
   - lib_openshift
+  - openshift_facts
 
   tasks:
   - name: Restart docker
@@ -12,7 +13,7 @@
       name: docker
       state: restarted
     register: l_docker_restart_docker_in_node_result
-    until: not l_docker_restart_docker_in_node_result | failed
+    until: not (l_docker_restart_docker_in_node_result is failed)
     retries: 3
     delay: 30
 
@@ -27,7 +28,7 @@
     - "{{ openshift_service_type }}-master-controllers"
     - "{{ openshift_service_type }}-node"
     failed_when: false
-    when: openshift.common.is_containerized | bool
+    when: openshift_is_containerized | bool
 
   - name: Wait for master API to come back online
     wait_for:

@@ -34,10 +34,10 @@
     msg: WARNING Use of openshift_logging_mux_client_mode=minimal is not recommended due to current scaling issues
   when: openshift_logging_mux_client_mode is defined and openshift_logging_mux_client_mode == 'minimal'
 
-- name: Set default image variables based on deployment_type
+- name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
-    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "{{ openshift_deployment_type }}.yml"
     - "default_images.yml"
   loop_control:
     loop_var: var_file_name
@@ -108,38 +108,28 @@
     dest: "{{ tempdir }}/fluent.conf"
   vars:
     deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
-  when: fluentd_config_contents is undefined
-  changed_when: no
 
 - copy:
     src: fluentd-throttle-config.yaml
     dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-  when: fluentd_throttle_contents is undefined
-  changed_when: no
 
 - copy:
     src: secure-forward.conf
     dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_secureforward_contents is undefined
-  changed_when: no
 
-- copy:
-    content: "{{ fluentd_config_contents }}"
-    dest: "{{ tempdir }}/fluent.conf"
-  when: fluentd_config_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ fluentd_throttle_contents }}"
-    dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-  when: fluentd_throttle_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ fluentd_secureforward_contents }}"
-    dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_secureforward_contents is defined
-  changed_when: no
+- import_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-fluentd"
+    configmap_namespace: "logging"
+    configmap_file_names:
+      - current_file: "fluent.conf"
+        new_file: "{{ tempdir }}/fluent.conf"
+      - current_file: "throttle-config.yaml"
+        new_file: "{{ tempdir }}/fluentd-throttle-config.yaml"
+      - current_file: "secure-forward.conf"
+        new_file: "{{ tempdir }}/secure-forward.conf"
 
 - name: Set Fluentd configmap
   oc_configmap:

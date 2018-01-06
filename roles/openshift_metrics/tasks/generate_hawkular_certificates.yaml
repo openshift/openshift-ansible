@@ -14,7 +14,7 @@
   changed_when: no
 
 - name: generate password for hawkular metrics
-  local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
+  local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | lib_utils_oo_random_word }}"
   with_items:
   - hawkular-metrics
   become: false

@@ -1,0 +1,43 @@
+---
+- name: Check for NetworkManager service
+  command: >
+    systemctl show NetworkManager
+  register: nm_show
+  changed_when: false
+  ignore_errors: True
+
+- name: Set fact using_network_manager
+  set_fact:
+    network_manager_active: "{{ True if 'ActiveState=active' in nm_show.stdout else False }}"
+
+- name: Install dnsmasq
+  package: name=dnsmasq state=installed
+  when: not openshift_is_atomic | bool
+  register: result
+  until: result is succeeded
+
+- name: ensure origin/node directory exists
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0700'
+  with_items:
+  - /etc/origin
+  - /etc/origin/node
+
+# this file is copied to /etc/dnsmasq.d/ when the node starts and is removed
+# when the node stops. A dbus-message is sent to dnsmasq to add the same entries
+# so that dnsmasq doesn't need to be restarted. Once we can use dnsmasq 2.77 or
+# newer we can use --server-file option to update the servers dynamically and
+# reload them by sending dnsmasq a SIGHUP. We write the file in case someone else
+# triggers a restart of dnsmasq but not a node restart.
+- name: Install node-dnsmasq.conf
+  template:
+    src: node-dnsmasq.conf.j2
+    dest: /etc/origin/node/node-dnsmasq.conf
+
+# Relies on ansible in order to configure static config
+- include_tasks: dnsmasq/no-network-manager.yml
+  when: not network_manager_active | bool

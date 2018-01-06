@@ -1,8 +1,11 @@
 ---
 - name: Gather OpenShift Logging Facts
   openshift_logging_facts:
-    oc_bin: "{{openshift.common.client_binary}}"
+    oc_bin: "{{openshift_client_binary}}"
     openshift_logging_namespace: "{{openshift_logging_namespace}}"
+
+## This is include vs import because we need access to group/inventory variables
+- include_tasks: set_defaults_from_current.yml
 
 - name: Set logging project
   oc_project:
@@ -72,7 +75,7 @@
     elasticsearch_storage_type: "{{ openshift_logging_elasticsearch_storage_type | default('pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir') }}"
 
 # We don't allow scaling down of ES nodes currently
-- include_role:
+- import_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -100,7 +103,7 @@
   - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
 # Create any new DC that may be required
-- include_role:
+- import_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -134,7 +137,7 @@
   when:
   - openshift_logging_use_ops | bool
 
-- include_role:
+- import_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -177,7 +180,7 @@
   - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
 # Create any new DC that may be required
-- include_role:
+- import_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -210,7 +213,7 @@
 
 
 ## Kibana
-- include_role:
+- import_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -223,7 +226,7 @@
     openshift_logging_kibana_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
 
-- include_role:
+- import_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -253,7 +256,7 @@
 - include_tasks: annotate_ops_projects.yaml
 
 ## Curator
-- include_role:
+- import_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -263,7 +266,7 @@
     openshift_logging_curator_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_curator_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
-- include_role:
+- import_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -281,7 +284,7 @@
   - openshift_logging_use_ops | bool
 
 ## Mux
-- include_role:
+- import_role:
     name: openshift_logging_mux
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -294,7 +297,7 @@
 
 
 ## Fluentd
-- include_role:
+- import_role:
     name: openshift_logging_fluentd
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -305,7 +308,7 @@
 
 
 ## EventRouter
-- include_role:
+- import_role:
     name: openshift_logging_eventrouter
   when:
     openshift_logging_install_eventrouter | default(false) | bool

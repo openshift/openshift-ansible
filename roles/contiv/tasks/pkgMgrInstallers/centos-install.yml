@@ -4,7 +4,7 @@
     pkg=net-tools
     state=latest
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: PkgMgr RHEL/CentOS | Get openstack ocata rpm
   get_url:
@@ -23,11 +23,11 @@
   tags:
     - ovs_install
   register: result
-  until: result | success
+  until: result is succeeded
 
 - name: PkgMgr RHEL/CentOS | Install ovs
   yum:
-    pkg=openvswitch-2.5.0-2.el7.x86_64
+    pkg=openvswitch
     state=present
   environment:
     http_proxy: "{{ http_proxy|default('') }}"
@@ -36,4 +36,4 @@
   tags:
     - ovs_install
   register: result
-  until: result | success
+  until: result is succeeded

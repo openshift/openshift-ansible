@@ -7,7 +7,7 @@
     containerized_svc_dir: "/etc/systemd/system"
     ha_svc_template_path: "docker-cluster"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
 
 - include_tasks: registry_auth.yml
 
@@ -30,11 +30,11 @@
 # This is the image used for both HA and non-HA clusters:
 - name: Pre-pull master image
   command: >
-    docker pull {{ openshift.master.master_image }}:{{ openshift_image_tag }}
+    docker pull {{ osm_image }}:{{ openshift_image_tag }}
   register: l_pull_result
   changed_when: "'Downloaded newer image' in l_pull_result.stdout"
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
   - not l_is_master_system_container | bool
 
 - name: Create the ha systemd unit files
@@ -50,7 +50,7 @@
 
 - command: systemctl daemon-reload
   when:
-  - l_create_ha_unit_files | changed
+  - l_create_ha_unit_files is changed
 # end workaround for missing systemd unit files
 
 - name: enable master services

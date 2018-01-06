@@ -5,7 +5,7 @@ Ensures docker package or system container is installed, and optionally raises t
 
 container-daemon.json items may be found at https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 
-This role is designed to be used with include_role and tasks_from.
+This role is designed to be used with import_role and tasks_from.
 
 Entry points
 ------------
@@ -30,7 +30,7 @@ Example Playbook
 
     - hosts: servers
       tasks:
-      - include_role: container_runtime
+      - import_role: container_runtime
         tasks_from: package_docker.yml
 
 License

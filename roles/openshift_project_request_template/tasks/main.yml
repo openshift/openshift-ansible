@@ -6,7 +6,7 @@
 
 - name: Generate default project template
   command: |
-    {{ openshift.common.client_binary | quote }} \
+    {{ openshift_client_binary | quote }} \
       --config {{ openshift.common.config_base | quote }}/master/admin.kubeconfig \
       --output yaml \
       adm create-bootstrap-project-template \
@@ -28,7 +28,7 @@
 
 - name: Create or update project request template
   command: |
-    {{ openshift.common.client_binary }} \
+    {{ openshift_client_binary }} \
       --config {{ openshift.common.config_base }}/master/admin.kubeconfig \
       --namespace {{ openshift_project_request_template_namespace | quote }} \
       apply --filename {{ mktemp.stdout }}

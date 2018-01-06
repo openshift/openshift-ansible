@@ -3,7 +3,7 @@
   hosts: localhost
   tasks:
   - name: provision cluster
-    include_role:
+    import_role:
       name: openshift_openstack
       tasks_from: provision.yml
 
@@ -36,7 +36,7 @@
   hosts: localhost
   tasks:
   - name: Populate DNS entries
-    include_role:
+    import_role:
       name: openshift_openstack
       tasks_from: populate-dns.yml
     when:
@@ -47,20 +47,28 @@
   hosts: oo_all_hosts
   become: yes
   gather_facts: yes
-  roles:
-  - role: rhel_subscribe
+  tasks:
+  - name: Subscribe RHEL instances
+    import_role:
+      name: rhel_subscribe
     when:
     - ansible_distribution == "RedHat"
-    - rhsub_user | default(False)
-    - rhsub_pass | default(False)
+    - rhsub_user is defined
+    - rhsub_pass is defined
 
-  tasks:
+  - name: Enable required YUM repositories
+    import_role:
+      name: openshift_repos
+    when:
+    - ansible_distribution == "RedHat"
+    - rh_subscribed is defined
+
   - name: Install dependencies
-    include_role:
+    import_role:
       name: openshift_openstack
       tasks_from: node-packages.yml
 
   - name: Configure Node
-    include_role:
+    import_role:
       name: openshift_openstack
       tasks_from: node-configuration.yml
