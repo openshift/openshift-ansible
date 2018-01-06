@@ -1,0 +1,31 @@
+---
+- name: Web Console Install Checkpoint Start
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Web Console install 'In Progress'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_web_console:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- name: Web Console
+  hosts: oo_first_master
+  roles:
+  - openshift_web_console
+  vars:
+    first_master: "{{ groups.oo_first_master[0] }}"
+
+- name: Web Console Install Checkpoint End
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Web Console install 'Complete'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_web_console:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

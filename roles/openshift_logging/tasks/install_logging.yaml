@@ -314,4 +314,16 @@
     openshift_logging_install_eventrouter | default(false) | bool
 
 
+# TODO: Remove when asset config is removed from master-config.yaml
 - include_tasks: update_master_config.yaml
+
+# Update asset config in openshift-web-console namespace
+- name: Add Kibana route information to web console asset config
+  include_role:
+    name: openshift_web_console
+    tasks_from: update_asset_config.yml
+  vars:
+    asset_config_edits:
+    - key: loggingPublicURL
+      value: "https://{{ openshift_logging_kibana_hostname }}"
+  when: openshift_web_console_install | default(true) | bool

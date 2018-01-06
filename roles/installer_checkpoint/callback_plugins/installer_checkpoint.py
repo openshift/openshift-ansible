@@ -31,6 +31,7 @@ class CallbackModule(CallbackBase):
             'installer_phase_node',
             'installer_phase_glusterfs',
             'installer_phase_hosted',
+            'installer_phase_web_console',
             'installer_phase_metrics',
             'installer_phase_logging',
             'installer_phase_prometheus',
@@ -79,6 +80,10 @@ class CallbackModule(CallbackBase):
             'installer_phase_hosted': {
                 'title': 'Hosted Install',
                 'playbook': 'playbooks/openshift-hosted/config.yml'
+            },
+            'installer_phase_web_console': {
+                'title': 'Web Console Install',
+                'playbook': 'playbooks/openshift-web-console/config.yml'
             },
             'installer_phase_metrics': {
                 'title': 'Metrics Install',
