@@ -62,7 +62,10 @@ openshift_hosted_router_certificate: {}
 openshift_hosted_router_create_certificate: True
 
 r_openshift_hosted_router_os_firewall_deny: []
-r_openshift_hosted_router_os_firewall_allow: []
+r_openshift_hosted_router_os_firewall_allow:
+- service: Router Statistics Port
+  port: "{{ stats_port }}/tcp"
+  cond: "{{ openshift_prometheus_state == 'present' }}"
 
 ############
 # Registry #
