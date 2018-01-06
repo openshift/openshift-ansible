@@ -1,5 +1,4 @@
 """A setuptools based setup module.
-
 """
 from __future__ import print_function
 
