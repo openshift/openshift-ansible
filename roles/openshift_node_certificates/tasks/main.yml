@@ -94,13 +94,6 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
-- name: Create local temp directory for syncing certs
-  local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-  register: node_cert_mktemp
-  changed_when: False
-  when: node_certs_missing | bool
-  become: no
-
 - name: Create a tarball of the node config directories
   command: >
     tar -czvf {{ openshift_node_generated_config_dir }}.tgz
@@ -117,8 +110,7 @@
 - name: Retrieve the node config tarballs from the master
   fetch:
     src: "{{ openshift_node_generated_config_dir }}.tgz"
-    dest: "{{ node_cert_mktemp.stdout }}/"
-    flat: yes
+    dest: "/tmp"
     fail_on_missing: yes
     validate_checksum: yes
   when: node_certs_missing | bool
@@ -132,15 +124,14 @@
 
 - name: Unarchive the tarball on the node
   unarchive:
-    src: "{{ node_cert_mktemp.stdout }}/{{ openshift_node_cert_subdir }}.tgz"
+    src: "/tmp/{{ inventory_hostname }}/{{ openshift_node_generated_config_dir }}.tgz"
     dest: "{{ openshift_node_cert_dir }}"
   when: node_certs_missing | bool
 
 - name: Delete local temp directory
-  local_action: file path="{{ node_cert_mktemp.stdout }}" state=absent
+  local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
   changed_when: False
   when: node_certs_missing | bool
-  become: no
 
 - name: Copy OpenShift CA to system CA trust
   copy:
