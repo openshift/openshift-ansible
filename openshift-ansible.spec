@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.27
+Version:        3.8.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Jan 07 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.28-1
+- 
+
 * Sat Jan 06 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.27-1
 - Migrate to import_role for static role inclusion (sdodson@redhat.com)
 - crio: create /etc/sysconfig/crio-storage (gscrivan@redhat.com)
