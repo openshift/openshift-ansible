@@ -13,6 +13,4 @@ galaxy_info:
   - cloud
 dependencies:
 - role: lib_openshift
-- role: openshift_cloud_provider
-  when: not (openshift_node_upgrade_in_progress | default(False))
 - role: lib_utils
