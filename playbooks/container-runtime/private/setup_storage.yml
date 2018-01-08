@@ -1,5 +1,7 @@
 ---
-- hosts: "{{ l_containerized_host_groups }}"
+- import_playbook: build_container_groups.yml
+
+- hosts: oo_nodes_to_config:oo_hosts_containerized_managed_true
   vars:
     l_chg_temp: "{{ hostvars[groups['oo_first_master'][0]]['openshift_containerized_host_groups'] | default([]) }}"
     l_containerized_host_groups: "{{ (['oo_nodes_to_config'] | union(l_chg_temp)) | join(':') }}"
