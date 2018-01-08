@@ -1,5 +1,5 @@
 ---
-openshift_client_binary: "{{ openshift_is_containerized | ternary('/usr/local/bin/oc', 'oc') }}"
+openshift_client_binary: "{{ (openshift_is_containerized | bool) | ternary('/usr/local/bin/oc', 'oc') }}"
 
 openshift_cli_image_dict:
   origin: 'openshift/origin'
