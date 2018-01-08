@@ -75,7 +75,7 @@
     elasticsearch_storage_type: "{{ openshift_logging_elasticsearch_storage_type | default('pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir') }}"
 
 # We don't allow scaling down of ES nodes currently
-- import_role:
+- include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -103,7 +103,7 @@
   - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
 # Create any new DC that may be required
-- import_role:
+- include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -137,7 +137,7 @@
   when:
   - openshift_logging_use_ops | bool
 
-- import_role:
+- include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -180,7 +180,7 @@
   - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
 # Create any new DC that may be required
-- import_role:
+- include_role:
     name: openshift_logging_elasticsearch
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
