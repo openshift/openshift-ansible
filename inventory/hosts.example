@@ -128,7 +128,7 @@ openshift_release=v3.7
 #openshift_crio_systemcontainer_image_override="registry.example.com/cri-o:latest"
 # NOTE: The following crio docker-gc items are tech preview and likely shouldn't be used
 # unless you know what you are doing!!
-# The following two variables are used when opneshift_use_crio is True
+# The following two variables are used when openshift_use_crio is True
 # and cleans up after builds that pass through docker.
 # Enable docker garbage collection when using cri-o
 #openshift_crio_enable_docker_gc=false
