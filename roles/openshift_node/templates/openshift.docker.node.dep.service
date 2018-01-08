@@ -3,7 +3,7 @@ Requires={{ openshift_docker_service_name }}.service
 After={{ openshift_docker_service_name }}.service
 PartOf={{ openshift_service_type }}-node.service
 Before={{ openshift_service_type }}-node.service
-{% if openshift_use_crio %}Wants=cri-o.service{% endif %}
+{% if openshift_use_crio | bool %}Wants=cri-o.service{% endif %}
 
 [Service]
 ExecStart=/bin/bash -c 'if [[ -f /usr/bin/docker-current ]]; \
