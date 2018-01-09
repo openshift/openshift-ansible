@@ -14,7 +14,7 @@ imageConfig:
   latest: {{ openshift_node_image_config_latest }}
 kind: NodeConfig
 kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_utils_to_padded_yaml(level=1) }}
-{% if openshift_use_crio %}
+{% if openshift_use_crio | bool %}
   container-runtime:
   - remote
   container-runtime-endpoint:

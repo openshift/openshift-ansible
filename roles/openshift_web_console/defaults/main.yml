@@ -1,0 +1,3 @@
+---
+# TODO: This is temporary and will be updated to use taints and tolerations so that the console runs on the masters
+openshift_web_console_nodeselector: {"region":"infra"}

@@ -9,6 +9,7 @@ environment.
 
 from __future__ import print_function
 
+from collections import Mapping
 import json
 
 import shade
@@ -101,6 +102,10 @@ def build_inventory():
             hostvars['glusterfs_devices'] = ['/dev/nvme0n1']
 
         node_labels = server.metadata.get('node_labels')
+        # NOTE(shadower): the node_labels value must be a dict not string
+        if not isinstance(node_labels, Mapping):
+            node_labels = json.loads(node_labels)
+
         if node_labels:
             hostvars['openshift_node_labels'] = node_labels
 

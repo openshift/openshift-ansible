@@ -22,5 +22,5 @@
 
 - include_tasks: setup_docker_symlink.yml
   when:
-    - openshift_use_crio
+    - openshift_use_crio | bool
     - dockerstat.stat.islnk is defined and not (dockerstat.stat.islnk | bool)

@@ -10,6 +10,6 @@
     docker pull {{ osn_ovs_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Downloaded newer image' in pull_result.stdout"
-  when: openshift_use_openshift_sdn | bool
+  when: openshift_node_use_openshift_sdn | bool
 
 - include_tasks: ../container_images.yml

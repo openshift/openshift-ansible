@@ -130,3 +130,14 @@
     name: openshift_logging_eventrouter
   when:
     not openshift_logging_install_eventrouter | default(false) | bool
+
+# Update asset config in openshift-web-console namespace
+- name: Remove Kibana route information from web console asset config
+  include_role:
+    name: openshift_web_console
+    tasks_from: update_asset_config.yml
+  vars:
+    asset_config_edits:
+      - key: loggingPublicURL
+        value: ""
+  when: openshift_web_console_install | default(true) | bool

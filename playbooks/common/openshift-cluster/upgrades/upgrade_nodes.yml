@@ -7,8 +7,6 @@
   - import_role:
       name: openshift_node
       tasks_from: upgrade_pre.yml
-    vars:
-      openshift_node_upgrade_in_progress: True
 
 - name: Drain and upgrade nodes
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
@@ -46,8 +44,6 @@
   - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
-    vars:
-      openshift_node_upgrade_in_progress: True
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"

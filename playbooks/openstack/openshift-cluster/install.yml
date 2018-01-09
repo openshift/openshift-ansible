@@ -9,4 +9,7 @@
 # some logic here?
 
 - name: run the cluster deploy
+  import_playbook: ../../prerequisites.yml
+
+- name: run the cluster deploy
   import_playbook: ../../deploy_cluster.yml

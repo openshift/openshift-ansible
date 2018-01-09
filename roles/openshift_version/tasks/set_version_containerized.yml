@@ -21,7 +21,7 @@
   register: cli_image_version
   when:
   - openshift_version is not defined
-  - not openshift_use_crio_only
+  - not openshift_use_crio_only | bool
 
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
@@ -30,7 +30,7 @@
   - openshift_version is not defined
   - openshift.common.deployment_type == 'origin'
   - cli_image_version.stdout_lines[0].split('-') | length > 1
-  - not openshift_use_crio_only
+  - not openshift_use_crio_only | bool
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
@@ -45,14 +45,14 @@
   when:
   - openshift_version is defined
   - openshift_version.split('.') | length == 2
-  - not openshift_use_crio_only
+  - not openshift_use_crio_only | bool
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when:
   - openshift_version is defined
   - openshift_version.split('.') | length == 2
-  - not openshift_use_crio_only
+  - not openshift_use_crio_only | bool
 
 # TODO: figure out a way to check for the openshift_version when using CRI-O.
 # We should do that using the images in the ostree storage so we don't have
