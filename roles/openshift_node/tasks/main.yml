@@ -4,7 +4,7 @@
   when:
     - (not ansible_selinux or ansible_selinux.status != 'enabled')
     - openshift_deployment_type == 'openshift-enterprise'
-    - not openshift_use_crio
+    - not openshift_use_crio | bool
 
 - include_tasks: dnsmasq_install.yml
 - include_tasks: dnsmasq.yml
@@ -50,7 +50,7 @@
     name: cri-o
     enabled: yes
     state: restarted
-  when: openshift_use_crio
+  when: openshift_use_crio | bool
   register: task_result
   failed_when:
     - task_result is failed

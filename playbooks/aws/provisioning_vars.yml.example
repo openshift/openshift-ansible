@@ -93,6 +93,11 @@ openshift_aws_ssh_key_name: # myuser_key
 # --------- #
 # Variables in this section apply to building a node AMI for use in your
 # openshift cluster.
+# openshift-ansible will perform the container runtime storage setup when specified
+# The current storage setup with require a drive if using a separate storage device
+# for the container runtime.
+container_runtime_docker_storage_type: overlay2
+container_runtime_docker_storage_setup_device: /dev/xvdb
 
 # must specify a base_ami when building an AMI
 openshift_aws_base_ami: # ami-12345678

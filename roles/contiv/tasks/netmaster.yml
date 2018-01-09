@@ -1,34 +1,16 @@
 ---
 - include_tasks: netmaster_firewalld.yml
-  when: has_firewalld
+  when: contiv_has_firewalld
 
 - include_tasks: netmaster_iptables.yml
-  when: not has_firewalld and has_iptables
+  when: not contiv_has_firewalld and contiv_has_iptables
 
-- name: Netmaster | Check is /etc/hosts file exists
-  stat:
-    path: /etc/hosts
-  register: hosts
-
-- name: Netmaster | Create hosts file if it is not present
-  file:
-    path: /etc/hosts
-    state: touch
-  when: not hosts.stat.exists
-
-- name: Netmaster | Build hosts file
-  lineinfile:
-    dest: /etc/hosts
-    regexp: .*netmaster$
-    line: "{{ hostvars[item]['ansible_' + netmaster_interface].ipv4.address }} netmaster"
-    state: present
-  when: hostvars[item]['ansible_' + netmaster_interface].ipv4.address is defined
-  with_items: "{{ groups['masters'] }}"
+- include_tasks: etcd.yml
 
 - name: Netmaster | Create netmaster symlinks
   file:
     src: "{{ contiv_current_release_directory }}/{{ item }}"
-    dest: "{{ bin_dir }}/{{ item }}"
+    dest: "{{ contiv_bin_dir }}/{{ item }}"
     state: link
   with_items:
     - netmaster
@@ -36,7 +18,7 @@
 
 - name: Netmaster | Copy environment file for netmaster
   template:
-    src: netmaster.env.j2
+    src: netmaster.j2
     dest: /etc/default/netmaster
     mode: 0644
   notify: restart netmaster
@@ -75,3 +57,5 @@
 
 - include_tasks: default_network.yml
   when: contiv_default_network == true
+
+- include_tasks: api_proxy.yml

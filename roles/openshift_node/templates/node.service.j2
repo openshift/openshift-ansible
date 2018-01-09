@@ -8,7 +8,7 @@ Wants={{ openshift_docker_service_name }}.service
 Documentation=https://github.com/openshift/origin
 Requires=dnsmasq.service
 After=dnsmasq.service
-{% if openshift_use_crio %}Wants=cri-o.service{% endif %}
+{% if openshift_use_crio | bool %}Wants=cri-o.service{% endif %}
 
 [Service]
 Type=notify

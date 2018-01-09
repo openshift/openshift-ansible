@@ -60,6 +60,7 @@
     dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
     src: "node.service.j2"
   register: l_node_unit
+  when: not openshift_is_containerized | bool
 
 - name: Reset selinux context
   command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
@@ -74,4 +75,3 @@
 #       require a service to be part of the call.
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: l_node_unit is changed

@@ -1,6 +1,6 @@
 ---
-- name: Ensure that all non-node hosts are accessible
-  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config
+- name: Install packages necessary for installer
+  hosts: oo_all_hosts
   any_errors_fatal: true
   tasks:
   - when:
