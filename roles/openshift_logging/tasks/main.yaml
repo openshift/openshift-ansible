@@ -17,7 +17,6 @@
   register: local_tmp
   changed_when: False
   check_mode: no
-  become: no
 
 - include_tasks: install_logging.yaml
   when:
@@ -31,4 +30,3 @@
   local_action: file path="{{local_tmp.stdout}}" state=absent
   tags: logging_cleanup
   changed_when: False
-  become: no

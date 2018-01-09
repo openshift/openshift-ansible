@@ -1,7 +1,7 @@
 # openshift_storage_nfs_lvm
 
 This role is useful to create and export nfs disks for openshift persistent volumes.
-It does so by creating lvm partitions on an already setup pv/vg, creating xfs 
+It does so by creating lvm partitions on an already setup pv/vg, creating xfs
 filesystem on each partition, mounting the partitions, exporting the mounts via NFS
 and creating a json file for each mount that an openshift master can use to
 create persistent volumes.
@@ -20,7 +20,7 @@ create persistent volumes.
 osnl_nfs_export_options: "*(rw,sync,all_squash)"
 
 # Directory, where the created partitions should be mounted. They will be
-# mounted as <osnl_mount_dir>/<lvm volume name> 
+# mounted as <osnl_mount_dir>/<lvm volume name>
 osnl_mount_dir: /exports/openshift
 
 # Volume Group to use.
@@ -64,11 +64,10 @@ None
 ## Example Playbook
 
 With this playbook, 2 5Gig lvm partitions are created, named stg5g0003 and stg5g0004
-Both of them are mounted into `/exports/openshift` directory.  Both directories are 
+Both of them are mounted into `/exports/openshift` directory.  Both directories are
 exported via NFS.  json files are created in /root.
 
     - hosts: nfsservers
-      become: no
       remote_user: root
       gather_facts: no
       roles:
@@ -94,7 +93,6 @@ exported via NFS.  json files are created in /root.
 * Create an ansible playbook, say `setupnfs.yaml`:
     ```
     - hosts: nfsservers
-      become: no
       remote_user: root
       gather_facts: no
       roles:

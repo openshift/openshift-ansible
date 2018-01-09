@@ -7,7 +7,6 @@
   register: check_results
 
 - name: Generate expiration report HTML
-  become: no
   run_once: yes
   template:
     src: cert-expiry-table.html.j2
@@ -21,7 +20,6 @@
   when: openshift_certificate_expiry_save_json_results|bool
 
 - name: Generate results JSON file
-  become: no
   run_once: yes
   template:
     src: save_json_results.j2
