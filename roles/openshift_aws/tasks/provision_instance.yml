@@ -42,5 +42,5 @@
 
 - name: add host to nodes
   add_host:
-    groups: nodes
+    groups: nodes,g_new_node_hosts
     name: "{{ instancesout.instances[0].public_dns_name }}"
