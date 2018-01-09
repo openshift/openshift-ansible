@@ -12,8 +12,9 @@
 # and we don't want to install wrong version of docker and have to downgrade
 # later.
 - name: Set openshift_version for etcd, node, and master hosts
-  hosts: oo_etcd_to_config:oo_nodes_to_config:oo_masters_to_config:!oo_first_master
+  hosts: "{{ l_openshift_version_set_hosts | default(l_default_version_set_hosts) }}"
   vars:
+    l_default_version_set_hosts: "oo_etcd_to_config:oo_nodes_to_config:oo_masters_to_config:!oo_first_master"
     l_first_master_openshift_version: "{{ hostvars[groups.oo_first_master.0].openshift_version }}"
     l_first_master_openshift_pkg_version: "{{ hostvars[groups.oo_first_master.0].openshift_pkg_version }}"
     l_first_master_openshift_image_tag: "{{ hostvars[groups.oo_first_master.0].openshift_image_tag}}"
