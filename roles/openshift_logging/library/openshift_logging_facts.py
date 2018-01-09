@@ -265,7 +265,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return
         for item in role["subjects"]:
             comp = self.comp(item["name"])
-            if comp is not None and namespace == item["namespace"]:
+            if comp is not None and namespace == item.get("namespace"):
                 self.add_facts_for(comp, "clusterrolebindings", "cluster-readers", dict())
 
 # this needs to end up nested under the service account...
