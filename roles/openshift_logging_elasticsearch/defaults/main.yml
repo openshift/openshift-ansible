@@ -31,6 +31,7 @@ openshift_logging_elasticsearch_pvc_name: ""
 openshift_logging_elasticsearch_pvc_size: ""
 openshift_logging_elasticsearch_pvc_dynamic: false
 openshift_logging_elasticsearch_pvc_pv_selector: {}
+openshift_logging_elasticsearch_pvc_storage_class_name: ""
 openshift_logging_elasticsearch_pvc_access_modes: ['ReadWriteOnce']
 openshift_logging_elasticsearch_storage_group: ['65534']
 
