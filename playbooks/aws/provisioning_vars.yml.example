@@ -44,9 +44,8 @@ openshift_pkg_version: # -3.7.0
 # Name of the vpc.  Needs to be set if using a pre-existing vpc.
 #openshift_aws_vpc_name: "{{ openshift_aws_clusterid }}"
 
-# Name of the subnet in the vpc to use.  Needs to be set if using a pre-existing
-# vpc + subnet.
-#openshift_aws_subnet_az:
+# Number of Availability Zones/networks to make available to AWS AutoScale Group
+#openshift_aws_asg_master_az_count: 1
 
 # -------------- #
 # Security Group #

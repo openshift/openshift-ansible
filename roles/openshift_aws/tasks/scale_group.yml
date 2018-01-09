@@ -3,6 +3,12 @@
   set_fact:
     l_node_group_name: "{{ openshift_aws_node_group.name }} {{ l_deployment_serial }}"
 
+- fail:
+    msg:
+      - "AWS ASG az count is greater than available az/subnets"
+      - "Please set openshift_aws_asg_az_count accordingly"
+  when: openshift_aws_asg_master_az_count > (subnetout.subnets | map(attribute='az') | list | length)
+
 - name: Create the scale group
   ec2_asg:
     name: "{{ l_node_group_name }}"
@@ -16,12 +22,12 @@
     termination_policies: "{{ l_node_group_config[openshift_aws_node_group.group].termination_policy if 'termination_policy' in  l_node_group_config[openshift_aws_node_group.group] else omit }}"
     load_balancers: "{{ l_node_group_config[openshift_aws_node_group.group].elbs if 'elbs' in l_node_group_config[openshift_aws_node_group.group] else omit }}"
     wait_for_instances: "{{ l_node_group_config[openshift_aws_node_group.group].wait_for_instances | default(False)}}"
-    vpc_zone_identifier: "{{ subnetout.subnets[0].id }}"
+    vpc_zone_identifier: "{{ subnetout.subnets[:openshift_aws_asg_master_az_count] | map(attribute='id') | list }}"
     replace_instances: "{{ openshift_aws_node_group_replace_instances if openshift_aws_node_group_replace_instances != [] else omit }}"
     replace_all_instances: "{{ omit if openshift_aws_node_group_replace_instances != []
                                     else (l_node_group_config[openshift_aws_node_group.group].replace_all_instances | default(omit)) }}"
     tags:
-    - "{{ openshift_aws_node_group_config_tags
+      - "{{ openshift_aws_node_group_config_tags
           | combine(openshift_aws_node_group.tags)
           | combine({'deployment_serial': l_deployment_serial, 'ami': openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami)}) }}"
 

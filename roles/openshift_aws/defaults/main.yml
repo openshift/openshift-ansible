@@ -272,19 +272,18 @@ openshift_aws_node_security_groups:
 openshift_aws_vpc_tags:
   Name: "{{ openshift_aws_vpc_name }}"
 
-openshift_aws_subnet_az: us-east-1c
+openshift_aws_asg_master_az_count: 1
 
 openshift_aws_vpc:
   name: "{{ openshift_aws_vpc_name }}"
   cidr: 172.31.0.0/16
   subnets:
-    us-east-1:
-    - cidr: 172.31.48.0/20
-      az: "us-east-1c"
-    - cidr: 172.31.32.0/20
-      az: "us-east-1e"
-    - cidr: 172.31.16.0/20
-      az: "us-east-1a"
+  - az: us-east-1a
+    cidr: 172.31.16.0/20
+  - az: us-east-1c
+    cidr: 172.31.48.0/20
+  - az: us-east-1e
+    cidr: 172.31.32.0/20
 
 openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''
