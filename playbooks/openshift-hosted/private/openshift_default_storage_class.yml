@@ -4,3 +4,9 @@
   roles:
   - role: openshift_default_storage_class
     when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce' or openshift_cloudprovider_kind == 'openstack')
+  - role: openshift_default_storage_class
+    openshift_storageclass_default: false
+    openshift_storageclass_name: ssd
+    openshift_storageclass_parameters:
+      type: pd-ssd
+    when: openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'gce'
