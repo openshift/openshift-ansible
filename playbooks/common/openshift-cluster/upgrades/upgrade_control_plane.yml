@@ -108,7 +108,6 @@
 - name: Gate on master update
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
@@ -242,7 +241,6 @@
 - name: Gate on reconcile
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars

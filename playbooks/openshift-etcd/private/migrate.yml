@@ -2,7 +2,6 @@
 - name: Check if the master has embedded etcd
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tags:
   - always
@@ -53,7 +52,6 @@
 - name: Gate on etcd backup
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       etcd_backup_completed: "{{ hostvars

@@ -14,7 +14,6 @@
 - name: Gate on etcd backup
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       etcd_backup_completed: "{{ hostvars

@@ -2,7 +2,6 @@
 - name: Create local temp directory for syncing certs
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -65,7 +64,6 @@
 - name: Delete local temp directory
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - name: Delete local temp directory
