@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.28
+Version:        3.8.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,36 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 09 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.29-1
+- Use openshift_node_use_openshift_sdn when doing a containerized node upgrade
+  (vrutkovs@redhat.com)
+- Fix: change import_role to include_role (mgugino@redhat.com)
+- docker storage setup for ami building (jdiaz@redhat.com)
+- Properly cast crio boolean variables to bool (mgugino@redhat.com)
+- Build containerized host group dynamically (mgugino@redhat.com)
+- install base_packages on oo_all_hosts (mgugino@redhat.com)
+- Fix error in variable in comment (mscherer@users.noreply.github.com)
+- Switch back to dynamic include_role in logging loops (sdodson@redhat.com)
+- Use Contiv version 1.2.0 (flamingo@2thebatcave.com)
+- Contiv multi-master and other fixes (flamingo@2thebatcave.com)
+- Add missing dependency on openshift_facts (sdodson@redhat.com)
+- upgrades: set openshift_client_binary fact when running on oo_first_master
+  host (vrutkovs@redhat.com)
+- Install web console server (spadgett@redhat.com)
+- Remove become=no from various roles and tasks (mgugino@redhat.com)
+- Don't overwrite node's systemd units for containerized install
+  (vrutkovs@redhat.com)
+- Fix docker_image_availability checks (mgugino@redhat.com)
+- test_oc_scale: add more scale test cases (vrutkovs@redhat.com)
+- test_oc_scale: fix test docstrings (vrutkovs@redhat.com)
+- Import prerequisites.yml for OpenStack (tomas@sedovic.cz)
+- Set the correct path to the openstack.conf file (tomas@sedovic.cz)
+- Return a openshift_node_labels as a dict (tomas@sedovic.cz)
+- Remove last of openshift_node role meta-depends (mgugino@redhat.com)
+- Fix yaml syntax error in the sample inventory (tomas@sedovic.cz)
+- Adding ability to update ami drive size. (kwoodson@redhat.com)
+- Add origin- prefix to ASB image (fabian@fabianism.us)
+
 * Sun Jan 07 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.28-1
 - 
 
