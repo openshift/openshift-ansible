@@ -13,6 +13,8 @@
 
 - name: Create service signer certificate
   hosts: oo_first_master
+  roles:
+  - openshift_facts
   tasks:
   - name: Create remote temp directory for creating certs
     command: mktemp -d /tmp/openshift-ansible-XXXXXXX

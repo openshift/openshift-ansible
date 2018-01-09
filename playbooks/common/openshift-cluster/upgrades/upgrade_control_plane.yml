@@ -22,6 +22,8 @@
 # See: https://github.com/openshift/origin/pull/14625#issuecomment-308467060
 - name: Pre master upgrade - Upgrade all storage
   hosts: oo_first_master
+  roles:
+  - openshift_facts
   tasks:
   - name: Upgrade all storage
     command: >
@@ -49,10 +51,9 @@
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
+  roles:
+  - openshift_facts
   tasks:
-  - import_role:
-      name: openshift_facts
-
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
@@ -128,6 +129,7 @@
   hosts: oo_masters_to_config
   roles:
   - { role: openshift_cli }
+  - { role: openshift_facts }
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
