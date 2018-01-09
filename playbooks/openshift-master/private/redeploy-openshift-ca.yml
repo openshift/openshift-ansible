@@ -132,6 +132,10 @@
     register: g_master_mktemp
     changed_when: false
 
+  - name: Chmod local temp directory for syncing certs
+    local_action: command chmod 777 "{{ g_master_mktemp.stdout }}"
+    changed_when: false
+
 - name: Retrieve OpenShift CA
   hosts: oo_first_master
   vars:

@@ -121,6 +121,11 @@
   changed_when: False
   when: master_certs_missing | bool
 
+- name: Chmod local temp directory for syncing certs
+  local_action: command chmod 777 "{{ g_master_certs_mktemp.stdout }}"
+  changed_when: False
+  when: master_certs_missing | bool
+
 - name: Create a tarball of the master certs
   command: >
     tar -czvf {{ openshift_master_generated_config_dir }}.tgz

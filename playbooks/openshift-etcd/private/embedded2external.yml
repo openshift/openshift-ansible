@@ -90,6 +90,10 @@
     register: g_etcd_client_mktemp
     changed_when: False
 
+  - name: Chmod local temp directory for syncing etcd backup
+    local_action: command chmod 777 "{{ g_etcd_client_mktemp.stdout }}"
+    changed_when: False
+
   - import_role:
       name: etcd
       tasks_from: backup.fetch.yml

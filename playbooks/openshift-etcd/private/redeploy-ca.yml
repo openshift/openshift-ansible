@@ -33,6 +33,10 @@
     register: g_etcd_mktemp
     changed_when: false
 
+  - name: Chmod local temp directory for syncing certs
+    local_action: command chmod 777 "{{ g_etcd_mktemp.stdout }}"
+    changed_when: false
+
 - name: Distribute etcd CA to etcd hosts
   hosts: oo_etcd_to_config
   tasks:

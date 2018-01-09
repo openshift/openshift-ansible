@@ -18,6 +18,11 @@
   changed_when: False
   check_mode: no
 
+- name: Chmod local temp directory for doing work in
+  local_action: command chmod 777 "{{ local_tmp.stdout }}"
+  changed_when: False
+  check_mode: no
+
 - include_tasks: install_logging.yaml
   when:
     - openshift_logging_install_logging | default(false) | bool
