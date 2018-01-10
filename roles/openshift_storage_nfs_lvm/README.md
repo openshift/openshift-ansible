@@ -15,47 +15,17 @@ create persistent volumes.
 
 ## Role Variables
 
-```
-# Options of NFS exports.
-osnl_nfs_export_options: "*(rw,sync,all_squash)"
-
-# Directory, where the created partitions should be mounted. They will be
-# mounted as <osnl_mount_dir>/<lvm volume name> 
-osnl_mount_dir: /exports/openshift
-
-# Volume Group to use.
-# This role always assumes that there is enough free space on the volume
-#   group for all the partitions you will be making
-osnl_volume_group: openshiftvg
-
-# volume names
-# volume names are {{osnl_volume_prefix}}{{osnl_volume_size}}g{{volume number}}
-#   example: stg5g0004
-
-# osnl_volume_prefix
-# Useful if you are using the nfs server for more than one cluster
-osnl_volume_prefix: "stg"
-
-# osnl_volume_size
-# Size of the volumes/partitions in Gigabytes.
-osnl_volume_size: 5
-
-# osnl_volume_num_start
-# Where to start the volume number numbering.
-osnl_volume_num_start: 3
-
-# osnl_number_of_volumes
-# How many volumes/partitions to build, with the size we stated.
-osnl_number_of_volumes: 2
-
-# osnl_volume_reclaim_policy
-# Volume reclaim policy of a PersistentVolume tells the cluster
-# what to do with the volume after it is released.
-#
-# Valid values are "Retain" or "Recycle" (default).
-osnl_volume_reclaim_policy: "Recycle"
-
-```
+| Name                                              | Default value         | Description                                                                          |
+|---------------------------------------------------|-----------------------|--------------------------------------------------------------------------------------|
+| r_openshift_storage_nfs_lvm_nfs_export_options    | *(rw,sync,all_squash) | Options of NFS exports                                                               |
+| r_openshift_storage_nfs_lvm_mount_dir             | /exports/openshift    | Directory, where the created partitions should be mounted.                           |
+| r_openshift_storage_nfs_lvm_export_dir_mode       | 0700                  | Mode on the nfs-exported directory.                                                  |
+| r_openshift_storage_nfs_lvm_volume_group          | openshiftvg           | Volume Group to use.                                                                 |
+| r_openshift_storage_nfs_lvm_volume_prefix         | os-pv                 | Volume name prefix. Useful if you are using the nfs server for more than one cluster |
+| r_openshift_storage_nfs_lvm_volume_size           | 1                     | Size of the volumes/partitions in Gigabytes.                                         |
+| r_openshift_storage_nfs_lvm_volume_num_start      | 1                     | Where to start the volume number numbering.                                          |
+| r_openshift_storage_nfs_lvm_volume_count          | 0                     | How many volumes/partitions to create. (will not create any volumes by default)      |
+| r_openshift_storage_nfs_lvm_volume_reclaim_policy | Recycle               | Volume reclaim policy of the PersistentVolume.                                       |
 
 ## Dependencies
 
@@ -73,12 +43,12 @@ exported via NFS.  json files are created in /root.
       gather_facts: no
       roles:
         - role: openshift_storage_nfs_lvm
-          osnl_mount_dir: /exports/openshift
-          osnl_volume_prefix: "stg"
-          osnl_volume_size: 5
-          osnl_volume_num_start: 3
-          osnl_number_of_volumes: 2
-          osnl_volume_reclaim_policy: "Recycle"
+          r_openshift_storage_nfs_lvm_mount_dir: /exports/openshift
+          r_openshift_storage_nfs_lvm_volume_prefix: "stg"
+          r_openshift_storage_nfs_lvm_volume_size: 5
+          r_openshift_storage_nfs_lvm_volume_num_start: 3
+          r_openshift_storage_nfs_lvm_volume_count: 2
+          r_openshift_storage_nfs_lvm_volume_reclaim_policy: "Recycle"
 
 
 ## Full example
@@ -99,12 +69,12 @@ exported via NFS.  json files are created in /root.
       gather_facts: no
       roles:
         - role: openshift_storage_nfs_lvm
-          osnl_mount_dir: /exports/stg
-          osnl_volume_prefix: "stg"
-          osnl_volume_size: 5
-          osnl_volume_num_start: 3
-          osnl_number_of_volumes: 2
-          osnl_volume_reclaim_policy: "Recycle"
+          r_openshift_storage_nfs_lvm_mount_dir: /exports/stg
+          r_openshift_storage_nfs_lvm_volume_prefix: "stg"
+          r_openshift_storage_nfs_lvm_volume_size: 5
+          r_openshift_storage_nfs_lvm_volume_num_start: 3
+          r_openshift_storage_nfs_lvm_volume_count: 2
+          r_openshift_storage_nfs_lvm_volume_reclaim_policy: "Recycle"
 
 * Run the playbook:
     ```

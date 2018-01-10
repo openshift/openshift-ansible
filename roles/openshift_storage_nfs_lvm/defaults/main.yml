@@ -1,17 +1,33 @@
 ---
 # Options of NFS exports.
-osnl_nfs_export_options: "*(rw,sync,all_squash)"
+r_openshift_storage_nfs_lvm_nfs_export_options: "{{ osnl_nfs_export_options | default('*(rw,sync,all_squash)') }}"
 
 # Directory, where the created partitions should be mounted. They will be
-# mounted as <osnl_mount_dir>/test1g0001 etc.
-osnl_mount_dir: /exports/openshift
+# mounted as <r_openshift_storage_nfs_lvm_mount_dir>/test1g0001 etc.
+r_openshift_storage_nfs_lvm_mount_dir: "{{ osnl_mount_dir | default('/exports/openshift') }}"
+
+# Mode for the NFS-exported directories. Defaults to secure mode which may require additional configs depending on the environment.
+# See https://docs.openshift.com/container-platform/3.5/install_config/persistent_storage/persistent_storage_nfs.html#nfs-volume-security
+r_openshift_storage_nfs_lvm_export_dir_mode: 0700
 
 # Volume Group to use.
-osnl_volume_group: openshiftvg
+r_openshift_storage_nfs_lvm_volume_group: "{{ osnl_volume_group | default('openshiftvg') }}"
+
+# Volume name prefix.
+r_openshift_storage_nfs_lvm_volume_prefix: "{{ osnl_volume_prefix | default('os-pv') }}"
+
+# Volume size (in GB)
+r_openshift_storage_nfs_lvm_volume_size: "{{ osnl_volume_size | default(1) }}"
+
+# Where to start the volume number numbering.
+r_openshift_storage_nfs_lvm_volume_num_start: "{{ osnl_volume_num_start | default(1) }}"
+
+# How many volumes to create. (will not create any by default)
+r_openshift_storage_nfs_lvm_volume_count: "{{ osnl_number_of_volumes | default(0) }}"
 
 # Volume reclaim policy of a PersistentVolume tells the cluster
 # what to do with the volume after it is released.
 #
 # Valid values are "Retain" or "Recycle".
 # See https://docs.openshift.com/enterprise/3.0/architecture/additional_concepts/storage.html#pv-recycling-policy
-osnl_volume_reclaim_policy: "Recycle"
+r_openshift_storage_nfs_lvm_volume_reclaim_policy: "{{ osnl_volume_reclaim_policy | default('Recycle') }}"
