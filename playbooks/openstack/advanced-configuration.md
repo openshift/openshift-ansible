@@ -384,7 +384,7 @@ You will need to set up OpenStack credentials. You can try putting this in your
     openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
     openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
     openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
-    openshift_cloudprovider_openstack_block_storage_version: v2
+    openshift_cloudprovider_openstack_blockstorage_version: v2
 
 **NOTE**: you must specify the Block Storage version as v2, because OpenShift
 does not support the v3 API yet and the version detection is currently not
