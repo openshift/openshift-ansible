@@ -26,7 +26,7 @@ openshift_cluster_domain: 'cluster.local'
 ##########
 r_openshift_hosted_router_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_hosted_router_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
-r_openshift_hosted_router_prometheus_enabled: "{{ openshift_prometheus_state == 'present' | default(True) }}"
+r_openshift_hosted_router_prometheus_enabled: "{{ openshift_prometheus_state is defined and openshift_prometheus_state == 'present' | default(True) }}"
 
 openshift_hosted_router_selector: "{{ openshift_router_selector | default(openshift_hosted_infra_selector) }}"
 openshift_hosted_router_namespace: 'default'
