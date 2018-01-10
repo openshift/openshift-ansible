@@ -94,7 +94,7 @@
     _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch#configmaps#logging-elasticsearch#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
   with_together:
-  - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() }}"
+  - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() | list }}"
   - "{{ openshift_logging_facts.elasticsearch.pvcs }}"
   - "{{ es_indices }}"
   loop_control:
@@ -169,7 +169,7 @@
     _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch_ops#configmaps#logging-elasticsearch-ops#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
   with_together:
-  - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() }}"
+  - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() | list }}"
   - "{{ openshift_logging_facts.elasticsearch_ops.pvcs }}"
   - "{{ es_ops_indices }}"
   loop_control:
