@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.29
+Version:        3.8.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 10 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.30-1
+- Adding logic to disable and reenable external communication to ES during full
+  restart (ewolinet@redhat.com)
+- Adding logic to do a full cluster restart if we are incrementing our major
+  versions of ES (ewolinet@redhat.com)
+
 * Tue Jan 09 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.29-1
 - Use openshift_node_use_openshift_sdn when doing a containerized node upgrade
   (vrutkovs@redhat.com)
