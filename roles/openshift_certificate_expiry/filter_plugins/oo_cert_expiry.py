@@ -31,7 +31,6 @@ certificates
 Example playbook usage:
 
   - name: Generate expiration results JSON
-    become: no
     run_once: yes
     delegate_to: localhost
     when: openshift_certificate_expiry_save_json_results|bool

@@ -89,7 +89,10 @@
     local_action: command mktemp -d /tmp/etcd_backup-XXXXXXX
     register: g_etcd_client_mktemp
     changed_when: False
-    become: no
+
+  - name: Chmod local temp directory for syncing etcd backup
+    local_action: command chmod 777 "{{ g_etcd_client_mktemp.stdout }}"
+    changed_when: False
 
   - import_role:
       name: etcd
@@ -116,7 +119,6 @@
   - name: Delete temporary directory
     local_action: file path="{{ g_etcd_client_mktemp.stdout }}" state=absent
     changed_when: False
-    become: no
 
 # 7. force new cluster from the backup
 - name: Force new etcd cluster

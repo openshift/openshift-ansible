@@ -8,4 +8,3 @@
 
 # wait half a second between labels
 - local_action: command sleep {{ openshift_logging_fluentd_label_delay | default('.5') }}
-  become: no

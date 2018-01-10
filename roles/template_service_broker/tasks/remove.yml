@@ -2,7 +2,6 @@
 - command: mktemp -d /tmp/tsb-ansible-XXXXXX
   register: mktemp
   changed_when: False
-  become: no
 
 - copy:
     src: "{{ __tsb_files_location }}/{{ item }}"
@@ -32,4 +31,3 @@
     state: absent
     name: "{{ mktemp.stdout }}"
   changed_when: False
-  become: no
