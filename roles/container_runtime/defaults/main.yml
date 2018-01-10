@@ -101,26 +101,15 @@ l_crt_crio_image_tag_dict:
   openshift-enterprise: "{{ l_openshift_image_tag }}"
   origin: "{{ openshift_crio_image_tag | default(openshift_crio_image_tag_default) }}"
 
-l_crt_crio_image_prepend_dict:
-  openshift-enterprise: "registry.access.redhat.com/openshift3"
-  origin: "docker.io/gscrivano"
-
 l_crt_crio_image_dict:
-  Fedora:
-    crio_image_name: "cri-o-fedora"
-    crio_image_tag: "latest"
-  CentOS:
-    crio_image_name: "cri-o-centos"
-    crio_image_tag: "latest"
-  RedHat:
-    crio_image_name: "cri-o"
-    crio_image_tag: "{{ openshift_crio_image_tag | default(l_crt_crio_image_tag_dict[openshift_deployment_type]) }}"
+  Fedora: "registry.fedoraproject.org/latest/cri-o"
+  CentOS: "registry.centos.org/projectatomic/cri-o"
+  RedHat: "registry.access.redhat.com/openshift3/cri-o"
 
-l_crio_image_prepend: "{{ l_crt_crio_image_prepend_dict[openshift_deployment_type] }}"
-l_crio_image_name: "{{ l_crt_crio_image_dict[ansible_distribution]['crio_image_name'] }}"
-l_crio_image_tag: "{{ l_crt_crio_image_dict[ansible_distribution] }}"
+l_crio_image_name: "{{ l_crt_crio_image_dict[ansible_distribution] }}"
+l_crio_image_tag: "{{ l_crt_crio_image_tag_dict[openshift_deployment_type] }}"
 
-l_crio_image_default: "{{ l_crio_image_prepend }}/{{ l_crio_image_name }}:{{ l_crio_image_tag }}"
+l_crio_image_default: "{{ l_crio_image_name }}:{{ l_crio_image_tag }}"
 l_crio_image: "{{ openshift_crio_systemcontainer_image_override | default(l_crio_image_default) }}"
 
 # ----------------------- #
