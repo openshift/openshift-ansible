@@ -151,7 +151,7 @@ def write_config(module, docker_config, dest):
     conf_file_path = os.path.join(dest, 'config.json')
     try:
         with open(conf_file_path, 'w') as conf_file:
-            json.dump(docker_config, conf_file, indent=8)
+            json.dump(docker_config.decode(), conf_file, indent=8)
     except IOError as ioerror:
         result = {'failed': True,
                   'changed': False,
