@@ -2,7 +2,6 @@
 - name: Populate config host groups
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - name: Load group name mapping variables

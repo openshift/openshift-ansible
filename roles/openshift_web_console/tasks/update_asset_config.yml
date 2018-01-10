@@ -30,7 +30,6 @@
   command: mktemp -d /tmp/console-ansible-XXXXXX
   register: mktemp
   changed_when: False
-  become: no
 
 - name: Copy asset config to temp file
   copy:
@@ -55,7 +54,6 @@
     state: absent
     name: "{{ mktemp.stdout }}"
   changed_when: False
-  become: no
 
 # There's currently no command to trigger a rollout for a k8s deployment
 # without changing the pod spec. Add an annotation to force a rollout after

@@ -4,7 +4,6 @@
 - name: Ensure there are new_masters or new_nodes
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - fail:

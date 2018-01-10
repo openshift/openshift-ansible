@@ -120,7 +120,6 @@
   register: g_master_certs_mktemp
   changed_when: False
   when: master_certs_missing | bool
-  become: no
 
 - name: Create a tarball of the master certs
   command: >
@@ -157,7 +156,6 @@
   local_action: file path="{{ g_master_certs_mktemp.stdout }}" state=absent
   changed_when: False
   when: master_certs_missing | bool
-  become: no
 
 - name: Lookup default group for ansible_ssh_user
   command: "/usr/bin/id -g {{ ansible_ssh_user | quote }}"
