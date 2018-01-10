@@ -1,5 +1,5 @@
 ---
-etcd_is_containerized: "{{ openshift_is_containerized }}"
+etcd_is_containerized: "{{ openshift_is_containerized | bool }}"
 etcd_is_atomic: "{{ openshift_is_atomic }}"
 etcd_hostname: "{{ openshift.common.hostname }}"
 etcd_ip: "{{ openshift.common.ip }}"
