@@ -115,20 +115,20 @@ l_crio_image: "{{ openshift_crio_systemcontainer_image_override | default(l_crio
 # ----------------------- #
 # systemcontainers_docker #
 # ----------------------- #
-l_crt_docker_image_prepend_dict:
-  Fedora: "registry.fedoraproject.org/latest"
-  Centos: "docker.io/gscrivano"
-  RedHat: "registry.access.redhat.com/openshift3"
+l_crt_docker_image_dict:
+  Fedora: "registry.fedoraproject.org/latest/docker"
+  Centos: "registry.centos.org/projectatomic/docker"
+  RedHat: "registry.access.redhat.com/openshift3/container-engine"
 
 openshift_docker_image_tag_default: "latest"
 l_crt_docker_image_tag_dict:
   openshift-enterprise: "{{ l_openshift_image_tag }}"
   origin: "{{ openshift_docker_image_tag | default(openshift_docker_image_tag_default) }}"
 
-l_docker_image_prepend: "{{ l_crt_docker_image_prepend_dict[ansible_distribution] }}"
+l_docker_image_prepend: "{{ l_crt_docker_image_dict[ansible_distribution] }}"
 l_docker_image_tag: "{{ l_crt_docker_image_tag_dict[openshift_deployment_type] }}"
 
-l_docker_image_default: "{{ l_docker_image_prepend }}/{{ openshift_docker_service_name }}:{{ l_docker_image_tag }}"
+l_docker_image_default: "{{ l_docker_image_prepend }}:{{ l_docker_image_tag }}"
 l_docker_image: "{{ openshift_docker_systemcontainer_image_override | default(l_docker_image_default) }}"
 
 l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
