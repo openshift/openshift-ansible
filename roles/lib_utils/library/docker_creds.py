@@ -135,7 +135,7 @@ def update_config(docker_config, registry, username, password):
         docker_config['auths'][registry] = {}
 
     # base64 encode our username:password string
-    encoded_data = base64.b64encode('{}:{}'.format(username, password))
+    encoded_data = base64.b64encode('{}:{}'.format(username, password).encode())
 
     # check if the same value is already present for idempotency.
     if 'auth' in docker_config['auths'][registry]:
