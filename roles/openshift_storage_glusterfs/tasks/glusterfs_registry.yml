@@ -7,6 +7,7 @@
     glusterfs_nodeselector: "{{ openshift_storage_glusterfs_registry_nodeselector | default(['storagenode', openshift_storage_glusterfs_registry_name] | join('=')) | map_from_pairs }}"
     glusterfs_use_default_selector: "{{ openshift_storage_glusterfs_registry_use_default_selector }}"
     glusterfs_storageclass: "{{ openshift_storage_glusterfs_registry_storageclass }}"
+    glusterfs_storageclass_default: "{{ openshift_storage_glusterfs_registry_storageclass_default | bool }}"
     glusterfs_image: "{{ openshift_storage_glusterfs_registry_image }}"
     glusterfs_version: "{{ openshift_storage_glusterfs_registry_version }}"
     glusterfs_block_deploy: "{{ openshift_storage_glusterfs_registry_block_deploy | bool }}"
