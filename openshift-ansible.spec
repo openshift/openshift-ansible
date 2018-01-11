@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.22
+Version:        3.7.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Jan 11 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.23-1
+- Don't hardcode the network interface in the openshift_logging_mux role
+  (nkinder@redhat.com)
+- Adding logic to disable and reenable external communication to ES during full
+  restart (ewolinet@redhat.com)
+- Adding logic to do a full cluster restart if we are incrementing our major
+  versions of ES (ewolinet@redhat.com)
+- Port glusterfs optional default (#6182) to 3.7 stable
+  (david_hocky@comcast.com)
+- logging with static pvc: allow specifying the storage class name
+  (bart.vanbos@kbc.be)
+
 * Mon Jan 08 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.22-1
 - 
 
