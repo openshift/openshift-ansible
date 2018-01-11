@@ -6,6 +6,7 @@ openshift_logging_mux_master_public_url: "{{ openshift_hosted_logging_master_pub
 openshift_logging_mux_namespace: logging
 
 ### Common settings
+# map_from_pairs is a custom filter plugin in role lib_utils
 openshift_logging_mux_nodeselector: "{{ openshift_hosted_logging_mux_nodeselector_label | default('') | map_from_pairs }}"
 openshift_logging_mux_cpu_limit: null
 openshift_logging_mux_cpu_request: 100m

@@ -8,6 +8,7 @@
     tags:
       "{{ {'kubernetes.io/cluster/' ~ openshift_aws_clusterid: openshift_aws_clusterid } }}"
   register: qasg
+  # scale_groups_match_capacity is a custom filter in role lib_utils
   until: qasg | json_query('results[*]') | scale_groups_match_capacity | bool
   delay: 10
   retries: 60

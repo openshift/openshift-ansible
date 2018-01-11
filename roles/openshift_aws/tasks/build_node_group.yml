@@ -43,6 +43,7 @@
 
 - name: set the value for the deployment_serial and the current asgs
   set_fact:
+    # scale_groups_serial is a custom filter in role lib_utils
     l_deployment_serial: "{{  openshift_aws_node_group_deployment_serial if openshift_aws_node_group_deployment_serial is defined else asgs.results | scale_groups_serial(openshift_aws_node_group_upgrade) }}"
     openshift_aws_current_asgs: "{{ asgs.results | map(attribute='auto_scaling_group_name') | list | union(openshift_aws_current_asgs) }}"
 

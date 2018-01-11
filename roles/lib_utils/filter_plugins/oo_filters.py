@@ -589,6 +589,14 @@ that result to this filter plugin.
     return secret_name
 
 
+def map_from_pairs(source, delim="="):
+    ''' Returns a dict given the source and delim delimited '''
+    if source == '':
+        return dict()
+
+    return dict(item.split(delim) for item in source.split(","))
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -618,4 +626,5 @@ class FilterModule(object):
             "lib_utils_oo_contains_rule": lib_utils_oo_contains_rule,
             "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
             "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
+            "map_from_pairs": map_from_pairs
         }
