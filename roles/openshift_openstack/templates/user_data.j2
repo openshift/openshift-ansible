@@ -15,6 +15,6 @@ write_files:
 {% if openshift_openstack_provision_user_commands %}
 runcmd:
 {% for cmd in openshift_openstack_provision_user_commands %}
-  - {{ cmd }}
+  - {{ cmd|map('string')|list|tojson }}
 {% endfor %}
 {% endif %}
