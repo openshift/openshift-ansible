@@ -15,6 +15,8 @@
 
 - import_playbook: evaluate_groups.yml
 
+- import_playbook: base_packages.yml
+
 - import_playbook: facts.yml
 
 - import_playbook: version.yml

@@ -1,4 +1,5 @@
 ---
+# Nothing in this file can depend on version!
 - name: Install packages necessary for installer
   hosts: oo_all_hosts
   any_errors_fatal: true
