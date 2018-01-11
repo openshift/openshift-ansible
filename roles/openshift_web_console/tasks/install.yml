@@ -18,6 +18,8 @@
   oc_project:
     name: openshift-web-console
     state: present
+    node_selector:
+      - ""
 
 - name: Make temp directory for asset config files
   command: mktemp -d /tmp/console-ansible-XXXXXX
