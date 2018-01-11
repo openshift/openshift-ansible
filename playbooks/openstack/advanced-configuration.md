@@ -372,6 +372,112 @@ In order to set a custom entrypoint, update `openshift_master_cluster_public_hos
 Note than an empty hostname does not work, so if your domain is `openshift.example.com`,
 you cannot set this value to simply `openshift.example.com`.
 
+
+## Using Cinder-backed Persistent Volumes
+
+You will need to set up OpenStack credentials. You can try putting this in your
+`inventory/group_vars/OSEv3.yml`:
+
+    openshift_cloudprovider_kind: openstack
+    openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+    openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
+    openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
+    openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
+    openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
+    openshift_cloudprovider_openstack_blockstorage_version: v2
+
+**NOTE**: you must specify the Block Storage version as v2, because OpenShift
+does not support the v3 API yet and the version detection is currently not
+working properly.
+
+For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
+
+[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
+
+**NOTE** the OpenStack integration currently requires DNS to be configured and
+running and the `openshift_hostname` variable must match the Nova server name
+for each node. The cluster deployment will fail without it. If you use the
+provided OpenStack dynamic inventory and configure the
+`openshift_openstack_dns_nameservers` Ansible variable, this will be handled
+for you.
+
+After a successful deployment, the cluster is configured for Cinder persistent
+volumes.
+
+### Validation
+
+1. Log in and create a new project (with `oc login` and `oc new-project`)
+2. Create a file called `cinder-claim.yaml` with the following contents:
+
+```yaml
+apiVersion: "v1"
+kind: "PersistentVolumeClaim"
+metadata:
+  name: "claim1"
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+```
+3. Run `oc create -f cinder-claim.yaml` to create the Persistent Volume Claim object in OpenShift
+4. Run `oc describe pvc claim1` to verify that the claim was created and its Status is `Bound`
+5. Run `openstack volume list`
+   * A new volume called `kubernetes-dynamic-pvc-UUID` should be created
+   * Its size should be `1`
+   * It should not be attached to any server
+6. Create a file called `mysql-pod.yaml` with the following contents:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  labels:
+    name: mysql
+spec:
+  containers:
+    - resources:
+        limits :
+          cpu: 0.5
+      image: openshift/mysql-55-centos7
+      name: mysql
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: yourpassword
+        - name: MYSQL_USER
+          value: wp_user
+        - name: MYSQL_PASSWORD
+          value: wp_pass
+        - name: MYSQL_DATABASE
+          value: wp_db
+      ports:
+        - containerPort: 3306
+          name: mysql
+      volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql/data
+  volumes:
+    - name: mysql-persistent-storage
+      persistentVolumeClaim:
+        claimName: claim1
+```
+
+7. Run `oc create -f mysql-pod.yaml` to create the pod
+8. Run `oc describe pod mysql`
+   * Its events should show that the pod has successfully attached the volume above
+   * It should show no errors
+   * `openstack volume list` should show the volume attached to an OpenShift app node
+   * NOTE: this can take several seconds
+9. After a while, `oc get pod` should show the `mysql` pod as running
+10. Run `oc delete pod mysql` to remove the pod
+   * The Cinder volume should no longer be attached
+11. Run `oc delete pvc claim1` to remove the volume claim
+   * The Cinder volume should be deleted
+
+
+
 ## Creating and using a Cinder volume for the OpenShift registry
 
 You can optionally have the playbooks create a Cinder volume and set
