@@ -28,7 +28,12 @@
     when: item.state == 'file'
 
   - name: Make tuned use the recommended tuned profile on restart
-    file: path=/etc/tuned/active_profile state=absent
+    file:
+      path: '{{ item }}'
+      state: absent
+    with_items:
+    - /etc/tuned/active_profile
+    - /etc/tuned/profile_mode
 
   - name: Restart tuned service
     systemd:
