@@ -14,6 +14,7 @@ parameters:
 - name: IMAGE
   value: openshift/origin-web-console:latest
 - name: NAMESPACE
+  # This namespace cannot be changed. Only `openshift-web-console` is supported.
   value: openshift-web-console
 - name: LOGLEVEL
   value: "0"
@@ -51,6 +52,7 @@ objects:
           command:
           - "/usr/bin/origin-web-console"
           - "--audit-log-path=-"
+          - "-v=${LOGLEVEL}"
           - "--config=/var/webconsole-config/webconsole-config.yaml"
           ports:
           - containerPort: 8443
@@ -64,15 +66,20 @@ objects:
               path: /healthz
               port: 8443
               scheme: HTTPS
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8443
+              scheme: HTTPS
         nodeSelector: "${{NODE_SELECTOR}}"
         volumes:
         - name: serving-cert
           secret:
-            defaultMode: 420
+            defaultMode: 400
             secretName: webconsole-serving-cert
         - name: webconsole-config
           configMap:
-            defaultMode: 420
+            defaultMode: 440
             name: webconsole-config
 
 # to create the config for the web console
