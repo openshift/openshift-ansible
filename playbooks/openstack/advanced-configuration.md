@@ -273,6 +273,10 @@ openshift_openstack_cluster_node_labels:
     mylabel: myvalue
 ```
 
+`openshift_openstack_provision_user_commands` allows users to execute
+additional post-provisioning commands for all of the created Nova servers in
+the Heat stack. It configures the `runcmd` directive via cloud-init.
+
 The `openshift_openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 

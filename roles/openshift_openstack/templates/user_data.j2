@@ -11,3 +11,10 @@ write_files:
     permissions: 440
     content: |
       Defaults:openshift !requiretty
+
+{% if openshift_openstack_provision_user_commands %}
+runcmd:
+{% for cmd in openshift_openstack_provision_user_commands %}
+  - {{ cmd }}
+{% endfor %}
+{% endif %}
