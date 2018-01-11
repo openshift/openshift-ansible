@@ -34,7 +34,6 @@ storage:
     accountname: {{ openshift_hosted_registry_storage_azure_blob_accountname }}
     accountkey: {{ openshift_hosted_registry_storage_azure_blob_accountkey }}
     container: {{ openshift_hosted_registry_storage_azure_blob_container }}
-    realm: {{ openshift_hosted_registry_storage_azure_blob_realm }}
 {% elif openshift_hosted_registry_storage_provider | default('') == 'swift' %}
   swift:
     authurl: {{ openshift_hosted_registry_storage_swift_authurl }}
