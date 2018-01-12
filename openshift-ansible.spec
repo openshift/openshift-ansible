@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.16.0%{?dist}
+Release:        0.17.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,99 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.17.0
+- Update latest image streams and templates (sdodson@redhat.com)
+- Use webconsole.config.openshift.io/v1 API group (spadgett@redhat.com)
+- Add missing v3.9 gluster templates (sdodson@redhat.com)
+- Spelling and grammar changes to the advanced-configuration.md file.
+  (mbruzek@gmail.com)
+- Fixing openshift_hosted variable. (kwoodson@redhat.com)
+- Update deployment and apiserver with new certs (jpeeler@redhat.com)
+- Move more plugins to lib_utils (mgugino@redhat.com)
+- Add the ability to specify a timeout for node drain operations
+  (sdodson@redhat.com)
+- Add defaults for openshift_pkg_version (mgugino@redhat.com)
+- Fix typo in the advanced config docs (tomas@sedovic.cz)
+- Write guide on setting up PVs with Cinder (tomas@sedovic.cz)
+- Allow using server names in openstack dynamic inv (tomas@sedovic.cz)
+- Specify the Cinder version in the inventory (tomas@sedovic.cz)
+- Add documentation example (joel.pearson@gmail.com)
+- Add blockstorage version for openstack (joel.pearson@gmail.com)
+- logging: fix jinja filters to support py3 (vrutkovs@redhat.com)
+- Ability to specify override tolerations via the buildconfig overrider
+  (cdaley@redhat.com)
+- Chmod temp dirs created on localhost (mgugino@redhat.com)
+- Bug 1532787 - Add empty node selector to openshift-web-console namespace
+  (spadgett@redhat.com)
+- Remove become statements (mgugino@redhat.com)
+- Bug 1527178 - installation of logging stack failed: Invalid version specified
+  for Elasticsearch (nhosoi@redhat.com)
+- Limit host group scope on control-plane upgrades (mgugino@redhat.com)
+- Refactor version and move some checks into sanity_checks.py
+  (mgugino@redhat.com)
+- Updating tsb image names and template (ewolinet@redhat.com)
+- Ensure that openshift_facts role is imported whenever we rely on
+  openshift_client_binary (sdodson@redhat.com)
+- Add key check for facts_for_clusterrolebindings (nakayamakenjiro@gmail.com)
+- Update web console template (spadgett@redhat.com)
+- Use openshift_node_use_openshift_sdn when doing a containerized node upgrade
+  (vrutkovs@redhat.com)
+- Add iptables save handler (ichavero@redhat.com)
+- Fix: change import_role to include_role (mgugino@redhat.com)
+- docker storage setup for ami building (jdiaz@redhat.com)
+- ensure containerized bools are cast (mgugino@redhat.com)
+- Properly cast crio boolean variables to bool (mgugino@redhat.com)
+- Build containerized host group dynamically (mgugino@redhat.com)
+- install base_packages on oo_all_hosts (mgugino@redhat.com)
+- Add key existing check to collect facts for rolebidings
+  (nakayamakenjiro@gmail.com)
+- 3.9 upgrade: remove openshift.common.service_type (vrutkovs@redhat.com)
+- container-engine: move registry_auth.yml before pull (gscrivan@redhat.com)
+- Fix error in variable in comment (mscherer@users.noreply.github.com)
+- Switch back to dynamic include_role in logging loops (sdodson@redhat.com)
+- Use Contiv version 1.2.0 (flamingo@2thebatcave.com)
+- Contiv multi-master and other fixes (flamingo@2thebatcave.com)
+- Add missing dependency on openshift_facts (sdodson@redhat.com)
+- upgrades: set openshift_client_binary fact when running on oo_first_master
+  host (vrutkovs@redhat.com)
+- Install web console server (spadgett@redhat.com)
+- Remove become=no from various roles and tasks (mgugino@redhat.com)
+- Don't overwrite node's systemd units for containerized install
+  (vrutkovs@redhat.com)
+- Migrate to import_role for static role inclusion (sdodson@redhat.com)
+- docker_upgrade_check: skip repoquery calls on containerized setups
+  (vrutkovs@redhat.com)
+- Adding logic to disable and reenable external communication to ES during full
+  restart (ewolinet@redhat.com)
+- Provide example on how to use osm_etcd_image in a disconnected and
+  containerized installation (tkarlsso@redhat.com)
+- crio: create /etc/sysconfig/crio-storage (gscrivan@redhat.com)
+- crio: configure proxy variables (gscrivan@redhat.com)
+- Fix docker_image_availability checks (mgugino@redhat.com)
+- Install node packages in one task instead of 3 (mgugino@redhat.com)
+- Don't hardcode the network interface in the openshift_logging_mux role
+  (nkinder@redhat.com)
+- failure_summary: make sure msg is always a string (vrutkovs@redhat.com)
+- Adding logic to do a full cluster restart if we are incrementing our major
+  versions of ES (ewolinet@redhat.com)
+- test_oc_scale: add more scale test cases (vrutkovs@redhat.com)
+- test_oc_scale: fix test docstrings (vrutkovs@redhat.com)
+- Import prerequisites.yml for OpenStack (tomas@sedovic.cz)
+- Set the correct path to the openstack.conf file (tomas@sedovic.cz)
+- Return a openshift_node_labels as a dict (tomas@sedovic.cz)
+- Remove last of openshift_node role meta-depends (mgugino@redhat.com)
+- OpenStack provisioning -- support cns. (jmencak@redhat.com)
+- Fix yaml syntax error in the sample inventory (tomas@sedovic.cz)
+- Adding ability to update ami drive size. (kwoodson@redhat.com)
+- Add origin- prefix to ASB image (fabian@fabianism.us)
+- lint issues (davis.phillips@gmail.com)
+- add vsphere examples in hosts.example (davis.phillips@gmail.com)
+- add template and vsphere.conf (davis.phillips@gmail.com)
+- add vsphere cloud providers (davis.phillips@gmail.com)
+- Fix wrong indentation (ichavero@redhat.com)
+- Fix yaml indentation (ichavero@redhat.com)
+- Add iptables rules for flannel (ichavero@redhat.com)
+
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.16.0
 - Add gluster 3.9 templates (sdodson@redhat.com)
 - Add in-tree CI scripts (mgugino@redhat.com)
