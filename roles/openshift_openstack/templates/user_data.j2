@@ -12,9 +12,9 @@ write_files:
     content: |
       Defaults:openshift !requiretty
 
-{% if openshift_openstack_provision_user_commands %}
+{% if openshift_openstack_cloud_init_runcmd %}
 runcmd:
-{% for cmd in openshift_openstack_provision_user_commands %}
+{% for cmd in openshift_openstack_cloud_init_runcmd %}
   - {{ cmd|map('string')|list|tojson }}
 {% endfor %}
 {% endif %}
