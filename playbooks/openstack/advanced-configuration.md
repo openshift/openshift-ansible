@@ -301,6 +301,10 @@ The commands should not use JSON escaped characters: `> < & '`. So the command
 `['foo', '>', '"bar"', '<', "'baz'", "&"]` is a bad one, while
 `['echo', '"${HOME}"']` is OK.
 
+**Note** To protect Nova servers from recreating when the user-data changes via
+`openshift_openstack_cloud_init_runcmd`, the
+`user_data_update_policy` parameter configured to `IGNORE` for Heat resources.
+
 The `openshift_openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 
