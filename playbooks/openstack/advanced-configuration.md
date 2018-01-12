@@ -133,7 +133,7 @@ You can also access the OpenShift cluster with a web browser by going to:
 https://master-0.openshift.example.com:8443
 
 Note that for this to work, the OpenShift nodes must be accessible
-from your computer and it's DNS configuration must use the cruster's
+from your computer and its DNS configuration must use the cluster's
 DNS.
 
 
@@ -153,7 +153,7 @@ openstack stack delete --wait --yes openshift.example.com
 Pay special attention to the values in the first paragraph -- these
 will depend on your OpenStack environment.
 
-Note that the provsisioning playbooks update the original Neutron subnet
+Note that the provisioning playbooks update the original Neutron subnet
 created with the Heat stack to point to the configured DNS servers.
 So the provisioned cluster nodes will start using those natively as
 default nameservers. Technically, this allows to deploy OpenShift clusters
@@ -162,7 +162,7 @@ without dnsmasq proxies.
 The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain`
 will form the cluster's public DNS domain all your servers will be under. With
 the default values, this will be `openshift.example.com`. For workloads, the
-default subdomain is 'apps'. That sudomain can be set as well by the
+default subdomain is 'apps'. That subdomain can be set as well by the
 `openshift_openstack_app_subdomain` variable in the inventory.
 
 If you want to use a two sets of hostnames for public and private/prefixed DNS
@@ -334,7 +334,7 @@ or your trusted network. The most important is the `openshift_openstack_node_ing
 that restricts public access to the deployed DNS server and cluster
 nodes' ephemeral ports range.
 
-Note, the command ``curl https://api.ipify.org`` helps fiding an external
+Note, the command ``curl https://api.ipify.org`` helps finding an external
 IP address of your box (the ansible admin node).
 
 There is also the `manage_packages` variable (defaults to True) you
@@ -521,7 +521,7 @@ OpenStack)[openstack] for more information.
 [openstack]: https://docs.openshift.org/latest/install_config/configuring_openstack.html
 
 
-Next, we need to instruct OpenShift to use the Cinder volume for it's
+Next, we need to instruct OpenShift to use the Cinder volume for its
 registry. Again in `OSEv3.yml`:
 
     #openshift_hosted_registry_storage_kind: openstack
@@ -576,12 +576,12 @@ The **Cinder volume ID**, **filesystem** and **volume size** variables
 must correspond to the values in your volume. The volume ID must be
 the **UUID** of the Cinder volume, *not its name*.
 
-We can do formate the volume for you if you ask for it in
+The volume can also be formatted if you configure it in
 `inventory/group_vars/all.yml`:
 
     openshift_openstack_prepare_and_format_registry_volume: true
 
-**NOTE:** doing so **will destroy any data that's currently on the volume**!
+**NOTE:** Formatting **will destroy any data that's currently on the volume**!
 
 You can also run the registry setup playbook directly:
 
