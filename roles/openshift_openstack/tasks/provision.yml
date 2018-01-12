@@ -98,5 +98,11 @@
   when:
   - openshift_openstack_stack_state == 'present'
 
-# TODO(shadower): create the registry and PV Cinder volumes if specified
-# and include the `prepare-and-format-cinder-volume` tasks to set it up
+- name: Create the Cinder volume for OpenShift Registry
+  include_tasks: create-registry-volume.yml
+  when:
+  - groups.infra_hosts is defined
+  - groups.infra_hosts.0 is defined
+  - hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_volume_name is defined
+  - hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_volume_size is defined
+  - hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_openstack_volumeID is not defined

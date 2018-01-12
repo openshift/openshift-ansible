@@ -440,32 +440,30 @@ You can create one by running:
 openstack volume create --size <volume size in gb> <volume name>
 ```
 
-The volume needs to have a file system created before you put it to
-use.
+Alternatively, the playbooks can create the volume created automatically if you
+specify its name and size.
 
-Once the volume is created, [set up OpenStack credentials](#openstack-credential-configuration),
-and then set the following in `inventory/group_vars/OSEv3.yml`:
+In either case, you have to [set up OpenStack
+credentials](#openstack-credential-configuration), and then set the following
+in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_hosted_registry_storage_kind`: openstack
 * `openshift_hosted_registry_storage_access_modes`: ['ReadWriteOnce']
 * `openshift_hosted_registry_storage_openstack_filesystem`: xfs
-* `openshift_hosted_registry_storage_openstack_volumeID`: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
 * `openshift_hosted_registry_storage_volume_size`: 10Gi
 
-The **Cinder volume ID**, **filesystem** and **volume size** variables
-must correspond to the values in your volume. The volume ID must be
-the **UUID** of the Cinder volume, *not its name*.
-
-The volume can also be formatted if you configure it in
-`inventory/group_vars/all.yml`:
-
-* openshift_openstack_prepare_and_format_registry_volume: true
-
-Note that formatting **will destroy any data that's currently on the volume**!
-
-If you already have a provisioned OpenShift cluster, you can also run the
-registry setup playbook directly:
+For a volume *you created*, you must also specify its **UUID** (it must be
+the UUID, not the volume's name):
 
 ```
-ansible-playbook -i inventory playbooks/provisioning/openstack/prepare-and-format-cinder-volume.yaml
+openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
 ```
+
+If you want the volume *created automatically*, set the desired name instead:
+
+```
+openshift_hosted_registry_storage_volume_name: registry
+```
+
+The volume will be formatted automaticaly and it will be mounted to one of the
+infra nodes when the registry pod gets started.
