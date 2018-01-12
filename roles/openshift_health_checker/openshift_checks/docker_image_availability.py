@@ -40,7 +40,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     # to look for images available remotely without waiting to pull them.
     dependencies = ["python-docker-py", "skopeo"]
     # command for checking if remote registries have an image, without docker pull
-    skopeo_command = "timeout 10 skopeo inspect --tls-verify={tls} {creds} docker://{registry}/{image}"
+    skopeo_command = "{proxyvars} timeout 10 skopeo inspect --tls-verify={tls} {creds} docker://{registry}/{image}"
     skopeo_example_command = "skopeo inspect [--tls-verify=false] [--creds=<user>:<pass>] docker://<registry>/<image>"
 
     def __init__(self, *args, **kwargs):
@@ -76,10 +76,19 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         if oreg_auth_user != '' and oreg_auth_password != '':
             oreg_auth_user = self.template_var(oreg_auth_user)
             oreg_auth_password = self.template_var(oreg_auth_password)
-            self.skopeo_command_creds = "--creds={}:{}".format(quote(oreg_auth_user), quote(oreg_auth_password))
+            self.skopeo_command_creds = quote("--creds={}:{}".format(oreg_auth_user, oreg_auth_password))
 
         # record whether we could reach a registry or not (and remember results)
         self.reachable_registries = {}
+
+        # take note of any proxy settings needed
+        proxies = []
+        for var in ['http_proxy', 'https_proxy', 'no_proxy']:
+            # ansible vars are openshift_http_proxy, openshift_https_proxy, openshift_no_proxy
+            value = self.get_var("openshift_" + var, default=None)
+            if value:
+                proxies.append(var.upper() + "=" + quote(self.template_var(value)))
+        self.skopeo_proxy_vars = " ".join(proxies)
 
     def is_active(self):
         """Skip hosts with unsupported deployment types."""
@@ -249,11 +258,18 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             if not self.reachable_registries[registry]:
                 continue  # do not keep trying unreachable registries
 
-            args = dict(registry=registry, image=image)
-            args["tls"] = "false" if registry in self.registries["insecure"] else "true"
-            args["creds"] = self.skopeo_command_creds if registry == self.registries["oreg"] else ""
+            args = dict(
+                proxyvars=self.skopeo_proxy_vars,
+                tls="false" if registry in self.registries["insecure"] else "true",
+                creds=self.skopeo_command_creds if registry == self.registries["oreg"] else "",
+                registry=quote(registry),
+                image=quote(image),
+            )
 
-            result = self.execute_module_with_retries("command", {"_raw_params": self.skopeo_command.format(**args)})
+            result = self.execute_module_with_retries("command", {
+                "_uses_shell": True,
+                "_raw_params": self.skopeo_command.format(**args),
+            })
             if result.get("rc", 0) == 0 and not result.get("failed"):
                 return True
             if result.get("rc") == 124:  # RC 124 == timed out; mark unreachable
@@ -263,6 +279,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     def connect_to_registry(self, registry):
         """Use ansible wait_for module to test connectivity from host to registry. Returns bool."""
+        if self.skopeo_proxy_vars != "":
+            # assume we can't connect directly; just waive the test
+            return True
+
         # test a simple TCP connection
         host, _, port = registry.partition(":")
         port = port or 443
