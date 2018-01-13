@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: controller-manager
-  strategy:
+  updateStrategy:
     rollingUpdate:
       maxUnavailable: 1
     type: RollingUpdate
@@ -38,6 +38,10 @@ spec:
         - "5m"
         - --feature-gates
         - OriginatingIdentity=true
+{% if openshift_service_catalog_async_bindings_enabled | bool %}
+        - --feature-gates
+        - AsyncBindingOperations=true
+{% endif %}
         image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
         command: ["/usr/bin/service-catalog"]
         imagePullPolicy: Always
