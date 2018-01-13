@@ -83,9 +83,6 @@
     when: openshift.common.use_calico | bool
   - role: nuage_node
     when: openshift.common.use_nuage | bool
-  - role: contiv
-    contiv_role: netplugin
-    when: openshift.common.use_contiv | bool
   - role: nickhammond.logrotate
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"
@@ -93,3 +90,16 @@
   - name: Create group for deployment type
     group_by: key=oo_nodes_deployment_type_{{ openshift.common.deployment_type }}
     changed_when: False
+
+- name: Configure Contiv masters
+  hosts: oo_masters_to_config
+  roles:
+  - role: contiv
+    contiv_master: true
+    when: openshift_use_contiv | default(false) | bool
+
+- name: Configure rest of Contiv nodes
+  hosts: oo_nodes_to_config:!oo_masters_to_config
+  roles:
+  - role: contiv
+    when: openshift_use_contiv | default(false) | bool

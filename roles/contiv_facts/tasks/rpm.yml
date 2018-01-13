@@ -6,10 +6,17 @@
   failed_when: false
   check_mode: no
 
-- name: Set the has_firewalld fact
+- name: RPM | Determine if firewalld enabled
+  command: "systemctl status firewalld.service"
+  register: ss
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+- name: Set the contiv_has_firewalld fact
   set_fact:
-    has_firewalld: true
-  when: s.rc == 0
+    contiv_has_firewalld: true
+  when: s.rc == 0 and ss.rc == 0
 
 - name: Determine if iptables-services installed
   command: "rpm -q iptables-services"
@@ -18,7 +25,7 @@
   failed_when: false
   check_mode: no
 
-- name: Set the has_iptables fact
+- name: Set the contiv_has_iptables fact
   set_fact:
-    has_iptables: true
+    contiv_has_iptables: true
   when: s.rc == 0
