@@ -21,6 +21,12 @@
     path: "/var/lib/dockershim/sandbox/"
     state: absent
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1518912
+- name: Clean up IPAM data
+  file:
+    path: "/var/lib/cni/networks/openshift-sdn/"
+    state: absent
+
 # Disable Swap Block (pre)
 - block:
   - name: Remove swap entries from /etc/fstab
