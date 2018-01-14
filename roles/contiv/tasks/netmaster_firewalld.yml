@@ -1,16 +1,17 @@
 ---
-- name: Netmaster Firewalld | Open Netmaster port
+- name: Netmaster Firewalld | Add internal rules
   firewalld:
-    port: "{{ netmaster_port }}/tcp"
-    permanent: false
-    state: enabled
-  # in case this is also a node where firewalld turned off
-  ignore_errors: yes
-
-- name: Netmaster Firewalld | Save Netmaster port
-  firewalld:
-    port: "{{ netmaster_port }}/tcp"
+    immediate: true
     permanent: true
-    state: enabled
-  # in case this is also a node where firewalld turned off
-  ignore_errors: yes
+    port: "{{ item[0] }}"
+    source: "{{ item[1] }}"
+  with_nested:
+    - "{{ contiv_netmaster_internal }}"
+    - "{{ groups.oo_nodes_to_config|difference(hostvars[inventory_hostname]['ansible_' + contiv_netmaster_interface].ipv4.address)|list }}"
+
+- name: Netmaster Firewalld | Add external rules
+  firewalld:
+    immediate: true
+    permanent: true
+    port: "{{ item }}"
+  with_items: "{{ contiv_netmaster_external }}"

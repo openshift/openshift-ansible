@@ -4,7 +4,7 @@
     path: "{{ contiv_current_release_directory }}"
     state: directory
 
-- name: Install bzip2
+- name: Download Bins | Install bzip2
   yum:
     name: bzip2
     state: installed
@@ -18,9 +18,9 @@
     mode: 0755
     validate_certs: False
   environment:
-    http_proxy: "{{ http_proxy|default('') }}"
-    https_proxy: "{{ https_proxy|default('') }}"
-    no_proxy: "{{ no_proxy|default('') }}"
+    http_proxy: "{{ contiv_http_proxy|default('') }}"
+    https_proxy: "{{ contiv_https_proxy|default('') }}"
+    no_proxy: "{{ contiv_no_proxy|default('') }}"
 
 - name: Download Bins | Extract Contiv tar file
   unarchive:
@@ -30,19 +30,19 @@
 
 - name: Download Bins | Download cni tar file
   get_url:
-    url: "{{ cni_bin_url }}"
-    dest: "{{ cni_download_dir }}"
+    url: "{{ contiv_cni_bin_url }}"
+    dest: "{{ contiv_cni_download_dir }}"
     mode: 0755
     validate_certs: False
   environment:
-    http_proxy: "{{ http_proxy|default('') }}"
-    https_proxy: "{{ https_proxy|default('') }}"
-    no_proxy: "{{ no_proxy|default('') }}"
+    http_proxy: "{{ contiv_http_proxy|default('') }}"
+    https_proxy: "{{ contiv_https_proxy|default('') }}"
+    no_proxy: "{{ contiv_no_proxy|default('') }}"
   register: download_file
 
 - name: Download Bins | Extract cni tar file
   unarchive:
     src: "{{ download_file.dest }}"
-    dest: "{{ cni_download_dir }}"
+    dest: "{{ contiv_cni_download_dir }}"
     copy: no
   when: download_file.changed
