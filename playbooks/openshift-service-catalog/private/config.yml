@@ -11,6 +11,14 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
+- name: Configure API Aggregation on masters
+  hosts: oo_masters
+  serial: 1
+  roles:
+  - role: openshift_facts
+  tasks:
+  - include_tasks: tasks/wire_aggregator.yml
+
 - name: Service Catalog
   hosts: oo_first_master
   roles:
