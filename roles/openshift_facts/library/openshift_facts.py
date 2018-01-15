@@ -1927,7 +1927,7 @@ class OpenShiftFacts(object):
                                       console_use_ssl=True,
                                       console_path='/console',
                                       console_port='8443', etcd_use_ssl=True,
-                                      etcd_hosts='', etcd_port='4001',
+                                      etcd_hosts='', etcd_port='2379',
                                       portal_net='172.30.0.0/16',
                                       embedded_etcd=True, embedded_kube=True,
                                       embedded_dns=True,
