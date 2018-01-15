@@ -291,15 +291,15 @@ possible, like this `provision_install_custom.yml` example playbook:
 The playbook leverages a two existing provider interfaces: `provision.yml` and
 `install.yml`. For some cases, like SSH keys configuration and coordinated reboots of
 servers, the cloud-init runcmd directive may be a better choice though. User specified
-shell commands for cloud-init need to be lists, for example:
+shell commands for cloud-init need to be either strings or lists, for example:
 ```
 - openshift_openstack_cloud_init_runcmd:
-  - ['echo', 'foo']
-  - ['reboot']
+  - set -vx
+  - systemctl stop sshd # fences off ansible playbooks as we want to reboot later
+  - ['echo', 'foo', '>', '/tmp/foo']
+  - [ ls, /tmp/foo, '||', true ]
+  - reboot # unfences ansible playbooks to continue after reboot
 ```
-The commands should not use JSON escaped characters: `> < & '`. So the command
-`['foo', '>', '"bar"', '<', "'baz'", "&"]` is a bad one, while
-`['echo', '"${HOME}"']` is OK.
 
 **Note** To protect Nova servers from recreating when the user-data changes via
 `openshift_openstack_cloud_init_runcmd`, the

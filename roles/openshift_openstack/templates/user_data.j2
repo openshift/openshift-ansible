@@ -13,8 +13,17 @@ write_files:
       Defaults:openshift !requiretty
 
 {% if openshift_openstack_cloud_init_runcmd %}
-runcmd:
+  - path: /root/ansible_install.sh
+    permissions: '0544'
+    content: |
 {% for cmd in openshift_openstack_cloud_init_runcmd %}
-  - {{ cmd|map('string')|list|tojson }}
+{% if cmd is string %}
+      {{ cmd }}
+{% elif cmd is iterable %}
+      {{ cmd|join(' ') }}
+{% endif %}
 {% endfor %}
+
+runcmd:
+  - /root/ansible_install.sh
 {% endif %}
