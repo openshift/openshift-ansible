@@ -1,9 +1,8 @@
 ## Dependencies for localhost (ansible control/admin node)
 
-* [Ansible 2.3](https://pypi.python.org/pypi/ansible)
-* [Ansible-galaxy](https://pypi.python.org/pypi/ansible-galaxy-local-deps)
-* [jinja2](http://jinja.pocoo.org/docs/2.9/)
-* [shade](https://pypi.python.org/pypi/shade)
+* [Ansible](https://pypi.python.org/pypi/ansible) version >=2.4.0
+* [jinja2](http://jinja.pocoo.org/docs/2.9/) version >= 2.10
+* [shade](https://pypi.python.org/pypi/shade) version >= 1.26
 * python-jmespath / [jmespath](https://pypi.python.org/pypi/jmespath)
 * python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
 * Become (sudo) is not required.
