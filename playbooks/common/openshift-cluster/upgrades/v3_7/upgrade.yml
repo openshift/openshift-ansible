@@ -34,6 +34,13 @@
 
 # Pre-upgrade completed
 
+- name: Configure API aggregation on masters
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      cluster_method: "{{ openshift_master_cluster_method | default('native') }}"
+  - include: ../../../openshift-master/private/tasks/wire_aggregator.yml
+
 - import_playbook: ../upgrade_control_plane.yml
   vars:
     master_config_hook: "v3_7/master_config_upgrade.yml"
