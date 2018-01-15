@@ -34,7 +34,6 @@
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version }}"
-      - "tuned-profiles-{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
   register: result
   until: result is succeeded
   when: ansible_pkg_mgr == 'dnf'

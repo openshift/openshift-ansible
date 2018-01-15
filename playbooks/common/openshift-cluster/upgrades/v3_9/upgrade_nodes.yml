@@ -12,6 +12,7 @@
   - set_fact:
       openshift_upgrade_target: '3.9'
       openshift_upgrade_min: '3.7'
+      openshift_release: '3.9'
 
 - import_playbook: ../pre/config.yml
   vars:

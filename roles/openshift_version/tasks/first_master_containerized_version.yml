@@ -7,6 +7,7 @@
   when:
   - openshift_image_tag is defined
   - openshift_version is not defined
+  - not (openshift_version_reinit | default(false))
 
 - name: Set containerized version to configure if openshift_release specified
   set_fact:
@@ -20,7 +21,7 @@
     docker run --rm {{ openshift_cli_image }}:latest version
   register: cli_image_version
   when:
-  - openshift_version is not defined
+  - openshift_version is not defined or openshift_version_reinit | default(false)
   - not openshift_use_crio_only
 
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
@@ -34,7 +35,7 @@
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
-  when: openshift_version is not defined
+  when: openshift_version is not defined or openshift_version_reinit | default(false)
 
 # If we got an openshift_version like "3.2", lookup the latest 3.2 container version
 # and use that value instead.
