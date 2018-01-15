@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.30
+Version:        3.8.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 15 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.31-1
+- Fixing openshift_hosted variable. (kwoodson@redhat.com)
+- Don't hardcode the network interface in the openshift_logging_mux role
+  (nkinder@redhat.com)
+
 * Wed Jan 10 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.30-1
 - Adding logic to disable and reenable external communication to ES during full
   restart (ewolinet@redhat.com)
