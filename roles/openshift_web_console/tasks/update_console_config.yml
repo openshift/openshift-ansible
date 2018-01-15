@@ -1,9 +1,9 @@
 ---
 # This task updates asset config values in the webconsole-config config map in
 # the openshift-web-console namespace. The values to set are pased in the
-# variable `asset_config_edits`, which is an array of objects with `key` and
+# variable `console_config_edits`, which is an array of objects with `key` and
 # `value` properties in the same format as `yedit` module `edits`. Only
-# properties passed are updated.
+# properties passed are updated. The separator for nested properties is `#`.
 #
 # Note that this triggers a redeployment on the console and a brief downtime
 # since it uses a `Recreate` strategy.
@@ -12,10 +12,10 @@
 #
 # - include_role:
 #     name: openshift_web_console
-#     tasks_from: update_asset_config.yml
+#     tasks_from: update_console_config.yml
 #   vars:
-#     asset_config_edits:
-#       - key: loggingPublicURL
+#     console_config_edits:
+#       - key: clusterInfo#loggingPublicURL
 #         value: "https://{{ openshift_logging_kibana_hostname }}"
 #   when: openshift_web_console_install | default(true) | bool
 
@@ -31,15 +31,17 @@
   register: mktemp_console
   changed_when: False
 
-- name: Copy asset config to temp file
+- name: Copy web console config to temp file
   copy:
     content: "{{webconsole_config.results.results[0].data['webconsole-config.yaml']}}"
     dest: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
 
-- name: Change asset config properties
+- name: Change web console config properties
   yedit:
     src: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
-    edits: "{{asset_config_edits}}"
+    edits: "{{console_config_edits}}"
+    separator: '#'
+    state: present
 
 - name: Update web console config map
   oc_configmap:
@@ -55,6 +57,7 @@
     name: "{{ mktemp_console.stdout }}"
   changed_when: False
 
+# TODO: Only rollout if config has changed.
 # There's currently no command to trigger a rollout for a k8s deployment
 # without changing the pod spec. Add an annotation to force a rollout after
 # the config map has been edited.
