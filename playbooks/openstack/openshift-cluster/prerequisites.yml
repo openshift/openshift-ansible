@@ -5,8 +5,3 @@
     import_role:
       name: openshift_openstack
       tasks_from: check-prerequisites.yml
-
-  - name: Check network configuration
-    import_role:
-      name: openshift_openstack
-      tasks_from: net_vars_check.yaml
