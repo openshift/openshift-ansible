@@ -142,10 +142,11 @@
     state: absent
   changed_when: False
 
-- name: Setup extension file for service console UI
-  template:
-    src: ../templates/openshift-ansible-catalog-console.js
-    dest: /etc/origin/master/openshift-ansible-catalog-console.js
+# setup extension file for service console UI
+- lineinfile:
+    dest=/etc/origin/master/openshift-ansible-catalog-console.js
+    line="window.OPENSHIFT_CONSTANTS.TEMPLATE_SERVICE_BROKER_ENABLED={{ 'true' if (template_service_broker_install | default(True)) else 'false' }}"
+    create=yes
 
 - name: Update master config
   yedit:
@@ -183,6 +184,13 @@
   systemd: name={{ openshift_service_type }}-master-api state=restarted
   when:
   - yedit_output.changed
+
+# this needs to be repopulated during upgrade
+- name: Delete apiserver extensionconfigmap
+  oc_configmap:
+    state: absent
+    name: extension-apiserver-authentication
+    namespace: kube-system
 
 # We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
