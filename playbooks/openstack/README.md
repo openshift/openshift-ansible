@@ -184,7 +184,7 @@ resources:
 
 ```bash
 $ ansible-playbook --user openshift -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml \
   -e openshift_repos_enable_testing=true
 ```
 
