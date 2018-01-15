@@ -35,8 +35,6 @@
 # Pre-upgrade completed
 
 - import_playbook: ../upgrade_control_plane.yml
-  vars:
-    master_config_hook: "v3_7/master_config_upgrade.yml"
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode
