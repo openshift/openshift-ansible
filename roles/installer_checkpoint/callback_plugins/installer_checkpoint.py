@@ -171,6 +171,10 @@ class CallbackModule(CallbackBase):
                         self._display.display(
                             '\tThis phase can be restarted by running: {}'.format(
                                 phase_attributes[phase]['playbook']))
+                    if 'message' in stats.custom['_run'][phase]:
+                        self._display.display(
+                            '\t{}'.format(
+                                stats.custom['_run'][phase]['message']))
 
         self._display.display("", screen_only=True)
 
