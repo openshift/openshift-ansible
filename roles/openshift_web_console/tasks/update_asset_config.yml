@@ -28,17 +28,17 @@
 
 - name: Make temp directory
   command: mktemp -d /tmp/console-ansible-XXXXXX
-  register: mktemp
+  register: mktemp_console
   changed_when: False
 
 - name: Copy asset config to temp file
   copy:
     content: "{{webconsole_config.results.results[0].data['webconsole-config.yaml']}}"
-    dest: "{{ mktemp.stdout }}/webconsole-config.yaml"
+    dest: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
 
 - name: Change asset config properties
   yedit:
-    src: "{{ mktemp.stdout }}/webconsole-config.yaml"
+    src: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
     edits: "{{asset_config_edits}}"
 
 - name: Update web console config map
@@ -47,12 +47,12 @@
     name: webconsole-config
     state: present
     from_file:
-      webconsole-config.yaml: "{{ mktemp.stdout }}/webconsole-config.yaml"
+      webconsole-config.yaml: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
 
 - name: Remove temp directory
   file:
     state: absent
-    name: "{{ mktemp.stdout }}"
+    name: "{{ mktemp_console.stdout }}"
   changed_when: False
 
 # There's currently no command to trigger a rollout for a k8s deployment
