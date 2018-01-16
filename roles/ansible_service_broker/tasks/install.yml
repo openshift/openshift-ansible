@@ -375,6 +375,11 @@
                   secret:
                     secretName: etcd-auth-secret
 
+- name: set auth name and type facts if needed
+  set_fact:
+    ansible_service_broker_registry_auth_type: "secret"
+    ansible_service_broker_registry_auth_name: "asb-registry-auth"
+  when: ansible_service_broker_registry_user != "" and ansible_service_broker_registry_password != ""
 
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
 - name: Create config map for ansible-service-broker
@@ -402,8 +407,8 @@
                 org:  {{ ansible_service_broker_registry_organization }}
                 tag:  {{ ansible_service_broker_registry_tag }}
                 white_list: {{  ansible_service_broker_registry_whitelist | to_yaml }}
-                auth_type: secret
-                auth_name: asb-registry-auth
+                auth_type: "{{ ansible_service_broker_registry_auth_type | default("") }}"
+                auth_name: "{{ ansible_service_broker_registry_auth_name | default("") }}"
               - type: local_openshift
                 name: localregistry
                 namespaces: ['openshift']
@@ -449,6 +454,7 @@
         data: "{{ ansible_service_broker_registry_user }}"
       - path: password
         data: "{{ ansible_service_broker_registry_password }}"
+  when: ansible_service_broker_registry_user != "" and ansible_service_broker_registry_password != ""
 
 - name: Create the Broker resource in the catalog
   oc_obj:
