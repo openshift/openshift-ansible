@@ -263,15 +263,45 @@ The `openshift_openstack_num_masters`, `openshift_openstack_num_infra` and
 App nodes to create.
 
 The `openshift_openstack_cluster_node_labels` defines custom labels for your openshift
-cluster node groups. It currently supports app and infra node groups.
+cluster node groups. It currently supports groups for masters, cns, app and infra nodes.
 The default value of this variable sets `region: primary` to app nodes and
-`region: infra` to infra nodes.
+`region: infra` to infra nodes. It is unset for the remaining node groups.
 An example of setting a customised label:
 ```
 openshift_openstack_cluster_node_labels:
   app:
     mylabel: myvalue
 ```
+For all-in-one deployments, you may want to define custom labels like that:
+```yaml
+openshift_node_labels:
+  region: default
+  zone: default
+openshift_openstack_cluster_node_labels:
+  app:
+    region: default
+    zone: default
+  infra:
+    region: default
+    zone: default
+  masters:
+    region: default
+    zone: default
+  cns:
+    region: default
+    zone: default
+osm_default_node_selector: "region=default"
+openshift_hosted_router_selector: "region=default"
+openshift_hosted_registry_selector: "region=default"
+openshift_web_console_nodeselector: "region=default"
+template_service_broker_selector: {"region": "default"}
+openshift_router_selector: "region=default"
+openshift_registry_selector: "region=default"
+openshift_prometheus_node_selector: {"region": "default"}
+openshift_hosted_infra_selector: "region=default"
+openshift_schedulable: true
+```
+This enables all pods scheduling and starting on a single (master) node.
 
 The `openshift_openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
