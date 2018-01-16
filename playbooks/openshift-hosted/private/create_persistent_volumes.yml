@@ -9,6 +9,7 @@
   vars:
     persistentlocalstorage_project: "{{ openshift_persistentlocalstorage_project | default('local-storage') }}"
     persistentlocalstorage_classes: "{{ openshift_persistentlocalstorage_classes | default([]) }}"
+    persistentlocalstorage_path: "{{ openshift_persistentlocalstorage_path | default('/mnt/local-storage') }}/{{ item }}"
   roles:
   - role: openshift_persistentlocalstorage
     when: openshift_persistentlocalstorage_enabled | default(False) | bool
@@ -18,7 +19,7 @@
   tasks:
   - name: Create Persistent Local Storage Classes Directories
     file:
-      path: "/mnt/local-storage/{{ item }}"
+      path: "{{ openshift_persistentlocalstorage_path | default('/mnt/local-storage') }}/{{ item }}"
       owner: root
       group: root
       mode: 0770

@@ -9,10 +9,11 @@ Requirements
 Role Variables
 --------------
 
-| Name                           | Default value |                                                                           |
-|--------------------------------|---------------|---------------------------------------------------------------------------|
-| persistentlocalstorage_project | local-storage | The namespace where the Persistent Local Volume Provider will be deployed |
-| persistentlocalstorage_classes | []            | Storage classes that will be created                                      |
+| Name                           | Default value      |                                                                           |
+|--------------------------------|--------------------|---------------------------------------------------------------------------|
+| persistentlocalstorage_project | local-storage      | The namespace where the Persistent Local Volume Provider will be deployed |
+| persistentlocalstorage_classes | []                 | Storage classes that will be created                                      |
+| persistentlocalstorage_path    | /mnt/local-storage | Path on the hosts that will be used as base for the local storage classes |
 
 Dependencies
 ------------

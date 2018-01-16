@@ -120,10 +120,10 @@
                 securityContext:
                   runAsUser: 0
                 volumeMounts:
-                - mountPath: /mnt/local-storage
+                - mountPath: "{{ persistentlocalstorage_path }}"
                   name: local-storage
               serviceAccountName: local-volume-provisioner
               volumes:
               - hostPath:
-                  path: /mnt/local-storage
+                  path: "{{ persistentlocalstorage_path }}"
                 name: local-storage
