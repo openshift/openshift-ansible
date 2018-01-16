@@ -1,6 +1,6 @@
 ---
 - command: >
-    oc get pod -l component=es,provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+    oc get pod -l component=es,provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
   register: _cluster_pods
 
 - name: "Getting ES version for logging-es cluster"
@@ -10,7 +10,7 @@
   when: _cluster_pods.stdout_lines | count > 0
 
 - command: >
-    oc get pod -l component=es-ops,provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+    oc get pod -l component=es-ops,provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
   register: _ops_cluster_pods
 
 - name: "Getting ES version for logging-es-ops cluster"
