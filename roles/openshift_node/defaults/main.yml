@@ -233,4 +233,4 @@ openshift_node_image_config_latest: "{{ openshift_node_image_config_latest_defau
 
 openshift_node_use_instance_profiles: False
 
-openshift_node_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) }}"
+openshift_node_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"

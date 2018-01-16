@@ -11,7 +11,7 @@
     persistentlocalstorage_classes: "{{ openshift_persistentlocalstorage_classes | default([]) }}"
   roles:
   - role: openshift_persistentlocalstorage
-    when: openshift_persistentlocalstorage_enabled | bool
+    when: openshift_persistentlocalstorage_enabled | default(False) | bool
 
 - name: Create Hosted Resources - Persistent Local Storage Classes
   hosts: nodes
