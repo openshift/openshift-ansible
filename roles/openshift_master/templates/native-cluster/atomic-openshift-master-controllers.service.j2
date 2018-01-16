@@ -11,6 +11,21 @@ Type=notify
 EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-master-controllers
 Environment=GOTRACEBACK=crash
 ExecStart=/usr/bin/openshift start master controllers --config=${CONFIG_FILE} $OPTIONS
+ExecStart=/usr/bin/hyperkube kube-controller-manager \
+  --controllers="*" --controllers=-ttl --controllers=-bootstrapsigner --controllers=-tokencleaner --controllers=-horizontalpodautoscaling --controllers=-serviceaccount-token \
+  --service-account-private-key-file=openshift.local.config/master/serviceaccounts.private.key \
+  --root-ca-file=openshift.local.config/master/ca-bundle.crt \
+  --kubeconfig=openshift.local.config/master/openshift-master.kubeconfig \
+  --pod-eviction-timeout=5m \
+  --enable-dynamic-provisioning=true \
+  --port=-1 \
+  --use-service-account-credentials=true \
+  --cluster-signing-cert-file="" \
+  --cluster-signing-key-file="" \
+  --leader-elect \
+  --leader-elect-retry-period=3s \
+  --leader-elect-resource-lock=configmaps \
+  --openshift-config=${CONFIG_FILE}
 LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ r_openshift_master_data_dir }}
@@ -20,3 +35,5 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+
+
