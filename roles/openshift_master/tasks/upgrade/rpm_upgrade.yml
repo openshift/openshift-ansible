@@ -17,6 +17,5 @@
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }}"
-      - "tuned-profiles-{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
   register: result
   until: result is succeeded
