@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.19.0%{?dist}
+Release:        0.20.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 15 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.20.0
+- Adjust openstack provider dependencies versions (bdobreli@redhat.com)
+- Fix openstack provider playbook name in docs (bdobreli@redhat.com)
+- Install web console on upgrade (spadgett@redhat.com)
+- Add var for controller to enable async bindings (jpeeler@redhat.com)
+- Add cluster-operator playbook directory. (abutcher@redhat.com)
+- Move s3 & elb provisioning into their own playbooks s.t. they are applied
+  outside of the openshift_aws master provisioning tasks. (abutcher@redhat.com)
+- Update to AWS EC2 root vol size so that Health Check tasks pass
+  (mazzystr@gmail.com)
+- Configure Kuryr CNI daemon (mdulko@redhat.com)
+- Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
+
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.19.0
 - 
 
