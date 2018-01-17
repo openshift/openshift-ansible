@@ -23,7 +23,7 @@
     -f {{ mktemp.stdout }}/calico-policy-controller.yml
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
   register: calico_create_output
-  failed_when: ('already exists' not in calico_create_output.stderr) and ('created' not in calico_create_output.stdout)
+  failed_when: "('already exists' not in calico_create_output.stderr) and ('created' not in calico_create_output.stdout) and calico_create_output.rc != 0"
   changed_when: ('created' in calico_create_output.stdout)
 
 - name: Calico Master | Delete temp directory
