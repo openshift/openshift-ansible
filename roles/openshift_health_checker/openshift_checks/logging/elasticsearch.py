@@ -170,7 +170,7 @@ class Elasticsearch(LoggingCheck):
         """
         errors = []
         for pod_name in pods_by_name.keys():
-            df_cmd = 'exec {} -- df --output=ipcent,pcent /elasticsearch/persistent'.format(pod_name)
+            df_cmd = '-c elasticsearch exec {} -- df --output=ipcent,pcent /elasticsearch/persistent'.format(pod_name)
             disk_output = self.exec_oc(df_cmd, [], save_as_name='get_pv_diskspace.json')
             lines = disk_output.splitlines()
             # expecting one header looking like 'IUse% Use%' and one body line
