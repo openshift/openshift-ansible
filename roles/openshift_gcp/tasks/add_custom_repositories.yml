@@ -1,13 +1,13 @@
 ---
 - name: Copy custom repository secrets
   copy:
-    src: "{{ playbook_dir }}/files/{{ item.1.sslclientcert }}"
+    src: "{{ files_dir }}/{{ item.1.sslclientcert }}"
     dest: /var/lib/yum/custom_secret_{{ item.0 }}_cert
   when: item.1.sslclientcert | default(false)
   with_indexed_items: "{{ provision_custom_repositories }}"
 - name: Copy custom repository secrets
   copy:
-    src: "{{ playbook_dir }}/files/{{ item.1.sslclientkey }}"
+    src: "{{ files_dir }}/{{ item.1.sslclientkey }}"
     dest: /var/lib/yum/custom_secret_{{ item.0 }}_key
   when: item.1.sslclientkey | default(false)
   with_indexed_items: "{{ provision_custom_repositories }}"

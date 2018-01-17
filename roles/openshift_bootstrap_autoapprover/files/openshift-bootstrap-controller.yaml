@@ -65,4 +65,4 @@ spec:
           SCRIPT
           chmod u+x /tmp/signer
 
-          oc observe csr --maximum-errors=1 --resync-period=10m -a '{.status.conditions[*].type}' -a '{.status.certificate}' -a '{.spec.username}' -- /tmp/signer
+          exec oc observe csr --maximum-errors=1 --resync-period=10m -a '{.status.conditions[*].type}' -a '{.status.certificate}' -a '{.spec.username}' -- /tmp/signer

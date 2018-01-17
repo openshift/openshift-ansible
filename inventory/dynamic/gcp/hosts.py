@@ -16,6 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
+# This is a derivative of gce.py that adds support for filtering
+# the returned inventory to only include instances that have tags
+# as specified by GCE_TAGGED_INSTANCES. This prevents dynamic 
+# inventory for multiple clusters within the same project from
+# accidentally stomping each other.
+
 # pylint: skip-file
 
 '''

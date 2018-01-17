@@ -14,8 +14,8 @@
     - openshift_master_bootstrap_enabled | default(False)
   - name: configure node bootstrap autoapprover
     include_role:
-      name: openshift_gcp
-      tasks_from: bootstrap_autoapprover.yml
+      name: openshift_bootstrap_autoapprover
+      tasks_from: main
     when:
     - openshift_master_bootstrap_enabled | default(False)
     - openshift_master_bootstrap_auto_approve | default(False) | bool

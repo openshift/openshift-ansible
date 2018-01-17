@@ -1,3 +1,9 @@
+#
+# These tasks configure the instance to periodically update the project metadata with the
+# latest bootstrap kubeconfig from the project metadata. This keeps the project metadata
+# in sync with the cluster's configuration. We then invoke a CSR approve on any nodes that
+# are waiting to join the cluster.
+#
 ---
 - name: Copy unit service
   copy:
