@@ -4,11 +4,9 @@
   roles:
   - role: openshift_facts
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade_pre.yml
-    vars:
-      openshift_node_upgrade_in_progress: True
 
 - name: Drain and upgrade nodes
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
@@ -35,12 +33,18 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
     until: not (l_upgrade_nodes_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_nodes_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
@@ -50,11 +54,9 @@
     when: openshift_node_upgrade_pre_hook is defined
 
   post_tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
-    vars:
-      openshift_node_upgrade_in_progress: True
 
   # Run the upgrade hook prior to make the node schedulable again.
   - debug: msg="Running node upgrade hook {{ openshift_node_upgrade_hook }}"
@@ -77,7 +79,7 @@
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable
