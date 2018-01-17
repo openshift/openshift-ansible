@@ -276,7 +276,7 @@ openshift_openstack_cluster_node_labels:
 `openshift_openstack_cloud_init_runcmd` allows users to execute
 shell commands via cloud-init for all of the created Nova servers in
 the Heat stack, before they are available for SSH connections.
-Note that you should better off using custom ansible playbooks whenever
+Note that you should use custom ansible playbooks whenever
 possible, like this `provision_install_custom.yml` example playbook:
 ```
 - import_playbook: openshift-ansible/playbooks/openstack/openshift-cluster/provision.yml
