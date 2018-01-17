@@ -53,13 +53,6 @@
   - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
     when: openshift_node_upgrade_pre_hook is defined
 
-  # Run the pre-upgrade hook if defined:
-  - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
-    when: openshift_node_upgrade_pre_hook is defined
-
-  - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
-    when: openshift_node_upgrade_pre_hook is defined
-
   post_tasks:
   - import_role:
       name: openshift_node
