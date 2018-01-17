@@ -16,6 +16,8 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 5): ["2.6", "2.7"],
         (3, 6): ["2.6", "2.7", "2.8"],
         (3, 7): ["2.6", "2.7", "2.8"],
+        (3, 8): ["2.6", "2.7", "2.8"],
+        (3, 9): ["2.6", "2.7", "2.8"],
     }
 
     openshift_to_docker_version = {
@@ -25,6 +27,9 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 4): "1.12",
         (3, 5): "1.12",
         (3, 6): "1.12",
+        (3, 7): "1.12",
+        (3, 8): "1.12",
+        (3, 9): ["1.12", "1.13"],
     }
 
     def is_active(self):

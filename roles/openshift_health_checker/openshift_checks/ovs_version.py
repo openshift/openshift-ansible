@@ -20,6 +20,8 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 5): ["2.6", "2.7"],
         (3, 6): ["2.6", "2.7", "2.8"],
         (3, 7): ["2.6", "2.7", "2.8"],
+        (3, 8): ["2.6", "2.7", "2.8"],
+        (3, 9): ["2.6", "2.7", "2.8"],
     }
 
     def is_active(self):
