@@ -13,5 +13,5 @@
     --config={{ mktemp.stdout }}/admin.kubeconfig
   register: pvc_create_output
   when: persistent_volume_claims | length > 0
-  failed_when: ('already exists' not in pvc_create_output.stderr) and ('created' not in pvc_create_output.stdout)
+  failed_when: "('already exists' not in pvc_create_output.stderr) and ('created' not in pvc_create_output.stdout) and pvc_create_output.rc != 0"
   changed_when: ('created' in pvc_create_output.stdout)
