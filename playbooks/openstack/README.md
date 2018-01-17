@@ -183,13 +183,20 @@ Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift -i inventory \
+$ ansible-playbook --user openshift \
+  -i openshift-ansible/playbooks/openstack/inventory.py
+  -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml \
   -e openshift_repos_enable_testing=true
 ```
 
 Note, you may want to use the testing repo for development purposes only.
 Normally, `openshift_repos_enable_testing` should not be specified.
+
+In addition to *your* inventory with your OpenShift and OpenStack
+configuration, we are also supplying the [dynamic inventory][dynamic] from
+`openshift-ansible/inventory`. It's a script that will look at the Nova servers
+and other resources that will be created and let Ansible know about them.
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
@@ -233,3 +240,4 @@ advanced configuration:
 [loadbalancer]: ./advanced-configuration.md#multi-master-configuration
 [external-dns]: ./advanced-configuration.md#dns-configuration-variables
 [cinder-registry]: ./advanced-configuration.md#creating-and-using-a-cinder-volume-for-the-openshift-registry
+[dynamic]: http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html
