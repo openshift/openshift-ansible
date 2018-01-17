@@ -49,7 +49,7 @@
         upgrade you may set openshift_master_unsupported_embedded_etcd=true
         until a migration playbook becomes available.
     when:
-    - g_etcd_hosts | default([]) | length not in [3,1]
+    - g_etcd_hosts | default([]) | length not in [5,3,1]
     - not openshift_master_unsupported_embedded_etcd | default(False)
     - not (openshift_node_bootstrap | default(False))
 
