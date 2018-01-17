@@ -6,6 +6,7 @@
   when:
   - openshift_pkg_version is defined
   - openshift_version is not defined
+  - not (openshift_version_reinit | default(false))
 
 # These tasks should only be run against masters and nodes
 - name: Set openshift_version for rpm installation
@@ -13,4 +14,7 @@
 
 - set_fact:
     openshift_version: "{{ rpm_results.results.versions.available_versions.0 }}"
-  when: openshift_version is not defined
+  when: openshift_version is not defined or ( openshift_version_reinit | default(false) )
+- set_fact:
+    openshift_pkg_version: "-{{ rpm_results.results.versions.available_versions.0 }}"
+  when: openshift_version_reinit | default(false)

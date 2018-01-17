@@ -21,7 +21,7 @@
   block:
   - name: Check latest available OpenShift RPM version
     repoquery:
-      name: "{{ openshift_service_type }}"
+      name: "{{ openshift_service_type }}{{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }}"
       ignore_excluders: true
     register: repoquery_out
 
