@@ -7,11 +7,7 @@ import yaml
 from ansible.plugins.callback import CallbackBase
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
-# ansible.compat.six goes away with Ansible 2.4
-try:
-    from ansible.compat.six import u
-except ImportError:
-    from ansible.module_utils.six import u
+from ansible.module_utils.six import u
 
 
 # pylint: disable=super-init-not-called
