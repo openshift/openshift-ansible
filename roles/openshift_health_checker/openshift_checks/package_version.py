@@ -1,7 +1,5 @@
 """Check that available RPM packages match the required versions."""
 
-import re
-
 from openshift_checks import OpenShiftCheck, OpenShiftCheckException
 from openshift_checks.mixins import NotContainerizedMixin
 
@@ -27,11 +25,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 4): "1.12",
         (3, 5): "1.12",
         (3, 6): "1.12",
-    }
-
-    # map major OpenShift release versions across releases to a common major version
-    map_major_release_version = {
-        1: 3,
     }
 
     def is_active(self):
@@ -83,7 +76,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
 
     def get_required_ovs_version(self):
         """Return the correct Open vSwitch version(s) for the current OpenShift version."""
-        openshift_version = self.get_openshift_version_tuple()
+        openshift_version = self.get_major_minor_version()
 
         earliest = min(self.openshift_to_ovs_version)
         latest = max(self.openshift_to_ovs_version)
@@ -101,7 +94,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
 
     def get_required_docker_version(self):
         """Return the correct Docker version(s) for the current OpenShift version."""
-        openshift_version = self.get_openshift_version_tuple()
+        openshift_version = self.get_major_minor_version()
 
         earliest = min(self.openshift_to_docker_version)
         latest = max(self.openshift_to_docker_version)
@@ -116,15 +109,3 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
             raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
 
         return docker_version
-
-    def get_openshift_version_tuple(self):
-        """Return received image tag as a normalized (X, Y) minor version tuple."""
-        version = self.get_var("openshift_image_tag")
-        comps = [int(component) for component in re.findall(r'\d+', version)]
-
-        if len(comps) < 2:
-            msg = "An invalid version of OpenShift was found for this host: {}"
-            raise OpenShiftCheckException(msg.format(version))
-
-        comps[0] = self.map_major_release_version.get(comps[0], comps[0])
-        return tuple(comps[0:2])

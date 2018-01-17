@@ -18,7 +18,7 @@ def task_vars_for(openshift_release, deployment_type):
 
 def test_openshift_version_not_supported():
     check = PackageVersion(None, task_vars_for("1.2.3", 'origin'))
-    check.get_openshift_version_tuple = lambda: (3, 4, 1)  # won't be in the dict
+    check.get_major_minor_version = lambda: (3, 4, 1)  # won't be in the dict
 
     with pytest.raises(OpenShiftCheckException) as excinfo:
         check.get_required_ovs_version()
