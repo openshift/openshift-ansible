@@ -1,6 +1,7 @@
 import pytest
 
-from openshift_checks.package_version import PackageVersion, OpenShiftCheckException
+from openshift_checks.package_version import PackageVersion
+from openshift_checks import OpenShiftCheckException
 
 
 def task_vars_for(openshift_release, deployment_type):

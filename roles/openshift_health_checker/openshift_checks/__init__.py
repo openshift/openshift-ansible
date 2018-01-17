@@ -325,6 +325,24 @@ class OpenShiftCheck(object):
 
         return tuple(int(x) for x in components[:2])
 
+    def get_required_version(self, name, version_map):
+        """Return the correct required version(s) for the current (or nearest) OpenShift version."""
+        openshift_version = self.get_major_minor_version()
+
+        earliest = min(version_map)
+        latest = max(version_map)
+        if openshift_version < earliest:
+            return version_map[earliest]
+        if openshift_version > latest:
+            return version_map[latest]
+
+        required_version = version_map.get(openshift_version)
+        if not required_version:
+            msg = "There is no recommended version of {} for the current version of OpenShift ({})"
+            raise OpenShiftCheckException(msg.format(name, ".".join(str(comp) for comp in openshift_version)))
+
+        return required_version
+
     def find_ansible_mount(self, path):
         """Return the mount point for path from ansible_mounts."""
 

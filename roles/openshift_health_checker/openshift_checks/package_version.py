@@ -1,6 +1,6 @@
 """Check that available RPM packages match the required versions."""
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck
 from openshift_checks.mixins import NotContainerizedMixin
 
 
@@ -76,36 +76,8 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
 
     def get_required_ovs_version(self):
         """Return the correct Open vSwitch version(s) for the current OpenShift version."""
-        openshift_version = self.get_major_minor_version()
-
-        earliest = min(self.openshift_to_ovs_version)
-        latest = max(self.openshift_to_ovs_version)
-        if openshift_version < earliest:
-            return self.openshift_to_ovs_version[earliest]
-        if openshift_version > latest:
-            return self.openshift_to_ovs_version[latest]
-
-        ovs_version = self.openshift_to_ovs_version.get(openshift_version)
-        if not ovs_version:
-            msg = "There is no recommended version of Open vSwitch for the current version of OpenShift: {}"
-            raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
-
-        return ovs_version
+        return self.get_required_version("Open vSwitch", self.openshift_to_ovs_version)
 
     def get_required_docker_version(self):
         """Return the correct Docker version(s) for the current OpenShift version."""
-        openshift_version = self.get_major_minor_version()
-
-        earliest = min(self.openshift_to_docker_version)
-        latest = max(self.openshift_to_docker_version)
-        if openshift_version < earliest:
-            return self.openshift_to_docker_version[earliest]
-        if openshift_version > latest:
-            return self.openshift_to_docker_version[latest]
-
-        docker_version = self.openshift_to_docker_version.get(openshift_version)
-        if not docker_version:
-            msg = "There is no recommended version of Docker for the current version of OpenShift: {}"
-            raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
-
-        return docker_version
+        return self.get_required_version("Docker", self.openshift_to_docker_version)
