@@ -48,6 +48,12 @@ openshift_node_kubelet_args_dict:
     cloud-config:
     - "{{ openshift_config_base ~ '/cloudprovider/gce.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
+  azure:
+    cloud-provider:
+    - azure
+    cloud-config:
+    - "{{ openshift_config_base ~ '/cloudprovider/azure.conf' }}"
+    node-labels: "{{ l_node_kubelet_node_labels }}"
   undefined:
     node-labels: "{{ l_node_kubelet_node_labels }}"
 
