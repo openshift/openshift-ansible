@@ -5,9 +5,9 @@
   tasks:
 
 - name: Initialize host facts
-  # l_upgrade_non_node_hosts is passed in via play during control-plane-only
-  # upgrades; otherwise oo_all_hosts is used.
-  hosts: "{{ l_upgrade_non_node_hosts | default('oo_all_hosts') }}"
+  # l_init_fact_hosts is passed in via play during control-plane-only
+  # upgrades and scale-up plays; otherwise oo_all_hosts is used.
+  hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
   tasks:
   - name: load openshift_facts module
     import_role:
