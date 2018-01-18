@@ -31,6 +31,7 @@ objects:
     name: "${NAME}-secrets"
   stringData:
     pg-password: "${DATABASE_PASSWORD}"
+    admin-password: "${APPLICATION_ADMIN_PASSWORD}"
     database-url: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_SERVICE_NAME}/${DATABASE_NAME}?encoding=utf8&pool=5&wait_timeout=5
     v2-key: "${V2_KEY}"
 - apiVersion: v1
@@ -126,6 +127,11 @@ objects:
               secretKeyRef:
                 name: "${NAME}-secrets"
                 key: v2-key
+          - name: APPLICATION_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${NAME}-secrets"
+                key: admin-password
           - name: ANSIBLE_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -581,6 +587,11 @@ parameters:
   displayName: Application Database Region
   description: Database region that will be used for application.
   value: '0'
+- name: APPLICATION_ADMIN_PASSWORD
+  displayName: Application Admin Password
+  required: true
+  description: Admin password that will be set on the application.
+  value: smartvm
 - name: ANSIBLE_DATABASE_NAME
   displayName: Ansible PostgreSQL database name
   required: true
@@ -603,6 +614,7 @@ parameters:
   displayName: Memcached Slab Page Size
   description: Memcached size of each slab page.
   value: 1m
+
 - name: ANSIBLE_SERVICE_NAME
   displayName: Ansible Service Name
   description: The name of the OpenShift Service exposed for the Ansible container.
