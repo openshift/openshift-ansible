@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.20.0%{?dist}
+Release:        0.21.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,37 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 17 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.21.0
+- Add call to 3.8 playbook in 3.9 upgrade (sdodson@redhat.com)
+- Remove 3.8 and 3.9 specific steps right now (sdodson@redhat.com)
+- Exclude 3.9 packages during 3.8 upgrade (sdodson@redhat.com)
+- fix typos (sdodson@redhat.com)
+- Ensure openshift_client_binary is set (sdodson@redhat.com)
+- Add init/main.yml to etc-upgrade (mgugino@redhat.com)
+- Fix a typo in "Determine if growpart is installed" (vrutkovs@redhat.com)
+- Check rc for commands with openshift_client_binary and failed_when
+  (vrutkovs@redhat.com)
+- Update console config for API changes (spadgett@redhat.com)
+- include elasticsearch container name (jvallejo@redhat.com)
+- openshift_checks: repair adhoc list-checks mode (lmeyer@redhat.com)
+- Remove tuned-profiles from list of master packages upgraded
+  (sdodson@redhat.com)
+- Add missing task that got dropped in a refactor (sdodson@redhat.com)
+- Web Console: use a different var for asset config (vrutkovs@redhat.com)
+- Document the inventory change (tomas@sedovic.cz)
+- Move the OpenStack dynamic inventory from sample (tomas@sedovic.cz)
+- fix bug 1534271 (wmeng@redhat.com)
+- Don't use from ansible.module_utils.six as its no longer available in Ansible
+  2.4 (vrutkovs@redhat.com)
+- Add console RBAC template (spadgett@redhat.com)
+- Setup master groups in order to use the master group's ansible_ssh_user to
+  pull bootstrap kubeconfig. (abutcher@redhat.com)
+- adding ability to add network policy objects. (shawn.hurley21@gmail.com)
+- add python2-boto3 package for centos-based origin-ansible container image
+  (jdiaz@redhat.com)
+- adding ability to interact with network resources. (shawn.hurley21@gmail.com)
+- Adding .ini to inventory_ignore_extensions (bedin@redhat.com)
+
 * Mon Jan 15 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.20.0
 - Adjust openstack provider dependencies versions (bdobreli@redhat.com)
 - Fix openstack provider playbook name in docs (bdobreli@redhat.com)
