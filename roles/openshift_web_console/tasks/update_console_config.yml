@@ -58,14 +58,4 @@
   changed_when: False
 
 # TODO: Only rollout if config has changed.
-# There's currently no command to trigger a rollout for a k8s deployment
-# without changing the pod spec. Add an annotation to force a rollout after
-# the config map has been edited.
-- name: Rollout updated web console deployment
-  oc_edit:
-    kind: deployments
-    name: webconsole
-    namespace: openshift-web-console
-    separator: '#'
-    content:
-      spec#template#metadata#annotations#installer-triggered-rollout: "{{ ansible_date_time.iso8601_micro }}"
+- include_tasks: rollout_console.yml
