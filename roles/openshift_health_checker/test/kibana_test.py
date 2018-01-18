@@ -1,12 +1,10 @@
 import pytest
 import json
 
-try:
-    import urllib2
-    from urllib2 import HTTPError, URLError
-except ImportError:
-    from urllib.error import HTTPError, URLError
-    import urllib.request as urllib2
+# pylint can't find the package when its installed in virtualenv
+from ansible.module_utils.six.moves.urllib import request  # pylint: disable=import-error
+# pylint: disable=import-error
+from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 
 from openshift_checks.logging.kibana import Kibana, OpenShiftCheckException
 
@@ -202,7 +200,7 @@ def test_verify_url_external_failure(lib_result, expect, monkeypatch):
         if type(lib_result) is int:
             return _http_return(lib_result)
         raise lib_result
-    monkeypatch.setattr(urllib2, 'urlopen', urlopen)
+    monkeypatch.setattr(request, 'urlopen', urlopen)
 
     check = Kibana()
     check._get_kibana_url = lambda: 'url'
