@@ -30,7 +30,7 @@
      {{ openshift_client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig ca create-server-cert
      --key={{generated_certs_dir}}/{{cert_info.procure_component}}.key --cert={{generated_certs_dir}}/{{cert_info.procure_component}}.crt
      --hostnames={{cert_info.hostnames|quote}} --signer-cert={{generated_certs_dir}}/ca.crt --signer-key={{generated_certs_dir}}/ca.key
-     --signer-serial={{generated_certs_dir}}/ca.serial.txt
+     --signer-serial={{generated_certs_dir}}/ca.serial.txt --overwrite=false
   check_mode: no
   when:
   - cert_info.hostnames is defined
