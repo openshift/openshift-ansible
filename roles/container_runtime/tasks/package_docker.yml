@@ -1,6 +1,17 @@
 ---
 - include_tasks: common/pre.yml
 
+# In some cases, some services may be run as containers and docker may still
+# be installed via rpm.
+- include_tasks: common/atomic_proxy.yml
+  when:
+  - >
+    (openshift_use_system_containers | default(False)) | bool
+    or (openshift_use_etcd_system_container | default(False)) | bool
+    or (openshift_use_openvswitch_system_container | default(False)) | bool
+    or (openshift_use_node_system_container | default(False)) | bool
+    or (openshift_use_master_system_container | default(False)) | bool
+
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"
   when: not openshift_is_atomic | bool

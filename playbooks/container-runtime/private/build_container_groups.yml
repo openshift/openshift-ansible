@@ -3,4 +3,4 @@
   hosts: oo_all_hosts:!oo_nodes_to_config
   tasks:
   - group_by:
-      key: oo_hosts_containerized_managed_{{ (containerized | default(False)) | ternary('true','false') }}
+      key: oo_hosts_containerized_managed_{{ (openshift_is_containerized | default(False)) | ternary('true','false') }}
