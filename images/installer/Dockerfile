@@ -1,7 +1,5 @@
 FROM centos:7
 
-MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
-
 USER root
 
 # Add origin repo for including the oc client
@@ -16,7 +14,8 @@ RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-
  && rpm -V $INSTALL_PKGS $EPEL_PKGS \
  && yum clean all
 
-LABEL name="openshift/origin-ansible" \
+LABEL maintainer="OpenShift Team <dev@lists.openshift.redhat.com>" \
+      name="openshift/origin-ansible" \
       summary="OpenShift's installation and configuration tool" \
       description="A containerized openshift-ansible image to let you run playbooks to install, upgrade, maintain and check an OpenShift cluster" \
       url="https://github.com/openshift/openshift-ansible" \
