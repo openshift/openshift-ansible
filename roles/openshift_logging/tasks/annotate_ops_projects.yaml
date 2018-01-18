@@ -12,6 +12,7 @@
     separator: '#'
     content:
       metadata#annotations#openshift.io/logging.ui.hostname: "{{ openshift_logging_kibana_ops_hostname }}"
+      metadata#annotations#openshift.io/logging.data.prefix: ".operations"
   with_items: "{{ __logging_ops_projects.stdout.split(' ') }}"
   loop_control:
     loop_var: project
