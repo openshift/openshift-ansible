@@ -1,6 +1,6 @@
 ---
 - shell: >
-    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
+    {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
     get rc hawkular-cassandra-{{node}} -o jsonpath='{.spec.replicas}' || echo 0
   vars:

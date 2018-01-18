@@ -3,7 +3,7 @@
 
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: curr_docker_version
   retries: 4
   until: curr_docker_version is succeeded
@@ -20,7 +20,7 @@
     name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
     state: present
   when:
-  - not (openshift.common.is_atomic | bool)
+  - not (openshift_is_atomic | bool)
   - not (curr_docker_version is skipped)
   - not (curr_docker_version.stdout != '')
   register: result
@@ -48,7 +48,7 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^{{ item.reg_conf_var }}=.*$'
-    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
+    line: "{{ item.reg_conf_var }}='{{ item.reg_fact_val | lib_utils_oo_prepend_strings_in_list(item.reg_flag ~ ' ') | join(' ') }}'"
   when:
   - item.reg_fact_val != []
   - docker_check.stat.isreg is defined
@@ -101,7 +101,7 @@
     line: "OPTIONS='\
       {% if ansible_selinux.status | default(None) == 'enabled' and openshift_docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %} \
       {% if openshift_docker_log_driver | bool %} --log-driver {{ openshift_docker_log_driver }}{% endif %} \
-      {% if l2_docker_log_options != [] %} {{ l2_docker_log_options |  oo_split() | oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %} \
+      {% if l2_docker_log_options != [] %} {{ l2_docker_log_options |  lib_utils_oo_split() | lib_utils_oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %} \
       {% if openshift_docker_hosted_registry_insecure and (openshift_docker_hosted_registry_network | bool) %} --insecure-registry={{ openshift_docker_hosted_registry_network }} {% endif %} \
       {% if docker_options is defined %} {{ docker_options }}{% endif %} \
       {% if openshift_docker_options %} {{ openshift_docker_options }}{% endif %} \

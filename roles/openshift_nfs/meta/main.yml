@@ -13,4 +13,4 @@ galaxy_info:
   - cloud
 dependencies:
 - role: lib_utils
-- role: lib_os_firewall
+- role: lib_utils

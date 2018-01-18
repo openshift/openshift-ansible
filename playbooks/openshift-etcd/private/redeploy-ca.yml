@@ -14,10 +14,10 @@
 - name: Backup existing etcd CA certificate directories
   hosts: oo_etcd_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup_ca_certificates.yml
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: remove_ca_certificates.yml
 
@@ -26,7 +26,6 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -34,10 +33,14 @@
     register: g_etcd_mktemp
     changed_when: false
 
+  - name: Chmod local temp directory for syncing certs
+    local_action: command chmod 777 "{{ g_etcd_mktemp.stdout }}"
+    changed_when: false
+
 - name: Distribute etcd CA to etcd hosts
   hosts: oo_etcd_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: distribute_ca.yml
     vars:
@@ -47,14 +50,14 @@
 - import_playbook: restart.yml
   # Do not restart etcd when etcd certificates were previously expired.
   when: ('expired' not in (hostvars
-                           | oo_select_keys(groups['etcd'])
-                           | oo_collect('check_results.check_results.etcd')
-                           | oo_collect('health')))
+                           | lib_utils_oo_select_keys(groups['etcd'])
+                           | lib_utils_oo_collect('check_results.check_results.etcd')
+                           | lib_utils_oo_collect('health')))
 
 - name: Retrieve etcd CA certificate
   hosts: oo_first_etcd
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: retrieve_ca_certificates.yml
     vars:
@@ -74,7 +77,6 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - file:
@@ -87,15 +89,15 @@
   when:
   # masters
   - ('expired' not in hostvars
-      | oo_select_keys(groups['oo_masters_to_config'])
-      | oo_collect('check_results.check_results.ocp_certs')
-      | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
+      | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+      | lib_utils_oo_collect('check_results.check_results.ocp_certs')
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
   - ('expired' not in hostvars
-      | oo_select_keys(groups['oo_masters_to_config'])
-      | oo_collect('check_results.check_results.ocp_certs')
-      | oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
+      | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+      | lib_utils_oo_collect('check_results.check_results.ocp_certs')
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
   # etcd
   - ('expired' not in (hostvars
-      | oo_select_keys(groups['etcd'])
-      | oo_collect('check_results.check_results.etcd')
-      | oo_collect('health')))
+      | lib_utils_oo_select_keys(groups['etcd'])
+      | lib_utils_oo_collect('check_results.check_results.etcd')
+      | lib_utils_oo_collect('health')))

@@ -28,7 +28,7 @@
     etcd_client_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
                                    else (False in (g_external_etcd_cert_stat_result.results
                                                    | default({})
-                                                   | oo_collect(attribute='stat.exists')
+                                                   | lib_utils_oo_collect(attribute='stat.exists')
                                                    | list)) }}"
 
 - name: Ensure generated_certs directory present
@@ -57,6 +57,7 @@
 
 # Certificates must be signed serially in order to avoid competing
 # for the serial file.
+# delegated_serial_command is a custom module in lib_utils
 - name: Sign and create the client crt
   delegated_serial_command:
     command: >
@@ -79,13 +80,6 @@
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
-- name: Create local temp directory for syncing certs
-  local_action: command mktemp -d /tmp/etcd_certificates-XXXXXXX
-  register: g_etcd_client_mktemp
-  changed_when: False
-  when: etcd_client_certs_missing | bool
-  become: no
-
 - name: Create a tarball of the etcd certs
   command: >
     tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
@@ -101,8 +95,7 @@
 - name: Retrieve the etcd cert tarballs
   fetch:
     src: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
-    dest: "{{ g_etcd_client_mktemp.stdout }}/"
-    flat: yes
+    dest: "/tmp"
     fail_on_missing: yes
     validate_checksum: yes
   when: etcd_client_certs_missing | bool
@@ -116,8 +109,13 @@
 
 - name: Unarchive etcd cert tarballs
   unarchive:
-    src: "{{ g_etcd_client_mktemp.stdout }}/{{ etcd_cert_subdir }}.tgz"
+    src: "/tmp/{{ inventory_hostname }}/{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
+  when: etcd_client_certs_missing | bool
+
+- name: Delete temporary directory
+  local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
+  changed_when: False
   when: etcd_client_certs_missing | bool
 
 - file:
@@ -130,9 +128,3 @@
   - "{{ etcd_cert_prefix }}client.key"
   - "{{ etcd_cert_prefix }}ca.crt"
   when: etcd_client_certs_missing | bool
-
-- name: Delete temporary directory
-  local_action: file path="{{ g_etcd_client_mktemp.stdout }}" state=absent
-  changed_when: False
-  when: etcd_client_certs_missing | bool
-  become: no

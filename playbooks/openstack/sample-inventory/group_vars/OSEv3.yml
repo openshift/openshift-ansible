@@ -14,12 +14,13 @@ openshift_hosted_router_wait: True
 openshift_hosted_registry_wait: True
 
 ## Openstack credentials
-#openshift_cloudprovider_kind=openstack
+#openshift_cloudprovider_kind: openstack
 #openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
 #openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
 #openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
 #openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_TENANT_NAME') }}"
-#openshift_cloudprovider_openstack_region="{{ lookup('env', 'OS_REGION_NAME') }}"
+#openshift_cloudprovider_openstack_region: "{{ lookup('env', 'OS_REGION_NAME') }}"
+#openshift_cloudprovider_openstack_blockstorage_version: v2
 
 
 ## Use Cinder volume for Openshift registry:

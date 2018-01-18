@@ -5,18 +5,16 @@ dnsBindAddress: 127.0.0.1:53
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
 {% endif %}
 dnsDomain: {{ openshift.common.dns_domain }}
-{% if 'dns_ip' in openshift.node %}
-dnsIP: {{ openshift.node.dns_ip }}
-{% endif %}
+dnsIP: {{ openshift_dns_ip }}
 dockerConfig:
   execHandlerName: ""
-iptablesSyncPeriod: "{{ openshift.node.iptables_sync_period }}"
+iptablesSyncPeriod: "{{ openshift_node_iptables_sync_period }}"
 imageConfig:
-  format: {{ openshift.node.registry_url }}
+  format: {{ oreg_url_node }}
   latest: {{ openshift_node_image_config_latest }}
 kind: NodeConfig
-kubeletArguments: {{ openshift.node.kubelet_args | default(None) | to_padded_yaml(level=1) }}
-{% if openshift_use_crio %}
+kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_utils_to_padded_yaml(level=1) }}
+{% if openshift_use_crio | bool %}
   container-runtime:
   - remote
   container-runtime-endpoint:
@@ -45,7 +43,7 @@ networkConfig:
 {% if openshift_node_use_openshift_sdn | bool or openshift_node_use_nuage | bool or openshift_node_use_contiv | bool or openshift_node_use_kuryr | bool or openshift_node_sdn_network_plugin_name == 'cni' %}
    networkPluginName: {{ openshift_node_sdn_network_plugin_name }}
 {% endif %}
-{% if openshift.node.set_node_ip | bool %}
+{% if openshift_set_node_ip | bool %}
 nodeIP: {{ openshift.common.ip }}
 {% endif %}
 nodeName: {{ openshift.node.nodename }}
@@ -68,8 +66,8 @@ volumeDirectory: {{ openshift_node_data_dir }}/openshift.local.volumes
 {% if not (openshift_node_use_kuryr | default(False)) | bool %}
 proxyArguments:
   proxy-mode:
-     - {{ openshift.node.proxy_mode }}
+     - {{ openshift_node_proxy_mode }}
 {% endif %}
 volumeConfig:
   localQuota:
-    perFSGroup: {{ openshift.node.local_quota_per_fsgroup }}
+    perFSGroup: {{ openshift_node_local_quota_per_fsgroup }}

@@ -5,12 +5,11 @@ Module for performing checks on a Kibana logging deployment
 import json
 import ssl
 
-try:
-    from urllib2 import HTTPError, URLError
-    import urllib2
-except ImportError:
-    from urllib.error import HTTPError, URLError
-    import urllib.request as urllib2
+# pylint can't find the package when its installed in virtualenv
+# pylint: disable=import-error,no-name-in-module
+from ansible.module_utils.six.moves.urllib import request
+# pylint: disable=import-error,no-name-in-module
+from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 
 from openshift_checks.logging.logging import LoggingCheck, OpenShiftCheckException
 
@@ -65,7 +64,7 @@ class Kibana(LoggingCheck):
         # Verify that the url is returning a valid response
         try:
             # We only care if the url connects and responds
-            return_code = urllib2.urlopen(url, context=ctx).getcode()
+            return_code = request.urlopen(url, context=ctx).getcode()
         except HTTPError as httperr:
             return httperr.reason
         except URLError as urlerr:

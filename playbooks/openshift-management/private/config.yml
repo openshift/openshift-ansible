@@ -21,7 +21,7 @@
 
   tasks:
   - name: Run the CFME Setup Role
-    include_role:
+    import_role:
       name: openshift_management
     vars:
       template_dir: "{{ hostvars[groups.masters.0].r_openshift_management_mktemp.stdout }}"

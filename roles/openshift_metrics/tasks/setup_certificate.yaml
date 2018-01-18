@@ -1,7 +1,7 @@
 ---
 - name: generate {{ component }} keys
   command: >
-    {{ openshift.common.client_binary }} adm ca create-server-cert
+    {{ openshift_client_binary }} adm ca create-server-cert
     --config={{ mktemp.stdout }}/admin.kubeconfig
     --key='{{ mktemp.stdout }}/{{ component }}.key'
     --cert='{{ mktemp.stdout }}/{{ component }}.crt'
@@ -23,7 +23,7 @@
 
 - name: generate random password for the {{ component }} keystore
   copy:
-    content: "{{ 15 | oo_random_word }}"
+    content: "{{ 15 | lib_utils_oo_random_word }}"
     dest: '{{ mktemp.stdout }}/{{ component }}-keystore.pwd'
 
 - slurp: src={{ mktemp.stdout | quote }}/{{ component|quote }}-keystore.pwd
@@ -39,5 +39,5 @@
 
 - name: generate random password for the {{ component }} truststore
   copy:
-    content: "{{ 15 | oo_random_word }}"
+    content: "{{ 15 | lib_utils_oo_random_word }}"
     dest: '{{ mktemp.stdout | quote }}/{{ component|quote }}-truststore.pwd'

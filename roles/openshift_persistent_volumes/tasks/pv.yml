@@ -8,10 +8,10 @@
 
 - name: Create PersistentVolumes
   command: >
-    {{ openshift.common.client_binary }} create
+    {{ openshift_client_binary }} create
     -f {{ mktemp.stdout }}/persistent-volumes.yml
     --config={{ mktemp.stdout }}/admin.kubeconfig
   register: pv_create_output
   when: persistent_volumes | length > 0
-  failed_when: ('already exists' not in pv_create_output.stderr) and ('created' not in pv_create_output.stdout)
+  failed_when: "('already exists' not in pv_create_output.stderr) and ('created' not in pv_create_output.stdout) and pv_create_output.rc != 0"
   changed_when: ('created' in pv_create_output.stdout)

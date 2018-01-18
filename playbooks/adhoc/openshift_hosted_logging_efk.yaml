@@ -10,7 +10,7 @@
   - set_fact:
       openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ openshift_master_default_subdomain }}"
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_logging
       tasks_from: update_master_config
     when: openshift_hosted_logging_deploy | default(false) | bool

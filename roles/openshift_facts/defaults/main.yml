@@ -1,7 +1,12 @@
 ---
+openshift_client_binary: "{{ (openshift_is_containerized | bool) | ternary('/usr/local/bin/oc', 'oc') }}"
+
 openshift_cli_image_dict:
   origin: 'openshift/origin'
   openshift-enterprise: 'openshift3/ose'
+
+repoquery_cmd: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0', 'repoquery --plugins') }}"
+repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed', 'repoquery --plugins --installed') }}"
 
 openshift_hosted_images_dict:
   origin: 'openshift/origin-${component}:${version}'
@@ -93,11 +98,6 @@ openshift_prometheus_alertbuffer_storage_access_modes:
   - 'ReadWriteOnce'
 openshift_prometheus_alertbuffer_storage_create_pv: True
 openshift_prometheus_alertbuffer_storage_create_pvc: False
-
-
-openshift_router_selector: "region=infra"
-openshift_hosted_router_selector: "{{ openshift_router_selector }}"
-openshift_hosted_registry_selector: "{{ openshift_router_selector }}"
 
 openshift_service_type_dict:
   origin: origin

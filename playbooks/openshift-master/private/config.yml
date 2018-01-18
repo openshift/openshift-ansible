@@ -47,7 +47,7 @@
       state: absent
     when:
     - rpmgenerated_config.stat.exists == true
-    - deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     with_items:
     - master
     - node
@@ -56,9 +56,9 @@
   - set_fact:
       openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
       openshift_master_etcd_hosts: "{{ hostvars
-                                       | oo_select_keys(groups['oo_etcd_to_config']
+                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
                                                         | default([]))
-                                       | oo_collect('openshift.common.hostname')
+                                       | lib_utils_oo_collect('openshift.common.hostname')
                                        | default(none, true) }}"
   roles:
   - openshift_facts
@@ -150,8 +150,8 @@
   hosts: oo_first_master
   vars:
     g_session_secrets_present: "{{ (openshift.master.session_auth_secrets | default([])) | length > 0 and (openshift.master.session_encryption_secrets | default([])) | length > 0 }}"
-    g_session_auth_secrets: "{{ [ 24 | oo_generate_secret ] }}"
-    g_session_encryption_secrets: "{{ [ 24 | oo_generate_secret ] }}"
+    g_session_auth_secrets: "{{ [ 24 | lib_utils_oo_generate_secret ] }}"
+    g_session_encryption_secrets: "{{ [ 24 | lib_utils_oo_generate_secret ] }}"
   roles:
   - role: openshift_facts
   tasks:
@@ -172,11 +172,11 @@
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
-                                     | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                     | oo_collect('openshift.common.hostname')
+                                     | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                     | lib_utils_oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
-    openshift_no_proxy_etcd_host_ips: "{{ hostvars | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                                | oo_collect('openshift.common.ip') | default([]) | join(',')
+    openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
                                                 }}"
   roles:
   - role: openshift_master_facts
@@ -185,9 +185,6 @@
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
   - role: nickhammond.logrotate
-  - role: contiv
-    contiv_role: netmaster
-    when: openshift_use_contiv | default(False) | bool
   - role: openshift_master
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
     r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
@@ -206,13 +203,13 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   tasks:
-  - include_role:
+  - import_role:
       name: kuryr
       tasks_from: master
     when: openshift_use_kuryr | default(false) | bool
 
   - name: Setup the node group config maps
-    include_role:
+    import_role:
       name: openshift_node_group
     when: openshift_master_bootstrap_enabled | default(false) | bool
     run_once: True

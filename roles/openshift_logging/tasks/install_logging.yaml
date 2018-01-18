@@ -1,8 +1,11 @@
 ---
 - name: Gather OpenShift Logging Facts
   openshift_logging_facts:
-    oc_bin: "{{openshift.common.client_binary}}"
+    oc_bin: "{{openshift_client_binary}}"
     openshift_logging_namespace: "{{openshift_logging_namespace}}"
+
+## This is include vs import because we need access to group/inventory variables
+- include_tasks: set_defaults_from_current.yml
 
 - name: Set logging project
   oc_project:
@@ -84,14 +87,14 @@
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
-    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name | default() }}"
     openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector if outer_item.0.nodeSelector | default(None) is none else outer_item.0.nodeSelector }}"
     openshift_logging_elasticsearch_storage_group: "{{ [openshift_logging_es_storage_group] if outer_item.0.storageGroups | default([]) | length == 0 else outer_item.0.storageGroups }}"
     _es_containers: "{{ outer_item.0.containers}}"
     _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch#configmaps#logging-elasticsearch#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
   with_together:
-  - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() }}"
+  - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() | list }}"
   - "{{ openshift_logging_facts.elasticsearch.pvcs }}"
   - "{{ es_indices }}"
   loop_control:
@@ -111,7 +114,7 @@
 
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
-    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name | default() }}"
 
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   loop_control:
@@ -148,7 +151,7 @@
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_ops_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_ops_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
-    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_ops_pvc_storage_class_name }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_ops_pvc_storage_class_name | default() }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
     openshift_logging_elasticsearch_cpu_request: "{{ openshift_logging_es_ops_cpu_request }}"
@@ -166,7 +169,7 @@
     _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch_ops#configmaps#logging-elasticsearch-ops#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
 
   with_together:
-  - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() }}"
+  - "{{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.values() | list }}"
   - "{{ openshift_logging_facts.elasticsearch_ops.pvcs }}"
   - "{{ es_ops_indices }}"
   loop_control:
@@ -190,7 +193,7 @@
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_ops_pvc_size }}"
     openshift_logging_elasticsearch_pvc_dynamic: "{{ openshift_logging_es_ops_pvc_dynamic }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_ops_pv_selector }}"
-    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_ops_pvc_storage_class_name }}"
+    openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_ops_pvc_storage_class_name | default() }}"
     openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_ops_memory_limit }}"
     openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_ops_cpu_limit }}"
     openshift_logging_elasticsearch_cpu_request: "{{ openshift_logging_es_ops_cpu_request }}"
@@ -210,7 +213,7 @@
 
 
 ## Kibana
-- include_role:
+- import_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -223,7 +226,7 @@
     openshift_logging_kibana_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
 
-- include_role:
+- import_role:
     name: openshift_logging_kibana
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -253,7 +256,7 @@
 - include_tasks: annotate_ops_projects.yaml
 
 ## Curator
-- include_role:
+- import_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -263,7 +266,7 @@
     openshift_logging_curator_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_curator_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
 
-- include_role:
+- import_role:
     name: openshift_logging_curator
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -281,7 +284,7 @@
   - openshift_logging_use_ops | bool
 
 ## Mux
-- include_role:
+- import_role:
     name: openshift_logging_mux
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -294,7 +297,7 @@
 
 
 ## Fluentd
-- include_role:
+- import_role:
     name: openshift_logging_fluentd
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
@@ -305,10 +308,27 @@
 
 
 ## EventRouter
-- include_role:
+- import_role:
     name: openshift_logging_eventrouter
   when:
     openshift_logging_install_eventrouter | default(false) | bool
 
 
+# TODO: Remove when asset config is removed from master-config.yaml
 - include_tasks: update_master_config.yaml
+
+# Update asset config in openshift-web-console namespace
+- name: Add Kibana route information to web console asset config
+  include_role:
+    name: openshift_web_console
+    tasks_from: update_console_config.yml
+  vars:
+    console_config_edits:
+    - key: clusterInfo#loggingPublicURL
+      value: "https://{{ openshift_logging_kibana_hostname }}"
+    # Continue to set the old deprecated property until the
+    # origin-web-console image is updated for the new name.
+    # This will be removed in a future pull.
+    - key: loggingPublicURL
+      value: "https://{{ openshift_logging_kibana_hostname }}"
+  when: openshift_web_console_install | default(true) | bool

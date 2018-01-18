@@ -14,12 +14,12 @@
 - name: Open firewall ports for GlusterFS nodes
   hosts: glusterfs
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_storage_glusterfs
       tasks_from: firewall.yml
     when:
     - openshift_storage_glusterfs_is_native | default(True) | bool
-  - include_role:
+  - import_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:
@@ -28,12 +28,12 @@
 - name: Open firewall ports for GlusterFS registry nodes
   hosts: glusterfs_registry
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_storage_glusterfs
       tasks_from: firewall.yml
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
-  - include_role:
+  - import_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:
@@ -43,7 +43,7 @@
   hosts: oo_first_master
   tasks:
   - name: setup glusterfs
-    include_role:
+    import_role:
       name: openshift_storage_glusterfs
     when: groups.oo_glusterfs_to_config | default([]) | count > 0
 

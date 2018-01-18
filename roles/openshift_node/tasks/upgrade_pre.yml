@@ -11,7 +11,7 @@
   command: "{{ ansible_pkg_mgr }} makecache"
   register: result
   until: result is succeeded
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
 
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"
@@ -26,7 +26,7 @@
   - l_docker_upgrade | bool
 
 - include_tasks: upgrade/containerized_upgrade_pull.yml
-  when: openshift.common.is_containerized | bool
+  when: openshift_is_containerized | bool
 
 # Prepull the rpms for docker upgrade, but don't install
 - name: download docker upgrade rpm
@@ -40,7 +40,7 @@
 - include_tasks: upgrade/rpm_upgrade.yml
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
-  when: not openshift.common.is_containerized | bool
+  when: not openshift_is_containerized | bool
 
 # https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
 - name: Check for swap usage

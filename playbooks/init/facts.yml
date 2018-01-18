@@ -5,7 +5,9 @@
   tasks:
 
 - name: Initialize host facts
-  hosts: oo_all_hosts
+  # l_upgrade_non_node_hosts is passed in via play during control-plane-only
+  # upgrades; otherwise oo_all_hosts is used.
+  hosts: "{{ l_upgrade_non_node_hosts | default('oo_all_hosts') }}"
   tasks:
   - name: load openshift_facts module
     import_role:
@@ -13,7 +15,7 @@
 
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
-    include_role:
+    import_role:
       name: openshift_sanitize_inventory
 
   - name: Detecting Operating System from ostree_booted
@@ -21,40 +23,24 @@
       path: /run/ostree-booted
     register: ostree_booted
 
-  # Locally setup containerized facts for now
-  - name: initialize_facts set fact l_is_atomic
+  # TODO(michaelgugino) remove this line once CI is updated.
+  - name: set openshift_deployment_type if unset
     set_fact:
-      l_is_atomic: "{{ ostree_booted.stat.exists }}"
+      openshift_deployment_type: "{{ deployment_type }}"
+    when:
+    - openshift_deployment_type is undefined
+    - deployment_type is defined
 
-  - name: initialize_facts set fact for containerized and l_is_*_system_container
+  - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
     set_fact:
-      l_is_containerized: "{{ (l_is_atomic | bool) or (containerized | default(false) | bool) }}"
-
-  # TODO: Should this be moved into health checks??
-  # Seems as though any check that happens with a corresponding fail should move into health_checks
-  - name: Validate python version - ans_dist is fedora and python is v3
-    fail:
-      msg: |
-        openshift-ansible requires Python 3 for {{ ansible_distribution }};
-        For information on enabling Python 3 with Ansible, see https://docs.ansible.com/ansible/python_3_support.html
-    when:
-    - ansible_distribution == 'Fedora'
-    - ansible_python['version']['major'] != 3
-
-  # TODO: Should this be moved into health checks??
-  # Seems as though any check that happens with a corresponding fail should move into health_checks
-  - name: Validate python version - ans_dist not Fedora and python must be v2
-    fail:
-      msg: "openshift-ansible requires Python 2 for {{ ansible_distribution }}"
-    when:
-    - ansible_distribution != 'Fedora'
-    - ansible_python['version']['major'] != 2
+      openshift_is_atomic: "{{ ostree_booted.stat.exists }}"
+      openshift_is_containerized: "{{ ostree_booted.stat.exists or (containerized | default(false) | bool) }}"
 
   # TODO: Should this be moved into health checks??
   # Seems as though any check that happens with a corresponding fail should move into health_checks
   # Fail as early as possible if Atomic and old version of Docker
   - when:
-    - l_is_atomic | bool
+    - openshift_is_atomic | bool
     block:
 
     # See https://access.redhat.com/articles/2317361
@@ -72,40 +58,7 @@
         - l_atomic_docker_version.stdout | replace('"', '') is version_compare('1.12','>=')
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
-  - when:
-    - not l_is_atomic | bool
-    block:
-    - name: Ensure openshift-ansible installer package deps are installed
-      package:
-        name: "{{ item }}"
-        state: present
-      with_items:
-      - iproute
-      - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
-      - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
-      - yum-utils
-      register: result
-      until: result is succeeded
-
-    - name: Ensure various deps for running system containers are installed
-      package:
-        name: "{{ item }}"
-        state: present
-      with_items:
-      - atomic
-      - ostree
-      - runc
-      when:
-      - >
-        (openshift_use_system_containers | default(False)) | bool
-        or (openshift_use_etcd_system_container | default(False)) | bool
-        or (openshift_use_openvswitch_system_container | default(False)) | bool
-        or (openshift_use_node_system_container | default(False)) | bool
-        or (openshift_use_master_system_container | default(False)) | bool
-      register: result
-      until: result is succeeded
-
-  - name: Gather Cluster facts and set is_containerized if needed
+  - name: Gather Cluster facts
     openshift_facts:
       role: common
       local_facts:
@@ -113,7 +66,6 @@
         deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
         hostname: "{{ openshift_hostname | default(None) }}"
         ip: "{{ openshift_ip | default(None) }}"
-        is_containerized: "{{ l_is_containerized | default(None) }}"
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"
         portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
@@ -126,10 +78,10 @@
     openshift_facts:
       role: common
       local_facts:
-        no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+        no_proxy_internal_hostnames: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_nodes_to_config']
                                              | union(groups['oo_masters_to_config'])
                                              | union(groups['oo_etcd_to_config'] | default([])))
-                                         | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                         | lib_utils_oo_collect('openshift.common.hostname') | default([]) | join (',')
                                          }}"
     when:
     - openshift_http_proxy is defined or openshift_https_proxy is defined
@@ -141,7 +93,14 @@
       local_facts:
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
 
-  - name: initialize_facts set_fact repoquery command
-    set_fact:
-      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
-      repoquery_installed: "{{ 'dnf repoquery --latest-limit 1 -d 0 --disableexcludes=all --installed' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins --installed' }}"
+- name: Initialize special first-master variables
+  hosts: oo_first_master
+  roles:
+  - role: openshift_facts
+  tasks:
+  - set_fact:
+      # We need to setup openshift_client_binary here for special uses of delegate_to in
+      # later roles and plays.
+      first_master_client_binary: "{{  openshift_client_binary }}"
+      #Some roles may require this to be set for first master
+      openshift_client_binary: "{{ openshift_client_binary }}"

@@ -1,0 +1,23 @@
+[OSEv3]
+
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+nfs
+
+[lb]
+# Empty, but present to pass integration tests.
+
+[nfs]
+# Empty, but present to pass integration tests.
+
+[masters]
+localhost
+
+[nodes]
+localhost
+
+[etcd]
+localhost

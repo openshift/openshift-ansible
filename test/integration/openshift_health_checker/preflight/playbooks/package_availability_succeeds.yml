@@ -3,7 +3,7 @@
   vars:
     image: preflight-aos-package-checks
     l_host_vars:
-      deployment_type: origin
+      openshift_deployment_type: origin
 
 - name: Succeeds as Origin packages are public
   hosts: all

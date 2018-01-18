@@ -4,7 +4,7 @@
   package:
     name: container-selinux
     state: present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
@@ -13,7 +13,7 @@
   package:
     name: atomic
     state: present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
@@ -23,6 +23,6 @@
   package:
     name: runc
     state: present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded

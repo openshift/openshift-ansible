@@ -1,10 +1,4 @@
 ---
-- name: Create temp directory for doing work in
-  command: mktemp -d /tmp/openshift-hosted-ansible-XXXXXX
-  register: mktempHosted
-  changed_when: False
-  check_mode: no
-
 - name: setup firewall
   import_tasks: firewall.yml
   vars:
@@ -132,25 +126,10 @@
     edits: "{{ openshift_hosted_registry_edits }}"
     force: "{{ True|bool in openshift_hosted_registry_force }}"
 
+# TODO(michaelgugino) remove this set fact.  It is currently necessary due to
+# custom module not properly templating variables.
 - name: setup registry list
   set_fact:
     r_openshift_hosted_registry_list:
     - name: "{{ openshift_hosted_registry_name }}"
       namespace: "{{ openshift_hosted_registry_namespace }}"
-
-- name: Wait for pod (Registry)
-  include_tasks: wait_for_pod.yml
-  vars:
-    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_registry_wait }}"
-    l_openshift_hosted_wfp_items: "{{ r_openshift_hosted_registry_list }}"
-
-- include_tasks: storage/glusterfs.yml
-  when:
-  - openshift_hosted_registry_storage_kind | default(none) == 'glusterfs' or openshift_hosted_registry_storage_glusterfs_swap
-
-- name: Delete temp directory
-  file:
-    name: "{{ mktempHosted.stdout }}"
-    state: absent
-  changed_when: False
-  check_mode: no

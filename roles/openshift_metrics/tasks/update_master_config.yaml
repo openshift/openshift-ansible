@@ -1,4 +1,5 @@
 ---
+# TODO: Remove when asset config is removed from master-config.yaml
 - name: Adding metrics route information to metricsPublicURL
   modify_yaml:
     dest: "{{ openshift.common.config_base }}/master/master-config.yaml"

@@ -1,7 +1,7 @@
 ---
 # Should this be run in a serial manner?
 - set_fact:
-    l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
+    l_etcd_service: "{{ 'etcd_container' if (openshift_is_containerized | bool) else 'etcd' }}"
 
 - name: Migrate etcd data
   command: >

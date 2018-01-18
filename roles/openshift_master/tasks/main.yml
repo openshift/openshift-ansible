@@ -16,10 +16,10 @@
 
 - name: Install Master package
   package:
-    name: "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when:
-  - not openshift.common.is_containerized | bool
+  - not openshift_is_containerized | bool
   register: result
   until: result is succeeded
 
@@ -31,12 +31,12 @@
     owner: root
     group: root
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
 
 - name: Re-gather package dependent master facts
   openshift_facts:
@@ -48,7 +48,7 @@
 
 - name: Create the policy file if it does not already exist
   command: >
-    {{ openshift.common.client_binary }} adm create-bootstrap-policy-file
+    {{ openshift_client_binary }} adm create-bootstrap-policy-file
       --filename={{ openshift_master_policy }}
   args:
     creates: "{{ openshift_master_policy }}"
@@ -69,7 +69,7 @@
   package: name=httpd-tools state=present
   when:
   - item.kind == 'HTPasswdPasswordIdentityProvider'
-  - not openshift.common.is_atomic | bool
+  - not openshift_is_atomic | bool
   with_items: "{{ openshift.master.identity_providers }}"
   register: result
   until: result is succeeded
@@ -164,7 +164,7 @@
 - name: Install Master system container
   include_tasks: system_container.yml
   when:
-  - openshift.common.is_containerized | bool
+  - openshift_is_containerized | bool
   - l_is_master_system_container | bool
 
 - name: Create session secrets file
@@ -181,6 +181,7 @@
   - restart master api
 
 - set_fact:
+    # translate_idps is a custom filter in role lib_utils
     translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1') }}"
 
 # TODO: add the validate parameter when there is a validation command to run

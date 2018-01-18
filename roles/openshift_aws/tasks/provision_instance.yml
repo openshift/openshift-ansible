@@ -14,11 +14,7 @@
     instance_type: m4.xlarge
     vpc_subnet_id: "{{ openshift_aws_subnet_id | default(subnetout.subnets[0].id) }}"
     image: "{{ openshift_aws_base_ami }}"
-    volumes:
-    - device_name: /dev/sdb
-      volume_type: gp2
-      volume_size: 100
-      delete_on_termination: true
+    volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
     wait: yes
     exact_count: 1
     count_tag:
@@ -46,5 +42,5 @@
 
 - name: add host to nodes
   add_host:
-    groups: nodes
+    groups: nodes,g_new_node_hosts
     name: "{{ instancesout.instances[0].public_dns_name }}"

@@ -1,4 +1,10 @@
 ---
+- name: Create temp directory for doing work in
+  command: mktemp -d /tmp/openshift-hosted-ansible-XXXXXX
+  register: mktempHosted
+  changed_when: False
+  check_mode: no
+
 - name: Generate GlusterFS registry endpoints
   template:
     src: "{{ openshift.common.examples_content_version }}/glusterfs-registry-endpoints.yml.j2"
@@ -10,7 +16,14 @@
     dest: "{{ mktempHosted.stdout }}/glusterfs-registry-service.yml"
 
 - name: Create GlusterFS registry service and endpoint
-  command: "{{ openshift.common.client_binary }} apply -f {{ item }} -n {{ openshift_hosted_registry_namespace | default('default') }}"
+  command: "{{ openshift_client_binary }} apply -f {{ item }} -n {{ openshift_hosted_registry_namespace | default('default') }}"
   with_items:
   - "{{ mktempHosted.stdout }}/glusterfs-registry-service.yml"
   - "{{ mktempHosted.stdout }}/glusterfs-registry-endpoints.yml"
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktempHosted.stdout }}"
+    state: absent
+  changed_when: False
+  check_mode: no

@@ -1,7 +1,13 @@
 ---
-###############################################################################
-# Post upgrade - Upgrade default router, default registry and examples
-###############################################################################
+####################################################################################
+# Post upgrade - Upgrade web console, default router, default registry, and examples
+####################################################################################
+- name: Upgrade web console
+  hosts: oo_first_master
+  roles:
+  - role: openshift_web_console
+    when: openshift_web_console_install | default(true) | bool
+
 - name: Upgrade default router and default registry
   hosts: oo_first_master
   vars:
@@ -27,8 +33,8 @@
 
   - set_fact:
       haproxy_routers: "{{ all_routers.results.results[0]['items'] |
-                           oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
-                           oo_select_keys_from_list(['metadata']) }}"
+                           lib_utils_oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
+                           lib_utils_oo_select_keys_from_list(['metadata']) }}"
     when:
     - all_routers.results.returncode == 0
 

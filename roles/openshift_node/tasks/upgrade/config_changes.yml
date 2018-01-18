@@ -1,7 +1,7 @@
 ---
 - name: Update systemd units
   include_tasks: ../systemd_units.yml
-  when: openshift.common.is_containerized
+  when: openshift_is_containerized | bool
 
 - name: Update oreg value
   yedit:
@@ -19,6 +19,12 @@
 - name: Clean up dockershim data
   file:
     path: "/var/lib/dockershim/sandbox/"
+    state: absent
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1518912
+- name: Clean up IPAM data
+  file:
+    path: "/var/lib/cni/networks/openshift-sdn/"
     state: absent
 
 # Disable Swap Block (pre)
@@ -60,6 +66,7 @@
     dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
     src: "node.service.j2"
   register: l_node_unit
+  when: not openshift_is_containerized | bool
 
 - name: Reset selinux context
   command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
@@ -74,4 +81,3 @@
 #       require a service to be part of the call.
 - name: Reload systemd units
   command: systemctl daemon-reload
-  when: l_node_unit is changed

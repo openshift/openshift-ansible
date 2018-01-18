@@ -9,6 +9,6 @@
   - role: openshift_ca
   - role: openshift_master_certificates
     openshift_master_etcd_hosts: "{{ hostvars
-                                     | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                     | oo_collect('openshift.common.hostname')
+                                     | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                     | lib_utils_oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"

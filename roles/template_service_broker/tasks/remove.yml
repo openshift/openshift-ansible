@@ -2,7 +2,6 @@
 - command: mktemp -d /tmp/tsb-ansible-XXXXXX
   register: mktemp
   changed_when: False
-  become: no
 
 - copy:
     src: "{{ __tsb_files_location }}/{{ item }}"
@@ -13,11 +12,11 @@
 
 - name: Delete TSB broker
   shell: >
-    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" | {{ openshift.common.client_binary }} delete --ignore-not-found -f -
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_broker_file }}" | {{ openshift_client_binary }} delete --ignore-not-found -f -
 
 - name: Delete TSB objects
   shell: >
-    {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" | {{ openshift.common.client_binary }} delete --ignore-not-found -f -
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" | {{ openshift_client_binary }} delete --ignore-not-found -f -
 
 - name: empty out tech preview extension file for service console UI
   copy:
@@ -32,4 +31,3 @@
     state: absent
     name: "{{ mktemp.stdout }}"
   changed_when: False
-  become: no

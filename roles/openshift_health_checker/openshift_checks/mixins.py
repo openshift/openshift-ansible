@@ -10,8 +10,8 @@ class NotContainerizedMixin(object):
 
     def is_active(self):
         """Only run on non-containerized hosts."""
-        is_containerized = self.get_var("openshift", "common", "is_containerized")
-        return super(NotContainerizedMixin, self).is_active() and not is_containerized
+        openshift_is_containerized = self.get_var("openshift_is_containerized")
+        return super(NotContainerizedMixin, self).is_active() and not openshift_is_containerized
 
 
 class DockerHostMixin(object):
@@ -23,7 +23,7 @@ class DockerHostMixin(object):
         """Only run on hosts that depend on Docker."""
         group_names = set(self.get_var("group_names", default=[]))
         needs_docker = set(["oo_nodes_to_config"])
-        if self.get_var("openshift.common.is_containerized"):
+        if self.get_var("openshift_is_containerized"):
             needs_docker.update(["oo_masters_to_config", "oo_etcd_to_config"])
         return super(DockerHostMixin, self).is_active() and bool(group_names.intersection(needs_docker))
 
@@ -33,7 +33,7 @@ class DockerHostMixin(object):
         (which would not be able to install but should already have them).
         Returns: msg, failed
         """
-        if self.get_var("openshift", "common", "is_atomic"):
+        if self.get_var("openshift_is_atomic"):
             return "", False
 
         # NOTE: we would use the "package" module but it's actually an action plugin

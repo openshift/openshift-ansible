@@ -69,7 +69,7 @@ r_openshift_hosted_router_os_firewall_allow: []
 ############
 
 openshift_hosted_registry_selector: "{{ openshift_registry_selector | default(openshift_hosted_infra_selector) }}"
-penshift_hosted_registry_registryurl: "{{ openshift_hosted_images_dict[openshift_deployment_type] }}"
+openshift_hosted_registry_registryurl: "{{ openshift_hosted_images_dict[openshift_deployment_type] }}"
 openshift_hosted_registry_routecertificates: {}
 openshift_hosted_registry_routetermination: "passthrough"
 

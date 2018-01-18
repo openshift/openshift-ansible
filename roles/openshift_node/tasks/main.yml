@@ -3,8 +3,8 @@
     msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
   when:
     - (not ansible_selinux or ansible_selinux.status != 'enabled')
-    - deployment_type == 'openshift-enterprise'
-    - not openshift_use_crio
+    - openshift_deployment_type == 'openshift-enterprise'
+    - not openshift_use_crio | bool
 
 - include_tasks: dnsmasq_install.yml
 - include_tasks: dnsmasq.yml
@@ -50,7 +50,7 @@
     name: cri-o
     enabled: yes
     state: restarted
-  when: openshift_use_crio
+  when: openshift_use_crio | bool
   register: task_result
   failed_when:
     - task_result is failed
@@ -85,21 +85,17 @@
 
 - name: GlusterFS storage plugin configuration
   include_tasks: storage_plugins/glusterfs.yml
-  when: "'glusterfs' in openshift.node.storage_plugin_deps"
+  when: "'glusterfs' in osn_storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
   include_tasks: storage_plugins/ceph.yml
-  when: "'ceph' in openshift.node.storage_plugin_deps"
+  when: "'ceph' in osn_storage_plugin_deps"
 
 - name: iSCSI storage plugin configuration
   include_tasks: storage_plugins/iscsi.yml
-  when: "'iscsi' in openshift.node.storage_plugin_deps"
+  when: "'iscsi' in osn_storage_plugin_deps"
 
 ##### END Storage #####
 
 - include_tasks: config/workaround-bz1331590-ovs-oom-fix.yml
   when: openshift_node_use_openshift_sdn | default(true) | bool
-
-- name: include bootstrap node config
-  include_tasks: bootstrap.yml
-  when: openshift_node_bootstrap

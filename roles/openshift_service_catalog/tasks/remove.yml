@@ -1,7 +1,7 @@
 ---
 - name: Remove Service Catalog APIServer
   command: >
-    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig delete apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
+    {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig delete apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io --ignore-not-found -n kube-service-catalog
 
 # TODO: this module doesn't currently remove this
 #- name: Remove service catalog api service
@@ -48,7 +48,7 @@
 
 - name: Remove Service Catalog kube-system Role Bindinds
   shell: >
-    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig process kube-system-service-catalog-role-bindings -n kube-system | {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig delete --ignore-not-found -f -
+    {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig process kube-system-service-catalog-role-bindings -n kube-system | {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig delete --ignore-not-found -f -
 
 - oc_obj:
     kind: template
@@ -58,7 +58,7 @@
 
 - name: Remove Service Catalog kube-service-catalog Role Bindinds
   shell: >
-    {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig process service-catalog-role-bindings -n kube-service-catalog | {{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig delete --ignore-not-found -f -
+    {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig process service-catalog-role-bindings -n kube-service-catalog | {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig delete --ignore-not-found -f -
 
 - oc_obj:
     kind: template

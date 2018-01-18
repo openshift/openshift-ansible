@@ -8,7 +8,6 @@
 
 - name: Evaluate node groups
   hosts: localhost
-  become: no
   connection: local
   tasks:
   - name: Evaluate oo_containerized_master_nodes
@@ -21,6 +20,6 @@
     when:
     - hostvars[item].openshift is defined
     - hostvars[item].openshift.common is defined
-    - hostvars[item].openshift.common.is_containerized | bool
+    - hostvars[item].openshift_is_containerized | bool
     - (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
     changed_when: False

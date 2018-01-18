@@ -1,14 +1,15 @@
 ---
-- name: Ensure bin_dir exists
+- include_tasks: old_version_cleanup.yml
+
+- name: Ensure contiv_bin_dir exists
   file:
-    path: "{{ bin_dir }}"
+    path: "{{ contiv_bin_dir }}"
     recurse: yes
     state: directory
 
 - include_tasks: download_bins.yml
 
 - include_tasks: netmaster.yml
-  when: contiv_role == "netmaster"
+  when: contiv_master
 
 - include_tasks: netplugin.yml
-  when: contiv_role == "netplugin"

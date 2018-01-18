@@ -14,6 +14,8 @@
 - import_playbook: ../init.yml
   vars:
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_upgrade_non_node_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+  when: not skip_version_info | default(false)
 
 - name: Configure the upgrade target for the common upgrade tasks
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
@@ -23,7 +25,11 @@
       openshift_upgrade_min: '3.7'
 
 - import_playbook: ../pre/config.yml
+  # These vars a meant to exclude oo_nodes from plays that would otherwise include
+  # them by default.
   vars:
+    l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
+    l_openshift_version_check_hosts: "oo_masters_to_config:!oo_first_master"
     l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_upgrade_no_proxy_hosts: "oo_masters_to_config"
     l_upgrade_health_check_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
@@ -42,8 +48,6 @@
 # Pre-upgrade completed
 
 - import_playbook: ../upgrade_control_plane.yml
-  vars:
-    master_config_hook: "v3_7/master_config_upgrade.yml"
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode

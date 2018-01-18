@@ -56,7 +56,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # ordered list of registries (according to inventory vars) that docker will try for unscoped images
         regs = self.ensure_list("openshift_docker_additional_registries")
         # currently one of these registries is added whether the user wants it or not.
-        deployment_type = self.get_var("openshift_deployment_type")
+        deployment_type = self.get_var("openshift_deployment_type", default="")
         if deployment_type == "origin" and "docker.io" not in regs:
             regs.append("docker.io")
         elif deployment_type == 'openshift-enterprise' and "registry.access.redhat.com" not in regs:
@@ -64,7 +64,9 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         self.registries["configured"] = regs
 
         # for the oreg_url registry there may be credentials specified
-        components = self.get_var("oreg_url", default="").split('/')
+        oreg_url = self.get_var("oreg_url", default="")
+        oreg_url = self.template_var(oreg_url)
+        components = oreg_url.split('/')
         self.registries["oreg"] = "" if len(components) < 3 else components[0]
 
         # Retrieve and template registry credentials, if provided
@@ -72,9 +74,8 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         oreg_auth_user = self.get_var('oreg_auth_user', default='')
         oreg_auth_password = self.get_var('oreg_auth_password', default='')
         if oreg_auth_user != '' and oreg_auth_password != '':
-            if self._templar is not None:
-                oreg_auth_user = self._templar.template(oreg_auth_user)
-                oreg_auth_password = self._templar.template(oreg_auth_password)
+            oreg_auth_user = self.template_var(oreg_auth_user)
+            oreg_auth_password = self.template_var(oreg_auth_password)
             self.skopeo_command_creds = "--creds={}:{}".format(quote(oreg_auth_user), quote(oreg_auth_password))
 
         # record whether we could reach a registry or not (and remember results)
@@ -153,6 +154,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # template for images that run on top of OpenShift
         image_url = "{}/{}-{}:{}".format(image_info["namespace"], image_info["name"], "${component}", "${version}")
         image_url = self.get_var("oreg_url", default="") or image_url
+        image_url = self.template_var(image_url)
         if 'oo_nodes_to_config' in host_groups:
             for suffix in NODE_IMAGE_SUFFIXES:
                 required.add(image_url.replace("${component}", suffix).replace("${version}", image_tag))
@@ -160,7 +162,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 required.add(self._registry_console_image(image_tag, image_info))
 
         # images for containerized components
-        if self.get_var("openshift", "common", "is_containerized"):
+        if self.get_var("openshift_is_containerized"):
             components = set()
             if 'oo_nodes_to_config' in host_groups:
                 components.update(["node", "openvswitch"])

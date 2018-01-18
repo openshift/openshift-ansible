@@ -22,10 +22,12 @@
 # See: https://github.com/openshift/origin/pull/14625#issuecomment-308467060
 - name: Pre master upgrade - Upgrade all storage
   hosts: oo_first_master
+  roles:
+  - openshift_facts
   tasks:
   - name: Upgrade all storage
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=* --confirm
     register: l_pb_upgrade_control_plane_pre_upgrade_storage
     when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
@@ -49,10 +51,9 @@
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
+  roles:
+  - openshift_facts
   tasks:
-  - include_role:
-      name: openshift_facts
-
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
@@ -60,7 +61,7 @@
   - include_tasks: "{{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
 
-  - include_role:
+  - import_role:
       name: openshift_master
       tasks_from: upgrade.yml
 
@@ -86,7 +87,7 @@
 
   - name: Post master upgrade - Upgrade clusterpolicies storage
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=clusterpolicies --confirm
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when:
@@ -108,12 +109,11 @@
 - name: Gate on master update
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
+                                 | lib_utils_oo_select_keys(groups.oo_masters_to_config)
+                                 | lib_utils_oo_collect('inventory_hostname', {'master_update_complete': true}) }}"
   - set_fact:
       master_update_failed: "{{ groups.oo_masters_to_config | difference(master_update_completed) | list }}"
   - fail:
@@ -128,12 +128,13 @@
   hosts: oo_masters_to_config
   roles:
   - { role: openshift_cli }
+  - { role: openshift_facts }
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
   - name: Reconcile Cluster Roles
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       policy reconcile-cluster-roles --additive-only=true --confirm -o name
     register: reconcile_cluster_role_result
     when: openshift_version is version_compare('3.7','<')
@@ -144,7 +145,7 @@
 
   - name: Reconcile Cluster Role Bindings
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       policy reconcile-cluster-role-bindings
       --exclude-groups=system:authenticated
       --exclude-groups=system:authenticated:oauth
@@ -160,7 +161,7 @@
 
   - name: Reconcile Jenkins Pipeline Role Bindings
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm -o name
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig policy reconcile-cluster-role-bindings system:build-strategy-jenkinspipeline --confirm -o name
     run_once: true
     register: reconcile_jenkins_role_binding_result
     changed_when:
@@ -214,7 +215,7 @@
 
   - name: Reconcile Security Context Constraints
     command: >
-      {{ openshift.common.client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --confirm --additive-only=true -o name
+      {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --confirm --additive-only=true -o name
     register: reconcile_scc_result
     changed_when:
     - reconcile_scc_result.stdout != ''
@@ -223,7 +224,7 @@
 
   - name: Migrate storage post policy reconciliation
     command: >
-      {{ openshift.common.client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       migrate storage --include=* --confirm
     run_once: true
     register: l_pb_upgrade_control_plane_post_upgrade_storage
@@ -242,12 +243,11 @@
 - name: Gate on reconcile
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
-                                 | oo_select_keys(groups.oo_masters_to_config)
-                                 | oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
+                                 | lib_utils_oo_select_keys(groups.oo_masters_to_config)
+                                 | lib_utils_oo_collect('inventory_hostname', {'reconcile_complete': true}) }}"
   - set_fact:
       reconcile_failed: "{{ groups.oo_masters_to_config | difference(reconcile_completed) | list }}"
   - fail:
@@ -262,7 +262,7 @@
   - openshift_facts
   tasks:
   - include_tasks: docker/tasks/upgrade.yml
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift.common.is_atomic | bool
+    when: l_docker_upgrade is defined and l_docker_upgrade | bool and not openshift_is_atomic | bool
 
 - name: Drain and upgrade master nodes
   hosts: oo_masters_to_config:&oo_nodes_to_upgrade
@@ -291,21 +291,25 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.client_binary }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
     until: not (l_upgrade_control_plane_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_control_plane_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   roles:
   - openshift_facts
   post_tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
-    vars:
-      openshift_node_upgrade_in_progress: True
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"

@@ -16,12 +16,13 @@
   roles:
   - role: openshift_metrics
 
+# TODO: Remove when master config property is removed
 - name: OpenShift Metrics
   hosts: oo_masters:!oo_first_master
   serial: 1
   tasks:
   - name: Setup the non-first masters configs
-    include_role:
+    import_role:
       name: openshift_metrics
       tasks_from: update_master_config.yaml
 

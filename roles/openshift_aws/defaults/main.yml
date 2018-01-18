@@ -98,17 +98,26 @@ openshift_aws_elb_dict:
       proxy_protocol: True
 
 openshift_aws_node_group_config_master_volumes:
+- device_name: /dev/sda1
+  volume_size: 100
+  device_type: gp2
+  delete_on_termination: False
 - device_name: /dev/sdb
   volume_size: 100
   device_type: gp2
   delete_on_termination: False
 
 openshift_aws_node_group_config_node_volumes:
+- device_name: /dev/sda1
+  volume_size: 100
+  device_type: gp2
+  delete_on_termination: True
 - device_name: /dev/sdb
   volume_size: 100
   device_type: gp2
   delete_on_termination: True
 
+# build_instance_tags is a custom filter in role lib_utils
 openshift_aws_node_group_config_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 openshift_aws_node_group_termination_policy: Default
 openshift_aws_node_group_replace_instances: []
@@ -122,12 +131,25 @@ openshift_aws_ami_map:
 openshift_aws_master_group:
 - name: "{{ openshift_aws_clusterid }} master group"
   group: master
+  tags:
+    host-type: master
+    sub-host-type: default
+    runtime: docker
 
 openshift_aws_node_groups:
 - name: "{{ openshift_aws_clusterid }} compute group"
   group: compute
+  tags:
+    host-type: node
+    sub-host-type: compute
+    runtime: docker
+
 - name: "{{ openshift_aws_clusterid }} infra group"
   group: infra
+  tags:
+    host-type: node
+    sub-host-type: infra
+    runtime: docker
 
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
@@ -144,10 +166,6 @@ openshift_aws_master_group_config:
     min_size: 3
     max_size: 3
     desired_size: 3
-    tags:
-      host-type: master
-      sub-host-type: default
-      runtime: docker
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
@@ -167,10 +185,6 @@ openshift_aws_node_group_config:
     min_size: 3
     max_size: 100
     desired_size: 3
-    tags:
-      host-type: node
-      sub-host-type: compute
-      runtime: docker
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
@@ -186,10 +200,6 @@ openshift_aws_node_group_config:
     min_size: 2
     max_size: 20
     desired_size: 2
-    tags:
-      host-type: node
-      sub-host-type: infra
-      runtime: docker
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
@@ -200,6 +210,7 @@ openshift_aws_node_group_config:
 openshift_aws_elb_tags: "{{ openshift_aws_kube_tags }}"
 openshift_aws_elb_az_load_balancing: False
 
+# build_instance_tags is a custom filter in role lib_utils
 openshift_aws_kube_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 
 openshift_aws_elb_security_groups: "{{ openshift_aws_launch_config_security_groups }}"

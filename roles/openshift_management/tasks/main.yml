@@ -8,7 +8,7 @@
 # This creates a service account allowing Container Provider
 # integration (managing OCP/Origin via MIQ/Management)
 - name: Enable Container Provider Integration
-  include_role:
+  import_role:
     role: openshift_manageiq
 
 - name: "Ensure the Management '{{ openshift_management_project }}' namespace exists"

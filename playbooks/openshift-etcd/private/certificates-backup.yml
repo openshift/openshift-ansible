@@ -3,10 +3,10 @@
   hosts: oo_first_etcd
   any_errors_fatal: true
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup_generated_certificates.yml
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: remove_generated_certificates.yml
 
@@ -14,6 +14,6 @@
   hosts: oo_etcd_to_config
   any_errors_fatal: true
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup_server_certificates.yml

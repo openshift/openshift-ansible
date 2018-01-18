@@ -18,6 +18,7 @@
 
 - name: set_fact replicas
   set_fact:
+    # get_router_replicas is a custom filter in role lib_utils
     replicas: "{{ openshift_hosted_router_replicas | default(None) | get_router_replicas(router_nodes) }}"
 
 - name: Get the certificate contents for router
@@ -25,10 +26,10 @@
     backup: True
     dest: "/etc/origin/master/{{ item | basename }}"
     src: "{{ item }}"
-  with_items: "{{ openshift_hosted_routers | oo_collect(attribute='certificate') |
-                  oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
+  with_items: "{{ openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') |
+                  lib_utils_oo_select_keys_from_list(['keyfile', 'certfile', 'cafile']) }}"
   when: ( not openshift_hosted_router_create_certificate | bool ) or openshift_hosted_router_certificate != {} or
-        (  openshift_hosted_routers | oo_collect(attribute='certificate') | oo_select_keys_from_list(['keyfile', 'certfile', 'cafile'])|length > 0 )
+        (  openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') | lib_utils_oo_select_keys_from_list(['keyfile', 'certfile', 'cafile'])|length > 0 )
 
 
 # This is for when we desire a cluster signed cert
@@ -55,7 +56,7 @@
   when:
   - openshift_hosted_router_create_certificate | bool
   - openshift_hosted_router_certificate == {}
-  - openshift_hosted_routers | oo_collect(attribute='certificate') | oo_select_keys_from_list(['keyfile', 'certfile', 'cafile'])|length == 0
+  - openshift_hosted_routers | lib_utils_oo_collect(attribute='certificate') | lib_utils_oo_select_keys_from_list(['keyfile', 'certfile', 'cafile'])|length == 0
 
 - name: Create the router service account(s)
   oc_serviceaccount:
@@ -98,9 +99,3 @@
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
-
-- name: Wait for pod (Routers)
-  include_tasks: wait_for_pod.yml
-  vars:
-    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
-    l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"

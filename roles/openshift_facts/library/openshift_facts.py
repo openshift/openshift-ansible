@@ -69,22 +69,6 @@ def migrate_common_facts(facts):
     return facts
 
 
-def migrate_node_facts(facts):
-    """ Migrate facts from various roles into node """
-    params = {
-        'common': ('dns_ip'),
-    }
-    if 'node' not in facts:
-        facts['node'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                if param in facts[role]:
-                    facts['node'][param] = facts[role].pop(param)
-    return facts
-
-
 def migrate_admission_plugin_facts(facts):
     """ Apply migrations for admission plugin facts """
     if 'master' in facts:
@@ -104,7 +88,6 @@ def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
     migrated_facts = migrate_common_facts(migrated_facts)
-    migrated_facts = migrate_node_facts(migrated_facts)
     migrated_facts = migrate_admission_plugin_facts(migrated_facts)
     return migrated_facts
 
@@ -536,8 +519,7 @@ def set_aggregate_facts(facts):
 
 def set_deployment_facts_if_unset(facts):
     """ Set Facts that vary based on deployment_type. This currently
-        includes master.registry_url, node.registry_url,
-        node.storage_plugin_deps
+        includes master.registry_url
 
         Args:
             facts (dict): existing facts
@@ -545,29 +527,17 @@ def set_deployment_facts_if_unset(facts):
             dict: the facts dict updated with the generated deployment_type
             facts
     """
-    # disabled to avoid breaking up facts related to deployment type into
-    # multiple methods for now.
-    # pylint: disable=too-many-statements, too-many-branches
-    for role in ('master', 'node'):
-        if role in facts:
-            deployment_type = facts['common']['deployment_type']
-            if 'registry_url' not in facts[role]:
-                registry_url = 'openshift/origin-${component}:${version}'
-                if deployment_type == 'openshift-enterprise':
-                    registry_url = 'openshift3/ose-${component}:${version}'
-                facts[role]['registry_url'] = registry_url
-
     if 'master' in facts:
         deployment_type = facts['common']['deployment_type']
         openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
         if 'disabled_features' not in facts['master']:
             if facts['common']['deployment_subtype'] == 'registry':
                 facts['master']['disabled_features'] = openshift_features
-
-    if 'node' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if 'storage_plugin_deps' not in facts['node']:
-            facts['node']['storage_plugin_deps'] = ['ceph', 'glusterfs', 'iscsi']
+        if 'registry_url' not in facts['master']:
+            registry_url = 'openshift/origin-${component}:${version}'
+            if deployment_type == 'openshift-enterprise':
+                registry_url = 'openshift3/ose-${component}:${version}'
+            facts['master']['registry_url'] = registry_url
 
     return facts
 
@@ -686,26 +656,6 @@ def set_nodename(facts):
     return facts
 
 
-def migrate_oauth_template_facts(facts):
-    """
-    Migrate an old oauth template fact to a newer format if it's present.
-
-    The legacy 'oauth_template' fact was just a filename, and assumed you were
-    setting the 'login' template.
-
-    The new pluralized 'oauth_templates' fact is a dict mapping the template
-    name to a filename.
-
-    Simplify the code after this by merging the old fact into the new.
-    """
-    if 'master' in facts and 'oauth_template' in facts['master']:
-        if 'oauth_templates' not in facts['master']:
-            facts['master']['oauth_templates'] = {"login": facts['master']['oauth_template']}
-        elif 'login' not in facts['master']['oauth_templates']:
-            facts['master']['oauth_templates']['login'] = facts['master']['oauth_template']
-    return facts
-
-
 def format_url(use_ssl, hostname, port, path=''):
     """ Format url based on ssl flag, hostname, port and path
 
@@ -790,62 +740,6 @@ def get_current_config(facts):
                 pass
 
     return current_config
-
-
-def build_kubelet_args(facts):
-    """Build node kubelet_args
-
-In the node-config.yaml file, kubeletArgument sub-keys have their
-values provided as a list. Hence the gratuitous use of ['foo'] below.
-    """
-    cloud_cfg_path = os.path.join(
-        facts['common']['config_base'],
-        'cloudprovider')
-
-    # We only have to do this stuff on hosts that are nodes
-    if 'node' in facts:
-        # Any changes to the kubeletArguments parameter are stored
-        # here first.
-        kubelet_args = {}
-
-        if 'cloudprovider' in facts:
-            # EVERY cloud is special <3
-            if 'kind' in facts['cloudprovider']:
-                if facts['cloudprovider']['kind'] == 'aws':
-                    kubelet_args['cloud-provider'] = ['aws']
-                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
-                if facts['cloudprovider']['kind'] == 'openstack':
-                    kubelet_args['cloud-provider'] = ['openstack']
-                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
-                if facts['cloudprovider']['kind'] == 'gce':
-                    kubelet_args['cloud-provider'] = ['gce']
-                    kubelet_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
-
-        # Automatically add node-labels to the kubeletArguments
-        # parameter. See BZ1359848 for additional details.
-        #
-        # Ref: https://bugzilla.redhat.com/show_bug.cgi?id=1359848
-        if 'labels' in facts['node'] and isinstance(facts['node']['labels'], dict):
-            # tl;dr: os_node_labels="{'foo': 'bar', 'a': 'b'}" turns
-            # into ['foo=bar', 'a=b']
-            #
-            # On the openshift_node_labels inventory variable we loop
-            # over each key-value tuple (from .items()) and join the
-            # key to the value with an '=' character, this produces a
-            # list.
-            #
-            # map() seems to be returning an itertools.imap object
-            # instead of a list. We cast it to a list ourselves.
-            # pylint: disable=unnecessary-lambda
-            labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
-            if labels_str != '':
-                kubelet_args['node-labels'] = labels_str
-
-        # If we've added items to the kubelet_args dict then we need
-        # to merge the new items back into the main facts object.
-        if kubelet_args != {}:
-            facts = merge_facts({'node': {'kubelet_args': kubelet_args}}, facts, [])
-    return facts
 
 
 def build_controller_args(facts):
@@ -973,7 +867,7 @@ def get_openshift_version(facts):
     if os.path.isfile('/usr/bin/openshift'):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])  # noqa: F405
         version = parse_openshift_version(output)
-    elif 'common' in facts and 'is_containerized' in facts['common']:
+    else:
         version = get_container_openshift_version(facts)
 
     # Handle containerized masters that have not yet been configured as a node.
@@ -1364,72 +1258,7 @@ def set_container_facts_if_unset(facts):
             dict: the facts dict updated with the generated containerization
             facts
     """
-    deployment_type = facts['common']['deployment_type']
-    if deployment_type == 'openshift-enterprise':
-        master_image = 'openshift3/ose'
-        node_image = 'openshift3/node'
-        ovs_image = 'openshift3/openvswitch'
-        pod_image = 'openshift3/ose-pod'
-        router_image = 'openshift3/ose-haproxy-router'
-        registry_image = 'openshift3/ose-docker-registry'
-        deployer_image = 'openshift3/ose-deployer'
-    else:
-        master_image = 'openshift/origin'
-        node_image = 'openshift/node'
-        ovs_image = 'openshift/openvswitch'
-        pod_image = 'openshift/origin-pod'
-        router_image = 'openshift/origin-haproxy-router'
-        registry_image = 'openshift/origin-docker-registry'
-        deployer_image = 'openshift/origin-deployer'
 
-    facts['common']['is_atomic'] = os.path.isfile('/run/ostree-booted')
-
-    if 'is_containerized' not in facts['common']:
-        facts['common']['is_containerized'] = facts['common']['is_atomic']
-    if 'pod_image' not in facts['common']:
-        facts['common']['pod_image'] = pod_image
-    if 'router_image' not in facts['common']:
-        facts['common']['router_image'] = router_image
-    if 'registry_image' not in facts['common']:
-        facts['common']['registry_image'] = registry_image
-    if 'deployer_image' not in facts['common']:
-        facts['common']['deployer_image'] = deployer_image
-    if 'master' in facts and 'master_image' not in facts['master']:
-        facts['master']['master_image'] = master_image
-        facts['master']['master_system_image'] = master_image
-    if 'node' in facts:
-        if 'node_image' not in facts['node']:
-            facts['node']['node_image'] = node_image
-            facts['node']['node_system_image'] = node_image
-        if 'ovs_image' not in facts['node']:
-            facts['node']['ovs_image'] = ovs_image
-            facts['node']['ovs_system_image'] = ovs_image
-
-    if safe_get_bool(facts['common']['is_containerized']):
-        facts['common']['client_binary'] = '/usr/local/bin/oc'
-
-    return facts
-
-
-def set_installed_variant_rpm_facts(facts):
-    """ Set RPM facts of installed variant
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with installed_variant_rpms
-                          """
-    installed_rpms = []
-    for base_rpm in ['openshift', 'atomic-openshift', 'origin']:
-        optional_rpms = ['master', 'node', 'clients', 'sdn-ovs']
-        variant_rpms = [base_rpm] + \
-                       ['{0}-{1}'.format(base_rpm, r) for r in optional_rpms] + \
-                       ['tuned-profiles-%s-node' % base_rpm]
-        for rpm in variant_rpms:
-            exit_code, _, _ = module.run_command(['rpm', '-q', rpm])  # noqa: F405
-            if exit_code == 0:
-                installed_rpms.append(rpm)
-
-    facts['common']['installed_variant_rpms'] = installed_rpms
     return facts
 
 
@@ -1538,14 +1367,12 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts,
                             local_facts,
                             additive_facts_to_overwrite)
-        facts = migrate_oauth_template_facts(facts)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_identity_providers_if_unset(facts)
         facts = set_deployment_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_container_facts_if_unset(facts)
-        facts = build_kubelet_args(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_version_facts_if_unset(facts)
@@ -1553,8 +1380,6 @@ class OpenShiftFacts(object):
         facts = set_proxy_facts(facts)
         facts = set_builddefaults_facts(facts)
         facts = set_buildoverrides_facts(facts)
-        if not safe_get_bool(facts['common']['is_containerized']):
-            facts = set_installed_variant_rpm_facts(facts)
         facts = set_nodename(facts)
         return dict(openshift=facts)
 
@@ -1582,7 +1407,6 @@ class OpenShiftFacts(object):
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
-                                  client_binary='oc',
                                   dns_domain='cluster.local',
                                   config_base='/etc/origin')
 
@@ -1607,10 +1431,7 @@ class OpenShiftFacts(object):
                                       max_requests_inflight=500)
 
         if 'node' in roles:
-            defaults['node'] = dict(labels={}, annotations={},
-                                    iptables_sync_period='30s',
-                                    local_quota_per_fsgroup="",
-                                    set_node_ip=False)
+            defaults['node'] = dict(labels={})
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)

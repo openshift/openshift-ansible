@@ -2,7 +2,7 @@
 - name: Setup the master node group
   hosts: localhost
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_aws
       tasks_from: setup_master_group.yml
 
@@ -11,7 +11,7 @@
   gather_facts: no
   remote_user: root
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_aws
       tasks_from: master_facts.yml
 

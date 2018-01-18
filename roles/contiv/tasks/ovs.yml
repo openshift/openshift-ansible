@@ -1,6 +1,6 @@
 ---
 - include_tasks: packageManagerInstall.yml
-  when: source_type == "packageManager"
+  when: contiv_source_type == "packageManager"
   tags:
     - binary-update
 

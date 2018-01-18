@@ -1,0 +1,111 @@
+---
+# Fact setting
+- name: Set default image variables based on deployment type
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
+    - "default_images.yml"
+
+- name: Set openshift_web_console facts
+  set_fact:
+    openshift_web_console_prefix: "{{ openshift_web_console_prefix | default(__openshift_web_console_prefix) }}"
+    openshift_web_console_version: "{{ openshift_web_console_version | default(__openshift_web_console_version) }}"
+    openshift_web_console_image_name: "{{ openshift_web_console_image_name | default(__openshift_web_console_image_name) }}"
+    # Default the replica count to the number of masters.
+    openshift_web_console_replica_count: "{{ openshift_web_console_replica_count | default(groups.oo_masters_to_config | length) }}"
+
+- name: Ensure openshift-web-console project exists
+  oc_project:
+    name: openshift-web-console
+    state: present
+    node_selector:
+      - ""
+
+- name: Make temp directory for the web console config files
+  command: mktemp -d /tmp/console-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy the web console config template to temp directory
+  copy:
+    src: "{{ __console_files_location }}/{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+    - "{{ __console_template_file }}"
+    - "{{ __console_rbac_file }}"
+    - "{{ __console_config_file }}"
+
+- name: Update the web console config properties
+  yedit:
+    src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+    edits:
+      - key: clusterInfo#consolePublicURL
+        # Must have a trailing slash
+        value: "{{ openshift.master.public_console_url }}/"
+      - key: clusterInfo#masterPublicURL
+        value: "{{ openshift.master.public_api_url }}"
+      - key: clusterInfo#logoutPublicURL
+        value: "{{ openshift.master.logout_url | default('') }}"
+      - key: features#inactivityTimeoutMinutes
+        value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
+
+      # TODO: The new extensions properties cannot be set until
+      # origin-web-console-server has been updated with the API changes since
+      # `extensions` in the old asset config was an array.
+
+      # - key: extensions#scriptURLs
+      #   value: "{{ openshift_web_console_extension_script_urls | default([]) }}"
+      # - key: extensions#stylesheetURLs
+      #   value: "{{ openshift_web_console_extension_stylesheet_urls | default([]) }}"
+      # - key: extensions#properties
+      #   value: "{{ openshift_web_console_extension_properties | default({}) }}"
+
+      # DEPRECATED PROPERTIES
+      # These properties have been renamed and will be removed from the install
+      # in a future pull. Keep both the old and new properties for now so that
+      # the install is not broken while the origin-web-console image is updated.
+      - key: publicURL
+        # Must have a trailing slash
+        value: "{{ openshift.master.public_console_url }}/"
+      - key: logoutURL
+        value: "{{ openshift.master.logout_url | default('') }}"
+      - key: masterPublicURL
+        value: "{{ openshift.master.public_api_url }}"
+    separator: '#'
+    state: present
+
+- slurp:
+    src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
+  register: config
+
+- name: Reconcile with the web console RBAC file
+  shell: >
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_rbac_file }}" | {{ openshift_client_binary }} auth reconcile -f -
+
+- name: Apply the web console template file
+  shell: >
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
+    --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
+    --param IMAGE="{{ openshift_web_console_prefix }}{{ openshift_web_console_image_name }}:{{ openshift_web_console_version }}"
+    --param NODE_SELECTOR={{ openshift_web_console_nodeselector | to_json | quote }}
+    --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
+    | {{ openshift_client_binary }} apply -f -
+
+- name: Verify that the web console is running
+  command: >
+    curl -k https://webconsole.openshift-web-console.svc/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: console_health
+  until: console_health.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False

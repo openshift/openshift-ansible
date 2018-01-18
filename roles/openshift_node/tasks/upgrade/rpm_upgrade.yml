@@ -3,7 +3,7 @@
 # - openshift_service_type
 # - component
 # - openshift_pkg_version
-# - openshift.common.is_atomic
+# - openshift_is_atomic
 
 # Pre-pull new node rpm, but don't install
 - name: download new node packages
@@ -12,7 +12,7 @@
   until: result is succeeded
   vars:
     openshift_node_upgrade_rpm_list:
-      - "{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
       - "PyYAML"
       - "dnsmasq"
 

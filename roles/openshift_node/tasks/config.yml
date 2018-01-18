@@ -4,7 +4,7 @@
 
 - name: Pull container images
   include_tasks: container_images.yml
-  when: openshift.common.is_containerized | bool
+  when: openshift_is_containerized | bool
 
 - name: Start and enable openvswitch service
   systemd:
@@ -13,7 +13,7 @@
     state: started
     daemon_reload: yes
   when:
-    - openshift.common.is_containerized | bool
+    - openshift_is_containerized | bool
     - openshift_node_use_openshift_sdn | default(true) | bool
   register: ovs_start_result
   until: not (ovs_start_result is failed)
@@ -24,9 +24,9 @@
     ovs_service_status_changed: "{{ ovs_start_result is changed }}"
 
 - file:
-    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
+    dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
     state: directory
-  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
+  when: ('config' in l2_openshift_node_kubelet_args) | bool
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -46,7 +46,7 @@
     regexp: "^{{ item.key }}="
     line: "{{ item.key }}={{ item.value }}"
     create: true
-  with_dict: "{{ openshift.node.env_vars | default({}) }}"
+  with_dict: "{{ openshift_node_env_vars }}"
   notify:
     - restart node
 
@@ -58,7 +58,7 @@
 # restarted after the node restarts docker and it will take up to 60 seconds for
 # systemd to start the master again
 - when:
-    - openshift.common.is_containerized | bool
+    - openshift_is_containerized | bool
     - not openshift_node_bootstrap
   block:
     - name: Wait for master API to become available before proceeding

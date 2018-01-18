@@ -109,14 +109,14 @@
 
 # remove annotations added by logging
 - command: >
-    {{ openshift.common.client_binary }}
+    {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     get namespaces -o name {{ __default_logging_ops_projects | join(' ') }}
   register: __logging_ops_projects
 
 - name: Remove Annotation of Operations Projects
   command: >
-    {{ openshift.common.client_binary }}
+    {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     annotate {{ project }} openshift.io/logging.ui.hostname-
   with_items: "{{ __logging_ops_projects.stdout_lines }}"
@@ -126,7 +126,18 @@
     - __logging_ops_projects.stderr | length == 0
 
 ## EventRouter
-- include_role:
+- import_role:
     name: openshift_logging_eventrouter
   when:
     not openshift_logging_install_eventrouter | default(false) | bool
+
+# Update asset config in openshift-web-console namespace
+- name: Remove Kibana route information from web console asset config
+  include_role:
+    name: openshift_web_console
+    tasks_from: update_asset_config.yml
+  vars:
+    asset_config_edits:
+      - key: loggingPublicURL
+        value: ""
+  when: openshift_web_console_install | default(true) | bool

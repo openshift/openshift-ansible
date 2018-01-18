@@ -1,11 +1,14 @@
 ---
 - name: Create local temp dir for OpenShift hosted templates copy
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-  become: False
   register: copy_hosted_templates_mktemp
   run_once: True
   # AUDIT:changed_when: not set here because this task actually
   # creates something
+
+- name: Chmod local temp dir for OpenShift examples copy
+  local_action: command chmod 777 "{{ copy_hosted_templates_mktemp.stdout }}"
+  run_once: True
 
 - name: Create tar of OpenShift examples
   local_action: command tar -C "{{ role_path }}/files/{{ content_version }}/{{ hosted_deployment_type }}" -cvf "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar" .
@@ -13,8 +16,10 @@
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
-  become: False
-  register: copy_hosted_templates_tar
+
+- name: Chmod local tar of OpenShift examples
+  local_action: command chmod 744 "{{ copy_hosted_templates_mktemp.stdout }}/openshift-hosted-templates.tar"
+  run_once: True
 
 - name: Create remote OpenShift hosted templates directory
   file:
@@ -28,7 +33,6 @@
     dest: "{{ hosted_base }}/"
 
 - name: Cleanup the OpenShift hosted templates temp dir
-  become: False
   local_action: file dest="{{ copy_hosted_templates_mktemp.stdout }}" state=absent
 
 - name: Modify registry paths if registry_url is not registry.access.redhat.com
@@ -52,7 +56,7 @@
 
 - name: Create or update hosted templates
   command: >
-    {{ openshift.common.client_binary }} {{ openshift_hosted_templates_import_command }}
+    {{ openshift_client_binary }} {{ openshift_hosted_templates_import_command }}
     -f {{ hosted_base }}
     --config={{ openshift_hosted_templates_kubeconfig }}
     -n openshift

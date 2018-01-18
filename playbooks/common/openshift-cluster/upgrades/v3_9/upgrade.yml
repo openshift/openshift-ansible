@@ -10,6 +10,7 @@
   - set_fact:
       openshift_upgrade_target: '3.9'
       openshift_upgrade_min: '3.7'
+      openshift_release: '3.9'
 
 - import_playbook: ../pre/config.yml
   vars:
@@ -31,8 +32,6 @@
 # Pre-upgrade completed
 
 - import_playbook: ../upgrade_control_plane.yml
-  vars:
-    master_config_hook: "v3_7/master_config_upgrade.yml"
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode
@@ -41,13 +40,13 @@
   roles:
   - role: openshift_facts
   tasks:
-  - name: Stop {{ openshift.common.service_type }}-master-controllers
+  - name: Stop {{ openshift_service_type }}-master-controllers
     systemd:
-      name: "{{ openshift.common.service_type }}-master-controllers"
+      name: "{{ openshift_service_type }}-master-controllers"
       state: stopped
-  - name: Start {{ openshift.common.service_type }}-master-controllers
+  - name: Start {{ openshift_service_type }}-master-controllers
     systemd:
-      name: "{{ openshift.common.service_type }}-master-controllers"
+      name: "{{ openshift_service_type }}-master-controllers"
       state: started
 
 - import_playbook: ../upgrade_nodes.yml

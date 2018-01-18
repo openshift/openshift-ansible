@@ -1,4 +1,6 @@
 ---
+# for control-plane upgrade, several variables may be passed in to this play
+# why may affect the tasks here and in imported playbooks.
 
 # Pre-upgrade
 - import_playbook: ../initialize_nodes_to_upgrade.yml
@@ -14,10 +16,10 @@
   hosts: "{{ l_upgrade_no_proxy_hosts }}"
   tasks:
   - set_fact:
-      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_config']
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_nodes_to_config']
                                                     | union(groups['oo_masters_to_config'])
                                                     | union(groups['oo_etcd_to_config'] | default([])))
-                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                | lib_utils_oo_collect('openshift.common.hostname') | default([]) | join (',')
                                                 }}"
     when:
     - openshift_http_proxy is defined or openshift_https_proxy is defined
@@ -48,6 +50,8 @@
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "{{ openshift_upgrade_target }}"
     openshift_protect_installed_version: False
+    # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
+    # l_openshift_version_check_hosts is passed via upgrade_control_plane.yml
 
 # If we're only upgrading nodes, we need to ensure masters are already upgraded
 - name: Verify masters are already upgraded
@@ -72,6 +76,6 @@
 - name: Verify docker upgrade targets
   hosts: "{{ l_upgrade_docker_target_hosts }}"
   tasks:
-  - include_role:
+  - import_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml

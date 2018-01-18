@@ -1,0 +1,13 @@
+---
+# This playbook waits for registry and router pods after both have been
+# created.  It is intended to allow the tasks of deploying both to complete
+# before polling to save time.
+- name: Poll for hosted pod deployments
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_hosted
+      tasks_from: registry_storage.yml
+    when:
+    - openshift_hosted_manage_registry | default(True) | bool
+    - openshift_hosted_registry_registryurl is defined
