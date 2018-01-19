@@ -1,0 +1,20 @@
+---
+- name: Check if console deployment exists
+  oc_obj:
+    kind: deployments
+    name: webconsole
+    namespace: openshift-web-console
+    state: list
+  register: console_deployment
+
+# There's currently no command to trigger a rollout for a k8s deployment
+# without changing the pod spec. Add an annotation to force a rollout.
+- name: Rollout updated web console deployment
+  oc_edit:
+    kind: deployments
+    name: webconsole
+    namespace: openshift-web-console
+    separator: '#'
+    content:
+      spec#template#metadata#annotations#installer-triggered-rollout: "{{ ansible_date_time.iso8601_micro }}"
+  when: console_deployment.results.results.0 | length > 0
