@@ -1,9 +1,11 @@
 ---
 # l_scale_up_hosts may be passed in via prerequisites.yml during scaleup plays.
+# l_etcd_scale_up_hosts may be passed in via prerequisites.yml during etcd
+# scaleup plays.
 
 - import_playbook: build_container_groups.yml
 
-- hosts: "{{ l_scale_up_hosts | default(l_default_container_runtime_hosts) }}"
+- hosts: "{{ l_etcd_scale_up_hosts | default(l_scale_up_hosts) | default(l_default_container_runtime_hosts) }}"
   vars:
     l_default_container_runtime_hosts: "oo_nodes_to_config:oo_hosts_containerized_managed_true"
   roles:
