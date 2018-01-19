@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.23
+Version:        3.7.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,25 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 19 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.24-1
+- Setting default storage_class_names for when calling
+  openshift_logging_elasticsearch role (ewolinet@redhat.com)
+- Fix service catalog upgrade from 3.6 (jpeeler@redhat.com)
+- Allow 5 etcd hosts as a valid configuration (sdodson@redhat.com)
+- Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
+- Fix typo in daemonset update strategy (jpeeler@redhat.com)
+- Update deployment and apiserver with new certs (jpeeler@redhat.com)
+- Sync v3.7 image streams (sdodson@redhat.com)
+- Use Contiv version 1.2.0 (flamingo@2thebatcave.com)
+- Contiv multi-master and other fixes (flamingo@2thebatcave.com)
+- Remove version requirement from openvswitch package, since listed version got
+  removed from repo (riffraff@hobbes.alephone.org)
+- Contiv systemd fixes (flamingo@2thebatcave.com)
+- Multimaster openshift+contiv fixes (landillo@cisco.com)
+- container-engine: move registry_auth.yml before pull (gscrivan@redhat.com)
+- Update object_storage.yml (jkaur@redhat.com)
+- bad keyname in object_storage.yml (jkaur@redhat.com)
+
 * Thu Jan 11 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.23-1
 - Don't hardcode the network interface in the openshift_logging_mux role
   (nkinder@redhat.com)
