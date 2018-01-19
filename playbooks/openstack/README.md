@@ -186,12 +186,8 @@ resources:
 $ ansible-playbook --user openshift \
   -i openshift-ansible/playbooks/openstack/inventory.py
   -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml \
-  -e openshift_repos_enable_testing=true
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml
 ```
-
-Note, you may want to use the testing repo for development purposes only.
-Normally, `openshift_repos_enable_testing` should not be specified.
 
 In addition to *your* inventory with your OpenShift and OpenStack
 configuration, we are also supplying the [dynamic inventory][dynamic] from
