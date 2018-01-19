@@ -64,6 +64,9 @@ spec:
         - -cookie-secret-file=/etc/proxy/secrets/session_secret
         - -openshift-ca=/etc/pki/tls/cert.pem
         - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+{% if openshift_prometheus_oauth_proxy_ca_cert is defined %}
+        - -openshift-ca={{ openshift_prometheus_oauth_proxy_ca_cert }}
+{% endif %}
         - -skip-auth-regex=^/metrics
         volumeMounts:
         - mountPath: /etc/tls/private
@@ -141,6 +144,9 @@ spec:
         - -cookie-secret-file=/etc/proxy/secrets/session_secret
         - -openshift-ca=/etc/pki/tls/cert.pem
         - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+{% if openshift_prometheus_oauth_proxy_ca_cert is defined %}
+        - -openshift-ca={{ openshift_prometheus_oauth_proxy_ca_cert }}
+{% endif %}
         volumeMounts:
         - mountPath: /etc/tls/private
           name: alerts-tls
