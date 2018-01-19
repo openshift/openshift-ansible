@@ -45,7 +45,7 @@
 
 ## restart all dcs for full restart
 - name: "Restart ES node {{ _es_node }}"
-  include_tasks: restart_es_node.yml
+  include: restart_es_node.yml
   with_items: "{{ _cluster_dcs }}"
   loop_control:
     loop_var: _es_node
@@ -54,7 +54,7 @@
 
 ## restart the node if it's dc is in the list of nodes to restart?
 - name: "Restart ES node {{ _es_node }}"
-  include_tasks: restart_es_node.yml
+  include: restart_es_node.yml
   with_items: "{{ _restart_logging_nodes }}"
   loop_control:
     loop_var: _es_node
