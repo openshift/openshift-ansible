@@ -184,7 +184,7 @@ resources:
 
 ```bash
 $ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py
+  -i openshift-ansible/playbooks/openstack/inventory.py \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml
 ```
