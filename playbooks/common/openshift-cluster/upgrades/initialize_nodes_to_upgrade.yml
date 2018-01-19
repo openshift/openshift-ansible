@@ -34,6 +34,11 @@
       - hostvars[item].openshift.common.hostname in nodes_to_upgrade.results.results[0]['items'] | map(attribute='metadata.name') | list
       changed_when: false
 
+    - name: Fail if nodes matched with openshift_upgrade_nodes_label are not matched with inventory hosts
+      fail:
+        msg: "openshift_upgrade_nodes_label matched nodes but they could not be mapped with inventory hosts"
+      when: groups.temp_nodes_to_upgrade | default([]) | length == 0
+
   # Build up the oo_nodes_to_upgrade group, use the list filtered by label if
   # present, otherwise hit all nodes:
   - name: Evaluate oo_nodes_to_upgrade
