@@ -14,7 +14,7 @@
 - import_playbook: ../init.yml
   vars:
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
-    l_upgrade_non_node_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
 
 ## Check to see if they're running 3.7 and if so upgrade them to 3.8 on control plan
 ## If they've specified pkg_version or image_tag preserve that for later use

@@ -1,4 +1,5 @@
 ---
+# l_sanity_check_hosts may be passed in during scale-up plays
 - name: Verify Requirements
   hosts: oo_first_master
   roles:
@@ -11,5 +12,5 @@
   # Thus, sanity_checks cannot gather new information about any hosts.
   - name: Run variable sanity checks
     sanity_checks:
-      check_hosts: "{{ groups['oo_all_hosts'] }}"
+      check_hosts: "{{ l_sanity_check_hosts | default(groups['oo_all_hosts']) }}"
     run_once: True
