@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.21.0%{?dist}
+Release:        0.22.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,44 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 19 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.22.0
+- Fix OpenStack readme (tomas@sedovic.cz)
+- Quick installer: deprecate upgrades (vrutkovs@redhat.com)
+- Fix node scaleup plays (mgugino@redhat.com)
+- Rollout console after template service broker install (spadgett@redhat.com)
+- Use openshift_is_containerized instead of openshift_is_atomic when installing
+  etcd (vrutkovs@redhat.com)
+- Bug 1535947: Fix missing task in metrics, logging uninstall playbooks
+  (spadgett@redhat.com)
+- Make openshift_web_console_prefix defaults like other components
+  (sdodson@redhat.com)
+- Allow for firewalld on atomic host (sdodson@redhat.com)
+- Drop the testing repo var from openstack readme (tomas@sedovic.cz)
+- Add Azure to support openshift_cloudprovider_kind (wehe@redhat.com)
+- bug 1523047. Annotate ops projects with an .operation prefix
+  (jcantril@redhat.com)
+- Pull openshift_image_tag from oo_masters_to_config rather oo_first_master.
+  (abutcher@redhat.com)
+- Ensure atomic_proxies are configured with docker (mgugino@redhat.com)
+- Default install_result when reloading generated facts. (abutcher@redhat.com)
+- health checks: update required pkg versions (lmeyer@redhat.com)
+- health checks: factor out get_required_version (lmeyer@redhat.com)
+- package_version check: reuse get_major_minor_version (lmeyer@redhat.com)
+- Rework default TSB prefix and imagename to match other services
+  (vrutkovs@redhat.com)
+- Add new grafana playbook. (mrsiano@gmail.com)
+- Remove duplication in node acceptance playbook and setup master groups so
+  that we can use the first master's ansible_ssh_user when delegating.
+  (abutcher@redhat.com)
+- Setting default storage_class_names for when calling
+  openshift_logging_elasticsearch role (ewolinet@redhat.com)
+- adding check if secret auth is needed (shawn.hurley21@gmail.com)
+- adding asb auth as a secret. (shawn.hurley21@gmail.com)
+- Ensure we are running oc execs against running pods (ewolinet@redhat.com)
+- Automatic profile setting for tuned 2.9 (jmencak@redhat.com)
+- Fix flake8 errors in utils/test (vrutkovs@redhat.com)
+- kibana checks: use six.moves instead of ImportError (vrutkovs@redhat.com)
+
 * Wed Jan 17 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.21.0
 - Add call to 3.8 playbook in 3.9 upgrade (sdodson@redhat.com)
 - Remove 3.8 and 3.9 specific steps right now (sdodson@redhat.com)
