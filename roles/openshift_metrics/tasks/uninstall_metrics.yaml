@@ -26,6 +26,6 @@
     tasks_from: update_console_config.yml
   vars:
     console_config_edits:
-      - key: metricsPublicURL
+      - key: clusterInfo#metricsPublicURL
         value: ""
   when: openshift_web_console_install | default(true) | bool

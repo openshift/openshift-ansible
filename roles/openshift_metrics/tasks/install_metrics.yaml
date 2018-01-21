@@ -79,11 +79,6 @@
     console_config_edits:
       - key: clusterInfo#metricsPublicURL
         value: "https://{{ openshift_metrics_hawkular_hostname}}/hawkular/metrics"
-      # Continue to set the old deprecated property until the
-      # origin-web-console image is updated for the new name.
-      # This will be removed in a future pull.
-      - key: metricsPublicURL
-        value: "https://{{ openshift_metrics_hawkular_hostname}}/hawkular/metrics"
   when: openshift_web_console_install | default(true) | bool
 
 - command: >

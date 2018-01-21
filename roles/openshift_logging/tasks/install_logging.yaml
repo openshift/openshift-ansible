@@ -326,9 +326,4 @@
     console_config_edits:
     - key: clusterInfo#loggingPublicURL
       value: "https://{{ openshift_logging_kibana_hostname }}"
-    # Continue to set the old deprecated property until the
-    # origin-web-console image is updated for the new name.
-    # This will be removed in a future pull.
-    - key: loggingPublicURL
-      value: "https://{{ openshift_logging_kibana_hostname }}"
   when: openshift_web_console_install | default(true) | bool

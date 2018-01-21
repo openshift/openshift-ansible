@@ -53,29 +53,12 @@
         value: "{{ openshift.master.logout_url | default('') }}"
       - key: features#inactivityTimeoutMinutes
         value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
-
-      # TODO: The new extensions properties cannot be set until
-      # origin-web-console-server has been updated with the API changes since
-      # `extensions` in the old asset config was an array.
-
-      # - key: extensions#scriptURLs
-      #   value: "{{ openshift_web_console_extension_script_urls | default([]) }}"
-      # - key: extensions#stylesheetURLs
-      #   value: "{{ openshift_web_console_extension_stylesheet_urls | default([]) }}"
-      # - key: extensions#properties
-      #   value: "{{ openshift_web_console_extension_properties | default({}) }}"
-
-      # DEPRECATED PROPERTIES
-      # These properties have been renamed and will be removed from the install
-      # in a future pull. Keep both the old and new properties for now so that
-      # the install is not broken while the origin-web-console image is updated.
-      - key: publicURL
-        # Must have a trailing slash
-        value: "{{ openshift.master.public_console_url }}/"
-      - key: logoutURL
-        value: "{{ openshift.master.logout_url | default('') }}"
-      - key: masterPublicURL
-        value: "{{ openshift.master.public_api_url }}"
+      - key: extensions#scriptURLs
+        value: "{{ openshift_web_console_extension_script_urls | default([]) }}"
+      - key: extensions#stylesheetURLs
+        value: "{{ openshift_web_console_extension_stylesheet_urls | default([]) }}"
+      - key: extensions#properties
+        value: "{{ openshift_web_console_extension_properties | default({}) }}"
     separator: '#'
     state: present
 
