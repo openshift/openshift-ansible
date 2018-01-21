@@ -119,6 +119,8 @@
   - name: Install common image prerequisites
     package: name={{ item }} state=latest
     with_items:
+    # required by Ansible
+    - PyYAML
     - docker
     - google-compute-engine
     - google-compute-engine-init
