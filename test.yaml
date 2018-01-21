@@ -1,0 +1,29 @@
+---
+- hosts: localhost
+  roles:
+  - lib_openshift
+  tasks:
+  - set_fact:
+      openshift_web_console_version: v3.9
+      openshift_web_console_prefix: docker.io/openshift/origin-
+      openshift_web_console_image_name: web-console
+  - name: Create web-console image stream
+    oc_obj:
+      name: "web-console:{{ openshift_web_console_version }}"
+      namespace: openshift-web-console
+      state: present
+      kind: ImageStreamTag
+      kubeconfig: "{{ lookup('ENV', 'KUBECONFIG') }}"
+      content:
+        path: /tmp/istagout
+        data:
+          apiVersion: image.openshift.io/v1
+          kind: ImageStreamTag
+          metadata:
+            name: "web-console:{{ openshift_web_console_version }}" # this value should always be locked to a tag, even for Origin
+            namespace: openshift-web-console
+          tag:
+            from:
+              kind: DockerImage
+              name: "{{ openshift_web_console_prefix }}{{ openshift_web_console_image_name }}:{{ openshift_web_console_version }}"
+
