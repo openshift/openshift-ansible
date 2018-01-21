@@ -8,11 +8,14 @@
       name: openshift_gcp
       tasks_from: setup_scale_group_facts.yml
 
-- name: run the cluster deploy
-  import_playbook: ../../deploy_cluster.yml
+- name: configure the control plane
+  import_playbook: ../../control_plane.yml
 
 - name: run the GCP specific post steps
   import_playbook: install_gcp.yml
+
+- name: install components
+  import_playbook: ../../components.yml
 
 - hosts: primary_master
   gather_facts: no
