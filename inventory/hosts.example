@@ -648,6 +648,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Currently prometheus deployment is disabled by default, enable it by setting this
 #openshift_hosted_prometheus_deploy=true
 #
+# Prometheus oauth proxy additional ca certificate
+#openshift_prometheus_oauth_proxy_ca_cert=/path/to/cert
+#
 # Prometheus storage config
 # Option A - NFS Host Group
 # An NFS volume will be created with path "nfs_directory/volume_name"
