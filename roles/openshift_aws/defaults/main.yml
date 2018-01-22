@@ -301,3 +301,7 @@ openshift_aws_node_user_data: ''
 openshift_aws_node_config_namespace: openshift-node
 
 openshift_aws_masters_groups: masters,etcd,nodes
+
+# By default, don't delete things like the shared IAM instance
+# profile and uploaded ssh keys
+openshift_aws_enable_uninstall_shared_objects: False
