@@ -25,6 +25,16 @@ parameters:
   value: "1"
 objects:
 
+- apiVersion: image.openshift.io/v1
+  kind: ImageStreamTag
+  metadata:
+    name: web-console:v3.9
+    namespace: ${NAMESPACE}
+  tag:
+    from:
+      kind: DockerImage
+      name: ${IMAGE}
+
 # to create the web console server
 - apiVersion: apps/v1beta1
   kind: Deployment
@@ -33,7 +43,8 @@ objects:
     name: webconsole
     labels:
       app: openshift-web-console
-      webconsole: "true"
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"web-console:v3.9"},"fieldPath":"spec.template.spec.containers[?(@.name==\"webconsole\")].image"}]'
   spec:
     replicas: "${{REPLICA_COUNT}}"
     strategy:
@@ -47,7 +58,7 @@ objects:
         serviceAccountName: webconsole
         containers:
         - name: webconsole
-          image: ${IMAGE}
+          image: " "
           imagePullPolicy: IfNotPresent
           command:
           - "/usr/bin/origin-web-console"
