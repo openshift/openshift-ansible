@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.24
+Version:        3.7.25
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 22 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.25-1
+- remove integration tests from tox (lmeyer@redhat.com)
+- Changing include_tasks to include for release-3.7 (ewolinet@redhat.com)
+- initialize_facts: include role os_firewall (gscrivan@redhat.com)
+
 * Fri Jan 19 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.24-1
 - Setting default storage_class_names for when calling
   openshift_logging_elasticsearch role (ewolinet@redhat.com)
