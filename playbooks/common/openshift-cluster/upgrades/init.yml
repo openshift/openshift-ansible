@@ -5,7 +5,8 @@
     g_new_master_hosts: []
     g_new_node_hosts: []
 
-- import_playbook: ../../../init/facts.yml
+- import_playbook: ../../../init/basic_facts.yml
+- import_playbook: ../../../init/cluster_facts.yml
 
 - name: Ensure firewall is not switched during upgrade
   hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"

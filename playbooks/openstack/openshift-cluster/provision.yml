@@ -26,8 +26,8 @@
   - name: Gather facts for the new nodes
     setup:
 
-- name: set common facts
-  import_playbook: ../../init/facts.yml
+- import_playbook: ../../init/basic_facts.yml
+- import_playbook: ../../init/cluster_facts.yml
 
 
 # TODO(shadower): consider splitting this up so people can stop here
