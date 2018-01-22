@@ -69,7 +69,7 @@
 - sysctl:
     name: net.ipv4.ip_forward
     value: 1
-    sysctl_file: "/etc/sysctl.d/99-openshift.conf"
+    sysctl_file: "/etc/sysctl.d/100-openshift.conf"
     reload: yes
 
 - include_tasks: registry_auth.yml
