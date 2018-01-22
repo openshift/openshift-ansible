@@ -6,6 +6,7 @@
 
 - name: Initialize host facts
   hosts: oo_all_hosts
+  any_errors_fatal: true
   tasks:
   - name: load openshift_facts module
     include_role:
