@@ -67,8 +67,8 @@
   with_items: "{{ hawkular_agent_object_defs.results }}"
   when: openshift_metrics_install_hawkular_agent | bool
 
-# TODO: Remove when asset config is removed from master-config.yaml
 - include_tasks: update_master_config.yaml
+  when: not openshift.common.version_gte_3_9
 
 # Update asset config in openshift-web-console namespace
 - name: Add metrics route information to web console asset config

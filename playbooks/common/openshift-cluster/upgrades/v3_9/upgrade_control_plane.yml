@@ -112,3 +112,9 @@
       state: started
 
 - import_playbook: ../post_control_plane.yml
+
+- hosts: oo_masters
+  tasks:
+  - import_role:
+      name: openshift_web_console
+      tasks_from: remove_old_asset_config

@@ -6,7 +6,9 @@
   hosts: oo_first_master
   roles:
   - role: openshift_web_console
-    when: openshift_web_console_install | default(true) | bool
+    when:
+    - openshift_web_console_install | default(true) | bool
+    - openshift_upgrade_target is version_compare('3.9','>=')
 
 - name: Upgrade default router and default registry
   hosts: oo_first_master
