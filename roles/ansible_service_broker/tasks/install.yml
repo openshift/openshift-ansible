@@ -25,10 +25,17 @@
     ansible_service_broker_registry_tag: "{{ ansible_service_broker_registry_tag | default(__ansible_service_broker_registry_tag) }}"
     ansible_service_broker_registry_whitelist: "{{ ansible_service_broker_registry_whitelist | default(__ansible_service_broker_registry_whitelist) }}"
 
-- name: set ansible-service-broker image facts using set prefix and tag
+- name: set ansible-service-broker image facts using set prefix and tag for openshift origin
   set_fact:
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
     ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
+  when: deployment_type == "origin"
+
+- name: set ansible-service-broker image facts using set prefix and tag for openshift enterprise
+  set_fact:
+    ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ose-ansible-service-broker:{{ ansible_service_broker_image_tag }}"
+    ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
+  when: deployment_type == "openshift-enterprise"
 
 - include_tasks: validate_facts.yml
 
