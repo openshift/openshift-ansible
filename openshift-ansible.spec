@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.22.0%{?dist}
+Release:        0.23.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,30 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 23 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.23.0
+- docker_image_availability: enable skopeo to use proxies (lmeyer@redhat.com)
+- Install base_packages earlier (mgugino@redhat.com)
+- allow uninstalling AWS objects created by prerequisite playbook
+  (jdiaz@redhat.com)
+- Bug 1536262: Default console and TSB node selector to
+  openshift_hosted_infra_selector (spadgett@redhat.com)
+- Migrate master-config.yaml asset config (spadgett@redhat.com)
+- Fix master scaleup play (mgugino@redhat.com)
+- use admin credentials for tsb install operations (bparees@redhat.com)
+- Fix etcd-upgrade sanity checks (mgugino@redhat.com)
+- Bug 1536253: Pass `--config` flag on oc commands when installing console
+  (spadgett@redhat.com)
+- Fix enterprise registry-console prefix (sdodson@redhat.com)
+- [release-3.7] Fix enterprise registry console image prefix
+  (sdodson@redhat.com)
+- [release-3.6] Fix enterprise registry console image prefix
+  (sdodson@redhat.com)
+- Bug 1512825 - add mux pod failed for Serial number 02 has already been issued
+  (nhosoi@redhat.com)
+- Remove old console asset config (spadgett@redhat.com)
+- Add support for Amazon EC2 C5 instance types (rteague@redhat.com)
+- Fix provider network support at openstack playbook (ltomasbo@redhat.com)
+
 * Fri Jan 19 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.22.0
 - Fix OpenStack readme (tomas@sedovic.cz)
 - Quick installer: deprecate upgrades (vrutkovs@redhat.com)
