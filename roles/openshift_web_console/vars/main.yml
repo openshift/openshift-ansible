@@ -1,5 +1,5 @@
 ---
-__console_files_location: "../../../files/origin-components/"
+__console_files_location: "../files/"
 
 __console_template_file: "console-template.yaml"
 __console_rbac_file: "console-rbac-template.yaml"
