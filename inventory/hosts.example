@@ -1117,6 +1117,8 @@ ose3-etcd[1:3]-ansible.test.example.com
 ose3-lb-ansible.test.example.com containerized=false
 
 # NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
+# You can manually set a master host to schedulable using the `openshift_schedulable=true` host variable,
+# though this is not recommended in production environments
 [nodes]
 # masters should be schedulable to run web console pods
 ose3-master[1:3]-ansible.test.example.com openshift_schedulable=True
