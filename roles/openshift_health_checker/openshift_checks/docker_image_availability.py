@@ -56,7 +56,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # ordered list of registries (according to inventory vars) that docker will try for unscoped images
         regs = self.ensure_list("openshift_docker_additional_registries")
         # currently one of these registries is added whether the user wants it or not.
-        deployment_type = self.get_var("openshift_deployment_type")
+        deployment_type = self.get_var("openshift_deployment_type", default="")
         if deployment_type == "origin" and "docker.io" not in regs:
             regs.append("docker.io")
         elif deployment_type == 'openshift-enterprise' and "registry.access.redhat.com" not in regs:
