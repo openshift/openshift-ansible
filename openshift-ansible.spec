@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.96
+Version:        3.6.173.0.97
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 23 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.97-1
+- openshift_checks: Add OVS versions for OCP 3.7 (miciah.masters@gmail.com)
+- Use Contiv version 1.2.0 (flamingo@2thebatcave.com)
+- Contiv multi-master and other fixes (flamingo@2thebatcave.com)
+- Remove version requirement from openvswitch package, since listed version got
+  removed from repo (riffraff@hobbes.alephone.org)
+- Contiv systemd fixes (flamingo@2thebatcave.com)
+- Multimaster openshift+contiv fixes (landillo@cisco.com)
+
 * Mon Jan 08 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.96-1
 - [release-3.6] Migrate to static:true for include_role (sdodson@redhat.com)
 
