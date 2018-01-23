@@ -86,6 +86,8 @@
             value: "{{ openshift.master.logout_url | default('') }}"
           - key: features#inactivityTimeoutMinutes
             value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
+          - key: features#clusterResourceOverridesEnabled
+            value: "{{ openshift_web_console_cluster_resource_overrides_enabled | default(false) }}"
           - key: extensions#scriptURLs
             value: "{{ openshift_web_console_extension_script_urls | default([]) }}"
           - key: extensions#stylesheetURLs
