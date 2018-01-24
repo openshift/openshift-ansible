@@ -1,6 +1,6 @@
 ---
 - name: Backup and remove generated etcd certificates
-  hosts: oo_first_etcd
+  hosts: oo_etcd_to_config
   any_errors_fatal: true
   roles:
     - role: etcd_common

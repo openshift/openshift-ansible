@@ -33,6 +33,29 @@
         embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
         debug_level: "{{ openshift_master_debug_level | default(openshift.common.debug_level | default(2)) }}"
 
+# Prior to 3.6, openshift-ansible created etcd serving certificates
+# without a SubjectAlternativeName entry for the system hostname. The
+# SAN list in Go 1.8 is now (correctly) authoritative and since
+# openshift-ansible configures masters to talk to etcd hostnames
+# rather than IP addresses, we must correct etcd certificates.
+#
+# This play examines the etcd serving certificate SANs on each etcd
+# host and records whether or not the system hostname is missing.
+- name: Examine etcd serving certificate SAN
+  hosts: oo_etcd_to_config
+  tasks:
+  - slurp:
+      src: /etc/etcd/server.crt
+    register: etcd_serving_cert
+  - set_fact:
+      __etcd_cert_lacks_hostname: "{{ (openshift.common.hostname not in (etcd_serving_cert.content | b64decode | oo_parse_certificate_san)) | bool }}"
+
+# Redeploy etcd certificates when hostnames were missing from etcd
+# serving certificate SANs.
+- import_playbook: ../../openshift-etcd/certificates.yml
+  when:
+  - true in hostvars | oo_select_keys(groups['oo_etcd_to_config']) | oo_collect('__etcd_cert_lacks_hostname') | default([false])
+
 - name: Upgrade and backup etcd
   include: ./etcd/main.yml
 
