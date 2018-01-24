@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: cloudforms
+  template: cloudforms-ext-db
 metadata:
-  name: cloudforms
+  name: cloudforms-ext-db
   annotations:
-    description: CloudForms appliance with persistent storage
+    description: CloudForms appliance with persistent storage using a external DB host
     tags: instant-app,cloudforms,cfme
     iconClass: icon-rails
 objects:
@@ -43,264 +43,6 @@ objects:
     secret-key: "${ANSIBLE_SECRET_KEY}"
     admin-password: "${ANSIBLE_ADMIN_PASSWORD}"
 - apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: "${DATABASE_SERVICE_NAME}-configs"
-  data:
-    01_miq_overrides.conf: |
-      #------------------------------------------------------------------------------
-      # CONNECTIONS AND AUTHENTICATION
-      #------------------------------------------------------------------------------
-
-      tcp_keepalives_count = 9
-      tcp_keepalives_idle = 3
-      tcp_keepalives_interval = 75
-
-      #------------------------------------------------------------------------------
-      # RESOURCE USAGE (except WAL)
-      #------------------------------------------------------------------------------
-
-      shared_preload_libraries = 'pglogical,repmgr_funcs'
-      max_worker_processes = 10
-
-      #------------------------------------------------------------------------------
-      # WRITE AHEAD LOG
-      #------------------------------------------------------------------------------
-
-      wal_level = 'logical'
-      wal_log_hints = on
-      wal_buffers = 16MB
-      checkpoint_completion_target = 0.9
-
-      #------------------------------------------------------------------------------
-      # REPLICATION
-      #------------------------------------------------------------------------------
-
-      max_wal_senders = 10
-      wal_sender_timeout = 0
-      max_replication_slots = 10
-      hot_standby = on
-
-      #------------------------------------------------------------------------------
-      # ERROR REPORTING AND LOGGING
-      #------------------------------------------------------------------------------
-
-      log_filename = 'postgresql.log'
-      log_rotation_age = 0
-      log_min_duration_statement = 5000
-      log_connections = on
-      log_disconnections = on
-      log_line_prefix = '%t:%r:%c:%u@%d:[%p]:'
-      log_lock_waits = on
-
-      #------------------------------------------------------------------------------
-      # AUTOVACUUM PARAMETERS
-      #------------------------------------------------------------------------------
-
-      log_autovacuum_min_duration = 0
-      autovacuum_naptime = 5min
-      autovacuum_vacuum_threshold = 500
-      autovacuum_analyze_threshold = 500
-      autovacuum_vacuum_scale_factor = 0.05
-
-      #------------------------------------------------------------------------------
-      # LOCK MANAGEMENT
-      #------------------------------------------------------------------------------
-
-      deadlock_timeout = 5s
-
-      #------------------------------------------------------------------------------
-      # VERSION/PLATFORM COMPATIBILITY
-      #------------------------------------------------------------------------------
-
-      escape_string_warning = off
-      standard_conforming_strings = off
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: "${HTTPD_SERVICE_NAME}-configs"
-  data:
-    application.conf: |
-      # Timeout: The number of seconds before receives and sends time out.
-      Timeout 120
-
-      RewriteEngine On
-      Options SymLinksIfOwnerMatch
-
-      <VirtualHost *:80>
-        KeepAlive on
-        # Without ServerName mod_auth_mellon compares against http:// and not https:// from the IdP
-        ServerName https://%{REQUEST_HOST}
-
-        ProxyPreserveHost on
-
-        RewriteCond %{REQUEST_URI}     ^/ws        [NC]
-        RewriteCond %{HTTP:UPGRADE}    ^websocket$ [NC]
-        RewriteCond %{HTTP:CONNECTION} ^Upgrade$   [NC]
-        RewriteRule .* ws://${NAME}%{REQUEST_URI}  [P,QSA,L]
-
-        # For httpd, some ErrorDocuments must by served by the httpd pod
-        RewriteCond %{REQUEST_URI} !^/proxy_pages
-
-        # For SAML /saml2 is only served by mod_auth_mellon in the httpd pod
-        RewriteCond %{REQUEST_URI} !^/saml2
-        RewriteRule ^/ http://${NAME}%{REQUEST_URI} [P,QSA,L]
-        ProxyPassReverse / http://${NAME}/
-
-        # Ensures httpd stdout/stderr are seen by docker logs.
-        ErrorLog  "| /usr/bin/tee /proc/1/fd/2 /var/log/httpd/error_log"
-        CustomLog "| /usr/bin/tee /proc/1/fd/1 /var/log/httpd/access_log" common
-      </VirtualHost>
-    authentication.conf: |
-      # Load appropriate authentication configuration files
-      #
-      Include "conf.d/configuration-${HTTPD_AUTH_TYPE}-auth"
-    configuration-internal-auth: |
-      # Internal authentication
-      #
-    configuration-external-auth: |
-      Include "conf.d/external-auth-load-modules-conf"
-
-      <Location /dashboard/kerberos_authenticate>
-        AuthType                   Kerberos
-        AuthName                   "Kerberos Login"
-        KrbMethodNegotiate         On
-        KrbMethodK5Passwd          Off
-        KrbAuthRealms              ${HTTPD_AUTH_KERBEROS_REALMS}
-        Krb5KeyTab                 /etc/http.keytab
-        KrbServiceName             Any
-        Require                    pam-account httpd-auth
-
-        ErrorDocument 401 /proxy_pages/invalid_sso_credentials.js
-      </Location>
-
-      Include "conf.d/external-auth-login-form-conf"
-      Include "conf.d/external-auth-application-api-conf"
-      Include "conf.d/external-auth-lookup-user-details-conf"
-      Include "conf.d/external-auth-remote-user-conf"
-    configuration-active-directory-auth: |
-      Include "conf.d/external-auth-load-modules-conf"
-
-      <Location /dashboard/kerberos_authenticate>
-        AuthType                   Kerberos
-        AuthName                   "Kerberos Login"
-        KrbMethodNegotiate         On
-        KrbMethodK5Passwd          Off
-        KrbAuthRealms              ${HTTPD_AUTH_KERBEROS_REALMS}
-        Krb5KeyTab                 /etc/krb5.keytab
-        KrbServiceName             Any
-        Require                    pam-account httpd-auth
-
-        ErrorDocument 401 /proxy_pages/invalid_sso_credentials.js
-      </Location>
-
-      Include "conf.d/external-auth-login-form-conf"
-      Include "conf.d/external-auth-application-api-conf"
-      Include "conf.d/external-auth-lookup-user-details-conf"
-      Include "conf.d/external-auth-remote-user-conf"
-    configuration-saml-auth: |
-      LoadModule auth_mellon_module modules/mod_auth_mellon.so
-
-      <Location />
-        MellonEnable               "info"
-
-        MellonIdPMetadataFile      "/etc/httpd/saml2/idp-metadata.xml"
-
-        MellonSPPrivateKeyFile     "/etc/httpd/saml2/sp-key.key"
-        MellonSPCertFile           "/etc/httpd/saml2/sp-cert.cert"
-        MellonSPMetadataFile       "/etc/httpd/saml2/sp-metadata.xml"
-
-        MellonVariable             "sp-cookie"
-        MellonSecureCookie         On
-        MellonCookiePath           "/"
-
-        MellonIdP                  "IDP"
-
-        MellonEndpointPath         "/saml2"
-
-        MellonUser                 username
-        MellonMergeEnvVars         On
-
-        MellonSetEnvNoPrefix       "REMOTE_USER"            username
-        MellonSetEnvNoPrefix       "REMOTE_USER_EMAIL"      email
-        MellonSetEnvNoPrefix       "REMOTE_USER_FIRSTNAME"  firstname
-        MellonSetEnvNoPrefix       "REMOTE_USER_LASTNAME"   lastname
-        MellonSetEnvNoPrefix       "REMOTE_USER_FULLNAME"   fullname
-        MellonSetEnvNoPrefix       "REMOTE_USER_GROUPS"     groups
-      </Location>
-
-      <Location /saml_login>
-        AuthType                   "Mellon"
-        MellonEnable               "auth"
-        Require                    valid-user
-      </Location>
-
-      Include "conf.d/external-auth-remote-user-conf"
-    external-auth-load-modules-conf: |
-      LoadModule authnz_pam_module            modules/mod_authnz_pam.so
-      LoadModule intercept_form_submit_module modules/mod_intercept_form_submit.so
-      LoadModule lookup_identity_module       modules/mod_lookup_identity.so
-      LoadModule auth_kerb_module             modules/mod_auth_kerb.so
-    external-auth-login-form-conf: |
-      <Location /dashboard/external_authenticate>
-        InterceptFormPAMService    httpd-auth
-        InterceptFormLogin         user_name
-        InterceptFormPassword      user_password
-        InterceptFormLoginSkip     admin
-        InterceptFormClearRemoteUserForSkipped on
-      </Location>
-    external-auth-application-api-conf: |
-      <LocationMatch ^/api>
-        SetEnvIf Authorization     '^Basic +YWRtaW46' let_admin_in
-        SetEnvIf X-Auth-Token      '^.+$'             let_api_token_in
-        SetEnvIf X-MIQ-Token       '^.+$'             let_sys_token_in
-
-        AuthType                   Basic
-        AuthName                   "External Authentication (httpd) for API"
-        AuthBasicProvider          PAM
-
-        AuthPAMService             httpd-auth
-        Require                    valid-user
-        Order                      Allow,Deny
-        Allow from                 env=let_admin_in
-        Allow from                 env=let_api_token_in
-        Allow from                 env=let_sys_token_in
-        Satisfy                    Any
-      </LocationMatch>
-    external-auth-lookup-user-details-conf: |
-      <LocationMatch ^/dashboard/external_authenticate$|^/dashboard/kerberos_authenticate$|^/api>
-        LookupUserAttr mail        REMOTE_USER_EMAIL
-        LookupUserAttr givenname   REMOTE_USER_FIRSTNAME
-        LookupUserAttr sn          REMOTE_USER_LASTNAME
-        LookupUserAttr displayname REMOTE_USER_FULLNAME
-        LookupUserAttr domainname  REMOTE_USER_DOMAIN
-
-        LookupUserGroups           REMOTE_USER_GROUPS ":"
-        LookupDbusTimeout          5000
-      </LocationMatch>
-    external-auth-remote-user-conf: |
-      RequestHeader unset X_REMOTE_USER
-
-      RequestHeader set X_REMOTE_USER           %{REMOTE_USER}e           env=REMOTE_USER
-      RequestHeader set X_EXTERNAL_AUTH_ERROR   %{EXTERNAL_AUTH_ERROR}e   env=EXTERNAL_AUTH_ERROR
-      RequestHeader set X_REMOTE_USER_EMAIL     %{REMOTE_USER_EMAIL}e     env=REMOTE_USER_EMAIL
-      RequestHeader set X_REMOTE_USER_FIRSTNAME %{REMOTE_USER_FIRSTNAME}e env=REMOTE_USER_FIRSTNAME
-      RequestHeader set X_REMOTE_USER_LASTNAME  %{REMOTE_USER_LASTNAME}e  env=REMOTE_USER_LASTNAME
-      RequestHeader set X_REMOTE_USER_FULLNAME  %{REMOTE_USER_FULLNAME}e  env=REMOTE_USER_FULLNAME
-      RequestHeader set X_REMOTE_USER_GROUPS    %{REMOTE_USER_GROUPS}e    env=REMOTE_USER_GROUPS
-      RequestHeader set X_REMOTE_USER_DOMAIN    %{REMOTE_USER_DOMAIN}e    env=REMOTE_USER_DOMAIN
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: "${HTTPD_SERVICE_NAME}-auth-configs"
-  data:
-    auth-type: internal
-    auth-kerberos-realms: undefined
-    auth-configuration.conf: |
-      # External Authentication Configuration File
-      #
-      # For details on usage please see https://github.com/ManageIQ/manageiq-pods/blob/master/README.md#configuring-external-authentication
-- apiVersion: v1
   kind: Service
   metadata:
     annotations:
@@ -330,16 +72,6 @@ objects:
     to:
       kind: Service
       name: "${HTTPD_SERVICE_NAME}"
-- apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: "${NAME}-${DATABASE_SERVICE_NAME}"
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: "${DATABASE_VOLUME_CAPACITY}"
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
@@ -581,87 +313,23 @@ objects:
   metadata:
     name: "${DATABASE_SERVICE_NAME}"
     annotations:
-      description: Exposes the database server
+      description: Remote database service
   spec:
     ports:
     - name: postgresql
       port: 5432
-      targetPort: 5432
-    selector:
-      name: "${DATABASE_SERVICE_NAME}"
+      targetPort: "${{DATABASE_PORT}}"
+    selector: {}
 - apiVersion: v1
-  kind: DeploymentConfig
+  kind: Endpoints
   metadata:
     name: "${DATABASE_SERVICE_NAME}"
-    annotations:
-      description: Defines how to deploy the database
-  spec:
-    strategy:
-      type: Recreate
-    triggers:
-    - type: ConfigChange
-    replicas: 1
-    selector:
-      name: "${DATABASE_SERVICE_NAME}"
-    template:
-      metadata:
-        name: "${DATABASE_SERVICE_NAME}"
-        labels:
-          name: "${DATABASE_SERVICE_NAME}"
-      spec:
-        volumes:
-        - name: cfme-pgdb-volume
-          persistentVolumeClaim:
-            claimName: "${NAME}-${DATABASE_SERVICE_NAME}"
-        - name: cfme-pg-configs
-          configMap:
-            name: "${DATABASE_SERVICE_NAME}-configs"
-        containers:
-        - name: postgresql
-          image: "${POSTGRESQL_IMG_NAME}:${POSTGRESQL_IMG_TAG}"
-          ports:
-          - containerPort: 5432
-          readinessProbe:
-            timeoutSeconds: 1
-            initialDelaySeconds: 15
-            exec:
-              command:
-              - "/bin/sh"
-              - "-i"
-              - "-c"
-              - psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'
-          livenessProbe:
-            timeoutSeconds: 1
-            initialDelaySeconds: 60
-            tcpSocket:
-              port: 5432
-          volumeMounts:
-          - name: cfme-pgdb-volume
-            mountPath: "/var/lib/pgsql/data"
-          - name: cfme-pg-configs
-            mountPath: "${POSTGRESQL_CONFIG_DIR}"
-          env:
-          - name: POSTGRESQL_USER
-            value: "${DATABASE_USER}"
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${NAME}-secrets"
-                key: pg-password
-          - name: POSTGRESQL_DATABASE
-            value: "${DATABASE_NAME}"
-          - name: POSTGRESQL_MAX_CONNECTIONS
-            value: "${POSTGRESQL_MAX_CONNECTIONS}"
-          - name: POSTGRESQL_SHARED_BUFFERS
-            value: "${POSTGRESQL_SHARED_BUFFERS}"
-          - name: POSTGRESQL_CONFIG_DIR
-            value: "${POSTGRESQL_CONFIG_DIR}"
-          resources:
-            requests:
-              memory: "${POSTGRESQL_MEM_REQ}"
-              cpu: "${POSTGRESQL_CPU_REQ}"
-            limits:
-              memory: "${POSTGRESQL_MEM_LIMIT}"
+  subsets:
+  - addresses:
+    - ip: "${DATABASE_IP}"
+    ports:
+    - port: "${{DATABASE_PORT}}"
+      name: postgresql
 - apiVersion: v1
   kind: Service
   metadata:
@@ -757,6 +425,191 @@ objects:
               memory: "${ANSIBLE_MEM_LIMIT}"
         serviceAccount: cfme-privileged
         serviceAccountName: cfme-privileged
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: "${HTTPD_SERVICE_NAME}-configs"
+  data:
+    application.conf: |
+      # Timeout: The number of seconds before receives and sends time out.
+      Timeout 120
+
+      RewriteEngine On
+      Options SymLinksIfOwnerMatch
+
+      <VirtualHost *:80>
+        KeepAlive on
+        # Without ServerName mod_auth_mellon compares against http:// and not https:// from the IdP
+        ServerName https://%{REQUEST_HOST}
+
+        ProxyPreserveHost on
+
+        RewriteCond %{REQUEST_URI}     ^/ws        [NC]
+        RewriteCond %{HTTP:UPGRADE}    ^websocket$ [NC]
+        RewriteCond %{HTTP:CONNECTION} ^Upgrade$   [NC]
+        RewriteRule .* ws://${NAME}%{REQUEST_URI}  [P,QSA,L]
+
+        # For httpd, some ErrorDocuments must by served by the httpd pod
+        RewriteCond %{REQUEST_URI} !^/proxy_pages
+
+        # For SAML /saml2 is only served by mod_auth_mellon in the httpd pod
+        RewriteCond %{REQUEST_URI} !^/saml2
+        RewriteRule ^/ http://${NAME}%{REQUEST_URI} [P,QSA,L]
+        ProxyPassReverse / http://${NAME}/
+
+        # Ensures httpd stdout/stderr are seen by docker logs.
+        ErrorLog  "| /usr/bin/tee /proc/1/fd/2 /var/log/httpd/error_log"
+        CustomLog "| /usr/bin/tee /proc/1/fd/1 /var/log/httpd/access_log" common
+      </VirtualHost>
+    authentication.conf: |
+      # Load appropriate authentication configuration files
+      #
+      Include "conf.d/configuration-${HTTPD_AUTH_TYPE}-auth"
+    configuration-internal-auth: |
+      # Internal authentication
+      #
+    configuration-external-auth: |
+      Include "conf.d/external-auth-load-modules-conf"
+
+      <Location /dashboard/kerberos_authenticate>
+        AuthType                   Kerberos
+        AuthName                   "Kerberos Login"
+        KrbMethodNegotiate         On
+        KrbMethodK5Passwd          Off
+        KrbAuthRealms              ${HTTPD_AUTH_KERBEROS_REALMS}
+        Krb5KeyTab                 /etc/http.keytab
+        KrbServiceName             Any
+        Require                    pam-account httpd-auth
+
+        ErrorDocument 401 /proxy_pages/invalid_sso_credentials.js
+      </Location>
+
+      Include "conf.d/external-auth-login-form-conf"
+      Include "conf.d/external-auth-application-api-conf"
+      Include "conf.d/external-auth-lookup-user-details-conf"
+      Include "conf.d/external-auth-remote-user-conf"
+    configuration-active-directory-auth: |
+      Include "conf.d/external-auth-load-modules-conf"
+
+      <Location /dashboard/kerberos_authenticate>
+        AuthType                   Kerberos
+        AuthName                   "Kerberos Login"
+        KrbMethodNegotiate         On
+        KrbMethodK5Passwd          Off
+        KrbAuthRealms              ${HTTPD_AUTH_KERBEROS_REALMS}
+        Krb5KeyTab                 /etc/krb5.keytab
+        KrbServiceName             Any
+        Require                    pam-account httpd-auth
+
+        ErrorDocument 401 /proxy_pages/invalid_sso_credentials.js
+      </Location>
+
+      Include "conf.d/external-auth-login-form-conf"
+      Include "conf.d/external-auth-application-api-conf"
+      Include "conf.d/external-auth-lookup-user-details-conf"
+      Include "conf.d/external-auth-remote-user-conf"
+    configuration-saml-auth: |
+      LoadModule auth_mellon_module modules/mod_auth_mellon.so
+
+      <Location />
+        MellonEnable               "info"
+
+        MellonIdPMetadataFile      "/etc/httpd/saml2/idp-metadata.xml"
+
+        MellonSPPrivateKeyFile     "/etc/httpd/saml2/sp-key.key"
+        MellonSPCertFile           "/etc/httpd/saml2/sp-cert.cert"
+        MellonSPMetadataFile       "/etc/httpd/saml2/sp-metadata.xml"
+
+        MellonVariable             "sp-cookie"
+        MellonSecureCookie         On
+        MellonCookiePath           "/"
+
+        MellonIdP                  "IDP"
+
+        MellonEndpointPath         "/saml2"
+
+        MellonUser                 username
+        MellonMergeEnvVars         On
+
+        MellonSetEnvNoPrefix       "REMOTE_USER"            username
+        MellonSetEnvNoPrefix       "REMOTE_USER_EMAIL"      email
+        MellonSetEnvNoPrefix       "REMOTE_USER_FIRSTNAME"  firstname
+        MellonSetEnvNoPrefix       "REMOTE_USER_LASTNAME"   lastname
+        MellonSetEnvNoPrefix       "REMOTE_USER_FULLNAME"   fullname
+        MellonSetEnvNoPrefix       "REMOTE_USER_GROUPS"     groups
+      </Location>
+
+      <Location /saml_login>
+        AuthType                   "Mellon"
+        MellonEnable               "auth"
+        Require                    valid-user
+      </Location>
+
+      Include "conf.d/external-auth-remote-user-conf"
+    external-auth-load-modules-conf: |
+      LoadModule authnz_pam_module            modules/mod_authnz_pam.so
+      LoadModule intercept_form_submit_module modules/mod_intercept_form_submit.so
+      LoadModule lookup_identity_module       modules/mod_lookup_identity.so
+      LoadModule auth_kerb_module             modules/mod_auth_kerb.so
+    external-auth-login-form-conf: |
+      <Location /dashboard/external_authenticate>
+        InterceptFormPAMService    httpd-auth
+        InterceptFormLogin         user_name
+        InterceptFormPassword      user_password
+        InterceptFormLoginSkip     admin
+        InterceptFormClearRemoteUserForSkipped on
+      </Location>
+    external-auth-application-api-conf: |
+      <LocationMatch ^/api>
+        SetEnvIf Authorization     '^Basic +YWRtaW46' let_admin_in
+        SetEnvIf X-Auth-Token      '^.+$'             let_api_token_in
+        SetEnvIf X-MIQ-Token       '^.+$'             let_sys_token_in
+
+        AuthType                   Basic
+        AuthName                   "External Authentication (httpd) for API"
+        AuthBasicProvider          PAM
+
+        AuthPAMService             httpd-auth
+        Require                    valid-user
+        Order                      Allow,Deny
+        Allow from                 env=let_admin_in
+        Allow from                 env=let_api_token_in
+        Allow from                 env=let_sys_token_in
+        Satisfy                    Any
+      </LocationMatch>
+    external-auth-lookup-user-details-conf: |
+      <LocationMatch ^/dashboard/external_authenticate$|^/dashboard/kerberos_authenticate$|^/api>
+        LookupUserAttr mail        REMOTE_USER_EMAIL
+        LookupUserAttr givenname   REMOTE_USER_FIRSTNAME
+        LookupUserAttr sn          REMOTE_USER_LASTNAME
+        LookupUserAttr displayname REMOTE_USER_FULLNAME
+        LookupUserAttr domainname  REMOTE_USER_DOMAIN
+
+        LookupUserGroups           REMOTE_USER_GROUPS ":"
+        LookupDbusTimeout          5000
+      </LocationMatch>
+    external-auth-remote-user-conf: |
+      RequestHeader unset X_REMOTE_USER
+
+      RequestHeader set X_REMOTE_USER           %{REMOTE_USER}e           env=REMOTE_USER
+      RequestHeader set X_EXTERNAL_AUTH_ERROR   %{EXTERNAL_AUTH_ERROR}e   env=EXTERNAL_AUTH_ERROR
+      RequestHeader set X_REMOTE_USER_EMAIL     %{REMOTE_USER_EMAIL}e     env=REMOTE_USER_EMAIL
+      RequestHeader set X_REMOTE_USER_FIRSTNAME %{REMOTE_USER_FIRSTNAME}e env=REMOTE_USER_FIRSTNAME
+      RequestHeader set X_REMOTE_USER_LASTNAME  %{REMOTE_USER_LASTNAME}e  env=REMOTE_USER_LASTNAME
+      RequestHeader set X_REMOTE_USER_FULLNAME  %{REMOTE_USER_FULLNAME}e  env=REMOTE_USER_FULLNAME
+      RequestHeader set X_REMOTE_USER_GROUPS    %{REMOTE_USER_GROUPS}e    env=REMOTE_USER_GROUPS
+      RequestHeader set X_REMOTE_USER_DOMAIN    %{REMOTE_USER_DOMAIN}e    env=REMOTE_USER_DOMAIN
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: "${HTTPD_SERVICE_NAME}-auth-configs"
+  data:
+    auth-type: internal
+    auth-kerberos-realms: undefined
+    auth-configuration.conf: |
+      # External Authentication Configuration File
+      #
+      # For details on usage please see https://github.com/ManageIQ/manageiq-pods/blob/master/README.md#configuring-external-authentication
 - apiVersion: v1
   kind: Service
   metadata:
@@ -891,6 +744,16 @@ parameters:
   description: Password for the PostgreSQL user.
   from: "[a-zA-Z0-9]{8}"
   generate: expression
+- name: DATABASE_IP
+  displayName: PostgreSQL Server IP
+  required: true
+  description: PostgreSQL external server IP used to configure service.
+  value: ''
+- name: DATABASE_PORT
+  displayName: PostgreSQL Server Port
+  required: true
+  description: PostgreSQL external server port used to configure service.
+  value: '5432'
 - name: DATABASE_NAME
   required: true
   displayName: PostgreSQL Database Name
@@ -928,18 +791,6 @@ parameters:
   displayName: Memcached Slab Page Size
   description: Memcached size of each slab page.
   value: 1m
-- name: POSTGRESQL_CONFIG_DIR
-  displayName: PostgreSQL Configuration Overrides
-  description: Directory used to store PostgreSQL configuration overrides.
-  value: "/var/lib/pgsql/conf.d"
-- name: POSTGRESQL_MAX_CONNECTIONS
-  displayName: PostgreSQL Max Connections
-  description: PostgreSQL maximum number of database connections allowed.
-  value: '1000'
-- name: POSTGRESQL_SHARED_BUFFERS
-  displayName: PostgreSQL Shared Buffer Amount
-  description: Amount of memory dedicated for PostgreSQL shared memory buffers.
-  value: 1GB
 - name: ANSIBLE_SERVICE_NAME
   displayName: Ansible Service Name
   description: The name of the OpenShift Service exposed for the Ansible container.
@@ -972,11 +823,6 @@ parameters:
   required: true
   description: Minimum amount of CPU time the Application container will need (expressed in millicores).
   value: 1000m
-- name: POSTGRESQL_CPU_REQ
-  displayName: PostgreSQL Min CPU Requested
-  required: true
-  description: Minimum amount of CPU time the PostgreSQL container will need (expressed in millicores).
-  value: 500m
 - name: MEMCACHED_CPU_REQ
   displayName: Memcached Min CPU Requested
   required: true
@@ -992,11 +838,6 @@ parameters:
   required: true
   description: Minimum amount of memory the Application container will need.
   value: 6144Mi
-- name: POSTGRESQL_MEM_REQ
-  displayName: PostgreSQL Min RAM Requested
-  required: true
-  description: Minimum amount of memory the PostgreSQL container will need.
-  value: 4Gi
 - name: MEMCACHED_MEM_REQ
   displayName: Memcached Min RAM Requested
   required: true
@@ -1012,11 +853,6 @@ parameters:
   required: true
   description: Maximum amount of memory the Application container can consume.
   value: 16384Mi
-- name: POSTGRESQL_MEM_LIMIT
-  displayName: PostgreSQL Max RAM Limit
-  required: true
-  description: Maximum amount of memory the PostgreSQL container can consume.
-  value: 8Gi
 - name: MEMCACHED_MEM_LIMIT
   displayName: Memcached Max RAM Limit
   required: true
@@ -1027,18 +863,10 @@ parameters:
   required: true
   description: Maximum amount of memory the Ansible container can consume.
   value: 8096Mi
-- name: POSTGRESQL_IMG_NAME
-  displayName: PostgreSQL Image Name
-  description: This is the PostgreSQL image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-postgresql
-- name: POSTGRESQL_IMG_TAG
-  displayName: PostgreSQL Image Tag
-  description: This is the PostgreSQL image tag/version requested to deploy.
-  value: latest
 - name: MEMCACHED_IMG_NAME
   displayName: Memcached Image Name
   description: This is the Memcached image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-memcached
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-memcached
 - name: MEMCACHED_IMG_TAG
   displayName: Memcached Image Tag
   description: This is the Memcached image tag/version requested to deploy.
@@ -1046,11 +874,11 @@ parameters:
 - name: FRONTEND_APPLICATION_IMG_NAME
   displayName: Frontend Application Image Name
   description: This is the Frontend Application image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-app-ui
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-app-ui
 - name: BACKEND_APPLICATION_IMG_NAME
   displayName: Backend Application Image Name
   description: This is the Backend Application image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-app
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-app
 - name: FRONTEND_APPLICATION_IMG_TAG
   displayName: Front end Application Image Tag
   description: This is the CloudForms Frontend Application image tag/version requested to deploy.
@@ -1062,7 +890,7 @@ parameters:
 - name: ANSIBLE_IMG_NAME
   displayName: Ansible Image Name
   description: This is the Ansible image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-embedded-ansible
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-embedded-ansible
 - name: ANSIBLE_IMG_TAG
   displayName: Ansible Image Tag
   description: This is the Ansible image tag/version requested to deploy.
@@ -1085,11 +913,6 @@ parameters:
   required: true
   description: Volume space available for application data.
   value: 5Gi
-- name: DATABASE_VOLUME_CAPACITY
-  displayName: Database Volume Capacity
-  required: true
-  description: Volume space available for database.
-  value: 15Gi
 - name: HTTPD_SERVICE_NAME
   required: true
   displayName: Apache httpd Service Name
@@ -1103,13 +926,13 @@ parameters:
 - name: HTTPD_IMG_NAME
   displayName: Apache httpd Image Name
   description: This is the httpd image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-httpd
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-httpd
 - name: HTTPD_IMG_TAG
   displayName: Apache httpd Image Tag
   description: This is the httpd image tag/version requested to deploy.
   value: latest
 - name: HTTPD_CONFIG_DIR
-  displayName: Apache Configuration Directory
+  displayName: Apache httpd Configuration Directory
   description: Directory used to store the Apache configuration files.
   value: "/etc/httpd/conf.d"
 - name: HTTPD_AUTH_CONFIG_DIR
