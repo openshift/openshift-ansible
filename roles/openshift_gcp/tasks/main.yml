@@ -17,7 +17,7 @@
 - name: Provision GCP DNS domain
   command: /tmp/openshift_gcp_provision_dns.sh
   args:
-    chdir: "{{ playbook_dir }}/files"
+    chdir: "{{ files_dir }}"
   register: dns_provision
   when:
   - state | default('present') == 'present'
@@ -33,7 +33,7 @@
 - name: Provision GCP resources
   command: /tmp/openshift_gcp_provision.sh
   args:
-    chdir: "{{ playbook_dir }}/files"
+    chdir: "{{ files_dir }}"
   when:
   - state | default('present') == 'present'
 

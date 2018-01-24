@@ -19,43 +19,49 @@
 #         value: "https://{{ openshift_logging_kibana_hostname }}"
 #   when: openshift_web_console_install | default(true) | bool
 
-- name: Read web console config map
+- name: Read the existing web console config map
   oc_configmap:
     namespace: openshift-web-console
     name: webconsole-config
     state: list
-  register: webconsole_config
+  register: webconsole_config_map
 
-- name: Make temp directory
-  command: mktemp -d /tmp/console-ansible-XXXXXX
-  register: mktemp_console
-  changed_when: False
+- set_fact:
+    existing_config_map_data: "{{ webconsole_config_map.results.results[0].data | default({}) }}"
 
-- name: Copy web console config to temp file
-  copy:
-    content: "{{webconsole_config.results.results[0].data['webconsole-config.yaml']}}"
-    dest: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
+- when: existing_config_map_data['webconsole-config.yaml'] is defined
+  block:
+  - name: Make temp directory
+    command: mktemp -d /tmp/console-ansible-XXXXXX
+    register: mktemp_console
+    changed_when: False
 
-- name: Change web console config properties
-  yedit:
-    src: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
-    edits: "{{console_config_edits}}"
-    separator: '#'
-    state: present
+  - name: Copy the existing web console config to temp directory
+    copy:
+      content: "{{ existing_config_map_data['webconsole-config.yaml'] }}"
+      dest: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
 
-- name: Update web console config map
-  oc_configmap:
-    namespace: openshift-web-console
-    name: webconsole-config
-    state: present
-    from_file:
-      webconsole-config.yaml: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
+  - name: Change web console config properties
+    yedit:
+      src: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
+      edits: "{{console_config_edits}}"
+      separator: '#'
+      state: present
 
-- name: Remove temp directory
-  file:
-    state: absent
-    name: "{{ mktemp_console.stdout }}"
-  changed_when: False
+  - name: Update web console config map
+    oc_configmap:
+      namespace: openshift-web-console
+      name: webconsole-config
+      state: present
+      from_file:
+        webconsole-config.yaml: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
+    register: update_console_config_map
 
-# TODO: Only rollout if config has changed.
-- include_tasks: rollout_console.yml
+  - name: Remove temp directory
+    file:
+      state: absent
+      name: "{{ mktemp_console.stdout }}"
+    changed_when: False
+
+  - include_tasks: rollout_console.yml
+    when: update_console_config_map.changed | bool

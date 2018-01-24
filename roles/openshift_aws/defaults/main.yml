@@ -59,7 +59,7 @@ openshift_aws_elb_name_dict:
     external: "{{ openshift_aws_elb_basename }}-infra"
 
 openshift_aws_elb_idle_timout: 400
-openshift_aws_elb_scheme: internet-facing
+
 openshift_aws_elb_cert_arn: ''
 
 openshift_aws_elb_dict:
@@ -282,8 +282,6 @@ openshift_aws_node_security_groups:
 openshift_aws_vpc_tags:
   Name: "{{ openshift_aws_vpc_name }}"
 
-openshift_aws_subnet_az: us-east-1c
-
 openshift_aws_vpc:
   name: "{{ openshift_aws_vpc_name }}"
   cidr: 172.31.0.0/16
@@ -291,10 +289,13 @@ openshift_aws_vpc:
     us-east-1:
     - cidr: 172.31.48.0/20
       az: "us-east-1c"
+      default_az: true
     - cidr: 172.31.32.0/20
       az: "us-east-1e"
     - cidr: 172.31.16.0/20
       az: "us-east-1a"
+
+openshift_aws_subnet_az: "{{ openshift_aws_vpc.subnets[openshift_aws_region] | get_default_az }}"
 
 openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''

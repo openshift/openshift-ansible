@@ -820,7 +820,7 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.echo(message)
 
 
-@click.group()
+@click.group(context_settings=dict(max_content_width=120))
 @click.pass_context
 @click.option('--unattended', '-u', is_flag=True, default=False)
 @click.option('--configuration', '-c',
@@ -932,7 +932,7 @@ def uninstall(ctx):
     openshift_ansible.run_uninstall_playbook(hosts, verbose)
 
 
-@click.command()
+@click.command(context_settings=dict(max_content_width=120))
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context

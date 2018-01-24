@@ -4,6 +4,7 @@
 """
 Custom filters for use in openshift-ansible
 """
+import json
 import os
 import pdb
 import random
@@ -586,6 +587,18 @@ that result to this filter plugin.
     return secret_name
 
 
+def lib_utils_oo_l_of_d_to_csv(input_list):
+    """Map a list of dictionaries, input_list, into a csv string
+    of json values.
+
+    Example input:
+    [{'var1': 'val1', 'var2': 'val2'}, {'var1': 'val3', 'var2': 'val4'}]
+    Example output:
+    u'{"var1": "val1", "var2": "val2"},{"var1": "val3", "var2": "val4"}'
+    """
+    return ','.join(json.dumps(x) for x in input_list)
+
+
 def map_from_pairs(source, delim="="):
     ''' Returns a dict given the source and delim delimited '''
     if source == '':
@@ -623,5 +636,6 @@ class FilterModule(object):
             "lib_utils_oo_contains_rule": lib_utils_oo_contains_rule,
             "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
             "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
+            "lib_utils_oo_l_of_d_to_csv": lib_utils_oo_l_of_d_to_csv,
             "map_from_pairs": map_from_pairs
         }

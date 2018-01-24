@@ -47,7 +47,7 @@
       msg: >
         Running etcd as an embedded service is no longer supported.
     when:
-    - g_etcd_hosts | default([]) | length not in [3,1]
+    - g_etcd_hosts | default([]) | length not in [5,3,1]
     - not (openshift_node_bootstrap | default(False))
 
   - name: Evaluate oo_all_hosts

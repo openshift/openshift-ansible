@@ -3,11 +3,10 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  roles:
+  - openshift_gcp
   tasks:
-
-  - name: provision a GCP cluster in the specified project
+  - name: recalculate the dynamic inventory
     import_role:
       name: openshift_gcp
-
-- name: run the cluster deploy
-  import_playbook: ../deploy_cluster.yml
+      tasks_from: dynamic_inventory.yml

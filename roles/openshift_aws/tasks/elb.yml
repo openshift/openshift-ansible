@@ -15,7 +15,7 @@
     - "{{ subnetout.subnets[0].id }}"
     health_check: "{{ openshift_aws_elb_health_check }}"
     listeners: "{{ item.value }}"
-    scheme: "{{ openshift_aws_elb_scheme }}"
+    scheme: "{{ (item.key == 'internal') | ternary('internal','internet-facing') }}"
     tags: "{{ openshift_aws_elb_tags }}"
     wait: True
   register: new_elb
