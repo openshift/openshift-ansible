@@ -55,6 +55,7 @@
       state: present
       from_file:
         webconsole-config.yaml: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
+    register: update_console_config_map
 
   - name: Remove temp directory
     file:
@@ -62,5 +63,5 @@
       name: "{{ mktemp_console.stdout }}"
     changed_when: False
 
-  # TODO: Only rollout if config has changed.
   - include_tasks: rollout_console.yml
+    when: update_console_config_map.changed | bool
