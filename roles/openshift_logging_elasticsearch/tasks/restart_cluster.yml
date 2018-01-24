@@ -19,7 +19,7 @@
 
 ## get all pods for the cluster
 - command: >
-    oc get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+    oc get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
   register: _cluster_pods
 
 - name: "Disable shard balancing for logging-{{ _cluster_component }} cluster"
@@ -64,7 +64,7 @@
 
 ## we may need a new first pod to run against -- fetch them all again
 - command: >
-    oc get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+    oc get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
   register: _cluster_pods
 
 - name: "Enable shard balancing for logging-{{ _cluster_component }} cluster"
