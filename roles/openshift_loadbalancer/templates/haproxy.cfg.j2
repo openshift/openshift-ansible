@@ -38,7 +38,8 @@ defaults
     timeout check           10s
     maxconn                 {{ openshift_loadbalancer_default_maxconn | default(20000) }}
 
-listen stats :9000
+listen stats
+    bind :9000
     mode http
     stats enable
     stats uri /
