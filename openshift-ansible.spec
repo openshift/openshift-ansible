@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.25
+Version:        3.7.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 24 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.26-1
+- Update CF 4.6 Beta templates in openshift_management directory
+  (simaishi@redhat.com)
+- CF 4.6 templates (simaishi@redhat.com)
+- remove legacy master (m.judeikis@gmail.com)
+- openshift_checks: repair adhoc list-checks mode (lmeyer@redhat.com)
+- docker_image_availability: enable skopeo to use proxies (lmeyer@redhat.com)
+- Fix docker_image_availability checks (mgugino@redhat.com)
+- [1512810] Ensure failures during init abort installation (rteague@redhat.com)
+- Require minimum Ansible version 2.3.2 (rteague@redhat.com)
+- Allow for firewalld on atomic host (sdodson@redhat.com)
+- Fix a typo in "Determine if growpart is installed" (vrutkovs@redhat.com)
+- Check rc for commands with openshift_client_binary and failed_when
+  (vrutkovs@redhat.com)
+
 * Mon Jan 22 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.25-1
 - remove integration tests from tox (lmeyer@redhat.com)
 - Changing include_tasks to include for release-3.7 (ewolinet@redhat.com)
