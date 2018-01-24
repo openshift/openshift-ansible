@@ -20,6 +20,7 @@ import ipaddress
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from ansible.module_utils.six import string_types, text_type
+from ansible.module_utils.six import u
 from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
@@ -1548,7 +1549,7 @@ def set_proxy_facts(facts):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
             # We always add local dns domain and ourselves no matter what
-            kube_svc_ip = ipaddress.ip_network(unicode(common['portal_net']))[1]
+            kube_svc_ip = str(ipaddress.ip_network(u(common['portal_net']))[1])
             common['no_proxy'].append(kube_svc_ip)
             common['no_proxy'].append('.' + common['dns_domain'])
             common['no_proxy'].append('.svc')
