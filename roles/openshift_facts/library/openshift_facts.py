@@ -1430,9 +1430,6 @@ class OpenShiftFacts(object):
                                       dynamic_provisioning_enabled=True,
                                       max_requests_inflight=500)
 
-        if 'node' in roles:
-            defaults['node'] = dict(labels={})
-
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
 
