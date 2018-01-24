@@ -28,7 +28,7 @@
   changed_when: false
 
 - copy:
-    src: "{{ __tsb_files_location }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
     - "{{ __tsb_template_file }}"
