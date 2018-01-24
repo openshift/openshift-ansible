@@ -59,7 +59,7 @@ openshift_aws_elb_name_dict:
     external: "{{ openshift_aws_elb_basename }}-infra"
 
 openshift_aws_elb_idle_timout: 400
-openshift_aws_elb_scheme: internet-facing
+
 openshift_aws_elb_cert_arn: ''
 
 openshift_aws_elb_dict:
