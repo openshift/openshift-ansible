@@ -310,13 +310,8 @@
   - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
-  - name: Set node schedulability
-    oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
-      schedulable: True
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    retries: 10
-    delay: 5
-    register: node_schedulable
-    until: node_schedulable is succeeded
-    when: node_unschedulable is changed
+  - import_role:
+      name: openshift_manage_node
+      tasks_from: config.yml
+    vars:
+      openshift_master_host: "{{ groups.oo_first_master.0 }}"
