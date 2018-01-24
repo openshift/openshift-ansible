@@ -15,21 +15,13 @@
     name: "{{ openshift.node.nodename }}"
     kind: node
     state: add
-    labels: "{{ openshift_node_labels | lib_utils_oo_dict_to_list_of_dict }}"
+    labels: "{{ l_all_labels | lib_utils_oo_dict_to_list_of_dict }}"
     namespace: default
   when:
     - "'nodename' in openshift.node"
-    - openshift_node_labels | default({}) != {}
+    - l_all_labels != {}
   delegate_to: "{{ openshift_master_host }}"
-
-- name: Label master nodes
-  oc_label:
-    name: "{{ openshift.node.nodename }}"
-    kind: node
-    state: add
-    labels: "{{ openshift_master_node_labels | lib_utils_oo_dict_to_list_of_dict }}"
-    namespace: default
-  when:
-    - "'nodename' in openshift.node"
-    - "'oo_masters_to_config' in group_names"
-  delegate_to: "{{ openshift_master_host }}"
+  vars:
+    l_node_labels: "{{ openshift_node_labels | default({}) }}"
+    l_master_labels: "{{ ('oo_masters_to_config' in group_names) | ternary(openshift_master_node_labels, {}) }}"
+    l_all_labels: "{{ l_node_labels | combine(l_master_labels) }}"
