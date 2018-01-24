@@ -17,7 +17,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -134,7 +134,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "editable": true,
             "error": false,
             "format": "percent",
@@ -215,7 +215,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -296,7 +296,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -380,7 +380,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -461,7 +461,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -542,7 +542,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -623,7 +623,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -704,7 +704,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -785,7 +785,7 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -875,7 +875,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 33,
             "legend": {
@@ -965,7 +965,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 3,
             "editable": true,
             "error": false,
@@ -1067,7 +1067,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 3,
             "editable": true,
             "error": false,
@@ -1171,7 +1171,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 3,
             "editable": true,
             "error": false,
@@ -1272,7 +1272,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 3,
             "editable": true,
             "error": false,
@@ -1372,7 +1372,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -1472,7 +1472,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -1573,7 +1573,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -1695,7 +1695,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -1794,7 +1794,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -1950,7 +1950,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -2060,7 +2060,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "decimals": 2,
             "editable": true,
             "error": false,
@@ -2171,7 +2171,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 35,
             "legend": {
@@ -2251,7 +2251,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 54,
             "legend": {
@@ -2326,7 +2326,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 55,
             "legend": {
@@ -2401,7 +2401,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 56,
             "legend": {
@@ -2476,7 +2476,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 57,
             "legend": {
@@ -2554,7 +2554,7 @@
             "bars": true,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 58,
             "legend": {
@@ -2629,7 +2629,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 0,
             "id": 59,
             "legend": {
@@ -2721,7 +2721,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 36,
             "legend": {
@@ -2796,7 +2796,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 41,
             "legend": {
@@ -2871,7 +2871,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 50,
             "legend": {
@@ -2952,7 +2952,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 37,
             "legend": {
@@ -3032,7 +3032,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 39,
             "legend": {
@@ -3107,7 +3107,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 42,
             "legend": {
@@ -3187,7 +3187,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 40,
             "legend": {
@@ -3274,7 +3274,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 44,
             "legend": {
@@ -3354,7 +3354,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 51,
             "legend": {
@@ -3434,7 +3434,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 52,
             "legend": {
@@ -3514,7 +3514,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 53,
             "legend": {
@@ -3606,7 +3606,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 46,
             "legend": {
@@ -3687,7 +3687,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 68,
             "legend": {
@@ -3775,7 +3775,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 48,
             "legend": {
@@ -3855,7 +3855,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 49,
             "legend": {
@@ -3935,7 +3935,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 74,
             "legend": {
@@ -4025,7 +4025,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 61,
             "legend": {
@@ -4112,7 +4112,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 62,
             "legend": {
@@ -4201,7 +4201,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 63,
             "legend": {
@@ -4276,7 +4276,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 64,
             "legend": {
@@ -4351,7 +4351,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 65,
             "legend": {
@@ -4426,7 +4426,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 66,
             "legend": {
@@ -4502,7 +4502,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 67,
             "legend": {
@@ -4577,7 +4577,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 47,
             "legend": {
@@ -4652,7 +4652,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 69,
             "legend": {
@@ -4727,7 +4727,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 70,
             "legend": {
@@ -4814,7 +4814,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 71,
             "legend": {
@@ -4895,7 +4895,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 72,
             "legend": {
@@ -4981,7 +4981,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PR}",
+            "datasource": "__DS_PR__",
             "fill": 1,
             "id": 73,
             "legend": {
@@ -5083,7 +5083,7 @@
         {
           "allValue": ".*",
           "current": {},
-          "datasource": "${DS_PR}",
+          "datasource": "__DS_PR__",
           "hide": 0,
           "includeAll": true,
           "label": null,

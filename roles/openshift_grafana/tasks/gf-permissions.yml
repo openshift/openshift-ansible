@@ -1,12 +1,35 @@
 ---
-- name: Create gf user on htpasswd
-  command: htpasswd -c /etc/origin/master/htpasswd gfadmin
+- name: Touching htpasswd file
+  file:
+    path: /etc/origin/master/htpasswd
+    state: touch
+
+- name: Create Grafana user on htpasswd
+  command: htpasswd /etc/origin/master/htpasswd gfadmin
 
 - name: Make sure master config use HTPasswdPasswordIdentityProvider
-  command: "sed -ie 's|AllowAllPasswordIdentityProvider|HTPasswdPasswordIdentityProvider\n      file: /etc/origin/master/htpasswd|' /etc/origin/master/master-config.yaml"
+  command: "sed -ie 's|AllowAllPasswordIdentityProvider|HTPasswdPasswordIdentityProvider\\n      file: /etc/origin/master/htpasswd|' /etc/origin/master/master-config.yaml"
 
-- name: Grant permission for gfuser
+- name: Grant permission for Grafana user
   command: oc adm policy add-cluster-role-to-user cluster-reader gfadmin
 
-- name: Restart mater api
-  command: systemctl restart atomic-openshift-master-api.service
+- name: Restart master API
+  systemd: name={{ openshift_service_type }}-master-api state=restarted
+
+- name: Verify API Server
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl --silent --tlsv1.2
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {{ openshift.master.api_url }}/healthz/ready
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: api_available_output
+  until: api_available_output.stdout == 'ok'
+  retries: 120
+  delay: 1
+  changed_when: false
+
