@@ -64,7 +64,7 @@
   tasks:
   - systemd:
       name: "{{ item }}"
-      status: stopped
+      state: stopped
     with_items:
     - "{{ openshift.common.service_type }}-master if groups.oo_masters_to_config | length == 1 else omit"
     - "{{ openshift.common.service_type }}-master-api if groups.oo_masters_to_config | length != 1 else omit"
