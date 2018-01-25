@@ -8,7 +8,6 @@
   - openshift_facts:
       role: master
       local_facts:
-        ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
   - name: Update master count
     modify_yaml:

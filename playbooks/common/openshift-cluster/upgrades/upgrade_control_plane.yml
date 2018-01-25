@@ -48,8 +48,6 @@
 # support for optional hooks to be defined.
 - name: Upgrade master
   hosts: oo_masters_to_config
-  vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
   roles:
   - openshift_facts
