@@ -272,7 +272,7 @@ def haproxy_backend_masters(hosts, port):
     return servers
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-nested-blocks
 def lib_utils_oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
     """ Parses names from list of certificate hashes.
 
@@ -318,8 +318,9 @@ def lib_utils_oo_parse_named_certificates(certificates, named_certs_dir, interna
             certificate['names'].append(str(cert.get_subject().commonName.decode()))
             for i in range(cert.get_extension_count()):
                 if cert.get_extension(i).get_short_name() == 'subjectAltName':
-                    for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
-                        certificate['names'].append(name)
+                    for name in str(cert.get_extension(i)).split(', '):
+                        if 'DNS:' in name:
+                            certificate['names'].append(name.replace('DNS:', ''))
         except Exception:
             raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
                                              "please specify certificate names in host inventory"))
