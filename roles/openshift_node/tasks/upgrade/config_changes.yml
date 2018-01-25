@@ -27,28 +27,12 @@
     path: "/var/lib/cni/networks/openshift-sdn/"
     state: absent
 
-# Disable Swap Block (pre)
-- block:
-  - name: Remove swap entries from /etc/fstab
-    replace:
-      dest: /etc/fstab
-      regexp: '(^[^#].*swap.*)'
-      replace: '# \1'
-      backup: yes
-
-  - name: Add notice about disabling swap
-    lineinfile:
-      dest: /etc/fstab
-      line: '# OpenShift-Ansible Installer disabled swap per overcommit guidelines'
-      state: present
-
-  - name: Disable swap
-    command: swapoff --all
-
-  when:
-  - openshift_node_upgrade_swap_result | default(False) | bool
-  - openshift_disable_swap | default(true) | bool
-# End Disable Swap Block
+# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
+# swapoff is a custom module in lib_utils that comments out swap entries in
+# /etc/fstab and runs swapoff -a, if necessary.
+- name: Disable swap
+  swapoff: {}
+  when: openshift_disable_swap | default(true) | bool
 
 - name: Apply 3.6 dns config changes
   yedit:
