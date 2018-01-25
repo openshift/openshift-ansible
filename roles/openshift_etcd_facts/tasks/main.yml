@@ -1,1 +1,4 @@
 ---
+- openshift_facts:
+    role: etcd
+    local_facts: {}
