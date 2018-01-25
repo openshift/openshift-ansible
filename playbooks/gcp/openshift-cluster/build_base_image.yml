@@ -90,6 +90,8 @@
       repo_gpgcheck: no
       state: present
     when: ansible_os_family == "RedHat"
+  - name: Accept GPG keys for the repos
+    command: yum -q makecache -y --disablerepo='*' --enablerepo='google-cloud,jdetiber-qemu-user-static'
   - name: Install qemu-user-static
     package:
       name: qemu-user-static
@@ -121,7 +123,6 @@
     with_items:
     # required by Ansible
     - PyYAML
-    - docker
     - google-compute-engine
     - google-compute-engine-init
     - google-config
