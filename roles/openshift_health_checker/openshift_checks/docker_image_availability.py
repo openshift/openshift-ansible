@@ -171,16 +171,21 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 required.add(self._registry_console_image(image_tag, image_info))
 
         # images for containerized components
-        if self.get_var("openshift_is_containerized"):
-            components = set()
+        def add_var_or_default_img(var_name, comp_name):
+            """Returns: default image from comp_name, overridden by var_name in task_vars"""
+            default = "{}/{}:{}".format(image_info["namespace"], comp_name, image_tag)
+            required.add(self.template_var(self.get_var(var_name, default=default)))
+
+        if self.get_var("openshift_is_containerized", convert=bool):
             if 'oo_nodes_to_config' in host_groups:
-                components.update(["node", "openvswitch"])
+                add_var_or_default_img("osn_image", "node")
+                add_var_or_default_img("osn_ovs_image", "openvswitch")
             if 'oo_masters_to_config' in host_groups:  # name is "origin" or "ose"
-                components.add(image_info["name"])
-            for component in components:
-                required.add("{}/{}:{}".format(image_info["namespace"], component, image_tag))
-            if 'oo_etcd_to_config' in host_groups:  # special case, note it is the same for origin/enterprise
-                required.add("registry.access.redhat.com/rhel7/etcd")  # and no image tag
+                add_var_or_default_img("osm_image", image_info["name"])
+            if 'oo_etcd_to_config' in host_groups:
+                # special case, note default is the same for origin/enterprise and has no image tag
+                etcd_img = self.get_var("osm_etcd_image", default="registry.access.redhat.com/rhel7/etcd")
+                required.add(self.template_var(etcd_img))
 
         return required
 
