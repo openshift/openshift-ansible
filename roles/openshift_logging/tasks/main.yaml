@@ -17,7 +17,11 @@
   register: local_tmp
   changed_when: False
   check_mode: no
-  become: no
+
+- name: Chmod local temp directory for doing work in
+  local_action: command chmod 777 "{{ local_tmp.stdout }}"
+  changed_when: False
+  check_mode: no
 
 - include_tasks: install_logging.yaml
   when:
@@ -31,4 +35,3 @@
   local_action: file path="{{local_tmp.stdout}}" state=absent
   tags: logging_cleanup
   changed_when: False
-  become: no

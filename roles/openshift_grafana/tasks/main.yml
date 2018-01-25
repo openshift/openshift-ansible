@@ -1,0 +1,122 @@
+---
+- name: Create grafana namespace
+  oc_project:
+    state: present
+    name: grafana
+
+- name: Configure Grafana Permissions
+  include_tasks: tasks/gf-permissions.yml
+  when: gf_oauth | default(false) | bool == true
+
+# TODO: we should grab this yaml file from openshift/origin
+- name: Templatize grafana yaml
+  template: src=grafana-ocp.yaml dest=/tmp/grafana-ocp.yaml
+  register:
+    cl_file: /tmp/grafana-ocp.yaml
+  when: gf_oauth | default(false) | bool == false
+
+# TODO: we should grab this yaml file from openshift/origin
+- name: Templatize grafana yaml
+  template: src=grafana-ocp-oauth.yaml dest=/tmp/grafana-ocp-oauth.yaml
+  register:
+    cl_file: /tmp/grafana-ocp-oauth.yaml
+  when: gf_oauth | default(false) | bool == true
+
+- name: Process the grafana file
+  oc_process:
+    namespace: grafana
+    template_name: "{{ cl_file }}"
+    create: True
+    when: gf_oauth | default(false) | bool == true
+
+- name: Wait to grafana be running
+  command: oc rollout status deployment/grafana-ocp
+
+- name: oc adm policy add-role-to-user view -z grafana-ocp -n {{ gf_prometheus_namespace }}
+  oc_adm_policy_user:
+    user: grafana-ocp
+    resource_kind: cluster-role
+    resource_name: view
+    state: present
+    role_namespace: "{{ gf_prometheus_namespace }}"
+
+- name: Get grafana route
+  oc_obj:
+    kind: route
+    name: grafana
+    namespace: grafana
+  register: route
+
+- name: Get prometheus route
+  oc_obj:
+    kind: route
+    name: prometheus
+    namespace: "{{ gf_prometheus_namespace }}"
+  register: route
+
+- name: Get the prometheus SA
+  oc_serviceaccount_secret:
+    state: list
+    service_account: prometheus
+    namespace: "{{ gf_prometheus_namespace }}"
+  register: sa
+
+- name: Get the management SA bearer token
+  set_fact:
+    management_token: "{{ sa.results | oo_filter_sa_secrets }}"
+
+- name: Ensure the SA bearer token value is read
+  oc_secret:
+    state: list
+    name: "{{ management_token }}"
+    namespace: "{{ gf_prometheus_namespace }}"
+  no_log: True
+  register: sa_secret
+
+- name: Get the SA bearer token for prometheus
+  set_fact:
+    token: "{{ sa_secret.results.encoded.token }}"
+
+- name: Convert to json
+  var:
+    ds_json: "{{ gf_body_tmp }} | to_json }}"
+
+- name: Set protocol type
+  var:
+    protocol: "{{ 'https' if {{ gf_oauth }} == true else 'http' }}"
+
+- name: Add gf datasrouce
+  uri:
+    url: "{{ protocol }}://{{ route }}/api/datasources"
+    user: admin
+    password: admin
+    method: POST
+    body: "{{ ds_json | regex_replace('grafana_name', {{ gf_datasource_name }}) | regex_replace('prometheus_url', 'https://'{{ prometheus }} ) | regex_replace('satoken', {{ token }}) }}"
+    headers:
+      Content-Type: "Content-Type: application/json"
+  register: add_ds
+
+- name: Regex setup ds name
+  replace:
+    path: "{{ lookup('file', 'openshift-cluster-monitoring.json') }}"
+    regexp: '${DS_PR}'
+    replace: '{{ gf_datasource_name }}'
+    backup: yes
+
+- name: Add new dashboard
+  uri:
+    url: "{{ protocol }}://{{ route }}/api/dashboards/db"
+    user: admin
+    password: admin
+    method: POST
+    body: "{{ lookup('file', 'openshift-cluster-monitoring.json') }}"
+    headers:
+      Content-Type: "Content-Type: application/json"
+  register: add_ds
+
+- name: Regex json tear down
+  replace:
+    path: "{{ lookup('file', 'openshift-cluster-monitoring.json') }}"
+    regexp: '${DS_PR}'
+    replace: '{{ gf_datasource_name }}'
+    backup: yes

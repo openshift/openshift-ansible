@@ -18,6 +18,7 @@
 
 - name: set_fact replicas
   set_fact:
+    # get_router_replicas is a custom filter in role lib_utils
     replicas: "{{ openshift_hosted_router_replicas | default(None) | get_router_replicas(router_nodes) }}"
 
 - name: Get the certificate contents for router

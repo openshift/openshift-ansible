@@ -523,7 +523,7 @@ resources:
           floating_network:
             if:
               - no_floating
-              - null
+              - ''
               - {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
@@ -589,8 +589,13 @@ resources:
           secgrp:
             - { get_resource: lb-secgrp }
             - { get_resource: common-secgrp }
-{% if not openshift_openstack_provider_network_name %}
-          floating_network: {{ openshift_openstack_external_network_name }}
+          floating_network:
+            if:
+              - no_floating
+              - ''
+              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_lb_volume_size }}
 {% if not openshift_openstack_provider_network_name %}
@@ -655,7 +660,7 @@ resources:
           floating_network:
             if:
               - no_floating
-              - null
+              - ''
               - {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
@@ -725,7 +730,7 @@ resources:
           floating_network:
             if:
               - no_floating
-              - null
+              - ''
               - {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
@@ -792,8 +797,13 @@ resources:
 {% endif %}
             - { get_resource: infra-secgrp }
             - { get_resource: common-secgrp }
-{% if not openshift_openstack_provider_network_name %}
-          floating_network: {{ openshift_openstack_external_network_name }}
+          floating_network:
+            if:
+              - no_floating
+              - ''
+              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_infra_volume_size }}
 {% if openshift_openstack_infra_server_group_policies|length > 0 %}

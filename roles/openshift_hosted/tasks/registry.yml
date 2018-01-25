@@ -43,7 +43,7 @@
 
 - name: Update registry environment variables when pushing via dns
   set_fact:
-    openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'OPENSHIFT_DEFAULT_REGISTRY':'docker-registry.default.svc:5000'}) }}"
+    openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'REGISTRY_OPENSHIFT_SERVER_ADDR':'docker-registry.default.svc:5000'}) }}"
   when: openshift_push_via_dns | bool
 
 - name: Update registry proxy settings for dc/docker-registry

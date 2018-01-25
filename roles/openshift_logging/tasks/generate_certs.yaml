@@ -19,7 +19,7 @@
   command: >
     {{ openshift_client_binary }} adm --config={{ mktemp.stdout }}/admin.kubeconfig ca create-signer-cert
     --key={{generated_certs_dir}}/ca.key --cert={{generated_certs_dir}}/ca.crt
-    --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test
+    --serial={{generated_certs_dir}}/ca.serial.txt --name=logging-signer-test --overwrite=false
   check_mode: no
   when:
     - not ca_key_file.stat.exists

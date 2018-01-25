@@ -21,7 +21,6 @@
 - name: Create temp file on localhost
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - local_action: command mktemp
@@ -38,7 +37,6 @@
 - name: Cleanup temp file on localhost
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - file: path="{{ hostvars.localhost.mktemp.stdout }}" state=absent

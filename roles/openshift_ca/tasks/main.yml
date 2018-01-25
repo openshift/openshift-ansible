@@ -19,7 +19,8 @@
 
 - name: Reload generated facts
   openshift_facts:
-  when: hostvars[openshift_ca_host].install_result is changed
+  when:
+  - hostvars[openshift_ca_host].install_result | default({'changed':false}) is changed
 
 - name: Create openshift_ca_config_dir if it does not exist
   file:

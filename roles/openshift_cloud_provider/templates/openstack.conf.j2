@@ -19,3 +19,7 @@ region = {{ openshift_cloudprovider_openstack_region }}
 [LoadBalancer]
 subnet-id = {{ openshift_cloudprovider_openstack_lb_subnet_id }}
 {% endif %}
+{% if openshift_cloudprovider_openstack_blockstorage_version is defined %}
+[BlockStorage]
+bs-version={{ openshift_cloudprovider_openstack_blockstorage_version }}
+{% endif %}

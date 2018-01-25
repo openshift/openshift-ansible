@@ -1,28 +1,18 @@
 ---
-- when: not openshift_is_containerized | bool
-  block:
-  - name: Install Node package
-    package:
-      name: "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-      state: present
-    register: result
-    until: result is succeeded
-
-  - name: Install sdn-ovs package
-    package:
-      name: "{{ openshift_service_type }}-sdn-ovs{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
-      state: present
-    when:
-    - openshift_node_use_openshift_sdn | bool
-    register: result
-    until: result is succeeded
-
-  - name: Install conntrack-tools package
-    package:
-      name: "conntrack-tools"
-      state: present
-    register: result
-    until: result is succeeded
+- name: Install Node package, sdn-ovs, conntrack packages
+  package:
+    name: "{{ item.name }}"
+    state: present
+  register: result
+  until: result is succeeded
+  with_items:
+  - name: "{{ openshift_service_type }}-node{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+  - name: "{{ openshift_service_type }}-sdn-ovs{{ (openshift_pkg_version | default('')) | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    install: "{{ openshift_node_use_openshift_sdn | bool }}"
+  - name: "conntrack-tools"
+  when:
+  - not openshift_is_containerized | bool
+  - item['install'] | default(True) | bool
 
 - when:
   - openshift_is_containerized | bool

@@ -20,6 +20,7 @@ openshift_hosted_registry_wait: True
 #openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
 #openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_TENANT_NAME') }}"
 #openshift_cloudprovider_openstack_region: "{{ lookup('env', 'OS_REGION_NAME') }}"
+#openshift_cloudprovider_openstack_blockstorage_version: v2
 
 
 ## Use Cinder volume for Openshift registry:
@@ -42,7 +43,7 @@ openshift_hosted_registry_wait: True
 # NOTE(shadower): the hostname check seems to always fail because the
 # host's floating IP address doesn't match the address received from
 # inside the host.
-openshift_override_hostname_check: true
+openshift_hostname_check: false
 
 # For POCs or demo environments that are using smaller instances than
 # the official recommended values for RAM and DISK, uncomment the line below.

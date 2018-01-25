@@ -1,0 +1,12 @@
+---
+gf_body_tmp:
+  name: grafana_name
+  type: prometheus
+  typeLogoUrl: ''
+  access: proxy
+  url: prometheus_url
+  basicAuth: false
+  withCredentials: false
+  jsonData:
+    tlsSkipVerify: true
+    token: satoken

@@ -41,16 +41,3 @@
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift_is_containerized | bool
-
-# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-- name: Check for swap usage
-  command: grep "^[^#].*swap" /etc/fstab
-  # grep: match any lines which don't begin with '#' and contain 'swap'
-  changed_when: false
-  failed_when: false
-  register: swap_result
-
-# Set this fact here so we can use it during the next play, which is serial.
-- name: set_fact swap_result
-  set_fact:
-    openshift_node_upgrade_swap_result: "{{ swap_result.stdout_lines | length > 0 | bool }}"

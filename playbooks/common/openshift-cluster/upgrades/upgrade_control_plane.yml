@@ -22,6 +22,8 @@
 # See: https://github.com/openshift/origin/pull/14625#issuecomment-308467060
 - name: Pre master upgrade - Upgrade all storage
   hosts: oo_first_master
+  roles:
+  - openshift_facts
   tasks:
   - name: Upgrade all storage
     command: >
@@ -49,10 +51,9 @@
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
+  roles:
+  - openshift_facts
   tasks:
-  - import_role:
-      name: openshift_facts
-
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
@@ -108,7 +109,6 @@
 - name: Gate on master update
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
@@ -128,6 +128,7 @@
   hosts: oo_masters_to_config
   roles:
   - { role: openshift_cli }
+  - { role: openshift_facts }
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
@@ -242,7 +243,6 @@
 - name: Gate on reconcile
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
@@ -291,12 +291,18 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
     until: not (l_upgrade_control_plane_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_control_plane_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   roles:
   - openshift_facts

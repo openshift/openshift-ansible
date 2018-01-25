@@ -7,7 +7,6 @@
   register: check_results
 
 - name: Generate expiration report HTML
-  become: no
   run_once: yes
   template:
     src: cert-expiry-table.html.j2
@@ -17,11 +16,12 @@
 
 - name: Generate the result JSON string
   run_once: yes
-  set_fact: json_result_string="{{ hostvars|oo_cert_expiry_results_to_json(play_hosts) }}"
+  set_fact:
+    # oo_cert_expiry_results_to_json is a custom filter in role lib_utils
+    json_result_string: "{{ hostvars|oo_cert_expiry_results_to_json(play_hosts) }}"
   when: openshift_certificate_expiry_save_json_results|bool
 
 - name: Generate results JSON file
-  become: no
   run_once: yes
   template:
     src: save_json_results.j2

@@ -14,6 +14,8 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        ca_hash: {{ ca_hash }}
       labels:
         app: apiserver
     spec:
@@ -47,7 +49,7 @@ spec:
         - OriginatingIdentity=true
         image: {{ openshift_service_catalog_image_prefix }}service-catalog:{{ openshift_service_catalog_image_version }}
         command: ["/usr/bin/service-catalog"]
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: apiserver
         ports:
         - containerPort: 6443

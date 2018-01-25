@@ -1465,6 +1465,11 @@ class OpenShiftFacts(object):
             if metadata:
                 metadata['project']['attributes'].pop('sshKeys', None)
                 metadata['instance'].pop('serviceAccounts', None)
+        elif bios_vendor == 'Amazon EC2':
+            # Adds support for Amazon EC2 C5 instance types
+            provider = 'aws'
+            metadata_url = 'http://169.254.169.254/latest/meta-data/'
+            metadata = get_provider_metadata(metadata_url)
         elif virt_type == 'xen' and virt_role == 'guest' and re.match(r'.*\.amazon$', product_version):
             provider = 'aws'
             metadata_url = 'http://169.254.169.254/latest/meta-data/'

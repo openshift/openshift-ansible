@@ -1,4 +1,6 @@
 ---
+# for control-plane upgrade, several variables may be passed in to this play
+# why may affect the tasks here and in imported playbooks.
 
 # Pre-upgrade
 - import_playbook: ../initialize_nodes_to_upgrade.yml
@@ -47,7 +49,9 @@
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "{{ openshift_upgrade_target }}"
-    openshift_protect_installed_version: False
+    # openshift_protect_installed_version is passed n via upgrade_control_plane.yml
+    # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
+    # l_openshift_version_check_hosts is passed via upgrade_control_plane.yml
 
 # If we're only upgrading nodes, we need to ensure masters are already upgraded
 - name: Verify masters are already upgraded

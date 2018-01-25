@@ -1,0 +1,12 @@
+---
+- name: Create gf user on htpasswd
+  command: htpasswd -c /etc/origin/master/htpasswd gfadmin
+
+- name: Make sure master config use HTPasswdPasswordIdentityProvider
+  command: "sed -ie 's|AllowAllPasswordIdentityProvider|HTPasswdPasswordIdentityProvider\n      file: /etc/origin/master/htpasswd|' /etc/origin/master/master-config.yaml"
+
+- name: Grant permission for gfuser
+  command: oc adm policy add-cluster-role-to-user cluster-reader gfadmin
+
+- name: Restart mater api
+  command: systemctl restart atomic-openshift-master-api.service

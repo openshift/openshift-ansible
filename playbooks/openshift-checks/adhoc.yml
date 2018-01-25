@@ -11,6 +11,7 @@
   # usage. Running this play only in localhost speeds up execution.
   hosts: localhost
   connection: local
+  gather_facts: false
   roles:
   - openshift_health_checker
   vars:

@@ -24,25 +24,21 @@
   local_action: file path="{{local_tmp.stdout}}/elasticsearch.jks" state=touch mode="u=rw,g=r,o=r"
   when: elasticsearch_jks.stat.exists
   changed_when: False
-  become: no
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/logging-es.jks" state=touch mode="u=rw,g=r,o=r"
   when: logging_es_jks.stat.exists
   changed_when: False
-  become: no
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/system.admin.jks" state=touch mode="u=rw,g=r,o=r"
   when: system_admin_jks.stat.exists
   changed_when: False
-  become: no
 
 - name: Create placeholder for previously created JKS certs to prevent recreating...
   local_action: file path="{{local_tmp.stdout}}/truststore.jks" state=touch mode="u=rw,g=r,o=r"
   when: truststore_jks.stat.exists
   changed_when: False
-  become: no
 
 - name: pulling down signing items from host
   fetch:
@@ -61,12 +57,10 @@
   vars:
     - top_dir: "{{local_tmp.stdout}}"
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
-  become: no
 
 - name: Run JKS generation script
   local_action: script generate-jks.sh {{local_tmp.stdout}} {{openshift_logging_namespace}}
   check_mode: no
-  become: no
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Pushing locally generated JKS certs to remote host...
