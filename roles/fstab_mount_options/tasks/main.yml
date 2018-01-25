@@ -1,0 +1,38 @@
+---
+- name: ensure mount point is passed
+  fail:
+    msg: "Please ensure that fstab_mount_point is defined."
+  when: fstab_mount_point is undefined or fstab_mount_point == ''
+
+- name: grab mount point line from fstab
+  shell: /usr/bin/awk '($1 !~ /^#/) && ($2=="{{ fstab_mount_point }}")' /etc/fstab
+  register: fstab_line
+  changed_when: False
+
+- debug: var=fstab_line
+
+- name: fail when
+  fail:
+    msg: "Found more than one fstab line matching {{ fstab_mount_point }}."
+  when: fstab_line.stdout_lines | length != 1
+
+- name: set var facts
+  set_fact:
+    mount_opts: |
+      {% set rval = fstab_line.stdout.strip().split() %}
+      {{- rval -}}
+
+- name: debug
+  debug:
+    var: mount_opts
+
+- name: update mount point with mount options in fstab
+  mount:
+    state: present
+    fstab: /etc/fstab
+    src: "{{ mount_opts[0] }}"
+    name: "{{ mount_opts[1] }}"
+    fstype: "{{ mount_opts[2] }}"
+    opts: "{{ fstab_mount_options }}"
+    dump: "{{ mount_opts[4] }}"
+    passno: "{{ mount_opts[5] }}"
