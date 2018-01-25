@@ -26,12 +26,12 @@
 
 - name: "Waiting for ES to be ready for {{ _es_node }}"
   shell: >
-    oc exec "{{ _pod }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- {{ __es_local_curl }} https://localhost:9200/_cat/health | cut -d' ' -f4
+    oc exec "{{ _pod }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- es_cluster_health
   with_items: "{{ _pods.stdout.split(' ') }}"
   loop_control:
     loop_var: _pod
   register: _pod_status
-  until: _pod_status.stdout in ['green', 'yellow']
+  until: (_pod_status.stdout | from_json)['status'] in ['green', 'yellow']
   retries: 60
   delay: 5
   changed_when: false
