@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.24.0%{?dist}
+Release:        0.25.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -204,6 +204,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.25.0
+- [1502838] Correct certificate alt name parsing (rteague@redhat.com)
+- sync imagestreams+templates from origin master for v3.9 (bparees@redhat.com)
+- node: specify bind option to /root/.docker (gscrivan@redhat.com)
+- [1530403] Improve etcd group error message (rteague@redhat.com)
+- Only automatically restart if cluster is in yellow or green state
+  (ewolinet@redhat.com)
+- openshift_manage_node: Label nodes in one pass (vrutkovs@redhat.com)
+- Redeploy etcd certificates during upgrade when etcd hostname not present in
+  etcd serving cert SAN. (abutcher@redhat.com)
+- Create swapoff module (mgugino@redhat.com)
+- Label masters with node-role.kubernetes.io/master. This PR also sets these
+  labels and scheduling status during upgrades (vrutkovs@redhat.com)
+- [1537946] Correct conditional check for GlusterFS IPs (rteague@redhat.com)
+- Remove unused node.lables from openshift_facts (mgugino@redhat.com)
+- Change dnsmasq Requires to Wants.
+  https://bugzilla.redhat.com/show_bug.cgi?id=1532960 (rchopra@redhat.com)
+- Set a default for openshift_hosted_registry_storage_azure_blob_realm
+  (sdodson@redhat.com)
+- openshift_prometheus: remove block duration settings (pgier@redhat.com)
+
 * Wed Jan 24 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.24.0
 - Update CF 4.6 Beta templates in openshift_management directory
   (simaishi@redhat.com)
