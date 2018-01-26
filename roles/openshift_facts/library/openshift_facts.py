@@ -1210,6 +1210,7 @@ class OpenShiftFacts(object):
                                       embedded_kube=True,
                                       embedded_dns=True,
                                       bind_addr='0.0.0.0',
+                                      bind_network='tcp4',
                                       session_max_seconds=3600,
                                       session_name='ssn',
                                       session_secrets_file='',

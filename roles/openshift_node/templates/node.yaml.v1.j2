@@ -45,6 +45,7 @@ nodeName: {{ openshift.node.nodename }}
 podManifestConfig:
 servingInfo:
   bindAddress: 0.0.0.0:10250
+  bindNetwork: {{ openshift_node_bind_network | default('tcp4') }}
   certFile: server.crt
   clientCA: ca.crt
   keyFile: server.key

@@ -34,7 +34,7 @@ kubeletArguments:
   - /etc/origin/cloudprovider/{{ openshift_node_group_cloud_provider }}.conf
   cloud-provider:
   - {{ openshift_node_group_cloud_provider }}
-  node-labels: 
+  node-labels:
   - "{{ openshift_node_group_labels | join(',') }}"
   enable-controller-attach-detach:
   - 'true'
@@ -50,7 +50,7 @@ networkConfig:
 networkPluginName: {{ openshift_node_group_network_plugin }}
 servingInfo:
   bindAddress: 0.0.0.0:10250
-  bindNetwork: tcp4
+  bindNetwork: {{ openshift_node_group_bind_network }}
   clientCA: client-ca.crt
 volumeConfig:
   localQuota:

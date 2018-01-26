@@ -30,3 +30,4 @@ openshift_node_group_network_plugin: "{{ openshift_node_group_network_plugin_def
 openshift_node_group_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 openshift_node_group_node_data_dir: "{{ openshift_node_group_node_data_dir_default }}"
 openshift_node_group_network_mtu: "{{ openshift_node_sdn_mtu | default(8951) | int }}"
+openshift_node_group_bind_network: "{{ openshift_node_bind_network | default('tcp4') }}"

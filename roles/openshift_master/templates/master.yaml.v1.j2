@@ -27,7 +27,7 @@ assetConfig:
 {% endif %}
   servingInfo:
     bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.console_port }}
-    bindNetwork: tcp4
+    bindNetwork: {{ openshift.master.bind_network }}
     certFile: master.server.crt
     clientCA: ""
     keyFile: master.server.key
@@ -69,7 +69,7 @@ disabledFeatures: {{ l_osm_disabled_features_list | to_json }}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift_master_dns_port }}
-  bindNetwork: tcp4
+  bindNetwork: {{ openshift.master.bind_network }}
 {% endif %}
 etcdClientInfo:
   ca: master.etcd-ca.crt
@@ -204,7 +204,7 @@ serviceAccountConfig:
   - serviceaccounts.public.key
 servingInfo:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
-  bindNetwork: tcp4
+  bindNetwork: {{ openshift.master.bind_network }}
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
