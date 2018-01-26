@@ -59,7 +59,7 @@ class OCGroup(OpenShiftCLI):
 
     def needs_update(self):
         ''' verify an update is needed '''
-        return not Utils.check_def_equal(self.config.data, self.group.yaml_dict, skip_keys=[], debug=True)
+        return not Utils.check_def_equal(self.config.data, self.group.yaml_dict, skip_keys=['users'], debug=True)
 
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
