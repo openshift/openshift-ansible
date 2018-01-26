@@ -34,25 +34,4 @@
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
 
-- name: Set node schedulability
-  oc_adm_manage_node:
-    node: "{{ openshift.node.nodename | lower }}"
-    schedulable: "{{ 'true' if l_openshift_manage_schedulable | bool else 'false' }}"
-  retries: 10
-  delay: 5
-  register: node_schedulable
-  until: node_schedulable is succeeded
-  when: "'nodename' in openshift.node"
-  delegate_to: "{{ openshift_master_host }}"
-
-- name: Label nodes
-  oc_label:
-    name: "{{ openshift.node.nodename }}"
-    kind: node
-    state: add
-    labels: "{{ openshift_node_labels | lib_utils_oo_dict_to_list_of_dict }}"
-    namespace: default
-  when:
-    - "'nodename' in openshift.node"
-    - openshift_node_labels | default({}) != {}
-  delegate_to: "{{ openshift_master_host }}"
+- include_tasks: config.yml

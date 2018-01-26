@@ -20,6 +20,7 @@
     l_upgrade_verify_targets_hosts: "oo_masters_to_config:oo_nodes_to_upgrade"
     l_upgrade_docker_target_hosts: "oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config"
     l_upgrade_excluder_hosts: "oo_nodes_to_config:oo_masters_to_config"
+    openshift_protect_installed_version: False
 
 - import_playbook: validator.yml
 

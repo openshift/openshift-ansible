@@ -49,7 +49,7 @@
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "{{ openshift_upgrade_target }}"
-    openshift_protect_installed_version: False
+    # openshift_protect_installed_version is passed n via upgrade_control_plane.yml
     # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
     # l_openshift_version_check_hosts is passed via upgrade_control_plane.yml
 

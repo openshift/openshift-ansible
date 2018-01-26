@@ -83,6 +83,7 @@ openshift_node_syscon_auth_mounts_l:
   destination: "/root/.docker"
   options:
   - ro
+  - bind
 
 # If we need to add new mounts in the future, or the user wants to mount data.
 # This should be in the same format as auth_mounts_l above.

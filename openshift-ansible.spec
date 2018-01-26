@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.23.0%{?dist}
+Release:        0.28.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -200,6 +200,80 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.28.0
+- Updating deprecations to use callback plugin (ewolinet@redhat.com)
+- Run console pods on the master (spadgett@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.26.0
+- docker_image_availability: containerized overrides (lmeyer@redhat.com)
+- Remove old assetConfig from master-config.yaml (spadgett@redhat.com)
+- Don't emit assetConfig on 3.9 (sdodson@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.25.0
+- [1502838] Correct certificate alt name parsing (rteague@redhat.com)
+- sync imagestreams+templates from origin master for v3.9 (bparees@redhat.com)
+- node: specify bind option to /root/.docker (gscrivan@redhat.com)
+- [1530403] Improve etcd group error message (rteague@redhat.com)
+- Only automatically restart if cluster is in yellow or green state
+  (ewolinet@redhat.com)
+- openshift_manage_node: Label nodes in one pass (vrutkovs@redhat.com)
+- Redeploy etcd certificates during upgrade when etcd hostname not present in
+  etcd serving cert SAN. (abutcher@redhat.com)
+- Create swapoff module (mgugino@redhat.com)
+- Label masters with node-role.kubernetes.io/master. This PR also sets these
+  labels and scheduling status during upgrades (vrutkovs@redhat.com)
+- [1537946] Correct conditional check for GlusterFS IPs (rteague@redhat.com)
+- Remove unused node.lables from openshift_facts (mgugino@redhat.com)
+- Change dnsmasq Requires to Wants.
+  https://bugzilla.redhat.com/show_bug.cgi?id=1532960 (rchopra@redhat.com)
+- Set a default for openshift_hosted_registry_storage_azure_blob_realm
+  (sdodson@redhat.com)
+- openshift_prometheus: remove block duration settings (pgier@redhat.com)
+
+* Wed Jan 24 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.24.0
+- Update CF 4.6 Beta templates in openshift_management directory
+  (simaishi@redhat.com)
+- installer: increase content width for commands, which may output URLs
+  (vrutkovs@redhat.com)
+- Only rollout console if config changed (spadgett@redhat.com)
+- Protect master installed version during node upgrades (mgugino@redhat.com)
+- [1506866] Update haproxy.cfg.j2 (rteague@redhat.com)
+- Split control plane and component install in deploy_cluster
+  (ccoleman@redhat.com)
+- Add clusterResourceOverridesEnabled to console config (spadgett@redhat.com)
+- [1537105] Add openshift_facts to flannel role (rteague@redhat.com)
+- PyYAML is required by openshift_facts on nodes (ccoleman@redhat.com)
+- Move origin-gce roles and playbooks into openshift-ansible
+  (ccoleman@redhat.com)
+- Directly select the ansible version (ccoleman@redhat.com)
+- use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to set the
+  registry hostname (bparees@redhat.com)
+- update Dockerfile to add boto3 dependency (jdiaz@redhat.com)
+- Lowercase node names when creating certificates (vrutkovs@redhat.com)
+- NFS Storage: make sure openshift_hosted_*_storage_nfs_directory are quoted
+  (vrutkovs@redhat.com)
+- Fix etcd scaleup playbook (mgugino@redhat.com)
+- Bug 1524805- ServiceCatalog now works disconnected (fabian@fabianism.us)
+- [1506750] Ensure proper hostname check override (rteague@redhat.com)
+- failed_when lists are implicitely ANDs, not ORs (vrutkovs@redhat.com)
+- un-hardcode default subnet az (jdiaz@redhat.com)
+- Ensure that node names are lowerecased before matching (sdodson@redhat.com)
+- Bug 1534020 - Only set logging and metrics URLs if console config map exists
+  (spadgett@redhat.com)
+- Add templates to v3.9 (simaishi@redhat.com)
+- Use Beta repo path (simaishi@redhat.com)
+- CF 4.6 templates (simaishi@redhat.com)
+- Add ability to mount volumes into system container nodes (mgugino@redhat.com)
+- Fix to master-internal elb scheme (mazzystr@gmail.com)
+- Allow 5 etcd hosts (sdodson@redhat.com)
+- Remove unused symlink (sdodson@redhat.com)
+- docker_creds: fix python3 exception (gscrivan@redhat.com)
+- docker_creds: fix python3 exception (gscrivan@redhat.com)
+- docker: use image from CentOS and Fedora registries (gscrivan@redhat.com)
+- crio: use Docker and CentOS registries for the image (gscrivan@redhat.com)
+- The provision_install file ends in yml not yaml! Ansible requirement
+  clarification. (mbruzek@gmail.com)
+
 * Tue Jan 23 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.23.0
 - docker_image_availability: enable skopeo to use proxies (lmeyer@redhat.com)
 - Install base_packages earlier (mgugino@redhat.com)
