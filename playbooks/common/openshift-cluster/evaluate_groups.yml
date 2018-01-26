@@ -44,10 +44,10 @@
     fail:
       msg: >
         Running etcd as an embedded service is no longer supported. If this is a
-        new install please define an 'etcd' group with either one or three
+        new install please define an 'etcd' group with either one, three or five
         hosts. These hosts may be the same hosts as your masters. If this is an
-        upgrade you may set openshift_master_unsupported_embedded_etcd=true
-        until a migration playbook becomes available.
+        upgrade please see https://docs.openshift.com/container-platform/latest/install_config/upgrading/migrating_embedded_etcd.html
+        for documentation on how to migrate from embedded to external etcd.
     when:
     - g_etcd_hosts | default([]) | length not in [5,3,1]
     - not openshift_master_unsupported_embedded_etcd | default(False)
