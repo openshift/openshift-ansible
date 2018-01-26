@@ -21,6 +21,12 @@ openshift_release: # v3.7
 # This will be dependent on the version provided by the yum repository
 openshift_pkg_version: # -3.7.0
 
+# OpenShift api port
+# Fulfills a chicken/egg scenario with how Ansible treats host inventory file
+# and extra_vars.  This is used for SecurityGroups, ELB Listeners as well as
+# an override to installer inventory openshift_master_api_port key
+# openshift_master_api_port: 8443
+
 # specify a clusterid
 # This value is also used as the default value for many other components.
 #openshift_aws_clusterid: default

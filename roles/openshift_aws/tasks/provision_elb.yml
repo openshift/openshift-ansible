@@ -10,6 +10,5 @@
   with_dict: "{{ openshift_aws_elb_dict }}"
   vars:
     l_elb_security_groups: "{{ openshift_aws_elb_security_groups }}"
-    l_openshift_aws_elb_name_dict: "{{ openshift_aws_elb_name_dict }}"
   loop_control:
     loop_var: l_elb_dict_item
