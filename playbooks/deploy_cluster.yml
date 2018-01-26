@@ -6,11 +6,3 @@
 - import_playbook: openshift-node/private/config.yml
 
 - import_playbook: common/private/components.yml
-
-- name: Print deprecated variable warning message if necessary
-  hosts: oo_first_master
-  gather_facts: no
-  tasks:
-  - debug: msg="{{__deprecation_message}}"
-    when:
-    - __deprecation_message | default ('') | length > 0

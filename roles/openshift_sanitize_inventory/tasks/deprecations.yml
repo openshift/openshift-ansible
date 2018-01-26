@@ -2,15 +2,18 @@
 
 - name: Check for usage of deprecated variables
   set_fact:
-    __deprecation_message: "{{ __deprecation_message | default([]) }} + ['{{ __deprecation_header }} {{ item }} is a deprecated variable and will be no longer be used in the next minor release. Please update your inventory accordingly.']"
+    __deprecation_message: "{{ __deprecation_message | default( __deprecation_header ) }} \n\t{{ item }}"
   when:
   - hostvars[inventory_hostname][item] is defined
   with_items: "{{ __warn_deprecated_vars }}"
 
 - block:
   - debug: msg="{{__deprecation_message}}"
-  - pause:
-      seconds: "{{ 10 }}"
+  - run_once: true
+    set_stats:
+      data:
+        installer_phase_initialize:
+          message: "{{ __deprecation_message }}"
   when:
   - __deprecation_message | default ('') | length > 0
 
