@@ -251,6 +251,7 @@
     kibana_proxy_memory_limit: "{{ openshift_logging_kibana_proxy_memory_limit }}"
     kibana_replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
     kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
+    kibana_env_vars: "{{ openshift_logging_kibana_env_vars | default({}) }}"
 
 - name: Set Kibana DC
   oc_obj:

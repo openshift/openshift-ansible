@@ -70,6 +70,10 @@ spec:
                 resourceFieldRef:
                   containerName: kibana
                   resource: limits.memory
+{% for key, value in kibana_env_vars.items() %}
+            - name: "{{ key }}"
+              value: "{{ value }}"
+{% endfor %}
           volumeMounts:
             - name: kibana
               mountPath: /etc/kibana/keys
