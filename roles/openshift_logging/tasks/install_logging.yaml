@@ -80,7 +80,7 @@
       elasticsearch_storage_type: openshift_logging_elasticsearch_storage_type
 
 - set_fact:
-    default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir' }}"
+    default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir' }}"
 
 - include_role:
     name: openshift_logging_elasticsearch
@@ -141,7 +141,7 @@
   when: openshift_logging_es_ops_pvc_prefix == ""
 
 - set_fact:
-    default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_ops_pvc_dynamic | bool or openshift_hosted_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_ops_pvc_size | length > 0)  else 'emptydir' }}"
+    default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_ops_pvc_dynamic | bool or openshift_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_ops_pvc_size | length > 0)  else 'emptydir' }}"
   when:
   - openshift_logging_use_ops | bool
 
