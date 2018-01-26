@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.25.0%{?dist}
+Release:        0.26.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -204,6 +204,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.26.0
+- docker_image_availability: containerized overrides (lmeyer@redhat.com)
+- Remove old assetConfig from master-config.yaml (spadgett@redhat.com)
+- Don't emit assetConfig on 3.9 (sdodson@redhat.com)
+
 * Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.25.0
 - [1502838] Correct certificate alt name parsing (rteague@redhat.com)
 - sync imagestreams+templates from origin master for v3.9 (bparees@redhat.com)
