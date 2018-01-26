@@ -76,6 +76,16 @@ def build_inventory():
 
     inventory['_meta'] = {'hostvars': {}}
 
+    # cinder volumes used for docker storage
+    docker_storage_volume_mountpoints = {}
+    for volume in cloud.list_volumes():
+        if 'purpose' in volume.metadata and volume.metadata.purpose == "openshift_docker_storage":
+            for attachment in volume.attachments:
+                if attachment.server_id in docker_storage_volume_mountpoints:
+                    docker_storage_volume_mountpoints[attachment.server_id].append(attachment.device)
+                else:
+                    docker_storage_volume_mountpoints[attachment.server_id] = [attachment.device]
+
     for server in cluster_hosts:
         ssh_ip_address = server.public_v4 or server.private_v4
         hostvars = {
@@ -111,9 +121,13 @@ def build_inventory():
         if node_labels:
             hostvars['openshift_node_labels'] = node_labels
 
+        # check for attached docker storage volumes
+        if 'os-extended-volumes:volumes_attached' in server:
+            if server.id in docker_storage_volume_mountpoints:
+                hostvars['docker_storage_volume_mountpoints'] = ' '.join(docker_storage_volume_mountpoints[server.id])
+
         inventory['_meta']['hostvars'][server.name] = hostvars
     return inventory
-
 
 if __name__ == '__main__':
     print(json.dumps(build_inventory(), indent=4, sort_keys=True))
