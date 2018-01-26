@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.29.0%{?dist}
+Release:        0.30.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -204,6 +204,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.30.0
+- Removing dependency on the extra stroage device. (kwoodson@redhat.com)
+
 * Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.29.0
 - Add prometheus annotations to console service (spadgett@redhat.com)
 - Add resource requests to console template (spadgett@redhat.com)
