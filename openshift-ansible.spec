@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.30.0%{?dist}
+Release:        0.31.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -200,6 +200,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.31.0
+- removed references to 'files' dir in spec file (dyocum@redhat.com)
+- files in ansible roles do not need to have the path specified to them when
+  referenced by a builtin module, i.e., copy: (dyocum@redhat.com)
+- moving files to their correct <role>/files dir for the openshift_web_console
+  and template_service_broker roles (dyocum@redhat.com)
+
 * Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.30.0
 - Removing dependency on the extra stroage device. (kwoodson@redhat.com)
 
