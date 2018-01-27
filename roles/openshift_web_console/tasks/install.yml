@@ -71,6 +71,9 @@
     - set_fact:
         config_to_migrate: "{{ master_config_output.content | b64decode | from_yaml }}"
 
+    - set_fact:
+        cro_plugin_enabled: "{{ config_to_migrate.admissionConfig is defined and config_to_migrate.admissionConfig.pluginConfig is defined and config_to_migrate.admissionConfig.pluginConfig.ClusterResourceOverrides is defined }}"
+
     # Update properties in the config template based on inventory vars when the
     # asset config does not exist.
     - name: Set web console config properties from inventory variables
@@ -87,7 +90,7 @@
           - key: features#inactivityTimeoutMinutes
             value: "{{ openshift_web_console_inactivity_timeout_minutes | default(0) }}"
           - key: features#clusterResourceOverridesEnabled
-            value: "{{ openshift_web_console_cluster_resource_overrides_enabled | default(false) }}"
+            value: "{{ openshift_web_console_cluster_resource_overrides_enabled | default(cro_plugin_enabled) }}"
           - key: extensions#scriptURLs
             value: "{{ openshift_web_console_extension_script_urls | default([]) }}"
           - key: extensions#stylesheetURLs
@@ -116,6 +119,8 @@
             value: "{{ config_to_migrate.assetConfig.servingInfo.maxRequestsInFlight | default(0) }}"
           - key: servingInfo#requestTimeoutSeconds
             value: "{{ config_to_migrate.assetConfig.servingInfo.requestTimeoutSeconds | default(0) }}"
+          - key: features#clusterResourceOverridesEnabled
+            value: "{{ openshift_web_console_cluster_resource_overrides_enabled | default(cro_plugin_enabled) }}"
         separator: '#'
         state: present
       when: config_to_migrate.assetConfig is defined
