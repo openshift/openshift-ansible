@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.26
+Version:        3.7.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.27-1
+- docker_image_availability: containerized overrides (lmeyer@redhat.com)
+- [release-3.7] [1538896] Correct certificate alt name parsing
+  (rteague@redhat.com)
+- Readd etcd openshift_facts (mgugino@redhat.com)
+- Only automatically restart if cluster is in yellow or green state
+  (ewolinet@redhat.com)
+- [1538816] Backport #6817 & #5970 (rteague@redhat.com)
+- [1530403] Improve etcd group error message (rteague@redhat.com)
+- Update haproxy.cfg.j2 (rteague@redhat.com)
+- Add support for Amazon EC2 C5 instance types (rteague@redhat.com)
+- Lowercase node names when creating certificates (vrutkovs@redhat.com)
+- Ensure that node names are lowerecased before matching (sdodson@redhat.com)
+- Ensure we are running oc execs against running pods (ewolinet@redhat.com)
+
 * Wed Jan 24 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.26-1
 - Update CF 4.6 Beta templates in openshift_management directory
   (simaishi@redhat.com)
