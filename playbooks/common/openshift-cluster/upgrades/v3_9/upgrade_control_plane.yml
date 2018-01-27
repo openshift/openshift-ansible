@@ -25,9 +25,17 @@
       openshift_upgrade_target: '3.8'
       openshift_upgrade_min: '3.7'
       openshift_release: '3.8'
-      _requested_pkg_version: "{{openshift_pkg_version if openshift_pkg_version is defined else omit }}"
-      _requested_image_tag: "{{openshift_image_tag if openshift_image_tag is defined else omit }}"
+      _requested_pkg_version: "{{ openshift_pkg_version if openshift_pkg_version is defined else omit }}"
+      _requested_image_tag: "{{ openshift_image_tag if openshift_image_tag is defined else omit }}"
+      l_double_upgrade_cp: True
     when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
+
+  - name: set l_force_image_tag_to_version = True
+    set_fact:
+      # Need to set this during 3.8 upgrade to ensure image_tag is set correctly
+      # to match 3.8 version
+      l_force_image_tag_to_version: True
+    when: _requested_image_tag is defined
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
@@ -69,7 +77,20 @@
       openshift_upgrade_min: '3.8'
       openshift_release: '3.9'
       openshift_pkg_version: "{{ _requested_pkg_version | default ('-3.9*') }}"
-      openshift_image_tag: "{{ _requested_image_tag | default('v3.9') }}"
+  # Set the user's specified image_tag for 3.9 upgrade if it was provided.
+  - set_fact:
+      openshift_image_tag: "{{ _requested_image_tag }}"
+      l_force_image_tag_to_version: False
+    when: _requested_image_tag is defined
+  # If the user didn't specify an image_tag, we need to force update image_tag
+  # because it will have already been set during 3.8.  If we aren't running
+  # a double upgrade, then we can preserve image_tag because it will still
+  # be the user provided value.
+  - set_fact:
+      l_force_image_tag_to_version: True
+    when:
+    - l_double_upgrade_cp is defined and l_double_upgrade_cp
+    - _requested_image_tag is not defined
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include

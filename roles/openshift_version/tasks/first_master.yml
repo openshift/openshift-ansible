@@ -24,7 +24,9 @@
 
 - block:
   - debug:
-      msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
+      msg: "openshift_image_tag set to v{{ openshift_version }}"
   - set_fact:
       openshift_image_tag: v{{ openshift_version }}
-  when: openshift_image_tag is not defined
+  when: >
+    openshift_image_tag is not defined
+    or l_force_image_tag_to_version | bool
