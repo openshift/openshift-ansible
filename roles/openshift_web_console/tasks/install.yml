@@ -33,7 +33,7 @@
 
 - name: Copy web console templates to temp directory
   copy:
-    src: "{{ __console_files_location }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
     - "{{ __console_template_file }}"
