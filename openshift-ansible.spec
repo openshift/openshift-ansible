@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.31
+Version:        3.8.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -204,6 +204,233 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.32-1
+- Only automatically restart if cluster is in yellow or green state
+  (ewolinet@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.24.0].
+  (smunilla@redhat.com)
+- Create swapoff module (mgugino@redhat.com)
+- Update CF 4.6 Beta templates in openshift_management directory
+  (simaishi@redhat.com)
+- installer: increase content width for commands, which may output URLs
+  (vrutkovs@redhat.com)
+- Only rollout console if config changed (spadgett@redhat.com)
+- Change dnsmasq Requires to Wants.
+  https://bugzilla.redhat.com/show_bug.cgi?id=1532960 (rchopra@redhat.com)
+- Protect master installed version during node upgrades (mgugino@redhat.com)
+- [1506866] Update haproxy.cfg.j2 (rteague@redhat.com)
+- Split control plane and component install in deploy_cluster
+  (ccoleman@redhat.com)
+- Add clusterResourceOverridesEnabled to console config (spadgett@redhat.com)
+- [1537105] Add openshift_facts to flannel role (rteague@redhat.com)
+- PyYAML is required by openshift_facts on nodes (ccoleman@redhat.com)
+- Move origin-gce roles and playbooks into openshift-ansible
+  (ccoleman@redhat.com)
+- Directly select the ansible version (ccoleman@redhat.com)
+- use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to set the
+  registry hostname (bparees@redhat.com)
+- update Dockerfile to add boto3 dependency (jdiaz@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.23.0].
+  (smunilla@redhat.com)
+- Lowercase node names when creating certificates (vrutkovs@redhat.com)
+- NFS Storage: make sure openshift_hosted_*_storage_nfs_directory are quoted
+  (vrutkovs@redhat.com)
+- docker_image_availability: enable skopeo to use proxies (lmeyer@redhat.com)
+- Fix etcd scaleup playbook (mgugino@redhat.com)
+- Bug 1524805- ServiceCatalog now works disconnected (fabian@fabianism.us)
+- [1506750] Ensure proper hostname check override (rteague@redhat.com)
+- failed_when lists are implicitely ANDs, not ORs (vrutkovs@redhat.com)
+- un-hardcode default subnet az (jdiaz@redhat.com)
+- Install base_packages earlier (mgugino@redhat.com)
+- allow uninstalling AWS objects created by prerequisite playbook
+  (jdiaz@redhat.com)
+- Ensure that node names are lowerecased before matching (sdodson@redhat.com)
+- Bug 1534020 - Only set logging and metrics URLs if console config map exists
+  (spadgett@redhat.com)
+- Bug 1536262: Default console and TSB node selector to
+  openshift_hosted_infra_selector (spadgett@redhat.com)
+- Migrate master-config.yaml asset config (spadgett@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.22.0].
+  (smunilla@redhat.com)
+- Fix master scaleup play (mgugino@redhat.com)
+- use admin credentials for tsb install operations (bparees@redhat.com)
+- Fix etcd-upgrade sanity checks (mgugino@redhat.com)
+- Bug 1536253: Pass `--config` flag on oc commands when installing console
+  (spadgett@redhat.com)
+- Fix enterprise registry-console prefix (sdodson@redhat.com)
+- [release-3.7] Fix enterprise registry console image prefix
+  (sdodson@redhat.com)
+- [release-3.6] Fix enterprise registry console image prefix
+  (sdodson@redhat.com)
+- Bug 1512825 - add mux pod failed for Serial number 02 has already been issued
+  (nhosoi@redhat.com)
+- Remove old console asset config (spadgett@redhat.com)
+- Fix OpenStack readme (tomas@sedovic.cz)
+- Add support for Amazon EC2 C5 instance types (rteague@redhat.com)
+- Add templates to v3.9 (simaishi@redhat.com)
+- Quick installer: deprecate upgrades (vrutkovs@redhat.com)
+- Use Beta repo path (simaishi@redhat.com)
+- CF 4.6 templates (simaishi@redhat.com)
+- Fix node scaleup plays (mgugino@redhat.com)
+- Rollout console after template service broker install (spadgett@redhat.com)
+- Add ability to mount volumes into system container nodes (mgugino@redhat.com)
+- Use openshift_is_containerized instead of openshift_is_atomic when installing
+  etcd (vrutkovs@redhat.com)
+- Ensure we are running oc execs against running pods (ewolinet@redhat.com)
+- Setting default storage_class_names for when calling
+  openshift_logging_elasticsearch role (ewolinet@redhat.com)
+- Bug 1535947: Fix missing task in metrics, logging uninstall playbooks
+  (spadgett@redhat.com)
+- Make openshift_web_console_prefix defaults like other components
+  (sdodson@redhat.com)
+- Allow for firewalld on atomic host (sdodson@redhat.com)
+- Drop the testing repo var from openstack readme (tomas@sedovic.cz)
+- Add Azure to support openshift_cloudprovider_kind (wehe@redhat.com)
+- Fix to master-internal elb scheme (mazzystr@gmail.com)
+- bug 1523047. Annotate ops projects with an .operation prefix
+  (jcantril@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.21.0].
+  (smunilla@redhat.com)
+- Pull openshift_image_tag from oo_masters_to_config rather oo_first_master.
+  (abutcher@redhat.com)
+- Ensure atomic_proxies are configured with docker (mgugino@redhat.com)
+- Default install_result when reloading generated facts. (abutcher@redhat.com)
+- Add call to 3.8 playbook in 3.9 upgrade (sdodson@redhat.com)
+- Remove 3.8 and 3.9 specific steps right now (sdodson@redhat.com)
+- Exclude 3.9 packages during 3.8 upgrade (sdodson@redhat.com)
+- fix typos (sdodson@redhat.com)
+- Ensure openshift_client_binary is set (sdodson@redhat.com)
+- Add init/main.yml to etc-upgrade (mgugino@redhat.com)
+- health checks: update required pkg versions (lmeyer@redhat.com)
+- health checks: factor out get_required_version (lmeyer@redhat.com)
+- package_version check: reuse get_major_minor_version (lmeyer@redhat.com)
+- Rework default TSB prefix and imagename to match other services
+  (vrutkovs@redhat.com)
+- Fix a typo in "Determine if growpart is installed" (vrutkovs@redhat.com)
+- Check rc for commands with openshift_client_binary and failed_when
+  (vrutkovs@redhat.com)
+- Add new grafana playbook. (mrsiano@gmail.com)
+- Allow 5 etcd hosts (sdodson@redhat.com)
+- Update console config for API changes (spadgett@redhat.com)
+- Remove duplication in node acceptance playbook and setup master groups so
+  that we can use the first master's ansible_ssh_user when delegating.
+  (abutcher@redhat.com)
+- Setting default storage_class_names for when calling
+  openshift_logging_elasticsearch role (ewolinet@redhat.com)
+- include elasticsearch container name (jvallejo@redhat.com)
+- adding check if secret auth is needed (shawn.hurley21@gmail.com)
+- adding asb auth as a secret. (shawn.hurley21@gmail.com)
+- openshift_checks: repair adhoc list-checks mode (lmeyer@redhat.com)
+- Ensure we are running oc execs against running pods (ewolinet@redhat.com)
+- Remove tuned-profiles from list of master packages upgraded
+  (sdodson@redhat.com)
+- Add missing task that got dropped in a refactor (sdodson@redhat.com)
+- Web Console: use a different var for asset config (vrutkovs@redhat.com)
+- Document the inventory change (tomas@sedovic.cz)
+- Move the OpenStack dynamic inventory from sample (tomas@sedovic.cz)
+- docker_upgrade_check: skip repoquery calls on containerized setups
+  (vrutkovs@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.20.0].
+  (smunilla@redhat.com)
+- Adjust openstack provider dependencies versions (bdobreli@redhat.com)
+- Fix openstack provider playbook name in docs (bdobreli@redhat.com)
+- fix bug 1534271 (wmeng@redhat.com)
+- Remove unused symlink (sdodson@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.19.0].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.18.0].
+  (smunilla@redhat.com)
+- Automatic commit of package [openshift-ansible] release [3.9.0-0.17.0].
+  (smunilla@redhat.com)
+- Automatic profile setting for tuned 2.9 (jmencak@redhat.com)
+- Don't use from ansible.module_utils.six as its no longer available in Ansible
+  2.4 (vrutkovs@redhat.com)
+- Install web console on upgrade (spadgett@redhat.com)
+- Add console RBAC template (spadgett@redhat.com)
+- Add var for controller to enable async bindings (jpeeler@redhat.com)
+- Update latest image streams and templates (sdodson@redhat.com)
+- Use webconsole.config.openshift.io/v1 API group (spadgett@redhat.com)
+- Add missing v3.9 gluster templates (sdodson@redhat.com)
+- Spelling and grammar changes to the advanced-configuration.md file.
+  (mbruzek@gmail.com)
+- Fixing openshift_hosted variable. (kwoodson@redhat.com)
+- Add cluster-operator playbook directory. (abutcher@redhat.com)
+- Move s3 & elb provisioning into their own playbooks s.t. they are applied
+  outside of the openshift_aws master provisioning tasks. (abutcher@redhat.com)
+- Update deployment and apiserver with new certs (jpeeler@redhat.com)
+- Move more plugins to lib_utils (mgugino@redhat.com)
+- Add the ability to specify a timeout for node drain operations
+  (sdodson@redhat.com)
+- Add defaults for openshift_pkg_version (mgugino@redhat.com)
+- docker_creds: fix python3 exception (gscrivan@redhat.com)
+- docker_creds: fix python3 exception (gscrivan@redhat.com)
+- docker: use image from CentOS and Fedora registries (gscrivan@redhat.com)
+- crio: use Docker and CentOS registries for the image (gscrivan@redhat.com)
+- Fix typo in the advanced config docs (tomas@sedovic.cz)
+- Write guide on setting up PVs with Cinder (tomas@sedovic.cz)
+- Allow using server names in openstack dynamic inv (tomas@sedovic.cz)
+- Specify the Cinder version in the inventory (tomas@sedovic.cz)
+- Add documentation example (joel.pearson@gmail.com)
+- Add blockstorage version for openstack (joel.pearson@gmail.com)
+- logging: fix jinja filters to support py3 (vrutkovs@redhat.com)
+- Ability to specify override tolerations via the buildconfig overrider
+  (cdaley@redhat.com)
+- Chmod temp dirs created on localhost (mgugino@redhat.com)
+- Bug 1532787 - Add empty node selector to openshift-web-console namespace
+  (spadgett@redhat.com)
+- Remove become statements (mgugino@redhat.com)
+- Setup master groups in order to use the master group's ansible_ssh_user to
+  pull bootstrap kubeconfig. (abutcher@redhat.com)
+- Bug 1527178 - installation of logging stack failed: Invalid version specified
+  for Elasticsearch (nhosoi@redhat.com)
+- Limit host group scope on control-plane upgrades (mgugino@redhat.com)
+- Refactor version and move some checks into sanity_checks.py
+  (mgugino@redhat.com)
+- Updating tsb image names and template (ewolinet@redhat.com)
+- Ensure that openshift_facts role is imported whenever we rely on
+  openshift_client_binary (sdodson@redhat.com)
+- Add key check for facts_for_clusterrolebindings (nakayamakenjiro@gmail.com)
+- Update web console template (spadgett@redhat.com)
+- Add iptables save handler (ichavero@redhat.com)
+- ensure containerized bools are cast (mgugino@redhat.com)
+- Update to AWS EC2 root vol size so that Health Check tasks pass
+  (mazzystr@gmail.com)
+- Add key existing check to collect facts for rolebidings
+  (nakayamakenjiro@gmail.com)
+- Fix provider network support at openstack playbook (ltomasbo@redhat.com)
+- 3.9 upgrade: remove openshift.common.service_type (vrutkovs@redhat.com)
+- container-engine: move registry_auth.yml before pull (gscrivan@redhat.com)
+- adding ability to add network policy objects. (shawn.hurley21@gmail.com)
+- docker_upgrade_check: skip repoquery calls on containerized setups
+  (vrutkovs@redhat.com)
+- Adding logic to disable and reenable external communication to ES during full
+  restart (ewolinet@redhat.com)
+- Provide example on how to use osm_etcd_image in a disconnected and
+  containerized installation (tkarlsso@redhat.com)
+- Install node packages in one task instead of 3 (mgugino@redhat.com)
+- Don't hardcode the network interface in the openshift_logging_mux role
+  (nkinder@redhat.com)
+- failure_summary: make sure msg is always a string (vrutkovs@redhat.com)
+- Fix flake8 errors in utils/test (vrutkovs@redhat.com)
+- Adding logic to do a full cluster restart if we are incrementing our major
+  versions of ES (ewolinet@redhat.com)
+- kibana checks: use six.moves instead of ImportError (vrutkovs@redhat.com)
+- add python2-boto3 package for centos-based origin-ansible container image
+  (jdiaz@redhat.com)
+- Configure Kuryr CNI daemon (mdulko@redhat.com)
+- adding ability to interact with network resources. (shawn.hurley21@gmail.com)
+- The provision_install file ends in yml not yaml! Ansible requirement
+  clarification. (mbruzek@gmail.com)
+- Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
+- Adding .ini to inventory_ignore_extensions (bedin@redhat.com)
+- lint issues (davis.phillips@gmail.com)
+- add vsphere examples in hosts.example (davis.phillips@gmail.com)
+- add template and vsphere.conf (davis.phillips@gmail.com)
+- add vsphere cloud providers (davis.phillips@gmail.com)
+- Fix wrong indentation (ichavero@redhat.com)
+- Fix yaml indentation (ichavero@redhat.com)
+- Add iptables rules for flannel (ichavero@redhat.com)
+
 * Mon Jan 15 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.31-1
 - Fixing openshift_hosted variable. (kwoodson@redhat.com)
 - Don't hardcode the network interface in the openshift_logging_mux role
