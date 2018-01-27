@@ -117,7 +117,7 @@ l_crio_image: "{{ openshift_crio_systemcontainer_image_override | default(l_crio
 # ----------------------- #
 l_crt_docker_image_dict:
   Fedora: "registry.fedoraproject.org/latest/docker"
-  Centos: "registry.centos.org/projectatomic/docker"
+  CentOS: "registry.centos.org/projectatomic/docker"
   RedHat: "registry.access.redhat.com/openshift3/container-engine"
 
 openshift_docker_image_tag_default: "latest"
