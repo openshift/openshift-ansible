@@ -1,0 +1,251 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: sdn
+  namespace: openshift-sdn
+  annotations:
+    kubernetes.io/description: |
+      This daemon set launches the OpenShift networking components (kube-proxy, DNS, and openshift-sdn).
+      It expects that OVS is running on the node.
+    image.openshift.io/triggers: |
+      [
+        {"from":{"kind":"ImageStreamTag","name":"node:v3.9"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sync\")].image"},
+        {"from":{"kind":"ImageStreamTag","name":"node:v3.9"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sdn\")].image"}
+      ]
+spec:
+  selector:
+    matchLabels:
+      app: sdn
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: sdn
+        component: network
+        type: infra
+        openshift.io/component: network
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      # Requires fairly broad permissions - ability to read all services and network functions as well
+      # as all pods.
+      serviceAccountName: sdn
+      hostNetwork: true
+      # Must be hostPID because it invokes operations on processes in the host space
+      hostPID: true
+      containers:
+
+      # The sync container is a temporary config loop until Kubelet dynamic config is implemented. It refreshes
+      # the contents of /etc/origin/node/ with the config map ${BOOTSTRAP_CONFIG_NAME} from the openshift-node
+      # namespace. It will restart the Kubelet on the host if it detects the node-config.yaml has changed.
+      #
+      # 1. Dynamic Kubelet config must pull down a full configmap
+      # 2. Nodes must relabel themselves https://github.com/kubernetes/kubernetes/issues/59314
+      #
+      - name: sync
+        image: " "
+        command:
+        - /bin/bash
+        - -c
+        - |
+          #!/bin/bash
+          set -euo pipefail
+
+          # loop until BOOTSTRAP_CONFIG_NAME is set
+          set -o allexport
+          while true; do
+            if [[ -f /etc/sysconfig/origin-node ]]; then
+              source /etc/sysconfig/origin-node
+              if [[ -z "${BOOTSTRAP_CONFIG_NAME-}" ]]; then
+                echo "info: Waiting for BOOTSTRAP_CONFIG_NAME to be set" 2>&1
+                sleep 15
+                continue
+              fi
+              break
+            fi
+          done
+
+          # track the current state of the config
+          if [[ -f /etc/origin/node/node-config.yaml ]]; then
+            md5sum /etc/origin/node/node-config.yaml > /tmp/.old
+          else
+            touch /tmp/.old
+          fi
+
+          # periodically refresh both node-config.yaml and relabel the node
+          while true; do
+            name=${BOOTSTRAP_CONFIG_NAME}
+            if ! oc extract --config=/etc/origin/node/node.kubeconfig "cm/${BOOTSTRAP_CONFIG_NAME}" -n openshift-node --to=/etc/origin/node --confirm; then
+              echo "error: Unable to retrieve latest config for node" 2>&1
+              sleep 15
+              continue
+            fi
+            # detect whether the node-config.yaml has changed, and if so trigger a restart of the kubelet.
+            md5sum /etc/origin/node/node-config.yaml > /tmp/.new
+            if [[ "$( cat /tmp/.old )" != "$( cat /tmp/.new )" ]]; then
+              echo "info: Configuration changed, restarting kubelet" 2>&1
+              # TODO: kubelet doesn't relabel nodes, best effort for now
+              # https://github.com/kubernetes/kubernetes/issues/59314
+              if args="$(openshift start node --write-flags --config /etc/origin/node/node-config.yaml)"; then
+                labels=' --node-labels=([^ ]+) '
+                if [[ ${args} =~ ${labels} ]]; then
+                  labels="${BASH_REMATCH[1]//,/ }"
+                  echo "info: Applying node labels $labels" 2>&1
+                  if ! oc label --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" ${labels} --overwrite; then
+                    echo "error: Unable to apply labels, will retry in 10" 2>&1
+                    sleep 10
+                    continue
+                  fi
+                fi
+              fi
+              if ! pgrep -U 0 -f 'hyperkube kubelet ' | xargs kill; then
+                echo "error: Unable to restart Kubelet" 2>&1
+              fi
+            fi
+            cp -f /tmp/.new /tmp/.old
+            sleep 180
+          done
+
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        securityContext:
+          runAsUser: 0
+          # Permission could be reduced by selecting an appropriate SELinux policy
+          privileged: true
+        volumeMounts:
+        # Directory which contains the host configuration. We write to this directory
+        - mountPath: /etc/origin/node/
+          name: host-config
+        - mountPath: /etc/sysconfig/origin-node
+          name: host-sysconfig-node
+          readOnly: true
+
+      # The network container launches the openshift-sdn process, the kube-proxy, and the local DNS service.
+      # It relies on an up to date node-config.yaml being present.
+      - name: sdn
+        image: " "
+        command: 
+        - /bin/bash
+        - -c
+        - |
+          #!/bin/bash
+          set -euo pipefail
+          # Take over network functions on the node
+          rm -Rf /etc/cni/net.d/*
+          rm -Rf /host/opt/cni/bin/*
+          cp -Rf /opt/cni/bin/* /host/opt/cni/bin/
+
+          if [[ -f /etc/sysconfig/origin-node ]]; then
+            set -o allexport
+            source /etc/sysconfig/origin-node
+          fi
+
+          # use either the bootstrapped node kubeconfig or the static configuration
+          file=/etc/origin/node/node.kubeconfig
+          if [[ ! -f "${file}" ]]; then
+            # use the static node config if it exists
+            # TODO: remove when static node configuration is no longer supported
+            for f in /etc/origin/node/system*.kubeconfig; do
+              echo "info: Using ${f} for node configuration" 1>&2
+              file="${f}"
+              break
+            done
+          fi
+          # Use the same config as the node, but with the service account token
+          oc config "--config=${file}" view --flatten > /tmp/kubeconfig
+          oc config --config=/tmp/kubeconfig set-credentials sa "--token=$( cat /var/run/secrets/kubernetes.io/serviceaccount/token )"
+          oc config --config=/tmp/kubeconfig set-context "$( oc config --config=/tmp/kubeconfig current-context )" --user=sa
+          # Launch the network process
+          exec openshift start network --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
+
+        securityContext:
+          runAsUser: 0
+          # Permission could be reduced by selecting an appropriate SELinux policy
+          privileged: true
+
+        volumeMounts:
+        # Directory which contains the host configuration.
+        - mountPath: /etc/origin/node/
+          name: host-config
+          readOnly: true
+        - mountPath: /etc/sysconfig/origin-node
+          name: host-sysconfig-node
+          readOnly: true
+        # Run directories where we need to be able to access sockets
+        - mountPath: /var/run/dbus/
+          name: host-var-run-dbus
+          readOnly: true
+        - mountPath: /var/run/openvswitch/
+          name: host-var-run-ovs
+          readOnly: true
+        - mountPath: /var/run/kubernetes/
+          name: host-var-run-kubernetes
+          readOnly: true
+        # We mount our socket here
+        - mountPath: /var/run/openshift-sdn
+          name: host-var-run-openshift-sdn
+        # CNI related mounts which we take over
+        - mountPath: /host/opt/cni/bin
+          name: host-opt-cni-bin
+        - mountPath: /etc/cni/net.d
+          name: host-etc-cni-netd
+        - mountPath: /var/lib/cni/networks/openshift-sdn
+          name: host-var-lib-cni-networks-openshift-sdn
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        env:
+        - name: OPENSHIFT_DNS_DOMAIN
+          value: cluster.local
+        ports:
+        - name: healthz
+          containerPort: 10256
+        livenessProbe:
+          initialDelaySeconds: 10
+          httpGet:
+            path: /healthz
+            port: 10256
+            scheme: HTTP
+        lifecycle:
+
+      volumes:
+      # In bootstrap mode, the host config contains information not easily available
+      # from other locations.
+      - name: host-config
+        hostPath:
+          path: /etc/origin/node
+      - name: host-sysconfig-node
+        hostPath:
+          path: /etc/sysconfig/origin-node
+      - name: host-modules
+        hostPath:
+          path: /lib/modules
+
+      - name: host-var-run-ovs
+        hostPath:
+          path: /var/run/openvswitch
+      - name: host-var-run-kubernetes
+        hostPath:
+          path: /var/run/kubernetes
+      - name: host-var-run-dbus
+        hostPath:
+          path: /var/run/dbus
+      - name: host-var-run-openshift-sdn
+        hostPath:
+          path: /var/run/openshift-sdn
+
+      - name: host-opt-cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: host-etc-cni-netd
+        hostPath:
+          path: /etc/cni/net.d
+      - name: host-var-lib-cni-networks-openshift-sdn
+        hostPath:
+          path: /var/lib/cni/networks/openshift-sdn

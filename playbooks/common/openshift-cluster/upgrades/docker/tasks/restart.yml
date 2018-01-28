@@ -9,11 +9,11 @@
 - name: Restart containerized services
   service: name={{ item }} state=started
   with_items:
-    - etcd_container
-    - openvswitch
-    - "{{ openshift_service_type }}-master-api"
-    - "{{ openshift_service_type }}-master-controllers"
-    - "{{ openshift_service_type }}-node"
+  - etcd_container
+  - openvswitch
+  - "{{ openshift_service_type }}-master-api"
+  - "{{ openshift_service_type }}-master-controllers"
+  - "{{ openshift_service_type }}-node"
   failed_when: false
   when: openshift_is_containerized | bool
 
