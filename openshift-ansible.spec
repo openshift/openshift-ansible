@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.99
+Version:        3.6.173.0.100
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.100-1
+- docker_image_availability: containerized overrides (lmeyer@redhat.com)
+- Remove remaining haproxy files with uninstallation
+  (nakayamakenjiro@gmail.com)
+- Add support for Amazon EC2 C5 instance types (rteague@redhat.com)
+- registry-console template 3.6 consistency (lmeyer@redhat.com)
+- registry-console: align image and check (lmeyer@redhat.com)
+- reconcile registry-console and docker_image_availability (lmeyer@redhat.com)
+
 * Wed Jan 24 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.99-1
 - 
 
