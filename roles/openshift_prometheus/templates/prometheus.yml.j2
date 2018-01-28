@@ -1,3 +1,10 @@
+global:
+  scrape_interval: {{ openshift_prometheus_scrape_interval }}
+  scrape_timeout: {{ openshift_prometheus_scrape_timeout }}
+  evaluation_interval: {{ openshift_prometheus_evaluation_interval }}
+
+
+
 rule_files:
   - 'prometheus.rules'
 {% if openshift_prometheus_additional_rules_file is defined and openshift_prometheus_additional_rules_file is not none %}
