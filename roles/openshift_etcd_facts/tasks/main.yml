@@ -1,4 +1,2 @@
 ---
-- openshift_facts:
-    role: etcd
-    local_facts: {}
+- import_tasks: set_etcd_ca_host.yml

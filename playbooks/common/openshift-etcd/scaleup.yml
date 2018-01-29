@@ -12,8 +12,6 @@
   hosts: oo_new_etcd_to_config
   serial: 1
   any_errors_fatal: true
-  vars:
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
   pre_tasks:
   - name: Add new etcd members to cluster
     command: >
@@ -44,7 +42,6 @@
   - role: openshift_etcd
     when: etcd_add_check.rc == 0
     etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
     etcd_initial_cluster_state: "existing"
     etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
@@ -69,8 +66,6 @@
   hosts: oo_masters_to_config
   serial: 1
   vars:
-    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     openshift_master_etcd_hosts: "{{ hostvars
                                      | oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
                                      | oo_collect('openshift.common.hostname')
