@@ -107,7 +107,7 @@ class BinarySyncer(object):
             self._sync_binary('oc')
 
         # Ensure correct symlinks created:
-        self._sync_symlink('kubectl', 'openshift')
+        self._sync_symlink('kubectl', 'oc')
 
         # Remove old oadm binary
         if os.path.exists(os.path.join(self.bin_dir, 'oadm')):
