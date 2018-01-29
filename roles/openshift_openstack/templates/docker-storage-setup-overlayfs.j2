@@ -1,5 +1,5 @@
-{% if docker_storage_volume_mountpoints is defined %}
-DEVS="{{ docker_storage_volume_mountpoints }}"
+{% if docker_storage_mountpoints is defined %}
+DEVS="{{ docker_storage_mountpoints }}"
 {% else %}
 DEVS="{{ openshift_openstack_container_storage_setup.docker_dev }}"
 {% endif %}
