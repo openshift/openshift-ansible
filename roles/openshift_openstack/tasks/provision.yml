@@ -4,6 +4,16 @@
   when:
   - openshift_openstack_stack_state == 'present'
 
+- name: check for openstack client
+  command: openstack
+  register: openstack_cli_exists
+  ignore_errors: True
+
+- name: validate the Heat template
+  command: openstack orchestration template validate -t {{ stack_template_path }}
+  register: template_validation_output
+  when: openstack_cli_exists|succeeded
+
 - name: Handle the Stack (create/delete)
   ignore_errors: False
   register: stack_create
