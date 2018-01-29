@@ -15,13 +15,31 @@
   when: openstack_cli_exists|succeeded
 
 - name: Handle the Stack (create/delete)
-  ignore_errors: False
+  ignore_errors: True
   register: stack_create
   os_stack:
     name: "{{ openshift_openstack_stack_name }}"
     state: "{{ openshift_openstack_stack_state }}"
     template: "{{ stack_template_path | default(omit) }}"
     wait: yes
+
+- name: get errors in stack creation, if any
+  command: openstack stack failures list {{ openshift_openstack_stack_name }}
+  register: stack_create_failures
+  when:
+  - openstack_cli_exists|succeeded
+  - stack_create|failed
+
+- name: show errors in stack creation, if any
+  debug: var=stack_create_failures
+  when:
+  - openstack_cli_exists|succeeded
+  - stack_create|failed
+
+- fail:
+    msg: Stack creation failed
+  when:
+  - stack_create|failed
 
 - name: Add the new nodes to the inventory
   meta: refresh_inventory
