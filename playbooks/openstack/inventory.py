@@ -61,6 +61,7 @@ def base_openshift_inventory(cluster_hosts):
 
     return inventory
 
+
 def get_docker_storage_mountpoints(volumes):
     '''Check volumes to see if they're being used for docker storage'''
     docker_storage_mountpoints = {}
@@ -72,6 +73,7 @@ def get_docker_storage_mountpoints(volumes):
                 else:
                     docker_storage_mountpoints[attachment.server_id] = [attachment.device]
     return docker_storage_mountpoints
+
 
 def build_inventory():
     '''Build the dynamic inventory.'''
@@ -139,6 +141,7 @@ def build_inventory():
 
         inventory['_meta']['hostvars'][server.name] = hostvars
     return inventory
+
 
 if __name__ == '__main__':
     print(json.dumps(build_inventory(), indent=4, sort_keys=True))
