@@ -244,6 +244,11 @@ openshift_aws_node_security_groups:
       from_port: all
       to_port: all
       group_name: "{{ openshift_aws_clusterid }}"
+    - proto: tcp
+      from_port: 9000
+      to_port: 10000
+      group_name: "{{ openshift_aws_clusterid }}"
+
   master:
     name: "{{ openshift_aws_clusterid }}_master"
     desc: "{{ openshift_aws_clusterid }} master instances"
