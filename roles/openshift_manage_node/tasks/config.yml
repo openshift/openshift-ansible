@@ -2,7 +2,7 @@
 - name: Set node schedulability
   oc_adm_manage_node:
     node: "{{ openshift.node.nodename | lower }}"
-    schedulable: "{{ 'true' if l_openshift_manage_schedulable | bool else 'false' }}"
+    schedulable: "{{ 'true' if openshift_schedulable | default(true) | bool else 'false' }}"
   retries: 10
   delay: 5
   register: node_schedulable
@@ -23,5 +23,5 @@
   delegate_to: "{{ openshift_master_host }}"
   vars:
     l_node_labels: "{{ openshift_node_labels | default({}) }}"
-    l_master_labels: "{{ ('oo_masters_to_config' in group_names) | ternary(openshift_master_node_labels, {}) }}"
+    l_master_labels: "{{ openshift_manage_node_is_master | ternary(openshift_master_node_labels, {}) }}"
     l_all_labels: "{{ l_node_labels | combine(l_master_labels) }}"
