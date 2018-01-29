@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.100
+Version:        3.6.173.0.101
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jan 29 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.101-1
+- 
+
 * Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.100-1
 - docker_image_availability: containerized overrides (lmeyer@redhat.com)
 - Remove remaining haproxy files with uninstallation
