@@ -61,46 +61,13 @@
   - role: etcd_common
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
   tasks:
-  - name: Create a tarball of the etcd ca certs
-    command: >
-      tar -czvf {{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz
-        -C {{ etcd_ca_dir }} .
-    args:
-      creates: "{{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz"
-      warn: no
-    delegate_to: "{{ etcd_ca_host }}"
-    run_once: true
-  - name: Retrieve etcd ca cert tarball
-    fetch:
-      src: "{{ etcd_conf_dir }}/{{ etcd_ca_name }}.tgz"
-      dest: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/"
-      flat: yes
-      fail_on_missing: yes
-      validate_checksum: yes
-    delegate_to: "{{ etcd_ca_host }}"
-    run_once: true
-  - name: Ensure ca directory exists
-    file:
-      path: "{{ etcd_ca_dir }}"
-      state: directory
-  - name: Unarchive etcd ca cert tarballs
-    unarchive:
-      src: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}/{{ etcd_ca_name }}.tgz"
-      dest: "{{ etcd_ca_dir }}"
-  - name: Read current etcd CA
-    slurp:
-      src: "{{ etcd_conf_dir }}/ca.crt"
-    register: g_current_etcd_ca_output
-  - name: Read new etcd CA
-    slurp:
-      src: "{{ etcd_ca_dir }}/ca.crt"
-    register: g_new_etcd_ca_output
-  - copy:
-      content: "{{ (g_new_etcd_ca_output.content|b64decode) + (g_current_etcd_ca_output.content|b64decode) }}"
-      dest: "{{ item }}/ca.crt"
-    with_items:
-    - "{{ etcd_conf_dir }}"
-    - "{{ etcd_ca_dir }}"
+  - include_role:
+      name: etcd
+      tasks_from: distribute_ca
+    vars:
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+      etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
+    static: true
 
 - include: ../../openshift-etcd/restart.yml
   # Do not restart etcd when etcd certificates were previously expired.

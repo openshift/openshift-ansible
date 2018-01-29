@@ -3,3 +3,5 @@
     role: etcd
     local_facts:
       etcd_image: "{{ osm_etcd_image | default(None) }}"
+- include: set_etcd_ca_host.yml
+  static: true
