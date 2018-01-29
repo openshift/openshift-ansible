@@ -3,3 +3,5 @@
 openshift_manage_node_is_master: False
 openshift_master_node_labels:
   node-role.kubernetes.io/master: 'true'
+l_openshift_master_webconsole_taint_noexecute_labels: "{{ openshift_master_webconsole_taint_noexecute_labels | default('webconsole=true') }}"
+l_openshift_master_webconsole_taint_noschedule_labels: "{{ openshift_master_webconsole_taint_noschedule_labels | default('webconsole=true') }}"
