@@ -3,7 +3,7 @@
   hosts: localhost
   tasks:
   - name: build upgrade scale groups
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: upgrade_node_group.yml
 
@@ -50,17 +50,17 @@
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
     until: not (l_upgrade_nodes_drain_result is failed)
-    retries: "{{ 1 if openshift_upgrade_nodes_drain_timeout | default(0) == '0' else 0  | int }}"
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
     delay: 5
     failed_when:
     - l_upgrade_nodes_drain_result is failed
-    - openshift_upgrade_nodes_drain_timeout | default(0) == '0'
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
 # Alright, let's clean up!
 - name: clean up the old scale group
   hosts: localhost
   tasks:
   - name: clean up scale group
-    include_role:
+    import_role:
       name: openshift_aws
       tasks_from: remove_scale_group.yml

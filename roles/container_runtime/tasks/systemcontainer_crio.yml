@@ -81,6 +81,17 @@
     dest: /etc/cni/net.d/openshift-sdn.conf
     src: 80-openshift-sdn.conf.j2
 
+- name: Create /etc/sysconfig/crio-storage
+  copy:
+    content: ""
+    dest: /etc/sysconfig/crio-storage
+    force: no
+
+- name: Create /etc/sysconfig/crio-network
+  template:
+    dest: /etc/sysconfig/crio-network
+    src: crio-network.j2
+
 - name: Start the CRI-O service
   systemd:
     name: "cri-o"
@@ -93,4 +104,4 @@
 # 'docker login'
 - include_tasks: common/post.yml
   vars:
-    openshift_docker_alternative_creds: "{{ openshift_use_crio_only }}"
+    openshift_docker_alternative_creds: "{{ openshift_use_crio_only | bool }}"

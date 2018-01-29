@@ -84,6 +84,9 @@ openshift_release=v3.7
 
 # Configure extensions in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
+#openshift_master_oauth_templates:
+#  login: /path/to/login-template.html
+# openshift_master_oauth_template is deprecated.  Use openshift_master_oauth_templates instead.
 #openshift_master_oauth_template=/path/to/login-template.html
 
 # Configure imagePolicyConfig in the master config
@@ -125,7 +128,7 @@ openshift_release=v3.7
 #openshift_crio_systemcontainer_image_override="registry.example.com/cri-o:latest"
 # NOTE: The following crio docker-gc items are tech preview and likely shouldn't be used
 # unless you know what you are doing!!
-# The following two variables are used when opneshift_use_crio is True
+# The following two variables are used when openshift_use_crio is True
 # and cleans up after builds that pass through docker.
 # Enable docker garbage collection when using cri-o
 #openshift_crio_enable_docker_gc=false
@@ -193,6 +196,10 @@ openshift_release=v3.7
 # OpenShift repository configuration
 #openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 #openshift_repos_enable_testing=false
+
+# If the image for etcd needs to be pulled from anywhere else than registry.access.redhat.com, e.g. in
+# a disconnected and containerized installation, use osm_etcd_image to specify the image to use:
+#osm_etcd_image=rhel7/etcd
 
 # htpasswd auth
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
@@ -279,8 +286,21 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cloudprovider_openstack_region=region
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
 #
+# Note: If you're getting a "BS API version autodetection failed" when provisioning cinder volumes you may need this setting
+#openshift_cloudprovider_openstack_blockstorage_version=v2
+#
 # GCE
 #openshift_cloudprovider_kind=gce
+#
+# vSphere
+#openshift_cloudprovider_kind=vsphere
+#openshift_cloudprovider_vsphere_username=username
+#openshift_cloudprovider_vsphere_password=password
+#openshift_cloudprovider_vsphere_host=vcenter_host or vsphere_host
+#openshift_cloudprovider_vsphere_datacenter=datacenter
+#openshift_cloudprovider_vsphere_datastore=datastore
+#openshift_cloudprovider_vsphere_folder=optional_folder_name
+
 
 # Project Configuration
 #osm_project_request_message=''
@@ -825,12 +845,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # See: https://github.com/nickhammond/ansible-logrotate
 #logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
 
-# openshift-ansible will wait indefinitely for your input when it detects that the
+# The OpenShift-Ansible installer will fail when it detects that the
 # value of openshift_hostname resolves to an IP address not bound to any local
 # interfaces. This mis-configuration is problematic for any pod leveraging host
 # networking and liveness or readiness probes.
-# Setting this variable to true will override that check.
-#openshift_override_hostname_check=true
+# Setting this variable to false will override that check.
+#openshift_hostname_check=true
 
 # openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
 # in versions >= 3.6
@@ -892,6 +912,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_buildoverrides_image_labels=[{'name':'imagelabelname1','value':'imagelabelvalue1'}]
 #openshift_buildoverrides_nodeselectors={'nodelabel1':'nodelabelvalue1'}
 #openshift_buildoverrides_annotations={'annotationkey1':'annotationvalue1'}
+#openshift_buildoverrides_tolerations=[{'key':'mykey1','value':'myvalue1','effect':'NoSchedule','operator':'Equal'}]
 
 # Or you may optionally define your own build overrides configuration serialized as json
 #openshift_buildoverrides_json='{"BuildOverrides":{"configuration":{"apiVersion":"v1","kind":"BuildDefaultsConfig","forcePull":"true"}}}'
@@ -987,6 +1008,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=49
 # where as this would not
 # openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=50
+#
+# A timeout to wait for nodes to drain pods can be specified to ensure that the
+# upgrade continues even if nodes fail to drain pods in the allowed time. The
+# default value of 0 will wait indefinitely allowing the admin to investigate
+# the root cause and ensuring that disruption budgets are respected. If the
+# a timeout of 0 is used there will also be one attempt to re-try draining the
+# node. If a non zero timeout is specified there will be no attempt to retry.
+#openshift_upgrade_nodes_drain_timeout=0
 #
 # Multiple data migrations take place and if they fail they will fail the upgrade
 # You may wish to disable these or make them non fatal

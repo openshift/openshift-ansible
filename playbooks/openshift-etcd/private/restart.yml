@@ -3,7 +3,7 @@
   hosts: oo_etcd_to_config
   serial: 1
   tasks:
-    - include_role:
+    - import_role:
         name: etcd
         tasks_from: restart.yml
       when:
@@ -12,7 +12,7 @@
 - name: Restart etcd
   hosts: oo_etcd_to_config
   tasks:
-    - include_role:
+    - import_role:
         name: etcd
         tasks_from: restart.yml
       when:

@@ -59,7 +59,7 @@ openshift_aws_elb_name_dict:
     external: "{{ openshift_aws_elb_basename }}-infra"
 
 openshift_aws_elb_idle_timout: 400
-openshift_aws_elb_scheme: internet-facing
+
 openshift_aws_elb_cert_arn: ''
 
 openshift_aws_elb_dict:
@@ -98,17 +98,26 @@ openshift_aws_elb_dict:
       proxy_protocol: True
 
 openshift_aws_node_group_config_master_volumes:
+- device_name: /dev/sda1
+  volume_size: 100
+  device_type: gp2
+  delete_on_termination: False
 - device_name: /dev/sdb
   volume_size: 100
   device_type: gp2
   delete_on_termination: False
 
 openshift_aws_node_group_config_node_volumes:
+- device_name: /dev/sda1
+  volume_size: 100
+  device_type: gp2
+  delete_on_termination: True
 - device_name: /dev/sdb
   volume_size: 100
   device_type: gp2
   delete_on_termination: True
 
+# build_instance_tags is a custom filter in role lib_utils
 openshift_aws_node_group_config_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 openshift_aws_node_group_termination_policy: Default
 openshift_aws_node_group_replace_instances: []
@@ -201,6 +210,7 @@ openshift_aws_node_group_config:
 openshift_aws_elb_tags: "{{ openshift_aws_kube_tags }}"
 openshift_aws_elb_az_load_balancing: False
 
+# build_instance_tags is a custom filter in role lib_utils
 openshift_aws_kube_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
 
 openshift_aws_elb_security_groups: "{{ openshift_aws_launch_config_security_groups }}"
@@ -272,8 +282,6 @@ openshift_aws_node_security_groups:
 openshift_aws_vpc_tags:
   Name: "{{ openshift_aws_vpc_name }}"
 
-openshift_aws_subnet_az: us-east-1c
-
 openshift_aws_vpc:
   name: "{{ openshift_aws_vpc_name }}"
   cidr: 172.31.0.0/16
@@ -281,13 +289,20 @@ openshift_aws_vpc:
     us-east-1:
     - cidr: 172.31.48.0/20
       az: "us-east-1c"
+      default_az: true
     - cidr: 172.31.32.0/20
       az: "us-east-1e"
     - cidr: 172.31.16.0/20
       az: "us-east-1a"
+
+openshift_aws_subnet_az: "{{ openshift_aws_vpc.subnets[openshift_aws_region] | get_default_az }}"
 
 openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''
 openshift_aws_node_config_namespace: openshift-node
 
 openshift_aws_masters_groups: masters,etcd,nodes
+
+# By default, don't delete things like the shared IAM instance
+# profile and uploaded ssh keys
+openshift_aws_enable_uninstall_shared_objects: False

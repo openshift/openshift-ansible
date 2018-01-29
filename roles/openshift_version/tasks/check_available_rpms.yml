@@ -1,0 +1,10 @@
+---
+- name: Get available {{ openshift_service_type}} version
+  repoquery:
+    name: "{{ openshift_service_type}}{{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }}"
+    ignore_excluders: true
+  register: rpm_results
+
+- fail:
+    msg: "Package {{ openshift_service_type}} not found"
+  when: not rpm_results.results.package_found

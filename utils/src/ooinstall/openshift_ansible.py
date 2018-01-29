@@ -122,7 +122,7 @@ def write_inventory_vars(base_inventory, lb):
     if CFG.deployment.variables['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=yes\n')
 
-    base_inventory.write('openshift_override_hostname_check=true\n')
+    base_inventory.write('openshift_hostname_check=false\n')
 
     if lb is not None:
         base_inventory.write("openshift_master_cluster_hostname={}\n".format(lb.hostname))
@@ -310,24 +310,6 @@ def run_ansible(playbook, inventory, env_vars, verbose=False):
 def run_uninstall_playbook(hosts, verbose=False):
     playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
                             'playbooks/adhoc/uninstall.yml')
-    inventory_file = generate_inventory(hosts)
-    facts_env = os.environ.copy()
-    if 'ansible_log_path' in CFG.settings:
-        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
-    if 'ansible_config' in CFG.settings:
-        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_config']
-    # override the ansible config for our main playbook run
-    if 'ansible_quiet_config' in CFG.settings:
-        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_quiet_config']
-
-    return run_ansible(playbook, inventory_file, facts_env, verbose)
-
-
-def run_upgrade_playbook(hosts, playbook, verbose=False):
-    playbook = os.path.join(CFG.settings['ansible_playbook_directory'],
-                            'playbooks/byo/openshift-cluster/upgrades/{}'.format(playbook))
-
-    # TODO: Upgrade inventory for upgrade?
     inventory_file = generate_inventory(hosts)
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:

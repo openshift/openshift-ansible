@@ -19,8 +19,8 @@ Install Contiv components (netmaster, netplugin, contiv_etcd) on Master and Mini
 * ``openshift_use_contiv=True``
 * ``openshift_use_openshift_sdn=False``
 * ``os_sdn_network_plugin_name='cni'``
-* ``netmaster_interface=eth0``
-* ``netplugin_interface=eth1``
+* ``contiv_netmaster_interface=eth0``
+* ``contiv_netplugin_interface=eth1``
 * ref. Openshift docs Contiv section for more details
 
 ## Example bare metal deployment of Openshift + Contiv 

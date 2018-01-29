@@ -1,5 +1,5 @@
 ---
-- name: Verify 3.9 specific upgrade checks
+- name: Verify 3.8 specific upgrade checks
   hosts: oo_first_master
   roles:
   - { role: lib_openshift }

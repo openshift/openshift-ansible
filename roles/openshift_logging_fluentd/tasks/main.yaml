@@ -108,38 +108,28 @@
     dest: "{{ tempdir }}/fluent.conf"
   vars:
     deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
-  when: fluentd_config_contents is undefined
-  changed_when: no
 
 - copy:
     src: fluentd-throttle-config.yaml
     dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-  when: fluentd_throttle_contents is undefined
-  changed_when: no
 
 - copy:
     src: secure-forward.conf
     dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_secureforward_contents is undefined
-  changed_when: no
 
-- copy:
-    content: "{{ fluentd_config_contents }}"
-    dest: "{{ tempdir }}/fluent.conf"
-  when: fluentd_config_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ fluentd_throttle_contents }}"
-    dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-  when: fluentd_throttle_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ fluentd_secureforward_contents }}"
-    dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_secureforward_contents is defined
-  changed_when: no
+- import_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-fluentd"
+    configmap_namespace: "logging"
+    configmap_file_names:
+      - current_file: "fluent.conf"
+        new_file: "{{ tempdir }}/fluent.conf"
+      - current_file: "throttle-config.yaml"
+        new_file: "{{ tempdir }}/fluentd-throttle-config.yaml"
+      - current_file: "secure-forward.conf"
+        new_file: "{{ tempdir }}/secure-forward.conf"
 
 - name: Set Fluentd configmap
   oc_configmap:
@@ -182,8 +172,8 @@
     app_port: "{{ openshift_logging_fluentd_app_port }}"
     ops_host: "{{ openshift_logging_fluentd_ops_host }}"
     ops_port: "{{ openshift_logging_fluentd_ops_port }}"
-    fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys()[0] }}"
-    fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values()[0] }}"
+    fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys() | first }}"
+    fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values() | first }}"
     fluentd_cpu_limit: "{{ openshift_logging_fluentd_cpu_limit }}"
     fluentd_cpu_request: "{{ openshift_logging_fluentd_cpu_request | min_cpu(openshift_logging_fluentd_cpu_limit | default(none)) }}"
     fluentd_memory_limit: "{{ openshift_logging_fluentd_memory_limit }}"

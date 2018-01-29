@@ -14,10 +14,10 @@
 - name: Backup existing etcd CA certificate directories
   hosts: oo_etcd_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup_ca_certificates.yml
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: remove_ca_certificates.yml
 
@@ -26,7 +26,6 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
@@ -34,10 +33,14 @@
     register: g_etcd_mktemp
     changed_when: false
 
+  - name: Chmod local temp directory for syncing certs
+    local_action: command chmod 777 "{{ g_etcd_mktemp.stdout }}"
+    changed_when: false
+
 - name: Distribute etcd CA to etcd hosts
   hosts: oo_etcd_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: distribute_ca.yml
     vars:
@@ -54,7 +57,7 @@
 - name: Retrieve etcd CA certificate
   hosts: oo_first_etcd
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: retrieve_ca_certificates.yml
     vars:
@@ -74,7 +77,6 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - file:

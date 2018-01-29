@@ -24,7 +24,7 @@
                                                                                openshift_use_nuage | default(false),
                                                                                nuage_mon_rest_server_port | default(none)))
                                           + openshift_loadbalancer_additional_backends | default([]) }}"
-    openshift_image_tag: "{{ hostvars[groups.oo_first_master.0].openshift_image_tag }}"
+    openshift_image_tag: "{{ hostvars[groups.oo_masters_to_config.0].openshift_image_tag }}"
   roles:
   - role: openshift_loadbalancer
   - role: tuned

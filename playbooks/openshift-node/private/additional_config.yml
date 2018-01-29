@@ -47,17 +47,23 @@
   - role: nuage_node
     when: openshift_use_nuage | default(false) | bool
 
-- name: Additional node config
-  hosts: oo_nodes_use_contiv
+- name: Configure Contiv masters
+  hosts: oo_masters_to_config
   roles:
   - role: contiv
-    contiv_role: netplugin
+    contiv_master: true
+    when: openshift_use_contiv | default(false) | bool
+
+- name: Configure rest of Contiv nodes
+  hosts: "{{ groups.oo_nodes_use_contiv | default([]) | difference(groups.oo_masters_to_config) }}"
+  roles:
+  - role: contiv
     when: openshift_use_contiv | default(false) | bool
 
 - name: Configure Kuryr node
   hosts: oo_nodes_use_kuryr
   tasks:
-  - include_role:
+  - import_role:
       name: kuryr
       tasks_from: node
     when: openshift_use_kuryr | default(false) | bool

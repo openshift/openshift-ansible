@@ -1,0 +1,23 @@
+---
+debug_level: 5
+osm_default_node_selector: "region=infra"
+osm_controller_args:
+  enable-hostpath-provisioner:
+    - "true"
+openshift_hosted_router_selector: "region=infra"
+openshift_hosted_router_create_certificate: true
+openshift_hosted_registry_selector: "region=infra"
+openshift_master_audit_config:
+  enabled: true
+openshift_master_identity_providers:
+  - name: "allow_all"
+    login: "true"
+    challenge: "true"
+    kind: "AllowAllPasswordIdentityProvider"
+openshift_template_service_broker_namespaces:
+  - "openshift"
+ansible_ssh_user: "ec2-user"
+enable_excluders: "false"
+osm_cluster_network_cidr: "10.128.0.0/14"
+openshift_portal_net: "172.30.0.0/16"
+osm_host_subnet_length: 9

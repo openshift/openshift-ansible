@@ -27,7 +27,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
     def test_state_list(self, mock_openshift_cmd, mock_tmpfile_copy):
-        ''' Testing a get '''
+        ''' Testing a list '''
         params = {'name': 'router',
                   'namespace': 'default',
                   'replicas': 2,
@@ -71,8 +71,296 @@ class OCScaleTest(unittest.TestCase):
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_state_present(self, mock_openshift_cmd, mock_tmpfile_copy):
+        ''' Testing a state present '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'replicas': 2,
+                  'state': 'present',
+                  'kind': 'dc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        dc = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6558",
+                   "generation": 8,
+                   "creationTimestamp": "2017-01-23T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 2,
+               }
+           }'''
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0}]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertFalse(results['changed'])
+        self.assertEqual(results['state'], 'present')
+        self.assertEqual(results['result'][0], 2)
+
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_scale_up(self, mock_openshift_cmd, mock_tmpfile_copy):
+        ''' Testing a scale up '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'replicas': 3,
+                  'state': 'present',
+                  'kind': 'dc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        dc = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6558",
+                   "generation": 8,
+                   "creationTimestamp": "2017-01-23T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 2,
+               }
+           }'''
+        dc_updated = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6559",
+                   "generation": 9,
+                   "creationTimestamp": "2017-01-24T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 3,
+               }
+           }'''
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc replace',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc_updated,
+             'returncode': 0}]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertTrue(results['changed'])
+        self.assertEqual(results['state'], 'present')
+        self.assertEqual(results['result'][0], 3)
+
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_scale_down(self, mock_openshift_cmd, mock_tmpfile_copy):
+        ''' Testing a scale down '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'replicas': 1,
+                  'state': 'present',
+                  'kind': 'dc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        dc = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6558",
+                   "generation": 8,
+                   "creationTimestamp": "2017-01-23T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 2,
+               }
+           }'''
+        dc_updated = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6560",
+                   "generation": 9,
+                   "creationTimestamp": "2017-01-24T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 1,
+               }
+           }'''
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc replace',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc_updated,
+             'returncode': 0}]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertTrue(results['changed'])
+        self.assertEqual(results['state'], 'present')
+        self.assertEqual(results['result'][0], 1)
+
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_scale_failed(self, mock_openshift_cmd, mock_tmpfile_copy):
+        ''' Testing a scale failure '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'replicas': 1,
+                  'state': 'present',
+                  'kind': 'dc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        dc = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6558",
+                   "generation": 8,
+                   "creationTimestamp": "2017-01-23T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 2,
+               }
+           }'''
+        error_message = "foo"
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc replace',
+             'results': error_message,
+             'returncode': 1}]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertTrue(results['failed'])
+
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_state_unknown(self, mock_openshift_cmd, mock_tmpfile_copy):
+        ''' Testing an unknown state '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'replicas': 2,
+                  'state': 'unknown-state',
+                  'kind': 'dc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        dc = '''{"kind": "DeploymentConfig",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6558",
+                   "generation": 8,
+                   "creationTimestamp": "2017-01-23T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 2,
+               }
+           }'''
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc get dc router -n default',
+             'results': dc,
+             'returncode': 0}]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertFalse('changed' in results)
+        self.assertEqual(results['failed'], True)
+
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
     def test_scale(self, mock_openshift_cmd, mock_tmpfile_copy):
-        ''' Testing a get '''
+        ''' Testing scale '''
         params = {'name': 'router',
                   'namespace': 'default',
                   'replicas': 3,
@@ -120,8 +408,57 @@ class OCScaleTest(unittest.TestCase):
 
     @mock.patch('oc_scale.Utils.create_tmpfile_copy')
     @mock.patch('oc_scale.OCScale.openshift_cmd')
+    def test_scale_rc(self, mock_openshift_cmd, mock_tmpfile_copy):
+        ''' Testing scale for replication controllers '''
+        params = {'name': 'router',
+                  'namespace': 'default',
+                  'replicas': 3,
+                  'state': 'list',
+                  'kind': 'rc',
+                  'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+                  'debug': False}
+
+        rc = '''{"kind": "ReplicationController",
+               "apiVersion": "v1",
+               "metadata": {
+                   "name": "router",
+                   "namespace": "default",
+                   "selfLink": "/oapi/v1/namespaces/default/deploymentconfigs/router",
+                   "uid": "a441eedc-e1ae-11e6-a2d5-0e6967f34d42",
+                   "resourceVersion": "6558",
+                   "generation": 8,
+                   "creationTimestamp": "2017-01-23T20:58:07Z",
+                   "labels": {
+                       "router": "router"
+                   }
+               },
+               "spec": {
+                   "replicas": 3,
+               }
+           }'''
+
+        mock_openshift_cmd.side_effect = [
+            {"cmd": '/usr/bin/oc get rc router -n default',
+             'results': rc,
+             'returncode': 0},
+            {"cmd": '/usr/bin/oc create -f /tmp/router -n default',
+             'results': '',
+             'returncode': 0}
+        ]
+
+        mock_tmpfile_copy.side_effect = [
+            '/tmp/mocked_kubeconfig',
+        ]
+
+        results = OCScale.run_ansible(params, False)
+
+        self.assertFalse(results['changed'])
+        self.assertEqual(results['result'][0], 3)
+
+    @mock.patch('oc_scale.Utils.create_tmpfile_copy')
+    @mock.patch('oc_scale.OCScale.openshift_cmd')
     def test_no_dc_scale(self, mock_openshift_cmd, mock_tmpfile_copy):
-        ''' Testing a get '''
+        ''' Testing scale for inexisting dc '''
         params = {'name': 'not_there',
                   'namespace': 'default',
                   'replicas': 3,
@@ -205,7 +542,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_fallback_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup fallback '''
+        ''' Testing binary lookup fallback in py3 '''
 
         mock_env_get.side_effect = lambda _v, _d: ''
 
@@ -217,7 +554,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_path_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup in path '''
+        ''' Testing binary lookup in path in py3 '''
 
         oc_bin = '/usr/bin/oc'
 
@@ -231,7 +568,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_usr_local_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup in /usr/local/bin '''
+        ''' Testing binary lookup in /usr/local/bin in py3 '''
 
         oc_bin = '/usr/local/bin/oc'
 
@@ -245,7 +582,7 @@ class OCScaleTest(unittest.TestCase):
     @mock.patch('shutil.which')
     @mock.patch('os.environ.get')
     def test_binary_lookup_in_home_py3(self, mock_env_get, mock_shutil_which):
-        ''' Testing binary lookup in ~/bin '''
+        ''' Testing binary lookup in ~/bin in py3 '''
 
         oc_bin = os.path.expanduser('~/bin/oc')
 

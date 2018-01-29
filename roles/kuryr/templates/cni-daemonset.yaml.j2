@@ -26,6 +26,13 @@ spec:
         image: kuryr/cni:latest
         imagePullPolicy: IfNotPresent
         command: [ "cni_ds_init" ]
+        env:
+        - name: CNI_DAEMON
+          value: "True"
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         securityContext:
           privileged: true
         volumeMounts:
@@ -38,6 +45,10 @@ spec:
           subPath: kuryr-cni.conf
         - name: etc
           mountPath: /etc
+        - name: proc
+          mountPath: /host_proc
+        - name: openvswitch
+          mountPath: /var/run/openvswitch
       volumes:
         - name: bin
           hostPath:
@@ -51,3 +62,9 @@ spec:
         - name: etc
           hostPath:
             path: /etc
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: openvswitch
+          hostPath:
+            path: /var/run/openvswitch

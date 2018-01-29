@@ -54,14 +54,17 @@
 - copy:
     src: curator.yml
     dest: "{{ tempdir }}/curator.yml"
-  when: curator_config_contents is undefined
   changed_when: no
 
-- copy:
-    content: "{{ curator_config_contents }}"
-    dest: "{{ tempdir }}/curator.yml"
-  when: curator_config_contents is defined
-  changed_when: no
+- import_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-curator"
+    configmap_namespace: "logging"
+    configmap_file_names:
+      - current_file: "config.yaml"
+        new_file: "{{ tempdir }}/curator.yml"
 
 - name: Set Curator configmap
   oc_configmap:

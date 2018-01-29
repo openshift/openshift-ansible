@@ -50,6 +50,7 @@
 
 # Certificates must be signed serially in order to avoid competing
 # for the serial file.
+# delegated_serial_command is a custom module in lib_utils
 - name: Sign and create the server crt
   delegated_serial_command:
     command: >
@@ -83,6 +84,7 @@
 
 # Certificates must be signed serially in order to avoid competing
 # for the serial file.
+# delegated_serial_command is a custom module in lib_utils
 - name: Sign and create the peer crt
   delegated_serial_command:
     command: >
@@ -105,13 +107,6 @@
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
-- name: Create local temp directory for syncing certs
-  local_action: command mktemp -d /tmp/etcd_certificates-XXXXXXX
-  become: no
-  register: g_etcd_server_mktemp
-  changed_when: False
-  when: etcd_server_certs_missing | bool
-
 - name: Create a tarball of the etcd certs
   command: >
     tar -czvf {{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz
@@ -127,8 +122,7 @@
 - name: Retrieve etcd cert tarball
   fetch:
     src: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
-    dest: "{{ g_etcd_server_mktemp.stdout }}/"
-    flat: yes
+    dest: "/tmp"
     fail_on_missing: yes
     validate_checksum: yes
   when: etcd_server_certs_missing | bool
@@ -144,7 +138,7 @@
 
 - name: Unarchive cert tarball
   unarchive:
-    src: "{{ g_etcd_server_mktemp.stdout }}/{{ etcd_cert_subdir }}.tgz"
+    src: "/tmp/{{ inventory_hostname }}/{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
   when: etcd_server_certs_missing | bool
 
@@ -161,8 +155,7 @@
 - name: Retrieve etcd ca cert tarball
   fetch:
     src: "{{ etcd_generated_certs_dir }}/{{ etcd_ca_name }}.tgz"
-    dest: "{{ g_etcd_server_mktemp.stdout }}/"
-    flat: yes
+    dest: "/tmp"
     fail_on_missing: yes
     validate_checksum: yes
   when: etcd_server_certs_missing | bool
@@ -177,8 +170,7 @@
   when: etcd_server_certs_missing | bool
 
 - name: Delete temporary directory
-  local_action: file path="{{ g_etcd_server_mktemp.stdout }}" state=absent
-  become: no
+  local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
   changed_when: False
   when: etcd_server_certs_missing | bool
 

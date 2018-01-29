@@ -125,12 +125,15 @@
 - name: Create temp directory for syncing certs
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - name: Create local temp directory for syncing certs
     local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
     register: g_master_mktemp
+    changed_when: false
+
+  - name: Chmod local temp directory for syncing certs
+    local_action: command chmod 777 "{{ g_master_mktemp.stdout }}"
     changed_when: false
 
 - name: Retrieve OpenShift CA
@@ -264,7 +267,6 @@
 - name: Delete temporary directory on localhost
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - file:

@@ -1,6 +1,8 @@
 ---
 # Upgrade predicates
 - vars:
+    # openshift_master_facts_default_predicates is a custom lookup plugin in
+    # role lib_utils
     prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
     prev_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, regions_enabled=False) }}"
     default_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', regions_enabled=False) }}"

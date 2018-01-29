@@ -1,8 +1,7 @@
 #!/usr/bin/ansible-playbook
 ---
-- name: Setup the vpc and the master node group
+- name: Accept nodes
   hosts: localhost
-  remote_user: root
   gather_facts: no
   tasks:
   - name: Alert user to variables needed - clusterid
@@ -17,37 +16,7 @@
     import_role:
       name: lib_openshift
 
-  - name: fetch masters
-    ec2_instance_facts:
-      region: "{{ openshift_aws_region | default('us-east-1') }}"
-      filters:
-        "tag:clusterid": "{{ openshift_aws_clusterid | default('default') }}"
-        "tag:host-type": master
-        instance-state-name: running
-    register: mastersout
-    retries: 20
-    delay: 3
-    until: "'instances' in mastersout and mastersout.instances|length > 0"
-
-  - name: fetch new node instances
-    ec2_instance_facts:
-      region: "{{ openshift_aws_region | default('us-east-1') }}"
-      filters:
-        "tag:clusterid": "{{ openshift_aws_clusterid | default('default') }}"
-        "tag:host-type": node
-        instance-state-name: running
-    register: instancesout
-    retries: 20
-    delay: 3
-    until: "'instances' in instancesout and instancesout.instances|length > 0"
-
-  - debug:
-      msg: "{{ instancesout.instances|map(attribute='private_dns_name') | list }}"
-
-  - name: approve nodes
-    oc_adm_csr:
-      #approve_all: True
-      nodes: "{{ instancesout.instances|map(attribute='private_dns_name') | list  }}"
-      timeout: 60
-    register: nodeout
-    delegate_to: "{{ mastersout.instances[0].public_ip_address }}"
+  - name: accept nodes
+    import_role:
+      name: openshift_aws
+      tasks_from: accept_nodes.yml

@@ -4,7 +4,7 @@
   roles:
   - role: openshift_etcd_facts
   post_tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup.yml
     vars:
@@ -14,7 +14,6 @@
 - name: Gate on etcd backup
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       etcd_backup_completed: "{{ hostvars

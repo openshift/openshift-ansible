@@ -1,6 +1,8 @@
 ---
-- name: Ensure that all non-node hosts are accessible
-  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nfs_to_config
+# l_scale_up_hosts may be passed in via prerequisites.yml during scaleup plays.
+
+- name: Install packages necessary for installer
+  hosts: "{{ l_scale_up_hosts | default('oo_all_hosts') }}"
   any_errors_fatal: true
   tasks:
   - when:

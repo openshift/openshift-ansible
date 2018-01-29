@@ -18,3 +18,14 @@
     clusterrolebinding/heapster-cluster-reader
     clusterrolebinding/hawkular-metrics
   changed_when: delete_metrics.stdout != 'No resources found'
+
+# Update the web config in openshift-web-console namespace
+- name: Remove metrics route information from the web console config
+  include_role:
+    name: openshift_web_console
+    tasks_from: update_console_config.yml
+  vars:
+    console_config_edits:
+      - key: clusterInfo#metricsPublicURL
+        value: ""
+  when: openshift_web_console_install | default(true) | bool

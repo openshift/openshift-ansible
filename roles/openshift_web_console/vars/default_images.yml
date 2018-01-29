@@ -1,0 +1,4 @@
+---
+__openshift_web_console_prefix: "docker.io/openshift/origin-"
+__openshift_web_console_version: "latest"
+__openshift_web_console_image_name: "web-console"

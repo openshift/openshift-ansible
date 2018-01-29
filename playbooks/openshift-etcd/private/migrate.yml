@@ -2,7 +2,6 @@
 - name: Check if the master has embedded etcd
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tags:
   - always
@@ -15,7 +14,7 @@
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: migrate.pre_check.yml
     vars:
@@ -43,7 +42,7 @@
   roles:
   - role: openshift_facts
   post_tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: backup.yml
     vars:
@@ -53,7 +52,6 @@
 - name: Gate on etcd backup
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       etcd_backup_completed: "{{ hostvars
@@ -70,7 +68,7 @@
   hosts: oo_etcd_to_migrate
   gather_facts: no
   pre_tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: disable_etcd.yml
 
@@ -78,7 +76,7 @@
   hosts: oo_etcd_to_migrate[0]
   gather_facts: no
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: migrate.yml
     vars:
@@ -90,7 +88,7 @@
   hosts: oo_etcd_to_migrate[1:]
   gather_facts: no
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: clean_data.yml
     vars:
@@ -126,7 +124,7 @@
 - name: Add TTLs on the first master
   hosts: oo_first_master[0]
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: migrate.add_ttls.yml
     vars:
@@ -138,7 +136,7 @@
 - name: Configure masters if etcd data migration is succesfull
   hosts: oo_masters_to_config
   tasks:
-  - include_role:
+  - import_role:
       name: etcd
       tasks_from: migrate.configure_master.yml
     when: etcd_migration_failed | length == 0

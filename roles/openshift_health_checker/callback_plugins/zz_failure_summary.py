@@ -175,6 +175,8 @@ def format_failure(failure):
     play = failure['play']
     task = failure['task']
     msg = failure['msg']
+    if not isinstance(msg, string_types):
+        msg = str(msg)
     checks = failure['checks']
     fields = (
         (u'Hosts', host),

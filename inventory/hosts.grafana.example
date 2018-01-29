@@ -1,0 +1,12 @@
+[OSEv3:children]
+masters
+nodes
+
+[OSEv3:vars]
+# Grafana Configuration
+#gf_datasource_name="example"
+#gf_prometheus_namespace="openshift-metrics"
+#gf_oauth=true
+
+[masters]
+master

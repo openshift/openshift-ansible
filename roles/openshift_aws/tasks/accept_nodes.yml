@@ -1,4 +1,6 @@
 ---
+- include_tasks: setup_master_group.yml
+
 - name: fetch masters
   ec2_instance_facts:
     region: "{{ openshift_aws_region | default('us-east-1') }}"
@@ -36,4 +38,4 @@
     nodes: "{{ instancesout.instances|map(attribute='private_dns_name') | list  }}"
     timeout: 60
   register: nodeout
-  delegate_to: "{{ mastersout.instances[0].public_ip_address }}"
+  delegate_to: "{{ groups.masters.0 }}"

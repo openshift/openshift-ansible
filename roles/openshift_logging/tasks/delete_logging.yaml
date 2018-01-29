@@ -126,7 +126,18 @@
     - __logging_ops_projects.stderr | length == 0
 
 ## EventRouter
-- include_role:
+- import_role:
     name: openshift_logging_eventrouter
   when:
     not openshift_logging_install_eventrouter | default(false) | bool
+
+# Update console config in openshift-web-console namespace
+- name: Remove Kibana route information from the web console config
+  include_role:
+    name: openshift_web_console
+    tasks_from: update_console_config.yml
+  vars:
+    console_config_edits:
+      - key: clusterInfo#loggingPublicURL
+        value: ""
+  when: openshift_web_console_install | default(true) | bool

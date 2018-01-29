@@ -1,0 +1,8 @@
+---
+# l_build_container_groups_hosts is passed in via prerequisites.yml during
+# etcd scaleup plays.
+- name: create oo_hosts_containerized_managed_true host group
+  hosts: "{{ l_build_container_groups_hosts | default('oo_all_hosts:!oo_nodes_to_config') }}"
+  tasks:
+  - group_by:
+      key: oo_hosts_containerized_managed_{{ (openshift_is_containerized | default(False)) | ternary('true','false') }}

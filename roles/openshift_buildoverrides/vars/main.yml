@@ -9,3 +9,4 @@ buildoverrides_yaml:
       imageLabels: "{{ openshift_buildoverrides_image_labels | default(None) }}"
       nodeSelector: "{{ openshift_buildoverrides_nodeselectors | default(None) }}"
       annotations: "{{ openshift_buildoverrides_annotations | default(None) }}"
+      tolerations: "{{ openshift_buildoverrides_tolerations | default(None) }}"

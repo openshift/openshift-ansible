@@ -8,7 +8,7 @@
 - name: Determine if growpart is installed
   command: "rpm -q cloud-utils-growpart"
   register: has_growpart
-  failed_when: has_growpart.cr != 0 and 'package cloud-utils-growpart is not installed' not in has_growpart.stdout
+  failed_when: has_growpart.rc != 0 and 'package cloud-utils-growpart is not installed' not in has_growpart.stdout
   changed_when: false
   when: openshift_is_containerized | bool
 

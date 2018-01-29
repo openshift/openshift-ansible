@@ -1,0 +1,4 @@
+---
+__openshift_web_console_prefix: "registry.access.redhat.com/openshift3/ose-"
+__openshift_web_console_version: "v3.9"
+__openshift_web_console_image_name: "web-console"

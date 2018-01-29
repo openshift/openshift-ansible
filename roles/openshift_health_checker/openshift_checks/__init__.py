@@ -5,6 +5,7 @@ Health checks for OpenShift clusters.
 import json
 import operator
 import os
+import re
 import time
 import collections
 
@@ -94,6 +95,13 @@ class OpenShiftCheck(object):
         # log messages for the check - tuples of (description, msg) where msg is serializable.
         # These are intended to be a sequential record of what the check observed and determined.
         self.logs = []
+
+    def template_var(self, var_to_template):
+        """Return a templated variable if self._templar is not None, else
+           just return the variable as-is"""
+        if self._templar is not None:
+            return self._templar.template(var_to_template)
+        return var_to_template
 
     @abstractproperty
     def name(self):
@@ -302,28 +310,38 @@ class OpenShiftCheck(object):
             name_list = name_list.split(',')
         return [name.strip() for name in name_list if name.strip()]
 
-    @staticmethod
-    def get_major_minor_version(openshift_image_tag):
+    def get_major_minor_version(self, openshift_image_tag=None):
         """Parse and return the deployed version of OpenShift as a tuple."""
-        if openshift_image_tag and openshift_image_tag[0] == 'v':
-            openshift_image_tag = openshift_image_tag[1:]
 
-        # map major release versions across releases
-        # to a common major version
-        openshift_major_release_version = {
-            "1": "3",
-        }
+        version = openshift_image_tag or self.get_var("openshift_image_tag")
+        components = [int(component) for component in re.findall(r'\d+', version)]
 
-        components = openshift_image_tag.split(".")
-        if not components or len(components) < 2:
+        if len(components) < 2:
             msg = "An invalid version of OpenShift was found for this host: {}"
-            raise OpenShiftCheckException(msg.format(openshift_image_tag))
+            raise OpenShiftCheckException(msg.format(version))
 
-        if components[0] in openshift_major_release_version:
-            components[0] = openshift_major_release_version[components[0]]
+        # map major release version across releases to OCP major version
+        components[0] = {1: 3}.get(components[0], components[0])
 
-        components = tuple(int(x) for x in components[:2])
-        return components
+        return tuple(int(x) for x in components[:2])
+
+    def get_required_version(self, name, version_map):
+        """Return the correct required version(s) for the current (or nearest) OpenShift version."""
+        openshift_version = self.get_major_minor_version()
+
+        earliest = min(version_map)
+        latest = max(version_map)
+        if openshift_version < earliest:
+            return version_map[earliest]
+        if openshift_version > latest:
+            return version_map[latest]
+
+        required_version = version_map.get(openshift_version)
+        if not required_version:
+            msg = "There is no recommended version of {} for the current version of OpenShift ({})"
+            raise OpenShiftCheckException(msg.format(name, ".".join(str(comp) for comp in openshift_version)))
+
+        return required_version
 
     def find_ansible_mount(self, path):
         """Return the mount point for path from ansible_mounts."""

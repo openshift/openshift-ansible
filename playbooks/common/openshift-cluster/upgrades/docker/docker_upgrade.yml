@@ -16,7 +16,7 @@
       msg: Cannot upgrade Docker on Atomic operating systems.
     when: openshift_is_atomic | bool
 
-  - include_role:
+  - import_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml
     when: docker_upgrade is not defined or docker_upgrade | bool
@@ -51,13 +51,19 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift_client_binary }} adm drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result
     until: not (l_docker_upgrade_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_docker_upgrade_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   - include_tasks: tasks/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool

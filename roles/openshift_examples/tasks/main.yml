@@ -13,8 +13,11 @@
 # use it either due to changes introduced in Ansible 2.x.
 - name: Create local temp dir for OpenShift examples copy
   local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
-  become: False
   register: copy_examples_mktemp
+  run_once: True
+
+- name: Chmod local temp dir for OpenShift examples copy
+  local_action: command chmod 777 "{{ copy_examples_mktemp.stdout }}"
   run_once: True
 
 - name: Create tar of OpenShift examples
@@ -23,8 +26,10 @@
     # Disables the following warning:
     # Consider using unarchive module rather than running tar
     warn: no
-  become: False
-  register: copy_examples_tar
+
+- name: Chmod local temp dir for OpenShift examples copy
+  local_action: command chmod 744 "{{ copy_examples_mktemp.stdout }}/openshift-examples.tar"
+  run_once: True
 
 - name: Create the remote OpenShift examples directory
   file:
@@ -38,7 +43,6 @@
     dest: "{{ examples_base }}/"
 
 - name: Cleanup the OpenShift Examples temp dir
-  become: False
   local_action: file dest="{{ copy_examples_mktemp.stdout }}" state=absent
 
 # Done copying examples

@@ -1,0 +1,13 @@
+---
+openshift_deployment_type: origin
+etcd_data_dir: "${ETCD_DATA_DIR}"
+openshift_node_port_range: '30000-32000'
+osm_controller_args:
+  enable-hostpath-provisioner:
+    - "true"
+
+# These env vars are created by the CI.  This allows us
+# to test specific versions of openshift.
+openshift_pkg_version: "{{ lookup('env', 'ORIGIN_PKG_VERSION') }}"
+openshift_release: "{{ lookup('env', 'ORIGIN_RELEASE') }}"
+oreg_url: "openshift/origin-${component}:{{ lookup('env', 'ORIGIN_COMMIT') }}"

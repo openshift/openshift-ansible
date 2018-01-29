@@ -2,25 +2,12 @@
 # Get bootstrap config token
 # bootstrap should be created on first master
 # need to fetch it and shove it into cloud data
-- name: fetch master instances
-  ec2_instance_facts:
-    region: "{{ openshift_aws_region }}"
-    filters:
-      "tag:clusterid": "{{ openshift_aws_clusterid }}"
-      "tag:host-type": master
-      instance-state-name: running
-  register: instancesout
-  retries: 20
-  delay: 3
-  until:
-  - "'instances' in instancesout"
-  - instancesout.instances|length > 0
+- include_tasks: setup_master_group.yml
 
 - name: slurp down the bootstrap.kubeconfig
   slurp:
     src: /etc/origin/master/bootstrap.kubeconfig
-  delegate_to: "{{ instancesout.instances[0].public_ip_address }}"
-  remote_user: root
+  delegate_to: "{{ groups.masters.0 }}"
   register: bootstrap
 
 - name: set_fact for kubeconfig token

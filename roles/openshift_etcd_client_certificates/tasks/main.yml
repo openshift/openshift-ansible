@@ -1,4 +1,4 @@
 ---
-- include_role:
+- import_role:
     name: etcd
     tasks_from: client_certificates

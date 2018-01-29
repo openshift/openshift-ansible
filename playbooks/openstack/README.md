@@ -30,13 +30,15 @@ version 10) or newer. It must also satisfy these requirements:
   - look at
     the [Minimum Hardware Requirements page][hardware-requirements]
     for production
-* The keypair for SSH must be available in openstack
-* `keystonerc` file that lets you talk to the openstack services
+* The keypair for SSH must be available in OpenStack
+* `keystonerc` file that lets you talk to the OpenStack services
    * NOTE: only Keystone V2 is currently supported
+* A host with the supported version of [Ansible][ansible] installed, see the
+  [Setup section of the openshift-ansible README][openshift-ansible-setup]
+  for details on the requirements.
 
 Optional:
 * External Neutron network with a floating IP address pool
-
 
 
 ## Installation
@@ -68,12 +70,11 @@ First, you need to select where to run [Ansible][ansible] from (the
 *Ansible host*). This can be the computer you read this guide on or an
 OpenStack VM you'll create specifically for this purpose.
 
-We will use
-a
+This guide will use a
 [Docker image that has all the dependencies installed][control-host-image] to
 make things easier. If you don't want to use Docker, take a look at
 the [Ansible host dependencies][ansible-dependencies] and make sure
-they're installed.
+they are installed.
 
 Your *Ansible host* needs to have the following:
 
@@ -183,13 +184,16 @@ Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yaml \
-  -e openshift_repos_enable_testing=true
+$ ansible-playbook --user openshift \
+  -i openshift-ansible/playbooks/openstack/inventory.py \
+  -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml
 ```
 
-Note, you may want to use the testing repo for development purposes only.
-Normally, `openshift_repos_enable_testing` should not be specified.
+In addition to *your* inventory with your OpenShift and OpenStack
+configuration, we are also supplying the [dynamic inventory][dynamic] from
+`openshift-ansible/inventory`. It's a script that will look at the Nova servers
+and other resources that will be created and let Ansible know about them.
 
 If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
@@ -219,6 +223,7 @@ advanced configuration:
 
 [ansible]: https://www.ansible.com/
 [openshift-ansible]: https://github.com/openshift/openshift-ansible
+[openshift-ansible-setup]: https://github.com/openshift/openshift-ansible#setup
 [devstack]: https://docs.openstack.org/devstack/
 [tripleo]: http://tripleo.org/
 [ansible-dependencies]: ./advanced-configuration.md#dependencies-for-localhost-ansible-controladmin-node
@@ -233,3 +238,4 @@ advanced configuration:
 [loadbalancer]: ./advanced-configuration.md#multi-master-configuration
 [external-dns]: ./advanced-configuration.md#dns-configuration-variables
 [cinder-registry]: ./advanced-configuration.md#creating-and-using-a-cinder-volume-for-the-openshift-registry
+[dynamic]: http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html

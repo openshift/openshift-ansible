@@ -1,0 +1,42 @@
+---
+- command: >
+    oc get pod -l component=es,provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
+  register: _cluster_pods
+
+- name: "Getting ES version for logging-es cluster"
+  command: >
+    oc exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XGET 'https://localhost:9200/'
+  register: _curl_output
+  when: _cluster_pods.stdout_lines | count > 0
+
+- command: >
+    oc get pod -l component=es-ops,provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
+  register: _ops_cluster_pods
+
+- name: "Getting ES version for logging-es-ops cluster"
+  command: >
+    oc exec {{ _ops_cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XGET 'https://localhost:9200/'
+  register: _ops_curl_output
+  when: _ops_cluster_pods.stdout_lines | count > 0
+
+- set_fact:
+    _es_output: "{{ _curl_output.stdout | from_json }}"
+  when: _curl_output.stdout is defined
+
+- set_fact:
+    _es_ops_output: "{{ _ops_curl_output.stdout | from_json }}"
+  when: _ops_curl_output.stdout is defined
+
+- set_fact:
+    _es_installed_version: "{{ _es_output.version.number }}"
+  when:
+    - _es_output is defined
+    - _es_output.version is defined
+    - _es_output.version.number is defined
+
+- set_fact:
+    _es_ops_installed_version: "{{ _es_ops_output.version.number }}"
+  when:
+    - _es_ops_output is defined
+    - _es_ops_output.version is defined
+    - _es_ops_output.version.number is defined

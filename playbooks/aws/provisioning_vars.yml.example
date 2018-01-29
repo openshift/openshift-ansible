@@ -41,11 +41,27 @@ openshift_pkg_version: # -3.7.0
 # a vpc, set this to false.
 #openshift_aws_create_vpc: true
 
+# when openshift_aws_create_vpc is true (the default), the VPC defined in
+# openshift_aws_vpc will be created
+#openshift_aws_vpc:
+#  name: "{{ openshift_aws_vpc_name }}"
+#  cidr: 172.31.0.0/16
+#  subnets:
+#    us-east-1:
+#    - cidr: 172.31.48.0/20
+#      az: "us-east-1c"
+#      default_az: true
+#    - cidr: 172.31.32.0/20
+#      az: "us-east-1e"
+#    - cidr: 172.31.16.0/20
+#      az: "us-east-1a"
+
 # Name of the vpc.  Needs to be set if using a pre-existing vpc.
 #openshift_aws_vpc_name: "{{ openshift_aws_clusterid }}"
 
 # Name of the subnet in the vpc to use.  Needs to be set if using a pre-existing
-# vpc + subnet.
+# vpc + subnet. Otherwise will use the subnet with 'default_az' set (see above
+# example VPC structure)
 #openshift_aws_subnet_az:
 
 # -------------- #
@@ -93,6 +109,11 @@ openshift_aws_ssh_key_name: # myuser_key
 # --------- #
 # Variables in this section apply to building a node AMI for use in your
 # openshift cluster.
+# openshift-ansible will perform the container runtime storage setup when specified
+# The current storage setup with require a drive if using a separate storage device
+# for the container runtime.
+container_runtime_docker_storage_type: overlay2
+container_runtime_docker_storage_setup_device: /dev/xvdb
 
 # must specify a base_ami when building an AMI
 openshift_aws_base_ami: # ami-12345678

@@ -40,7 +40,7 @@
     regexp: '^OPTIONS="?(.*?)"?$'
     backrefs: yes
     backup: yes
-    line: 'OPTIONS="\1 --disable dns,proxy,plugins"'
+    line: 'OPTIONS="\1 --disable proxy"'
 
 - name: force node restart to disable the proxy
   service:

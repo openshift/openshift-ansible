@@ -2,6 +2,30 @@
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
+
+# Prior to 3.6, openshift-ansible created etcd serving certificates
+# without a SubjectAlternativeName entry for the system hostname. The
+# SAN list in Go 1.8 is now (correctly) authoritative and since
+# openshift-ansible configures masters to talk to etcd hostnames
+# rather than IP addresses, we must correct etcd certificates.
+#
+# This play examines the etcd serving certificate SANs on each etcd
+# host and records whether or not the system hostname is missing.
+- name: Examine etcd serving certificate SAN
+  hosts: oo_etcd_to_config
+  tasks:
+  - slurp:
+      src: /etc/etcd/server.crt
+    register: etcd_serving_cert
+  - set_fact:
+      __etcd_cert_lacks_hostname: "{{ (openshift.common.hostname not in (etcd_serving_cert.content | b64decode | lib_utils_oo_parse_certificate_san)) | bool }}"
+
+# Redeploy etcd certificates when hostnames were missing from etcd
+# serving certificate SANs.
+- import_playbook: ../../../openshift-etcd/redeploy-certificates.yml
+  when:
+  - true in hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config']) | lib_utils_oo_collect('__etcd_cert_lacks_hostname') | default([false])
+
 - name: Backup and upgrade etcd
   import_playbook: ../../../openshift-etcd/private/upgrade_main.yml
 
@@ -22,6 +46,8 @@
 # See: https://github.com/openshift/origin/pull/14625#issuecomment-308467060
 - name: Pre master upgrade - Upgrade all storage
   hosts: oo_first_master
+  roles:
+  - openshift_facts
   tasks:
   - name: Upgrade all storage
     command: >
@@ -49,10 +75,9 @@
   vars:
     openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
+  roles:
+  - openshift_facts
   tasks:
-  - include_role:
-      name: openshift_facts
-
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
@@ -60,7 +85,7 @@
   - include_tasks: "{{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
 
-  - include_role:
+  - import_role:
       name: openshift_master
       tasks_from: upgrade.yml
 
@@ -108,7 +133,6 @@
 - name: Gate on master update
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
@@ -128,6 +152,7 @@
   hosts: oo_masters_to_config
   roles:
   - { role: openshift_cli }
+  - { role: openshift_facts }
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
@@ -242,7 +267,6 @@
 - name: Gate on reconcile
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
@@ -291,28 +315,27 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
     until: not (l_upgrade_control_plane_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_control_plane_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   roles:
   - openshift_facts
   post_tasks:
-  - include_role:
+  - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
+  - import_role:
+      name: openshift_manage_node
+      tasks_from: config.yml
     vars:
-      openshift_node_upgrade_in_progress: True
-  - name: Set node schedulability
-    oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
-      schedulable: True
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    retries: 10
-    delay: 5
-    register: node_schedulable
-    until: node_schedulable is succeeded
-    when: node_unschedulable is changed
+      openshift_master_host: "{{ groups.oo_first_master.0 }}"

@@ -43,6 +43,7 @@ deployment:
         node:
 """
 
+
 def read_yaml(config_file_path):
     cfg_f = open(config_file_path, 'r')
     config = yaml.safe_load(cfg_f.read())
@@ -105,7 +106,7 @@ class OOCliFixture(OOInstallFixture):
                 self.assertTrue('ip' in host)
                 self.assertTrue('public_ip' in host)
 
-    #pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     def _verify_get_hosts_to_run_on(self, mock_facts, load_facts_mock,
                                     run_playbook_mock, cli_input,
                                     exp_hosts_len=None, exp_hosts_to_run_on_len=None,
@@ -152,7 +153,7 @@ class OOCliFixture(OOInstallFixture):
             self.assertEquals(exp_hosts_to_run_on_len, len(hosts_to_run_on))
 
 
-#pylint: disable=too-many-arguments,too-many-branches,too-many-statements
+# pylint: disable=too-many-arguments,too-many-branches,too-many-statements
 def build_input(ssh_user=None, hosts=None, variant_num=None,
                 add_nodes=None, confirm_facts=None, schedulable_masters_ok=None,
                 master_lb=('', False), storage=None):
@@ -190,7 +191,7 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             else:
                 inputs.append('rpm')
 
-            #inputs.append('rpm')
+            # inputs.append('rpm')
             # We should not be prompted to add more hosts if we're currently at
             # 2 masters, this is an invalid HA configuration, so this question
             # will not be asked, and the user must enter the next host:
@@ -224,13 +225,13 @@ def build_input(ssh_user=None, hosts=None, variant_num=None,
             inputs.append('y')
         inputs.append('1')  # Add more nodes
         i = 0
-        for (host, is_master, is_containerized) in add_nodes:
+        for (host, _, is_containerized) in add_nodes:
             inputs.append(host)
             if is_containerized:
                 inputs.append('container')
             else:
                 inputs.append('rpm')
-            #inputs.append('rpm')
+            # inputs.append('rpm')
             if i < len(add_nodes) - 1:
                 inputs.append('y')  # Add more hosts
             else:

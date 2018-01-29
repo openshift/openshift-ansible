@@ -34,19 +34,25 @@ openshift_node_kubelet_args_dict:
     cloud-provider:
     - aws
     cloud-config:
-    - "{{ openshift_config_base ~ '/aws.conf' }}"
+    - "{{ openshift_config_base ~ '/cloudprovider/aws.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
   openstack:
     cloud-provider:
     - openstack
     cloud-config:
-    - "{{ openshift_config_base ~ '/openstack.conf' }}"
+    - "{{ openshift_config_base ~ '/cloudprovider/openstack.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
   gce:
     cloud-provider:
     - gce
     cloud-config:
-    - "{{ openshift_config_base ~ '/gce.conf' }}"
+    - "{{ openshift_config_base ~ '/cloudprovider/gce.conf' }}"
+    node-labels: "{{ l_node_kubelet_node_labels }}"
+  azure:
+    cloud-provider:
+    - azure
+    cloud-config:
+    - "{{ openshift_config_base ~ '/cloudprovider/azure.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
   undefined:
     node-labels: "{{ l_node_kubelet_node_labels }}"
@@ -70,6 +76,19 @@ r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+
+openshift_node_syscon_auth_mounts_l:
+- type: bind
+  source: "{{ oreg_auth_credentials_path }}"
+  destination: "/root/.docker"
+  options:
+  - ro
+  - bind
+
+# If we need to add new mounts in the future, or the user wants to mount data.
+# This should be in the same format as auth_mounts_l above.
+openshift_node_syscon_add_mounts_l: []
+
 
 openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
 
@@ -169,9 +188,9 @@ oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
 openshift_use_crio: False
-openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False)) or (openshift_use_crio_only | default(False)) }}"
+openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False) | bool) or (openshift_use_crio_only | default(False) | bool) }}"
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"
+openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
 
 # NOTE
 # r_openshift_node_*_default may be defined external to this role.

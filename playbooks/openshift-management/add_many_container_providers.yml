@@ -27,7 +27,7 @@
     register: results
 
   # Include openshift_management for access to filter_plugins.
-  - include_role:
+  - import_role:
       name: openshift_management
       tasks_from: noop
 

@@ -18,6 +18,7 @@
 
 - name: set_fact replicas
   set_fact:
+    # get_router_replicas is a custom filter in role lib_utils
     replicas: "{{ openshift_hosted_router_replicas | default(None) | get_router_replicas(router_nodes) }}"
 
 - name: Get the certificate contents for router
@@ -98,9 +99,3 @@
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
-
-- name: Wait for pod (Routers)
-  include_tasks: wait_for_pod.yml
-  vars:
-    l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
-    l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"

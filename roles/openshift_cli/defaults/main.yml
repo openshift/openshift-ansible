@@ -8,4 +8,4 @@ system_images_registry: "{{ system_images_registry_dict[openshift_deployment_typ
 openshift_use_crio_only: False
 
 l_is_system_container_image: "{{ openshift_use_master_system_container | default(openshift_use_system_containers | default(False)) | bool }}"
-l_use_cli_atomic_image: "{{ openshift_use_crio_only or l_is_system_container_image }}"
+l_use_cli_atomic_image: "{{ (openshift_use_crio_only | bool) or (l_is_system_container_image | bool) }}"

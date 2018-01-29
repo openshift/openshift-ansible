@@ -1,4 +1,8 @@
 ---
-- import_playbook: ../init/evaluate_groups.yml
+- import_playbook: ../init/main.yml
+  vars:
+    skip_verison: True
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_sanity_check_hosts: "{{ groups['oo_etcd_to_config'] | union(groups['oo_masters_to_config']) }}"
 
 - import_playbook: private/upgrade_main.yml

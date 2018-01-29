@@ -13,6 +13,7 @@
 
   roles:
   - role: openshift_clock
+  - role: openshift_cloud_provider
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: nickhammond.logrotate

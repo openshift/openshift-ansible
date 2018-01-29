@@ -1,26 +1,29 @@
 ---
-- hosts: "{{ l_containerized_host_groups }}"
+# l_scale_up_hosts may be passed in via prerequisites.yml during scaleup plays.
+# l_etcd_scale_up_hosts may be passed in via prerequisites.yml during etcd
+# scaleup plays.
+
+- import_playbook: build_container_groups.yml
+
+- hosts: "{{ l_etcd_scale_up_hosts | default(l_scale_up_hosts) | default(l_default_container_runtime_hosts) }}"
   vars:
-    l_chg_temp: "{{ hostvars[groups['oo_first_master'][0]]['openshift_containerized_host_groups'] | default([]) }}"
-    l_containerized_host_groups: "{{ (['oo_nodes_to_config'] | union(l_chg_temp)) | join(':') }}"
-  # role: container_runtime is necessary  here to bring role default variables
-  # into the play scope.
+    l_default_container_runtime_hosts: "oo_nodes_to_config:oo_hosts_containerized_managed_true"
   roles:
     - role: container_runtime
   tasks:
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: package_docker.yml
       when:
         - not openshift_docker_use_system_container | bool
         - not openshift_use_crio_only | bool
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: systemcontainer_docker.yml
       when:
         - openshift_docker_use_system_container | bool
         - not openshift_use_crio_only | bool
-    - include_role:
+    - import_role:
         name: container_runtime
         tasks_from: systemcontainer_crio.yml
       when:

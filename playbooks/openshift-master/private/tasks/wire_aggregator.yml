@@ -142,11 +142,6 @@
     state: absent
   changed_when: False
 
-- name: Setup extension file for service console UI
-  template:
-    src: ../templates/openshift-ansible-catalog-console.js
-    dest: /etc/origin/master/openshift-ansible-catalog-console.js
-
 - name: Update master config
   yedit:
     state: present
@@ -166,9 +161,6 @@
       value: [X-Remote-Group]
     - key: authConfig.requestHeader.extraHeaderPrefixes
       value: [X-Remote-Extra-]
-    - key: assetConfig.extensionScripts
-      value: /etc/origin/master/openshift-ansible-catalog-console.js
-      action: append
     - key: kubernetesMasterConfig.apiServerArguments.runtime-config
       value: [apis/settings.k8s.io/v1alpha1=true]
     - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
@@ -179,37 +171,51 @@
       value: false
   register: yedit_output
 
+# Only add the catalog extension script if not 3.9. From 3.9 on, the console
+# can discover if template service broker is running.
+- when: not openshift.common.version_gte_3_9
+  block:
+  - name: Setup extension file for service console UI
+    template:
+      src: ../templates/openshift-ansible-catalog-console.js
+      dest: /etc/origin/master/openshift-ansible-catalog-console.js
+
+  - name: Update master config
+    yedit:
+      state: present
+      src: /etc/origin/master/master-config.yaml
+      key: assetConfig.extensionScripts
+      value: /etc/origin/master/openshift-ansible-catalog-console.js
+      action: append
+    register: yedit_asset_config_output
+
 #restart master serially here
-- name: restart master api
-  systemd: name={{ openshift_service_type }}-master-api state=restarted
-  when:
-  - yedit_output.changed
+- when: yedit_output.changed or (yedit_asset_config_output is defined and yedit_asset_config_output.changed)
+  block:
+  - name: restart master api
+    systemd: name={{ openshift_service_type }}-master-api state=restarted
 
-# We retry the controllers because the API may not be 100% initialized yet.
-- name: restart master controllers
-  command: "systemctl restart {{ openshift_service_type }}-master-controllers"
-  retries: 3
-  delay: 5
-  register: result
-  until: result.rc == 0
-  when:
-  - yedit_output.changed
+  # We retry the controllers because the API may not be 100% initialized yet.
+  - name: restart master controllers
+    command: "systemctl restart {{ openshift_service_type }}-master-controllers"
+    retries: 3
+    delay: 5
+    register: result
+    until: result.rc == 0
 
-- name: Verify API Server
-  # Using curl here since the uri module requires python-httplib2 and
-  # wait_for port doesn't provide health information.
-  command: >
-    curl --silent --tlsv1.2
-    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
-    {{ openshift.master.api_url }}/healthz/ready
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
-  register: api_available_output
-  until: api_available_output.stdout == 'ok'
-  retries: 120
-  delay: 1
-  changed_when: false
-  when:
-  - yedit_output.changed
+  - name: Verify API Server
+    # Using curl here since the uri module requires python-httplib2 and
+    # wait_for port doesn't provide health information.
+    command: >
+      curl --silent --tlsv1.2
+      --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+      {{ openshift.master.api_url }}/healthz/ready
+    args:
+      # Disables the following warning:
+      # Consider using get_url or uri module rather than running curl
+      warn: no
+    register: api_available_output
+    until: api_available_output.stdout == 'ok'
+    retries: 120
+    delay: 1
+    changed_when: false

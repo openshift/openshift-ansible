@@ -12,6 +12,13 @@
 - name: run node config
   import_playbook: configure_nodes.yml
 
+- name: node bootstrap config
+  hosts: oo_nodes_to_config:!oo_containerized_master_nodes
+  tasks:
+    - import_role:
+        name: openshift_node
+        tasks_from: bootstrap.yml
+
 - name: Re-enable excluders
   import_playbook: enable_excluders.yml
 

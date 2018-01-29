@@ -185,9 +185,6 @@
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
   - role: nickhammond.logrotate
-  - role: contiv
-    contiv_role: netmaster
-    when: openshift_use_contiv | default(False) | bool
   - role: openshift_master
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
     r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
@@ -206,13 +203,13 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   tasks:
-  - include_role:
+  - import_role:
       name: kuryr
       tasks_from: master
     when: openshift_use_kuryr | default(false) | bool
 
   - name: Setup the node group config maps
-    include_role:
+    import_role:
       name: openshift_node_group
     when: openshift_master_bootstrap_enabled | default(false) | bool
     run_once: True

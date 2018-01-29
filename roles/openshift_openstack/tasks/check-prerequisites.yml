@@ -91,6 +91,7 @@
   with_items:
   - "{{ openshift_openstack_master_image }}"
   - "{{ openshift_openstack_infra_image }}"
+  - "{{ openshift_openstack_cns_image }}"
   - "{{ openshift_openstack_node_image }}"
   - "{{ openshift_openstack_lb_image }}"
   - "{{ openshift_openstack_etcd_image }}"
@@ -100,6 +101,7 @@
   with_items:
   - "{{ openshift_openstack_master_flavor }}"
   - "{{ openshift_openstack_infra_flavor }}"
+  - "{{ openshift_openstack_cns_flavor }}"
   - "{{ openshift_openstack_node_flavor }}"
   - "{{ openshift_openstack_lb_flavor }}"
   - "{{ openshift_openstack_etcd_flavor }}"

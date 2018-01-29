@@ -7,7 +7,7 @@
                         --namespace {{ item.namespace | default('default') }} \
                         --config {{ openshift_master_config_dir }}/admin.kubeconfig
     async: 600
-    poll: 15
+    poll: 5
     with_items: "{{ l_openshift_hosted_wfp_items }}"
     failed_when: false
 
@@ -28,8 +28,8 @@
              -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
     register: openshift_hosted_wfp_rc_phase
     until: "'Running' not in openshift_hosted_wfp_rc_phase.stdout"
-    delay: 15
-    retries: 40
+    delay: 5
+    retries: 60
     failed_when: "'Failed' in openshift_hosted_wfp_rc_phase.stdout"
     with_together:
     - "{{ l_openshift_hosted_wfp_items }}"
