@@ -15,17 +15,9 @@ import json
 import shade
 
 
-def build_inventory():
-    '''Build the dynamic inventory.'''
-    cloud = shade.openstack_cloud()
-
+def base_openshift_inventory(cluster_hosts):
+    '''Set the base openshift inventory.'''
     inventory = {}
-
-    # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
-    # environment variable.
-    cluster_hosts = [
-        server for server in cloud.list_servers()
-        if 'metadata' in server and 'clusterid' in server.metadata]
 
     masters = [server.name for server in cluster_hosts
                if server.metadata['host-type'] == 'master']
@@ -67,6 +59,32 @@ def build_inventory():
     inventory['dns'] = {'hosts': dns}
     inventory['lb'] = {'hosts': load_balancers}
 
+    return inventory
+
+def get_docker_storage_mountpoints(volumes):
+    '''Check volumes to see if they're being used for docker storage'''
+    docker_storage_mountpoints = {}
+    for volume in volumes:
+        if volume.metadata.get('purpose') == "openshift_docker_storage":
+            for attachment in volume.attachments:
+                if attachment.server_id in docker_storage_mountpoints:
+                    docker_storage_mountpoints[attachment.server_id].append(attachment.device)
+                else:
+                    docker_storage_mountpoints[attachment.server_id] = [attachment.device]
+    return docker_storage_mountpoints
+
+def build_inventory():
+    '''Build the dynamic inventory.'''
+    cloud = shade.openstack_cloud()
+
+    # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
+    # environment variable.
+    cluster_hosts = [
+        server for server in cloud.list_servers()
+        if 'metadata' in server and 'clusterid' in server.metadata]
+
+    inventory = base_openshift_inventory(cluster_hosts)
+
     for server in cluster_hosts:
         if 'group' in server.metadata:
             group = server.metadata.group
@@ -77,14 +95,7 @@ def build_inventory():
     inventory['_meta'] = {'hostvars': {}}
 
     # cinder volumes used for docker storage
-    docker_storage_volume_mountpoints = {}
-    for volume in cloud.list_volumes():
-        if 'purpose' in volume.metadata and volume.metadata.purpose == "openshift_docker_storage":
-            for attachment in volume.attachments:
-                if attachment.server_id in docker_storage_volume_mountpoints:
-                    docker_storage_volume_mountpoints[attachment.server_id].append(attachment.device)
-                else:
-                    docker_storage_volume_mountpoints[attachment.server_id] = [attachment.device]
+    docker_storage_mountpoints = get_docker_storage_mountpoints(cloud.list_volumes())
 
     for server in cluster_hosts:
         ssh_ip_address = server.public_v4 or server.private_v4
@@ -123,8 +134,8 @@ def build_inventory():
 
         # check for attached docker storage volumes
         if 'os-extended-volumes:volumes_attached' in server:
-            if server.id in docker_storage_volume_mountpoints:
-                hostvars['docker_storage_volume_mountpoints'] = ' '.join(docker_storage_volume_mountpoints[server.id])
+            if server.id in docker_storage_mountpoints:
+                hostvars['docker_storage_mountpoints'] = ' '.join(docker_storage_mountpoints[server.id])
 
         inventory['_meta']['hostvars'][server.name] = hostvars
     return inventory
