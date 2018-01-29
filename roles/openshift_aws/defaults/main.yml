@@ -42,60 +42,77 @@ openshift_aws_ami_tags:
 openshift_aws_s3_mode: create
 openshift_aws_s3_bucket_name: "{{ openshift_aws_clusterid }}-docker-registry"
 
-openshift_aws_elb_health_check:
-  ping_protocol: tcp
-  ping_port: 443
-  response_timeout: 5
-  interval: 30
-  unhealthy_threshold: 2
-  healthy_threshold: 2
-
 openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}"
-openshift_aws_elb_name_dict:
-  master:
-    external: "{{ openshift_aws_elb_basename }}-master-external"
-    internal: "{{ openshift_aws_elb_basename }}-master-internal"
-  infra:
-    external: "{{ openshift_aws_elb_basename }}-infra"
-
-openshift_aws_elb_idle_timout: 400
-
-openshift_aws_elb_cert_arn: ''
 
 openshift_aws_elb_dict:
   master:
     external:
-    - protocol: tcp
-      load_balancer_port: 80
-      instance_protocol: ssl
-      instance_port: 443
-    - protocol: ssl
-      load_balancer_port: 443
-      instance_protocol: ssl
-      instance_port: 443
-      # ssl certificate required for https or ssl
-      ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
+      cross_az_load_balancing: False
+      health_check:
+        ping_protocol: tcp
+        ping_port: "{{ openshift_master_api_port | default(8443) }}"
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+      idle_timout: 400
+      listeners:
+      - protocol: tcp
+        load_balancer_port: 80
+        instance_protocol: ssl
+        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+      - protocol: ssl
+        load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_protocol: ssl
+        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+        ssl_certificate_id: ''
+      name: "{{ openshift_aws_elb_basename }}-master-external"
+      tags: "{{ openshift_aws_kube_tags }}"
     internal:
-    - protocol: tcp
-      load_balancer_port: 80
-      instance_protocol: tcp
-      instance_port: 80
-    - protocol: tcp
-      load_balancer_port: 443
-      instance_protocol: tcp
-      instance_port: 443
+      cross_az_load_balancing: False
+      health_check:
+        ping_protocol: tcp
+        ping_port: "{{ openshift_master_api_port | default(8443) }}"
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+      idle_timout: 400
+      listeners:
+      - protocol: tcp
+        load_balancer_port: 80
+        instance_protocol: tcp
+        instance_port: 80
+      - protocol: tcp
+        load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_protocol: tcp
+        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+      name: "{{ openshift_aws_elb_basename }}-master-internal"
+      tags: "{{ openshift_aws_kube_tags }}"
   infra:
     external:
-    - protocol: tcp
-      load_balancer_port: 80
-      instance_protocol: tcp
-      instance_port: 443
-      proxy_protocol: True
-    - protocol: tcp
-      load_balancer_port: 443
-      instance_protocol: tcp
-      instance_port: 443
-      proxy_protocol: True
+      cross_az_load_balancing: False
+      health_check:
+        ping_protocol: tcp
+        ping_port: 443
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+      idle_timout: 400
+      listeners:
+      - protocol: tcp
+        load_balancer_port: 80
+        instance_protocol: tcp
+        instance_port: 443
+        proxy_protocol: True
+      - protocol: tcp
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 443
+        proxy_protocol: True
+      name: "{{ openshift_aws_elb_basename }}-infra"
+      tags: "{{ openshift_aws_kube_tags }}"
 
 openshift_aws_node_group_config_master_volumes:
 - device_name: /dev/sda1
@@ -172,7 +189,7 @@ openshift_aws_master_group_config:
     iam_role: "{{ openshift_aws_iam_role_name }}"
     policy_name: "{{ openshift_aws_iam_role_policy_name }}"
     policy_json: "{{ openshift_aws_iam_role_policy_json }}"
-    elbs: "{{ openshift_aws_elb_name_dict['master'].keys()| map('extract', openshift_aws_elb_name_dict['master']) | list }}"
+    elbs: "{{ openshift_aws_elb_dict | json_query('master.[*][0][*].name') }}"
 
 openshift_aws_node_group_config:
   # The 'compute' key is always required here.
@@ -205,10 +222,7 @@ openshift_aws_node_group_config:
     iam_role: "{{ openshift_aws_iam_role_name }}"
     policy_name: "{{ openshift_aws_iam_role_policy_name }}"
     policy_json: "{{ openshift_aws_iam_role_policy_json }}"
-    elbs: "{{ openshift_aws_elb_name_dict['infra'].keys()| map('extract', openshift_aws_elb_name_dict['infra']) | list }}"
-
-openshift_aws_elb_tags: "{{ openshift_aws_kube_tags }}"
-openshift_aws_elb_az_load_balancing: False
+    elbs: "{{ openshift_aws_elb_dict | json_query('infra.[*][0][*].name') }}"
 
 # build_instance_tags is a custom filter in role lib_utils
 openshift_aws_kube_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
@@ -253,8 +267,8 @@ openshift_aws_node_security_groups:
       to_port: 80
       cidr_ip: 0.0.0.0/0
     - proto: tcp
-      from_port: 443
-      to_port: 443
+      from_port: "{{ openshift_master_api_port | default(8443) }}"
+      to_port: "{{ openshift_master_api_port | default(8443) }}"
       cidr_ip: 0.0.0.0/0
   compute:
     name: "{{ openshift_aws_clusterid }}_compute"
@@ -268,8 +282,8 @@ openshift_aws_node_security_groups:
       to_port: 80
       cidr_ip: 0.0.0.0/0
     - proto: tcp
-      from_port: 443
-      to_port: 443
+      from_port: "{{ openshift_master_api_port | default(8443) }}"
+      to_port: "{{ openshift_master_api_port | default(8443) }}"
       cidr_ip: 0.0.0.0/0
     - proto: tcp
       from_port: 30000
