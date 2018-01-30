@@ -12,7 +12,7 @@
   when:
     - openshift_management_template_parameters.APPLICATION_VOLUME_CAPACITY is not defined
 
-- when: openshift_management_app_template in ['miq-template', 'cfme-template']
+- when: not __openshift_management_use_ext_db
   block:
     - name: Note the DB PV Size from Template Parameters
       set_fact:
@@ -31,7 +31,7 @@
     namespace: "{{ openshift_management_project }}"
     state: list
     kind: pv
-    name: "{{ openshift_management_flavor_short }}-app"
+    name: "{{ __openshift_management_flavor_short }}-app"
   register: miq_app_pv_check
 
 - name: Check if the Management DB PV has been created
@@ -39,15 +39,15 @@
     namespace: "{{ openshift_management_project }}"
     state: list
     kind: pv
-    name: "{{ openshift_management_flavor_short }}-db"
+    name: "{{ __openshift_management_flavor_short }}-db"
   register: miq_db_pv_check
   when:
-    - openshift_management_app_template in ['miq-template', 'cfme-template']
+    - not __openshift_management_use_ext_db
 
 - name: Ensure the Management App PV is created
   oc_process:
     namespace: "{{ openshift_management_project }}"
-    template_name: "{{ openshift_management_flavor }}-app-pv"
+    template_name: "{{ __openshift_management_flavor }}-app-pv"
     create: True
     params:
       PV_SIZE: "{{ openshift_management_app_pv_size }}"
@@ -58,12 +58,12 @@
 - name: Ensure the Management DB PV is created
   oc_process:
     namespace: "{{ openshift_management_project }}"
-    template_name: "{{ openshift_management_flavor }}-db-pv"
+    template_name: "{{ __openshift_management_flavor }}-db-pv"
     create: True
     params:
       PV_SIZE: "{{ openshift_management_db_pv_size }}"
       BASE_PATH: "{{ openshift_management_storage_nfs_base_dir }}"
       NFS_HOST: "{{ openshift_management_nfs_server }}"
   when:
-    - openshift_management_app_template in ['miq-template', 'cfme-template']
+    - not __openshift_management_use_ext_db
     - miq_db_pv_check.results.results == [{}]

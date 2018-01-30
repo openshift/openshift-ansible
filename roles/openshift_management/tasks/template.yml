@@ -13,59 +13,59 @@
 
 ######################################################################
 # STANDARD PODIFIED DATABASE TEMPLATE
-- when: openshift_management_app_template in ['miq-template', 'cfme-template']
+- when: not __openshift_management_use_ext_db
   block:
   - name: Check if the Management Server template has been created already
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       state: list
       kind: template
-      name: "{{ openshift_management_flavor }}"
+      name: "{{ __openshift_management_flavor }}"
     register: miq_server_check
 
   - when: miq_server_check.results.results == [{}]
     block:
     - name: Copy over Management Server template
       copy:
-        src: "templates/{{ openshift_management_flavor }}/{{ openshift_management_flavor_short }}-template.yaml"
+        src: "templates/{{ __openshift_management_flavor }}/{{ __openshift_management_flavor_short }}-template.yaml"
         dest: "{{ template_dir }}/"
 
     - name: Ensure Management Server Template is created
       oc_obj:
         namespace: "{{ openshift_management_project }}"
-        name: "{{ openshift_management_flavor }}"
+        name: "{{ __openshift_management_flavor }}"
         state: present
         kind: template
         files:
-        - "{{ template_dir }}/{{ openshift_management_flavor_short }}-template.yaml"
+        - "{{ template_dir }}/{{ __openshift_management_flavor_short }}-template.yaml"
 
 ######################################################################
 # EXTERNAL DATABASE TEMPLATE
-- when: openshift_management_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
+- when: __openshift_management_use_ext_db
   block:
   - name: Check if the Management Ext-DB Server template has been created already
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       state: list
       kind: template
-      name: "{{ openshift_management_flavor }}-ext-db"
+      name: "{{ __openshift_management_flavor }}-ext-db"
     register: miq_ext_db_server_check
 
   - when: miq_ext_db_server_check.results.results == [{}]
     block:
     - name: Copy over Management Ext-DB Server template
       copy:
-        src: "templates/{{ openshift_management_flavor }}/{{openshift_management_flavor_short}}-template-ext-db.yaml"
+        src: "templates/{{ __openshift_management_flavor }}/{{__openshift_management_flavor_short}}-template-ext-db.yaml"
         dest: "{{ template_dir }}/"
 
     - name: Ensure Management Ext-DB Server Template is created
       oc_obj:
         namespace: "{{ openshift_management_project }}"
-        name: "{{ openshift_management_flavor }}-ext-db"
+        name: "{{ __openshift_management_flavor }}-ext-db"
         state: present
         kind: template
         files:
-        - "{{ template_dir }}/{{ openshift_management_flavor_short }}-template-ext-db.yaml"
+        - "{{ template_dir }}/{{ __openshift_management_flavor_short }}-template-ext-db.yaml"
 
 # End app template creation.
 ######################################################################
@@ -79,50 +79,50 @@
     namespace: "{{ openshift_management_project }}"
     state: list
     kind: template
-    name: "{{ openshift_management_flavor }}-app-pv"
+    name: "{{ __openshift_management_flavor }}-app-pv"
   register: miq_app_pv_check
 
 - when: miq_app_pv_check.results.results == [{}]
   block:
   - name: Copy over Management App PV template
     copy:
-      src: "templates/{{ openshift_management_flavor }}/{{ openshift_management_flavor_short }}-pv-server-example.yaml"
+      src: "templates/{{ __openshift_management_flavor }}/{{ __openshift_management_flavor_short }}-pv-server-example.yaml"
       dest: "{{ template_dir }}/"
 
   - name: Ensure Management App PV Template is created
     oc_obj:
       namespace: "{{ openshift_management_project }}"
-      name: "{{ openshift_management_flavor }}-app-pv"
+      name: "{{ __openshift_management_flavor }}-app-pv"
       state: present
       kind: template
       files:
-      - "{{ template_dir }}/{{ openshift_management_flavor_short }}-pv-server-example.yaml"
+      - "{{ template_dir }}/{{ __openshift_management_flavor_short }}-pv-server-example.yaml"
 
 #---------------------------------------------------------------------
 
 # Required for database if the installation is fully podified
-- when: openshift_management_app_template in ['miq-template', 'cfme-template']
+- when: not __openshift_management_use_ext_db
   block:
   - name: Check if the Management DB PV template has been created already
     oc_obj:
       namespace: "{{ openshift_management_project }}"
       state: list
       kind: template
-      name: "{{ openshift_management_flavor }}-db-pv"
+      name: "{{ __openshift_management_flavor }}-db-pv"
     register: miq_db_pv_check
 
   - when: miq_db_pv_check.results.results == [{}]
     block:
     - name: Copy over Management DB PV template
       copy:
-        src: "templates/{{ openshift_management_flavor }}/{{ openshift_management_flavor_short }}-pv-db-example.yaml"
+        src: "templates/{{ __openshift_management_flavor }}/{{ __openshift_management_flavor_short }}-pv-db-example.yaml"
         dest: "{{ template_dir }}/"
 
     - name: Ensure Management DB PV Template is created
       oc_obj:
         namespace: "{{ openshift_management_project }}"
-        name: "{{ openshift_management_flavor }}-db-pv"
+        name: "{{ __openshift_management_flavor }}-db-pv"
         state: present
         kind: template
         files:
-        - "{{ template_dir }}/{{ openshift_management_flavor_short }}-pv-db-example.yaml"
+        - "{{ template_dir }}/{{ __openshift_management_flavor_short }}-pv-db-example.yaml"
