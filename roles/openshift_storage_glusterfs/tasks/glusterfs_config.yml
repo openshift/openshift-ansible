@@ -9,6 +9,7 @@
     glusterfs_use_default_selector: "{{ openshift_storage_glusterfs_use_default_selector }}"
     glusterfs_storageclass: "{{ openshift_storage_glusterfs_storageclass }}"
     glusterfs_storageclass_default: "{{ openshift_storage_glusterfs_storageclass_default | bool }}"
+    glusterfs_storageclassblock_default: "{{ openshift_storage_glusterfs_storageclassblock_default | bool }}"
     glusterfs_image: "{{ openshift_storage_glusterfs_image }}"
     glusterfs_version: "{{ openshift_storage_glusterfs_version }}"
     glusterfs_block_deploy: "{{ openshift_storage_glusterfs_block_deploy | bool }}"
