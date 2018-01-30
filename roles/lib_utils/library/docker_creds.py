@@ -148,10 +148,12 @@ def update_config(docker_config, registry, username, password):
 
 def write_config(module, docker_config, dest):
     '''Write updated credentials into dest/config.json'''
+    if not isinstance(docker_config, dict):
+        docker_config = docker_config.decode()
     conf_file_path = os.path.join(dest, 'config.json')
     try:
         with open(conf_file_path, 'w') as conf_file:
-            json.dump(docker_config.decode(), conf_file, indent=8)
+            json.dump(docker_config, conf_file, indent=8)
     except IOError as ioerror:
         result = {'failed': True,
                   'changed': False,
