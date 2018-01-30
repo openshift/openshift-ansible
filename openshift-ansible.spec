@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.31.0%{?dist}
+Release:        0.32.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -200,6 +200,23 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.32.0
+- Revert "Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to
+  set the registry hostname"" (bparees@users.noreply.github.com)
+- Rebase Prometheus example for new scrape endpoints and expose alert manager
+  (m.judeikis@gmail.com)
+- Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to set the
+  registry hostname" (bparees@users.noreply.github.com)
+- Bug 1539182: Detect if ClusterResourceOverrides enabled during console
+  install (spadgett@redhat.com)
+- Fix container_runtime variable typo (mgugino@redhat.com)
+- Correct 3.7 to 3.9 upgrade openshift_image_tag (mgugino@redhat.com)
+- Fix misaligned ports for sg,elb,api (mazzystr@gmail.com)
+- Add GPG keys in the base image and don't install docker (ccoleman@redhat.com)
+- Change catalog roles install to use aggregation (jpeeler@redhat.com)
+- Make IP object a string (fabian@fabianism.us)
+- Add kube service ipaddress to no_proxy list (sdodson@redhat.com)
+
 * Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.31.0
 - removed references to 'files' dir in spec file (dyocum@redhat.com)
 - files in ansible roles do not need to have the path specified to them when
