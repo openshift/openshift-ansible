@@ -1,6 +1,33 @@
 ---
 - name: Install iSCSI storage plugin dependencies
-  package: name=iscsi-initiator-utils state=present
+  package:
+    name: "{{ item }}"
+    state: present
   when: not openshift.common.is_atomic | bool
   register: result
-  until: result | success
+  until: result is succeeded
+  with_items:
+    - iscsi-initiator-utils
+    - device-mapper-multipath
+
+- name: restart services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: True
+  when: not openshift.common.is_atomic | bool
+  with_items:
+    - multipathd
+    - rpcbind
+
+- name: Template multipath configuration
+  template:
+    dest: "/etc/multipath.conf"
+    src: multipath.conf.j2
+    backup: true
+  when: not openshift.common.is_atomic | bool
+
+#enable multipath
+- name: Enable multipath
+  command: "mpathconf --enable"
+  when: not openshift.common.is_atomic | bool

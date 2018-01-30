@@ -16,6 +16,8 @@
     glusterfs_block_host_vol_create: "{{ openshift_storage_glusterfs_block_host_vol_create }}"
     glusterfs_block_host_vol_size: "{{ openshift_storage_glusterfs_block_host_vol_size }}"
     glusterfs_block_host_vol_max: "{{ openshift_storage_glusterfs_block_host_vol_max }}"
+    glusterfs_block_storageclass: "{{ openshift_storage_glusterfs_block_storageclass | bool }}"
+    glusterfs_block_storageclass_default: "{{ openshift_storage_glusterfs_block_storageclass_default | bool }}"
     glusterfs_s3_deploy: "{{ openshift_storage_glusterfs_s3_deploy | bool }}"
     glusterfs_s3_image: "{{ openshift_storage_glusterfs_s3_image }}"
     glusterfs_s3_version: "{{ openshift_storage_glusterfs_s3_version }}"
