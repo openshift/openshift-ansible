@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.32.0%{?dist}
+Release:        0.33.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -200,6 +200,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.33.0
+- 
+
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.32.0
 - Revert "Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to
   set the registry hostname"" (bparees@users.noreply.github.com)
