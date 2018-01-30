@@ -32,5 +32,7 @@
   with_items:
     - { effect: "NoExecute", label: "{{ l_openshift_master_webconsole_taint_noexecute_labels }}" }
     - { effect: "NoSchedule", label: "{{ l_openshift_master_webconsole_taint_noschedule_labels }}" }
-  when: "{{ openshift_manage_node_is_master }}"
+  when:
+    - openshift_manage_node_is_master
+    - openshift_has_dedicated_nodes
   delegate_to: "{{ openshift_master_host }}"
