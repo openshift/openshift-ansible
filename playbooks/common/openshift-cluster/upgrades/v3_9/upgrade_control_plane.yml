@@ -127,6 +127,9 @@
     systemd:
       name: "{{ openshift_service_type }}-master-controllers"
       state: stopped
+  - name: need to pause here, otherwise master service can sometimes fail to start
+    pause:
+      seconds: 10
   - name: Start {{ openshift_service_type }}-master-controllers
     systemd:
       name: "{{ openshift_service_type }}-master-controllers"
