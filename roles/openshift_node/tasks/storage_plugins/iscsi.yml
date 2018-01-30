@@ -4,3 +4,17 @@
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
+
+#enable multipath
+- name: Enable multipath
+  command: "mpathconf --enable"
+  when: not openshift_is_atomic | bool
+
+- name: Tempalte multipath configuration
+  template:
+    dest: "/etc/multipath.conf"
+    src: multipath.conf.j2
+    backup: true
+  when: not openshift_is_atomic | bool
+  notify:
+    - restart multipathd

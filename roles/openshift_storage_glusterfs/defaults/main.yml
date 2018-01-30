@@ -6,6 +6,7 @@ openshift_storage_glusterfs_nodeselector: "glusterfs={{ openshift_storage_gluste
 openshift_storage_glusterfs_use_default_selector: False
 openshift_storage_glusterfs_storageclass: True
 openshift_storage_glusterfs_storageclass_default: False
+openshift_storage_glusterfs_storageclassblock_default: False
 openshift_storage_glusterfs_image: "{{ 'rhgs3/rhgs-server-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'gluster/gluster-centos' | quote }}"
 openshift_storage_glusterfs_version: 'latest'
 openshift_storage_glusterfs_block_deploy: True
@@ -103,3 +104,9 @@ r_openshift_storage_glusterfs_os_firewall_allow:
   port: "24008/tcp"
 - service: glusterfs_bricks
   port: "49152-49251/tcp"
+- service: glusterblockd
+  port: "24010/tcp"
+- service: iscsi-targets
+  port: "3260/tcp"
+- service: rpcbind
+  port: "111/tcp"

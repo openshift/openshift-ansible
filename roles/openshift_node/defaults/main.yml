@@ -137,6 +137,7 @@ default_r_openshift_node_image_prep_packages:
 - yum-utils
 # gluster
 - glusterfs-fuse
+- device-mapper-multipath
 # nfs
 - nfs-utils
 - flannel

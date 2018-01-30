@@ -53,3 +53,9 @@
   command: systemctl daemon-reload
   when:
   - (not skip_node_svc_handlers | default(False) | bool)
+
+- name: restart multipathd
+  systemd:
+    name: multipathd
+    state: restarted
+    enabled: True
