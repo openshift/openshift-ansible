@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.33.0%{?dist}
+Release:        0.34.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -200,6 +200,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.34.0
+- docker_creds: decode docker_config for py3 only if its a string
+  (vrutkovs@redhat.com)
+- Removing ability to change default cassandra_pvc_prefix based on metrics
+  volume name (ewolinet@redhat.com)
+- Don't deploy the console if disabled or registry subtype (sdodson@redhat.com)
+- [1538960] Correct ability to overried openshift_management_app_template
+  (rteague@redhat.com)
+
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.33.0
 - 
 
