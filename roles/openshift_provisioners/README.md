@@ -4,7 +4,7 @@
 * `openshift_provisioners_install_provisioners`: When `True` the openshift_provisioners role will install provisioners that have their "master" var (e.g. `openshift_provisioners_efs`) set `True`. When `False` will uninstall provisioners that have their var set `True`.
 
 ## Optional Vars
-* `openshift_provisioners_image_prefix`: The prefix for the provisioner images to use. Defaults to 'docker.io/openshift/origin-'.
+* `openshift_provisioners_image_prefix`: The prefix for the provisioner images to use. Defaults to 'registry.access.redhat.com/openshift3/'.
 * `openshift_provisioners_image_version`: The image version for the provisioner images to use. Defaults to 'latest'.
 * `openshift_provisioners_project`: The namespace that provisioners will be installed in. Defaults to 'openshift-infra'.
 
