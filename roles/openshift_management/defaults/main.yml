@@ -15,6 +15,8 @@ openshift_management_pod_rollout_retries: 30
 #
 # Choose 'miq-template' for a podified database install
 # Choose 'miq-template-ext-db' for an external database install
+# TODO: Swap this var declaration once CFME is fully supported
+#openshift_management_app_template: "{{ 'cfme-template' if openshift_deployment_type == 'openshift-enterprise' else 'miq-template' }}"
 openshift_management_app_template: miq-template
 # If you are using the miq-template-ext-db template then you must add
 # the required database parameters to the
