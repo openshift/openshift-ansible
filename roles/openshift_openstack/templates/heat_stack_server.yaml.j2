@@ -261,11 +261,12 @@ resources:
     properties:
       size: { get_param: volume_size }
       availability_zone: { get_param: availability_zone }
+      metadata:
+        purpose: openshift_docker_storage
 
   volume_attachment:
     type: OS::Cinder::VolumeAttachment
     properties:
       volume_id: { get_resource: cinder_volume }
       instance_uuid: { get_resource: server }
-      mountpoint: /dev/sdb
 {% endif %}
