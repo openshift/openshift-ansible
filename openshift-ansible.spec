@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.34.0%{?dist}
+Release:        0.35.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -200,6 +200,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jan 31 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.35.0
+- add glusterblock support for ansible (m.judeikis@gmail.com)
+- Add a bare minimum localhost hosts file (sdodson@redhat.com)
+- copy etcd client certificates for nuage openshift monitor
+  (siva_teja.areti@nokia.com)
+- fix hostvars parameter name (tzumainn@redhat.com)
+- remove mountpoint parameter (tzumainn@redhat.com)
+- flake cleanup (tzumainn@redhat.com)
+- code simplification and lint cleanup (tzumainn@redhat.com)
+- Symlink kubectl to oc instead of openshift (mfojtik@redhat.com)
+- Rework provisioners vars to support different prefix/version for Origin/OSE
+  (vrutkovs@redhat.com)
+- add cinder mountpoint to inventory (tzumainn@redhat.com)
+- allow setting of kibana env vars (jcantril@redhat.com)
+- No longer compare with legacy hosted var (ewolinet@redhat.com)
+- Preserving ES dc storage type unless overridden by inventory variable
+  (ewolinet@redhat.com)
+- Fix: e2e tests failing due to :1936/metrics unaccessible.
+  (jmencak@redhat.com)
+
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.34.0
 - docker_creds: decode docker_config for py3 only if its a string
   (vrutkovs@redhat.com)
