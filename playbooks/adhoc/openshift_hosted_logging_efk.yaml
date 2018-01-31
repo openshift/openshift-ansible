@@ -13,4 +13,6 @@
   - import_role:
       name: openshift_logging
       tasks_from: update_master_config
-    when: openshift_hosted_logging_deploy | default(false) | bool
+    when:
+    - openshift_hosted_logging_deploy | default(false) | bool
+    - not openshift.common.version_gte_3_9
