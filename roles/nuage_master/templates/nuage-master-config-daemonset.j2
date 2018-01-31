@@ -37,11 +37,14 @@ data:
       nuageMonServer:
           URL: 0.0.0.0:9443
           certificateDirectory: {{ nuage_master_crt_dir }}
+          clientCA: ""
+          serverCertificate: ""
+          serverKey: ""
       # etcd config required for HA
       etcdClientConfig:
-          ca: {{ nuage_master_crt_dir }}/nuageMonCA.crt
-          certFile: {{ nuage_master_crt_dir }}/nuageMonServer.crt
-          keyFile: {{ nuage_master_crt_dir }}/master.etcd-client.key
+          ca: {{ nuage_master_crt_dir }}/nuageEtcd-ca.crt
+          certFile: {{ nuage_master_crt_dir }}/nuageEtcd-client.crt
+          keyFile: {{ nuage_master_crt_dir }}/nuageEtcd-client.key
           urls:
       {% for etcd_url in openshift.master.etcd_urls %}
               - {{ etcd_url }}
