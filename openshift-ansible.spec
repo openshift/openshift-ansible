@@ -28,6 +28,7 @@ Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
+Requires:      python2-crypto
 
 %description
 Openshift and Atomic Enterprise Ansible
