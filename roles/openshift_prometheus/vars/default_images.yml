@@ -8,5 +8,5 @@ l_openshift_prometheus_alertbuffer_image_prefix: "{{ openshift_prometheus_alertb
 # image version defaults
 l_openshift_prometheus_image_version: "{{ openshift_prometheus_image_version | default('v2.0.0') }}"
 l_openshift_prometheus_proxy_image_version: "{{ openshift_prometheus_proxy_image_version | default('v1.0.0') }}"
-l_openshift_prometheus_alertmanager_image_version: "{{ openshift_prometheus_alertmanager_image_version | default('v0.9.1') }}"
+l_openshift_prometheus_alertmanager_image_version: "{{ openshift_prometheus_alertmanager_image_version | default('v0.13.0') }}"
 l_openshift_prometheus_alertbuffer_image_version: "{{ openshift_prometheus_alertbuffer_image_version | default('v0.0.2') }}"
