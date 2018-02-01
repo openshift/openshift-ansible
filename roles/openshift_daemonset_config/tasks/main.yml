@@ -1,4 +1,9 @@
 ---
+- name: create the namespace
+  oc_project:
+    state: present
+    name: "{{ openshift_daemonset_config_namespace }}"
+
 - name: add a sa
   oc_serviceaccount:
     name: "{{ openshift_daemonset_config_sa_name }}"
@@ -25,11 +30,6 @@
     dest: "{{ item.value }}"
   with_dict: "{{ openshift_daemonset_config_configmap_files }}"
 
-- name: create the namespace
-  oc_project:
-    state: present
-    name: "{{ openshift_daemonset_config_namespace }}"
-
 - name: lay down secrets
   oc_secret:
     state: present
@@ -39,6 +39,7 @@
     contents: "{{ openshift_daemonset_config_secrets }}"
   when:
   - openshift_daemonset_config_secrets != {}
+  register: secout
 
 - name: create the configmap
   oc_configmap:
@@ -47,6 +48,7 @@
     namespace: "{{ openshift_daemonset_config_namespace }}"
     from_literal: "{{ openshift_daemonset_config_configmap_literals }}"
     from_file: "{{ openshift_daemonset_config_configmap_files }}"
+  register: cmout
 
 - name: deploy daemonset
   oc_obj:
@@ -56,3 +58,4 @@
     kind: daemonset
     files:
     - /tmp/daemonset.yml
+    force: "{{ True if cmout.changed or secout.changed else False | bool }}"
