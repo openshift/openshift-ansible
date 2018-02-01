@@ -1,9 +1,9 @@
 #cloud-config
-disable_root: true
+disable_root: {{ openshift_openstack_disable_root }}
 
 system_info:
   default_user:
-    name: openshift
+    name: {{ openshift_openstack_user }}
     sudo: ["ALL=(ALL) NOPASSWD: ALL"]
 
 write_files:
