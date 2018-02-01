@@ -1,0 +1,4 @@
+---
+openshift_gcp_project: ''
+openshift_gcp_prefix: ''
+openshift_gcp_network_name: "{{ openshift_gcp_prefix }}network"
