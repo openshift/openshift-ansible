@@ -665,3 +665,10 @@ data:
 
     # Minimun interval (in seconds) between pool updates (integer value)
     ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
+
+    [oslo_concurrency]
+
+    #
+    # From kuryr_kubernetes
+    #
+    lock_path = {{ kuryr_openstack_lock_path | default('/var/kuryr-lock') }}
