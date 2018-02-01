@@ -325,7 +325,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # or to one or all of the masters defined in the inventory if no load
 # balancer is present.
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
-#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# If an external load balancer is used public hostname should resolve to
+# external load balancer address
+#openshift_master_cluster_public_hostname=openshift-ansible.public.example.com
 
 # Configure controller arguments
 #osm_controller_args={'resource-quota-sync-period': ['10s']}
