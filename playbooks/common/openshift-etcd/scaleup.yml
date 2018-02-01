@@ -58,16 +58,23 @@
 - name: Update master etcd client urls
   hosts: oo_masters_to_config
   serial: 1
-  tasks:
-  - include_role:
-      name: openshift_master
-      tasks_from: update_etcd_client_urls
-    vars:
-      etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
-      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-      openshift_master_etcd_hosts: "{{ hostvars
+  vars:
+    openshift_master_etcd_hosts: "{{ hostvars
                                        | oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([])))
                                        | oo_collect('openshift.common.hostname')
                                        | default(none, true) }}"
-      openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
-    static: true
+    openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
+  roles:
+  - lib_utils
+  - openshift_master_facts
+  post_tasks:
+  - yedit:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      key: 'etcdClientInfo.urls'
+      value: "{{ openshift.master.etcd_urls }}"
+    notify:
+    - restart master api
+    - restart master controllers
+  handlers:
+  - include: ../../../roles/openshift_master/handlers/main.yml
+    static: yes
