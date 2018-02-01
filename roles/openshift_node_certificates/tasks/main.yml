@@ -86,7 +86,7 @@
     --expire-days={{ openshift_node_cert_expire_days }}
     {% endif %}
     --overwrite=true
-    --hostnames={{ hostvars[item].openshift.common.hostname }},{{ hostvars[item].openshift.common.hostname | lower }},{{ hostvars[item].openshift.common.public_hostname }},{{ hostvars[item].openshift.common.public_hostname | lower }},{{ hostvars[item].openshift.common.ip }},{{ hostvars[item].openshift.common.public_ip }}
+    --hostnames={{ hostvars[item].openshift.common.hostname }},{{ hostvars[item].openshift.common.hostname | lower }},{{ hostvars[item].openshift.common.public_hostname }},{{ hostvars[item].openshift.common.public_hostname | lower }},{{ hostvars[item].openshift.common.ip }},{{ hostvars[item].openshift.common.public_ip }},{{ hostvars[item].openshift.common.internal_ip }},{{ hostvars[item].openshift.common.internal_ip }}
     --signer-cert={{ openshift_ca_cert }}
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}

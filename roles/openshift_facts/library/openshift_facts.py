@@ -403,6 +403,11 @@ def normalize_openstack_facts(metadata, facts):
     local_ipv4 = metadata['ec2_compat']['local-ipv4'].split(',')[0]
     facts['network']['ip'] = local_ipv4
     facts['network']['public_ip'] = metadata['ec2_compat']['public-ipv4']
+    # workaround : get eth1 address from ifconfig
+    ifconfig = os.popen("ifconfig eth1 | grep 'inet ' | awk '{ print $2 }'")
+    private_ip = ifconfig.read()
+    if private_ip:
+        facts['network']['internal_ip'] = private_ip.rstrip()
 
     for f_var, h_var, ip_var in [('hostname', 'hostname', 'local-ipv4'),
                                  ('public_hostname', 'public-hostname', 'public-ipv4')]:
@@ -681,6 +686,8 @@ def set_aggregate_facts(facts):
 
         internal_hostnames.add(facts['common']['hostname'])
         internal_hostnames.add(facts['common']['ip'])
+        if facts['common']['internal_ip']:
+            all_hostnames.add(facts['common']['internal_ip'])
 
         cluster_domain = facts['common']['dns_domain']
 
@@ -1335,7 +1342,7 @@ def apply_provider_facts(facts, provider_facts):
     if not provider_facts:
         return facts
 
-    common_vars = [('hostname', 'ip'), ('public_hostname', 'public_ip')]
+    common_vars = [('hostname', 'ip'), ('public_hostname', 'public_ip'), ('internal_ip', 'internal_ip')]
     for h_var, ip_var in common_vars:
         ip_value = provider_facts['network'].get(ip_var)
         if ip_value:
