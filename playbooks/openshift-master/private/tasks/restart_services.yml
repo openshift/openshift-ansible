@@ -1,4 +1,0 @@
----
-- import_role:
-    name: openshift_master
-    tasks_from: restart.yml

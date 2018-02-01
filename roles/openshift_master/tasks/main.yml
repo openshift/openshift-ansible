@@ -227,7 +227,7 @@
 - pause:
     seconds: 15
   when:
-  - openshift.master.ha | bool
+  - openshift_master_ha | bool
 
 - name: Start and enable master api all masters
   systemd:
