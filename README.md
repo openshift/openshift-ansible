@@ -74,6 +74,16 @@ Fedora:
 dnf install -y ansible pyOpenSSL python-cryptography python-lxml
 ```
 
+Additional requirements:
+
+Logging:
+
+- java-1.8.0-openjdk-headless
+
+Metrics:
+
+- httpd-tools
+
 ## Simple all-in-one localhost Installation
 This assumes that you've installed the base dependencies and you're running on
 Fedora or RHEL
