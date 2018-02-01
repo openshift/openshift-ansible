@@ -44,6 +44,8 @@ openshift_aws_s3_bucket_name: "{{ openshift_aws_clusterid }}-docker-registry"
 
 openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}"
 
+openshift_aws_elb_cert_arn: ''
+
 openshift_aws_elb_dict:
   master:
     external:
@@ -65,7 +67,7 @@ openshift_aws_elb_dict:
         load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
         instance_protocol: ssl
         instance_port: "{{ openshift_master_api_port | default(8443) }}"
-        ssl_certificate_id: ''
+        ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
       name: "{{ openshift_aws_elb_basename }}-master-external"
       tags: "{{ openshift_aws_kube_tags }}"
     internal:
