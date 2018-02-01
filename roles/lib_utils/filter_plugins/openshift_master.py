@@ -451,6 +451,28 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
         if self.challenge:
             raise errors.AnsibleFilterError("|failed provider {0} does not "
                                             "allow challenge authentication".format(self.__class__.__name__))
+class GitLabIdentityProvider(IdentityProviderOauthBase):
+    """ GitLabIdentityProvider
+
+        Attributes:
+
+        Args:
+            api_version(str): OpenShift config version
+            idp (dict): idp config dict
+
+        Raises:
+            AnsibleFilterError:
+    """
+    def __init__(self, api_version, idp):
+        IdentityProviderOauthBase.__init__(self, api_version, idp)
+        self._required += [['url']]
+
+    def validate(self):
+        ''' validate this idp instance '''
+        if self.challenge:
+            raise errors.AnsibleFilterError("|failed provider {0} does not "
+                                            "allow challenge authentication".format(self.__class__.__name__))
+
 
 
 class FilterModule(object):
