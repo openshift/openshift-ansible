@@ -173,18 +173,20 @@ openshift_aws_node_groups:
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
 
+openshift_aws_scale_group_health_check:
+  period: 60
+  type: EC2
+
 # these will be used during upgrade
 openshift_aws_master_group_config:
   # The 'master' key is always required here.
   master:
-    instance_type: m4.xlarge
+    instance_type: "{{ openshift_aws_master_group_instance_type | default('m4.xlarge') }}"
     volumes: "{{ openshift_aws_node_group_config_master_volumes }}"
-    health_check:
-      period: 60
-      type: EC2
-    min_size: 3
-    max_size: 3
-    desired_size: 3
+    health_check: "{{ openshift_aws_scale_group_health_check }}"
+    min_size: "{{ openshift_aws_master_group_min_size | default(3) }}"
+    max_size: "{{ openshift_aws_master_group_max_size | default(3) }}"
+    desired_size: "{{ openshift_aws_master_group_desired_size | default(3) }}"
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
@@ -196,14 +198,12 @@ openshift_aws_master_group_config:
 openshift_aws_node_group_config:
   # The 'compute' key is always required here.
   compute:
-    instance_type: m4.xlarge
+    instance_type: "{{ openshift_aws_compute_group_instance_type | default('m4.xlarge') }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
-    health_check:
-      period: 60
-      type: EC2
-    min_size: 3
-    max_size: 100
-    desired_size: 3
+    health_check: "{{ openshift_aws_scale_group_health_check }}"
+    min_size: "{{ openshift_aws_compute_group_min_size | default(3) }}"
+    max_size: "{{ openshift_aws_compute_group_max_size | default(100) }}"
+    desired_size: "{{ openshift_aws_compute_group_desired_size | default(3) }}"
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
@@ -211,14 +211,12 @@ openshift_aws_node_group_config:
     policy_json: "{{ openshift_aws_iam_role_policy_json }}"
   # The 'infra' key is always required here.
   infra:
-    instance_type: m4.xlarge
+    instance_type: "{{ openshift_aws_infra_group_instance_type | default('m4.xlarge') }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
-    health_check:
-      period: 60
-      type: EC2
-    min_size: 2
-    max_size: 20
-    desired_size: 2
+    health_check: "{{ openshift_aws_scale_group_health_check }}"
+    min_size: "{{ openshift_aws_infra_group_min_size | default(2) }}"
+    max_size: "{{ openshift_aws_infra_group_max_size | default(20) }}"
+    desired_size: "{{ openshift_aws_infra_group_desired_size | default(2) }}"
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
