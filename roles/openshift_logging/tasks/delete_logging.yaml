@@ -140,4 +140,6 @@
     console_config_edits:
       - key: clusterInfo#loggingPublicURL
         value: ""
-  when: openshift_web_console_install | default(true) | bool
+  when:
+    - openshift_web_console_install | default(true) | bool
+    - openshift.common.version_gte_3_9
