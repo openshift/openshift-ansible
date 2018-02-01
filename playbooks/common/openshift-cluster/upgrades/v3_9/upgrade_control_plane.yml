@@ -26,6 +26,7 @@
       openshift_upgrade_min: '3.7'
       openshift_release: '3.8'
       _requested_pkg_version: "{{ openshift_pkg_version if openshift_pkg_version is defined else omit }}"
+      openshift_pkg_version: ''
       _requested_image_tag: "{{ openshift_image_tag if openshift_image_tag is defined else omit }}"
       l_double_upgrade_cp: True
     when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
@@ -61,10 +62,8 @@
 
 # Pre-upgrade completed
 
-- import_playbook: ../upgrade_control_plane.yml
-  vars:
-    openshift_release: '3.8'
-    openshift_pkg_version: ''
+- name: Intermediate 3.8 Upgrade
+  import_playbook: ../upgrade_control_plane.yml
   when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
 
 ## 3.8 upgrade complete we should now be able to upgrade to 3.9
@@ -77,7 +76,7 @@
       openshift_upgrade_target: '3.9'
       openshift_upgrade_min: '3.8'
       openshift_release: '3.9'
-      openshift_pkg_version: "{{ _requested_pkg_version | default ('-3.9*') }}"
+      openshift_pkg_version: "{{ _requested_pkg_version if _requested_pkg_version is defined else '' }}"
   # Set the user's specified image_tag for 3.9 upgrade if it was provided.
   - set_fact:
       openshift_image_tag: "{{ _requested_image_tag }}"
@@ -106,6 +105,7 @@
     l_upgrade_docker_target_hosts: "oo_masters_to_config:oo_etcd_to_config"
     l_upgrade_excluder_hosts: "oo_masters_to_config"
     openshift_protect_installed_version: False
+    openshift_version_reinit: True
 
 - name: Flag pre-upgrade checks complete for hosts without errors
   hosts: oo_masters_to_config:oo_etcd_to_config
@@ -114,8 +114,6 @@
       pre_upgrade_complete: True
 
 - import_playbook: ../upgrade_control_plane.yml
-  vars:
-    openshift_release: '3.9'
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode

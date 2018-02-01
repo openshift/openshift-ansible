@@ -5,6 +5,7 @@
     openshift_version: "{{ openshift_pkg_version[1:].split('-')[0] }}"
   when:
   - openshift_pkg_version is defined
+  - openshift_pkg_version != ""
   - openshift_version is not defined
   - not (openshift_version_reinit | default(false))
 

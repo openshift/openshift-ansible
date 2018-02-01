@@ -6,6 +6,7 @@
     openshift_version: "{{ openshift_image_tag[1:].split('-')[0] if openshift_image_tag != 'latest' else openshift_image_tag }}"
   when:
   - openshift_image_tag is defined
+  - openshift_image_tag != ""
   - openshift_version is not defined
   - not (openshift_version_reinit | default(false))
 
