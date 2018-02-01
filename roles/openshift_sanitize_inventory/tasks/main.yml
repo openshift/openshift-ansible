@@ -75,3 +75,11 @@
     - ( openshift_cloudprovider_vsphere_username is undefined or openshift_cloudprovider_vsphere_password is undefined or
         openshift_cloudprovider_vsphere_host is undefined or openshift_cloudprovider_vsphere_datacenter is undefined or
         openshift_cloudprovider_vsphere_datastore is undefined )
+
+- name: Ensure at least one master is schedulable when web console is installed
+  fail:
+    msg: >
+      Ensure that at least one master is marked as schedulable when web console is being installed.
+  when:
+    - openshift_web_console_install | default(true) | bool
+    - true not in (groups['oo_masters'] | map('extract', hostvars, 'openshift_schedulable') | list)
