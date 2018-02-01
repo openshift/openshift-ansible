@@ -12,6 +12,11 @@ openshift_storageclass_defaults:
     provisioner: gce-pd
     parameters:
       type: pd-standard
+  openstack:
+    name: standard
+    provisioner: cinder
+    parameters:
+      availability: nova
 
 openshift_storageclass_default: "true"
 openshift_storageclass_name: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['name'] }}"
