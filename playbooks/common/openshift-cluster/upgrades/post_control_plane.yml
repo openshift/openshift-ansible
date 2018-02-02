@@ -113,6 +113,22 @@
     registry_url: "{{ openshift.master.registry_url }}"
     openshift_hosted_templates_import_command: replace
 
+  post_tasks:
+  # we need to migrate customers to the new pattern of pushing to the registry via dns
+  # Step 1: verify the certificates have the docker registry service name
+  - shell: >
+      echo -n | openssl s_client -showcerts -servername docker-registry.default.svc -connect docker-registry.default.svc:5000  | openssl x509 -text |  grep -A1 'X509v3 Subject Alternative Name:' | grep -Pq 'DNS:docker-registry\.default\.svc(,|$)'
+    register: cert_output
+
+  # Step 2: Set a fact to be used to determine if we should run the redeploy of registry certs
+  - name: set a fact to include the registry certs playbook if needed
+    set_fact:
+      openshift_hosted_rollout_certs_and_registry: "{{ cert_output.rc == 0  }}"
+
+# Run the redeploy certs based upon the certificates
+- when: hostvars[groups.oo_first_master.0].openshift_hosted_rollout_certs_and_registry
+  import_playbook: ../../../openshift-hosted/redeploy-registry-certificates.yml
+
 # Check for warnings to be printed at the end of the upgrade:
 - name: Clean up and display warnings
   hosts: oo_masters_to_config

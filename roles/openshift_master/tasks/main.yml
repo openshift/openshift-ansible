@@ -137,17 +137,8 @@
   - item.clientCA | default('') != ''
   with_items: "{{ openshift.master.identity_providers }}"
 
-# This is an ugly hack to verify settings are in a file without modifying them with lineinfile.
-# The template file will stomp any other settings made.
-- block:
-  - name: check whether our docker-registry setting exists in the env file
-    command: "awk '/^OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000/' /etc/sysconfig/{{ openshift_service_type }}-master"
-    failed_when: false
-    changed_when: false
-    register: l_already_set
-
-  - set_fact:
-      openshift_push_via_dns: "{{ openshift.common.version_gte_3_6 or (l_already_set.stdout is defined and l_already_set.stdout is match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
+- name: Include push_via_dns.yml
+  include_tasks: push_via_dns.yml
 
 - name: Set fact of all etcd host IPs
   openshift_facts:
