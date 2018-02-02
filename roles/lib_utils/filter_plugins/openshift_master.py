@@ -405,7 +405,30 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
             raise errors.AnsibleFilterError("|failed provider {0} has unknown "
                                             "urls: {1}".format(self.__class__.__name__, ', '.join(unknown_urls)))
 
+            
+class GitLabIdentityProvider(IdentityProviderOauthBase):
+    """ GitLabIdentityProvider
 
+        Attributes:
+
+        Args:
+            api_version(str): OpenShift config version
+            idp (dict): idp config dict
+
+        Raises:
+            AnsibleFilterError:
+    """
+    def __init__(self, api_version, idp):
+        IdentityProviderOauthBase.__init__(self, api_version, idp)
+        self._required += [['url']]
+
+    def validate(self):
+        ''' validate this idp instance '''
+        if self.challenge:
+            raise errors.AnsibleFilterError("|failed provider {0} does not "
+                                            "allow challenge authentication".format(self.__class__.__name__))
+
+            
 class GoogleIdentityProvider(IdentityProviderOauthBase):
     """ GoogleIdentityProvider
 
