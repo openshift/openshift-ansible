@@ -129,8 +129,7 @@
 
   - name: Redeploy router
     command: >
-      {{ openshift_client_binary }} deploy dc/router
-      --latest
+      {{ openshift_client_binary }} rollout latest dc/router
       --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
       -n default
 

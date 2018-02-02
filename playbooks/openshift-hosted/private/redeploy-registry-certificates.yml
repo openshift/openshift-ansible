@@ -88,8 +88,7 @@
 
   - name: Redeploy docker registry
     command: >
-      {{ openshift_client_binary }} deploy dc/docker-registry
-      --latest
+      {{ openshift_client_binary }} rollout latest dc/docker-registry
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default
 
