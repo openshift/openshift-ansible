@@ -13,6 +13,8 @@ openshift_storage_glusterfs_block_version: 'latest'
 openshift_storage_glusterfs_block_host_vol_create: True
 openshift_storage_glusterfs_block_host_vol_size: 100
 openshift_storage_glusterfs_block_host_vol_max: 15
+openshift_storage_glusterfs_block_storageclass: False
+openshift_storage_glusterfs_block_storageclass_default: False
 openshift_storage_glusterfs_s3_deploy: True
 openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-gluster-s3-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
 openshift_storage_glusterfs_s3_version: 'latest'
@@ -59,6 +61,8 @@ openshift_storage_glusterfs_registry_block_version: "{{ openshift_storage_gluste
 openshift_storage_glusterfs_registry_block_host_vol_create: "{{ openshift_storage_glusterfs_block_host_vol_create }}"
 openshift_storage_glusterfs_registry_block_host_vol_size: "{{ openshift_storage_glusterfs_block_host_vol_size }}"
 openshift_storage_glusterfs_registry_block_host_vol_max: "{{ openshift_storage_glusterfs_block_host_vol_max }}"
+openshift_storage_glusterfs_registry_block_storageclass: False
+openshift_storage_glusterfs_registry_block_storageclass_default: False
 openshift_storage_glusterfs_registry_s3_deploy: "{{ openshift_storage_glusterfs_s3_deploy }}"
 openshift_storage_glusterfs_registry_s3_image: "{{ openshift_storage_glusterfs_s3_image }}"
 openshift_storage_glusterfs_registry_s3_version: "{{ openshift_storage_glusterfs_s3_version }}"
@@ -88,3 +92,22 @@ openshift_storage_glusterfs_registry_heketi_ssh_user: "{{ openshift_storage_glus
 openshift_storage_glusterfs_registry_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_heketi_ssh_sudo }}"
 openshift_storage_glusterfs_registry_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_heketi_ssh_keyfile | default(omit) }}"
 openshift_storage_glusterfs_registry_heketi_fstab: "{{ '/var/lib/heketi/fstab' | quote if openshift_storage_glusterfs_registry_heketi_executor == 'kubernetes' else '/etc/fstab' | quote }}"
+
+r_openshift_storage_glusterfs_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_storage_glusterfs_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+r_openshift_storage_glusterfs_os_firewall_deny: []
+r_openshift_storage_glusterfs_os_firewall_allow:
+- service: glusterfs_sshd
+  port: "2222/tcp"
+- service: glusterfs_management
+  port: "24007/tcp"
+- service: glusterfs_rdma
+  port: "24008/tcp"
+- service: glusterfs_bricks
+  port: "49152-49251/tcp"
+- service: glusterblockd
+  port: "24010/tcp"
+- service: iscsi-targets
+  port: "3260/tcp"
+- service: rpcbind
+  port: "111/tcp"

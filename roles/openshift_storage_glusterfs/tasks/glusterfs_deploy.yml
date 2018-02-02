@@ -55,6 +55,8 @@
   - glusterfs_wipe
   - item.stdout_lines | count > 0
 
+- include: firewall.yml
+
 - name: Label GlusterFS nodes
   oc_label:
     name: "{{ hostvars[item].openshift.node.nodename }}"
