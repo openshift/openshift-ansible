@@ -405,7 +405,7 @@ class OpenIDIdentityProvider(IdentityProviderOauthBase):
             raise errors.AnsibleFilterError("|failed provider {0} has unknown "
                                             "urls: {1}".format(self.__class__.__name__, ', '.join(unknown_urls)))
 
-            
+   
 class GitLabIdentityProvider(IdentityProviderOauthBase):
     """ GitLabIdentityProvider
 
@@ -428,7 +428,7 @@ class GitLabIdentityProvider(IdentityProviderOauthBase):
             raise errors.AnsibleFilterError("|failed provider {0} does not "
                                             "allow challenge authentication".format(self.__class__.__name__))
 
-            
+
 class GoogleIdentityProvider(IdentityProviderOauthBase):
     """ GoogleIdentityProvider
 
