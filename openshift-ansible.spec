@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.35.0%{?dist}
+Release:        0.36.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,35 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.36.0
+- Add missing tasks file (sdodson@redhat.com)
+- Upgrade to migrate to using push to DNS for registries. (kwoodson@redhat.com)
+- Adding defaults for the gcp variables to fix an undefined ansible exception.
+  (kwoodson@redhat.com)
+- Fix vsphere sanitization (sdodson@redhat.com)
+- Set a default for required vsphere variable (sdodson@redhat.com)
+- Add python2-crypto package (ccoleman@redhat.com)
+- hosts.example: clarify usage of openshift_master_cluster_public_hostname
+  (vrutkovs@redhat.com)
+- Conditionally create pvcs for metrics depending on whether or not it already
+  exists (ewolinet@redhat.com)
+- Update hosts examples with a note about scheduling on masters
+  (vrutkovs@redhat.com)
+- Fixing file write issue. (kwoodson@redhat.com)
+- Only perform console configmap ops when >= 3.9 (sdodson@redhat.com)
+- Remove playbooks/adhoc/openshift_hosted_logging_efk.yaml (sdodson@redhat.com)
+- upgrades: use openshift_version as a regexp when checking
+  openshift.common.version (vrutkovs@redhat.com)
+- Don't update master-config.yaml with logging/metrics urls >= 3.9
+  (sdodson@redhat.com)
+- Make master schedulable (vrutkovs@redhat.com)
+- Re-add openshift_aws_elb_cert_arn. (abutcher@redhat.com)
+- Ignore openshift_pkg_version during 3.8 upgrade (rteague@redhat.com)
+- bug 1537857. Fix retrieving prometheus metrics (jcantril@redhat.com)
+- Remove master_ha bool checks (mgugino@redhat.com)
+- Don't restart docker when re-deploying node certificates (sdodson@redhat.com)
+- vsphere storage default add (davis.phillips@gmail.com)
+
 * Wed Jan 31 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.35.0
 - add glusterblock support for ansible (m.judeikis@gmail.com)
 - Add a bare minimum localhost hosts file (sdodson@redhat.com)
