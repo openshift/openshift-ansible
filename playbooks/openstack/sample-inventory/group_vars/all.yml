@@ -86,6 +86,9 @@ openshift_openstack_docker_volume_size: "15"
 #openshift_openstack_prepare_and_format_registry_volume: False
 
 openshift_openstack_subnet_prefix: "192.168.99"
+#openshift_openstack_subnet_cidr_suffix: "24"
+#openshift_openstack_subnet_start_suffix: "3"
+#openshift_openstack_subnet_end_suffix: "254"
 
 ## Red Hat subscription:
 #rhsub_user: '<username>'
