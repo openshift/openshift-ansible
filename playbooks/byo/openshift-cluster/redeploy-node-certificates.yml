@@ -14,3 +14,5 @@
     openshift_certificates_redeploy: true
 
 - include: ../../common/openshift-node/restart.yml
+  vars:
+    openshift_node_restart_docker_required: False
