@@ -55,7 +55,9 @@ openshift_openstack_app_subdomain: "apps"
 # heat vars
 openshift_openstack_clusterid: openshift
 openshift_openstack_stack_name: "{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
-openshift_openstack_subnet_prefix: "192.168.99"
+openshift_openstack_subnet_cidr: "192.168.99.0/24"
+openshift_openstack_pool_start: "192.168.99.3"
+openshift_openstack_pool_end: "192.168.99.254"
 openshift_openstack_master_hostname: master
 openshift_openstack_infra_hostname: infra-node
 openshift_openstack_cns_hostname: cns
