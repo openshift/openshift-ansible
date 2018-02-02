@@ -80,18 +80,18 @@ resources:
       network: { get_resource: net }
       cidr:
         str_replace:
-          template: subnet_24_prefix.0/24
+          template: subnet_24_prefix.0/{{ openshift_openstack_subnet_cidr_suffix }}
           params:
             subnet_24_prefix: {{ openshift_openstack_subnet_prefix }}
       allocation_pools:
         - start:
             str_replace:
-              template: subnet_24_prefix.3
+              template: subnet_24_prefix.{{ openshift_openstack_subnet_start_suffix }}
               params:
                 subnet_24_prefix: {{ openshift_openstack_subnet_prefix }}
           end:
             str_replace:
-              template: subnet_24_prefix.254
+              template: subnet_24_prefix.{{ openshift_openstack_subnet_end_suffix }}
               params:
                 subnet_24_prefix: {{ openshift_openstack_subnet_prefix }}
       dns_nameservers:
