@@ -137,6 +137,16 @@
     - "prometheus_out.stderr | length > 0"
     - "'already exists' not in prometheus_out.stderr"
 
+- set_fact:
+    _logging_metrics_proxy_passwd: "{{ 16 | lib_utils_oo_random_word | b64encode }}"
+
+- template:
+    src: passwd.j2
+    dest: "{{mktemp.stdout}}/passwd.yml"
+  vars:
+    logging_user_name: "{{ openshift_logging_elasticsearch_prometheus_sa }}"
+    logging_user_passwd: "{{ _logging_metrics_proxy_passwd }}"
+
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
   template:
@@ -255,6 +265,8 @@
         path: "{{ generated_certs_dir }}/ca.crt"
       - name: admin.jks
         path: "{{ generated_certs_dir }}/system.admin.jks"
+      - name: passwd.yml
+        path: "{{mktemp.stdout}}/passwd.yml"
 
 # services
 - name: Set logging-{{ es_component }}-cluster service
@@ -391,6 +403,7 @@
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
+    basic_auth_passwd: "{{ _logging_metrics_proxy_passwd | b64decode }}"
 
 - name: Set ES dc
   oc_obj:
