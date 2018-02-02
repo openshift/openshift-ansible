@@ -16,6 +16,7 @@
     until: not (l_docker_restart_docker_in_node_result is failed)
     retries: 3
     delay: 30
+    when: openshift_node_restart_docker_required | default(True)
 
   - name: Restart containerized services
     service:
