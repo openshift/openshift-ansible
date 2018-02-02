@@ -94,6 +94,12 @@
   - include_tasks: "{{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
 
+  - name: Disable master controller
+    service:
+      name: "{{ openshift_service_type }}-master-controllers"
+      enabled: false
+    when: openshift.common.rolling_restart_mode == 'system'
+
   - include_tasks: ../../../openshift-master/private/tasks/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
 

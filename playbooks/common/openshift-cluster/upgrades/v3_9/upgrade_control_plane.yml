@@ -124,14 +124,16 @@
   roles:
   - role: openshift_facts
   tasks:
-  - name: Stop {{ openshift_service_type }}-master-controllers
-    systemd:
+  - name: Restart master controllers to force new leader election mode
+    service:
       name: "{{ openshift_service_type }}-master-controllers"
-      state: stopped
-  - name: Start {{ openshift_service_type }}-master-controllers
-    systemd:
+      state: restart
+    when: openshift.common.rolling_restart_mode == 'service'
+  - name: Re-enable master controllers to force new leader election mode
+    service:
       name: "{{ openshift_service_type }}-master-controllers"
-      state: started
+      enabled: true
+    when: openshift.common.rolling_restart_mode == 'system'
 
 - import_playbook: ../post_control_plane.yml
 
