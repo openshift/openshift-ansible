@@ -1,4 +1,12 @@
 ---
+- name: check variables are passed
+  fail:
+    msg: "Ensure correct variables are defined for gcp. {{ item }}"
+  when: item == ''
+  with_items:
+  - "{{ openshift_gcp_project }}"
+  - "{{ openshift_gcp_prefix }}"
+
 # Work around ini_file create option in 2.2 which defaults to no
 - name: Create cloud config file
   file:
@@ -16,8 +24,8 @@
     option: "{{ item.key }}"
     value: "{{ item.value }}"
   with_items:
-    - { key: 'project-id', value: '{{ openshift_gcp_project }}' }
-    - { key: 'network-name', value: '{{ openshift_gcp_network_name }}' }
-    - { key: 'node-tags', value: '{{ openshift_gcp_prefix }}ocp' }
-    - { key: 'node-instance-prefix', value: '{{ openshift_gcp_prefix }}' }
-    - { key: 'multizone', value: 'false' }
+  - { key: 'project-id', value: '{{ openshift_gcp_project }}' }
+  - { key: 'network-name', value: '{{ openshift_gcp_network_name }}' }
+  - { key: 'node-tags', value: '{{ openshift_gcp_prefix }}ocp' }
+  - { key: 'node-instance-prefix', value: '{{ openshift_gcp_prefix }}' }
+  - { key: 'multizone', value: 'false' }
