@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.36.0%{?dist}
+Release:        0.37.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.37.0
+- Don't use 'omit' for package module (vrutkovs@redhat.com)
+- Adding requirements for logging and metrics (ewolinet@redhat.com)
+- Disable master controllers before upgrade and re-enable those when restart
+  mode is system (vrutkovs@redhat.com)
+- upgrade: run upgrade_control_plane and upgrade_nodes playbooks during full
+  upgrade (vrutkovs@redhat.com)
+
 * Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.36.0
 - Add missing tasks file (sdodson@redhat.com)
 - Upgrade to migrate to using push to DNS for registries. (kwoodson@redhat.com)
