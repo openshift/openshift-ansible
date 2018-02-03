@@ -15,6 +15,7 @@
     name: "{{ item }}"
     state: started
     enabled: True
+  when: not openshift_is_atomic | bool
   with_items:
     - multipathd
     - rpcbind
