@@ -1,4 +1,4 @@
-allowDisabledDocker: false
+kind: NodeConfig
 apiVersion: v1
 authConfig:
   authenticationCacheSize: 1000
@@ -19,13 +19,25 @@ imageConfig:
   format: "{{ openshift_imageconfig_format }}"
   latest: false
 iptablesSyncPeriod: 30s
-kind: NodeConfig
 kubeletArguments:
+  pod-manifest-path:
+  - /etc/origin/node/pods
+  bootstrap-kubeconfig:
+  - /etc/origin/node/bootstrap.kubeconfig
+  feature-gates:
+  - RotateKubeletClientCertificate=true,RotateKubeletServerCertificate=true
+  rotate-certificates:
+  - "true"
+  cert-dir:
+  - /etc/origin/node/certificates
   cloud-config:
   - /etc/origin/cloudprovider/{{ openshift_node_group_cloud_provider }}.conf
   cloud-provider:
   - {{ openshift_node_group_cloud_provider }}
-  node-labels: {{ openshift_node_group_labels | to_json }}
+  node-labels: 
+  - "{{ openshift_node_group_labels | join(',') }}"
+  enable-controller-attach-detach:
+  - 'true'
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
   burst: 40
@@ -35,19 +47,12 @@ masterKubeConfig: node.kubeconfig
 networkConfig:
   mtu: {{ openshift_node_group_network_mtu }}
   networkPluginName: {{ openshift_node_group_network_plugin }}
-nodeIP: ""
-podManifestConfig: null
+networkPluginName: {{ openshift_node_group_network_plugin }}
 servingInfo:
   bindAddress: 0.0.0.0:10250
   bindNetwork: tcp4
-  certFile: server.crt
-  clientCA: node-client-ca.crt
-  keyFile: server.key
-  namedCertificates: null
+  clientCA: client-ca.crt
 volumeConfig:
   localQuota:
     perFSGroup: null
 volumeDirectory: {{ openshift_node_group_node_data_dir }}/openshift.local.volumes
-enable-controller-attach-detach:
-- 'true'
-networkPluginName: {{ openshift_node_group_network_plugin }}
