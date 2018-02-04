@@ -50,6 +50,12 @@
   notify:
     - restart node
 
+- name: Ensure the node static pod directory exists
+  file:
+    path: "{{ openshift.common.config_base }}/node/pods"
+    state: directory
+    mode: 0755
+
 - name: include aws provider credentials
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))

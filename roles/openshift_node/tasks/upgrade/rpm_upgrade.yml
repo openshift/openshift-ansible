@@ -13,12 +13,5 @@
   vars:
     openshift_node_upgrade_rpm_list:
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
+      - "{{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }}"
       - "PyYAML"
-      - "dnsmasq"
-
-# Pre-pull the rpms for openvswitch, but don't install
-# openvswitch requires the latest version to be installed.
-- name: download openvswitch upgrade rpm
-  command: "{{ ansible_pkg_mgr }} update -y --downloadonly openvswitch"
-  register: result
-  until: result is succeeded

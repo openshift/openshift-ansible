@@ -26,7 +26,7 @@ ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
 ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
 ExecStart=/usr/bin/docker run --name {{ openshift_service_type }}-node \
   --rm --privileged --net=host --pid=host --env-file=/etc/sysconfig/{{ openshift_service_type }}-node \
-  -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} \
+  -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} -e DEBUG_LOGLEVEL=${DEBUG_LOGLEVEL}\
   -e HOST=/rootfs -e HOST_ETC=/host-etc \
   -v {{ openshift_node_data_dir }}:{{ openshift_node_data_dir }}:rslave \
   -v {{ openshift.common.config_base }}/node:{{ openshift.common.config_base }}/node \

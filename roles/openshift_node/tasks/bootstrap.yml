@@ -26,26 +26,20 @@
   - line: "KUBECONFIG={{ openshift_node_config_dir }}/bootstrap.kubeconfig"
     regexp: "^KUBECONFIG=.*"
   # remove the config file.  This comes from openshift_facts
-  - line: "CONFIG_FILE={{ openshift_node_config_dir }}/node-config.yaml"
+  - line: "CONFIG_FILE={{ openshift_node_config_dir }}/bootstrap-node-config.yaml"
     regexp: "^CONFIG_FILE=.*"
 
 - name: include aws sysconfig credentials
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
 
-#- name: update the ExecStart to have bootstrap
-#  lineinfile:
-#    dest: "/usr/lib/systemd/system/{{ openshift_service_type }}-node.service"
-#    line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
-#    regexp: "^ExecStart=.*"
 
-- name: "disable {{ openshift_service_type }}-node"  # and {{ openshift_service_type }}-master services"
+- name: "disable {{ openshift_service_type }}-node service"
   systemd:
     name: "{{ item }}"
     enabled: no
   with_items:
   - "{{ openshift_service_type }}-node.service"
-#  - "{{ openshift_service_type }}-master.service"
 
 - name: Check for RPM generated config marker file .config_managed
   stat:
@@ -74,7 +68,12 @@
     state: link
     force: yes
   with_items:
-  - "{{ openshift_node_config_dir }}/node-client-ca.crt"
+  - "{{ openshift_node_config_dir }}/client-ca.crt"
+
+- name: Remove default node-config.yaml to allow bootstrapping config
+  file:
+    path: "/etc/origin/node/node-config.yaml"
+    state: absent
 
 - when: rpmgenerated_config.stat.exists
   block:
