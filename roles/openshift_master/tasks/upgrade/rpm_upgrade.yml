@@ -17,7 +17,6 @@
       - "{{ openshift_service_type }}{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
-      - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }}"
   register: result
   until: result is succeeded
@@ -32,7 +31,6 @@
       - "{{ openshift_service_type }}{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-master{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
-      - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version }}"
   register: result
   until: result is succeeded

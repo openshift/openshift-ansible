@@ -1,6 +1,6 @@
 ---
 - name: restart master
-  command: /usr/bin/master-restart "{{ item }}"
+  command: /usr/local/bin/master-restart "{{ item }}"
   with_items:
   - api
   - controllers

@@ -6,6 +6,15 @@
   retries: 3
   delay: 30
 
+- name: Restart static master services
+  command: /usr/local/bin/master-restart "{{ item }}"
+  with_items:
+  - api
+  - controllers
+  - etcd
+  failed_when: false
+  when: openshift_is_containerized | bool
+
 - name: Restart containerized services
   service: name={{ item }} state=started
   with_items:

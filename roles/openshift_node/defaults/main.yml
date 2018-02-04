@@ -16,12 +16,6 @@ openshift_oreg_url_default_dict:
 openshift_oreg_url_default: "{{ openshift_oreg_url_default_dict[openshift_deployment_type] }}"
 oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) }}"
 
-osn_ovs_image_default_dict:
-  origin: "openshift/openvswitch"
-  openshift-enterprise: "openshift3/openvswitch"
-osn_ovs_image_default: "{{ osn_ovs_image_default_dict[openshift_deployment_type] }}"
-osn_ovs_image: "{{ osn_ovs_image_default }}"
-
 openshift_dns_ip: "{{ ansible_default_ipv4['address'] }}"
 
 openshift_node_env_vars: {}
@@ -113,8 +107,6 @@ system_images_registry_dict:
   origin: "docker.io"
 
 system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
-openshift_use_external_openvswitch: False
-l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
 openshift_image_tag: ''
 

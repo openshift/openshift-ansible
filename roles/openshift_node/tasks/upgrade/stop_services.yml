@@ -12,7 +12,7 @@
   failed_when: false
 
 - name: Ensure static containerized services stopped before Docker restart
-  command: /usr/bin/master-restart "{{ item }}"
+  command: /usr/local/bin/master-restart "{{ item }}"
   with_items:
   - api
   - controllers

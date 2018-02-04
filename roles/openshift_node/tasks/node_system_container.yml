@@ -11,6 +11,13 @@
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
 
+# TODO: remove when system container is fixed to not include it
+- name: Ensure old system path is set
+  file:
+    state: directory
+    path: "/etc/origin/openvswitch"
+    mode: '0750'
+
 - name: Install or Update node system container
   oc_atomic_container:
     name: "{{ openshift_service_type }}-node"
