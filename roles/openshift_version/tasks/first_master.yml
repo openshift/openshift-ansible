@@ -19,7 +19,7 @@
   - set_fact:
       openshift_pkg_version: -{{ openshift_version }}
   when:
-  - openshift_pkg_version is not defined
+  - openshift_pkg_version is not defined or openshift_pkg_version == ""
   - openshift_upgrade_target is not defined
 
 - block:
@@ -28,5 +28,5 @@
   - set_fact:
       openshift_image_tag: v{{ openshift_version }}
   when: >
-    openshift_image_tag is not defined
+    openshift_image_tag is not defined or openshift_image_tag == ""
     or l_force_image_tag_to_version | bool
