@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf2-camel-rest-sql-1.0.0.redhat-000019",
+      "value": "karaf2-camel-rest-sql-1.0.0.redhat-000022",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -73,7 +73,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000019",
+      "value": "1.0.0.redhat-000022",
       "description": "The application version."
     },
     {
