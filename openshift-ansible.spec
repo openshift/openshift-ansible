@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.27
+Version:        3.7.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 05 2018 Justin Pierce <jupierce@redhat.com> 3.7.28-1
+- Conditionally create pvcs for metrics depending on whether or not it already
+  exists (ewolinet@redhat.com)
+- cherry-pick to 3.7 gluster block (m.judeikis@gmail.com)
+- allow setting of kibana env vars (jcantril@redhat.com)
+- No longer compare with legacy hosted var (ewolinet@redhat.com)
+- Preserving ES dc storage type unless overridden by inventory variable
+  (ewolinet@redhat.com)
+- Rework provisioners vars to support different prefix/version for Origin/OSE
+  (vrutkovs@redhat.com)
+- Correct ability to override openshift_management_app_template
+  (rteague@redhat.com)
+- Pull openshift_image_tag from oo_masters_to_config rather oo_first_master.
+  (abutcher@redhat.com)
+- Default install_result when reloading generated facts. (abutcher@redhat.com)
+- Remove remaining haproxy files with uninstallation
+  (nakayamakenjiro@gmail.com)
+- Remove master ha_bool checks 3.7 (mgugino@redhat.com)
+- Don't restart docker when re-deploying node certs (sdodson@redhat.com)
+
 * Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.27-1
 - docker_image_availability: containerized overrides (lmeyer@redhat.com)
 - [release-3.7] [1538896] Correct certificate alt name parsing
