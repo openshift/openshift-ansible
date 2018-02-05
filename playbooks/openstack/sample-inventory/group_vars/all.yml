@@ -124,3 +124,7 @@ ansible_user: openshift
 #    region: primary
 #  infra:
 #    region: infra
+
+## cloud config
+openshift_openstack_disable_root: true
+openshift_openstack_user: openshift
