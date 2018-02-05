@@ -41,43 +41,7 @@ spec:
 {% endfor %}
 {% endif %}
       containers:
-        - name: proxy
-          image: {{ proxy_image }}
-          imagePullPolicy: IfNotPresent
-          args:
-           - --upstream-ca=/etc/elasticsearch/secret/admin-ca
-           - --https-address=:4443
-           - -provider=openshift
-           - -client-id={{openshift_logging_elasticsearch_prometheus_sa}}
-           - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
-           - -cookie-secret={{ 16 | lib_utils_oo_random_word | b64encode }}
-           - -basic-auth-password={{ basic_auth_passwd }}
-           - -upstream=https://localhost:9200
-           - '-openshift-sar={"namespace": "{{ openshift_logging_elasticsearch_namespace}}", "verb": "view", "resource": "prometheus", "group": "metrics.openshift.io"}'
-           - '-openshift-delegate-urls={"/": {"resource": "prometheus", "verb": "view", "group": "metrics.openshift.io", "namespace": "{{ openshift_logging_elasticsearch_namespace}}"}}'
-           - --tls-cert=/etc/tls/private/tls.crt
-           - --tls-key=/etc/tls/private/tls.key
-           - -pass-access-token
-           - -pass-user-headers
-          ports:
-          - containerPort: 4443
-            name: proxy
-            protocol: TCP
-          volumeMounts:
-          - mountPath: /etc/tls/private
-            name: proxy-tls
-            readOnly: true
-          - mountPath: /etc/elasticsearch/secret
-            name: elasticsearch
-            readOnly: true
-          resources:
-            limits:
-              memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
-            requests:
-              cpu: "{{openshift_logging_elasticsearch_proxy_cpu_request }}"
-              memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
-        -
-          name: "elasticsearch"
+        - name: "elasticsearch"
           image: {{image}}
           imagePullPolicy: IfNotPresent
           resources:
@@ -165,6 +129,42 @@ spec:
             initialDelaySeconds: 10
             timeoutSeconds: 30
             periodSeconds: 5
+        -
+          name: proxy
+          image: {{ proxy_image }}
+          imagePullPolicy: IfNotPresent
+          args:
+           - --upstream-ca=/etc/elasticsearch/secret/admin-ca
+           - --https-address=:4443
+           - -provider=openshift
+           - -client-id={{openshift_logging_elasticsearch_prometheus_sa}}
+           - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+           - -cookie-secret={{ 16 | lib_utils_oo_random_word | b64encode }}
+           - -basic-auth-password={{ basic_auth_passwd }}
+           - -upstream=https://localhost:9200
+           - '-openshift-sar={"namespace": "{{ openshift_logging_elasticsearch_namespace}}", "verb": "view", "resource": "prometheus", "group": "metrics.openshift.io"}'
+           - '-openshift-delegate-urls={"/": {"resource": "prometheus", "verb": "view", "group": "metrics.openshift.io", "namespace": "{{ openshift_logging_elasticsearch_namespace}}"}}'
+           - --tls-cert=/etc/tls/private/tls.crt
+           - --tls-key=/etc/tls/private/tls.key
+           - -pass-access-token
+           - -pass-user-headers
+          ports:
+          - containerPort: 4443
+            name: proxy
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /etc/tls/private
+            name: proxy-tls
+            readOnly: true
+          - mountPath: /etc/elasticsearch/secret
+            name: elasticsearch
+            readOnly: true
+          resources:
+            limits:
+              memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
+            requests:
+              cpu: "{{openshift_logging_elasticsearch_proxy_cpu_request }}"
+              memory: "{{openshift_logging_elasticsearch_proxy_memory_limit }}"
       volumes:
         - name: proxy-tls
           secret:
