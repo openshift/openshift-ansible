@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.37.0%{?dist}
+Release:        0.38.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 05 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.38.0
+- Moving upgrade sg playbook to 3.9 (kwoodson@redhat.com)
+- remove openshift_upgrade_{pre,post}_storage_migration_enabled from
+  failed_when (nakayamakenjiro@gmail.com)
+- Fix version handling in 3.8/3.9 control plane upgrades (rteague@redhat.com)
+- add S3 bucket cleanup (jdiaz@redhat.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- Parameterize user and disable_root options in cloud config
+  (nelluri@redhat.com)
+- Fix softlinks broken by d3fefc32a727fe3c13159c4e9fe4399f35b487a8
+  (Klaas-@users.noreply.github.com)
+
 * Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.37.0
 - Don't use 'omit' for package module (vrutkovs@redhat.com)
 - Adding requirements for logging and metrics (ewolinet@redhat.com)
