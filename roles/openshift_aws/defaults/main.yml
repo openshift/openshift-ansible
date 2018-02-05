@@ -322,3 +322,8 @@ openshift_aws_masters_groups: masters,etcd,nodes
 # By default, don't delete things like the shared IAM instance
 # profile and uploaded ssh keys
 openshift_aws_enable_uninstall_shared_objects: False
+# S3 bucket names are global by default and can take minutes/hours for the
+# name to become available for re-use (assuming someone doesn't take the
+# name in the meantime). Default to just emptying the contents of the S3
+# bucket if we've been asked to create the bucket during provisioning.
+openshift_aws_really_delete_s3_bucket: False
