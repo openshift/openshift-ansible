@@ -119,6 +119,9 @@
   - shell: >
       echo -n | openssl s_client -showcerts -servername docker-registry.default.svc -connect docker-registry.default.svc:5000  | openssl x509 -text |  grep -A1 'X509v3 Subject Alternative Name:' | grep -Pq 'DNS:docker-registry\.default\.svc(,|$)'
     register: cert_output
+    changed_when: false
+    failed_when:
+    - cert_output.rc not in [0, 1]
 
   # Step 2: Set a fact to be used to determine if we should run the redeploy of registry certs
   - name: set a fact to include the registry certs playbook if needed
