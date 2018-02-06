@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.38.0%{?dist}
+Release:        0.39.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.39.0
+- Update code to not fail when rc != 0 (kwoodson@redhat.com)
+- Upgrades: pass openshift_manage_node_is_master to master nodes during upgrade
+  (vrutkovs@redhat.com)
+- Updates to configure monitoring container. (kwoodson@redhat.com)
+- Move cert SAN update logic to openshift-etcd (rteague@redhat.com)
+- Swapping container order for es pod (ewolinet@redhat.com)
+- Adding support for ES 5.x tech preview opt in (ewolinet@redhat.com)
+- bug 1540799: openshift_prometheus: update alertmanager config file flag
+  (pgier@redhat.com)
+- parameterize various master scale group bits (jdiaz@redhat.com)
+- Use rollout instead of deploy (deprecated) (rteague@redhat.com)
+- cri-o: export variables defined in crio-network (gscrivan@redhat.com)
+
 * Mon Feb 05 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.38.0
 - Moving upgrade sg playbook to 3.9 (kwoodson@redhat.com)
 - remove openshift_upgrade_{pre,post}_storage_migration_enabled from
