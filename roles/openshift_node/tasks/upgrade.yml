@@ -13,7 +13,7 @@
   include_tasks: upgrade/stop_services.yml
 
 # Ensure actually install latest package.
-- name: download docker upgrade rpm
+- name: install docker upgrade rpm
   command: "{{ ansible_pkg_mgr }} install -C -y docker{{ '-' + docker_version }}"
   register: result
   until: result is succeeded
