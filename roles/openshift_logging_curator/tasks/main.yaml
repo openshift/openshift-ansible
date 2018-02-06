@@ -52,7 +52,7 @@
 
 # configmap
 - copy:
-    src: curator.yml
+    src: "{{ __base_file_dir }}/curator.yml"
     dest: "{{ tempdir }}/curator.yml"
   changed_when: no
 
@@ -96,7 +96,7 @@
 # TODO: scale should not exceed 1
 - name: Generate Curator deploymentconfig
   template:
-    src: curator.j2
+    src: "{{ __base_file_dir }}/curator.j2"
     dest: "{{ tempdir }}/templates/curator-dc.yaml"
   vars:
     component: "{{ curator_component }}"
