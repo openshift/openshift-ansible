@@ -18,12 +18,6 @@
     when:
     - openshift_storage_glusterfs_is_native | default(True) | bool
     static: true
-  - include_role:
-      name: openshift_storage_glusterfs
-      tasks_from: kernel_modules.yml
-    when:
-    - openshift_storage_glusterfs_is_native | default(True) | bool
-    static: true
 
 - name: Open firewall ports for GlusterFS registry nodes
   hosts: glusterfs_registry
@@ -34,6 +28,10 @@
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
     static: true
+
+- name: Load kernel modules for nodes
+  hosts: oo_nodes_to_config
+  tasks:
   - include_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
