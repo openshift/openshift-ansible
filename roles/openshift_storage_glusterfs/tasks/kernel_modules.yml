@@ -1,7 +1,7 @@
 ---
 - name: Ensure device mapper modules loaded
   template:
-    src: glusterfs.conf
+    src: glusterfs.conf.j2
     dest: /etc/modules-load.d/glusterfs.conf
   register: km
 
