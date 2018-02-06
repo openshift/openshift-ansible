@@ -1,4 +1,24 @@
-# This is an example of an OpenShift-Ansible host inventory
+# This is an example of an OpenShift-Ansible host inventory. You will have to,
+# at a minimum, alter the hosts in the master, etcd, and node groups to match
+# your hostnames
+
+# host group for masters
+[masters]
+ose3-master[1:3]-ansible.test.example.com
+
+[etcd]
+ose3-master[1:3]-ansible.test.example.com
+
+[nodes]
+# masters should be schedulable to run web console pods
+ose3-master[1:3]-ansible.test.example.com
+ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+[nfs]
+ose3-master1.example.com
+
+[lb]
+# none
 
 # Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
@@ -1103,24 +1123,3 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # names and ports/port ranges for either masters or nodes.
 #openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
 #openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
-
-# host group for masters
-[masters]
-ose3-master[1:3]-ansible.test.example.com
-
-[etcd]
-ose3-etcd[1:3]-ansible.test.example.com
-
-# NOTE: Containerized load balancer hosts are not yet supported, if using a global
-# containerized=true host variable we must set to false.
-[lb]
-ose3-lb-ansible.test.example.com containerized=false
-
-# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
-[nodes]
-# masters should be schedulable to run web console pods
-ose3-master[1:3]-ansible.test.example.com openshift_schedulable=True
-ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
-
-[nfs]
-ose3-nfs-ansible.test.example.com
