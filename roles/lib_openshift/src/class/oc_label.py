@@ -108,6 +108,26 @@ class OCLabel(OpenShiftCLI):
 
         return False
 
+    def sanitize_labels(self):
+        ''' sanitize labels: \
+        Awful work around because somehow openshift_node_labels values are
+        leaking into node labels\
+        '''
+        cmd = self.cmd_template()
+
+        get_extra_current_labels = self.get_extra_current_labels()
+        for label in self.labels:
+            if any(label['value'] in a for a in get_extra_current_labels):
+                exec_cmd = True
+                cmd.append("{}-".format(label['value']))
+
+        try:
+            if exec_cmd:
+                cmd.append('--overwrite')
+                return self.openshift_cmd(cmd)
+        except NameError:
+            pass
+
     def replace(self):
         ''' replace currently stored labels with user provided labels '''
         cmd = self.cmd_template()
@@ -220,6 +240,7 @@ class OCLabel(OpenShiftCLI):
         # Add
         #######
         if state == 'add':
+            oc_label.sanitize_labels()
             if not (name or selector):
                 return {'failed': True,
                         'msg': "Param 'name' or 'selector' is required if state == 'add'"}

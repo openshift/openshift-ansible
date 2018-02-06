@@ -27,7 +27,7 @@ openshift_dns_ip: "{{ ansible_default_ipv4['address'] }}"
 openshift_node_env_vars: {}
 
 # Create list of 'k=v' pairs.
-l_node_kubelet_node_labels: "{{ openshift_node_labels | default({}) | lib_utils_oo_dict_to_keqv_list }}"
+l_node_kubelet_node_labels: "{{ openshift_node_labels | default({}) }}"
 
 openshift_node_kubelet_args_dict:
   aws:
