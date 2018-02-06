@@ -1,7 +1,6 @@
 ---
 - name: Update systemd units
   include_tasks: ../systemd_units.yml
-  when: openshift_is_containerized | bool
 
 - name: Update oreg value
   yedit:
