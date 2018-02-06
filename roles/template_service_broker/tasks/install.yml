@@ -1,5 +1,12 @@
 ---
 # Fact setting
+- name: Ensure that Template Service Broker has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for Template Service Broker - '{{ template_service_broker_selector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(template_service_broker_selector)
+
 - name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ item }}"
   with_first_found:

@@ -15,6 +15,13 @@
   fail: msg='the openshift_provisioners_efs_aws_secret_access_key variable is required'
   when: (openshift_provisioners_efs | bool) and openshift_provisioners_efs_aws_secret_access_key is not defined
 
+- name: Ensure that provisioners have nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for Prometheus - '{{ openshift_provisioners_efs_nodeselector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_provisioners_efs_nodeselector)
+
 - name: Install support
   include_tasks: install_support.yaml
 

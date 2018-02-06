@@ -2,6 +2,13 @@
 # set facts
 - include_tasks: facts.yaml
 
+- name: Ensure that Prometheus has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for Prometheus - '{{ openshift_prometheus_node_selector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_prometheus_node_selector)
+
 # namespace
 - name: Add prometheus project
   oc_project:

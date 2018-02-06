@@ -1,4 +1,11 @@
 ---
+- name: Ensure that ElasticSearch has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for Elasticsearch - '{{ openshift_logging_es_nodeselector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_es_nodeselector)
+
 - name: Validate Elasticsearch cluster size
   fail: msg="The openshift_logging_es_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
   when: openshift_logging_facts.elasticsearch.deploymentconfigs | length > openshift_logging_es_cluster_size|int
