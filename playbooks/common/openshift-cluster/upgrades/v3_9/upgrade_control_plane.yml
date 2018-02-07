@@ -125,8 +125,8 @@
   - name: Restart master controllers to force new leader election mode
     service:
       name: "{{ openshift_service_type }}-master-controllers"
-      state: restart
-    when: openshift.common.rolling_restart_mode == 'service'
+      state: restarted
+    when: openshift.common.rolling_restart_mode == 'services'
   - name: Re-enable master controllers to force new leader election mode
     service:
       name: "{{ openshift_service_type }}-master-controllers"
