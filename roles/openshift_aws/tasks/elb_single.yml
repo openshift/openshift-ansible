@@ -1,0 +1,34 @@
+---
+- name: "dump the elb listeners for {{ item.key }}"
+  debug:
+    msg: "{{ item.value }}"
+    verbosity: 1
+
+- name: "Create ELB {{ item.value.name }}"
+  ec2_elb_lb:
+    name: "{{ item.value.name }}"
+    state: present
+    cross_az_load_balancing: "{{ item.value.cross_az_load_balancing }}"
+    security_group_names: "{{ l_elb_security_groups[l_elb_dict_item.key] }}"
+    idle_timeout: "{{ item.value.idle_timout }}"
+    region: "{{ openshift_aws_region }}"
+    subnets:
+    - "{{ subnetout.subnets[0].id }}"
+    health_check: "{{ item.value.health_check }}"
+    listeners: "{{ item.value.listeners }}"
+    scheme: "{{ (item.key == 'internal') | ternary('internal','internet-facing') }}"
+    tags: "{{ item.value.tags }}"
+    wait: True
+  register: new_elb
+  retries: 20
+  delay: 5
+  until: new_elb | succeeded
+  ignore_errors: yes
+
+- fail:
+    msg: "couldn't create ELB {{ item.value.name }}"
+  when: not new_elb | succeeded
+
+- debug:
+    msg: "{{ new_elb }}"
+    verbosity: 1
