@@ -1,0 +1,7 @@
+---
+- name: Delete the Stack
+  ignore_errors: False
+  os_stack:
+    name: "{{ openshift_openstack_stack_name }}"
+    state: "absent"
+    wait: yes

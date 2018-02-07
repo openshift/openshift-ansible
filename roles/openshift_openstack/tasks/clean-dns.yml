@@ -2,7 +2,7 @@
 - name: Generate DNS records
   include_tasks: generate-dns.yml
 
-- name: "Add DNS A records"
+- name: "Remove DNS A records"
   nsupdate:
     key_name: "{{ item.0.key_name }}"
     key_secret: "{{ item.0.key_secret }}"
@@ -12,12 +12,11 @@
     record: "{{ item.1.hostname }}"
     value: "{{ item.1.ip }}"
     type: "{{ item.1.type }}"
-    # TODO(shadower): add a cleanup playbook that removes these records, too!
-    state: present
+    state: absent
   with_subelements:
     - "{{ openshift_openstack_dns_records | default([]) }}"
     - entries
-  register: nsupdate_add_result
-  until: nsupdate_add_result is succeeded
+  register: nsupdate_remove_result
+  until: nsupdate_remove_result is succeeded
   retries: 10
   delay: 1
