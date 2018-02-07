@@ -311,6 +311,9 @@
   post_tasks:
   - import_role:
       name: openshift_node
+      tasks_from: upgrade_pre.yml
+  - import_role:
+      name: openshift_node
       tasks_from: upgrade.yml
   - import_role:
       name: openshift_manage_node
