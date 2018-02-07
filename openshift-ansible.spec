@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.39.0%{?dist}
+Release:        0.40.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.40.0
+- health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
+- Fix docker rpm upgrade install task wording (mgugino@redhat.com)
+- Initial support for 3.10 (sdodson@redhat.com)
+- add deprovisioning for ELB (and IAM certs) (jdiaz@redhat.com)
+- [6632] fix indentation of terminationGracePeriodSeconds var
+  (jsanda@redhat.com)
+
 * Tue Feb 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.39.0
 - Update code to not fail when rc != 0 (kwoodson@redhat.com)
 - Upgrades: pass openshift_manage_node_is_master to master nodes during upgrade
