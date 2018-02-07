@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.40.0%{?dist}
+Release:        0.41.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.41.0
+- Allow OVS 2.7 in OCP 3.10 (sdodson@redhat.com)
+- GlusterFS: Minor documentation update (jarrpa@redhat.com)
+- Make sure to include upgrade_pre when upgrading master nodes
+  (sdodson@redhat.com)
+
 * Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.40.0
 - health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
 - Fix docker rpm upgrade install task wording (mgugino@redhat.com)
