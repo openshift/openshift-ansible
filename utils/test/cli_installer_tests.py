@@ -393,14 +393,16 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with config file and all installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on1(self, load_facts_mock, run_playbook_mock):
+    def test_get_hosts_to_run_on1(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         mock_facts = copy.deepcopy(MOCK_FACTS)
         mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
         mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
         mock_facts['10.0.0.3']['common']['version'] = "3.0.0"
 
         load_facts_mock.return_value = (mock_facts, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -415,12 +417,15 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with config file and all installed hosts (with --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on2(self, load_facts_mock, run_playbook_mock):
+    def test_get_hosts_to_run_on2(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         mock_facts = copy.deepcopy(MOCK_FACTS)
         mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
         mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
         mock_facts['10.0.0.3']['common']['version'] = "3.0.0"
+        prerequisites_mock.return_value = 0
+
         self._verify_get_hosts_to_run_on(mock_facts, load_facts_mock, run_playbook_mock,
                                          cli_input=None,
                                          exp_hosts_len=3,
@@ -429,9 +434,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with config file and no installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on3(self, load_facts_mock, run_playbook_mock):
+    def test_get_hosts_to_run_on3(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
         self._verify_get_hosts_to_run_on(MOCK_FACTS, load_facts_mock, run_playbook_mock,
                                          cli_input=None,
@@ -441,9 +448,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with config file and no installed hosts (with --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on4(self, load_facts_mock, run_playbook_mock):
+    def test_get_hosts_to_run_on4(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
         self._verify_get_hosts_to_run_on(MOCK_FACTS, load_facts_mock, run_playbook_mock,
                                          cli_input=None,
@@ -453,8 +462,9 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with config file and some installed some uninstalled hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on5(self, load_facts_mock, run_playbook_mock):
+    def test_get_hosts_to_run_on5(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         mock_facts = copy.deepcopy(MOCK_FACTS)
         mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
         mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
@@ -465,9 +475,10 @@ class UnattendedCliTests(OOCliFixture):
                                          force=False)
 
     # unattended with config file and some installed some uninstalled hosts (with --force)
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_get_hosts_to_run_on6(self, load_facts_mock, run_playbook_mock):
+    def test_get_hosts_to_run_on6(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         mock_facts = copy.deepcopy(MOCK_FACTS)
         mock_facts['10.0.0.1']['common']['version'] = "3.0.0"
         mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
@@ -477,10 +488,12 @@ class UnattendedCliTests(OOCliFixture):
                                          exp_hosts_to_run_on_len=3,
                                          force=True)
 
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.run_main_playbook')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_cfg_full_run(self, load_facts_mock, run_playbook_mock):
+    def test_cfg_full_run(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -514,10 +527,12 @@ class UnattendedCliTests(OOCliFixture):
         self.assertEquals(3, len(hosts_to_run_on))
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_inventory_write(self, load_facts_mock, run_playbook_mock):
+    def test_inventory_write(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         merged_config = SAMPLE_CONFIG % 'openshift-enterprise'
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -551,9 +566,11 @@ class UnattendedCliTests(OOCliFixture):
             self.assertTrue('openshift_public_hostname' in master_line)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_variant_version_latest_assumed(self, load_facts_mock, run_playbook_mock):
+    def test_variant_version_latest_assumed(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -578,9 +595,11 @@ class UnattendedCliTests(OOCliFixture):
                           inventory.get('OSEv3:vars', 'deployment_type'))
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_variant_version_preserved(self, load_facts_mock, run_playbook_mock):
+    def test_variant_version_preserved(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config = SAMPLE_CONFIG % 'openshift-enterprise'
@@ -606,9 +625,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with bad config file and no installed hosts (without --force)
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_bad_config(self, load_facts_mock, run_playbook_mock):
+    def test_bad_config(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -625,9 +646,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with three masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha_full_run(self, load_facts_mock, run_playbook_mock):
+    def test_quick_ha_full_run(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -646,9 +669,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with two masters, one node, and haproxy
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha_only_2_masters(self, load_facts_mock, run_playbook_mock):
+    def test_quick_ha_only_2_masters(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -664,9 +689,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with three masters, one node, but no load balancer specified:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha_no_lb(self, load_facts_mock, run_playbook_mock):
+    def test_quick_ha_no_lb(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -682,9 +709,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with three masters, one node, and one of the masters reused as load balancer:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha_reused_lb(self, load_facts_mock, run_playbook_mock):
+    def test_quick_ha_reused_lb(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -699,9 +728,11 @@ class UnattendedCliTests(OOCliFixture):
 
     # unattended with preconfigured lb
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_quick_ha_preconfigured_lb(self, load_facts_mock, run_playbook_mock):
+    def test_quick_ha_preconfigured_lb(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(
@@ -728,9 +759,11 @@ class AttendedCliTests(OOCliFixture):
         self.cli_args.extend(["-c", self.config_file])
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_full_run(self, load_facts_mock, run_playbook_mock):
+    def test_full_run(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
@@ -764,8 +797,9 @@ class AttendedCliTests(OOCliFixture):
 
     # interactive with config file and some installed some uninstalled hosts
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_scaleup_hint(self, load_facts_mock, run_playbook_mock):
+    def test_scaleup_hint(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
 
         # Modify the mock facts to return a version indicating OpenShift
         # is already installed on our master, and the first node.
@@ -774,6 +808,7 @@ class AttendedCliTests(OOCliFixture):
         mock_facts['10.0.0.2']['common']['version'] = "3.0.0"
 
         load_facts_mock.return_value = (mock_facts, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
@@ -797,9 +832,11 @@ class AttendedCliTests(OOCliFixture):
         self.assert_result(result, 1)
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_fresh_install_with_config(self, load_facts_mock, run_playbook_mock):
+    def test_fresh_install_with_config(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         config_file = self.write_config(os.path.join(self.work_dir,
@@ -821,6 +858,7 @@ class AttendedCliTests(OOCliFixture):
 
 #    #interactive with config file and all installed hosts
 #    @patch('ooinstall.openshift_ansible.run_main_playbook')
+#    @patch('ooinstall.openshift_ansible.run_prerequisites')
 #    @patch('ooinstall.openshift_ansible.load_system_facts')
 #    def test_get_hosts_to_run_on(self, load_facts_mock, run_playbook_mock):
 #        mock_facts = copy.deepcopy(MOCK_FACTS)
@@ -846,9 +884,11 @@ class AttendedCliTests(OOCliFixture):
 
     # interactive multimaster: one more node than master
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ha_dedicated_node(self, load_facts_mock, run_playbook_mock):
+    def test_ha_dedicated_node(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
@@ -889,9 +929,11 @@ class AttendedCliTests(OOCliFixture):
 
     # interactive multimaster: identical masters and nodes
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ha_no_dedicated_nodes(self, load_facts_mock, run_playbook_mock):
+    def test_ha_no_dedicated_nodes(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
@@ -958,9 +1000,11 @@ class AttendedCliTests(OOCliFixture):
 
     # interactive multimaster: attempting to use a master as the load balancer should fail:
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_ha_reuse_master_as_lb(self, load_facts_mock, run_playbook_mock):
+    def test_ha_reuse_master_as_lb(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS_QUICKHA, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
@@ -981,9 +1025,11 @@ class AttendedCliTests(OOCliFixture):
 
     # interactive all-in-one
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_all_in_one(self, load_facts_mock, run_playbook_mock):
+    def test_all_in_one(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
@@ -1010,9 +1056,11 @@ class AttendedCliTests(OOCliFixture):
                                        'openshift_schedulable=True')
 
     @patch('ooinstall.openshift_ansible.run_main_playbook')
+    @patch('ooinstall.openshift_ansible.run_prerequisites')
     @patch('ooinstall.openshift_ansible.load_system_facts')
-    def test_gen_inventory(self, load_facts_mock, run_playbook_mock):
+    def test_gen_inventory(self, load_facts_mock, prerequisites_mock, run_playbook_mock):
         load_facts_mock.return_value = (MOCK_FACTS, 0)
+        prerequisites_mock.return_value = 0
         run_playbook_mock.return_value = 0
 
         cli_input = build_input(
