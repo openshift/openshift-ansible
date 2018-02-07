@@ -43,13 +43,13 @@
 #    line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
 #    regexp: "^ExecStart=.*"
 
-- name: "disable {{ openshift_service_type }}-node and {{ openshift_service_type }}-master services"
+- name: "disable {{ openshift_service_type }}-node"  # and {{ openshift_service_type }}-master services"
   systemd:
     name: "{{ item }}"
     enabled: no
   with_items:
   - "{{ openshift_service_type }}-node.service"
-  - "{{ openshift_service_type }}-master.service"
+#  - "{{ openshift_service_type }}-master.service"
 
 - name: Check for RPM generated config marker file .config_managed
   stat:
