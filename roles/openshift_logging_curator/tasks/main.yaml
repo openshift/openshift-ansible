@@ -19,7 +19,7 @@
     msg: |-
       No schedulable nodes found matching node selector for logging curator - '{{ openshift_logging_curator_nodeselector }}'
   when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_curator_nodeselector)
+    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_curator_nodeselector)
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in

@@ -45,7 +45,7 @@
       kind: ClusterRole
       name: hawkular-openshift-agent
     subjects:
-      - kind: ServiceAccount
-        name: hawkular-openshift-agent
-        namespace: "{{openshift_metrics_hawkular_agent_namespace}}"
+    - kind: ServiceAccount
+      name: hawkular-openshift-agent
+      namespace: "{{openshift_metrics_hawkular_agent_namespace}}"
   changed_when: no

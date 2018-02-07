@@ -41,10 +41,10 @@
 - name: Create objects
   include_tasks: oc_apply.yaml
   vars:
-    - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
-    - namespace: "{{ openshift_provisioners_project }}"
-    - file_name: "{{ file.source }}"
-    - file_content: "{{ file.content | b64decode | from_yaml }}"
+  - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+  - namespace: "{{ openshift_provisioners_project }}"
+  - file_name: "{{ file.source }}"
+  - file_content: "{{ file.content | b64decode | from_yaml }}"
   with_items: "{{ object_defs.results }}"
   loop_control:
     loop_var: file

@@ -13,7 +13,7 @@
     msg: |-
       No schedulable nodes found matching node selector for Kibana - '{{ openshift_logging_kibana_nodeselector }}'
   when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_kibana_nodeselector)
+    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_kibana_nodeselector)
 
 - name: Set kibana image facts
   set_fact:

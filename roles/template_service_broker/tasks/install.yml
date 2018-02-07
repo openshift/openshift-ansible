@@ -10,8 +10,8 @@
 - name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
-    - "default_images.yml"
+  - "{{ openshift_deployment_type }}.yml"
+  - "default_images.yml"
 
 - name: set template_service_broker facts
   set_fact:
@@ -23,7 +23,7 @@
     name: openshift-template-service-broker
     state: present
     node_selector:
-      - ""
+    - ""
 
 - command: mktemp -d /tmp/tsb-ansible-XXXXXX
   register: mktemp
@@ -38,10 +38,10 @@
     src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
-    - "{{ __tsb_template_file }}"
-    - "{{ __tsb_rbac_file }}"
-    - "{{ __tsb_broker_file }}"
-    - "{{ __tsb_config_file }}"
+  - "{{ __tsb_template_file }}"
+  - "{{ __tsb_rbac_file }}"
+  - "{{ __tsb_broker_file }}"
+  - "{{ __tsb_config_file }}"
 
 - yedit:
     src: "{{ mktemp.stdout }}/{{ __tsb_config_file }}"
