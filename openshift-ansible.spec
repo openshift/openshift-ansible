@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.28
+Version:        3.7.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.7.29-1
+- Add ability to mount volumes into system container nodes (mgugino@redhat.com)
+- health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
+- Fixing file write issue. (kwoodson@redhat.com)
+- image name incorrect (rcook@redhat.com)
+
 * Mon Feb 05 2018 Justin Pierce <jupierce@redhat.com> 3.7.28-1
 - Conditionally create pvcs for metrics depending on whether or not it already
   exists (ewolinet@redhat.com)
