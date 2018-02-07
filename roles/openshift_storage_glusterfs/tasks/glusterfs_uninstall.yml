@@ -99,6 +99,7 @@
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
   failed_when: False
+  when: glusterfs_wipe
 
   # Runs "lvremove -ff <vg>; vgremove -fy <vg>; pvremove -fy <pv>" for every device found to be a physical volume.
 - name: Clear GlusterFS storage device contents
@@ -111,4 +112,5 @@
   delay: 1
   retries: 30
   when:
+  - glusterfs_wipe
   - item.stdout_lines | count > 0
