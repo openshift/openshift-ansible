@@ -18,7 +18,7 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 7): ["2.6", "2.7", "2.8", "2.9"],
         (3, 8): ["2.6", "2.7", "2.8", "2.9"],
         (3, 9): ["2.6", "2.7", "2.8", "2.9"],
-        (3, 10): ["2.8", "2.9"],
+        (3, 10): ["2.7", "2.8", "2.9"],
     }
 
     openshift_to_docker_version = {
