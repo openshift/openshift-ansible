@@ -330,6 +330,25 @@
       - path: key
         data: "{{ glusterfs_heketi_admin_key }}"
     when: glusterfs_heketi_admin_key is defined
+
+  - name: Get heketi route
+    oc_obj:
+      namespace: "{{ glusterfs_namespace }}"
+      kind: route
+      state: list
+      name: "heketi-{{ glusterfs_name }}"
+    register: heketi_route
+    when:
+    - glusterfs_heketi_is_native
+    - glusterfs_heketi_route is not defined
+
+  - name: Determine StorageClass heketi URL
+    set_fact:
+      glusterfs_heketi_route: "{{ heketi_route.results.results[0]['spec']['host'] }}"
+    when:
+    - glusterfs_heketi_is_native
+    - glusterfs_heketi_route is not defined
+
   - name: Generate Gluster Block StorageClass file
     template:
       src: "{{ openshift.common.examples_content_version }}/gluster-block-storageclass.yml.j2"
