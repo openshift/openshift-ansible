@@ -26,7 +26,7 @@ openshift_master_is_scaleup_host: False
 # syslog or wall, using 8GB of disk space maximum, using 10MB journal
 # files, keeping only a days worth of logs per journal file, and
 # retaining journal files no longer than a month.
-journald_vars_to_replace:
+journald_vars_to_replace_defaults:
 - { var: Storage, val: persistent }
 - { var: Compress, val: yes }
 - { var: SyncIntervalSec, val: 1s }
