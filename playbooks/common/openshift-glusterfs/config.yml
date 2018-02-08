@@ -32,7 +32,7 @@
 - name: Load kernel modules for nodes
   hosts: oo_nodes_to_config
   tasks:
-  - import_role:
+  - include_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:
