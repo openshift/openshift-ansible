@@ -82,6 +82,20 @@ spec:
         - --web.listen-address=localhost:9090
         image: "{{ l_openshift_prometheus_image_prefix }}prometheus:{{ l_openshift_prometheus_image_version }}"
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - |-
+              set -euo pipefail;
+              touch /tmp/prometheusconfig.hash;
+              if [[ $(find /etc/prometheus -type f | sort | xargs md5sum | md5sum) != $(cat /tmp/prometheusconfig.hash) ]]; then
+                find /etc/prometheus -type f | sort | xargs md5sum | md5sum > /tmp/prometheusconfig.hash;
+                kill -HUP 1;
+              fi
+          initialDelaySeconds: 60
+          periodSeconds: 60
         resources:
           requests:
 {% if openshift_prometheus_memory_requests is defined and openshift_prometheus_memory_requests is not none %}
