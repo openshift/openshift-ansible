@@ -26,6 +26,6 @@
   with_items:
   - { key: 'project-id', value: '{{ openshift_gcp_project }}' }
   - { key: 'network-name', value: '{{ openshift_gcp_network_name }}' }
-  - { key: 'node-tags', value: '{{ openshift_gcp_prefix }}ocp' }
+  - { key: 'node-tags', value: '{{ openshift_gcp_prefix }}' }
   - { key: 'node-instance-prefix', value: '{{ openshift_gcp_prefix }}' }
-  - { key: 'multizone', value: 'false' }
+  - { key: 'multizone', value: 'true' }
