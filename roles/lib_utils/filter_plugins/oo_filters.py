@@ -126,7 +126,7 @@ def lib_utils_oo_collect(data_list, attribute=None, filters=None):
             raise errors.AnsibleFilterError(
                 "lib_utils_oo_collect expects filter to be a dict")
         retval.extend([get_attr(d, attribute) for d in data if (
-            all([d.get(key, None) == filters[key] for key in filters]))])
+            all([get_attr(d, key) == filters[key] for key in filters]))])
     else:
         retval.extend([get_attr(d, attribute) for d in data])
 

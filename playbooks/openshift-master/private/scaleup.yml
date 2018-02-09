@@ -45,7 +45,7 @@
 
 - import_playbook: set_network_facts.yml
 
-- import_playbook: ../../openshift-etcd/private/certificates.yml
+- import_playbook: ../../openshift-etcd/private/master_etcd_certificates.yml
 
 - import_playbook: config.yml
 
