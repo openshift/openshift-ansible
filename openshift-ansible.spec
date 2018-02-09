@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.41.0%{?dist}
+Release:        0.42.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,57 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 09 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.42.0
+- xPaaS v1.4.8 for v3.7 (sdodson@redhat.com)
+- xPaaS v1.4.8-1 for v3.8 (sdodson@redhat.com)
+- xPaaS v1.4.8-1 for v3.9 (sdodson@redhat.com)
+- Bump xpaas version (sdodson@redhat.com)
+- Bug 1524805- CFME example now works disconnected (fabian@fabianism.us)
+- Only try to yaml.load a file if it ends in .yml or .yaml in logging facts
+  (ewolinet@redhat.com)
+- Set default image tag to openshift_image_tag for services
+  (vrutkovs@redhat.com)
+- Redeploy router certificates during upgrade only when secure.
+  (kwoodson@redhat.com)
+- GlusterFS: Fix block StorageClass heketi route (jarrpa@redhat.com)
+- changed oc to {{ openshift_client_binary }} (datarace101@gmail.com)
+- Use v3.9 web-console image for now (sdodson@redhat.com)
+- Adding ability to provide additional mounts to crio system container.
+  (kwoodson@redhat.com)
+- Remove spaces introduced at the start of the line
+  (geoff.newson@googlemail.com)
+- Changing the check for the number of etcd nodes (geoff.newson@gmail.com)
+- aws ami: make it so the tags from the orinal AMI are used with the newly
+  created AMI (mwoodson@redhat.com)
+- Setup docker excluder if requested before container_runtime is installed
+  (vrutkovs@redhat.com)
+- openshift_node: Remove master from aws node building (smilner@redhat.com)
+- Use wait_for_connection to validate ssh transport is alive
+  (sdodson@redhat.com)
+- Bug 1541625- properly cast provided ip address to unicode
+  (fabian@fabianism.us)
+- Add base package installation to upgrade playbooks (rteague@redhat.com)
+- 3.9 upgrade: fix typos in restart masters procedure (vrutkovs@redhat.com)
+- quick installer: disable broken test_get_hosts_to_run_on6 test
+  (vrutkovs@redhat.com)
+- Quick installer: run prerequistes first and update path to main playbook
+  (vrutkovs@redhat.com)
+- Fix uninstall using openshift_prometheus_state=absent (zgalor@redhat.com)
+- Detect config changes in console liveness probe (spadgett@redhat.com)
+- Fix master and node system container variables (mgugino@redhat.com)
+- Correct the list of certificates checked in openshift_master_certificates
+  s.t. masters do not incorrectly report that master certs are missing.
+  (abutcher@redhat.com)
+- tag fix without ose- (rcook@redhat.com)
+- lib_utils_oo_collect: Allow filtering on dot separated keys.
+  (abutcher@redhat.com)
+- Determine which etcd host is the etcd_ca_host rather than assume it is the
+  first host in the etcd host group. (abutcher@redhat.com)
+- Attempt to back up generated certificates on every etcd host.
+  (abutcher@redhat.com)
+- Remove pre upgrade verification step re: etcd ca host. (abutcher@redhat.com)
+- Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
+
 * Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.41.0
 - Allow OVS 2.7 in OCP 3.10 (sdodson@redhat.com)
 - GlusterFS: Minor documentation update (jarrpa@redhat.com)
