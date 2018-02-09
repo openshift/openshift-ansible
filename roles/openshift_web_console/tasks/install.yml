@@ -20,6 +20,7 @@
     state: present
     node_selector:
       - ""
+  register: create_console_project
 
 - name: Make temp directory for web console templates
   command: mktemp -d /tmp/console-ansible-XXXXXX
@@ -143,6 +144,16 @@
     --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+
+# Wait to give the rollout time to start before verifying that the console is
+# running. Unfortunately, we can't check if the deployment revision changed
+# because it's possible applying the template did not result in any changes to
+# the pod template spec, which would skip a new revision.
+- name: Pause for the web console deployment to start
+  pause:
+    seconds: 30
+  # Skip if the project didn't exist since there was no previous deployment.
+  when: not create_console_project.changed
 
 - name: Verify that the web console is running
   command: >
