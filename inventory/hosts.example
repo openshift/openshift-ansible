@@ -934,6 +934,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Force a specific image version to use when pulling the service catalog image
 #openshift_service_catalog_image_version=v3.7
 
+# TSB image tag
+#template_service_broker_version='v3.7'
+
 # Configure one of more namespaces whose templates will be served by the TSB
 #openshift_template_service_broker_namespaces=['openshift']
 
