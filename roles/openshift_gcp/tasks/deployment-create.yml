@@ -1,0 +1,32 @@
+---
+- name: Include vars for deployment manager
+  include_vars:
+    file: deployment-manager.yaml
+
+- name: Create deployment {{ openshift_gcp_deployment_name_with_prefix }} config file
+  template:
+    src: '{{ openshift_gcp_deployment_config_template }}'
+    dest: '{{ openshift_gcp_deployment_config }}'
+  register: deployment_config_from_template
+
+- name: Check if deployment {{ openshift_gcp_deployment_name_with_prefix }} exists
+  command: gcloud --project {{ openshift_gcp_project }} deployment-manager deployments describe {{ openshift_gcp_deployment_name_with_prefix }} --format 'yaml(deployment.operation)'
+  register: deployment_exists
+  changed_when: false
+  ignore_errors: true
+
+- name: Delete deployment if it exists in failed state
+  import_tasks: deployment-delete.yml
+  when:
+  - deployment_exists | succeeded
+  - (deployment_exists.stdout | from_yaml).deployment.operation.error is defined
+
+- name: Create deployment {{ openshift_gcp_deployment_name_with_prefix }}
+  command: gcloud --project {{ openshift_gcp_project }} deployment-manager deployments create {{ openshift_gcp_deployment_name_with_prefix }} --config '{{ openshift_gcp_deployment_config }}'
+  when: deployment_exists | failed or (deployment_exists.stdout | from_yaml).deployment.operation.error is defined
+
+- name: Update deployment {{ openshift_gcp_deployment_name_with_prefix }}
+  command: gcloud --project {{ openshift_gcp_project }} deployment-manager deployments update {{ openshift_gcp_deployment_name_with_prefix }} --config '{{ openshift_gcp_deployment_config }}'
+  when:
+  - deployment_exists | succeeded
+  - deployment_config_from_template | changed

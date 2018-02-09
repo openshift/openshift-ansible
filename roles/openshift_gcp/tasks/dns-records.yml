@@ -1,0 +1,41 @@
+---
+- name: get master ssl lb ip
+  command: gcloud --project {{ openshift_gcp_project }} compute addresses describe {{ openshift_gcp_prefix }}-master-https-lb-ip --global --format='value(address)'
+  register: master_ssl_lb_ip
+  changed_when: false
+
+- name: get master network lb ip
+  command: gcloud --project {{ openshift_gcp_project }} compute addresses describe {{ openshift_gcp_prefix }}-master-network-lb-ip --region {{ openshift_gcp_region }} --format='value(address)'
+  register: master_network_lb_ip
+  changed_when: false
+
+- name: get router network lb ip
+  command: gcloud --project {{ openshift_gcp_project }} compute addresses describe {{ openshift_gcp_prefix }}-router-network-lb-ip --region {{ openshift_gcp_region }} --format='value(address)'
+  register: router_network_lb_ip
+  changed_when: false
+
+- name: set ns records
+  gcdns_record:
+    record: '{{ item.record }}'
+    zone: '{{ public_hosted_zone }}'
+    type: '{{ item.type }}'
+    record_data: '{{ item.record_data }}'
+    ttl: 3600
+    overwrite: true
+    service_account_email: '{{ openshift_gcp_iam_service_account }}'
+    credentials_file: '{{ openshift_gcp_iam_service_account_keyfile }}'
+    project_id: '{{ openshift_gcp_project }}'
+    state: present
+  with_items:
+  - record: '{{ openshift_master_cluster_public_hostname }}'
+    record_data: '{{ master_ssl_lb_ip.stdout }}'
+    type: A
+  - record: '{{ openshift_master_cluster_hostname }}'
+    record_data: '{{ master_network_lb_ip.stdout }}'
+    type: A
+  - record: '{{ wildcard_zone }}'
+    record_data: '{{ router_network_lb_ip.stdout }}'
+    type: A
+  - record: '*.{{ wildcard_zone }}'
+    record_data: '{{ wildcard_zone }}.'
+    type: CNAME

@@ -1,0 +1,4 @@
+---
+- name: Delete ssl certificate
+  command: gcloud --project {{ openshift_gcp_project }} compute ssl-certificates delete {{ openshift_gcp_prefix }}-master-https-lb-cert
+  ignore_errors: true

@@ -1,0 +1,19 @@
+---
+- name: Create DNS zone
+  gcdns_zone:
+    zone: '{{ public_hosted_zone }}'
+    description: '{{ public_hosted_zone }} domain'
+    service_account_email: '{{ openshift_gcp_iam_service_account }}'
+    credentials_file: '{{ openshift_gcp_iam_service_account_keyfile }}'
+    project_id: '{{ openshift_gcp_project }}'
+    state: present
+
+- name: Get ns servers
+  command: gcloud --project {{ openshift_gcp_project }} dns managed-zones describe {{ public_hosted_zone | replace('.', '-') }} --format='value(nameServers)'
+  register: ns_servers
+
+- name: Ensure that DNS resolves to the hosted zone
+  assert:
+    that:
+    - "lookup('dig', public_hosted_zone, 'qtype=NS', wantlist=True) | sort | join(',') == ns_servers.stdout | replace(';', ',')"
+    msg: "The DNS domain {{ public_hosted_zone }} defined in 'public_hosted_zone' must have NS records pointing to the Google nameservers: '{{ ns_servers.stdout | replace(';', ',') }}' instead of '{{ lookup('dig', public_hosted_zone, 'qtype=NS') }}'."

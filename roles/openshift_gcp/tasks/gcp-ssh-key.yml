@@ -1,0 +1,28 @@
+---
+- name: Create gcp ssh key
+  command: ssh-keygen -f '{{ openshift_gcp_ssh_private_key }}' -t rsa -C cloud-user -N '' creates='{{ openshift_gcp_ssh_private_key }}'
+
+- name: Read public ssh key
+  slurp:
+    src: '{{ openshift_gcp_ssh_private_key }}.pub'
+  register: public_ssh_key
+
+- name: Get current ssh keys in the gcp project
+  command: gcloud --project {{ openshift_gcp_project }} compute project-info describe --format='value(commonInstanceMetadata.items.key.sshKeys.value)'
+  register: project_ssh_keys
+  changed_when: false
+
+- block:
+  - name: Create variable with our public key for gcp metadata, when there are no other public keys
+    set_fact:
+      ssh_public_key_metadata: 'cloud-user:{{ public_ssh_key.content | b64decode | trim }}'
+    when: "'ssh-rsa' not in project_ssh_keys.stdout"
+
+  - name: Create variable with our public key for gcp metadata, when there are other public keys
+    set_fact:
+      ssh_public_key_metadata: "{{ project_ssh_keys.stdout }}\ncloud-user:{{ public_ssh_key.content | b64decode | trim }}"
+    when: "'ssh-rsa' in project_ssh_keys.stdout"
+
+  - name: Add our ssh key to the project
+    command: gcloud --project {{ openshift_gcp_project }} compute project-info add-metadata --metadata='sshKeys={{ ssh_public_key_metadata }}'
+  when: public_ssh_key.content | b64decode | regex_replace('ssh-rsa (.*) cloud-user', '\\1') | trim not in project_ssh_keys.stdout

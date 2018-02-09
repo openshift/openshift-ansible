@@ -1,0 +1,95 @@
+---
+- name: Check if ssl certificate exists
+  command: gcloud --project {{ openshift_gcp_project }} compute ssl-certificates describe {{ openshift_gcp_prefix }}-master-https-lb-cert
+  register: ssl_cert_exists
+  changed_when: false
+  ignore_errors: true
+
+- when: ssl_cert_exists | failed
+  block:
+  - when:
+    - provision_master_https_key_file is defined
+    - provision_master_https_key_file is not none
+    - provision_master_https_key_file | trim != ''
+    - provision_master_https_cert_file is defined
+    - provision_master_https_cert_file is not none
+    - provision_master_https_cert_file | trim != ''
+    block:
+    - name: Stat key file
+      stat:
+        path: '{{ provision_master_https_key_file }}'
+      register: https_key_file
+
+    - name: Stat cert file
+      stat:
+        path: '{{ provision_master_https_cert_file }}'
+      register: https_cert_file
+
+    - name: Check key file
+      assert:
+        that:
+        - 'https_key_file.stat.exists'
+        - 'https_key_file.stat.readable'
+        msg: Master HTTPS key file must exist and it must be readable
+
+    - name: Check cert file
+      assert:
+        that:
+        - 'https_cert_file.stat.exists'
+        - 'https_cert_file.stat.readable'
+        msg: Master HTTPS certificate file must exist and it must be readable
+
+    - name: Set certificate files facts
+      set_fact:
+        ssl_key: '{{ provision_master_https_key_file }}'
+        ssl_cert: '{{ provision_master_https_cert_file }}'
+        ssl_selfsigned: false
+
+  - when: provision_master_https_key_file is not defined or provision_master_https_key_file is none or provision_master_https_key_file | trim == '' or
+          provision_master_https_cert_file is not defined or provision_master_https_cert_file is none or provision_master_https_cert_file | trim == ''
+    block:
+    - name: Ensure files directory exists
+      file:
+        path: '{{ playbook_dir }}/files'
+        state: directory
+
+    - name: Set certificate files facts
+      set_fact:
+        ssl_key: '{{ playbook_dir }}/files/ocp-ssl.pem'
+        ssl_csr: '{{ playbook_dir }}/files/ocp-ssl.csr'
+        ssl_cert: '{{ playbook_dir }}/files/ocp-ssl.crt'
+        ssl_selfsigned: true
+
+    - name: Create private key for certificate
+      openssl_privatekey:
+        path: '{{ ssl_key }}'
+        size: 2048
+        state: present
+
+    - name: Create CSR for certificate
+      openssl_csr:
+        path: '{{ ssl_csr }}'
+        privatekey_path: '{{ ssl_key }}'
+        common_name: '{{ openshift_master_cluster_public_hostname }}'
+        state: present
+
+    - name: Generate a Self Signed certificate
+      openssl_certificate:
+        path: '{{ ssl_cert }}'
+        privatekey_path: '{{ ssl_key }}'
+        csr_path: '{{ ssl_csr }}'
+        provider: selfsigned
+        state: present
+
+  - name: Create ssl certificate in GCP
+    command: gcloud --project {{ openshift_gcp_project }} compute ssl-certificates create {{ openshift_gcp_prefix }}-master-https-lb-cert --private-key "{{ ssl_key }}" --certificate "{{ ssl_cert }}"
+
+  - name: Delete self-signed certificate files
+    file:
+      path: '{{ item }}'
+      state: absent
+    with_items:
+    - '{{ ssl_key }}'
+    - '{{ ssl_csr }}'
+    - '{{ ssl_cert }}'
+    when: ssl_selfsigned

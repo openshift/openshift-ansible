@@ -1,0 +1,11 @@
+imports:
+- path: network.jinja
+resources:
+- name: network
+  type: network.jinja
+  properties:
+    prefix: {{ openshift_gcp_prefix }}
+    region: {{ openshift_gcp_region }}
+    console_port: {{ console_port }}
+    network_name: {{ openshift_gcp_network_name | default(openshift_gcp_prefix + '-network') }}
+    gce_vpc_custom_subnet_cidr: {{ openshift_gcp_vpc_custom_subnet_cidr | default('') }}

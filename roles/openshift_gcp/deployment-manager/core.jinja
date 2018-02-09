@@ -1,0 +1,278 @@
+resources:
+{# - name: {{ properties['prefix'] }}-bastion   no bastion for now
+  properties:
+    disks:
+    - autoDelete: true
+      boot: true
+      deviceName: persistent-disk-0
+      index: 0
+      initializeParams:
+        sourceImage: global/images/family/{{ properties['gold_image'] }}
+        diskSizeGb: {{ properties['bastion_disk_size'] }}
+        diskType: zones/{{ properties['zone'] }}/diskTypes/pd-ssd
+    machineType: zones/{{ properties['zone'] }}/machineTypes/{{ properties['bastion_machine_type'] }}
+    metadata: {}
+    networkInterfaces:
+    - accessConfigs:
+      - name: external-nat
+        type: ONE_TO_ONE_NAT
+      name: nic0
+      network: projects/{{env['project']}}/global/networks/{{ properties['prefix'] }}-network
+      {% if properties['gce_vpc_custom_subnet_cidr'] %}
+      subnetwork: projects/{{env['project']}}/regions/{{ properties['region'] }}/subnetworks/{{ properties['prefix'] }}-{{ properties['region'] }}-subnet
+      {% endif %}
+    scheduling:
+      automaticRestart: true
+      onHostMaintenance: MIGRATE
+      preemptible: false
+    serviceAccounts:
+    - scopes:
+      - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+      - https://www.googleapis.com/auth/compute
+      - https://www.googleapis.com/auth/devstorage.read_write
+      - https://www.googleapis.com/auth/logging.write
+      - https://www.googleapis.com/auth/monitoring.write
+      - https://www.googleapis.com/auth/service.management.readonly
+      - https://www.googleapis.com/auth/servicecontrol
+    tags:
+      items:
+      - {{ properties['prefix'] }}-bastion
+      - {{ properties['prefix'] }}-ssh-external
+    zone: {{ properties['zone'] }}
+  type: compute.v1.instance #}
+
+{% for node_group in properties['openshift_gcp_node_group_config'] %}
+
+- name: {{ properties['prefix'] }}-instance-template-{{ node_group.name }}
+  properties:
+    description: ''
+    properties:
+      canIpForward: false
+      disks:
+      - autoDelete: true
+        boot: true
+        index: 0
+        initializeParams:
+          diskSizeGb: {{ node_group.boot_disk_size }}
+          sourceImage: global/images/family/{{ node_group.image | default(properties['openshift_gcp_image']) }}
+          diskType: pd-ssd
+      - autoDelete: true
+        boot: false
+        index: 1
+        deviceName: docker
+        initializeParams:
+          sourceImage: global/images/empty-1g
+          diskSizeGb: {{ node_group.docker_disk_size | default(25) }}
+          diskType: pd-ssd
+      - autoDelete: true
+        boot: false
+        index: 2
+        deviceName: openshift
+        initializeParams:
+          sourceImage: global/images/empty-1g
+          diskSizeGb: {{ node_group.openshift_disk_size | default(50) }}
+          diskType: pd-ssd
+      machineType: {{ node_group.machine_type }}
+      metadata:
+        items:
+        - key: user-data
+          value: |
+            #cloud-config
+            write_files:
+            - content: |
+                DOCKER_STORAGE_OPTIONS='--storage-driver overlay2'
+              path: /etc/sysconfig/docker-storage
+              permissions: '0644'
+
+            fs_setup:
+            - label: docker
+              filesystem: xfs
+              device: /dev/disk/by-id/google-docker
+              partition: none
+            - label: osl
+              filesystem: xfs
+              device: /dev/disk/by-id/google-openshift
+              partition: none
+
+            mounts:
+            - [ '/dev/disk/by-id/google-docker', '/var/lib/docker', 'xfs', 'defaults', '0', '0' ]
+            - [ '/dev/disk/by-id/google-openshift', '/var/lib/origin/openshift.local.volumes', 'xfs', 'defaults,gquota', '0', '0' ]
+
+            runcmd:
+            - [ /usr/sbin/restorecon, -R, /var/lib/docker ]
+
+        - key: bootstrap
+          value: '{{ node_group.bootstrap | default(false) }}'
+
+        - key: cluster-id
+          value: {{ properties['prefix'] + properties['openshift_gcp_clusterid'] }}
+
+        - key: node-group
+          value: {{ node_group.name }}
+      networkInterfaces:
+      - accessConfigs:
+        - name: external-nat
+          type: ONE_TO_ONE_NAT
+        network: projects/{{env['project']}}/global/networks/{{ properties['network_name'] }}
+        {% if properties['gce_vpc_custom_subnet_cidr'] %}
+        subnetwork: projects/{{env['project']}}/regions/{{ properties['region'] }}/subnetworks/{{ properties['network_name'] }}-{{ properties['region'] }}-subnet
+        {% endif %}
+      scheduling:
+        automaticRestart: true
+        onHostMaintenance: MIGRATE
+        preemptible: false
+      serviceAccounts:
+      - scopes:
+        - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+        - https://www.googleapis.com/auth/compute
+        - https://www.googleapis.com/auth/devstorage.read_only
+        - https://www.googleapis.com/auth/logging.write
+        - https://www.googleapis.com/auth/monitoring.write
+        - https://www.googleapis.com/auth/service.management.readonly
+        - https://www.googleapis.com/auth/servicecontrol
+      tags:
+        items:
+        - {{ properties['prefix'] }}
+        {% if node_group.bootstrap | default(false) %}
+        - {{ properties['prefix'] }}-bootstrap
+        {% endif %}
+        {% for i in node_group.tags %}
+        - {{ i }}
+        {% endfor %}
+  type: compute.v1.instanceTemplate
+
+- name: {{ properties['prefix'] }}-ig-{{ node_group.suffix }}
+  properties:
+    baseInstanceName: {{ properties['prefix'] }}-ig-{{ node_group.suffix }}
+    instanceTemplate: $(ref.{{ properties['prefix'] }}-instance-template-{{ node_group.name }}.selfLink)
+    {% if node_group.suffix == 'm' %}
+    namedPorts:
+    - name: {{ properties['prefix'] }}-web-console
+      port: {{ properties['console_port'] }}
+    targetPools:
+    - $(ref.{{ properties['prefix'] }}-master-network-lb-pool.selfLink)
+    {% elif node_group.suffix == 'i' %}
+    targetPools:
+    - $(ref.{{ properties['prefix'] }}-router-network-lb-pool.selfLink)
+    {% endif %}
+    targetSize: {{ node_group.scale }}
+    region: {{ properties['region'] }}
+  type: compute.v1.regionInstanceGroupManager
+
+{% endfor %}
+
+- name: {{ properties['prefix'] }}-master-https-lb-health-check
+  properties:
+    checkIntervalSec: 5
+    description: ''
+    healthyThreshold: 2
+    httpsHealthCheck:
+      port: {{ properties['console_port'] }}
+      proxyHeader: NONE
+      requestPath: /healthz
+    timeoutSec: 5
+    type: HTTPS
+    unhealthyThreshold: 2
+  type: compute.v1.healthCheck
+- name: {{ properties['prefix'] }}-master-network-lb-health-check
+  properties:
+    checkIntervalSec: 5
+    description: ''
+    healthyThreshold: 2
+    host: ''
+    port: 8080
+    requestPath: /healthz
+    timeoutSec: 5
+    unhealthyThreshold: 2
+  type: compute.v1.httpHealthCheck
+- name: {{ properties['prefix'] }}-router-network-lb-health-check
+  properties:
+    checkIntervalSec: 5
+    description: ''
+    healthyThreshold: 2
+    host: ''
+    port: 1936
+    requestPath: /healthz
+    timeoutSec: 5
+    unhealthyThreshold: 2
+  type: compute.v1.httpHealthCheck
+- name: {{ properties['prefix'] }}-master-https-lb-backend
+  properties:
+    healthChecks:
+    - $(ref.{{ properties['prefix'] }}-master-https-lb-health-check.selfLink)
+    loadBalancingScheme: EXTERNAL
+    portName: {{ properties['prefix'] }}-web-console
+    protocol: HTTPS
+    timeoutSec: 300
+    backends:
+    - group: $(ref.{{ properties['prefix'] }}-ig-m.instanceGroup)
+  type: compute.v1.backendService
+- name: {{ properties['prefix'] }}-master-https-lb-url-map
+  properties:
+    defaultService: $(ref.{{ properties['prefix'] }}-master-https-lb-backend.selfLink)
+  type: compute.v1.urlMap
+- name: {{ properties['prefix'] }}-master-https-lb-target
+  properties:
+    urlMap: $(ref.{{ properties['prefix'] }}-master-https-lb-url-map.selfLink)
+    sslCertificates:
+    - projects/{{env['project']}}/global/sslCertificates/{{ properties['prefix'] }}-master-https-lb-cert
+  type: compute.v1.targetHttpsProxy
+- name: {{ properties['prefix'] }}-master-https-lb-ip
+  type: compute.v1.globalAddress
+- name: {{ properties['prefix'] }}-master-https-lb-rule
+  properties:
+    IPProtocol: TCP
+    description: ''
+    IPAddress: $(ref.{{ properties['prefix'] }}-master-https-lb-ip.selfLink)
+    loadBalancingScheme: EXTERNAL
+    portRange: {{ properties['console_port'] }}-{{ properties['console_port'] }}
+    target: $(ref.{{ properties['prefix'] }}-master-https-lb-target.selfLink)
+  type: compute.v1.globalForwardingRule
+- name: {{ properties['prefix'] }}-master-network-lb-pool
+  properties:
+    description: ''
+    healthChecks:
+    - $(ref.{{ properties['prefix'] }}-master-network-lb-health-check.selfLink)
+    region: {{ properties['region'] }}
+  type: compute.v1.targetPool
+- name: {{ properties['prefix'] }}-master-network-lb-ip
+  properties:
+    description: ''
+    region: {{ properties['region'] }}
+  type: compute.v1.address
+- name: {{ properties['prefix'] }}-master-network-lb-rule
+  properties:
+    IPProtocol: TCP
+    description: ''
+    IPAddress: $(ref.{{ properties['prefix'] }}-master-network-lb-ip.selfLink)
+    loadBalancingScheme: EXTERNAL
+    portRange: {{ properties['console_port'] }}-{{ properties['console_port'] }}
+    region: {{ properties['region'] }}
+    target: $(ref.{{ properties['prefix'] }}-master-network-lb-pool.selfLink)
+  type: compute.v1.forwardingRule
+- name: {{ properties['prefix'] }}-router-network-lb-pool
+  properties:
+    description: ''
+    healthChecks:
+    - $(ref.{{ properties['prefix'] }}-router-network-lb-health-check.selfLink)
+    region: {{ properties['region'] }}
+  type: compute.v1.targetPool
+- name: {{ properties['prefix'] }}-router-network-lb-ip
+  properties:
+    description: ''
+    region: {{ properties['region'] }}
+  type: compute.v1.address
+- name: {{ properties['prefix'] }}-router-network-lb-rule
+  properties:
+    IPProtocol: TCP
+    description: ''
+    IPAddress: $(ref.{{ properties['prefix'] }}-router-network-lb-ip.selfLink)
+    loadBalancingScheme: EXTERNAL
+    portRange: 80-443
+    region: {{ properties['region'] }}
+    target: $(ref.{{ properties['prefix'] }}-router-network-lb-pool.selfLink)
+  type: compute.v1.forwardingRule
+- name: {{ properties['gcs_registry_bucket'] }}
+  properties:
+    location: {{ properties['region'] }}
+  type: storage.v1.bucket

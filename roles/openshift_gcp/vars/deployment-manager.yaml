@@ -1,0 +1,4 @@
+---
+openshift_gcp_deployment_name_with_prefix: '{{ openshift_gcp_prefix }}-{{ openshift_gcp_deployment_name }}'
+openshift_gcp_deployment_config_template: '{{ role_path }}/deployment-manager/{{ openshift_gcp_deployment_name }}-config.yaml.j2'
+openshift_gcp_deployment_config: '{{ role_path }}/deployment-manager/{{ openshift_gcp_deployment_name_with_prefix }}-config.yaml'

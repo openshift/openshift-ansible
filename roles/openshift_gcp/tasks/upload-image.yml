@@ -1,0 +1,34 @@
+---
+- block:
+  - name: Archive raw image
+    command: /usr/bin/tar -Szcf '{{ playbook_dir }}/files/gcp-image.tar.gz' -C '{{ openshift_gcp_raw_image_dir }}' '{{ openshift_gcp_raw_image | default('disk.raw') }}' creates='{{ playbook_dir }}/files/gcp-image.tar.gz'
+
+  - name: Check if a bucket in GCS exists
+    command: gsutil ls -p {{ openshift_gcp_project }} gs://{{ openshift_gcp_project }}-gcp-image
+    register: bucket_exists
+    ignore_errors: true
+
+  - name: Create a bucket in GCS
+    command: gsutil mb -p {{ openshift_gcp_project }} -l {{ openshift_gcp_region }} gs://{{ openshift_gcp_project }}-gcp-image
+    when: bucket_exists | failed
+
+  - name: Check if the bucket contains image
+    command: gsutil ls -p {{ openshift_gcp_project }} gs://{{ openshift_gcp_project }}-gcp-image/gcp-image.tar.gz
+    register: image_in_bucket_exists
+    ignore_errors: true
+
+  - name: Upload image to the bucket
+    command: gsutil -o GSUtil:parallel_composite_upload_threshold=150M cp '{{ playbook_dir }}/files/gcp-image.tar.gz' gs://{{ openshift_gcp_project }}-gcp-image
+    when: image_in_bucket_exists | failed
+
+  - name: Create gce image from the uploaded archive
+    command: gcloud --project {{ openshift_gcp_project }} compute images create {{ openshift_gcp_image_to_create }} --source-uri gs://{{ openshift_gcp_project }}-gcp-image/gcp-image.tar.gz
+
+  always:
+  - name: Delete temporary file
+    file:
+      path: '{{ playbook_dir }}/files/gcp-image.tar.gz'
+      state: absent
+
+  - name: Delete bucket with uploaded archive
+    command: gsutil -m rm -r gs://{{ openshift_gcp_project }}-gcp-image
