@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.101
+Version:        3.6.173.0.103
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 09 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.103-1
+- fix indentation of terminationGracePeriodSeconds var (jsanda@redhat.com)
+- health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
+- openshift_common: don't install base package for versioning during upgrade
+  (vrutkovs@redhat.com)
+- cherry pick gluster block support for 3.6 (m.judeikis@gmail.com)
+- more 3.7 to 3.6 files (rcook@redhat.com)
+- Remove master certificate side effects from etcd scaleup.
+  (abutcher@redhat.com)
+- file is in 3.7 but not 3.6 (rcook@redhat.com)
+- Ensure that node names are lowerecased before matching (sdodson@redhat.com)
+- Lowercase node names when creating certificates (vrutkovs@redhat.com)
+- [release-3.6] [1538895] Correct certificate alt name parsing
+  (rteague@redhat.com)
+
 * Mon Jan 29 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.173.0.101-1
 - 
 
