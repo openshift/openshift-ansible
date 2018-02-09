@@ -57,7 +57,7 @@ class OCImageTest(unittest.TestCase):
                         "annotations": null,
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.reg-aws.openshift.com/ops/oso-rhel7-zagg-web:int"
+                            "name": "registry.reg-aws.openshift.com:443/ops/oso-rhel7-zagg-web:int"
                         },
                         "generation": 1,
                         "importPolicy": {}
@@ -72,7 +72,7 @@ class OCImageTest(unittest.TestCase):
                         "items": [
                             {
                                 "created": "2017-01-17T17:36:05Z",
-                                "dockerImageReference": "registry.reg-aws.openshift.com/ops/oso-rhel7-zagg-web@sha256:645bab780cf18a9b764d64b02ca65c39d13cb16f19badd0a49a1668629759392",
+                                "dockerImageReference": "registry.reg-aws.openshift.com:443/ops/oso-rhel7-zagg-web@sha256:645bab780cf18a9b764d64b02ca65c39d13cb16f19badd0a49a1668629759392",
                                 "image": "sha256:645bab780cf18a9b764d64b02ca65c39d13cb16f19badd0a49a1668629759392",
                                 "generation": 1
                             }
@@ -130,7 +130,7 @@ class OCImageTest(unittest.TestCase):
                         "annotations": null,
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.reg-aws.openshift.com/ops/oso-rhel7-zagg-web:int"
+                            "name": "registry.reg-aws.openshift.com:443/ops/oso-rhel7-zagg-web:int"
                         },
                         "generation": 1,
                         "importPolicy": {}
@@ -145,7 +145,7 @@ class OCImageTest(unittest.TestCase):
                         "items": [
                             {
                                 "created": "2017-01-17T17:36:05Z",
-                                "dockerImageReference": "registry.reg-aws.openshift.com/ops/oso-rhel7-zagg-web@sha256:645bab780cf18a9b764d64b02ca65c39d13cb16f19badd0a49a1668629759392",
+                                "dockerImageReference": "registry.reg-aws.openshift.com:443/ops/oso-rhel7-zagg-web@sha256:645bab780cf18a9b764d64b02ca65c39d13cb16f19badd0a49a1668629759392",
                                 "image": "sha256:645bab780cf18a9b764d64b02ca65c39d13cb16f19badd0a49a1668629759392",
                                 "generation": 1
                             }

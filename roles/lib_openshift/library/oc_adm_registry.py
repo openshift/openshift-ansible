@@ -201,7 +201,7 @@ EXAMPLES = '''
     replicas: 2
     namespace: default
     selector: type=infra
-    images: "registry.reg-aws.openshift.com/openshift3/ose-${component}:${version}"
+    images: "registry.reg-aws.openshift.com:443/openshift3/ose-${component}:${version}"
     env_vars:
       REGISTRY_CONFIGURATION_PATH: /etc/registryconfig/config.yml
       REGISTRY_HTTP_TLS_CERTIFICATE: /etc/secrets/registry.crt
