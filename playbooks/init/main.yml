@@ -1,5 +1,5 @@
 ---
-# skip_verison and l_install_base_packages are passed in via prerequistes.yml.
+# skip_version and l_install_base_packages are passed in via prerequistes.yml.
 # skip_sanity_checks is passed in via openshift-node/private/image_prep.yml
 
 - name: Initialization Checkpoint Start
@@ -27,7 +27,7 @@
 - import_playbook: cluster_facts.yml
 
 - import_playbook: version.yml
-  when: not (skip_verison | default(False))
+  when: not (skip_version | default(False))
 
 - import_playbook: sanity_checks.yml
   when: not (skip_sanity_checks | default(False))
