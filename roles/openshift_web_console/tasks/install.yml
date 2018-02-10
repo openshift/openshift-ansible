@@ -164,8 +164,8 @@
     warn: no
   register: console_health
   until: console_health.stdout == 'ok'
-  retries: 120
-  delay: 1
+  retries: 60
+  delay: 5
   changed_when: false
 
 - name: Remove temp directory
