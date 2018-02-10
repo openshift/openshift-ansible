@@ -137,15 +137,22 @@
     - "prometheus_out.stderr | length > 0"
     - "'already exists' not in prometheus_out.stderr"
 
-- set_fact:
-    _logging_metrics_proxy_passwd: "{{ 16 | oo_random_word | b64encode }}"
+- name: Checking for passwd.yml
+  stat: path="{{ generated_certs_dir }}/passwd.yml"
+  register: passwd_file
+  check_mode: no
 
-- template:
+- when: not passwd_file.stat.exists
+  template:
     src: passwd.j2
-    dest: "{{mktemp.stdout}}/passwd.yml"
+    dest: "{{ generated_certs_dir }}/passwd.yml"
   vars:
     logging_user_name: "{{ openshift_logging_elasticsearch_prometheus_sa }}"
-    logging_user_passwd: "{{ _logging_metrics_proxy_passwd }}"
+    logging_user_passwd: "{{ 16 | lib_utils_oo_random_word | b64encode }}"
+
+- slurp:
+    src: "{{ generated_certs_dir }}/passwd.yml"
+  register: _logging_metrics_proxy_passwd
 
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
@@ -266,7 +273,7 @@
       - name: admin.jks
         path: "{{ generated_certs_dir }}/system.admin.jks"
       - name: passwd.yml
-        path: "{{mktemp.stdout}}/passwd.yml"
+        path: "{{ generated_certs_dir }}/passwd.yml"
 
 # services
 - name: Set logging-{{ es_component }}-cluster service
@@ -403,7 +410,9 @@
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
-    basic_auth_passwd: "{{ _logging_metrics_proxy_passwd | b64decode }}"
+    basic_auth_passwd: "{{ ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )[openshift_logging_elasticsearch_prometheus_sa]['passwd'] }}"
+    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
 
 - name: Set ES dc
   oc_obj:
