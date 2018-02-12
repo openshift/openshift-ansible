@@ -8,9 +8,3 @@
     openshift_master_ensure_nodes_service: Template Service Broker
 
 - include_tasks: deploy.yml
-
-- name: Rollout console so it discovers the template service broker is installed
-  include_role:
-    name: openshift_web_console
-    tasks_from: rollout_console.yml
-  when: openshift_web_console_install | default(true) | bool
