@@ -9,7 +9,6 @@
 # some logic here?
 
 - import_playbook: ../../prerequisites.yml
-- import_playbook: ../../init/cluster_facts.yml
 
 - name: run the cluster deploy
   import_playbook: ../../deploy_cluster.yml
