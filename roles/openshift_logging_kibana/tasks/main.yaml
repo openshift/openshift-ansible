@@ -8,6 +8,13 @@
   loop_control:
     loop_var: var_file_name
 
+- name: Ensure that Kibana has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for Kibana - '{{ openshift_logging_kibana_nodeselector }}'
+  when:
+    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_kibana_nodeselector)
+
 - name: Set kibana image facts
   set_fact:
     openshift_logging_kibana_image_prefix: "{{ openshift_logging_kibana_image_prefix | default(__openshift_logging_kibana_image_prefix) }}"
