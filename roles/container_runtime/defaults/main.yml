@@ -101,6 +101,7 @@ l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registrie
 #   options:
 #   - rw
 #   - mode=755
+#   type: bind
 container_runtime_crio_additional_mounts: []
 
 l_crio_additional_mounts: "{{ ',' + (container_runtime_crio_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_crio_additional_mounts != [] else '' }}"
