@@ -117,7 +117,7 @@ EOF
       if ! grep -qw search ${NEW_RESOLV_CONF}; then
         echo 'search cluster.local' >> ${NEW_RESOLV_CONF}
       elif ! grep -q 'search.*cluster.local' ${NEW_RESOLV_CONF}; then
-        sed -i '/^search/ s/$/ cluster.local/' ${NEW_RESOLV_CONF}
+        sed -i 's/\<search\>/& cluster.local/' ${NEW_RESOLV_CONF}
       fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
