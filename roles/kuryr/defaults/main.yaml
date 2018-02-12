@@ -17,6 +17,9 @@ kuryr_namespace: kube-system
 # Whether to run the cni plugin in debug mode
 kuryr_cni_debug: "false"
 
+# Default pod-in-VM link interface
+kuryr_cni_link_interface: eth0
+
 # The version of cni binaries
 cni_version: v0.5.2
 

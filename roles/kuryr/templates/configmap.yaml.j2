@@ -141,15 +141,7 @@ data:
     # Driver to use for binding and unbinding ports. (string value)
     # Deprecated group/name - [binding]/driver
     #default_driver = kuryr.lib.binding.drivers.veth
-
-    # Drivers to use for binding and unbinding ports. (list value)
-    #enabled_drivers = kuryr.lib.binding.drivers.veth
-
-    # Specifies the name of the Nova instance interface to link the virtual devices
-    # to (only applicable to some binding drivers. (string value)
-    link_iface = eth0
-
-    driver = kuryr.lib.binding.drivers.vlan
+    default_driver = kuryr.lib.binding.drivers.vlan
 
 
     [cni_daemon]
@@ -466,21 +458,9 @@ data:
     # From kuryr_kubernetes
     #
 
-    # The name prefix of the veth endpoint put inside the container. (string value)
-    #veth_dst_prefix = eth
-
-    # Driver to use for binding and unbinding ports. (string value)
-    # Deprecated group/name - [binding]/driver
-    #default_driver = kuryr.lib.binding.drivers.veth
-
-    # Drivers to use for binding and unbinding ports. (list value)
-    #enabled_drivers = kuryr.lib.binding.drivers.veth
-
     # Specifies the name of the Nova instance interface to link the virtual devices
     # to (only applicable to some binding drivers. (string value)
-    link_iface = eth0
-
-    driver = kuryr.lib.binding.drivers.vlan
+    link_iface = {{ kuryr_cni_link_interface }}
 
 
     [cni_daemon]
