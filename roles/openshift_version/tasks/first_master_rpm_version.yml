@@ -11,6 +11,8 @@
 - name: Set openshift_version for rpm installation
   include_tasks: check_available_rpms.yml
 
+# If double upgrade is in process, we want to set openshift_version to whatever
+# rpm package is available.
 - set_fact:
     openshift_version: "{{ rpm_results.results.versions.available_versions.0 }}"
-  when: openshift_version is not defined
+  when: openshift_version is not defined or l_double_upgrade_cp_reset_version
