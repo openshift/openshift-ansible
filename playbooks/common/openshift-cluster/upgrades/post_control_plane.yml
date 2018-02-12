@@ -130,7 +130,7 @@
     # Step 2: Set a fact to be used to determine if we should run the redeploy of registry certs
     - name: set a fact to include the registry certs playbook if needed
       set_fact:
-        openshift_hosted_rollout_certs_and_registry: "{{ cert_output.rc == 0  }}"
+        openshift_hosted_rollout_certs_and_registry: "{{ cert_output.rc != 0  }}"
 
 # Run the redeploy certs based upon the certificates. Defaults to False for insecure registries
 - when: (hostvars[groups.oo_first_master.0].openshift_hosted_rollout_certs_and_registry | default(False)) | bool
