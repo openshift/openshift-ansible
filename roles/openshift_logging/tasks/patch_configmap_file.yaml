@@ -18,18 +18,24 @@
 - copy:
     content: "{{ __configmap_output.results.results[0]['data'][configmap_current_file] }}"
     dest: "{{ tempdir }}/current.yml"
+  when: configmap_current_file in __configmap_output.results.results[0]['data']
 
 - logging_patch:
     original_file: "{{ tempdir }}/current.yml"
     new_file: "{{ configmap_new_file }}"
     whitelist: "{{ configmap_protected_lines | default([]) }}"
   register: patch_output
+  when: configmap_current_file in __configmap_output.results.results[0]['data']
 
 - copy:
     content: "{{ patch_output.raw_patch }}\n"
     dest: "{{ tempdir }}/patch.patch"
-  when: patch_output.raw_patch | length > 0
+  when:
+  - patch_output.raw_patch is defined
+  - patch_output.raw_patch | length > 0
 
 - command: >
     patch --force --quiet -u "{{ configmap_new_file }}" "{{ tempdir }}/patch.patch"
-  when: patch_output.raw_patch | length > 0
+  when:
+  - patch_output.raw_patch is defined
+  - patch_output.raw_patch | length > 0
