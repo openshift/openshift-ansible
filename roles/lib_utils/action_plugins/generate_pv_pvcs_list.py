@@ -118,10 +118,16 @@ class ActionModule(ActionBase):
                     create_pvc = self._templar.template(create_pvc)
                     if kind != 'object' and create_pv and create_pvc:
                         volume, size, _, access_modes = self.build_common(varname=varname)
+                        storageclass = self.task_vars.get(str(varname) + '_storageclass')
+                        if storageclass:
+                            storageclass = self._templar.template(storageclass)
+                        elif storageclass is None and kind != 'dynamic':
+                            storageclass = ''
                         return dict(
                             name="{0}-claim".format(volume),
                             capacity=size,
-                            access_modes=access_modes)
+                            access_modes=access_modes,
+                            storageclass=storageclass)
         return None
 
     def run(self, tmp=None, task_vars=None):
