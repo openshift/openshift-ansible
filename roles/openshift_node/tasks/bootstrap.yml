@@ -6,6 +6,7 @@
   with_items: "{{ r_openshift_node_image_prep_packages }}"
   register: result
   until: result is succeeded
+  when: not openshift_is_atomic
 
 - name: create the directory for node
   file:
