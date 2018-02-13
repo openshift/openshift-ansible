@@ -42,6 +42,8 @@
 
 
 - import_playbook: ../../init/basic_facts.yml
+- import_playbook: ../../init/base_packages.yml
+- import_playbook: ../../init/cluster_facts.yml
 
 - name: Optionally subscribe the RHEL nodes
   hosts: oo_all_hosts
