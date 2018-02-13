@@ -12,6 +12,8 @@ Environment variables may also be used.
 
 * [OpenStack Configuration](#openstack-configuration)
 * [OpenShift Configuration](#openshift-configuration)
+* [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration)
+* [OpenStack With SSL Configuration](#openstack-with-ssl-configuration)
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
@@ -96,6 +98,66 @@ Additional options can be found in this sample inventory:
 
 https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
 
+
+## OpenStack Cloud Provider Configuration
+
+The base OpenStack cloud provider configuration file provides limited parameters:
+
+```
+[Global]
+auth-url
+username
+password
+tenant-id / tenant-name
+domain-id (optional)
+domain-name (optional)
+region (optional)
+
+[LoadBalancer]
+subnet-id (optional)
+
+[BlockStorage]
+bs-version (optional)
+```
+
+If you would like to use additional parameters, create a custom cloud provider
+configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:
+
+* `openshift_cloudprovider_openstack_conf_file` Path to local openstack.conf
+
+
+## OpenStack With SSL Configuration
+
+In order to configure your OpenShift cluster to work properly with OpenStack with
+SSL-endpoints, you must do the following:
+
+### 1. Specify a custom OpenStack cloud provider configuration file
+
+Follow the instructions in [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration)
+and create a custom OpenStack cloud provider configuration file. In the Global
+section, add:
+
+```
+[Global]
+.
+.
+ca-file = /path/to/ca-bundle.crt
+.
+.
+```
+
+Make sure you set `openshift_cloudprovider_openstack_conf_file` in 
+`inventory/group_vars/OSEv3.yml`.
+
+### 2. Add Parameters to OSEv3.yml
+
+Add the following to `inventory/group_vars/OSEv3.yml`:
+
+```
+openshift_certificates_redeploy: true
+openshift_additional_ca: /path/to/ca.crt.pem
+kuryr_openstack_ca: /path/to/ca.crt.pem (optional)
+```
 
 ## Stack Name Configuration
 
