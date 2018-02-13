@@ -21,16 +21,15 @@ openshift_openstack_cluster_node_labels:
 
 openshift_openstack_install_debug_packages: false
 openshift_openstack_required_packages:
-  - docker
   - NetworkManager
-  - wget
-  - git
-  - net-tools
-  - bind-utils
-  - bridge-utils
 openshift_openstack_debug_packages:
   - bash-completion
+  - bind-utils
+  - bridge-utils
+  - git
+  - net-tools
   - vim-enhanced
+  - wget
 
 # container-storage-setup
 openshift_openstack_container_storage_setup:

@@ -8,8 +8,7 @@
 # values here. We do it in the OSEv3 group vars. Do we need to add
 # some logic here?
 
-- name: run the cluster deploy
-  import_playbook: ../../prerequisites.yml
+- import_playbook: ../../prerequisites.yml
 
 - name: run the cluster deploy
   import_playbook: ../../deploy_cluster.yml
