@@ -4,6 +4,7 @@
     # Expects a leading "v" in inventory, strip it off here unless
     # openshift_image_tag=latest
     openshift_version: "{{ openshift_image_tag[1:].split('-')[0] if openshift_image_tag != 'latest' else openshift_image_tag }}"
+    l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
   when:
   - openshift_image_tag is defined
   - openshift_version is not defined
@@ -15,13 +16,26 @@
   - openshift_release is defined
   - openshift_version is not defined
 
-- name: Lookup latest containerized version if no version specified
+- name: Lookup latest containerized version via Docker if no version specified
   command: >
     docker run --rm {{ openshift_cli_image }}:latest version
   register: cli_image_version
   when:
   - openshift_version is not defined
   - not openshift_use_crio_only
+  - not l_is_master_system_container
+
+- block:
+  - name: Pre-pull CLI image to OSTree
+    command: >
+      atomic pull --storage ostree {{ system_images_registry }}/{{ openshift_cli_image }}:latest
+  - name: Lookup latest containerized version via atomic if no version specified
+    command: >
+      atomic run --storage ostree {{ system_images_registry }}/{{ openshift_cli_image }}:latest /usr/bin/openshift version
+    register: cli_image_version
+  when:
+  - openshift_version is not defined or openshift_version_reinit | default(false)
+  - openshift_use_crio_only or l_is_master_system_container
 
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
@@ -38,7 +52,7 @@
 
 # If we got an openshift_version like "3.2", lookup the latest 3.2 container version
 # and use that value instead.
-- name: Set precise containerized version to configure if openshift_release specified
+- name: Set precise containerized version to configure via Docker if openshift_release specified
   command: >
     docker run --rm {{ openshift_cli_image }}:v{{ openshift_version }} version
   register: cli_image_version
@@ -46,6 +60,22 @@
   - openshift_version is defined
   - openshift_version.split('.') | length == 2
   - not openshift_use_crio_only
+  - not l_is_master_system_container
+
+# If we got an openshift_version like "3.2", lookup the latest 3.2 container version
+# and use that value instead.
+- block:
+  - name: Pre-pull CLI image to OSTree
+    command: >
+      atomic pull --storage ostree {{ system_images_registry }}/{{ openshift_cli_image }}:latest
+  - name: Set precise containerized version to configure via atomic if openshift_release specified
+    command: >
+      atomic run --storage ostree {{ system_images_registry }}/{{ openshift_cli_image }}:v{{ openshift_version }} /usr/bin/openshift version
+    register: cli_image_version
+  when:
+  - openshift_version is defined
+  - openshift_version.split('.') | length == 2
+  - openshift_use_crio_only or l_is_master_system_container
 
 - set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift.common.deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
