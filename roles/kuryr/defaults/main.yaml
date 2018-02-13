@@ -26,6 +26,10 @@ cni_version: v0.5.2
 # Path to bin dir (where kuryr execs get installed)
 bin_dir: /usr/bin
 
+# Default controller and CNI images
+openshift_openstack_kuryr_controller_image: kuryr/controller:latest
+openshift_openstack_kuryr_cni_image: kuryr/cni:latest
+
 # Path to the cni binaries
 cni_bin_dir: /opt/cni/bin
 
