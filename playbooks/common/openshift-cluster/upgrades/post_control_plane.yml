@@ -165,3 +165,10 @@
       msg: "WARNING the shared-resource-viewer role could not be upgraded to 3.6 spec because it's marked protected, please see https://bugzilla.redhat.com/show_bug.cgi?id=1493213"
     when:
     - __shared_resource_viewer_protected | default(false)
+
+- name: Upgrade Service Catalog
+  hosts: oo_first_master
+  roles:
+  - role: openshift_service_catalog
+    when:
+    - openshift_enable_service_catalog | default(true) | bool
