@@ -18,9 +18,17 @@ kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_util
   container-runtime:
   - remote
   container-runtime-endpoint:
+{% if openshift.common.version_gte_3_9 %}
   - /var/run/crio/crio.sock
+{% else %}
+  - /var/run/crio.sock
+{% endif %}
   image-service-endpoint:
+{% if openshift.common.version_gte_3_9 %}
   - /var/run/crio/crio.sock
+{% else %}
+  - /var/run/crio.sock
+{% endif %}
   node-labels:
   - router=true
   - registry=true
