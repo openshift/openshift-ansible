@@ -1,10 +1,27 @@
 ---
-- name: Get available {{ openshift_service_type}} version
+- name: Get available openshift_service_type version
   repoquery:
-    name: "{{ openshift_service_type}}{{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }}"
+    name: "{{ openshift_service_type }}{{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }}"
     ignore_excluders: true
   register: rpm_results
 
-- fail:
-    msg: "Package {{ openshift_service_type}} not found"
+- name: Fail when Package openshift_service_type not found
+  fail:
+    msg: "The requested service type package {{ openshift_service_type }} or version {{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }} was not found"
   when: not rpm_results.results.package_found
+
+- name: Abort when the release requested does not match the available RPM version.
+  vars:
+    l_rpm_version: "{{ rpm_results.results.versions.available_versions.0 }}"
+  when:
+  - openshift_version is defined
+  assert:
+    that:
+    - l_rpm_version.startswith(openshift_version) | bool
+    msg: >
+      You requested openshift version {{ openshift_version }}, which is not matched by
+      the latest OpenShift RPM we detected as {{ openshift_service_type }}-{{ l_rpm_version }}
+      on host {{ inventory_hostname }}.
+      We will only install the latest RPMs, so please ensure you are getting the release
+      you expect. You may need to adjust your Ansible inventory, modify the repositories
+      available on the host, or run the appropriate OpenShift upgrade playbook.

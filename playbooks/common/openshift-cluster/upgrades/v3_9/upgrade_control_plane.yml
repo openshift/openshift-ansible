@@ -27,17 +27,10 @@
       openshift_upgrade_min: '3.7'
       openshift_release: '3.8'
       _requested_pkg_version: "{{ openshift_pkg_version if openshift_pkg_version is defined else omit }}"
-      openshift_pkg_version: ''
+      openshift_pkg_version: '-3.8'
       _requested_image_tag: "{{ openshift_image_tag if openshift_image_tag is defined else omit }}"
-      l_double_upgrade_cp: True
+      openshift_image_tag: 'v3.8'
     when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
-
-  - name: set l_force_image_tag_to_version = True
-    set_fact:
-      # Need to set this during 3.8 upgrade to ensure image_tag is set correctly
-      # to match 3.8 version
-      l_force_image_tag_to_version: True
-    when: _requested_image_tag is defined
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
@@ -54,13 +47,6 @@
     openshift_protect_installed_version: False
   when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
 
-- name: Flag pre-upgrade checks complete for hosts without errors 3.8
-  hosts: oo_masters_to_config:oo_etcd_to_config
-  tasks:
-  - set_fact:
-      pre_upgrade_complete: True
-    when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
-
 # Pre-upgrade completed
 
 - name: Intermediate 3.8 Upgrade
@@ -72,26 +58,12 @@
 - name: Configure the upgrade target for the common upgrade tasks 3.9
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tasks:
-  - meta: clear_facts
   - set_fact:
       openshift_upgrade_target: '3.9'
       openshift_upgrade_min: '3.8'
       openshift_release: '3.9'
       openshift_pkg_version: "{{ _requested_pkg_version if _requested_pkg_version is defined else '' }}"
-  # Set the user's specified image_tag for 3.9 upgrade if it was provided.
-  - set_fact:
-      openshift_image_tag: "{{ _requested_image_tag }}"
-      l_force_image_tag_to_version: False
-    when: _requested_image_tag is defined
-  # If the user didn't specify an image_tag, we need to force update image_tag
-  # because it will have already been set during 3.8.  If we aren't running
-  # a double upgrade, then we can preserve image_tag because it will still
-  # be the user provided value.
-  - set_fact:
-      l_force_image_tag_to_version: True
-    when:
-    - l_double_upgrade_cp is defined and l_double_upgrade_cp
-    - _requested_image_tag is not defined
+      openshift_image_tag: "{{ _requested_image_tag if _requested_image_tag is defined else '' }}"
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
@@ -107,12 +79,6 @@
     l_upgrade_excluder_hosts: "oo_masters_to_config"
     openshift_protect_installed_version: False
     openshift_version_reinit: True
-
-- name: Flag pre-upgrade checks complete for hosts without errors
-  hosts: oo_masters_to_config:oo_etcd_to_config
-  tasks:
-  - set_fact:
-      pre_upgrade_complete: True
 
 - import_playbook: ../upgrade_control_plane.yml
 

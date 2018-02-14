@@ -13,20 +13,15 @@
 
 - include_tasks: "{{ l_first_master_version_task_file }}"
 
-- block:
-  - debug:
-      msg: "openshift_pkg_version was not defined. Falling back to -{{ openshift_version }}"
-  - set_fact:
-      openshift_pkg_version: -{{ openshift_version }}
-  when:
-  - openshift_pkg_version is not defined or openshift_pkg_version == ""
-  - openshift_upgrade_target is not defined
+# The end result of these variables is quite important so make sure they are displayed and logged:
+- debug:
+    var: openshift_release
 
-- block:
-  - debug:
-      msg: "openshift_image_tag set to v{{ openshift_version }}"
-  - set_fact:
-      openshift_image_tag: v{{ openshift_version }}
-  when: >
-    openshift_image_tag is not defined or openshift_image_tag == ""
-    or l_force_image_tag_to_version | bool
+- debug:
+    var: openshift_version
+
+- debug:
+    var: openshift_image_tag
+
+- debug:
+    var: openshift_pkg_version
