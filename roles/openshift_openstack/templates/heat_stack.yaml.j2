@@ -290,15 +290,7 @@ resources:
           template: Basic ssh/icmp security group for cluster_id OpenShift cluster
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
-      rules:
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-          remote_ip_prefix: {{ openshift_openstack_ssh_ingress_cidr }}
-        - direction: ingress
-          protocol: icmp
-          remote_ip_prefix: {{ openshift_openstack_ssh_ingress_cidr }}
+      rules: {{ openshift_openstack_common_secgroup_rules|to_json }}
 
 {% if openshift_use_kuryr|default(false)|bool %}
   pod_access_sg:
@@ -570,19 +562,7 @@ resources:
           template: Security group for cluster_id OpenShift infrastructure cluster nodes
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
-      rules:
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 80
-          port_range_max: 80
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 443
-          port_range_max: 443
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 1936
-          port_range_max: 1936
+      rules: {{ openshift_openstack_infra_secgroup_rules|to_json }}
 
   cns-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -597,37 +577,7 @@ resources:
           template: Security group for cluster_id OpenShift cns cluster nodes
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
-      rules:
-        # Allow rcpbind for CNS block
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 111
-          port_range_max: 111
-        # glusterfs_sshd
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 2222
-          port_range_max: 2222
-        # heketi dialing backends
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 10250
-          port_range_max: 10250
-        # glusterfs_management
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 24007
-          port_range_max: 24007
-        # glusterfs_rdma
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 24008
-          port_range_max: 24008
-        # glusterfs_bricks
-        - direction: ingress
-          protocol: tcp
-          port_range_min: 49152
-          port_range_max: 49251
+      rules: {{ openshift_openstack_cns_secgroup_rules|to_json }}
 
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -635,22 +585,12 @@ resources:
       name: openshift-ansible-{{ openshift_openstack_full_dns_domain }}-lb-secgrp
       description: Security group for {{ openshift_openstack_full_dns_domain }} cluster Load Balancer
       rules:
-      - direction: ingress
-        protocol: tcp
-        port_range_min: 443
-        port_range_max: 443
-        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr }}
-      - direction: ingress
-        protocol: tcp
-        port_range_min: {{ openshift_master_api_port | default(8443) }}
-        port_range_max: {{ openshift_master_api_port | default(8443) }}
-        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr }}
 {% if openshift_master_console_port is defined and openshift_master_console_port != openshift_master_api_port %}
-      - direction: ingress
-        protocol: tcp
-        port_range_min: {{ openshift_master_console_port | default(8443) }}
-        port_range_max: {{ openshift_master_console_port | default(8443) }}
-        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr }}
+{% for rule in openshift_openstack_lb_base_secgroup_rules|list + openshift_openstack_lb_console_secgroup_rules|list %}
+        - {{ rule|to_json }}
+{% endfor %}
+{% else %}
+        {{ openshift_openstack_lb_base_secgroup_rules|to_json }}
 {% endif %}
 
   etcd:
