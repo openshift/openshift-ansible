@@ -23,6 +23,7 @@ openshift_openstack_external_network_name: "public"
 ## Kuryr networking
 # TODO: Allow the user to specify pre-existing subnets for pod and services
 #openshift_openstack_kuryr_service_subnet_cidr: "172.30.0.0/16"
+
 #
 ## You can alter the port pooling defaults here
 #kuryr_openstack_enable_pools: True
@@ -41,6 +42,9 @@ openshift_openstack_external_network_name: "public"
 # deployed after kuryr is up and running. This can be done with oadm
 # #Disable management of the OpenShift Registry
 #openshift_hosted_manage_registry: false
+# # Kuryr needs to know the subnet you will be taking Floating IPs for the
+# loadbalancer services from.
+# kuryr_openstack_public_subnet_id: uuid_of_my_fip_subnet
 
 # If you VM images will name the ethernet device different than 'eth0',
 # override this

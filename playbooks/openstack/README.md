@@ -155,6 +155,7 @@ $ vi inventory/group_vars/all.yml
 #os_sdn_network_plugin_name: cni
 #openshift_node_proxy_mode: userspace
 #openshift_hosted_manage_registry: false
+#kuryr_openstack_public_subnet_id: uuid of my public subnet
 ```
 
 
