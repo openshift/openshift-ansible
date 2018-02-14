@@ -82,8 +82,8 @@
     warn: no
   register: api_health
   until: api_health.stdout == 'ok'
-  retries: 120
-  delay: 1
+  retries: 60
+  delay: 5
   changed_when: false
 
 - set_fact:
