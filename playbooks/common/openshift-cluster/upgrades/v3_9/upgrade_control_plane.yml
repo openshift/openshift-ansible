@@ -16,9 +16,13 @@
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_base_packages_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+  tags:
+  - pre_upgrade
 
 - name: Configure the initial upgrade target for the common upgrade tasks
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
+  tags:
+  - pre_upgrade
   tasks:
   - set_fact:
       # We use 3.9 here so when we run openshift_version we can get
@@ -30,6 +34,8 @@
 ## Check to see if we need to double upgrade (3.7 -> 3.8 -> 3.9)
 - name: Configure variables for double upgrade
   hosts: oo_masters_to_config:oo_etcd_to_config
+  tags:
+  - pre_upgrade
   tasks:
   - set_fact:
       l_double_upgrade_cp: True
@@ -41,6 +47,8 @@
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
   # them by default.
+  tags:
+  - pre_upgrade
   vars:
     l_version_override_hosts: "oo_masters_to_config:oo_etcd_to_config"
     l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
