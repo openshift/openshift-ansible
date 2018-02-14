@@ -65,6 +65,12 @@
       {{ openshift_client_binary }} get dc -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
     register: _cluster_dcs
 
+  # If we are currently restarting the "es" cluster we want to check if we are scaling up the number of es nodes
+  # If we are currently restarting the "es-ops" cluster we want to check if we are scaling up the number of ops nodes
+  # If we've created a new node for that cluster then the appropriate variable will be true, otherwise we default to false
+  - set_fact:
+      _skip_healthcheck: "{{ __logging_scale_up | default(false) if _cluster_component == 'es' else __logging_ops_scale_up | default(false) }}"
+
   ## restart all dcs for full restart
   - name: "Restart ES node {{ _es_node }}"
     include_tasks: restart_es_node.yml
@@ -94,6 +100,7 @@
       {{ openshift_client_binary }} exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_cluster/settings' -d '{ "transient": { "cluster.routing.allocation.enable" : "all" } }'
     register: _enable_output
     changed_when: "'\"acknowledged\":true' in _enable_output.stdout"
+    when: _cluster_pods.stdout != ""
 
   # Reenable external communication for {{ _cluster_component }}
   - name: Reenable external communication for logging-{{ _cluster_component }}
