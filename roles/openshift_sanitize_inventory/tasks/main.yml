@@ -2,6 +2,8 @@
 # We should print out deprecations prior to any failures so that if a play does fail for other reasons
 # the user would also be aware of any deprecated variables they should note to adjust
 - include_tasks: deprecations.yml
+  when:
+    - openshift_deprecations_test | default(true) | bool
 
 - name: Standardize on latest variable names
   set_fact:
