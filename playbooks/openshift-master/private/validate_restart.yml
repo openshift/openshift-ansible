@@ -33,6 +33,7 @@
   - stat: path="{{ hostvars.localhost.mktemp.stdout }}"
     register: exists
     changed_when: false
+    when: "'stdout' in hostvars.localhost.mktemp"
 
 - name: Cleanup temp file on localhost
   hosts: localhost
@@ -41,6 +42,7 @@
   tasks:
   - file: path="{{ hostvars.localhost.mktemp.stdout }}" state=absent
     changed_when: false
+    when: "'stdout' in hostvars.localhost.mktemp"
 
 - name: Warn if restarting the system where ansible is running
   hosts: oo_masters_to_config
@@ -54,7 +56,9 @@
         must be verified manually. To only restart services, set
         openshift_master_rolling_restart_mode=services in host
         inventory and relaunch the playbook.
-    when: exists.stat.exists and openshift.common.rolling_restart_mode == 'system'
+    when:
+    - "'stat' in exists"
+    - exists.stat.exists and openshift.common.rolling_restart_mode == 'system'
   - set_fact:
       current_host: "{{ exists.stat.exists }}"
     when: openshift.common.rolling_restart_mode == 'system'
