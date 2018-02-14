@@ -68,3 +68,13 @@ The file may **not** be a playbook.
 - Runs **after** each master is upgraded and has had it's service/system restart.
 - This hook runs against **each master** in serial.
 - If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+
+### openshift_node_upgrade_pre_hook
+- Runs **before** each node is marked unschedulable or drained.
+- This hook runs against **each node** in serial.
+- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+
+### openshift_node_upgrade_post_hook
+- Runs **after** each node is upgraded and before pods are rescheduled on the host (excluding daemonsets).
+- This hook runs against **each node** in serial.
+- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
