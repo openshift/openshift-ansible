@@ -639,7 +639,7 @@ objects:
           - name: cfme-pgdb-volume
             mountPath: "/var/lib/pgsql/data"
           - name: cfme-pg-configs
-            mountPath: "${POSTGRESQL_CONFIG_DIR}"
+            mountPath: "/opt/app-root/src/postgresql-config/"
           env:
           - name: POSTGRESQL_USER
             value: "${DATABASE_USER}"
@@ -654,8 +654,6 @@ objects:
             value: "${POSTGRESQL_MAX_CONNECTIONS}"
           - name: POSTGRESQL_SHARED_BUFFERS
             value: "${POSTGRESQL_SHARED_BUFFERS}"
-          - name: POSTGRESQL_CONFIG_DIR
-            value: "${POSTGRESQL_CONFIG_DIR}"
           resources:
             requests:
               memory: "${POSTGRESQL_MEM_REQ}"
@@ -928,10 +926,6 @@ parameters:
   displayName: Memcached Slab Page Size
   description: Memcached size of each slab page.
   value: 1m
-- name: POSTGRESQL_CONFIG_DIR
-  displayName: PostgreSQL Configuration Overrides
-  description: Directory used to store PostgreSQL configuration overrides.
-  value: "/var/lib/pgsql/conf.d"
 - name: POSTGRESQL_MAX_CONNECTIONS
   displayName: PostgreSQL Max Connections
   description: PostgreSQL maximum number of database connections allowed.
