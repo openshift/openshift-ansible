@@ -214,7 +214,7 @@
       name: openshift_logging
       tasks_from: patch_configmap_files.yaml
     vars:
-      configmap_name: "logging-elasticsearch"
+      configmap_name: "{{ elasticsearch_name }}"
       configmap_namespace: "logging"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
@@ -247,7 +247,7 @@
       name: openshift_logging
       tasks_from: patch_configmap_files.yaml
     vars:
-      configmap_name: "logging-elasticsearch"
+      configmap_name: "{{ elasticsearch_name }}"
       configmap_namespace: "logging"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
