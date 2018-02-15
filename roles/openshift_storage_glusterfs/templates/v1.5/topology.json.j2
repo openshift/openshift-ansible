@@ -2,7 +2,7 @@
   "clusters": [
 {%- set clusters = {} -%}
 {%- for node in glusterfs_nodes -%}
-  {%- set cluster = hostvars[node].glusterfs_cluster if 'glusterfs_cluster' in node else '1' -%}
+  {%- set cluster = hostvars[node].glusterfs_cluster if 'glusterfs_cluster' in hostvars[node] else '1' -%}
   {%- if cluster in clusters -%}
     {%- set _dummy = clusters[cluster].append(node) -%}
   {%- else -%}
