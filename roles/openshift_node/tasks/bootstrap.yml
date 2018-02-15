@@ -67,8 +67,8 @@
   - "/etc/docker/certs.d/docker-registry.default.svc:5000"
 
 - name: laydown the bootstrap.yml file for on boot configuration
-  copy:
-    src: bootstrap.yml
+  template:
+    src: bootstrap.yml.j2
     dest: /root/openshift_bootstrap/bootstrap.yml
 
 - name: symlink master ca for docker-registry
