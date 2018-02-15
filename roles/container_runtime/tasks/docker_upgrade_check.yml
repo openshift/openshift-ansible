@@ -36,14 +36,16 @@
   failed_when: false
   changed_when: false
 
-- fail:
-    msg: This playbook requires access to Docker 1.12 or later
+- name: Required docker version not available (non-atomic)
+  fail:
+    msg: "This playbook requires access to Docker {{ l_required_docker_version }} or later"
   # Disable the 1.12 requirement if the user set a specific Docker version
   when:
     - not openshift_is_atomic | bool
     - docker_version is not defined
-    - docker_upgrade is not defined or docker_upgrade | bool == True
-    - (pkg_check.rc == 0 and (avail_docker_version.stdout == "" or avail_docker_version.stdout is version_compare('1.12','<')))
+    - docker_upgrade | bool
+    - pkg_check.rc == 0
+    - avail_docker_version.stdout == "" or avail_docker_version.stdout is version_compare(l_required_docker_version,'<')
 
 # Default l_docker_upgrade to False, we'll set to True if an upgrade is required:
 - set_fact:
@@ -54,7 +56,8 @@
     docker_version: "{{ avail_docker_version.stdout }}"
   when:
     - not openshift_is_atomic | bool
-    - pkg_check.rc == 0 and docker_version is not defined
+    - pkg_check.rc == 0
+    - docker_version is not defined
 
 - name: Flag for Docker upgrade if necessary
   set_fact:
@@ -74,8 +77,9 @@
     l_docker_version: "{{ g_atomic_docker_version_result.stdout | from_yaml }}"
   when: openshift_is_atomic | bool
 
-- fail:
-    msg: This playbook requires access to Docker 1.12 or later
+- name: Required docker version is unavailable (atomic)
+  fail:
+    msg: "This playbook requires access to Docker {{ l_required_docker_version }} or later"
   when:
     - openshift_is_atomic | bool
-    - l_docker_version.avail_version | default(l_docker_version.curr_version, true) is version_compare('1.12','<')
+    - l_docker_version.avail_version | default(l_docker_version.curr_version, true) is version_compare(l_required_docker_version,'<')

@@ -38,7 +38,8 @@ openshift_storage_glusterfs_heketi_ssh_keyfile=/root/id_rsa
 master
 
 [nodes]
-master  openshift_schedulable=False
+# masters should be schedulable to run web console pods
+master  openshift_schedulable=True
 node0   openshift_schedulable=True
 node1   openshift_schedulable=True
 node2   openshift_schedulable=True

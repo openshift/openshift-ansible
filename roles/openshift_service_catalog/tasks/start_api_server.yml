@@ -10,13 +10,13 @@
 # wait to see that the apiserver is available
 - name: wait for api server to be ready
   command: >
-    curl -k https://apiserver.kube-service-catalog.svc/healthz
+    curl --noproxy '*' -k https://apiserver.kube-service-catalog.svc/healthz
   args:
     # Disables the following warning:
     # Consider using get_url or uri module rather than running curl
     warn: no
   register: api_health
   until: api_health.stdout == 'ok'
-  retries: 120
-  delay: 1
+  retries: 60
+  delay: 5
   changed_when: false

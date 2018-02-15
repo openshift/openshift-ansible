@@ -62,6 +62,12 @@
       timeout: 120
     with_items: "{{ gce.instance_data }}"
 
+- name: Wait for full SSH connection
+  hosts: nodes
+  gather_facts: no
+  tasks:
+  - wait_for_connection:
+
 - hosts: nodes
   tasks:
   - name: Set facts

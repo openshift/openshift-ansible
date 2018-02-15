@@ -4,6 +4,13 @@
     msg: Invalid sink type "{{openshift_logging_eventrouter_sink}}", only one of "{{__eventrouter_sinks}}" allowed
     that: openshift_logging_eventrouter_sink in __eventrouter_sinks
 
+- name: Ensure that logging eventrouter has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for logging EventRouter - '{{ openshift_logging_eventrouter_nodeselector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_eventrouter_nodeselector)
+
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -23,7 +30,7 @@
 # create EventRouter deployment config
 - name: Generate EventRouter template
   template:
-    src: eventrouter-template.j2
+    src: "{{ __base_file_dir }}/eventrouter-template.j2"
     dest: "{{ tempdir }}/templates/eventrouter-template.yaml"
   vars:
     node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) }}"

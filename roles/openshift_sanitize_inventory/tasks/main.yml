@@ -61,3 +61,17 @@
   when:
     - template_service_broker_remove | default(false) | bool
     - template_service_broker_install | default(true) | bool
+
+- name: Ensure that all requires vsphere configuration variables are set
+  fail:
+    msg: >
+      When the vSphere cloud provider is configured you must define all of these variables:
+      openshift_cloudprovider_vsphere_username, openshift_cloudprovider_vsphere_password,
+      openshift_cloudprovider_vsphere_host, openshift_cloudprovider_vsphere_datacenter,
+      openshift_cloudprovider_vsphere_datastore
+  when:
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'vsphere'
+    - ( openshift_cloudprovider_vsphere_username is undefined or openshift_cloudprovider_vsphere_password is undefined or
+        openshift_cloudprovider_vsphere_host is undefined or openshift_cloudprovider_vsphere_datacenter is undefined or
+        openshift_cloudprovider_vsphere_datastore is undefined )

@@ -796,6 +796,17 @@ If changes are needed please edit the installer.cfg.yml config file above and re
     if not unattended:
         confirm_continue(message)
 
+    error = openshift_ansible.run_prerequisites(inventory_file, oo_cfg.deployment.hosts,
+                                                hosts_to_run_on, verbose)
+    if error:
+        # The bootstrap script will print out the log location.
+        message = """
+An error was detected. After resolving the problem please relaunch the
+installation process.
+"""
+        click.echo(message)
+        sys.exit(1)
+
     error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.deployment.hosts,
                                                 hosts_to_run_on, verbose)
 

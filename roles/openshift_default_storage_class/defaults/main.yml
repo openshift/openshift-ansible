@@ -1,4 +1,7 @@
 ---
+# Must not be blank if you're using vsphere
+openshift_cloudprovider_vsphere_datacenter: ''
+
 openshift_storageclass_defaults:
   aws:
     provisioner: aws-ebs

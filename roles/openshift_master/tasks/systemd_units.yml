@@ -1,6 +1,8 @@
 ---
 # systemd_units.yml is included both in the openshift_master role and in the upgrade
 # playbooks.
+- name: include push_via_dns.yml tasks
+  include_tasks: push_via_dns.yml
 
 - name: Set HA Service Info for containerized installs
   set_fact:
@@ -9,7 +11,8 @@
   when:
   - openshift_is_containerized | bool
 
-- include_tasks: registry_auth.yml
+- name: include registry_auth tasks
+  include_tasks: registry_auth.yml
 
 - name: Disable the legacy master service if it exists
   systemd:

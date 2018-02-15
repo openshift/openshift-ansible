@@ -18,7 +18,7 @@ import socket
 import ipaddress
 from distutils.util import strtobool
 from distutils.version import LooseVersion
-from ansible.module_utils.six import u
+from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
 from ansible.module_utils.six.moves import configparser
 
@@ -564,18 +564,23 @@ def set_version_facts_if_unset(facts):
             version_gte_3_7 = version >= LooseVersion('3.7')
             version_gte_3_8 = version >= LooseVersion('3.8')
             version_gte_3_9 = version >= LooseVersion('3.9')
+            version_gte_3_10 = version >= LooseVersion('3.10')
         else:
             # 'Latest' version is set to True, 'Next' versions set to False
             version_gte_3_6 = True
             version_gte_3_7 = True
             version_gte_3_8 = False
             version_gte_3_9 = False
+            version_gte_3_10 = False
         facts['common']['version_gte_3_6'] = version_gte_3_6
         facts['common']['version_gte_3_7'] = version_gte_3_7
         facts['common']['version_gte_3_8'] = version_gte_3_8
         facts['common']['version_gte_3_9'] = version_gte_3_9
+        facts['common']['version_gte_3_10'] = version_gte_3_10
 
-        if version_gte_3_9:
+        if version_gte_3_10:
+            examples_content_version = 'v3.10'
+        elif version_gte_3_9:
             examples_content_version = 'v3.9'
         elif version_gte_3_8:
             examples_content_version = 'v3.8'
@@ -1148,7 +1153,7 @@ def set_proxy_facts(facts):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
             # We always add local dns domain and ourselves no matter what
-            kube_svc_ip = str(ipaddress.ip_network(u(common['portal_net']))[1])
+            kube_svc_ip = str(ipaddress.ip_network(text_type(common['portal_net']))[1])
             common['no_proxy'].append(kube_svc_ip)
             common['no_proxy'].append('.' + common['dns_domain'])
             common['no_proxy'].append('.svc')

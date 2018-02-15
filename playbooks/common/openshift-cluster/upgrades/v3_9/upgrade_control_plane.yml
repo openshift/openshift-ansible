@@ -15,32 +15,34 @@
   vars:
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_base_packages_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
 
-## Check to see if they're running 3.7 and if so upgrade them to 3.8 on control plan
-## If they've specified pkg_version or image_tag preserve that for later use
-- name: Configure the upgrade target for the common upgrade tasks 3.8
+- name: Configure the initial upgrade target for the common upgrade tasks
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tasks:
   - set_fact:
-      openshift_upgrade_target: '3.8'
+      # We use 3.9 here so when we run openshift_version we can get
+      # correct values for 3.9, 3.8 we will hard-code the values in
+      # ../pre/version_override.yml, if necessary.
+      openshift_upgrade_target: '3.9'
       openshift_upgrade_min: '3.7'
-      openshift_release: '3.8'
-      _requested_pkg_version: "{{ openshift_pkg_version if openshift_pkg_version is defined else omit }}"
-      _requested_image_tag: "{{ openshift_image_tag if openshift_image_tag is defined else omit }}"
-      l_double_upgrade_cp: True
-    when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
 
-  - name: set l_force_image_tag_to_version = True
-    set_fact:
-      # Need to set this during 3.8 upgrade to ensure image_tag is set correctly
-      # to match 3.8 version
-      l_force_image_tag_to_version: True
-    when: _requested_image_tag is defined
+## Check to see if we need to double upgrade (3.7 -> 3.8 -> 3.9)
+- name: Configure variables for double upgrade
+  hosts: oo_masters_to_config:oo_etcd_to_config
+  tasks:
+  - set_fact:
+      l_double_upgrade_cp: True
+      l_version_override_hosts: "oo_masters_to_config:oo_etcd_to_config"
+      l_double_upgrade_first_version: "3.8"
+      l_double_upgrade_first_release: "3.8"
+    when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
   # them by default.
   vars:
+    l_version_override_hosts: "oo_masters_to_config:oo_etcd_to_config"
     l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
     l_openshift_version_check_hosts: "oo_masters_to_config:!oo_first_master"
     l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
@@ -50,47 +52,48 @@
     l_upgrade_docker_target_hosts: "oo_masters_to_config:oo_etcd_to_config"
     l_upgrade_excluder_hosts: "oo_masters_to_config"
     openshift_protect_installed_version: False
-  when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
+  when: l_double_upgrade_cp | default(False)
 
 - name: Flag pre-upgrade checks complete for hosts without errors 3.8
   hosts: oo_masters_to_config:oo_etcd_to_config
   tasks:
   - set_fact:
       pre_upgrade_complete: True
-    when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
+    when: l_double_upgrade_cp | default(False)
 
 # Pre-upgrade completed
 
-- import_playbook: ../upgrade_control_plane.yml
-  vars:
-    openshift_release: '3.8'
-  when: hostvars[groups.oo_first_master.0].openshift_currently_installed_version | version_compare('3.8','<')
+- name: Intermediate 3.8 Upgrade
+  import_playbook: ../upgrade_control_plane.yml
+  when: l_double_upgrade_cp | default(False)
+
+- name: Restore 3.9 version variables
+  hosts: oo_masters_to_config:oo_etcd_to_config
+  tasks:
+  - set_fact:
+      # all:!all == 0 hosts
+      l_version_override_hosts: "all:!all"
+      openshift_version: "{{ l_double_upgrade_saved_version }}"
+      openshift_release: "{{ l_double_upgrade_saved_release }}"
+      openshift_image_tag: "{{ l_double_upgrade_saved_tag }}"
+      openshift_pkg_version: "{{ l_double_upgrade_saved_pkgv }}"
+    when: l_double_upgrade_cp | default(False)
 
 ## 3.8 upgrade complete we should now be able to upgrade to 3.9
+- name: Clear some values now that we're done with double upgrades.
+  hosts: oo_masters_to_config:oo_etcd_to_config
+  tasks:
+  - set_fact:
+      l_double_upgrade_cp: False
+      l_double_upgrade_cp_reset_version: False
 
-- name: Configure the upgrade target for the common upgrade tasks 3.9
+# We should be on 3.8 at this point, need to set upgrade_target to 3.9
+- name: Configure the upgrade target for second upgrade
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tasks:
-  - meta: clear_facts
   - set_fact:
       openshift_upgrade_target: '3.9'
       openshift_upgrade_min: '3.8'
-      openshift_release: '3.9'
-      openshift_pkg_version: "{{ _requested_pkg_version | default ('-3.9*') }}"
-  # Set the user's specified image_tag for 3.9 upgrade if it was provided.
-  - set_fact:
-      openshift_image_tag: "{{ _requested_image_tag }}"
-      l_force_image_tag_to_version: False
-    when: _requested_image_tag is defined
-  # If the user didn't specify an image_tag, we need to force update image_tag
-  # because it will have already been set during 3.8.  If we aren't running
-  # a double upgrade, then we can preserve image_tag because it will still
-  # be the user provided value.
-  - set_fact:
-      l_force_image_tag_to_version: True
-    when:
-    - l_double_upgrade_cp is defined and l_double_upgrade_cp
-    - _requested_image_tag is not defined
 
 - import_playbook: ../pre/config.yml
   # These vars a meant to exclude oo_nodes from plays that would otherwise include
@@ -113,8 +116,6 @@
       pre_upgrade_complete: True
 
 - import_playbook: ../upgrade_control_plane.yml
-  vars:
-    openshift_release: '3.9'
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode
@@ -123,14 +124,16 @@
   roles:
   - role: openshift_facts
   tasks:
-  - name: Stop {{ openshift_service_type }}-master-controllers
-    systemd:
+  - name: Restart master controllers to force new leader election mode
+    service:
       name: "{{ openshift_service_type }}-master-controllers"
-      state: stopped
-  - name: Start {{ openshift_service_type }}-master-controllers
-    systemd:
+      state: restarted
+    when: openshift.common.rolling_restart_mode == 'services'
+  - name: Re-enable master controllers to force new leader election mode
+    service:
       name: "{{ openshift_service_type }}-master-controllers"
-      state: started
+      enabled: true
+    when: openshift.common.rolling_restart_mode == 'system'
 
 - import_playbook: ../post_control_plane.yml
 
