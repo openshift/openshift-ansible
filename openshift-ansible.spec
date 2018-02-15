@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.43.0%{?dist}
+Release:        0.44.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.44.0
+- 
+
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.43.0
 - Changing conditional_set_fact from module to action_plugin since it does not
   need to access hosts to be effective and to reduce playbook output
