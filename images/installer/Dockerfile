@@ -8,7 +8,7 @@ USER root
 COPY images/installer/origin-extra-root /
 
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless python2-passlib httpd-tools openssh-clients origin-clients" \
+RUN INSTALL_PKGS="python-lxml python-dns pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless python2-passlib httpd-tools openssh-clients origin-clients iproute" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
  && EPEL_PKGS="ansible python2-boto python2-boto3 python2-crypto google-cloud-sdk-183.0.0 which python2-pip.noarch" \
  && yum install -y epel-release \
