@@ -51,6 +51,4 @@
       name: "{{ openshift_service_type }}-master-controllers"
       state: started
 
-- import_playbook: ../upgrade_nodes.yml
-
 - import_playbook: ../post_control_plane.yml
