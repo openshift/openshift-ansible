@@ -8,7 +8,7 @@
   register: dep_check
 
 - block:
-  - debug: msg="{{__deprecation_message}}"
+  - debug: msg="{{ dep_check.msg }}"
   - pause:
       seconds: "{{ 10 }}"
   when:

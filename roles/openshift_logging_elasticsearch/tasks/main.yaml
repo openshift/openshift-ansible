@@ -148,7 +148,7 @@
     dest: "{{ generated_certs_dir }}/passwd.yml"
   vars:
     logging_user_name: "{{ openshift_logging_elasticsearch_prometheus_sa }}"
-    logging_user_passwd: "{{ 16 | lib_utils_oo_random_word | b64encode }}"
+    logging_user_passwd: "{{ 16 | oo_random_word | b64encode }}"
 
 - slurp:
     src: "{{ generated_certs_dir }}/passwd.yml"

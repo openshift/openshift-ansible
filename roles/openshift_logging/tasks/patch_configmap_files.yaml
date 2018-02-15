@@ -21,7 +21,7 @@
   register: __configmap_output
 
 - when: __configmap_output.results.stderr is undefined
-  include_tasks: patch_configmap_file.yaml
+  include: patch_configmap_file.yaml
   vars:
     configmap_current_file: "{{ configmap_files.current_file }}"
     configmap_new_file: "{{ configmap_files.new_file }}"
