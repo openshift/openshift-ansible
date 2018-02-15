@@ -194,7 +194,6 @@
     dest: "{{ tempdir }}/elasticsearch-logging.yml"
   vars:
     root_logger: "{{openshift_logging_es_log_appenders | join(', ')}}"
-  when: es_logging_contents is undefined
   changed_when: no
 
 - template:
@@ -205,8 +204,6 @@
     es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
     es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
-
-  when: es_config_contents is undefined
   changed_when: no
 
 # create diff between current configmap files and our current files
@@ -214,7 +211,7 @@
     name: openshift_logging
     tasks_from: patch_configmap_files.yaml
   vars:
-    configmap_name: "logging-elasticsearch"
+    configmap_name: "{{ elasticsearch_name }}"
     configmap_namespace: "logging"
     configmap_file_names:
       - current_file: "elasticsearch.yml"
