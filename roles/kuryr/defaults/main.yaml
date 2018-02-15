@@ -12,7 +12,7 @@ kuryr_openstack_user_domain_name: default
 kuryr_openstack_project_domain_name: default
 
 # Kuryr OpenShift namespace
-kuryr_namespace: kube-system
+kuryr_namespace: openshift-infra
 
 # Whether to run the cni plugin in debug mode
 kuryr_cni_debug: "false"
