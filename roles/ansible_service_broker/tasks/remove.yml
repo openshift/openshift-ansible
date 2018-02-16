@@ -75,18 +75,22 @@
     name: asb
     namespace: openshift-ansible-service-broker
     state: absent
+  register: result
+  failed_when:
+    - result.msg is defined and result.msg.returncode is defined
+    - result.msg.returncode != 0
+    - ('NotFound' not in result.msg.stderr)
 
 - name: remove asb-etcd service
   oc_service:
     state: absent
     name: asb-etcd
     namespace: openshift-ansible-service-broker
-
-- name: remove etcd service
-  oc_service:
-    name: etcd
-    namespace: openshift-ansible-service-broker
-    state: absent
+  register: result
+  failed_when:
+    - result.msg is defined and result.msg.returncode is defined
+    - result.msg.returncode != 0
+    - ('NotFound' not in result.msg.stderr)
 
 - name: remove route for ansible-service-broker service
   oc_route:
@@ -99,6 +103,11 @@
     name: etcd
     namespace: openshift-ansible-service-broker
     state: absent
+  register: result
+  failed_when:
+    - result.msg is defined and result.msg.returncode is defined
+    - result.msg.returncode != 0
+    - ('NotFound' not in result.msg.stderr)
 
 - name: remove Ansible Service Broker deployment config
   oc_obj:
