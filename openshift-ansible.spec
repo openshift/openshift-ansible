@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.29
+Version:        3.7.31
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,30 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 16 2018 Justin Pierce <jupierce@redhat.com> 3.7.31-1
+- origin-dns: make sure cluster.local DNS server is listed first
+  (vrutkovs@redhat.com)
+- Whenever we create a new es node ignore health checks, changing prometheus pw
+  gen for increased secret idempotency (ewolinet@redhat.com)
+- Add python-ipaddress to dependencies (fabian@fabianism.us)
+- Bug 1541625- properly cast provided ip address to unicode
+  (fabian@fabianism.us)
+- Make IP object a string (fabian@fabianism.us)
+- Add kube service ipaddress to no_proxy list (sdodson@redhat.com)
+- Use r_etcd_common_etcdctl_command instead of hardcoded binary name to support
+  containerized upgrade (vrutkovs@redhat.com)
+- bug 1537857. Fix retrieving prometheus metrics (jcantril@redhat.com)
+- include elasticsearch container name (jvallejo@redhat.com)
+- persistent volume: fix template to support python3 (vrutkovs@redhat.com)
+- xPaaS v1.4.8 for v3.7 (sdodson@redhat.com)
+- Bump xpaas version (sdodson@redhat.com)
+- changed oc command to {{ openshift.common.client_binary }}
+  (datarace101@gmail.com)
+- Allow journald_vars_to_replace to set (mgugino@redhat.com)
+- fix indentation of terminationGracePeriodSeconds var (jsanda@redhat.com)
+- Changing the check for 1,3 or 5 etcd nodes so that it just checks that the
+  number isn't 0 (geoff.newson@gmail.com)
+
 * Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.7.29-1
 - Add ability to mount volumes into system container nodes (mgugino@redhat.com)
 - health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
