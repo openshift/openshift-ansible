@@ -258,6 +258,21 @@
   retries: 1
   delay: 60
 
+- name: configure vsphere svc account
+  include_role:
+    name: openshift_cloud_provider
+    tasks_from: vsphere-svc
+  when:
+  - openshift_cloudprovider_kind in 'vsphere'
+  - openshift_version | version_compare('3.9', '>=')
+  - inventory_hostname == openshift_master_hosts[0]
+
+- name: update vsphere provider master config
+  include_tasks: update-vsphere.yml
+  when:
+  - openshift_cloudprovider_kind in 'vsphere'
+  - openshift_version | version_compare('3.9', '>=')
+
 - name: Dump logs from master-controllers if it failed
   command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-controllers
   when:
