@@ -1664,6 +1664,8 @@ def set_proxy_facts(facts):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
             # We always add local dns domain and ourselves no matter what
+            kube_svc_ip = ipaddress.ip_network(unicode(common['portal_net']))[1]
+            common['no_proxy'].append(kube_svc_ip)
             common['no_proxy'].append('.' + common['dns_domain'])
             common['no_proxy'].append('.svc')
             common['no_proxy'].append(common['hostname'])

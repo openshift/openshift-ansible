@@ -4,3 +4,4 @@ required_packages:
   - python-dbus
   - PyYAML
   - yum-utils
+  - python-ipaddress
