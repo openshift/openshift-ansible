@@ -15,8 +15,7 @@ openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_s
 
 openshift_docker_hosted_registry_insecure: False  # bool
 
-openshift_docker_hosted_registry_network_default: "{{ openshift_portal_net | default(openshift.common.portal_net) | default(False) }}"
-openshift_docker_hosted_registry_network: "{{ openshift_docker_hosted_registry_network_default }}"
+openshift_docker_hosted_registry_network: "{{ openshift_portal_net }}"
 
 openshift_docker_additional_registries: []
 openshift_docker_blocked_registries: []
