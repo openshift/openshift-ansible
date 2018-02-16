@@ -492,6 +492,34 @@ def set_nodename(facts):
     return facts
 
 
+def make_allowed_registries(registry_list):
+    """ turns a list of wildcard registries to allowedRegistriesForImport json setting """
+    return {
+        "allowedRegistriesForImport": [
+            {'domainName': reg} if isinstance(reg, str) else reg for reg in registry_list
+        ]
+    }
+
+
+def set_allowed_registries(facts):
+    """ override allowedRegistriesForImport in imagePolicyConfig """
+    if 'master' in facts:
+        image_policy = {}
+        overriden = False
+        if facts['master'].get('image_policy_config', None):
+            image_policy = facts['master']['image_policy_config']
+            overriden = True
+
+        overrides = facts['master'].get('image_policy_allowed_registries_for_import', None)
+        if overrides:
+            image_policy = merge_facts(image_policy, make_allowed_registries(overrides), None)
+            overriden = True
+
+        if overriden:
+            facts['master']['image_policy_config'] = image_policy
+    return facts
+
+
 def format_url(use_ssl, hostname, port, path=''):
     """ Format url based on ssl flag, hostname, port and path
 
@@ -1045,6 +1073,7 @@ class OpenShiftFacts(object):
         facts = set_builddefaults_facts(facts)
         facts = set_buildoverrides_facts(facts)
         facts = set_nodename(facts)
+        facts = set_allowed_registries(facts)
         return dict(openshift=facts)
 
     def get_defaults(self, roles):
