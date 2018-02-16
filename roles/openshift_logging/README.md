@@ -58,6 +58,7 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_kibana_replica_count`: The number of replicas Kibana should be scaled up to. Defaults to 1.
 - `openshift_logging_kibana_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the pod will land.
 - `openshift_logging_kibana_edge_term_policy`: Insecure Edge Termination Policy. Defaults to Redirect.
+- `openshift_logging_kibana_env_vars`: A map of environment variables to add to the kibana deployment config (e.g. {"ELASTICSEARCH_REQUESTTIMEOUT":"30000"})
 
 - `openshift_logging_fluentd_nodeselector`: The node selector that the Fluentd daemonset uses to determine where to deploy to. Defaults to '"logging-infra-fluentd": "true"'.
 - `openshift_logging_fluentd_cpu_request`: The minimum amount of CPU to allocate for Fluentd collector pods. Defaults to '100m'.

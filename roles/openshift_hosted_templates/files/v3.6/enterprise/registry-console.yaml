@@ -102,7 +102,7 @@ objects:
 parameters:
   - description: 'Specify "registry/repository" prefix for container image; e.g. for "registry.access.redhat.com/openshift3/registry-console:latest", set prefix "registry.access.redhat.com/openshift3/"'
     name: IMAGE_PREFIX
-    value: "openshift3/"
+    value: "registry.access.redhat.com/openshift3/"
   - description: 'Specify component name for container image; e.g. for "registry.access.redhat.com/openshift3/registry-console:latest", use base name "registry-console"'
     name: IMAGE_BASENAME
     value: "registry-console"

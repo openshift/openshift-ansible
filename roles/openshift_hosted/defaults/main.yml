@@ -109,3 +109,5 @@ openshift_push_via_dns: False
 # NOTE: settting openshift_docker_hosted_registry_insecure may affect other roles
 openshift_hosted_docker_registry_insecure_default: "{{ openshift_docker_hosted_registry_insecure | default(False) }}"
 openshift_hosted_docker_registry_insecure: "{{ openshift_hosted_docker_registry_insecure_default }}"
+
+openshift_hosted_registry_storage_azure_blob_realm: core.windows.net

@@ -25,7 +25,7 @@
     when:
     - lookupip.stdout != '127.0.0.1'
     - lookupip.stdout not in ansible_all_ipv4_addresses
-    - openshift_hostname_check | default(true)
+    - openshift_hostname_check | default(true) | bool
 
   - name: Validate openshift_ip exists on node when defined
     fail:
@@ -40,4 +40,4 @@
     when:
     - openshift_ip is defined
     - openshift_ip not in ansible_all_ipv4_addresses
-    - openshift_ip_check | default(true)
+    - openshift_ip_check | default(true) | bool

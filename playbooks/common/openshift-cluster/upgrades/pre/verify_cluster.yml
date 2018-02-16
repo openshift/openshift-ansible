@@ -17,6 +17,7 @@
         valid version for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_pkg_version is defined
+    - openshift_pkg_version != ""
     - openshift_pkg_version.split('-',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - fail:
@@ -25,6 +26,7 @@
         valid version for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_image_tag is defined
+    - openshift_image_tag != ""
     - openshift_image_tag.split('v',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - set_fact:

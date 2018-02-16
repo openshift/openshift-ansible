@@ -1,0 +1,14 @@
+---
+- name: delete the node group sgs
+  oo_ec2_group:
+    state: absent
+    name: "{{ item.value.name}}"
+    region: "{{ openshift_aws_region }}"
+  with_dict: "{{ openshift_aws_node_security_groups }}"
+
+- name: delete the k8s sgs for the node group
+  oo_ec2_group:
+    state: absent
+    name: "{{ item.value.name }}_k8s"
+    region: "{{ openshift_aws_region }}"
+  with_dict: "{{ openshift_aws_node_security_groups }}"

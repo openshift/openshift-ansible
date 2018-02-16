@@ -54,6 +54,12 @@ openshift_node_kubelet_args_dict:
     cloud-config:
     - "{{ openshift_config_base ~ '/cloudprovider/azure.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
+  vsphere:
+    cloud-provider:
+    - vsphere
+    cloud-config:
+    - "{{ openshift_config_base ~ '/cloudprovider/vsphere.conf' }}"
+    node-labels: "{{ l_node_kubelet_node_labels }}"
   undefined:
     node-labels: "{{ l_node_kubelet_node_labels }}"
 
@@ -76,6 +82,19 @@ r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+
+openshift_node_syscon_auth_mounts_l:
+- type: bind
+  source: "{{ oreg_auth_credentials_path }}"
+  destination: "/root/.docker"
+  options:
+  - ro
+  - bind
+
+# If we need to add new mounts in the future, or the user wants to mount data.
+# This should be in the same format as auth_mounts_l above.
+openshift_node_syscon_add_mounts_l: []
+
 
 openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
 
@@ -124,6 +143,7 @@ default_r_openshift_node_image_prep_packages:
 - yum-utils
 # gluster
 - glusterfs-fuse
+- device-mapper-multipath
 # nfs
 - nfs-utils
 - flannel

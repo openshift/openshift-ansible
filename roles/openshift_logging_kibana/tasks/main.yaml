@@ -8,6 +8,13 @@
   loop_control:
     loop_var: var_file_name
 
+- name: Ensure that Kibana has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for Kibana - '{{ openshift_logging_kibana_nodeselector }}'
+  when:
+    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_kibana_nodeselector)
+
 - name: Set kibana image facts
   set_fact:
     openshift_logging_kibana_image_prefix: "{{ openshift_logging_kibana_image_prefix | default(__openshift_logging_kibana_image_prefix) }}"
@@ -133,7 +140,7 @@
 
 - name: Generating Kibana route template
   template:
-    src: route_reencrypt.j2
+    src: "{{ __base_file_dir }}/route_reencrypt.j2"
     dest: "{{ tempdir }}/templates/kibana-route.yaml"
   vars:
     obj_name: "{{ kibana_name }}"
@@ -174,7 +181,7 @@
 # create oauth client
 - name: Create oauth-client template
   template:
-    src: oauth-client.j2
+    src: "{{ __base_file_dir }}/oauth-client.j2"
     dest: "{{ tempdir }}/templates/oauth-client.yml"
   vars:
     kibana_hostnames: "{{ proxy_hostnames | unique }}"
@@ -233,7 +240,7 @@
 # create Kibana DC
 - name: Generate Kibana DC template
   template:
-    src: kibana.j2
+    src: "{{ __base_file_dir }}/kibana.j2"
     dest: "{{ tempdir }}/templates/kibana-dc.yaml"
   vars:
     component: "{{ kibana_component }}"
@@ -251,6 +258,7 @@
     kibana_proxy_memory_limit: "{{ openshift_logging_kibana_proxy_memory_limit }}"
     kibana_replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
     kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
+    kibana_env_vars: "{{ openshift_logging_kibana_env_vars | default({}) }}"
 
 - name: Set Kibana DC
   oc_obj:

@@ -18,6 +18,8 @@
     state: latest
     values:
     - COMMAND=api
+    - "NODE_SERVICE={{ openshift_service_type }}-node.service"
+    - "DOCKER_SERVICE={{ openshift_docker_service_name }}.service"
 
 - name: Install or Update HA controller master system container
   oc_atomic_container:
@@ -26,3 +28,5 @@
     state: latest
     values:
     - COMMAND=controllers
+    - "NODE_SERVICE={{ openshift_service_type }}-node.service"
+    - "DOCKER_SERVICE={{ openshift_docker_service_name }}.service"

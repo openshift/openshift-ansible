@@ -198,3 +198,21 @@ At this point your cluster should be ready for workloads.  Proceed to deploy app
 ### Still to come
 
 There are more enhancements that are arriving for provisioning.  These will include more playbooks that enhance the provisioning capabilities.
+
+## Uninstall / Deprovisioning
+
+To undo the work done by the prerequisites playbook, simply call the uninstall_prerequisites.yml playbook. You will have needed to remove any of the other objects (ie ELBs, instances, etc) before attempting. You should use the same inventory file and provisioning_vars.yml file that was used during provisioning.
+
+```
+ansible-playbook -i <previous inventory file> -e @<previous provisioning_vars file> uninstall_prerequisites.yml
+```
+
+This should result in removal of the security groups and VPC that were created.
+
+Cleaning up the S3 bucket contents can be accomplished with:
+
+```
+ansible-playbook -i <previous inventory file> -e @<previous provisioning_vars file> uninstall_s3.yml
+```
+
+NOTE: If you want to also remove the ssh keys that were uploaded (**these ssh keys would be shared if you are running multiple clusters in the same AWS account** so we don't remove these by default) then you should add 'openshift_aws_enable_uninstall_shared_objects: True' to your provisioning_vars.yml file.

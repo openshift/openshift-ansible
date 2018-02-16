@@ -8,10 +8,7 @@
     fail:
       msg: "OCP rpm version {{ rpm_results.results.versions.available_versions.0 }} is different from OCP image version {{ openshift_version }}"
     # Both versions have the same string representation
-    when:
-    - openshift_version not in rpm_results.results.versions.available_versions.0
-    - openshift_version_reinit | default(false)
-
+    when: rpm_results.results.versions.available_versions.0 != openshift_version
   # block when
   when: not openshift_is_atomic | bool
 

@@ -45,9 +45,13 @@
   - name: Evaluate groups - Fail if no etcd hosts group is defined
     fail:
       msg: >
-        Running etcd as an embedded service is no longer supported.
+        Running etcd as an embedded service is no longer supported. If this is a
+        new install please define an 'etcd' group with either one, three or five
+        hosts. These hosts may be the same hosts as your masters. If this is an
+        upgrade please see https://docs.openshift.com/container-platform/latest/install_config/upgrading/migrating_embedded_etcd.html
+        for documentation on how to migrate from embedded to external etcd.
     when:
-    - g_etcd_hosts | default([]) | length not in [3,1]
+    - g_etcd_hosts | default([]) | length == 0
     - not (openshift_node_bootstrap | default(False))
 
   - name: Evaluate oo_all_hosts

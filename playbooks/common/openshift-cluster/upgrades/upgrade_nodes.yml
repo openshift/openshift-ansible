@@ -76,6 +76,12 @@
     until: node_schedulable is succeeded
     when: node_unschedulable is changed
 
+  - import_role:
+      name: openshift_manage_node
+      tasks_from: config.yml
+    vars:
+      openshift_master_host: "{{ groups.oo_first_master.0 }}"
+
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
   tasks:

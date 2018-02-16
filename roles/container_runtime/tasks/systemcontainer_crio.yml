@@ -53,6 +53,8 @@
     name: "cri-o"
     image: "{{ l_crio_image }}"
     state: latest
+    values:
+      - "ADDTL_MOUNTS={{ l_crio_additional_mounts }}"
 
 - name: Remove CRI-O default configuration files
   file:

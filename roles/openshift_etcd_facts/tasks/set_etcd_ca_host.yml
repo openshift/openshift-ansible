@@ -1,0 +1,44 @@
+---
+- name: Check for CA indicator files
+  stat:
+    path: "{{ item.0 }}"
+  delegate_to: "{{ item.1 }}"
+  with_nested:
+  - - /etc/etcd/ca
+    - /etc/etcd/generated_certs
+  - "{{ groups[etcd_ca_host_group] }}"
+  register: __etcd_ca_host_stat
+  run_once: true
+
+# Collect ansible_host (inventory hostname) of hosts with /etc/etcd/ca
+# and /etc/etcd/generated_certs directories.
+- set_fact:
+    __etcd_ca_dir_hosts: "{{ __etcd_ca_host_stat.results
+                             | lib_utils_oo_collect('_ansible_delegated_vars.inventory_hostname',
+                                                    filters={'stat.path':'/etc/etcd/ca','stat.exists':True}) }}"
+    __etcd_generated_certs_dir_hosts: "{{ __etcd_ca_host_stat.results
+                                          | lib_utils_oo_collect('_ansible_delegated_vars.inventory_hostname',
+                                                                 filters={'stat.path':'/etc/etcd/generated_certs','stat.exists':True}) }}"
+  run_once: true
+
+# __etcd_ca_hosts is the intersection of hosts which have /etc/etcd/ca
+# and /etc/etcd/generated_certs directories.
+- set_fact:
+    __etcd_ca_hosts: "{{ __etcd_ca_dir_hosts | intersect(__etcd_generated_certs_dir_hosts) }}"
+  run_once: true
+
+# __etcd_ca_hosts should only contain one host. If more than one host
+# is able to be an etcd CA host then we will use the first.
+- set_fact:
+    etcd_ca_host: "{{ __etcd_ca_hosts[0] }}"
+  when:
+  - __etcd_ca_hosts | length > 0
+  - etcd_ca_host is not defined
+
+# No etcd_ca_host was found in __etcd_ca_hosts. This is probably a
+# fresh installation so we will default to the first member of the
+# etcd host group.
+- set_fact:
+    etcd_ca_host: "{{ groups[etcd_ca_host_group].0 }}"
+  when:
+  - etcd_ca_host is not defined

@@ -42,60 +42,79 @@ openshift_aws_ami_tags:
 openshift_aws_s3_mode: create
 openshift_aws_s3_bucket_name: "{{ openshift_aws_clusterid }}-docker-registry"
 
-openshift_aws_elb_health_check:
-  ping_protocol: tcp
-  ping_port: 443
-  response_timeout: 5
-  interval: 30
-  unhealthy_threshold: 2
-  healthy_threshold: 2
-
 openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}"
-openshift_aws_elb_name_dict:
-  master:
-    external: "{{ openshift_aws_elb_basename }}-master-external"
-    internal: "{{ openshift_aws_elb_basename }}-master-internal"
-  infra:
-    external: "{{ openshift_aws_elb_basename }}-infra"
 
-openshift_aws_elb_idle_timout: 400
-openshift_aws_elb_scheme: internet-facing
 openshift_aws_elb_cert_arn: ''
 
 openshift_aws_elb_dict:
   master:
     external:
-    - protocol: tcp
-      load_balancer_port: 80
-      instance_protocol: ssl
-      instance_port: 443
-    - protocol: ssl
-      load_balancer_port: 443
-      instance_protocol: ssl
-      instance_port: 443
-      # ssl certificate required for https or ssl
-      ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
+      cross_az_load_balancing: False
+      health_check:
+        ping_protocol: tcp
+        ping_port: "{{ openshift_master_api_port | default(8443) }}"
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+      idle_timout: 400
+      listeners:
+      - protocol: tcp
+        load_balancer_port: 80
+        instance_protocol: ssl
+        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+      - protocol: ssl
+        load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_protocol: ssl
+        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+        ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
+      name: "{{ openshift_aws_elb_basename }}-master-external"
+      tags: "{{ openshift_aws_kube_tags }}"
     internal:
-    - protocol: tcp
-      load_balancer_port: 80
-      instance_protocol: tcp
-      instance_port: 80
-    - protocol: tcp
-      load_balancer_port: 443
-      instance_protocol: tcp
-      instance_port: 443
+      cross_az_load_balancing: False
+      health_check:
+        ping_protocol: tcp
+        ping_port: "{{ openshift_master_api_port | default(8443) }}"
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+      idle_timout: 400
+      listeners:
+      - protocol: tcp
+        load_balancer_port: 80
+        instance_protocol: tcp
+        instance_port: 80
+      - protocol: tcp
+        load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_protocol: tcp
+        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+      name: "{{ openshift_aws_elb_basename }}-master-internal"
+      tags: "{{ openshift_aws_kube_tags }}"
   infra:
     external:
-    - protocol: tcp
-      load_balancer_port: 80
-      instance_protocol: tcp
-      instance_port: 443
-      proxy_protocol: True
-    - protocol: tcp
-      load_balancer_port: 443
-      instance_protocol: tcp
-      instance_port: 443
-      proxy_protocol: True
+      cross_az_load_balancing: False
+      health_check:
+        ping_protocol: tcp
+        ping_port: 443
+        response_timeout: 5
+        interval: 30
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+      idle_timout: 400
+      listeners:
+      - protocol: tcp
+        load_balancer_port: 80
+        instance_protocol: tcp
+        instance_port: 443
+        proxy_protocol: True
+      - protocol: tcp
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 443
+        proxy_protocol: True
+      name: "{{ openshift_aws_elb_basename }}-infra"
+      tags: "{{ openshift_aws_kube_tags }}"
 
 openshift_aws_node_group_config_master_volumes:
 - device_name: /dev/sda1
@@ -154,37 +173,37 @@ openshift_aws_node_groups:
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
 
+openshift_aws_scale_group_health_check:
+  period: 60
+  type: EC2
+
 # these will be used during upgrade
 openshift_aws_master_group_config:
   # The 'master' key is always required here.
   master:
-    instance_type: m4.xlarge
+    instance_type: "{{ openshift_aws_master_group_instance_type | default('m4.xlarge') }}"
     volumes: "{{ openshift_aws_node_group_config_master_volumes }}"
-    health_check:
-      period: 60
-      type: EC2
-    min_size: 3
-    max_size: 3
-    desired_size: 3
+    health_check: "{{ openshift_aws_scale_group_health_check }}"
+    min_size: "{{ openshift_aws_master_group_min_size | default(3) }}"
+    max_size: "{{ openshift_aws_master_group_max_size | default(3) }}"
+    desired_size: "{{ openshift_aws_master_group_desired_size | default(3) }}"
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
     policy_name: "{{ openshift_aws_iam_role_policy_name }}"
     policy_json: "{{ openshift_aws_iam_role_policy_json }}"
-    elbs: "{{ openshift_aws_elb_name_dict['master'].keys()| map('extract', openshift_aws_elb_name_dict['master']) | list }}"
+    elbs: "{{ openshift_aws_elb_dict | json_query('master.[*][0][*].name') }}"
 
 openshift_aws_node_group_config:
   # The 'compute' key is always required here.
   compute:
-    instance_type: m4.xlarge
+    instance_type: "{{ openshift_aws_compute_group_instance_type | default('m4.xlarge') }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
-    health_check:
-      period: 60
-      type: EC2
-    min_size: 3
-    max_size: 100
-    desired_size: 3
+    health_check: "{{ openshift_aws_scale_group_health_check }}"
+    min_size: "{{ openshift_aws_compute_group_min_size | default(3) }}"
+    max_size: "{{ openshift_aws_compute_group_max_size | default(100) }}"
+    desired_size: "{{ openshift_aws_compute_group_desired_size | default(3) }}"
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
@@ -192,23 +211,18 @@ openshift_aws_node_group_config:
     policy_json: "{{ openshift_aws_iam_role_policy_json }}"
   # The 'infra' key is always required here.
   infra:
-    instance_type: m4.xlarge
+    instance_type: "{{ openshift_aws_infra_group_instance_type | default('m4.xlarge') }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
-    health_check:
-      period: 60
-      type: EC2
-    min_size: 2
-    max_size: 20
-    desired_size: 2
+    health_check: "{{ openshift_aws_scale_group_health_check }}"
+    min_size: "{{ openshift_aws_infra_group_min_size | default(2) }}"
+    max_size: "{{ openshift_aws_infra_group_max_size | default(20) }}"
+    desired_size: "{{ openshift_aws_infra_group_desired_size | default(2) }}"
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
     iam_role: "{{ openshift_aws_iam_role_name }}"
     policy_name: "{{ openshift_aws_iam_role_policy_name }}"
     policy_json: "{{ openshift_aws_iam_role_policy_json }}"
-    elbs: "{{ openshift_aws_elb_name_dict['infra'].keys()| map('extract', openshift_aws_elb_name_dict['infra']) | list }}"
-
-openshift_aws_elb_tags: "{{ openshift_aws_kube_tags }}"
-openshift_aws_elb_az_load_balancing: False
+    elbs: "{{ openshift_aws_elb_dict | json_query('infra.[*][0][*].name') }}"
 
 # build_instance_tags is a custom filter in role lib_utils
 openshift_aws_kube_tags: "{{ openshift_aws_clusterid | build_instance_tags }}"
@@ -253,8 +267,8 @@ openshift_aws_node_security_groups:
       to_port: 80
       cidr_ip: 0.0.0.0/0
     - proto: tcp
-      from_port: 443
-      to_port: 443
+      from_port: "{{ openshift_master_api_port | default(8443) }}"
+      to_port: "{{ openshift_master_api_port | default(8443) }}"
       cidr_ip: 0.0.0.0/0
   compute:
     name: "{{ openshift_aws_clusterid }}_compute"
@@ -268,8 +282,8 @@ openshift_aws_node_security_groups:
       to_port: 80
       cidr_ip: 0.0.0.0/0
     - proto: tcp
-      from_port: 443
-      to_port: 443
+      from_port: "{{ openshift_master_api_port | default(8443) }}"
+      to_port: "{{ openshift_master_api_port | default(8443) }}"
       cidr_ip: 0.0.0.0/0
     - proto: tcp
       from_port: 30000
@@ -282,8 +296,6 @@ openshift_aws_node_security_groups:
 openshift_aws_vpc_tags:
   Name: "{{ openshift_aws_vpc_name }}"
 
-openshift_aws_subnet_az: us-east-1c
-
 openshift_aws_vpc:
   name: "{{ openshift_aws_vpc_name }}"
   cidr: 172.31.0.0/16
@@ -291,13 +303,25 @@ openshift_aws_vpc:
     us-east-1:
     - cidr: 172.31.48.0/20
       az: "us-east-1c"
+      default_az: true
     - cidr: 172.31.32.0/20
       az: "us-east-1e"
     - cidr: 172.31.16.0/20
       az: "us-east-1a"
+
+openshift_aws_subnet_az: "{{ openshift_aws_vpc.subnets[openshift_aws_region] | get_default_az }}"
 
 openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''
 openshift_aws_node_config_namespace: openshift-node
 
 openshift_aws_masters_groups: masters,etcd,nodes
+
+# By default, don't delete things like the shared IAM instance
+# profile and uploaded ssh keys
+openshift_aws_enable_uninstall_shared_objects: False
+# S3 bucket names are global by default and can take minutes/hours for the
+# name to become available for re-use (assuming someone doesn't take the
+# name in the meantime). Default to just emptying the contents of the S3
+# bucket if we've been asked to create the bucket during provisioning.
+openshift_aws_really_delete_s3_bucket: False

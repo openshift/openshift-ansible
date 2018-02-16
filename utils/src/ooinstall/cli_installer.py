@@ -24,19 +24,6 @@ DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 QUIET_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible-quiet.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
-UPGRADE_MAPPINGS = {
-    '3.6': {
-        'minor_version': '3.6',
-        'minor_playbook': 'v3_6/upgrade.yml',
-        'major_playbook': 'v3_7/upgrade.yml',
-        'major_version': '3.7',
-    },
-    '3.7': {
-        'minor_version': '3.7',
-        'minor_playbook': 'v3_7/upgrade.yml',
-    },
-}
-
 
 def validate_ansible_dir(path):
     if not path:
@@ -796,6 +783,17 @@ If changes are needed please edit the installer.cfg.yml config file above and re
     if not unattended:
         confirm_continue(message)
 
+    error = openshift_ansible.run_prerequisites(inventory_file, oo_cfg.deployment.hosts,
+                                                hosts_to_run_on, verbose)
+    if error:
+        # The bootstrap script will print out the log location.
+        message = """
+An error was detected. After resolving the problem please relaunch the
+installation process.
+"""
+        click.echo(message)
+        sys.exit(1)
+
     error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.deployment.hosts,
                                                 hosts_to_run_on, verbose)
 
@@ -820,7 +818,7 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.echo(message)
 
 
-@click.group()
+@click.group(context_settings=dict(max_content_width=120))
 @click.pass_context
 @click.option('--unattended', '-u', is_flag=True, default=False)
 @click.option('--configuration', '-c',
@@ -932,7 +930,7 @@ def uninstall(ctx):
     openshift_ansible.run_uninstall_playbook(hosts, verbose)
 
 
-@click.command()
+@click.command(context_settings=dict(max_content_width=120))
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context

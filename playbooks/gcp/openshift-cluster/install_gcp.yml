@@ -1,0 +1,21 @@
+---
+- hosts: masters
+  gather_facts: no
+  tasks:
+  - name: create master health check service
+    include_role:
+      name: openshift_gcp
+      tasks_from: configure_master_healthcheck.yml
+  - name: configure node bootstrapping
+    include_role:
+      name: openshift_gcp
+      tasks_from: configure_master_bootstrap.yml
+    when:
+    - openshift_master_bootstrap_enabled | default(False)
+  - name: configure node bootstrap autoapprover
+    include_role:
+      name: openshift_bootstrap_autoapprover
+      tasks_from: main
+    when:
+    - openshift_master_bootstrap_enabled | default(False)
+    - openshift_master_bootstrap_auto_approve | default(False) | bool

@@ -47,7 +47,13 @@ def test_ovs_package_version(openshift_release, expected_ovs_version):
 
         return return_value
 
-    result = OvsVersion(execute_module, task_vars).run()
+    check = OvsVersion(execute_module, task_vars)
+    check.openshift_to_ovs_version = {
+        (3, 4): "2.4",
+        (3, 5): ["2.6", "2.7"],
+        (3, 6): ["2.6", "2.7", "2.8"],
+    }
+    result = check.run()
     assert result is return_value
 
 

@@ -5,8 +5,6 @@
 # Pre-upgrade
 - import_playbook: ../initialize_nodes_to_upgrade.yml
 
-- import_playbook: verify_cluster.yml
-
 - name: Update repos on upgrade hosts
   hosts: "{{ l_upgrade_repo_hosts }}"
   roles:
@@ -49,9 +47,15 @@
     # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
     # defined, and overriding the normal behavior of protecting the installed version
     openshift_release: "{{ openshift_upgrade_target }}"
-    openshift_protect_installed_version: False
+    # openshift_protect_installed_version is passed n via upgrade_control_plane.yml
     # l_openshift_version_set_hosts is passed via upgrade_control_plane.yml
     # l_openshift_version_check_hosts is passed via upgrade_control_plane.yml
+
+# version_override will set various version-related variables during a double upgrade.
+- import_playbook: version_override.yml
+  when: l_double_upgrade_cp | default(False)
+
+- import_playbook: verify_cluster.yml
 
 # If we're only upgrading nodes, we need to ensure masters are already upgraded
 - name: Verify masters are already upgraded
@@ -60,7 +64,7 @@
   - fail: msg="Master running {{ openshift.common.version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
     when:
     - l_upgrade_nodes_only | default(False) | bool
-    - openshift.common.version != openshift_version
+    - not openshift.common.version | match(openshift_version)
 
 # If we're only upgrading nodes, skip this.
 - import_playbook: ../../../../openshift-master/private/validate_restart.yml
@@ -79,3 +83,4 @@
   - import_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml
+    when: docker_upgrade | default(True) | bool

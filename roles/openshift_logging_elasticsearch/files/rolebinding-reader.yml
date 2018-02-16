@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ClusterRole
-metadata:
-  name: rolebinding-reader
-rules:
-- resources:
-    - clusterrolebindings
-  verbs:
-    - get

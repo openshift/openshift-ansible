@@ -10,3 +10,6 @@ openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_typ
 openshift_use_crio_only: False
 
 l_first_master_version_task_file: "{{ openshift_is_containerized | ternary('first_master_containerized_version.yml', 'first_master_rpm_version.yml') }}"
+
+# Used during double control plane upgrades.
+l_double_upgrade_cp_reset_version: False

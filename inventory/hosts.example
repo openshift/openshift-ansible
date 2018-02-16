@@ -325,7 +325,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # or to one or all of the masters defined in the inventory if no load
 # balancer is present.
 #openshift_master_cluster_hostname=openshift-ansible.test.example.com
-#openshift_master_cluster_public_hostname=openshift-ansible.test.example.com
+
+# If an external load balancer is used public hostname should resolve to
+# external load balancer address
+#openshift_master_cluster_public_hostname=openshift-ansible.public.example.com
 
 # Configure controller arguments
 #osm_controller_args={'resource-quota-sync-period': ['10s']}
@@ -845,12 +848,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # See: https://github.com/nickhammond/ansible-logrotate
 #logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
 
-# openshift-ansible will wait indefinitely for your input when it detects that the
+# The OpenShift-Ansible installer will fail when it detects that the
 # value of openshift_hostname resolves to an IP address not bound to any local
 # interfaces. This mis-configuration is problematic for any pod leveraging host
 # networking and liveness or readiness probes.
-# Setting this variable to true will override that check.
-#openshift_override_hostname_check=true
+# Setting this variable to false will override that check.
+#openshift_hostname_check=true
 
 # openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
 # in versions >= 3.6
@@ -930,6 +933,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_service_catalog_image_prefix=registry.access.redhat.com/openshift3/ose-
 # Force a specific image version to use when pulling the service catalog image
 #openshift_service_catalog_image_version=v3.7
+
+# TSB image tag
+#template_service_broker_version='v3.7'
 
 # Configure one of more namespaces whose templates will be served by the TSB
 #openshift_template_service_broker_namespaces=['openshift']
@@ -1114,10 +1120,9 @@ ose3-etcd[1:3]-ansible.test.example.com
 ose3-lb-ansible.test.example.com containerized=false
 
 # NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
-# However, in order to ensure that your masters are not burdened with running pods you should
-# make them unschedulable by adding openshift_schedulable=False any node that's also a master.
 [nodes]
-ose3-master[1:3]-ansible.test.example.com
+# masters should be schedulable to run web console pods
+ose3-master[1:3]-ansible.test.example.com openshift_schedulable=True
 ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
 
 [nfs]

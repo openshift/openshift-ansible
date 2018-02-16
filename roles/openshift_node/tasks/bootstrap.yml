@@ -1,11 +1,7 @@
 ---
-- name: install needed rpm(s)
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items: "{{ r_openshift_node_image_prep_packages }}"
-  register: result
-  until: result is succeeded
+- name: include package installs
+  import_tasks: install_rpms.yml
+  when: not (openshift_is_atomic | default(False) | bool)
 
 - name: create the directory for node
   file:
@@ -43,13 +39,13 @@
 #    line: "{% raw %}ExecStart=/usr/bin/openshift start node --bootstrap --kubeconfig=${KUBECONFIG} $OPTIONS{% endraw %}"
 #    regexp: "^ExecStart=.*"
 
-- name: "disable {{ openshift_service_type }}-node and {{ openshift_service_type }}-master services"
+- name: "disable {{ openshift_service_type }}-node"  # and {{ openshift_service_type }}-master services"
   systemd:
     name: "{{ item }}"
     enabled: no
   with_items:
   - "{{ openshift_service_type }}-node.service"
-  - "{{ openshift_service_type }}-master.service"
+#  - "{{ openshift_service_type }}-master.service"
 
 - name: Check for RPM generated config marker file .config_managed
   stat:

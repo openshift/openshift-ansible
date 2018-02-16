@@ -15,5 +15,5 @@
 - name: Include the accept.yml playbook to accept nodes into the cluster
   import_playbook: accept.yml
 
-- name: Include the hosted.yml playbook to finish the hosted configuration
-  import_playbook: hosted.yml
+- name: Include the components playbook to finish the hosted configuration
+  import_playbook: ../../common/private/components.yml

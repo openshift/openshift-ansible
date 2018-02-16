@@ -1,0 +1,28 @@
+---
+- name: Copy auto-approver config to host
+  run_once: true
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/openshift-approver/
+    owner: root
+    mode: 0400
+  with_fileglob:
+    - "*.yaml"
+
+- name: Set auto-approver nodeSelector
+  run_once: true
+  yedit:
+    src: "/tmp/openshift-approver/openshift-bootstrap-controller.yaml"
+    key: spec.template.spec.nodeSelector
+    value: "{{ openshift_master_bootstrap_auto_approver_node_selector | default({}) }}"
+    value_type: list
+
+- name: Create auto-approver on cluster
+  run_once: true
+  command: oc apply -f /tmp/openshift-approver/
+
+- name: Remove auto-approver config
+  run_once: true
+  file:
+    path: /tmp/openshift-approver/
+    state: absent

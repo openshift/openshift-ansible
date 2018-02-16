@@ -35,7 +35,8 @@ openshift_hosted_registry_storage_kind=glusterfs
 master
 
 [nodes]
-master  openshift_schedulable=False
+# masters should be schedulable to run web console pods
+master  openshift_schedulable=True
 # It is recommended to not use a single cluster for both general and registry
 # storage, so two three-node clusters will be required.
 node0   openshift_schedulable=True

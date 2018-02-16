@@ -340,10 +340,16 @@ class Yedit(object):  # pragma: no cover
             pass
 
         # Try to use RoundTripDumper if supported.
-        try:
-            Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
-        except AttributeError:
-            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
+        if self.content_type == 'yaml':
+            try:
+                Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+            except AttributeError:
+                Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
+        elif self.content_type == 'json':
+            Yedit._write(self.filename, json.dumps(self.yaml_dict, indent=4, sort_keys=True))
+        else:
+            raise YeditException('Unsupported content_type: {}.'.format(self.content_type) +
+                                 'Please specify a content_type of yaml or json.')
 
         return (True, self.yaml_dict)
 
@@ -391,7 +397,7 @@ class Yedit(object):  # pragma: no cover
 
                 # Try to use RoundTripLoader if supported.
                 try:
-                    self.yaml_dict = yaml.safe_load(contents, yaml.RoundTripLoader)
+                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
                 except AttributeError:
                     self.yaml_dict = yaml.safe_load(contents)
 
@@ -636,7 +642,12 @@ class Yedit(object):  # pragma: no cover
 
         curr_value = invalue
         if val_type == 'yaml':
-            curr_value = yaml.load(invalue)
+            try:
+                # AUDIT:maybe-no-member makes sense due to different yaml libraries
+                # pylint: disable=maybe-no-member
+                curr_value = yaml.safe_load(invalue, Loader=yaml.RoundTripLoader)
+            except AttributeError:
+                curr_value = yaml.safe_load(invalue)
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -705,6 +716,7 @@ class Yedit(object):  # pragma: no cover
         '''perform the idempotent crud operations'''
         yamlfile = Yedit(filename=params['src'],
                          backup=params['backup'],
+                         content_type=params['content_type'],
                          separator=params['separator'])
 
         state = params['state']
@@ -1116,7 +1128,7 @@ class Utils(object):  # pragma: no cover
         ''' Actually write the file contents to disk. This helps with mocking. '''
 
         with open(filename, 'w') as sfd:
-            sfd.write(contents)
+            sfd.write(str(contents))
 
     @staticmethod
     def create_tmp_file_from_contents(rname, data, ftype='yaml'):
@@ -1639,6 +1651,7 @@ def main():
             timeout=dict(default=30, type='int'),
             approve_all=dict(default=False, type='bool'),
             service_account=dict(default='node-bootstrapper', type='str'),
+            fail_on_timeout=dict(default=False, type='bool'),
         ),
         supports_check_mode=True,
         mutually_exclusive=[['approve_all', 'nodes']],
@@ -1648,6 +1661,12 @@ def main():
         module.fail_json(**dict(failed=True, msg='Please specify hosts.'))
 
     rval = OCcsr.run_ansible(module.params, module.check_mode)
+
+    # If we timed out then we weren't finished. Fail if user requested to fail.
+    if (module.params['timeout'] > 0 and
+            module.params['fail_on_timeout'] and
+            rval['timeout']):
+        return module.fail_json(msg='Timed out accepting certificate signing requests. Failing as requested.', **rval)
 
     if 'failed' in rval:
         return module.fail_json(**rval)

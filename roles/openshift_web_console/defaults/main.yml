@@ -1,2 +1,2 @@
 ---
-openshift_web_console_nodeselector: "{{ openshift_hosted_infra_selector | default('region=infra') | map_from_pairs }}"
+openshift_web_console_nodeselector: {"node-role.kubernetes.io/master":"true"}

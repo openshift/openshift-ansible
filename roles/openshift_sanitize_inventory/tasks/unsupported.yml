@@ -45,7 +45,8 @@
 - name: Ensure the hosted registry's GlusterFS storage is configured correctly
   when:
   - openshift_hosted_registry_storage_kind | default(none) in ['glusterfs']
-  - openshift_hosted_registry_storage_glusterfs_ips is defined and openshift_hosted_registry_storage_glusterfs_ips != ''
+  - openshift_hosted_registry_storage_glusterfs_ips is defined
+  - openshift_hosted_registry_storage_glusterfs_ips != []
   - "'glusterfs_registry' in groups | default([])"
   fail:
     msg: |-

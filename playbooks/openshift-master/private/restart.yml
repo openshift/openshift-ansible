@@ -3,16 +3,13 @@
 
 - name: Restart masters
   hosts: oo_masters_to_config
-  vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
-  handlers:
-  - import_tasks: ../../../roles/openshift_master/handlers/main.yml
   roles:
   - openshift_facts
   post_tasks:
   - include_tasks: tasks/restart_hosts.yml
     when: openshift_rolling_restart_mode | default('services') == 'system'
-
-  - include_tasks: tasks/restart_services.yml
+  - import_role:
+      name: openshift_master
+      tasks_from: restart.yml
     when: openshift_rolling_restart_mode | default('services') == 'services'
