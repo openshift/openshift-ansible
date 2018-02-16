@@ -116,8 +116,9 @@ EOF
       echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
       if ! grep -qw search ${NEW_RESOLV_CONF}; then
         echo 'search cluster.local' >> ${NEW_RESOLV_CONF}
-      elif ! grep -q 'search.*cluster.local' ${NEW_RESOLV_CONF}; then
-        sed -i '/^search/ s/$/ cluster.local/' ${NEW_RESOLV_CONF}
+      elif ! grep -q 'search cluster.local' ${NEW_RESOLV_CONF}; then
+        # cluster.local should be in first three DNS names so that glibc resolver would work
+        sed -i -e 's/^search \(.\+\)\( cluster\.local\)\{0,1\}$/search cluster.local \1/' ${NEW_RESOLV_CONF}
       fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
