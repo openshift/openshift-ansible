@@ -8,6 +8,7 @@ openshift_daemonset_config_monitoring_pos: "false"
 openshift_daemonset_config_node_selector:
   config: config
 openshift_daemonset_config_sa_name: configurator
+openshift_daemonset_config_configmap_contents_to_files: []
 openshift_daemonset_config_configmap_files: {}
 openshift_daemonset_config_configmap_literals: {}
 openshift_daemonset_config_monitoring: False
