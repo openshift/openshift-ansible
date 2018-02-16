@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.158
+Version:        3.5.159
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -276,6 +276,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Feb 16 2018 Justin Pierce <jupierce@redhat.com> 3.5.159-1
+- fix indentation of terminationGracePeriodSeconds var (jsanda@redhat.com)
+- Lowercase node names when creating certificates (vrutkovs@redhat.com)
+- Ensure that node names are lowerecased before matching (sdodson@redhat.com)
+
 * Sun Jan 28 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.5.158-1
 - 
 
