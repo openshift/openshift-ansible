@@ -27,7 +27,11 @@ storage_option = [
 [crio.api]
 
 # listen is the path to the AF_LOCAL socket on which crio will listen.
+{% if openshift.common.version_gte_3_9 %}
 listen = "/var/run/crio/crio.sock"
+{% else %}
+listen = "/var/run/crio.sock"
+{% endif %}
 
 # stream_address is the IP address on which the stream server will listen
 stream_address = ""
