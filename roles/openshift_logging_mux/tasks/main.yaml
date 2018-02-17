@@ -88,26 +88,24 @@
 - copy:
     src: fluent.conf
     dest: "{{mktemp.stdout}}/fluent-mux.conf"
-  when: fluentd_mux_config_contents is undefined
   changed_when: no
 
 - copy:
     src: secure-forward.conf
     dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
-  when: fluentd_mux_securefoward_contents is undefined
   changed_when: no
 
-- copy:
-    content: "{{fluentd_mux_config_contents}}"
-    dest: "{{mktemp.stdout}}/fluent-mux.conf"
-  when: fluentd_mux_config_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{fluentd_mux_secureforward_contents}}"
-    dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
-  when: fluentd_mux_secureforward_contents is defined
-  changed_when: no
+- include_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-mux"
+    configmap_namespace: "{{ openshift_logging_mux_namespace }}"
+    configmap_file_names:
+      - current_file: "fluent.conf"
+        new_file: "{{ tempdir }}/fluent-mux.conf"
+      - current_file: "secure-forward.conf"
+        new_file: "{{ tempdir }}/secure-forward-mux.conf"
 
 - name: Set Mux configmap
   oc_configmap:
