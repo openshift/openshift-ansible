@@ -81,6 +81,14 @@
   when:
   - stack_create|failed
 
+- name: Legacy LBaaSv2 SG OpenShift API correction
+  os_port:
+    state: present
+    name: openshift_openstack_api_lb_port_id
+    security_groups: openshift_openstack_api_lb_sg_id
+  when:
+  - openshift_openstack_api_lb_provider == "haproxy"
+
 - name: Add the new nodes to the inventory
   meta: refresh_inventory
 

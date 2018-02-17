@@ -142,16 +142,20 @@ def build_inventory():
 
         inventory['_meta']['hostvars'][server.name] = hostvars
 
-    kuryr_vars = _get_kuryr_vars(cloud)
-    if kuryr_vars:
-        inventory['OSEv3']['vars'] = kuryr_vars
-
+    stout = _get_stack_outputs(cloud)
+    if stout is not None:
+        inventory['_meta']['hostvars']['localhost'] = {
+            'openshift_openstack_api_lb_provider': stout['api_lb_provider'],
+            'openshift_openstack_api_lb_port_id': stout['api_lb_vip_port_id'],
+            'openshift_openstack_api_lb_sg_id': stout['api_lb_sg_id']}
+        kuryr_vars = _get_kuryr_vars(cloud, stout)
+        if kuryr_vars:
+            inventory['OSEv3']['vars'] = kuryr_vars
     return inventory
 
 
-def _get_kuryr_vars(cloud_client):
-    """Returns a dictionary of Kuryr variables resulting of heat stacking"""
-    # TODO: Filter the cluster stack with tags once it is supported in shade
+def _get_stack_outputs(cloud_client):
+    """Returns a dictionary with the stack outputs"""
     cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
 
     stack = cloud_client.get_stack(cluster_name)
@@ -162,7 +166,11 @@ def _get_kuryr_vars(cloud_client):
     data = {}
     for output in stack['outputs']:
         data[output['output_key']] = output['output_value']
+    return data
 
+
+def _get_kuryr_vars(cloud_client, data):
+    """Returns a dictionary of Kuryr variables resulting of heat stacking"""
     settings = {}
     settings['kuryr_openstack_pod_subnet_id'] = data['pod_subnet']
     settings['kuryr_openstack_worker_nodes_subnet_id'] = data['vm_subnet']
