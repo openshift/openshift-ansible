@@ -1,3 +1,4 @@
+{% raw %}
 #!/usr/bin/ansible-playbook
 ---
 - hosts: localhost
@@ -61,3 +62,22 @@
       with_items:
       - line: "BOOTSTRAP_CONFIG_NAME=node-config-{{ openshift_group_type }}"
         regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
+{% endraw %}
+
+{% if openshift_cloudprovider_kind | default('') == 'aws' %}
+  # need to update aws.conf file if the instance has come up in a new region
+  - name: set up aws.conf
+    block:
+    - name: get current AZ
+      uri:
+        url: http://169.254.169.254/latest/meta-data/placement/availability-zone
+        return_content: yes
+      register: aws_out
+
+    - name: set AZ in aws.conf
+      ini_file:
+        path: /etc/origin/cloudprovider/aws.conf
+        section: Global
+        option: Zone
+        value: "{% raw %}{{ aws_out.content }}{% endraw %}"
+{% endif %}
