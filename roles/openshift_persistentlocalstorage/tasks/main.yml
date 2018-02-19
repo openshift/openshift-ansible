@@ -115,7 +115,7 @@
                       fieldPath: metadata.namespace
                 - name: VOLUME_CONFIG_NAME
                   value: local-volume-provisioner-config
-                image: quay.io/external_storage/local-volume-provisioner:v1.0.1
+                image: "{{ persistentlocalstorage_provisionner_image }}"
                 name: provisioner
                 securityContext:
                   runAsUser: 0
