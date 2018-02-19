@@ -50,7 +50,7 @@ kubeletArguments:
   - "{{ openshift_node_group_labels | join(',') }}"
   enable-controller-attach-detach:
   - 'true'
-{% if openshift_node_use_persistentlocalvolumes | bool %}
+{% if openshift_node_group_use_persistentlocalvolumes | bool %}
   feature-gates:
   - PersistentLocalVolumes=true
 {% endif %}
