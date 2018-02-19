@@ -1,8 +1,6 @@
 ---
-- name: delete the node scale groups
+- name: Alert user to variables needed
   hosts: localhost
-  connection: local
-  gather_facts: yes
   tasks:
   - name: Alert user to variables needed - clusterid
     debug:
@@ -12,7 +10,10 @@
     debug:
       msg: "openshift_aws_region={{ openshift_aws_region }}"
 
-  - name: delete the node groups
+- name: Delete the master node group
+  hosts: localhost
+  tasks:
+  - name: delete masters
     import_role:
       name: openshift_aws
-      tasks_from: uninstall_nodes.yml
+      tasks_from: uninstall_masters.yml
