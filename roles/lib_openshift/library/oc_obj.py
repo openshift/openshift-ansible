@@ -34,6 +34,7 @@
 from __future__ import print_function
 import atexit
 import copy
+import fcntl
 import json
 import os
 import re
@@ -336,7 +337,9 @@ class Yedit(object):  # pragma: no cover
         tmp_filename = filename + '.yedit'
 
         with open(tmp_filename, 'w') as yfd:
+            fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
+            fcntl.flock(yfd, fcntl.LOCK_UN)
 
         os.rename(tmp_filename, filename)
 
