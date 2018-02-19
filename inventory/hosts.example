@@ -624,6 +624,8 @@ debug_level=2
 # This will create all necessary configuration to use persistent storage on nodes.
 #openshift_persistentlocalstorage_enabled=False
 #openshift_persistentlocalstorage_classes=[]
+#openshift_persistentlocalstorage_path=/mnt/local-storage
+#openshift_persistentlocalstorage_provisionner_image=quay.io/external_storage/local-volume-provisioner:v1.0.1
 
 # Logging deployment
 #
