@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.45.0%{?dist}
+Release:        0.46.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,38 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Feb 19 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.46.0
+- Tolerate OVS 2.6 in 3.10 as well (sdodson@redhat.com)
+- hosts.example: openshift_dns_ip should be node-specific (vrutkovs@redhat.com)
+- Add target mount for gluster block (m.judeikis@gmail.com)
+- Allow for overriding hosted registry_url variables (rteague@redhat.com)
+- Link to etcd v3 migration docs rather than suggesting dangerous things
+  (sdodson@redhat.com)
+- Run openshift_version for image prep (mgugino@redhat.com)
+- Remove redundant openshift_hosted_registry_network_default
+  (mgugino@redhat.com)
+- Correct the usage of bool and str (ghuang@redhat.com)
+- kernel module loading fix (m.judeikis@gmail.com)
+- add steps in bootstrap playbook to handle updating aws.conf file
+  (jdiaz@redhat.com)
+- Add cloud config variables to the sample inventory (nelluri@redhat.com)
+- Run init/facts for docker upgrade (mgugino@redhat.com)
+- quick installer: remove UPGRADE_MAPPINGS (vrutkovs@redhat.com)
+- Update quick installer to support 3.9 and 3.8 (vrutkovs@redhat.com)
+- Updating deprecation variable check to use a module for cleaner output and
+  use run_once to limit to one host. Add flag to skip dep check if desired
+  (ewolinet@redhat.com)
+- Patch only if the file exists, otherwise we should copy the file in
+  (ewolinet@redhat.com)
+- Add vsphere section for openshift_node_kubelet_args_dict (ghuang@redhat.com)
+- Correctly comparing against the current configmap when making es configmap
+  patches (ewolinet@redhat.com)
+- add uninstall playbooks for compute/infra scale groups (jdiaz@redhat.com)
+- Adding ability to pass content and create files from content.
+  (kwoodson@redhat.com)
+- Bug 1541946- waiting for master reboot now works behind bastion
+  (fabian@fabianism.us)
+
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.45.0
 - 
 
