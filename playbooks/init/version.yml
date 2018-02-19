@@ -1,7 +1,7 @@
 ---
 # NOTE: requires openshift_facts be run
 - name: Determine openshift_version to configure on first master
-  hosts: oo_first_master
+  hosts: "{{ l_openshift_version_determine_hosts | default('oo_first_master') }}"
   tasks:
   - include_role:
       name: openshift_version
