@@ -7,6 +7,7 @@
   file:
     state: directory
     path: "/etc/systemd/system/{{ openshift_service_type }}-node.service.d"
+  when: '"cloud-init" in r_openshift_node_image_prep_packages'
 
 - name: laydown systemd override
   copy:
@@ -14,6 +15,7 @@
     content: |
       [Unit]
       After=cloud-init.service
+  when: '"cloud-init" in r_openshift_node_image_prep_packages'
 
 - name: update the sysconfig to have necessary variables
   lineinfile:
