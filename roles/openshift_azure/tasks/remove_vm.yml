@@ -1,0 +1,5 @@
+---
+- name: remove virtual machine
+  azure_rm_virtualmachine:
+    state: absent
+    name: "{{ openshift_azure_vm_name }}"
