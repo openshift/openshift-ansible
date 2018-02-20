@@ -12,6 +12,7 @@
     register: g_master_config_stat
   - slurp:
       src: "{{ openshift_config_base }}/master/master-config.yaml"
+    when: g_master_config_stat.stat.exists | bool
     register: g_master_config_slurp
   - name: Set existing cluster network setting facts
     # These existing values will be checked against existing values in sanity_checks.
@@ -44,7 +45,7 @@
     set_fact:
       openshift_portal_net: hostvars[groups.oo_first_master.0].openshift_portal_net
       osm_host_subnet_length: hostvars[groups.oo_first_master.0].osm_host_subnet_length
-      osm_cluster_network_cidr: hostvars[groups.oo_first_master.0].osm_host_subnet_length
+      osm_cluster_network_cidr: hostvars[groups.oo_first_master.0].osm_cluster_network_cidr
 
 - name: Initialize cluster facts
   # l_init_fact_hosts is passed in via play during control-plane-only
