@@ -1,0 +1,12 @@
+---
+- name: Create security group that allows SSH
+  azure_rm_securitygroup:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_resource_group_name }}"
+    rules:
+      - name: SSH
+        protocol: Tcp
+        destination_port_range: 22
+        access: Allow
+        priority: 101
+        direction: Inbound

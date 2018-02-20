@@ -1,0 +1,7 @@
+---
+# this passes back provisioning_state when successful, how do I key on that?
+- name: Create Resource Group
+  azure_rm_resourcegroup:
+    name: "{{ openshift_azure_resource_group_name }}"
+    location: "{{ openshift_azure_resource_location }}"
+  when: openshift_azure_create_resource_group | bool
