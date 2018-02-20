@@ -12,6 +12,8 @@
 
 - include_tasks: systemd_units.yml
 
+- include_tasks: set_loopback_context.yml
+
 - name: Check for ca-bundle.crt
   stat:
     path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
