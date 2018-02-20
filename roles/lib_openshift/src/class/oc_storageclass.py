@@ -65,13 +65,27 @@ class OCStorageClass(OpenShiftCLI):
         return False
 
     @staticmethod
+    def provisionerNameIsFullyQualified(provisionerName):
+        pattern = re.compile('^[a-z0-9A-Z-_.]+\/[a-z0-9A-Z-_.]+$')
+        return pattern.match(provisionerName)
+
+    @staticmethod
     # pylint: disable=too-many-return-statements,too-many-branches
     # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
         '''run the ansible idempotent code'''
 
+        # Make sure that the provisioner is fully qualified before using it
+        # E.g. if 'aws-efs' is provided as a provisioner, convert it to 'kubernetes.io/aws-efs'
+        # but if the name is already qualified  (e.g. 'openshift.org/aws-efs') then leave it be.
+        rawProvisionerName = params['provisioner']
+        if OCStorageClass.provisionerNameIsFullyQualified(rawProvisionerName):
+            qualifiedProvisionerName = rawProvisionerName
+        else:
+            qualifiedProvisionerName = "kubernetes.io/{}".format(params['provisioner'])
+
         rconfig = StorageClassConfig(params['name'],
-                                     provisioner="kubernetes.io/{}".format(params['provisioner']),
+                                     provisioner=qualifiedProvisionerName,
                                      parameters=params['parameters'],
                                      annotations=params['annotations'],
                                      api_version="storage.k8s.io/{}".format(params['api_version']),
