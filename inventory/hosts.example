@@ -1,4 +1,25 @@
-# This is an example of an OpenShift-Ansible host inventory
+# This is an example of an OpenShift-Ansible host inventory that provides the
+# minimum recommended configuration for production use. This includes 3 masters,
+# two infra nodes, two compute nodes, and an haproxy load balancer to load
+# balance traffic to the API servers. For a truly production environment you
+# should use an external load balancing solution that itself is highly available.
+
+[masters]
+ose3-master[1:3].test.example.com
+
+[etcd]
+ose3-master[1:3].test.example.com
+
+[nodes]
+ose3-master[1:3].test.example.com
+ose3-infra[1:2].test.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+ose3-node[1:2].test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+[nfs]
+ose3-master1.test.example.com
+
+[lb]
+ose3-lb.test.example.com
 
 # Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
@@ -8,12 +29,10 @@ etcd
 lb
 nfs
 
-# Set variables common for all OSEv3 hosts
 [OSEv3:vars]
-# Enable unsupported configurations, things that will yield a partially
-# functioning cluster but would not be supported for production use
-#openshift_enable_unsupported_configurations=false
-
+###############################################################################
+# Common/ Required configuration variables follow                             #
+###############################################################################
 # SSH user, this user should allow ssh based auth without requiring a
 # password. If using ssh key based auth, then the key should be managed by an
 # ssh agent.
@@ -22,9 +41,6 @@ ansible_user=root
 # If ansible_user is not root, ansible_become must be set to true and the
 # user must be configured for passwordless sudo
 #ansible_become=yes
-
-# Debug level for all OpenShift components (Defaults to 2)
-debug_level=2
 
 # Specify the deployment type. Valid values are origin and openshift-enterprise.
 openshift_deployment_type=origin
@@ -36,6 +52,23 @@ openshift_deployment_type=origin
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
 openshift_release=v3.7
+
+# default subdomain to use for exposed routes, you should have wildcard dns
+# for *.apps.test.example.com that points at your infra nodes which will run
+# your router
+openshift_master_default_subdomain=apps.test.example.com
+
+#Set cluster_hostname to point at your load balancer
+openshift_master_cluster_hostname=ose3-lb.test.example.com
+
+
+
+###############################################################################
+# Additional configuration variables follow                                   #
+###############################################################################
+
+# Debug level for all OpenShift components (Defaults to 2)
+debug_level=2
 
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
@@ -202,7 +235,7 @@ openshift_release=v3.7
 #osm_etcd_image=rhel7/etcd
 
 # htpasswd auth
-openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+#openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 # Defining htpasswd users
 #openshift_master_htpasswd_users={'user1': '<pre-hashed password>', 'user2': '<pre-hashed password>'}
 # or
@@ -335,9 +368,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure api server arguments
 #osm_api_server_args={'max-requests-inflight': ['400']}
-
-# default subdomain to use for exposed routes
-#openshift_master_default_subdomain=apps.test.example.com
 
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
@@ -1113,23 +1143,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
 #openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
 
-# host group for masters
-[masters]
-ose3-master[1:3]-ansible.test.example.com
-
-[etcd]
-ose3-etcd[1:3]-ansible.test.example.com
-
-# NOTE: Containerized load balancer hosts are not yet supported, if using a global
-# containerized=true host variable we must set to false.
-[lb]
-ose3-lb-ansible.test.example.com containerized=false
-
-# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
-[nodes]
-# masters should be schedulable to run web console pods
-ose3-master[1:3]-ansible.test.example.com openshift_schedulable=True
-ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
-
-[nfs]
-ose3-nfs-ansible.test.example.com
+# Enable unsupported configurations, things that will yield a partially
+# functioning cluster but would not be supported for production use
+#openshift_enable_unsupported_configurations=false
