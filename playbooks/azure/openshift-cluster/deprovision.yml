@@ -1,0 +1,13 @@
+---
+# Warning, use with caution, this will remove all resources 
+# from the group.
+
+- name: "Create resource group"
+  hosts: localhost 
+  tasks:
+  - name: "rm resource group"
+    import_role:
+      name: openshift_azure
+      tasks_from: rm_resource_group.yml
+
+
