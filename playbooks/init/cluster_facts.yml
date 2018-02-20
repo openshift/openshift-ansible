@@ -4,12 +4,14 @@
 - name: Read first master's config network settings
   hosts: oo_first_master
   gather_facts: no
+  roles:
+  - role: openshift_facts
   tasks:
   - stat:
-      path: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      path: "{{ openshift_config_base }}/master/master-config.yaml"
     register: g_master_config_stat
   - slurp:
-      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      src: "{{ openshift_config_base }}/master/master-config.yaml"
     register: g_master_config_slurp
   - name: Set existing cluster network setting facts
     # These existing values will be checked against existing values in sanity_checks.
@@ -55,6 +57,7 @@
     openshift_facts:
       role: common
       local_facts:
+        config_base: "{{ openshift_config_base }}"
         deployment_type: "{{ openshift_deployment_type }}"
         deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
         hostname: "{{ openshift_hostname | default(None) }}"

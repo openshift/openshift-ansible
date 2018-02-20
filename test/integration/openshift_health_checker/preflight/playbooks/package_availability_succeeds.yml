@@ -8,6 +8,7 @@
 - name: Succeeds as Origin packages are public
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
   tasks:
     - block:

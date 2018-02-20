@@ -19,7 +19,7 @@ Role Variables
 | flannel_interface    | ansible_default_ipv4.interface          | interface to use for inter-host communication |
 | flannel_etcd_key     | /openshift.com/network                  | etcd prefix                                   |
 | etcd_hosts           | etcd_urls                               | a list of etcd endpoints                      |
-| etcd_cert_config_dir | {{ openshift.common.config_base }}/node | SSL certificates directory                    |
+| etcd_cert_config_dir | {{ openshift_config_base }}/node | SSL certificates directory                    |
 | etcd_peer_ca_file    | {{ etcd_conf_dir }}/ca.crt              | SSL CA to use for etcd                        |
 | etcd_peer_cert_file  | Openshift SSL cert                      | SSL cert to use for etcd                      |
 | etcd_peer_key_file   | Openshift SSL key                       | SSL key to use for etcd                       |

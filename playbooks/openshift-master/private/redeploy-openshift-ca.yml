@@ -17,39 +17,39 @@
   hosts: oo_masters_to_config
   tasks:
   - slurp:
-      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      src: "{{ openshift_config_base }}/master/master-config.yaml"
     register: g_master_config_output
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: kubeletClientInfo.ca
       yaml_value: ca-bundle.crt
     when: (g_master_config_output.content|b64decode|from_yaml).kubeletClientInfo.ca != 'ca-bundle.crt'
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: serviceAccountConfig.masterCA
       yaml_value: ca-bundle.crt
     when: (g_master_config_output.content|b64decode|from_yaml).serviceAccountConfig.masterCA != 'ca-bundle.crt'
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: oauthConfig.masterCA
       yaml_value: ca-bundle.crt
     when: (g_master_config_output.content|b64decode|from_yaml).oauthConfig.masterCA != 'ca-bundle.crt'
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: etcdClientInfo.ca
       yaml_value: ca-bundle.crt
     when:
     - groups.oo_etcd_to_config | default([]) | length == 0
     - (g_master_config_output.content|b64decode|from_yaml).etcdClientInfo.ca != 'ca-bundle.crt'
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: etcdConfig.peerServingInfo.clientCA
       yaml_value: ca-bundle.crt
     when:
     - groups.oo_etcd_to_config | default([]) | length == 0
     - (g_master_config_output.content|b64decode|from_yaml).etcdConfig.peerServingInfo.clientCA != 'ca-bundle.crt'
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: etcdConfig.servingInfo.clientCA
       yaml_value: ca-bundle.crt
     when:
@@ -58,7 +58,7 @@
   # Set servingInfo.clientCA to client-ca-bundle.crt in order to roll the CA certificate.
   # This change will be reverted in playbooks/redeploy-certificates.yml
   - modify_yaml:
-      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      dest: "{{ openshift_config_base }}/master/master-config.yaml"
       yaml_key: servingInfo.clientCA
       yaml_value: client-ca-bundle.crt
     when: (g_master_config_output.content|b64decode|from_yaml).servingInfo.clientCA != 'client-ca-bundle.crt'
@@ -68,7 +68,7 @@
   pre_tasks:
   - name: Create legacy-ca directory
     file:
-      path: "{{ openshift.common.config_base }}/master/legacy-ca"
+      path: "{{ openshift_config_base }}/master/legacy-ca"
       state: directory
       mode: 0700
       owner: root
@@ -87,8 +87,8 @@
   # - openshift_node_certificates
   - name: Copy current OpenShift CA to legacy directory
     copy:
-      src: "{{ openshift.common.config_base }}/master/{{ item }}"
-      dest: "{{ openshift.common.config_base }}/master/legacy-ca/{{ g_legacy_ca_mktemp.stdout }}-{{ item }}"
+      src: "{{ openshift_config_base }}/master/{{ item }}"
+      dest: "{{ openshift_config_base }}/master/legacy-ca/{{ g_legacy_ca_mktemp.stdout }}-{{ item }}"
       remote_src: true
     # It is possible that redeploying failed and files may be missing.
     # Ignore errors in this case. Files should have been copied to
@@ -166,7 +166,7 @@
   - name: Deploy CA certificate, key, bundle and serial
     copy:
       src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/{{ item }}"
-      dest: "{{ openshift.common.config_base }}/master/"
+      dest: "{{ openshift_config_base }}/master/"
     with_items:
     - ca.crt
     - ca.key
@@ -175,12 +175,12 @@
     - client-ca-bundle.crt
   - name: Update master client kubeconfig CA data
     kubeclient_ca:
-      client_path: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"
-      ca_path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+      client_path: "{{ openshift_config_base }}/master/openshift-master.kubeconfig"
+      ca_path: "{{ openshift_config_base }}/master/ca-bundle.crt"
   - name: Update admin client kubeconfig CA data
     kubeclient_ca:
-      client_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
-      ca_path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+      client_path: "{{ openshift_config_base }}/master/admin.kubeconfig"
+      ca_path: "{{ openshift_config_base }}/master/ca-bundle.crt"
   - name: Lookup default group for ansible_ssh_user
     command: "/usr/bin/id -g {{ ansible_ssh_user | quote }}"
     changed_when: false
@@ -197,7 +197,7 @@
     with_items: "{{ client_users }}"
   - name: Copy the admin client config(s)
     copy:
-      src: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+      src: "{{ openshift_config_base }}/master/admin.kubeconfig"
       dest: "~{{ item }}/.kube/config"
       remote_src: yes
     with_items: "{{ client_users }}"
@@ -217,11 +217,11 @@
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift_config_base ~ "/master/master.server.crt"}))
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift_config_base ~ "/master/ca-bundle.crt"}))
   # etcd
   - ('expired' not in (hostvars
       | lib_utils_oo_select_keys(groups['etcd'])
@@ -235,7 +235,7 @@
   tasks:
   - copy:
       src: "{{ hostvars['localhost'].g_master_mktemp.stdout }}/ca-bundle.crt"
-      dest: "{{ openshift.common.config_base }}/node/ca.crt"
+      dest: "{{ openshift_config_base }}/node/ca.crt"
   - name: Copy OpenShift CA to system CA trust
     copy:
       src: "{{ item.cert }}"
@@ -243,13 +243,13 @@
       remote_src: yes
     with_items:
     - id: openshift
-      cert: "{{ openshift.common.config_base }}/node/ca.crt"
+      cert: "{{ openshift_config_base }}/node/ca.crt"
     notify:
     - update ca trust
   - name: Update node client kubeconfig CA data
     kubeclient_ca:
-      client_path: "{{ openshift.common.config_base }}/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
-      ca_path: "{{ openshift.common.config_base }}/node/ca.crt"
+      client_path: "{{ openshift_config_base }}/node/system:node:{{ openshift.common.hostname }}.kubeconfig"
+      ca_path: "{{ openshift_config_base }}/node/ca.crt"
   handlers:
   # Normally this handler would restart docker after updating ca
   # trust. We'll do that when we restart nodes to avoid restarting
@@ -281,20 +281,20 @@
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/server.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift_config_base ~ "/node/server.crt"}))
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift.common.config_base ~ "/node/ca.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_nodes_to_config.0].openshift_config_base ~ "/node/ca.crt"}))
   # masters
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/master.server.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift_config_base ~ "/master/master.server.crt"}))
   - ('expired' not in hostvars
       | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
       | lib_utils_oo_collect('check_results.check_results.ocp_certs')
-      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift.common.config_base ~ "/master/ca-bundle.crt"}))
+      | lib_utils_oo_collect('health', {'path':hostvars[groups.oo_first_master.0].openshift_config_base ~ "/master/ca-bundle.crt"}))
   # etcd
   - ('expired' not in (hostvars
       | lib_utils_oo_select_keys(groups['etcd'])

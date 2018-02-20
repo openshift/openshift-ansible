@@ -7,7 +7,7 @@
 
 - name: Create cloudprovider config dir
   file:
-    path: "{{ openshift.common.config_base }}/cloudprovider"
+    path: "{{ openshift_config_base }}/cloudprovider"
     state: directory
   when: has_cloudprovider | bool
 

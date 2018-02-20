@@ -29,7 +29,7 @@
 
 - name: Copy admin client config
   command: >
-    cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    cp {{ openshift_config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
   changed_when: false
 
 - name: Copy web console templates to temp directory
@@ -66,7 +66,7 @@
   # web console config config map.
   - name: Read existing assetConfig in master-config.yaml
     slurp:
-      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      src: "{{ openshift_config_base }}/master/master-config.yaml"
     register: master_config_output
 
   - set_fact:

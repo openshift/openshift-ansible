@@ -11,7 +11,7 @@
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
   - name: Update master count
     modify_yaml:
-      dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+      dest: "{{ openshift_config_base}}/master/master-config.yaml"
       yaml_key: 'kubernetesMasterConfig.masterCount'
       yaml_value: "{{ openshift.master.master_count }}"
     notify:
@@ -31,7 +31,7 @@
   - name: verify api server
     command: >
       curl --silent --tlsv1.2
-      --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+      --cacert {{ openshift_config_base }}/master/ca-bundle.crt
       {{ openshift.master.api_url }}/healthz/ready
     args:
       # Disables the following warning:

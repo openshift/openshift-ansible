@@ -1,2 +1,2 @@
 ---
-openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+openshift_master_config_dir: "{{ openshift_config_base }}/master"

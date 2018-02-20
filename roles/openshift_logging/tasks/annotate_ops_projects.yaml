@@ -1,7 +1,7 @@
 ---
 - command: >
     {{ openshift_client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    --config={{ openshift_config_base }}/master/admin.kubeconfig
     get namespaces -o jsonpath={.items[*].metadata.name} {{ __default_logging_ops_projects | join(' ') }}
   register: __logging_ops_projects
 

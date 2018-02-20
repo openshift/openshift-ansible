@@ -83,7 +83,7 @@
   register: task_result
   until: task_result.rc == 0
   shell: >
-    {{ openshift_client_binary }} auth reconcile --config={{ openshift.common.config_base }}/master/admin.kubeconfig -f {{ mktemp.stdout}}/openshift_catalog_clusterroles.yml
+    {{ openshift_client_binary }} auth reconcile --config={{ openshift_config_base }}/master/admin.kubeconfig -f {{ mktemp.stdout}}/openshift_catalog_clusterroles.yml
 
 - oc_adm_policy_user:
     namespace: kube-service-catalog

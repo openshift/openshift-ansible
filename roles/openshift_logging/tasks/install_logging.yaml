@@ -49,7 +49,7 @@
 
 - name: Create logging cert directory
   file:
-    path: "{{ openshift.common.config_base }}/logging"
+    path: "{{ openshift_config_base }}/logging"
     state: directory
     mode: 0755
   changed_when: False
@@ -57,7 +57,7 @@
 
 - include_tasks: generate_certs.yaml
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
 
 - set_fact:
     __base_file_dir: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
@@ -93,7 +93,7 @@
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_deployment_name: "{{ outer_item.0.name }}"
     openshift_logging_elasticsearch_pvc_name: "{{ outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim.claimName if outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim is defined else openshift_logging_es_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
@@ -122,7 +122,7 @@
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_pvc_prefix }}-{{ outer_item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_pvc_size: "{{ openshift_logging_es_pvc_size }}"
@@ -157,7 +157,7 @@
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_deployment_name: "{{ outer_item.0.name }}"
     openshift_logging_elasticsearch_pvc_name: "{{ outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim.claimName if outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim is defined else openshift_logging_es_ops_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
@@ -201,7 +201,7 @@
 - include_role:
     name: openshift_logging_elasticsearch
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_elasticsearch_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_elasticsearch_pvc_name: "{{ openshift_logging_es_ops_pvc_prefix }}-{{ outer_item | int + openshift_logging_facts.elasticsearch_ops.deploymentconfigs | count - 1 }}"
     openshift_logging_elasticsearch_ops_deployment: true
@@ -235,7 +235,7 @@
 - import_role:
     name: openshift_logging_kibana
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_kibana_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_kibana_master_url: "{{ openshift_logging_master_url }}"
     openshift_logging_kibana_master_public_url: "{{ openshift_logging_master_public_url }}"
@@ -248,7 +248,7 @@
 - import_role:
     name: openshift_logging_kibana
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_kibana_ops_deployment: true
     openshift_logging_kibana_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_kibana_master_url: "{{ openshift_logging_master_url }}"
@@ -278,7 +278,7 @@
 - import_role:
     name: openshift_logging_curator
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_curator_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_curator_es_host: "{{ openshift_logging_es_host }}"
     openshift_logging_curator_es_port: "{{ openshift_logging_es_port }}"
@@ -288,7 +288,7 @@
 - import_role:
     name: openshift_logging_curator
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_curator_ops_deployment: true
     openshift_logging_curator_es_host: "{{ openshift_logging_es_ops_host }}"
     openshift_logging_curator_es_port: "{{ openshift_logging_es_ops_port }}"
@@ -306,7 +306,7 @@
 - import_role:
     name: openshift_logging_mux
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_mux_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
     openshift_logging_mux_namespace: "{{ openshift_logging_namespace }}"
     openshift_logging_mux_master_url: "{{ openshift_logging_master_url }}"
@@ -319,7 +319,7 @@
 - import_role:
     name: openshift_logging_fluentd
   vars:
-    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    generated_certs_dir: "{{openshift_config_base}}/logging"
     openshift_logging_fluentd_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
     openshift_logging_fluentd_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
     openshift_logging_fluentd_master_url: "{{ openshift_logging_master_url }}"

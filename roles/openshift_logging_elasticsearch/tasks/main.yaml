@@ -125,7 +125,7 @@
 - name: Create logging-metrics-reader-role
   command: >
     {{ openshift_client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    --config={{ openshift_config_base }}/master/admin.kubeconfig
     -n "{{ openshift_logging_elasticsearch_namespace }}"
     create -f "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
   register: prometheus_out

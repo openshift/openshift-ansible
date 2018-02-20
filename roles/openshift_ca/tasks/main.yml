@@ -80,7 +80,7 @@
   run_once: true
 
 - find:
-    paths: "{{ openshift.common.config_base }}/master/legacy-ca/"
+    paths: "{{ openshift_config_base }}/master/legacy-ca/"
     patterns: ".*-ca.crt"
     use_regex: true
   register: g_master_legacy_ca_result

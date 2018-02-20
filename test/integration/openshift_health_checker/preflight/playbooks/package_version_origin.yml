@@ -8,6 +8,7 @@
 - name: Succeeds with Origin although multiple versions are available
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
   tasks:
     - block:

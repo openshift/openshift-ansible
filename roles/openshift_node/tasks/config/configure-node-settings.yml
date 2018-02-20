@@ -9,7 +9,7 @@
   - regex: '^OPTIONS='
     line: "OPTIONS=--loglevel={{ openshift_node_debug_level }} {{ openshift_node_start_options | default('') }}"
   - regex: '^CONFIG_FILE='
-    line: "CONFIG_FILE={{ openshift.common.config_base }}/node/node-config.yaml"
+    line: "CONFIG_FILE={{ openshift_config_base }}/node/node-config.yaml"
   - regex: '^IMAGE_VERSION='
     line: "IMAGE_VERSION={{ openshift_image_tag }}"
   notify:

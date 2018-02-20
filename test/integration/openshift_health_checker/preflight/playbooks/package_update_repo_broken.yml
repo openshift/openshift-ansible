@@ -9,6 +9,7 @@
 - name: Fails when a repo definition is completely broken
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
 
   post_tasks:

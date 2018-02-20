@@ -10,6 +10,7 @@
 - name: Failure when AOS version doesn't match openshift_release
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
 
   post_tasks:
