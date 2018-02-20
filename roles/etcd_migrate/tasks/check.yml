@@ -28,7 +28,7 @@
 
 - fail:
     msg: "The etcd has at least one v3 key"
-  when: "'count' in (l_etcdctl_output.stdout | from_json) and (l_etcdctl_output.stdout | from_json).count != 0"
+  when: "( l_etcdctl_output.stdout | from_json ).count | default(0) | int == 0"
 
 
 # TODO(jchaloup): once the until loop can be used over include/block,
