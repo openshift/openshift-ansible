@@ -660,7 +660,7 @@ def map_from_pairs(source, delim="="):
     return dict(item.split(delim) for item in source.split(","))
 
 
-def lib_utils_oo_get_node_labels(source, hostvars=None):
+def lib_utils_oo_get_node_labels(source, hostvars=None, nodes=None):
     ''' Return a list of labels assigned to schedulable nodes '''
     labels = list()
 
@@ -685,6 +685,21 @@ def lib_utils_oo_get_node_labels(source, hostvars=None):
 
         # Get a list of labels from the node
         node_labels = node_vars.get('openshift_node_labels')
+        if node_labels:
+            labels.append(node_labels)
+
+    if nodes is None:
+        nodes = list()
+
+    # Filter out the unschedulable nodes
+    for node in nodes:
+        schedulable = node.get('spec').get('unschedulable')
+        # explicitly marked as unschedulable
+        if schedulable is not None:
+            continue
+
+        # Get a list of labels from the node
+        node_labels = node.get('metadata').get('labels')
         if node_labels:
             labels.append(node_labels)
 

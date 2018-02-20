@@ -11,4 +11,6 @@
     l_openshift_version_check_hosts: "all:!all"
     l_sanity_check_hosts: "{{ groups['oo_masters_to_config'] }}"
 
+- import_playbook: ../init/collect_schedulable_node_labels.yml
+
 - import_playbook: private/config.yml

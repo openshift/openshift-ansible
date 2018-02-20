@@ -1,0 +1,28 @@
+---
+# Several roles test existing node labels to determine if a component
+# has nodes to be deployed to based on the selectors for the
+# component. This playbook sets "openshift_component_nodes" which
+# contains a list of all nodes. "openshift_component_nodes" is used by
+# the openshift_facts role to update
+# "openshift_schedulable_node_labels" to contain labels for
+# schedulable nodes collected from the API.
+
+- name: Retrieve node list
+  hosts: oo_first_master
+  roles:
+  - lib_openshift
+  post_tasks:
+  - name: Retrieve node list
+    oc_obj:
+      state: list
+      kind: node
+    register: __component_nodes
+  - set_fact:
+      openshift_component_nodes: "{{ __component_nodes['results']['results'][0]['items'] | default([]) }}"
+
+- name: Update openshift_schedulable_node_labels
+  hosts: oo_first_master
+  roles:
+  # Facts must be refreshed s.t. node labels will be included in
+  # openshift_schedulable_node_labels
+  - openshift_facts
