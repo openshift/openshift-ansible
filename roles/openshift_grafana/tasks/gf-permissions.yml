@@ -1,12 +1,25 @@
 ---
-- name: Create gf user on htpasswd
-  command: htpasswd -c /etc/origin/master/htpasswd gfadmin
+- name: Create grafana user on htpasswd
+  htpasswd:
+    path: /etc/origin/master/htpasswd
+    name: "{{ grafana_user }}"
+    password: "{{ grafana_password }}"
 
-- name: Make sure master config use HTPasswdPasswordIdentityProvider
-  command: "sed -ie 's|AllowAllPasswordIdentityProvider|HTPasswdPasswordIdentityProvider\n      file: /etc/origin/master/htpasswd|' /etc/origin/master/master-config.yaml"
-
-- name: Grant permission for gfuser
-  command: oc adm policy add-cluster-role-to-user cluster-reader gfadmin
+- name: Set htpasswd provider for master-config
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    edits:
+    - key: a.identityProviders
+      update: true
+      value:
+      - challenge: true
+        login: true
+        mappingMethod: claim
+        name: allow_all
+        provider:
+          apiVersion: v1
+          kind: HTPasswdPasswordIdentityProvider
+          file: /etc/origin/master/htpasswd
 
 - name: Restart mater api
   command: systemctl restart atomic-openshift-master-api.service

@@ -1,5 +1,6 @@
 ---
-gf_body_tmp:
+grafana_base_url: https://raw.githubusercontent.com/openshift/origin/master/examples/grafana/
+datasource_payload:
   name: grafana_name
   type: prometheus
   typeLogoUrl: ''
