@@ -1,0 +1,8 @@
+---
+# this is used to set the logging variables from deprecated values to the current variables names
+# this file should be deleted once variables are no longer honored
+
+- conditional_set_fact:
+    facts: "{{ hostvars[inventory_hostname] }}"
+    vars:
+      openshift_portal_net: openshift_master_portal_net

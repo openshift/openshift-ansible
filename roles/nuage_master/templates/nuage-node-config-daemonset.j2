@@ -22,7 +22,7 @@ data:
       vsdUser: {{ vsd_user }}
       # IP address and port number of master API server
       masterApiServer: {{ api_server_url }}
-      # REST server URL 
+      # REST server URL
       nuageMonRestServer: https://{{ openshift_master_cluster_hostname }}:{{ nuage_mon_rest_server_port }}
       # Bridge name for the docker bridge
       dockerBridgeName: docker0
@@ -93,7 +93,7 @@ spec:
                   key: cni_yaml_config
             # Nuage cluster network CIDR for iptables configuration
             - name: NUAGE_CLUSTER_NW_CIDR
-              value: "{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
+              value: "{{ hostvars[groups.oo_first_master.0].osm_cluster_network_cidr }}"
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir

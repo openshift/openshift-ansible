@@ -1,4 +1,49 @@
 ---
+# We need to ensure that users provide network variables that match an already
+# configured cluster.  We don't support changing these.
+- name: Read first master's config network settings
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - stat:
+      path: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    register: g_master_config_stat
+  - slurp:
+      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    register: g_master_config_slurp
+  - name: Set existing cluster network setting facts
+    # These existing values will be checked against existing values in sanity_checks.
+    set_fact:
+      oo_first_master_osm_cluster_network_cidr: "{{ (g_master_config_slurp.content|b64decode|from_yaml).networkConfig.clusterNetworkCIDR }}"
+      oo_first_master_osm_host_subnet_length: "{{ (g_master_config_slurp.content|b64decode|from_yaml).networkConfig.hostSubnetLength }}"
+      oo_first_master_openshift_portal_net: "{{ (g_master_config_slurp.content|b64decode|from_yaml).networkConfig.serviceNetworkCIDR }}"
+    when: g_master_config_stat.stat.exists | bool
+
+  - name: Set first master openshift_portal_net
+    set_fact:
+      openshift_portal_net: "{{ oo_first_master_osm_cluster_network_cidr | default('10.128.0.0/14') }}"
+    when: openshift_portal_net is undefined
+
+  - name: Set first master osm_host_subnet_length
+    set_fact:
+      osm_host_subnet_length: "{{ oo_first_master_osm_host_subnet_length | default(9) }}"
+    when: osm_host_subnet_length is undefined
+
+  - name: Set first master osm_cluster_network_cidr
+    set_fact:
+      osm_cluster_network_cidr: "{{ oo_first_master_openshift_portal_net | default('172.30.0.0/16') }}"
+    when: osm_cluster_network_cidr is undefined
+
+- name: Set network facts for masters
+  hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
+  gather_facts: no
+  tasks:
+  - name: set all hosts to first master's network variables
+    set_fact:
+      openshift_portal_net: hostvars[groups.oo_first_master.0].openshift_portal_net
+      osm_host_subnet_length: hostvars[groups.oo_first_master.0].osm_host_subnet_length
+      osm_cluster_network_cidr: hostvars[groups.oo_first_master.0].osm_host_subnet_length
+
 - name: Initialize cluster facts
   # l_init_fact_hosts is passed in via play during control-plane-only
   # upgrades and scale-up plays; otherwise oo_all_hosts is used.
@@ -16,7 +61,7 @@
         ip: "{{ openshift_ip | default(None) }}"
         public_hostname: "{{ openshift_public_hostname | default(None) }}"
         public_ip: "{{ openshift_public_ip | default(None) }}"
-        portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
+        portal_net: "{{ openshift_portal_net | default(None) }}"
         http_proxy: "{{ openshift_http_proxy | default(None) }}"
         https_proxy: "{{ openshift_https_proxy | default(None) }}"
         no_proxy: "{{ openshift_no_proxy | default(None) }}"
