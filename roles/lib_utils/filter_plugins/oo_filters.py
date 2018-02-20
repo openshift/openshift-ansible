@@ -698,7 +698,7 @@ def lib_utils_oo_has_no_matching_selector(source, selector=None):
     if not selector:
         return False
     for item in source:
-        if selector.items() <= item.items():
+        if set(selector.items()).issubset(set(item.items())):
             # Matching selector found
             return False
     return True
