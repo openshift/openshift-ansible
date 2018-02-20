@@ -5,6 +5,7 @@
     state: restarted
   when:
   - not (master_api_service_status_changed | default(false) | bool)
+  - openshift_master_fire_handlers
   notify:
   - Verify API Server
 
@@ -17,6 +18,7 @@
   until: result.rc == 0
   when:
   - not (master_controllers_service_status_changed | default(false) | bool)
+  - openshift_master_fire_handlers
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
@@ -34,3 +36,5 @@
   retries: 120
   delay: 1
   changed_when: false
+  when:
+  - openshift_master_fire_handlers

@@ -136,7 +136,6 @@ default_r_openshift_node_image_prep_packages:
 - libselinux-python
 - conntrack-tools
 - openssl
-- cloud-init
 - iproute
 - python-dbus
 - PyYAML

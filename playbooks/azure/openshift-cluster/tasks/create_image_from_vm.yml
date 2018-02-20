@@ -1,0 +1,38 @@
+---
+- name: deallocate vm
+  azure_rm_virtualmachine:
+    name: vm
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    allocated: no
+  register: vm
+
+- name: generalize vm
+  command: >
+    az vm generalize
+    -g "{{ openshift_azure_resource_group_name }}"
+    -n vm
+
+- name: create image resource group
+  azure_rm_resourcegroup:
+    name: "{{ image_resource_group }}"
+    location: "{{ openshift_azure_resource_location }}"
+
+# Note: requires ansible 2.5
+- name: create image
+  azure_rm_image:
+    resource_group: "{{ image_resource_group }}"
+    name: "{{ image_name }}"
+    source: "{{ vm.ansible_facts.azure_vm.properties.storageProfile.osDisk.managedDisk.id }}"
+    os_type: Linux
+
+- name: calculate tags
+  set_fact:
+    final_tags: "{{ (input_image.stdout | from_json).tags | combine(image_tags) }}"
+
+- name: tag image
+  command: >
+    az resource tag
+    --resource-type Microsoft.Compute/images
+    -g "{{ image_resource_group }}"
+    -n "{{ image_name }}"
+    --tags {% for k in final_tags %}{{ k }}={{ final_tags[k] }} {% endfor %}
