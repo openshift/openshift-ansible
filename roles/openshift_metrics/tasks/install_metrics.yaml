@@ -6,6 +6,7 @@
   with_items:
     - support
     - heapster
+    - hawkular_schema_job
     - hawkular
     - cassandra
   loop_control:

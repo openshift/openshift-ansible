@@ -1,0 +1,23 @@
+---
+- name: list installed jobs
+  oc_obj:
+    state: list
+    kind: job
+    name: hawkular-metrics-schema
+    namespace: "{{ openshift_metrics_project }}"
+  register: schema_job
+
+# We cannot use oc apply here because the Job template has immutable fields
+# on which oc apply will fail.
+- name: remove hawkular-metrics-schema job
+  command: >
+    {{ openshift_client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    delete job hawkular-metrics-schema
+  register: delete_schema_job
+  when: schema_job.results.results[0] | length > 0
+
+- name: generate hawkular-metrics schema job
+  template:
+    src: hawkular_metrics_schema_job.j2
+    dest: "{{ mktemp.stdout }}/templates/hawkular_metrics_schema_job.yaml"
+  changed_when: false
