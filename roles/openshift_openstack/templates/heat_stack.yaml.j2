@@ -73,7 +73,7 @@ outputs:
 
   api_lb_vip_port_id:
     description: Id of the OpenShift API load balancer VIP port
-    value: { get_resource: api_lb }
+    value: { get_attr: [api_lb, vip_port_id] }
 
   api_lb_sg_id:
     description: Security Group Id of the OpenShift API load balancer VIP port
@@ -516,6 +516,15 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_stack_name }}
       rules:
+        # NOTE(shadower): the 53 rules are needed for Kuryr
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 53
+          port_range_max: 53
+        - direction: ingress
+          protocol: udp
+          port_range_min: 53
+          port_range_max: 53
         - direction: ingress
           protocol: tcp
           port_range_min: 10250
@@ -621,6 +630,11 @@ resources:
       name: openshift-ansible-{{ openshift_openstack_stack_name }}-lb-secgrp
       description: Security group for {{ openshift_openstack_stack_name }} cluster Load Balancer
       rules:
+      - direction: ingress
+        protocol: tcp
+        port_range_min: 443
+        port_range_max: 443
+        remote_ip_prefix: {{ openshift_openstack_lb_ingress_cidr }}
       - direction: ingress
         protocol: tcp
         port_range_min: {{ openshift_master_api_port | default(8443) }}
