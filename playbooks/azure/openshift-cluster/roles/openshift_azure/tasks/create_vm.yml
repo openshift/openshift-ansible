@@ -1,0 +1,17 @@
+---
+- name: Create virtual machine
+  azure_rm_virtualmachine:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_vm_name }}"
+    vm_size: "{{ openshift_azure_vm_size }}"
+    storage_account: "{{ openshift_azure_resource_group_name }}"
+    storage_container: openshiftbasevm
+    storage_blob: "{{ openshift_azure_vm_storage_container }}"
+    admin_username: "{{ openshift_azure_vm_admin_username }}"
+    admin_password: "{{ openshift_azure_vm_admin_password }}"
+    network_interfaces: "{{ openshift_azure_resource_group_name }}"
+    image:
+      offer: "{{ openshift_azure_vm_offer }}"
+      publisher: "{{ openshift_azure_vm_publisher }}"
+      sku: "{{ openshift_azure_vm_sku }}"
+      version: "{{ openshift_azure_vm_version }}"
