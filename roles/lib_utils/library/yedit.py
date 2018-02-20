@@ -30,7 +30,8 @@
 
 from __future__ import print_function  # noqa: F401
 import copy  # noqa: F401
-import json  # noqa: F401
+import fcntl  # noqa: F401
+import json   # noqa: F401
 import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
@@ -391,7 +392,9 @@ class Yedit(object):
         tmp_filename = filename + '.yedit'
 
         with open(tmp_filename, 'w') as yfd:
+            fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
+            fcntl.flock(yfd, fcntl.LOCK_UN)
 
         os.rename(tmp_filename, filename)
 
