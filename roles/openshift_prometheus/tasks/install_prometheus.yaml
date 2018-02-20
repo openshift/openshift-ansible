@@ -39,6 +39,13 @@
     namespace: "{{ openshift_prometheus_namespace }}"
   changed_when: no
 
+# serviceaccount reader
+- name: create openshift_prometheus_reader_serviceaccount_name serviceaccount
+  oc_serviceaccount:
+    state: present
+    name: "{{ openshift_prometheus_reader_serviceaccount_name }}"
+    namespace: "{{ openshift_prometheus_namespace }}"
+  changed_when: no
 
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
@@ -56,6 +63,15 @@
     resource_kind: cluster-role
     resource_name: cluster-reader
     user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:{{ openshift_prometheus_service_name }}"
+
+# create view role for prometheus-reader serviceaccount
+- name: Set view permissions for prometheus reader
+  oc_adm_policy_user:
+    state: present
+    namespace: "{{ openshift_prometheus_namespace }}"
+    resource_kind: cluster-role
+    resource_name: view
+    user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:{{ openshift_prometheus_reader_serviceaccount_name }}"
 
 
 - name: create services for prometheus
