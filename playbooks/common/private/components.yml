@@ -20,9 +20,7 @@
 - import_playbook: ../../openshift-hosted/private/config.yml
 
 - import_playbook: ../../openshift-web-console/private/config.yml
-  when:
-    - openshift_web_console_install | default(true) | bool
-    - openshift.common.version_gte_3_9
+  when: openshift_web_console_install | default(true) | bool
 
 - import_playbook: ../../openshift-metrics/private/config.yml
   when: openshift_metrics_install_metrics | default(false) | bool

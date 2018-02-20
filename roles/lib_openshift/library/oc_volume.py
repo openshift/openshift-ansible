@@ -237,14 +237,35 @@ class Yedit(object):  # pragma: no cover
 
         return True
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def remove_entry(data, key, sep='.'):
+    def remove_entry(data, key, index=None, value=None, sep='.'):
         ''' remove data at location key '''
         if key == '' and isinstance(data, dict):
-            data.clear()
+            if value is not None:
+                data.pop(value)
+            elif index is not None:
+                raise YeditException("remove_entry for a dictionary does not have an index {}".format(index))
+            else:
+                data.clear()
+
             return True
+
         elif key == '' and isinstance(data, list):
-            del data[:]
+            ind = None
+            if value is not None:
+                try:
+                    ind = data.index(value)
+                except ValueError:
+                    return False
+            elif index is not None:
+                ind = index
+            else:
+                del data[:]
+
+            if ind is not None:
+                data.pop(ind)
+
             return True
 
         if not (key and Yedit.valid_key(key, sep)) and \
@@ -496,7 +517,7 @@ class Yedit(object):  # pragma: no cover
 
         return (False, self.yaml_dict)
 
-    def delete(self, path):
+    def delete(self, path, index=None, value=None):
         ''' remove path from a dict'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
@@ -506,7 +527,7 @@ class Yedit(object):  # pragma: no cover
         if entry is None:
             return (False, self.yaml_dict)
 
-        result = Yedit.remove_entry(self.yaml_dict, path, self.separator)
+        result = Yedit.remove_entry(self.yaml_dict, path, index, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
 
@@ -787,7 +808,7 @@ class Yedit(object):  # pragma: no cover
             if params['update']:
                 rval = yamlfile.pop(params['key'], params['value'])
             else:
-                rval = yamlfile.delete(params['key'])
+                rval = yamlfile.delete(params['key'], params['index'], params['value'])
 
             if rval[0] and params['src']:
                 yamlfile.write()
