@@ -10,14 +10,29 @@
   with_items: "{{ openshift_aws_current_asgs if openshift_aws_current_asgs != [] else openshift_aws_asgs_to_remove }}"
   register: qasg
 
-- name: remove non-master scale groups
+- set_fact:
+    l_asgs_to_remove: []
+
+- name: protect masters from deletion
+  set_fact:
+    l_asgs_to_remove: "{{ [item.results[0]] | union(l_asgs_to_remove) }}"
+  with_items: "{{ qasg.results }}"
+  when:
+  - item.results != []
+  - "'master' not in item.results[0].auto_scaling_group_name"
+  - openshift_aws_protect_masters_from_deletion
+
+- debug:
+    var: l_asgs_to_remove
+  verbosity: 1
+
+- name: remove scale groups
   ec2_asg:
     region: "{{ openshift_aws_region }}"
     state: absent
     name: "{{ item.auto_scaling_group_name }}"
-  when: "'master'  not in item.auto_scaling_group_name"
   register: asg_results
-  with_items: "{{ qasg | json_query('results[*]') | sum(attribute='results', start=[]) }}"
+  with_items: "{{ l_asgs_to_remove }}"
   async: 600
   poll: 0
 
@@ -28,3 +43,10 @@
   with_items: "{{ asg_results.results }}"
   until: jobs_results.finished
   retries: 200
+
+- name: remove launch configs
+  ec2_lc:
+    name: "{{ item.launch_configuration_name }}"
+    state: absent
+    region: "{{ openshift_aws_region }}"
+  with_items: "{{ l_asgs_to_remove }}"

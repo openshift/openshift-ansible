@@ -325,3 +325,5 @@ openshift_aws_enable_uninstall_shared_objects: False
 # name in the meantime). Default to just emptying the contents of the S3
 # bucket if we've been asked to create the bucket during provisioning.
 openshift_aws_really_delete_s3_bucket: False
+# Protect master scale groups from deletion by default
+openshift_aws_protect_masters_from_deletion: True
