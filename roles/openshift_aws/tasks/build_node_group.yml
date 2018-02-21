@@ -2,7 +2,9 @@
 # When openshift_aws_use_custom_ami is '' then
 # we retrieve the latest build AMI.
 # Then set openshift_aws_ami to the ami.
-- when: openshift_aws_ami == ''
+- when:
+  - openshift_aws_ami == ''
+  - openshift_aws_node_group.group not in openshift_aws_ami_map
   block:
   - name: fetch recently created AMI
     ec2_ami_find:
