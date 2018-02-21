@@ -1,10 +1,11 @@
 ---
 - name: Ensure that Cassandra has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for cassandra - '{{ openshift_metrics_cassandra_nodeselector }}'
-  when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_metrics_cassandra_nodeselector)
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_metrics_cassandra_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Cassandra
 
 - shell: >
     {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}

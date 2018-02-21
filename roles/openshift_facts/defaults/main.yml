@@ -100,6 +100,3 @@ openshift_service_type_dict:
   openshift-enterprise: atomic-openshift
 
 openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
-
-# Create a list of node labels (dict) for schedulable nodes
-openshift_schedulable_node_labels: "{{ groups['oo_nodes_to_config'] | lib_utils_oo_get_node_labels(hostvars) }}"

@@ -9,11 +9,12 @@
     loop_var: var_file_name
 
 - name: Ensure that Kibana has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for Kibana - '{{ openshift_logging_kibana_nodeselector }}'
-  when:
-    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_kibana_nodeselector)
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_logging_kibana_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Kibana
 
 - name: Set kibana image facts
   set_fact:
