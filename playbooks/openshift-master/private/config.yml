@@ -207,11 +207,9 @@
       tasks_from: master
     when: openshift_use_kuryr | default(false) | bool
 
-  - name: Setup the node group config maps
-    import_role:
-      name: openshift_node_group
+  - name: setup bootstrap settings
+    include_tasks: tasks/enable_bootstrap.yml
     when: openshift_master_bootstrap_enabled | default(false) | bool
-    run_once: True
 
   post_tasks:
   - name: Create group for deployment type
