@@ -1,4 +1,11 @@
 ---
+- name: Ensure that Heapster has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for heapster - '{{ openshift_metrics_heapster_nodeselector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_metrics_heapster_nodeselector)
+
 - command: >
     {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
@@ -20,8 +27,8 @@
 - set_fact:
     heapster_sa_secrets: "{{ heapster_sa_secrets + [item] }}"
   with_items:
-    - hawkular-metrics-certs
-    - hawkular-metrics-account
+  - hawkular-metrics-certs
+  - hawkular-metrics-account
   when: not openshift_metrics_heapster_standalone | bool
 
 - name: Generating serviceaccount for heapster
@@ -38,7 +45,7 @@
   vars:
     obj_name: heapster
     ports:
-      - {port: 80, targetPort: http-endpoint}
+    - {port: 80, targetPort: http-endpoint}
     selector:
       name: "{{obj_name}}"
     annotations:
@@ -61,9 +68,9 @@
       kind: ClusterRole
       name: cluster-reader
     subjects:
-      - kind: ServiceAccount
-        name: heapster
-        namespace: "{{ openshift_metrics_project }}"
+    - kind: ServiceAccount
+      name: heapster
+      namespace: "{{ openshift_metrics_project }}"
   changed_when: no
 
 - include_tasks: generate_heapster_secrets.yaml

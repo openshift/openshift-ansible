@@ -15,6 +15,7 @@ openshift_prometheus_node_selector: {"region":"infra"}
 openshift_prometheus_service_port: 443
 openshift_prometheus_service_targetport: 8443
 openshift_prometheus_service_name: prometheus
+openshift_prometheus_reader_serviceaccount_name: prometheus-reader
 openshift_prometheus_alerts_service_targetport: 9443
 openshift_prometheus_alerts_service_name: alerts
 openshift_prometheus_alertmanager_service_targetport: 10443

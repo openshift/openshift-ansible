@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Eldad Marciano
-  description: Setup grafana pod
+  description: Setup grafana for openshift and node exporter dashboarding
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
   min_ansible_version: 2.3

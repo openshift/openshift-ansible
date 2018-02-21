@@ -119,6 +119,12 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             unreachable = [reg for reg, reachable in self.reachable_registries.items() if not reachable]
             unreachable_msg = "Failed connecting to: {}\n".format(", ".join(unreachable))
             blocked_msg = "Blocked registries: {}\n".format(", ".join(self.registries["blocked"]))
+            missing = ",\n    ".join(sorted(unavailable_images))
+            if six.PY2:
+                unreachable_msg = unreachable_msg.encode('utf8')
+                blocked_msg = blocked_msg.encode('utf8')
+                missing = missing.encode('utf8')
+
             msg = (
                 "One or more required container images are not available:\n    {missing}\n"
                 "Checked with: {cmd}\n"
@@ -126,7 +132,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 "{blocked}"
                 "{unreachable}"
             ).format(
-                missing=",\n    ".join(sorted(unavailable_images)),
+                missing=missing,
                 cmd=self.skopeo_example_command,
                 registries=", ".join(self.registries["configured"]),
                 blocked=blocked_msg if self.registries["blocked"] else "",
@@ -262,6 +268,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 self.reachable_registries[registry] = self.connect_to_registry(registry)
             if not self.reachable_registries[registry]:
                 continue  # do not keep trying unreachable registries
+
+            if six.PY2:
+                registry = registry.encode('utf8')
+                image = image.encode('utf8')
 
             args = dict(
                 proxyvars=self.skopeo_proxy_vars,

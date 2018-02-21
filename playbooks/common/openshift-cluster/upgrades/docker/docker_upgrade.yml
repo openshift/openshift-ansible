@@ -7,6 +7,26 @@
 
 - import_playbook: ../initialize_nodes_to_upgrade.yml
 
+- import_playbook: ../../../../init/basic_facts.yml
+  vars:
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_upgrade"
+
+- import_playbook: ../../../../init/cluster_facts.yml
+  vars:
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_upgrade"
+
+# We need version for sanity_checks, but we don't need to actually check if
+# packages/images are available because we're not install any origin components.
+- import_playbook: ../../../../init/version.yml
+  vars:
+    l_openshift_version_set_hosts: "oo_etcd_to_config:oo_nodes_to_upgrade:oo_masters_to_config:!oo_first_master"
+    l_openshift_version_check_hosts: "all:!all"
+
+# Ensure inventory sanity_checks are run.
+- import_playbook: ../../../../init/sanity_checks.yml
+  vars:
+    l_sanity_check_hosts: "{{ groups['oo_nodes_to_upgrade'] | union(groups['oo_masters_to_config']) | union(groups['oo_etcd_to_config']) }}"
+
 - name: Check for appropriate Docker versions
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   roles:
@@ -19,7 +39,7 @@
   - import_role:
       name: container_runtime
       tasks_from: docker_upgrade_check.yml
-    when: docker_upgrade is not defined or docker_upgrade | bool
+    when: docker_upgrade | default(True) | bool
 
 
 # If a node fails, halt everything, the admin will need to clean up and we
@@ -56,7 +76,10 @@
       --force --delete-local-data --ignore-daemonsets
       --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
+    - inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result
     until: not (l_docker_upgrade_drain_result is failed)
     retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
@@ -66,7 +89,9 @@
     - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   - include_tasks: tasks/upgrade.yml
-    when: l_docker_upgrade is defined and l_docker_upgrade | bool
+    when:
+    - l_docker_upgrade is defined
+    - l_docker_upgrade | bool
 
   - name: Set node schedulability
     oc_adm_manage_node:

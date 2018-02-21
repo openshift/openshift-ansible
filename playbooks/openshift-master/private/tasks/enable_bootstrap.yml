@@ -1,0 +1,20 @@
+---
+- name: Setup the master bootstrap settings
+  import_role:
+    name: openshift_master
+    tasks_from: bootstrap_settings.yml
+
+- name: Setup the bootstrap kubeconfig
+  import_role:
+    name: openshift_master
+    tasks_from: bootstrap.yml
+
+- name: Setup the node group config maps
+  import_role:
+    name: openshift_node_group
+  run_once: True
+
+- name: Setup the node bootstrap auto approver
+  import_role:
+    name: openshift_bootstrap_autoapprover
+  run_once: True

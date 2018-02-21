@@ -1,7 +1,0 @@
----
-- name: Verify 3.8 specific upgrade checks
-  hosts: oo_first_master
-  roles:
-  - { role: lib_openshift }
-  tasks:
-  - debug: msg="noop"

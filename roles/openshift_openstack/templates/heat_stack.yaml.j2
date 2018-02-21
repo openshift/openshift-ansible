@@ -78,22 +78,10 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_stack_name }}
       network: { get_resource: net }
-      cidr:
-        str_replace:
-          template: subnet_24_prefix.0/24
-          params:
-            subnet_24_prefix: {{ openshift_openstack_subnet_prefix }}
+      cidr: {{ openshift_openstack_subnet_cidr }}
       allocation_pools:
-        - start:
-            str_replace:
-              template: subnet_24_prefix.3
-              params:
-                subnet_24_prefix: {{ openshift_openstack_subnet_prefix }}
-          end:
-            str_replace:
-              template: subnet_24_prefix.254
-              params:
-                subnet_24_prefix: {{ openshift_openstack_subnet_prefix }}
+        - start: {{ openshift_openstack_pool_start }}
+          end: {{ openshift_openstack_pool_end }}
       dns_nameservers:
 {% for nameserver in openshift_openstack_dns_nameservers %}
         - {{ nameserver }}
@@ -261,7 +249,7 @@ resources:
           protocol: tcp
           port_range_min: 30000
           port_range_max: 32767
-          remote_ip_prefix: "{{ openshift_openstack_subnet_prefix }}.0/24"
+          remote_ip_prefix: "{{ openshift_openstack_subnet_cidr }}"
 {% else %}
   master-secgrp:
     type: OS::Neutron::SecurityGroup
@@ -393,7 +381,7 @@ resources:
           protocol: tcp
           port_range_min: 30000
           port_range_max: 32767
-          remote_ip_prefix: "{{ openshift_openstack_subnet_prefix }}.0/24"
+          remote_ip_prefix: "{{ openshift_openstack_subnet_cidr }}"
 {% endif %}
 
   infra-secgrp:

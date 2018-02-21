@@ -35,6 +35,15 @@ objects:
         - name: glusterfs
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
           imagePullPolicy: IfNotPresent
+          env:
+          - name: GB_GLFS_LRU_COUNT
+            value: "${GB_GLFS_LRU_COUNT}"
+          - name: TCMU_LOGDIR
+            value: "${TCMU_LOGDIR}"
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
           volumeMounts:
           - name: glusterfs-heketi
             mountPath: "/var/lib/heketi"
@@ -58,6 +67,8 @@ objects:
           - name: glusterfs-ssl
             mountPath: "/etc/ssl"
             readOnly: true
+          - name: glusterfs-target
+            mountPath: "/etc/target"
           securityContext:
             capabilities: {}
             privileged: true
@@ -83,7 +94,6 @@ objects:
             periodSeconds: 25
             successThreshold: 1
             failureThreshold: 15
-          resources: {}
           terminationMessagePath: "/dev/termination-log"
         volumes:
         - name: glusterfs-heketi
@@ -115,6 +125,9 @@ objects:
         - name: glusterfs-ssl
           hostPath:
             path: "/etc/ssl"
+        - name: glusterfs-target
+          hostPath:
+            path: "/etc/target"
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         dnsPolicy: ClusterFirst
@@ -134,3 +147,13 @@ parameters:
   displayName: GlusterFS cluster name
   description: A unique name to identify which heketi service manages this cluster, useful for running multiple heketi instances
   value: storage
+- name: GB_GLFS_LRU_COUNT
+  displayName: Maximum number of block hosting volumes
+  description: This value is to set maximum number of block hosting volumes.
+  value: "15"
+  required: true
+- name: TCMU_LOGDIR
+  displayName: Tcmu runner log directory
+  description: This value is to set tcmu runner log directory
+  value: "/var/log/glusterfs/gluster-block"
+  required: true

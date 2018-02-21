@@ -34,6 +34,7 @@
 from __future__ import print_function
 import atexit
 import copy
+import fcntl
 import json
 import os
 import re
@@ -159,14 +160,35 @@ class Yedit(object):  # pragma: no cover
 
         return True
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def remove_entry(data, key, sep='.'):
+    def remove_entry(data, key, index=None, value=None, sep='.'):
         ''' remove data at location key '''
         if key == '' and isinstance(data, dict):
-            data.clear()
+            if value is not None:
+                data.pop(value)
+            elif index is not None:
+                raise YeditException("remove_entry for a dictionary does not have an index {}".format(index))
+            else:
+                data.clear()
+
             return True
+
         elif key == '' and isinstance(data, list):
-            del data[:]
+            ind = None
+            if value is not None:
+                try:
+                    ind = data.index(value)
+                except ValueError:
+                    return False
+            elif index is not None:
+                ind = index
+            else:
+                del data[:]
+
+            if ind is not None:
+                data.pop(ind)
+
             return True
 
         if not (key and Yedit.valid_key(key, sep)) and \
@@ -281,7 +303,9 @@ class Yedit(object):  # pragma: no cover
         tmp_filename = filename + '.yedit'
 
         with open(tmp_filename, 'w') as yfd:
+            fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
+            fcntl.flock(yfd, fcntl.LOCK_UN)
 
         os.rename(tmp_filename, filename)
 
@@ -300,10 +324,16 @@ class Yedit(object):  # pragma: no cover
             pass
 
         # Try to use RoundTripDumper if supported.
-        try:
-            Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
-        except AttributeError:
-            Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
+        if self.content_type == 'yaml':
+            try:
+                Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+            except AttributeError:
+                Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
+        elif self.content_type == 'json':
+            Yedit._write(self.filename, json.dumps(self.yaml_dict, indent=4, sort_keys=True))
+        else:
+            raise YeditException('Unsupported content_type: {}.'.format(self.content_type) +
+                                 'Please specify a content_type of yaml or json.')
 
         return (True, self.yaml_dict)
 
@@ -351,7 +381,7 @@ class Yedit(object):  # pragma: no cover
 
                 # Try to use RoundTripLoader if supported.
                 try:
-                    self.yaml_dict = yaml.safe_load(contents, yaml.RoundTripLoader)
+                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
                 except AttributeError:
                     self.yaml_dict = yaml.safe_load(contents)
 
@@ -410,7 +440,7 @@ class Yedit(object):  # pragma: no cover
 
         return (False, self.yaml_dict)
 
-    def delete(self, path):
+    def delete(self, path, index=None, value=None):
         ''' remove path from a dict'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
@@ -420,7 +450,7 @@ class Yedit(object):  # pragma: no cover
         if entry is None:
             return (False, self.yaml_dict)
 
-        result = Yedit.remove_entry(self.yaml_dict, path, self.separator)
+        result = Yedit.remove_entry(self.yaml_dict, path, index, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
 
@@ -596,7 +626,12 @@ class Yedit(object):  # pragma: no cover
 
         curr_value = invalue
         if val_type == 'yaml':
-            curr_value = yaml.load(invalue)
+            try:
+                # AUDIT:maybe-no-member makes sense due to different yaml libraries
+                # pylint: disable=maybe-no-member
+                curr_value = yaml.safe_load(invalue, Loader=yaml.RoundTripLoader)
+            except AttributeError:
+                curr_value = yaml.safe_load(invalue)
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -665,6 +700,7 @@ class Yedit(object):  # pragma: no cover
         '''perform the idempotent crud operations'''
         yamlfile = Yedit(filename=params['src'],
                          backup=params['backup'],
+                         content_type=params['content_type'],
                          separator=params['separator'])
 
         state = params['state']
@@ -695,7 +731,7 @@ class Yedit(object):  # pragma: no cover
             if params['update']:
                 rval = yamlfile.pop(params['key'], params['value'])
             else:
-                rval = yamlfile.delete(params['key'])
+                rval = yamlfile.delete(params['key'], params['index'], params['value'])
 
             if rval[0] and params['src']:
                 yamlfile.write()

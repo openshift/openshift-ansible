@@ -130,7 +130,7 @@
     # Step 2: Set a fact to be used to determine if we should run the redeploy of registry certs
     - name: set a fact to include the registry certs playbook if needed
       set_fact:
-        openshift_hosted_rollout_certs_and_registry: "{{ cert_output.rc == 0  }}"
+        openshift_hosted_rollout_certs_and_registry: "{{ cert_output.rc != 0  }}"
 
 # Run the redeploy certs based upon the certificates. Defaults to False for insecure registries
 - when: (hostvars[groups.oo_first_master.0].openshift_hosted_rollout_certs_and_registry | default(False)) | bool
@@ -165,3 +165,10 @@
       msg: "WARNING the shared-resource-viewer role could not be upgraded to 3.6 spec because it's marked protected, please see https://bugzilla.redhat.com/show_bug.cgi?id=1493213"
     when:
     - __shared_resource_viewer_protected | default(false)
+
+- name: Upgrade Service Catalog
+  hosts: oo_first_master
+  roles:
+  - role: openshift_service_catalog
+    when:
+    - openshift_enable_service_catalog | default(true) | bool

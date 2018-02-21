@@ -273,6 +273,38 @@ openshift_openstack_cluster_node_labels:
     mylabel: myvalue
 ```
 
+`openshift_openstack_provision_user_commands` allows users to execute
+shell commands via cloud-init for all of the created Nova servers in
+the Heat stack, before they are available for SSH connections.
+Note that you should use custom ansible playbooks whenever
+possible, like this `provision_install_custom.yml` example playbook:
+```
+- import_playbook: openshift-ansible/playbooks/openstack/openshift-cluster/provision.yml
+
+- name: My custom actions
+  hosts: cluster_hosts
+  tasks:
+  - do whatever you want here
+
+- import_playbook: openshift-ansible/playbooks/openstack/openshift-cluster/install.yml
+```
+The playbook leverages a two existing provider interfaces: `provision.yml` and
+`install.yml`. For some cases, like SSH keys configuration and coordinated reboots of
+servers, the cloud-init runcmd directive may be a better choice though. User specified
+shell commands for cloud-init need to be either strings or lists, for example:
+```
+- openshift_openstack_provision_user_commands:
+  - set -vx
+  - systemctl stop sshd # fences off ansible playbooks as we want to reboot later
+  - ['echo', 'foo', '>', '/tmp/foo']
+  - [ ls, /tmp/foo, '||', true ]
+  - reboot # unfences ansible playbooks to continue after reboot
+```
+
+**Note** To protect Nova servers from recreating when the user-data changes via
+`openshift_openstack_provision_user_commands`, the
+`user_data_update_policy` parameter configured to `IGNORE` for Heat resources.
+
 The `openshift_openstack_nodes_to_remove` allows you to specify the numerical indexes
 of App nodes that should be removed; for example, ['0', '2'],
 

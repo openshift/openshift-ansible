@@ -1,6 +1,7 @@
 ---
 - name: Perform OpenShift ServiceAccount config
   include_tasks: serviceaccount.yaml
+  run_once: true
 
 - name: Create kuryr manifests tempdir
   command: mktemp -d
@@ -32,6 +33,7 @@
     namespace: "{{ kuryr_namespace }}"
     files:
     - "{{ manifests_tmpdir.stdout }}/configmap.yaml"
+  run_once: true
 
 - name: Apply Controller Deployment manifest
   oc_obj:
@@ -41,6 +43,7 @@
     namespace: "{{ kuryr_namespace }}"
     files:
     - "{{ manifests_tmpdir.stdout }}/controller-deployment.yaml"
+  run_once: true
 
 - name: Apply kuryr-cni DaemonSet manifest
   oc_obj:
@@ -50,3 +53,4 @@
     namespace: "{{ kuryr_namespace }}"
     files:
     - "{{ manifests_tmpdir.stdout }}/cni-daemonset.yaml"
+  run_once: true

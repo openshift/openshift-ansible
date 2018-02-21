@@ -54,6 +54,12 @@ class ActionModule(ActionBase):
     def template_var(self, hostvars, host, varname):
         """Retrieve a variable from hostvars and template it.
            If undefined, return None type."""
+        # We will set the current host and variable checked for easy debugging
+        # if there are any unhandled exceptions.
+        # pylint: disable=W0201
+        self.last_checked_var = varname
+        # pylint: disable=W0201
+        self.last_checked_host = host
         res = hostvars[host].get(varname)
         if res is None:
             return None
@@ -156,6 +162,11 @@ class ActionModule(ActionBase):
         # pylint: disable=W0201
         self.task_vars = task_vars or {}
 
+        # pylint: disable=W0201
+        self.last_checked_host = "none"
+        # pylint: disable=W0201
+        self.last_checked_var = "none"
+
         # self._task.args holds task parameters.
         # check_hosts is a parameter to this plugin, and should provide
         # a list of hosts.
@@ -172,7 +183,13 @@ class ActionModule(ActionBase):
 
         # We loop through each host in the provided list check_hosts
         for host in check_hosts:
-            self.run_checks(hostvars, host)
+            try:
+                self.run_checks(hostvars, host)
+            except Exception as uncaught_e:
+                msg = "last_checked_host: {}, last_checked_var: {};"
+                msg = msg.format(self.last_checked_host, self.last_checked_var)
+                msg += str(uncaught_e)
+                raise errors.AnsibleModuleError(msg)
 
         result["changed"] = False
         result["failed"] = False

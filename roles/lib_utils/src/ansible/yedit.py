@@ -13,7 +13,7 @@ def main():
             debug=dict(default=False, type='bool'),
             src=dict(default=None, type='str'),
             content=dict(default=None),
-            content_type=dict(default='dict', choices=['dict']),
+            content_type=dict(default='yaml', choices=['yaml', 'json']),
             key=dict(default='', type='str'),
             value=dict(),
             value_type=dict(default='', type='str'),

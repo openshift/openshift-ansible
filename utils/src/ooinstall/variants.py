@@ -39,18 +39,20 @@ class Variant(object):
 
 # WARNING: Keep the versions ordered, most recent first:
 OSE = Variant('openshift-enterprise', 'OpenShift Container Platform', [
-    Version('3.6', 'openshift-enterprise'),
+    Version('3.9', 'openshift-enterprise'),
 ])
 
 REG = Variant('openshift-enterprise', 'Registry', [
-    Version('3.6', 'openshift-enterprise', 'registry'),
+    Version('3.9', 'openshift-enterprise', 'registry'),
 ])
 
 origin = Variant('origin', 'OpenShift Origin', [
-    Version('3.6', 'origin'),
+    Version('3.9', 'origin'),
 ])
 
 LEGACY = Variant('openshift-enterprise', 'OpenShift Container Platform', [
+    Version('3.7', 'openshift-enterprise'),
+    Version('3.6', 'openshift-enterprise'),
     Version('3.5', 'openshift-enterprise'),
     Version('3.4', 'openshift-enterprise'),
     Version('3.3', 'openshift-enterprise'),
