@@ -1,6 +1,6 @@
 ---
 - name: Create heketi DB volume
-  command: "{{ glusterfs_heketi_client }} setup-openshift-heketi-storage --listfile /tmp/heketi-storage.json"
+  command: "{{ glusterfs_heketi_client }} setup-openshift-heketi-storage --image {{ glusterfs_heketi_image}}:{{ glusterfs_heketi_version }} --listfile /tmp/heketi-storage.json"
   register: setup_storage
 
 - name: Copy heketi-storage list
