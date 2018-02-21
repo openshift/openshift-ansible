@@ -4,6 +4,7 @@
 """
 Custom filters for use in openshift-ansible
 """
+import ast
 import json
 import os
 import pdb
@@ -248,6 +249,15 @@ def lib_utils_oo_dict_to_keqv_list(data):
         Return data:
         ['a=1', 'b=2']
     """
+    if not isinstance(data, dict):
+        try:
+            # This will attempt to convert something that looks like a string
+            # representation of a dictionary (including json) into a dictionary.
+            data = ast.literal_eval(data)
+        except ValueError:
+            msg = "|failed expects first param is a dict. Got {}. Type: {}"
+            msg = msg.format(str(data), str(type(data)))
+            raise errors.AnsibleFilterError(msg)
     return ['='.join(str(e) for e in x) for x in data.items()]
 
 
