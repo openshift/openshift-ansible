@@ -133,6 +133,12 @@ options:
     required: false
     default: None
     aliases: []
+  field_selector:
+    description:
+    - Field selector that gets added to the query.
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
@@ -977,12 +983,18 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, name=None, selector=None):
+    def _get(self, resource, name=None, selector=None, field_selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
+
         if selector is not None:
             cmd.append('--selector={}'.format(selector))
-        elif name is not None:
+
+        if field_selector is not None:
+            cmd.append('--field-selector={}'.format(field_selector))
+
+        # Name cannot be used with selector or field_selector.
+        if selector is None and field_selector is None and name is not None:
             cmd.append(name)
 
         cmd.extend(['-o', 'json'])
@@ -1456,17 +1468,19 @@ class OCObject(OpenShiftCLI):
                  selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False,
-                 all_namespaces=False):
+                 all_namespaces=False,
+                 field_selector=None):
         ''' Constructor for OpenshiftOC '''
         super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
         self.name = name
         self.selector = selector
+        self.field_selector = field_selector
 
     def get(self):
         '''return a kind by name '''
-        results = self._get(self.kind, name=self.name, selector=self.selector)
+        results = self._get(self.kind, name=self.name, selector=self.selector, field_selector=self.field_selector)
         if (results['returncode'] != 0 and 'stderr' in results and
                 '\"{}\" not found'.format(self.name) in results['stderr']):
             results['returncode'] = 0
@@ -1555,7 +1569,8 @@ class OCObject(OpenShiftCLI):
                          params['selector'],
                          kubeconfig=params['kubeconfig'],
                          verbose=params['debug'],
-                         all_namespaces=params['all_namespaces'])
+                         all_namespaces=params['all_namespaces'],
+                         field_selector=params['field_selector'])
 
         state = params['state']
 
@@ -1676,8 +1691,9 @@ def main():
             content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
             selector=dict(default=None, type='str'),
+            field_selector=dict(default=None, type='str'),
         ),
-        mutually_exclusive=[["content", "files"], ["selector", "name"]],
+        mutually_exclusive=[["content", "files"], ["selector", "name"], ["field_selector", "name"]],
 
         supports_check_mode=True,
     )

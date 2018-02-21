@@ -965,12 +965,18 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, name=None, selector=None):
+    def _get(self, resource, name=None, selector=None, field_selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
+
         if selector is not None:
             cmd.append('--selector={}'.format(selector))
-        elif name is not None:
+
+        if field_selector is not None:
+            cmd.append('--field-selector={}'.format(field_selector))
+
+        # Name cannot be used with selector or field_selector.
+        if selector is None and field_selector is None and name is not None:
             cmd.append(name)
 
         cmd.extend(['-o', 'json'])
