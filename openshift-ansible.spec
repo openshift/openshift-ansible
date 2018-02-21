@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.46.0%{?dist}
+Release:        0.47.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,28 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 20 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.47.0
+- Update API healthz check to use uri module (mkhan@redhat.com)
+- fixed an oo_filter plugin lib_utils_oo_has_no_matching_selector to do set
+  comparison (mwoodson@redhat.com)
+- Grafana roles updates. (mrsiano@gmail.com)
+- add deprovision playbook for cluster-operator infrastructure
+  (jdiaz@redhat.com)
+- Add tox test to check for invalid playbook include (rteague@redhat.com)
+- Change openshift.common.hostname to inventory_hostname (mgugino@redhat.com)
+- Fix openshift-webconsole version check (mgugino@redhat.com)
+- add master deprovisioning (jdiaz@redhat.com)
+- Adding file locking to yedit. (kwoodson@redhat.com)
+- Log troubleshooting info when console install fails (spadgett@redhat.com)
+- CRI-O: use /var/run/crio/crio.sock for >=3.9 (gscrivan@redhat.com)
+- Fix pvc template by replacing None by lowercase none (toj315@gmail.com)
+- GlusterFS: Fix uninstall regression (jarrpa@redhat.com)
+- Add prometheus reader role for lightweight privileges. (mrsiano@gmail.com)
+- docker_image_availability: encode error message (vrutkovs@redhat.com)
+- Tweak things based on feedback (sdodson@redhat.com)
+- Update example inventory to drive required hostgroups to the top
+  (sdodson@redhat.com)
+
 * Mon Feb 19 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.46.0
 - Tolerate OVS 2.6 in 3.10 as well (sdodson@redhat.com)
 - hosts.example: openshift_dns_ip should be node-specific (vrutkovs@redhat.com)
