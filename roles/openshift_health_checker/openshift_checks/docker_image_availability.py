@@ -164,6 +164,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         host_groups = self.get_var("group_names")
         # containerized etcd may not have openshift_image_tag, see bz 1466622
         image_tag = self.get_var("openshift_image_tag", default="latest")
+        image_tag = self.template_var(image_tag)
         image_info = DEPLOYMENT_IMAGE_INFO[deployment_type]
 
         # template for images that run on top of OpenShift
