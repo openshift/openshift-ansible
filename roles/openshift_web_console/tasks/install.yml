@@ -1,19 +1,4 @@
 ---
-# Fact setting
-- name: Set default image variables based on deployment type
-  include_vars: "{{ item }}"
-  with_first_found:
-  - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
-  - "default_images.yml"
-
-- name: Set openshift_web_console facts
-  set_fact:
-    openshift_web_console_prefix: "{{ openshift_web_console_prefix | default(__openshift_web_console_prefix) }}"
-    openshift_web_console_version: "{{ openshift_web_console_version | default(__openshift_web_console_version) }}"
-    openshift_web_console_image_name: "{{ openshift_web_console_image_name | default(__openshift_web_console_image_name) }}"
-    # Default the replica count to the number of masters.
-    openshift_web_console_replica_count: "{{ openshift_web_console_replica_count | default(groups.oo_masters_to_config | length) }}"
-
 - name: Ensure openshift-web-console project exists
   oc_project:
     name: openshift-web-console
