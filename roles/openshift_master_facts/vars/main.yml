@@ -2,3 +2,4 @@
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
 openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
 openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
+has_cloudprovider: "{{ openshift_cloudprovider_kind | default(None) != None }}"
