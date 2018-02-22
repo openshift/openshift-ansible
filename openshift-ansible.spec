@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.48.0%{?dist}
+Release:        0.50.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.50.0
+- Fix upgrade verify_upgrade_targets (mgugino@redhat.com)
+- Ensure wire-aggregator run on 3.7 upgrades (mgugino@redhat.com)
+- Add no_log to prevent printing AWS creds (sedgar@redhat.com)
+- added ci inventory and groups for containerized (mgugino@redhat.com)
+
 * Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.48.0
 - Fix openshift_hosted_registry_storage_glusterfs_path (mgugino@redhat.com)
 - Revert openshift_portal_net (mgugino@redhat.com)
