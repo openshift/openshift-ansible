@@ -1,0 +1,52 @@
+---
+# TODO(shadower): consider splitting this up so people can stop here
+# and configure their DNS if they have to.
+- name: Populate the DNS entries
+  hosts: localhost
+  tasks:
+  - name: Populate DNS entries
+    import_role:
+      name: openshift_openstack
+      tasks_from: populate-dns.yml
+    when:
+    - openshift_openstack_external_nsupdate_keys is defined
+    - openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined
+
+
+- import_playbook: ../../init/basic_facts.yml
+
+- name: Optionally subscribe the RHEL nodes
+  hosts: oo_all_hosts
+  become: yes
+  gather_facts: yes
+  tasks:
+  - name: Subscribe RHEL instances
+    import_role:
+      name: rhel_subscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - rhsub_user is defined
+    - rhsub_pass is defined
+
+  - name: Enable required YUM repositories
+    import_role:
+      name: openshift_repos
+    when:
+    - ansible_distribution == "RedHat"
+    - rh_subscribed is defined
+
+
+- name: Prepare the Nodes in the cluster for installation
+  hosts: oo_all_hosts
+  become: yes
+  gather_facts: yes
+  tasks:
+  - name: Install dependencies
+    import_role:
+      name: openshift_openstack
+      tasks_from: node-packages.yml
+
+  - name: Configure Node
+    import_role:
+      name: openshift_openstack
+      tasks_from: node-configuration.yml

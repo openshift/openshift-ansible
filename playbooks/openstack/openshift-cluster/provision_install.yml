@@ -5,5 +5,8 @@
 - name: Include the provision.yml playbook to create cluster
   import_playbook: provision.yml
 
+- name: Include the node-config.yml playbook to configure nodes
+  import_playbook: node-config.yml
+
 - name: Include the install.yml playbook to install cluster
   import_playbook: install.yml
