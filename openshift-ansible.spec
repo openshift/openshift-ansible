@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.31
+Version:        3.7.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,31 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.7.32-1
+- bug 1547348. Annotate ops projects with an .operation prefix
+  (jcantril@redhat.com)
+- Link to etcd v3 migration docs rather than suggesting dangerous things
+  (sdodson@redhat.com)
+- Adding blank library files for action_plugins (ewolinet@redhat.com)
+- Only try to yaml.load a file if it ends in .yml or .yaml in logging facts
+  (ewolinet@redhat.com)
+- Removing include_tasks calls and fixing prior cherrypicks
+  (ewolinet@redhat.com)
+- Fix undefined lib_utils_oo_random_word on release-3.7. #7173
+  (Shelnutt2@gmail.com)
+- Patching only if file exists. Fixing es configmap name we patch against
+  (ewolinet@redhat.com)
+- Updating deprecation variable check to use a module for cleaner output and
+  use run_once to limit to one host. Add flag to skip dep check if desired
+  (ewolinet@redhat.com)
+- Changing conditional_set_fact from module to action_plugin since it does not
+  need to access hosts to be effective and to reduce playbook output
+  (ewolinet@redhat.com)
+- Updating logging_facts to be able to pull values from config maps yaml files,
+  use diffs to keep custom changes, white list certain settings when creating
+  diffs (ewolinet@redhat.com)
+- Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
+
 * Fri Feb 16 2018 Justin Pierce <jupierce@redhat.com> 3.7.31-1
 - origin-dns: make sure cluster.local DNS server is listed first
   (vrutkovs@redhat.com)
