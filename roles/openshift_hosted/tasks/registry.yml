@@ -106,7 +106,7 @@
       type: persistentVolumeClaim
       claim_name: "{{ openshift_hosted_registry_storage_volume_name }}-claim"
   when:
-  - openshift_hosted_registry_storage_kind | default(none) in ['nfs', 'openstack', 'glusterfs']
+  - openshift_hosted_registry_storage_kind | default(none) in ['nfs', 'openstack', 'glusterfs', 'vsphere']
 
 - include_tasks: storage/glusterfs_endpoints.yml
   when:

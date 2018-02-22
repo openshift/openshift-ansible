@@ -11,9 +11,9 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- import_playbook: create_persistent_volumes.yml
-
 - import_playbook: openshift_default_storage_class.yml
+
+- import_playbook: create_persistent_volumes.yml
 
 - import_playbook: openshift_hosted_create_projects.yml
 

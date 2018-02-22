@@ -553,7 +553,11 @@ debug_level=2
 #openshift_hosted_registry_storage_s3_cloudfront_baseurl=https://myendpoint.cloudfront.net/
 #openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile=/full/path/to/secret.pem
 #openshift_hosted_registry_storage_s3_cloudfront_keypairid=yourpairid
-
+# vSphere Volume with vSphere Cloud Provider
+# openshift_hosted_registry_storage_kind=vsphere
+# openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
+# openshift_hosted_registry_storage_annotations=['volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/vsphere-volume']
+#
 # Metrics deployment
 # See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
 #
