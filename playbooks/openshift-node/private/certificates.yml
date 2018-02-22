@@ -3,6 +3,7 @@
   hosts: oo_nodes_to_config
   gather_facts: no
   roles:
+  - role: openshift_master_facts
+    when: not openshift_node_bootstrap | default(False) | bool
   - role: openshift_node_certificates
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
     when: not openshift_node_bootstrap | default(false) | bool

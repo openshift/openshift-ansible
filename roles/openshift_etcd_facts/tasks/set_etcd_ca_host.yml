@@ -10,7 +10,7 @@
   register: __etcd_ca_host_stat
   run_once: true
 
-# Collect ansible_host (inventory hostname) of hosts with /etc/etcd/ca
+# Collect inventory_hostname of hosts with /etc/etcd/ca
 # and /etc/etcd/generated_certs directories.
 - set_fact:
     __etcd_ca_dir_hosts: "{{ __etcd_ca_host_stat.results

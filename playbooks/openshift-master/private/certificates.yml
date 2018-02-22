@@ -1,8 +1,6 @@
 ---
 - name: Create OpenShift certificates for master hosts
   hosts: oo_masters_to_config
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   roles:
   - role: openshift_master_facts
   - role: openshift_named_certificates

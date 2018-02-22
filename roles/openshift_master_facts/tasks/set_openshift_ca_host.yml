@@ -1,0 +1,45 @@
+---
+- name: Check for CA indicator files
+  stat:
+    path: "{{ item.0 }}"
+  delegate_to: "{{ item.1 }}"
+  with_nested:
+  - - /etc/origin/generated-configs
+    - /etc/origin/master/ca.serial.txt
+  - "{{ groups[openshift_ca_host_group] }}"
+  register: __openshift_ca_host_stat
+  run_once: true
+
+# Collect inventory_hostname of hosts with /etc/origin/generated-configs
+# and /etc/origin/master/ca.serial.txt files.
+- set_fact:
+    __openshift_ca_serial_hosts: "{{ __openshift_ca_host_stat.results
+                                     | lib_utils_oo_collect('_ansible_delegated_vars.inventory_hostname',
+                                                            filters={'stat.path':'/etc/origin/master/ca.serial.txt','stat.exists':True}) }}"
+    __openshift_generated_certs_dir_hosts: "{{ __openshift_ca_host_stat.results
+                                               | lib_utils_oo_collect('_ansible_delegated_vars.inventory_hostname',
+                                                                      filters={'stat.path':'/etc/origin/generated-configs','stat.exists':True}) }}"
+  run_once: true
+
+# __openshift_ca_hosts is the intersection of hosts which have
+# /etc/origin/generated-configs and /etc/origin/master/ca.serial.txt
+# files.
+- set_fact:
+    __openshift_ca_hosts: "{{ __openshift_ca_serial_hosts | intersect(__openshift_generated_certs_dir_hosts) }}"
+  run_once: true
+
+# __openshift_ca_hosts should only contain one host. If more than one host
+# is able to be an OpenShift CA host then we will use the first.
+- set_fact:
+    openshift_ca_host: "{{ __openshift_ca_hosts[0] }}"
+  when:
+  - __openshift_ca_hosts | length > 0
+  - openshift_ca_host is not defined
+
+# No openshift_ca_host was found in __openshift_ca_hosts. This is probably a
+# fresh installation so we will default to the first member of the
+# master host group.
+- set_fact:
+    openshift_ca_host: "{{ groups[openshift_ca_host_group].0 }}"
+  when:
+  - openshift_ca_host is not defined
