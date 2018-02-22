@@ -14,6 +14,9 @@
 #    include the masters and usually includes infra nodes.
 # 5. The init/main.yml playbook has been invoked
 
+
+- import_playbook: ../../init/collect_schedulable_node_labels.yml
+
 - import_playbook: ../../openshift-glusterfs/private/config.yml
   when: groups.oo_glusterfs_to_config | default([]) | count > 0
 
