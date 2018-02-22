@@ -484,7 +484,9 @@ debug_level=2
 #
 # Manage the OpenShift Registry (optional)
 #openshift_hosted_manage_registry=true
-
+# Manage the OpenShift Registry Console (optional)
+#openshift_hosted_manage_registry_console=true
+#
 # Registry Storage Options
 #
 # NFS Host Group
