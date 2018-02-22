@@ -109,8 +109,8 @@
 
 - name: Set Default scheduler predicates and priorities
   set_fact:
-    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
-    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
+    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates', cloudprovider_enabled=has_cloudprovider) }}"
+    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities', cloudprovider_enabled=has_cloudprovider) }}"
 
 - block:
   - name: Retrieve current scheduler config

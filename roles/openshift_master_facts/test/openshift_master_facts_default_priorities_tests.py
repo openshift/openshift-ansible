@@ -56,6 +56,16 @@ ZONE_PRIORITY = {
     'weight': 2
 }
 
+CLOUD_PROVIDER_ZONE_PRIORITY = {
+    'name': 'Zone',
+    'argument': {
+        'serviceAntiAffinity': {
+            'label': 'failure-domain.beta.kubernetes.io/zone'
+        }
+    },
+    'weight': 2
+}
+
 TEST_VARS = [
     ('1.1', 'origin', DEFAULT_PRIORITIES_1_1),
     ('3.1', 'openshift-enterprise', DEFAULT_PRIORITIES_1_1),
@@ -74,17 +84,21 @@ TEST_VARS = [
 ]
 
 
-def assert_ok(priorities_lookup, default_priorities, zones_enabled, **kwargs):
-    results = priorities_lookup.run(None, zones_enabled=zones_enabled, **kwargs)
-    if zones_enabled:
+def assert_ok(priorities_lookup, default_priorities, zones_enabled, cloudprovider_enabled, **kwargs):
+    results = priorities_lookup.run(None, zones_enabled=zones_enabled,
+                                    cloudprovider_enabled=cloudprovider_enabled, **kwargs)
+    if zones_enabled and cloudprovider_enabled:
+        assert results == default_priorities + [CLOUD_PROVIDER_ZONE_PRIORITY]
+    elif zones_enabled and not cloudprovider_enabled:
         assert results == default_priorities + [ZONE_PRIORITY]
     else:
         assert results == default_priorities
 
 
-def test_openshift_version(priorities_lookup, openshift_version_fixture, zones_enabled):
+def test_openshift_version(priorities_lookup, openshift_version_fixture, zones_enabled, cloudprovider_enabled):
     facts, default_priorities = openshift_version_fixture
-    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled)
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled,
+              cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -96,9 +110,10 @@ def openshift_version_fixture(request, facts):
     return facts, default_priorities
 
 
-def test_openshift_release(priorities_lookup, openshift_release_fixture, zones_enabled):
+def test_openshift_release(priorities_lookup, openshift_release_fixture, zones_enabled, cloudprovider_enabled):
     facts, default_priorities = openshift_release_fixture
-    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled)
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled,
+              cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -109,9 +124,10 @@ def openshift_release_fixture(request, facts, release_mod):
     return facts, default_priorities
 
 
-def test_short_version(priorities_lookup, short_version_fixture, zones_enabled):
+def test_short_version(priorities_lookup, short_version_fixture, zones_enabled, cloudprovider_enabled):
     facts, default_priorities = short_version_fixture
-    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled)
+    assert_ok(priorities_lookup, default_priorities, variables=facts, zones_enabled=zones_enabled,
+              cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -122,11 +138,12 @@ def short_version_fixture(request, facts):
     return facts, default_priorities
 
 
-def test_short_version_kwarg(priorities_lookup, short_version_kwarg_fixture, zones_enabled):
+def test_short_version_kwarg(priorities_lookup, short_version_kwarg_fixture, zones_enabled, cloudprovider_enabled):
     facts, short_version, default_priorities = short_version_kwarg_fixture
     assert_ok(
         priorities_lookup, default_priorities, variables=facts,
-        zones_enabled=zones_enabled, short_version=short_version)
+        zones_enabled=zones_enabled, short_version=short_version,
+        cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -136,11 +153,12 @@ def short_version_kwarg_fixture(request, facts):
     return facts, short_version, default_priorities
 
 
-def test_deployment_type_kwarg(priorities_lookup, deployment_type_kwarg_fixture, zones_enabled):
+def test_deployment_type_kwarg(priorities_lookup, deployment_type_kwarg_fixture, zones_enabled, cloudprovider_enabled):
     facts, deployment_type, default_priorities = deployment_type_kwarg_fixture
     assert_ok(
         priorities_lookup, default_priorities, variables=facts,
-        zones_enabled=zones_enabled, deployment_type=deployment_type)
+        zones_enabled=zones_enabled, deployment_type=deployment_type,
+        cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -151,11 +169,12 @@ def deployment_type_kwarg_fixture(request, facts):
 
 
 def test_short_version_deployment_type_kwargs(
-        priorities_lookup, short_version_deployment_type_kwargs_fixture, zones_enabled):
+        priorities_lookup, short_version_deployment_type_kwargs_fixture, zones_enabled, cloudprovider_enabled):
     short_version, deployment_type, default_priorities = short_version_deployment_type_kwargs_fixture
     assert_ok(
         priorities_lookup, default_priorities, zones_enabled=zones_enabled,
-        short_version=short_version, deployment_type=deployment_type)
+        short_version=short_version, deployment_type=deployment_type,
+        cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)

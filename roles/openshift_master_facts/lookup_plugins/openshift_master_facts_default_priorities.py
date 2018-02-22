@@ -9,7 +9,7 @@ class LookupModule(LookupBase):
     # pylint: disable=too-many-branches,too-many-statements,too-many-arguments
 
     def run(self, terms, variables=None, zones_enabled=True, short_version=None,
-            deployment_type=None, **kwargs):
+            deployment_type=None, cloudprovider_enabled=False, **kwargs):
 
         priorities = []
 
@@ -103,11 +103,15 @@ class LookupModule(LookupBase):
             ])
 
         if zones_enabled:
+            if cloudprovider_enabled:
+                zone_label = 'failure-domain.beta.kubernetes.io/zone'
+            else:
+                zone_label = 'zone'
             zone_priority = {
                 'name': 'Zone',
                 'argument': {
                     'serviceAntiAffinity': {
-                        'label': 'zone'
+                        'label': zone_label
                     }
                 },
                 'weight': 2
