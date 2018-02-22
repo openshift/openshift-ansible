@@ -43,3 +43,10 @@
     when:
     - openshift_master_scheduler_current_predicates != osm_default_predicates_no_region
     - openshift_master_scheduler_current_predicates in osm_older_predicates_no_region + [osm_prev_predicates_no_region]
+
+  - name: set_fact openshift_upgrade_scheduler_predicates 3
+    set_fact:
+      openshift_upgrade_scheduler_predicates: "{{ osm_default_predicates_cloud_provider }}"
+    when:
+    - openshift_master_scheduler_current_predicates != osm_default_predicates_cloud_provider
+    - openshift_master_scheduler_current_predicates == osm_prev_predicates_cloud_provider
