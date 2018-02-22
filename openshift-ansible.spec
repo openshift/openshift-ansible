@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.47.0%{?dist}
+Release:        0.48.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -201,6 +201,19 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.48.0
+- Fix openshift_hosted_registry_storage_glusterfs_path (mgugino@redhat.com)
+- Revert openshift_portal_net (mgugino@redhat.com)
+- skip search for an ami if openshift_aws_ami_map provides one
+  (jdiaz@redhat.com)
+- Adding node autoapprover. (kwoodson@redhat.com)
+- Adding ability to state absent array items with index/curr_value.
+  (kwoodson@redhat.com)
+- Change image location to CF 4.6 GA from Beta (simaishi@redhat.com)
+- Update templates to mount the configmap into the directory the new image
+  expects (simaishi@redhat.com)
+- Fix for support multi-cluster heketi's topology (chinacoolhacker@gmail.com)
+
 * Tue Feb 20 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.47.0
 - Update API healthz check to use uri module (mkhan@redhat.com)
 - fixed an oo_filter plugin lib_utils_oo_has_no_matching_selector to do set
