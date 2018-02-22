@@ -23,15 +23,28 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_<COMPONENT>_image_version`: specify image version for the component 
 
+- `openshift_prometheus_args`: Modify or add arguments for prometheus application
+
+- `openshift_prometheus_hostname`: specify the hostname for the route to prometheus `prometheus-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
+
+- `openshift_prometheus_alerts_hostname`: specify the hostname for the route to prometheus-alerts `prometheus_alerts-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`
+
+e.g
+```
+openshift_prometheus_args=['--storage.tsdb.retention=6h', '--query.timeout=2m']
+```
+
 ## PVC related variables
 Each prometheus component (prometheus, alertmanager, alertbuffer) can set pv claim by setting corresponding role variable:
 ```
 openshift_prometheus_<COMPONENT>_storage_type: <VALUE> (pvc, emptydir)
+openshift_prometheus_<COMPONENT>_storage_class: <VALUE>
 openshift_prometheus_<COMPONENT>_pvc_(name|size|access_modes|pv_selector): <VALUE>
 ```
 e.g
 ```
 openshift_prometheus_storage_type: pvc
+openshift_prometheus_storage_class: glusterfs-storage
 openshift_prometheus_alertmanager_pvc_name: alertmanager
 openshift_prometheus_alertbuffer_pvc_size: 10G
 openshift_prometheus_pvc_access_modes: [ReadWriteOnce]

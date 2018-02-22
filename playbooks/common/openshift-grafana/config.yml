@@ -1,0 +1,28 @@
+---
+- name: Grafana Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Grafana install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_grafana: "In Progress"
+      aggregate: false
+
+- name: Configure Grafana
+  hosts: oo_first_master
+  tasks:
+  - name: setup grafana
+    include_role:
+      name: openshift_grafana
+    static: true
+
+- name: Grafana Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Grafana install 'Complete'
+    set_stats:
+      data:
+        installer_phase_grafana: "Complete"
+      aggregate: false
