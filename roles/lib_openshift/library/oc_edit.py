@@ -140,6 +140,12 @@ options:
     required: false
     default: None
     aliases: []
+  edits:
+    description:
+    - a list of dictionaries with a yedit format for edits
+    required: false
+    default: None
+    aliases: []
   force:
     description:
     - Whether or not to force the operation
@@ -926,7 +932,7 @@ class OpenShiftCLI(object):
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
-    def _replace_content(self, resource, rname, content, force=False, sep='.'):
+    def _replace_content(self, resource, rname, content, edits=None, force=False, sep='.'):
         ''' replace the current object with the content '''
         res = self._get(resource, rname)
         if not res['results']:
@@ -935,13 +941,24 @@ class OpenShiftCLI(object):
         fname = Utils.create_tmpfile(rname + '-')
 
         yed = Yedit(fname, res['results'][0], separator=sep)
-        changes = []
-        for key, value in content.items():
-            changes.append(yed.put(key, value))
+        updated = False
 
-        if any([change[0] for change in changes]):
+        if content is not None:
+            changes = []
+            for key, value in content.items():
+                changes.append(yed.put(key, value))
+
+            if any([change[0] for change in changes]):
+                updated = True
+
+        elif edits is not None:
+            results = Yedit.process_edits(edits, yed)
+
+            if results['changed']:
+                updated = True
+
+        if updated:
             yed.write()
-
             atexit.register(Utils.cleanup, [fname])
 
             return self._replace(fname, force)
@@ -1506,7 +1523,7 @@ class Edit(OpenShiftCLI):
         '''return a secret by name '''
         return self._get(self.kind, self.name)
 
-    def update(self, file_name, content, force=False, content_type='yaml'):
+    def update(self, file_name, content, edits, force=False, content_type='yaml'):
         '''run update '''
         if file_name:
             if content_type == 'yaml':
@@ -1514,13 +1531,22 @@ class Edit(OpenShiftCLI):
             elif content_type == 'json':
                 data = json.loads(open(file_name).read())
 
-            changes = []
             yed = Yedit(filename=file_name, content=data, separator=self.separator)
-            for key, value in content.items():
-                changes.append(yed.put(key, value))
+            # Keep this for compatibility
+            if content is not None:
+                changes = []
 
-            if any([not change[0] for change in changes]):
-                return {'returncode': 0, 'updated': False}
+                for key, value in content.items():
+                    changes.append(yed.put(key, value))
+
+                if any([not change[0] for change in changes]):
+                    return {'returncode': 0, 'updated': False}
+
+            elif edits is not None:
+                results = Yedit.process_edits(edits, yed)
+
+                if not results['changed']:
+                    return results
 
             yed.write()
 
@@ -1528,7 +1554,7 @@ class Edit(OpenShiftCLI):
 
             return self._replace(file_name, force=force)
 
-        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+        return self._replace_content(self.kind, self.name, content, edits, force=force, sep=self.separator)
 
     @staticmethod
     def run_ansible(params, check_mode):
@@ -1557,6 +1583,7 @@ class Edit(OpenShiftCLI):
 
         api_rval = ocedit.update(params['file_name'],
                                  params['content'],
+                                 params['edits'],
                                  params['force'],
                                  params['file_format'])
 
@@ -1595,11 +1622,14 @@ def main():
             kind=dict(required=True, type='str'),
             file_name=dict(default=None, type='str'),
             file_format=dict(default='yaml', type='str'),
-            content=dict(default=None, required=True, type='dict'),
+            content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
             separator=dict(default='.', type='str'),
+            edits=dict(default=None, type='list'),
         ),
         supports_check_mode=True,
+        mutually_exclusive=[['content', 'edits']],
+        required_one_of=[['content', 'edits']],
     )
 
     rval = Edit.run_ansible(module.params, module.check_mode)
