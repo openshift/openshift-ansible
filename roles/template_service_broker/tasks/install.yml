@@ -81,6 +81,7 @@
   retries: 60
   delay: 10
   changed_when: false
+  when: containerized
 
 - set_fact:
     openshift_master_config_dir: "{{ openshift.common.config_base }}/master"

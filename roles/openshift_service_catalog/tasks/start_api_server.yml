@@ -18,3 +18,4 @@
   retries: 60
   delay: 10
   changed_when: false
+  when: containerized
