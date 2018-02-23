@@ -85,7 +85,12 @@ openshift_openstack_docker_volume_size: "15"
 ## WARNING: This will delete any data on the volume!
 #openshift_openstack_prepare_and_format_registry_volume: False
 
-openshift_openstack_subnet_prefix: "192.168.99"
+# The Classless Inter-Domain Routing (CIDR) for the OpenStack VM subnet.
+openshift_openstack_subnet_cidr: "192.168.99.0/24"
+# The starting IP address for the OpenStack subnet allocation pool.
+openshift_openstack_pool_start: "192.168.99.3"
+# The ending IP address for the OpenStack subnet allocation pool.
+openshift_openstack_pool_end: "192.168.99.254"
 
 ## Red Hat subscription:
 #rhsub_user: '<username>'
@@ -124,3 +129,7 @@ ansible_user: openshift
 #    region: primary
 #  infra:
 #    region: infra
+
+## cloud config
+openshift_openstack_disable_root: true
+openshift_openstack_user: openshift

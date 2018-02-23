@@ -1,0 +1,150 @@
+---
+- name: Create grafana namespace
+  oc_project:
+    state: present
+    name: "{{ grafana_namespace }}"
+
+- name: Configure Grafana Permissions
+  include_tasks: tasks/gf-permissions.yml
+
+# TODO:// Templatize the remote files
+- name: Pull grafana yaml from openshift/origin
+  get_url:
+    url: "{{ grafana_base_url }}/grafana.yaml"
+    dest: /tmp/grafana.yaml
+
+- name: Create grafana template
+  oc_obj:
+    namespace: "{{ grafana_namespace }}"
+    kind: template
+    name: grafana
+    state: present
+    files:
+    - "/tmp/grafana.yaml"
+
+- name: Process the grafana file
+  oc_process:
+    namespace: "{{ grafana_namespace }}"
+    template_name: grafana
+    create: True
+
+- name: Wait to grafana be running
+  command: oc rollout status deployment/grafana
+
+- name: Add view role to grafana user
+  oc_adm_policy_user:
+    user: "{{ grafana_user }}"
+    resource_kind: cluster-role
+    resource_name: view
+    state: present
+    role_namespace: "{{ grafana_prometheus_namespace }}"
+
+- name: Get the prometheus SA
+  shell: oc sa get-token {{ grafana_prometheus_sa }} -n {{ grafana_prometheus_namespace }}
+  register: sa
+
+- name: Get prometheus route
+  oc_route:
+    state: list
+    name: prometheus
+    namespace: "{{ grafana_prometheus_namespace }}"
+  register: prom_out
+
+- name: Get prometheus route
+  oc_route:
+    state: list
+    name: grafana
+    namespace: "{{ grafana_namespace }}"
+  register: grafana_out
+
+- set_fact: ds_json={{ datasource_payload | to_json }}
+- set_fact: prometheus=prom_out.results[0].spec.host
+- set_fact: route=grafana_out.results[0].spec.host
+- set_fact: token={{ sa.stdout }}
+- set_fact:
+    payload_data: "{{ ds_json | regex_replace('grafana_name', grafana_datasource_name ) | regex_replace('prometheus_url', prometheus ) | regex_replace('satoken',  token ) }}"
+
+- name: Add new datasrouce to grafana
+  uri:
+    url: "https://{{ route }}/api/datasources"
+    user: admin
+    password: admin
+    method: POST
+    body: "{{ payload_data }}"
+    body_format: json
+    headers:
+      Content-Type: "Content-Type: application/json"
+  register: add_ds
+
+- name: Pull grafana yaml from openshift/origin
+  get_url:
+    url: "{{ grafana_base_url }}/openshift-cluster-monitoring.json"
+    dest: /tmp/openshift-cluster-monitoring.json
+
+- name: Regex set data soure name for openshift dashboard
+  replace:
+    path: /tmp/openshift-cluster-monitoring.json
+    regexp: '${DS_PR}'
+    replace: '{{ grafana_datasource_name }}'
+    backup: yes
+
+- name: Regex setup granularity
+  replace:
+    path: /tmp/openshift-cluster-monitoring.json
+    regexp: 'Xs'
+    replace: '{{ grafana_graph_granularity }}'
+    backup: yes
+
+- name: Add openshift dashboard
+  uri:
+    url: "https://{{ route }}/api/dashboards/db"
+    user: admin
+    password: admin
+    method: POST
+    body: "{{ lookup('file','/tmp/openshift-cluster-monitoring.json') }}"
+    body_format: json
+    headers:
+      Content-Type: "Content-Type: application/json"
+  register: add_ds
+
+- name: Regex json tear down
+  replace:
+    path: /tmp/openshift-cluster-monitoring.json
+    regexp: '{{ grafana_datasource_name }}'
+    replace: '${DS_PR}'
+
+- name: Pull node exporter dashboard from openshift/origin
+  get_url:
+    url: "{{ grafana_base_url }}/node-exporter-full-dashboard.json"
+    dest: /tmp/node-exporter-full-dashboard.json
+  when: grafana_node_exporter | default(false) | bool == true
+
+
+- name: Regex set data soure name for node exporter
+  replace:
+    path: /tmp/node-exporter-full-dashboard.json
+    regexp: '${DS_PR}'
+    replace: '{{ grafana_datasource_name }}'
+    backup: yes
+  when: grafana_node_exporter | default(false) | bool == true
+
+- name: Regex setup granularity for node exporter
+  replace:
+    path: /tmp/node-exporter-full-dashboard.json
+    regexp: 'Xs'
+    replace: '{{ grafana_graph_granularity }}'
+    backup: yes
+  when: grafana_node_exporter | default(false) | bool == true
+
+- name: Add node exporter dashboard
+  uri:
+    url: "https://{{ route }}/api/dashboards/db"
+    user: admin
+    password: admin
+    method: POST
+    body: "{{ lookup('file','/tmp/node-exporter-full-dashboard.json') }}"
+    body_format: json
+    headers:
+      Content-Type: "Content-Type: application/json"
+  register: add_ds
+  when: grafana_node_exporter | default(false) | bool == true

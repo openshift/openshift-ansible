@@ -1,0 +1,4 @@
+---
+openshift_image_tag: "{{ lookup('env', 'OPENSHIFT_IMAGE_TAG') }}"
+oreg_url: "openshift/origin-${component}:{{ openshift_image_tag }}"
+containerized: True

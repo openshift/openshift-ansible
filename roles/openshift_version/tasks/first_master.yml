@@ -1,0 +1,42 @@
+---
+# Determine the openshift_version to configure if none has been specified or set previously.
+
+# Protect the installed version by default unless explicitly told not to, or given an
+# openshift_version already.
+- name: Use openshift.common.version fact as version to configure if already installed
+  set_fact:
+    openshift_version: "{{ openshift.common.version }}"
+  when:
+  - openshift.common.version is defined
+  - openshift_version is not defined or openshift_version == ""
+  - openshift_protect_installed_version | bool
+
+- include_tasks: "{{ l_first_master_version_task_file }}"
+
+# When double upgrade is in process, we want to set everything to match
+# openshift_verison.
+- block:
+  - debug:
+      msg: "openshift_pkg_version was not defined. Falling back to -{{ openshift_version }}"
+  - set_fact:
+      openshift_pkg_version: "-{{ openshift_version }}"
+  when:
+  - openshift_pkg_version is not defined or l_double_upgrade_cp_reset_version
+
+# When double upgrade is in process, we want to set everything to match
+# openshift_verison.
+- block:
+  - debug:
+      msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
+  - set_fact:
+      openshift_image_tag: "v{{ openshift_version }}"
+  when: openshift_image_tag is not defined or l_double_upgrade_cp_reset_version
+
+# The end result of these three variables is quite important so make sure they are displayed and logged:
+- debug: var=openshift_release
+
+- debug: var=openshift_image_tag
+
+- debug: var=openshift_pkg_version
+
+- debug: var=openshift_version

@@ -1,6 +1,7 @@
 ---
 openshift_service_catalog_remove: false
 openshift_service_catalog_nodeselector: {"openshift-infra": "apiserver"}
+openshift_service_catalog_async_bindings_enabled: false
 
 openshift_use_openshift_sdn: True
 # os_sdn_network_plugin_name: "{% if openshift_use_openshift_sdn %}redhat/openshift-ovs-subnet{% else %}{% endif %}"

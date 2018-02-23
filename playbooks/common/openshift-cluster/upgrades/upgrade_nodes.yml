@@ -33,27 +33,28 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_nodes_drain_result
     until: not (l_upgrade_nodes_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_nodes_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   post_tasks:
   - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
-  - name: Set node schedulability
-    oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
-      schedulable: True
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    retries: 10
-    delay: 5
-    register: node_schedulable
-    until: node_schedulable is succeeded
-    when: node_unschedulable is changed
+  - import_role:
+      name: openshift_manage_node
+      tasks_from: config.yml
+    vars:
+      openshift_master_host: "{{ groups.oo_first_master.0 }}"
 
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config

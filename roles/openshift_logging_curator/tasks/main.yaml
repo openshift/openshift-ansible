@@ -14,6 +14,13 @@
 
 - include_tasks: determine_version.yaml
 
+- name: Ensure that logging curator has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for logging curator - '{{ openshift_logging_curator_nodeselector }}'
+  when:
+    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_curator_nodeselector)
+
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -52,7 +59,7 @@
 
 # configmap
 - copy:
-    src: curator.yml
+    src: "{{ __base_file_dir }}/curator.yml"
     dest: "{{ tempdir }}/curator.yml"
   changed_when: no
 
@@ -96,7 +103,7 @@
 # TODO: scale should not exceed 1
 - name: Generate Curator deploymentconfig
   template:
-    src: curator.j2
+    src: "{{ __base_file_dir }}/curator.j2"
     dest: "{{ tempdir }}/templates/curator-dc.yaml"
   vars:
     component: "{{ curator_component }}"

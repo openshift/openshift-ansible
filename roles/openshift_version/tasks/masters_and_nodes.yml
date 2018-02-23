@@ -1,0 +1,39 @@
+---
+# These tasks should only be run against masters and nodes
+
+- block:
+  - name: Check openshift_version for rpm installation
+    include_tasks: check_available_rpms.yml
+  - name: Fail if rpm version and docker image version are different
+    fail:
+      msg: "OCP rpm version {{ rpm_results.results.versions.available_versions.0 }} is different from OCP image version {{ openshift_version }}"
+    # Both versions have the same string representation
+    when: rpm_results.results.versions.available_versions.0 != openshift_version
+  # block when
+  when: not openshift_is_atomic | bool
+
+# We can't map an openshift_release to full rpm version like we can with containers; make sure
+# the rpm version we looked up matches the release requested and error out if not.
+- name: For an RPM install, abort when the release requested does not match the available version.
+  when:
+  - not openshift_is_containerized | bool
+  - openshift_release is defined
+  assert:
+    that:
+    - l_rpm_version.startswith(openshift_release) | bool
+    msg: |-
+      You requested openshift_release {{ openshift_release }}, which is not matched by
+      the latest OpenShift RPM we detected as {{ openshift_service_type }}-{{ l_rpm_version }}
+      on host {{ inventory_hostname }}.
+      We will only install the latest RPMs, so please ensure you are getting the release
+      you expect. You may need to adjust your Ansible inventory, modify the repositories
+      available on the host, or run the appropriate OpenShift upgrade playbook.
+  vars:
+    l_rpm_version: "{{ rpm_results.results.versions.available_versions.0 }}"
+
+# The end result of these three variables is quite important so make sure they are displayed and logged:
+- debug: var=openshift_release
+
+- debug: var=openshift_image_tag
+
+- debug: var=openshift_pkg_version

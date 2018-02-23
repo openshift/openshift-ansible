@@ -1,26 +1,7 @@
 import pytest
 
-from openshift_checks.ovs_version import OvsVersion, OpenShiftCheckException
-
-
-def test_openshift_version_not_supported():
-    def execute_module(*_):
-        return {}
-
-    openshift_release = '111.7.0'
-
-    task_vars = dict(
-        openshift=dict(common=dict()),
-        openshift_release=openshift_release,
-        openshift_image_tag='v' + openshift_release,
-        openshift_deployment_type='origin',
-        openshift_service_type='origin'
-    )
-
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        OvsVersion(execute_module, task_vars).run()
-
-    assert "no recommended version of Open vSwitch" in str(excinfo.value)
+from openshift_checks.ovs_version import OvsVersion
+from openshift_checks import OpenShiftCheckException
 
 
 def test_invalid_openshift_release_format():
@@ -66,7 +47,13 @@ def test_ovs_package_version(openshift_release, expected_ovs_version):
 
         return return_value
 
-    result = OvsVersion(execute_module, task_vars).run()
+    check = OvsVersion(execute_module, task_vars)
+    check.openshift_to_ovs_version = {
+        (3, 4): "2.4",
+        (3, 5): ["2.6", "2.7"],
+        (3, 6): ["2.6", "2.7", "2.8"],
+    }
+    result = check.run()
     assert result is return_value
 
 

@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.16.0%{?dist}
+Release:        0.50.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -28,6 +28,7 @@ Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
+Requires:      python2-crypto
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -48,7 +49,8 @@ popd
 %install
 # Base openshift-ansible install
 mkdir -p %{buildroot}%{_datadir}/%{name}
-mkdir -p %{buildroot}%{_datadir}/ansible/%{name}
+mkdir -p %{buildroot}%{_datadir}/ansible/%{name}/inventory
+cp -rp inventory/dynamic %{buildroot}%{_datadir}/ansible/%{name}/inventory
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -62,10 +64,7 @@ rm -f %{buildroot}%{python_sitelib}/openshift_ansible/gce
 # openshift-ansible-docs install
 # Install example inventory into docs/examples
 mkdir -p docs/example-inventories
-cp inventory/* docs/example-inventories/
-
-# openshift-ansible-files install
-cp -rp files %{buildroot}%{_datadir}/ansible/%{name}/
+cp inventory/hosts.* inventory/README.md docs/example-inventories/
 
 # openshift-ansible-playbooks install
 cp -rp playbooks %{buildroot}%{_datadir}/ansible/%{name}/
@@ -100,7 +99,7 @@ popd
 %doc README*
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
-%{_datadir}/ansible/%{name}/files
+%{_datadir}/ansible/%{name}/inventory/dynamic
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 
 # ----------------------------------------------------------------------------------
@@ -202,6 +201,621 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.50.0
+- Fix upgrade verify_upgrade_targets (mgugino@redhat.com)
+- Ensure wire-aggregator run on 3.7 upgrades (mgugino@redhat.com)
+- Add no_log to prevent printing AWS creds (sedgar@redhat.com)
+- added ci inventory and groups for containerized (mgugino@redhat.com)
+
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.48.0
+- Fix openshift_hosted_registry_storage_glusterfs_path (mgugino@redhat.com)
+- Revert openshift_portal_net (mgugino@redhat.com)
+- skip search for an ami if openshift_aws_ami_map provides one
+  (jdiaz@redhat.com)
+- Adding node autoapprover. (kwoodson@redhat.com)
+- Adding ability to state absent array items with index/curr_value.
+  (kwoodson@redhat.com)
+- Change image location to CF 4.6 GA from Beta (simaishi@redhat.com)
+- Update templates to mount the configmap into the directory the new image
+  expects (simaishi@redhat.com)
+- Fix for support multi-cluster heketi's topology (chinacoolhacker@gmail.com)
+
+* Tue Feb 20 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.47.0
+- Update API healthz check to use uri module (mkhan@redhat.com)
+- fixed an oo_filter plugin lib_utils_oo_has_no_matching_selector to do set
+  comparison (mwoodson@redhat.com)
+- Grafana roles updates. (mrsiano@gmail.com)
+- add deprovision playbook for cluster-operator infrastructure
+  (jdiaz@redhat.com)
+- Add tox test to check for invalid playbook include (rteague@redhat.com)
+- Change openshift.common.hostname to inventory_hostname (mgugino@redhat.com)
+- Fix openshift-webconsole version check (mgugino@redhat.com)
+- add master deprovisioning (jdiaz@redhat.com)
+- Adding file locking to yedit. (kwoodson@redhat.com)
+- Log troubleshooting info when console install fails (spadgett@redhat.com)
+- CRI-O: use /var/run/crio/crio.sock for >=3.9 (gscrivan@redhat.com)
+- Fix pvc template by replacing None by lowercase none (toj315@gmail.com)
+- GlusterFS: Fix uninstall regression (jarrpa@redhat.com)
+- Add prometheus reader role for lightweight privileges. (mrsiano@gmail.com)
+- docker_image_availability: encode error message (vrutkovs@redhat.com)
+- Tweak things based on feedback (sdodson@redhat.com)
+- Update example inventory to drive required hostgroups to the top
+  (sdodson@redhat.com)
+
+* Mon Feb 19 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.46.0
+- Tolerate OVS 2.6 in 3.10 as well (sdodson@redhat.com)
+- hosts.example: openshift_dns_ip should be node-specific (vrutkovs@redhat.com)
+- Add target mount for gluster block (m.judeikis@gmail.com)
+- Allow for overriding hosted registry_url variables (rteague@redhat.com)
+- Link to etcd v3 migration docs rather than suggesting dangerous things
+  (sdodson@redhat.com)
+- Run openshift_version for image prep (mgugino@redhat.com)
+- Remove redundant openshift_hosted_registry_network_default
+  (mgugino@redhat.com)
+- Correct the usage of bool and str (ghuang@redhat.com)
+- kernel module loading fix (m.judeikis@gmail.com)
+- add steps in bootstrap playbook to handle updating aws.conf file
+  (jdiaz@redhat.com)
+- Add cloud config variables to the sample inventory (nelluri@redhat.com)
+- Run init/facts for docker upgrade (mgugino@redhat.com)
+- quick installer: remove UPGRADE_MAPPINGS (vrutkovs@redhat.com)
+- Update quick installer to support 3.9 and 3.8 (vrutkovs@redhat.com)
+- Updating deprecation variable check to use a module for cleaner output and
+  use run_once to limit to one host. Add flag to skip dep check if desired
+  (ewolinet@redhat.com)
+- Patch only if the file exists, otherwise we should copy the file in
+  (ewolinet@redhat.com)
+- Add vsphere section for openshift_node_kubelet_args_dict (ghuang@redhat.com)
+- Correctly comparing against the current configmap when making es configmap
+  patches (ewolinet@redhat.com)
+- add uninstall playbooks for compute/infra scale groups (jdiaz@redhat.com)
+- Adding ability to pass content and create files from content.
+  (kwoodson@redhat.com)
+- Bug 1541946- waiting for master reboot now works behind bastion
+  (fabian@fabianism.us)
+
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.45.0
+- 
+
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.44.0
+- 
+
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.43.0
+- Changing conditional_set_fact from module to action_plugin since it does not
+  need to access hosts to be effective and to reduce playbook output
+  (ewolinet@redhat.com)
+- Revert "Bug 1512825 - add mux pod failed for Serial number 02 has already
+  been issued" (mkhan@redhat.com)
+- Fix metadata access in OpenStack inventory (tomas@sedovic.cz)
+- Adding ability to yedit json files. (kwoodson@redhat.com)
+- Simplify double upgrade version logic (mgugino@redhat.com)
+- Whenever we create a new es node ignore health checks, changing prometheus pw
+  gen for increased secret idempotency (ewolinet@redhat.com)
+- oc_adm_csr: Add fail_on_timeout parameter which causes module to fail when
+  timeout was reached. (abutcher@redhat.com)
+- Adding missing template (ewolinet@redhat.com)
+- Move installation of packages before container_runtime to ensure bind mounts
+  are avaialable. (kwoodson@redhat.com)
+- Use curl --noproxy option for internal apiserver access (takayoshi@gmail.com)
+- Revert openshift_version to previous state (mgugino@redhat.com)
+- Add openshift_gcp_multizone bool (mgugino@redhat.com)
+- Invert logic to decide when to re-deploy certs (sdodson@redhat.com)
+- etcd_scaleup: use inventory_hostname when etcd ca host is being picked
+  (vrutkovs@redhat.com)
+- Fix docker_upgrade variable (mgugino@redhat.com)
+- Fix gcp variable warnings (mgugino@redhat.com)
+- Disable console install when not 3.9 or newer (spadgett@redhat.com)
+- Fix etcd scaleup plays (mgugino@redhat.com)
+- Add playbook to install components for cluster operator (cewong@redhat.com)
+- Remove cluster_facts.yml from the install.yml (tomas@sedovic.cz)
+- Allow for blank StorageClass in PVC creation (jarrpa@redhat.com)
+- Add service catalog to be upgraded (jpeeler@redhat.com)
+- Remove node start from bootstrap.yml. (abutcher@redhat.com)
+- Restart systemd-hostnamed before restarting NetworkManager in node user-data.
+  (abutcher@redhat.com)
+- additional mounts: specify 'type' in container_runtime_crio_additional_mounts
+  (vrutkovs@redhat.com)
+- Fix openshift_openstack_provision_user_commands (bdobreli@redhat.com)
+- origin-dns: make sure cluster.local DNS server is listed first
+  (vrutkovs@redhat.com)
+- Fix OpenStack playbooks (tomas@sedovic.cz)
+- Backport changes for glusterfs, heketi, s3 and block templates
+  (sarumuga@redhat.com)
+- Fix indentation to make yamllint happy (vrutkovs@redhat.com)
+- Use r_etcd_common_etcdctl_command instead of hardcoded binary name to support
+  containerized upgrade (vrutkovs@redhat.com)
+- Verify that requested services have schedulable nodes matching the selectors
+  (vrutkovs@redhat.com)
+- Normalize the time we wait for pods to 5s * 60 retries (sdodson@redhat.com)
+- Pause for console rollout (spadgett@redhat.com)
+- Fix wording (bdobreli@redhat.com)
+- Fix cloud init runcmd templating (bdobreli@redhat.com)
+- Note ignored Heat user data changes for openstack (bdobreli@redhat.com)
+- Clarify the ansible playbook vs cloud-init (bdobreli@redhat.com)
+- Fix openstack cloud-init runcmd templating (bdobreli@redhat.com)
+- [openstack] custom user commands for cloud-init (bdobreli@redhat.com)
+- Limit host scope during plays (mgugino@redhat.com)
+- Fix upgrade-control plane post_control_plane.yml (mgugino@redhat.com)
+- erase data only if variable is set. fix block indentatation
+  (sarumuga@redhat.com)
+- uninstall playbook for GlusterFS (sarumuga@redhat.com)
+- Removing prefix and replacing with cidr, pool_start and pool_end variables.
+  (mbruzek@gmail.com)
+- Make node start options configurable (celebdor@gmail.com)
+- Support master node high availability (jihoon.o@samsung.com)
+
+* Fri Feb 09 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.42.0
+- xPaaS v1.4.8 for v3.7 (sdodson@redhat.com)
+- xPaaS v1.4.8-1 for v3.8 (sdodson@redhat.com)
+- xPaaS v1.4.8-1 for v3.9 (sdodson@redhat.com)
+- Bump xpaas version (sdodson@redhat.com)
+- Bug 1524805- CFME example now works disconnected (fabian@fabianism.us)
+- Only try to yaml.load a file if it ends in .yml or .yaml in logging facts
+  (ewolinet@redhat.com)
+- Set default image tag to openshift_image_tag for services
+  (vrutkovs@redhat.com)
+- Redeploy router certificates during upgrade only when secure.
+  (kwoodson@redhat.com)
+- GlusterFS: Fix block StorageClass heketi route (jarrpa@redhat.com)
+- changed oc to {{ openshift_client_binary }} (datarace101@gmail.com)
+- Use v3.9 web-console image for now (sdodson@redhat.com)
+- Adding ability to provide additional mounts to crio system container.
+  (kwoodson@redhat.com)
+- Remove spaces introduced at the start of the line
+  (geoff.newson@googlemail.com)
+- Changing the check for the number of etcd nodes (geoff.newson@gmail.com)
+- aws ami: make it so the tags from the orinal AMI are used with the newly
+  created AMI (mwoodson@redhat.com)
+- Setup docker excluder if requested before container_runtime is installed
+  (vrutkovs@redhat.com)
+- openshift_node: Remove master from aws node building (smilner@redhat.com)
+- Use wait_for_connection to validate ssh transport is alive
+  (sdodson@redhat.com)
+- Bug 1541625- properly cast provided ip address to unicode
+  (fabian@fabianism.us)
+- Add base package installation to upgrade playbooks (rteague@redhat.com)
+- 3.9 upgrade: fix typos in restart masters procedure (vrutkovs@redhat.com)
+- quick installer: disable broken test_get_hosts_to_run_on6 test
+  (vrutkovs@redhat.com)
+- Quick installer: run prerequistes first and update path to main playbook
+  (vrutkovs@redhat.com)
+- Fix uninstall using openshift_prometheus_state=absent (zgalor@redhat.com)
+- Detect config changes in console liveness probe (spadgett@redhat.com)
+- Fix master and node system container variables (mgugino@redhat.com)
+- Correct the list of certificates checked in openshift_master_certificates
+  s.t. masters do not incorrectly report that master certs are missing.
+  (abutcher@redhat.com)
+- tag fix without ose- (rcook@redhat.com)
+- lib_utils_oo_collect: Allow filtering on dot separated keys.
+  (abutcher@redhat.com)
+- Determine which etcd host is the etcd_ca_host rather than assume it is the
+  first host in the etcd host group. (abutcher@redhat.com)
+- Attempt to back up generated certificates on every etcd host.
+  (abutcher@redhat.com)
+- Remove pre upgrade verification step re: etcd ca host. (abutcher@redhat.com)
+- Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
+
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.41.0
+- Allow OVS 2.7 in OCP 3.10 (sdodson@redhat.com)
+- GlusterFS: Minor documentation update (jarrpa@redhat.com)
+- Make sure to include upgrade_pre when upgrading master nodes
+  (sdodson@redhat.com)
+
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.40.0
+- health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
+- Fix docker rpm upgrade install task wording (mgugino@redhat.com)
+- Initial support for 3.10 (sdodson@redhat.com)
+- add deprovisioning for ELB (and IAM certs) (jdiaz@redhat.com)
+- [6632] fix indentation of terminationGracePeriodSeconds var
+  (jsanda@redhat.com)
+
+* Tue Feb 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.39.0
+- Update code to not fail when rc != 0 (kwoodson@redhat.com)
+- Upgrades: pass openshift_manage_node_is_master to master nodes during upgrade
+  (vrutkovs@redhat.com)
+- Updates to configure monitoring container. (kwoodson@redhat.com)
+- Move cert SAN update logic to openshift-etcd (rteague@redhat.com)
+- Swapping container order for es pod (ewolinet@redhat.com)
+- Adding support for ES 5.x tech preview opt in (ewolinet@redhat.com)
+- bug 1540799: openshift_prometheus: update alertmanager config file flag
+  (pgier@redhat.com)
+- parameterize various master scale group bits (jdiaz@redhat.com)
+- Use rollout instead of deploy (deprecated) (rteague@redhat.com)
+- cri-o: export variables defined in crio-network (gscrivan@redhat.com)
+
+* Mon Feb 05 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.38.0
+- Moving upgrade sg playbook to 3.9 (kwoodson@redhat.com)
+- remove openshift_upgrade_{pre,post}_storage_migration_enabled from
+  failed_when (nakayamakenjiro@gmail.com)
+- Fix version handling in 3.8/3.9 control plane upgrades (rteague@redhat.com)
+- add S3 bucket cleanup (jdiaz@redhat.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- Parameterize user and disable_root options in cloud config
+  (nelluri@redhat.com)
+- Fix softlinks broken by d3fefc32a727fe3c13159c4e9fe4399f35b487a8
+  (Klaas-@users.noreply.github.com)
+
+* Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.37.0
+- Don't use 'omit' for package module (vrutkovs@redhat.com)
+- Adding requirements for logging and metrics (ewolinet@redhat.com)
+- Disable master controllers before upgrade and re-enable those when restart
+  mode is system (vrutkovs@redhat.com)
+- upgrade: run upgrade_control_plane and upgrade_nodes playbooks during full
+  upgrade (vrutkovs@redhat.com)
+
+* Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.36.0
+- Add missing tasks file (sdodson@redhat.com)
+- Upgrade to migrate to using push to DNS for registries. (kwoodson@redhat.com)
+- Adding defaults for the gcp variables to fix an undefined ansible exception.
+  (kwoodson@redhat.com)
+- Fix vsphere sanitization (sdodson@redhat.com)
+- Set a default for required vsphere variable (sdodson@redhat.com)
+- Add python2-crypto package (ccoleman@redhat.com)
+- hosts.example: clarify usage of openshift_master_cluster_public_hostname
+  (vrutkovs@redhat.com)
+- Conditionally create pvcs for metrics depending on whether or not it already
+  exists (ewolinet@redhat.com)
+- Update hosts examples with a note about scheduling on masters
+  (vrutkovs@redhat.com)
+- Fixing file write issue. (kwoodson@redhat.com)
+- Only perform console configmap ops when >= 3.9 (sdodson@redhat.com)
+- Remove playbooks/adhoc/openshift_hosted_logging_efk.yaml (sdodson@redhat.com)
+- upgrades: use openshift_version as a regexp when checking
+  openshift.common.version (vrutkovs@redhat.com)
+- Don't update master-config.yaml with logging/metrics urls >= 3.9
+  (sdodson@redhat.com)
+- Make master schedulable (vrutkovs@redhat.com)
+- Re-add openshift_aws_elb_cert_arn. (abutcher@redhat.com)
+- Ignore openshift_pkg_version during 3.8 upgrade (rteague@redhat.com)
+- bug 1537857. Fix retrieving prometheus metrics (jcantril@redhat.com)
+- Remove master_ha bool checks (mgugino@redhat.com)
+- Don't restart docker when re-deploying node certificates (sdodson@redhat.com)
+- vsphere storage default add (davis.phillips@gmail.com)
+
+* Wed Jan 31 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.35.0
+- add glusterblock support for ansible (m.judeikis@gmail.com)
+- Add a bare minimum localhost hosts file (sdodson@redhat.com)
+- copy etcd client certificates for nuage openshift monitor
+  (siva_teja.areti@nokia.com)
+- fix hostvars parameter name (tzumainn@redhat.com)
+- remove mountpoint parameter (tzumainn@redhat.com)
+- flake cleanup (tzumainn@redhat.com)
+- code simplification and lint cleanup (tzumainn@redhat.com)
+- Symlink kubectl to oc instead of openshift (mfojtik@redhat.com)
+- Rework provisioners vars to support different prefix/version for Origin/OSE
+  (vrutkovs@redhat.com)
+- add cinder mountpoint to inventory (tzumainn@redhat.com)
+- allow setting of kibana env vars (jcantril@redhat.com)
+- No longer compare with legacy hosted var (ewolinet@redhat.com)
+- Preserving ES dc storage type unless overridden by inventory variable
+  (ewolinet@redhat.com)
+- Fix: e2e tests failing due to :1936/metrics unaccessible.
+  (jmencak@redhat.com)
+
+* Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.34.0
+- docker_creds: decode docker_config for py3 only if its a string
+  (vrutkovs@redhat.com)
+- Removing ability to change default cassandra_pvc_prefix based on metrics
+  volume name (ewolinet@redhat.com)
+- Don't deploy the console if disabled or registry subtype (sdodson@redhat.com)
+- [1538960] Correct ability to overried openshift_management_app_template
+  (rteague@redhat.com)
+
+* Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.33.0
+- 
+
+* Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.32.0
+- Revert "Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to
+  set the registry hostname"" (bparees@users.noreply.github.com)
+- Rebase Prometheus example for new scrape endpoints and expose alert manager
+  (m.judeikis@gmail.com)
+- Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to set the
+  registry hostname" (bparees@users.noreply.github.com)
+- Bug 1539182: Detect if ClusterResourceOverrides enabled during console
+  install (spadgett@redhat.com)
+- Fix container_runtime variable typo (mgugino@redhat.com)
+- Correct 3.7 to 3.9 upgrade openshift_image_tag (mgugino@redhat.com)
+- Fix misaligned ports for sg,elb,api (mazzystr@gmail.com)
+- Add GPG keys in the base image and don't install docker (ccoleman@redhat.com)
+- Change catalog roles install to use aggregation (jpeeler@redhat.com)
+- Make IP object a string (fabian@fabianism.us)
+- Add kube service ipaddress to no_proxy list (sdodson@redhat.com)
+
+* Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.31.0
+- removed references to 'files' dir in spec file (dyocum@redhat.com)
+- files in ansible roles do not need to have the path specified to them when
+  referenced by a builtin module, i.e., copy: (dyocum@redhat.com)
+- moving files to their correct <role>/files dir for the openshift_web_console
+  and template_service_broker roles (dyocum@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.30.0
+- Removing dependency on the extra stroage device. (kwoodson@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.29.0
+- Add prometheus annotations to console service (spadgett@redhat.com)
+- Add resource requests to console template (spadgett@redhat.com)
+- ignore 'users' field in oc_group module (jdiaz@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.28.0
+- Updating deprecations to use callback plugin (ewolinet@redhat.com)
+- Run console pods on the master (spadgett@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.26.0
+- docker_image_availability: containerized overrides (lmeyer@redhat.com)
+- Remove old assetConfig from master-config.yaml (spadgett@redhat.com)
+- Don't emit assetConfig on 3.9 (sdodson@redhat.com)
+
+* Fri Jan 26 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.25.0
+- [1502838] Correct certificate alt name parsing (rteague@redhat.com)
+- sync imagestreams+templates from origin master for v3.9 (bparees@redhat.com)
+- node: specify bind option to /root/.docker (gscrivan@redhat.com)
+- [1530403] Improve etcd group error message (rteague@redhat.com)
+- Only automatically restart if cluster is in yellow or green state
+  (ewolinet@redhat.com)
+- openshift_manage_node: Label nodes in one pass (vrutkovs@redhat.com)
+- Redeploy etcd certificates during upgrade when etcd hostname not present in
+  etcd serving cert SAN. (abutcher@redhat.com)
+- Create swapoff module (mgugino@redhat.com)
+- Label masters with node-role.kubernetes.io/master. This PR also sets these
+  labels and scheduling status during upgrades (vrutkovs@redhat.com)
+- [1537946] Correct conditional check for GlusterFS IPs (rteague@redhat.com)
+- Remove unused node.lables from openshift_facts (mgugino@redhat.com)
+- Change dnsmasq Requires to Wants.
+  https://bugzilla.redhat.com/show_bug.cgi?id=1532960 (rchopra@redhat.com)
+- Set a default for openshift_hosted_registry_storage_azure_blob_realm
+  (sdodson@redhat.com)
+- openshift_prometheus: remove block duration settings (pgier@redhat.com)
+
+* Wed Jan 24 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.24.0
+- Update CF 4.6 Beta templates in openshift_management directory
+  (simaishi@redhat.com)
+- installer: increase content width for commands, which may output URLs
+  (vrutkovs@redhat.com)
+- Only rollout console if config changed (spadgett@redhat.com)
+- Protect master installed version during node upgrades (mgugino@redhat.com)
+- [1506866] Update haproxy.cfg.j2 (rteague@redhat.com)
+- Split control plane and component install in deploy_cluster
+  (ccoleman@redhat.com)
+- Add clusterResourceOverridesEnabled to console config (spadgett@redhat.com)
+- [1537105] Add openshift_facts to flannel role (rteague@redhat.com)
+- PyYAML is required by openshift_facts on nodes (ccoleman@redhat.com)
+- Move origin-gce roles and playbooks into openshift-ansible
+  (ccoleman@redhat.com)
+- Directly select the ansible version (ccoleman@redhat.com)
+- use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to set the
+  registry hostname (bparees@redhat.com)
+- update Dockerfile to add boto3 dependency (jdiaz@redhat.com)
+- Lowercase node names when creating certificates (vrutkovs@redhat.com)
+- NFS Storage: make sure openshift_hosted_*_storage_nfs_directory are quoted
+  (vrutkovs@redhat.com)
+- Fix etcd scaleup playbook (mgugino@redhat.com)
+- Bug 1524805- ServiceCatalog now works disconnected (fabian@fabianism.us)
+- [1506750] Ensure proper hostname check override (rteague@redhat.com)
+- failed_when lists are implicitely ANDs, not ORs (vrutkovs@redhat.com)
+- un-hardcode default subnet az (jdiaz@redhat.com)
+- Ensure that node names are lowerecased before matching (sdodson@redhat.com)
+- Bug 1534020 - Only set logging and metrics URLs if console config map exists
+  (spadgett@redhat.com)
+- Add templates to v3.9 (simaishi@redhat.com)
+- Use Beta repo path (simaishi@redhat.com)
+- CF 4.6 templates (simaishi@redhat.com)
+- Add ability to mount volumes into system container nodes (mgugino@redhat.com)
+- Fix to master-internal elb scheme (mazzystr@gmail.com)
+- Allow 5 etcd hosts (sdodson@redhat.com)
+- Remove unused symlink (sdodson@redhat.com)
+- docker_creds: fix python3 exception (gscrivan@redhat.com)
+- docker_creds: fix python3 exception (gscrivan@redhat.com)
+- docker: use image from CentOS and Fedora registries (gscrivan@redhat.com)
+- crio: use Docker and CentOS registries for the image (gscrivan@redhat.com)
+- The provision_install file ends in yml not yaml! Ansible requirement
+  clarification. (mbruzek@gmail.com)
+
+* Tue Jan 23 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.23.0
+- docker_image_availability: enable skopeo to use proxies (lmeyer@redhat.com)
+- Install base_packages earlier (mgugino@redhat.com)
+- allow uninstalling AWS objects created by prerequisite playbook
+  (jdiaz@redhat.com)
+- Bug 1536262: Default console and TSB node selector to
+  openshift_hosted_infra_selector (spadgett@redhat.com)
+- Migrate master-config.yaml asset config (spadgett@redhat.com)
+- Fix master scaleup play (mgugino@redhat.com)
+- use admin credentials for tsb install operations (bparees@redhat.com)
+- Fix etcd-upgrade sanity checks (mgugino@redhat.com)
+- Bug 1536253: Pass `--config` flag on oc commands when installing console
+  (spadgett@redhat.com)
+- Fix enterprise registry-console prefix (sdodson@redhat.com)
+- [release-3.7] Fix enterprise registry console image prefix
+  (sdodson@redhat.com)
+- [release-3.6] Fix enterprise registry console image prefix
+  (sdodson@redhat.com)
+- Bug 1512825 - add mux pod failed for Serial number 02 has already been issued
+  (nhosoi@redhat.com)
+- Remove old console asset config (spadgett@redhat.com)
+- Add support for Amazon EC2 C5 instance types (rteague@redhat.com)
+- Fix provider network support at openstack playbook (ltomasbo@redhat.com)
+
+* Fri Jan 19 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.22.0
+- Fix OpenStack readme (tomas@sedovic.cz)
+- Quick installer: deprecate upgrades (vrutkovs@redhat.com)
+- Fix node scaleup plays (mgugino@redhat.com)
+- Rollout console after template service broker install (spadgett@redhat.com)
+- Use openshift_is_containerized instead of openshift_is_atomic when installing
+  etcd (vrutkovs@redhat.com)
+- Bug 1535947: Fix missing task in metrics, logging uninstall playbooks
+  (spadgett@redhat.com)
+- Make openshift_web_console_prefix defaults like other components
+  (sdodson@redhat.com)
+- Allow for firewalld on atomic host (sdodson@redhat.com)
+- Drop the testing repo var from openstack readme (tomas@sedovic.cz)
+- Add Azure to support openshift_cloudprovider_kind (wehe@redhat.com)
+- bug 1523047. Annotate ops projects with an .operation prefix
+  (jcantril@redhat.com)
+- Pull openshift_image_tag from oo_masters_to_config rather oo_first_master.
+  (abutcher@redhat.com)
+- Ensure atomic_proxies are configured with docker (mgugino@redhat.com)
+- Default install_result when reloading generated facts. (abutcher@redhat.com)
+- health checks: update required pkg versions (lmeyer@redhat.com)
+- health checks: factor out get_required_version (lmeyer@redhat.com)
+- package_version check: reuse get_major_minor_version (lmeyer@redhat.com)
+- Rework default TSB prefix and imagename to match other services
+  (vrutkovs@redhat.com)
+- Add new grafana playbook. (mrsiano@gmail.com)
+- Remove duplication in node acceptance playbook and setup master groups so
+  that we can use the first master's ansible_ssh_user when delegating.
+  (abutcher@redhat.com)
+- Setting default storage_class_names for when calling
+  openshift_logging_elasticsearch role (ewolinet@redhat.com)
+- adding check if secret auth is needed (shawn.hurley21@gmail.com)
+- adding asb auth as a secret. (shawn.hurley21@gmail.com)
+- Ensure we are running oc execs against running pods (ewolinet@redhat.com)
+- Automatic profile setting for tuned 2.9 (jmencak@redhat.com)
+- Fix flake8 errors in utils/test (vrutkovs@redhat.com)
+- kibana checks: use six.moves instead of ImportError (vrutkovs@redhat.com)
+
+* Wed Jan 17 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.21.0
+- Add call to 3.8 playbook in 3.9 upgrade (sdodson@redhat.com)
+- Remove 3.8 and 3.9 specific steps right now (sdodson@redhat.com)
+- Exclude 3.9 packages during 3.8 upgrade (sdodson@redhat.com)
+- fix typos (sdodson@redhat.com)
+- Ensure openshift_client_binary is set (sdodson@redhat.com)
+- Add init/main.yml to etc-upgrade (mgugino@redhat.com)
+- Fix a typo in "Determine if growpart is installed" (vrutkovs@redhat.com)
+- Check rc for commands with openshift_client_binary and failed_when
+  (vrutkovs@redhat.com)
+- Update console config for API changes (spadgett@redhat.com)
+- include elasticsearch container name (jvallejo@redhat.com)
+- openshift_checks: repair adhoc list-checks mode (lmeyer@redhat.com)
+- Remove tuned-profiles from list of master packages upgraded
+  (sdodson@redhat.com)
+- Add missing task that got dropped in a refactor (sdodson@redhat.com)
+- Web Console: use a different var for asset config (vrutkovs@redhat.com)
+- Document the inventory change (tomas@sedovic.cz)
+- Move the OpenStack dynamic inventory from sample (tomas@sedovic.cz)
+- fix bug 1534271 (wmeng@redhat.com)
+- Don't use from ansible.module_utils.six as its no longer available in Ansible
+  2.4 (vrutkovs@redhat.com)
+- Add console RBAC template (spadgett@redhat.com)
+- Setup master groups in order to use the master group's ansible_ssh_user to
+  pull bootstrap kubeconfig. (abutcher@redhat.com)
+- adding ability to add network policy objects. (shawn.hurley21@gmail.com)
+- add python2-boto3 package for centos-based origin-ansible container image
+  (jdiaz@redhat.com)
+- adding ability to interact with network resources. (shawn.hurley21@gmail.com)
+- Adding .ini to inventory_ignore_extensions (bedin@redhat.com)
+
+* Mon Jan 15 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.20.0
+- Adjust openstack provider dependencies versions (bdobreli@redhat.com)
+- Fix openstack provider playbook name in docs (bdobreli@redhat.com)
+- Install web console on upgrade (spadgett@redhat.com)
+- Add var for controller to enable async bindings (jpeeler@redhat.com)
+- Add cluster-operator playbook directory. (abutcher@redhat.com)
+- Move s3 & elb provisioning into their own playbooks s.t. they are applied
+  outside of the openshift_aws master provisioning tasks. (abutcher@redhat.com)
+- Update to AWS EC2 root vol size so that Health Check tasks pass
+  (mazzystr@gmail.com)
+- Configure Kuryr CNI daemon (mdulko@redhat.com)
+- Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
+
+* Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.19.0
+- 
+
+* Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.18.0
+- 
+
+* Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.17.0
+- Update latest image streams and templates (sdodson@redhat.com)
+- Use webconsole.config.openshift.io/v1 API group (spadgett@redhat.com)
+- Add missing v3.9 gluster templates (sdodson@redhat.com)
+- Spelling and grammar changes to the advanced-configuration.md file.
+  (mbruzek@gmail.com)
+- Fixing openshift_hosted variable. (kwoodson@redhat.com)
+- Update deployment and apiserver with new certs (jpeeler@redhat.com)
+- Move more plugins to lib_utils (mgugino@redhat.com)
+- Add the ability to specify a timeout for node drain operations
+  (sdodson@redhat.com)
+- Add defaults for openshift_pkg_version (mgugino@redhat.com)
+- Fix typo in the advanced config docs (tomas@sedovic.cz)
+- Write guide on setting up PVs with Cinder (tomas@sedovic.cz)
+- Allow using server names in openstack dynamic inv (tomas@sedovic.cz)
+- Specify the Cinder version in the inventory (tomas@sedovic.cz)
+- Add documentation example (joel.pearson@gmail.com)
+- Add blockstorage version for openstack (joel.pearson@gmail.com)
+- logging: fix jinja filters to support py3 (vrutkovs@redhat.com)
+- Ability to specify override tolerations via the buildconfig overrider
+  (cdaley@redhat.com)
+- Chmod temp dirs created on localhost (mgugino@redhat.com)
+- Bug 1532787 - Add empty node selector to openshift-web-console namespace
+  (spadgett@redhat.com)
+- Remove become statements (mgugino@redhat.com)
+- Bug 1527178 - installation of logging stack failed: Invalid version specified
+  for Elasticsearch (nhosoi@redhat.com)
+- Limit host group scope on control-plane upgrades (mgugino@redhat.com)
+- Refactor version and move some checks into sanity_checks.py
+  (mgugino@redhat.com)
+- Updating tsb image names and template (ewolinet@redhat.com)
+- Ensure that openshift_facts role is imported whenever we rely on
+  openshift_client_binary (sdodson@redhat.com)
+- Add key check for facts_for_clusterrolebindings (nakayamakenjiro@gmail.com)
+- Update web console template (spadgett@redhat.com)
+- Use openshift_node_use_openshift_sdn when doing a containerized node upgrade
+  (vrutkovs@redhat.com)
+- Add iptables save handler (ichavero@redhat.com)
+- Fix: change import_role to include_role (mgugino@redhat.com)
+- docker storage setup for ami building (jdiaz@redhat.com)
+- ensure containerized bools are cast (mgugino@redhat.com)
+- Properly cast crio boolean variables to bool (mgugino@redhat.com)
+- Build containerized host group dynamically (mgugino@redhat.com)
+- install base_packages on oo_all_hosts (mgugino@redhat.com)
+- Add key existing check to collect facts for rolebidings
+  (nakayamakenjiro@gmail.com)
+- 3.9 upgrade: remove openshift.common.service_type (vrutkovs@redhat.com)
+- container-engine: move registry_auth.yml before pull (gscrivan@redhat.com)
+- Fix error in variable in comment (mscherer@users.noreply.github.com)
+- Switch back to dynamic include_role in logging loops (sdodson@redhat.com)
+- Use Contiv version 1.2.0 (flamingo@2thebatcave.com)
+- Contiv multi-master and other fixes (flamingo@2thebatcave.com)
+- Add missing dependency on openshift_facts (sdodson@redhat.com)
+- upgrades: set openshift_client_binary fact when running on oo_first_master
+  host (vrutkovs@redhat.com)
+- Install web console server (spadgett@redhat.com)
+- Remove become=no from various roles and tasks (mgugino@redhat.com)
+- Don't overwrite node's systemd units for containerized install
+  (vrutkovs@redhat.com)
+- Migrate to import_role for static role inclusion (sdodson@redhat.com)
+- docker_upgrade_check: skip repoquery calls on containerized setups
+  (vrutkovs@redhat.com)
+- Adding logic to disable and reenable external communication to ES during full
+  restart (ewolinet@redhat.com)
+- Provide example on how to use osm_etcd_image in a disconnected and
+  containerized installation (tkarlsso@redhat.com)
+- crio: create /etc/sysconfig/crio-storage (gscrivan@redhat.com)
+- crio: configure proxy variables (gscrivan@redhat.com)
+- Fix docker_image_availability checks (mgugino@redhat.com)
+- Install node packages in one task instead of 3 (mgugino@redhat.com)
+- Don't hardcode the network interface in the openshift_logging_mux role
+  (nkinder@redhat.com)
+- failure_summary: make sure msg is always a string (vrutkovs@redhat.com)
+- Adding logic to do a full cluster restart if we are incrementing our major
+  versions of ES (ewolinet@redhat.com)
+- test_oc_scale: add more scale test cases (vrutkovs@redhat.com)
+- test_oc_scale: fix test docstrings (vrutkovs@redhat.com)
+- Import prerequisites.yml for OpenStack (tomas@sedovic.cz)
+- Set the correct path to the openstack.conf file (tomas@sedovic.cz)
+- Return a openshift_node_labels as a dict (tomas@sedovic.cz)
+- Remove last of openshift_node role meta-depends (mgugino@redhat.com)
+- OpenStack provisioning -- support cns. (jmencak@redhat.com)
+- Fix yaml syntax error in the sample inventory (tomas@sedovic.cz)
+- Adding ability to update ami drive size. (kwoodson@redhat.com)
+- Add origin- prefix to ASB image (fabian@fabianism.us)
+- lint issues (davis.phillips@gmail.com)
+- add vsphere examples in hosts.example (davis.phillips@gmail.com)
+- add template and vsphere.conf (davis.phillips@gmail.com)
+- add vsphere cloud providers (davis.phillips@gmail.com)
+- Fix wrong indentation (ichavero@redhat.com)
+- Fix yaml indentation (ichavero@redhat.com)
+- Add iptables rules for flannel (ichavero@redhat.com)
+
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.16.0
 - Add gluster 3.9 templates (sdodson@redhat.com)
 - Add in-tree CI scripts (mgugino@redhat.com)

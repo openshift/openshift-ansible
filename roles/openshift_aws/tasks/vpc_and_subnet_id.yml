@@ -7,7 +7,9 @@
   register: vpcout
 
 - name: debug vcpout
-  debug: var=vpcout
+  debug:
+    var: vpcout
+    verbosity: 1
 
 - name: fetch the default subnet id
   ec2_vpc_subnet_facts:
@@ -18,4 +20,6 @@
   register: subnetout
 
 - name: debug subnetout
-  debug: var=subnetout
+  debug:
+    var: subnetout
+    verbosity: 1

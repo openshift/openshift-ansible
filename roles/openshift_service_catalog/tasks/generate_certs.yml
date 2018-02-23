@@ -59,11 +59,6 @@
     src: "{{ generated_certs_dir }}/ca.crt"
   register: apiserver_ca
 
-- shell: >
-    {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig get apiservices.apiregistration.k8s.io/v1beta1.servicecatalog.k8s.io -n kube-service-catalog || echo "not found"
-  register: get_apiservices
-  changed_when: no
-
 - name: Create api service
   oc_obj:
     state: present
@@ -86,4 +81,3 @@
           caBundle: "{{ apiserver_ca.content }}"
           groupPriorityMinimum: 20
           versionPriority: 10
-  when: "'not found' in get_apiservices.stdout"

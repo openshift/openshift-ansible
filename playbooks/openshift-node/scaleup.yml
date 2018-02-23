@@ -4,7 +4,6 @@
 - name: Ensure there are new_nodes
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - fail:
@@ -13,9 +12,28 @@
         new_nodes host group to add nodes.
     when:
     - g_new_node_hosts | default([]) | length == 0
+  - fail:
+      msg: >
+        Please run playbooks/openshift-master/scaleup.yml if you need to
+        scale up both masters and nodes.  This playbook is only needed if
+        you are only adding new nodes and not new masters.
+    when:
+    - g_new_node_hosts | default([]) | length > 0
+    - g_new_master_hosts | default([]) | length > 0
 
-# Need a better way to do the above check for node without
-# running evaluate_groups and init/main.yml
-- import_playbook: ../init/main.yml
+# if g_new_node_hosts is not empty, oo_nodes_to_config will be set to
+# g_new_node_hosts via evaluate_groups.yml
+
+- import_playbook: ../prerequisites.yml
+  vars:
+    l_scale_up_hosts: "oo_nodes_to_config"
+    l_base_packages_hosts: "oo_nodes_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
+    l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters_to_config']) }}"
+
+- import_playbook: ../init/version.yml
+  vars:
+    l_openshift_version_set_hosts: "oo_nodes_to_config:!oo_first_master"
+    l_openshift_version_check_hosts: "oo_nodes_to_config"
 
 - import_playbook: private/config.yml

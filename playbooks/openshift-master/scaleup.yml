@@ -1,23 +1,44 @@
 ---
 - import_playbook: ../init/evaluate_groups.yml
 
-- name: Ensure there are new_masters or new_nodes
+- name: Ensure there are new_masters and new_nodes
   hosts: localhost
   connection: local
-  become: no
   gather_facts: no
   tasks:
   - fail:
+      # new_masters must be part of new_nodes as well; otherwise if new_nodes
+      # is not present, oo_nodes_to_config will contain all existing nodes.
       msg: >
-        Detected no new_masters or no new_nodes in inventory. Please
-        add hosts to the new_masters and new_nodes host groups to add
-        masters.
-    when:
-    - g_new_master_hosts | default([]) | length == 0
-    - g_new_node_hosts | default([]) | length == 0
+        Detected no new_masters and/or no new_nodes in inventory. New
+        masters must be part of both new_masters and new_nodes groups.
+        If you are adding just new_nodes, use the
+        playbooks/openshift-node/scaleup.yml play.
+    when: >
+      g_new_master_hosts | default([]) | length == 0
+      or g_new_node_hosts | default([]) | length == 0
 
-# Need a better way to do the above check for node without
-# running evaluate_groups and init/main.yml
-- import_playbook: ../init/main.yml
+- name: Ensure there are new_masters and new_nodes
+  hosts: oo_masters_to_config
+  connection: local
+  gather_facts: no
+  tasks:
+  - fail:
+      # new_masters must be part of new_nodes as well;
+      msg: >
+        Each host in new_masters must also appear in new_nodes
+    when: inventory_hostname not in groups['oo_nodes_to_config']
+
+- import_playbook: ../prerequisites.yml
+  vars:
+    l_scale_up_hosts: "oo_nodes_to_config:oo_masters_to_config"
+    l_base_packages_hosts: "oo_nodes_to_config:oo_masters_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
+    l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters_to_config']) }}"
+
+- import_playbook: ../init/version.yml
+  vars:
+    l_openshift_version_set_hosts: "oo_masters_to_config:oo_nodes_to_config:!oo_first_master"
+    l_openshift_version_check_hosts: "oo_masters_to_config:oo_nodes_to_config"
 
 - import_playbook: private/scaleup.yml

@@ -5,6 +5,7 @@ openshift_logging_fluentd_master_url: "https://kubernetes.default.svc.{{ openshi
 openshift_logging_fluentd_namespace: logging
 
 ### Common settings
+# map_from_pairs is a custom filter plugin in role lib_utils
 openshift_logging_fluentd_nodeselector: "{{ openshift_hosted_logging_fluentd_nodeselector_label | default('logging-infra-fluentd=true') | map_from_pairs }}"
 openshift_logging_fluentd_cpu_limit: null
 openshift_logging_fluentd_cpu_request: 100m

@@ -100,4 +100,4 @@
       'openshift_management_template_parameters'"
   with_items: "{{ __openshift_management_required_db_conn_params }}"
   when:
-    - openshift_management_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
+    - __openshift_management_use_ext_db

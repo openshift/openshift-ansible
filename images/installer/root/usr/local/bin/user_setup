@@ -12,6 +12,8 @@ chmod g+rw /etc/passwd
 # ensure that the ansible content is accessible
 chmod -R g+r ${WORK_DIR}
 find ${WORK_DIR} -type d -exec chmod g+x {} +
+# ensure that the dynamic inventory dir can have content created
+find ${WORK_DIR} -type d -exec chmod g+wx {} +
 
 # no need for this script to remain in the image after running
 rm $0

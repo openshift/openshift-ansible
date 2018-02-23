@@ -1,6 +1,17 @@
 ---
 - include_tasks: common/pre.yml
 
+# In some cases, some services may be run as containers and docker may still
+# be installed via rpm.
+- include_tasks: common/atomic_proxy.yml
+  when:
+  - >
+    (openshift_use_system_containers | default(False)) | bool
+    or (openshift_use_etcd_system_container | default(False)) | bool
+    or (openshift_use_openvswitch_system_container | default(False)) | bool
+    or (openshift_use_node_system_container | default(False)) | bool
+    or (openshift_use_master_system_container | default(False)) | bool
+
 - name: Get current installed Docker version
   command: "{{ repoquery_installed }} --qf '%{version}' docker"
   when: not openshift_is_atomic | bool
@@ -100,12 +111,12 @@
     regexp: '^OPTIONS=.*$'
     line: "OPTIONS='\
       {% if ansible_selinux.status | default(None) == 'enabled' and openshift_docker_selinux_enabled | default(true) | bool %} --selinux-enabled {% endif %} \
-      {% if openshift_docker_log_driver | bool %} --log-driver {{ openshift_docker_log_driver }}{% endif %} \
+      {% if openshift_docker_log_driver %} --log-driver {{ openshift_docker_log_driver }}{% endif %} \
       {% if l2_docker_log_options != [] %} {{ l2_docker_log_options |  lib_utils_oo_split() | lib_utils_oo_prepend_strings_in_list('--log-opt ') | join(' ')}}{% endif %} \
-      {% if openshift_docker_hosted_registry_insecure and (openshift_docker_hosted_registry_network | bool) %} --insecure-registry={{ openshift_docker_hosted_registry_network }} {% endif %} \
+      {% if (openshift_docker_hosted_registry_insecure | bool) and openshift_docker_hosted_registry_network %} --insecure-registry={{ openshift_docker_hosted_registry_network }} {% endif %} \
       {% if docker_options is defined %} {{ docker_options }}{% endif %} \
       {% if openshift_docker_options %} {{ openshift_docker_options }}{% endif %} \
-      {% if openshift_docker_disable_push_dockerhub %} --confirm-def-push={{ openshift_docker_disable_push_dockerhub | bool }}{% endif %} \
+      {% if openshift_docker_disable_push_dockerhub | bool %} --confirm-def-push={{ openshift_docker_disable_push_dockerhub | bool }}{% endif %} \
       --signature-verification={{ openshift_docker_signature_verification | bool }}'"
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:

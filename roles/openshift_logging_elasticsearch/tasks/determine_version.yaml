@@ -10,8 +10,14 @@
 
 # should we just assume that we will have the correct major version?
 - set_fact: es_version="{{ openshift_logging_elasticsearch_image_version | regex_replace('^v?(?P<major>\d)\.(?P<minor>\d).*$', '3_\\g<minor>') }}"
-  when: openshift_logging_elasticsearch_image_version != 'latest'
+  when:
+  - openshift_logging_elasticsearch_image_version != 'latest'
+  - not openshift_logging_es5_techpreview | default(false) | bool
 
 - fail:
     msg: Invalid version specified for Elasticsearch
-  when: es_version not in __allowed_es_versions
+  when:
+  - es_version not in __allowed_es_versions
+  - not openshift_logging_es5_techpreview | default(false) | bool
+
+- include_tasks: get_es_version.yml

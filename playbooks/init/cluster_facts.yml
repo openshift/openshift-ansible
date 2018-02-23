@@ -1,0 +1,42 @@
+---
+- name: Initialize cluster facts
+  # l_init_fact_hosts is passed in via play during control-plane-only
+  # upgrades and scale-up plays; otherwise oo_all_hosts is used.
+  hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
+  roles:
+  - role: openshift_facts
+  tasks:
+  - name: Gather Cluster facts
+    openshift_facts:
+      role: common
+      local_facts:
+        deployment_type: "{{ openshift_deployment_type }}"
+        deployment_subtype: "{{ openshift_deployment_subtype | default(None) }}"
+        hostname: "{{ openshift_hostname | default(None) }}"
+        ip: "{{ openshift_ip | default(None) }}"
+        public_hostname: "{{ openshift_public_hostname | default(None) }}"
+        public_ip: "{{ openshift_public_ip | default(None) }}"
+        portal_net: "{{ openshift_portal_net | default(openshift_master_portal_net) | default(None) }}"
+        http_proxy: "{{ openshift_http_proxy | default(None) }}"
+        https_proxy: "{{ openshift_https_proxy | default(None) }}"
+        no_proxy: "{{ openshift_no_proxy | default(None) }}"
+        generate_no_proxy_hosts: "{{ openshift_generate_no_proxy_hosts | default(True) }}"
+
+  - name: Set fact of no_proxy_internal_hostnames
+    openshift_facts:
+      role: common
+      local_facts:
+        no_proxy_internal_hostnames: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_nodes_to_config']
+                                             | union(groups['oo_masters_to_config'])
+                                             | union(groups['oo_etcd_to_config'] | default([])))
+                                         | lib_utils_oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                         }}"
+    when:
+    - openshift_http_proxy is defined or openshift_https_proxy is defined
+    - openshift_generate_no_proxy_hosts | default(True) | bool
+
+  - name: Initialize openshift.node.sdn_mtu
+    openshift_facts:
+      role: node
+      local_facts:
+        sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"

@@ -249,3 +249,31 @@
       that: results.result == [1, 2, 3, 4]
       msg: "Test: '[1, 2, 3, 4]' != [{{ results.result }}]"
       ###### end test create multiple list value #####
+
+  ###### test state absent on list item #####
+  - name: test state absent on a list item
+    yedit:
+      state: absent
+      content: ['oranges', 'apples']
+      value: apples
+    register: absentout
+
+  - debug: var=absentout
+  - assert:
+      that:
+      - absentout.result == ['oranges']
+      - absentout.result|length == 1
+
+  - name: test state absent on a list item
+    yedit:
+      state: absent
+      content: ['oranges', 'apples']
+      index: 1
+    register: absentout
+
+  - debug: var=absentout
+  - assert:
+      that:
+      - absentout.result == ['oranges']
+      - absentout.result|length == 1
+      ###### end test state absent on list item ####

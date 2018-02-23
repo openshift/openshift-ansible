@@ -8,7 +8,6 @@
 
 - name: Evaluate node groups
   hosts: localhost
-  become: no
   connection: local
   tasks:
   - name: Evaluate oo_containerized_master_nodes

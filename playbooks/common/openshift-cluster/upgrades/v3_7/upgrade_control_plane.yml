@@ -14,6 +14,7 @@
 - import_playbook: ../init.yml
   vars:
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
 
 - name: Configure the upgrade target for the common upgrade tasks
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
@@ -23,13 +24,18 @@
       openshift_upgrade_min: '3.6'
 
 - import_playbook: ../pre/config.yml
+  # These vars a meant to exclude oo_nodes from plays that would otherwise include
+  # them by default.
   vars:
+    l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
+    l_openshift_version_check_hosts: "oo_masters_to_config:!oo_first_master"
     l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_upgrade_no_proxy_hosts: "oo_masters_to_config"
     l_upgrade_health_check_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_upgrade_verify_targets_hosts: "oo_masters_to_config"
     l_upgrade_docker_target_hosts: "oo_masters_to_config:oo_etcd_to_config"
     l_upgrade_excluder_hosts: "oo_masters_to_config"
+    openshift_protect_installed_version: False
 
 - import_playbook: validator.yml
 
@@ -44,6 +50,16 @@
 - import_playbook: ../upgrade_control_plane.yml
   vars:
     master_config_hook: "v3_7/master_config_upgrade.yml"
+
+# this must occur after the control plane is upgraded because systemd service
+# names are changed
+- name: Configure API aggregation on masters
+  hosts: oo_masters_to_config
+  serial: 1
+  roles:
+  - role: openshift_facts
+  tasks:
+  - include_tasks: ../../../openshift-master/tasks/wire_aggregator.yml
 
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode

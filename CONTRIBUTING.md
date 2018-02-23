@@ -74,6 +74,27 @@ If you are new to Git, these links might help:
 
 ---
 
+## Simple all-in-one localhost installation
+```
+git clone https://github.com/openshift/openshift-ansible
+cd openshift-ansible
+sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
+sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
+```
+
+## Development process
+Most changes can be applied by re-running the config playbook. However, while
+the config playbook will run faster the second time through it's still going to
+take a very long time. As such, you may wish to run a smaller subsection of the
+installation playbooks. You can for instance run the node, master, or hosted
+playbooks in playbooks/openshift-node/config.yml,
+playbooks/openshift-master/config.yml, playbooks/openshift-hosted/config.yml
+respectively.
+
+We're actively working to refactor the playbooks into smaller discrete
+components and we'll be documenting that structure shortly, for now those are
+the most sensible logical units of work.
+
 ## Running tests and other verification tasks
 
 We use [`tox`](http://readthedocs.org/docs/tox/) to manage virtualenvs where

@@ -2,26 +2,8 @@
 - name: "dump the elb listeners for {{ l_elb_dict_item.key }}"
   debug:
     msg: "{{ l_elb_dict_item.value }}"
+    verbosity: 1
 
-- name: "Create ELB {{ l_elb_dict_item.key }}"
-  ec2_elb_lb:
-    name: "{{ l_openshift_aws_elb_name_dict[l_elb_dict_item.key][item.key] }}"
-    state: present
-    cross_az_load_balancing: "{{ openshift_aws_elb_az_load_balancing }}"
-    security_group_names: "{{ l_elb_security_groups[l_elb_dict_item.key] }}"
-    idle_timeout: "{{ openshift_aws_elb_idle_timout }}"
-    region: "{{ openshift_aws_region }}"
-    subnets:
-    - "{{ subnetout.subnets[0].id }}"
-    health_check: "{{ openshift_aws_elb_health_check }}"
-    listeners: "{{ item.value }}"
-    scheme: "{{ openshift_aws_elb_scheme }}"
-    tags: "{{ openshift_aws_elb_tags }}"
-    wait: True
-  register: new_elb
+- name: Create ELB(s)
+  include_tasks: elb_single.yml
   with_dict: "{{ l_elb_dict_item.value }}"
-
-- debug:
-    msg: "{{ item }}"
-  with_items:
-  - "{{ new_elb }}"

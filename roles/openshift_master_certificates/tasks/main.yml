@@ -1,25 +1,16 @@
 ---
-- set_fact:
-    openshift_master_certs_no_etcd:
-    - admin.crt
-    - master.kubelet-client.crt
-    - master.proxy-client.crt
-    - master.server.crt
-    - openshift-master.crt
-    - openshift-registry.crt
-    - openshift-router.crt
-    - etcd.server.crt
-    openshift_master_certs_etcd:
-    - master.etcd-client.crt
-
-- set_fact:
-    openshift_master_certs: "{{ (openshift_master_certs_no_etcd | union(openshift_master_certs_etcd )) if openshift_master_etcd_hosts | length > 0 else openshift_master_certs_no_etcd }}"
-
 - name: Check status of master certificates
   stat:
     path: "{{ openshift_master_config_dir }}/{{ item }}"
   with_items:
-  - "{{ openshift_master_certs }}"
+  - admin.crt
+  - ca.crt
+  - ca-bundle.crt
+  - master.kubelet-client.crt
+  - master.proxy-client.crt
+  - master.server.crt
+  - openshift-master.crt
+  - service-signer.crt
   register: g_master_cert_stat_result
   when: not openshift_certificates_redeploy | default(false) | bool
 
@@ -101,6 +92,7 @@
     state: hard
     force: true
   with_items:
+  # certificates_to_synchronize is a custom filter in lib_utils
   - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
@@ -120,7 +112,11 @@
   register: g_master_certs_mktemp
   changed_when: False
   when: master_certs_missing | bool
-  become: no
+
+- name: Chmod local temp directory for syncing certs
+  local_action: command chmod 777 "{{ g_master_certs_mktemp.stdout }}"
+  changed_when: False
+  when: master_certs_missing | bool
 
 - name: Create a tarball of the master certs
   command: >
@@ -157,7 +153,6 @@
   local_action: file path="{{ g_master_certs_mktemp.stdout }}" state=absent
   changed_when: False
   when: master_certs_missing | bool
-  become: no
 
 - name: Lookup default group for ansible_ssh_user
   command: "/usr/bin/id -g {{ ansible_ssh_user | quote }}"

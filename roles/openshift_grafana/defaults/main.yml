@@ -1,0 +1,13 @@
+---
+grafana_base_url: https://raw.githubusercontent.com/openshift/origin/master/examples/grafana/
+datasource_payload:
+  name: grafana_name
+  type: prometheus
+  typeLogoUrl: ''
+  access: proxy
+  url: prometheus_url
+  basicAuth: false
+  withCredentials: false
+  jsonData:
+    tlsSkipVerify: true
+    token: satoken

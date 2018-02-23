@@ -104,17 +104,17 @@
 
 # create Fluentd configmap
 - template:
-    src: fluent.conf.j2
+    src: "{{ __base_file_dir }}/fluent.conf.j2"
     dest: "{{ tempdir }}/fluent.conf"
   vars:
     deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
 
 - copy:
-    src: fluentd-throttle-config.yaml
+    src: "{{ __base_file_dir }}/fluentd-throttle-config.yaml"
     dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
 
 - copy:
-    src: secure-forward.conf
+    src: "{{ __base_file_dir }}/secure-forward.conf"
     dest: "{{ tempdir }}/secure-forward.conf"
 
 - import_role:
@@ -161,7 +161,7 @@
 # TODO: pass in aggregation configurations
 - name: Generate logging-fluentd daemonset definition
   template:
-    src: fluentd.j2
+    src: "{{ __base_file_dir }}/fluentd.j2"
     dest: "{{ tempdir }}/templates/logging-fluentd.yaml"
   vars:
     daemonset_name: logging-fluentd
@@ -172,8 +172,8 @@
     app_port: "{{ openshift_logging_fluentd_app_port }}"
     ops_host: "{{ openshift_logging_fluentd_ops_host }}"
     ops_port: "{{ openshift_logging_fluentd_ops_port }}"
-    fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys()[0] }}"
-    fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values()[0] }}"
+    fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys() | first }}"
+    fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values() | first }}"
     fluentd_cpu_limit: "{{ openshift_logging_fluentd_cpu_limit }}"
     fluentd_cpu_request: "{{ openshift_logging_fluentd_cpu_request | min_cpu(openshift_logging_fluentd_cpu_limit | default(none)) }}"
     fluentd_memory_limit: "{{ openshift_logging_fluentd_memory_limit }}"

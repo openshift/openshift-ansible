@@ -33,7 +33,7 @@ spec:
       hostIPC: true
       containers:
       - name: config
-        image: centos:7
+        image: "{{ openshift_daemonset_config_image }}"
         env:
         - name: RESYNC_INTERVAL
           value: "{{ openshift_daemonset_config_interval }}"
@@ -50,8 +50,8 @@ spec:
             sh /opt/config/{{ openshift_daemonset_config_script }}
 
             # sleep for ${RESYNC_INTERVAL} minutes, then loop. if we fail Kubelet will restart us again
-            echo "Success, sleeping for ${RESYNC_INTERVAL}s"
-            exec sleep ${RESYNC_INTERVAL}
+            echo "Success, sleeping for ${RESYNC_INTERVAL}s. Date: $(date)"
+            sleep ${RESYNC_INTERVAL}
 
           # Return to perform the config
           done
@@ -68,6 +68,8 @@ spec:
         # Our node configuration
         - mountPath: /opt/config
           name: config
+        - mountPath: /opt/tmp_shared_config
+          name: tmp-shared-dir
 {% if openshift_daemonset_config_secrets != {} %}
         # Our delivered secrets
         - mountPath: /opt/secrets
@@ -79,12 +81,14 @@ spec:
             memory: {{ openshift_daemonset_config_resources.memory }}
 {% if openshift_daemonset_config_monitoring %}
       - name: monitoring
-        image: openshifttools/oso-centos7-host-monitoring:latest
+        image: "{{ openshift_daemonset_config_monitoring_image }}"
+        env:
+        - name: OO_PAUSE_ON_START
+          value: "{{ openshift_daemonset_config_monitoring_pos }}"
         securityContext:
           # Must be root to read content
           runAsUser: 0
           privileged: true
-
         volumeMounts:
         - mountPath: /host
           name: host
@@ -118,17 +122,23 @@ spec:
         - mountPath: /host/var/cache/yum
           subPath: var/cache/yum
           name: host
-        - mountPath: /container_setup/monitoring-config.yml
-          subPath: monitoring-config.yaml
-          name: config
+          readOnly: true
+        - mountPath: /container_setup
+          name: tmp-shared-dir
         - mountPath: /opt/config
           name: config
+{% if openshift_daemonset_config_secrets != {} %}
+        - mountPath: /opt/secrets
+          name: secrets
+{% endif %}
         resources:
           requests:
             cpu: 10m
             memory: 10Mi
 {% endif %}
       volumes:
+      - name: tmp-shared-dir
+        emptyDir: {}
       - name: config
         configMap:
           name: {{ openshift_daemonset_config_configmap_name }}

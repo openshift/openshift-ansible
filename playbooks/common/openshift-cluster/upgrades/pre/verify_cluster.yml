@@ -17,6 +17,7 @@
         valid version for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_pkg_version is defined
+    - openshift_pkg_version != ""
     - openshift_pkg_version.split('-',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - fail:
@@ -25,6 +26,7 @@
         valid version for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_image_tag is defined
+    - openshift_image_tag != ""
     - openshift_image_tag.split('v',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - set_fact:
@@ -53,7 +55,7 @@
     register: _storage_backend
 
   - fail:
-      msg: "Storage backend in /etc/origin/master/master-config.yaml must be set to 'etcd3' before the upgrade can continue"
+      msg: "The cluster must be migrated to etcd v3 prior to upgrading to 3.7. Please see https://docs.openshift.com/container-platform/3.7/install_config/upgrading/migrating_etcd.html"
     when:
     # assuming the master-config.yml is properly configured, i.e. the value is a list
     - _storage_backend.result | default([], true) | length == 0 or _storage_backend.result[0] != "etcd3"

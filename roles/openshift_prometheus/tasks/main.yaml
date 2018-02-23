@@ -16,9 +16,11 @@
 - name: Create templates subdirectory
   file:
     state: directory
-    path: "{{ tempdir }}/templates"
+    path: "{{ tempdir }}/{{ item }}"
     mode: 0755
   changed_when: False
+  with_items:
+    - templates
 
 - include_tasks: install_prometheus.yaml
   when: openshift_prometheus_state == 'present'

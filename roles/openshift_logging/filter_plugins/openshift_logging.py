@@ -79,14 +79,6 @@ def entry_from_named_pair(register_pairs, key):
     raise RuntimeError("There was no entry found in the dict that had an item with a name that matched {}".format(key))
 
 
-def map_from_pairs(source, delim="="):
-    ''' Returns a dict given the source and delim delimited '''
-    if source == '':
-        return dict()
-
-    return dict(item.split(delim) for item in source.split(","))
-
-
 def serviceaccount_name(qualified_sa):
     ''' Returns the simple name from a fully qualified name '''
     return qualified_sa.split(":")[-1]
@@ -134,7 +126,6 @@ class FilterModule(object):
         return {
             'random_word': random_word,
             'entry_from_named_pair': entry_from_named_pair,
-            'map_from_pairs': map_from_pairs,
             'min_cpu': min_cpu,
             'es_storage': es_storage,
             'serviceaccount_name': serviceaccount_name,

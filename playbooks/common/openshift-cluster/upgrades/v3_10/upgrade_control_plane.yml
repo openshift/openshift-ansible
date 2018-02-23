@@ -1,0 +1,58 @@
+---
+#
+# Control Plane Upgrade Playbook
+#
+# Upgrades masters and Docker (only on standalone etcd hosts)
+#
+# This upgrade does not include:
+# - node service running on masters
+# - docker running on masters
+# - node service running on dedicated nodes
+#
+# You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
+#
+- import_playbook: ../init.yml
+  vars:
+    l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+
+- name: Configure the upgrade target for the common upgrade tasks 3.10
+  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
+  tasks:
+  - meta: clear_facts
+  - set_fact:
+      openshift_upgrade_target: '3.10'
+      openshift_upgrade_min: '3.9'
+      openshift_release: '3.10'
+
+- import_playbook: ../pre/config.yml
+  # These vars a meant to exclude oo_nodes from plays that would otherwise include
+  # them by default.
+  vars:
+    l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
+    l_openshift_version_check_hosts: "oo_masters_to_config:!oo_first_master"
+    l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_upgrade_no_proxy_hosts: "oo_masters_to_config"
+    l_upgrade_health_check_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_upgrade_verify_targets_hosts: "oo_masters_to_config"
+    l_upgrade_docker_target_hosts: "oo_masters_to_config:oo_etcd_to_config"
+    l_upgrade_excluder_hosts: "oo_masters_to_config"
+    openshift_protect_installed_version: False
+
+- name: Flag pre-upgrade checks complete for hosts without errors
+  hosts: oo_masters_to_config:oo_etcd_to_config
+  tasks:
+  - set_fact:
+      pre_upgrade_complete: True
+
+- import_playbook: ../upgrade_control_plane.yml
+  vars:
+    openshift_release: '3.10'
+
+- import_playbook: ../post_control_plane.yml
+
+- hosts: oo_masters
+  tasks:
+  - import_role:
+      name: openshift_web_console
+      tasks_from: remove_old_asset_config

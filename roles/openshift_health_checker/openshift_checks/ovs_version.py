@@ -3,7 +3,7 @@ Ansible module for determining if an installed version of Open vSwitch is incomp
 currently installed version of OpenShift.
 """
 
-from openshift_checks import OpenShiftCheck, OpenShiftCheckException
+from openshift_checks import OpenShiftCheck
 from openshift_checks.mixins import NotContainerizedMixin
 
 
@@ -16,10 +16,13 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
     tags = ["health"]
 
     openshift_to_ovs_version = {
-        "3.7": ["2.6", "2.7", "2.8"],
-        "3.6": ["2.6", "2.7", "2.8"],
-        "3.5": ["2.6", "2.7"],
-        "3.4": "2.4",
+        (3, 4): "2.4",
+        (3, 5): ["2.6", "2.7"],
+        (3, 6): ["2.6", "2.7", "2.8", "2.9"],
+        (3, 7): ["2.6", "2.7", "2.8", "2.9"],
+        (3, 8): ["2.6", "2.7", "2.8", "2.9"],
+        (3, 9): ["2.6", "2.7", "2.8", "2.9"],
+        (3, 10): ["2.6", "2.7", "2.8", "2.9"],
     }
 
     def is_active(self):
@@ -40,16 +43,5 @@ class OvsVersion(NotContainerizedMixin, OpenShiftCheck):
         return self.execute_module("rpm_version", args)
 
     def get_required_ovs_version(self):
-        """Return the correct Open vSwitch version for the current OpenShift version"""
-        openshift_version_tuple = self.get_major_minor_version(self.get_var("openshift_image_tag"))
-
-        if openshift_version_tuple < (3, 5):
-            return self.openshift_to_ovs_version["3.4"]
-
-        openshift_version = ".".join(str(x) for x in openshift_version_tuple)
-        ovs_version = self.openshift_to_ovs_version.get(openshift_version)
-        if ovs_version:
-            return self.openshift_to_ovs_version[openshift_version]
-
-        msg = "There is no recommended version of Open vSwitch for the current version of OpenShift: {}"
-        raise OpenShiftCheckException(msg.format(openshift_version))
+        """Return the correct Open vSwitch version(s) for the current OpenShift version."""
+        return self.get_required_version("Open vSwitch", self.openshift_to_ovs_version)

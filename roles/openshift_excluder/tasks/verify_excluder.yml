@@ -3,7 +3,7 @@
 # - excluder
 - name: Get available excluder version
   repoquery:
-    name: "{{ excluder }}"
+    name: "{{ excluder }}{{ '-' ~ r_openshift_excluder_upgrade_target.split('.')[0:2] | join('.') ~ '*' if r_openshift_excluder_upgrade_target is defined else '' }}"
     ignore_excluders: true
   register: repoquery_out
 

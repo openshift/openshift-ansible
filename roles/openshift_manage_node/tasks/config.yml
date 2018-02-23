@@ -1,0 +1,27 @@
+---
+- name: Set node schedulability
+  oc_adm_manage_node:
+    node: "{{ openshift.node.nodename | lower }}"
+    schedulable: "{{ 'true' if openshift_schedulable | default(true) | bool else 'false' }}"
+  retries: 10
+  delay: 5
+  register: node_schedulable
+  until: node_schedulable is succeeded
+  when: "'nodename' in openshift.node"
+  delegate_to: "{{ openshift_master_host }}"
+
+- name: Label nodes
+  oc_label:
+    name: "{{ openshift.node.nodename }}"
+    kind: node
+    state: add
+    labels: "{{ l_all_labels | lib_utils_oo_dict_to_list_of_dict }}"
+    namespace: default
+  when:
+    - "'nodename' in openshift.node"
+    - l_all_labels != {}
+  delegate_to: "{{ openshift_master_host }}"
+  vars:
+    l_node_labels: "{{ openshift_node_labels | default({}) }}"
+    l_master_labels: "{{ openshift_manage_node_is_master | ternary(openshift_master_node_labels, {}) }}"
+    l_all_labels: "{{ l_node_labels | combine(l_master_labels) }}"

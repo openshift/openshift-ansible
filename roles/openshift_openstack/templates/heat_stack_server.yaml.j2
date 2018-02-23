@@ -102,13 +102,11 @@ parameters:
     label: Attach-float-net
     description: A switch for floating network port connection
 
-{% if not openshift_openstack_provider_network_name %}
   floating_network:
     type: string
     default: ''
     label: Floating network
     description: Network to allocate floating IP from
-{% endif %}
 
   availability_zone:
     type: string
@@ -212,6 +210,9 @@ resources:
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
         node_labels: { get_param: node_labels }
+{% if openshift_openstack_dns_nameservers %}
+        openshift_hostname: { get_param: name }
+{% endif %}
       scheduler_hints: { get_param: scheduler_hints }
 
 {% if use_trunk_ports|default(false)|bool %}
@@ -260,11 +261,12 @@ resources:
     properties:
       size: { get_param: volume_size }
       availability_zone: { get_param: availability_zone }
+      metadata:
+        purpose: openshift_docker_storage
 
   volume_attachment:
     type: OS::Cinder::VolumeAttachment
     properties:
       volume_id: { get_resource: cinder_volume }
       instance_uuid: { get_resource: server }
-      mountpoint: /dev/sdb
 {% endif %}

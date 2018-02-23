@@ -10,7 +10,7 @@ import traceback
 from ansible.plugins.callback import CallbackBase
 from ansible import constants as C
 from ansible.utils.color import stringc
-from ansible.module_utils.six import string_types
+from ansible.module_utils.six import string_types, PY2
 
 
 FAILED_NO_MSG = u'Failed without returning a message.'
@@ -86,6 +86,8 @@ def failure_summary(failures, playbook):
         entries = format_failure(failure)
         summary.append(u'\n{}{}'.format(initial_indent_format.format(i), entries[0]))
         for entry in entries[1:]:
+            if PY2:
+                entry = entry.decode('utf8')
             entry = entry.replace(u'\n', u'\n' + subsequent_extra_indent)
             indented = u'{}{}'.format(subsequent_indent, entry)
             summary.append(indented)
@@ -175,6 +177,8 @@ def format_failure(failure):
     play = failure['play']
     task = failure['task']
     msg = failure['msg']
+    if not isinstance(msg, string_types):
+        msg = str(msg)
     checks = failure['checks']
     fields = (
         (u'Hosts', host),
@@ -185,7 +189,7 @@ def format_failure(failure):
     if checks:
         fields += ((u'Details', format_failed_checks(checks)),)
     row_format = '{:10}{}'
-    return [row_format.format(header + u':', body) for header, body in fields]
+    return [row_format.format(header + u':', body.encode('utf8')) if PY2 else body for header, body in fields]
 
 
 def format_failed_checks(checks):

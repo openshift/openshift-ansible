@@ -24,19 +24,6 @@ DEFAULT_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible.cfg'
 QUIET_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible-quiet.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
-UPGRADE_MAPPINGS = {
-    '3.6': {
-        'minor_version': '3.6',
-        'minor_playbook': 'v3_6/upgrade.yml',
-        'major_playbook': 'v3_7/upgrade.yml',
-        'major_version': '3.7',
-    },
-    '3.7': {
-        'minor_version': '3.7',
-        'minor_playbook': 'v3_7/upgrade.yml',
-    },
-}
-
 
 def validate_ansible_dir(path):
     if not path:
@@ -796,6 +783,17 @@ If changes are needed please edit the installer.cfg.yml config file above and re
     if not unattended:
         confirm_continue(message)
 
+    error = openshift_ansible.run_prerequisites(inventory_file, oo_cfg.deployment.hosts,
+                                                hosts_to_run_on, verbose)
+    if error:
+        # The bootstrap script will print out the log location.
+        message = """
+An error was detected. After resolving the problem please relaunch the
+installation process.
+"""
+        click.echo(message)
+        sys.exit(1)
+
     error = openshift_ansible.run_main_playbook(inventory_file, oo_cfg.deployment.hosts,
                                                 hosts_to_run_on, verbose)
 
@@ -820,7 +818,7 @@ http://docs.openshift.com/enterprise/latest/admin_guide/overview.html
         click.echo(message)
 
 
-@click.group()
+@click.group(context_settings=dict(max_content_width=120))
 @click.pass_context
 @click.option('--unattended', '-u', is_flag=True, default=False)
 @click.option('--configuration', '-c',
@@ -932,97 +930,16 @@ def uninstall(ctx):
     openshift_ansible.run_uninstall_playbook(hosts, verbose)
 
 
-@click.command()
+@click.command(context_settings=dict(max_content_width=120))
 @click.option('--latest-minor', '-l', is_flag=True, default=False)
 @click.option('--next-major', '-n', is_flag=True, default=False)
 @click.pass_context
 # pylint: disable=too-many-statements,too-many-branches
 def upgrade(ctx, latest_minor, next_major):
-    oo_cfg = ctx.obj['oo_cfg']
-
-    if len(oo_cfg.deployment.hosts) == 0:
-        click.echo("No hosts defined in: %s" % oo_cfg.config_path)
-        sys.exit(1)
-
-    variant = oo_cfg.settings['variant']
-    if find_variant(variant)[0] is None:
-        click.echo("%s is not a supported variant for upgrade." % variant)
-        sys.exit(0)
-
-    old_version = oo_cfg.settings['variant_version']
-
-    try:
-        mapping = UPGRADE_MAPPINGS[old_version]
-    except KeyError:
-        click.echo('No upgrades available for %s %s' % (variant, old_version))
-        sys.exit(0)
-
-    message = """
-        This tool will help you upgrade your existing OpenShift installation.
-        Currently running: %s %s
-"""
-    click.echo(message % (variant, old_version))
-
-    # Map the dynamic upgrade options to the playbook to run for each.
-    # Index offset by 1.
-    # List contains tuples of booleans for (latest_minor, next_major)
-    selections = []
-    if not (latest_minor or next_major):
-        i = 0
-        if 'minor_playbook' in mapping:
-            click.echo("(%s) Update to latest %s" % (i + 1, old_version))
-            selections.append((True, False))
-            i += 1
-        if 'major_playbook' in mapping:
-            click.echo("(%s) Upgrade to next release: %s" % (i + 1, mapping['major_version']))
-            selections.append((False, True))
-            i += 1
-
-        response = click.prompt("\nChoose an option from above",
-                                type=click.Choice(list(map(str, range(1, len(selections) + 1)))))
-        latest_minor, next_major = selections[int(response) - 1]
-
-    if next_major:
-        if 'major_playbook' not in mapping:
-            click.echo("No major upgrade supported for %s %s with this version "
-                       "of atomic-openshift-utils." % (variant, old_version))
-            sys.exit(0)
-        playbook = mapping['major_playbook']
-        new_version = mapping['major_version']
-        # Update config to reflect the version we're targeting, we'll write
-        # to disk once Ansible completes successfully, not before.
-        oo_cfg.settings['variant_version'] = new_version
-        if oo_cfg.settings['variant'] == 'enterprise':
-            oo_cfg.settings['variant'] = 'openshift-enterprise'
-
-    if latest_minor:
-        if 'minor_playbook' not in mapping:
-            click.echo("No minor upgrade supported for %s %s with this version "
-                       "of atomic-openshift-utils." % (variant, old_version))
-            sys.exit(0)
-        playbook = mapping['minor_playbook']
-        new_version = old_version
-
-    click.echo("OpenShift will be upgraded from %s %s to latest %s %s on the following hosts:\n" % (
-        variant, old_version, oo_cfg.settings['variant'], new_version))
-    for host in oo_cfg.deployment.hosts:
-        click.echo("  * %s" % host.connect_to)
-
-    if not ctx.obj['unattended']:
-        # Prompt interactively to confirm:
-        if not click.confirm("\nDo you want to proceed?"):
-            click.echo("Upgrade cancelled.")
-            sys.exit(0)
-
-    retcode = openshift_ansible.run_upgrade_playbook(oo_cfg.deployment.hosts,
-                                                     playbook,
-                                                     ctx.obj['verbose'])
-    if retcode > 0:
-        click.echo("Errors encountered during upgrade, please check %s." %
-                   oo_cfg.settings['ansible_log_path'])
-    else:
-        oo_cfg.save_to_disk()
-        click.echo("Upgrade completed! Rebooting all hosts is recommended.")
+    click.echo("Upgrades are no longer supported by this version of installer")
+    click.echo("Please see the documentation for manual upgrade:")
+    click.echo("https://docs.openshift.com/container-platform/latest/install_config/upgrading/automated_upgrades.html")
+    sys.exit(1)
 
 
 @click.command()

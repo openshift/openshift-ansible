@@ -2,6 +2,7 @@
 ###############################################################################
 # Upgrade Masters
 ###############################################################################
+
 - name: Backup and upgrade etcd
   import_playbook: ../../../openshift-etcd/private/upgrade_main.yml
 
@@ -22,6 +23,8 @@
 # See: https://github.com/openshift/origin/pull/14625#issuecomment-308467060
 - name: Pre master upgrade - Upgrade all storage
   hosts: oo_first_master
+  roles:
+  - openshift_facts
   tasks:
   - name: Upgrade all storage
     command: >
@@ -30,7 +33,6 @@
     register: l_pb_upgrade_control_plane_pre_upgrade_storage
     when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
 
@@ -46,13 +48,10 @@
 # support for optional hooks to be defined.
 - name: Upgrade master
   hosts: oo_masters_to_config
-  vars:
-    openshift_master_ha: "{{ groups.oo_masters_to_config | length > 1 }}"
   serial: 1
+  roles:
+  - openshift_facts
   tasks:
-  - import_role:
-      name: openshift_facts
-
   # Run the pre-upgrade hook if defined:
   - debug: msg="Running master pre-upgrade hook {{ openshift_master_upgrade_pre_hook }}"
     when: openshift_master_upgrade_pre_hook is defined
@@ -64,12 +63,22 @@
       name: openshift_master
       tasks_from: upgrade.yml
 
+  - name: Setup and enable bootstrapping options
+    include_tasks: ../../../openshift-master/private/tasks/enable_bootstrap.yml
+    when: openshift_master_bootstrap_enabled | default(false) | bool
+
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
 
   - include_tasks: "{{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
+
+  - name: Disable master controller
+    service:
+      name: "{{ openshift_service_type }}-master-controllers"
+      enabled: false
+    when: openshift.common.rolling_restart_mode == 'system'
 
   - include_tasks: ../../../openshift-master/private/tasks/restart_hosts.yml
     when: openshift.common.rolling_restart_mode == 'system'
@@ -93,7 +102,6 @@
     - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - openshift_version is version_compare('3.7','<')
     failed_when:
-    - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
     run_once: true
@@ -108,7 +116,6 @@
 - name: Gate on master update
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       master_update_completed: "{{ hostvars
@@ -128,6 +135,7 @@
   hosts: oo_masters_to_config
   roles:
   - { role: openshift_cli }
+  - { role: openshift_facts }
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
@@ -229,7 +237,6 @@
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when: openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     failed_when:
-    - openshift_upgrade_post_storage_migration_enabled | default(true) | bool
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
 
@@ -242,7 +249,6 @@
 - name: Gate on reconcile
   hosts: localhost
   connection: local
-  become: no
   tasks:
   - set_fact:
       reconcile_completed: "{{ hostvars
@@ -291,26 +297,31 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
     until: not (l_upgrade_control_plane_drain_result is failed)
-    retries: 60
-    delay: 60
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_control_plane_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   roles:
   - openshift_facts
   post_tasks:
   - import_role:
       name: openshift_node
+      tasks_from: upgrade_pre.yml
+  - import_role:
+      name: openshift_node
       tasks_from: upgrade.yml
-  - name: Set node schedulability
-    oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
-      schedulable: True
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    retries: 10
-    delay: 5
-    register: node_schedulable
-    until: node_schedulable is succeeded
-    when: node_unschedulable is changed
+  - import_role:
+      name: openshift_manage_node
+      tasks_from: config.yml
+    vars:
+      openshift_master_host: "{{ groups.oo_first_master.0 }}"
+      openshift_manage_node_is_master: true

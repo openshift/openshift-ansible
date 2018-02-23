@@ -12,6 +12,11 @@
   check_mode: no
   tags: provisioners_init
 
+- name: Set eventrouter image facts
+  set_fact:
+    openshift_provisioners_image_prefix: "{{ openshift_provisioners_image_prefix | default(openshift_provisioners_image_prefix_dict[openshift_deployment_type]) }}"
+    openshift_provisioners_image_version: "{{ openshift_provisioners_image_version | default(openshift_provisioners_image_version_dict[openshift_deployment_type]) }}"
+
 - include_tasks: install_provisioners.yaml
   when: openshift_provisioners_install_provisioners | default(false) | bool
 
