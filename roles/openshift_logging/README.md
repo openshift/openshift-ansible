@@ -36,7 +36,7 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_mux_image_version`: Setting the image version for Mux image. Defaults to `openshift_logging_image_version`.
 - `openshift_logging_use_ops`: If 'True', set up a second ES and Kibana cluster for infrastructure logs. Defaults to 'False'.
 - `openshift_logging_master_url`: The URL for the Kubernetes master, this does not need to be public facing but should be accessible from within the cluster. Defaults to 'https://kubernetes.default.svc.{{openshift.common.dns_domain}}'.
-- `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to 'https://{{openshift.common.public_hostname}}:{{openshift.master.api_port}}'.
+- `openshift_logging_master_public_url`: The public facing URL for the Kubernetes master, this is used for Authentication redirection. Defaults to `openshift.master.public_api_url`.
 - `openshift_logging_namespace`: The namespace that Aggregated Logging will be installed in. Defaults to 'logging'.
 - `openshift_logging_curator_default_days`: The default minimum age (in days) Curator uses for deleting log records. Defaults to '30'.
 - `openshift_logging_curator_run_hour`: The hour of the day that Curator will run at. Defaults to '0'.
