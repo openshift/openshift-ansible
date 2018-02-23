@@ -180,6 +180,7 @@
   - role: openshift_master_facts
   - role: openshift_clock
   - role: openshift_cloud_provider
+    when: openshift_cloudprovider_kind is defined
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
   - role: nickhammond.logrotate

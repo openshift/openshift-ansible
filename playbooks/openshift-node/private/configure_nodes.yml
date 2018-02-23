@@ -12,6 +12,7 @@
   roles:
   - role: openshift_clock
   - role: openshift_cloud_provider
+    when: openshift_cloudprovider_kind is defined
   - role: openshift_node
   - role: tuned
   - role: nickhammond.logrotate
