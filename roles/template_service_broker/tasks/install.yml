@@ -79,7 +79,7 @@
   register: api_health
   until: api_health.stdout == 'ok'
   retries: 60
-  delay: 5
+  delay: 10
   changed_when: false
 
 - set_fact:

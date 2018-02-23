@@ -165,7 +165,7 @@
   register: console_health
   until: console_health.stdout == 'ok'
   retries: 60
-  delay: 5
+  delay: 10
   changed_when: false
   # Ignore errors so we can log troubleshooting info on failures.
   ignore_errors: yes
