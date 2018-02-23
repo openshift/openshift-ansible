@@ -1,0 +1,7 @@
+---
+- name: Enable bootstrapping for masters
+  hosts: oo_masters_to_config
+  gather_facts: no
+  tasks:
+  - name: include bootstrapping tasks
+    include_tasks: tasks/enable_bootstrap.yml

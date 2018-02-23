@@ -1,4 +1,11 @@
 ---
+- name: Ensure that Cassandra has nodes to run on
+  fail:
+    msg: |-
+      No schedulable nodes found matching node selector for cassandra - '{{ openshift_metrics_cassandra_nodeselector }}'
+  when:
+  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_metrics_cassandra_nodeselector)
+
 - shell: >
     {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig

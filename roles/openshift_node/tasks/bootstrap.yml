@@ -1,11 +1,7 @@
 ---
-- name: install needed rpm(s)
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items: "{{ r_openshift_node_image_prep_packages }}"
-  register: result
-  until: result is succeeded
+- name: include package installs
+  import_tasks: install_rpms.yml
+  when: not (openshift_is_atomic | default(False) | bool)
 
 - name: create the directory for node
   file:
@@ -67,8 +63,8 @@
   - "/etc/docker/certs.d/docker-registry.default.svc:5000"
 
 - name: laydown the bootstrap.yml file for on boot configuration
-  copy:
-    src: bootstrap.yml
+  template:
+    src: bootstrap.yml.j2
     dest: /root/openshift_bootstrap/bootstrap.yml
 
 - name: symlink master ca for docker-registry

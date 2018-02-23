@@ -63,6 +63,10 @@
       name: openshift_master
       tasks_from: upgrade.yml
 
+  - name: Setup and enable bootstrapping options
+    include_tasks: ../../../openshift-master/private/tasks/enable_bootstrap.yml
+    when: openshift_master_bootstrap_enabled | default(false) | bool
+
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined

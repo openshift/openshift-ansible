@@ -67,6 +67,8 @@ objects:
           - name: glusterfs-ssl
             mountPath: "/etc/ssl"
             readOnly: true
+          - name: glusterfs-target
+            mountPath: "/etc/target"
           securityContext:
             capabilities: {}
             privileged: true
@@ -123,6 +125,9 @@ objects:
         - name: glusterfs-ssl
           hostPath:
             path: "/etc/ssl"
+        - name: glusterfs-target
+          hostPath:
+            path: "/etc/target"
         restartPolicy: Always
         terminationGracePeriodSeconds: 30
         dnsPolicy: ClusterFirst

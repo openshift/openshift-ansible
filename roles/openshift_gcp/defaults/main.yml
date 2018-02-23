@@ -56,3 +56,5 @@ openshift_gcp_node_group_config:
 
 openshift_gcp_startup_script_file: ''
 openshift_gcp_user_data_file: ''
+
+openshift_gcp_multizone: False

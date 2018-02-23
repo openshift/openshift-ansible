@@ -25,8 +25,6 @@
     l_upgrade_excluder_hosts: "oo_nodes_to_config:oo_masters_to_config"
     openshift_protect_installed_version: False
 
-- import_playbook: validator.yml
-
 - name: Flag pre-upgrade checks complete for hosts without errors
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   tasks:

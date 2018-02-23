@@ -16,6 +16,7 @@ def main():
             timeout=dict(default=30, type='int'),
             approve_all=dict(default=False, type='bool'),
             service_account=dict(default='node-bootstrapper', type='str'),
+            fail_on_timeout=dict(default=False, type='bool'),
         ),
         supports_check_mode=True,
         mutually_exclusive=[['approve_all', 'nodes']],
@@ -25,6 +26,12 @@ def main():
         module.fail_json(**dict(failed=True, msg='Please specify hosts.'))
 
     rval = OCcsr.run_ansible(module.params, module.check_mode)
+
+    # If we timed out then we weren't finished. Fail if user requested to fail.
+    if (module.params['timeout'] > 0 and
+            module.params['fail_on_timeout'] and
+            rval['timeout']):
+        return module.fail_json(msg='Timed out accepting certificate signing requests. Failing as requested.', **rval)
 
     if 'failed' in rval:
         return module.fail_json(**rval)
