@@ -193,13 +193,11 @@
 
 - include_tasks: set_loopback_context.yml
 
-- name: Start and enable master api on first master
+- name: Start and enable master api
   systemd:
     name: "{{ openshift_service_type }}-master-api"
     enabled: yes
     state: started
-  when:
-  - inventory_hostname == openshift_master_hosts[0]
   register: l_start_result
   until: not (l_start_result is failed)
   retries: 1
@@ -212,38 +210,7 @@
 
 - set_fact:
     master_api_service_status_changed: "{{ l_start_result is changed }}"
-  when:
-  - inventory_hostname == openshift_master_hosts[0]
 
-- pause:
-    seconds: 15
-  when:
-  - openshift_master_ha | bool
-
-- name: Start and enable master api all masters
-  systemd:
-    name: "{{ openshift_service_type }}-master-api"
-    enabled: yes
-    state: started
-  when:
-  - inventory_hostname != openshift_master_hosts[0]
-  register: l_start_result
-  until: not (l_start_result is failed)
-  retries: 1
-  delay: 60
-
-- name: Dump logs from master-api if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
-  when:
-  - l_start_result is failed
-
-- set_fact:
-    master_api_service_status_changed: "{{ l_start_result is changed }}"
-  when:
-  - inventory_hostname != openshift_master_hosts[0]
-
-# A separate wait is required here for native HA since notifies will
-# be resolved after all tasks in the role.
 - include_tasks: check_master_api_is_ready.yml
   when:
   - master_api_service_status_changed | bool
