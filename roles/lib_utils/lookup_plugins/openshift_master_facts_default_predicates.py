@@ -114,7 +114,7 @@ class LookupModule(LookupBase):
                 {'name': 'CheckNodeDiskPressure'},
             ])
 
-        if short_version in ['3.7', '3.8', '3.9', '3.10']:
+        if short_version in ['3.7', '3.8']:
             predicates.extend([
                 {'name': 'NoVolumeZoneConflict'},
                 {'name': 'MaxEBSVolumeCount'},
@@ -127,6 +127,21 @@ class LookupModule(LookupBase):
                 {'name': 'CheckNodeMemoryPressure'},
                 {'name': 'CheckNodeDiskPressure'},
                 {'name': 'NoVolumeNodeConflict'},
+            ])
+
+        if short_version in ['3.9', '3.10']:
+            predicates.extend([
+                {'name': 'NoVolumeZoneConflict'},
+                {'name': 'MaxEBSVolumeCount'},
+                {'name': 'MaxGCEPDVolumeCount'},
+                {'name': 'MaxAzureDiskVolumeCount'},
+                {'name': 'MatchInterPodAffinity'},
+                {'name': 'NoDiskConflict'},
+                {'name': 'GeneralPredicates'},
+                {'name': 'PodToleratesNodeTaints'},
+                {'name': 'CheckNodeMemoryPressure'},
+                {'name': 'CheckNodeDiskPressure'},
+                {'name': 'CheckVolumeBinding'},
             ])
 
         if regions_enabled:
