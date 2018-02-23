@@ -169,6 +169,7 @@
   changed_when: false
   # Ignore errors so we can log troubleshooting info on failures.
   ignore_errors: yes
+  when: containerized
 
 # Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment/webconsole` for troubleshooting failures.
 - when: console_health.stdout != 'ok'
