@@ -4,7 +4,7 @@
   "metadata": {
     "annotations": {
       "description": "REST example using CXF in Karaf container. This quickstart demonstrates how to create a RESTful (JAX-RS) web service using CXF and expose it through the OSGi HTTP Service",
-      "tags": "quickstart,java,karaf,fis",
+      "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-jboss",
       "version": "2.0"
     },
