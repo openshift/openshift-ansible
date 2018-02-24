@@ -1,6 +1,6 @@
 ---
 
-- name: Delete pre-existing heketi resources
+- name: Delete pre-existing Heketi resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
     kind: "{{ item.kind }}"
@@ -53,28 +53,28 @@
 
 - name: Delete pre-existing GlusterFS config
   file:
-    path: /var/lib/glusterd
+    path: /var/lib/glusterd/
     state: absent
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
 
 - name: Delete pre-existing additional GlusterFS config
   file:
-    path: /etc/glusterfs
+    path: /etc/glusterfs/
     state: absent
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
 
 - name: Delete pre-existing Heketi config
   file:
-    path: /var/lib/heketi
+    path: /var/lib/heketi/
     state: absent
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
 
-- name: Delete Glusterfs logs
+- name: Delete GlusterFS logs
   file:
-    path: /var/log/glusterfs
+    path: /var/log/glusterfs/
     state: absent
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
