@@ -10,6 +10,7 @@
   failed_when:
     - task_result is failed
     - ('could not' not in task_result.msg|lower)
+  become: yes
 
 - name: Wait 10 seconds after disabling firewalld
   pause:
