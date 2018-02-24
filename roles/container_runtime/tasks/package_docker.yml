@@ -154,6 +154,7 @@
   until: not (r_docker_package_docker_start_result is failed)
   retries: 3
   delay: 30
+  become: yes
 
 - set_fact:
     docker_service_status_changed: "{{ (r_docker_package_docker_start_result is changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
