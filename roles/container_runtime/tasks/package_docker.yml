@@ -43,6 +43,7 @@
     file:
       path: "{{ docker_systemd_dir }}"
       state: directory
+    become: yes
 
   - name: Configure Docker service unit file
     template:
@@ -50,6 +51,7 @@
       src: custom.conf.j2
     notify:
     - restart container runtime
+    become: yes
   when: not (os_firewall_use_firewalld | default(False)) | bool
 
 - stat: path=/etc/sysconfig/docker
@@ -118,6 +120,7 @@
       {% if openshift_docker_options %} {{ openshift_docker_options }}{% endif %} \
       {% if openshift_docker_disable_push_dockerhub | bool %} --confirm-def-push={{ openshift_docker_disable_push_dockerhub | bool }}{% endif %} \
       --signature-verification={{ openshift_docker_signature_verification | bool }}'"
+  become: yes
   when: docker_check.stat.isreg is defined and docker_check.stat.isreg
   notify:
   - restart container runtime
@@ -131,6 +134,7 @@
     regexp: '^DOCKER_NETWORK_OPTIONS=.*$'
     line: "DOCKER_NETWORK_OPTIONS='\
       {% if openshift.node is defined and openshift.node.sdn_mtu is defined %} --mtu={{ openshift.node.sdn_mtu }}{% endif %}'"
+  become: yes
   when:
   - sysconfig_docker_network_check.stat.isreg is defined
   - sysconfig_docker_network_check.stat.isreg

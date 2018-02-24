@@ -26,6 +26,7 @@
   when: not r_os_firewall_is_atomic | bool
   register: result
   until: result is succeeded
+  become: yes
 
 - name: Start and enable iptables service
   systemd:
