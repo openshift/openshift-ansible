@@ -9,6 +9,7 @@
       port: "{{ item.port.split('/')[0] }}"
     when: item.cond | default(True)
     with_items: "{{ r_etcd_os_firewall_allow }}"
+    become: yes
 
   - name: Remove iptables rules
     os_firewall_manage_iptables:

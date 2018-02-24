@@ -3,10 +3,12 @@
   file:
     path: /var/lib/containers
     state: directory
+  become: yes
 
 - name: Fix SELinux Permissions on /var/lib/containers
   command: "restorecon -R /var/lib/containers/"
   changed_when: false
+  become: yes
 
 - meta: flush_handlers
 

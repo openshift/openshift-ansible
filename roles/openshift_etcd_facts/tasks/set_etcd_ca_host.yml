@@ -9,6 +9,7 @@
   - "{{ groups[etcd_ca_host_group] }}"
   register: __etcd_ca_host_stat
   run_once: true
+  become: yes
 
 # Collect ansible_host (inventory hostname) of hosts with /etc/etcd/ca
 # and /etc/etcd/generated_certs directories.
