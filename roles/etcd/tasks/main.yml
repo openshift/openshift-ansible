@@ -24,11 +24,13 @@
     command: docker pull {{ etcd_image }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
+    become: yes
 
   - name: Install etcd container service file
     template:
       dest: "/etc/systemd/system/etcd_container.service"
       src: etcd.docker.service
+    become: yes
   when:
   - etcd_is_containerized | bool
   - not l_is_etcd_system_container | bool
@@ -67,6 +69,7 @@
     state: directory
     mode: 0700
   when: etcd_is_containerized | bool
+  become: yes
 
 - name: Ensure etcd datadir ownership for thirdparty datadir
   file:
@@ -96,12 +99,14 @@
     failed_when:
     - task_result is failed
     - ('could not' not in task_result.msg|lower)
+    become: yes
 
   - name: Install etcd container service file
     template:
       dest: "/etc/systemd/system/etcd_container.service"
       src: etcd.docker.service
     when: not l_is_etcd_system_container | bool
+    become: yes
 
   - name: Install Etcd system container
     include_tasks: system_container.yml
@@ -121,6 +126,7 @@
     src: etcd.conf.j2
     dest: "{{ etcd_conf_file }}"
     backup: true
+  become: yes
   notify:
   - restart etcd
 
@@ -129,6 +135,7 @@
     name: "{{ etcd_service }}"
     state: started
     enabled: yes
+  become: yes
   register: start_result
 
 - name: Set fact etcd_service_status_changed

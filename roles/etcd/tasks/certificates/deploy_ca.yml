@@ -21,6 +21,7 @@
   - "{{ etcd_ca_dir }}/fragments"
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - command: cp /etc/pki/tls/openssl.cnf ./
   args:
@@ -28,6 +29,7 @@
     creates: "{{ etcd_ca_dir }}/fragments/openssl.cnf"
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - template:
     dest: "{{ etcd_ca_dir }}/fragments/openssl_append.cnf"
@@ -35,12 +37,14 @@
     backup: true
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - assemble:
     src: "{{ etcd_ca_dir }}/fragments"
     dest: "{{ etcd_openssl_conf }}"
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - name: Check etcd_ca_db exist
   stat: path="{{ etcd_ca_db }}"
@@ -48,6 +52,7 @@
   changed_when: false
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - name: Touch etcd_ca_db file
   file:
@@ -56,6 +61,7 @@
   when: etcd_ca_db_check.stat.isreg is not defined
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - copy:
     dest: "{{ etcd_ca_serial }}"
@@ -63,6 +69,7 @@
     force: no
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - name: Create etcd CA certificate
   command: >
@@ -78,3 +85,4 @@
     SAN: 'etcd-signer'
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes

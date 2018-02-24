@@ -5,6 +5,7 @@
   register: g_ca_cert_stat_result
   delegate_to: "{{ etcd_ca_host }}"
   run_once: true
+  become: yes
 
 - fail:
     msg: >
@@ -23,6 +24,7 @@
   - "{{ etcd_cert_prefix }}ca.crt"
   register: g_external_etcd_cert_stat_result
   when: not etcd_certificates_redeploy | default(false) | bool
+  become: yes
 
 - set_fact:
     etcd_client_certs_missing: "{{ true if etcd_certificates_redeploy | default(false) | bool
@@ -38,6 +40,7 @@
     mode: 0700
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
+  become: yes
 
 - name: Create the client csr
   command: >
@@ -54,6 +57,7 @@
     SAN: "IP:{{ etcd_ip }},DNS:{{ etcd_hostname }}"
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
+  become: yes
 
 # Certificates must be signed serially in order to avoid competing
 # for the serial file.
@@ -72,6 +76,7 @@
     SAN: "IP:{{ etcd_ip }}"
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
+  become: yes
 
 - file:
     src: "{{ etcd_ca_cert }}"
@@ -79,6 +84,7 @@
     state: hard
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
+  become: yes
 
 - name: Create a tarball of the etcd certs
   command: >
@@ -91,6 +97,7 @@
     warn: no
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
+  become: yes
 
 - name: Retrieve the etcd cert tarballs
   fetch:
@@ -100,23 +107,27 @@
     validate_checksum: yes
   when: etcd_client_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
+  become: yes
 
 - name: Ensure certificate directory exists
   file:
     path: "{{ etcd_cert_config_dir }}"
     state: directory
   when: etcd_client_certs_missing | bool
+  become: yes
 
 - name: Unarchive etcd cert tarballs
   unarchive:
     src: "/tmp/{{ inventory_hostname }}/{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
     dest: "{{ etcd_cert_config_dir }}"
   when: etcd_client_certs_missing | bool
+  become: yes
 
 - name: Delete temporary directory
   local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
   changed_when: False
   when: etcd_client_certs_missing | bool
+  become: yes
 
 - file:
     path: "{{ etcd_cert_config_dir }}/{{ item }}"
@@ -128,3 +139,4 @@
   - "{{ etcd_cert_prefix }}client.key"
   - "{{ etcd_cert_prefix }}ca.crt"
   when: etcd_client_certs_missing | bool
+  become: yes
