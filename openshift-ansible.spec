@@ -29,6 +29,7 @@ Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
 Requires:      python2-crypto
+Requires:      patch
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -278,10 +279,10 @@ Atomic OpenShift Utilities includes
   (fabian@fabianism.us)
 
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.45.0
-- 
+-
 
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.44.0
-- 
+-
 
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.43.0
 - Changing conditional_set_fact from module to action_plugin since it does not
@@ -506,7 +507,7 @@ Atomic OpenShift Utilities includes
   (rteague@redhat.com)
 
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.33.0
-- 
+-
 
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.32.0
 - Revert "Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to
@@ -721,10 +722,10 @@ Atomic OpenShift Utilities includes
 - Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.19.0
-- 
+-
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.18.0
-- 
+-
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.17.0
 - Update latest image streams and templates (sdodson@redhat.com)
@@ -824,7 +825,7 @@ Atomic OpenShift Utilities includes
 - Add in-tree CI scripts (mgugino@redhat.com)
 
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.15.0
-- 
+-
 
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.14.0
 - Cast openshift_docker_use_system_container to bool (mgugino@redhat.com)
@@ -843,7 +844,7 @@ Atomic OpenShift Utilities includes
   (mgugino@redhat.com)
 
 * Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.12.0
-- 
+-
 
 * Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.11.0
 - aws: Fix misnamed variable in provisioning_vars.yml.example
