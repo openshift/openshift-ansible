@@ -51,4 +51,6 @@
 - include_tasks: dnsmasq_install.yml
 - include_tasks: dnsmasq.yml
 
+- include_tasks: journald.yml
+
 - meta: flush_handlers
