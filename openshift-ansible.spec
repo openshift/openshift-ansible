@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.51.0%{?dist}
+Release:        0.52.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,36 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.52.0
+- Move journald setup to node tasks from master (nakayamakenjiro@gmail.com)
+- [BZ 1497408] delete config map, dameon set, and cluster role
+  (john.sanda@gmail.com)
+- Fix aggregator relative paths (mgugino@redhat.com)
+- Fix package tasks ordering in OpenStack playbooks (tomas@sedovic.cz)
+- Change openshift_release to openshift_upgrade_target in upgrade
+  (mgugino@redhat.com)
+- Normalize times we wait on pods to 10s * 60retries (sdodson@redhat.com)
+- start_api_server: service catalog healthcheck doesn't require proxy
+  (vrutkovs@redhat.com)
+- Changing default of openshift_logging_public_master_url to use
+  openshift_master_cluster_public_hostname if available (ewolinet@redhat.com)
+- Sync v3.8 content (sdodson@redhat.com)
+- Sync v3.7 content (sdodson@redhat.com)
+- Sync v3.9 content (sdodson@redhat.com)
+- Allow branch specific pulls from origin (sdodson@redhat.com)
+- Fixing bz1540467 docker-registry env var migration. Adding ability to oc_edit
+  complex array style edits. (kwoodson@redhat.com)
+- [1537872] Adding seboolean for virt_use_samba (kwoodson@redhat.com)
+- Making patching a local_action and ensuring we become:false for local_actions
+  (ewolinet@redhat.com)
+- Cast string to dict in lib_utils_oo_dict_to_keqv_list (mgugino@redhat.com)
+- refine condition for doing ami fetching (jdiaz@redhat.com)
+- Add field_selector parameter to oc_obj. (abutcher@redhat.com)
+- GlusterFS: Check for groups in template file (jarrpa@redhat.com)
+- Updating AMI copying tags to no longer default to parent AMI.
+  (kwoodson@redhat.com)
+- Remove NoVolumeNodeConflict from 3.9+ (sdodson@redhat.com)
+
 * Fri Feb 23 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.51.0
 - 
 
