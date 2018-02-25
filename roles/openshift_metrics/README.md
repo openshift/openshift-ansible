@@ -17,6 +17,8 @@ The following variables need to be set and will be validated:
 - `openshift_metrics_project`: project (i.e. namespace) where the components will be
   deployed.
 
+- `openshift_metrics_server_project`: project (i.e. namespace) where
+  the metrics-server components will be deployed.
 
 Role Variables
 --------------

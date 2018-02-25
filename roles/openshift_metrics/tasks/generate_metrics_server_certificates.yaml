@@ -1,0 +1,50 @@
+---
+- name: generate metrics-server certificates
+  include_tasks: setup_certificate.yaml
+  vars:
+    component: metrics-server
+    hostnames: "metrics-server,metrics-server.{{ openshift_metrics_server_project }}.svc,metrics-server.{{ openshift_metrics_server_project }}.svc.cluster.local"
+  changed_when: no
+
+- name: read files for the metrics-server-certs secret
+  shell: >
+    printf '%s: ' '{{ item }}'
+    && base64 --wrap 0 '{{ mktemp.stdout }}/{{ item }}'
+  register: metrics_server_secrets
+  with_items:
+  - metrics-server.crt
+  - metrics-server.key
+  changed_when: false
+
+- set_fact:
+    metrics_server_secrets: |
+      {{ metrics_server_secrets.results|map(attribute='stdout')|join('
+      ')|from_yaml }}
+
+- slurp:
+    src: "{{ mktemp.stdout }}/ca.crt"
+  register: apiserver_ca
+
+- name: generate metrics-server secret template
+  template:
+    src: secret.j2
+    dest: "{{ mktemp.stdout }}/templates/metrics-server-certs.yaml"
+  vars:
+    name: metrics-server-certs
+    labels:
+      metrics-infra: metrics-server
+    data:
+      tls.crt: >
+        {{ metrics_server_secrets['metrics-server.crt'] }}
+      tls.key: >
+        {{ metrics_server_secrets['metrics-server.key'] }}
+  when: name not in existing_metrics_server_secrets.stdout_lines
+  changed_when: no
+
+- name: Generate metrics-server apiservice
+  template:
+    src: metrics-server-apiservice.j2
+    dest: "{{ mktemp.stdout }}/templates/metrics-server-apiservice.yaml"
+  vars:
+    caBundle: "{{ apiserver_ca.content }}"
+  changed_when: no
