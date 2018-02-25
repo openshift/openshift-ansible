@@ -105,6 +105,8 @@
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
       - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
       - yum-utils
+      when:
+      - item != ''
       register: result
       until: result | success
 
