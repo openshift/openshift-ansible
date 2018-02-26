@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.52.0%{?dist}
+Release:        0.53.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.53.0
+- 
+
 * Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.52.0
 - Move journald setup to node tasks from master (nakayamakenjiro@gmail.com)
 - [BZ 1497408] delete config map, dameon set, and cluster role
