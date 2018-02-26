@@ -24,7 +24,7 @@ from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
 # pylint: disable=import-error,no-name-in-module
-from ansible.module_utils.six import string_types, u
+from ansible.module_utils.six import iteritems, string_types, u
 # pylint: disable=import-error,no-name-in-module
 from ansible.module_utils.six.moves.urllib.parse import urlparse
 
@@ -670,48 +670,14 @@ def map_from_pairs(source, delim="="):
     return dict(item.split(delim) for item in source.split(","))
 
 
-def lib_utils_oo_get_node_labels(source, hostvars=None):
-    ''' Return a list of labels assigned to schedulable nodes '''
-    labels = list()
+def map_to_pairs(source, delim="="):
+    ''' Returns a comma separated str given the source as a dict '''
 
-    # Filter out the unschedulable nodes
-    for host in source:
-        if host not in hostvars:
-            return
-        node_vars = hostvars[host]
+    # Some default selectors are empty strings.
+    if source == {} or source == '':
+        return str()
 
-        # All nodes are considered schedulable,
-        # unless explicitly marked so
-        schedulable = node_vars.get('openshift_schedulable')
-        if schedulable is None:
-            schedulable = True
-        try:
-            if not strtobool(str(schedulable)):
-                # explicitly marked as unschedulable
-                continue
-        except ValueError:
-            # Incorrect value in openshift_schedulable, skip node
-            continue
-
-        # Get a list of labels from the node
-        node_labels = node_vars.get('openshift_node_labels')
-        if node_labels:
-            labels.append(node_labels)
-
-    return labels
-
-
-def lib_utils_oo_has_no_matching_selector(source, selector=None):
-    ''' Return True when selector cannot be placed
-        on nodes with labels from source '''
-    # Empty selector means any node
-    if not selector:
-        return False
-    for item in source:
-        if set(selector.items()).issubset(set(item.items())):
-            # Matching selector found
-            return False
-    return True
+    return ','.join(["{}{}{}".format(key, delim, value) for key, value in iteritems(source)])
 
 
 class FilterModule(object):
@@ -745,7 +711,6 @@ class FilterModule(object):
             "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
             "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
             "lib_utils_oo_l_of_d_to_csv": lib_utils_oo_l_of_d_to_csv,
-            "lib_utils_oo_has_no_matching_selector": lib_utils_oo_has_no_matching_selector,
-            "lib_utils_oo_get_node_labels": lib_utils_oo_get_node_labels,
             "map_from_pairs": map_from_pairs,
+            "map_to_pairs": map_to_pairs,
         }

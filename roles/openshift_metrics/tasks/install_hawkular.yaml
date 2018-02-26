@@ -1,10 +1,11 @@
 ---
 - name: Ensure that Hawkular has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for hawkular - '{{ openshift_metrics_hawkular_nodeselector }}'
-  when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_metrics_hawkular_nodeselector)
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_metrics_hawkular_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Hawkular
 
 - command: >
     {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
