@@ -6,7 +6,7 @@
   tasks:
   - name: Unsubscribe RHEL instances
     import_role:
-      name: rhel_subscribe
+      name: rhel_unsubscribe
     when:
     - ansible_distribution == "RedHat"
     - rhsub_user is defined
