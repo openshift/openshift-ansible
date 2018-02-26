@@ -12,7 +12,6 @@
     record: "{{ item.1.hostname }}"
     value: "{{ item.1.ip }}"
     type: "{{ item.1.type }}"
-    # TODO(shadower): add a cleanup playbook that removes these records, too!
     state: present
   with_subelements:
     - "{{ openshift_openstack_dns_records | default([]) }}"
