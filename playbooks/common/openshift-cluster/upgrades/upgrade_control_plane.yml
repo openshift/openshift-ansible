@@ -51,7 +51,8 @@
       name: openshift_cloud_provider
       tasks_from: vsphere-svc
     when:
-    - openshift_cloudprovider_kind in 'vsphere'
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'vsphere'
     - openshift_version | version_compare('3.9', '>=')
 
 # The main master upgrade play. Should handle all changes to the system in one pass, with
@@ -78,7 +79,8 @@
       name: openshift_master
       tasks_from: update-vsphere
     when:
-    - openshift_cloudprovider_kind in 'vsphere'
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'vsphere'
     - openshift_version | version_compare('3.9', '>=')
 
   - name: Setup and enable bootstrapping options
