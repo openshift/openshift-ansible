@@ -752,6 +752,19 @@ debug_level=2
 #
 # Option C - none -- Prometheus, alertmanager and alertbuffer will use emptydir volumes
 # which are destroyed when pods are deleted
+#
+# Deploying Prometheus in a offline / disconnected installation, requires the following addition. 
+# Each pod in Prometheus have its own image prefix and version, version can be left out if going with the default Openshift version.
+# openshift_prometheus_image_prefix=registry.access.redhat.com/openshift3/
+# openshift_prometheus_image_version=v3.7
+# openshift_prometheus_proxy_image_prefix=registry.access.redhat.com/openshift3/
+# openshift_prometheus_proxy_image_version=v3.7
+# openshift_prometheus_alertbuffer_image_prefix=registry.access.redhat.com/openshift3/
+# openshift_prometheus_alertbuffer_image_version=v3.7
+# openshift_prometheus_alertmanager_image_prefix=registry.access.redhat.com/openshift3/
+# openshift_prometheus_alertmanager_image_version=v3.7
+# If desired Prometheus can be deployed to specific nodes with the node-selector set during provisioning 
+# openshift_prometheus_node_selector={'region':'infra'} 
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
