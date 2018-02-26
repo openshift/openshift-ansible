@@ -31,7 +31,7 @@
 
 - name: Copy admin client config
   command: >
-    cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    cp {{ openshift_config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
   changed_when: false
 
 - copy:
@@ -83,7 +83,7 @@
   changed_when: false
 
 - set_fact:
-    openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
+    openshift_master_config_dir: "{{ openshift_config_base }}/master"
   when: openshift_master_config_dir is undefined
 
 - slurp:

@@ -12,8 +12,9 @@
   gather_facts: no
   hosts: localhost
   connection: local
+  roles:
+    - role: openshift_facts
   tasks:
-
     - set_fact:
         # This is a little weird but if we use a var instead of a fact,
         # a different random value is generated for each task. See:
@@ -54,7 +55,6 @@
 
 - hosts: all
   tasks:
-
     # put it back like it was for the tests
     - include_tasks: preflight/playbooks/tasks/enable_repo.yml
       vars: { repo_name: "ose-3.2", enabled: False }

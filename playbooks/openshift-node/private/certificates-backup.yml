@@ -9,7 +9,7 @@
   # that it is missing here.
   - name: Ensure node directories and tarballs are absent from generated configs
     shell: >
-      rm -rf {{ openshift.common.config_base }}/generated-configs/node-*
+      rm -rf {{ openshift_config_base }}/generated-configs/node-*
     args:
       warn: no
 
@@ -21,4 +21,4 @@
       path: "{{ item }}"
       state: absent
     with_items:
-    - "{{ openshift.common.config_base }}/node/ca.crt"
+    - "{{ openshift_config_base }}/node/ca.crt"

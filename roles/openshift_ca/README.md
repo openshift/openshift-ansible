@@ -14,7 +14,7 @@ From this role:
 | Name                    | Default value                                 | Description                                                                 |
 |-------------------------|-----------------------------------------------|-----------------------------------------------------------------------------|
 | openshift_ca_host       | None (Required)                               | The hostname of the system where the OpenShift CA will be created.          |
-| openshift_ca_config_dir | `{{ openshift.common.config_base }}/master`   | CA certificate directory.                                                   |
+| openshift_ca_config_dir | `{{ openshift_config_base }}/master`   | CA certificate directory.                                                   |
 | openshift_ca_cert       | `{{ openshift_ca_config_dir }}/ca.crt`        | CA certificate path including CA certificate filename.                      |
 | openshift_ca_key        | `{{ openshift_ca_config_dir }}/ca.key`        | CA key path including CA key filename.                                      |
 | openshift_ca_serial     | `{{ openshift_ca_config_dir }}/ca.serial.txt` | CA serial path including CA serial filename.                                |

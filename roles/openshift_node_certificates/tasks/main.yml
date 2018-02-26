@@ -16,7 +16,7 @@
 
 - name: Check status of node certificates
   stat:
-    path: "{{ openshift.common.config_base }}/node/{{ item }}"
+    path: "{{ openshift_config_base }}/node/{{ item }}"
   with_items:
   - "system:node:{{ openshift.common.hostname | lower }}.crt"
   - "system:node:{{ openshift.common.hostname | lower }}.key"
@@ -43,7 +43,7 @@
   delegate_to: "{{ openshift_ca_host }}"
 
 - find:
-    paths: "{{ openshift.common.config_base }}/master/legacy-ca/"
+    paths: "{{ openshift_config_base }}/master/legacy-ca/"
     patterns: ".*-ca.crt"
     use_regex: true
   register: g_master_legacy_ca_result

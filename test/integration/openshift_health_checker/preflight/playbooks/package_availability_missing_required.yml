@@ -9,6 +9,7 @@
 - name: Fail as required packages cannot be installed
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
 
   post_tasks:

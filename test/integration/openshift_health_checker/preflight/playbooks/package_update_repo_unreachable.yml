@@ -9,6 +9,7 @@
 - name: Fails when repo content is not available
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
 
   post_tasks:

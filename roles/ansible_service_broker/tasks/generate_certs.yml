@@ -4,30 +4,30 @@
   block:
   - name: Create ansible-service-broker cert directory
     file:
-      path: "{{ openshift.common.config_base }}/ansible-service-broker"
+      path: "{{ openshift_config_base }}/ansible-service-broker"
       state: directory
       mode: 0755
     check_mode: no
 
   - name: Create self signing ca cert
-    command: 'openssl req -nodes -x509 -newkey rsa:4096 -keyout {{ openshift.common.config_base }}/ansible-service-broker/key.pem -out {{ openshift.common.config_base }}/ansible-service-broker/cert.pem -days 365 -subj "/CN=asb-etcd.openshift-ansible-service-broker.svc"'
+    command: 'openssl req -nodes -x509 -newkey rsa:4096 -keyout {{ openshift_config_base }}/ansible-service-broker/key.pem -out {{ openshift_config_base }}/ansible-service-broker/cert.pem -days 365 -subj "/CN=asb-etcd.openshift-ansible-service-broker.svc"'
     args:
-      creates: '{{ openshift.common.config_base }}/ansible-service-broker/cert.pem'
+      creates: '{{ openshift_config_base }}/ansible-service-broker/cert.pem'
 
   - name: Create self signed client cert
     command: '{{ item.cmd }}'
     args:
       creates: '{{ item.creates }}'
     with_items:
-    - cmd: openssl genrsa -out {{ openshift.common.config_base }}/ansible-service-broker/client.key 2048
-      creates: '{{ openshift.common.config_base }}/ansible-service-broker/client.key'
-    - cmd: 'openssl req -new -key {{ openshift.common.config_base }}/ansible-service-broker/client.key -out {{ openshift.common.config_base }}/ansible-service-broker/client.csr -subj "/CN=client"'
-      creates: '{{ openshift.common.config_base }}/ansible-service-broker/client.csr'
-    - cmd: openssl x509 -req -in {{ openshift.common.config_base }}/ansible-service-broker/client.csr -CA {{ openshift.common.config_base }}/ansible-service-broker/cert.pem -CAkey {{ openshift.common.config_base }}/ansible-service-broker/key.pem -CAcreateserial -out {{ openshift.common.config_base }}/ansible-service-broker/client.pem -days 1024
-      creates: '{{ openshift.common.config_base }}/ansible-service-broker/client.pem'
+    - cmd: openssl genrsa -out {{ openshift_config_base }}/ansible-service-broker/client.key 2048
+      creates: '{{ openshift_config_base }}/ansible-service-broker/client.key'
+    - cmd: 'openssl req -new -key {{ openshift_config_base }}/ansible-service-broker/client.key -out {{ openshift_config_base }}/ansible-service-broker/client.csr -subj "/CN=client"'
+      creates: '{{ openshift_config_base }}/ansible-service-broker/client.csr'
+    - cmd: openssl x509 -req -in {{ openshift_config_base }}/ansible-service-broker/client.csr -CA {{ openshift_config_base }}/ansible-service-broker/cert.pem -CAkey {{ openshift_config_base }}/ansible-service-broker/key.pem -CAcreateserial -out {{ openshift_config_base }}/ansible-service-broker/client.pem -days 1024
+      creates: '{{ openshift_config_base }}/ansible-service-broker/client.pem'
 
   - set_fact:
-      ansible_service_broker_certs_dir: "{{ openshift.common.config_base }}/ansible-service-broker"
+      ansible_service_broker_certs_dir: "{{ openshift_config_base }}/ansible-service-broker"
 
 - name: Read in certs for etcd
   slurp:

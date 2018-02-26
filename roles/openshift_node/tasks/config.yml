@@ -31,7 +31,7 @@
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
   template:
-    dest: "{{ openshift.common.config_base }}/node/node-config.yaml"
+    dest: "{{ openshift_config_base }}/node/node-config.yaml"
     src: node.yaml.v1.j2
     backup: true
     owner: root
@@ -65,7 +65,7 @@
       # Using curl here since the uri module requires python-httplib2 and
       # wait_for port doesn't provide health information.
       command: >
-        curl --silent --tlsv1.2 --cacert {{ openshift.common.config_base }}/node/ca.crt
+        curl --silent --tlsv1.2 --cacert {{ openshift_config_base }}/node/ca.crt
         {{ openshift_node_master_api_url }}/healthz/ready
       args:
         # Disables the following warning:

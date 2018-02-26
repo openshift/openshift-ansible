@@ -5,7 +5,7 @@
 - name: Remove assetConfig from master-config.yaml
   yedit:
     state: absent
-    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    src: "{{ openshift_config_base }}/master/master-config.yaml"
     key: assetConfig
 
 # This file was written by wire_aggregator.yml. It is no longer needed since
@@ -14,6 +14,6 @@
 - name: Remove obsolete web console / service catalog extension file
   file:
     state: absent
-    # Hard-code the path instead of using `openshift.common.config_base` since
+    # Hard-code the path instead of using `openshift_config_base` since
     # the path is hard-coded in wire_aggregator.yml.
     path: /etc/origin/master/openshift-ansible-catalog-console.js

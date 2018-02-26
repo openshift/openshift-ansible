@@ -4,6 +4,8 @@ __deprecation_header: "[DEPRECATION WARNING]: The following are deprecated varia
 
 # this is a list of variables that we will be deprecating within the next minor release, this list should be expected to change from release to release
 __warn_deprecated_vars:
+  # general
+  - 'openshift_master_portal_net'
   # logging
   - 'openshift_hosted_logging_deploy'
   - 'openshift_hosted_logging_hostname'

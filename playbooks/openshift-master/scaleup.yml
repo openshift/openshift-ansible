@@ -33,7 +33,7 @@
   vars:
     l_scale_up_hosts: "oo_nodes_to_config:oo_masters_to_config"
     l_base_packages_hosts: "oo_nodes_to_config:oo_masters_to_config"
-    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config:oo_first_master"
     l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters_to_config']) }}"
 
 - import_playbook: ../init/version.yml

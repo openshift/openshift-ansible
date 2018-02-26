@@ -9,6 +9,7 @@
 - name: Success when AOS version matches openshift_release
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
 
   post_tasks:

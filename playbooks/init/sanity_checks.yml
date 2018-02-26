@@ -13,4 +13,5 @@
   - name: Run variable sanity checks
     sanity_checks:
       check_hosts: "{{ l_sanity_check_hosts | default(groups['oo_all_hosts']) }}"
+      groups: "{{ groups }}"
     run_once: True

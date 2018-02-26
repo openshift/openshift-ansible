@@ -7,4 +7,4 @@
   - role: openshift_etcd_client_certificates
     etcd_cert_prefix: flannel.etcd-
     etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
-    etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
+    etcd_cert_config_dir: "{{ openshift_config_base }}/node"

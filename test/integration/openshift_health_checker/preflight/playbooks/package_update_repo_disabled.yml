@@ -9,6 +9,7 @@
 - name: Succeeds when nothing blocks a yum update
   hosts: all
   roles:
+    - openshift_facts
     - openshift_health_checker
 
   post_tasks:

@@ -38,6 +38,14 @@ you must set openshift_release or openshift_image_tag in your inventory to
 specify which version of the OpenShift component images to use.
 (Suggestion: add openshift_release="x.y" to inventory.)"""
 
+SDN_NETWORK_VARIABLES_ERROR_MSG = """Detected change in sdn network variables.
+inventory variables must match existing cluster deployment. Please adjust
+variables as follows:
+osm_cluster_network_cidr={},
+osm_host_subnet_length={},
+openshift_portal_net={}
+"""
+
 
 def to_bool(var_to_check):
     """Determine a boolean value given the multiple
@@ -51,6 +59,7 @@ def to_bool(var_to_check):
 
 class ActionModule(ActionBase):
     """Action plugin to execute sanity checks."""
+
     def template_var(self, hostvars, host, varname):
         """Retrieve a variable from hostvars and template it.
            If undefined, return None type."""
@@ -64,6 +73,26 @@ class ActionModule(ActionBase):
         if res is None:
             return None
         return self._templar.template(res)
+
+    def get_first_master_vars(self, hostvars):
+        """Get existing values from master to save time later"""
+        host = self.groups['oo_first_master'][0]
+
+        m_net_cidr = self.template_var(
+            hostvars, host,
+            'oo_first_master_osm_cluster_network_cidr')
+        m_subnet_len = self.template_var(
+            hostvars, host,
+            'oo_first_master_osm_host_subnet_length')
+        m_portal_net = self.template_var(
+            hostvars, host,
+            'oo_first_master_openshift_portal_net')
+
+        # pylint: disable=W0201
+        self.fm_vars_templated = {
+            'm_net_cidr': m_net_cidr,
+            'm_subnet_len': m_subnet_len,
+            'm_portal_net': m_portal_net}
 
     def check_openshift_deployment_type(self, hostvars, host):
         """Ensure a valid openshift_deployment_type is set"""
@@ -144,6 +173,38 @@ class ActionModule(ActionBase):
                 msg = '{} must be 63 characters or less'.format(varname)
                 raise errors.AnsibleModuleError(msg)
 
+    def check_network_variables(self, hostvars, host):
+        """Check network variables are correct if defined"""
+        failure = 0
+
+        # Check that all variables are defined.
+        net_cidr = self.template_var(hostvars, host, 'osm_cluster_network_cidr')
+        subnet_len = self.template_var(hostvars, host, 'osm_host_subnet_length')
+        portal_net = self.template_var(hostvars, host, 'openshift_portal_net')
+
+        m_net_cidr = self.fm_vars_templated['m_net_cidr']
+        m_subnet_len = self.fm_vars_templated['m_subnet_len']
+        m_portal_net = self.fm_vars_templated['m_portal_net']
+
+        if self.fm_vars_templated['m_portal_net'] is None:
+            # No existing cluster variables found, we can continue.
+            return None
+
+        failure += ((net_cidr is not None) and (net_cidr != m_net_cidr))
+        failure += ((subnet_len is not None) and (subnet_len != m_subnet_len))
+        failure += ((portal_net is not None) and (portal_net != m_portal_net))
+
+        if failure > 0:
+            msg = SDN_NETWORK_VARIABLES_ERROR_MSG.format(
+                m_net_cidr,
+                m_subnet_len,
+                m_portal_net)
+            raise errors.AnsibleModuleError(msg)
+
+    def run_master_checks(self, hostvars, host):
+        """Execute master-specific checks"""
+        self.check_network_variables(hostvars, host)
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -153,6 +214,8 @@ class ActionModule(ActionBase):
         self.no_origin_image_version(hostvars, host, odt)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
+        if host in self.groups['oo_masters_to_config']:
+            self.run_master_checks(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
@@ -175,11 +238,20 @@ class ActionModule(ActionBase):
             msg = "check_hosts is required"
             raise errors.AnsibleModuleError(msg)
 
+        # ansible groups to determine group membership of checked hosts.
+        # pylint: disable=W0201
+        self.groups = self._task.args.get('groups')
+
         # We need to access each host's variables
         hostvars = self.task_vars.get('hostvars')
         if not hostvars:
             msg = hostvars
             raise errors.AnsibleModuleError(msg)
+
+        # first master vars might need to be compared to another host's vars,
+        # first master always has facts run against it.
+        # template some first_master_vars now to save time in loop later.
+        self.get_first_master_vars(hostvars)
 
         # We loop through each host in the provided list check_hosts
         for host in check_hosts:

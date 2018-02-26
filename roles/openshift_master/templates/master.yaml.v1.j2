@@ -116,7 +116,7 @@ kubernetesMasterConfig:
   schedulerArguments: {{ openshift_master_scheduler_args | default(None) | lib_utils_to_padded_yaml( level=3 ) }}
   schedulerConfigFile: {{ openshift_master_scheduler_conf }}
   servicesNodePortRange: "{{ openshift_node_port_range | default("") }}"
-  servicesSubnet: {{ openshift.common.portal_net }}
+  servicesSubnet: {{ openshift_portal_net }}
   staticNodeNames: {{ openshift_node_ips | default([], true) }}
 {% endif %}
 masterClients:
@@ -135,18 +135,18 @@ masterClients:
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
-  clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
-  hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
+  clusterNetworkCIDR: {{ osm_cluster_network_cidr }}
+  hostSubnetLength: {{ osm_host_subnet_length }}
 {% if openshift.common.version_gte_3_7 | bool %}
   clusterNetworks:
-  - cidr: {{ openshift.master.sdn_cluster_network_cidr }}
-    hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
+  - cidr: {{ osm_cluster_network_cidr }}
+    hostSubnetLength: {{ osm_host_subnet_length }}
 {% endif %}
 {% if r_openshift_master_use_openshift_sdn or r_openshift_master_use_nuage or r_openshift_master_use_contiv or r_openshift_master_use_kuryr or r_openshift_master_sdn_network_plugin_name == 'cni' %}
   networkPluginName: {{ r_openshift_master_sdn_network_plugin_name_default }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
-  serviceNetworkCIDR: {{ openshift.common.portal_net }}
+  serviceNetworkCIDR: {{ openshift_portal_net }}
   externalIPNetworkCIDRs: {{ openshift_master_external_ip_network_cidrs | default(["0.0.0.0/0"]) | lib_utils_to_padded_yaml(1,2) }}
 {% if openshift_master_ingress_ip_network_cidr is defined %}
   ingressIPNetworkCIDR: {{ openshift_master_ingress_ip_network_cidr }}

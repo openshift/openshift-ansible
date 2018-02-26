@@ -51,7 +51,7 @@
 
 - name: Copy the admin client config(s)
   command: >
-    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ openshift_hosted_templates_kubeconfig }}
+    cp {{ openshift_config_base }}/master/admin.kubeconfig {{ openshift_hosted_templates_kubeconfig }}
   changed_when: False
 
 - name: Create or update hosted templates
