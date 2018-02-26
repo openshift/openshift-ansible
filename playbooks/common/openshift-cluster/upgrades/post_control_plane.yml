@@ -166,9 +166,4 @@
     when:
     - __shared_resource_viewer_protected | default(false)
 
-- name: Upgrade Service Catalog
-  hosts: oo_first_master
-  roles:
-  - role: openshift_service_catalog
-    when:
-    - openshift_enable_service_catalog | default(true) | bool
+- import_playbook: upgrade_components.yml
