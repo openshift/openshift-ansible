@@ -9,6 +9,16 @@
       msg: "A base image name or family is required for image building.  Please ensure `openshift_gcp_base_image` is defined."
     when: openshift_gcp_base_image is undefined
 
+- name: Provision ssh key
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Set up core host GCP configuration
+    import_role:
+      name: openshift_gcp
+      tasks_from: provision_ssh_keys.yml
+
 - name: Launch image build instance
   hosts: localhost
   connection: local

@@ -30,6 +30,8 @@
   when:
   - state | default('present') == 'present'
 
+- import_tasks: provision_ssh_keys.yml
+
 - name: Provision GCP resources
   command: /tmp/openshift_gcp_provision.sh
   args:
