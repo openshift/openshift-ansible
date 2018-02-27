@@ -1,4 +1,12 @@
 ---
+- name: Ensure that docker-gc will have nodes to run on
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ r_docker_gc_node_selectors }}"
+    openshift_master_ensure_nodes_service: docker-gc daemonset
+
 - name: Create docker-gc tempdir
   command: mktemp -d
   register: templates_tmpdir

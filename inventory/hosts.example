@@ -166,7 +166,7 @@ debug_level=2
 # Enable docker garbage collection when using cri-o
 #openshift_crio_enable_docker_gc=True
 # Node Selectors to run the garbage collection
-#openshift_crio_docker_gc_node_selector: {'runtime': 'cri-o'}
+#openshift_crio_docker_gc_node_selector={'runtime': 'cri-o'}
 
 # Items added, as is, to end of /etc/sysconfig/docker OPTIONS
 # Default value: "--log-driver=journald"
