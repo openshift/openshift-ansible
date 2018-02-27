@@ -1,4 +1,7 @@
 ---
+- name: evaluate groups
+  import_playbook: ../../init/evaluate_groups.yml
+
 - name: Unsubscribe RHEL instances
   hosts: oo_all_hosts
   become: yes
