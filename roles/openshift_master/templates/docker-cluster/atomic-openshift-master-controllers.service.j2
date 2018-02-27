@@ -10,14 +10,14 @@ PartOf={{ openshift_docker_service_name }}.service
 [Service]
 EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-master-controllers
 Environment=GOTRACEBACK=crash
-ExecStartPre=-/usr/bin/docker rm -f {{ openshift_service_type}}-master-controllers
+ExecStartPre=-/usr/bin/docker rm -f {{ openshift_service_type }}-master-controllers
 ExecStart=/usr/bin/docker run --rm --privileged --net=host \
   --name {{ openshift_service_type }}-master-controllers \
   --env-file=/etc/sysconfig/{{ openshift_service_type }}-master-controllers \
   -v {{ r_openshift_master_data_dir }}:{{ r_openshift_master_data_dir }} \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v {{ openshift.common.config_base }}:{{ openshift.common.config_base }} \
-  {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} \
+  {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base }}/cloudprovider {% endif -%} \
   -v /etc/pki:/etc/pki:ro \
   {% if l_bind_docker_reg_auth | default(False) %} -v {{ oreg_auth_credentials_path }}:/root/.docker:ro{% endif %}\
   {{ osm_image }}:${IMAGE_VERSION} start master controllers \
