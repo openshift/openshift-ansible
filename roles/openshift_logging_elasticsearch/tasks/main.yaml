@@ -118,31 +118,46 @@
     dest: "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
   vars:
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+
+- template:
+    src: logging-metrics-rolebinding.j2
+    dest: "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
+  vars:
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     role_namespace: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_namespace(openshift_logging_elasticsearch_namespace) }}"
     role_user: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_name }}"
 
 - name: Create logging-metrics-reader-role
-  command: >
-    {{ openshift.common.client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    -n "{{ openshift_logging_elasticsearch_namespace }}"
-    create -f "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
-  register: prometheus_out
-  check_mode: no
-  ignore_errors: yes
+  oc_obj:
+    state: present
+    name: "prometheus-metrics-viewer"
+    kind: role
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+      - "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
+    delete_after: true
 
-- fail:
-    msg: "There was an error creating the logging-metrics-role and binding: {{prometheus_out}}"
-  when:
-    - "prometheus_out.stderr | length > 0"
-    - "'already exists' not in prometheus_out.stderr"
+- name: Create logging-metrics-reader-rolebinding
+  oc_obj:
+    state: present
+    name: "prometheus-metrics-viewer"
+    kind: rolebinding
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+      - "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
+    delete_after: true
 
 - name: Checking for passwd.yml
   stat: path="{{ generated_certs_dir }}/passwd.yml"
   register: passwd_file
   check_mode: no
 
-- when: not passwd_file.stat.exists
+- when: passwd_file.stat.exists
+  slurp:
+    src: "{{ generated_certs_dir }}/passwd.yml"
+  register: _logging_metrics_proxy_passwd
+
+- when: not passwd_file.stat.exists or openshift_logging_elasticsearch_prometheus_sa not in ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )
   template:
     src: passwd.j2
     dest: "{{ generated_certs_dir }}/passwd.yml"
@@ -310,7 +325,7 @@
         port: 443
         targetPort: 4443
     selector:
-      component: "{{ es_component }}-prometheus"
+      component: "{{ es_component }}"
       provider: openshift
 
 - oc_edit:
@@ -405,7 +420,7 @@
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
-    basic_auth_passwd: "{{ ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )[openshift_logging_elasticsearch_prometheus_sa]['passwd'] }}"
+    basic_auth_passwd: "{{ ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )[openshift_logging_elasticsearch_prometheus_sa]['passwd'] | b64decode }}"
     es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
     es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
 
