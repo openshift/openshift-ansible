@@ -61,4 +61,6 @@
     - exists.stat.exists and openshift.common.rolling_restart_mode == 'system'
   - set_fact:
       current_host: "{{ exists.stat.exists }}"
-    when: openshift.common.rolling_restart_mode == 'system'
+    when:
+    - "'stat' in exists"
+    - openshift.common.rolling_restart_mode == 'system'
