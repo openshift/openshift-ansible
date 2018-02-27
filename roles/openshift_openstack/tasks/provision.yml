@@ -14,23 +14,45 @@
   register: template_validation_output
   when: openstack_cli_exists|succeeded
 
-- name: Dry-run the stack
-  command: openstack stack create --dry-run -t {{ stack_template_path }} {{ openshift_openstack_stack_name }}
+- name: Check if the stack exists
+  command: openstack stack show {{ openshift_openstack_stack_name }}
   ignore_errors: True
-  register: stack_dry_run_output
+  register: stack_exists
   when: openstack_cli_exists|succeeded
 
-- name: Show the dry run errors
-  debug: var=stack_dry_run_output.stderr
+- name: Dry-run the stack (create)
+  command: openstack stack create --dry-run -t {{ stack_template_path }} {{ openshift_openstack_stack_name }}
+  ignore_errors: True
+  register: stack_create_dry_run_output
   when:
   - openstack_cli_exists|succeeded
-  - stack_dry_run_output|failed
+  - stack_exists|failed
+
+- name: Dry-run the stack (update)
+  command: openstack stack update --dry-run -t {{ stack_template_path }} {{ openshift_openstack_stack_name }}
+  ignore_errors: True
+  register: stack_update_dry_run_output
+  when:
+  - openstack_cli_exists|succeeded
+  - stack_exists|succeeded
+
+- name: Show the dry run errors (create)
+  debug: var=stack_create_dry_run_output.stderr
+  when:
+  - openstack_cli_exists|succeeded
+  - stack_create_dry_run_output|failed
+
+- name: Show the dry run errors (update)
+  debug: var=stack_update_dry_run_output.stderr
+  when:
+  - openstack_cli_exists|succeeded
+  - stack_update_dry_run_output|failed
 
 - fail:
     msg: The Heat stack creation failed. Please inspect the message above.
   when:
   - openstack_cli_exists|succeeded
-  - stack_dry_run_output|failed
+  - (stack_create_dry_run_output|failed or stack_update_dry_run_output|failed)
 
 - name: Handle the Stack (create/delete)
   ignore_errors: True
