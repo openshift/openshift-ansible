@@ -110,7 +110,8 @@ def _retrieve_available_packages(pkg_mgr, expected_pkgs):
         # search for package versions available for openshift pkgs
         yb = yum.YumBase()  # pylint: disable=invalid-name
 
-        yb.conf.disable_excludes = ['all']
+        # Find out whether this check still makes sense with excluders in place
+        # yb.conf.disable_excludes = ['all']
 
         try:
             pkgs = yb.rpmdb.returnPackages(patterns=expected_pkgs)
@@ -125,7 +126,7 @@ def _retrieve_available_packages(pkg_mgr, expected_pkgs):
     elif pkg_mgr == "dnf":
         dbase = dnf.Base()  # pyling: disable=invalid-name
 
-        dbase.conf.disable_excludes = ['all']
+        # dbase.conf.disable_excludes = ['all']
         dbase.read_all_repos()
         dbase.fill_sack(load_system_repo=False, load_available_repos=True)
 
