@@ -44,6 +44,17 @@
   roles:
   - openshift_master_facts
 
+- name: configure vsphere svc account
+  hosts: oo_first_master
+  tasks:
+  - include_role:
+      name: openshift_cloud_provider
+      tasks_from: vsphere-svc
+    when:
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'vsphere'
+    - openshift_version | version_compare('3.9', '>=')
+
 # The main master upgrade play. Should handle all changes to the system in one pass, with
 # support for optional hooks to be defined.
 - name: Upgrade master
@@ -62,6 +73,15 @@
   - import_role:
       name: openshift_master
       tasks_from: upgrade.yml
+
+  - name: update vsphere provider master config
+    include_role:
+      name: openshift_master
+      tasks_from: update-vsphere
+    when:
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'vsphere'
+    - openshift_version | version_compare('3.9', '>=')
 
   - name: Setup and enable bootstrapping options
     include_tasks: ../../../openshift-master/private/tasks/enable_bootstrap.yml
