@@ -1,6 +1,7 @@
 ---
 # defaults file for openshift_prometheus
 openshift_prometheus_state: present
+openshift_prometheus_node_exporter_install: true
 
 openshift_prometheus_namespace: openshift-metrics
 
@@ -74,3 +75,7 @@ openshift_prometheus_oauth_proxy_cpu_limit: null
 openshift_prometheus_oauth_proxy_memory_limit: null
 openshift_prometheus_oauth_proxy_cpu_requests: null
 openshift_prometheus_oauth_proxy_memory_requests: null
+openshift_prometheus_node_exporter_cpu_limit: 200m
+openshift_prometheus_node_exporter_memory_limit: 50Mi
+openshift_prometheus_node_exporter_cpu_requests: 100m
+openshift_prometheus_node_exporter_memory_requests: 30Mi
