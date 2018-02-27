@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.0
-Release:        0.53.0%{?dist}
+Version:        3.9.1
+Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,50 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Feb 27 2018 Justin Pierce <jupierce@redhat.com> 3.9.1-1
+- Add prometheus node-exporter (aweiteka@redhat.com)
+- hosts.example: use 3.9 versions in sample inventory file
+  (vrutkovs@redhat.com)
+- upgrade: skip restart during double upgrade (vrutkovs@redhat.com)
+- gcp: Move provisioning of SSH key into separate task
+  (chance.zibolski@coreos.com)
+- fix when logging metrics user is modified (jcantril@redhat.com)
+- bug 1537857. Additional logging proxy metrics fixes (jcantril@redhat.com)
+- changed logic due to failures in CI (davis.phillips@gmail.com)
+- ntpd/chronyd will now be started before node/master services
+  (fabian@fabianism.us)
+- Add service catalog components to upgrade (mgugino@redhat.com)
+- Add registry GCS storage to hosts.example (sdodson@redhat.com)
+- Remove no_log: True from openshift_version calls (sdodson@redhat.com)
+- docker: support ADDTL_MOUNTS (gscrivan@redhat.com)
+- refactor grafana role (m.judeikis@gmail.com)
+- Remove v3_8 upgrade playbooks (vrutkovs@redhat.com)
+- Dump verbose curl output and API logs when API doesn't become available.
+  (abutcher@redhat.com)
+- Start master API in parallel on all masters. (abutcher@redhat.com)
+- Update glusterfs-template:  - Add GB_LOGDIR  - failureThreshold as 50 secs
+  (sarumuga@redhat.com)
+- Don't upgrade master nodes during double upgrade (vrutkovs@redhat.com)
+- Don't upgrade nodes for OCP 3.8 (vrutkovs@redhat.com)
+- sanity_checks: warn that some OCP versions cannot be installed
+  (vrutkovs@redhat.com)
+- repo_query: always include package_name in results (vrutkovs@redhat.com)
+- Update upgrade README and add 3.7.x -> 3.9.x entry (vrutkovs@redhat.com)
+- Remove unused tasks upgrade_facts in openshift_master (mgugino@redhat.com)
+- Remove set_fact usage from web-console role (mgugino@redhat.com)
+- Retrieve node list from API when testing for nodes with selector.
+  (abutcher@redhat.com)
+- Update controller port to match containerPort (jpeeler@redhat.com)
+- Fix way openshift_openstack_nodes_to_remove parameter is parsed in template
+  (tzumainn@redhat.com)
+- logging: update README about cri-o (jwozniak@redhat.com)
+- Bug 1536651 - logging-mux not working in 3.7.z when logging installed with
+  openshift_logging_use_mux=true (nhosoi@redhat.com)
+- vsphere svc fix upgrade and datastore fix (davis.phillips@gmail.com)
+- logging: allow fluentd to determine cri-o (jwozniak@redhat.com)
+- add generic image-and-flavor check that verifies existence and compatibility
+  (tzumainn@redhat.com)
+
 * Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.53.0
 - 
 
