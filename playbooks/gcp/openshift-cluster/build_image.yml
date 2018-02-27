@@ -83,9 +83,6 @@
   tasks:
   - include_role:
       name: openshift_gcp
-      tasks_from: node_cloud_config.yml
-  - include_role:
-      name: openshift_gcp
       tasks_from: frequent_log_rotation.yml
 
 - name: Commit image

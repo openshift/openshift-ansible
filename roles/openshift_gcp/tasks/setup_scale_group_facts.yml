@@ -3,21 +3,19 @@
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: masters, etcd
-  with_items: "{{ groups['tag_ocp-master'] }}"
+  with_items: "{{ groups['tag_' + openshift_gcp_prefix + '-master'] }}"
 
 - name: Add a master to the primary masters group
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: primary_master
-  with_items: "{{ groups['tag_ocp-master'].0 }}"
+  with_items: "{{ groups['tag_' + openshift_gcp_prefix + '-master'].0 }}"
 
 - name: Add non-bootstrapping master node instances to node group
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: nodes
-    openshift_node_labels:
-      role: infra
-  with_items: "{{ groups['tag_ocp-master'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
+  with_items: "{{ groups['tag_' + openshift_gcp_prefix + '-master'] | default([]) | difference(groups['tag_' + openshift_gcp_prefix + '-bootstrap'] | default([])) }}"
 
 - name: Add infra node instances to node group
   add_host:
@@ -25,7 +23,7 @@
     groups: nodes
     openshift_node_labels:
       role: infra
-  with_items: "{{ groups['tag_ocp-infra-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
+  with_items: "{{ groups['tag_' + openshift_gcp_prefix + '-infra-node'] | default([]) | difference(groups['tag_' + openshift_gcp_prefix + '-bootstrap'] | default([])) }}"
 
 - name: Add node instances to node group
   add_host:
@@ -33,12 +31,12 @@
     groups: nodes
     openshift_node_labels:
       role: app
-  with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
+  with_items: "{{ groups['tag_' + openshift_gcp_prefix + '-node'] | default([]) | difference(groups['tag_' + openshift_gcp_prefix + '-bootstrap'] | default([])) }}"
 
 - name: Add bootstrap node instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: bootstrap_nodes
     openshift_node_bootstrap: True
-  with_items: "{{ groups['tag_ocp-node'] | default([]) | intersect(groups['tag_ocp-bootstrap'] | default([])) }}"
+  with_items: "{{ groups['tag_' + openshift_gcp_prefix + '-node'] | default([]) | intersect(groups['tag_' + openshift_gcp_prefix + '-bootstrap'] | default([])) }}"
   when: not (openshift_node_bootstrap | default(False))

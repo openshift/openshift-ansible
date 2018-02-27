@@ -37,7 +37,7 @@ openshift_gcp_node_group_config:
     scale: 1
   - name: infra
     suffix: i
-    tags: ocp-infra-node ocp-node
+    tags: ocp-infra-node,ocp-node
     machine_type: n1-standard-2
     boot_disk_size: 150
     scale: 1

@@ -1,0 +1,28 @@
+---
+- name: Check if empty image is already present in GCP
+  command: gcloud --project {{ openshift_gcp_project }} compute images describe {{ openshift_gcp_empty_image | default('empty-1g') }}
+  register: empty_image_gcp_exists
+  changed_when: false
+  ignore_errors: true
+
+- when: empty_image_gcp_exists | failed
+  block:
+  - name: Ensure files directory exists
+    file:
+      path: '{{ playbook_dir }}/files'
+      state: directory
+
+  - name: Create empty 1g image
+    command: truncate -s 1g '{{ playbook_dir }}/files/disk.raw' creates='{{ playbook_dir }}/files/disk.raw'
+
+  - name: Upload image to the GCP
+    import_tasks: upload-image.yml
+    vars:
+      openshift_gcp_raw_image_dir: '{{ playbook_dir }}/files'
+      openshift_gcp_image_to_create: '{{ openshift_gcp_empty_image | default("empty-1g") }}'
+
+  always:
+  - name: Delete temporary file
+    file:
+      path: '{{ playbook_dir }}/files/disk.raw'
+      state: absent

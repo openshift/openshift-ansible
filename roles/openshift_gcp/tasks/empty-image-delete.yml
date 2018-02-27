@@ -1,0 +1,4 @@
+---
+- name: Delete empty GCP image
+  command: gcloud --project {{ openshift_gcp_project }} compute images delete {{ openshift_gcp_empty_image | default('empty-1g') }}
+  ignore_errors: true

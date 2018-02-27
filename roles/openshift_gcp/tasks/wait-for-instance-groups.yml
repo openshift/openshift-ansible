@@ -1,0 +1,9 @@
+---
+- name: wait until the instance groups are ready
+  command: gcloud --project {{ openshift_gcp_project }} compute instance-groups managed describe {{ openshift_gcp_prefix }}-ig-{{ item.suffix }} --region {{ openshift_gcp_region }} --format 'yaml(targetSize, currentActions.none)'
+  register: instance_group_size_and_action_none
+  until: (instance_group_size_and_action_none.stdout | from_yaml).targetSize == (instance_group_size_and_action_none.stdout | from_yaml).currentActions.none
+  retries: 20
+  delay: 5
+  changed_when: false
+  with_items: '{{ openshift_gcp_node_group_config }}'

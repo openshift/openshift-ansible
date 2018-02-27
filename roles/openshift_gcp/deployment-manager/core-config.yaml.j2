@@ -1,0 +1,19 @@
+imports:
+- path: core.jinja
+resources:
+- name: core
+  type: core.jinja
+  properties:
+    prefix: {{ openshift_gcp_prefix }}
+    project: {{ openshift_gcp_project }}
+    region: {{ openshift_gcp_region }}
+    zone: {{ openshift_gcp_zone }}
+    console_port: {{ console_port }}
+{#    bastion_machine_type: {{ bastion_machine_type }}   no bastion for now
+    bastion_disk_size: {{ bastion_disk_size }} #}
+    network_name: {{ openshift_gcp_network_name | default(openshift_gcp_prefix + '-network') }}
+    openshift_gcp_image: {{ openshift_gcp_image }}
+    openshift_gcp_clusterid: {{ openshift_gcp_clusterid }}
+    gcs_registry_bucket: {{ openshift_gcp_registry_bucket_name }}
+    gce_vpc_custom_subnet_cidr: {{ openshift_gcp_vpc_custom_subnet_cidr | default('') }}
+    openshift_gcp_node_group_config: {{ openshift_gcp_node_group_config | to_json }}

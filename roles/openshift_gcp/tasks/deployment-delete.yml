@@ -1,0 +1,8 @@
+---
+- name: Include vars for deployment manager
+  include_vars:
+    file: deployment-manager.yaml
+
+- name: Delete deployment {{ openshift_gcp_deployment_name_with_prefix }}
+  command: gcloud -q --project {{ openshift_gcp_project }} deployment-manager deployments delete {{ openshift_gcp_deployment_name_with_prefix }}
+  ignore_errors: true
