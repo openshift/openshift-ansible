@@ -30,7 +30,7 @@
 - import_playbook: install_docker_gc.yml
   when:
   - openshift_use_crio | default(False) | bool
-  - openshift_crio_enable_docker_gc | default(False) | bool
+  - openshift_crio_enable_docker_gc | default(True) | bool
 
 - name: Hosted Install Checkpoint End
   hosts: all

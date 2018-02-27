@@ -159,12 +159,12 @@ debug_level=2
 # use this option if you are sure you know what you are doing!
 #openshift_docker_systemcontainer_image_override="registry.example.com/container-engine:latest"
 #openshift_crio_systemcontainer_image_override="registry.example.com/cri-o:latest"
-# NOTE: The following crio docker-gc items are tech preview and likely shouldn't be used
-# unless you know what you are doing!!
 # The following two variables are used when openshift_use_crio is True
-# and cleans up after builds that pass through docker.
+# and cleans up after builds that pass through docker. When openshift_use_crio is True
+# these variables are set to the defaults shown. You may override them here.
+# NOTE: You will still need to tag crio nodes with your given label(s)!
 # Enable docker garbage collection when using cri-o
-#openshift_crio_enable_docker_gc=false
+#openshift_crio_enable_docker_gc=True
 # Node Selectors to run the garbage collection
 #openshift_crio_docker_gc_node_selector: {'runtime': 'cri-o'}
 
