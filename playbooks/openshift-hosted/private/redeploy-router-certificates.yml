@@ -117,9 +117,7 @@
 
   - import_role:
       name: openshift_hosted
-      tasks_from: main
-    vars:
-      openshift_hosted_manage_registry: false
+      tasks_from: router.yml
     when:
     - l_router_dc.rc == 0
     - l_router_svc.rc == 0
