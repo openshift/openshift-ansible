@@ -1,19 +1,4 @@
 ---
-# Fact setting
-- name: Set default image variables based on deployment type
-  include_vars: "{{ item }}"
-  with_first_found:
-  - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
-  - "default_images.yml"
-
-- name: Set openshift_web_console facts
-  set_fact:
-    openshift_web_console_prefix: "{{ openshift_web_console_prefix | default(__openshift_web_console_prefix) }}"
-    openshift_web_console_version: "{{ openshift_web_console_version | default(__openshift_web_console_version) }}"
-    openshift_web_console_image_name: "{{ openshift_web_console_image_name | default(__openshift_web_console_image_name) }}"
-    # Default the replica count to the number of masters.
-    openshift_web_console_replica_count: "{{ openshift_web_console_replica_count | default(groups.oo_masters_to_config | length) }}"
-
 - name: Ensure openshift-web-console project exists
   oc_project:
     name: openshift-web-console
@@ -165,11 +150,50 @@
   register: console_health
   until: console_health.stdout == 'ok'
   retries: 60
-  delay: 5
+  delay: 10
   changed_when: false
+  # Ignore errors so we can log troubleshooting info on failures.
+  ignore_errors: yes
+
+# Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment/webconsole` for troubleshooting failures.
+- when: console_health.stdout != 'ok'
+  block:
+  - name: Check status in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} status --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+    register: console_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_status.stdout_lines }}"
+  - name: Get pods in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} get pods --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console -o wide
+    register: console_pods
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_pods.stdout_lines }}"
+  - name: Get events in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} get events --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+    register: console_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_events.stdout_lines }}"
+  - name: Get console pod logs
+    command: >
+      {{ openshift_client_binary }} logs deployment/webconsole --tail=50 --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+    register: console_log
+    ignore_errors: true
+  - debug:
+      msg: "{{ console_log.stdout_lines }}"
 
 - name: Remove temp directory
   file:
     state: absent
     name: "{{ mktemp.stdout }}"
   changed_when: False
+
+- name: Report console errors
+  fail:
+    msg: Console install failed.
+  when: console_health.stdout != 'ok'

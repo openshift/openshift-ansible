@@ -36,5 +36,5 @@
   register: _pod_status
   until: (_pod_status.stdout | from_json)['status'] in ['green', 'yellow']
   retries: 60
-  delay: 5
+  delay: 10
   changed_when: false

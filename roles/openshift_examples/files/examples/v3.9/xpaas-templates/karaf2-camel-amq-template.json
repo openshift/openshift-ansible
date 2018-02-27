@@ -4,7 +4,7 @@
   "metadata": {
     "annotations": {
       "description": "Camel route using ActiveMQ in Karaf container. This quickstart shows how to use Camel in a Karaf Container using Blueprint to connect to the A-MQ xPaaS message broker on OpenShift that should already be installed, one simple way to run a A-MQ service is following the documentation of the A-MQ xPaaS image for OpenShift related to the amq63-basic template.",
-      "tags": "quickstart,java,karaf,fis",
+      "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-jboss",
       "version": "2.0"
     },

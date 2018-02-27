@@ -1,6 +1,6 @@
 ---
 # This playbook ensures that a base image is up to date with all of the required settings
-- name: Launch image build instance
+- name: Verify prerequisites for image build
   hosts: localhost
   connection: local
   gather_facts: no
@@ -10,6 +10,21 @@
       msg: "A root OS image name or family is required for base image building.  Please ensure `openshift_gcp_root_image` is defined."
     when: openshift_gcp_root_image is undefined
 
+- name: Provision ssh key
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Set up core host GCP configuration
+    import_role:
+      name: openshift_gcp
+      tasks_from: provision_ssh_keys.yml
+
+- name: Launch image build instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
   - name: Create the image instance disk
     gce_pd:
       service_account_email: "{{ (lookup('file', openshift_gcp_iam_service_account_keyfile ) | from_json ).client_email }}"

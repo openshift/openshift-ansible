@@ -1,0 +1,9 @@
+---
+# image prefix defaults
+l_openshift_grafana_image_prefix: "{{ openshift_grafana_image_prefix | default('mrsiano/') }}"
+l_openshift_grafana_proxy_image_prefix: "{{ openshift_grafana_proxy_image_prefix | default('openshift/') }}"
+l_openshift_grafana_image: "{{ openshift_grafana_image| default('grafana-ocp') }}"
+
+# image version defaults
+l_openshift_grafana_image_version: "{{ openshift_grafana_image_version | default('latest') }}"
+l_openshift_grafana_proxy_image_version: "{{ openshift_grafana_proxy_image_version | default('v1.0.0') }}"

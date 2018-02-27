@@ -30,7 +30,8 @@
 
 from __future__ import print_function  # noqa: F401
 import copy  # noqa: F401
-import json  # noqa: F401
+import fcntl  # noqa: F401
+import json   # noqa: F401
 import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
@@ -546,13 +547,13 @@ class Repoquery(RepoqueryCLI):
         rval = self._repoquery_cmd(repoquery_cmd, True, 'raw')
 
         # check to see if there are actual results
+        rval['package_name'] = self.name
         if rval['results']:
             processed_versions = Repoquery.process_versions(rval['results'].strip())
             formatted_versions = self.format_versions(processed_versions)
 
             rval['package_found'] = True
             rval['versions'] = formatted_versions
-            rval['package_name'] = self.name
 
             if self.verbose:
                 rval['raw_versions'] = processed_versions

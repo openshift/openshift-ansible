@@ -295,12 +295,54 @@ class YeditTest(unittest.TestCase):
         data = Yedit.remove_entry({'a': {'b': 12}}, '')
         self.assertTrue(data)
 
+    def test_remove_dict_entry(self):
+        '''test removing dict entry'''
+        data = {'a': {'b': [{'c': 3, 'd': 4, 'e': 5}]}}
+        results = Yedit.remove_entry(data, 'a.b[0].c')
+        self.assertTrue(results)
+        self.assertEqual(data, {'a': {'b': [{'d': 4, 'e': 5}]}})
+
+    def test_remove_dict_entry_top_all(self):
+        '''test removing dict entry top all'''
+        data = {'a': 1, 'b': 2}
+        results = Yedit.remove_entry(data, '')
+        self.assertTrue(results)
+        self.assertEqual(data, {})
+
+    def test_remove_dict_entry_top(self):
+        '''test removing dict entry top'''
+        data = {'a': 1, 'b': 2}
+        results = Yedit.remove_entry(data, '', value='b')
+        self.assertTrue(results)
+        self.assertEqual(data, {'a': 1})
+
     def test_remove_list_entry(self):
         '''test removing list entry'''
         data = {'a': {'b': [{'c': 3}]}}
         results = Yedit.remove_entry(data, 'a.b[0]')
         self.assertTrue(results)
-        self.assertTrue(data, {'a': {'b': []}})
+        self.assertEqual(data, {'a': {'b': []}})
+
+    def test_remove_list_entry_value_top(self):
+        '''test removing top list entry'''
+        data = ['c', 'd', 'e']
+        results = Yedit.remove_entry(data, '', value='d')
+        self.assertTrue(results)
+        self.assertEqual(data, ['c', 'e'])
+
+    def test_remove_list_entry_index_top(self):
+        '''test removing top list entry'''
+        data = ['c', 'd', 'e']
+        results = Yedit.remove_entry(data, '', 2)
+        self.assertTrue(results)
+        self.assertEqual(data, ['c', 'd'])
+
+    def test_remove_list_entry_index(self):
+        '''test removing list entry 1 index'''
+        data = {'a': {'b': ['c', 'd', 'e']}}
+        results = Yedit.remove_entry(data, 'a.b[1]')
+        self.assertTrue(results)
+        self.assertEqual(data, {'a': {'b': ['c', 'e']}})
 
     def test_parse_value_string_true(self):
         '''test parse_value'''

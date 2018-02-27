@@ -18,11 +18,14 @@ def main():
             kind=dict(required=True, type='str'),
             file_name=dict(default=None, type='str'),
             file_format=dict(default='yaml', type='str'),
-            content=dict(default=None, required=True, type='dict'),
+            content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
             separator=dict(default='.', type='str'),
+            edits=dict(default=None, type='list'),
         ),
         supports_check_mode=True,
+        mutually_exclusive=[['content', 'edits']],
+        required_one_of=[['content', 'edits']],
     )
 
     rval = Edit.run_ansible(module.params, module.check_mode)

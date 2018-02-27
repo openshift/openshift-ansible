@@ -14,6 +14,7 @@
   roles:
   - role: openshift_clock
   - role: openshift_cloud_provider
+    when: openshift_cloudprovider_kind is defined
   - role: openshift_node
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   - role: nickhammond.logrotate

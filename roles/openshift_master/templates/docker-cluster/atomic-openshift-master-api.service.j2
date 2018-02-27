@@ -5,6 +5,8 @@ After=etcd_container.service
 Wants=etcd_container.service
 Before={{ openshift_service_type }}-node.service
 After={{ openshift_docker_service_name }}.service
+After=chronyd.service
+After=ntpd.service
 PartOf={{ openshift_docker_service_name }}.service
 Requires={{ openshift_docker_service_name }}.service
 

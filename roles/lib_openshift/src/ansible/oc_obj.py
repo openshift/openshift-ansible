@@ -22,8 +22,9 @@ def main():
             content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
             selector=dict(default=None, type='str'),
+            field_selector=dict(default=None, type='str'),
         ),
-        mutually_exclusive=[["content", "files"], ["selector", "name"]],
+        mutually_exclusive=[["content", "files"], ["selector", "name"], ["field_selector", "name"]],
 
         supports_check_mode=True,
     )

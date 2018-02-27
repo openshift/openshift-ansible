@@ -33,6 +33,10 @@ ENTERPRISE_TAG_REGEX = {'re': '(^v\\d+\\.\\d+(\\.\\d+)*(-\\d+(\\.\\d+)*)?$)',
 IMAGE_TAG_REGEX = {'origin': ORIGIN_TAG_REGEX,
                    'openshift-enterprise': ENTERPRISE_TAG_REGEX}
 
+UNSUPPORTED_OCP_VERSIONS = {
+    '^3.8.*$': 'OCP 3.8 is not supported and cannot be installed'
+}
+
 CONTAINERIZED_NO_TAG_ERROR_MSG = """To install a containerized Origin release,
 you must set openshift_release or openshift_image_tag in your inventory to
 specify which version of the OpenShift component images to use.
@@ -144,6 +148,17 @@ class ActionModule(ActionBase):
                 msg = '{} must be 63 characters or less'.format(varname)
                 raise errors.AnsibleModuleError(msg)
 
+    def check_supported_ocp_version(self, hostvars, host, openshift_deployment_type):
+        """Checks that the OCP version supported"""
+        if openshift_deployment_type == 'origin':
+            return None
+        openshift_version = self.template_var(hostvars, host, 'openshift_version')
+        for regex_to_match, error_msg in UNSUPPORTED_OCP_VERSIONS.items():
+            res = re.match(regex_to_match, str(openshift_version))
+            if res is not None:
+                raise errors.AnsibleModuleError(error_msg)
+        return None
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -153,6 +168,7 @@ class ActionModule(ActionBase):
         self.no_origin_image_version(hostvars, host, odt)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
+        self.check_supported_ocp_version(hostvars, host, odt)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)

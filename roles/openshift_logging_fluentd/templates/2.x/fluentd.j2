@@ -79,6 +79,9 @@ spec:
         - name: dockerdaemoncfg
           mountPath: /etc/docker
           readOnly: true
+        - name: originnodecfg 
+          mountPath: /etc/origin/node
+          readOnly: true
         - name: filebufferstorage
           mountPath: /var/lib/fluentd
 {% if openshift_logging_mux_client_mode is defined and
@@ -234,6 +237,9 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
+      - name: originnodecfg 
+        hostPath:
+          path: /etc/origin/node
       - name: dockerdaemoncfg
         hostPath:
           path: /etc/docker

@@ -672,7 +672,7 @@ resources:
     properties:
       count: {{ openshift_openstack_num_nodes }}
       removal_policies:
-      - resource_list: {{ openshift_openstack_nodes_to_remove }}
+      - resource_list: {{ openshift_openstack_nodes_to_remove | to_json }}
       resource_def:
         type: server.yaml
         properties:
