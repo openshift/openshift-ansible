@@ -69,12 +69,12 @@
   # If we are currently restarting the "es-ops" cluster we want to check if we are scaling up the number of ops nodes
   # If we've created a new node for that cluster then the appropriate variable will be true, otherwise we default to false
   - set_fact:
-      _skip_healthcheck: "{{ __logging_scale_up | default(false) if _cluster_component == 'es' else __logging_ops_scale_up | default(false) }}"
+      _skip_healthcheck: "{{ ( __logging_scale_up | default(false) ) if _cluster_component == 'es' else ( __logging_ops_scale_up | default(false) ) }}"
 
   ## restart all dcs for full restart
   - name: "Restart ES node {{ _es_node }}"
     include: restart_es_node.yml
-    with_items: "{{ _cluster_dcs }}"
+    with_items: "{{ _cluster_dcs.stdout_lines }}"
     loop_control:
       loop_var: _es_node
     when:
