@@ -20,9 +20,9 @@
 # pylint: disable=unused-wildcard-import,wildcard-import,unused-import,redefined-builtin
 
 ''' os_network_extensions '''
+import keystoneauth1
 
 from ansible.module_utils.basic import AnsibleModule
-import keystoneauth1
 
 try:
     import shade
@@ -65,6 +65,7 @@ def main():
 
     try:
         cloud = shade.openstack_cloud()
+    # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to connect to the cloud')
 
@@ -75,12 +76,14 @@ def main():
             interface=cloud.cloud_config.get_interface('network'),
             endpoint_override=cloud.cloud_config.get_endpoint('network'),
             version=cloud.cloud_config.get_api_version('network'))
+    # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to get an adapter to talk to the Neutron '
                              'API')
 
     try:
         response = adapter.get('/extensions.json')
+    # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to retrieve Neutron extensions')
 
@@ -88,6 +91,7 @@ def main():
     try:
         for ext_record in response.json()['extensions']:
             extensions.append(ext_record['alias'])
+    # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to process cloud networking '
                          'extensions')
