@@ -52,7 +52,7 @@ class OpenShiftCLI(object):
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
-    def _replace_content(self, resource, rname, content, force=False, sep='.'):
+    def _replace_content(self, resource, rname, content, edits=None, force=False, sep='.'):
         ''' replace the current object with the content '''
         res = self._get(resource, rname)
         if not res['results']:
@@ -61,13 +61,24 @@ class OpenShiftCLI(object):
         fname = Utils.create_tmpfile(rname + '-')
 
         yed = Yedit(fname, res['results'][0], separator=sep)
-        changes = []
-        for key, value in content.items():
-            changes.append(yed.put(key, value))
+        updated = False
 
-        if any([change[0] for change in changes]):
+        if content is not None:
+            changes = []
+            for key, value in content.items():
+                changes.append(yed.put(key, value))
+
+            if any([change[0] for change in changes]):
+                updated = True
+
+        elif edits is not None:
+            results = Yedit.process_edits(edits, yed)
+
+            if results['changed']:
+                updated = True
+
+        if updated:
             yed.write()
-
             atexit.register(Utils.cleanup, [fname])
 
             return self._replace(fname, force)
@@ -145,12 +156,18 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, name=None, selector=None):
+    def _get(self, resource, name=None, selector=None, field_selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
+
         if selector is not None:
             cmd.append('--selector={}'.format(selector))
-        elif name is not None:
+
+        if field_selector is not None:
+            cmd.append('--field-selector={}'.format(field_selector))
+
+        # Name cannot be used with selector or field_selector.
+        if selector is None and field_selector is None and name is not None:
             cmd.append(name)
 
         cmd.extend(['-o', 'json'])
@@ -314,7 +331,7 @@ class Utils(object):
         ''' Actually write the file contents to disk. This helps with mocking. '''
 
         with open(filename, 'w') as sfd:
-            sfd.write(contents)
+            sfd.write(str(contents))
 
     @staticmethod
     def create_tmp_file_from_contents(rname, data, ftype='yaml'):

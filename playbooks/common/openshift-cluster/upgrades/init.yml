@@ -6,6 +6,7 @@
     g_new_node_hosts: []
 
 - import_playbook: ../../../init/basic_facts.yml
+- import_playbook: ../../../init/base_packages.yml
 - import_playbook: ../../../init/cluster_facts.yml
 
 - name: Ensure firewall is not switched during upgrade

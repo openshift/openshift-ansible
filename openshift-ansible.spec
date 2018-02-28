@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.9.0
-Release:        0.35.0%{?dist}
+Release:        0.53.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -28,6 +28,8 @@ Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
+Requires:      python2-crypto
+Requires:      patch
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -200,6 +202,314 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.53.0
+- 
+
+* Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.52.0
+- Move journald setup to node tasks from master (nakayamakenjiro@gmail.com)
+- [BZ 1497408] delete config map, dameon set, and cluster role
+  (john.sanda@gmail.com)
+- Fix aggregator relative paths (mgugino@redhat.com)
+- Fix package tasks ordering in OpenStack playbooks (tomas@sedovic.cz)
+- Change openshift_release to openshift_upgrade_target in upgrade
+  (mgugino@redhat.com)
+- Normalize times we wait on pods to 10s * 60retries (sdodson@redhat.com)
+- start_api_server: service catalog healthcheck doesn't require proxy
+  (vrutkovs@redhat.com)
+- Changing default of openshift_logging_public_master_url to use
+  openshift_master_cluster_public_hostname if available (ewolinet@redhat.com)
+- Sync v3.8 content (sdodson@redhat.com)
+- Sync v3.7 content (sdodson@redhat.com)
+- Sync v3.9 content (sdodson@redhat.com)
+- Allow branch specific pulls from origin (sdodson@redhat.com)
+- Fixing bz1540467 docker-registry env var migration. Adding ability to oc_edit
+  complex array style edits. (kwoodson@redhat.com)
+- [1537872] Adding seboolean for virt_use_samba (kwoodson@redhat.com)
+- Making patching a local_action and ensuring we become:false for local_actions
+  (ewolinet@redhat.com)
+- Cast string to dict in lib_utils_oo_dict_to_keqv_list (mgugino@redhat.com)
+- refine condition for doing ami fetching (jdiaz@redhat.com)
+- Add field_selector parameter to oc_obj. (abutcher@redhat.com)
+- GlusterFS: Check for groups in template file (jarrpa@redhat.com)
+- Updating AMI copying tags to no longer default to parent AMI.
+  (kwoodson@redhat.com)
+- Remove NoVolumeNodeConflict from 3.9+ (sdodson@redhat.com)
+
+* Fri Feb 23 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.51.0
+- 
+
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.50.0
+- Fix upgrade verify_upgrade_targets (mgugino@redhat.com)
+- Ensure wire-aggregator run on 3.7 upgrades (mgugino@redhat.com)
+- Add no_log to prevent printing AWS creds (sedgar@redhat.com)
+- added ci inventory and groups for containerized (mgugino@redhat.com)
+
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.48.0
+- Fix openshift_hosted_registry_storage_glusterfs_path (mgugino@redhat.com)
+- Revert openshift_portal_net (mgugino@redhat.com)
+- skip search for an ami if openshift_aws_ami_map provides one
+  (jdiaz@redhat.com)
+- Adding node autoapprover. (kwoodson@redhat.com)
+- Adding ability to state absent array items with index/curr_value.
+  (kwoodson@redhat.com)
+- Change image location to CF 4.6 GA from Beta (simaishi@redhat.com)
+- Update templates to mount the configmap into the directory the new image
+  expects (simaishi@redhat.com)
+- Fix for support multi-cluster heketi's topology (chinacoolhacker@gmail.com)
+
+* Tue Feb 20 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.47.0
+- Update API healthz check to use uri module (mkhan@redhat.com)
+- fixed an oo_filter plugin lib_utils_oo_has_no_matching_selector to do set
+  comparison (mwoodson@redhat.com)
+- Grafana roles updates. (mrsiano@gmail.com)
+- add deprovision playbook for cluster-operator infrastructure
+  (jdiaz@redhat.com)
+- Add tox test to check for invalid playbook include (rteague@redhat.com)
+- Change openshift.common.hostname to inventory_hostname (mgugino@redhat.com)
+- Fix openshift-webconsole version check (mgugino@redhat.com)
+- add master deprovisioning (jdiaz@redhat.com)
+- Adding file locking to yedit. (kwoodson@redhat.com)
+- Log troubleshooting info when console install fails (spadgett@redhat.com)
+- CRI-O: use /var/run/crio/crio.sock for >=3.9 (gscrivan@redhat.com)
+- Fix pvc template by replacing None by lowercase none (toj315@gmail.com)
+- GlusterFS: Fix uninstall regression (jarrpa@redhat.com)
+- Add prometheus reader role for lightweight privileges. (mrsiano@gmail.com)
+- docker_image_availability: encode error message (vrutkovs@redhat.com)
+- Tweak things based on feedback (sdodson@redhat.com)
+- Update example inventory to drive required hostgroups to the top
+  (sdodson@redhat.com)
+
+* Mon Feb 19 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.46.0
+- Tolerate OVS 2.6 in 3.10 as well (sdodson@redhat.com)
+- hosts.example: openshift_dns_ip should be node-specific (vrutkovs@redhat.com)
+- Add target mount for gluster block (m.judeikis@gmail.com)
+- Allow for overriding hosted registry_url variables (rteague@redhat.com)
+- Link to etcd v3 migration docs rather than suggesting dangerous things
+  (sdodson@redhat.com)
+- Run openshift_version for image prep (mgugino@redhat.com)
+- Remove redundant openshift_hosted_registry_network_default
+  (mgugino@redhat.com)
+- Correct the usage of bool and str (ghuang@redhat.com)
+- kernel module loading fix (m.judeikis@gmail.com)
+- add steps in bootstrap playbook to handle updating aws.conf file
+  (jdiaz@redhat.com)
+- Add cloud config variables to the sample inventory (nelluri@redhat.com)
+- Run init/facts for docker upgrade (mgugino@redhat.com)
+- quick installer: remove UPGRADE_MAPPINGS (vrutkovs@redhat.com)
+- Update quick installer to support 3.9 and 3.8 (vrutkovs@redhat.com)
+- Updating deprecation variable check to use a module for cleaner output and
+  use run_once to limit to one host. Add flag to skip dep check if desired
+  (ewolinet@redhat.com)
+- Patch only if the file exists, otherwise we should copy the file in
+  (ewolinet@redhat.com)
+- Add vsphere section for openshift_node_kubelet_args_dict (ghuang@redhat.com)
+- Correctly comparing against the current configmap when making es configmap
+  patches (ewolinet@redhat.com)
+- add uninstall playbooks for compute/infra scale groups (jdiaz@redhat.com)
+- Adding ability to pass content and create files from content.
+  (kwoodson@redhat.com)
+- Bug 1541946- waiting for master reboot now works behind bastion
+  (fabian@fabianism.us)
+
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.45.0
+-
+
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.44.0
+-
+
+* Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.43.0
+- Changing conditional_set_fact from module to action_plugin since it does not
+  need to access hosts to be effective and to reduce playbook output
+  (ewolinet@redhat.com)
+- Revert "Bug 1512825 - add mux pod failed for Serial number 02 has already
+  been issued" (mkhan@redhat.com)
+- Fix metadata access in OpenStack inventory (tomas@sedovic.cz)
+- Adding ability to yedit json files. (kwoodson@redhat.com)
+- Simplify double upgrade version logic (mgugino@redhat.com)
+- Whenever we create a new es node ignore health checks, changing prometheus pw
+  gen for increased secret idempotency (ewolinet@redhat.com)
+- oc_adm_csr: Add fail_on_timeout parameter which causes module to fail when
+  timeout was reached. (abutcher@redhat.com)
+- Adding missing template (ewolinet@redhat.com)
+- Move installation of packages before container_runtime to ensure bind mounts
+  are avaialable. (kwoodson@redhat.com)
+- Use curl --noproxy option for internal apiserver access (takayoshi@gmail.com)
+- Revert openshift_version to previous state (mgugino@redhat.com)
+- Add openshift_gcp_multizone bool (mgugino@redhat.com)
+- Invert logic to decide when to re-deploy certs (sdodson@redhat.com)
+- etcd_scaleup: use inventory_hostname when etcd ca host is being picked
+  (vrutkovs@redhat.com)
+- Fix docker_upgrade variable (mgugino@redhat.com)
+- Fix gcp variable warnings (mgugino@redhat.com)
+- Disable console install when not 3.9 or newer (spadgett@redhat.com)
+- Fix etcd scaleup plays (mgugino@redhat.com)
+- Add playbook to install components for cluster operator (cewong@redhat.com)
+- Remove cluster_facts.yml from the install.yml (tomas@sedovic.cz)
+- Allow for blank StorageClass in PVC creation (jarrpa@redhat.com)
+- Add service catalog to be upgraded (jpeeler@redhat.com)
+- Remove node start from bootstrap.yml. (abutcher@redhat.com)
+- Restart systemd-hostnamed before restarting NetworkManager in node user-data.
+  (abutcher@redhat.com)
+- additional mounts: specify 'type' in container_runtime_crio_additional_mounts
+  (vrutkovs@redhat.com)
+- Fix openshift_openstack_provision_user_commands (bdobreli@redhat.com)
+- origin-dns: make sure cluster.local DNS server is listed first
+  (vrutkovs@redhat.com)
+- Fix OpenStack playbooks (tomas@sedovic.cz)
+- Backport changes for glusterfs, heketi, s3 and block templates
+  (sarumuga@redhat.com)
+- Fix indentation to make yamllint happy (vrutkovs@redhat.com)
+- Use r_etcd_common_etcdctl_command instead of hardcoded binary name to support
+  containerized upgrade (vrutkovs@redhat.com)
+- Verify that requested services have schedulable nodes matching the selectors
+  (vrutkovs@redhat.com)
+- Normalize the time we wait for pods to 5s * 60 retries (sdodson@redhat.com)
+- Pause for console rollout (spadgett@redhat.com)
+- Fix wording (bdobreli@redhat.com)
+- Fix cloud init runcmd templating (bdobreli@redhat.com)
+- Note ignored Heat user data changes for openstack (bdobreli@redhat.com)
+- Clarify the ansible playbook vs cloud-init (bdobreli@redhat.com)
+- Fix openstack cloud-init runcmd templating (bdobreli@redhat.com)
+- [openstack] custom user commands for cloud-init (bdobreli@redhat.com)
+- Limit host scope during plays (mgugino@redhat.com)
+- Fix upgrade-control plane post_control_plane.yml (mgugino@redhat.com)
+- erase data only if variable is set. fix block indentatation
+  (sarumuga@redhat.com)
+- uninstall playbook for GlusterFS (sarumuga@redhat.com)
+- Removing prefix and replacing with cidr, pool_start and pool_end variables.
+  (mbruzek@gmail.com)
+- Make node start options configurable (celebdor@gmail.com)
+- Support master node high availability (jihoon.o@samsung.com)
+
+* Fri Feb 09 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.42.0
+- xPaaS v1.4.8 for v3.7 (sdodson@redhat.com)
+- xPaaS v1.4.8-1 for v3.8 (sdodson@redhat.com)
+- xPaaS v1.4.8-1 for v3.9 (sdodson@redhat.com)
+- Bump xpaas version (sdodson@redhat.com)
+- Bug 1524805- CFME example now works disconnected (fabian@fabianism.us)
+- Only try to yaml.load a file if it ends in .yml or .yaml in logging facts
+  (ewolinet@redhat.com)
+- Set default image tag to openshift_image_tag for services
+  (vrutkovs@redhat.com)
+- Redeploy router certificates during upgrade only when secure.
+  (kwoodson@redhat.com)
+- GlusterFS: Fix block StorageClass heketi route (jarrpa@redhat.com)
+- changed oc to {{ openshift_client_binary }} (datarace101@gmail.com)
+- Use v3.9 web-console image for now (sdodson@redhat.com)
+- Adding ability to provide additional mounts to crio system container.
+  (kwoodson@redhat.com)
+- Remove spaces introduced at the start of the line
+  (geoff.newson@googlemail.com)
+- Changing the check for the number of etcd nodes (geoff.newson@gmail.com)
+- aws ami: make it so the tags from the orinal AMI are used with the newly
+  created AMI (mwoodson@redhat.com)
+- Setup docker excluder if requested before container_runtime is installed
+  (vrutkovs@redhat.com)
+- openshift_node: Remove master from aws node building (smilner@redhat.com)
+- Use wait_for_connection to validate ssh transport is alive
+  (sdodson@redhat.com)
+- Bug 1541625- properly cast provided ip address to unicode
+  (fabian@fabianism.us)
+- Add base package installation to upgrade playbooks (rteague@redhat.com)
+- 3.9 upgrade: fix typos in restart masters procedure (vrutkovs@redhat.com)
+- quick installer: disable broken test_get_hosts_to_run_on6 test
+  (vrutkovs@redhat.com)
+- Quick installer: run prerequistes first and update path to main playbook
+  (vrutkovs@redhat.com)
+- Fix uninstall using openshift_prometheus_state=absent (zgalor@redhat.com)
+- Detect config changes in console liveness probe (spadgett@redhat.com)
+- Fix master and node system container variables (mgugino@redhat.com)
+- Correct the list of certificates checked in openshift_master_certificates
+  s.t. masters do not incorrectly report that master certs are missing.
+  (abutcher@redhat.com)
+- tag fix without ose- (rcook@redhat.com)
+- lib_utils_oo_collect: Allow filtering on dot separated keys.
+  (abutcher@redhat.com)
+- Determine which etcd host is the etcd_ca_host rather than assume it is the
+  first host in the etcd host group. (abutcher@redhat.com)
+- Attempt to back up generated certificates on every etcd host.
+  (abutcher@redhat.com)
+- Remove pre upgrade verification step re: etcd ca host. (abutcher@redhat.com)
+- Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
+
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.41.0
+- Allow OVS 2.7 in OCP 3.10 (sdodson@redhat.com)
+- GlusterFS: Minor documentation update (jarrpa@redhat.com)
+- Make sure to include upgrade_pre when upgrading master nodes
+  (sdodson@redhat.com)
+
+* Wed Feb 07 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.40.0
+- health checks: tolerate ovs 2.9 (lmeyer@redhat.com)
+- Fix docker rpm upgrade install task wording (mgugino@redhat.com)
+- Initial support for 3.10 (sdodson@redhat.com)
+- add deprovisioning for ELB (and IAM certs) (jdiaz@redhat.com)
+- [6632] fix indentation of terminationGracePeriodSeconds var
+  (jsanda@redhat.com)
+
+* Tue Feb 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.39.0
+- Update code to not fail when rc != 0 (kwoodson@redhat.com)
+- Upgrades: pass openshift_manage_node_is_master to master nodes during upgrade
+  (vrutkovs@redhat.com)
+- Updates to configure monitoring container. (kwoodson@redhat.com)
+- Move cert SAN update logic to openshift-etcd (rteague@redhat.com)
+- Swapping container order for es pod (ewolinet@redhat.com)
+- Adding support for ES 5.x tech preview opt in (ewolinet@redhat.com)
+- bug 1540799: openshift_prometheus: update alertmanager config file flag
+  (pgier@redhat.com)
+- parameterize various master scale group bits (jdiaz@redhat.com)
+- Use rollout instead of deploy (deprecated) (rteague@redhat.com)
+- cri-o: export variables defined in crio-network (gscrivan@redhat.com)
+
+* Mon Feb 05 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.38.0
+- Moving upgrade sg playbook to 3.9 (kwoodson@redhat.com)
+- remove openshift_upgrade_{pre,post}_storage_migration_enabled from
+  failed_when (nakayamakenjiro@gmail.com)
+- Fix version handling in 3.8/3.9 control plane upgrades (rteague@redhat.com)
+- add S3 bucket cleanup (jdiaz@redhat.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- Parameterize user and disable_root options in cloud config
+  (nelluri@redhat.com)
+- Fix softlinks broken by d3fefc32a727fe3c13159c4e9fe4399f35b487a8
+  (Klaas-@users.noreply.github.com)
+
+* Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.37.0
+- Don't use 'omit' for package module (vrutkovs@redhat.com)
+- Adding requirements for logging and metrics (ewolinet@redhat.com)
+- Disable master controllers before upgrade and re-enable those when restart
+  mode is system (vrutkovs@redhat.com)
+- upgrade: run upgrade_control_plane and upgrade_nodes playbooks during full
+  upgrade (vrutkovs@redhat.com)
+
+* Fri Feb 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.36.0
+- Add missing tasks file (sdodson@redhat.com)
+- Upgrade to migrate to using push to DNS for registries. (kwoodson@redhat.com)
+- Adding defaults for the gcp variables to fix an undefined ansible exception.
+  (kwoodson@redhat.com)
+- Fix vsphere sanitization (sdodson@redhat.com)
+- Set a default for required vsphere variable (sdodson@redhat.com)
+- Add python2-crypto package (ccoleman@redhat.com)
+- hosts.example: clarify usage of openshift_master_cluster_public_hostname
+  (vrutkovs@redhat.com)
+- Conditionally create pvcs for metrics depending on whether or not it already
+  exists (ewolinet@redhat.com)
+- Update hosts examples with a note about scheduling on masters
+  (vrutkovs@redhat.com)
+- Fixing file write issue. (kwoodson@redhat.com)
+- Only perform console configmap ops when >= 3.9 (sdodson@redhat.com)
+- Remove playbooks/adhoc/openshift_hosted_logging_efk.yaml (sdodson@redhat.com)
+- upgrades: use openshift_version as a regexp when checking
+  openshift.common.version (vrutkovs@redhat.com)
+- Don't update master-config.yaml with logging/metrics urls >= 3.9
+  (sdodson@redhat.com)
+- Make master schedulable (vrutkovs@redhat.com)
+- Re-add openshift_aws_elb_cert_arn. (abutcher@redhat.com)
+- Ignore openshift_pkg_version during 3.8 upgrade (rteague@redhat.com)
+- bug 1537857. Fix retrieving prometheus metrics (jcantril@redhat.com)
+- Remove master_ha bool checks (mgugino@redhat.com)
+- Don't restart docker when re-deploying node certificates (sdodson@redhat.com)
+- vsphere storage default add (davis.phillips@gmail.com)
+
 * Wed Jan 31 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.35.0
 - add glusterblock support for ansible (m.judeikis@gmail.com)
 - Add a bare minimum localhost hosts file (sdodson@redhat.com)
@@ -230,7 +540,7 @@ Atomic OpenShift Utilities includes
   (rteague@redhat.com)
 
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.33.0
-- 
+-
 
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.32.0
 - Revert "Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to
@@ -445,10 +755,10 @@ Atomic OpenShift Utilities includes
 - Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.19.0
-- 
+-
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.18.0
-- 
+-
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.17.0
 - Update latest image streams and templates (sdodson@redhat.com)
@@ -548,7 +858,7 @@ Atomic OpenShift Utilities includes
 - Add in-tree CI scripts (mgugino@redhat.com)
 
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.15.0
-- 
+-
 
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.14.0
 - Cast openshift_docker_use_system_container to bool (mgugino@redhat.com)
@@ -567,7 +877,7 @@ Atomic OpenShift Utilities includes
   (mgugino@redhat.com)
 
 * Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.12.0
-- 
+-
 
 * Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.11.0
 - aws: Fix misnamed variable in provisioning_vars.yml.example

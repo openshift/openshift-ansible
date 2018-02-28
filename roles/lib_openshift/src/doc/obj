@@ -81,6 +81,12 @@ options:
     required: false
     default: None
     aliases: []
+  field_selector:
+    description:
+    - Field selector that gets added to the query.
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []

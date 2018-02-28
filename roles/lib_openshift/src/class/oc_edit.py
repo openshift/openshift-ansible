@@ -22,7 +22,7 @@ class Edit(OpenShiftCLI):
         '''return a secret by name '''
         return self._get(self.kind, self.name)
 
-    def update(self, file_name, content, force=False, content_type='yaml'):
+    def update(self, file_name, content, edits, force=False, content_type='yaml'):
         '''run update '''
         if file_name:
             if content_type == 'yaml':
@@ -30,13 +30,22 @@ class Edit(OpenShiftCLI):
             elif content_type == 'json':
                 data = json.loads(open(file_name).read())
 
-            changes = []
             yed = Yedit(filename=file_name, content=data, separator=self.separator)
-            for key, value in content.items():
-                changes.append(yed.put(key, value))
+            # Keep this for compatibility
+            if content is not None:
+                changes = []
 
-            if any([not change[0] for change in changes]):
-                return {'returncode': 0, 'updated': False}
+                for key, value in content.items():
+                    changes.append(yed.put(key, value))
+
+                if any([not change[0] for change in changes]):
+                    return {'returncode': 0, 'updated': False}
+
+            elif edits is not None:
+                results = Yedit.process_edits(edits, yed)
+
+                if not results['changed']:
+                    return results
 
             yed.write()
 
@@ -44,7 +53,7 @@ class Edit(OpenShiftCLI):
 
             return self._replace(file_name, force=force)
 
-        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+        return self._replace_content(self.kind, self.name, content, edits, force=force, sep=self.separator)
 
     @staticmethod
     def run_ansible(params, check_mode):
@@ -73,6 +82,7 @@ class Edit(OpenShiftCLI):
 
         api_rval = ocedit.update(params['file_name'],
                                  params['content'],
+                                 params['edits'],
                                  params['force'],
                                  params['file_format'])
 

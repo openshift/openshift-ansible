@@ -122,7 +122,7 @@ spec:
             exec:
               command:
               - "/opt/apache-cassandra/bin/cassandra-poststart.sh"
-        terminationGracePeriodSeconds: 1800
+      terminationGracePeriodSeconds: 1800
       volumes:
       - name: cassandra-data
 {%      if openshift_metrics_cassandra_storage_type == 'emptydir' %}

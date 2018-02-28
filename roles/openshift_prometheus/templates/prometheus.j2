@@ -219,7 +219,7 @@ spec:
 
       - name: alertmanager
         args:
-        - -config.file=/etc/alertmanager/alertmanager.yml
+        - --config.file=/etc/alertmanager/alertmanager.yml
         image: "{{ l_openshift_prometheus_alertmanager_image_prefix }}prometheus-alertmanager:{{ l_openshift_prometheus_alertmanager_image_version }}"
         imagePullPolicy: IfNotPresent
         resources:

@@ -275,6 +275,21 @@ def default_facts(hosts, verbose=False):
     return load_system_facts(inventory_file, os_facts_path, facts_env, verbose)
 
 
+def run_prerequisites(inventory_file, hosts, hosts_to_run_on, verbose=False):
+    global CFG
+    prerequisites_playbook_path = os.path.join(CFG.ansible_playbook_directory,
+                                               'playbooks/prerequisites.yml')
+    facts_env = os.environ.copy()
+    if 'ansible_log_path' in CFG.settings:
+        facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']
+
+    # override the ansible config for prerequisites playbook run
+    if 'ansible_quiet_config' in CFG.settings:
+        facts_env['ANSIBLE_CONFIG'] = CFG.settings['ansible_quiet_config']
+
+    return run_ansible(prerequisites_playbook_path, inventory_file, facts_env, verbose)
+
+
 def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
     global CFG
     if len(hosts_to_run_on) != len(hosts):
@@ -282,7 +297,7 @@ def run_main_playbook(inventory_file, hosts, hosts_to_run_on, verbose=False):
                                           'playbooks/openshift-node/scaleup.yml')
     else:
         main_playbook_path = os.path.join(CFG.ansible_playbook_directory,
-                                          'playbooks/byo/openshift-cluster/config.yml')
+                                          'playbooks/deploy_cluster.yml')
     facts_env = os.environ.copy()
     if 'ansible_log_path' in CFG.settings:
         facts_env['ANSIBLE_LOG_PATH'] = CFG.settings['ansible_log_path']

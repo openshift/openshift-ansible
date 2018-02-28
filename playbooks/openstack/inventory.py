@@ -89,7 +89,7 @@ def build_inventory():
 
     for server in cluster_hosts:
         if 'group' in server.metadata:
-            group = server.metadata.group
+            group = server.metadata.get('group')
             if group not in inventory:
                 inventory[group] = {'hosts': []}
             inventory[group]['hosts'].append(server.name)

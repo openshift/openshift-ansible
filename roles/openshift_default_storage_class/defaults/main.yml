@@ -1,4 +1,7 @@
 ---
+# Must not be blank if you're using vsphere
+openshift_cloudprovider_vsphere_datastore: ''
+
 openshift_storageclass_defaults:
   aws:
     provisioner: aws-ebs
@@ -23,7 +26,7 @@ openshift_storageclass_defaults:
     provisioner: vsphere-volume
     name: standard
     parameters:
-      datastore: "{{ openshift_cloudprovider_vsphere_datacenter }}"
+      datastore: "{{ openshift_cloudprovider_vsphere_datastore }}"
 
 openshift_storageclass_default: "true"
 openshift_storageclass_name: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['name'] }}"

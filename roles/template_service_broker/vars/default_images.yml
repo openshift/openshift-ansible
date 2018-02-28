@@ -1,4 +1,0 @@
----
-__template_service_broker_prefix: "docker.io/openshift/origin-"
-__template_service_broker_version: "latest"
-__template_service_broker_image_name: "template-service-broker"

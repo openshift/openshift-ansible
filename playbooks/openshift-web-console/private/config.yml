@@ -13,10 +13,13 @@
 
 - name: Web Console
   hosts: oo_first_master
-  roles:
-  - openshift_web_console
   vars:
     first_master: "{{ groups.oo_first_master[0] }}"
+  tasks:
+  - debug: msg="{{ openshift_version | version_compare('3.9', '>=') }}"
+  - import_role:
+      name: openshift_web_console
+    when: openshift_version | version_compare('3.9', '>=')
 
 - name: Web Console Install Checkpoint End
   hosts: all

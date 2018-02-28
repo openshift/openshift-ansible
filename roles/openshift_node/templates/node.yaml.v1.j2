@@ -18,9 +18,9 @@ kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_util
   container-runtime:
   - remote
   container-runtime-endpoint:
-  - /var/run/crio/crio.sock
+  - {{ l_crio_var_sock }}
   image-service-endpoint:
-  - /var/run/crio/crio.sock
+  - {{ l_crio_var_sock }}
   node-labels:
   - router=true
   - registry=true

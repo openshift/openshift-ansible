@@ -1,4 +1,9 @@
 ---
+- name: create the namespace
+  oc_project:
+    state: present
+    name: "{{ openshift_daemonset_config_namespace }}"
+
 - name: add a sa
   oc_serviceaccount:
     name: "{{ openshift_daemonset_config_sa_name }}"
@@ -19,16 +24,19 @@
   with_items:
   - name: daemonset.yml
 
+- name: create files from contents
+  copy:
+    content: "{{ item.contents }}"
+    dest: "{{ item.path }}"
+  with_items: "{{ openshift_daemonset_config_configmap_contents_to_files }}"
+  no_log: true
+
 - name: copy files to disk
   copy:
     src: "{{ item.key }}"
     dest: "{{ item.value }}"
   with_dict: "{{ openshift_daemonset_config_configmap_files }}"
-
-- name: create the namespace
-  oc_project:
-    state: present
-    name: "{{ openshift_daemonset_config_namespace }}"
+  no_log: true
 
 - name: lay down secrets
   oc_secret:
@@ -39,6 +47,7 @@
     contents: "{{ openshift_daemonset_config_secrets }}"
   when:
   - openshift_daemonset_config_secrets != {}
+  register: secout
 
 - name: create the configmap
   oc_configmap:
@@ -46,7 +55,8 @@
     name: "{{ openshift_daemonset_config_configmap_name }}"
     namespace: "{{ openshift_daemonset_config_namespace }}"
     from_literal: "{{ openshift_daemonset_config_configmap_literals }}"
-    from_file: "{{ openshift_daemonset_config_configmap_files }}"
+    from_file: "{{ openshift_daemonset_config_configmap_contents_to_files | odc_join_files_from_dict(openshift_daemonset_config_configmap_files) }}"
+  register: cmout
 
 - name: deploy daemonset
   oc_obj:
@@ -56,3 +66,23 @@
     kind: daemonset
     files:
     - /tmp/daemonset.yml
+    force: "{{ True if cmout.changed or secout.changed else False | bool }}"
+
+- name: clean up files generated from contents
+  file:
+    state: absent
+    path: "{{ item.path }}"
+  with_items: "{{ openshift_daemonset_config_configmap_contents_to_files }}"
+  no_log: true
+
+- name: clean up copied files
+  file:
+    state: absent
+    path: "{{ item.value }}"
+  with_dict: "{{ openshift_daemonset_config_configmap_files }}"
+  no_log: true
+
+- name: clean up daemonset template
+  file:
+    state: absent
+    path: /tmp/daemonset.yml

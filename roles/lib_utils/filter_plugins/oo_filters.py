@@ -4,6 +4,7 @@
 """
 Custom filters for use in openshift-ansible
 """
+import ast
 import json
 import os
 import pdb
@@ -23,7 +24,7 @@ from ansible import errors
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
 # pylint: disable=import-error,no-name-in-module
-from ansible.module_utils.six import string_types, u
+from ansible.module_utils.six import iteritems, string_types, u
 # pylint: disable=import-error,no-name-in-module
 from ansible.module_utils.six.moves.urllib.parse import urlparse
 
@@ -126,7 +127,7 @@ def lib_utils_oo_collect(data_list, attribute=None, filters=None):
             raise errors.AnsibleFilterError(
                 "lib_utils_oo_collect expects filter to be a dict")
         retval.extend([get_attr(d, attribute) for d in data if (
-            all([d.get(key, None) == filters[key] for key in filters]))])
+            all([get_attr(d, key) == filters[key] for key in filters]))])
     else:
         retval.extend([get_attr(d, attribute) for d in data])
 
@@ -248,6 +249,15 @@ def lib_utils_oo_dict_to_keqv_list(data):
         Return data:
         ['a=1', 'b=2']
     """
+    if not isinstance(data, dict):
+        try:
+            # This will attempt to convert something that looks like a string
+            # representation of a dictionary (including json) into a dictionary.
+            data = ast.literal_eval(data)
+        except ValueError:
+            msg = "|failed expects first param is a dict. Got {}. Type: {}"
+            msg = msg.format(str(data), str(type(data)))
+            raise errors.AnsibleFilterError(msg)
     return ['='.join(str(e) for e in x) for x in data.items()]
 
 
@@ -660,6 +670,16 @@ def map_from_pairs(source, delim="="):
     return dict(item.split(delim) for item in source.split(","))
 
 
+def map_to_pairs(source, delim="="):
+    ''' Returns a comma separated str given the source as a dict '''
+
+    # Some default selectors are empty strings.
+    if source == {} or source == '':
+        return str()
+
+    return ','.join(["{}{}{}".format(key, delim, value) for key, value in iteritems(source)])
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -691,5 +711,6 @@ class FilterModule(object):
             "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
             "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
             "lib_utils_oo_l_of_d_to_csv": lib_utils_oo_l_of_d_to_csv,
-            "map_from_pairs": map_from_pairs
+            "map_from_pairs": map_from_pairs,
+            "map_to_pairs": map_to_pairs,
         }

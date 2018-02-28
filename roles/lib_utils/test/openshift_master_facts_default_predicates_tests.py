@@ -71,7 +71,23 @@ DEFAULT_PREDICATES_3_7 = [
     {'name': 'NoVolumeNodeConflict'},
 ]
 
-DEFAULT_PREDICATES_3_9 = DEFAULT_PREDICATES_3_8 = DEFAULT_PREDICATES_3_7
+DEFAULT_PREDICATES_3_8 = DEFAULT_PREDICATES_3_7
+
+DEFAULT_PREDICATES_3_9 = [
+    {'name': 'NoVolumeZoneConflict'},
+    {'name': 'MaxEBSVolumeCount'},
+    {'name': 'MaxGCEPDVolumeCount'},
+    {'name': 'MaxAzureDiskVolumeCount'},
+    {'name': 'MatchInterPodAffinity'},
+    {'name': 'NoDiskConflict'},
+    {'name': 'GeneralPredicates'},
+    {'name': 'PodToleratesNodeTaints'},
+    {'name': 'CheckNodeMemoryPressure'},
+    {'name': 'CheckNodeDiskPressure'},
+    {'name': 'CheckVolumeBinding'},
+]
+
+DEFAULT_PREDICATES_3_10 = DEFAULT_PREDICATES_3_9
 
 REGION_PREDICATE = {
     'name': 'Region',
@@ -101,6 +117,8 @@ TEST_VARS = [
     ('3.8', 'openshift-enterprise', DEFAULT_PREDICATES_3_8),
     ('3.9', 'origin', DEFAULT_PREDICATES_3_9),
     ('3.9', 'openshift-enterprise', DEFAULT_PREDICATES_3_9),
+    ('3.10', 'origin', DEFAULT_PREDICATES_3_10),
+    ('3.10', 'openshift-enterprise', DEFAULT_PREDICATES_3_10),
 ]
 
 

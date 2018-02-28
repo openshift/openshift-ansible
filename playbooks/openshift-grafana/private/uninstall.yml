@@ -1,0 +1,10 @@
+---
+- name: Uninstall Grafana
+  hosts: masters[0]
+  vars:
+    openshift_grafana_state: absent
+  tasks:
+  - name: Run the Grafana Uninstall Role Tasks
+    include_role:
+      name: openshift_grafana
+      tasks_from: uninstall_grafana

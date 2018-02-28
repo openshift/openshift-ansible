@@ -54,6 +54,12 @@ openshift_node_kubelet_args_dict:
     cloud-config:
     - "{{ openshift_config_base ~ '/cloudprovider/azure.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
+  vsphere:
+    cloud-provider:
+    - vsphere
+    cloud-config:
+    - "{{ openshift_config_base ~ '/cloudprovider/vsphere.conf' }}"
+    node-labels: "{{ l_node_kubelet_node_labels }}"
   undefined:
     node-labels: "{{ l_node_kubelet_node_labels }}"
 
@@ -189,9 +195,30 @@ oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
 openshift_use_crio: False
+l_crio_use_new_var_sock: "{{ openshift_version | version_compare('3.9', '>=') }}"
+l_crio_var_sock: "{{ l_crio_use_new_var_sock | ternary('/var/run/crio/crio.sock', '/var/run/crio.sock') }}"
 openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False) | bool) or (openshift_use_crio_only | default(False) | bool) }}"
 
 openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+
+# These defaults assume forcing journald persistence, fsync to disk once
+# a second, rate-limiting to 10,000 logs a second, no forwarding to
+# syslog or wall, using 8GB of disk space maximum, using 10MB journal
+# files, keeping only a days worth of logs per journal file, and
+# retaining journal files no longer than a month.
+journald_vars_to_replace:
+- { var: Storage, val: persistent }
+- { var: Compress, val: yes }
+- { var: SyncIntervalSec, val: 1s }
+- { var: RateLimitInterval, val: 1s }
+- { var: RateLimitBurst, val: 10000 }
+- { var: SystemMaxUse, val: 8G }
+- { var: SystemKeepFree, val: 20% }
+- { var: SystemMaxFileSize, val: 10M }
+- { var: MaxRetentionSec, val: 1month }
+- { var: MaxFileSec, val: 1day }
+- { var: ForwardToSyslog, val: no }
+- { var: ForwardToWall, val: no }
 
 # NOTE
 # r_openshift_node_*_default may be defined external to this role.

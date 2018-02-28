@@ -1,1 +1,2 @@
 ---
+- import_tasks: set_etcd_ca_host.yml

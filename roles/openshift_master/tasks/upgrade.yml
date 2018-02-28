@@ -8,8 +8,6 @@
 - include_tasks: "upgrade/{{ master_config_hook }}"
   when: master_config_hook is defined
 
-- include_tasks: journald.yml
-
 - include_tasks: systemd_units.yml
 
 - name: Check for ca-bundle.crt

@@ -30,7 +30,7 @@
   # masters, or absent if such is the case.
   - name: Detect if this host is a new master in a scale up
     set_fact:
-      g_openshift_master_is_scaleup: "{{ openshift.common.hostname in ( groups['new_masters'] | default([]) ) }}"
+      g_openshift_master_is_scaleup: "{{ inventory_hostname in ( groups['new_masters'] | default([]) ) }}"
 
   - name: Scaleup Detection
     debug:
@@ -78,7 +78,6 @@
         console_url: "{{ openshift_master_console_url | default(None) }}"
         console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
-        ha: "{{ openshift_master_ha | default(groups.oo_masters | length > 1) }}"
         master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
 
 - name: Inspect state of first master config settings
@@ -166,7 +165,6 @@
   hosts: oo_masters_to_config
   any_errors_fatal: true
   vars:
-    openshift_master_ha: "{{ openshift.master.ha }}"
     openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
@@ -182,10 +180,12 @@
   - role: openshift_master_facts
   - role: openshift_clock
   - role: openshift_cloud_provider
+    when: openshift_cloudprovider_kind is defined
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
   - role: nickhammond.logrotate
   - role: openshift_master
+    openshift_master_ha: "{{ (groups.oo_masters | length > 1) | bool }}"
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
     r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
     r_openshift_master_etcd3_storage: "{{ hostvars[groups.oo_first_master.0].l_etcd3_enabled }}"
@@ -208,11 +208,9 @@
       tasks_from: master
     when: openshift_use_kuryr | default(false) | bool
 
-  - name: Setup the node group config maps
-    import_role:
-      name: openshift_node_group
+  - name: setup bootstrap settings
+    include_tasks: tasks/enable_bootstrap.yml
     when: openshift_master_bootstrap_enabled | default(false) | bool
-    run_once: True
 
   post_tasks:
   - name: Create group for deployment type

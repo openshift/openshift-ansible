@@ -17,6 +17,7 @@
         valid version for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_pkg_version is defined
+    - openshift_pkg_version != ""
     - openshift_pkg_version.split('-',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - fail:
@@ -25,6 +26,7 @@
         valid version for a {{ openshift_upgrade_target }} upgrade
     when:
     - openshift_image_tag is defined
+    - openshift_image_tag != ""
     - openshift_image_tag.split('v',1).1 is version_compare(openshift_upgrade_target ,'<')
 
   - set_fact:
@@ -53,7 +55,7 @@
     register: _storage_backend
 
   - fail:
-      msg: "Storage backend in /etc/origin/master/master-config.yaml must be set to 'etcd3' before the upgrade can continue"
+      msg: "The cluster must be migrated to etcd v3 prior to upgrading to 3.7. Please see https://docs.openshift.com/container-platform/3.7/install_config/upgrading/migrating_etcd.html"
     when:
     # assuming the master-config.yml is properly configured, i.e. the value is a list
     - _storage_backend.result | default([], true) | length == 0 or _storage_backend.result[0] != "etcd3"
@@ -92,25 +94,3 @@
         state: started
         enabled: yes
       with_items: "{{ master_services }}"
-
-# Until openshift-ansible is determining which host is the CA host we
-# must (unfortunately) ensure that the first host in the etcd group is
-# the etcd CA host.
-# https://bugzilla.redhat.com/show_bug.cgi?id=1469358
-- name: Verify we can proceed on first etcd
-  hosts: oo_first_etcd
-  gather_facts: no
-  tasks:
-  - name: Ensure CA exists on first etcd
-    stat:
-      path: /etc/etcd/generated_certs
-    register: __etcd_ca_stat
-
-  - fail:
-      msg: >
-        In order to correct an etcd certificate signing problem
-        upgrading may require re-generating etcd certificates. Please
-        ensure that the /etc/etcd/generated_certs directory exists on
-        the first host defined in your [etcd] group.
-    when:
-    - not __etcd_ca_stat.stat.exists | bool

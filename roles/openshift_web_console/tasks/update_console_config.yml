@@ -5,9 +5,6 @@
 # `value` properties in the same format as `yedit` module `edits`. Only
 # properties passed are updated. The separator for nested properties is `#`.
 #
-# Note that this triggers a redeployment on the console and a brief downtime
-# since it uses a `Recreate` strategy.
-#
 # Example usage:
 #
 # - include_role:
@@ -55,13 +52,9 @@
       state: present
       from_file:
         webconsole-config.yaml: "{{ mktemp_console.stdout }}/webconsole-config.yaml"
-    register: update_console_config_map
 
   - name: Remove temp directory
     file:
       state: absent
       name: "{{ mktemp_console.stdout }}"
     changed_when: False
-
-  - include_tasks: rollout_console.yml
-    when: update_console_config_map.changed | bool
