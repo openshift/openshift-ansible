@@ -12,8 +12,6 @@
     openshift_logging_curator_image_prefix: "{{ openshift_logging_curator_image_prefix | default(__openshift_logging_curator_image_prefix) }}"
     openshift_logging_curator_image_version: "{{ openshift_logging_curator_image_version | default(__openshift_logging_curator_image_version) }}"
 
-- include_tasks: determine_version.yaml
-
 - name: Ensure that Logging Curator has nodes to run on
   import_role:
     name: openshift_master
