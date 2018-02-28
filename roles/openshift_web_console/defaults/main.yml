@@ -8,11 +8,11 @@ __console_config_file: "console-config.yaml"
 openshift_web_console_image_dict:
   origin:
     prefix: "docker.io/openshift/origin-"
-    version: "{{ openshift_image_tag }}"
+    version: "{{ openshift_web_console_version | default(openshift_image_tag) }}"
     image_name: "web-console"
   openshift-enterprise:
     prefix: "registry.access.redhat.com/openshift3/ose-"
-    version: "{{ openshift_image_tag }}"
+    version: "{{ openshift_web_console_version | default(openshift_image_tag) }}"
     image_name: "web-console"
 
 openshift_web_console_prefix: "{{ openshift_web_console_image_dict[openshift_deployment_type]['prefix'] }}"
