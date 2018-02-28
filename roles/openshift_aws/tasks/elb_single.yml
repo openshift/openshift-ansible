@@ -15,6 +15,7 @@
     subnets:
     - "{{ subnetout.subnets[0].id }}"
     health_check: "{{ item.value.health_check }}"
+    instance_ids: "{{ item.value.instance_ids | default(omit) }}"
     listeners: "{{ item.value.listeners }}"
     scheme: "{{ (item.key == 'internal') | ternary('internal','internet-facing') }}"
     tags: "{{ item.value.tags }}"
