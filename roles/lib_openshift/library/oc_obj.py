@@ -1612,6 +1612,8 @@ class OCObject(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
+            if api_rval['returncode'] != 0:
+                return {'changed': False, 'failed': True, 'msg': api_rval}
             return {'changed': False, 'results': api_rval, 'state': state}
 
         ########
