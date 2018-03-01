@@ -1,13 +1,13 @@
 ---
 - name: Verify that the web console is running
-  command: >
-    curl -k https://webconsole.openshift-web-console.svc/healthz
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
+  uri:
+    url: https://webconsole.openshift-web-console.svc/healthz
+    validate_certs: no
+    return_content: yes
+  environment:
+    no_proxy: '*'
   register: endpoint_health
-  until: endpoint_health.stdout == 'ok'
+  until: "'ok' in endpoint_health.content"
   retries: 60
   delay: 10
   changed_when: false
