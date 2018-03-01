@@ -123,11 +123,15 @@
     openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type | default(default_elasticsearch_storage_type) }}"
     openshift_logging_elasticsearch_pvc_pv_selector: "{{ openshift_logging_es_pv_selector }}"
     openshift_logging_elasticsearch_pvc_storage_class_name: "{{ openshift_logging_es_pvc_storage_class_name | default() }}"
-    __logging_scale_up: True
 
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   loop_control:
     loop_var: outer_item
+
+- set_fact:
+    __logging_scale_up: True
+  when:
+  - openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
 - set_fact: es_ops_indices={{ es_ops_indices | default([]) + [item | int - 1] }}
   with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
@@ -214,13 +218,18 @@
     openshift_logging_es_hostname: "{{ openshift_logging_es_ops_hostname }}"
     openshift_logging_es_edge_term_policy: "{{ openshift_logging_es_ops_edge_term_policy | default('') }}"
     openshift_logging_es_allow_external: "{{ openshift_logging_es_ops_allow_external }}"
-    __logging_ops_scale_up: True
 
   with_sequence: count={{ openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
   loop_control:
     loop_var: outer_item
   when:
   - openshift_logging_use_ops | bool
+
+- set_fact:
+    __logging_ops_scale_up: True
+  when:
+  - openshift_logging_use_ops | bool
+  - openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
 
 ## Kibana
