@@ -1,6 +1,4 @@
 ---
-__latest_es_version: "3_10"
-__allowed_es_versions: ["3_5", "3_6", "3_7", "3_8", "3_9", "3_10"]
 __allowed_es_types: ["data-master", "data-client", "master", "client"]
 __es_log_appenders: ['file', 'console']
 __kibana_index_modes: ["unique", "shared_ops"]
