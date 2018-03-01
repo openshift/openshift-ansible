@@ -44,7 +44,7 @@ spec:
         - "--wrapper.username_file=/hawkular-account/hawkular-metrics.username"
         - "--wrapper.password_file=/hawkular-account/hawkular-metrics.password"
         - "--wrapper.endpoint_check=https://hawkular-metrics:443/hawkular/metrics/status"
-        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-metrics-certs/tls.crt&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)"
+        - "--sink=hawkular:https://hawkular-metrics:443?tenant=_system&labelToTenant=pod_namespace&labelNodeId={{openshift_metrics_node_id}}&caCert=/hawkular-metrics-certs/tls.crt&user=%username%&pass=%password%&filter=label(container_name:^system.slice.*|^user.slice)&concurrencyLimit={{ openshift_metrics_heapster_concurrency_limit }}"
 {% endif %}
         env:
         - name: STARTUP_TIMEOUT
