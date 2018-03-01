@@ -50,14 +50,14 @@
 
 # Check that the TSB is running
 - name: Verify that TSB is running
-  command: >
-    curl -k https://apiserver.openshift-template-service-broker.svc/healthz
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
+  uri:
+    url: https://apiserver.openshift-template-service-broker.svc/healthz
+    validate_certs: no
+    return_content: yes
+  environment:
+    no_proxy: '*'
   register: api_health
-  until: api_health.stdout == 'ok'
+  until: "'ok' in api_health.content"
   retries: 60
   delay: 10
   changed_when: false
