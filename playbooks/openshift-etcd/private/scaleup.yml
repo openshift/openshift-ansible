@@ -15,7 +15,8 @@
   pre_tasks:
   - name: Add new etcd members to cluster
     command: >
-      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+      {{ r_etcd_common_etcdctl_command }}
+                       --cert-file {{ etcd_peer_cert_file }}
                        --key-file {{ etcd_peer_key_file }}
                        --ca-file {{ etcd_peer_ca_file }}
                        -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_ip }}:{{ etcd_client_port }}
@@ -49,7 +50,8 @@
   post_tasks:
   - name: Verify cluster is stable
     command: >
-      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+      {{ r_etcd_common_etcdctl_command }}
+                       --cert-file {{ etcd_peer_cert_file }}
                        --key-file {{ etcd_peer_key_file }}
                        --ca-file {{ etcd_peer_ca_file }}
                        -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}

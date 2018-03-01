@@ -324,6 +324,13 @@ debug_level=2
 #
 # GCE
 #openshift_cloudprovider_kind=gce
+# Note: When using GCE, openshift_gcp_project and openshift_gcp_prefix must be
+# defined.
+# openshift_gcp_project is the project-id
+#openshift_gcp_project=
+# openshift_gcp_prefix is a unique string to identify each openshift cluster.
+#openshift_gcp_prefix=
+#openshift_gcp_multizone=False
 #
 # vSphere
 #openshift_cloudprovider_kind=vsphere

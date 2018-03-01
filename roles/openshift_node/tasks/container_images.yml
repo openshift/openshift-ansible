@@ -9,6 +9,7 @@
   when:
   - openshift_node_use_openshift_sdn | bool
   - l_is_openvswitch_system_container | bool
+  - not openshift_use_external_openvswitch | bool
 
 - name: Pre-pull openvswitch image
   command: >
@@ -18,3 +19,4 @@
   when:
   - openshift_node_use_openshift_sdn | bool
   - not l_is_openvswitch_system_container | bool
+  - not openshift_use_external_openvswitch | bool
