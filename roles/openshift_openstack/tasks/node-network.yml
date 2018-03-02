@@ -15,5 +15,3 @@
     name: NetworkManager
     state: restarted
     enabled: yes
-
-# TODO(shadower): add the flannel interface tasks from post-provision-openstack.yml
