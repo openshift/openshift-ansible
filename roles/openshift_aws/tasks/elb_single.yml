@@ -10,7 +10,7 @@
     state: present
     cross_az_load_balancing: "{{ item.value.cross_az_load_balancing }}"
     security_group_names: "{{ l_elb_security_groups[l_elb_dict_item.key] }}"
-    idle_timeout: "{{ item.value.idle_timout }}"
+    idle_timeout: "{{ item.value.idle_timeout }}"
     region: "{{ openshift_aws_region }}"
     subnets:
     - "{{ subnetout.subnets[0].id }}"
