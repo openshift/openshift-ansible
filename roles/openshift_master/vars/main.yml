@@ -1,8 +1,8 @@
 ---
 # openshift_master_facts_default_predicates is a custom lookup plugin in
 # role lib_utils
-osm_prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
-osm_prev_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, regions_enabled=False) }}"
+osm_prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min }}"
+osm_prev_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, regions_enabled=False) }}"
 osm_default_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', regions_enabled=False) }}"
 # osm_older_predicates are the set of predicates that have previously been
 # hard-coded into openshift_facts
@@ -58,8 +58,8 @@ osm_older_predicates_no_region:
   - name: PodFitsPorts
   - name: NoDiskConflict
 
-osm_prev_priorities: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
-osm_prev_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, zones_enabled=False) }}"
+osm_prev_priorities: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min) }}"
+osm_prev_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, zones_enabled=False) }}"
 osm_default_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', zones_enabled=False) }}"
 # osm_older_priorities are the set of priorities that have previously been
 # hard-coded into openshift_facts
