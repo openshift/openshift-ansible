@@ -25,3 +25,5 @@
     l_node_labels: "{{ openshift_node_labels | default({}) }}"
     l_master_labels: "{{ openshift_manage_node_is_master | ternary(openshift_master_node_labels, {}) }}"
     l_all_labels: "{{ l_node_labels | combine(l_master_labels) }}"
+
+- import_tasks: set_default_node_role.yml
