@@ -151,12 +151,21 @@ def build_inventory():
 
     stout = _get_stack_outputs(cloud)
     if stout is not None:
-        inventory['localhost']['openshift_openstack_api_lb_provider'] = stout['api_lb_provider']
-        inventory['localhost']['openshift_openstack_api_lb_port_id'] = stout['api_lb_vip_port_id']
-        inventory['localhost']['openshift_openstack_api_lb_sg_id'] = stout['api_lb_sg_id']
-        kuryr_vars = _get_kuryr_vars(cloud, stout)
-        if kuryr_vars:
-            inventory['OSEv3']['vars'] = kuryr_vars
+        try:
+            inventory['localhost'].update({
+                'openshift_openstack_api_lb_provider':
+                stout['api_lb_provider'],
+                'openshift_openstack_api_lb_port_id':
+                stout['api_lb_vip_port_id'],
+                'openshift_openstack_api_lb_sg_id':
+                stout['api_lb_sg_id']})
+        except KeyError:
+            pass  # Not an API load balanced deployment
+
+        try:
+            inventory['OSEv3']['vars'] = _get_kuryr_vars(cloud, stout)
+        except KeyError:
+            pass  # Not a kuryr deployment
     return inventory
 
 
