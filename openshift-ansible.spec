@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.1
+Version:        3.9.2
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,33 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.2-1
+- Master scheduler upgrade cleanup (mgugino@redhat.com)
+- docker_image_availability: encode error message (vrutkovs@redhat.com)
+- Allow for using an external openvswitch (flaper87@gmail.com)
+- etcd scaleup: use r_etcd_common_etcdctl_command instead of binary path
+  (vrutkovs@redhat.com)
+- add stack update case for dry run (tzumainn@redhat.com)
+- add stack dry run check (tzumainn@redhat.com)
+- Add openstack stack failures list if stack fails to create
+  (tzumainn@redhat.com)
+- Add Heat template validation (tzumainn@redhat.com)
+- Fix redeploy router from openshift_hosted refactor. (kwoodson@redhat.com)
+- [BZ 1513706] make concurrenyLimit of heapster's hawkular sink configurable
+  (john.sanda@gmail.com)
+- Move common master upgrade playbooks to openshift-master (rteague@redhat.com)
+- ansible-quiet.cfg: Don't set callback_plugins path (vrutkovs@redhat.com)
+- Add support for instance_ids to ELB provisioner (bmorriso@redhat.com)
+- [bz 1508561] default to secure registry and update certificates
+  (kwoodson@redhat.com)
+- Add inventory docs for gcp variables (mgugino@redhat.com)
+- Remove RBAC console template (spadgett@redhat.com)
+- Fixing evaluating if ops deployment needs to skip health check, removing
+  logic for determining version, fixing pod check for elasticsearch to get
+  running version (ewolinet@redhat.com)
+- Remove v3_10 playbooks from release-3.9 branch (sdodson@redhat.com)
+- Use explicit broker version for v3.9 (erik@nsk.io)
+
 * Tue Feb 27 2018 Justin Pierce <jupierce@redhat.com> 3.9.1-1
 - Add prometheus node-exporter (aweiteka@redhat.com)
 - hosts.example: use 3.9 versions in sample inventory file
