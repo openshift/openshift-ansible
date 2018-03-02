@@ -17,7 +17,7 @@ openshift_storage_glusterfs_block_host_vol_max: 15
 openshift_storage_glusterfs_block_storageclass: False
 openshift_storage_glusterfs_block_storageclass_default: False
 openshift_storage_glusterfs_s3_deploy: True
-openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-gluster-s3-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
+openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-s3-server-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
 openshift_storage_glusterfs_s3_version: 'latest'
 openshift_storage_glusterfs_s3_account: "{{ omit }}"
 openshift_storage_glusterfs_s3_user: "{{ omit }}"
