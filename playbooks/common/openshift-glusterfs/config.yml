@@ -64,11 +64,7 @@
       name: os_firewall
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
-  tasks:
-  - include_role: 
-      name: os_firewall
-    when:
-    - openshift_storage_glusterfs_registry_is_native | default(True) | bool
+    static: true
   - include_role:
       name: openshift_storage_glusterfs
       tasks_from: host_services.yml

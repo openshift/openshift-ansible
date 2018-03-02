@@ -47,7 +47,7 @@
     name: "{{ hostvars[item].openshift.node.nodename }}"
     kind: node
     state: absent
-    labels: "{{ glusterfs_nodeselector | lib_utils_oo_dict_to_list_of_dict }}"
+    labels: "{{ glusterfs_nodeselector | oo_dict_to_list_of_dict }}"
   with_items: "{{ groups.all }}"
   when: "'openshift' in hostvars[item]"
 
@@ -93,6 +93,30 @@
     name: "heketi-storage-endpoints"
   - kind: "secret"
     name: "heketi-{{ glusterfs_name }}-topology-secret"
+
+- name: Delete glusterblock provisioner resources
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    selector: "{{ item.selector | default(omit) }}"
+    state: absent
+  with_items:
+  - kind: "all,deploy,sa,clusterrole,clusterrolebinding"
+    selector: "glusterblock"
+  failed_when: False
+
+- name: Delete gluster-s3 resources
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    selector: "{{ item.selector | default(omit) }}"
+    state: absent
+  with_items:
+  - kind: "all,svc,deploy,secret,sc,pvc"
+    selector: "gluster-s3"
+  failed_when: False
 
 - name: Get GlusterFS storage devices state
   command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
