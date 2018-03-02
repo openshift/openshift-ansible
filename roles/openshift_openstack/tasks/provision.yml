@@ -91,7 +91,7 @@
     security_groups:
     - "{{ openshift_openstack_api_lb_sg_id }}"
   when:
-  - openshift_openstack_api_lb_provider == "haproxy"
+  - openshift_openstack_api_lb_provider|default(None) == "haproxy"
 
 - name: CleanUp
   include_tasks: cleanup.yml
