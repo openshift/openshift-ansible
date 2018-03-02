@@ -23,7 +23,7 @@ defined:
 
 | Name                                         | Default value     | Description                                  |
 |----------------------------------------------|-------------------|----------------------------------------------|
-| openshift_grafana_namespace                  | grafana           | Default grafana namespace                    |
+| openshift_grafana_namespace                  | openshift-grafana | Default grafana namespace                    |
 | openshift_grafana_timeout                    | 300               | Default pod wait timeout                     |
 | openshift_grafana_prometheus_namespace       | openshift-metrics | Default prometheus namespace                 |
 | openshift_grafana_prometheus_serviceaccount  | promethus         | Prometheus service account                   |

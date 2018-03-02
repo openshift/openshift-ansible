@@ -1,7 +1,7 @@
 ---
 
 openshift_grafana_state: present
-openshift_grafana_namespace: grafana
+openshift_grafana_namespace: openshift-grafana
 openshift_grafana_pod_timeout: 300
 openshift_grafana_prometheus_namespace: "{{ openshift_prometheus_namespace | default('openshift-metrics') }}"
 openshift_grafana_prometheus_serviceaccount: prometheus
