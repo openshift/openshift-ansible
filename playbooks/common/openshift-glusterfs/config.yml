@@ -22,7 +22,7 @@
       tasks_from: host_services.yml
     when: openshift_storage_glusterfs_is_native | default(True) | bool
     static: true
-   
+
 - name: Configure GlusterFS registry hosts
   hosts: glusterfs_registry
   tasks:
