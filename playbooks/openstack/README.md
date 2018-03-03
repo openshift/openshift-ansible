@@ -144,7 +144,19 @@ $ vi inventory/group_vars/all.yml
 4. Set the `openshift_openstack_default_flavor` to the flavor you want your
    OpenShift VMs to use.
    - See `openstack flavor list` for the list of available flavors.
+5. If you opt to use Kuryr for the networking, make sure that you review all
+   the kuryr options in the file. At the very least, if you use Kuryr, you
+   should uncomment:
 
+```bash
+#openshift_use_kuryr: True
+#use_trunk_ports: True
+#openshift_use_openshift_sdn: False
+#os_sdn_network_plugin_name: cni
+#openshift_node_proxy_mode: userspace
+#openshift_hosted_manage_registry: false
+#kuryr_openstack_public_subnet_id: uuid of my public subnet
+```
 
 
 #### OpenShift configuration

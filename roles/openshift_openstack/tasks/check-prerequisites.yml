@@ -17,6 +17,22 @@
     that: 'shade_result.rc == 0'
     msg: "Python module shade is not installed"
 
+# Gather Neutron extension facts
+- name: Check for Neutron trunk support
+  os_network_extensions:
+
+# Check trunk support
+- fail:
+    msg: "Trunk ports enabled but support lacking in Neutron"
+  when: (use_trunk_ports | default(False)) and
+        ('trunk' not in openstack_network_extensions)
+
+# Check lbaasv2 support
+- fail:
+    msg: "Kuryr enabled but lacking required lbaasv2 support in Neutron"
+  when: (openshift_use_kuryr | default(False)) and
+        ('lbaasv2' not in openstack_network_extensions)
+
 # Check jmespath
 - name: Try to import python module shade
   command: python -c "import jmespath"
