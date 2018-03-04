@@ -71,6 +71,8 @@ objects:
           configMap:
             defaultMode: 420
             name: apiserver-config
+    updateStrategy:
+      type: RollingUpdate
 
 # to create the config for the TSB
 - apiVersion: v1
