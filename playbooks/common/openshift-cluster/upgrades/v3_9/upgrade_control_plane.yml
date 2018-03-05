@@ -142,3 +142,12 @@
   - import_role:
       name: openshift_web_console
       tasks_from: remove_old_asset_config
+
+# This is for a migration for a dc/docker-registry env var
+# https://bugzilla.redhat.com/show_bug.cgi?id=1540467
+# OPENSHIFT_DEFAULT_REGISTRY to REGISTRY_OPENSHIFT_SERVER_ADDR
+- hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_hosted
+      tasks_from: migrate_default_registry_var.yml

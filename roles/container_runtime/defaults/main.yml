@@ -107,6 +107,18 @@ container_runtime_crio_additional_mounts: []
 
 l_crio_additional_mounts: "{{ ',' + (container_runtime_crio_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_crio_additional_mounts != [] else '' }}"
 
+# this is a list of dictionaries of mounts
+# container_runtime_docker_additional_mounts:
+# - destination: /test
+#   source: /var/test
+#   options:
+#   - rw
+#   - mode=755
+#   type: bind
+container_runtime_docker_additional_mounts: []
+
+l_docker_additional_mounts: "{{ ',' + (container_runtime_docker_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_docker_additional_mounts != [] else '' }}"
+
 openshift_crio_image_tag_default: "latest"
 
 l_crt_crio_image_tag_dict:

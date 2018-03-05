@@ -23,7 +23,7 @@ objects:
       port: 8080
       targetPort: 8080
     selector:
-      glusterfs: s3-pod
+      glusterfs: s3-${CLUSTER_NAME}-${S3_ACCOUNT}-pod
     type: ClusterIP
     sessionAffinity: None
   status:

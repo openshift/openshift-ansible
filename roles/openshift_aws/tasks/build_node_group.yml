@@ -3,8 +3,7 @@
 # we retrieve the latest build AMI.
 # Then set openshift_aws_ami to the ami.
 - when:
-  - openshift_aws_ami == ''
-  - openshift_aws_node_group.group not in openshift_aws_ami_map
+  - (openshift_aws_ami == '' and openshift_aws_node_group.group not in openshift_aws_ami_map) or (openshift_aws_node_group.group in openshift_aws_ami_map and openshift_aws_ami_map[openshift_aws_node_group.group] == '')
   block:
   - name: fetch recently created AMI
     ec2_ami_find:

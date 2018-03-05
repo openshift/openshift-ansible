@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.0
-Release:        0.48.0%{?dist}
+Version:        3.10.0
+Release:        0.1.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -29,6 +29,7 @@ Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
 Requires:      python2-crypto
+Requires:      patch
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -201,6 +202,94 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Feb 28 2018 Scott Dodson <sdodson@redhat.com> 3.10.0-0.1.0
+- Adding 3.10 releaser (jupierce@redhat.com)
+- Add inventory docs for gcp variables (mgugino@redhat.com)
+- Add prometheus node-exporter (aweiteka@redhat.com)
+- hosts.example: use 3.9 versions in sample inventory file
+  (vrutkovs@redhat.com)
+- upgrade: skip restart during double upgrade (vrutkovs@redhat.com)
+- gcp: Move provisioning of SSH key into separate task
+  (chance.zibolski@coreos.com)
+- fix when logging metrics user is modified (jcantril@redhat.com)
+- bug 1537857. Additional logging proxy metrics fixes (jcantril@redhat.com)
+- changed logic due to failures in CI (davis.phillips@gmail.com)
+- ntpd/chronyd will now be started before node/master services
+  (fabian@fabianism.us)
+- Add service catalog components to upgrade (mgugino@redhat.com)
+- Add registry GCS storage to hosts.example (sdodson@redhat.com)
+- Remove no_log: True from openshift_version calls (sdodson@redhat.com)
+- docker: support ADDTL_MOUNTS (gscrivan@redhat.com)
+- refactor grafana role (m.judeikis@gmail.com)
+- Remove v3_8 upgrade playbooks (vrutkovs@redhat.com)
+- Dump verbose curl output and API logs when API doesn't become available.
+  (abutcher@redhat.com)
+- Start master API in parallel on all masters. (abutcher@redhat.com)
+- Update glusterfs-template:  - Add GB_LOGDIR  - failureThreshold as 50 secs
+  (sarumuga@redhat.com)
+- Don't upgrade master nodes during double upgrade (vrutkovs@redhat.com)
+- Don't upgrade nodes for OCP 3.8 (vrutkovs@redhat.com)
+- sanity_checks: warn that some OCP versions cannot be installed
+  (vrutkovs@redhat.com)
+- repo_query: always include package_name in results (vrutkovs@redhat.com)
+- Update upgrade README and add 3.7.x -> 3.9.x entry (vrutkovs@redhat.com)
+- Remove unused tasks upgrade_facts in openshift_master (mgugino@redhat.com)
+- Remove set_fact usage from web-console role (mgugino@redhat.com)
+- Retrieve node list from API when testing for nodes with selector.
+  (abutcher@redhat.com)
+- Update controller port to match containerPort (jpeeler@redhat.com)
+- Fix way openshift_openstack_nodes_to_remove parameter is parsed in template
+  (tzumainn@redhat.com)
+- logging: update README about cri-o (jwozniak@redhat.com)
+- Bug 1536651 - logging-mux not working in 3.7.z when logging installed with
+  openshift_logging_use_mux=true (nhosoi@redhat.com)
+- vsphere svc fix upgrade and datastore fix (davis.phillips@gmail.com)
+- logging: allow fluentd to determine cri-o (jwozniak@redhat.com)
+- add generic image-and-flavor check that verifies existence and compatibility
+  (tzumainn@redhat.com)
+
+* Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.53.0
+- 
+
+* Sun Feb 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.52.0
+- Move journald setup to node tasks from master (nakayamakenjiro@gmail.com)
+- [BZ 1497408] delete config map, dameon set, and cluster role
+  (john.sanda@gmail.com)
+- Fix aggregator relative paths (mgugino@redhat.com)
+- Fix package tasks ordering in OpenStack playbooks (tomas@sedovic.cz)
+- Change openshift_release to openshift_upgrade_target in upgrade
+  (mgugino@redhat.com)
+- Normalize times we wait on pods to 10s * 60retries (sdodson@redhat.com)
+- start_api_server: service catalog healthcheck doesn't require proxy
+  (vrutkovs@redhat.com)
+- Changing default of openshift_logging_public_master_url to use
+  openshift_master_cluster_public_hostname if available (ewolinet@redhat.com)
+- Sync v3.8 content (sdodson@redhat.com)
+- Sync v3.7 content (sdodson@redhat.com)
+- Sync v3.9 content (sdodson@redhat.com)
+- Allow branch specific pulls from origin (sdodson@redhat.com)
+- Fixing bz1540467 docker-registry env var migration. Adding ability to oc_edit
+  complex array style edits. (kwoodson@redhat.com)
+- [1537872] Adding seboolean for virt_use_samba (kwoodson@redhat.com)
+- Making patching a local_action and ensuring we become:false for local_actions
+  (ewolinet@redhat.com)
+- Cast string to dict in lib_utils_oo_dict_to_keqv_list (mgugino@redhat.com)
+- refine condition for doing ami fetching (jdiaz@redhat.com)
+- Add field_selector parameter to oc_obj. (abutcher@redhat.com)
+- GlusterFS: Check for groups in template file (jarrpa@redhat.com)
+- Updating AMI copying tags to no longer default to parent AMI.
+  (kwoodson@redhat.com)
+- Remove NoVolumeNodeConflict from 3.9+ (sdodson@redhat.com)
+
+* Fri Feb 23 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.51.0
+- 
+
+* Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.50.0
+- Fix upgrade verify_upgrade_targets (mgugino@redhat.com)
+- Ensure wire-aggregator run on 3.7 upgrades (mgugino@redhat.com)
+- Add no_log to prevent printing AWS creds (sedgar@redhat.com)
+- added ci inventory and groups for containerized (mgugino@redhat.com)
+
 * Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.48.0
 - Fix openshift_hosted_registry_storage_glusterfs_path (mgugino@redhat.com)
 - Revert openshift_portal_net (mgugino@redhat.com)
@@ -269,10 +358,10 @@ Atomic OpenShift Utilities includes
   (fabian@fabianism.us)
 
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.45.0
-- 
+-
 
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.44.0
-- 
+-
 
 * Thu Feb 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.43.0
 - Changing conditional_set_fact from module to action_plugin since it does not
@@ -497,7 +586,7 @@ Atomic OpenShift Utilities includes
   (rteague@redhat.com)
 
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.33.0
-- 
+-
 
 * Tue Jan 30 2018 Justin Pierce <jupierce@redhat.com> 3.9.0-0.32.0
 - Revert "Revert "use non-deprecated REGISTRY_OPENSHIFT_SERVER_ADDR variable to
@@ -712,10 +801,10 @@ Atomic OpenShift Utilities includes
 - Clean up host-local IPAM data while nodes are drained (danw@redhat.com)
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.19.0
-- 
+-
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.18.0
-- 
+-
 
 * Fri Jan 12 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.17.0
 - Update latest image streams and templates (sdodson@redhat.com)
@@ -815,7 +904,7 @@ Atomic OpenShift Utilities includes
 - Add in-tree CI scripts (mgugino@redhat.com)
 
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.15.0
-- 
+-
 
 * Wed Jan 03 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.14.0
 - Cast openshift_docker_use_system_container to bool (mgugino@redhat.com)
@@ -834,7 +923,7 @@ Atomic OpenShift Utilities includes
   (mgugino@redhat.com)
 
 * Tue Jan 02 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.12.0
-- 
+-
 
 * Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.9.0-0.11.0
 - aws: Fix misnamed variable in provisioning_vars.yml.example

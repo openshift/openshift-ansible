@@ -6,5 +6,5 @@
   register: rpm_results
 
 - fail:
-    msg: "Package {{ openshift_service_type}} not found"
+    msg: "Package '{{ rpm_results.results.package_name }}' not found"
   when: not rpm_results.results.package_found

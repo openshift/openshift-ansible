@@ -113,6 +113,7 @@ system_images_registry_dict:
   origin: "docker.io"
 
 system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
+openshift_use_external_openvswitch: False
 l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
 openshift_image_tag: ''
@@ -200,6 +201,25 @@ l_crio_var_sock: "{{ l_crio_use_new_var_sock | ternary('/var/run/crio/crio.sock'
 openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False) | bool) or (openshift_use_crio_only | default(False) | bool) }}"
 
 openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+
+# These defaults assume forcing journald persistence, fsync to disk once
+# a second, rate-limiting to 10,000 logs a second, no forwarding to
+# syslog or wall, using 8GB of disk space maximum, using 10MB journal
+# files, keeping only a days worth of logs per journal file, and
+# retaining journal files no longer than a month.
+journald_vars_to_replace:
+- { var: Storage, val: persistent }
+- { var: Compress, val: yes }
+- { var: SyncIntervalSec, val: 1s }
+- { var: RateLimitInterval, val: 1s }
+- { var: RateLimitBurst, val: 10000 }
+- { var: SystemMaxUse, val: 8G }
+- { var: SystemKeepFree, val: 20% }
+- { var: SystemMaxFileSize, val: 10M }
+- { var: MaxRetentionSec, val: 1month }
+- { var: MaxFileSec, val: 1day }
+- { var: ForwardToSyslog, val: no }
+- { var: ForwardToWall, val: no }
 
 # NOTE
 # r_openshift_node_*_default may be defined external to this role.

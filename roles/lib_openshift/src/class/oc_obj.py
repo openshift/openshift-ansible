@@ -14,17 +14,19 @@ class OCObject(OpenShiftCLI):
                  selector=None,
                  kubeconfig='/etc/origin/master/admin.kubeconfig',
                  verbose=False,
-                 all_namespaces=False):
+                 all_namespaces=False,
+                 field_selector=None):
         ''' Constructor for OpenshiftOC '''
         super(OCObject, self).__init__(namespace, kubeconfig=kubeconfig, verbose=verbose,
                                        all_namespaces=all_namespaces)
         self.kind = kind
         self.name = name
         self.selector = selector
+        self.field_selector = field_selector
 
     def get(self):
         '''return a kind by name '''
-        results = self._get(self.kind, name=self.name, selector=self.selector)
+        results = self._get(self.kind, name=self.name, selector=self.selector, field_selector=self.field_selector)
         if (results['returncode'] != 0 and 'stderr' in results and
                 '\"{}\" not found'.format(self.name) in results['stderr']):
             results['returncode'] = 0
@@ -113,7 +115,8 @@ class OCObject(OpenShiftCLI):
                          params['selector'],
                          kubeconfig=params['kubeconfig'],
                          verbose=params['debug'],
-                         all_namespaces=params['all_namespaces'])
+                         all_namespaces=params['all_namespaces'],
+                         field_selector=params['field_selector'])
 
         state = params['state']
 
@@ -123,6 +126,8 @@ class OCObject(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
+            if api_rval['returncode'] != 0:
+                return {'changed': False, 'failed': True, 'msg': api_rval}
             return {'changed': False, 'results': api_rval, 'state': state}
 
         ########

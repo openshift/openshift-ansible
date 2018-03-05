@@ -3,6 +3,8 @@ Description=Atomic OpenShift Master API
 Documentation=https://github.com/openshift/origin
 After=network-online.target
 After=etcd.service
+After=chronyd.service
+After=ntpd.service
 Before={{ openshift_service_type }}-node.service
 Requires=network-online.target
 

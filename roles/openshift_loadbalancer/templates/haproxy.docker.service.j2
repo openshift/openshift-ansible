@@ -1,5 +1,7 @@
 [Unit]
 After={{ openshift_docker_service_name }}.service
+After=chronyd.service
+After=ntpd.service
 Requires={{ openshift_docker_service_name }}.service
 PartOf={{ openshift_docker_service_name }}.service
 

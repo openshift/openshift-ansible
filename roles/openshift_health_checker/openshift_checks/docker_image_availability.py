@@ -117,16 +117,12 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         if unavailable_images:
             unreachable = [reg for reg, reachable in self.reachable_registries.items() if not reachable]
-            unreachable_msg = "Failed connecting to: {}\n".format(", ".join(unreachable))
-            blocked_msg = "Blocked registries: {}\n".format(", ".join(self.registries["blocked"]))
-            missing = ",\n    ".join(sorted(unavailable_images))
-            if six.PY2:
-                unreachable_msg = unreachable_msg.encode('utf8')
-                blocked_msg = blocked_msg.encode('utf8')
-                missing = missing.encode('utf8')
+            unreachable_msg = u"Failed connecting to: {}\n".format(u", ".join(unreachable))
+            blocked_msg = u"Blocked registries: {}\n".format(u", ".join(self.registries["blocked"]))
+            missing = u",\n    ".join(sorted(unavailable_images))
 
             msg = (
-                "One or more required container images are not available:\n    {missing}\n"
+                u"One or more required container images are not available:\n    {missing}\n"
                 "Checked with: {cmd}\n"
                 "Default registries searched: {registries}\n"
                 "{blocked}"
@@ -139,7 +135,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 unreachable=unreachable_msg if unreachable else "",
             )
 
-            return dict(failed=True, msg=msg)
+            return dict(failed=True, msg=msg.encode('utf8') if six.PY2 else msg)
 
         return {}
 
@@ -164,6 +160,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         host_groups = self.get_var("group_names")
         # containerized etcd may not have openshift_image_tag, see bz 1466622
         image_tag = self.get_var("openshift_image_tag", default="latest")
+        image_tag = self.template_var(image_tag)
         image_info = DEPLOYMENT_IMAGE_INFO[deployment_type]
 
         # template for images that run on top of OpenShift

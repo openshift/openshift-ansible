@@ -2,6 +2,9 @@
 - name: Create the OpenStack resources for cluster installation
   hosts: localhost
   tasks:
+  - name: retrieve cluster name from the environment if present
+    set_fact:
+      openshift_openstack_stack_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER') | ternary (lookup('env', 'OPENSHIFT_CLUSTER'), omit) }}"
   - name: provision cluster
     import_role:
       name: openshift_openstack
@@ -55,26 +58,3 @@
     - ansible_distribution == "RedHat"
     - rhsub_user is defined
     - rhsub_pass is defined
-
-  - name: Enable required YUM repositories
-    import_role:
-      name: openshift_repos
-    when:
-    - ansible_distribution == "RedHat"
-    - rh_subscribed is defined
-
-
-- name: Prepare the Nodes in the cluster for installation
-  hosts: oo_all_hosts
-  become: yes
-  gather_facts: yes
-  tasks:
-  - name: Install dependencies
-    import_role:
-      name: openshift_openstack
-      tasks_from: node-packages.yml
-
-  - name: Configure Node
-    import_role:
-      name: openshift_openstack
-      tasks_from: node-configuration.yml

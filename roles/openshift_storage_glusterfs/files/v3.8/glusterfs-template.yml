@@ -40,6 +40,8 @@ objects:
             value: "${GB_GLFS_LRU_COUNT}"
           - name: TCMU_LOGDIR
             value: "${TCMU_LOGDIR}"
+          - name: GB_LOGDIR
+            value: "/var/log/glusterfs/gluster-block"
           resources:
             requests:
               memory: 100Mi
@@ -82,7 +84,7 @@ objects:
               - systemctl status glusterd.service
             periodSeconds: 25
             successThreshold: 1
-            failureThreshold: 15
+            failureThreshold: 50
           livenessProbe:
             timeoutSeconds: 3
             initialDelaySeconds: 40
@@ -93,7 +95,7 @@ objects:
               - systemctl status glusterd.service
             periodSeconds: 25
             successThreshold: 1
-            failureThreshold: 15
+            failureThreshold: 50
           terminationMessagePath: "/dev/termination-log"
         volumes:
         - name: glusterfs-heketi

@@ -7,12 +7,13 @@
     msg: Operations logs destination is required
   when: not openshift_logging_mux_ops_host or openshift_logging_mux_ops_host == ''
 
-- name: Ensure that logging mux has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for logging mux - '{{ openshift_logging_mux_nodeselector }}'
-  when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_mux_nodeselector)
+- name: Ensure that Logging Mux has nodes to run on
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_logging_mux_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Logging Mux
 
 - name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ var_file_name }}"
@@ -26,8 +27,6 @@
   set_fact:
     openshift_logging_mux_image_prefix: "{{ openshift_logging_mux_image_prefix | default(__openshift_logging_mux_image_prefix) }}"
     openshift_logging_mux_image_version: "{{ openshift_logging_mux_image_version | default(__openshift_logging_mux_image_version) }}"
-
-- include_tasks: determine_version.yaml
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
