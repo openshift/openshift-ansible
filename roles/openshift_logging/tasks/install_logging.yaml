@@ -2,7 +2,7 @@
 - name: Gather OpenShift Logging Facts
   openshift_logging_facts:
     oc_bin: "{{openshift_client_binary}}"
-    openshift_logging_namespace: "{{openshift_logging_namespace}}"
+    openshift_logging_namespace: "{{ openshift_logging_namespace }}"
 
 ## This is include vs import because we need access to group/inventory variables
 - include_tasks: set_defaults_from_current.yml
