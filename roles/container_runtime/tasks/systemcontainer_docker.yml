@@ -71,6 +71,8 @@
     name: "{{ openshift_docker_service_name }}"
     image: "{{ l_docker_image }}"
     state: latest
+    values:
+      - "ADDTL_MOUNTS={{ l_docker_additional_mounts }}"
 
 - name: Configure Container Engine Service File
   template:

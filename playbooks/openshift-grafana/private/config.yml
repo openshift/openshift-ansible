@@ -1,6 +1,29 @@
 ---
-- name: Deploy grafana server
-  hosts: masters
+- name: Grafana Install Checkpoint Start
+  hosts: all
+  gather_facts: false
   tasks:
-  - include_role:
-      name: openshift_grafana
+  - name: Set Grafana install 'In Progress'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_grafana:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- name: OpenShift Grafana
+  hosts: oo_first_master
+  roles:
+  - role: openshift_grafana
+
+- name: Grafana Install Checkpoint End
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Grafana install 'Complete'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_grafana:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

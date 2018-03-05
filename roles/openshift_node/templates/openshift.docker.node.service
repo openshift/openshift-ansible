@@ -1,6 +1,8 @@
 [Unit]
 After={{ openshift_service_type }}-master.service
 After={{ openshift_docker_service_name }}.service
+After=chronyd.service
+After=ntpd.service
 After=openvswitch.service
 PartOf={{ openshift_docker_service_name }}.service
 Requires={{ openshift_docker_service_name }}.service

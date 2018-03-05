@@ -1,4 +1,25 @@
-# This is an example of an OpenShift-Ansible host inventory
+# This is an example of an OpenShift-Ansible host inventory that provides the
+# minimum recommended configuration for production use. This includes 3 masters,
+# two infra nodes, two compute nodes, and an haproxy load balancer to load
+# balance traffic to the API servers. For a truly production environment you
+# should use an external load balancing solution that itself is highly available.
+
+[masters]
+ose3-master[1:3].test.example.com
+
+[etcd]
+ose3-master[1:3].test.example.com
+
+[nodes]
+ose3-master[1:3].test.example.com
+ose3-infra[1:2].test.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+ose3-node[1:2].test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+[nfs]
+ose3-master1.test.example.com
+
+[lb]
+ose3-lb.test.example.com
 
 # Create an OSEv3 group that contains the masters and nodes groups
 [OSEv3:children]
@@ -8,12 +29,10 @@ etcd
 lb
 nfs
 
-# Set variables common for all OSEv3 hosts
 [OSEv3:vars]
-# Enable unsupported configurations, things that will yield a partially
-# functioning cluster but would not be supported for production use
-#openshift_enable_unsupported_configurations=false
-
+###############################################################################
+# Common/ Required configuration variables follow                             #
+###############################################################################
 # SSH user, this user should allow ssh based auth without requiring a
 # password. If using ssh key based auth, then the key should be managed by an
 # ssh agent.
@@ -22,9 +41,6 @@ ansible_user=root
 # If ansible_user is not root, ansible_become must be set to true and the
 # user must be configured for passwordless sudo
 #ansible_become=yes
-
-# Debug level for all OpenShift components (Defaults to 2)
-debug_level=2
 
 # Specify the deployment type. Valid values are origin and openshift-enterprise.
 openshift_deployment_type=origin
@@ -35,17 +51,34 @@ openshift_deployment_type=origin
 # use this to lookup the latest exact version of the container images, which is the tag actually used to configure
 # the cluster. For RPM installations we just verify the version detected in your configured repos matches this
 # release.
-openshift_release=v3.7
+openshift_release=v3.9
+
+# default subdomain to use for exposed routes, you should have wildcard dns
+# for *.apps.test.example.com that points at your infra nodes which will run
+# your router
+openshift_master_default_subdomain=apps.test.example.com
+
+#Set cluster_hostname to point at your load balancer
+openshift_master_cluster_hostname=ose3-lb.test.example.com
+
+
+
+###############################################################################
+# Additional configuration variables follow                                   #
+###############################################################################
+
+# Debug level for all OpenShift components (Defaults to 2)
+debug_level=2
 
 # Specify an exact container image tag to install or configure.
 # WARNING: This value will be used for all hosts in containerized environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_image_tag=v3.7.0
+#openshift_image_tag=v3.9.0
 
 # Specify an exact rpm version to install or configure.
 # WARNING: This value will be used for all hosts in RPM based environments, even those that have another version installed.
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
-#openshift_pkg_version=-3.7.0
+#openshift_pkg_version=-3.9.0
 
 # This enables all the system containers except for docker:
 #openshift_use_system_containers=False
@@ -202,7 +235,7 @@ openshift_release=v3.7
 #osm_etcd_image=rhel7/etcd
 
 # htpasswd auth
-openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+#openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 # Defining htpasswd users
 #openshift_master_htpasswd_users={'user1': '<pre-hashed password>', 'user2': '<pre-hashed password>'}
 # or
@@ -291,6 +324,13 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #
 # GCE
 #openshift_cloudprovider_kind=gce
+# Note: When using GCE, openshift_gcp_project and openshift_gcp_prefix must be
+# defined.
+# openshift_gcp_project is the project-id
+#openshift_gcp_project=
+# openshift_gcp_prefix is a unique string to identify each openshift cluster.
+#openshift_gcp_prefix=
+#openshift_gcp_multizone=False
 #
 # vSphere
 #openshift_cloudprovider_kind=vsphere
@@ -335,9 +375,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 
 # Configure api server arguments
 #osm_api_server_args={'max-requests-inflight': ['400']}
-
-# default subdomain to use for exposed routes
-#openshift_master_default_subdomain=apps.test.example.com
 
 # additional cors origins
 #osm_custom_cors_origins=['foo.example.com', 'bar.example.com']
@@ -523,6 +560,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_hosted_registry_storage_s3_cloudfront_baseurl=https://myendpoint.cloudfront.net/
 #openshift_hosted_registry_storage_s3_cloudfront_privatekeyfile=/full/path/to/secret.pem
 #openshift_hosted_registry_storage_s3_cloudfront_keypairid=yourpairid
+#
+# GCS Storage Bucket
+#openshift_hosted_registry_storage_provider=gcs
+#openshift_hosted_registry_storage_gcs_bucket=bucket01
+#openshift_hosted_registry_storage_gcs_keyfile=test.key
+#openshift_hosted_registry_storage_gcs_rootdirectory=/registry
 
 # Metrics deployment
 # See: https://docs.openshift.com/enterprise/latest/install_config/cluster_metrics.html
@@ -579,10 +622,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_metrics_hawkular_hostname=hawkular-metrics.example.com
 # Configure the prefix and version for the component images
 #openshift_metrics_image_prefix=docker.io/openshift/origin-
-#openshift_metrics_image_version=v3.7
+#openshift_metrics_image_version=v3.9
 # when openshift_deployment_type=='openshift-enterprise'
 #openshift_metrics_image_prefix=registry.access.redhat.com/openshift3/
-#openshift_metrics_image_version=v3.7
+#openshift_metrics_image_version=v3.9
 #
 # StorageClass
 # openshift_storageclass_name=gp2
@@ -641,10 +684,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_logging_es_cluster_size=1
 # Configure the prefix and version for the component images
 #openshift_logging_image_prefix=docker.io/openshift/origin-
-#openshift_logging_image_version=v3.7.0
+#openshift_logging_image_version=v3.9.0
 # when openshift_deployment_type=='openshift-enterprise'
 #openshift_logging_image_prefix=registry.access.redhat.com/openshift3/
-#openshift_logging_image_version=3.7.0
+#openshift_logging_image_version=3.9.0
 
 # Prometheus deployment
 #
@@ -779,9 +822,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_console_port=8443
 
 # set exact RPM version (include - prefix)
-#openshift_pkg_version=-3.6.0
+#openshift_pkg_version=-3.9.0
 # you may also specify version and release, ie:
-#openshift_pkg_version=-3.7.0-0.126.0.git.0.9351aae.el7
+#openshift_pkg_version=-3.9.0-0.126.0.git.0.9351aae.el7
 
 # Configure custom ca certificate
 #openshift_master_ca_certificate={'certfile': '/path/to/ca.crt', 'keyfile': '/path/to/ca.key'}
@@ -938,10 +981,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_service_catalog_image_prefix=docker.io/openshift/origin-
 #openshift_service_catalog_image_prefix=registry.access.redhat.com/openshift3/ose-
 # Force a specific image version to use when pulling the service catalog image
-#openshift_service_catalog_image_version=v3.7
+#openshift_service_catalog_image_version=v3.9
 
 # TSB image tag
-#template_service_broker_version='v3.7'
+#template_service_broker_version='v3.9'
 
 # Configure one of more namespaces whose templates will be served by the TSB
 #openshift_template_service_broker_namespaces=['openshift']
@@ -1113,23 +1156,6 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
 #openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
 
-# host group for masters
-[masters]
-ose3-master[1:3]-ansible.test.example.com
-
-[etcd]
-ose3-etcd[1:3]-ansible.test.example.com
-
-# NOTE: Containerized load balancer hosts are not yet supported, if using a global
-# containerized=true host variable we must set to false.
-[lb]
-ose3-lb-ansible.test.example.com containerized=false
-
-# NOTE: Currently we require that masters be part of the SDN which requires that they also be nodes
-[nodes]
-# masters should be schedulable to run web console pods
-ose3-master[1:3]-ansible.test.example.com openshift_schedulable=True
-ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
-
-[nfs]
-ose3-nfs-ansible.test.example.com
+# Enable unsupported configurations, things that will yield a partially
+# functioning cluster but would not be supported for production use
+#openshift_enable_unsupported_configurations=false

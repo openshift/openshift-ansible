@@ -15,7 +15,7 @@ openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_s
 
 openshift_docker_hosted_registry_insecure: False  # bool
 
-openshift_docker_hosted_registry_network: "{{ openshift_portal_net }}"
+openshift_docker_hosted_registry_network: "{{ openshift.common.portal_net }}"
 
 openshift_docker_additional_registries: []
 openshift_docker_blocked_registries: []
@@ -106,6 +106,18 @@ l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registrie
 container_runtime_crio_additional_mounts: []
 
 l_crio_additional_mounts: "{{ ',' + (container_runtime_crio_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_crio_additional_mounts != [] else '' }}"
+
+# this is a list of dictionaries of mounts
+# container_runtime_docker_additional_mounts:
+# - destination: /test
+#   source: /var/test
+#   options:
+#   - rw
+#   - mode=755
+#   type: bind
+container_runtime_docker_additional_mounts: []
+
+l_docker_additional_mounts: "{{ ',' + (container_runtime_docker_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_docker_additional_mounts != [] else '' }}"
 
 openshift_crio_image_tag_default: "latest"
 

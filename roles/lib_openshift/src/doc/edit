@@ -88,6 +88,12 @@ options:
     required: false
     default: None
     aliases: []
+  edits:
+    description:
+    - a list of dictionaries with a yedit format for edits
+    required: false
+    default: None
+    aliases: []
   force:
     description:
     - Whether or not to force the operation

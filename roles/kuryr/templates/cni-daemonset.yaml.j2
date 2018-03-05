@@ -23,7 +23,7 @@ spec:
       serviceAccountName: kuryr-controller
       containers:
       - name: kuryr-cni
-        image: kuryr/cni:latest
+        image: {{ openshift_openstack_kuryr_cni_image }}
         imagePullPolicy: IfNotPresent
         command: [ "cni_ds_init" ]
         env:

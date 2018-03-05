@@ -144,3 +144,4 @@
   when:
   - master_controllers_aws.rc == 0
   - not (openshift_cloudprovider_kind is defined and openshift_cloudprovider_kind == 'aws' and openshift_cloudprovider_aws_access_key is defined and openshift_cloudprovider_aws_secret_key is defined)
+  no_log: True

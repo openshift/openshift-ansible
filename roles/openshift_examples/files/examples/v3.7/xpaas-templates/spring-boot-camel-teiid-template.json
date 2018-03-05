@@ -4,7 +4,7 @@
   "metadata": {
     "annotations": {
       "description": "Spring-Boot, Camel and JBoss Data Virtualization QuickStart. This example demonstrates how to connect Apache Camel to a remote JBoss Data Virtualization (or Teiid) Server using the JDBC protocol. This quickstart assumes that the JDV server is already running and configured on OpenShift, more information about to setup a JDV server can be found at https://github.com/fabric8-quickstarts/spring-boot-camel-teiid/blob/fis-2.0.x.redhat/README.redhat.md",
-      "tags": "quickstart,java,springboot,fis",
+      "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-jboss",
       "version": "2.0"
     },

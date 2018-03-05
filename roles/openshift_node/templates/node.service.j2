@@ -1,6 +1,8 @@
 [Unit]
 Description=OpenShift Node
 After={{ openshift_docker_service_name }}.service
+After=chronyd.service
+After=ntpd.service
 Wants=openvswitch.service
 After=ovsdb-server.service
 After=ovs-vswitchd.service

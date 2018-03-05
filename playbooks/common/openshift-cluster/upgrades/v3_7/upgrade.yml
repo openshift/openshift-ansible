@@ -39,6 +39,16 @@
   vars:
     master_config_hook: "v3_7/master_config_upgrade.yml"
 
+# this must occur after the control plane is upgraded because systemd service
+# names are changed
+- name: Configure API aggregation on masters
+  hosts: oo_masters_to_config
+  serial: 1
+  roles:
+  - role: openshift_facts
+  tasks:
+  - include_tasks: ../../../../openshift-master/private/tasks/wire_aggregator.yml
+
 # All controllers must be stopped at the same time then restarted
 - name: Cycle all controller services to force new leader election mode
   hosts: oo_masters_to_config

@@ -63,7 +63,7 @@
   until:
   - "gluster_s3_pvcs.results.results[0]['items'] | count > 0"
   # Pod's 'Bound' status must be True
-  - "gluster_s3_pvcs.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Bound'}) | map('bool') | select | list | count == 2"
+  - "gluster_s3_pvcs.results.results[0]['items'] | lib_utils_oo_collect(attribute='status') | lib_utils_oo_collect(attribute='phase', filters={'phase': 'Bound'}) | list | count == 2"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 

@@ -3,18 +3,19 @@
 - include_tasks: facts.yaml
 
 - name: Ensure that Prometheus has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for Prometheus - '{{ openshift_prometheus_node_selector }}'
-  when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_prometheus_node_selector)
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_prometheus_node_selector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Prometheus
 
 # namespace
 - name: Add prometheus project
   oc_project:
     state: present
     name: "{{ openshift_prometheus_namespace }}"
-    node_selector: "{{ openshift_prometheus_node_selector | lib_utils_oo_selector_to_string_list() }}"
+    node_selector: ""
     description: Prometheus
 
 # secrets
@@ -39,6 +40,13 @@
     namespace: "{{ openshift_prometheus_namespace }}"
   changed_when: no
 
+# serviceaccount reader
+- name: create openshift_prometheus_reader_serviceaccount_name serviceaccount
+  oc_serviceaccount:
+    state: present
+    name: "{{ openshift_prometheus_reader_serviceaccount_name }}"
+    namespace: "{{ openshift_prometheus_namespace }}"
+  changed_when: no
 
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
@@ -56,6 +64,15 @@
     resource_kind: cluster-role
     resource_name: cluster-reader
     user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:{{ openshift_prometheus_service_name }}"
+
+# create view role for prometheus-reader serviceaccount
+- name: Set view permissions for prometheus reader
+  oc_adm_policy_user:
+    state: present
+    namespace: "{{ openshift_prometheus_namespace }}"
+    resource_kind: cluster-role
+    resource_name: view
+    user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:{{ openshift_prometheus_reader_serviceaccount_name }}"
 
 
 - name: create services for prometheus

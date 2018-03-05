@@ -140,6 +140,12 @@ options:
     required: false
     default: None
     aliases: []
+  edits:
+    description:
+    - a list of dictionaries with a yedit format for edits
+    required: false
+    default: None
+    aliases: []
   force:
     description:
     - Whether or not to force the operation
@@ -236,14 +242,35 @@ class Yedit(object):  # pragma: no cover
 
         return True
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def remove_entry(data, key, sep='.'):
+    def remove_entry(data, key, index=None, value=None, sep='.'):
         ''' remove data at location key '''
         if key == '' and isinstance(data, dict):
-            data.clear()
+            if value is not None:
+                data.pop(value)
+            elif index is not None:
+                raise YeditException("remove_entry for a dictionary does not have an index {}".format(index))
+            else:
+                data.clear()
+
             return True
+
         elif key == '' and isinstance(data, list):
-            del data[:]
+            ind = None
+            if value is not None:
+                try:
+                    ind = data.index(value)
+                except ValueError:
+                    return False
+            elif index is not None:
+                ind = index
+            else:
+                del data[:]
+
+            if ind is not None:
+                data.pop(ind)
+
             return True
 
         if not (key and Yedit.valid_key(key, sep)) and \
@@ -495,7 +522,7 @@ class Yedit(object):  # pragma: no cover
 
         return (False, self.yaml_dict)
 
-    def delete(self, path):
+    def delete(self, path, index=None, value=None):
         ''' remove path from a dict'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
@@ -505,7 +532,7 @@ class Yedit(object):  # pragma: no cover
         if entry is None:
             return (False, self.yaml_dict)
 
-        result = Yedit.remove_entry(self.yaml_dict, path, self.separator)
+        result = Yedit.remove_entry(self.yaml_dict, path, index, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
 
@@ -786,7 +813,7 @@ class Yedit(object):  # pragma: no cover
             if params['update']:
                 rval = yamlfile.pop(params['key'], params['value'])
             else:
-                rval = yamlfile.delete(params['key'])
+                rval = yamlfile.delete(params['key'], params['index'], params['value'])
 
             if rval[0] and params['src']:
                 yamlfile.write()
@@ -905,7 +932,7 @@ class OpenShiftCLI(object):
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
-    def _replace_content(self, resource, rname, content, force=False, sep='.'):
+    def _replace_content(self, resource, rname, content, edits=None, force=False, sep='.'):
         ''' replace the current object with the content '''
         res = self._get(resource, rname)
         if not res['results']:
@@ -914,13 +941,24 @@ class OpenShiftCLI(object):
         fname = Utils.create_tmpfile(rname + '-')
 
         yed = Yedit(fname, res['results'][0], separator=sep)
-        changes = []
-        for key, value in content.items():
-            changes.append(yed.put(key, value))
+        updated = False
 
-        if any([change[0] for change in changes]):
+        if content is not None:
+            changes = []
+            for key, value in content.items():
+                changes.append(yed.put(key, value))
+
+            if any([change[0] for change in changes]):
+                updated = True
+
+        elif edits is not None:
+            results = Yedit.process_edits(edits, yed)
+
+            if results['changed']:
+                updated = True
+
+        if updated:
             yed.write()
-
             atexit.register(Utils.cleanup, [fname])
 
             return self._replace(fname, force)
@@ -998,12 +1036,18 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, name=None, selector=None):
+    def _get(self, resource, name=None, selector=None, field_selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
+
         if selector is not None:
             cmd.append('--selector={}'.format(selector))
-        elif name is not None:
+
+        if field_selector is not None:
+            cmd.append('--field-selector={}'.format(field_selector))
+
+        # Name cannot be used with selector or field_selector.
+        if selector is None and field_selector is None and name is not None:
             cmd.append(name)
 
         cmd.extend(['-o', 'json'])
@@ -1485,7 +1529,7 @@ class Edit(OpenShiftCLI):
         '''return a secret by name '''
         return self._get(self.kind, self.name)
 
-    def update(self, file_name, content, force=False, content_type='yaml'):
+    def update(self, file_name, content, edits, force=False, content_type='yaml'):
         '''run update '''
         if file_name:
             if content_type == 'yaml':
@@ -1493,13 +1537,22 @@ class Edit(OpenShiftCLI):
             elif content_type == 'json':
                 data = json.loads(open(file_name).read())
 
-            changes = []
             yed = Yedit(filename=file_name, content=data, separator=self.separator)
-            for key, value in content.items():
-                changes.append(yed.put(key, value))
+            # Keep this for compatibility
+            if content is not None:
+                changes = []
 
-            if any([not change[0] for change in changes]):
-                return {'returncode': 0, 'updated': False}
+                for key, value in content.items():
+                    changes.append(yed.put(key, value))
+
+                if any([not change[0] for change in changes]):
+                    return {'returncode': 0, 'updated': False}
+
+            elif edits is not None:
+                results = Yedit.process_edits(edits, yed)
+
+                if not results['changed']:
+                    return results
 
             yed.write()
 
@@ -1507,7 +1560,7 @@ class Edit(OpenShiftCLI):
 
             return self._replace(file_name, force=force)
 
-        return self._replace_content(self.kind, self.name, content, force=force, sep=self.separator)
+        return self._replace_content(self.kind, self.name, content, edits, force=force, sep=self.separator)
 
     @staticmethod
     def run_ansible(params, check_mode):
@@ -1536,6 +1589,7 @@ class Edit(OpenShiftCLI):
 
         api_rval = ocedit.update(params['file_name'],
                                  params['content'],
+                                 params['edits'],
                                  params['force'],
                                  params['file_format'])
 
@@ -1574,11 +1628,14 @@ def main():
             kind=dict(required=True, type='str'),
             file_name=dict(default=None, type='str'),
             file_format=dict(default='yaml', type='str'),
-            content=dict(default=None, required=True, type='dict'),
+            content=dict(default=None, type='dict'),
             force=dict(default=False, type='bool'),
             separator=dict(default='.', type='str'),
+            edits=dict(default=None, type='list'),
         ),
         supports_check_mode=True,
+        mutually_exclusive=[['content', 'edits']],
+        required_one_of=[['content', 'edits']],
     )
 
     rval = Edit.run_ansible(module.params, module.check_mode)
