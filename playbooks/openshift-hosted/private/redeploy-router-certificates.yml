@@ -125,12 +125,6 @@
     - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
     - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
 
-  - name: Redeploy router
-    command: >
-      {{ openshift_client_binary }} rollout latest dc/router
-      --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
-      -n default
-
   - name: Delete temp directory
     file:
       name: "{{ router_cert_redeploy_tempdir.stdout }}"
