@@ -37,6 +37,10 @@
     - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
   - debug:
       msg: "master service name: {{ master_services }}"
+  - name: Update loopback kubeconfig
+    include_role:
+      name: openshift_master
+      tasks_from: set_loopback_context.yml
   - name: Stop masters
     service:
       name: "{{ item }}"
