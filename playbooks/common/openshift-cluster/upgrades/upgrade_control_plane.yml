@@ -97,6 +97,9 @@
   - name: Update systemd units
     include: ../../../../roles/openshift_master/tasks/systemd_units.yml
 
+  - name: Update loopback kubeconfig
+    include: ../../../../roles/openshift_master/tasks/set_loopback_context.yml
+
   - name: Check for ca-bundle.crt
     stat:
       path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
