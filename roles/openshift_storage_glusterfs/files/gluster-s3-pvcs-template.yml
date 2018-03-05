@@ -18,7 +18,7 @@ objects:
       glusterfs: s3-${CLUSTER_NAME}-${S3_ACCOUNT}-storage
       gluster-s3: ${CLUSTER_NAME}-${S3_ACCOUNT}-pvc
     annotations:
-      volume.beta.kubernetes.io/storage-class: "glusterfs-${CLUSTER_NAME}"
+      volume.beta.kubernetes.io/storage-class: "glusterfs-${CLUSTER_NAME}-s3"
   spec:
     accessModes:
     - ReadWriteMany
@@ -33,7 +33,7 @@ objects:
       glusterfs: s3-${CLUSTER_NAME}-${S3_ACCOUNT}-storage
       gluster-s3: ${CLUSTER_NAME}-${S3_ACCOUNT}-meta-pvc
     annotations:
-      volume.beta.kubernetes.io/storage-class: "glusterfs-${CLUSTER_NAME}"
+      volume.beta.kubernetes.io/storage-class: "glusterfs-${CLUSTER_NAME}-s3"
   spec:
     accessModes:
     - ReadWriteMany
