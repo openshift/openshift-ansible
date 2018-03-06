@@ -5,6 +5,7 @@ Ansible action plugin to set version facts
 from ansible.plugins.action import ActionBase
 from distutils.version import LooseVersion
 
+
 # pylint: disable=too-many-statements
 def set_version_facts_if_unset(version):
     """ Set version facts. This currently includes common.version and
@@ -44,7 +45,7 @@ def set_version_facts_if_unset(version):
         examples_content_version = 'v3.9'
     elif version_gte_3_8:
         examples_content_version = 'v3.8'
-    else version_gte_3_7:
+    else:
         examples_content_version = 'v3.7'
 
     facts['openshift_examples_content_version'] = examples_content_version
@@ -54,7 +55,6 @@ def set_version_facts_if_unset(version):
 
 class ActionModule(ActionBase):
     """Action plugin to set version facts"""
-
 
     def run(self, tmp=None, task_vars=None):
         """Run set_version_facts"""

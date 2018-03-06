@@ -8,7 +8,6 @@
 
 # pylint: disable=no-name-in-module, import-error, wrong-import-order
 import copy
-import errno
 import json
 import re
 import os
@@ -19,7 +18,6 @@ import ipaddress
 from distutils.util import strtobool
 from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
-from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -744,7 +742,6 @@ def merge_facts(orig, new):
         Returns:
             dict: the merged facts
     """
-    additive_facts = ['named_certificates']
 
     # Facts we do not ever want to merge. These originate in inventory variables
     # and contain JSON dicts. We don't ever want to trigger a merge
@@ -1039,7 +1036,7 @@ class OpenShiftFacts(object):
 
         defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
-                                  hostname=hostname,choose_hostname,
+                                  hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
                                   dns_domain='cluster.local',
