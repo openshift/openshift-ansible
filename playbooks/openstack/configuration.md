@@ -1,15 +1,18 @@
 # Configuration
 
-Configuration is handled through an Ansible inventory directory. A
-sample inventory can be found at
+The majority of the configuration is handled through an Ansible inventory
+directory. A sample inventory can be found at
 `openshift-ansible/playbooks/openstack/sample-inventory/`.
 
 `inventory/group_vars/all.yml` is used for OpenStack configuration,
 while `inventory/group_vars/OSEv3.yml` is used for OpenShift
 configuration.
 
+Environment variables may also be used.
+
 * [OpenStack Configuration](#openstack-configuration)
 * [OpenShift Configuration](#openshift-configuration)
+* [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
@@ -94,6 +97,20 @@ In `inventory/group_vars/OSEv3.yml`:
 Additional options can be found in this sample inventory:
 
 https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
+
+
+## Stack Name Configuration
+
+By default the Heat stack created by OpenStack for the OpenShift cluster will be
+named `openshift-cluster`. If you would like to use a different name then you
+must set the `OPENSHIFT_CLUSTER` environment variable before running the playbooks:
+
+```
+$ export OPENSHIFT_CLUSTER=openshift.example.com
+```
+
+If you use a non-default stack name and run the openshift-ansible playbooks to update
+your deployment, you must set `OPENSHIFT_CLUSTER` to your stack name to avoid errors.
 
 
 ## DNS Configuration
