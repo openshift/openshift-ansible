@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.2
+Version:        3.9.3
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.3-1
+- enable iscsid on start and add rpcbind dependencies (m.judeikis@gmail.com)
+- Remove redeploy after the roll has executed. (kwoodson@redhat.com)
+- crio: Add schedulable check for dockergc-ds (smilner@redhat.com)
+- crio: docker_gc on by default (smilner@redhat.com)
+- ansible-quite: set callback_plugins path (vrutkovs@redhat.com)
+- Change default etcd port to 2379 (jpeeler@redhat.com)
+- Ensure removed web console extension variables are not set
+  (spadgett@redhat.com)
+- Bug 1550148 - Fail install if console port does not match API server port
+  (spadgett@redhat.com)
+- fix bz 1550271: restore mpath defaults config (hchen@redhat.com)
+- Add proxy env vars to ASB DC. (derekwhatley@gmail.com)
+
 * Fri Mar 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.2-1
 - Master scheduler upgrade cleanup (mgugino@redhat.com)
 - docker_image_availability: encode error message (vrutkovs@redhat.com)
