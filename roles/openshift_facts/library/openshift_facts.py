@@ -17,7 +17,6 @@ import struct
 import socket
 import ipaddress
 from distutils.util import strtobool
-from distutils.version import LooseVersion
 from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
 from ansible.module_utils.six.moves import configparser
@@ -544,58 +543,6 @@ def set_deployment_facts_if_unset(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_version_facts_if_unset(facts):
-    """ Set version facts. This currently includes common.version and
-        common.version_gte_3_x
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-    """
-    if 'common' in facts:
-        openshift_version = get_openshift_version(facts)
-        if openshift_version and openshift_version != "latest":
-            version = LooseVersion(openshift_version)
-            facts['common']['version'] = openshift_version
-            facts['common']['short_version'] = '.'.join([str(x) for x in version.version[0:2]])
-            version_gte_3_6 = version >= LooseVersion('3.6')
-            version_gte_3_7 = version >= LooseVersion('3.7')
-            version_gte_3_8 = version >= LooseVersion('3.8')
-            version_gte_3_9 = version >= LooseVersion('3.9')
-            version_gte_3_10 = version >= LooseVersion('3.10')
-        else:
-            # 'Latest' version is set to True, 'Next' versions set to False
-            version_gte_3_6 = True
-            version_gte_3_7 = True
-            version_gte_3_8 = False
-            version_gte_3_9 = False
-            version_gte_3_10 = False
-        facts['common']['version_gte_3_6'] = version_gte_3_6
-        facts['common']['version_gte_3_7'] = version_gte_3_7
-        facts['common']['version_gte_3_8'] = version_gte_3_8
-        facts['common']['version_gte_3_9'] = version_gte_3_9
-        facts['common']['version_gte_3_10'] = version_gte_3_10
-
-        if version_gte_3_10:
-            examples_content_version = 'v3.10'
-        elif version_gte_3_9:
-            examples_content_version = 'v3.9'
-        elif version_gte_3_8:
-            examples_content_version = 'v3.8'
-        elif version_gte_3_7:
-            examples_content_version = 'v3.7'
-        elif version_gte_3_6:
-            examples_content_version = 'v3.6'
-        else:
-            examples_content_version = 'v1.5'
-
-        facts['common']['examples_content_version'] = examples_content_version
-
-    return facts
-
-
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -848,106 +795,6 @@ def get_docker_version_info():
                 'version': version_info['Server']['Version']
             }
     return result
-
-
-def get_openshift_version(facts):
-    """ Get current version of openshift on the host.
-
-        Checks a variety of ways ranging from fastest to slowest.
-
-        Args:
-            facts (dict): existing facts
-            optional cli_image for pulling the version number
-
-        Returns:
-            version: the current openshift version
-    """
-    version = None
-
-    # No need to run this method repeatedly on a system if we already know the
-    # version
-    # TODO: We need a way to force reload this after upgrading bits.
-    if 'common' in facts:
-        if 'version' in facts['common'] and facts['common']['version'] is not None:
-            return chomp_commit_offset(facts['common']['version'])
-
-    if os.path.isfile('/usr/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])  # noqa: F405
-        version = parse_openshift_version(output)
-    else:
-        version = get_container_openshift_version(facts)
-
-    # Handle containerized masters that have not yet been configured as a node.
-    # This can be very slow and may get re-run multiple times, so we only use this
-    # if other methods failed to find a version.
-    if not version and os.path.isfile('/usr/local/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])  # noqa: F405
-        version = parse_openshift_version(output)
-
-    return chomp_commit_offset(version)
-
-
-def chomp_commit_offset(version):
-    """Chomp any "+git.foo" commit offset string from the given `version`
-    and return the modified version string.
-
-Ex:
-- chomp_commit_offset(None)                 => None
-- chomp_commit_offset(1337)                 => "1337"
-- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
-- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
-- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
-    """
-    if version is None:
-        return version
-    else:
-        # Stringify, just in case it's a Number type. Split by '+' and
-        # return the first split. No concerns about strings without a
-        # '+', .split() returns an array of the original string.
-        return str(version).split('+')[0]
-
-
-def get_container_openshift_version(facts):
-    """
-    If containerized, see if we can determine the installed version via the
-    systemd environment files.
-    """
-    deployment_type = facts['common']['deployment_type']
-    service_type_dict = {'origin': 'origin',
-                         'openshift-enterprise': 'atomic-openshift'}
-    service_type = service_type_dict[deployment_type]
-
-    for filename in ['/etc/sysconfig/%s-master-controllers', '/etc/sysconfig/%s-node']:
-        env_path = filename % service_type
-        if not os.path.exists(env_path):
-            continue
-
-        with open(env_path) as env_file:
-            for line in env_file:
-                if line.startswith("IMAGE_VERSION="):
-                    tag = line[len("IMAGE_VERSION="):].strip()
-                    # Remove leading "v" and any trailing release info, we just want
-                    # a version number here:
-                    no_v_version = tag[1:] if tag[0] == 'v' else tag
-                    version = no_v_version.split("-")[0]
-                    return version
-    return None
-
-
-def parse_openshift_version(output):
-    """ Apply provider facts to supplied facts dict
-
-        Args:
-            string: output of 'openshift version'
-        Returns:
-            string: the version number
-    """
-    versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
-    ver = versions.get('openshift', '')
-    # Remove trailing build number and commit hash from older versions, we need to return a straight
-    # w.x.y.z version here for use as openshift_version throughout the playbooks/roles. (i.e. 3.1.1.6-64-g80b61da)
-    ver = ver.split('-')[0]
-    return ver
 
 
 def apply_provider_facts(facts, provider_facts):
@@ -1384,7 +1231,6 @@ class OpenShiftFacts(object):
         facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
-        facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_proxy_facts(facts)
         facts = set_builddefaults_facts(facts)
