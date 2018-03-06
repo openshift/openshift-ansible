@@ -12,87 +12,16 @@
 
 - name: Upgrade default router and default registry
   hosts: oo_first_master
-  vars:
-    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  |
-                         replace ( '${version}', openshift_image_tag ) }}"
-    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) |
-                      replace ( '${version}', openshift_image_tag ) }}"
-    registry_console_image: "{{ openshift.master.registry_url | regex_replace ( '(origin|ose)-\\${component}', 'registry-console') |
-                                replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
-
   pre_tasks:
-  - name: Load lib_openshift modules
-    import_role:
-      name: lib_openshift
-
-  - name: Collect all routers
-    oc_obj:
-      state: list
-      kind: pods
-      all_namespaces: True
-      selector: 'router'
-    register: all_routers
-
-  - set_fact:
-      haproxy_routers: "{{ all_routers.results.results[0]['items'] |
-                           lib_utils_oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
-                           lib_utils_oo_select_keys_from_list(['metadata']) }}"
-    when:
-    - all_routers.results.returncode == 0
-
-  - set_fact: haproxy_routers=[]
-    when:
-    - all_routers.results.returncode != 0
-
-  - name: Update router image to current version
-    oc_edit:
-      kind: dc
-      name: "{{ item['labels']['deploymentconfig'] }}"
-      namespace: "{{ item['namespace'] }}"
-      content:
-        spec.template.spec.containers[0].image: "{{ router_image }}"
-    with_items: "{{ haproxy_routers }}"
-    when:
-    - all_routers.results.returncode == 0
-
-  - name: Check for default registry
-    oc_obj:
-      state: list
-      kind: dc
-      name: docker-registry
-    register: _default_registry
-
-  - name: Update registry image to current version
-    oc_edit:
-      kind: dc
-      name: docker-registry
-      namespace: default
-      content:
-        spec.template.spec.containers[0].image: "{{ registry_image }}"
-    when:
-    - _default_registry.results.results[0] != {}
-
-  - name: Check for registry-console
-    oc_obj:
-      state: list
-      kind: dc
-      name: registry-console
-    register: _registry_console
-    when:
-    - openshift.common.deployment_type != 'origin'
-
-  - name: Update registry-console image to current version
-    oc_edit:
-      kind: dc
-      name: registry-console
-      namespace: default
-      content:
-        spec.template.spec.containers[0].image: "{{ registry_console_image }}"
-    when:
-    - openshift.common.deployment_type != 'origin'
-    - _registry_console.results.results[0] != {}
+  - import_role:
+      name: openshift_hosted
+      tasks_from: upgrade_routers.yml
+  - import_role:
+      name: openshift_hosted
+      tasks_from: upgrade_registry.yml
 
   roles:
+  - lib_utils
   - openshift_manageiq
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
@@ -107,10 +36,8 @@
   # Update the existing templates
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
-    registry_url: "{{ openshift.master.registry_url }}"
     openshift_examples_import_command: replace
   - role: openshift_hosted_templates
-    registry_url: "{{ openshift.master.registry_url }}"
     openshift_hosted_templates_import_command: replace
 
   post_tasks:
