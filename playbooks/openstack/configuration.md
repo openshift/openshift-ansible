@@ -1,0 +1,463 @@
+# Configuration
+
+Configuration is handled through an Ansible inventory directory. A
+sample inventory can be found at
+`openshift-ansible/playbooks/openstack/sample-inventory/`.
+
+`inventory/group_vars/all.yml` is used for OpenStack configuration,
+while `inventory/group_vars/OSEv3.yml` is used for OpenShift
+configuration.
+
+* [OpenStack Configuration](#openstack-configuration)
+* [OpenShift Configuration](#openshift-configuration)
+* [DNS Configuration](#dns-configuration)
+* [Kuryr Networking Configuration](#kuryr-networking-configuration)
+* [Provider Network Configuration](#provider-network-configuration)
+* [Multi-Master Configuration](#multi-master-configuration)
+* [Provider Network Configuration](#provider-network-configuration)
+* [Security Configuration](#security-configuration)
+* [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
+* [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
+
+
+## OpenStack Configuration
+
+In `inventory/group_vars/all.yml`:
+
+* `openshift_openstack_keypair_name` OpenStack keypair to use.
+
+* `openshift_openstack_num_masters` Number of master nodes to create.
+* `openshift_openstack_num_infra` Number of infra nodes to create.
+* `openshift_openstack_num_nodes` Number of app nodes to create.
+
+* `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
+* `openshift_openstack_master_image_name`
+* `openshift_openstack_infra_image_name`
+* `openshift_openstack_cns_image_name`
+* `openshift_openstack_node_image_name`
+* `openshift_openstack_lb_image_name`
+* `openshift_openstack_etcd_image_name`
+
+* `openshift_openstack_default_flavor` OpenStack flavor used by all VMs, unless a particular role flavor name is specified.
+* `openshift_openstack_master_flavor`
+* `openshift_openstack_infra_flavor`
+* `openshift_openstack_cns_flavor`
+* `openshift_openstack_node_flavor`
+* `openshift_openstack_lb_flavor`
+* `openshift_openstack_etcd_flavor`
+
+* `openshift_openstack_external_network_name` OpenStack network providing external connectivity.
+* `openshift_openstack_private_network_name` OpenStack network providing admin/control access for Ansible. It can be merged with other
+cluster networks; there are no special requirements for networking.
+
+* `openshift_openstack_cluster_node_labels` Custom labels for openshift cluster node groups; currently supports app and infra node groups.
+The default value of this variable sets `region: primary` to app nodes and `region: infra` to infra nodes. An example of setting a customized label:
+
+```
+openshift_openstack_cluster_node_labels:
+  app:
+    mylabel: myvalue
+```
+
+* `openshift_openstack_provision_user_commands` Allows users to execute shell commands via cloud-init for all of the created Nova servers in the Heat stack, before they are available for SSH connections. Note that you should use custom Ansible playbooks whenever possible. User specified shell commands for cloud-init need to be either strings or lists:
+
+```
+- openshift_openstack_provision_user_commands:
+  - set -vx
+  - systemctl stop sshd # fences off ansible playbooks as we want to reboot later
+  - ['echo', 'foo', '>', '/tmp/foo']
+  - [ ls, /tmp/foo, '||', true ]
+  - reboot # unfences ansible playbooks to continue after reboot
+```
+
+* `openshift_openstack_nodes_to_remove` The numerical indexes of app nodes that should be removed; for example, `['0', '2']`,
+
+* `openshift_openstack_docker_volume_size` Default Docker volume size used by all VMs, unless a particular role Docker volume size is specified. If `openshift_openstack_ephemeral_volumes` is set to `true`, the `*_volume_size` variables will be ignored and the deployment will not create any cinder volumes.
+* `openshift_openstack_docker_master_volume_size`
+* `openshift_openstack_docker_infra_volume_size`
+* `openshift_openstack_docker_cns_volume_size`
+* `openshift_openstack_docker_node_volume_size`
+* `openshift_openstack_docker_etcd_volume_size`
+* `openshift_openstack_docker_lb_volume_size`
+
+* `openshift_openstack_flat_secgrp` Set to True if you experience issues with sec group rules quotas. It trades security for number of rules, by sharing the same set of firewall rules for master, node, etcd and infra nodes.
+
+* `openshift_openstack_required_packages` List of additional prerequisite packages to be installed before deploying an OpenShift cluster. Ignored if `manage_packages: False`.
+
+
+## OpenShift Configuration
+
+In `inventory/group_vars/OSEv3.yml`:
+
+* `openshift_disable_check` List of checks to disable.
+* `openshift_master_cluster_public_hostname` Custom entrypoint; for example, `api.openshift.example.com`. Note than an empty hostname does not work, so if your domain is `openshift.example.com` you cannot set this value to simply `openshift.example.com`.
+* `openshift_deployment_type` Version of OpenShift to deploy; for example, `origin` or `openshift-enterprise`
+* `openshift_master_default_subdomain`
+
+Additional options can be found in this sample inventory:
+
+https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
+
+
+## DNS Configuration
+
+Pay special attention to the values in the first paragraph -- these
+will depend on your OpenStack environment.
+
+Note that the provisioning playbooks update the original Neutron subnet
+created with the Heat stack to point to the configured DNS servers.
+So the provisioned cluster nodes will start using those natively as
+default nameservers. Technically, this allows to deploy OpenShift clusters
+without dnsmasq proxies.
+
+The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain`
+will form the cluster's public DNS domain all your servers will be under. With
+the default values, this will be `openshift.example.com`. For workloads, the
+default subdomain is 'apps'. That subdomain can be set as well by the
+`openshift_openstack_app_subdomain` variable in the inventory.
+
+If you want to use a two sets of hostnames for public and private/prefixed DNS
+records for your externally managed public DNS server, you can specify
+`openshift_openstack_public_hostname_suffix` and/or
+`openshift_openstack_private_hostname_suffix`. The suffixes will be added
+to the nsupdate records sent to the external DNS server. Those are empty by default.
+
+**Note** the real hostnames, Nova servers' or ansible hostnames and inventory
+variables will not be updated. The deployment may be done on arbitrary named
+hosts with the hostnames managed by cloud-init. Inventory hostnames will ignore
+the suffixes.
+
+The `openstack_<role name>_hostname` is a set of variables used for customising
+public names of Nova servers provisioned with a given role. When such a variable stays commented,
+default value (usually the role name) is used.
+
+The `openshift_openstack_dns_nameservers` is a list of DNS servers accessible from all
+the created Nova servers. These will provide the internal name resolution for
+your OpenShift nodes (as well as upstream name resolution for installing
+packages, etc.).
+
+The `openshift_use_dnsmasq` controls either dnsmasq is deployed or not.
+By default, dnsmasq is deployed and comes as the hosts' /etc/resolv.conf file
+first nameserver entry that points to the local host instance of the dnsmasq
+daemon that in turn proxies DNS requests to the authoritative DNS server.
+When Network Manager is enabled for provisioned cluster nodes, which is
+normally the case, you should not change the defaults and always deploy dnsmasq.
+
+`openshift_openstack_external_nsupdate_keys` describes an external authoritative DNS server(s)
+processing dynamic records updates in the public only cluster view:
+
+    openshift_openstack_external_nsupdate_keys:
+      public:
+        key_secret: <some nsupdate key>
+        key_algorithm: 'hmac-md5'
+        key_name: 'update-key'
+        server: <public DNS server IP>
+
+Here, for the public view section, we specified another key algorithm and
+optional `key_name`, which normally defaults to the cluster's DNS domain.
+This just illustrates a compatibility mode with a DNS service deployed
+by OpenShift on OSP10 reference architecture, and used in a mixed mode with
+another external DNS server.
+
+
+## Flannel Networking Configuration
+
+In order to configure the
+[Flannel networking](https://docs.openshift.com/container-platform/3.6/install_config/configuring_sdn.html#using-flannel),
+uncomment and adjust the appropriate `inventory/group_vars/OSEv3.yml` group vars.
+Note that the `osm_cluster_network_cidr` must not overlap with the default
+Docker bridge subnet of 172.17.0.0/16. Or you should change the docker0 default
+CIDR range otherwise. For example, by adding `--bip=192.168.2.1/24` to
+`DOCKER_NETWORK_OPTIONS` located in `/etc/sysconfig/docker-network`.
+
+Also note that the flannel network will be provisioned on a separate isolated Neutron
+subnet defined from `osm_cluster_network_cidr` and having ports security disabled.
+Use the `openstack_private_data_network_name` variable to define the network
+name for the heat stack resource.
+
+After the cluster deployment done, you should run an additional post installation
+step for flannel and docker iptables configuration:
+
+    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-install.yml
+
+
+## Kuryr Networking Configuration
+
+If you opt to use Kuryr for networking, make sure that you review all
+the Kuryr options. The following parameters should be uncommented in
+`inventory/group_vars/all.yml`:
+
+* `openshift_use_kuryr`
+* `use_trunk_ports`
+* `openshift_use_openshift_sdn`
+* `os_sdn_network_plugin_name`
+* `openshift_node_proxy_mode`
+* `openshift_hosted_manage_registry`
+* `kuryr_openstack_public_subnet_id` Set to uuid of the public subnet.
+
+
+## Multi-Master Configuration
+
+Please refer to the official documentation for the
+[multi-master setup](https://docs.openshift.com/container-platform/3.6/install_config/install/advanced_install.html#multiple-masters)
+and define the corresponding [inventory variables](https://docs.openshift.com/container-platform/3.6/install_config/install/advanced_install.html#configuring-cluster-variables)
+in `inventory/group_vars/OSEv3.yml`. For example, given a load balancer node
+under the ansible group named `ext_lb`:
+
+```
+openshift_master_cluster_hostname: "{{ groups.ext_lb.0 }}"
+openshift_master_cluster_public_hostname: "{{ groups.ext_lb.0 }}"
+```
+
+## Provider Network Configuration
+
+Normally, the playbooks create a new Neutron network and subnet and attach
+floating IP addresses to each node. If you have a provider network set up, this
+is all unnecessary as you can just access servers that are placed in the
+provider network directly.
+
+Note that this will not update the nodes' DNS, so running openshift-ansible
+right after provisioning will fail (unless you're using an external DNS server
+your provider network knows about). You must make sure your nodes are able to
+resolve each other by name.
+
+In `inventory/group_vars/all.yml`:
+
+* `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
+
+
+## Security Configuration
+
+Configure required `*_ingress_cidr` variables to restrict public access
+to provisioned servers from your laptop (a /32 notation should be used)
+or your trusted network.
+
+You can use the command ``curl https://api.ipify.org`` to find the external
+IP address of your box (the ansible admin node).
+
+In `inventory/group_vars/all.yml`:
+
+* `openshift_openstack_node_ingress_cidr` Restricts public access to the deployed DNS server and cluster nodes' ephemeral ports range.
+* `openshift_openstack_ssh_ingress_cidr`
+* `openshift_openstack_lb_ingress_cidr`
+
+There is also the `manage_packages` variable (defaults to True) you
+may want to turn off in order to speed up the provisioning tasks. This may
+be the case for development environments. When turned off, the servers will
+be provisioned omitting the ``yum update`` command. This brings security
+implications though, and is not recommended for production deployments.
+
+
+## Cinder-Backed Persistent Volumes Configuration
+
+You will need to set up OpenStack credentials. You can try putting this in your
+`inventory/group_vars/OSEv3.yml`:
+
+    openshift_cloudprovider_kind: openstack
+    openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+    openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
+    openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
+    openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
+    openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
+    openshift_cloudprovider_openstack_blockstorage_version: v2
+
+**NOTE**: you must specify the Block Storage version as v2, because OpenShift
+does not support the v3 API yet and the version detection is currently not
+working properly.
+
+For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
+
+[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
+
+**NOTE** the OpenStack integration currently requires DNS to be configured and
+running and the `openshift_hostname` variable must match the Nova server name
+for each node. The cluster deployment will fail without it. If you use the
+provided OpenStack dynamic inventory and configure the
+`openshift_openstack_dns_nameservers` Ansible variable, this will be handled
+for you.
+
+After a successful deployment, the cluster is configured for Cinder persistent
+volumes.
+
+### Validation
+
+1. Log in and create a new project (with `oc login` and `oc new-project`)
+2. Create a file called `cinder-claim.yaml` with the following contents:
+
+```yaml
+apiVersion: "v1"
+kind: "PersistentVolumeClaim"
+metadata:
+  name: "claim1"
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1Gi"
+```
+3. Run `oc create -f cinder-claim.yaml` to create the Persistent Volume Claim object in OpenShift
+4. Run `oc describe pvc claim1` to verify that the claim was created and its Status is `Bound`
+5. Run `openstack volume list`
+   * A new volume called `kubernetes-dynamic-pvc-UUID` should be created
+   * Its size should be `1`
+   * It should not be attached to any server
+6. Create a file called `mysql-pod.yaml` with the following contents:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  labels:
+    name: mysql
+spec:
+  containers:
+    - resources:
+        limits :
+          cpu: 0.5
+      image: openshift/mysql-55-centos7
+      name: mysql
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: yourpassword
+        - name: MYSQL_USER
+          value: wp_user
+        - name: MYSQL_PASSWORD
+          value: wp_pass
+        - name: MYSQL_DATABASE
+          value: wp_db
+      ports:
+        - containerPort: 3306
+          name: mysql
+      volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql/data
+  volumes:
+    - name: mysql-persistent-storage
+      persistentVolumeClaim:
+        claimName: claim1
+```
+
+7. Run `oc create -f mysql-pod.yaml` to create the pod
+8. Run `oc describe pod mysql`
+   * Its events should show that the pod has successfully attached the volume above
+   * It should show no errors
+   * `openstack volume list` should show the volume attached to an OpenShift app node
+   * NOTE: this can take several seconds
+9. After a while, `oc get pod` should show the `mysql` pod as running
+10. Run `oc delete pod mysql` to remove the pod
+   * The Cinder volume should no longer be attached
+11. Run `oc delete pvc claim1` to remove the volume claim
+   * The Cinder volume should be deleted
+
+
+## Cinder-Backed Registry Configuration
+
+You can optionally have the playbooks create a Cinder volume and set
+it up as the OpenShift hosted registry.
+
+To do that you need specify the desired Cinder volume name and size in
+Gigabytes in `inventory/group_vars/all.yml`:
+
+    openshift_openstack_cinder_hosted_registry_name: cinder-registry
+    openshift_openstack_cinder_hosted_registry_size_gb: 10
+
+With this, the playbooks will create the volume and set up its
+filesystem. If there is an existing volume of the same name, we will
+use it but keep the existing data on it.
+
+To use the volume for the registry, you must first configure it with
+the OpenStack credentials by putting the following to `OSEv3.yml`:
+
+    openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
+    openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
+    openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+    openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_TENANT_NAME') }}"
+
+This will use the credentials from your shell environment. If you want
+to enter them explicitly, you can. You can also use credentials
+different from the provisioning ones (say for quota or access control
+reasons).
+
+**NOTE**: If you're testing this on (DevStack)[devstack], you must
+explicitly set your Keystone API version to v2 (e.g.
+`OS_AUTH_URL=http://10.34.37.47/identity/v2.0`) instead of the default
+value provided by `openrc`. You may also encounter the following issue
+with Cinder:
+
+https://github.com/kubernetes/kubernetes/issues/50461
+
+You can read the (OpenShift documentation on configuring
+OpenStack)[openstack] for more information.
+
+[devstack]: https://docs.openstack.org/devstack/latest/
+[openstack]: https://docs.openshift.org/latest/install_config/configuring_openstack.html
+
+
+Next, we need to instruct OpenShift to use the Cinder volume for its
+registry. Again in `OSEv3.yml`:
+
+    #openshift_hosted_registry_storage_kind: openstack
+    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
+    #openshift_hosted_registry_storage_openstack_filesystem: xfs
+
+The filesystem value here will be used in the initial formatting of
+the volume.
+
+If you're using the dynamic inventory, you must uncomment these two values as
+well:
+
+    #openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', openshift_openstack_cinder_hosted_registry_name).id }}"
+    #openshift_hosted_registry_storage_volume_size: "{{ openshift_openstack_cinder_hosted_registry_size_gb }}Gi"
+
+But note that they use the `os_cinder` lookup plugin we provide, so you must
+tell Ansible where to find it either in `ansible.cfg` (the one we provide is
+configured properly) or by exporting the
+`ANSIBLE_LOOKUP_PLUGINS=openshift-ansible-contrib/lookup_plugins` environment
+variable.
+
+
+### Using an existing Cinder volume for the OpenShift registry
+
+You can also use a pre-existing Cinder volume for the storage of your
+OpenShift registry.
+
+To do that, you need to have a Cinder volume. You can create one by
+running:
+
+    openstack volume create --size <volume size in gb> <volume name>
+
+The volume needs to have a file system created before you put it to
+use.
+
+As with the automatically-created volume, you have to set up the
+OpenStack credentials in `inventory/group_vars/OSEv3.yml` as well as
+registry values:
+
+    #openshift_hosted_registry_storage_kind: openstack
+    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
+    #openshift_hosted_registry_storage_openstack_filesystem: xfs
+    #openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
+    #openshift_hosted_registry_storage_volume_size: 10Gi
+
+Note the `openshift_hosted_registry_storage_openstack_volumeID` and
+`openshift_hosted_registry_storage_volume_size` values: these need to
+be added in addition to the previous variables.
+
+The **Cinder volume ID**, **filesystem** and **volume size** variables
+must correspond to the values in your volume. The volume ID must be
+the **UUID** of the Cinder volume, *not its name*.
+
+The volume can also be formatted if you configure it in
+`inventory/group_vars/all.yml`:
+
+    openshift_openstack_prepare_and_format_registry_volume: true
+
+**NOTE:** Formatting **will destroy any data that's currently on the volume**!
+
+You can also run the registry setup playbook directly:
+
+   ansible-playbook -i inventory playbooks/provisioning/openstack/prepare-and-format-cinder-volume.yaml
+
+(the provisioning phase must be completed, first)

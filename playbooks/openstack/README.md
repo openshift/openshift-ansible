@@ -6,23 +6,59 @@ etc.). The result is an environment ready for OpenShift installation
 via [openshift-ansible].
 
 We provide everything necessary to be able to install OpenShift on
-OpenStack (including the load balancer servers when
-necessary). In addition, we work on providing integration with the
-OpenStack-native services (storage, lbaas, baremetal as a service,
-dns, etc.).
+OpenStack (including the load balancer servers when necessary). In addition,
+we work on providing integration with the OpenStack-native services (storage,
+lbaas, baremetal as a service, dns, etc.).
 
 
-## OpenStack Requirements
+## Requirements
 
-Before you start the installation, you need to have an OpenStack
-environment to connect to. You can use a public cloud or an OpenStack
-within your organisation. It is also possible to
-use [Devstack][devstack] or [TripleO][tripleo]. In the case of
-TripleO, we will be running on top of the **overcloud**.
+In order to run these Ansible playbooks, you'll need an Ansible host and an
+OpenStack environment.
 
-The OpenStack release must be Newton (for Red Hat OpenStack this is
-version 10) or newer. It must also satisfy these requirements:
+### Ansible Host
 
+Start by choosing a host from which you'll run [Ansible][ansible]. This can
+be the computer you read this guide on or an OpenStack VM you'll create
+specifically for this purpose.
+
+The required dependencies for the Ansible host are:
+
+* [Ansible](https://pypi.python.org/pypi/ansible) version >=2.4.1
+* [jinja2](http://jinja.pocoo.org/docs/2.9/) version >= 2.10
+* [shade](https://pypi.python.org/pypi/shade) version >= 1.26
+* python-jmespath / [jmespath](https://pypi.python.org/pypi/jmespath)
+* python-dns / [dnspython](https://pypi.python.org/pypi/dnspython)
+* Become (sudo) is *not* required.
+
+Optional dependencies include:
+
+* `python-openstackclient`
+* `python-heatclient`
+
+**Note**: If you're using RHEL images, the `rhel-7-server-openstack-10-rpms`
+repository is required in order to install these openstack clients.
+
+Clone the [openshift-ansible][openshift-ansible] repository:
+
+```
+$ git clone https://github.com/openshift/openshift-ansible
+```
+
+### OpenStack Environment
+
+Before you start the installation, you'll need an OpenStack environment.
+Options include:
+
+* [Devstack][devstack]
+* [Packstack][packstack]
+* [TripleO][tripleo] **Overcloud**
+
+You can also use a public cloud or an OpenStack within your organization.
+
+The OpenStack environment must satisfy these requirements:
+
+* It must be Newton (equivalent to Red hat OpenStack 10) or newer
 * Heat (Orchestration) must be available
 * The deployment image (CentOS 7.4 or RHEL 7) must be loaded
 * The deployment flavor must be available to your user
@@ -33,95 +69,34 @@ version 10) or newer. It must also satisfy these requirements:
 * The keypair for SSH must be available in OpenStack
 * `keystonerc` file that lets you talk to the OpenStack services
    * NOTE: only Keystone V2 is currently supported
-* A host with the supported version of [Ansible][ansible] installed, see the
-  [Setup section of the openshift-ansible README][openshift-ansible-setup]
-  for details on the requirements.
 
-Optional:
+You may also optionally want:
+
 * External Neutron network with a floating IP address pool
 
 
-## Installation
+## Configuration
 
-There are four main parts to the installation:
+Configuration is done through an Ansible inventory directory. You can switch
+between multiple inventories to test multiple configurations.
 
-1. [Preparing Ansible and dependencies](#1-preparing-ansible-and-dependencies)
-2. [Configuring the desired OpenStack environment and OpenShift cluster](#2-configuring-the-openstack-environment-and-openshift-cluster)
-3. [Creating the OpenStack Resources and Installing OpenShift](#3-creating-the-openstack-resources-and-installing-openshift)
-
-This guide is going to install [OpenShift Origin][origin]
-with [CentOS 7][centos7] images with minimal customisation.
-
-We will create the VMs for running OpenShift, in a new Neutron network and
-assign Floating IP addresses.
-
-The OpenShift cluster will have a single Master node that will run
-`etcd`, a single Infra node and two App nodes.
-
-You can look at
-the [Advanced Configuration page][advanced-configuration] for
-additional options.
-
-
-
-### 1. Preparing Ansible and dependencies
-
-First, you need to select where to run [Ansible][ansible] from (the
-*Ansible host*). This can be the computer you read this guide on or an
-OpenStack VM you'll create specifically for this purpose.
-
-This guide will use a
-[Docker image that has all the dependencies installed][control-host-image] to
-make things easier. If you don't want to use Docker, take a look at
-the [Ansible host dependencies][ansible-dependencies] and make sure
-they are installed.
-
-Your *Ansible host* needs to have the following:
-
-1. Docker
-2. `keystonerc` file with your OpenStack credentials
-3. SSH private key for logging in to your OpenShift nodes
-
-Assuming your private key is `~/.ssh/id_rsa` and `keystonerc` in your
-current directory:
-
-```bash
-$ sudo docker run -it -v ~/.ssh:/mnt/.ssh:Z \
-     -v $PWD/keystonerc:/root/.config/openstack/keystonerc.sh:Z \
-     redhatcop/control-host-openstack bash
-```
-
-This will create the container, add your SSH key and source your
-`keystonerc`. It should be set up for the installation.
-
-You can verify that everything is in order:
-
-
-```bash
-$ less .ssh/id_rsa
-$ ansible --version
-$ openstack image list
-```
-
-
-### 2. Configuring the OpenStack Environment and OpenShift Cluster
-
-The configuration is all done in an Ansible inventory directory. We
-will clone the [openshift-ansible][openshift-ansible] repository and set
-things up for a minimal installation.
-
+Start by copying the sample inventory to your inventory directory.
 
 ```
-$ git clone https://github.com/openshift/openshift-ansible
 $ cp -r openshift-ansible/playbooks/openstack/sample-inventory/ inventory
 ```
 
-If you're testing multiple configurations, you can have multiple
-inventories and switch between them.
+The sample inventory contains defaults that will do the following:
 
-#### OpenStack Configuration
+* create VMs for an OpenShift cluster with 1 Master node, 1 Infra node, and 2 App nodes
+* create a new Neutron network and assign floating IP addresses to the VMs
 
-The OpenStack configuration is in `inventory/group_vars/all.yml`.
+You may have to perform further configuration in order to match the inventory
+to your environment.
+
+### OpenStack Configuration
+
+The OpenStack configuration file is `inventory/group_vars/all.yml`.
 
 Open the file and plug in the image, flavor and network configuration
 corresponding to your OpenStack installation.
@@ -130,63 +105,63 @@ corresponding to your OpenStack installation.
 $ vi inventory/group_vars/all.yml
 ```
 
-1. Set the `openshift_openstack_keypair_name` to your OpenStack keypair name.
+* `openshift_openstack_keypair_name` Set your OpenStack keypair name.
    - See `openstack keypair list` to find the keypairs registered with
    OpenShift.
    - This must correspond to your private SSH key in `~/.ssh/id_rsa`
-2. Set the `openshift_openstack_external_network_name` to the floating IP
-   network of your openstack.
+* `openshift_openstack_external_network_name` Set the floating IP
+   network of your OpenStack.
    - See `openstack network list` for the list of networks.
-   - It's often called `public`, `external` or `ext-net`.
-3. Set the `openshift_openstack_default_image_name` to the image you want your
+   - Often called `public`, `external` or `ext-net`.
+* `openshift_openstack_default_image_name` Set the image you want your
    OpenShift VMs to run.
    - See `openstack image list` for the list of available images.
-4. Set the `openshift_openstack_default_flavor` to the flavor you want your
+* `openshift_openstack_default_flavor` Set the flavor you want your
    OpenShift VMs to use.
    - See `openstack flavor list` for the list of available flavors.
-5. If you opt to use Kuryr for the networking, make sure that you review all
-   the kuryr options in the file. At the very least, if you use Kuryr, you
-   should uncomment:
-
-```bash
-#openshift_use_kuryr: True
-#use_trunk_ports: True
-#openshift_use_openshift_sdn: False
-#os_sdn_network_plugin_name: cni
-#openshift_node_proxy_mode: userspace
-#openshift_hosted_manage_registry: false
-#kuryr_openstack_public_subnet_id: uuid of my public subnet
-```
 
 
-#### OpenShift configuration
+### OpenShift Configuration
 
-The OpenShift configuration is in `inventory/group_vars/OSEv3.yml`.
+The OpenShift configuration file is `inventory/group_vars/OSEv3.yml`.
 
-The default options will mostly work, but unless you used the large
-flavors for a production-ready environment, openshift-ansible's
-hardware check will fail.
+The default options will mostly work, but openshift-ansible's hardware check
+may fail unless you specified a large flavor suitable for a production-ready
+environment.
 
-Let's disable those checks by putting this in
-`inventory/group_vars/OSEv3.yml`:
+You can disable those checks by adding this line to `inventory/group_vars/OSEv3.yml`:
 
 ```yaml
-openshift_disable_check: disk_availability,memory_availability
+openshift_disable_check: disk_availability,memory_availability,docker_storage
 ```
 
-**NOTE**: The default authentication method will allow **any username
+**Important**: The default authentication method will allow **any username
 and password** in! If you're running this in a public place, you need
 to set up access control.
 
 Feel free to look at
 the [Sample OpenShift Inventory][sample-openshift-inventory] and
-the [advanced configuration][advanced-configuration].
+the [configuration][configuration].
+
+### Advanced Configuration
+
+The [Configuration page][configuration] details several
+additional options. These include:
+
+* Set Up Authentication (TODO)
+* [Multiple Masters with a load balancer][loadbalancer]
+* [External Dns][external-dns]
+* Multiple Clusters (TODO)
+* [Cinder Registry][cinder-registry]
+
+Read the [Configuration page][configuration] for a full listing of
+configuration options.
 
 
-### 3. Creating the OpenStack Resources and Installing OpenShift
+## Installation
 
-We provide an `ansible.cfg` file which has some useful defaults -- you should
-copy it to the directory you're going to run `ansible-playbook` from.
+Before running the installation playbook, you may want to create an `ansible.cfg`
+file with useful defaults:
 
 ```bash
 $ cp openshift-ansible/ansible.cfg ansible.cfg
@@ -201,8 +176,8 @@ any_errors_fatal = true
 This will abort the Ansible playbook execution as soon as any error is
 encountered.
 
-Now, run the provision + install playbook -- this will create the OpenStack
-resources:
+Now, run the provision + install playbook. This will create OpenStack resources
+and deploy an OpenShift cluster on top of them:
 
 ```bash
 $ ansible-playbook --user openshift \
@@ -211,52 +186,265 @@ $ ansible-playbook --user openshift \
   openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml
 ```
 
-In addition to *your* inventory with your OpenShift and OpenStack
-configuration, we are also supplying the [dynamic inventory][dynamic] from
-`openshift-ansible/inventory`. It's a script that will look at the Nova servers
-and other resources that will be created and let Ansible know about them.
-
-If you're using multiple inventories, make sure you pass the path to
+* If you're using multiple inventories, make sure you pass the path to
 the right one to `-i`.
-
-If your SSH private key is not in `~/.ssh/id_rsa` use the `--private-key`
+* If your SSH private key is not in `~/.ssh/id_rsa`, use the `--private-key`
 option to specify the correct path.
+* Note that we must pass in the [dynamic inventory][dynamic] --
+`openshift-ansible/playbooks/openstack/inventory.py`. This is a script that
+looks for OpenStack resources and enables Ansible to reference them.
 
 
+## Post-Install
 
-### Next Steps
+Once installation completes, a few additional steps may be required or useful.
 
-And that's it! You should have a small but functional OpenShift
-cluster now.
+### Configure DNS
 
-Take a look at [how to access the cluster][accessing-openshift]
-and [how to remove it][uninstall-openshift] as well as the more
-advanced configuration:
+OpenShift requires two public DNS records to function fully. The first one points to
+the master/load balancer and provides the UI/API access. The other one is a
+wildcard domain that resolves app route requests to the infra node. A private DNS
+server and records are not required and not managed here.
 
-* [Accessing the OpenShift cluster][accessing-openshift]
-* [Removing the OpenShift cluster][uninstall-openshift]
-* Set Up Authentication (TODO)
-* [Multiple Masters with a load balancer][loadbalancer]
-* [External Dns][external-dns]
-* Multiple Clusters (TODO)
-* [Cinder Registry][cinder-registry]
+If you followed the default installation from the README section, there is no
+DNS configured. You should add two entries to the `/etc/hosts` file on the
+Ansible host (where you to do a quick validation. A real deployment will
+however require a DNS server with the following entries set.
 
+First, run the `openstack server list` command and note the floating IP
+addresses of the *master* and *infra* nodes (we will use `10.40.128.130` for
+master and `10.40.128.134` for infra here).
+
+Then add the following entries to your `/etc/hosts`:
+
+```
+10.40.128.130 console.openshift.example.com
+10.40.128.134 cakephp-mysql-example-test.apps.openshift.example.com
+```
+
+This points the cluster domain (as defined in the
+`openshift_master_cluster_public_hostname` Ansible variable in `OSEv3`) to the
+master node and any routes for deployed apps to the infra node.
+
+If you deploy another app, it will end up with a different URL (e.g.
+myapp-test.apps.openshift.example.com) and you will need to add that too.  This
+is why a real deployment should always run a DNS where the second entry will be
+a wildcard `*.apps.openshift.example.com).
+
+This will be sufficient to validate the cluster here.
+
+Take a look at the [External DNS](#dns-configuration-variables) section for
+configuring a DNS service.
+
+
+### Get the `oc` Client
+
+The OpenShift command line client (called `oc`) can be downloaded and extracted
+from `openshift-origin-client-tools` on the OpenShift release page:
+
+https://github.com/openshift/origin/releases/latest/
+
+You can also copy it from the master node:
+
+    $ ansible -i inventory masters[0] -m fetch -a "src=/bin/oc dest=oc"
+
+Once you obtain the `oc` binary, remember to put it in your `PATH`.
+
+
+### Logging in Using the Command Line
+
+```
+oc login --insecure-skip-tls-verify=true https://master-0.openshift.example.com:8443 -u user -p password
+oc new-project test
+oc new-app --template=cakephp-mysql-example
+oc status -v
+curl http://cakephp-mysql-example-test.apps.openshift.example.com
+```
+
+This will trigger an image build. You can run `oc logs -f
+bc/cakephp-mysql-example` to follow its progress.
+
+Wait until the build has finished and both pods are deployed and running:
+
+```
+$ oc status -v
+In project test on server https://master-0.openshift.example.com:8443
+
+http://cakephp-mysql-example-test.apps.openshift.example.com (svc/cakephp-mysql-example)
+  dc/cakephp-mysql-example deploys istag/cakephp-mysql-example:latest <-
+    bc/cakephp-mysql-example source builds https://github.com/openshift/cakephp-ex.git on openshift/php:7.0
+    deployment #1 deployed about a minute ago - 1 pod
+
+svc/mysql - 172.30.144.36:3306
+  dc/mysql deploys openshift/mysql:5.7
+    deployment #1 deployed 3 minutes ago - 1 pod
+
+Info:
+  * pod/cakephp-mysql-example-1-build has no liveness probe to verify pods are still running.
+    try: oc set probe pod/cakephp-mysql-example-1-build --liveness ...
+View details with 'oc describe <resource>/<name>' or list everything with 'oc get all'.
+
+```
+
+You can now look at the deployed app using its route:
+
+```
+$ curl http://cakephp-mysql-example-test.apps.openshift.example.com
+```
+
+Its `title` should say: "Welcome to OpenShift".
+
+
+### Accessing the UI
+
+You can access the OpenShift cluster with a web browser by going to:
+
+https://master-0.openshift.example.com:8443
+
+Note that for this to work, the OpenShift nodes must be accessible
+from your computer and its DNS configuration must use the cluster's
+DNS.
+
+### Running Custom Post-Provision Actions
+
+A custom playbook can be run like this:
+
+```
+ansible-playbook --private-key ~/.ssh/openshift -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml
+```
+
+If you'd like to limit the run to one particular host, you can do so as follows:
+
+```
+ansible-playbook --private-key ~/.ssh/openshift -i inventory/ openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/custom-playbook.yml -l app-node-0.openshift.example.com
+```
+
+You can also create your own custom playbook. Here are a few examples:
+
+#### Adding additional YUM repositories
+
+```
+---
+- hosts: app
+  tasks:
+
+  # enable EPL
+  - name: Add repository
+    yum_repository:
+      name: epel
+      description: EPEL YUM repo
+      baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+```
+
+This example runs against app nodes. The list of options include:
+
+  - cluster_hosts (all hosts: app, infra, masters, dns, lb)
+  - OSEv3 (app, infra, masters)
+  - app
+  - dns
+  - masters
+  - infra_hosts
+
+#### Attaching additional RHN pools
+
+```
+---
+- hosts: cluster_hosts
+  tasks:
+  - name: Attach additional RHN pool
+    become: true
+    command: "/usr/bin/subscription-manager attach --pool=<pool ID>"
+    register: attach_rhn_pool_result
+    until: attach_rhn_pool_result.rc == 0
+    retries: 10
+    delay: 1
+```
+
+This playbook runs against all cluster nodes. In order to help prevent slow connectivity
+problems, the task is retried 10 times in case of initial failure.
+Note that in order for this example to work in your deployment, your servers must use the RHEL image.
+
+#### Adding extra Docker registry URLs
+
+This playbook is located in the [custom-actions](https://github.com/openshift/openshift-ansible-contrib/tree/master/playbooks/provisioning/openstack/custom-actions) directory.
+
+It adds URLs passed as arguments to the docker configuration program.
+Going into more detail, the configuration program (which is in the YAML format) is loaded into an ansible variable
+([lines 27-30](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml#L27-L30))
+and in its structure, `registries` and `insecure_registries` sections are expanded with the newly added items
+([lines 56-76](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml#L56-L76)).
+The new content is then saved into the original file
+([lines 78-82](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml#L78-L82))
+and docker is restarted.
+
+Example usage:
+```
+ansible-playbook -i <inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml  --extra-vars '{"registries": "reg1", "insecure_registries": ["ins_reg1","ins_reg2"]}'
+```
+
+#### Adding extra CAs to the trust chain
+
+This playbook is also located in the [custom-actions](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions) directory.
+It copies passed CAs to the trust chain location and updates the trust chain on each selected host.
+
+Example usage:
+```
+ansible-playbook -i <inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions/add-cas.yml --extra-vars '{"ca_files": [<absolute path to ca1 file>, <absolute path to ca2 file>]}'
+```
+
+Please consider contributing your custom playbook back to openshift-ansible-contrib!
+
+A library of custom post-provision actions exists in `openshift-ansible-contrib/playbooks/provisioning/openstack/custom-actions`. Playbooks include:
+
+* [add-yum-repos.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-yum-repos.yml): adds a list of custom yum repositories to every node in the cluster
+* [add-rhn-pools.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-rhn-pools.yml): attaches a list of additional RHN pools to every node in the cluster
+* [add-docker-registry.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-docker-registry.yml): adds a list of docker registries to the docker configuration on every node in the cluster
+* [add-cas.yml](https://github.com/openshift/openshift-ansible-contrib/blob/master/playbooks/provisioning/openstack/custom-actions/add-rhn-pools.yml): adds a list of CAs to the trust chain on every node in the cluster
+
+
+### Scale Deployment up/down
+
+#### Scaling up
+
+One can scale up the number of application nodes by executing the ansible playbook
+`openshift-ansible-contrib/playbooks/provisioning/openstack/scale-up.yaml`.
+This process can be done even if there is currently no deployment available.
+The `increment_by` variable is used to specify by how much the deployment should
+be scaled up (if none exists, it serves as a target number of application nodes).
+The path to `openshift-ansible` directory can be customised by the `openshift_ansible_dir`
+variable. Its value must be an absolute path to `openshift-ansible` and it cannot
+contain the '/' symbol at the end.
+
+Usage:
+
+```
+ansible-playbook -i <path to inventory> openshift-ansible-contrib/playbooks/provisioning/openstack/scale-up.yaml` [-e increment_by=<number>] [-e openshift_ansible_dir=<path to openshift-ansible>]
+```
+
+
+## Uninstall
+
+Everything in the cluster is contained within a Heat stack. To
+completely remove the cluster and all the related OpenStack resources,
+run this command:
+
+```bash
+openstack stack delete --wait --yes openshift.example.com
+```
 
 [ansible]: https://www.ansible.com/
 [openshift-ansible]: https://github.com/openshift/openshift-ansible
 [openshift-ansible-setup]: https://github.com/openshift/openshift-ansible#setup
 [devstack]: https://docs.openstack.org/devstack/
 [tripleo]: http://tripleo.org/
-[ansible-dependencies]: ./advanced-configuration.md#dependencies-for-localhost-ansible-controladmin-node
+[packstack]: https://www.rdoproject.org/install/packstack/
 [control-host-image]: https://hub.docker.com/r/redhatcop/control-host-openstack/
 [hardware-requirements]: https://docs.openshift.org/latest/install_config/install/prerequisites.html#hardware
 [origin]: https://www.openshift.org/
 [centos7]: https://www.centos.org/
 [sample-openshift-inventory]: https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.example
-[advanced-configuration]: ./advanced-configuration.md
-[accessing-openshift]: ./advanced-configuration.md#accessing-the-openshift-cluster
-[uninstall-openshift]: ./advanced-configuration.md#removing-the-openshift-cluster
-[loadbalancer]: ./advanced-configuration.md#multi-master-configuration
-[external-dns]: ./advanced-configuration.md#dns-configuration-variables
-[cinder-registry]: ./advanced-configuration.md#creating-and-using-a-cinder-volume-for-the-openshift-registry
+[configuration]: ./configuration.md
+[loadbalancer]: ./configuration.md#multi-master-configuration
+[external-dns]: ./configuration.md#dns-configuration
+[cinder-registry]: ./configuration.md#cinder-backed-registry-configuration
 [dynamic]: http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html
