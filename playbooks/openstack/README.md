@@ -35,10 +35,13 @@ Optional dependencies include:
 * `python-openstackclient`
 * `python-heatclient`
 
-**Note**: If you're using RHEL images, the `rhel-7-server-openstack-10-rpms`
-repository is required in order to install these openstack clients.
+There are a few OS-specific instructions:
 
-Clone the [openshift-ansible][openshift-ansible] repository:
+* RHEL: The `rhel-7-server-openstack-10-rpms` repository is required in order to install these openstack clients.
+* CentOS: Run `yum install -y centos-release-openstack-pike`
+
+Once the dependencies are installed, clone the [openshift-ansible][openshift-ansible]
+repository:
 
 ```
 $ git clone https://github.com/openshift/openshift-ansible
@@ -51,7 +54,7 @@ Options include:
 
 * [Devstack][devstack]
 * [Packstack][packstack]
-* [TripleO][tripleo] **Overcloud**
+* [TripleO][tripleo] (Overcloud)
 
 You can also use a public cloud or an OpenStack within your organization.
 
