@@ -2,8 +2,9 @@
 Ansible action plugin to set version facts
 """
 
-from ansible.plugins.action import ActionBase
+# pylint: disable=no-name-in-module, import-error, wrong-import-order
 from distutils.version import LooseVersion
+from ansible.plugins.action import ActionBase
 
 
 # pylint: disable=too-many-statements
@@ -53,6 +54,7 @@ def set_version_facts_if_unset(version):
     return facts
 
 
+# pylint: disable=too-few-public-methods
 class ActionModule(ActionBase):
     """Action plugin to set version facts"""
 

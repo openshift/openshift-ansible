@@ -618,7 +618,7 @@ def build_controller_args(facts):
                     controller_args['cloud-provider'] = ['gce']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
         if controller_args != {}:
-            facts = merge_facts({'master': {'controller_args': controller_args}}, facts, [])
+            facts = merge_facts({'master': {'controller_args': controller_args}}, facts)
     return facts
 
 
@@ -640,7 +640,7 @@ def build_api_server_args(facts):
                     api_server_args['cloud-provider'] = ['gce']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/gce.conf']
         if api_server_args != {}:
-            facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [])
+            facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts)
     return facts
 
 
