@@ -218,7 +218,6 @@ openstack stack delete --wait --yes openshift.example.com
 [tripleo]: http://tripleo.org/
 [packstack]: https://www.rdoproject.org/install/packstack/
 [configure-authentication]: https://docs.openshift.org/latest/install_config/configuring_authentication.html
-[control-host-image]: https://hub.docker.com/r/redhatcop/control-host-openstack/
 [hardware-requirements]: https://docs.openshift.org/latest/install_config/install/prerequisites.html#hardware
 [origin]: https://www.openshift.org/
 [centos7]: https://www.centos.org/
