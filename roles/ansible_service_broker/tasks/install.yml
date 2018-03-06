@@ -212,16 +212,7 @@
       - ReadWriteOnce
     volume_capacity: 1G
 
-- name: Search for existing Ansible Service Broker deployment config
-  oc_obj:
-    name: asb
-    namespace: openshift-ansible-service-broker
-    kind: DeploymentConfig
-    state: list
-  register: asb_dc
-
-- name: Create Ansible Service Broker deployment config
-  when: asb_dc.results.results.0 | length == 0
+- name: Set Ansible Service Broker deployment config
   oc_obj:
     force: yes
     name: asb
