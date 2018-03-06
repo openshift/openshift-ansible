@@ -13,7 +13,11 @@ openshift_storageclass_defaults:
     parameters:
       type: pd-standard
 
+  openstack:
+    name: sc-cinder
+    provisioner: cinder
+
 openshift_storageclass_default: "true"
 openshift_storageclass_name: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['name'] }}"
 openshift_storageclass_provisioner: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['provisioner'] }}"
-openshift_storageclass_parameters: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['parameters'] }}"
+openshift_storageclass_parameters: "{{ openshift_storageclass_defaults[openshift_cloudprovider_kind]['parameters'] | default({}) }}"

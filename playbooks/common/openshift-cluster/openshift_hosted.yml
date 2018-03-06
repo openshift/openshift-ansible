@@ -27,7 +27,7 @@
       logging_elasticsearch_ops_cluster_size: "{{ openshift_hosted_logging_elasticsearch_ops_cluster_size | default(1) }}"
   roles:
   - role: openshift_default_storage_class
-    when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce')
+    when: openshift_cloudprovider_kind is defined and (openshift_cloudprovider_kind == 'aws' or openshift_cloudprovider_kind == 'gce' or openshift_cloudprovider_kind == 'openstack')
   - role: openshift_hosted
   - role: openshift_metrics
     when: openshift_hosted_metrics_deploy | default(false) | bool
