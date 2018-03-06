@@ -26,5 +26,9 @@ cockpit_ui_base: "{{ examples_base }}/infrastructure-templates/enterprise"
 
 
 openshift_examples_import_command: "create"
-registry_url: ""
-registry_host: "{{ registry_url.split('/')[0] if '.' in registry_url.split('/')[0] else '' }}"
+registry_host: "{{ openshift_examples_registryurl.split('/')[0] if '.' in openshift_examples_registryurl.split('/')[0] else '' }}"
+
+openshift_hosted_images_dict:
+  origin: 'openshift/origin-${component}:${version}'
+  openshift-enterprise: 'openshift3/ose-${component}:${version}'
+openshift_examples_registryurl: "{{ oreg_url_master | default(oreg_url) | default(openshift_hosted_images_dict[openshift_deployment_type]) }}"
