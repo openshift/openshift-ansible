@@ -9,7 +9,7 @@
 # This is used in the subsequent task
 - name: Copy the admin client config
   command: >
-    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    cp /etc/origin/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
   changed_when: False
   check_mode: no
 

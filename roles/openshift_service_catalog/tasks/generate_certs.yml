@@ -1,14 +1,14 @@
 ---
 - name: Create service catalog cert directory
   file:
-    path: "{{ openshift.common.config_base }}/service-catalog"
+    path: "/etc/origin/service-catalog"
     state: directory
     mode: 0755
   changed_when: False
   check_mode: no
 
 - set_fact:
-    generated_certs_dir: "{{ openshift.common.config_base }}/service-catalog"
+    generated_certs_dir: "/etc/origin/service-catalog"
 
 - name: Generate signing cert
   command: >

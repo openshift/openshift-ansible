@@ -4,7 +4,7 @@
   # wait_for port doesn't provide health information.
   command: >
     curl --silent --tlsv1.2
-    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    --cacert /etc/origin/master/ca-bundle.crt
     {{ openshift.master.api_url }}/healthz/ready
   register: l_api_available_output
   until: l_api_available_output.stdout == 'ok'
@@ -17,7 +17,7 @@
 - name: "Collect verbose curl output when API didn't become available"
   command: >-
     curl --verbose --tlsv1.2
-    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    --cacert /etc/origin/master/ca-bundle.crt
     {{ openshift.master.api_url }}/healthz/ready
   register: l_api_available_verbose_output
   failed_when: false

@@ -2,7 +2,7 @@
 # TODO: Remove when asset config is removed from master-config.yaml
 - name: Adding Kibana route information to loggingPublicURL
   modify_yaml:
-    dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    dest: "/etc/origin/master/master-config.yaml"
     yaml_key: assetConfig.loggingPublicURL
     yaml_value: "https://{{ openshift_logging_kibana_hostname }}"
   notify:

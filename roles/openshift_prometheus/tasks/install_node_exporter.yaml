@@ -17,7 +17,7 @@
 
 - name: Copy admin client config
   command: >
-    cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    cp /etc/origin/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
   changed_when: false
 
 # create clusterrolebinding for prometheus-node-exporter serviceaccount

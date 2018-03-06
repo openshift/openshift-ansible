@@ -12,7 +12,7 @@
 
   - name: Copy admin client config(s)
     command: >
-      cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+      cp /etc/origin/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
     changed_when: false
 
   - name: Determine if docker-registry exists
@@ -63,13 +63,13 @@
     - name: Generate registry certificate
       command: >
         {{ openshift_client_binary }} adm ca create-server-cert
-        --signer-cert={{ openshift.common.config_base }}/master/ca.crt
-        --signer-key={{ openshift.common.config_base }}/master/ca.key
-        --signer-serial={{ openshift.common.config_base }}/master/ca.serial.txt
+        --signer-cert=/etc/origin/master/ca.crt
+        --signer-key=/etc/origin/master/ca.key
+        --signer-serial=/etc/origin/master/ca.serial.txt
         --config={{ mktemp.stdout }}/admin.kubeconfig
         --hostnames="{{ docker_registry_service_ip.results.clusterip }},docker-registry.default.svc,docker-registry.default.svc.cluster.local,{{ docker_registry_route_hostname }}"
-        --cert={{ openshift.common.config_base }}/master/registry.crt
-        --key={{ openshift.common.config_base }}/master/registry.key
+        --cert=/etc/origin/master/registry.crt
+        --key=/etc/origin/master/registry.key
         --expire-days={{ openshift_hosted_registry_cert_expire_days | default(730) }}
 
     - name: Update registry certificates secret
@@ -80,9 +80,9 @@
         state: present
         files:
         - name: registry.crt
-          path: "{{ openshift.common.config_base }}/master/registry.crt"
+          path: "/etc/origin/master/registry.crt"
         - name: registry.key
-          path: "{{ openshift.common.config_base }}/master/registry.key"
+          path: "/etc/origin/master/registry.key"
       run_once: true
     when: l_docker_registry_dc.rc == 0 and 'registry-certificates' in docker_registry_secrets and 'REGISTRY_HTTP_TLS_CERTIFICATE' in docker_registry_env_vars and 'REGISTRY_HTTP_TLS_KEY' in docker_registry_env_vars
 

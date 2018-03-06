@@ -72,7 +72,7 @@
   - name: Drain Node for Kubelet upgrade
     command: >
       {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
-      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --config=/etc/origin/master/admin.kubeconfig
       --force --delete-local-data --ignore-daemonsets
       --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"

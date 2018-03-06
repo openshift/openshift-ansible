@@ -1,5 +1,5 @@
 ---
-kubeconfig: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"
+kubeconfig: "/etc/origin/master/openshift-master.kubeconfig"
 
 calicoctl_bin_dir: "/usr/local/bin/"
 

@@ -62,7 +62,7 @@
   - name: Deploy service signer certificate
     copy:
       src: "{{ hostvars.localhost.local_cert_sync_tmpdir.stdout }}/{{ item }}"
-      dest: "{{ openshift.common.config_base }}/master/"
+      dest: "/etc/origin/master/"
     with_items:
     - "service-signer.crt"
     - "service-signer.key"

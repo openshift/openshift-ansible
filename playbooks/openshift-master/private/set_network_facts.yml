@@ -4,10 +4,10 @@
   gather_facts: no
   tasks:
   - stat:
-      path: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      path: "/etc/origin/master/master-config.yaml"
     register: g_master_config_stat
   - slurp:
-      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      src: "/etc/origin/master/master-config.yaml"
     register: g_master_config_slurp
 
 - name: Set network facts for masters

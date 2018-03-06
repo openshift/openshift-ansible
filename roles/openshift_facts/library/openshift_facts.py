@@ -613,8 +613,7 @@ def set_sdn_facts_if_unset(facts, system_facts):
         sdn_cluster_network_cidr = '10.128.0.0/14'
         sdn_host_subnet_length = '9'
 
-        master_cfg_path = os.path.join(facts['common']['config_base'],
-                                       'master/master-config.yaml')
+        master_cfg_path = '/etc/origin/master/master-config.yaml'
         if os.path.isfile(master_cfg_path):
             with open(master_cfg_path, 'r') as master_cfg_f:
                 config = yaml.safe_load(master_cfg_f.read())
@@ -751,8 +750,7 @@ def get_current_config(facts):
 
 def build_controller_args(facts):
     """ Build master controller_args """
-    cloud_cfg_path = os.path.join(facts['common']['config_base'],
-                                  'cloudprovider')
+    cloud_cfg_path = '/etc/origin/cloudprovider'
     if 'master' in facts:
         controller_args = {}
         if 'cloudprovider' in facts:
@@ -773,8 +771,7 @@ def build_controller_args(facts):
 
 def build_api_server_args(facts):
     """ Build master api_server_args """
-    cloud_cfg_path = os.path.join(facts['common']['config_base'],
-                                  'cloudprovider')
+    cloud_cfg_path = '/etc/origin/cloudprovider'
     if 'master' in facts:
         api_server_args = {}
         if 'cloudprovider' in facts:
@@ -1416,8 +1413,7 @@ class OpenShiftFacts(object):
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
-                                  dns_domain='cluster.local',
-                                  config_base='/etc/origin')
+                                  dns_domain='cluster.local')
 
         if 'master' in roles:
             defaults['master'] = dict(api_use_ssl=True, api_port='8443',
