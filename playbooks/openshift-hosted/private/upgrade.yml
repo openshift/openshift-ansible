@@ -1,0 +1,14 @@
+---
+# This play is called during upgrade_control_plane via post_control_plane.yml
+- name: Upgrade default router and default registry
+  hosts: oo_first_master
+  roles:
+  - lib_utils
+  - openshift_facts
+  tasks:
+  - import_role:
+      name: openshift_hosted
+      tasks_from: upgrade_routers.yml
+  - import_role:
+      name: openshift_hosted
+      tasks_from: upgrade_registry.yml
