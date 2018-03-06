@@ -1,6 +1,6 @@
 allowDisabledDocker: false
 apiVersion: v1
-{% if openshift.common.version_gte_3_6 %}
+{% if openshift_version_gte_3_6 %}
 dnsBindAddress: 127.0.0.1:53
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
 {% endif %}

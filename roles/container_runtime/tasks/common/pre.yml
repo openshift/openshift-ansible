@@ -6,7 +6,7 @@
   set_fact:
     l2_docker_additional_registries: "{{ l2_docker_additional_registries + [openshift_docker_ent_reg] }}"
   when:
-    - openshift.common.deployment_type == 'openshift-enterprise'
+    - openshift_deployment_type == 'openshift-enterprise'
     - openshift_docker_ent_reg != ''
     - openshift_docker_ent_reg not in l2_docker_additional_registries
     - not openshift_use_crio_only | bool

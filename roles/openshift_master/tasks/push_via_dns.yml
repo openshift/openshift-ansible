@@ -10,4 +10,4 @@
     register: l_already_set
 
   - set_fact:
-      openshift_push_via_dns: "{{ openshift.common.version_gte_3_6 or (l_already_set.stdout is defined and l_already_set.stdout is match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
+      openshift_push_via_dns: "{{ openshift_version_gte_3_6 or (l_already_set.stdout is defined and l_already_set.stdout is match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"

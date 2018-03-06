@@ -173,7 +173,7 @@
 
 # Only add the catalog extension script if not 3.9. From 3.9 on, the console
 # can discover if template service broker is running.
-- when: not openshift.common.version_gte_3_9
+- when: not openshift_version_gte_3_9
   block:
   - name: Setup extension file for service console UI
     template:
