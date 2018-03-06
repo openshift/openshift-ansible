@@ -75,4 +75,6 @@
   tasks:
   - set_fact:
       openshift_web_console_install: False
-    when: openshift_deployment_subtype == 'registry' or ( osm_disabled_features is defined and 'WebConsole' in osm_disabled_features )
+    when:
+    - openshift_deployment_subtype is defined
+    - openshift_deployment_subtype == 'registry' or ( osm_disabled_features is defined and 'WebConsole' in osm_disabled_features )

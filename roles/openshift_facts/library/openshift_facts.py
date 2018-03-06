@@ -375,33 +375,6 @@ def normalize_provider_facts(provider, metadata):
     return facts
 
 
-def set_identity_providers_if_unset(facts):
-    """ Set identity_providers fact if not already present in facts dict
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated identity providers
-            facts if they were not already present
-    """
-    if 'master' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if 'identity_providers' not in facts['master']:
-            identity_provider = dict(
-                name='allow_all', challenge=True, login=True,
-                kind='AllowAllPasswordIdentityProvider'
-            )
-            if deployment_type == 'openshift-enterprise':
-                identity_provider = dict(
-                    name='deny_all', challenge=True, login=True,
-                    kind='DenyAllPasswordIdentityProvider'
-                )
-
-            facts['master']['identity_providers'] = [identity_provider]
-
-    return facts
-
-
 def set_url_facts_if_unset(facts):
     """ Set url facts if not already present in facts dict
 
@@ -514,31 +487,6 @@ def set_aggregate_facts(facts):
 
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
-
-    return facts
-
-
-def set_deployment_facts_if_unset(facts):
-    """ Set Facts that vary based on deployment_type. This currently
-        includes master.registry_url
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated deployment_type
-            facts
-    """
-    if 'master' in facts:
-        deployment_type = facts['common']['deployment_type']
-        openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
-        if 'disabled_features' not in facts['master']:
-            if facts['common']['deployment_subtype'] == 'registry':
-                facts['master']['disabled_features'] = openshift_features
-        if 'registry_url' not in facts['master']:
-            registry_url = 'openshift/origin-${component}:${version}'
-            if deployment_type == 'openshift-enterprise':
-                registry_url = 'openshift3/ose-${component}:${version}'
-            facts['master']['registry_url'] = registry_url
 
     return facts
 
@@ -1207,17 +1155,7 @@ class OpenShiftFacts(object):
                                             additive_facts_to_overwrite)
         roles = local_facts.keys()
 
-        if 'common' in local_facts and 'deployment_type' in local_facts['common']:
-            deployment_type = local_facts['common']['deployment_type']
-        else:
-            deployment_type = 'origin'
-
-        if 'common' in local_facts and 'deployment_subtype' in local_facts['common']:
-            deployment_subtype = local_facts['common']['deployment_subtype']
-        else:
-            deployment_subtype = 'basic'
-
-        defaults = self.get_defaults(roles, deployment_type, deployment_subtype)
+        defaults = self.get_defaults(roles)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
@@ -1225,8 +1163,6 @@ class OpenShiftFacts(object):
                             additive_facts_to_overwrite)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
-        facts = set_identity_providers_if_unset(facts)
-        facts = set_deployment_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
@@ -1238,7 +1174,7 @@ class OpenShiftFacts(object):
         facts = set_nodename(facts)
         return dict(openshift=facts)
 
-    def get_defaults(self, roles, deployment_type, deployment_subtype):
+    def get_defaults(self, roles):
         """ Get default fact values
 
             Args:
@@ -1257,8 +1193,6 @@ class OpenShiftFacts(object):
 
         defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
-                                  deployment_type=deployment_type,
-                                  deployment_subtype=deployment_subtype,
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',

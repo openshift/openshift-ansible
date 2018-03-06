@@ -63,8 +63,8 @@ corsAllowedOrigins:
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
   - (?i)//{{ custom_origin | regex_escape() }}(:|\z)
 {% endfor %}
-{% if 'disabled_features' in openshift.master %}
-disabledFeatures: {{ openshift.master.disabled_features | to_json }}
+{% if l_osm_disabled_features %}
+disabledFeatures: {{ l_osm_disabled_features_list | to_json }}
 {% endif %}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
@@ -85,7 +85,7 @@ etcdStorageConfig:
   openShiftStoragePrefix: openshift.io
   openShiftStorageVersion: v1
 imageConfig:
-  format: {{ openshift.master.registry_url }}
+  format: {{ l_osm_registry_url }}
   latest: {{ openshift_master_image_config_latest }}
 {% if 'image_policy_config' in openshift.master %}
 imagePolicyConfig:{{ openshift.master.image_policy_config | lib_utils_to_padded_yaml(level=1) }}
