@@ -15,7 +15,6 @@ configuration.
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
-* [Security Configuration](#security-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 
@@ -47,8 +46,6 @@ In `inventory/group_vars/all.yml`:
 * `openshift_openstack_etcd_flavor`
 
 * `openshift_openstack_external_network_name` OpenStack network providing external connectivity.
-* `openshift_openstack_private_network_name` OpenStack network providing admin/control access for Ansible. It can be merged with other
-cluster networks; there are no special requirements for networking.
 
 * `openshift_openstack_cluster_node_labels` Custom labels for openshift cluster node groups; currently supports app and infra node groups.
 The default value of this variable sets `region: primary` to app nodes and `region: infra` to infra nodes. An example of setting a customized label:
@@ -59,7 +56,7 @@ openshift_openstack_cluster_node_labels:
     mylabel: myvalue
 ```
 
-* `openshift_openstack_provision_user_commands` Allows users to execute shell commands via cloud-init for all of the created Nova servers in the Heat stack, before they are available for SSH connections. Note that you should use custom Ansible playbooks whenever possible. User specified shell commands for cloud-init need to be either strings or lists:
+* `openshift_openstack_provision_user_commands` Allows users to execute shell commands via cloud-init for all of the created Nova servers in the Heat stack, before they are available for SSH connections. Note that you should use [custom Ansible playbooks](./configuration.md#dns-configuration) whenever possible. User specified shell commands for cloud-init need to be either strings or lists:
 
 ```
 - openshift_openstack_provision_user_commands:
@@ -82,7 +79,7 @@ openshift_openstack_cluster_node_labels:
 
 * `openshift_openstack_flat_secgrp` Set to True if you experience issues with sec group rules quotas. It trades security for number of rules, by sharing the same set of firewall rules for master, node, etcd and infra nodes.
 
-* `openshift_openstack_required_packages` List of additional prerequisite packages to be installed before deploying an OpenShift cluster. Ignored if `manage_packages: False`.
+* `openshift_openstack_required_packages` List of additional prerequisite packages to be installed before deploying an OpenShift cluster.
 
 
 ## OpenShift Configuration
@@ -160,27 +157,6 @@ by OpenShift on OSP10 reference architecture, and used in a mixed mode with
 another external DNS server.
 
 
-## Flannel Networking Configuration
-
-In order to configure the
-[Flannel networking](https://docs.openshift.com/container-platform/3.6/install_config/configuring_sdn.html#using-flannel),
-uncomment and adjust the appropriate `inventory/group_vars/OSEv3.yml` group vars.
-Note that the `osm_cluster_network_cidr` must not overlap with the default
-Docker bridge subnet of 172.17.0.0/16. Or you should change the docker0 default
-CIDR range otherwise. For example, by adding `--bip=192.168.2.1/24` to
-`DOCKER_NETWORK_OPTIONS` located in `/etc/sysconfig/docker-network`.
-
-Also note that the flannel network will be provisioned on a separate isolated Neutron
-subnet defined from `osm_cluster_network_cidr` and having ports security disabled.
-Use the `openstack_private_data_network_name` variable to define the network
-name for the heat stack resource.
-
-After the cluster deployment done, you should run an additional post installation
-step for flannel and docker iptables configuration:
-
-    ansible-playbook openshift-ansible-contrib/playbooks/provisioning/openstack/post-install.yml
-
-
 ## Kuryr Networking Configuration
 
 If you opt to use Kuryr for networking, make sure that you review all
@@ -224,28 +200,6 @@ resolve each other by name.
 In `inventory/group_vars/all.yml`:
 
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
-
-
-## Security Configuration
-
-Configure required `*_ingress_cidr` variables to restrict public access
-to provisioned servers from your laptop (a /32 notation should be used)
-or your trusted network.
-
-You can use the command ``curl https://api.ipify.org`` to find the external
-IP address of your box (the ansible admin node).
-
-In `inventory/group_vars/all.yml`:
-
-* `openshift_openstack_node_ingress_cidr` Restricts public access to the deployed DNS server and cluster nodes' ephemeral ports range.
-* `openshift_openstack_ssh_ingress_cidr`
-* `openshift_openstack_lb_ingress_cidr`
-
-There is also the `manage_packages` variable (defaults to True) you
-may want to turn off in order to speed up the provisioning tasks. This may
-be the case for development environments. When turned off, the servers will
-be provisioned omitting the ``yum update`` command. This brings security
-implications though, and is not recommended for production deployments.
 
 
 ## Cinder-Backed Persistent Volumes Configuration
@@ -354,73 +308,7 @@ spec:
 
 ## Cinder-Backed Registry Configuration
 
-You can optionally have the playbooks create a Cinder volume and set
-it up as the OpenShift hosted registry.
-
-To do that you need specify the desired Cinder volume name and size in
-Gigabytes in `inventory/group_vars/all.yml`:
-
-    openshift_openstack_cinder_hosted_registry_name: cinder-registry
-    openshift_openstack_cinder_hosted_registry_size_gb: 10
-
-With this, the playbooks will create the volume and set up its
-filesystem. If there is an existing volume of the same name, we will
-use it but keep the existing data on it.
-
-To use the volume for the registry, you must first configure it with
-the OpenStack credentials by putting the following to `OSEv3.yml`:
-
-    openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
-    openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
-    openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
-    openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_TENANT_NAME') }}"
-
-This will use the credentials from your shell environment. If you want
-to enter them explicitly, you can. You can also use credentials
-different from the provisioning ones (say for quota or access control
-reasons).
-
-**NOTE**: If you're testing this on (DevStack)[devstack], you must
-explicitly set your Keystone API version to v2 (e.g.
-`OS_AUTH_URL=http://10.34.37.47/identity/v2.0`) instead of the default
-value provided by `openrc`. You may also encounter the following issue
-with Cinder:
-
-https://github.com/kubernetes/kubernetes/issues/50461
-
-You can read the (OpenShift documentation on configuring
-OpenStack)[openstack] for more information.
-
-[devstack]: https://docs.openstack.org/devstack/latest/
-[openstack]: https://docs.openshift.org/latest/install_config/configuring_openstack.html
-
-
-Next, we need to instruct OpenShift to use the Cinder volume for its
-registry. Again in `OSEv3.yml`:
-
-    #openshift_hosted_registry_storage_kind: openstack
-    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
-    #openshift_hosted_registry_storage_openstack_filesystem: xfs
-
-The filesystem value here will be used in the initial formatting of
-the volume.
-
-If you're using the dynamic inventory, you must uncomment these two values as
-well:
-
-    #openshift_hosted_registry_storage_openstack_volumeID: "{{ lookup('os_cinder', openshift_openstack_cinder_hosted_registry_name).id }}"
-    #openshift_hosted_registry_storage_volume_size: "{{ openshift_openstack_cinder_hosted_registry_size_gb }}Gi"
-
-But note that they use the `os_cinder` lookup plugin we provide, so you must
-tell Ansible where to find it either in `ansible.cfg` (the one we provide is
-configured properly) or by exporting the
-`ANSIBLE_LOOKUP_PLUGINS=openshift-ansible-contrib/lookup_plugins` environment
-variable.
-
-
-### Using an existing Cinder volume for the OpenShift registry
-
-You can also use a pre-existing Cinder volume for the storage of your
+You can use a pre-existing Cinder volume for the storage of your
 OpenShift registry.
 
 To do that, you need to have a Cinder volume. You can create one by
