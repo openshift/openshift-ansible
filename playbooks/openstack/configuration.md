@@ -56,7 +56,7 @@ openshift_openstack_cluster_node_labels:
     mylabel: myvalue
 ```
 
-* `openshift_openstack_provision_user_commands` Allows users to execute shell commands via cloud-init for all of the created Nova servers in the Heat stack, before they are available for SSH connections. Note that you should use [custom Ansible playbooks](./configuration.md#dns-configuration) whenever possible. User specified shell commands for cloud-init need to be either strings or lists:
+* `openshift_openstack_provision_user_commands` Allows users to execute shell commands via cloud-init for all of the created Nova servers in the Heat stack, before they are available for SSH connections. Note that you should use [custom Ansible playbooks](./post-install.md#run-custom-post-provision-actions) whenever possible. User specified shell commands for cloud-init need to be either strings or lists:
 
 ```
 - openshift_openstack_provision_user_commands:
