@@ -6,7 +6,7 @@
   until: result is succeeded
 
 - name: Check for existence of fusefs sebooleans
-  command: getsebool {{ item }}
+  command: /usr/sbin/getsebool {{ item }}
   register: fusefs_getsebool_status
   when:
   - ansible_selinux
