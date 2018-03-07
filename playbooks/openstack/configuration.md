@@ -27,29 +27,34 @@ Environment variables may also be used.
 In `inventory/group_vars/all.yml`:
 
 * `openshift_openstack_keypair_name` OpenStack keypair to use.
-
-* `openshift_openstack_num_masters` Number of master nodes to create.
-* `openshift_openstack_num_infra` Number of infra nodes to create.
-* `openshift_openstack_num_nodes` Number of app nodes to create.
-
-* `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
-* `openshift_openstack_master_image_name`
-* `openshift_openstack_infra_image_name`
-* `openshift_openstack_cns_image_name`
-* `openshift_openstack_node_image_name`
-* `openshift_openstack_lb_image_name`
-* `openshift_openstack_etcd_image_name`
-
-* `openshift_openstack_default_flavor` OpenStack flavor used by all VMs, unless a particular role flavor name is specified.
-* `openshift_openstack_master_flavor`
-* `openshift_openstack_infra_flavor`
-* `openshift_openstack_cns_flavor`
-* `openshift_openstack_node_flavor`
-* `openshift_openstack_lb_flavor`
-* `openshift_openstack_etcd_flavor`
-
+* Role Node Counts
+  * `openshift_openstack_num_masters` Number of master nodes to create.
+  * `openshift_openstack_num_infra` Number of infra nodes to create.
+  * `openshift_openstack_num_nodes` Number of app nodes to create.
+* Role Images
+  * `openshift_openstack_default_image_name` OpenStack image used by all VMs, unless a particular role image name is specified.
+  * `openshift_openstack_master_image_name`
+  * `openshift_openstack_infra_image_name`
+  * `openshift_openstack_cns_image_name`
+  * `openshift_openstack_node_image_name`
+  * `openshift_openstack_lb_image_name`
+  * `openshift_openstack_etcd_image_name`
+* Role Flavors
+  * `openshift_openstack_default_flavor` OpenStack flavor used by all VMs, unless a particular role flavor name is specified.
+  * `openshift_openstack_master_flavor`
+  * `openshift_openstack_infra_flavor`
+  * `openshift_openstack_cns_flavor`
+  * `openshift_openstack_node_flavor`
+  * `openshift_openstack_lb_flavor`
+  * `openshift_openstack_etcd_flavor`
+* Role Hostnames: used for customizing public names of Nova servers provisioned with a given role.
+  * `openshift_openstack_master_hostname` Defaults to `master`.
+  * `openshift_openstack_infra_hostname` Defaults to `infra-node`.
+  * `openshift_openstack_cns_hostname` Defaults to `cns`.
+  * `openshift_openstack_node_hostname` Defaults to `app-node`.
+  * `openshift_openstack_lb_hostname` Defaults to `lb`.
+  * `openshift_openstack_etcd_hostname` Defaults to `etcd`.
 * `openshift_openstack_external_network_name` OpenStack network providing external connectivity.
-
 * `openshift_openstack_cluster_node_labels` Custom labels for openshift cluster node groups; currently supports app and infra node groups.
 The default value of this variable sets `region: primary` to app nodes and `region: infra` to infra nodes. An example of setting a customized label:
 
@@ -115,57 +120,47 @@ your deployment, you must set `OPENSHIFT_CLUSTER` to your stack name to avoid er
 
 ## DNS Configuration
 
-Pay special attention to the values in the first paragraph -- these
-will depend on your OpenStack environment.
-
 Note that the provisioning playbooks update the original Neutron subnet
 created with the Heat stack to point to the configured DNS servers.
 So the provisioned cluster nodes will start using those natively as
-default nameservers. Technically, this allows to deploy OpenShift clusters
-without dnsmasq proxies.
+default nameservers. Technically, this allows the deployment of OpenShift
+clusters without dnsmasq proxies.
 
-The `openshift_openstack_clusterid` and `openshift_openstack_public_dns_domain`
-will form the cluster's public DNS domain all your servers will be under. With
-the default values, this will be `openshift.example.com`. For workloads, the
-default subdomain is 'apps'. That subdomain can be set as well by the
-`openshift_openstack_app_subdomain` variable in the inventory.
+In `inventory/group_vars/all.yml`:
 
-If you want to use a two sets of hostnames for public and private/prefixed DNS
-records for your externally managed public DNS server, you can specify
-`openshift_openstack_public_hostname_suffix` and/or
-`openshift_openstack_private_hostname_suffix`. The suffixes will be added
-to the nsupdate records sent to the external DNS server. Those are empty by default.
+* `openshift_openstack_clusterid` Defaults to `openshift`
+* `openshift_openstack_public_dns_domain` Defaults to `example.com`
 
-**Note** the real hostnames, Nova servers' or ansible hostnames and inventory
-variables will not be updated. The deployment may be done on arbitrary named
-hosts with the hostnames managed by cloud-init. Inventory hostnames will ignore
-the suffixes.
+These two parameters together form the cluster's public DNS domain that all
+the servers will be under; by default this domain will be `openshift.example.com`.
 
-The `openstack_<role name>_hostname` is a set of variables used for customising
-public names of Nova servers provisioned with a given role. When such a variable stays commented,
-default value (usually the role name) is used.
+* `openshift_openstack_app_subdomain` Subdomain for workloads. Defaults to `apps`.
 
-The `openshift_openstack_dns_nameservers` is a list of DNS servers accessible from all
-the created Nova servers. These will provide the internal name resolution for
-your OpenShift nodes (as well as upstream name resolution for installing
-packages, etc.).
+* `openshift_openstack_public_hostname_suffix` Empty by default.
+* `openshift_openstack_private_hostname_suffix` Empty by default.
 
-The `openshift_use_dnsmasq` controls either dnsmasq is deployed or not.
-By default, dnsmasq is deployed and comes as the hosts' /etc/resolv.conf file
-first nameserver entry that points to the local host instance of the dnsmasq
-daemon that in turn proxies DNS requests to the authoritative DNS server.
-When Network Manager is enabled for provisioned cluster nodes, which is
-normally the case, you should not change the defaults and always deploy dnsmasq.
+If you want to use two sets of hostnames for public and private/prefixed DNS
+records for your externally managed public DNS server, you can specify the
+`openshift_openstack_*_hostname_suffix` parameters. These suffixes are added to
+the nsupdate records sent to the external DNS server. Note that the real hostnames,
+Nova servers, and ansible hostnames and inventory variables are not be updated.
+The deployment may be done on arbitrary named hosts with the hostnames managed by
+cloud-init. Inventory hostnames will ignore these suffixes.
 
-`openshift_openstack_external_nsupdate_keys` describes an external authoritative DNS server(s)
-processing dynamic records updates in the public only cluster view:
+* `openshift_openstack_dns_nameservers` List of DNS servers accessible from all the created Nova servers. These will provide the internal name resolution for your OpenShift nodes (as well as upstream name resolution for installing packages, etc.).
 
+* `openshift_use_dnsmasq` Controls whether dnsmasq is deployed or not.By default, dnsmasq is deployed and comes as the hosts' /etc/resolv.conf file first nameserver entry that points to the local host instance of the dnsmasq daemon that in turn proxies DNS requests to the authoritative DNS server. When Network Manager is enabled for provisioned cluster nodes, which is normally the case, you should not change the defaults and always deploy dnsmasq.
+
+* `openshift_openstack_external_nsupdate_keys` Describes an external authoritative DNS server(s) processing dynamic records updates in the public only cluster view. For example:
+
+```
     openshift_openstack_external_nsupdate_keys:
       public:
         key_secret: <some nsupdate key>
         key_algorithm: 'hmac-md5'
         key_name: 'update-key'
         server: <public DNS server IP>
+```
 
 Here, for the public view section, we specified another key algorithm and
 optional `key_name`, which normally defaults to the cluster's DNS domain.
