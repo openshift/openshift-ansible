@@ -330,7 +330,7 @@
       regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
 
   - name: Detect Docker storage configuration
-    shell: vgs -o name | grep docker
+    shell: /usr/sbin/vgs -o name | grep docker
     register: docker_vg_name
     failed_when: false
     changed_when: false
