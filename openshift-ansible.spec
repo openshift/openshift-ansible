@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.36
+Version:        3.7.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.7.37-1
+- During master upgrade reset loopback config (sdodson@redhat.com)
+
 * Thu Mar 01 2018 Justin Pierce <jupierce@redhat.com> 3.7.36-1
 - Fixing evaluating if ops deployment needs to skip health check, removing
   logic for determining version, fixing pod check for elasticsearch to get
