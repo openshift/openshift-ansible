@@ -1,7 +1,7 @@
 ---
 - name: Trigger init.main.yml
   import_playbook: ../../init/main.yml
-  when: full_deploy is undefined
+  when: init_called is undefined
 
 - name: Metrics Install Checkpoint Start
   hosts: all

@@ -1,7 +1,4 @@
 ---
-- set_fact:
-  full_install: true
-
 - import_playbook: init/main.yml
 
 - import_playbook: common/private/control_plane.yml
