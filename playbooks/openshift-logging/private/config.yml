@@ -55,7 +55,7 @@
   - include_role:
       name: openshift_logging
       tasks_from: update_master_config
-    when: not openshift.common.version_gte_3_9
+    when: not openshift_version_gte_3_9
 
 - name: Logging Install Checkpoint End
   hosts: all
