@@ -234,5 +234,4 @@ openstack stack delete --wait --yes openshift.example.com
 [get-the-oc-client]: ./post-install.md#get-the-oc-client
 [log-in-using-the-command-line]: ./post-install.md#log-in-using-the-command-line
 [access-the-ui]: ./post-install.md#access-the-ui
-[scale-deployment]: ./post-install.md#scale-deployment
 [dynamic]: http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html
