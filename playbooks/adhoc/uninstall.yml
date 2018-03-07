@@ -336,7 +336,7 @@
     changed_when: false
 
   - name: Wipe out Docker storage contents
-    command: vgremove -f {{ item }}
+    command: /usr/sbin/vgremove -f {{ item }}
     with_items: "{{ docker_vg_name.stdout_lines }}"
     when: docker_vg_name.rc == 0
 
