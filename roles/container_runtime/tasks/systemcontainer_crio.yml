@@ -26,7 +26,7 @@
         backup: yes
 
     - name: Manually modprobe overlay into the kernel
-      command: modprobe overlay
+      command: /usr/sbin/modprobe overlay
 
     - name: Enable and start systemd-modules-load
       service:
