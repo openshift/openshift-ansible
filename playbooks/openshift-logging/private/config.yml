@@ -1,6 +1,6 @@
 ---
 - name: Trigger init.main.yml
-  import_playbook: init/main.yml
+  import_playbook: ../../init/main.yml
   when: full_deploy is undefined
 
 - name: Logging Install Checkpoint Start
