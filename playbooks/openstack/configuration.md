@@ -12,12 +12,14 @@ Environment variables may also be used.
 
 * [OpenStack Configuration](#openstack-configuration)
 * [OpenShift Configuration](#openshift-configuration)
+* [OpenShift Configuration](#openshift-configuration)
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
+* [OpenStack Credential Configuration](#openstack-credential-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 
@@ -212,22 +214,16 @@ In `inventory/group_vars/all.yml`:
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
 
 
-## Cinder-Backed Persistent Volumes Configuration
+## OpenStack Credential Configuration
 
-You will need to set up OpenStack credentials. You can try putting this in your
-`inventory/group_vars/OSEv3.yml`:
+Some features require you to configure OpenStack credentials. In `inventory/group_vars/OSEv3.yml`:
 
-    openshift_cloudprovider_kind: openstack
-    openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
-    openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
-    openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
-    openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
-    openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
-    openshift_cloudprovider_openstack_blockstorage_version: v2
-
-**NOTE**: you must specify the Block Storage version as v2, because OpenShift
-does not support the v3 API yet and the version detection is currently not
-working properly.
+* `openshift_cloudprovider_kind: openstack
+* `openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
+* `openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
+* `openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
+* `openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
+* `openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
 
 For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
 
@@ -240,7 +236,18 @@ provided OpenStack dynamic inventory and configure the
 `openshift_openstack_dns_nameservers` Ansible variable, this will be handled
 for you.
 
-After a successful deployment, the cluster is configured for Cinder persistent
+
+## Cinder-Backed Persistent Volumes Configuration
+
+In addition to [setting up OpenStack credentials](#openstack-credential-configuration),
+you must set the following in `inventory/group_vars/OSEv3.yml`:
+
+* `openshift_cloudprovider_openstack_blockstorage_version`: v2
+
+The Block Storage version must be set to `v2`, because OpenShift does not support
+the v3 API yet and the version detection currently does not work.
+
+After a successful deployment, the cluster will be configured for Cinder persistent
 volumes.
 
 ### Validation
@@ -319,29 +326,24 @@ spec:
 ## Cinder-Backed Registry Configuration
 
 You can use a pre-existing Cinder volume for the storage of your
-OpenShift registry.
+OpenShift registry. To do that, you need to have a Cinder volume.
+You can create one by running:
 
-To do that, you need to have a Cinder volume. You can create one by
-running:
-
-    openstack volume create --size <volume size in gb> <volume name>
+```
+openstack volume create --size <volume size in gb> <volume name>
+```
 
 The volume needs to have a file system created before you put it to
 use.
 
-As with the automatically-created volume, you have to set up the
-OpenStack credentials in `inventory/group_vars/OSEv3.yml` as well as
-registry values:
+Once the volume is created, [set up OpenStack credentials](#openstack-credential-configuration),
+and then set the following in `inventory/group_vars/OSEv3.yml`:
 
-    #openshift_hosted_registry_storage_kind: openstack
-    #openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
-    #openshift_hosted_registry_storage_openstack_filesystem: xfs
-    #openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
-    #openshift_hosted_registry_storage_volume_size: 10Gi
-
-Note the `openshift_hosted_registry_storage_openstack_volumeID` and
-`openshift_hosted_registry_storage_volume_size` values: these need to
-be added in addition to the previous variables.
+* `openshift_hosted_registry_storage_kind`: openstack
+* `openshift_hosted_registry_storage_access_modes`: ['ReadWriteOnce']
+* `openshift_hosted_registry_storage_openstack_filesystem`: xfs
+* `openshift_hosted_registry_storage_openstack_volumeID`: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
+* `openshift_hosted_registry_storage_volume_size`: 10Gi
 
 The **Cinder volume ID**, **filesystem** and **volume size** variables
 must correspond to the values in your volume. The volume ID must be
@@ -350,12 +352,13 @@ the **UUID** of the Cinder volume, *not its name*.
 The volume can also be formatted if you configure it in
 `inventory/group_vars/all.yml`:
 
-    openshift_openstack_prepare_and_format_registry_volume: true
+* openshift_openstack_prepare_and_format_registry_volume: true
 
-**NOTE:** Formatting **will destroy any data that's currently on the volume**!
+Note that formatting **will destroy any data that's currently on the volume**!
 
-You can also run the registry setup playbook directly:
+If you already have a provisioned OpenShift cluster, you can also run the
+registry setup playbook directly:
 
-   ansible-playbook -i inventory playbooks/provisioning/openstack/prepare-and-format-cinder-volume.yaml
-
-(the provisioning phase must be completed, first)
+```
+ansible-playbook -i inventory playbooks/provisioning/openstack/prepare-and-format-cinder-volume.yaml
+```
