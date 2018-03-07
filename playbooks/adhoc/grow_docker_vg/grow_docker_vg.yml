@@ -162,7 +162,7 @@
     delay: 2
 
   - name: partition the new drive and make it lvm
-    command: parted /dev/xvdc --script -- mklabel msdos mkpart primary 0% 100% set 1 lvm
+    command: /usr/sbin/parted /dev/xvdc --script -- mklabel msdos mkpart primary 0% 100% set 1 lvm
 
   - name: pvcreate /dev/xvdc
     command: pvcreate /dev/xvdc1
