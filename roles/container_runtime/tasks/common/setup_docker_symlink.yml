@@ -19,7 +19,7 @@
         - "'already exists' not in results.stderr"
 
     - name: "restorecon the {{ docker_alt_storage_path }}"
-      command: "restorecon -r {{ docker_alt_storage_path }}"
+      command: "/sbin/restorecon -r {{ docker_alt_storage_path }}"
 
     - name: Remove the old docker location
       file:
