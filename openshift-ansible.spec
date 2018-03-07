@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.2.0%{?dist}
+Release:        0.3.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.3.0
+- 
+
 * Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.2.0
 - Add wait_for_pods to upgrade for hosted components (mgugino@redhat.com)
 - Refactor openshift.common.version to openshift_current_version
