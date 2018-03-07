@@ -34,7 +34,7 @@
   when: glusterfs_wipe
 
 - name: Get GlusterFS storage devices state
-  command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
+  command: "/usr/sbin/pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
   register: devices_info
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
