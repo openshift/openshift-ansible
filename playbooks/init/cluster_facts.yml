@@ -5,7 +5,14 @@
   hosts: "{{ l_init_fact_hosts | default('oo_all_hosts') }}"
   roles:
   - role: openshift_facts
+  - role: lib_utils
   tasks:
+  - name: get openshift_current_version
+    # get_current_openshift_version is a custom module in lib_utils
+    # this will set_fact openshift_current_version
+    get_current_openshift_version:
+      deployment_type: "{{ openshift_deployment_type }}"
+
   - name: Gather Cluster facts
     openshift_facts:
       role: common

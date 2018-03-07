@@ -30,4 +30,4 @@
         value: ""
   when:
     - openshift_web_console_install | default(true) | bool
-    - openshift.common.version_gte_3_9
+    - openshift_version_gte_3_9

@@ -1,7 +1,7 @@
 ---
 - name: Copy initial heketi resource files
   copy:
-    src: "{{ openshift.common.examples_content_version }}/{{ item }}"
+    src: "{{ openshift_examples_content_version }}/{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "deploy-heketi-template.yml"
