@@ -5,6 +5,10 @@
 - name: Poll for hosted pod deployments
   hosts: oo_first_master
   tasks:
+  # Need to set_fact variable for registry.
+  - import_role:
+      name: openshift_hosted
+      tasks_from: set_fact_workaround.yml
   - import_role:
       name: openshift_hosted
       tasks_from: wait_for_pod.yml
