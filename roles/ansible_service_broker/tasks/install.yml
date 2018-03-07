@@ -264,7 +264,7 @@
                     - name: HTTPS_PROXY
                       value: "{{ openshift.common.https_proxy  | default('') }}"
                     - name: NO_PROXY
-                      value: "{{ openshift.common.no_proxy  | default('') }}"
+                      value: "{{ ([openshift.common.no_proxy, '.default'] | join(',')) if openshift.get('common', {}).get('no_proxy') else '' }}"
                   resources: {}
                   terminationMessagePath: /tmp/termination-log
                   readinessProbe:
