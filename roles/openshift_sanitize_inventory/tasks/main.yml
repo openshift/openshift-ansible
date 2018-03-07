@@ -87,7 +87,6 @@
       openshift_master_extension_stylesheets, openshift_master_extensions
   when:
     - openshift_master_extension_scripts is defined or openshift_master_extension_stylesheets is defined or openshift_master_extensions is defined
-    - openshift_version | version_compare('3.9', '>=')
 
 - name: Ensure that web console port matches API server port
   fail:
@@ -98,4 +97,3 @@
   when:
     - openshift_master_console_port is defined
     - openshift_master_console_port != (openshift_master_api_port | default(8443))
-    - openshift_version | version_compare('3.9', '>=')
