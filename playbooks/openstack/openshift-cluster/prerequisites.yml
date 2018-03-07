@@ -1,5 +1,6 @@
 ---
 - hosts: localhost
+  any_errors_fatal: true
   tasks:
   - name: Check dependencies and OpenStack prerequisites
     import_role:

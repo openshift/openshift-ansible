@@ -1,5 +1,6 @@
 ---
 - name: Create the OpenStack resources for cluster installation
+  any_errors_fatal: true
   hosts: localhost
   tasks:
   - name: retrieve cluster name from the environment if present
@@ -17,6 +18,7 @@
 
 
 - name: Wait for the nodes and gather their facts
+  any_errors_fatal: true
   hosts: oo_all_hosts
   become: yes
   # NOTE: The nodes may not be up yet, don't gather facts here.
@@ -33,6 +35,7 @@
 # TODO(shadower): consider splitting this up so people can stop here
 # and configure their DNS if they have to.
 - name: Populate the DNS entries
+  any_errors_fatal: true
   hosts: localhost
   tasks:
   - name: Populate DNS entries
@@ -47,6 +50,7 @@
 - import_playbook: ../../init/basic_facts.yml
 
 - name: Optionally subscribe the RHEL nodes
+  any_errors_fatal: true
   hosts: oo_all_hosts
   become: yes
   gather_facts: yes

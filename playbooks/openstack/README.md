@@ -192,7 +192,16 @@ copy it to the directory you're going to run `ansible-playbook` from.
 $ cp openshift-ansible/ansible.cfg ansible.cfg
 ```
 
-Then run the provision + install playbook -- this will create the OpenStack
+We recommend adding an additional option:
+
+```cfg
+any_errors_fatal = true
+```
+
+This will abort the Ansible playbook execution as soon as any error is
+encountered.
+
+Now, run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
