@@ -98,7 +98,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-api-lb
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       vip_address: {{ openshift_openstack_kuryr_service_subnet_cidr | ipaddr('1') | ipaddr('address') }}
       vip_subnet: { get_resource: service_subnet }
 
@@ -109,7 +109,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-api-lb-listener
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       loadbalancer: { get_resource: api_lb }
       protocol: HTTPS
       protocol_port: 443
@@ -121,7 +121,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-api-lb-pool
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       protocol: HTTPS
       lb_algorithm: ROUND_ROBIN
       listener: { get_resource: api_lb_listener }
@@ -133,7 +133,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-pod-net
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
 
   pod_subnet:
     type: OS::Neutron::Subnet
@@ -145,7 +145,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-pod-subnet
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       dns_nameservers:
 {% for nameserver in openshift_openstack_dns_nameservers %}
         - {{ nameserver }}
@@ -158,7 +158,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-service-net
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
 
   service_subnet:
     type: OS::Neutron::Subnet
@@ -174,7 +174,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-service-subnet
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
 
 {% endif %}
 
@@ -185,7 +185,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-net
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
 
   subnet:
     type: OS::Neutron::Subnet
@@ -194,7 +194,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-subnet
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       network: { get_resource: net }
       cidr: {{ openshift_openstack_subnet_cidr }}
       allocation_pools:
@@ -209,13 +209,13 @@ resources:
   data_net:
     type: OS::Neutron::Net
     properties:
-      name: openshift-ansible-{{ openshift_openstack_stack_name }}-data-net
+      name: openshift-ansible-{{ openshift_openstack_full_dns_domain }}-data-net
       port_security_enabled: false
 
   data_subnet:
     type: OS::Neutron::Subnet
     properties:
-      name: openshift-ansible-{{ openshift_openstack_stack_name }}-data-subnet
+      name: openshift-ansible-{{ openshift_openstack_full_dns_domain }}-data-subnet
       network: { get_resource: data_net }
       cidr: {{ osm_cluster_network_cidr|default('10.128.0.0/14') }}
       gateway_ip: null
@@ -228,7 +228,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-router
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       external_gateway_info:
         network: {{ openshift_openstack_external_network_name }}
 
@@ -256,7 +256,7 @@ resources:
           str_replace:
             template: openshift-ansible-cluster_id-service-subnet-router-port
             params:
-              cluster_id: {{ openshift_openstack_stack_name }}
+              cluster_id: {{ openshift_openstack_full_dns_domain }}
 
   service_subnet_interface:
     type: OS::Neutron::RouterInterface
@@ -274,7 +274,7 @@ resources:
 #        str_replace:
 #          template: openshift-ansible-cluster_id-keypair
 #          params:
-#            cluster_id: {{ openshift_openstack_stack_name }}
+#            cluster_id: {{ openshift_openstack_full_dns_domain }}
 #      public_key: {{ openshift_openstack_keypair_name }}
 
   common-secgrp:
@@ -284,12 +284,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-common-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Basic ssh/icmp security group for cluster_id OpenShift cluster
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         - direction: ingress
           protocol: tcp
@@ -308,7 +308,7 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-pod-service-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description: Give services and nodes access to the pods
       rules:
       - ethertype: IPv4
@@ -327,12 +327,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-flat-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Security group for cluster_id OpenShift cluster
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         - direction: ingress
           protocol: tcp
@@ -422,12 +422,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-master-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Security group for cluster_id OpenShift cluster master
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         - direction: ingress
           protocol: tcp
@@ -483,12 +483,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-etcd-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Security group for cluster_id etcd cluster
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         - direction: ingress
           protocol: tcp
@@ -509,12 +509,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-node-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Security group for cluster_id OpenShift cluster nodes
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         # NOTE(shadower): the 53 rules are needed for Kuryr
         - direction: ingress
@@ -564,12 +564,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-infra-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Security group for cluster_id OpenShift infrastructure cluster nodes
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         - direction: ingress
           protocol: tcp
@@ -591,12 +591,12 @@ resources:
         str_replace:
           template: openshift-ansible-cluster_id-cns-secgrp
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       description:
         str_replace:
           template: Security group for cluster_id OpenShift cns cluster nodes
           params:
-            cluster_id: {{ openshift_openstack_stack_name }}
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules:
         # glusterfs_sshd
         - direction: ingress
@@ -627,8 +627,8 @@ resources:
   lb-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: openshift-ansible-{{ openshift_openstack_stack_name }}-lb-secgrp
-      description: Security group for {{ openshift_openstack_stack_name }} cluster Load Balancer
+      name: openshift-ansible-{{ openshift_openstack_full_dns_domain }}-lb-secgrp
+      description: Security group for {{ openshift_openstack_full_dns_domain }} cluster Load Balancer
       rules:
       - direction: ingress
         protocol: tcp
@@ -659,16 +659,16 @@ resources:
             str_replace:
               template: k8s_type-%index%.cluster_id
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
                 k8s_type: {{ openshift_openstack_etcd_hostname }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
-          cluster_id:  {{ openshift_openstack_stack_name }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
             str_replace:
               template: k8s_type.cluster_id
               params:
                 k8s_type: etcds
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        etcd
           image:       {{ openshift_openstack_etcd_image }}
           flavor:      {{ openshift_openstack_etcd_flavor }}
@@ -683,7 +683,7 @@ resources:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% endif %}
           secgrp:
             - { get_resource: {% if openshift_openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}etcd-secgrp{% endif %} }
@@ -728,16 +728,16 @@ resources:
             str_replace:
               template: k8s_type-%index%.cluster_id
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
                 k8s_type: {{ openshift_openstack_lb_hostname }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
-          cluster_id:  {{ openshift_openstack_stack_name }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
             str_replace:
               template: k8s_type.cluster_id
               params:
                 k8s_type: lb
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        lb
           image:       {{ openshift_openstack_lb_image }}
           flavor:      {{ openshift_openstack_lb_flavor }}
@@ -752,7 +752,7 @@ resources:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% endif %}
           secgrp:
             - { get_resource: lb-secgrp }
@@ -783,16 +783,16 @@ resources:
             str_replace:
               template: k8s_type-%index%.cluster_id
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
                 k8s_type: {{ openshift_openstack_master_hostname }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
-          cluster_id:  {{ openshift_openstack_stack_name }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
             str_replace:
               template: k8s_type.cluster_id
               params:
                 k8s_type: masters
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        master
           image:       {{ openshift_openstack_master_image }}
           flavor:      {{ openshift_openstack_master_flavor }}
@@ -807,7 +807,7 @@ resources:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% if openshift_use_flannel|default(False)|bool %}
           attach_data_net: true
           data_net:    { get_resource: data_net }
@@ -859,16 +859,16 @@ resources:
             str_replace:
               template: sub_type_k8s_type-%index%.cluster_id
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
                 sub_type_k8s_type: {{ openshift_openstack_node_hostname }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
-          cluster_id:  {{ openshift_openstack_stack_name }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
             str_replace:
               template: k8s_type.cluster_id
               params:
                 k8s_type: nodes
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        node
           subtype:     app
           node_labels:
@@ -888,7 +888,7 @@ resources:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% if openshift_use_flannel|default(False)|bool %}
           attach_data_net: true
           data_net:    { get_resource: data_net }
@@ -923,16 +923,16 @@ resources:
             str_replace:
               template: sub_type_k8s_type-%index%.cluster_id
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
                 sub_type_k8s_type: {{ openshift_openstack_infra_hostname }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
-          cluster_id:  {{ openshift_openstack_stack_name }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
             str_replace:
               template: k8s_type.cluster_id
               params:
                 k8s_type: infra
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        node
           subtype:     infra
           node_labels:
@@ -952,7 +952,7 @@ resources:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% if openshift_use_flannel|default(False)|bool %}
           attach_data_net: true
           data_net:    { get_resource: data_net }
@@ -997,16 +997,16 @@ resources:
             str_replace:
               template: sub_type_k8s_type-%index%.cluster_id
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
                 sub_type_k8s_type: {{ openshift_openstack_cns_hostname }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
-          cluster_id:  {{ openshift_openstack_stack_name }}
+          cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
             str_replace:
               template: k8s_type.cluster_id
               params:
                 k8s_type: cns
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        cns
           image:       {{ openshift_openstack_cns_image }}
           flavor:      {{ openshift_openstack_cns_flavor }}
@@ -1021,7 +1021,7 @@ resources:
             str_replace:
               template: openshift-ansible-cluster_id-net
               params:
-                cluster_id: {{ openshift_openstack_stack_name }}
+                cluster_id: {{ openshift_openstack_full_dns_domain }}
 {% if openshift_use_flannel|default(False)|bool %}
           attach_data_net: true
           data_net:    { get_resource: data_net }
