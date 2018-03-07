@@ -11,7 +11,7 @@
   until: result is succeeded
 
 - name: Is host already registered?
-  command: "subscription-manager version"
+  command: "/usr/sbin/subscription-manager version"
   register: rh_subscribed
   changed_when: False
 
@@ -31,13 +31,13 @@
     - rh_subscription.failed
 
 - name: Determine if OpenShift Pool Already Attached
-  command: "subscription-manager list --consumed --pool-only --matches '*OpenShift*'"
+  command: "/usr/sbin/subscription-manager list --consumed --pool-only --matches '*OpenShift*'"
   register: openshift_pool_attached
   changed_when: False
   ignore_errors: yes
 
 - name: Attach to OpenShift Pool
-  command: "subscription-manager attach --pool {{ rhsub_pool }}"
+  command: "/usr/sbin/subscription-manager attach --pool {{ rhsub_pool }}"
   register: openshift_pool_attached
   changed_when: "'Successfully attached a subscription' in openshift_pool_attached.stdout"
   when: rhsub_pool not in openshift_pool_attached.stdout
