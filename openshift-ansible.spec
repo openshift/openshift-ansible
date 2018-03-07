@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.1.0%{?dist}
+Release:        0.2.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,76 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.2.0
+- Add wait_for_pods to upgrade for hosted components (mgugino@redhat.com)
+- Refactor openshift.common.version to openshift_current_version
+  (mgugino@redhat.com)
+- Fix the DNS server name issue for OpenStack (tomas@sedovic.cz)
+- Fix hosted registry upgrade bug (mgugino@redhat.com)
+- Remove redeploy after the roll has executed. (kwoodson@redhat.com)
+- ansible-quite: set callback_plugins path (vrutkovs@redhat.com)
+- Make broker pods run correct versions on upgrade (jpeeler@redhat.com)
+- enable iscsid on start and add rpcbind dependencies (m.judeikis@gmail.com)
+- fix bz 1550271: restore mpath defaults config (hchen@redhat.com)
+- Ensure removed web console extension variables are not set
+  (spadgett@redhat.com)
+- openstack: set a default when no API LB is needed (antonisp@celebdor.com)
+- openshift on openstack: fix non kuryr non API LB (antonisp@celebdor.com)
+- kuryr: fix linting tests (antonisp@celebdor.com)
+- kuryr: fix API LB and DNS access (tomas@sedovic.cz)
+- update LB ports iff the provider is haproxy (antonisp@celebdor.com)
+- kuryr: Use openshift-infra namespace (antonisp@celebdor.com)
+- kuryr: required pub subnet configuration option (antonisp@celebdor.com)
+- sanity_checks: add missing kuryr net_plugin (antonisp@celebdor.com)
+- kuryr: Make controller and CNI image configurable (antonisp@celebdor.com)
+- Check openstack kuryr prerequisites (antonisp@celebdor.com)
+- Kuryr var generation in OSt dynamic inventory (antonisp@celebdor.com)
+- kuryr: move to new binding_driver setting config (antonisp@celebdor.com)
+- Add s3 and block uninstall sections as well. (sarumuga@redhat.com)
+- Temporarily fix Dockerfile until we can find a replacement package
+  (ccoleman@redhat.com)
+- Bug 1550148 - Fail install if console port does not match API server port
+  (spadgett@redhat.com)
+- Master scheduler upgrade cleanup (mgugino@redhat.com)
+- Add proxy env vars to ASB DC. (derekwhatley@gmail.com)
+- Correcting a typo: idle_timout -> idle_timeout (bmorriso@redhat.com)
+- docker_image_availability: encode error message (vrutkovs@redhat.com)
+- Fix the gluster-s3 pod label used in gluster-s3 service.
+  (sarumuga@redhat.com)
+- etcd scaleup: use r_etcd_common_etcdctl_command instead of binary path
+  (vrutkovs@redhat.com)
+- Change default etcd port to 2379 (jpeeler@redhat.com)
+- Fixing evaluating if ops deployment needs to skip health check, removing
+  logic for determining version, fixing pod check for elasticsearch to get
+  running version (ewolinet@redhat.com)
+- oc_obj: fail in state=list when return code != 0. (abutcher@redhat.com)
+- Fix for gluster-s3 pvc check count. (sarumuga@redhat.com)
+- Allow for using an external openvswitch (flaper87@gmail.com)
+- Fix rhgs-s3 image name (sarumuga@redhat.com)
+- Prometheus reader in continuing to #7064 using the right prometheus sa, with
+  view privileges. (mrsiano@gmail.com)
+- ansible-quiet.cfg: Don't set callback_plugins path (vrutkovs@redhat.com)
+- Add support for instance_ids to ELB provisioner (bmorriso@redhat.com)
+- Remove RBAC console template (spadgett@redhat.com)
+- crio: Add schedulable check for dockergc-ds (smilner@redhat.com)
+- Move common master upgrade playbooks to openshift-master (rteague@redhat.com)
+- crio: docker_gc on by default (smilner@redhat.com)
+- add stack update case for dry run (tzumainn@redhat.com)
+- [bz 1508561] default to secure registry and update certificates
+  (kwoodson@redhat.com)
+- [BZ 1513706] make concurrenyLimit of heapster's hawkular sink configurable
+  (john.sanda@gmail.com)
+- Fix redeploy router from openshift_hosted refactor. (kwoodson@redhat.com)
+- add stack dry run check (tzumainn@redhat.com)
+- prometheus retention 3d (aweiteka@redhat.com)
+- add liveness probe for config reload (aweiteka@redhat.com)
+- Add kuryr-kubernetes external lock_path * Lock path is now configurable to
+  run cni daemon without error. (esevan.park@samsung.com)
+- Add openstack stack failures list if stack fails to create
+  (tzumainn@redhat.com)
+- Add Heat template validation (tzumainn@redhat.com)
+- Clarify node system container service unit (mgugino@redhat.com)
+
 * Wed Feb 28 2018 Scott Dodson <sdodson@redhat.com> 3.10.0-0.1.0
 - Adding 3.10 releaser (jupierce@redhat.com)
 - Add inventory docs for gcp variables (mgugino@redhat.com)
