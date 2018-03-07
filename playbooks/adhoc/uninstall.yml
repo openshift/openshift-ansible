@@ -146,7 +146,7 @@
       failed_when: False
 
     - name: Remove linux interfaces
-      shell: ip link del "{{ item }}"
+      shell: /usr/sbin/ip link del "{{ item }}"
       changed_when: False
       failed_when: False
       with_items:
@@ -330,13 +330,13 @@
       regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
 
   - name: Detect Docker storage configuration
-    shell: vgs -o name | grep docker
+    shell: /usr/sbin/vgs -o name | grep docker
     register: docker_vg_name
     failed_when: false
     changed_when: false
 
   - name: Wipe out Docker storage contents
-    command: vgremove -f {{ item }}
+    command: /usr/sbin/vgremove -f {{ item }}
     with_items: "{{ docker_vg_name.stdout_lines }}"
     when: docker_vg_name.rc == 0
 

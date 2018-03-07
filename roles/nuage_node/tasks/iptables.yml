@@ -1,6 +1,6 @@
 ---
 - name: IPtables | Get iptables rules
-  command: iptables -L --wait
+  command: /sbin/iptables -L --wait
   register: iptablesrules
   check_mode: no
 

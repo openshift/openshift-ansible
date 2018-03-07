@@ -72,7 +72,7 @@ def check_swap_in_fstab(module):
 def check_swapon_status(module):
     '''Check if swap is actually in use.'''
     try:
-        res = subprocess.check_output(['swapon', '--show'])
+        res = subprocess.check_output(['/sbin/swapon', '--show'])
     except subprocess.CalledProcessError:
         # Some other grep error code, we shouldn't get here.
         result = {'failed': True,
@@ -96,7 +96,7 @@ def comment_swap_fstab(module):
 
 def run_swapoff(module, changed):
     '''Run swapoff command'''
-    res = subprocess.call(['swapoff', '--all'])
+    res = subprocess.call(['/usr/sbin/swapoff', '--all'])
     if res:
         result = {'failed': True,
                   'changed': changed,

@@ -29,6 +29,6 @@
   register: created_export
 
 - name: Re-export NFS filesystems
-  command: exportfs -ar
+  command: /usr/sbin/exportfs -ar
   when:
     - created_export is changed

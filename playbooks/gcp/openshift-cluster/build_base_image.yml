@@ -128,10 +128,10 @@
   - role: os_update_latest
   post_tasks:
   - name: Disable all repos on RHEL
-    command: subscription-manager repos --disable="*"
+    command: /usr/sbin/subscription-manager repos --disable="*"
     when: using_rhel_subscriptions
   - name: Enable repos for packages on RHEL
-    command: subscription-manager repos --enable="rhel-7-server-rpms" --enable="rhel-7-server-extras-rpms"
+    command: /usr/sbin/subscription-manager repos --enable="rhel-7-server-rpms" --enable="rhel-7-server-extras-rpms"
     when: using_rhel_subscriptions
   - name: Install common image prerequisites
     package: name={{ item }} state=latest

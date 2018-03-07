@@ -6,7 +6,7 @@
   until: result is succeeded
 
 - name: Check for existence of nfs sebooleans
-  command: getsebool {{ item }}
+  command: /usr/sbin/getsebool {{ item }}
   register: nfs_getsebool_status
   when:
   - ansible_selinux
@@ -41,7 +41,7 @@
 # ansible release.
 - name: Set seboolean to allow nfs storage plugin access from containers (python 3)
   command: >
-    setsebool -P {{ item.item }} on
+    /usr/sbin/setsebool -P {{ item.item }} on
   when:
   - ansible_selinux
   - ansible_selinux.status == "enabled"

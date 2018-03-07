@@ -53,7 +53,7 @@
   when: not openshift_is_containerized | bool
 
 - name: Reset selinux context
-  command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
+  command: /sbin/restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
   when:
   - ansible_selinux is defined
   - ansible_selinux.status == 'enabled'

@@ -119,7 +119,7 @@
   failed_when: False
 
 - name: Get GlusterFS storage devices state
-  command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
+  command: "/usr/sbin/pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
   register: devices_info
   delegate_to: "{{ item }}"
   with_items: "{{ glusterfs_nodes | default([]) }}"
@@ -128,7 +128,7 @@
 
   # Runs "lvremove -ff <vg>; vgremove -fy <vg>; pvremove -fy <pv>" for every device found to be a physical volume.
 - name: Clear GlusterFS storage device contents
-  shell: "{% for line in item.stdout_lines %}{% set fields = line.split() %}{% if fields | count > 1 %}lvremove -ff {{ fields[1] }}; vgremove -fy {{ fields[1] }}; {% endif %}pvremove -fy {{ fields[0] }}; {% endfor %}"
+  shell: "{% for line in item.stdout_lines %}{% set fields = line.split() %}{% if fields | count > 1 %}lvremove -ff {{ fields[1] }}; /usr/sbin/vgremove -fy {{ fields[1] }}; {% endif %}/usr/sbin/pvremove -fy {{ fields[0] }}; {% endfor %}"
   delegate_to: "{{ item.item }}"
   with_items: "{{ devices_info.results }}"
   register: clear_devices

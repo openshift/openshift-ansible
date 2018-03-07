@@ -5,7 +5,7 @@
     - binary-update
 
 - name: OVS | Configure selinux for ovs
-  command: "semanage permissive -a openvswitch_t"
+  command: "/usr/sbin/semanage permissive -a openvswitch_t"
 
 - name: OVS | Enable ovs
   service:
