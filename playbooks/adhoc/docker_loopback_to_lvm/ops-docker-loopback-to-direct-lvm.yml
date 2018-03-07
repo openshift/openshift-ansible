@@ -98,7 +98,7 @@
   - debug: var=setup_output
 
   - name: extend the vg
-    command: lvextend -l 90%VG /dev/docker_vg/docker-pool
+    command: /usr/sbin/lvextend -l 90%VG /dev/docker_vg/docker-pool
     register: extend_output
 
   - debug: var=extend_output

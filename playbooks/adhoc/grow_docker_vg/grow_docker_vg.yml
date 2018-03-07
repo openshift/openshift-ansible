@@ -182,7 +182,7 @@
     command: "pvremove {{ docker_pv_name.stdout }}"
 
   - name: Extend the docker lvm
-    command: "lvextend -l '90%VG' /dev/{{ docker_vg_name.stdout }}/docker-pool"
+    command: "/usr/sbin/lvextend -l '90%VG' /dev/{{ docker_vg_name.stdout }}/docker-pool"
 
   - name: detach  old docker volume
     delegate_to: localhost
