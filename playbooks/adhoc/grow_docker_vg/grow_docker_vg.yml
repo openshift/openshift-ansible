@@ -168,7 +168,7 @@
     command: /usr/sbin/pvcreate /dev/xvdc1
 
   - name: Extend the docker volume group
-    command: vgextend "{{ docker_vg_name.stdout }}" /dev/xvdc1
+    command: /usr/sbin/vgextend "{{ docker_vg_name.stdout }}" /dev/xvdc1
 
   - name: pvmove onto new volume
     command: "pvmove {{ docker_pv_name.stdout }} /dev/xvdc1"
