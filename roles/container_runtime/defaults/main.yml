@@ -81,6 +81,7 @@ docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
 openshift_use_crio: False
+openshift_crio_use_rpm: False
 openshift_use_crio_only: False
 
 l_openshift_image_tag_default: "{{ openshift_release | default('latest') }}"
