@@ -12,7 +12,7 @@
         - results.rc != 0
 
     - name: "Set the selinux context on {{ docker_alt_storage_path }}"
-      command: "semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
+      command: "/usr/sbin/semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
       register: results
       failed_when:
         - results.rc == 1
