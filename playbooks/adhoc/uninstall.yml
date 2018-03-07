@@ -146,7 +146,7 @@
       failed_when: False
 
     - name: Remove linux interfaces
-      shell: ip link del "{{ item }}"
+      shell: /usr/sbin/ip link del "{{ item }}"
       changed_when: False
       failed_when: False
       with_items:
