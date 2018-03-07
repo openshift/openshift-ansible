@@ -76,17 +76,15 @@ openshift_openstack_cluster_node_labels:
 ```
 
 * `openshift_openstack_nodes_to_remove` The numerical indexes of app nodes that should be removed; for example, `['0', '2']`,
-
-* `openshift_openstack_docker_volume_size` Default Docker volume size used by all VMs, unless a particular role Docker volume size is specified. If `openshift_openstack_ephemeral_volumes` is set to `true`, the `*_volume_size` variables will be ignored and the deployment will not create any cinder volumes.
-* `openshift_openstack_docker_master_volume_size`
-* `openshift_openstack_docker_infra_volume_size`
-* `openshift_openstack_docker_cns_volume_size`
-* `openshift_openstack_docker_node_volume_size`
-* `openshift_openstack_docker_etcd_volume_size`
-* `openshift_openstack_docker_lb_volume_size`
-
+* Role Docker Volume Size
+  * `openshift_openstack_docker_volume_size` Default Docker volume size used by all VMs, unless a particular role Docker volume size is specified. If `openshift_openstack_ephemeral_volumes` is set to `true`, the `*_volume_size` variables will be ignored and the deployment will not create any cinder volumes.
+  * `openshift_openstack_docker_master_volume_size`
+  * `openshift_openstack_docker_infra_volume_size`
+  * `openshift_openstack_docker_cns_volume_size`
+  * `openshift_openstack_docker_node_volume_size`
+  * `openshift_openstack_docker_etcd_volume_size`
+  * `openshift_openstack_docker_lb_volume_size`
 * `openshift_openstack_flat_secgrp` Set to True if you experience issues with sec group rules quotas. It trades security for number of rules, by sharing the same set of firewall rules for master, node, etcd and infra nodes.
-
 * `openshift_openstack_required_packages` List of additional prerequisite packages to be installed before deploying an OpenShift cluster.
 
 
