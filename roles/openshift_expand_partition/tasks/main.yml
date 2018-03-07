@@ -16,7 +16,7 @@
   command: "growpart {{oep_drive}} {{oep_partition}}"
 
 - name: Expand the filesystem - xfs
-  command: "xfs_growfs {{oep_drive}}{{oep_partition}}"
+  command: "/usr/sbin/xfs_growfs {{oep_drive}}{{oep_partition}}"
   when: oep_file_system == "xfs"
 
 - name: Expand the filesystem - ext(2,3,4)
