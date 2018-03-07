@@ -96,7 +96,7 @@ def comment_swap_fstab(module):
 
 def run_swapoff(module, changed):
     '''Run swapoff command'''
-    res = subprocess.call(['swapoff', '--all'])
+    res = subprocess.call(['/usr/sbin/swapoff', '--all'])
     if res:
         result = {'failed': True,
                   'changed': changed,
