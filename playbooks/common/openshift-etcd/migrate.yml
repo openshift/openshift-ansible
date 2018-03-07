@@ -32,6 +32,10 @@
     - (openshift_master_cluster_method is defined and openshift_master_cluster_method == "native") or openshift.common.is_master_system_container | bool
   - debug:
       msg: "master service name: {{ master_services }}"
+  - name: Update loopback kubeconfig
+    include_role:
+      name: openshift_master
+      tasks_from: set_loopback_context.yml
   - name: Stop masters
     service:
       name: "{{ item }}"
