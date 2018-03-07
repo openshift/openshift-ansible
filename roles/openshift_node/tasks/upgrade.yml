@@ -14,7 +14,7 @@
 
 # Ensure actually install latest package.
 - name: install docker upgrade rpm
-  command: "{{ ansible_pkg_mgr }} install -C -y docker{{ '-' + docker_version }}"
+  command: "{{ ansible_pkg_mgr }} install -y docker{{ '-' + docker_version }}"
   register: result
   until: result is succeeded
   when:
