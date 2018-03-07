@@ -13,7 +13,7 @@
 
 # NOTE: oc_adm_policy_user does not support -z (yet)
 - name: Add dockergc as priviledged
-  shell: oc adm policy add-scc-to-user -z dockergc privileged
+  shell: "{{ openshift_client_binary }}  adm policy add-scc-to-user -z dockergc privileged"
 #  oc_adm_policy_user:
 #    user: dockergc
 #    resource_kind: scc
