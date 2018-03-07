@@ -176,7 +176,7 @@
     poll: 10
 
   - name: Remove the old docker drive from the volume group
-    command: "vgreduce {{ docker_vg_name.stdout }} {{ docker_pv_name.stdout }}"
+    command: "/usr/sbin/vgreduce {{ docker_vg_name.stdout }} {{ docker_pv_name.stdout }}"
 
   - name: Remove the pv from the old drive
     command: "pvremove {{ docker_pv_name.stdout }}"
