@@ -29,6 +29,8 @@ items:
         serviceAccountName: dockergc
         containers:
         - image: {{ openshift_docker_gc_image }}:{{ openshift_docker_gc_version }}
+          command:
+          - "/usr/bin/oc"
           args:
           - "ex"
           - "dockergc"
