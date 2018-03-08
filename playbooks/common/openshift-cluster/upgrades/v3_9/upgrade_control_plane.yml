@@ -115,6 +115,8 @@
   - set_fact:
       pre_upgrade_complete: True
 
+- import_playbook: label_nodes.yml
+
 - import_playbook: ../upgrade_control_plane.yml
 
 # All controllers must be stopped at the same time then restarted
@@ -134,6 +136,7 @@
       name: "{{ openshift_service_type }}-master-controllers"
       enabled: true
     when: openshift.common.rolling_restart_mode == 'system'
+
 
 - import_playbook: ../post_control_plane.yml
 
