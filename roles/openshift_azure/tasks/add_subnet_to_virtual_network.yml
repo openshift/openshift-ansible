@@ -2,6 +2,6 @@
 - name: Add subnet
   azure_rm_subnet:
     resource_group: "{{ openshift_azure_resource_group_name }}"
-    name: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_subnet_name }}"
     address_prefix: "{{ openshift_azure_subnet_prefix }}"
     virtual_network: "{{ openshift_azure_resource_group_name }}"

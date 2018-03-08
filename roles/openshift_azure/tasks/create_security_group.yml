@@ -1,0 +1,6 @@
+---
+- name: Create security group
+  azure_rm_securitygroup:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_sg_name }}"
+    rules: "{{ openshift_azure_sg_rules }}"
