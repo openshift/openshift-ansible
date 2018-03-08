@@ -2703,7 +2703,7 @@ class Router(OpenShiftCLI):
            - secret/router-certs
            - clusterrolebinding/router-router-role
         '''
-        super(Router, self).__init__('default', router_config.kubeconfig, verbose)
+        super(Router, self).__init__(router_config.namespace, router_config.kubeconfig, verbose)
         self.config = router_config
         self.verbose = verbose
         self.router_parts = [{'kind': 'dc', 'name': self.config.name},
