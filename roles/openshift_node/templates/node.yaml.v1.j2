@@ -21,9 +21,6 @@ kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_util
   - {{ l_crio_var_sock }}
   image-service-endpoint:
   - {{ l_crio_var_sock }}
-  node-labels:
-  - router=true
-  - registry=true
   runtime-request-timeout:
   - 10m
 {% endif %}
