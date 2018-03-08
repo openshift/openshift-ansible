@@ -214,7 +214,7 @@
 
   post_tasks:
   - name: Create group for deployment type
-    group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
+    group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
     changed_when: False
 
 - name: Configure API Aggregation on masters

@@ -14,7 +14,7 @@
 # until after the next play to hopefully save some time polling.
 - import_playbook: ../../../openshift-hosted/private/upgrade.yml
 
-- name: Upgrade default router and default registry
+- name: Upgrade manageiq, templates, examples
   hosts: oo_first_master
   roles:
   - lib_utils
