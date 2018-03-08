@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.3
+Version:        3.9.4
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,32 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 08 2018 Justin Pierce <jupierce@redhat.com> 3.9.4-1
+- openshift_node: Remove hardcoded cri-o node labels (smilner@redhat.com)
+- Update roles and playbooks to split cri-o install types (smilner@redhat.com)
+- bump route timeout based on online testing (gmontero@redhat.com)
+- system containers: ensure Atomic won't reset permissions for etcd_data_dir
+  (vrutkovs@redhat.com)
+- Updating how the whitelist works -- changing from removing the lines which
+  can cause issues when patching lines near the whitelist line to changing the
+  current source line to match the new souce line (ewolinet@redhat.com)
+- firewall: allow access to DNS for flannel network (vrutkovs@redhat.com)
+- docker-gc: use openshift_client_binary to support Atomic
+  (vrutkovs@redhat.com)
+- docker_gc: map the r_docker_gc_node_selectors to pairs (vrutkovs@redhat.com)
+- TSB upgrade remove and reinstall (mgugino@redhat.com)
+- Bug 1548641- upgrade now properly sets labels and selectors
+  (fabian@fabianism.us)
+- Remove force cache during node upgrade install (mgugino@redhat.com)
+- Use variables for docker_gc image (rteague@redhat.com)
+- Add .default to no_proxy list for ASB. (derekwhatley@gmail.com)
+- Bug 1550148 - Don't use undefined openshift_version in
+  openshift_sanitize_inventory (spadgett@redhat.com)
+- Add wait_for_pods to upgrade for hosted components (mgugino@redhat.com)
+- Fix hosted registry upgrade bug (mgugino@redhat.com)
+- Make broker pods run correct versions on upgrade (jpeeler@redhat.com)
+- pull in recent jenkins template updates (gmontero@redhat.com)
+
 * Tue Mar 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.3-1
 - enable iscsid on start and add rpcbind dependencies (m.judeikis@gmail.com)
 - Remove redeploy after the roll has executed. (kwoodson@redhat.com)
