@@ -1,0 +1,53 @@
+---
+# Note: this required ansible-galaxy install Azure.azure_modules
+
+# create all the items necessary to make the VM
+- name: "Create resource group"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision public ip address"
+    import_role:
+      name: openshift_azure
+      tasks_from: provision_instance.yml
+
+- name: update OS and install packages
+  hosts: nodes
+  gather_facts: yes
+  remote_user: "{{ openshift_azure_vm_admin_username }}"
+  become: True
+  tasks:
+  - name: set the user to perform installation
+    set_fact:
+      ansible_ssh_user: "{{ openshift_azure_vm_admin_username | default(ansible_ssh_user) }}"
+      openshift_node_bootstrap: True
+      openshift_node_image_prep_packages:
+      - cloud-utils-growpart
+      ansible_become: true
+
+  - name: lay down yum certs
+    copy:
+      content: "{{ item.content }}"
+      dest: "/var/lib/yum/{{ item.name }}"
+    with_items:
+    - name: client-cert.pem
+      content: "{{ yum_client_cert_contents }}"
+    - name: client-key.pem
+      content: "{{ yum_client_key_contents }}"
+
+- import_playbook: ../../openshift-node/private/image_prep.yml
+
+# NOTE: this isn't available until ansible 2.5
+# https://github.com/ansible/ansible/pull/32589
+# installed from https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
+- name: Create image
+  hosts: localhost
+  tasks:
+  - set_fact:
+      ansible_become: false
+  - name: deprovision and prepare image
+    import_role:
+      name: openshift_azure
+      tasks_from: create_image_from_vm.yml
+    vars:
+      openshift_azure_vm_host: "{{ groups['nodes'][0] }}"
