@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.32
+Version:        3.8.33
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -204,6 +204,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 08 2018 Justin Pierce <jupierce@redhat.com> 3.8.33-1
+- Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
+
 * Sat Jan 27 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.8.32-1
 - Only automatically restart if cluster is in yellow or green state
   (ewolinet@redhat.com)
