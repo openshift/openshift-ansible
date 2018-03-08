@@ -15,6 +15,9 @@
         installer_phase_initialize:
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+  - name: Set init_called fact
+    set_fact:
+      init_called: true
 
 - import_playbook: evaluate_groups.yml
 

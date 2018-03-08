@@ -1,4 +1,8 @@
 ---
+- name: Trigger init.main.yml
+  import_playbook: ../../init/main.yml
+  when: init_called is undefined
+
 - name: Logging Install Checkpoint Start
   hosts: all
   gather_facts: false
