@@ -1,0 +1,81 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: openshift-cluster-monitoring-operator
+  annotations:
+    openshift.io/display-name: OpenShift Cluster Monitoring Operator
+    description: The OpenShift Cluster Monitoring Operator manages the deployment of the OpenShift monitoring platform.
+    iconClass: icon-openshift
+    tags: openshift,infra,monitoring
+    openshift.io/documentation-url: https://github.com/coreos-inc/tectonic-prometheus-operator/
+    openshift.io/support-url: https://access.redhat.com
+openshift.io/provider-display-name: Red Hat, Inc.
+parameters:
+- name: OPERATOR_IMAGE
+  value: quay.io/coreos/cluster-monitoring-operator:198d25d6
+- name: PROMETHEUS_OPERATOR_IMAGE
+  value: quay.io/coreos/prometheus-operator-dev
+- name: ALERTMANAGER_IMAGE
+  value: quay.io/prometheus/alertmanager
+- name: PROMETHEUS_IMAGE
+  value: quay.io/prometheus/prometheus
+- name: PROMETHEUS_CONFIG_RELOADER_IMAGE
+  value: quay.io/coreos/prometheus-config-reloader
+- name: CONFIG_RELOADER_IMAGE
+  value: quay.io/coreos/configmap-reload
+- name: NAMESPACE
+  # This namespace cannot be changed. Only `openshift-monitoring` is supported.
+  value: openshift-monitoring
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: cluster-monitoring-config
+    namespace: ${NAMESPACE}
+  data:
+    config.yaml: |+
+      prometheusOperator:
+        baseImage: ${PROMETHEUS_OPERATOR_IMAGE}
+        prometheusConfigReloaderBaseImage: ${PROMETHEUS_CONFIG_RELOADER_IMAGE}
+        configReloaderBaseImage: ${CONFIG_RELOADER_IMAGE}
+      prometheusK8s:
+        baseImage: ${PROMETHEUS_IMAGE}
+      alertmanagerMain:
+        baseImage: ${ALERTMANAGER_IMAGE}
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: cluster-monitoring-operator
+    namespace: ${NAMESPACE}
+    labels:
+      k8s-app: cluster-monitoring-operator
+      managed-by-channel-operator: "true"
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        k8s-app: cluster-monitoring-operator
+    template:
+      metadata:
+        labels:
+          k8s-app: cluster-monitoring-operator
+          tectonic-app-version-name: tectonic-monitoring
+      spec:
+        containers:
+        - image: ${OPERATOR_IMAGE}
+          name: cluster-monitoring-operator
+          args:
+          - "-namespace=${NAMESPACE}"
+          - "-configmap=cluster-monitoring-config"
+          - "-logtostderr=true"
+          - "-v=4"
+          resources:
+            limits:
+              cpu: 20m
+              memory: 50Mi
+            requests:
+              cpu: 20m
+              memory: 50Mi
+        restartPolicy: Always
+        terminationGracePeriodSeconds: 30
