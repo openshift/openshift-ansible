@@ -248,6 +248,7 @@
   shell: "{{ openshift.common.client_binary }} exec --namespace={{ glusterfs_namespace }} -i {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} -- bash -c 'mkdir -p {{ mktemp.stdout }} && cat > {{ mktemp.stdout }}/topology.json' < {{ mktemp.stdout }}/topology.json"
   when:
   - glusterfs_heketi_is_native
+  - glusterfs_heketi_topology_load
 
 - name: Load heketi topology
   command: "{{ glusterfs_heketi_client }} topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
