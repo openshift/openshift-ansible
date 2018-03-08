@@ -34,4 +34,12 @@
         tasks_from: systemcontainer_crio.yml
       when:
         - openshift_use_crio | bool
+        - not openshift_crio_use_rpm | bool
+        - openshift_docker_is_node_or_master | bool
+    - import_role:
+        name: container_runtime
+        tasks_from: package_crio.yml
+      when:
+        - openshift_use_crio | bool
+        - openshift_crio_use_rpm | bool
         - openshift_docker_is_node_or_master | bool
