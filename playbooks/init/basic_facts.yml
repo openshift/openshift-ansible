@@ -62,12 +62,35 @@
   roles:
   - role: openshift_facts
   tasks:
+  - when: not (osm_default_node_selector is defined)
+    block:
+    - stat:
+        path: "/etc/origin/master/master-config.yaml"
+      register: master_config_path_check
+
+    - slurp:
+        src: "/etc/origin/master/master-config.yaml"
+      register: openshift_master_config_encoded_contents
+      when: master_config_path_check.stat.exists
+
+    - set_fact:
+        openshift_master_config_node_selector: "{{ l_existing_config_master_config.projectConfig.defaultNodeSelector }}"
+      vars:
+        l_existing_config_master_config: "{{ (openshift_master_config_encoded_contents.content | b64decode | from_yaml) }}"
+      when:
+      - master_config_path_check.stat.exists
+      - l_existing_config_master_config.projectConfig is defined
+      - l_existing_config_master_config.projectConfig.defaultNodeSelector is defined
+      - l_existing_config_master_config.projectConfig.defaultNodeSelector != ''
+
   - set_fact:
       # We need to setup openshift_client_binary here for special uses of delegate_to in
       # later roles and plays.
       first_master_client_binary: "{{  openshift_client_binary }}"
       #Some roles may require this to be set for first master
       openshift_client_binary: "{{ openshift_client_binary }}"
+      # we need to know if a default node selector has been manually set outside the installer
+      l_osm_default_node_selector: '{{ osm_default_node_selector | default(openshift_master_config_node_selector) | default("node-role.kubernetes.io/compute=true") }}'
 
 - name: Disable web console if required
   hosts: oo_masters_to_config
