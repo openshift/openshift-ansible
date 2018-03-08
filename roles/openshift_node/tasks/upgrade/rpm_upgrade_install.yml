@@ -8,8 +8,8 @@
 # Install the pre-pulled RPM
 # Note: dnsmasq is covered in it's own play.  openvswitch is included here
 # because once we have the latest rpm downloaded, it will happily be installed.
-- name: download new node packages
-  command: "{{ ansible_pkg_mgr }} install -C -y {{ openshift_node_upgrade_rpm_list | join(' ')}}"
+- name: install new node packages
+  command: "{{ ansible_pkg_mgr }} install -y {{ openshift_node_upgrade_rpm_list | join(' ')}}"
   register: result
   until: result is succeeded
   vars:
