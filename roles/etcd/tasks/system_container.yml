@@ -86,3 +86,9 @@
     owner: root
     group: root
     recurse: True
+
+- name: Ensure correct permissions are set for etcd_data_dir
+  template:
+    src: etcd-dir.conf.j2
+    dest: "/etc/tmpfiles.d/etcd-dir.conf"
+    backup: true
