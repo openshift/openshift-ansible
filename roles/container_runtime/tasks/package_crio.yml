@@ -1,14 +1,10 @@
 ---
-# TODO: Much of this file is shared with container engine tasks
-- name: Check we are not using node as a Docker container with CRI-O
-  fail: msg='Cannot use CRI-O with node configured as a Docker container'
+- name: Fail if Atomic Host since this is an rpm request
+  fail: msg='Cannot use CRI-O as a package on Atomic Host'
   when:
-    - openshift_is_containerized | bool
-    - not l_is_node_system_container | bool
+    - openshift_is_atomic | bool
 
 - include_tasks: common/pre.yml
-
-- include_tasks: common/syscontainer_packages.yml
 
 - name: Check that overlay is in the kernel
   shell: lsmod | grep overlay
@@ -34,27 +30,12 @@
         enabled: yes
         state: restarted
 
-- name: Ensure proxies are in the atomic.conf
-  include_tasks: common/atomic_proxy.yml
-
-# Be nice and let the user see the variable result
-- debug:
-    var: l_crio_image
-
-# NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
-- name: Pre-pull CRI-O System Container image
-  command: "atomic pull --storage ostree {{ l_crio_image }}"
-  changed_when: false
-  environment:
-    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
-
-- name: Install CRI-O System Container
-  oc_atomic_container:
+- name: Install cri-o
+  package:
     name: "cri-o"
-    image: "{{ l_crio_image }}"
-    state: latest
-    values:
-      - "ADDTL_MOUNTS={{ l_crio_additional_mounts }}"
+    state: present
+  register: result
+  until: result is succeeded
 
 - name: Remove CRI-O default configuration files
   file:
@@ -83,12 +64,6 @@
     dest: /etc/cni/net.d/openshift-sdn.conf
     src: 80-openshift-sdn.conf.j2
 
-- name: Create /etc/sysconfig/crio-storage
-  copy:
-    content: ""
-    dest: /etc/sysconfig/crio-storage
-    force: no
-
 - name: Create /etc/sysconfig/crio-network
   template:
     dest: /etc/sysconfig/crio-network
@@ -98,7 +73,7 @@
   systemd:
     name: "cri-o"
     enabled: yes
-    state: started
+    state: restarted
     daemon_reload: yes
   register: start_result
 
