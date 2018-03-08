@@ -33,3 +33,8 @@
     name: "dockergc"
     files:
     - "{{ templates_tmpdir.stdout }}/dockergc-ds.yaml"
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ templates_tmpdir.stdout }}"
