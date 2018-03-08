@@ -20,15 +20,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 7): ["2.6", "2.7", "2.8", "2.9"],
     }
 
-    openshift_to_docker_version = {
-        (3, 1): "1.8",
-        (3, 2): "1.10",
-        (3, 3): "1.10",
-        (3, 4): "1.12",
-        (3, 5): "1.12",
-        (3, 6): "1.12",
-    }
-
     # map major OpenShift release versions across releases to a common major version
     map_major_release_version = {
         1: 3,
@@ -52,11 +43,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
                 {
                     "name": "openvswitch",
                     "version": self.get_required_ovs_version(),
-                    "check_multi": False,
-                },
-                {
-                    "name": "docker",
-                    "version": self.get_required_docker_version(),
                     "check_multi": False,
                 },
                 {
@@ -96,24 +82,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
             raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
 
         return ovs_version
-
-    def get_required_docker_version(self):
-        """Return the correct Docker version(s) for the current OpenShift version."""
-        openshift_version = self.get_openshift_version_tuple()
-
-        earliest = min(self.openshift_to_docker_version)
-        latest = max(self.openshift_to_docker_version)
-        if openshift_version < earliest:
-            return self.openshift_to_docker_version[earliest]
-        if openshift_version > latest:
-            return self.openshift_to_docker_version[latest]
-
-        docker_version = self.openshift_to_docker_version.get(openshift_version)
-        if not docker_version:
-            msg = "There is no recommended version of Docker for the current version of OpenShift: {}"
-            raise OpenShiftCheckException(msg.format(".".join(str(comp) for comp in openshift_version)))
-
-        return docker_version
 
     def get_openshift_version_tuple(self):
         """Return received image tag as a normalized (X, Y) minor version tuple."""
