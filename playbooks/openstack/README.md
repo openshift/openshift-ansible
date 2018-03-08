@@ -206,12 +206,15 @@ Read the [Post-Install page][post-install] for a full list of options.
 
 ## Uninstall
 
-Everything in the cluster is contained within a Heat stack. To
-completely remove the cluster and all the related OpenStack resources,
-run this command:
+The installation process not only creates a Heat stack, but can also
+perform actions such as writing DNS records or subscribing a host to RHN.
+In order to do a clean uninstall, run this command:
 
 ```bash
-openstack stack delete --wait --yes openshift.example.com
+$ ansible-playbook --user openshift \
+  -i openshift-ansible/playbooks/openstack/inventory.py \
+  -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/uninstall.yml
 ```
 
 [ansible]: https://www.ansible.com/
