@@ -1,3 +1,4 @@
+---
 - name: Create virtual network
   azure_rm_virtualnetwork:
     resource_group: "{{ openshift_azure_resource_group_name }}"

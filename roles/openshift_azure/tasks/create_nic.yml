@@ -1,0 +1,10 @@
+---
+- name: Create NIC
+  azure_rm_networkinterface:
+    resource_group: "{{ item.resource_group }}"
+    name: "{{ item.name }}"
+    virtual_network: "{{ item.virtual_network }}"
+    subnet: "{{ item.subnet }}"
+    public_ip_name: "{{ item.public_ip }}"
+    security_group: "{{ item.security_group }}"
+  with_items: "{{ openshift_azure_nw_interfaces }}"

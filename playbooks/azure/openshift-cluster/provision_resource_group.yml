@@ -1,0 +1,9 @@
+---
+- name: "Create resource group"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision resource group"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_resource_group.yml

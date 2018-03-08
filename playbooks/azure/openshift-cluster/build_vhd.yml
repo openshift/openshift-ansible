@@ -2,93 +2,67 @@
 # Note: this required ansible-galaxy install Azure.azure_modules
 
 # create all the items necessary to make the VM
-
 - name: "Create resource group"
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: "provision resource group"
-    import_role:
-      name: openshift_azure
-      tasks_from: create_resource_group.yml
-
-- name: "Create storage account"
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: "provision storage account"
-    import_role:
-      name: openshift_azure
-      tasks_from: create_storage_account.yml
-
-- name: Create virtual network
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: "provision virtual network"
-    import_role:
-      name: openshift_azure
-      tasks_from: create_virtual_network.yml
-
-- name: Add subnet
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: "provision subnet in virtual network"
-    import_role:
-      name: openshift_azure
-      tasks_from: add_subnet_to_virtual_network.yml
-
-- name: Create public ip
   hosts: localhost
   gather_facts: no
   tasks:
   - name: "provision public ip address"
     import_role:
       name: openshift_azure
-      tasks_from: create_public_ip.yml
+      tasks_from: provision_instance.yml
 
-
-- name: Create security group that allows SSH
-  hosts: localhost
-  gather_facts: no
+- name: update OS and install packages
+  hosts: nodes
+  gather_facts: yes
+  remote_user: "{{ openshift_azure_vm_admin_username }}"
+  become: True
   tasks:
-  - name: "provision security group allowing SSH"
+  - name: lay down yum certs
+    copy:
+      content: "{{ item.content }}"
+      dest: "/var/lib/yum/{{ item.name }}"
+    with_items:
+    - name: client-cert.pem
+      content: "{{ yum_client_cert_contents }}"
+    - name: client-key.pem
+      content: "{{ yum_client_key_contents }}"
+
+  - name: setup yum repositories
     import_role:
-      name: openshift_azure
-      tasks_from: create_security_group.yml
+      name: openshift_repos
 
-- name: Create NIC
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: "provision network interface card"
+  - name: update OS
     import_role:
-      name: openshift_azure
-      tasks_from: create_nic.yml
+      name: os_update_latest
+    vars:
+      os_update_latest_reboot: True
 
+  ## Cleanup yum repositories and certificates
+  - name: remove yum repositories
+    yum_repository:
+      state: absent
+      file: "{{ item.name | default(item.id) }}"
+      name: "{{ item.name | default(item.id) }}"
+    with_items: "{{ openshift_additional_repos }}"
 
-- name: Create virtual machine
-  hosts: localhost
-  gather_facts: no
-  tasks:
-  - name: "provision vm"
-    import_role:
-      name: openshift_azure
-      tasks_from: create_vm.yml
-
-#
-# TODO: do OpenShifty stuff to the VM
-#
+  - name: remove our yum client certs
+    file:
+      state: absent
+      path: "/var/lib/yum/{{ item.name }}"
+    with_items:
+    - name: client-cert.pem
+    - name: client-key.pem
+  ## End cleanup yum repositories and certificates
 
 # NOTE: this isn't available until ansible 2.5
 # https://github.com/ansible/ansible/pull/32589
 # installed from https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
 - name: Create image
   hosts: localhost
-  gather_facts: no
   tasks:
-  - name: "create image"
+  - name: deprovision and prepare image
     import_role:
       name: openshift_azure
       tasks_from: create_image_from_vm.yml
+    vars:
+      openshift_azure_vm_host: "{{ groups['nodes'][0] }}"

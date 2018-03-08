@@ -1,0 +1,8 @@
+- name: Create security group that allows SSH
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision security group allowing SSH"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_security_group.yml
