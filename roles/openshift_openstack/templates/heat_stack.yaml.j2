@@ -794,6 +794,12 @@ resources:
                 k8s_type: masters
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        master
+{% if openshift_openstack_cluster_node_labels.masters is defined %}
+          node_labels:
+{% for k, v in openshift_openstack_cluster_node_labels.masters.items() %}
+            {{ k|e }}: {{ v|e }}
+{% endfor %}
+{% endif %}
           image:       {{ openshift_openstack_master_image }}
           flavor:      {{ openshift_openstack_master_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
@@ -826,6 +832,12 @@ resources:
 {% if openshift_openstack_num_etcd|int == 0 %}
             - { get_resource: etcd-secgrp }
 {% endif %}
+{% endif %}
+{% if openshift_openstack_num_infra|int == 0 %}
+            - { get_resource: infra-secgrp }
+{% endif %}
+{% if openshift_openstack_num_cns|int == 0 and openshift_openstack_num_nodes|int == 0 %}
+            - { get_resource: cns-secgrp }
 {% endif %}
             - { get_resource: common-secgrp }
           floating_network:
@@ -1008,6 +1020,12 @@ resources:
                 k8s_type: cns
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        cns
+{% if openshift_openstack_cluster_node_labels.cns is defined %}
+          node_labels:
+{% for k, v in openshift_openstack_cluster_node_labels.cns.items() %}
+            {{ k|e }}: {{ v|e }}
+{% endfor %}
+{% endif %}
           image:       {{ openshift_openstack_cns_image }}
           flavor:      {{ openshift_openstack_cns_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
