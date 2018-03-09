@@ -165,7 +165,8 @@ class ActionModule(ActionBase):
         distro = self.template_var(hostvars, host, 'ansible_distribution')
         odt = self.check_openshift_deployment_type(hostvars, host)
         self.check_python_version(hostvars, host, distro)
-        self.check_image_tag_format(hostvars, host, odt)
+        # TODO: disabled because this breaks legitimate uses
+        # self.check_image_tag_format(hostvars, host, odt)
         self.no_origin_image_version(hostvars, host, odt)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
