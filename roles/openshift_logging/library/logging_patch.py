@@ -81,7 +81,7 @@ def account_for_whitelist(current_file_contents, new_file_contents, white_list=N
         if new_file_line:
             current_file_contents = re.sub(regex_line, new_file_line.group(0), current_file_contents)
         else:
-            current_file_contents = re.sub(regex_line % line, "", current_file_contents)
+            current_file_contents = re.sub(regex_line, "", current_file_contents)
 
     return current_file_contents
 
