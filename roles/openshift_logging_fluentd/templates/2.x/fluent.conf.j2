@@ -18,7 +18,7 @@
   @type secure_forward
   @label @INGRESS
 
-  self_hostname ${HOSTNAME}
+  self_hostname ${hostname}
   bind 0.0.0.0
   port {{openshift_logging_fluentd_aggregating_port}}
 
@@ -62,7 +62,7 @@
   <match **>
     @type secure_forward
 
-    self_hostname ${HOSTNAME}
+    self_hostname ${hostname}
     shared_key {{openshift_logging_fluentd_shared_key}}
 
     secure {{openshift_logging_fluentd_aggregating_secure}}
