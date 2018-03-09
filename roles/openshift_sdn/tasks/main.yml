@@ -30,8 +30,7 @@
     src: "{{ mktemp.stdout }}/sdn-images.yaml"
     key: 'tag.from.name'
     # TODO: this should be easier to replace
-    value: "{{ osn_image }}:{{ openshift_image_tag }}"
-  when: oreg_url is defined
+    value: "{{ osn_image }}"
 
 - name: Ensure the SDN can run privileged
   oc_adm_policy_user:
