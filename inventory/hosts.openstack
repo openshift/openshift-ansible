@@ -19,7 +19,7 @@ openshift_deployment_type=openshift-enterprise
 
 openshift_additional_repos=[{'id': 'ose-3.1', 'name': 'ose-3.1', 'baseurl': 'http://pulp.dist.prod.ext.phx2.redhat.com/content/dist/rhel/server/7/7Server/x86_64/ose/3.1/os', 'enabled': 1, 'gpgcheck': 0}]
 
-openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '{{ openshift.common.config_base }}/htpasswd'}]
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/htpasswd'}]
 
 #openshift_pkg_version=-3.0.0.0
 

@@ -12,7 +12,7 @@
 # Work around ini_file create option in 2.2 which defaults to no
 - name: Create cloud config file
   file:
-    dest: "{{ openshift.common.config_base }}/cloudprovider/gce.conf"
+    dest: "/etc/origin/cloudprovider/gce.conf"
     state: touch
     mode: 0660
     owner: root
@@ -21,7 +21,7 @@
 
 - name: Configure GCE cloud provider
   ini_file:
-    dest: "{{ openshift.common.config_base }}/cloudprovider/gce.conf"
+    dest: "/etc/origin/cloudprovider/gce.conf"
     section: Global
     option: "{{ item.key }}"
     value: "{{ item.value }}"

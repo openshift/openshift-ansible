@@ -36,7 +36,7 @@ class DiagnosticCheck(OpenShiftCheck):
         Raises OcNotFound or registers OcDiagFailed.
         Returns True on success or False on failure (non-zero rc).
         """
-        config_base = self.get_var("openshift.common.config_base")
+        config_base = '/etc/origin'
         args = {
             "config_file": os.path.join(config_base, "master", "admin.kubeconfig"),
             "cmd": "adm diagnostics",

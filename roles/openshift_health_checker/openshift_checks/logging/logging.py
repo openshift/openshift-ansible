@@ -76,7 +76,7 @@ class LoggingCheck(OpenShiftCheck):
         Returns: output of command and namespace,
         or raises CouldNotUseOc on error
         """
-        config_base = self.get_var("openshift", "common", "config_base")
+        config_base = '/etc/origin'
         args = {
             "namespace": self.logging_namespace(),
             "config_file": os.path.join(config_base, "master", "admin.kubeconfig"),

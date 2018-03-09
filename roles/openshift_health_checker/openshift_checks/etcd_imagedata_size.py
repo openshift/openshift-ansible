@@ -25,7 +25,7 @@ class EtcdImageDataSize(OpenShiftCheck):
         etcd_port = self.get_var("openshift", "master", "etcd_port", default=2379)
         etcd_hosts = self.get_var("openshift", "master", "etcd_hosts")
 
-        config_base = self.get_var("openshift", "common", "config_base")
+        config_base = '/etc/origin'
 
         cert = self.get_var("etcd_client_cert", default=config_base + "/master/master.etcd-client.crt")
         key = self.get_var("etcd_client_key", default=config_base + "/master/master.etcd-client.key")

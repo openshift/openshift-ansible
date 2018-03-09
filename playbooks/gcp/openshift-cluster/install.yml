@@ -28,6 +28,6 @@
   tasks:
   - name: Retrieve cluster configuration
     fetch:
-      src: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+      src: "/etc/origin/master/admin.kubeconfig"
       dest: "/tmp/"
       flat: yes

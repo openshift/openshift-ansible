@@ -5,13 +5,13 @@
     edits:
     - key: kubernetesMasterConfig.controllerArguments.cloud-config
       value:
-      - "{{ openshift.common.config_base }}/cloudprovider/vsphere.conf"
+      - "/etc/origin/cloudprovider/vsphere.conf"
     - key: kubernetesMasterConfig.controllerArguments.cloud-provider
       value:
       - vsphere
     - key: kubernetesMasterConfig.apiServerArguments.cloud-config
       value:
-      - "{{ openshift.common.config_base }}/cloudprovider/vsphere.conf"
+      - "/etc/origin/cloudprovider/vsphere.conf"
     - key: kubernetesMasterConfig.apiServerArguments.cloud-provider
       value:
       - vsphere

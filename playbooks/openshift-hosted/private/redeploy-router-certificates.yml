@@ -12,7 +12,7 @@
 
   - name: Copy admin client config(s)
     command: >
-      cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
+      cp /etc/origin/master//admin.kubeconfig {{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
     changed_when: false
 
   - name: Determine if router exists

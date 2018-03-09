@@ -140,7 +140,7 @@ r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_p
 openshift_master_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
 openshift_master_image_config_latest: "{{ openshift_master_image_config_latest_default }}"
 
-openshift_master_config_dir_default: "{{ openshift.common.config_base ~ '/master' if openshift is defined and 'common' in openshift else '/etc/origin/master' }}"
+openshift_master_config_dir_default: "/etc/origin"
 openshift_master_config_dir: "{{ openshift_master_config_dir_default }}"
 
 openshift_master_bootstrap_enabled: False
