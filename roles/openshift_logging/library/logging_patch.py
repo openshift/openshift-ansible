@@ -76,11 +76,12 @@ def account_for_whitelist(current_file_contents, new_file_contents, white_list=N
     """
 
     for line in white_list:
-        new_file_line = re.match(r".*%s:.*\n" % line, new_file_contents)
+        regex_line = r".*" + re.escape(line) + r":.*\n"
+        new_file_line = re.match(regex_line, new_file_contents)
         if new_file_line:
-            current_file_contents = re.sub(r".*%s:.*\n" % line, new_file_line.group(0), current_file_contents)
+            current_file_contents = re.sub(regex_line, new_file_line.group(0), current_file_contents)
         else:
-            current_file_contents = re.sub(r".*%s:.*\n" % line, "", current_file_contents)
+            current_file_contents = re.sub(regex_line % line, "", current_file_contents)
 
     return current_file_contents
 
