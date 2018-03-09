@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.33
+Version:        3.8.34
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -204,6 +204,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 09 2018 Justin Pierce <jupierce@redhat.com> 3.8.34-1
+- 
+
 * Thu Mar 08 2018 Justin Pierce <jupierce@redhat.com> 3.8.33-1
 - Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
 
