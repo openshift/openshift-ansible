@@ -1,6 +1,2 @@
 ---
-# TODO(michaelgugino)
-# We can get rid of this remove section after switching to deployments.
-- include_tasks: remove.yml
-
 - include_tasks: deploy.yml
