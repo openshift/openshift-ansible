@@ -171,17 +171,98 @@ another external DNS server.
 
 ## Kuryr Networking Configuration
 
-If you opt to use Kuryr for networking, make sure that you review all
-the Kuryr options. The following parameters should be uncommented in
-`inventory/group_vars/all.yml`:
+Kuryr is an SDN that uses OpenStack Neutron. This prevents the double overlay
+overhead one would get when running OpenShift on OpenStack using the default
+OpenShift SDN.
 
-* `openshift_use_kuryr`
-* `use_trunk_ports`
-* `openshift_use_openshift_sdn`
-* `os_sdn_network_plugin_name`
-* `openshift_node_proxy_mode`
-* `openshift_hosted_manage_registry`
-* `kuryr_openstack_public_subnet_id` Set to uuid of the public subnet.
+
+### OpenStack Requirements
+
+Kuryr has a few additional requirements on the underlying OpenStack deployment:
+
+* The Trunk Ports extension must be enabled:
+  * https://docs.openstack.org/neutron/pike/admin/config-trunking.html
+* Neutron must use the Open vSwitch firewall driver:
+  * https://docs.openstack.org/neutron/pike/admin/config-ovsfwdriver.html
+* A Load Balancer as a Service (implementing LBaaS v2 API) must be available
+  * Octavia is the only supported solution right now
+  * You could try the native Neutron LBaaSv2 but it is deprecated and buggy
+
+We recommend you use the Queens or newer release of OpenStack.
+
+
+### Necessary Kuryr Options
+
+This is is the minimum you need to  set:
+
+```yaml
+openshift_use_kuryr: true
+openshift_use_openshift_sdn: false
+os_sdn_network_plugin_name: cni
+openshift_node_proxy_mode: userspace
+openshift_hosted_manage_registry: false
+use_trunk_ports: true
+
+openshift_master_open_ports:
+- service: dns tcp
+  port: 53/tcp
+- service: dns udp
+  port: 53/udp
+openshift_node_open_ports:
+- service: dns tcp
+  port: 53/tcp
+- service: dns udp
+  port: 53/udp
+
+kuryr_openstack_public_subnet_id: <public/external subnet UUID>
+```
+
+The `kuryr_openstack_public_subnet_id` value must be set to the UUID of the
+public subnet in your OpenStack. In other words, the subnet with the Floating
+IP range defined. It corresponds to the public network, which is often called
+`public`, `external` or `ext-net`.
+
+**NOTE**: A lot of OpenStack deployments do not make the public subnet
+accessible to regular users. We will add an option to enter the network here
+instead. This issue is tracked at:
+
+https://github.com/openshift/openshift-ansible/issues/7383
+
+### Port pooling
+
+It is possible to pre-create Neutron ports for later use. This means that
+several ports (each port will be attached to an OpenShift pod) would be created
+at once. This will speed up individual pod creation at the cost of having a few
+extra ports that are not currently in use.
+
+To enable this feature, you must set:
+
+```yaml
+kuryr_openstack_enable_pools: true
+```
+
+You can control the port pooling characteristics with these options:
+
+```yaml
+kuryr_openstack_pool_max: 0
+kuryr_openstack_pool_min: 1
+kuryr_openstack_pool_batch: 5
+kuryr_openstack_pool_update_frequency: 20
+```
+
+### Deploying OpenShift Registry
+
+Since we've disabled the OpenShift registry creation, you will have to create
+it manually afterwards. SSH to a master node and run this as root:
+
+```yaml
+oadm registry --config=/etc/origin/master/admin.kubeconfig --service-account=registry
+```
+
+For more information, please follow the OpenShift documentation on the
+registry:
+
+https://docs.openshift.org/latest/install_config/registry/index.html
 
 
 ## Multi-Master Configuration
