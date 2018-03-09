@@ -1,0 +1,5 @@
+---
+- name: Create date backup directory
+  file:
+    state: directory
+    path: "{{ openshift_backup_location }}/{{ ansible_date_time.date }}"

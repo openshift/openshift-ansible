@@ -1,0 +1,5 @@
+---
+openshift_backup_location: "/backup"
+openshift_iptables_config_file: "/etc/sysconfig/iptables"
+openshift_flannel_config_file: "/etc/sysconfig/flanneld"
+openshift_dnsmasq_config_file: "/etc/dnsmasq.conf"

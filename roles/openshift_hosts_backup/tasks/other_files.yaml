@@ -1,0 +1,171 @@
+---
+- name: Create other files backup directory
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items:
+    - "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/sysconfig"
+    - "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/pki/ca-trust/source/anchors"
+    - "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/dnsmasq.d"
+    - "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/cni"
+    - "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/docker"
+
+- name: List docker config files in /etc/sysconfig
+  find:
+    path: /etc/sysconfig/
+    recurse: yes
+    file_type: any
+    patterns: 'docker*'
+  register: docker_result
+  become: yes
+
+- name: Create the docker config directories
+  file:
+    path: '{{ item.path | regex_replace("/etc/sysconfig/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/sysconfig/") }}'
+    state: directory
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ docker_result.files }}"
+  when:
+    - item.isdir
+
+- name: Copy the docker config files
+  copy:
+    src: "{{ item.path }}"
+    dest: '{{ item.path | regex_replace("/etc/sysconfig/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/sysconfig/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ docker_result.files }}"
+  when:
+    - item.isdir == False
+  become: yes
+
+- name: List docker config files in /etc/docker/
+  find:
+    path: /etc/docker/
+    recurse: yes
+    file_type: any
+  register: docker_config_result
+  become: yes
+
+- name: Create the docker config files directories
+  file:
+    path: '{{ item.path | regex_replace("/etc/docker/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/docker/") }}'
+    state: directory
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ docker_config_result.files }}"
+  when:
+    - item.isdir
+
+- name: Copy docker config configuration files
+  copy:
+    src: "{{ item.path }}"
+    dest: '{{ item.path | regex_replace("/etc/docker/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/docker/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ docker_config_result.files }}"
+  when:
+    - item.isdir == False
+  become: yes
+
+- name: Copy iptables config files
+  copy:
+    src: "{{ openshift_iptables_config_file }}"
+    dest: "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/sysconfig/"
+    remote_src: yes
+  become: yes
+
+- name: Verify if using flannel
+  stat:
+    path: "{{ openshift_flannel_config_file }}"
+  register: flannel_result
+  become: yes
+
+- name: Copy flannel config file
+  copy:
+    src: "{{ openshift_flannel_config_file }}"
+    dest: "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/sysconfig/"
+    remote_src: yes
+  when:
+    flannel_result.stat.exists
+  become: yes
+
+- name: List cni config files in /etc/cni/
+  find:
+    path: /etc/cni/
+    recurse: yes
+    file_type: any
+  register: cni_result
+  become: yes
+
+- name: Create the cni directories
+  file:
+    path: '{{ item.path | regex_replace("/etc/cni/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/cni/") }}'
+    state: directory
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ cni_result.files }}"
+  when:
+    - item.isdir
+
+- name: Copy cni configuration files
+  copy:
+    src: "{{ item }}"
+    dest: '{{ item.path | regex_replace("/etc/cni/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/cni/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ cni_result.files }}"
+  when:
+    - item.isdir == False
+  become: yes
+
+- name: Copy dnsmasq main config file
+  copy:
+    src: "{{ openshift_dnsmasq_config_file }}"
+    dest: "{{ openshift_backup_location }}/{{ ansible_date_time.date }}/etc/"
+    remote_src: yes
+  become: yes
+
+- name: List dnsmasq config files in /etc/dnsmasq.d/
+  find:
+    path: /etc/dnsmasq.d/
+    recurse: yes
+    file_type: any
+  register: dnsmasq_result
+  become: yes
+
+- name: Copy dnsmasq configuration files
+  copy:
+    src: "{{ item.path }}"
+    dest: '{{ item.path | regex_replace("/etc/dnsmasq.d/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/dnsmasq.d/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ dnsmasq_result.files }}"
+  when:
+    - item.isdir == False
+  become: yes
+
+- name: List extra certificates files to copy
+  find:
+    path: /etc/pki/ca-trust/source/anchors/
+    recurse: yes
+    file_type: file
+  register: extra_certs
+  become: yes
+
+- name: Copy extra certificates files
+  copy:
+    src: "{{ item.path }}"
+    dest: '{{ item.path | regex_replace("/etc/pki/ca-trust/source/anchors/", openshift_backup_location + "/" + ansible_date_time.date + "/etc/pki/ca-trust/source/anchors/") }}'
+    remote_src: yes
+    mode: "{{ item.mode }}"
+  with_items:
+    - "{{ extra_certs.files }}"
+  when:
+    - item.isdir == False
+  become: yes
