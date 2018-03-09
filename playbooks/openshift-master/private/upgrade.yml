@@ -260,6 +260,14 @@
   - set_fact:
       reconcile_complete: True
 
+- name: Configure API aggregation on masters
+  hosts: oo_masters_to_config
+  serial: 1
+  roles:
+  - role: openshift_facts
+  tasks:
+  - include_tasks: tasks/wire_aggregator.yml
+
 ##############################################################################
 # Gate on reconcile
 ##############################################################################
