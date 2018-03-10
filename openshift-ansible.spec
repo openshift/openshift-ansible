@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.4
+Version:        3.9.5
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,21 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 10 2018 Justin Pierce <jupierce@redhat.com> 3.9.5-1
+- Adding missed line change (ewolinet@redhat.com)
+- Ensure that the aggregator is configured during all control plane upgrades
+  (sdodson@redhat.com)
+- Revert delete tsb upgrade (mgugino@redhat.com)
+- Correctly escape the variable value for regex searching when building patch
+  (ewolinet@redhat.com)
+- Only run no_log on task that scrapes all inventory variables
+  (sdodson@redhat.com)
+- Fix the gluster-s3 pod label used in gluster-s3 service.
+  (sarumuga@redhat.com)
+- Fix for gluster-s3 pvc check count. (sarumuga@redhat.com)
+- Fix rhgs-s3 image name (sarumuga@redhat.com)
+- Add s3 and block uninstall sections as well. (sarumuga@redhat.com)
+
 * Thu Mar 08 2018 Justin Pierce <jupierce@redhat.com> 3.9.4-1
 - openshift_node: Remove hardcoded cri-o node labels (smilner@redhat.com)
 - Update roles and playbooks to split cri-o install types (smilner@redhat.com)
