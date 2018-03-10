@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.37
+Version:        3.7.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 10 2018 Justin Pierce <jupierce@redhat.com> 3.7.38-1
+- package_version check: stop looking for docker (lmeyer@redhat.com)
+- Use explicit broker version for image tag (erik@nsk.io)
+- etcd migrate: instead of scaleup playbook etcd server should be started back
+  (vrutkovs@redhat.com)
+- Changing default of openshift_logging_public_master_url to use
+  openshift_master_cluster_public_hostname if available (ewolinet@redhat.com)
+
 * Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.7.37-1
 - During master upgrade reset loopback config (sdodson@redhat.com)
 
