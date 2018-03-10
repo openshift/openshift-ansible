@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.104
+Version:        3.6.173.0.105
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 10 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.105-1
+- package_version check: stop looking for docker (lmeyer@redhat.com)
+- During master upgrade reset loopback config (sdodson@redhat.com)
+- fix bz 1550271: restore mpath defaults config (hchen@redhat.com)
+- etcd migrate: instead of scaleup playbook etcd server should be started back
+  (vrutkovs@redhat.com)
+- bug 1547688. Annotate ops projects with an .operation prefix
+  (jcantril@redhat.com)
+- Re-generate lib_openshift (mail@jkroepke.de)
+- Remove provisioner restrictions on oc_storageclass (mail@jkroepke.de)
+- Create default storageclass for cloudprovider openstack (piqin@redhat.com)
+- Make IP object a string (fabian@fabianism.us)
+- Add kube service ipaddress to no_proxy list (vrutkovs@redhat.com)
+
 * Fri Feb 16 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.104-1
 - 
 
