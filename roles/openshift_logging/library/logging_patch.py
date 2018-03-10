@@ -77,7 +77,7 @@ def account_for_whitelist(current_file_contents, new_file_contents, white_list=N
 
     for line in white_list:
         regex_line = r".*" + re.escape(line) + r":.*\n"
-        new_file_line = re.match(regex_line, new_file_contents)
+        new_file_line = re.search(regex_line, new_file_contents)
         if new_file_line:
             current_file_contents = re.sub(regex_line, new_file_line.group(0), current_file_contents)
         else:
