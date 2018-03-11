@@ -1,0 +1,87 @@
+---
+- name: Evaluate bootstrapped nodes
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  tasks:
+  - name: Add all nodes that are bootstrapped
+    add_host:
+      name: "{{ item }}"
+      groups: oo_nodes_to_bootstrap
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
+    when:
+    - hostvars[item].openshift is defined
+    - hostvars[item].openshift.common is defined
+    - hostvars[item].openshift_is_bootstrapped | bool
+    changed_when: False
+
+- name: Gather facts from nodes to bootstrap
+  hosts: oo_nodes_to_bootstrap
+  gather_facts: no
+  tasks:
+  - name: Gather node information
+    openshift_facts:
+      role: node
+      local_facts:
+        bootstrapped: true
+
+  - name: Copy master bootstrap config locally
+    slurp:
+      src: "/etc/origin/master/bootstrap.kubeconfig"
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    register: bootstrap_credentials
+
+  - name: Distribute bootstrap kubeconfig if one does not exist
+    copy:
+      content: "{{ bootstrap_credentials.content | b64decode }}"
+      dest: "/etc/origin/node/bootstrap.kubeconfig"
+      mode: 0700
+      owner: root
+      group: root
+      force: no
+
+- name: Approve any pending CSR requests from inventory nodes
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - name: Dump all candidate bootstrap hostnames
+    debug:
+      msg: "{{ groups['oo_nodes_to_bootstrap'] | default([]) }}"
+
+  - name: Find all node names
+    set_fact:
+      l_nodes_to_join: "{{ groups['oo_nodes_to_bootstrap'] | default([]) | map('extract', hostvars) | map(attribute='openshift.node.nodename') | list }}"
+
+  - name: Dump the bootstrap hostnames
+    debug:
+      msg: "{{ l_nodes_to_join }}"
+
+  - name: Approve bootstrap nodes
+    oc_adm_csr:
+      nodes: "{{ l_nodes_to_join }}"
+      timeout: 60
+      fail_on_timeout: true
+    register: approve_out
+    ignore_errors: true
+    when:
+    - l_nodes_to_join|length > 0
+
+  - when: not approve_out|succeeded
+    block:
+    - name: Get CSRs
+      command: >
+        {{ openshift_client_binary }} describe csr --config=/etc/origin/master/admin.kubeconfig
+    - name: Report approval errors
+      fail:
+        msg: Node approval failed
+
+- name: Ensure any inventory labels are applied to the nodes
+  hosts: oo_nodes_to_bootstrap
+  vars:
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+  roles:
+  - role: openshift_manage_node
+    openshift_master_host: "{{ groups.oo_first_master.0 }}"
+    openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"

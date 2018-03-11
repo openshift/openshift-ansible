@@ -1,0 +1,8 @@
+kind: List
+apiVersion: v1
+items:
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: sync
+    namespace: openshift-node

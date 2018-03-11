@@ -1,28 +1,36 @@
 ---
-- name: Copy auto-approver config to host
-  run_once: true
+- name: Make temp directory for templates
+  command: mktemp -d /tmp/ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy templates to temp directory
   copy:
     src: "{{ item }}"
-    dest: /tmp/openshift-approver/
-    owner: root
-    mode: 0400
+    dest: "{{ mktemp.stdout }}/{{ item | basename }}"
   with_fileglob:
-    - "*.yaml"
+    - "files/*.yaml"
 
-- name: Set auto-approver nodeSelector
+- name: Update the image tag
   run_once: true
   yedit:
-    src: "/tmp/openshift-approver/openshift-bootstrap-controller.yaml"
-    key: spec.template.spec.nodeSelector
-    value: "{{ openshift_master_bootstrap_auto_approver_node_selector | default({}) }}"
-    value_type: list
+    src: "{{ mktemp.stdout }}/openshift-bootstrap-images.yaml"
+    key: 'tag.from.name'
+    value: "{{ osn_image }}"
 
-- name: Create auto-approver on cluster
+# TODO: temporary until we fix apply for image stream tags
+- name: Remove the image stream tag
+  shell: >
+    {{ openshift_client_binary }} delete -n openshift-infra istag node:v3.10 --ignore-not-found
+
+- name: Apply the config
   run_once: true
-  command: "{{ openshift_client_binary }} apply -f /tmp/openshift-approver/"
+  shell: >
+    {{ openshift_client_binary }} apply -f "{{ mktemp.stdout }}"
 
-- name: Remove auto-approver config
+- name: Remove temp directory
   run_once: true
   file:
-    path: /tmp/openshift-approver/
     state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False

@@ -12,7 +12,7 @@ l_openshift_grafana_serviceaccount_annotations:
 openshift_grafana_datasource_name: "prometheus"
 openshift_grafana_node_exporter: false
 openshift_grafana_graph_granularity: "2m"
-openshift_grafana_node_selector: {"region":"infra"}
+openshift_grafana_node_selector: {"node-role.kubernetes.io/infra":"true"}
 openshift_grafana_hostname: grafana-{{openshift_grafana_namespace}}.{{openshift_master_default_subdomain}}
 openshift_grafana_service_name: grafana
 openshift_grafana_service_port: 443

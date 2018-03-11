@@ -1,4 +1,6 @@
 ---
+# DEPRECATED: These tasks will be removed
+
 - name: Make temp cert dir
   command: mktemp -d /tmp/openshift-service-catalog-ansible-XXXXXX
   register: certtemp

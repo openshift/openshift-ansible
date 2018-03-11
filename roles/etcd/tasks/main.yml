@@ -1,8 +1,3 @@
 ---
 - name: Configure etcd with static pods
   import_tasks: static.yml
-  when: openshift_master_bootstrap_enabled | default(False) | bool
-
-- name: Configure etcd with RPMs
-  import_tasks: rpm.yml
-  when: not (openshift_master_bootstrap_enabled | default(False) | bool)

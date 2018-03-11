@@ -187,6 +187,43 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
+# create-api-client-config generates a ca.crt file which will
+# overwrite the OpenShift CA certificate.  Generate the loopback
+# kubeconfig in a temporary directory and then copy files into the
+# master config dir to avoid overwriting ca.crt.
+- block:
+  - name: Create temp directory for loopback master client config
+    command: mktemp -d /tmp/openshift-ansible-XXXXXX
+    register: openshift_ca_loopback_tmpdir
+  - name: Generate the aggregator api-client config
+    command: >
+      {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm create-api-client-config
+        --certificate-authority={{ openshift_ca_cert }}
+        {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
+        --certificate-authority {{ named_ca_certificate }}
+        {% endfor %}
+        --client-dir={{ openshift_ca_loopback_tmpdir.stdout }}
+        --user=aggregator-front-proxy
+        --signer-cert={{ openshift_ca_cert }}
+        --signer-key={{ openshift_ca_key }}
+        --signer-serial={{ openshift_ca_serial }}
+        --expire-days={{ openshift_master_cert_expire_days }}
+  - name: Copy generated loopback master client config to master config dir
+    copy:
+      src: "{{ openshift_ca_loopback_tmpdir.stdout }}/{{ item }}"
+      dest: "{{ openshift_ca_config_dir }}"
+      remote_src: true
+    with_items:
+    - aggregator-front-proxy.crt
+    - aggregator-front-proxy.key
+    - aggregator-front-proxy.kubeconfig
+  - name: Delete temp directory
+    file:
+      name: "{{ openshift_ca_loopback_tmpdir.stdout }}"
+      state: absent
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
 - name: Restore original serviceaccount keys
   copy:
     src: "{{ item }}.keep"

@@ -19,7 +19,7 @@
   tasks:
   - name: Check the master API is ready
     import_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: check_master_api_is_ready.yml
   - set_fact:
       master_service: "{{ openshift_service_type + '-master' }}"
@@ -146,7 +146,7 @@
   hosts: oo_first_master
   tasks:
   - import_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: configure_external_etcd.yml
     vars:
       etcd_peer_url_scheme: "https"

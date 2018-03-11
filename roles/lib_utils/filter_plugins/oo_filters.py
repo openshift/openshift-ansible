@@ -575,7 +575,7 @@ def lib_utils_oo_selector_to_string_list(user_dict):
     """Convert a dict of selectors to a key=value list of strings
 
 Given input of {'region': 'infra', 'zone': 'primary'} returns a list
-of items as ['region=infra', 'zone=primary']
+of items as ['node-role.kubernetes.io/infra=true', 'zone=primary']
     """
     selectors = []
     for key in user_dict:

@@ -16,6 +16,7 @@ else
   dnf install -y sed
   target_branch="$( git describe | sed 's/^openshift-ansible-\([0-9]*\.[0-9]*\)\.[0-9]*-.*/\1/' )"
 fi
+export target_branch
 
 pip install -r requirements.txt
 
@@ -32,10 +33,10 @@ upload_journals() {
 trap upload_journals ERR
 
 # make all nodes ready for bootstrapping
-ansible-playbook -vvv -i .papr.inventory playbooks/openshift-node/private/image_prep.yml
+ansible-playbook -v -i .papr.inventory playbooks/openshift-node/private/image_prep.yml
 
 # run the actual installer
-ansible-playbook -vvv -i .papr.inventory playbooks/deploy_cluster.yml -e "openshift_release=${target_branch}"
+ansible-playbook -v -i .papr.inventory playbooks/deploy_cluster.yml
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132

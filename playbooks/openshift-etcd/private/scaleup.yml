@@ -74,5 +74,5 @@
   - role: openshift_master_facts
   post_tasks:
   - import_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: update_etcd_client_urls.yml
