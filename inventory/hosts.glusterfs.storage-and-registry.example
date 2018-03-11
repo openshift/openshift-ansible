@@ -43,7 +43,7 @@ node0   openshift_schedulable=True
 node1   openshift_schedulable=True
 node2   openshift_schedulable=True
 # A hosted registry, by default, will only be deployed on nodes labeled
-# "region=infra".
+# "node-role.kubernetes.io/infra=true".
 node3   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
 node4   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True
 node5   openshift_node_labels="{'region': 'infra'}" openshift_schedulable=True

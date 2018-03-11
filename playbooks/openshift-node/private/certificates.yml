@@ -1,6 +1,6 @@
 ---
 - name: Create OpenShift certificates for node hosts
-  hosts: oo_nodes_to_config
+  hosts: oo_nodes_to_config:!oo_exclude_nodes_to_config
   gather_facts: no
   roles:
   - role: openshift_node_certificates

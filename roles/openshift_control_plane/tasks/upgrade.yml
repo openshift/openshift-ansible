@@ -8,7 +8,9 @@
 - include_tasks: "upgrade/{{ master_config_hook }}"
   when: master_config_hook is defined
 
-- include_tasks: journald.yml
+- include_tasks: systemd_units.yml
+
+- include_tasks: set_loopback_context.yml
 
 - name: Check for ca-bundle.crt
   stat:
@@ -42,4 +44,9 @@
     value: "{{ oreg_url | default(oreg_url_master) }}"
   when: oreg_url is defined or oreg_url_master is defined
 
-- include_tasks: static.yml
+- name: Change default node selector to compute=true
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    key: 'projectConfig.defaultNodeSelector'
+    value: '{{ hostvars[groups.oo_first_master.0].l_osm_default_node_selector }}'
+  when: openshift_upgrade_target | version_compare('3.9', '>=')

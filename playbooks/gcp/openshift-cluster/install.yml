@@ -11,14 +11,17 @@
 - name: run the init
   import_playbook: ../../init/main.yml
 
+- name: ensure master nodes are ready for bootstrapping
+  import_playbook: ../../openshift-node/private/bootstrap.yml
+
 - name: configure the control plane
   import_playbook: ../../common/private/control_plane.yml
 
-- name: ensure the masters are configured as nodes
-  import_playbook: ../../openshift-node/private/config.yml
-
 - name: run the GCP specific post steps
   import_playbook: install_gcp.yml
+
+- name: configure any nodes that aren't bootstrapped
+  import_playbook: ../../openshift-node/private/config.yml
 
 - name: install components
   import_playbook: ../../common/private/components.yml

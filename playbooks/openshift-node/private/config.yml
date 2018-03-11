@@ -11,11 +11,9 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
-- import_playbook: certificates.yml
-
 - import_playbook: setup.yml
 
-- import_playbook: containerized_nodes.yml
+- import_playbook: certificates.yml
 
 - import_playbook: configure_nodes.yml
 

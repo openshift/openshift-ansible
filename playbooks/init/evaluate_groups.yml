@@ -52,7 +52,7 @@
         for documentation on how to migrate from embedded to external etcd.
     when:
     - g_etcd_hosts | default([]) | length == 0
-    - not (openshift_node_bootstrap | default(False))
+    - not (openshift_node_bootstrap | default(True))
 
   - name: Evaluate oo_all_hosts
     add_host:
