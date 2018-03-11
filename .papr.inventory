@@ -17,8 +17,6 @@ osm_host_subnet_length=9
 
 [all:vars]
 # bootstrap configs
-openshift_node_groups=[{"name":"node-config-master","labels":["node-role.kubernetes.io/master=true","node-role.kubernetes.io/infra=true"]},{"name":"node-config-node","labels":["node-role.kubernetes.io/compute=true"]}]
-openshift_master_bootstrap_enabled=true
 openshift_master_bootstrap_auto_approve=true
 openshift_master_bootstrap_auto_approver_node_selector={"node-role.kubernetes.io/master":"true"}
 osm_controller_args={"experimental-cluster-signing-duration": ["20m"]}
@@ -33,6 +31,6 @@ ocp-master
 ocp-master
 
 [nodes]
-ocp-master openshift_schedulable=true
+ocp-master openshift_schedulable=true openshift_node_labels="{'node-role.kubernetes.io/infra':'true'}"
 ocp-node1
 ocp-node2

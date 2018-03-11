@@ -17,7 +17,7 @@
 
 - name: Ensure that Provisioners has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_provisioners_efs_nodeselector | map_to_pairs }}"

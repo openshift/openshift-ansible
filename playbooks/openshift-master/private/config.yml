@@ -163,16 +163,20 @@
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   pre_tasks:
-  # This will be moved into the control plane role once openshift_master is removed
-  - name: Add static pod and systemd shim commands
-    import_role:
-      name: openshift_control_plane
-      tasks_from: static_shim
   - name: Prepare the bootstrap node config on masters for self-hosting
     import_role:
       name: openshift_node_group
       tasks_from: bootstrap
-    when: openshift_master_bootstrap_enabled | default(false) | bool
+  # TODO: move me into a more appropriate location
+  - name: Update the sysconfig for the masters to give them bootstrap config
+    lineinfile:
+      dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
+      line: "{{ item.line | default(omit) }}"
+      regexp: "{{ item.regexp }}"
+      state: "{{ item.state | default('present') }}"
+    with_items:
+    - line: "BOOTSTRAP_CONFIG_NAME={{ openshift_node_group_master | default('node-config-master') }}"
+      regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
 
   roles:
   - role: openshift_master_facts
@@ -183,20 +187,7 @@
   - role: openshift_buildoverrides
   - role: nickhammond.logrotate
 
-  # DEPRECATED: begin moving away from this
-  - role: openshift_master
-    openshift_master_ha: "{{ (groups.oo_masters | length > 1) | bool }}"
-    openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
-    r_openshift_master_clean_install: "{{ hostvars[groups.oo_first_master.0].l_clean_install }}"
-    r_openshift_master_etcd3_storage: "{{ hostvars[groups.oo_first_master.0].l_etcd3_enabled }}"
-    openshift_master_is_scaleup_host: "{{ g_openshift_master_is_scaleup | default(false) }}"
-    openshift_master_default_registry_value: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value }}"
-    openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
-    openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
-    when: not ( openshift_master_bootstrap_enabled | default(false) | bool )
-
   - role: openshift_control_plane
-    when: openshift_master_bootstrap_enabled | default(false) | bool
   - role: tuned
   - role: nuage_ca
     when: openshift_use_nuage | default(false) | bool
@@ -218,20 +209,11 @@
 
   - name: setup bootstrap settings
     include_tasks: tasks/enable_bootstrap.yml
-    when: openshift_master_bootstrap_enabled | default(false) | bool
 
   post_tasks:
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
     changed_when: False
-
-- name: Configure API Aggregation on masters
-  hosts: oo_masters
-  serial: 1
-  roles:
-  - role: openshift_facts
-  tasks:
-  - include_tasks: tasks/wire_aggregator.yml
 
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config
