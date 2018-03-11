@@ -54,7 +54,7 @@ openshift_gcp_node_group_config:
     boot_disk_size: 150
     scale: 0
 
-openshift_gcp_startup_script_file: ''
+openshift_gcp_startup_script_file: "{{ role_path }}/files/bootstrap-script.sh"
 openshift_gcp_user_data_file: ''
 
 openshift_gcp_multizone: False

@@ -3,9 +3,6 @@ Description=OpenShift Node
 After={{ openshift_docker_service_name }}.service
 After=chronyd.service
 After=ntpd.service
-Wants=openvswitch.service
-After=ovsdb-server.service
-After=ovs-vswitchd.service
 Wants={{ openshift_docker_service_name }}.service
 Documentation=https://github.com/openshift/origin
 Wants=dnsmasq.service
@@ -15,12 +12,7 @@ After=dnsmasq.service
 [Service]
 Type=notify
 EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-node
-Environment=GOTRACEBACK=crash
-ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
-ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
-ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
-ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
-ExecStart=/usr/bin/openshift start node {% if openshift_node_bootstrap %} --kubeconfig=${KUBECONFIG} --bootstrap-config-name=${BOOTSTRAP_CONFIG_NAME}{% endif %} --config=${CONFIG_FILE} $OPTIONS
+ExecStart=/usr/local/bin/openshift-node
 LimitNOFILE=65536
 LimitCORE=infinity
 WorkingDirectory=/var/lib/origin/

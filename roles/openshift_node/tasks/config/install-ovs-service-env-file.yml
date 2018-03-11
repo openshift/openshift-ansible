@@ -1,8 +1,0 @@
----
-- name: Create the openvswitch service env file
-  template:
-    src: openvswitch.sysconfig.j2
-    dest: /etc/sysconfig/openvswitch
-  notify:
-  - reload systemd units
-  - restart openvswitch

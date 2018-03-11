@@ -21,7 +21,7 @@ openshift_oreg_url_default_dict:
   origin: "openshift/origin-${component}:${version}"
   openshift-enterprise: openshift3/ose-${component}:${version}
 openshift_oreg_url_default: "{{ openshift_oreg_url_default_dict[openshift_deployment_type] }}"
-oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) }}"
+oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 
 openshift_imageconfig_format: "{{ oreg_url_node }}"
 openshift_node_group_cloud_provider: "{{ openshift_cloudprovider_kind | default('aws') }}"

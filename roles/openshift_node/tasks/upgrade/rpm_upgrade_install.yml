@@ -15,5 +15,5 @@
   vars:
     openshift_node_upgrade_rpm_list:
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
+      - "{{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }}"
       - "PyYAML"
-      - "openvswitch"

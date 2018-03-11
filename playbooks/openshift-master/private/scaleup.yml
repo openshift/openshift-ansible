@@ -15,19 +15,14 @@
       yaml_key: 'kubernetesMasterConfig.masterCount'
       yaml_value: "{{ openshift.master.master_count }}"
     notify:
-    - restart master api
-    - restart master controllers
+    - restart master
   handlers:
-  - name: restart master api
-    service: name={{ openshift_service_type }}-master-controllers state=restarted
+  - name: restart master
+    command: /usr/local/bin/master-restart "{{ item }}"
+    with_items:
+    - api
+    - controllers
     notify: verify api server
-  # We retry the controllers because the API may not be 100% initialized yet.
-  - name: restart master controllers
-    command: "systemctl restart {{ openshift_service_type }}-master-controllers"
-    retries: 3
-    delay: 5
-    register: result
-    until: result.rc == 0
   - name: verify api server
     command: >
       curl --silent --tlsv1.2

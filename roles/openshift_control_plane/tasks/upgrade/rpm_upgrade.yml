@@ -1,0 +1,36 @@
+---
+# When we update package "a-${version}" and a requires b >= ${version} if we
+# don't specify the version of b yum will choose the latest version of b
+# available and the whole set of dependencies end up at the latest version.
+# Since the package module, unlike the yum module, doesn't flatten a list
+# of packages into one transaction we need to do that explicitly. The ansible
+# core team tells us not to rely on yum module transaction flattening anyway.
+
+# TODO: If the sdn package isn't already installed this will install it, we
+# should fix that
+
+- import_tasks: ../static.yml
+
+- name: Upgrade master packages
+  command:
+    yum install -y {{ master_pkgs | join(' ') }} \
+    {{ ' --exclude *' ~ openshift_service_type ~ '*3.9*' if openshift_release | version_compare('3.9','<') else '' }}
+  vars:
+    master_pkgs:
+      - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
+      - "{{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }}"
+  register: result
+  until: result is succeeded
+  when: ansible_pkg_mgr == 'yum'
+
+- name: Upgrade master packages - dnf
+  dnf:
+    name: "{{ master_pkgs | join(',') }}"
+    state: present
+  vars:
+    master_pkgs:
+      - "{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type }}-clients{{ openshift_pkg_version }}"
+  register: result
+  until: result is succeeded
+  when: ansible_pkg_mgr == 'dnf'

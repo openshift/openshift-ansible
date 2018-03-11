@@ -1,0 +1,63 @@
+---
+- name: Enable bootstrapping in the master config
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    edits:
+    - key: kubernetesMasterConfig.controllerArguments.cluster-signing-cert-file
+      value:
+      - /etc/origin/master/ca.crt
+    - key: kubernetesMasterConfig.controllerArguments.cluster-signing-key-file
+      value:
+      - /etc/origin/master/ca.key
+
+- name: Create temp directory for static pods
+  command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  register: mktemp
+  changed_when: false
+
+- name: Prepare master static pods
+  copy:
+    src: "{{ item }}"
+    dest: "{{ mktemp.stdout }}"
+    mode: 0600
+  with_items:
+  - apiserver.yaml
+  - controller.yaml
+
+- name: Update master static pods
+  yedit:
+    src: "{{ mktemp.stdout }}/{{ item }}"
+    edits:
+    - key: spec.containers[0].image
+      value: "{{ osm_image }}:{{ openshift_image_tag }}"
+  with_items:
+  - apiserver.yaml
+  - controller.yaml
+
+- name: Update master static pods
+  copy:
+    remote_src: true
+    src: "{{ mktemp.stdout }}/{{ item }}"
+    dest: "/etc/origin/node/pods/"
+    mode: 0600
+  with_items:
+  - apiserver.yaml
+  - controller.yaml
+
+- name: Remove temporary directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False
+
+- name: Establish the default bootstrap kubeconfig for masters
+  copy:
+    remote_src: true
+    src: "/etc/origin/master/admin.kubeconfig"
+    dest: "{{ item }}"
+    mode: 0600
+  with_items:
+  # bootstrap as an admin
+  - /etc/origin/node/bootstrap.kubeconfig
+  # copy to this location to bypass initial bootstrap request
+  - /etc/origin/node/node.kubeconfig

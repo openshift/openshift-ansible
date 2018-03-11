@@ -14,13 +14,7 @@ openshift_oreg_url_default_dict:
   origin: "openshift/origin-${component}:${version}"
   openshift-enterprise: "openshift3/ose-${component}:${version}"
 openshift_oreg_url_default: "{{ openshift_oreg_url_default_dict[openshift_deployment_type] }}"
-oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) }}"
-
-osn_ovs_image_default_dict:
-  origin: "openshift/openvswitch"
-  openshift-enterprise: "openshift3/openvswitch"
-osn_ovs_image_default: "{{ osn_ovs_image_default_dict[openshift_deployment_type] }}"
-osn_ovs_image: "{{ osn_ovs_image_default }}"
+oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 
 openshift_dns_ip: "{{ ansible_default_ipv4['address'] }}"
 
@@ -113,26 +107,21 @@ system_images_registry_dict:
   origin: "docker.io"
 
 system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
-openshift_use_external_openvswitch: False
-l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
 openshift_image_tag: ''
 
 default_r_openshift_node_image_prep_packages:
-- "{{ openshift_service_type }}-master"
 - "{{ openshift_service_type }}-node"
 - "{{ openshift_service_type }}-docker-excluder"
-- "{{ openshift_service_type }}-sdn-ovs"
 - ansible
-- openvswitch
+- bash-completion
 - docker
-- etcd
 - haproxy
 - dnsmasq
 - ntp
 - logrotate
 - httpd-tools
-- bind
+- bind-utils
 - firewalld
 - libselinux-python
 - conntrack-tools
@@ -142,27 +131,15 @@ default_r_openshift_node_image_prep_packages:
 - python-dbus
 - PyYAML
 - yum-utils
-# gluster
 - glusterfs-fuse
 - device-mapper-multipath
-# nfs
 - nfs-utils
-- flannel
-- bash-completion
-# cockpit
 - cockpit-ws
 - cockpit-system
 - cockpit-bridge
 - cockpit-docker
-# iscsi
 - iscsi-initiator-utils
-# ceph
 - ceph-common
-# systemcontainer
-# - runc
-# - container-selinux
-# - atomic
-#
 r_openshift_node_image_prep_packages: "{{ default_r_openshift_node_image_prep_packages | union(openshift_node_image_prep_packages | default([])) }}"
 
 openshift_node_bootstrap: False

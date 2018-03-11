@@ -18,6 +18,9 @@
     etcd_urls: "{{ openshift.master.etcd_urls }}"
     omc_cluster_hosts: "{{ groups.oo_masters | join(' ')}}"
   roles:
+  # TODO: this is currently required in order to schedule pods onto the masters, but
+  #   should be moved into components once nodes are using dynamic config
+  - role: openshift_sdn
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
   - role: openshift_examples
