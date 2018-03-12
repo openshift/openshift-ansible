@@ -48,7 +48,7 @@ spec:
            - --upstream-ca=/etc/elasticsearch/secret/admin-ca
            - --https-address=:4443
            - -provider=openshift
-           - -client-id={{openshift_logging_elasticsearch_prometheus_sa}}
+           - -client-id=system:serviceaccount:{{ openshift_logging_elasticsearch_namespace }}:aggregated-logging-elasticsearch
            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
            - -cookie-secret={{ 16 | oo_random_word | b64encode }}
            - -basic-auth-password={{ basic_auth_passwd }}
