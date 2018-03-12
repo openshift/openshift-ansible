@@ -160,3 +160,8 @@ l_is_node_system_container: "{{ (openshift_use_node_system_container | default(o
 
 l_crio_use_new_var_sock: "{{  (l_openshift_image_tag == 'latest') or (l_openshift_image_tag | version_compare('3.9', '>='))  | bool }}"
 l_crio_var_sock: "{{ l_crio_use_new_var_sock | ternary('/var/run/crio/crio.sock', '/var/run/crio.sock') }}"
+
+container_runtime_oci_umounts:
+- '/var/lib/containers/storage/*'
+- '/run/containers/storage/*'
+- '/var/lib/origin/*'
