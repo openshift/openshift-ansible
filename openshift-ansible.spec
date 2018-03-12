@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.6
+Version:        3.9.7
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Mar 11 2018 Justin Pierce <jupierce@redhat.com> 3.9.7-1
+- 
+
 * Sun Mar 11 2018 Justin Pierce <jupierce@redhat.com> 3.9.6-1
 - Changing python regex method from match to search due to variable content
   structure (ewolinet@redhat.com)
