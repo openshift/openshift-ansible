@@ -48,15 +48,6 @@
     -n "{{ openshift_prometheus_namespace }}"
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f - -n "{{ openshift_prometheus_namespace }}"
 
-- name: Verify that node exporter is running
-  uri:
-    url: http://localhost:9100/metrics
-  register: node_exporter_health
-  until: node_exporter_health.status == 200
-  retries: 120
-  delay: 1
-  changed_when: false
-
 - name: Remove temp directory
   file:
     state: absent
