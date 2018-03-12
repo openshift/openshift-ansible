@@ -13,6 +13,7 @@
     - routes
     - templates
     - ds
+    - cronjobs
 
 # return all persistent volume claims as well if purge is set
 - name: delete logging pvc objects
