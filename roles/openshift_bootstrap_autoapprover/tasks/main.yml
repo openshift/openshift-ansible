@@ -19,7 +19,7 @@
 
 - name: Create auto-approver on cluster
   run_once: true
-  command: oc apply -f /tmp/openshift-approver/
+  command: "{{ openshift_client_binary }} apply -f /tmp/openshift-approver/"
 
 - name: Remove auto-approver config
   run_once: true
