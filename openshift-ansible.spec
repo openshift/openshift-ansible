@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.7
+Version:        3.9.8
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 13 2018 Justin Pierce <jupierce@redhat.com> 3.9.8-1
+- Bug 1548541- Conditional for applying defaultNodeSelector now valid
+  (fabian@fabianism.us)
+- Enable epel-testing repo for ansible-2.4.3 until it goes live
+  (sdodson@redhat.com)
+- Temporarily fix Dockerfile until we can find a replacement package
+  (ccoleman@redhat.com)
+- Require Ansible 2.4.3 (rteague@redhat.com)
+
 * Sun Mar 11 2018 Justin Pierce <jupierce@redhat.com> 3.9.7-1
 - 
 
