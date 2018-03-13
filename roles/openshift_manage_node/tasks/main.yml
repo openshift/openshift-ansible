@@ -35,3 +35,4 @@
   delegate_to: "{{ openshift_master_host }}"
 
 - include_tasks: config.yml
+- include_tasks: set_default_node_role.yml
