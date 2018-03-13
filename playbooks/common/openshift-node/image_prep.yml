@@ -1,0 +1,24 @@
+---
+- name: normalize groups
+  include: ../../byo/openshift-cluster/initialize_groups.yml
+
+- name: evaluate the groups
+  include: ../openshift-cluster/evaluate_groups.yml
+
+- name: initialize the facts
+  include: ../openshift-cluster/initialize_facts.yml
+
+- name: initialize the repositories
+  include: ../openshift-cluster/initialize_openshift_repos.yml
+
+- name: run node config setup
+  include: setup.yml
+
+- name: run node config
+  include: configure_nodes.yml
+
+- name: Re-enable excluders
+  include: enable_excluders.yml
+
+- name: Remove any undesired artifacts from build
+  include: clean_image.yml

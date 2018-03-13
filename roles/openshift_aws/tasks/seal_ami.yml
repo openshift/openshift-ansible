@@ -1,6 +1,6 @@
 ---
 - name: fetch newly created instances
-  ec2_instance_facts:
+  ec2_remote_facts:
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:Name": "{{ openshift_aws_base_ami_name }}"
@@ -12,7 +12,7 @@
 
 - name: bundle ami
   ec2_ami:
-    instance_id: "{{ instancesout.instances.0.instance_id }}"
+    instance_id: "{{ instancesout.instances.0.id }}"
     region: "{{ openshift_aws_region }}"
     state: present
     description: "This was provisioned {{ ansible_date_time.iso8601 }}"
@@ -31,7 +31,7 @@
         source-ami: "{{ amioutput.image_id }}"
 
   - name: copy the ami for encrypted disks
-    include_tasks: ami_copy.yml
+    include: ami_copy.yml
     vars:
       openshift_aws_ami_copy_name: "{{ openshift_aws_ami_name }}-encrypted"
       openshift_aws_ami_copy_src_ami: "{{ amioutput.image_id }}"
@@ -46,4 +46,4 @@
   ec2:
     state: absent
     region: "{{ openshift_aws_region }}"
-    instance_ids: "{{ instancesout.instances.0.instance_id }}"
+    instance_ids: "{{ instancesout.instances.0.id }}"

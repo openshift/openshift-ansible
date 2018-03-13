@@ -34,14 +34,14 @@ def main():
             external_host_insecure=dict(default=False, type='bool'),
             external_host_partition_path=dict(default=None, type='str'),
             external_host_username=dict(default=None, type='str'),
-            external_host_password=dict(default=None, type='str', no_log=True),
-            external_host_private_key=dict(default=None, type='str', no_log=True),
+            external_host_password=dict(default=None, type='str'),
+            external_host_private_key=dict(default=None, type='str'),
             # Metrics
             expose_metrics=dict(default=False, type='bool'),
             metrics_image=dict(default=None, type='str'),
             # Stats
             stats_user=dict(default=None, type='str'),
-            stats_password=dict(default=None, type='str', no_log=True),
+            stats_password=dict(default=None, type='str'),
             stats_port=dict(default=1936, type='int'),
             # extra
             cacert_file=dict(default=None, type='str'),

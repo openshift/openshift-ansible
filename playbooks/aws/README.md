@@ -75,7 +75,7 @@ If customization is required for the instances, scale groups, or any other confi
 In order to create the bootstrap-able AMI we need to create a basic openshift-ansible inventory.  This enables us to create the AMI using the openshift-ansible node roles.  This inventory should not include any hosts, but certain variables should be defined in the appropriate groups, just as deploying a cluster
 using the normal openshift-ansible method.  See provisioning-inventory.example.ini for an example.
 
-There are more examples of cluster inventory settings [`here`](../../inventory/).
+There are more examples of cluster inventory settings [`here`](../../inventory/byo/).
 
 #### Step 0 (optional)
 
@@ -134,11 +134,11 @@ At this point we have successfully created the infrastructure including the mast
 Now it is time to install Openshift using the openshift-ansible installer.  This can be achieved by running the following playbook:
 
 ```
-$ ansible-playbook -i inventory.yml install.yml -e @provisioning_vars.yml
+$ ansible-playbook -i inventory.yml install.yml @provisioning_vars.yml
 ```
 This playbook accomplishes the following:
 1. Builds a dynamic inventory file by querying AWS.
-2. Runs the [`deploy_cluster.yml`](../deploy_cluster.yml)
+2. Runs the [`byo`](../../common/openshift-cluster/config.yml)
 
 Once this playbook completes, the cluster masters should be installed and configured.
 

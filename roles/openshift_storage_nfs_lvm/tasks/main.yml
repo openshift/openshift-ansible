@@ -2,7 +2,7 @@
 # TODO -- this may actually work on atomic hosts
 - fail:
     msg: "openshift_storage_nfs_lvm is not compatible with atomic host"
-  when: openshift_is_atomic | bool
+  when: openshift.common.is_atomic | bool
 
 - name: Create lvm volumes
   lvol: vg={{osnl_volume_group}} lv={{ item }} size={{osnl_volume_size}}G
@@ -20,7 +20,7 @@
   file: path={{osnl_mount_dir}}/{{ item }} owner=nfsnobody group=nfsnobody mode=0700
   with_sequence: start={{osnl_volume_num_start}} count={{osnl_number_of_volumes}} format={{osnl_volume_prefix}}{{osnl_volume_size}}g%04d
 
-- include_tasks: nfs.yml
+- include: nfs.yml
 
 - name: Create volume json file
   template: src=../templates/nfs.json.j2 dest=/root/persistent-volume.{{ item }}.json

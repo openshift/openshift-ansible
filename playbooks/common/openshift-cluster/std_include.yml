@@ -1,0 +1,46 @@
+---
+- name: Initialization Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  roles:
+  - installer_checkpoint
+  tasks:
+  - name: Set install initialization 'In Progress'
+    set_stats:
+      data:
+        installer_phase_initialize: "In Progress"
+      aggregate: false
+
+- include: evaluate_groups.yml
+  tags:
+  - always
+
+- include: initialize_facts.yml
+  tags:
+  - always
+
+- include: sanity_checks.yml
+  tags:
+  - always
+
+- include: validate_hostnames.yml
+  tags:
+  - node
+
+- include: initialize_openshift_repos.yml
+  tags:
+  - always
+
+- include: initialize_openshift_version.yml
+  tags:
+  - always
+
+- name: Initialization Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set install initialization 'Complete'
+    set_stats:
+      data:
+        installer_phase_initialize: "Complete"
+      aggregate: false

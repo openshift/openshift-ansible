@@ -7,15 +7,16 @@
     etcd_ip: "{{ etcd_ip }}"
 
 - name: setup firewall
-  import_tasks: firewall.yml
+  include: firewall.yml
+  static: yes
 
 - name: Install etcd
   package: name=etcd{{ '-' + etcd_version if etcd_version is defined else '' }} state=present
   when: not etcd_is_containerized | bool
   register: result
-  until: result is succeeded
+  until: result | success
 
-- include_tasks: drop_etcdctl.yml
+- include: drop_etcdctl.yml
   when:
   - openshift_etcd_etcdctl_profile | default(true) | bool
 
@@ -31,7 +32,7 @@
       src: etcd.docker.service
   when:
   - etcd_is_containerized | bool
-  - not l_is_etcd_system_container | bool
+  - not openshift.common.is_etcd_system_container | bool
 
 # Start secondary etcd instance for third party integrations
 # TODO: Determine an alternative to using thirdparty variable
@@ -91,21 +92,19 @@
       enabled: no
       masked: yes
       daemon_reload: yes
-    when: not l_is_etcd_system_container | bool
+    when: not openshift.common.is_etcd_system_container | bool
     register: task_result
-    failed_when:
-    - task_result is failed
-    - ('could not' not in task_result.msg|lower)
+    failed_when: task_result|failed and 'could not' not in task_result.msg|lower
 
   - name: Install etcd container service file
     template:
       dest: "/etc/systemd/system/etcd_container.service"
       src: etcd.docker.service
-    when: not l_is_etcd_system_container | bool
+    when: not openshift.common.is_etcd_system_container | bool
 
   - name: Install Etcd system container
-    include_tasks: system_container.yml
-    when: l_is_etcd_system_container | bool
+    include: system_container.yml
+    when: openshift.common.is_etcd_system_container | bool
   when: etcd_is_containerized | bool
 
 - name: Validate permissions on the config dir
@@ -133,4 +132,4 @@
 
 - name: Set fact etcd_service_status_changed
   set_fact:
-    etcd_service_status_changed: "{{ start_result is changed }}"
+    etcd_service_status_changed: "{{ start_result | changed }}"

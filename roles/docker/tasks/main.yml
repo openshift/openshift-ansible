@@ -1,0 +1,92 @@
+---
+# These tasks dispatch to the proper set of docker tasks based on the
+# inventory:openshift_docker_use_system_container variable
+
+- include: udev_workaround.yml
+  when: docker_udev_workaround | default(False) | bool
+
+- set_fact:
+    l_use_system_container: "{{ openshift.docker.use_system_container | default(False) }}"
+    l_use_crio: "{{ openshift_use_crio | default(False) }}"
+    l_use_crio_only: "{{ openshift_use_crio_only | default(False) }}"
+
+- name: Add enterprise registry, if necessary
+  set_fact:
+    l2_docker_additional_registries: "{{ l2_docker_additional_registries + [openshift_docker_ent_reg] }}"
+  when:
+    - openshift.common.deployment_type == 'openshift-enterprise'
+    - openshift_docker_ent_reg != ''
+    - openshift_docker_ent_reg not in l2_docker_additional_registries
+    - not l_use_crio_only
+
+- name: Use Package Docker if Requested
+  include: package_docker.yml
+  when:
+    - not l_use_system_container
+    - not l_use_crio_only
+
+- name: Ensure /var/lib/containers exists
+  file:
+    path: /var/lib/containers
+    state: directory
+
+- name: Fix SELinux Permissions on /var/lib/containers
+  command: "restorecon -R /var/lib/containers/"
+  changed_when: false
+
+- name: Use System Container Docker if Requested
+  include: systemcontainer_docker.yml
+  when:
+    - l_use_system_container
+    - not l_use_crio_only
+
+- name: Add CRI-O usage Requested
+  include: systemcontainer_crio.yml
+  when:
+    - l_use_crio
+    - openshift_docker_is_node_or_master | bool
+
+- name: stat the docker data dir
+  stat:
+    path: "{{ docker_default_storage_path }}"
+  register: dockerstat
+
+- when:
+    - l_use_crio
+    - dockerstat.stat.islnk is defined and not (dockerstat.stat.islnk | bool)
+  block:
+    - name: stop the current running docker
+      systemd:
+        state: stopped
+        name: "{{ openshift.docker.service_name }}"
+
+    - name: "Ensure {{ docker_alt_storage_path }} exists"
+      file:
+        path: "{{ docker_alt_storage_path }}"
+        state: directory
+
+    - name: "Set the selinux context on {{ docker_alt_storage_path }}"
+      command: "semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
+      register: results
+      failed_when:
+        - results.rc == 1
+        - "'already exists' not in results.stderr"
+
+    - name: "restorecon the {{ docker_alt_storage_path }}"
+      command: "restorecon -r {{ docker_alt_storage_path }}"
+
+    - name: Remove the old docker location
+      file:
+        state: absent
+        path: "{{ docker_default_storage_path }}"
+
+    - name: Setup the link
+      file:
+        state: link
+        src: "{{ docker_alt_storage_path }}"
+        path: "{{ docker_default_storage_path }}"
+
+    - name: start docker
+      systemd:
+        state: started
+        name: "{{ openshift.docker.service_name }}"

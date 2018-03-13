@@ -1,0 +1,60 @@
+---
+- include: evaluate_groups.yml
+
+- name: Load openshift_facts
+  hosts: oo_masters_to_config:oo_nodes_to_config
+  roles:
+  - openshift_facts
+  post_tasks:
+  - fail: msg="This playbook requires a master version of at least Origin 1.1 or OSE 3.1"
+    when: not openshift.common.version_gte_3_1_1_or_1_1_1 | bool
+
+- name: Reconfigure masters to listen on our new dns_port
+  hosts: oo_masters_to_config
+  handlers:
+  - include: ../../../roles/openshift_master/handlers/main.yml
+    static: yes
+  vars:
+    os_firewall_allow:
+    - service: skydns tcp
+      port: "{{ openshift.master.dns_port }}/tcp"
+    - service: skydns udp
+      port: "{{ openshift.master.dns_port }}/udp"
+  roles:
+  - os_firewall
+  tasks:
+  - openshift_facts:
+      role: "{{ item.role }}"
+      local_facts: "{{ item.local_facts }}"
+    with_items:
+    - role: master
+      local_facts:
+        dns_port: '8053'
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      yaml_key: dnsConfig.bindAddress
+      yaml_value: "{{ openshift.master.bind_addr }}:{{ openshift.master.dns_port }}"
+    notify: restart master api
+  - meta: flush_handlers
+
+- name: Configure nodes for dnsmasq
+  hosts: oo_nodes_to_config
+  handlers:
+  - include: ../../../roles/openshift_node/handlers/main.yml
+    static: yes
+  pre_tasks:
+  - openshift_facts:
+      role: "{{ item.role }}"
+      local_facts: "{{ item.local_facts }}"
+    with_items:
+    - role: node
+      local_facts:
+        dns_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+  roles:
+  - openshift_node_dnsmasq
+  post_tasks:
+  - modify_yaml:
+      dest: "{{ openshift.common.config_base }}/node/node-config.yaml"
+      yaml_key: dnsIP
+      yaml_value: "{{ openshift.node.dns_ip }}"
+    notify: restart node

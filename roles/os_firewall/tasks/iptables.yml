@@ -7,14 +7,12 @@
     enabled: no
     masked: yes
   register: task_result
-  failed_when:
-    - task_result is failed
-    - ('could not' not in task_result.msg|lower)
+  failed_when: task_result|failed and 'could not' not in task_result.msg|lower
 
 - name: Wait 10 seconds after disabling firewalld
   pause:
     seconds: 10
-  when: task_result is changed
+  when: task_result | changed
 
 - name: Install iptables packages
   package:
@@ -25,7 +23,7 @@
     - iptables-services
   when: not r_os_firewall_is_atomic | bool
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: Start and enable iptables service
   systemd:
@@ -42,4 +40,4 @@
 - name: need to pause here, otherwise the iptables service starting can sometimes cause ssh to fail
   pause:
     seconds: 10
-  when: result is changed
+  when: result | changed

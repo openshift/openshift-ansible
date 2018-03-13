@@ -1,0 +1,75 @@
+---
+- name: Create temp directory for kubeconfig
+  command: mktemp -d /tmp/openshift-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Record kubeconfig tmp dir
+  set_fact:
+    openshift_hosted_metrics_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+
+- name: Copy the admin client config(s)
+  command: >
+    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ openshift_hosted_metrics_kubeconfig }}
+  changed_when: False
+
+- name: Set hosted metrics facts
+  openshift_facts:
+    role: hosted
+    openshift_env: "{{ hostvars
+                       | oo_merge_hostvars(vars, inventory_hostname)
+                       | oo_openshift_env }}"
+    openshift_env_structures:
+    - 'openshift.hosted.metrics.*'
+
+- set_fact:
+    metrics_persistence: "{{ openshift.hosted.metrics.storage_kind | default(none) is not none }}"
+    metrics_dynamic_vol: "{{ openshift.hosted.metrics.storage_kind | default(none) == 'dynamic' }}"
+    metrics_template_dir: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/examples/infrastructure-templates/{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
+    image_prefix: "{{ '-v IMAGE_PREFIX=' ~ openshift.hosted.metrics.deployer.prefix if 'prefix' in openshift.hosted.metrics.deployer else '' }}"
+    image_version: "{{ '-v IMAGE_VERSION=' ~ openshift.hosted.metrics.deployer.version if 'version' in openshift.hosted.metrics.deployer else '' }}"
+
+
+- name: Check for existing metrics pods
+  shell: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
+    --namespace openshift-infra
+    get pods -l {{ item }} | grep -q Running
+  register: metrics_pods_status
+  with_items:
+  - metrics-infra=hawkular-metrics
+  - metrics-infra=heapster
+  - metrics-infra=hawkular-cassandra
+  failed_when: false
+  changed_when: false
+
+- name: Check for previous deployer
+  shell: >
+    {{ openshift.common.client_binary }}
+    --config={{ openshift_hosted_metrics_kubeconfig }}
+    --namespace openshift-infra
+    get pods -l metrics-infra=deployer --sort-by='{.metadata.creationTimestamp}' | tail -1 | grep metrics-deployer-
+  register: metrics_deployer_status
+  failed_when: false
+  changed_when: false
+
+- name: Record current deployment status
+  set_fact:
+    greenfield: "{{ not metrics_deployer_status.rc == 0 }}"
+    failed_error: "{{ True if 'Error' in metrics_deployer_status.stdout else False }}"
+    metrics_running: "{{ metrics_pods_status.results | oo_collect(attribute='rc') == [0,0,0] }}"
+
+- name: Set deployment mode
+  set_fact:
+    deployment_mode: "{{ 'refresh' if (failed_error | bool or metrics_upgrade | bool) else 'deploy' }}"
+
+# TODO: handle non greenfield deployments in the future
+- include: install.yml
+  when: greenfield
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

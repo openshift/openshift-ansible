@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  author: OpenShift
+  description: Atomic related tasks
+  company: Red Hat, Inc
+  license: ASL 2.0
+  min_ansible_version: 2.2
+  platforms:
+  - name: EL
+    versions:
+    - 7
+dependencies:
+- role: lib_openshift

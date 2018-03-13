@@ -1,0 +1,8 @@
+---
+- name: Install OpenvSwitch docker service file
+  template:
+    dest: "/etc/systemd/system/openvswitch.service"
+    src: openvswitch.docker.service
+  notify:
+  - reload systemd units
+  - restart openvswitch

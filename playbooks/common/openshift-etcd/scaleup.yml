@@ -1,0 +1,85 @@
+---
+- name: Gather facts
+  hosts: oo_etcd_to_config:oo_new_etcd_to_config
+  roles:
+  - openshift_etcd_facts
+  post_tasks:
+  - set_fact:
+      etcd_hostname: "{{ etcd_hostname }}"
+      etcd_ip: "{{ etcd_ip }}"
+
+- name: Configure etcd
+  hosts: oo_new_etcd_to_config
+  serial: 1
+  any_errors_fatal: true
+  vars:
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+  pre_tasks:
+  - name: Add new etcd members to cluster
+    command: >
+      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+                       --key-file {{ etcd_peer_key_file }}
+                       --ca-file {{ etcd_peer_ca_file }}
+                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_ip }}:{{ etcd_client_port }}
+                       member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}
+    delegate_to: "{{ etcd_ca_host }}"
+    failed_when:
+    - etcd_add_check.rc == 1
+    - ("peerURL exists" not in etcd_add_check.stderr)
+    register: etcd_add_check
+    retries: 3
+    delay: 10
+    until: etcd_add_check.rc == 0
+  - include_role:
+      name: etcd
+      tasks_from: server_certificates
+    vars:
+      etcd_peers: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
+      etcd_certificates_etcd_hosts: "{{ groups.oo_new_etcd_to_config | default([], true) }}"
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    static: true
+  roles:
+  - role: os_firewall
+    when: etcd_add_check.rc == 0
+  - role: openshift_etcd
+    when: etcd_add_check.rc == 0
+    etcd_peers: "{{ groups.oo_etcd_to_config | union(groups.oo_new_etcd_to_config)| default([], true) }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    etcd_initial_cluster_state: "existing"
+    etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
+    etcd_ca_setup: False
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  - role: nickhammond.logrotate
+    when: etcd_add_check.rc == 0
+  post_tasks:
+  - name: Verify cluster is stable
+    command: >
+      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+                       --key-file {{ etcd_peer_key_file }}
+                       --ca-file {{ etcd_peer_ca_file }}
+                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
+                       cluster-health
+    register: scaleup_health
+    retries: 3
+    delay: 30
+    until: scaleup_health.rc == 0
+
+- name: Update master etcd client urls
+  hosts: oo_masters_to_config
+  serial: 1
+  vars:
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    openshift_master_etcd_hosts: "{{ hostvars
+                                     | oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
+                                     | oo_collect('openshift.common.hostname')
+                                     | default(none, true) }}"
+    openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
+  roles:
+  - role: openshift_master_facts
+  post_tasks:
+  - include_role:
+      name: openshift_master
+      tasks_from: update_etcd_client_urls
+    static: true

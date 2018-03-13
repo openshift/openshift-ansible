@@ -1,0 +1,30 @@
+---
+# For 1.4/3.4 we want to upgrade everyone to etcd-3.0. etcd docs say to
+# upgrade from 2.0.x to 2.1.x to 2.2.x to 2.3.x to 3.0.x. While this is a tedius
+# task for RHEL and CENTOS it's simply not possible in Fedora unless you've
+# mirrored packages on your own because only the GA and latest versions are
+# available in the repos. So for Fedora we'll simply skip this, sorry.
+
+- name: Backup etcd before upgrading anything
+  include: backup.yml
+  vars:
+    etcd_backup_tag: "pre-upgrade-"
+  when: openshift_etcd_backup | default(true) | bool
+
+- name: Drop etcdctl profiles
+  hosts: oo_etcd_hosts_to_upgrade
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: drop_etcdctl
+    static: true
+
+- name: Perform etcd upgrade
+  include: ./upgrade.yml
+  when: openshift_etcd_upgrade | default(true) | bool
+
+- name: Backup etcd
+  include: backup.yml
+  vars:
+    etcd_backup_tag: "post-3.0-"
+  when: openshift_etcd_backup | default(true) | bool

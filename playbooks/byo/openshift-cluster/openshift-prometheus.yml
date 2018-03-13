@@ -1,0 +1,6 @@
+---
+- include: initialize_groups.yml
+
+- include: ../../common/openshift-cluster/std_include.yml
+
+- include: ../../common/openshift-cluster/openshift_prometheus.yml

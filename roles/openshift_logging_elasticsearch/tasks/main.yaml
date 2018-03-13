@@ -15,10 +15,10 @@
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
-- name: Set default image variables based on openshift_deployment_type
+- name: Set default image variables based on deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
     - "default_images.yml"
   loop_control:
     loop_var: var_file_name
@@ -30,7 +30,19 @@
     openshift_logging_elasticsearch_image_prefix: "{{ openshift_logging_elasticsearch_image_prefix | default(__openshift_logging_elasticsearch_image_prefix) }}"
     openshift_logging_elasticsearch_image_version: "{{ openshift_logging_elasticsearch_image_version | default(__openshift_logging_elasticsearch_image_version) }}"
 
-- include_tasks: determine_version.yaml
+- include: get_es_version.yml
+
+- set_fact:
+    full_restart_cluster: True
+  when:
+    - _es_installed_version is defined
+    - _es_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+
+- set_fact:
+    full_restart_cluster: True
+  when:
+    - _es_ops_installed_version is defined
+    - _es_ops_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -106,24 +118,56 @@
     dest: "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
   vars:
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+
+- template:
+    src: logging-metrics-rolebinding.j2
+    dest: "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
+  vars:
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     role_namespace: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_namespace(openshift_logging_elasticsearch_namespace) }}"
     role_user: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_name }}"
 
 - name: Create logging-metrics-reader-role
-  command: >
-    {{ openshift_client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    -n "{{ openshift_logging_elasticsearch_namespace }}"
-    create -f "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
-  register: prometheus_out
-  check_mode: no
-  ignore_errors: yes
+  oc_obj:
+    state: present
+    name: "prometheus-metrics-viewer"
+    kind: role
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+      - "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
+    delete_after: true
 
-- fail:
-    msg: "There was an error creating the logging-metrics-role and binding: {{prometheus_out}}"
-  when:
-    - "prometheus_out.stderr | length > 0"
-    - "'already exists' not in prometheus_out.stderr"
+- name: Create logging-metrics-reader-rolebinding
+  oc_obj:
+    state: present
+    name: "prometheus-metrics-viewer"
+    kind: rolebinding
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+      - "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
+    delete_after: true
+
+- name: Checking for passwd.yml
+  stat: path="{{ generated_certs_dir }}/passwd.yml"
+  register: passwd_file
+  check_mode: no
+
+- when: passwd_file.stat.exists
+  slurp:
+    src: "{{ generated_certs_dir }}/passwd.yml"
+  register: _logging_metrics_proxy_passwd
+
+- when: not passwd_file.stat.exists or openshift_logging_elasticsearch_prometheus_sa not in ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )
+  template:
+    src: passwd.j2
+    dest: "{{ generated_certs_dir }}/passwd.yml"
+  vars:
+    logging_user_name: "{{ openshift_logging_elasticsearch_prometheus_sa }}"
+    logging_user_passwd: "{{ 16 | oo_random_word | b64encode }}"
+
+- slurp:
+    src: "{{ generated_certs_dir }}/passwd.yml"
+  register: _logging_metrics_proxy_passwd
 
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
@@ -165,36 +209,31 @@
     dest: "{{ tempdir }}/elasticsearch-logging.yml"
   vars:
     root_logger: "{{openshift_logging_es_log_appenders | join(', ')}}"
-  when: es_logging_contents is undefined
   changed_when: no
-
-- set_fact:
-    __es_num_of_shards: "{{ _es_configmap | default({}) | walk('index.number_of_shards', '1') }}"
-    __es_num_of_replicas: "{{ _es_configmap | default({}) | walk('index.number_of_replicas', '0') }}"
 
 - template:
     src: elasticsearch.yml.j2
     dest: "{{ tempdir }}/elasticsearch.yml"
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
-    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(None) or __es_num_of_shards }}"
-    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas | default(None) or __es_num_of_replicas }}"
+    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
-
-  when: es_config_contents is undefined
   changed_when: no
 
-- copy:
-    content: "{{ es_logging_contents }}"
-    dest: "{{ tempdir }}/elasticsearch-logging.yml"
-  when: es_logging_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ es_config_contents }}"
-    dest: "{{ tempdir }}/elasticsearch.yml"
-  when: es_config_contents is defined
-  changed_when: no
+# create diff between current configmap files and our current files
+- include_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "{{ elasticsearch_name }}"
+    configmap_namespace: "logging"
+    configmap_file_names:
+      - current_file: "elasticsearch.yml"
+        new_file: "{{ tempdir }}/elasticsearch.yml"
+        protected_lines: ["number_of_shards", "number_of_replicas"]
+      - current_file: "logging.yml"
+        new_file: "{{ tempdir }}/elasticsearch-logging.yml"
 
 - name: Set ES configmap
   oc_configmap:
@@ -213,7 +252,7 @@
         _restart_logging_components: "{{ _restart_logging_components | default([]) + [es_component] | unique }}"
 
     - shell: >
-        oc get dc -l component="{{ es_component }}" -n "{{ openshift_logging_elasticsearch_namespace }}" -o name | cut -d'/' -f2
+        {{ openshift.common.client_binary }} get dc -l component="{{ es_component }}" -n "{{ openshift_logging_elasticsearch_namespace }}" -o name | cut -d'/' -f2
       register: _es_dcs
 
     - set_fact:
@@ -243,6 +282,8 @@
         path: "{{ generated_certs_dir }}/ca.crt"
       - name: admin.jks
         path: "{{ generated_certs_dir }}/system.admin.jks"
+      - name: passwd.yml
+        path: "{{ generated_certs_dir }}/passwd.yml"
 
 # services
 - name: Set logging-{{ es_component }}-cluster service
@@ -352,7 +393,7 @@
         delete_after: true
 
 - set_fact:
-    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | lib_utils_oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
+    es_deploy_name: "logging-{{ es_component }}-{{ openshift_logging_elasticsearch_deployment_type }}-{{ 8 | oo_random_word('abcdefghijklmnopqrstuvwxyz0123456789') }}"
   when: openshift_logging_elasticsearch_deployment_name == ""
 
 - set_fact:
@@ -379,6 +420,9 @@
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
+    basic_auth_passwd: "{{ ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )[openshift_logging_elasticsearch_prometheus_sa]['passwd'] | b64decode }}"
+    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
+    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
 
 - name: Set ES dc
   oc_obj:

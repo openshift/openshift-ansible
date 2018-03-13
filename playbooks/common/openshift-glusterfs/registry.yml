@@ -1,0 +1,49 @@
+---
+- include: config.yml
+
+- name: Initialize GlusterFS registry PV and PVC vars
+  hosts: oo_first_master
+  tags: hosted
+  tasks:
+  - set_fact:
+      glusterfs_pv: []
+      glusterfs_pvc: []
+
+  - set_fact:
+      glusterfs_pv:
+      - name: "{{ openshift.hosted.registry.storage.volume.name }}-glusterfs-volume"
+        capacity: "{{ openshift.hosted.registry.storage.volume.size }}"
+        access_modes: "{{ openshift.hosted.registry.storage.access.modes }}"
+        storage:
+          glusterfs:
+            endpoints: "{{ openshift.hosted.registry.storage.glusterfs.endpoints }}"
+            path: "{{ openshift.hosted.registry.storage.glusterfs.path }}"
+            readOnly: "{{ openshift.hosted.registry.storage.glusterfs.readOnly }}"
+      glusterfs_pvc:
+      - name: "{{ openshift.hosted.registry.storage.volume.name }}-glusterfs-claim"
+        capacity: "{{ openshift.hosted.registry.storage.volume.size }}"
+        access_modes: "{{ openshift.hosted.registry.storage.access.modes }}"
+    when: openshift.hosted.registry.storage.glusterfs.swap
+
+- name: Create persistent volumes
+  hosts: oo_first_master
+  tags:
+  - hosted
+  vars:
+    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups, glusterfs_pv) }}"
+    persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims(glusterfs_pvc) }}"
+  roles:
+  - role: openshift_persistent_volumes
+    when: persistent_volumes | union(glusterfs_pv) | length > 0 or persistent_volume_claims | union(glusterfs_pvc) | length > 0
+
+- name: Create Hosted Resources
+  hosts: oo_first_master
+  tags:
+  - hosted
+  pre_tasks:
+  - set_fact:
+      openshift_hosted_router_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
+      openshift_hosted_registry_registryurl: "{{ hostvars[groups.oo_first_master.0].openshift.master.registry_url }}"
+    when: "'master' in hostvars[groups.oo_first_master.0].openshift and 'registry_url' in hostvars[groups.oo_first_master.0].openshift.master"
+  roles:
+  - role: openshift_hosted

@@ -19,7 +19,7 @@
 - fail: msg="'keytool' is unavailable. Please install java-1.8.0-openjdk-headless on the control node"
   when: keytool_check.rc  == 1
 
-- include_tasks: generate_certificates.yaml
-- include_tasks: generate_serviceaccounts.yaml
-- include_tasks: generate_services.yaml
-- include_tasks: generate_rolebindings.yaml
+- include: generate_certificates.yaml
+- include: generate_serviceaccounts.yaml
+- include: generate_services.yaml
+- include: generate_rolebindings.yaml

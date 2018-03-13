@@ -1,2 +1,2 @@
 ---
-- include_tasks: upgrade/upgrade_rpm.yml
+- include: upgrade/upgrade_rpm.yml

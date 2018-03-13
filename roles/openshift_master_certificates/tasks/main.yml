@@ -3,7 +3,7 @@
     openshift_master_certs_no_etcd:
     - admin.crt
     - master.kubelet-client.crt
-    - master.proxy-client.crt
+    - "{{ 'master.proxy-client.crt' if openshift.common.version_gte_3_1_or_1_1 else omit }}"
     - master.server.crt
     - openshift-master.crt
     - openshift-registry.crt
@@ -27,7 +27,7 @@
     master_certs_missing: "{{ true if openshift_certificates_redeploy | default(false) | bool
                               else (False in (g_master_cert_stat_result.results
                                               | default({})
-                                              | lib_utils_oo_collect(attribute='stat.exists')
+                                              | oo_collect(attribute='stat.exists')
                                               | list)) }}"
 
 - name: Ensure the generated_configs directory present
@@ -47,33 +47,35 @@
 
 - name: Create the master server certificate
   command: >
-    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm ca create-server-cert
-    {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-server-cert
+    {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
-    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') %}
+    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
     --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
     --hostnames={{ hostvars[item].openshift.common.all_hostnames | join(',') }}
     --cert={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.crt
     --key={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/master.server.key
+    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
     --expire-days={{ openshift_master_cert_expire_days }}
+    {% endif %}
     --signer-cert={{ openshift_ca_cert }}
     --signer-key={{ openshift_ca_key }}
     --signer-serial={{ openshift_ca_serial }}
     --overwrite=false
   when: item != openshift_ca_host
   with_items: "{{ hostvars
-                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
-                  | lib_utils_oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
+                  | oo_select_keys(groups['oo_masters_to_config'])
+                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
 - name: Generate the loopback master client config
   command: >
-    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm create-api-client-config
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
       --certificate-authority={{ openshift_ca_cert }}
-      {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
+      {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
       --certificate-authority {{ named_ca_certificate }}
       {% endfor %}
       --client-dir={{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}
@@ -85,12 +87,14 @@
       --signer-serial={{ openshift_ca_serial }}
       --user=system:openshift-master
       --basename=openshift-master
+      {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
       --expire-days={{ openshift_master_cert_expire_days }}
+      {% endif %}
   args:
     creates: "{{ openshift_generated_configs_dir }}/master-{{ hostvars[item].openshift.common.hostname }}/openshift-master.kubeconfig"
   with_items: "{{ hostvars
-                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
-                  | lib_utils_oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
+                  | oo_select_keys(groups['oo_masters_to_config'])
+                  | oo_collect(attribute='inventory_hostname', filters={'master_certs_missing':True}) }}"
   when: item != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true

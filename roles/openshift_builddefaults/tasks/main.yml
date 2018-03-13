@@ -4,6 +4,11 @@
     role: builddefaults
     # TODO: add ability to define builddefaults env vars sort of like this
     # may need to move the config generation to a filter however.
+    # openshift_env: "{{ hostvars
+    #                    | oo_merge_hostvars(vars, inventory_hostname)
+    #                    | oo_openshift_env }}"
+    # openshift_env_structures:
+    # - 'openshift.builddefaults.env.*'
     local_facts:
       http_proxy: "{{ openshift_builddefaults_http_proxy | default(None) }}"
       https_proxy: "{{ openshift_builddefaults_https_proxy | default(None) }}"

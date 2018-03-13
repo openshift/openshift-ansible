@@ -12,7 +12,7 @@ Checks are typically implemented as two parts:
 
 The checks are called from Ansible playbooks via the `openshift_health_check`
 action plugin. See
-[playbooks/openshift-checks/pre-install.yml](../../playbooks/openshift-checks/pre-install.yml)
+[playbooks/byo/openshift-preflight/check.yml](../../playbooks/byo/openshift-preflight/check.yml)
 for an example.
 
 The action plugin dynamically discovers all checks and executes only those

@@ -2,15 +2,13 @@
 r_etcd_common_backup_tag: ''
 r_etcd_common_backup_sufix_name: ''
 
-l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-
 # runc, docker, host
-r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if openshift_is_containerized else 'host' }}"
+r_etcd_common_etcd_runtime: "docker"
 r_etcd_common_embedded_etcd: false
 
 osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'
 etcd_image_dict:
-  origin: "registry.fedoraproject.org/latest/etcd"
+  origin: "registry.fedoraproject.org/f26/etcd"
   openshift-enterprise: "{{ osm_etcd_image }}"
 etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }}"
 
@@ -78,7 +76,7 @@ etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_p
 
 # required role variable
 #etcd_peer: 127.0.0.1
-etcdctlv2: "etcdctl --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} -C https://{{ etcd_peer }}:{{ etcd_client_port }}"
+etcdctlv2: "{{ r_etcd_common_etcdctl_command }} --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} -C https://{{ etcd_peer }}:{{ etcd_client_port }}"
 
 etcd_service: "{{ 'etcd_container' if r_etcd_common_etcd_runtime == 'docker' else 'etcd' }}"
 # Location of the service file is fixed and not meant to be changed
@@ -97,5 +95,3 @@ r_etcd_os_firewall_allow:
 
 # set the backend quota to 4GB by default
 etcd_quota_backend_bytes: 4294967296
-
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False)) else 'docker' }}"

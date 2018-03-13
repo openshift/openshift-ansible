@@ -5,7 +5,7 @@
     state: present
   with_items: "{{ r_openshift_node_image_prep_packages }}"
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: create the directory for node
   file:
@@ -34,8 +34,8 @@
     regexp: "^CONFIG_FILE=.*"
 
 - name: include aws sysconfig credentials
-  import_tasks: aws.yml
-  when: not (openshift_node_use_instance_profiles | default(False))
+  include: aws.yml
+  static: yes
 
 #- name: update the ExecStart to have bootstrap
 #  lineinfile:

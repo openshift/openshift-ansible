@@ -1,24 +1,25 @@
 ---
-- import_playbook: ../../../../init/evaluate_groups.yml
+- include: ../../evaluate_groups.yml
   vars:
     # Do not allow adding hosts during upgrade.
     g_new_master_hosts: []
     g_new_node_hosts: []
 
-- import_playbook: ../initialize_nodes_to_upgrade.yml
+- include: ../initialize_nodes_to_upgrade.yml
 
 - name: Check for appropriate Docker versions
   hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config
   roles:
   - openshift_facts
   tasks:
+  - set_fact:
+      repoquery_cmd: "{{ 'dnf repoquery --latest-limit 1 -d 0' if ansible_pkg_mgr == 'dnf' else 'repoquery --plugins' }}"
+
   - fail:
       msg: Cannot upgrade Docker on Atomic operating systems.
-    when: openshift_is_atomic | bool
+    when: openshift.common.is_atomic | bool
 
-  - include_role:
-      name: container_runtime
-      tasks_from: docker_upgrade_check.yml
+  - include: upgrade_check.yml
     when: docker_upgrade is not defined or docker_upgrade | bool
 
 
@@ -31,7 +32,6 @@
   any_errors_fatal: true
 
   roles:
-  - openshift_facts
   - lib_openshift
 
   tasks:
@@ -43,7 +43,7 @@
     retries: 10
     delay: 5
     register: node_unschedulable
-    until: node_unschedulable is succeeded
+    until: node_unschedulable|succeeded
     when:
     - l_docker_upgrade is defined
     - l_docker_upgrade | bool
@@ -51,15 +51,15 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ openshift_client_binary }} adm drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ openshift.common.admin_binary }} drain {{ openshift.node.nodename }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
     delegate_to: "{{ groups.oo_first_master.0 }}"
     when: l_docker_upgrade is defined and l_docker_upgrade | bool and inventory_hostname in groups.oo_nodes_to_upgrade
     register: l_docker_upgrade_drain_result
-    until: not (l_docker_upgrade_drain_result is failed)
+    until: not l_docker_upgrade_drain_result | failed
     retries: 60
     delay: 60
 
-  - include_tasks: tasks/upgrade.yml
+  - include: tasks/upgrade.yml
     when: l_docker_upgrade is defined and l_docker_upgrade | bool
 
   - name: Set node schedulability
@@ -70,5 +70,5 @@
     retries: 10
     delay: 5
     register: node_schedulable
-    until: node_schedulable is succeeded
-    when: node_unschedulable is changed
+    until: node_schedulable|succeeded
+    when: node_unschedulable|changed

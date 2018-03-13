@@ -3,12 +3,12 @@
   become: yes
   systemd: name=calico state=restarted
 
-- name: restart container runtime
+- name: restart docker
   become: yes
   systemd:
-    name: "{{ openshift_docker_service_name }}"
+    name: "{{ openshift.docker.service_name }}"
     state: restarted
   register: l_docker_restart_docker_in_calico_result
-  until: not (l_docker_restart_docker_in_calico_result is failed)
+  until: not l_docker_restart_docker_in_calico_result | failed
   retries: 3
   delay: 30

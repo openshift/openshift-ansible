@@ -1,0 +1,113 @@
+---
+#
+# Node Upgrade Playbook
+#
+# Upgrades nodes only, but requires the control plane to have already been upgraded.
+#
+- include: ../init.yml
+  tags:
+  - pre_upgrade
+
+- name: Configure the upgrade target for the common upgrade tasks
+  hosts: oo_all_hosts
+  tags:
+  - pre_upgrade
+  tasks:
+  - set_fact:
+      openshift_upgrade_target: "{{ '1.3' if deployment_type == 'origin' else '3.3' }}"
+      openshift_upgrade_min: "{{ '1.2' if deployment_type == 'origin' else '3.2' }}"
+
+# Pre-upgrade
+- include: ../initialize_nodes_to_upgrade.yml
+  tags:
+  - pre_upgrade
+
+- name: Update repos on nodes
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade:oo_etcd_to_config:oo_lb_to_config
+  roles:
+  - openshift_repos
+  tags:
+  - pre_upgrade
+
+- name: Set openshift_no_proxy_internal_hostnames
+  hosts: oo_masters_to_config:oo_nodes_to_upgrade
+  tags:
+  - pre_upgrade
+  tasks:
+  - set_fact:
+      openshift_no_proxy_internal_hostnames: "{{ hostvars | oo_select_keys(groups['oo_nodes_to_upgrade']
+                                                    | union(groups['oo_masters_to_config'])
+                                                    | union(groups['oo_etcd_to_config'] | default([])))
+                                                | oo_collect('openshift.common.hostname') | default([]) | join (',')
+                                                }}"
+    when:
+    - openshift_http_proxy is defined or openshift_https_proxy is defined
+    - openshift_generate_no_proxy_hosts | default(True) | bool
+
+- include: ../pre/verify_inventory_vars.yml
+  tags:
+  - pre_upgrade
+
+- include: ../disable_node_excluders.yml
+  tags:
+  - pre_upgrade
+
+- include: ../../initialize_openshift_version.yml
+  tags:
+  - pre_upgrade
+  vars:
+    # Request specific openshift_release and let the openshift_version role handle converting this
+    # to a more specific version, respecting openshift_image_tag and openshift_pkg_version if
+    # defined, and overriding the normal behavior of protecting the installed version
+    openshift_release: "{{ openshift_upgrade_target }}"
+    openshift_protect_installed_version: False
+
+    # We skip the docker role at this point in upgrade to prevent
+    # unintended package, container, or config upgrades which trigger
+    # docker restarts. At this early stage of upgrade we can assume
+    # docker is configured and running.
+    skip_docker_role: True
+
+- name: Verify masters are already upgraded
+  hosts: oo_masters_to_config
+  tags:
+  - pre_upgrade
+  tasks:
+  - fail: msg="Master running {{ openshift.common.version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
+    when: openshift.common.version != openshift_version
+
+- include: ../pre/verify_control_plane_running.yml
+  tags:
+  - pre_upgrade
+
+- name: Verify upgrade targets
+  hosts: oo_nodes_to_upgrade
+  tasks:
+  - include: ../pre/verify_upgrade_targets.yml
+  tags:
+  - pre_upgrade
+
+- name: Verify docker upgrade targets
+  hosts: oo_nodes_to_upgrade
+  tasks:
+  - include: ../pre/tasks/verify_docker_upgrade_targets.yml
+  tags:
+  - pre_upgrade
+
+- include: ../pre/gate_checks.yml
+  tags:
+  - pre_upgrade
+
+# Pre-upgrade completed, nothing after this should be tagged pre_upgrade.
+
+# Separate step so we can execute in parallel and clear out anything unused
+# before we get into the serialized upgrade process which will then remove
+# remaining images if possible.
+- name: Cleanup unused Docker images
+  hosts: oo_nodes_to_upgrade
+  tasks:
+  - include: ../cleanup_unused_images.yml
+
+- include: ../upgrade_nodes.yml
+  vars:
+    node_config_hook: "v3_3/node_config_upgrade.yml"

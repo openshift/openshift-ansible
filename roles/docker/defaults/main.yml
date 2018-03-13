@@ -1,0 +1,40 @@
+---
+docker_cli_auth_config_path: '/root/.docker'
+openshift_docker_signature_verification: False
+
+openshift_docker_alternative_creds: False
+
+# oreg_url is defined by user input.
+oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
+oreg_auth_credentials_replace: False
+
+openshift_docker_additional_registries: []
+openshift_docker_blocked_registries: []
+openshift_docker_insecure_registries: []
+
+openshift_docker_ent_reg: 'registry.access.redhat.com'
+
+# The l2_docker_* variables convert csv strings to lists, if
+# necessary.  These variables should be used in place of their respective
+# openshift_docker_* counterparts to ensure the properly formatted lists are
+# utilized.
+l2_docker_additional_registries: "{% if openshift_docker_additional_registries is string %}{% if openshift_docker_additional_registries == '' %}[]{% elif ',' in openshift_docker_additional_registries %}{{ openshift_docker_additional_registries.split(',') | list }}{% else %}{{ [ openshift_docker_additional_registries ] }}{% endif %}{% else %}{{ openshift_docker_additional_registries }}{% endif %}"
+l2_docker_blocked_registries: "{% if openshift_docker_blocked_registries is string %}{% if openshift_docker_blocked_registries == '' %}[]{% elif ',' in openshift_docker_blocked_registries %}{{ openshift_docker_blocked_registries.split(',') | list }}{% else %}{{ [ openshift_docker_blocked_registries ] }}{% endif %}{% else %}{{ openshift_docker_blocked_registries }}{% endif %}"
+l2_docker_insecure_registries: "{% if openshift_docker_insecure_registries is string %}{% if openshift_docker_insecure_registries == '' %}[]{% elif ',' in openshift_docker_insecure_registries %}{{ openshift_docker_insecure_registries.split(',') | list }}{% else %}{{ [ openshift_docker_insecure_registries ] }}{% endif %}{% else %}{{ openshift_docker_insecure_registries }}{% endif %}"
+
+openshift_docker_use_etc_containers: False
+containers_registries_conf_path: /etc/containers/registries.conf
+
+r_crio_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_crio_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+
+r_crio_os_firewall_deny: []
+r_crio_os_firewall_allow:
+- service: crio
+  port: 10010/tcp
+
+
+openshift_docker_is_node_or_master: "{{ True if inventory_hostname in (groups['oo_masters_to_config']|default([])) or inventory_hostname in (groups['oo_nodes_to_config']|default([])) else False | bool }}"
+
+docker_alt_storage_path: /var/lib/containers/docker
+docker_default_storage_path: /var/lib/docker

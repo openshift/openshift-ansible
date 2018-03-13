@@ -1,0 +1,66 @@
+---
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.acceptContentTypes'
+    yaml_value: 'application/vnd.kubernetes.protobuf,application/json'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.contentType'
+    yaml_value: 'application/vnd.kubernetes.protobuf'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.burst'
+    yaml_value: 400
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.externalKubernetesClientConnectionOverrides.qps'
+    yaml_value: 200
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.acceptContentTypes'
+    yaml_value: 'application/vnd.kubernetes.protobuf,application/json'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.contentType'
+    yaml_value: 'application/vnd.kubernetes.protobuf'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.burst'
+    yaml_value: 600
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'masterClients.openshiftLoopbackClientConnectionOverrides.qps'
+    yaml_value: 300
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'controllerConfig.serviceServingCert.signer.certFile'
+    yaml_value: service-signer.crt
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'controllerConfig.serviceServingCert.signer.keyFile'
+    yaml_value: service-signer.key
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'admissionConfig.pluginConfig'
+    yaml_value: "{{ openshift.master.admission_plugin_config }}"
+  when: "'admission_plugin_config' in openshift.master"
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'admissionConfig.pluginOrderOverride'
+    yaml_value:
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
+    yaml_key: 'kubernetesMasterConfig.admissionConfig'
+    yaml_value:

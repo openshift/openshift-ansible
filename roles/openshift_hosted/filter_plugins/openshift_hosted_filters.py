@@ -12,7 +12,7 @@ class FilterModule(object):
     def get_router_replicas(replicas=None, router_nodes=None):
         ''' This function will return the number of replicas
             based on the results from the defined
-            openshift_hosted_router_replicas OR
+            openshift.hosted.router.replicas OR
             the query from oc_obj on openshift nodes with a selector OR
             default to 1
 

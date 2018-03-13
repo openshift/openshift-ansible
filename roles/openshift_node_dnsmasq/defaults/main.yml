@@ -1,0 +1,7 @@
+---
+openshift_node_dnsmasq_install_network_manager_hook: true
+
+# lo must always be present in this list or dnsmasq will conflict with
+# the node's dns service.
+openshift_node_dnsmasq_except_interfaces:
+- lo

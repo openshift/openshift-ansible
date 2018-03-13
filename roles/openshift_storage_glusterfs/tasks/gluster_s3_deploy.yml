@@ -63,7 +63,7 @@
   until:
   - "gluster_s3_pvcs.results.results[0]['items'] | count > 0"
   # Pod's 'Bound' status must be True
-  - "gluster_s3_pvcs.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Bound'}) | map('bool') | select | list | count == 2"
+  - "gluster_s3_pvcs.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Bound'}) | map('bool') | select | list | count == 2"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"
 
@@ -108,6 +108,6 @@
   until:
   - "gluster_s3_pod.results.results[0]['items'] | count > 0"
   # Pod's 'Ready' status must be True
-  - "gluster_s3_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  - "gluster_s3_pod.results.results[0]['items'] | oo_collect(attribute='status.conditions') | oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
   delay: 10
   retries: "{{ (glusterfs_timeout | int / 10) | int }}"

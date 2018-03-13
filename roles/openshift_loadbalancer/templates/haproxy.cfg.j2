@@ -3,7 +3,7 @@
 global
     maxconn     {{ openshift_loadbalancer_global_maxconn | default(20000) }}
     log         /dev/log local0 info
-{% if openshift_is_containerized | bool %}
+{% if openshift.common.is_containerized | bool %}
     stats socket /var/lib/haproxy/run/haproxy.sock mode 600 level admin
 {% else %}
     chroot      /var/lib/haproxy
@@ -79,3 +79,33 @@ backend {{ backend.name }}
     server      {{ server.name }} {{ server.address }} {{ server.opts }}
 {% endfor %}
 {% endfor %}
+
+{% if openshift_use_contrail | default(false) | bool %}
+{% for frontend in openshift_loadbalancer_frontends %}
+frontend contrail-web-ui
+    bind *:8143 ssl crt /etc/contrail/contrail-webui.pem
+    reqadd X-Forwarded-Proto:\ https
+    default_backend contrail-web-ui
+{% if 'options' in frontend %}
+{% for option in frontend.options %}
+    option {{ option }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if openshift_use_contrail | default(false) | bool %}
+{% for backend in openshift_loadbalancer_backends %}
+backend contrail-web-ui
+    balance roundrobin
+    cookie SERVERID insert indirect nocache
+{% if 'options' in backend %}
+{% for option in backend.options %}
+    option {{ option }}
+{% endfor %}
+{% endif %}
+{% for server in backend.servers %}
+    server      {{ server.name }} {{ server.address.split(':')[0] }}:8080 cookie {{ server.address.split(':')[0] }} check
+{% endfor %}
+{% endfor %}
+{% endif %}

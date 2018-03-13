@@ -13,6 +13,5 @@ galaxy_info:
   - cloud
   - system
 dependencies:
-- role: lib_utils
 - role: calico
 - role: openshift_facts

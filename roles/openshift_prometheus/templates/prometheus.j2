@@ -75,9 +75,8 @@ spec:
 
       - name: prometheus
         args:
-{% for arg in openshift_prometheus_args %}
-        - {{ arg }}
-{% endfor %}
+        - --storage.tsdb.retention=6h
+        - --storage.tsdb.min-block-duration=2m
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.listen-address=localhost:9090
         image: "{{ l_openshift_prometheus_image_prefix }}prometheus:{{ l_openshift_prometheus_image_version }}"

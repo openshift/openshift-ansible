@@ -9,4 +9,4 @@
   systemd:
     name: systemd-modules-load.service
     state: restarted
-  when: km is changed
+  when: km | changed

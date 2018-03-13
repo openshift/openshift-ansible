@@ -1,6 +1,7 @@
 ---
 - name: setup firewall
-  import_tasks: firewall.yml
+  include: firewall.yml
+  static: yes
 
 - name: Install cockpit-ws
   package: name={{ item }} state=present
@@ -10,13 +11,13 @@
     - cockpit-bridge
     - cockpit-docker
     - "{{ cockpit_plugins }}"
-  when: not openshift_is_containerized | bool
+  when: not openshift.common.is_containerized | bool
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: Enable cockpit-ws
   systemd:
     name: cockpit.socket
     enabled: true
     state: started
-  when: not openshift_is_containerized | bool
+  when: not openshift.common.is_containerized | bool

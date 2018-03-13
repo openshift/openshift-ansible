@@ -1,0 +1,36 @@
+---
+- name: restart openvswitch
+  systemd:
+    name: openvswitch
+    state: restarted
+  when:
+  - not skip_node_svc_handlers | default(False) | bool
+  - not (ovs_service_status_changed | default(false) | bool)
+  - openshift_use_openshift_sdn | bool
+  register: l_openshift_node_upgrade_stop_openvswitch_result
+  until: not l_openshift_node_upgrade_stop_openvswitch_result | failed
+  retries: 3
+  delay: 30
+  notify:
+  - restart openvswitch pause
+
+- name: restart openvswitch pause
+  pause: seconds=15
+  when: (not skip_node_svc_handlers | default(False) | bool) and openshift.common.is_containerized | bool
+
+- name: restart node
+  systemd:
+    name: "{{ openshift.common.service_type }}-node"
+    state: restarted
+  register: l_openshift_node_upgrade_restart_node_result
+  until: not l_openshift_node_upgrade_restart_node_result | failed
+  retries: 3
+  delay: 30
+  when:
+  - (not skip_node_svc_handlers | default(False) | bool)
+  - not (node_service_status_changed | default(false) | bool)
+
+# TODO(jchaloup): once it is verified the systemd module works as expected
+# switch to it: http://docs.ansible.com/ansible/latest/systemd_module.html
+- name: reload systemd units
+  command: systemctl daemon-reload

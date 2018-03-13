@@ -1,0 +1,25 @@
+---
+- name: Prometheus Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Prometheus install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_prometheus: "In Progress"
+      aggregate: false
+
+- name: Create Hosted Resources - openshift_prometheus
+  hosts: oo_first_master
+  roles:
+  - role: openshift_prometheus
+
+- name: Prometheus Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Prometheus install 'Complete'
+    set_stats:
+      data:
+        installer_phase_prometheus: "Complete"
+      aggregate: false

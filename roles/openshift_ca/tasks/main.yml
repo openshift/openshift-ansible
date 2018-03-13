@@ -9,17 +9,18 @@
 
 - name: Install the base package for admin tooling
   package:
-    name: "{{ openshift_service_type }}{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift.common.service_type }}{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
-  when: not openshift_is_containerized | bool
+  when: not openshift.common.is_containerized | bool
   register: install_result
-  until: install_result is succeeded
+  until: install_result | success
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
 - name: Reload generated facts
   openshift_facts:
-  when: hostvars[openshift_ca_host].install_result is changed
+  when:
+  - hostvars[openshift_ca_host].install_result | default({'changed':false}) is changed
 
 - name: Create openshift_ca_config_dir if it does not exist
   file:
@@ -41,7 +42,7 @@
 
 - set_fact:
     master_ca_missing: "{{ False in (g_master_ca_stat_result.results
-                                     | lib_utils_oo_collect(attribute='stat.exists')
+                                     | oo_collect(attribute='stat.exists')
                                      | list) }}"
   run_once: true
 
@@ -87,19 +88,21 @@
 # This should NOT replace the CA due to --overwrite=false when a CA already exists.
 - name: Create the master certificates if they do not already exist
   command: >
-    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm ca create-master-certs
-    {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm ca create-master-certs
+    {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
     --certificate-authority {{ named_ca_certificate }}
     {% endfor %}
-    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') %}
+    {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | oo_collect('path') %}
     --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
     --hostnames={{ hostvars[openshift_ca_host].openshift.common.all_hostnames | join(',') }}
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
     --cert-dir={{ openshift_ca_config_dir }}
+    {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
     --expire-days={{ openshift_master_cert_expire_days }}
     --signer-expire-days={{ openshift_ca_cert_expire_days }}
+    {% endif %}
     --overwrite=false
   when: master_ca_missing | bool or openshift_certificates_redeploy | default(false) | bool
   delegate_to: "{{ openshift_ca_host }}"
@@ -117,7 +120,7 @@
       src: "{{ item }}"
       dest: "{{ openshift_ca_clientconfig_tmpdir.stdout }}/"
       remote_src: true
-    with_items: "{{ g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') }}"
+    with_items: "{{ g_master_legacy_ca_result.files | default([]) | oo_collect('path') }}"
     delegate_to: "{{ openshift_ca_host }}"
     run_once: true
   - copy:
@@ -137,7 +140,7 @@
 
 - name: Test local loopback context
   command: >
-    {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} config view
+    {{ hostvars[openshift_ca_host].openshift.common.client_binary }} config view
     --config={{ openshift_master_loopback_config }}
   changed_when: false
   register: loopback_config
@@ -154,9 +157,9 @@
     register: openshift_ca_loopback_tmpdir
   - name: Generate the loopback master client config
     command: >
-      {{ hostvars[openshift_ca_host]['first_master_client_binary'] }} adm create-api-client-config
+      {{ hostvars[openshift_ca_host].openshift.common.client_binary }} adm create-api-client-config
         --certificate-authority={{ openshift_ca_cert }}
-        {% for named_ca_certificate in openshift.master.named_certificates | default([]) | lib_utils_oo_collect('cafile') %}
+        {% for named_ca_certificate in openshift.master.named_certificates | default([]) | oo_collect('cafile') %}
         --certificate-authority {{ named_ca_certificate }}
         {% endfor %}
         --client-dir={{ openshift_ca_loopback_tmpdir.stdout }}
@@ -168,7 +171,9 @@
         --signer-serial={{ openshift_ca_serial }}
         --user=system:openshift-master
         --basename=openshift-master
+        {% if openshift_version | oo_version_gte_3_5_or_1_5(openshift.common.deployment_type) | bool %}
         --expire-days={{ openshift_master_cert_expire_days }}
+        {% endif %}
   - name: Copy generated loopback master client config to master config dir
     copy:
       src: "{{ openshift_ca_loopback_tmpdir.stdout }}/{{ item }}"

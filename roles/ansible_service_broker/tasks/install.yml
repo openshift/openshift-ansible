@@ -4,7 +4,7 @@
 - name: Set default image variables based on deployment type
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
     - "default_images.yml"
 
 - name: set ansible_service_broker facts
@@ -30,9 +30,9 @@
     ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
     ansible_service_broker_etcd_image: "{{ ansible_service_broker_etcd_image_prefix }}etcd:{{ ansible_service_broker_etcd_image_tag }}"
 
-- include_tasks: validate_facts.yml
+- include: validate_facts.yml
 
-- include_tasks: generate_certs.yml
+- include: generate_certs.yml
 
 # Deployment of ansible-service-broker starts here
 - name: create openshift-ansible-service-broker project

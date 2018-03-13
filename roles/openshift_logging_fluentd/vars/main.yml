@@ -1,5 +1,3 @@
 ---
-__latest_fluentd_version: "3_6"
-__allowed_fluentd_versions: ["3_5", "3_6", "3_7"]
 __allowed_fluentd_types: ["hosted", "secure-aggregator", "secure-host"]
 __allowed_mux_client_modes: ["minimal", "maximal"]

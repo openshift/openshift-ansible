@@ -19,6 +19,11 @@
       msg: "openshift_excluder role can only be called with 'enable' or 'disable'"
     when: r_openshift_excluder_action not in ['enable', 'disable']
 
+  - name: Fail if r_openshift_excluder_service_type is not defined
+    fail:
+      msg: "r_openshift_excluder_service_type must be specified for this role"
+    when: r_openshift_excluder_service_type is not defined
+
   - name: Fail if r_openshift_excluder_upgrade_target is not defined
     fail:
       msg: "r_openshift_excluder_upgrade_target must be provided when using this role for upgrades"
@@ -27,7 +32,7 @@
     - r_openshift_excluder_upgrade_target is not defined
 
   - name: Include main action task file
-    include_tasks: "{{ r_openshift_excluder_action }}.yml"
+    include: "{{ r_openshift_excluder_action }}.yml"
 
   when:
   - not ostree_booted.stat.exists | bool

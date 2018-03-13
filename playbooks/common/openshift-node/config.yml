@@ -1,0 +1,34 @@
+---
+- name: Node Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Node install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_node: "In Progress"
+      aggregate: false
+
+- include: certificates.yml
+
+- include: setup.yml
+
+- include: containerized_nodes.yml
+
+- include: configure_nodes.yml
+
+- include: additional_config.yml
+
+- include: manage_node.yml
+
+- include: enable_excluders.yml
+
+- name: Node Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Node install 'Complete'
+    set_stats:
+      data:
+        installer_phase_node: "Complete"
+      aggregate: false

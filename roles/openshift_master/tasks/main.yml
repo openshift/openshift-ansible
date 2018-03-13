@@ -11,17 +11,43 @@
   - openshift_master_oauth_grant_method is defined
   - openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
+# HA Variable Validation
+- fail:
+    msg: "openshift_master_cluster_method must be set to either 'native' or 'pacemaker' for multi-master installations"
+  when:
+  - openshift.master.ha | bool
+  - (openshift.master.cluster_method is not defined) or (openshift.master.cluster_method is defined and openshift.master.cluster_method not in ["native", "pacemaker"])
+- fail:
+    msg: "'native' high availability is not supported for the requested OpenShift version"
+  when:
+  - openshift.master.ha | bool
+  - openshift.master.cluster_method == "native"
+  - not openshift.common.version_gte_3_1_or_1_1 | bool
+- fail:
+    msg: "openshift_master_cluster_password must be set for multi-master installations"
+  when:
+  - openshift.master.ha | bool
+  - openshift.master.cluster_method == "pacemaker"
+  - openshift_master_cluster_password is not defined or not openshift_master_cluster_password
+- fail:
+    msg: "Pacemaker based HA is not supported at this time when used with containerized installs"
+  when:
+  - openshift.master.ha | bool
+  - openshift.master.cluster_method == "pacemaker"
+  - openshift.common.is_containerized | bool
+
 - name: Open up firewall ports
-  import_tasks: firewall.yml
+  include: firewall.yml
+  static: yes
 
 - name: Install Master package
   package:
-    name: "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
+    name: "{{ openshift.common.service_type }}-master{{ openshift_pkg_version | default('') | oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
   when:
-  - not openshift_is_containerized | bool
+  - not openshift.common.is_containerized | bool
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: Create r_openshift_master_data_dir
   file:
@@ -31,12 +57,12 @@
     owner: root
     group: root
   when:
-  - openshift_is_containerized | bool
+  - openshift.common.is_containerized | bool
 
 - name: Reload systemd units
   command: systemctl daemon-reload
   when:
-  - openshift_is_containerized | bool
+  - openshift.common.is_containerized | bool
 
 - name: Re-gather package dependent master facts
   openshift_facts:
@@ -48,7 +74,7 @@
 
 - name: Create the policy file if it does not already exist
   command: >
-    {{ openshift_client_binary }} adm create-bootstrap-policy-file
+    {{ openshift.common.client_binary }} adm create-bootstrap-policy-file
       --filename={{ openshift_master_policy }}
   args:
     creates: "{{ openshift_master_policy }}"
@@ -69,10 +95,10 @@
   package: name=httpd-tools state=present
   when:
   - item.kind == 'HTPasswdPasswordIdentityProvider'
-  - not openshift_is_atomic | bool
+  - not openshift.common.is_atomic | bool
   with_items: "{{ openshift.master.identity_providers }}"
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: Ensure htpasswd directory exists
   file:
@@ -141,13 +167,13 @@
 # The template file will stomp any other settings made.
 - block:
   - name: check whether our docker-registry setting exists in the env file
-    command: "awk '/^OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000/' /etc/sysconfig/{{ openshift_service_type }}-master"
+    command: "awk '/^OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000/' /etc/sysconfig/{{ openshift.common.service_type }}-master"
     failed_when: false
     changed_when: false
     register: l_already_set
 
   - set_fact:
-      openshift_push_via_dns: "{{ openshift.common.version_gte_3_6 or (l_already_set.stdout is defined and l_already_set.stdout is match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
+      openshift_push_via_dns: "{{ openshift.common.version_gte_3_6 or (l_already_set.stdout is defined and l_already_set.stdout | match('OPENSHIFT_DEFAULT_REGISTRY=docker-registry.default.svc:5000')) }}"
 
 - name: Set fact of all etcd host IPs
   openshift_facts:
@@ -156,16 +182,16 @@
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
 - name: Update journald config
-  include_tasks: journald.yml
+  include: journald.yml
 
 - name: Install the systemd units
-  include_tasks: systemd_units.yml
+  include: systemd_units.yml
 
 - name: Install Master system container
-  include_tasks: system_container.yml
+  include: system_container.yml
   when:
-  - openshift_is_containerized | bool
-  - l_is_master_system_container | bool
+  - openshift.common.is_containerized | bool
+  - openshift.common.is_master_system_container | bool
 
 - name: Create session secrets file
   template:
@@ -196,85 +222,119 @@
   - restart master api
   - restart master controllers
 
-- include_tasks: bootstrap_settings.yml
+- include: bootstrap_settings.yml
   when: openshift_master_bootstrap_enabled | default(False)
 
-- include_tasks: set_loopback_context.yml
+- include: set_loopback_context.yml
+  when:
+  - openshift.common.version_gte_3_2_or_1_2
 
 - name: Start and enable master api on first master
   systemd:
-    name: "{{ openshift_service_type }}-master-api"
+    name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
   when:
+  - openshift.master.cluster_method == 'native'
   - inventory_hostname == openshift_master_hosts[0]
   register: l_start_result
-  until: not (l_start_result is failed)
+  until: not l_start_result | failed
   retries: 1
   delay: 60
 
 - name: Dump logs from master-api if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-api
   when:
-  - l_start_result is failed
+  - l_start_result | failed
 
 - set_fact:
-    master_api_service_status_changed: "{{ l_start_result is changed }}"
+    master_api_service_status_changed: "{{ l_start_result | changed }}"
   when:
+  - openshift.master.cluster_method == 'native'
   - inventory_hostname == openshift_master_hosts[0]
 
 - pause:
     seconds: 15
   when:
   - openshift.master.ha | bool
+  - openshift.master.cluster_method == 'native'
 
 - name: Start and enable master api all masters
   systemd:
-    name: "{{ openshift_service_type }}-master-api"
+    name: "{{ openshift.common.service_type }}-master-api"
     enabled: yes
     state: started
   when:
+  - openshift.master.cluster_method == 'native'
   - inventory_hostname != openshift_master_hosts[0]
   register: l_start_result
-  until: not (l_start_result is failed)
+  until: not l_start_result | failed
   retries: 1
   delay: 60
 
 - name: Dump logs from master-api if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-api
   when:
-  - l_start_result is failed
+  - l_start_result | failed
 
 - set_fact:
-    master_api_service_status_changed: "{{ l_start_result is changed }}"
+    master_api_service_status_changed: "{{ l_start_result | changed }}"
   when:
+  - openshift.master.cluster_method == 'native'
   - inventory_hostname != openshift_master_hosts[0]
 
 # A separate wait is required here for native HA since notifies will
 # be resolved after all tasks in the role.
-- include_tasks: check_master_api_is_ready.yml
+- include: check_master_api_is_ready.yml
   when:
+  - openshift.master.cluster_method == 'native'
   - master_api_service_status_changed | bool
 
 - name: Start and enable master controller service
   systemd:
-    name: "{{ openshift_service_type }}-master-controllers"
+    name: "{{ openshift.common.service_type }}-master-controllers"
     enabled: yes
     state: started
+  when:
+  - openshift.master.cluster_method == 'native'
   register: l_start_result
-  until: not (l_start_result is failed)
+  until: not l_start_result | failed
   retries: 1
   delay: 60
 
 - name: Dump logs from master-controllers if it failed
-  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-controllers
+  command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-master-controllers
   when:
-  - l_start_result is failed
+  - l_start_result | failed
 
 - name: Set fact master_controllers_service_status_changed
   set_fact:
-    master_controllers_service_status_changed: "{{ l_start_result is changed }}"
+    master_controllers_service_status_changed: "{{ l_start_result | changed }}"
+  when:
+  - openshift.master.cluster_method == 'native'
+
+- name: Install cluster packages
+  package: name=pcs state=present
+  when:
+  - openshift.master.cluster_method == 'pacemaker'
+  - not openshift.common.is_containerized | bool
+  register: l_install_result
+  until: l_install_result | success
+
+- name: Start and enable cluster service
+  systemd:
+    name: pcsd
+    enabled: yes
+    state: started
+  when:
+  - openshift.master.cluster_method == 'pacemaker'
+  - not openshift.common.is_containerized | bool
+
+- name: Set the cluster user password
+  shell: echo {{ openshift_master_cluster_password | quote }} | passwd --stdin hacluster
+  when:
+  - l_install_result | changed
 
 - name: node bootstrap settings
-  include_tasks: bootstrap.yml
+  include: bootstrap.yml
   when: openshift_master_bootstrap_enabled | default(False)

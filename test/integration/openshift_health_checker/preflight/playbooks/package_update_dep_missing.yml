@@ -1,5 +1,5 @@
 ---
-- import_playbook: ../../setup_container.yml
+- include: ../../setup_container.yml
   vars:
     image: preflight-aos-package-checks
     l_host_vars:
@@ -14,7 +14,7 @@
   post_tasks:
     - block:
 
-        - include_tasks: tasks/enable_repo.yml
+        - include: tasks/enable_repo.yml
           vars: { repo_name: "break-yum" }
 
         - action: openshift_health_check
@@ -22,4 +22,4 @@
             checks: [ 'package_update' ]
 
       always:  # destroy the container whether check passed or not
-        - include_tasks: ../../teardown_container.yml
+        - include: ../../teardown_container.yml

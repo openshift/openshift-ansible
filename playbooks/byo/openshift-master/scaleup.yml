@@ -1,0 +1,20 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+
+- name: Ensure there are new_masters or new_nodes
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - fail:
+      msg: >
+        Detected no new_masters or no new_nodes in inventory. Please
+        add hosts to the new_masters and new_nodes host groups to add
+        masters.
+    when:
+    - (g_new_master_hosts | default([]) | length == 0) and (g_new_node_hosts | default([]) | length == 0)
+
+- include: ../../common/openshift-cluster/std_include.yml
+
+- include: ../../common/openshift-master/scaleup.yml

@@ -1,0 +1,4 @@
+---
+- include: initialize_groups.yml
+
+- include: ../../common/openshift-cluster/enable_dnsmasq.yml

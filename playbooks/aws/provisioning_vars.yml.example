@@ -46,7 +46,7 @@ openshift_pkg_version: # -3.7.0
 
 # Name of the subnet in the vpc to use.  Needs to be set if using a pre-existing
 # vpc + subnet.
-#openshift_aws_subnet_az:
+#openshift_aws_subnet_name:
 
 # -------------- #
 # Security Group #

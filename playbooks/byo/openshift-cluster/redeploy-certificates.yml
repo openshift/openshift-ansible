@@ -1,0 +1,48 @@
+---
+- include: initialize_groups.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/redeploy-certificates/check-expiry.yml
+  vars:
+    g_check_expiry_hosts: 'oo_etcd_to_config'
+
+- include: ../../common/openshift-cluster/redeploy-certificates/etcd-backup.yml
+
+- include: ../../common/openshift-etcd/certificates.yml
+  vars:
+    etcd_certificates_redeploy: true
+
+- include: ../../common/openshift-cluster/redeploy-certificates/masters-backup.yml
+
+- include: ../../common/openshift-master/certificates.yml
+  vars:
+    openshift_certificates_redeploy: true
+
+- include: ../../common/openshift-cluster/redeploy-certificates/nodes-backup.yml
+
+- include: ../../common/openshift-node/certificates.yml
+  vars:
+    openshift_certificates_redeploy: true
+
+- include: ../../common/openshift-etcd/restart.yml
+  vars:
+    g_etcd_certificates_expired: "{{ ('expired' in (hostvars | oo_select_keys(groups['etcd']) | oo_collect('check_results.check_results.etcd') | oo_collect('health'))) | bool }}"
+
+- include: ../../common/openshift-master/restart.yml
+
+- include: ../../common/openshift-node/restart.yml
+
+- include: ../../common/openshift-cluster/redeploy-certificates/router.yml
+  when: openshift_hosted_manage_router | default(true) | bool
+
+- include: ../../common/openshift-cluster/redeploy-certificates/registry.yml
+  when: openshift_hosted_manage_registry | default(true) | bool
+
+- include: ../../common/openshift-master/revert-client-ca.yml
+
+- include: ../../common/openshift-master/restart.yml

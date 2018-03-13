@@ -9,10 +9,10 @@
       - "'not installed' not in passlib_result.stdout"
     msg: "python-passlib rpm must be installed on control host"
 
-- name: Set default image variables based on openshift_deployment_type
+- name: Set default image variables based on deployment_type
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
     - "default_images.yml"
 
 - name: Set metrics image facts
@@ -43,15 +43,15 @@
   check_mode: no
   tags: metrics_init
 
-- include_tasks: install_metrics.yaml
+- include: install_metrics.yaml
   when:
     - openshift_metrics_install_metrics | bool
 
-- include_tasks: uninstall_metrics.yaml
+- include: uninstall_metrics.yaml
   when:
     - not openshift_metrics_install_metrics | bool
 
-- include_tasks: uninstall_hosa.yaml
+- include: uninstall_hosa.yaml
   when: not openshift_metrics_install_hawkular_agent | bool
 
 - name: Delete temp directory

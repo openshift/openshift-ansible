@@ -1,0 +1,37 @@
+---
+# input variables
+# - openshift.node.node_image
+# - openshift_image_tag
+# - openshift.common.is_containerized
+# - openshift.node.ovs_image
+# - openshift_use_openshift_sdn
+# - openshift.common.service_type
+# - openshift_node_debug_level
+# - openshift.common.config_base
+# - openshift.common.http_proxy
+# - openshift.common.portal_net
+# - openshift.common
+# - openshift.common.http_proxy
+# notify:
+# - restart openvswitch
+# - restart node
+
+# This file is included both in the openshift_master role and in the upgrade
+# playbooks.
+- include: config/install-node-deps-docker-service-file.yml
+  when: openshift.common.is_containerized | bool
+
+- include: config/install-node-docker-service-file.yml
+  when: openshift.common.is_containerized | bool
+
+- include: config/install-ovs-service-env-file.yml
+  when: openshift.common.is_containerized | bool
+
+- include: config/workaround-bz1331590-ovs-oom-fix.yml
+  when: openshift_use_openshift_sdn | bool
+
+- include: config/install-ovs-docker-service-file.yml
+  when: openshift.common.is_containerized | bool and openshift_use_openshift_sdn | bool
+
+- include: config/configure-node-settings.yml
+- include: config/configure-proxy-settings.yml

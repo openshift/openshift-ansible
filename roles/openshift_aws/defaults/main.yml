@@ -1,12 +1,10 @@
 ---
 openshift_aws_create_s3: True
 openshift_aws_create_iam_cert: True
-openshift_aws_create_iam_role: False
 openshift_aws_create_security_groups: True
 openshift_aws_create_launch_config: True
 openshift_aws_create_scale_group: True
 
-openshift_aws_node_group_upgrade: False
 openshift_aws_wait_for_ssh: True
 
 openshift_aws_clusterid: default
@@ -17,10 +15,7 @@ openshift_aws_build_ami_group: "{{ openshift_aws_clusterid }}"
 openshift_aws_iam_cert_name: "{{ openshift_aws_clusterid }}-master-external"
 openshift_aws_iam_cert_path: ''
 openshift_aws_iam_cert_key_path: ''
-
-openshift_aws_iam_role_name: openshift_node_describe_instances
-openshift_aws_iam_role_policy_json: "{{ lookup('file', 'describeinstances.json') }}"
-openshift_aws_iam_role_policy_name: "describe_instances"
+openshift_aws_scale_group_basename: "{{ openshift_aws_clusterid }} openshift"
 
 openshift_aws_iam_kms_alias: "alias/{{ openshift_aws_clusterid }}_kms"
 openshift_aws_ami: ''
@@ -31,13 +26,14 @@ openshift_aws_ami_name: openshift-gi
 openshift_aws_base_ami_name: ami_base
 
 openshift_aws_launch_config_bootstrap_token: ''
+openshift_aws_launch_config_basename: "{{ openshift_aws_clusterid }}"
 
 openshift_aws_users: []
 
 openshift_aws_ami_tags:
   bootstrap: "true"
   openshift-created: "true"
-  parent: "{{ openshift_aws_base_ami | default('unknown') }}"
+  clusterid: "{{ openshift_aws_clusterid }}"
 
 openshift_aws_s3_mode: create
 openshift_aws_s3_bucket_name: "{{ openshift_aws_clusterid }}-docker-registry"
@@ -113,39 +109,13 @@ openshift_aws_node_group_config_tags: "{{ openshift_aws_clusterid | build_instan
 openshift_aws_node_group_termination_policy: Default
 openshift_aws_node_group_replace_instances: []
 openshift_aws_node_group_replace_all_instances: False
+openshift_aws_node_group_config_extra_labels: {}
 
 openshift_aws_ami_map:
   master: "{{ openshift_aws_ami }}"
   infra: "{{ openshift_aws_ami }}"
   compute: "{{ openshift_aws_ami }}"
 
-openshift_aws_master_group:
-- name: "{{ openshift_aws_clusterid }} master group"
-  group: master
-  tags:
-    host-type: master
-    sub-host-type: default
-    runtime: docker
-
-openshift_aws_node_groups:
-- name: "{{ openshift_aws_clusterid }} compute group"
-  group: compute
-  tags:
-    host-type: node
-    sub-host-type: compute
-    runtime: docker
-
-- name: "{{ openshift_aws_clusterid }} infra group"
-  group: infra
-  tags:
-    host-type: node
-    sub-host-type: infra
-    runtime: docker
-
-openshift_aws_created_asgs: []
-openshift_aws_current_asgs: []
-
-# these will be used during upgrade
 openshift_aws_master_group_config:
   # The 'master' key is always required here.
   master:
@@ -157,12 +127,14 @@ openshift_aws_master_group_config:
     min_size: 3
     max_size: 3
     desired_size: 3
+    tags:
+      host-type: master
+      sub-host-type: default
+    labels:
+      type: master
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_role_name }}"
-    policy_name: "{{ openshift_aws_iam_role_policy_name }}"
-    policy_json: "{{ openshift_aws_iam_role_policy_json }}"
     elbs: "{{ openshift_aws_elb_name_dict['master'].keys()| map('extract', openshift_aws_elb_name_dict['master']) | list }}"
 
 openshift_aws_node_group_config:
@@ -176,11 +148,13 @@ openshift_aws_node_group_config:
     min_size: 3
     max_size: 100
     desired_size: 3
+    tags:
+      host-type: node
+      sub-host-type: compute
+    labels:
+      type: compute
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_role_name }}"
-    policy_name: "{{ openshift_aws_iam_role_policy_name }}"
-    policy_json: "{{ openshift_aws_iam_role_policy_json }}"
   # The 'infra' key is always required here.
   infra:
     instance_type: m4.xlarge
@@ -191,11 +165,13 @@ openshift_aws_node_group_config:
     min_size: 2
     max_size: 20
     desired_size: 2
+    tags:
+      host-type: node
+      sub-host-type: infra
+    labels:
+      type: infra
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_role_name }}"
-    policy_name: "{{ openshift_aws_iam_role_policy_name }}"
-    policy_json: "{{ openshift_aws_iam_role_policy_json }}"
     elbs: "{{ openshift_aws_elb_name_dict['infra'].keys()| map('extract', openshift_aws_elb_name_dict['infra']) | list }}"
 
 openshift_aws_elb_tags: "{{ openshift_aws_kube_tags }}"
@@ -272,7 +248,7 @@ openshift_aws_node_security_groups:
 openshift_aws_vpc_tags:
   Name: "{{ openshift_aws_vpc_name }}"
 
-openshift_aws_subnet_az: us-east-1c
+openshift_aws_subnet_name: us-east-1c
 
 openshift_aws_vpc:
   name: "{{ openshift_aws_vpc_name }}"
@@ -290,4 +266,17 @@ openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''
 openshift_aws_node_config_namespace: openshift-node
 
-openshift_aws_masters_groups: masters,etcd,nodes
+# If creating extra node groups, you'll need to define all of the following
+
+# The format is the same as openshift_aws_node_group_config, but the top-level
+# key names should be different (ie, not == master or infra).
+# openshift_aws_node_group_config_extra: {}
+
+# This variable should look like openshift_aws_launch_config_security_groups
+# and contain a one-to-one mapping of top level keys that are defined in
+# openshift_aws_node_group_config_extra.
+# openshift_aws_launch_config_security_groups_extra: {}
+
+# openshift_aws_node_security_groups_extra: {}
+
+# openshift_aws_ami_map_extra: {}

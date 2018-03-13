@@ -8,14 +8,14 @@
   - openshift_version is not defined
 
 - block:
-  - name: Get available {{ openshift_service_type}} version
+  - name: Get available {{ openshift.common.service_type}} version
     repoquery:
-      name: "{{ openshift_service_type}}"
+      name: "{{ openshift.common.service_type}}"
       ignore_excluders: true
     register: rpm_results
 
   - fail:
-      msg: "Package {{ openshift_service_type}} not found"
+      msg: "Package {{ openshift.common.service_type}} not found"
     when: not rpm_results.results.package_found
 
   - set_fact:

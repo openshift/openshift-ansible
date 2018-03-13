@@ -1,0 +1,67 @@
+---
+###############################################################################
+# Pre upgrade checks for known data problems, if this playbook fails you should
+# contact support. If you're not supported contact users@lists.openshift.com
+#
+# oc_objectvalidator provides these two checks
+# 1 - SDN Data issues, never seen in the wild but known possible due to code audits
+#     https://github.com/openshift/origin/issues/12697
+# 2 - Namespace protections, https://bugzilla.redhat.com/show_bug.cgi?id=1428934
+#
+###############################################################################
+- name: Verify 3.5 specific upgrade checks
+  hosts: oo_first_master
+  roles:
+  - { role: lib_openshift }
+  tasks:
+  - name: Check for invalid namespaces and SDN errors
+    oc_objectvalidator:
+
+  # What's all this PetSet business about?
+  #
+  # 'PetSets' were ALPHA resources in Kube <= 3.4. In >= 3.5 they are
+  # no longer supported. The BETA resource 'StatefulSets' replaces
+  # them. We can't migrate clients PetSets to
+  # StatefulSets. Additionally, Red Hat has never officially supported
+  # these resource types. Sorry users, but if you were using
+  # unsupported resources from the Kube documentation then we can't
+  # help you at this time.
+  #
+  # Reference: https://bugzilla.redhat.com/show_bug.cgi?id=1428229
+  - name: Check if legacy PetSets exist
+    oc_obj:
+      state: list
+      all_namespaces: true
+      kind: petsets
+    register: l_do_petsets_exist
+
+  - name: Fail on unsupported resource migration 'PetSets'
+    fail:
+      msg: >
+        PetSet objects were detected in your cluster. These are an
+        Alpha feature in upstream Kubernetes 1.4 and are not supported
+        by Red Hat. In Kubernetes 1.5, they are replaced by the Beta
+        feature StatefulSets. Red Hat currently does not offer support
+        for either PetSets or StatefulSets.
+
+        Automatically migrating PetSets to StatefulSets in OpenShift
+        Container Platform (OCP) 3.5 is not supported. See the
+        Kubernetes "Upgrading from PetSets to StatefulSets"
+        documentation for additional information:
+
+        https://kubernetes.io/docs/tasks/manage-stateful-set/upgrade-pet-set-to-stateful-set/
+
+        PetSets MUST be removed before upgrading to OCP 3.5. Red Hat
+        strongly recommends reading the above referenced documentation
+        in its entirety before taking any destructive actions.
+
+        If you want to simply remove all PetSets without manually
+        migrating to StatefulSets, run this command as a user with
+        cluster-admin privileges:
+
+        $ oc get petsets --all-namespaces -o yaml | oc delete -f - --cascade=false
+    when:
+    # Search did not fail, valid resource type found
+    - l_do_petsets_exist.results.returncode == 0
+    # Items do exist in the search results
+    - l_do_petsets_exist.results.results.0['items'] | length > 0

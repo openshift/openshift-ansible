@@ -1,0 +1,2 @@
+---
+hosted_base: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/hosted"

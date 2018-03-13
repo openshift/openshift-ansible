@@ -16,3 +16,4 @@
     include_role:
       name: openshift_aws
       tasks_from: provision_nodes.yml
+    static: true

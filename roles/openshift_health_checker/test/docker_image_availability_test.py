@@ -6,16 +6,21 @@ from openshift_checks.docker_image_availability import DockerImageAvailability, 
 @pytest.fixture()
 def task_vars():
     return dict(
-        openshift_is_atomic=False,
-        openshift_is_containerized=False,
-        openshift_service_type='origin',
+        openshift=dict(
+            common=dict(
+                service_type='origin',
+                is_containerized=False,
+                is_atomic=False,
+            ),
+            docker=dict(),
+        ),
         openshift_deployment_type='origin',
         openshift_image_tag='',
         group_names=['oo_nodes_to_config', 'oo_masters_to_config'],
     )
 
 
-@pytest.mark.parametrize('deployment_type, openshift_is_containerized, group_names, expect_active', [
+@pytest.mark.parametrize('deployment_type, is_containerized, group_names, expect_active', [
     ("invalid", True, [], False),
     ("", True, [], False),
     ("origin", False, [], False),
@@ -25,20 +30,20 @@ def task_vars():
     ("origin", True, ["nfs"], False),
     ("openshift-enterprise", True, ["lb"], False),
 ])
-def test_is_active(task_vars, deployment_type, openshift_is_containerized, group_names, expect_active):
+def test_is_active(task_vars, deployment_type, is_containerized, group_names, expect_active):
     task_vars['openshift_deployment_type'] = deployment_type
-    task_vars['openshift_is_containerized'] = openshift_is_containerized
+    task_vars['openshift']['common']['is_containerized'] = is_containerized
     task_vars['group_names'] = group_names
     assert DockerImageAvailability(None, task_vars).is_active() == expect_active
 
 
-@pytest.mark.parametrize("openshift_is_containerized,openshift_is_atomic", [
+@pytest.mark.parametrize("is_containerized,is_atomic", [
     (True, True),
     (False, False),
     (True, False),
     (False, True),
 ])
-def test_all_images_available_locally(task_vars, openshift_is_containerized, openshift_is_atomic):
+def test_all_images_available_locally(task_vars, is_containerized, is_atomic):
     def execute_module(module_name, module_args, *_):
         if module_name == "yum":
             return {}
@@ -50,8 +55,8 @@ def test_all_images_available_locally(task_vars, openshift_is_containerized, ope
             'images': [module_args['name']],
         }
 
-    task_vars['openshift_is_containerized'] = openshift_is_containerized
-    task_vars['openshift_is_atomic'] = openshift_is_atomic
+    task_vars['openshift']['common']['is_containerized'] = is_containerized
+    task_vars['openshift']['common']['is_atomic'] = is_atomic
     result = DockerImageAvailability(execute_module, task_vars).run()
 
     assert not result.get('failed', False)
@@ -167,7 +172,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
     assert expect_registries_reached == check.reachable_registries
 
 
-@pytest.mark.parametrize("deployment_type, openshift_is_containerized, groups, oreg_url, expected", [
+@pytest.mark.parametrize("deployment_type, is_containerized, groups, oreg_url, expected", [
     (  # standard set of stuff required on nodes
         "origin", False, ['oo_nodes_to_config'], "",
         set([
@@ -227,10 +232,14 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
     ),
 
 ])
-def test_required_images(deployment_type, openshift_is_containerized, groups, oreg_url, expected):
+def test_required_images(deployment_type, is_containerized, groups, oreg_url, expected):
     task_vars = dict(
-        openshift_is_containerized=openshift_is_containerized,
-        openshift_is_atomic=False,
+        openshift=dict(
+            common=dict(
+                is_containerized=is_containerized,
+                is_atomic=False,
+            ),
+        ),
         openshift_deployment_type=deployment_type,
         group_names=groups,
         oreg_url=oreg_url,
@@ -276,11 +285,44 @@ def test_registry_console_image(task_vars, expected):
     assert expected == DockerImageAvailability(task_vars=task_vars)._registry_console_image(tag, info)
 
 
-def test_containerized_etcd():
-    task_vars = dict(
-        openshift_is_containerized=True,
+@pytest.mark.parametrize("task_vars, expected", [
+    (
+        dict(
+            group_names=['oo_nodes_to_config'],
+            osn_ovs_image='spam/ovs',
+            openshift_image_tag="veggs",
+        ),
+        set([
+            'spam/ovs', 'openshift/node:veggs', 'cockpit/kubernetes:latest',
+            'openshift/origin-haproxy-router:veggs', 'openshift/origin-deployer:veggs',
+            'openshift/origin-docker-registry:veggs', 'openshift/origin-pod:veggs',
+        ]),
+    ), (
+        dict(
+            group_names=['oo_masters_to_config'],
+        ),
+        set(['openshift/origin:latest']),
+    ), (
+        dict(
+            group_names=['oo_etcd_to_config'],
+        ),
+        set(['registry.access.redhat.com/rhel7/etcd']),
+    ), (
+        dict(
+            group_names=['oo_etcd_to_config'],
+            osm_etcd_image='spam/etcd',
+        ),
+        set(['spam/etcd']),
+    ),
+])
+def test_containerized(task_vars, expected):
+    task_vars.update(dict(
+        openshift=dict(
+            common=dict(
+                is_containerized=True,
+            ),
+        ),
         openshift_deployment_type="origin",
-        group_names=['oo_etcd_to_config'],
-    )
-    expected = set(['registry.access.redhat.com/rhel7/etcd'])
+    ))
+
     assert expected == DockerImageAvailability(task_vars=task_vars).required_images()

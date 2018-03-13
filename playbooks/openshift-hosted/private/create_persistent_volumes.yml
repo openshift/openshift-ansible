@@ -1,5 +1,0 @@
----
-- name: Create Hosted Resources - persistent volumes
-  hosts: oo_first_master
-  roles:
-  - role: openshift_persistent_volumes

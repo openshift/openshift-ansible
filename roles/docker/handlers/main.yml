@@ -1,0 +1,18 @@
+---
+
+- name: restart docker
+  systemd:
+    name: "{{ openshift.docker.service_name }}"
+    state: restarted
+    daemon_reload: yes
+  register: r_docker_restart_docker_result
+  until: not r_docker_restart_docker_result | failed
+  retries: 3
+  delay: 30
+  when: not docker_service_status_changed | default(false) | bool
+
+- name: restart udev
+  systemd:
+    name: systemd-udevd
+    state: restarted
+    daemon_reload: yes

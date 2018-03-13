@@ -1,0 +1,26 @@
+---
+- name: NFS Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set NFS install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_nfs: "In Progress"
+      aggregate: false
+
+- name: Configure nfs
+  hosts: oo_nfs_to_config
+  roles:
+  - role: os_firewall
+  - role: openshift_storage_nfs
+
+- name: NFS Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set NFS install 'Complete'
+    set_stats:
+      data:
+        installer_phase_nfs: "Complete"
+      aggregate: false

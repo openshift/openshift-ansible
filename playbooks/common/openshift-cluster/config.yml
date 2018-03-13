@@ -1,0 +1,44 @@
+---
+- include: ../openshift-checks/install.yml
+
+- include: ../openshift-etcd/config.yml
+
+- include: ../openshift-nfs/config.yml
+  when: groups.oo_nfs_to_config | default([]) | count > 0
+
+- include: ../openshift-loadbalancer/config.yml
+  when: groups.oo_lb_to_config | default([]) | count > 0
+
+- include: ../openshift-master/config.yml
+
+- include: ../openshift-master/additional_config.yml
+
+- include: ../openshift-node/config.yml
+
+- include: ../openshift-glusterfs/config.yml
+  when: groups.oo_glusterfs_to_config | default([]) | count > 0
+
+- include: openshift_hosted.yml
+
+- include: openshift_metrics.yml
+  when: openshift_metrics_install_metrics | default(false) | bool
+
+- include: openshift_logging.yml
+  when: openshift_logging_install_logging | default(false) | bool
+
+- include: openshift_prometheus.yml
+  when: openshift_hosted_prometheus_deploy | default(false) | bool
+
+- include: service_catalog.yml
+  when: openshift_enable_service_catalog | default(true) | bool
+
+- include: ../openshift-management/config.yml
+  when: openshift_management_install_management | default(false) | bool
+
+- name: Print deprecated variable warning message if necessary
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - debug: msg="{{ dep_check.msg }}"
+    when:
+    - dep_check.changed

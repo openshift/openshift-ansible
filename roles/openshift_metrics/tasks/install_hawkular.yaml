@@ -1,6 +1,6 @@
 ---
 - command: >
-    {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
     get rc hawkular-metrics -o jsonpath='{.spec.replicas}'
   register: hawkular_metrics_replica_count
@@ -23,15 +23,15 @@
 
 - block:
   - set_fact: hawkular_key={{ lookup('file', openshift_metrics_hawkular_key) }}
-    when: openshift_metrics_hawkular_key is exists
+    when: openshift_metrics_hawkular_key | exists
     changed_when: false
 
   - set_fact: hawkular_cert={{ lookup('file', openshift_metrics_hawkular_cert) }}
-    when: openshift_metrics_hawkular_cert is exists
+    when: openshift_metrics_hawkular_cert | exists
     changed_when: false
 
   - set_fact: hawkular_ca={{ lookup('file', openshift_metrics_hawkular_ca) }}
-    when: openshift_metrics_hawkular_ca is exists
+    when: openshift_metrics_hawkular_ca | exists
     changed_when: false
 
   - name: generate the hawkular-metrics route

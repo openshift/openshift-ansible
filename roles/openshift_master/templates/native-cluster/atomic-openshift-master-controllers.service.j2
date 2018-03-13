@@ -2,19 +2,23 @@
 Description=Atomic OpenShift Master Controllers
 Documentation=https://github.com/openshift/origin
 After=network-online.target
-After={{ openshift_service_type }}-master-api.service
-Wants={{ openshift_service_type }}-master-api.service
+After={{ openshift.common.service_type }}-master-api.service
+Wants={{ openshift.common.service_type }}-master-api.service
 Requires=network-online.target
 
 [Service]
+{% if openshift.common.version_gte_3_1_1_or_1_1_1 | bool %}
 Type=notify
-EnvironmentFile=/etc/sysconfig/{{ openshift_service_type }}-master-controllers
+{% else %}
+Type=simple
+{% endif %}
+EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-master-controllers
 Environment=GOTRACEBACK=crash
 ExecStart=/usr/bin/openshift start master controllers --config=${CONFIG_FILE} $OPTIONS
 LimitNOFILE=131072
 LimitCORE=infinity
 WorkingDirectory={{ r_openshift_master_data_dir }}
-SyslogIdentifier={{ openshift_service_type }}-master-controllers
+SyslogIdentifier={{ openshift.common.service_type }}-master-controllers
 Restart=always
 RestartSec=5s
 

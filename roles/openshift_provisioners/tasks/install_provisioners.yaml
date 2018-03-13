@@ -16,10 +16,10 @@
   when: (openshift_provisioners_efs | bool) and openshift_provisioners_efs_aws_secret_access_key is not defined
 
 - name: Install support
-  include_tasks: install_support.yaml
+  include: install_support.yaml
 
 - name: Install EFS
-  include_tasks: install_efs.yaml
+  include: install_efs.yaml
   when: openshift_provisioners_efs | bool
 
 - find: paths={{ mktemp.stdout }}/templates patterns=*.yaml
@@ -32,7 +32,7 @@
   changed_when: no
 
 - name: Create objects
-  include_tasks: oc_apply.yaml
+  include: oc_apply.yaml
   vars:
     - kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
     - namespace: "{{ openshift_provisioners_project }}"
@@ -51,5 +51,5 @@
   when: ansible_check_mode
 
 - name: Scaling up cluster
-  include_tasks: start_cluster.yaml
+  include: start_cluster.yaml
   when: start_cluster | default(true) | bool

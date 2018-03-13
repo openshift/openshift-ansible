@@ -1,0 +1,50 @@
+[Unit]
+After={{ openshift.common.service_type }}-master.service
+After={{ openshift.docker.service_name }}.service
+After=openvswitch.service
+PartOf={{ openshift.docker.service_name }}.service
+Requires={{ openshift.docker.service_name }}.service
+{% if openshift_use_openshift_sdn %}
+Wants=openvswitch.service
+PartOf=openvswitch.service
+After=ovsdb-server.service
+After=ovs-vswitchd.service
+{% endif %}
+Wants={{ openshift.common.service_type }}-master.service
+Requires={{ openshift.common.service_type }}-node-dep.service
+After={{ openshift.common.service_type }}-node-dep.service
+Requires=dnsmasq.service
+After=dnsmasq.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node
+EnvironmentFile=/etc/sysconfig/{{ openshift.common.service_type }}-node-dep
+ExecStartPre=-/usr/bin/docker rm -f {{ openshift.common.service_type }}-node
+ExecStartPre=/usr/bin/cp /etc/origin/node/node-dnsmasq.conf /etc/dnsmasq.d/
+ExecStartPre=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:/in-addr.arpa/127.0.0.1,/{{ openshift.common.dns_domain }}/127.0.0.1
+ExecStart=/usr/bin/docker run --name {{ openshift.common.service_type }}-node \
+  --rm --privileged --net=host --pid=host --env-file=/etc/sysconfig/{{ openshift.common.service_type }}-node \
+  -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} \
+  -e HOST=/rootfs -e HOST_ETC=/host-etc \
+  -v {{ openshift_node_data_dir }}:{{ openshift_node_data_dir }}{{ ':rslave' if openshift.docker.gte_1_10 | default(False) | bool else '' }} \
+  -v {{ openshift.common.config_base }}/node:{{ openshift.common.config_base }}/node \
+  {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} \
+  -v /etc/localtime:/etc/localtime:ro -v /etc/machine-id:/etc/machine-id:ro \
+  -v /run:/run -v /sys:/sys:rw -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+  -v /usr/bin/docker:/usr/bin/docker:ro -v /var/lib/docker:/var/lib/docker \
+  -v /lib/modules:/lib/modules -v /etc/origin/openvswitch:/etc/openvswitch \
+  -v /etc/origin/sdn:/etc/openshift-sdn -v /var/lib/cni:/var/lib/cni \
+  -v /etc/systemd/system:/host-etc/systemd/system -v /var/log:/var/log \
+  -v /dev:/dev $DOCKER_ADDTL_BIND_MOUNTS -v /etc/pki:/etc/pki:ro \
+  {% if l_bind_docker_reg_auth %} -v {{ oreg_auth_credentials_path }}:/root/.docker:ro{% endif %}\
+  {{ openshift.node.node_image }}:${IMAGE_VERSION}
+ExecStartPost=/usr/bin/sleep 10
+ExecStop=/usr/bin/docker stop {{ openshift.common.service_type }}-node
+ExecStopPost=/usr/bin/rm /etc/dnsmasq.d/node-dnsmasq.conf
+ExecStopPost=/usr/bin/dbus-send --system --dest=uk.org.thekelleys.dnsmasq /uk/org/thekelleys/dnsmasq uk.org.thekelleys.SetDomainServers array:string:
+SyslogIdentifier={{ openshift.common.service_type }}-node
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy={{ openshift.docker.service_name }}.service

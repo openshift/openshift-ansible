@@ -1,0 +1,43 @@
+---
+- fail:
+    msg: This role requires that openshift_master_cluster_vip is set
+  when: openshift_master_cluster_vip is not defined or not openshift_master_cluster_vip
+- fail:
+    msg: This role requires that openshift_master_cluster_public_vip is set
+  when: openshift_master_cluster_public_vip is not defined or not openshift_master_cluster_public_vip
+
+- name: Authenticate to the cluster
+  command: pcs cluster auth -u hacluster -p {{ openshift_master_cluster_password }} {{ omc_cluster_hosts }}
+
+- name: Create the cluster
+  command: pcs cluster setup --name openshift_master {{ omc_cluster_hosts }}
+
+- name: Start the cluster
+  command: pcs cluster start --all
+
+- name: Enable the cluster on all nodes
+  command: pcs cluster enable --all
+
+- name: Set default resource stickiness
+  command: pcs resource defaults resource-stickiness=100
+
+- name: Add the cluster VIP resource
+  command: pcs resource create virtual-ip IPaddr2 ip={{ openshift_master_cluster_vip }} --group {{ openshift.common.service_type }}-master
+
+- name: Add the cluster public VIP resource
+  command: pcs resource create virtual-ip IPaddr2 ip={{ openshift_master_cluster_public_vip }} --group {{ openshift.common.service_type }}-master
+  when: openshift_master_cluster_public_vip != openshift_master_cluster_vip
+
+- name: Add the cluster master service resource
+  command: pcs resource create master systemd:{{ openshift.common.service_type }}-master op start timeout=90s stop timeout=90s --group {{ openshift.common.service_type }}-master
+
+- name: Disable stonith
+  command: pcs property set stonith-enabled=false
+
+- name: Wait for the clustered master service to be available
+  wait_for:
+    host: "{{ openshift_master_cluster_vip }}"
+    port: "{{ openshift.master.api_port }}"
+    state: started
+    timeout: 180
+    delay: 90

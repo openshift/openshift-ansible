@@ -1,20 +1,20 @@
 ---
 - name: generate hawkular-metrics certificates
-  include_tasks: setup_certificate.yaml
+  include: setup_certificate.yaml
   vars:
     component: hawkular-metrics
     hostnames: "hawkular-metrics,hawkular-metrics.{{ openshift_metrics_project }}.svc.cluster.local,{{ openshift_metrics_hawkular_hostname }}"
   changed_when: no
 
 - name: generate hawkular-cassandra certificates
-  include_tasks: setup_certificate.yaml
+  include: setup_certificate.yaml
   vars:
     component: hawkular-cassandra
     hostnames: hawkular-cassandra
   changed_when: no
 
 - name: generate password for hawkular metrics
-  local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | lib_utils_oo_random_word }}"
+  local_action: copy dest="{{ local_tmp.stdout }}/{{ item }}.pwd" content="{{ 15 | oo_random_word }}"
   with_items:
   - hawkular-metrics
   become: false

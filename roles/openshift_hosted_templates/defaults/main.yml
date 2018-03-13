@@ -1,5 +1,5 @@
 ---
-hosted_base: "{{ openshift.common.config_base if openshift_is_containerized | bool else '/usr/share/openshift' }}/hosted"
+hosted_base: "{{ openshift.common.config_base if openshift.common.is_containerized | bool else '/usr/share/openshift' }}/hosted"
 hosted_deployment_type: "{{ 'origin' if openshift_deployment_type == 'origin' else 'enterprise' }}"
 
 content_version: "{{ openshift.common.examples_content_version }}"

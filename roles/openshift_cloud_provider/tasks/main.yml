@@ -11,11 +11,11 @@
     state: directory
   when: has_cloudprovider | bool
 
-- include_tasks: openstack.yml
+- include: openstack.yml
   when: cloudprovider_is_openstack | bool
 
-- include_tasks: aws.yml
+- include: aws.yml
   when: cloudprovider_is_aws | bool
 
-- include_tasks: gce.yml
+- include: gce.yml
   when: cloudprovider_is_gce | bool

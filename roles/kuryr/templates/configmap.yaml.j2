@@ -161,14 +161,6 @@ data:
     # The driver that provides VIFs for Kubernetes Pods. (string value)
     pod_vif_driver = nested-vlan
 
-    # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('nested', 'noop') }}
-
-    [vif_pool]
-    ports_pool_max = {{ kuryr_openstack_pool_max | default(0) }}
-    ports_pool_min = {{ kuryr_openstack_pool_min | default(1) }}
-    ports_pool_batch = {{ kuryr_openstack_pool_batch | default(5) }}
-    ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -229,7 +221,6 @@ data:
     # TODO (apuimedo): Remove the duplicated line just after this one once the
     # RDO packaging contains the upstream patch
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
-    external_svc_subnet = {{ kuryr_openstack_external_svc_subnet_id }}
 
     [pod_vif_nested]
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}

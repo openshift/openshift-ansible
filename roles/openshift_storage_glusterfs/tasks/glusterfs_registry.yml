@@ -16,6 +16,8 @@
     glusterfs_block_host_vol_create: "{{ openshift_storage_glusterfs_registry_block_host_vol_create }}"
     glusterfs_block_host_vol_size: "{{ openshift_storage_glusterfs_registry_block_host_vol_size }}"
     glusterfs_block_host_vol_max: "{{ openshift_storage_glusterfs_registry_block_host_vol_max }}"
+    glusterfs_block_storageclass: "{{ openshift_storage_glusterfs_registry_block_storageclass | bool }}"
+    glusterfs_block_storageclass_default: "{{ openshift_storage_glusterfs_registry_block_storageclass_default | bool }}"
     glusterfs_s3_deploy: "{{ openshift_storage_glusterfs_registry_s3_deploy | bool }}"
     glusterfs_s3_image: "{{ openshift_storage_glusterfs_registry_s3_image }}"
     glusterfs_s3_version: "{{ openshift_storage_glusterfs_registry_s3_version }}"
@@ -47,7 +49,7 @@
     glusterfs_heketi_fstab: "{{ openshift_storage_glusterfs_registry_heketi_fstab }}"
     glusterfs_nodes: "{% if groups.glusterfs_registry is defined %}{% set nodes = groups.glusterfs_registry %}{% elif 'groups.glusterfs' is defined %}{% set nodes = groups.glusterfs %}{% else %}{% set nodes = '[]' %}{% endif %}{{ nodes }}"
 
-- include_tasks: glusterfs_common.yml
+- include: glusterfs_common.yml
   when:
   - glusterfs_nodes | default([]) | count > 0
   - "'glusterfs' not in groups or glusterfs_nodes != groups.glusterfs"
@@ -57,5 +59,5 @@
   register: registry_volume
 
 - name: Create GlusterFS registry volume
-  command: "{{ glusterfs_heketi_client }} volume create --size={{ openshift_hosted_registry_storage_volume_size | replace('Gi','') }} --name={{ openshift_hosted_registry_storage_glusterfs_path }}"
-  when: "openshift_hosted_registry_storage_glusterfs_path not in registry_volume.stdout"
+  command: "{{ glusterfs_heketi_client }} volume create --size={{ openshift.hosted.registry.storage.volume.size | replace('Gi','') }} --name={{ openshift.hosted.registry.storage.glusterfs.path }}"
+  when: "openshift.hosted.registry.storage.glusterfs.path not in registry_volume.stdout"

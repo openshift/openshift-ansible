@@ -1,0 +1,9 @@
+---
+- name: Create Hosted Resources - persistent volumes
+  hosts: oo_first_master
+  vars:
+    persistent_volumes: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volumes(groups) }}"
+    persistent_volume_claims: "{{ hostvars[groups.oo_first_master.0] | oo_persistent_volume_claims }}"
+  roles:
+  - role: openshift_persistent_volumes
+    when: persistent_volumes | length > 0 or persistent_volume_claims | length > 0

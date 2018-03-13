@@ -1,9 +1,9 @@
 ---
 # fail is we don't have an endpoint for ES to connect to?
-- name: Set default image variables based on openshift_deployment_type
+- name: Set default image variables based on deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
+    - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
     - "default_images.yml"
   loop_control:
     loop_var: var_file_name
@@ -14,8 +14,6 @@
     openshift_logging_kibana_image_version: "{{ openshift_logging_kibana_image_version | default(__openshift_logging_kibana_image_version) }}"
     openshift_logging_kibana_proxy_image_prefix: "{{ openshift_logging_kibana_proxy_image_prefix | default(__openshift_logging_kibana_proxy_image_prefix) }}"
     openshift_logging_kibana_proxy_image_version: "{{ openshift_logging_kibana_proxy_image_version | default(__openshift_logging_kibana_proxy_image_version) }}"
-
-- include_tasks: determine_version.yaml
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -69,7 +67,7 @@
 # gen session_secret if necessary
 - name: Generate session secret
   copy:
-    content: "{{ 200 | lib_utils_oo_random_word }}"
+    content: "{{ 200 | oo_random_word }}"
     dest: "{{ generated_certs_dir }}/session_secret"
   when:
     - not session_secret_file.stat.exists
@@ -77,7 +75,7 @@
 # gen oauth_secret if necessary
 - name: Generate oauth secret
   copy:
-    content: "{{ 64 | lib_utils_oo_random_word }}"
+    content: "{{ 64 | oo_random_word }}"
     dest: "{{ generated_certs_dir }}/oauth_secret"
   when:
     - not oauth_secret_file.stat.exists
@@ -251,6 +249,7 @@
     kibana_proxy_memory_limit: "{{ openshift_logging_kibana_proxy_memory_limit }}"
     kibana_replicas: "{{ openshift_logging_kibana_replicas | default (1) }}"
     kibana_node_selector: "{{ openshift_logging_kibana_nodeselector | default({}) }}"
+    kibana_env_vars: "{{ openshift_logging_kibana_env_vars | default({}) }}"
 
 - name: Set Kibana DC
   oc_obj:

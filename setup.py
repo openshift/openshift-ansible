@@ -83,14 +83,10 @@ def find_entrypoint_playbooks():
                 if not isinstance(task, dict):
                     # Skip yaml files which are not a dictionary of tasks
                     continue
-                if 'include' in task or 'import_playbook' in task:
+                if 'include' in task:
                     # Add the playbook and capture included playbooks
                     playbooks.add(yaml_file)
-                    if 'include' in task:
-                        directive = task['include']
-                    else:
-                        directive = task['import_playbook']
-                    included_file_name = directive.split()[0]
+                    included_file_name = task['include'].split()[0]
                     included_file = os.path.normpath(
                         os.path.join(os.path.dirname(yaml_file),
                                      included_file_name))
@@ -322,7 +318,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         has_errors = False
 
         print('Ansible Deprecation Checks')
-        exclude_dirs = ['adhoc', 'files', 'meta', 'vars', 'defaults', '.tox']
+        exclude_dirs = ['adhoc', 'files', 'meta', 'test', 'tests', 'vars', 'defaults', '.tox']
         for yaml_file in find_files(
                 os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
@@ -334,29 +330,34 @@ class OpenShiftAnsibleSyntaxCheck(Command):
                 result = self.deprecate_jinja2_in_when(yaml_contents, yaml_file)
                 has_errors = result or has_errors
 
-                # Check for usage of include: directive
-                result = self.deprecate_include(yaml_contents, yaml_file)
-                has_errors = result or has_errors
+                # TODO (rteague): This test will be enabled once we move to Ansible 2.4
+                # result = self.deprecate_include(yaml_contents, yaml_file)
+                # has_errors = result or has_errors
 
         if not has_errors:
             print('...PASSED')
+
         print('Ansible Playbook Entry Point Syntax Checks')
         for playbook in find_entrypoint_playbooks():
             print('-' * 60)
             print('Syntax checking playbook: {}'.format(playbook))
 
-            # --syntax-check each entry point playbook
-            try:
-                # Create a host group list to avoid WARNING on unmatched host patterns
-                tox_ansible_inv = os.environ['TOX_ANSIBLE_INV_PATH']
-                subprocess.check_output(
-                    ['ansible-playbook', '-i', tox_ansible_inv,
-                     '--syntax-check', playbook, '-e', '@{}_extras'.format(tox_ansible_inv)]
-                )
-            except subprocess.CalledProcessError as cpe:
-                print('{}Execution failed: {}{}'.format(
-                    self.FAIL, cpe, self.ENDC))
+            # Error on any entry points in 'common'
+            if 'common' in playbook:
+                print('{}Invalid entry point playbook. All playbooks must'
+                      ' start in playbooks/byo{}'.format(self.FAIL, self.ENDC))
                 has_errors = True
+            # --syntax-check each entry point playbook
+            else:
+                try:
+                    subprocess.check_output(
+                        ['ansible-playbook', '-i localhost,',
+                         '--syntax-check', playbook]
+                    )
+                except subprocess.CalledProcessError as cpe:
+                    print('{}Execution failed: {}{}'.format(
+                        self.FAIL, cpe, self.ENDC))
+                    has_errors = True
 
         if has_errors:
             raise SystemExit(1)

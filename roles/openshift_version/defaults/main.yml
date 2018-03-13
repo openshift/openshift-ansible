@@ -1,10 +1,2 @@
 ---
 openshift_protect_installed_version: True
-
-openshift_service_type_dict:
-  origin: origin
-  openshift-enterprise: atomic-openshift
-
-openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
-
-openshift_use_crio_only: False

@@ -1,0 +1,42 @@
+---
+# When we update package "a-${version}" and a requires b >= ${version} if we
+# don't specify the version of b yum will choose the latest version of b
+# available and the whole set of dependencies end up at the latest version.
+# Since the package module, unlike the yum module, doesn't flatten a list
+# of packages into one transaction we need to do that explicitly. The ansible
+# core team tells us not to rely on yum module transaction flattening anyway.
+
+# TODO: If the sdn package isn't already installed this will install it, we
+# should fix that
+- name: Upgrade master packages
+  package: name={{ master_pkgs | join(',') }} state=present
+  vars:
+    master_pkgs:
+      - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-master{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-clients{{ openshift_pkg_version }}"
+      - "tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
+      - PyYAML
+  when:
+    - component == "master"
+    - not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
+
+- name: Upgrade node packages
+  package: name={{ node_pkgs | join(',') }} state=present
+  vars:
+    node_pkgs:
+      - "{{ openshift.common.service_type }}{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-sdn-ovs{{ openshift_pkg_version }}"
+      - "{{ openshift.common.service_type }}-clients{{ openshift_pkg_version }}"
+      - "tuned-profiles-{{ openshift.common.service_type }}-node{{ openshift_pkg_version }}"
+      - PyYAML
+  when:
+    - component == "node"
+    - not openshift.common.is_atomic | bool
+  register: result
+  until: result | success

@@ -1,0 +1,19 @@
+---
+# INPUT etcd_upgrade_version
+# INPUT etcd_container_version
+# INPUT openshift.common.is_containerized
+- name: Upgrade containerized hosts to {{ etcd_upgrade_version }}
+  hosts: oo_etcd_hosts_to_upgrade
+  serial: 1
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: upgrade_image
+    vars:
+      r_etcd_upgrade_version: "{{ etcd_upgrade_version }}"
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+      etcd_peer: "{{ openshift.common.hostname }}"
+    when:
+    - etcd_container_version | default('99') | version_compare(etcd_upgrade_version,'<')
+    - openshift.common.is_containerized | bool
+    static: true

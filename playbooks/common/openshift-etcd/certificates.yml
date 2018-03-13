@@ -1,0 +1,4 @@
+---
+- include: server_certificates.yml
+
+- include: master_etcd_certificates.yml

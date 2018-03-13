@@ -1,0 +1,20 @@
+---
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/node/node-config.yaml"
+    yaml_key: 'masterClientConnectionOverrides.acceptContentTypes'
+    yaml_value: 'application/vnd.kubernetes.protobuf,application/json'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/node/node-config.yaml"
+    yaml_key: 'masterClientConnectionOverrides.contentType'
+    yaml_value: 'application/vnd.kubernetes.protobuf'
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/node/node-config.yaml"
+    yaml_key: 'masterClientConnectionOverrides.burst'
+    yaml_value: 40
+
+- modify_yaml:
+    dest: "{{ openshift.common.config_base}}/node/node-config.yaml"
+    yaml_key: 'masterClientConnectionOverrides.qps'
+    yaml_value: 20

@@ -8,7 +8,7 @@
   hosts: masters:!masters[0]
   pre_tasks:
   - set_fact:
-      openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ openshift_master_default_subdomain }}"
+      openshift_logging_kibana_hostname: "{{ openshift_hosted_logging_hostname | default('kibana.' ~ (openshift_master_default_subdomain | default('router.default.svc.cluster.local', true))) }}"
   tasks:
   - include_role:
       name: openshift_logging

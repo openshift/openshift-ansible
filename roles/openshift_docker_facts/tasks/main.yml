@@ -1,0 +1,39 @@
+---
+- name: Set docker facts
+  openshift_facts:
+    role: "{{ item.role }}"
+    local_facts: "{{ item.local_facts }}"
+  with_items:
+  - role: docker
+    local_facts:
+      selinux_enabled: "{{ openshift_docker_selinux_enabled | default(None) }}"
+      log_driver: "{{ openshift_docker_log_driver | default(None) }}"
+      log_options: "{{ openshift_docker_log_options | default(None) }}"
+      options: "{{ openshift_docker_options | default(None) }}"
+      disable_push_dockerhub: "{{ openshift_disable_push_dockerhub | default(None) }}"
+      hosted_registry_insecure: "{{ openshift_docker_hosted_registry_insecure | default(openshift.docker.hosted_registry_insecure | default(False)) }}"
+      hosted_registry_network: "{{ openshift_docker_hosted_registry_network | default(None) }}"
+      use_system_container: "{{ openshift_docker_use_system_container | default(False) }}"
+      use_crio: "{{ openshift_use_crio | default(False) }}"
+  - role: node
+    local_facts:
+      sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+
+- set_fact:
+    docker_selinux_enabled: "{{ openshift.docker.selinux_enabled | default(omit) }}"
+    docker_log_driver: "{{ openshift.docker.log_driver | default(omit) }}"
+    docker_log_options: "{{ openshift.docker.log_options | default(omit) }}"
+    docker_push_dockerhub: "{{ openshift.docker.disable_push_dockerhub
+                               | default(omit) }}"
+    docker_http_proxy: "{{ openshift.common.http_proxy | default(omit) }}"
+    docker_https_proxy: "{{ openshift.common.https_proxy | default(omit) }}"
+    docker_no_proxy: "{{ openshift.common.no_proxy | default(omit) }}"
+
+- set_fact:
+    docker_options: "--insecure-registry={{ openshift.docker.hosted_registry_network }} {{ openshift.docker.options | default ('') }}"
+  when: openshift.docker.hosted_registry_insecure | default(False) | bool and openshift.docker.hosted_registry_network is defined
+  register: hosted_registry_options
+
+- set_fact:
+    docker_options: "{{ openshift.docker.options | default(omit) }}"
+  when: hosted_registry_options | skipped

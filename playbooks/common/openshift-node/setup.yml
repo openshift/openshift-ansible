@@ -1,0 +1,27 @@
+---
+- name: Disable excluders
+  hosts: oo_nodes_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_excluder
+    r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
+
+- name: Evaluate node groups
+  hosts: localhost
+  become: no
+  connection: local
+  tasks:
+  - name: Evaluate oo_containerized_master_nodes
+    add_host:
+      name: "{{ item }}"
+      groups: oo_containerized_master_nodes
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
+    when:
+    - hostvars[item].openshift is defined
+    - hostvars[item].openshift.common is defined
+    - hostvars[item].openshift.common.is_containerized | bool
+    - (item in groups.oo_nodes_to_config and item in groups.oo_masters_to_config)
+    changed_when: False

@@ -1,6 +1,6 @@
 ---
 - command: >
-    {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project | quote }}
     --config={{ mktemp.stdout }}/admin.kubeconfig
     get rc heapster -o jsonpath='{.spec.replicas}'
   register: heapster_replica_count
@@ -66,4 +66,4 @@
         namespace: "{{ openshift_metrics_project }}"
   changed_when: no
 
-- include_tasks: generate_heapster_secrets.yaml
+- include: generate_heapster_secrets.yaml

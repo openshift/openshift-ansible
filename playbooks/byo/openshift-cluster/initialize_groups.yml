@@ -1,0 +1,10 @@
+---
+- name: Create initial host groups for localhost
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tags:
+  - always
+  tasks:
+  - include_vars: cluster_hosts.yml

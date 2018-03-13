@@ -102,6 +102,28 @@ def serviceaccount_namespace(qualified_sa, default=None):
     return seg[-1]
 
 
+def flatten_dict(data, parent_key=None):
+    """ This filter plugin will flatten a dict and its sublists into a single dict
+    """
+    if not isinstance(data, dict):
+        raise RuntimeError("flatten_dict failed, expects to flatten a dict")
+
+    merged = dict()
+
+    for key in data:
+        if parent_key is not None:
+            insert_key = '.'.join((parent_key, key))
+        else:
+            insert_key = key
+
+        if isinstance(data[key], dict):
+            merged.update(flatten_dict(data[key], insert_key))
+        else:
+            merged[insert_key] = data[key]
+
+    return merged
+
+
 # pylint: disable=too-few-public-methods
 class FilterModule(object):
     ''' OpenShift Logging Filters '''
@@ -117,5 +139,6 @@ class FilterModule(object):
             'es_storage': es_storage,
             'serviceaccount_name': serviceaccount_name,
             'serviceaccount_namespace': serviceaccount_namespace,
-            'walk': walk
+            'walk': walk,
+            "flatten_dict": flatten_dict
         }

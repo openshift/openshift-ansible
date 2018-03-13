@@ -1,2 +1,2 @@
 ---
-- include_tasks: auxiliary/clean_data.yml
+- include: auxiliary/clean_data.yml

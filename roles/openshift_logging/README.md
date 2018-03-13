@@ -58,6 +58,7 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_kibana_replica_count`: The number of replicas Kibana should be scaled up to. Defaults to 1.
 - `openshift_logging_kibana_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the pod will land.
 - `openshift_logging_kibana_edge_term_policy`: Insecure Edge Termination Policy. Defaults to Redirect.
+- `openshift_logging_kibana_env_vars`: A map of environment variables to add to the kibana deployment config (e.g. {"ELASTICSEARCH_REQUESTTIMEOUT":"30000"})
 
 - `openshift_logging_fluentd_nodeselector`: The node selector that the Fluentd daemonset uses to determine where to deploy to. Defaults to '"logging-infra-fluentd": "true"'.
 - `openshift_logging_fluentd_cpu_request`: The minimum amount of CPU to allocate for Fluentd collector pods. Defaults to '100m'.
@@ -177,6 +178,9 @@ Elasticsearch OPS too, if using an OPS cluster:
   clients will use to connect to mux, and will be used in the TLS server cert
   subject.
 - `openshift_logging_mux_port`: 24284
+- `openshift_logging_mux_external_address`: The IP address that mux will listen
+ on for connections from *external* clients.  Default is the default ipv4
+ interface as reported by the `ansible_default_ipv4` fact.
 - `openshift_logging_mux_cpu_request`: 100m
 - `openshift_logging_mux_memory_limit`: 512Mi
 - `openshift_logging_mux_default_namespaces`: Default `["mux-undefined"]` - the

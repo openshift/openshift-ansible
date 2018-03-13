@@ -11,13 +11,13 @@ start)
     set -e
 
     docker run --net=host \
-    -e "APIC_URL={{ apic_url }}" \
-    -e "APIC_USERNAME={{ apic_username }}" \
-    -e "APIC_PASSWORD={{ apic_password }}" \
-    -e "APIC_LEAF_NODE={{ apic_leaf_nodes }}" \
-    -e "APIC_PHYS_DOMAIN={{ apic_phys_dom }}" \
-    -e "APIC_EPG_BRIDGE_DOMAIN={{ apic_epg_bridge_domain }}" \
-    -e "APIC_CONTRACTS_UNRESTRICTED_MODE={{ apic_contracts_unrestricted_mode }}" \
+    -e "APIC_URL={{ contiv_apic_url }}" \
+    -e "APIC_USERNAME={{ contiv_apic_username }}" \
+    -e "APIC_PASSWORD={{ contiv_apic_password }}" \
+    -e "APIC_LEAF_NODE={{ contiv_apic_leaf_nodes }}" \
+    -e "APIC_PHYS_DOMAIN={{ contiv_apic_phys_dom }}" \
+    -e "APIC_EPG_BRIDGE_DOMAIN={{ contiv_apic_epg_bridge_domain }}" \
+    -e "APIC_CONTRACTS_UNRESTRICTED_MODE={{ contiv_apic_contracts_unrestricted_mode }}" \
     --name=contiv-aci-gw \
     contiv/aci-gw
     ;;

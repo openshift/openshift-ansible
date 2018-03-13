@@ -1,0 +1,14 @@
+---
+- name: Create OpenShift certificates for master hosts
+  hosts: oo_masters_to_config
+  vars:
+    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  roles:
+  - role: openshift_master_facts
+  - role: openshift_named_certificates
+  - role: openshift_ca
+  - role: openshift_master_certificates
+    openshift_master_etcd_hosts: "{{ hostvars
+                                     | oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                     | oo_collect('openshift.common.hostname')
+                                     | default(none, true) }}"

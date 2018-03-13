@@ -1,0 +1,254 @@
+---
+- name: Check if the master has embedded etcd
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tags:
+  - always
+  tasks:
+  - fail:
+      msg: "Migration of an embedded etcd is not supported. Please, migrate the embedded etcd into an external etcd first."
+    when:
+    - groups.oo_etcd_to_config | default([]) | length == 0
+
+- name: Run pre-checks
+  hosts: oo_etcd_to_migrate
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate.pre_check
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ ansible_default_ipv4.address }}"
+    static: true
+
+- name: Prepare masters for etcd data migration
+  hosts: oo_masters_to_config
+  tasks:
+  - set_fact:
+      master_services:
+      - "{{ openshift.common.service_type + '-master' }}"
+  - set_fact:
+      master_services:
+      - "{{ openshift.common.service_type + '-master-controllers' }}"
+      - "{{ openshift.common.service_type + '-master-api' }}"
+    when:
+    - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
+  - debug:
+      msg: "master service name: {{ master_services }}"
+  - name: Update loopback kubeconfig
+    include_role:
+      name: openshift_master
+      tasks_from: set_loopback_context.yml
+  - name: Stop masters
+    service:
+      name: "{{ item }}"
+      state: stopped
+    with_items: "{{ master_services }}"
+
+- name: Backup v2 data
+  hosts: oo_etcd_to_migrate
+  gather_facts: no
+  roles:
+  - role: openshift_facts
+  post_tasks:
+  - include_role:
+      name: etcd
+      tasks_from: backup
+    vars:
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+      r_etcd_common_backup_tag: pre-migration
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      r_etcd_common_backup_sufix_name: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    static: true
+
+- name: Gate on etcd backup
+  hosts: localhost
+  connection: local
+  become: no
+  tasks:
+  - set_fact:
+      etcd_backup_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_etcd_to_migrate)
+                                 | oo_collect('inventory_hostname', {'r_etcd_common_backup_complete': true}) }}"
+  - set_fact:
+      etcd_backup_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_backup_completed) | list }}"
+  - fail:
+      msg: "Migration cannot continue. The following hosts did not complete etcd backup: {{ etcd_backup_failed | join(',') }}"
+    when:
+    - etcd_backup_failed | length > 0
+
+- name: Stop etcd
+  hosts: oo_etcd_to_migrate
+  gather_facts: no
+  pre_tasks:
+  - include_role:
+      name: etcd
+      tasks_from: disable_etcd
+    vars:
+      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    static: true
+
+- name: Migrate data on first etcd
+  hosts: oo_etcd_to_migrate[0]
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ openshift.common.ip }}"
+      etcd_url_scheme: "https"
+      etcd_peer_url_scheme: "https"
+    static: true
+
+- name: Clean data stores on remaining etcd hosts
+  hosts: oo_etcd_to_migrate[1:]
+  gather_facts: no
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: clean_data
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ openshift.common.ip }}"
+      etcd_url_scheme: "https"
+      etcd_peer_url_scheme: "https"
+    static: true
+  - name: Add etcd hosts
+    delegate_to: localhost
+    add_host:
+      name: "{{ item }}"
+      groups: oo_new_etcd_to_config
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_etcd_to_migrate[1:] | default([]) }}"
+    changed_when: no
+  - name: Set success
+    set_fact:
+      r_etcd_migrate_success: true
+
+- name: Gather facts for migrated nodes
+  hosts: oo_etcd_to_config:oo_new_etcd_to_config
+  roles:
+  - openshift_etcd_facts
+  post_tasks:
+  - set_fact:
+      etcd_hostname: "{{ etcd_hostname }}"
+      etcd_ip: "{{ etcd_ip }}"
+
+- name: Re-configure etcd and bring the cluster up
+  hosts: oo_new_etcd_to_config
+  serial: 1
+  any_errors_fatal: true
+  vars:
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_peer_port: 2380
+    etcd_client_port: 2379
+    etcd_conf_dir: '/etc/etcd'
+    etcd_conf_file: "{{ etcd_conf_dir }}/etcd.conf"
+    etcd_peer_ca_file: "{{ etcd_conf_dir }}/ca.crt"
+    etcd_peer_cert_file: "{{ etcd_conf_dir }}/peer.crt"
+    etcd_peer_key_file: "{{ etcd_conf_dir }}/peer.key"
+    etcd_peer_url_scheme: "https"
+  tasks:
+  - name: Add new etcd members to cluster
+    command: >
+      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+                       --key-file {{ etcd_peer_key_file }}
+                       --ca-file {{ etcd_peer_ca_file }}
+                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
+                       member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}
+    delegate_to: "{{ etcd_ca_host }}"
+    failed_when:
+    - etcd_add_check.rc == 1
+    - ("peerURL exists" not in etcd_add_check.stderr)
+    register: etcd_add_check
+    retries: 12
+    delay: 10
+    until: etcd_add_check.rc == 0
+  - name: Set ETCD_INITIAL_CLUSTER_STATE=existing on migrated etcd host
+    lineinfile:
+      regexp: ^ETCD_INITIAL_CLUSTER_STATE=
+      line: "ETCD_INITIAL_CLUSTER_STATE=existing"
+      dest: /etc/etcd/etcd.conf
+  - name: Set ETCD_INITIAL_CLUSTER  on migrated etcd host
+    lineinfile:
+      regexp: ^ETCD_INITIAL_CLUSTER=
+      line: "ETCD_INITIAL_CLUSTER={{ initial_etcd_cluster }}"
+      dest: /etc/etcd/etcd.conf
+    vars:
+      initial_etcd_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
+  - name: restart etcd
+    systemd:
+      name: "{{ l_etcd_service }}"
+      state: started
+    vars:
+      l_etcd_service: "{{ 'etcd_container' if openshift.common.is_containerized else 'etcd' }}"
+  - name: Pause for 30 secs to let etcd come up and sync data
+    pause: seconds=30
+  - name: Verify cluster is stable
+    command: >
+      /usr/bin/etcdctl --cert-file {{ etcd_peer_cert_file }}
+                      --key-file {{ etcd_peer_key_file }}
+                      --ca-file {{ etcd_peer_ca_file }}
+                      -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_hostname }}:{{ etcd_client_port }}
+                      cluster-health
+    register: scaleup_health
+    retries: 3
+    delay: 30
+    until: scaleup_health.rc == 0
+    delegate_to: "{{ etcd_ca_host }}"
+
+- name: Gate on etcd migration
+  hosts: oo_masters_to_config
+  gather_facts: no
+  tasks:
+  - set_fact:
+      etcd_migration_completed: "{{ hostvars
+                                 | oo_select_keys(groups.oo_etcd_to_migrate)
+                                 | oo_collect('inventory_hostname', {'r_etcd_migrate_success': true}) }}"
+  - set_fact:
+      etcd_migration_failed: "{{ groups.oo_etcd_to_migrate | difference(etcd_migration_completed) | list }}"
+
+- name: Add TTLs on the first master
+  hosts: oo_first_master[0]
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate.add_ttls
+    vars:
+      etcd_peer: "{{ hostvars[groups.oo_etcd_to_migrate.0].openshift.common.ip }}"
+      etcd_url_scheme: "https"
+      etcd_peer_url_scheme: "https"
+    when: etcd_migration_failed | length == 0
+    static: true
+
+- name: Configure masters if etcd data migration is succesfull
+  hosts: oo_masters_to_config
+  tasks:
+  - include_role:
+      name: etcd
+      tasks_from: migrate.configure_master
+    when: etcd_migration_failed | length == 0
+    static: true
+  - debug:
+      msg: "Skipping master re-configuration since migration failed."
+    when:
+    - etcd_migration_failed | length > 0
+  - name: Start master services
+    service:
+      name: "{{ item }}"
+      state: started
+    register: service_status
+    # Sometimes the master-api, resp. master-controllers fails to start for the first time
+    until: service_status.state is defined and service_status.state == "started"
+    retries: 5
+    delay: 10
+    with_items: "{{ master_services[::-1] }}"
+  - fail:
+      msg: "Migration failed. The following hosts were not properly migrated: {{ etcd_migration_failed | join(',') }}"
+    when:
+    - etcd_migration_failed | length > 0

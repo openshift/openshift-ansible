@@ -1,11 +1,12 @@
 ---
 - name: setup firewall
-  import_tasks: firewall.yml
+  include: firewall.yml
+  static: yes
 
 - name: Install nfs-utils
   package: name=nfs-utils state=present
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: Configure NFS
   lineinfile:
@@ -16,29 +17,29 @@
 
 - name: Restart nfs-config
   systemd: name=nfs-config state=restarted
-  when: nfs_config is changed
+  when: nfs_config | changed
 
 - name: Ensure exports directory exists
   file:
-    path: "{{ openshift_hosted_registry_storage_nfs_directory }}"
+    path: "{{ openshift.hosted.registry.storage.nfs.directory }}"
     state: directory
 
 - name: Ensure export directories exist
   file:
-    path: "{{ item }}"
+    path: "{{ item.storage.nfs.directory }}/{{ item.storage.volume.name }}"
     state: directory
     mode: 0777
     owner: nfsnobody
     group: nfsnobody
   with_items:
-    - "{{ openshift_hosted_registry_storage_nfs_directory }}/{{ openshift_hosted_registry_storage_volume_name }}"
-    - "{{ openshift_metrics_storage_nfs_directory }}/{{ openshift_metrics_storage_volume_name }}"
-    - "{{ openshift_logging_storage_nfs_directory }}/{{ openshift_logging_storage_volume_name }}"
-    - "{{ openshift_loggingops_storage_nfs_directory }}/{{ openshift_loggingops_storage_volume_name }}"
-    - "{{ openshift_hosted_etcd_storage_nfs_directory }}/{{ openshift_hosted_etcd_storage_volume_name }}"
-    - "{{ openshift_prometheus_storage_nfs_directory }}/{{ openshift_prometheus_storage_volume_name }}"
-    - "{{ openshift_prometheus_alertmanager_storage_nfs_directory }}/{{ openshift_prometheus_alertmanager_storage_volume_name }}"
-    - "{{ openshift_prometheus_alertbuffer_storage_nfs_directory }}/{{ openshift_prometheus_alertbuffer_storage_volume_name }}"
+    - "{{ openshift.hosted.registry }}"
+    - "{{ openshift.metrics }}"
+    - "{{ openshift.logging }}"
+    - "{{ openshift.loggingops }}"
+    - "{{ openshift.hosted.etcd }}"
+    - "{{ openshift.prometheus }}"
+    - "{{ openshift.prometheus.alertmanager }}"
+    - "{{ openshift.prometheus.alertbuffer }}"
 
 - name: Configure exports
   template:
@@ -70,4 +71,4 @@
   register: start_result
 
 - set_fact:
-    nfs_service_status_changed: "{{ start_result is changed }}"
+    nfs_service_status_changed: "{{ start_result | changed }}"

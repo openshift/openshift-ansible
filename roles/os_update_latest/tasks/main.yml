@@ -2,4 +2,4 @@
 - name: Update all packages
   package: name=* state=latest
   register: result
-  until: result is succeeded
+  until: result | success

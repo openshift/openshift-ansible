@@ -52,7 +52,7 @@
 
 - name: Create or update hosted templates
   command: >
-    {{ openshift_client_binary }} {{ openshift_hosted_templates_import_command }}
+    {{ openshift.common.client_binary }} {{ openshift_hosted_templates_import_command }}
     -f {{ hosted_base }}
     --config={{ openshift_hosted_templates_kubeconfig }}
     -n openshift

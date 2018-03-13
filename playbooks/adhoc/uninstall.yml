@@ -18,8 +18,32 @@
 
   # Since we're not calling openshift_facts we'll do this for now
   - set_fact:
-      openshift_is_atomic: "{{ ostree_output.rc == 0 }}"
-      openshift_is_containerized: "{{ ostree_output.rc == 0 or containerized | default(false) | bool }}"
+      is_atomic: "{{ ostree_output.rc == 0 }}"
+  - set_fact:
+      is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
+
+# Uninstall Contrail SDN
+- hosts: masters
+  become: yes
+  tasks:
+  - name: Uninstall Contrail SDN
+    when: openshift_use_contrail | default(false) | bool
+    command: oc delete -f /tmp/contrail-installer.yaml
+    run_once: True
+    ignore_errors: yes
+
+  - name: Delete Contrail mountpaths
+    when: openshift_use_contrail | default(false) | bool
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /var/lib/contrail
+    - /var/lib/configdb
+    - /var/lib/analyticsdb
+    - /var/lib/config_zookeeper_data
+    - /var/lib/analyticsdb_zookeeper_data
+  tags: contrail
 
 # Stop services on all hosts prior to removing files.
 - hosts: nodes
@@ -61,6 +85,7 @@
     - origin-master
     - origin-master-api
     - origin-master-controllers
+    - pcsd
     failed_when: false
 
 - hosts: etcd
@@ -122,17 +147,17 @@
         - origin-clients
         - origin-node
         - origin-sdn-ovs
-        - tuned-profiles-atomic-openshift-node
+        - tuned-profiles-openshift-node
         - tuned-profiles-origin-node
         register: result
-        until: result is succeeded
+        until: result | success
 
       - name: Remove flannel package
         package: name=flannel state=absent
         when: openshift_use_flannel | default(false) | bool
         register: result
-        until: result is succeeded
-      when: not openshift_is_atomic | bool
+        until: result | success
+      when: not is_atomic | bool
 
     - shell: systemctl reset-failed
       changed_when: False
@@ -153,14 +178,6 @@
       - lbr0
       - vlinuxbr
       - vovsbr
-
-    - name: Remove virtual devices
-      command: nmcli delete device "{{ item }}"
-      failed_when: False
-      with_items:
-      - tun0
-      - docker0
-
     when: openshift_remove_all | default(true) | bool
 
   - shell: atomic uninstall "{{ item }}"-master-api
@@ -274,30 +291,12 @@
     - "{{ directories.results | default([]) }}"
     - files
 
-  - shell: systemctl daemon-reload
-    changed_when: False
-
-  - name: restart container-engine
-    service: name=container-engine state=stopped enabled=no
-    failed_when: false
-    register: container_engine
-
-  - name: restart docker
-    service: name=docker state=stopped enabled=no
-    failed_when: false
-    when: not (container_engine is changed)
-    register: l_docker_restart_docker_in_pb_result
-    until: not (l_docker_restart_docker_in_pb_result is failed)
-    retries: 3
-    delay: 30
-
   - name: Remove remaining files
     file: path={{ item }} state=absent
     with_items:
     - /etc/ansible/facts.d/openshift.fact
     - /etc/openshift
     - /etc/openshift-sdn
-    - /etc/pki/ca-trust/source/anchors/openshift-ca.crt
     - /etc/sysconfig/atomic-openshift-node
     - /etc/sysconfig/atomic-openshift-node-dep
     - /etc/sysconfig/openshift-node-dep
@@ -312,38 +311,23 @@
     - /etc/systemd/system/origin-node-dep.service
     - /etc/systemd/system/origin-node.service
     - /etc/systemd/system/origin-node.service.wants
-    - /var/lib/docker
 
-  - name: Rebuild ca-trust
-    command: update-ca-trust
+  - shell: systemctl daemon-reload
+    changed_when: False
 
-  - name: Reset Docker proxy configuration
-    lineinfile:
-      state=absent
-      dest=/etc/sysconfig/docker
-      regexp='(NO_PROXY|HTTP_PROXY|HTTPS_PROXY)=.*'
-
-  - name: Reset Docker registry configuration
-    lineinfile:
-      state=absent
-      dest=/etc/sysconfig/docker
-      regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
-
-  - name: Detect Docker storage configuration
-    shell: vgs -o name | grep docker
-    register: docker_vg_name
+  - name: restart container-engine
+    service: name=container-engine state=restarted
     failed_when: false
-    changed_when: false
+    register: container_engine
 
-  - name: Wipe out Docker storage contents
-    command: vgremove -f {{ item }}
-    with_items: "{{ docker_vg_name.stdout_lines }}"
-    when: docker_vg_name.rc == 0
-
-  - name: Wipe out Docker storage configuration
-    file: path=/etc/sysconfig/docker-storage state=absent
-    when: docker_vg_name.rc == 0
-
+  - name: restart docker
+    service: name=docker state=restarted
+    failed_when: false
+    when: not (container_engine | changed)
+    register: l_docker_restart_docker_in_pb_result
+    until: not l_docker_restart_docker_in_pb_result | failed
+    retries: 3
+    delay: 30
 
 - hosts: masters
   become: yes
@@ -362,7 +346,7 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
+    when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - atomic-openshift
     - atomic-openshift-clients
@@ -382,8 +366,10 @@
     - origin-excluder
     - origin-docker-excluder
     - origin-master
+    - pacemaker
+    - pcs
     register: result
-    until: result is succeeded
+    until: result | success
 
   - shell: systemctl reset-failed
     changed_when: False
@@ -452,6 +438,8 @@
     - /etc/sysconfig/origin-master-api
     - /etc/sysconfig/origin-master-controllers
     - /usr/share/openshift/examples
+    - /var/lib/pacemaker
+    - /var/lib/pcsd
     - /usr/lib/systemd/system/atomic-openshift-master-api.service
     - /usr/lib/systemd/system/atomic-openshift-master-controllers.service
     - /usr/lib/systemd/system/origin-master-api.service
@@ -486,19 +474,19 @@
 
   - name: Stop additional atomic services
     service: name={{ item }} state=stopped
-    when: openshift_is_containerized | bool
+    when: is_containerized | bool
     with_items:
     - etcd_container
     failed_when: false
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
+    when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - etcd
     - etcd3
     register: result
-    until: result is succeeded
+    until: result | success
 
   - shell: systemctl reset-failed
     changed_when: False
@@ -553,11 +541,11 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
+    when: not is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - haproxy
     register: result
-    until: result is succeeded
+    until: result | success
 
   - shell: systemctl reset-failed
     changed_when: False
@@ -574,3 +562,17 @@
     # - /etc/systemd/system/haproxy.service.d
     - /etc/systemd/system/haproxy.service.d/limits.conf
     - /etc/systemd/system/haproxy.service
+
+# Remove Contrail vRouter
+- hosts: nodes
+  become: yes
+  tasks:
+  - name: Find nodes which has vRouter
+    shell: "ip addr | grep -i vhost0 | cat"
+    register: vhost_register
+
+  - name: Reboot vRouter nodes
+    shell: /sbin/shutdown -r +1
+    when: vhost_register.stdout.find('vhost0') != -1
+    ignore_errors: yes
+  tags: contrail

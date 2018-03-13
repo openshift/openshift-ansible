@@ -1,0 +1,19 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+
+- name: Ensure there are new_nodes
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: no
+  tasks:
+  - fail:
+      msg: >
+        Detected no new_nodes in inventory. Please add hosts to the
+        new_nodes host group to add nodes.
+    when:
+    - g_new_node_hosts | default([]) | length == 0
+
+- include: ../../common/openshift-cluster/std_include.yml
+
+- include: ../../common/openshift-node/config.yml

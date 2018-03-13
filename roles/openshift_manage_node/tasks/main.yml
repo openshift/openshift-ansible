@@ -7,7 +7,11 @@
   # wait_for port doesn't provide health information.
   command: >
     curl --silent --tlsv1.2
+    {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
     --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {% else %}
+    --cacert {{ openshift.common.config_base }}/master/ca.crt
+    {% endif %}
     {{ openshift_node_master_api_url }}/healthz/ready
   args:
     # Disables the following warning:
@@ -18,7 +22,7 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: openshift_is_containerized | bool
+  when: openshift.common.is_containerized | bool
   delegate_to: "{{ openshift_master_host }}"
   run_once: true
 
@@ -37,11 +41,11 @@
 - name: Set node schedulability
   oc_adm_manage_node:
     node: "{{ openshift.node.nodename | lower }}"
-    schedulable: "{{ 'true' if l_openshift_manage_schedulable | bool else 'false' }}"
+    schedulable: "{{ 'true' if openshift.node.schedulable | bool else 'false' }}"
   retries: 10
   delay: 5
   register: node_schedulable
-  until: node_schedulable is succeeded
+  until: node_schedulable|succeeded
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
 
@@ -50,9 +54,10 @@
     name: "{{ openshift.node.nodename }}"
     kind: node
     state: add
-    labels: "{{ openshift_node_labels | lib_utils_oo_dict_to_list_of_dict }}"
+    labels: "{{ openshift.node.labels | oo_dict_to_list_of_dict }}"
     namespace: default
   when:
     - "'nodename' in openshift.node"
-    - openshift_node_labels | default({}) != {}
+    - "'labels' in openshift.node"
+    - openshift.node.labels != {}
   delegate_to: "{{ openshift_master_host }}"

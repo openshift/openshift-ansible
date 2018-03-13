@@ -1,0 +1,19 @@
+---
+# openshift_*_selector variables have been deprecated in favor of
+# openshift_hosted_*_selector variables.
+- set_fact:
+    openshift_hosted_router_selector: "{{ openshift_router_selector | default(openshift_hosted_infra_selector) }}"
+  when: openshift_hosted_router_selector is not defined and openshift_hosted_infra_selector is defined
+- set_fact:
+    openshift_hosted_registry_selector: "{{ openshift_registry_selector | default(openshift_hosted_infra_selector) }}"
+  when: openshift_hosted_registry_selector is not defined and openshift_hosted_infra_selector is defined
+
+- name: Set hosted facts
+  openshift_facts:
+    role: "{{ item }}"
+    openshift_env: "{{ hostvars
+                       | oo_merge_hostvars(vars, inventory_hostname)
+                       | oo_openshift_env }}"
+    openshift_env_structures:
+    - 'openshift.hosted.router.*'
+  with_items: [hosted, logging, loggingops, metrics, prometheus]

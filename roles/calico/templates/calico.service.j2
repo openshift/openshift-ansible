@@ -1,7 +1,7 @@
 [Unit]
 Description=calico
-After={{ openshift_docker_service_name }}.service
-Requires={{ openshift_docker_service_name }}.service
+After={{ openshift.docker.service_name }}.service
+Requires={{ openshift.docker.service_name }}.service
 
 [Service]
 Restart=always

@@ -3,7 +3,7 @@
   set_fact:
     openshift_node_bootstrap: True
 
-- include_tasks: vpc_and_subnet_id.yml
+- include: vpc_and_subnet_id.yml
 
 - name: create instance for ami creation
   ec2:
@@ -27,7 +27,7 @@
       Name: "{{ openshift_aws_base_ami_name }}"
 
 - name: fetch newly created instances
-  ec2_instance_facts:
+  ec2_remote_facts:
     region: "{{ openshift_aws_region }}"
     filters:
       "tag:Name": "{{ openshift_aws_base_ami_name }}"

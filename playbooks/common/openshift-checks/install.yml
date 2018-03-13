@@ -1,0 +1,47 @@
+---
+- name: Health Check Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Health Check 'In Progress'
+    set_stats:
+      data:
+        installer_phase_health: "In Progress"
+      aggregate: false
+
+- name: OpenShift Health Checks
+  hosts: oo_all_hosts
+  any_errors_fatal: true
+  roles:
+  - openshift_health_checker
+  vars:
+  - r_openshift_health_checker_playbook_context: install
+  post_tasks:
+  - name: Run health checks (install) - EL
+    when: ansible_distribution != "Fedora"
+    action: openshift_health_check
+    args:
+      checks:
+      - disk_availability
+      - memory_availability
+      - package_availability
+      - package_version
+      - docker_image_availability
+      - docker_storage
+
+  - name: Run health checks (install) - Fedora
+    when: ansible_distribution == "Fedora"
+    action: openshift_health_check
+    args:
+      checks:
+      - docker_image_availability
+
+- name: Health Check Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Health Check 'Complete'
+    set_stats:
+      data:
+        installer_phase_health: "Complete"
+      aggregate: false

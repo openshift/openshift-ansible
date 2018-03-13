@@ -3,7 +3,7 @@
   block:
   - name: Ensure OpenShift pod correctly rolls out (best-effort today)
     command: |
-      {{ openshift_client_binary }} rollout status deploymentconfig {{ item.name }} \
+      {{ openshift.common.client_binary }} rollout status deploymentconfig {{ item.name }} \
                         --namespace {{ item.namespace | default('default') }} \
                         --config {{ openshift_master_config_dir }}/admin.kubeconfig
     async: 600
@@ -13,7 +13,7 @@
 
   - name: Determine the latest version of the OpenShift pod deployment
     command: |
-      {{ openshift_client_binary }} get deploymentconfig {{ item.name }} \
+      {{ openshift.common.client_binary }} get deploymentconfig {{ item.name }} \
              --namespace {{ item.namespace }} \
              --config {{ openshift_master_config_dir }}/admin.kubeconfig \
              -o jsonpath='{ .status.latestVersion }'
@@ -22,7 +22,7 @@
 
   - name: Poll for OpenShift pod deployment success
     command: |
-      {{ openshift_client_binary }} get replicationcontroller {{ item.0.name }}-{{ item.1.stdout }} \
+      {{ openshift.common.client_binary }} get replicationcontroller {{ item.0.name }}-{{ item.1.stdout }} \
              --namespace {{ item.0.namespace }} \
              --config {{ openshift_master_config_dir }}/admin.kubeconfig \
              -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'

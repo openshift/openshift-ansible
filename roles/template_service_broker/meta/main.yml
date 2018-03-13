@@ -11,5 +11,3 @@ galaxy_info:
     - 7
   categories:
   - cloud
-dependencies:
-- role: lib_utils

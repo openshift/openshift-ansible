@@ -28,7 +28,7 @@ Role Variables
 | r_openshift_excluder_verify_upgrade       | false   | true, false     | When upgrading, this variable should be set to true when calling the role |
 | r_openshift_excluder_package_state        | present | present, latest | Use 'latest' to upgrade openshift_excluder package                        |
 | r_openshift_excluder_docker_package_state | present | present, latest | Use 'latest' to upgrade docker_excluder package                           |
-| r_openshift_excluder_service_type         | None    |                 | (Required) Defined as openshift_service_type e.g. atomic-openshift        |
+| r_openshift_excluder_service_type         | None    |                 | (Required) Defined as openshift.common.service_type e.g. atomic-openshift |
 | r_openshift_excluder_upgrade_target       | None    |                 | Required when r_openshift_excluder_verify_upgrade is true, defined as openshift_upgrade_target by Upgrade playbooks e.g. '3.6'|
 
 Dependencies
@@ -46,12 +46,15 @@ Example Playbook
   # Disable all excluders
   - role: openshift_excluder
     r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
   # Enable all excluders
   - role: openshift_excluder
     r_openshift_excluder_action: enable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
   # Disable all excluders and verify appropriate excluder packages are available for upgrade
   - role: openshift_excluder
     r_openshift_excluder_action: disable
+    r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
     r_openshift_excluder_verify_upgrade: true
     r_openshift_excluder_upgrade_target: "{{ openshift_upgrade_target }}"
     r_openshift_excluder_package_state: latest

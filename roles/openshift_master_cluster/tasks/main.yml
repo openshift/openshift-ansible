@@ -1,0 +1,18 @@
+---
+- fail:
+    msg: "Not possible on atomic hosts for now"
+  when: openshift.common.is_containerized | bool
+
+- fail:
+    msg: "Pacemaker HA is unsupported on OpenShift Enterprise 3.2 and Origin 1.2"
+  when: openshift.master.cluster_method == "pacemaker" and openshift.common.version_gte_3_2_or_1_2 | bool
+
+- name: Test if cluster is already configured
+  command: pcs status
+  register: pcs_status
+  changed_when: false
+  failed_when: false
+  when: openshift.master.cluster_method == "pacemaker"
+
+- include: configure.yml
+  when: "pcs_status | failed and 'Error: cluster is not currently running on this node' in pcs_status.stderr"

@@ -5,6 +5,7 @@
   - include_role:
       name: openshift_aws
       tasks_from: setup_master_group.yml
+    static: true
 
 - name: set the master facts for hostname to elb
   hosts: masters
@@ -14,33 +15,13 @@
   - include_role:
       name: openshift_aws
       tasks_from: master_facts.yml
+    static: true
 
-- name: run the init
-  import_playbook: ../../init/main.yml
+- name: normalize groups
+  include: ../../byo/openshift-cluster/initialize_groups.yml
 
-- name: perform the installer openshift-checks
-  import_playbook: ../../openshift-checks/private/install.yml
+- name: run the std_include
+  include: ../../common/openshift-cluster/std_include.yml
 
-- name: etcd install
-  import_playbook: ../../openshift-etcd/private/config.yml
-
-- name: include nfs
-  import_playbook: ../../openshift-nfs/private/config.yml
-  when: groups.oo_nfs_to_config | default([]) | count > 0
-
-- name: include loadbalancer
-  import_playbook: ../../openshift-loadbalancer/private/config.yml
-  when: groups.oo_lb_to_config | default([]) | count > 0
-
-- name: include openshift-master config
-  import_playbook: ../../openshift-master/private/config.yml
-
-- name: include master additional config
-  import_playbook: ../../openshift-master/private/additional_config.yml
-
-- name: include master additional config
-  import_playbook: ../../openshift-node/private/config.yml
-
-- name: include openshift-glusterfs
-  import_playbook: ../../openshift-glusterfs/private/config.yml
-  when: groups.oo_glusterfs_to_config | default([]) | count > 0
+- name: run the config
+  include: ../../common/openshift-cluster/config.yml

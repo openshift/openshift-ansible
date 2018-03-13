@@ -1,4 +1,0 @@
----
-dependencies:
-- lib_openshift
-- role: lib_utils

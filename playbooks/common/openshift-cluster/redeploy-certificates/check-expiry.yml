@@ -1,0 +1,12 @@
+---
+- name: Check cert expirys
+  hosts: "{{ g_check_expiry_hosts }}"
+  vars:
+    openshift_certificate_expiry_show_all: yes
+  roles:
+  # Sets 'check_results' per host which contains health status for
+  # etcd, master and node certificates.  We will use 'check_results'
+  # to determine if any certificates were expired prior to running
+  # this playbook. Service restarts will be skipped if any
+  # certificates were previously expired.
+  - role: openshift_certificate_expiry

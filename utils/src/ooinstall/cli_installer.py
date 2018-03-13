@@ -25,16 +25,28 @@ QUIET_ANSIBLE_CONFIG = '/usr/share/atomic-openshift-utils/ansible-quiet.cfg'
 DEFAULT_PLAYBOOK_DIR = '/usr/share/ansible/openshift-ansible/'
 
 UPGRADE_MAPPINGS = {
+    '3.4': {
+        'minor_version': '3.4',
+        'minor_playbook': 'v3_4/upgrade.yml',
+        'major_playbook': 'v3_5/upgrade.yml',
+        'major_version': '3.5',
+    },
+    '3.5': {
+        'minor_version': '3.5',
+        'minor_playbook': 'v3_5/upgrade.yml',
+        'major_playbook': 'v3_6/upgrade.yml',
+        'major_version': '3.6',
+    },
     '3.6': {
         'minor_version': '3.6',
         'minor_playbook': 'v3_6/upgrade.yml',
-        'major_playbook': 'v3_7/upgrade.yml',
         'major_version': '3.7',
+        'major_playbook': 'v3_7/upgrade.yml',
     },
     '3.7': {
         'minor_version': '3.7',
         'minor_playbook': 'v3_7/upgrade.yml',
-    },
+    }
 }
 
 
@@ -333,10 +345,12 @@ Note: Containerized storage hosts are not currently supported.
     existing, existing_host = is_host_already_node_or_master(hostname_or_ip, hosts)
     if existing and existing_host.is_node():
         existing_host.roles.append('storage')
+        existing_host.other_variables['openshift_hosted_registry_storage_kind'] = 'nfs'
     else:
         host_props['connect_to'] = hostname_or_ip
         host_props['preconfigured'] = False
         host_props['roles'] = ['storage']
+        host_props['openshift_hosted_registry_storage_kind'] = 'nfs'
         storage = Host(**host_props)
         hosts.append(storage)
 

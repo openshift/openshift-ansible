@@ -1,0 +1,48 @@
+---
+- name: Master Additional Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Master Additional install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_master_additional: "In Progress"
+      aggregate: false
+
+- name: Additional master configuration
+  hosts: oo_first_master
+  vars:
+    cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
+    etcd_urls: "{{ openshift.master.etcd_urls }}"
+    openshift_master_ha: "{{ groups.oo_masters | length > 1 }}"
+    omc_cluster_hosts: "{{ groups.oo_masters | join(' ')}}"
+  roles:
+  - role: openshift_master_cluster
+    when: openshift_master_ha | bool and openshift.master.cluster_method == "pacemaker"
+  - role: openshift_project_request_template
+    when: openshift_project_request_template_manage
+  - role: openshift_examples
+    when: openshift_install_examples | default(true, true) | bool
+    registry_url: "{{ openshift.master.registry_url }}"
+  - role: openshift_hosted_templates
+    registry_url: "{{ openshift.master.registry_url }}"
+  - role: openshift_manageiq
+    when: openshift_use_manageiq | default(true) | bool
+  - role: cockpit
+    when:
+    - not openshift.common.is_atomic | bool
+    - deployment_type == 'openshift-enterprise'
+    - osm_use_cockpit is undefined or osm_use_cockpit | bool
+    - openshift.common.deployment_subtype != 'registry'
+  - role: flannel_register
+    when: openshift_use_flannel | default(false) | bool
+
+- name: Master Additional Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Master Additional install 'Complete'
+    set_stats:
+      data:
+        installer_phase_master_additional: "Complete"
+      aggregate: false

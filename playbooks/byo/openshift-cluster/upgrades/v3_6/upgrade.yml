@@ -2,4 +2,6 @@
 #
 # Full Control Plane + Nodes Upgrade
 #
-- import_playbook: ../../../../common/openshift-cluster/upgrades/v3_6/upgrade.yml
+- include: ../../initialize_groups.yml
+
+- include: ../../../../common/openshift-cluster/upgrades/v3_6/upgrade.yml

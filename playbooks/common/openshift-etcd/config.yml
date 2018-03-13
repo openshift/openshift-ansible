@@ -1,0 +1,36 @@
+---
+- name: etcd Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set etcd install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_etcd: "In Progress"
+      aggregate: false
+
+- include: ca.yml
+
+- include: certificates.yml
+
+- name: Configure etcd
+  hosts: oo_etcd_to_config
+  any_errors_fatal: true
+  roles:
+  - role: os_firewall
+  - role: openshift_etcd
+    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+  - role: nickhammond.logrotate
+
+- name: etcd Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set etcd install 'Complete'
+    set_stats:
+      data:
+        installer_phase_etcd: "Complete"
+      aggregate: false

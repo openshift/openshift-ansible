@@ -31,4 +31,4 @@
 - name: Re-export NFS filesystems
   command: exportfs -ar
   when:
-    - created_export is changed
+    - created_export | changed

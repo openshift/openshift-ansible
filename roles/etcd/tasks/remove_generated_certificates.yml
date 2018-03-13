@@ -1,2 +1,2 @@
 ---
-- include_tasks: certificates/remove_generated_certificates.yml
+- include: certificates/remove_generated_certificates.yml

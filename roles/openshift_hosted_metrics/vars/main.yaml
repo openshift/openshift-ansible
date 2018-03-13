@@ -1,0 +1,21 @@
+---
+hawkular_permission_oc_commands:
+  - policy add-role-to-user edit system:serviceaccount:openshift-infra:metrics-deployer -n openshift-infra
+  - policy add-cluster-role-to-user cluster-admin system:serviceaccount:openshift-infra:heapster
+
+metrics_deployer_sa:
+  apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: metrics-deployer
+  secrets:
+    - name: metrics-deployer
+
+
+hawkular_tmp_conf: /tmp/hawkular_admin.kubeconfig
+
+hawkular_persistence: "{% if openshift.hosted.metrics.storage.kind != None %}true{% else %}false{% endif %}"
+
+hawkular_type: "{{ 'origin' if deployment_type == 'origin' else 'enterprise' }}"
+
+metrics_upgrade: openshift.hosted.metrics.upgrade | default(False)

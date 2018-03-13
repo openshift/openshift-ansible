@@ -20,12 +20,6 @@ options:
     required: false
     default: None
     aliases: []
-  role_namespace:
-    description:
-    - The namespace where to find the role
-    required: false
-    default: None
-    aliases: []
   debug:
     description:
     - Turn on debug output.
@@ -77,12 +71,4 @@ EXAMPLES = '''
     resource_kind: cluster-role
     resource_name: system:build-strategy-docker
     state: present
-
-- name: oc adm policy add-role-to-user system:build-strategy-docker ausername --role-namespace foo
-  oc_adm_policy_user:
-    user: ausername
-    resource_kind: cluster-role
-    resource_name: system:build-strategy-docker
-    state: present
-    role_namespace: foo
 '''

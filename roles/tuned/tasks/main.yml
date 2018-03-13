@@ -11,7 +11,7 @@
   block:
   - name: Set tuned OpenShift variables
     set_fact:
-      openshift_tuned_guest_profile: "{{ 'atomic-guest' if openshift_is_atomic else 'virtual-guest' }}"
+      openshift_tuned_guest_profile: "{{ 'atomic-guest' if openshift.common.is_atomic else 'virtual-guest' }}"
 
   - name: Ensure directory structure exists
     file:

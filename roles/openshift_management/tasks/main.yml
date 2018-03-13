@@ -3,13 +3,14 @@
 # Users, projects, and privileges
 
 - name: Run pre-install Management validation checks
-  include_tasks: validate.yml
+  include: validate.yml
 
 # This creates a service account allowing Container Provider
 # integration (managing OCP/Origin via MIQ/Management)
 - name: Enable Container Provider Integration
   include_role:
     role: openshift_manageiq
+  static: true
 
 - name: "Ensure the Management '{{ openshift_management_project }}' namespace exists"
   oc_project:
@@ -18,18 +19,18 @@
     display_name: "{{ openshift_management_project_description }}"
 
 - name: Create and Authorize Management Accounts
-  include_tasks: accounts.yml
+  include: accounts.yml
 
 ######################################################################
 # STORAGE - Initialize basic storage class
 - name: Determine the correct NFS host if required
-  include_tasks: storage/nfs_server.yml
+  include: storage/nfs_server.yml
   when: openshift_management_storage_class in ['nfs', 'nfs_external']
 
 #---------------------------------------------------------------------
 # * nfs - set up NFS shares on the first master for a proof of concept
 - name: Create required NFS exports for Management app storage
-  include_tasks: storage/nfs.yml
+  include: storage/nfs.yml
   when: openshift_management_storage_class == 'nfs'
 
 #---------------------------------------------------------------------
@@ -56,14 +57,14 @@
 ######################################################################
 # APPLICATION TEMPLATE
 - name: Install the Management app and PV templates
-  include_tasks: template.yml
+  include: template.yml
 
 ######################################################################
 # APP & DB Storage
 
 # For local/external NFS backed installations
 - name: "Create the required App and DB PVs using {{ openshift_management_storage_class }}"
-  include_tasks: storage/create_nfs_pvs.yml
+  include: storage/create_nfs_pvs.yml
   when:
     - openshift_management_storage_class in ['nfs', 'nfs_external']
 
@@ -71,15 +72,15 @@
 # CREATE APP
 - name: Note the correct ext-db template name
   set_fact:
-    openshift_management_template_name: "{{ openshift_management_flavor }}-ext-db"
+    openshift_management_template_name: "{{ __openshift_management_flavor }}-ext-db"
   when:
-    - openshift_management_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
+    - __openshift_management_use_ext_db
 
 - name: Note the correct podified db template name
   set_fact:
-    openshift_management_template_name: "{{ openshift_management_flavor }}"
+    openshift_management_template_name: "{{ __openshift_management_flavor }}"
   when:
-    - openshift_management_app_template in ['miq-template', 'cfme-template']
+    - not __openshift_management_use_ext_db
 
 - name: Ensure the Management App is created
   oc_process:
@@ -89,7 +90,7 @@
     params: "{{ openshift_management_template_parameters }}"
 
 - name: Wait for the app to come up. May take several minutes, 30s check intervals, {{ openshift_management_pod_rollout_retries }} retries
-  command: "oc logs {{ openshift_management_flavor }}-0 -n {{ openshift_management_project }}"
+  command: "oc logs {{ __openshift_management_flavor }}-0 -n {{ openshift_management_project }}"
   register: app_seeding_logs
   until: app_seeding_logs.stdout.find('Server starting complete') != -1
   delay: 30

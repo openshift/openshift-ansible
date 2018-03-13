@@ -15,6 +15,8 @@ openshift_management_pod_rollout_retries: 30
 #
 # Choose 'miq-template' for a podified database install
 # Choose 'miq-template-ext-db' for an external database install
+# TODO: Swap this var declaration once CFME is fully supported
+#openshift_management_app_template: "{{ 'cfme-template' if openshift_deployment_type == 'openshift-enterprise' else 'miq-template' }}"
 openshift_management_app_template: miq-template
 # If you are using the miq-template-ext-db template then you must add
 # the required database parameters to the
@@ -88,7 +90,7 @@ openshift_management_storage_nfs_local_hostname: false
 # name and password AND are trying to use integration scripts.
 #
 # For example, adding this cluster as a container provider,
-# playbooks/openshift-management/add_container_provider.yml
+# playbooks/byo/openshift-management/add_container_provider.yml
 openshift_management_username: admin
 openshift_management_password: smartvm
 

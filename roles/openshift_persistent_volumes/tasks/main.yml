@@ -9,36 +9,39 @@
     cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
   changed_when: False
 
-- set_fact:
-    glusterfs_pv:
-    - name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs-volume"
-      capacity: "{{ openshift_hosted_registry_storage_volume_size }}"
-      access_modes: "{{ openshift_hosted_registry_storage_access_modes }}"
-      storage:
-        glusterfs:
-          endpoints: "{{ openshift_hosted_registry_storage_glusterfs_endpoints }}"
-          path: "{{ openshift_hosted_registry_storage_glusterfs_path }}"
-          readOnly: "{{ openshift_hosted_registry_storage_glusterfs_readOnly }}"
-    glusterfs_pvc:
-    - name: "{{ openshift_hosted_registry_storage_volume_name }}-glusterfs-claim"
-      capacity: "{{ openshift_hosted_registry_storage_volume_size }}"
-      access_modes: "{{ openshift_hosted_registry_storage_access_modes }}"
-  when: openshift_hosted_registry_storage_glusterfs_swap | default(False)
+- name: Deploy PersistentVolume definitions
+  template:
+    dest: "{{ mktemp.stdout }}/persistent-volumes.yml"
+    src: persistent-volume.yml.j2
+  when: persistent_volumes | length > 0
+  changed_when: False
 
-- name: create standard pv and pvc lists
-  # generate_pv_pvcs_list is a custom action module defined in ../action_plugins
-  generate_pv_pvcs_list: {}
-  register: l_pv_pvcs_list
+- name: Create PersistentVolumes
+  command: >
+    {{ openshift.common.client_binary }} create
+    -f {{ mktemp.stdout }}/persistent-volumes.yml
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+  register: pv_create_output
+  when: persistent_volumes | length > 0
+  failed_when: ('already exists' not in pv_create_output.stderr) and ('created' not in pv_create_output.stdout)
+  changed_when: ('created' in pv_create_output.stdout)
 
-- include_tasks: pv.yml
-  vars:
-    l_extra_persistent_volumes: "{{ openshift_persistent_volume_extras | union(glusterfs_pv) }}"
-    persistent_volumes: "{{ l_pv_pvcs_list.persistent_volumes | union(l_extra_persistent_volumes) }}"
+- name: Deploy PersistentVolumeClaim definitions
+  template:
+    dest: "{{ mktemp.stdout }}/persistent-volume-claims.yml"
+    src: persistent-volume-claim.yml.j2
+  when: persistent_volume_claims | length > 0
+  changed_when: False
 
-- include_tasks: pvc.yml
-  vars:
-    l_extra_persistent_volume_claims: "{{ openshift_persistent_volume_claims_extras | union(glusterfs_pvc) }}"
-    persistent_volume_claims: "{{ l_pv_pvcs_list.persistent_volume_claims | union(l_extra_persistent_volume_claims) }}"
+- name: Create PersistentVolumeClaims
+  command: >
+    {{ openshift.common.client_binary }} create
+    -f {{ mktemp.stdout }}/persistent-volume-claims.yml
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+  register: pvc_create_output
+  when: persistent_volume_claims | length > 0
+  failed_when: ('already exists' not in pvc_create_output.stderr) and ('created' not in pvc_create_output.stdout)
+  changed_when: ('created' in pvc_create_output.stdout)
 
 - name: Delete temp directory
   file:

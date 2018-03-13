@@ -1,0 +1,4 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+
+- include: ../../common/openshift-node/network_manager.yml

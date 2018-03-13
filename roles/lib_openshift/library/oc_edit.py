@@ -1152,7 +1152,7 @@ class Utils(object):  # pragma: no cover
         ''' Actually write the file contents to disk. This helps with mocking. '''
 
         with open(filename, 'w') as sfd:
-            sfd.write(contents)
+            sfd.write(str(contents))
 
     @staticmethod
     def create_tmp_file_from_contents(rname, data, ftype='yaml'):
@@ -1556,7 +1556,20 @@ def main():
             debug=dict(default=False, type='bool'),
             namespace=dict(default='default', type='str'),
             name=dict(default=None, required=True, type='str'),
-            kind=dict(required=True, type='str'),
+            kind=dict(required=True,
+                      type='str',
+                      choices=['dc', 'deploymentconfig',
+                               'rc', 'replicationcontroller',
+                               'svc', 'service',
+                               'scc', 'securitycontextconstraints',
+                               'ns', 'namespace', 'project', 'projects',
+                               'is', 'imagestream',
+                               'istag', 'imagestreamtag',
+                               'bc', 'buildconfig',
+                               'routes',
+                               'node',
+                               'secret',
+                               'pv', 'persistentvolume']),
             file_name=dict(default=None, type='str'),
             file_format=dict(default='yaml', type='str'),
             content=dict(default=None, required=True, type='dict'),

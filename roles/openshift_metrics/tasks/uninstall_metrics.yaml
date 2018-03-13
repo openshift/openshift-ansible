@@ -1,10 +1,10 @@
 ---
 - name: stop metrics
-  include_tasks: stop_metrics.yaml
+  include: stop_metrics.yaml
 
 - name: remove metrics components
   command: >
-    {{ openshift_client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
     delete --ignore-not-found --selector=metrics-infra
     all,sa,secrets,templates,routes,pvc,rolebindings,clusterrolebindings,clusterrole
   register: delete_metrics
@@ -12,7 +12,7 @@
 
 - name: remove rolebindings
   command: >
-    {{ openshift_client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    {{ openshift.common.client_binary }} -n {{ openshift_metrics_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
     delete --ignore-not-found
     rolebinding/hawkular-view
     clusterrolebinding/heapster-cluster-reader

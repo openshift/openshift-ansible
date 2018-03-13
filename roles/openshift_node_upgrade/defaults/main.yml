@@ -1,0 +1,15 @@
+---
+openshift_node_debug_level: "{{ debug_level | default(2) }}"
+
+openshift_use_openshift_sdn: True
+os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
+
+openshift_node_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
+openshift_node_data_dir: "{{ openshift_node_data_dir_default }}"
+
+# oreg_url is defined by user input
+oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
+oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
+oreg_auth_credentials_replace: False
+l_bind_docker_reg_auth: False
+openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False)) or (openshift_use_crio_only | default(False)) }}"

@@ -1,0 +1,15 @@
+---
+#
+# This playbook is a preview of upcoming changes for installing
+# Hosted logging on.  See inventory/byo/hosts.*.example for the
+# currently supported method.
+#
+- include: initialize_groups.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/std_include.yml
+  tags:
+  - always
+
+- include: ../../common/openshift-cluster/service_catalog.yml

@@ -1,8 +1,14 @@
 ---
+# Ensure the default sub-domain is set:
+- name: Migrate legacy osm_default_subdomain fact
+  set_fact:
+    openshift_master_default_subdomain: "{{ osm_default_subdomain | default(None) }}"
+  when: openshift_master_default_subdomain is not defined
+
 - name: Verify required variables are set
   fail:
     msg: openshift_master_default_subdomain must be set to deploy metrics
-  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain == ""
+  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain | default("") == ""
 
 # NOTE: These metrics variables are unfortunately needed by both the master and the metrics roles
 # to properly configure the master-config.yaml file.
@@ -14,8 +20,8 @@
 - name: Set g_metrics_hostname
   set_fact:
     g_metrics_hostname: "{{ openshift_hosted_metrics_public_url
-                        | default('hawkular-metrics.' ~ openshift_master_default_subdomain)
-                        | lib_utils_oo_hostname_from_url }}"
+                        | default('hawkular-metrics.' ~ (openshift_master_default_subdomain))
+                        | oo_hostname_from_url }}"
 
 - set_fact:
     openshift_hosted_metrics_deploy_url: "https://{{ g_metrics_hostname }}/hawkular/metrics"
@@ -25,6 +31,7 @@
   openshift_facts:
     role: master
     local_facts:
+      cluster_method: "{{ openshift_master_cluster_method | default('native') }}"
       cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
       cluster_public_hostname: "{{ openshift_master_cluster_public_hostname | default(None) }}"
       api_port: "{{ openshift_master_api_port | default(None) }}"
@@ -45,8 +52,11 @@
       etcd_port: "{{ openshift_master_etcd_port | default(None) }}"
       etcd_use_ssl: "{{ openshift_master_etcd_use_ssl | default(None) }}"
       etcd_urls: "{{ openshift_master_etcd_urls | default(None) }}"
+      embedded_etcd: "{{ openshift_master_embedded_etcd | default(None) }}"
       embedded_kube: "{{ openshift_master_embedded_kube | default(None) }}"
       embedded_dns: "{{ openshift_master_embedded_dns | default(None) }}"
+      # defaults to 8053 when using dnsmasq in 1.2/3.2
+      dns_port: "{{ openshift_master_dns_port | default(None) }}"
       bind_addr: "{{ openshift_master_bind_addr | default(None) }}"
       pod_eviction_timeout: "{{ openshift_master_pod_eviction_timeout | default(None) }}"
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
@@ -67,11 +77,18 @@
       sdn_cluster_network_cidr: "{{ osm_cluster_network_cidr | default(None) }}"
       sdn_host_subnet_length: "{{ osm_host_subnet_length | default(None) }}"
       custom_cors_origins: "{{ osm_custom_cors_origins | default(None) }}"
+      default_node_selector: "{{ osm_default_node_selector | default(None) }}"
+      project_request_message: "{{ osm_project_request_message | default(None) }}"
+      project_request_template: "{{ osm_project_request_template | default(None) }}"
+      mcs_allocator_range: "{{ osm_mcs_allocator_range | default(None) }}"
+      mcs_labels_per_project: "{{ osm_mcs_labels_per_project | default(None) }}"
+      uid_allocator_range: "{{ osm_uid_allocator_range | default(None) }}"
       registry_selector: "{{ openshift_registry_selector | default(None) }}"
       api_server_args: "{{ osm_api_server_args | default(None) }}"
       controller_args: "{{ osm_controller_args | default(None) }}"
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
+      master_image: "{{ osm_image | default(None) }}"
       admission_plugin_config: "{{openshift_master_admission_plugin_config }}"
       kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"  # deprecated, merged with admission_plugin_config
       oauth_template: "{{ openshift_master_oauth_template | default(None) }}"  # deprecated in origin 1.2 / OSE 3.2

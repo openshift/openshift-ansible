@@ -1,10 +1,6 @@
 ---
 - name: Install the systemd units
-  include_tasks: systemd_units.yml
-
-- name: Pull container images
-  include_tasks: container_images.yml
-  when: openshift_is_containerized | bool
+  include: systemd_units.yml
 
 - name: Start and enable openvswitch service
   systemd:
@@ -13,20 +9,20 @@
     state: started
     daemon_reload: yes
   when:
-    - openshift_is_containerized | bool
+    - openshift.common.is_containerized | bool
     - openshift_node_use_openshift_sdn | default(true) | bool
   register: ovs_start_result
-  until: not (ovs_start_result is failed)
+  until: not ovs_start_result | failed
   retries: 3
   delay: 30
 
 - set_fact:
-    ovs_service_status_changed: "{{ ovs_start_result is changed }}"
+    ovs_service_status_changed: "{{ ovs_start_result | changed }}"
 
 - file:
-    dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
+    dest: "{{ (openshift_node_kubelet_args|default({'config':None})).config}}"
     state: directory
-  when: ('config' in l2_openshift_node_kubelet_args) | bool
+  when: openshift_node_kubelet_args is defined and 'config' in openshift_node_kubelet_args
 
 # TODO: add the validate parameter when there is a validation command to run
 - name: Create the Node config
@@ -42,23 +38,23 @@
 
 - name: Configure Node Environment Variables
   lineinfile:
-    dest: /etc/sysconfig/{{ openshift_service_type }}-node
+    dest: /etc/sysconfig/{{ openshift.common.service_type }}-node
     regexp: "^{{ item.key }}="
     line: "{{ item.key }}={{ item.value }}"
     create: true
-  with_dict: "{{ openshift_node_env_vars }}"
+  with_dict: "{{ openshift.node.env_vars | default({}) }}"
   notify:
     - restart node
 
 - name: include aws provider credentials
-  import_tasks: aws.yml
-  when: not (openshift_node_use_instance_profiles | default(False))
+  include: aws.yml
+  static: yes
 
 # Necessary because when you're on a node that's also a master the master will be
 # restarted after the node restarts docker and it will take up to 60 seconds for
 # systemd to start the master again
 - when:
-    - openshift_is_containerized | bool
+    - openshift.common.is_containerized | bool
     - not openshift_node_bootstrap
   block:
     - name: Wait for master API to become available before proceeding
@@ -80,7 +76,7 @@
     - name: Start and enable node dep
       systemd:
         daemon_reload: yes
-        name: "{{ openshift_service_type }}-node-dep"
+        name: "{{ openshift.common.service_type }}-node-dep"
         enabled: yes
         state: started
 
@@ -88,24 +84,24 @@
   block:
     - name: Start and enable node
       systemd:
-        name: "{{ openshift_service_type }}-node"
+        name: "{{ openshift.common.service_type }}-node"
         enabled: yes
         state: started
         daemon_reload: yes
       register: node_start_result
-      until: not node_start_result is failed
+      until: not node_start_result | failed
       retries: 1
       delay: 30
       ignore_errors: true
 
     - name: Dump logs from node service if it failed
-      command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-node
-      when: node_start_result is failed
+      command: journalctl --no-pager -n 100 -u {{ openshift.common.service_type }}-node
+      when: node_start_result | failed
 
     - name: Abort if node failed to start
       fail:
         msg: Node failed to start please inspect the logs and try again
-      when: node_start_result is failed
+      when: node_start_result | failed
 
     - set_fact:
-        node_service_status_changed: "{{ node_start_result is changed }}"
+        node_service_status_changed: "{{ node_start_result | changed }}"

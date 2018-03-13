@@ -1,5 +1,5 @@
 ---
-- name: Set default image variables based on openshift_deployment_type
+- name: Set default image variables based on deployment_type
   include_vars: "{{ item }}"
   with_first_found:
     - "{{ openshift_deployment_type }}.yml"
@@ -20,11 +20,9 @@
     mode: 0755
   changed_when: False
 
-- include_tasks: install_prometheus.yaml
-  when: openshift_prometheus_state == 'present'
-
-- include_tasks: uninstall_prometheus.yaml
-  when: openshift_prometheus_state == 'absent'
+- include: install_prometheus.yaml
+  vars:
+    state: "{{ openshift_prometheus_state }}"
 
 - name: Delete temp directory
   file:

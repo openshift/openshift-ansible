@@ -1,8 +1,8 @@
 ---
-- include_tasks: pre_install.yaml
+- include: pre_install.yaml
 
 - name: Install Metrics
-  include_tasks: "install_{{ include_file }}.yaml"
+  include: "{{ role_path }}/tasks/install_{{ include_file }}.yaml"
   with_items:
     - support
     - heapster
@@ -13,11 +13,11 @@
   when: not openshift_metrics_heapster_standalone | bool
 
 - name: Install Heapster Standalone
-  include_tasks: install_heapster.yaml
+  include: install_heapster.yaml
   when: openshift_metrics_heapster_standalone | bool
 
 - name: Install Hawkular OpenShift Agent (HOSA)
-  include_tasks: install_hosa.yaml
+  include: install_hosa.yaml
   when: openshift_metrics_install_hawkular_agent | default(false) | bool
 
 - find:
@@ -34,7 +34,7 @@
   changed_when: no
 
 - name: Create objects
-  include_tasks: oc_apply.yaml
+  include: oc_apply.yaml
   vars:
     kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
     namespace: "{{ openshift_metrics_project }}"
@@ -58,7 +58,7 @@
   changed_when: no
 
 - name: Create Hawkular Agent objects
-  include_tasks: oc_apply.yaml
+  include: oc_apply.yaml
   vars:
     kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
     namespace: "{{ openshift_metrics_hawkular_agent_namespace }}"
@@ -67,10 +67,10 @@
   with_items: "{{ hawkular_agent_object_defs.results }}"
   when: openshift_metrics_install_hawkular_agent | bool
 
-- include_tasks: update_master_config.yaml
+- include: update_master_config.yaml
 
 - command: >
-    {{openshift_client_binary}}
+    {{openshift.common.client_binary}}
     --config={{mktemp.stdout}}/admin.kubeconfig
     get rc
     -l metrics-infra
@@ -80,11 +80,11 @@
   changed_when: no
 
 - name: Scaling down cluster to recognize changes
-  include_tasks: stop_metrics.yaml
+  include: stop_metrics.yaml
   when: existing_metrics_rc.stdout_lines | length > 0
 
 - name: Scaling up cluster
-  include_tasks: start_metrics.yaml
+  include: start_metrics.yaml
   tags: openshift_metrics_start_cluster
   when:
     - openshift_metrics_start_cluster | default(true) | bool

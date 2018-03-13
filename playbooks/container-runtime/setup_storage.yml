@@ -1,6 +1,0 @@
----
-- import_playbook: ../init/main.yml
-  vars:
-    skip_verison: True
-
-- import_playbook: private/setup_storage.yml

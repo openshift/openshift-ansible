@@ -1,5 +1,5 @@
 ---
-- include_tasks: vars.yml
+- include: vars.yml
 
 # TODO: replace shell module with command and update later checks
 - name: Check available disk space for etcd backup
@@ -44,7 +44,7 @@
   - r_etcd_common_embedded_etcd | bool
   - not l_ostree_booted.stat.exists | bool
   register: result
-  until: result is succeeded
+  until: result | success
 
 - name: Check selinux label of '{{ etcd_data_dir }}'
   command: >

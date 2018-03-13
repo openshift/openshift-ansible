@@ -54,7 +54,7 @@ included in this role, or you can [read on below for more examples](#more-exampl
 to help you craft you own.
 
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/easy-mode.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/easy-mode.yaml
 ```
 
 Using the `easy-mode.yaml` playbook will produce:
@@ -65,7 +65,7 @@ Using the `easy-mode.yaml` playbook will produce:
 
 
 > **Note:** If you are running from an RPM install use
-> `/usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/easy-mode.yaml`
+> `/usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/easy-mode.yaml`
 > instead
 
 ## Run from a container
@@ -80,7 +80,7 @@ There are several [examples](../../examples/README.md) in the `examples` directo
 ## More Example Playbooks
 
 > **Note:** These Playbooks are available to run directly out of the
-> [/playbooks/openshift-checks/certificate_expiry/](../../playbooks/openshift-checks/certificate_expiry/) directory.
+> [/playbooks/byo/openshift-checks/certificate_expiry/](../../playbooks/byo/openshift-checks/certificate_expiry/) directory.
 
 ### Default behavior
 
@@ -99,14 +99,14 @@ This playbook just invokes the certificate expiration check role with default op
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/default.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/default.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/default.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/default.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/default.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/default.yaml)
 
 ### Easy mode
 
@@ -130,14 +130,14 @@ certificates (healthy or not) are included in the results:
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/easy-mode.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/easy-mode.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/easy-mode.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/easy-mode.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/easy-mode.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/easy-mode.yaml)
 
 ### Easy mode and upload reports to masters
 
@@ -193,14 +193,14 @@ options via environment variables:
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/easy-mode-upload.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/easy-mode-upload.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/easy-mode-upload.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/easy-mode-upload.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/easy-mode-upload.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/easy-mode-upload.yaml)
 
 ### Generate HTML and JSON artifacts in their default paths
 
@@ -219,14 +219,14 @@ $ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/op
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/html_and_json_default_paths.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/html_and_json_default_paths.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/html_and_json_default_paths.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/html_and_json_default_paths.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/html_and_json_default_paths.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/html_and_json_default_paths.yaml)
 
 ### Generate HTML and JSON reports in a custom path
 
@@ -250,14 +250,14 @@ This example customizes the report generation path to point to a specific path (
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml)
 
 ### Long warning window
 
@@ -278,14 +278,14 @@ the module out):
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/longer_warning_period.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/longer_warning_period.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/longer_warning_period.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/longer_warning_period.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/longer_warning_period.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/longer_warning_period.yaml)
 
 ### Long warning window and JSON report
 
@@ -307,14 +307,14 @@ the module out) and save the results as a JSON file:
 
 **From git:**
 ```
-$ ansible-playbook -v -i HOSTS playbooks/openshift-checks/certificate_expiry/longer-warning-period-json-results.yaml
+$ ansible-playbook -v -i HOSTS playbooks/byo/openshift-checks/certificate_expiry/longer-warning-period-json-results.yaml
 ```
 **From openshift-ansible-playbooks rpm:**
 ```
-$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/openshift-checks/certificate_expiry/longer-warning-period-json-results.yaml
+$ ansible-playbook -v -i HOSTS /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-checks/certificate_expiry/longer-warning-period-json-results.yaml
 ```
 
-> [View This Playbook](../../playbooks/openshift-checks/certificate_expiry/longer-warning-period-json-results.yaml)
+> [View This Playbook](../../playbooks/byo/openshift-checks/certificate_expiry/longer-warning-period-json-results.yaml)
 
 
 

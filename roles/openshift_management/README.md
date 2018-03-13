@@ -164,14 +164,14 @@ away.
 If you want to install CFME/MIQ at the same time you install your
 OCP/Origin cluster, ensure that `openshift_management_install_management` is set
 to `true` in your inventory. Call the standard
-`playbooks/deploy_cluster.yml` playbook to begin the cluster and CFME/MIQ
+`playbooks/byo/config.yml` playbook to begin the cluster and CFME/MIQ
 installation.
 
 If you are installing CFME/MIQ on an *already provisioned cluster*
 then you can call the CFME/MIQ playbook directly:
 
 ```
-$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/openshift-management/config.yml
+$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-management/config.yml
 ```
 
 *Note: Use `miq-template` in the following examples for ManageIQ installs*
@@ -489,7 +489,7 @@ This playbook will:
 
 
 ```
-$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/openshift-management/add_container_provider.yml
+$ ansible-playbook -v -i <YOUR_INVENTORY> playbooks/byo/openshift-management/add_container_provider.yml
 ```
 
 ## Multiple Providers
@@ -567,7 +567,7 @@ the config file path.
 
 ```
 $ ansible-playbook -v -e container_providers_config=/tmp/cp.yml \
-      playbooks/openshift-management/add_many_container_providers.yml
+      playbooks/byo/openshift-management/add_many_container_providers.yml
 ```
 
 Afterwards you will find two new container providers in your
@@ -579,7 +579,7 @@ to see an overview.
 This role includes a playbook to uninstall and erase the CFME/MIQ
 installation:
 
-* `playbooks/openshift-management/uninstall.yml`
+* `playbooks/byo/openshift-management/uninstall.yml`
 
 NFS export definitions and data stored on NFS exports are not
 automatically removed. You are urged to manually erase any data from

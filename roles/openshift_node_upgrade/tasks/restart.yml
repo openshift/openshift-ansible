@@ -1,0 +1,46 @@
+---
+# input variables:
+# - openshift.common.service_type
+# - openshift.common.is_containerized
+# - openshift.common.hostname
+# - openshift.master.api_port
+
+# NOTE: This is needed to make sure we are using the correct set
+#       of systemd unit files. The RPMs lay down defaults but
+#       the install/upgrade may override them in /etc/systemd/system/.
+# NOTE: We don't use the systemd module as some versions of the module
+#       require a service to be part of the call.
+- name: Reload systemd to ensure latest unit files
+  command: systemctl daemon-reload
+
+- name: Restart docker
+  service:
+    name: "{{ openshift.docker.service_name }}"
+    state: started
+  register: docker_start_result
+  until: not docker_start_result | failed
+  retries: 3
+  delay: 30
+
+- name: Update docker facts
+  openshift_facts:
+    role: docker
+
+- name: Start services
+  service: name={{ item }} state=started
+  with_items:
+    - etcd_container
+    - openvswitch
+    - "{{ openshift.common.service_type }}-master-api"
+    - "{{ openshift.common.service_type }}-master-controllers"
+    - "{{ openshift.common.service_type }}-node"
+  failed_when: false
+
+- name: Wait for master API to come back online
+  wait_for:
+    host: "{{ openshift.common.hostname }}"
+    state: started
+    delay: 10
+    port: "{{ openshift.master.api_port }}"
+    timeout: 600
+  when: inventory_hostname in groups.oo_masters_to_config

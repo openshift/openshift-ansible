@@ -1,0 +1,47 @@
+---
+- name: Load Balancer Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set load balancer install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_loadbalancer: "In Progress"
+      aggregate: false
+
+- name: Configure firewall and docker for load balancers
+  hosts: oo_lb_to_config:!oo_masters_to_config:!oo_nodes_to_config
+  vars:
+    openshift_image_tag: "{{ hostvars[groups.oo_first_master.0].openshift_image_tag }}"
+  roles:
+  - role: os_firewall
+  - role: openshift_docker
+    when: openshift.common.is_containerized | default(False) | bool and not skip_docker_role | default(False) | bool
+
+- name: Configure load balancers
+  hosts: oo_lb_to_config
+  vars:
+    openshift_loadbalancer_frontends: "{{ (openshift_master_api_port | default(8443)
+                                           | oo_openshift_loadbalancer_frontends(hostvars | oo_select_keys(groups['oo_masters']),
+                                                                                 openshift_use_nuage | default(false),
+                                                                                 nuage_mon_rest_server_port | default(none)))
+                                           + openshift_loadbalancer_additional_frontends | default([]) }}"
+    openshift_loadbalancer_backends: "{{ (openshift_master_api_port | default(8443)
+                                          | oo_openshift_loadbalancer_backends(hostvars | oo_select_keys(groups['oo_masters']),
+                                                                               openshift_use_nuage | default(false),
+                                                                               nuage_mon_rest_server_port | default(none)))
+                                          + openshift_loadbalancer_additional_backends | default([]) }}"
+    openshift_image_tag: "{{ hostvars[groups.oo_masters_to_config.0].openshift_image_tag }}"
+  roles:
+  - role: openshift_loadbalancer
+  - role: tuned
+
+- name: Load Balancer Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set load balancer install 'Complete'
+    set_stats:
+      data:
+        installer_phase_loadbalancer: "Complete"
+      aggregate: false

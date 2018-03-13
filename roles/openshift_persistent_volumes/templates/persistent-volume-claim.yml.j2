@@ -8,7 +8,7 @@ items:
   metadata:
     name: "{{ claim.name }}"
   spec:
-    accessModes: {{ claim.access_modes | lib_utils_to_padded_yaml(2, 2) }}
+    accessModes: {{ claim.access_modes | to_padded_yaml(2, 2) }}
     resources:
       requests:
         storage: "{{ claim.capacity }}"

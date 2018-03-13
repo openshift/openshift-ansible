@@ -1,0 +1,51 @@
+---
+- name: Verify Requirements
+  hosts: oo_all_hosts
+  tasks:
+  - fail:
+      msg: Flannel can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use flannel
+    when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_flannel | default(false) | bool
+
+  - fail:
+      msg: Nuage sdn can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use nuage
+    when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_nuage | default(false) | bool
+
+  - fail:
+      msg: Nuage sdn can not be used with flannel
+    when: openshift_use_flannel | default(false) | bool and openshift_use_nuage | default(false) | bool
+
+  - fail:
+      msg: Contiv can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use contiv
+    when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_contiv | default(false) | bool
+
+  - fail:
+      msg: Contiv can not be used with flannel
+    when: openshift_use_flannel | default(false) | bool and openshift_use_contiv | default(false) | bool
+
+  - fail:
+      msg: Contiv can not be used with nuage
+    when: openshift_use_nuage | default(false) | bool and openshift_use_contiv | default(false) | bool
+
+  - fail:
+      msg: Calico can not be used with openshift sdn, set openshift_use_openshift_sdn=false if you want to use Calico
+    when: openshift_use_openshift_sdn | default(true) | bool and openshift_use_calico | default(false) | bool
+
+  - fail:
+      msg: The Calico playbook does not yet integrate with the Flannel playbook in Openshift. Set either openshift_use_calico or openshift_use_flannel, but not both.
+    when: openshift_use_calico | default(false) | bool and openshift_use_flannel | default(false) | bool
+
+  - fail:
+      msg: Calico can not be used with Nuage in Openshift. Set either openshift_use_calico or openshift_use_nuage, but not both
+    when: openshift_use_calico | default(false) | bool and openshift_use_nuage | default(false) | bool
+
+  - fail:
+      msg: Calico can not be used with Contiv in Openshift. Set either openshift_use_calico or openshift_use_contiv, but not both
+    when: openshift_use_calico | default(false) | bool and openshift_use_contiv | default(false) | bool
+
+  - fail:
+      msg: openshift_hostname must be 63 characters or less
+    when: openshift_hostname is defined and openshift_hostname | length > 63
+
+  - fail:
+      msg: openshift_public_hostname must be 63 characters or less
+    when: openshift_public_hostname is defined and openshift_public_hostname | length > 63

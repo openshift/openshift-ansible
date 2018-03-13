@@ -1,0 +1,194 @@
+---
+
+# TODO: Much of this file is shared with container engine tasks
+- set_fact:
+    l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
+  when: l2_docker_insecure_registries | bool
+- set_fact:
+    l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
+  when: l2_docker_additional_registries | bool
+- set_fact:
+    l_crio_registries: "{{ ['docker.io'] }}"
+  when: not (l2_docker_additional_registries | bool)
+- set_fact:
+    l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
+  when: l2_docker_additional_registries | bool
+
+- set_fact:
+    l_openshift_image_tag: "{{ openshift_image_tag | string }}"
+  when: openshift_image_tag is defined
+
+- set_fact:
+    l_openshift_image_tag: "latest"
+  when:
+    - openshift_image_tag is not defined
+    - openshift_release == "latest"
+
+- set_fact:
+    l_openshift_image_tag: "{{ openshift_release | string }}"
+  when:
+    - openshift_image_tag is not defined
+    - openshift_release != "latest"
+
+- name: Ensure container-selinux is installed
+  package:
+    name: container-selinux
+    state: present
+  when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
+
+- name: Check we are not using node as a Docker container with CRI-O
+  fail: msg='Cannot use CRI-O with node configured as a Docker container'
+  when:
+    - openshift.common.is_containerized | bool
+    - not openshift.common.is_node_system_container | bool
+
+# Used to pull and install the system container
+- name: Ensure atomic is installed
+  package:
+    name: atomic
+    state: present
+  when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
+
+# At the time of writing the atomic command requires runc for it's own use. This
+# task is here in the even that the atomic package ever removes the dependency.
+- name: Ensure runc is installed
+  package:
+    name: runc
+    state: present
+  when: not openshift.common.is_atomic | bool
+  register: result
+  until: result | success
+
+
+- name: Check that overlay is in the kernel
+  shell: lsmod | grep overlay
+  register: l_has_overlay_in_kernel
+  ignore_errors: yes
+  failed_when: false
+
+- when: l_has_overlay_in_kernel.rc != 0
+  block:
+
+    - name: Add overlay to modprobe.d
+      template:
+        dest: /etc/modules-load.d/overlay.conf
+        src: overlay.conf.j2
+        backup: yes
+
+    - name: Manually modprobe overlay into the kernel
+      command: modprobe overlay
+
+    - name: Enable and start systemd-modules-load
+      service:
+        name: systemd-modules-load
+        enabled: yes
+        state: restarted
+
+- name: Ensure proxies are in the atomic.conf
+  include_role:
+    name: openshift_atomic
+    tasks_from: proxy
+  static: true
+
+- block:
+
+    - name: Set CRI-O image defaults
+      set_fact:
+        l_crio_image_prepend: "docker.io/gscrivano"
+        l_crio_image_name: "cri-o-fedora"
+        l_crio_image_tag: "latest"
+
+    - name: Use Centos based image when distribution is CentOS
+      set_fact:
+        l_crio_image_name: "cri-o-centos"
+      when: ansible_distribution == "CentOS"
+
+    - name: Set CRI-O image tag
+      set_fact:
+        l_crio_image_tag: "{{ l_openshift_image_tag }}"
+      when:
+        - openshift_deployment_type == 'openshift-enterprise'
+
+    - name: Use RHEL based image when distribution is Red Hat
+      set_fact:
+        l_crio_image_prepend: "registry.access.redhat.com/openshift3"
+        l_crio_image_name: "cri-o"
+      when: ansible_distribution == "RedHat"
+
+    - name: Set the full image name
+      set_fact:
+        l_crio_image: "{{ l_crio_image_prepend }}/{{ l_crio_image_name }}:{{ l_crio_image_tag }}"
+
+    # For https://github.com/openshift/aos-cd-jobs/pull/624#pullrequestreview-61816548
+    - name: Use a specific image if requested
+      set_fact:
+        l_crio_image: "{{ openshift_crio_systemcontainer_image_override }}"
+      when:
+        - openshift_crio_systemcontainer_image_override is defined
+        - openshift_crio_systemcontainer_image_override != ""
+
+    # Be nice and let the user see the variable result
+    - debug:
+        var: l_crio_image
+
+# NOTE: no_proxy added as a workaround until https://github.com/projectatomic/atomic/pull/999 is released
+- name: Pre-pull CRI-O System Container image
+  command: "atomic pull --storage ostree {{ l_crio_image }}"
+  changed_when: false
+  environment:
+    NO_PROXY: "{{ openshift.common.no_proxy | default('') }}"
+
+
+- name: Install CRI-O System Container
+  oc_atomic_container:
+    name: "cri-o"
+    image: "{{ l_crio_image }}"
+    state: latest
+
+- name: Remove CRI-O default configuration files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/cni/net.d/200-loopback.conf
+    - /etc/cni/net.d/100-crio-bridge.conf
+
+- name: Create the CRI-O configuration
+  template:
+    dest: /etc/crio/crio.conf
+    src: crio.conf.j2
+    backup: yes
+
+- name: Ensure CNI configuration directory exists
+  file:
+    path: /etc/cni/net.d/
+    state: directory
+
+- name: setup firewall for CRI-O
+  include: crio_firewall.yml
+  static: yes
+
+- name: Configure the CNI network
+  template:
+    dest: /etc/cni/net.d/openshift-sdn.conf
+    src: 80-openshift-sdn.conf.j2
+
+- name: Start the CRI-O service
+  systemd:
+    name: "cri-o"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  register: start_result
+
+- meta: flush_handlers
+
+# If we are using crio only, docker.service might not be available for
+# 'docker login'
+- include: registry_auth.yml
+  vars:
+    openshift_docker_alternative_creds: "{{ l_use_crio_only }}"

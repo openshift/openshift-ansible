@@ -1,2 +1,2 @@
 ---
-- include_tasks: certificates/backup_generated_certificates.yml
+- include: certificates/backup_generated_certificates.yml

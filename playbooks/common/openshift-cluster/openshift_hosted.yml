@@ -1,0 +1,37 @@
+---
+- name: Hosted Install Checkpoint Start
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Hosted install 'In Progress'
+    set_stats:
+      data:
+        installer_phase_hosted: "In Progress"
+      aggregate: false
+
+- include: create_persistent_volumes.yml
+
+- include: openshift_default_storage_class.yml
+
+- include: openshift_hosted_create_projects.yml
+
+- include: openshift_hosted_router.yml
+
+- include: openshift_hosted_registry.yml
+
+- include: cockpit-ui.yml
+
+- include: install_docker_gc.yml
+  when:
+  - openshift_use_crio | default(False) | bool
+  - openshift_crio_enable_docker_gc | default(False) | bool
+
+- name: Hosted Install Checkpoint End
+  hosts: oo_all_hosts
+  gather_facts: false
+  tasks:
+  - name: Set Hosted install 'Complete'
+    set_stats:
+      data:
+        installer_phase_hosted: "Complete"
+      aggregate: false
