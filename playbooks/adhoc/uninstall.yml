@@ -22,6 +22,29 @@
   - set_fact:
       is_containerized: "{{ is_atomic or containerized | default(false) | bool }}"
 
+# Uninstall Contrail SDN
+- hosts: masters
+  become: yes
+  tasks:
+  - name: Uninstall Contrail SDN
+    when: openshift_use_contrail | default(false) | bool
+    command: oc delete -f /tmp/contrail-installer.yaml
+    run_once: True
+    ignore_errors: yes
+
+  - name: Delete Contrail mountpaths
+    when: openshift_use_contrail | default(false) | bool
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /var/lib/contrail
+    - /var/lib/configdb
+    - /var/lib/analyticsdb
+    - /var/lib/config_zookeeper_data
+    - /var/lib/analyticsdb_zookeeper_data
+  tags: contrail
+
 # Stop services on all hosts prior to removing files.
 - hosts: nodes
   become: yes
@@ -539,3 +562,17 @@
     # - /etc/systemd/system/haproxy.service.d
     - /etc/systemd/system/haproxy.service.d/limits.conf
     - /etc/systemd/system/haproxy.service
+
+# Remove Contrail vRouter
+- hosts: nodes
+  become: yes
+  tasks:
+  - name: Find nodes which has vRouter
+    shell: "ip addr | grep -i vhost0 | cat"
+    register: vhost_register
+
+  - name: Reboot vRouter nodes
+    shell: /sbin/shutdown -r +1
+    when: vhost_register.stdout.find('vhost0') != -1
+    ignore_errors: yes
+  tags: contrail

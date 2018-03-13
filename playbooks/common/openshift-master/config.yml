@@ -206,6 +206,8 @@
     when: openshift_use_nuage | default(false) | bool
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
+  - role: contrail_master
+    when: openshift_use_contrail | default(false) | bool
   tasks:
   - include_role:
       name: kuryr

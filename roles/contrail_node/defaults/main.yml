@@ -1,0 +1,3 @@
+---
+contrail_os_release: redhat7
+cni_version: v0.5.2

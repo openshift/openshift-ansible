@@ -1,0 +1,4 @@
+---
+contrail_os_release: redhat7
+analyticsdb_min_diskgb: 50
+configdb_min_diskgb: 25

@@ -25,6 +25,8 @@ r_openshift_loadbalancer_os_firewall_allow:
 - service: nuage mon
   port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
   cond: "{{ r_openshift_lb_use_nuage | bool }}"
+- service: contrail webui
+  port: "8143/tcp"
 
 # NOTE
 # r_openshift_lb_use_nuage_default may be defined external to this role.
