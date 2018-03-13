@@ -235,6 +235,11 @@ several ports (each port will be attached to an OpenShift pod) would be created
 at once. This will speed up individual pod creation at the cost of having a few
 extra ports that are not currently in use.
 
+For more information on the Kuryr port pools, check out the Kuryr
+documentation:
+
+https://docs.openstack.org/kuryr-kubernetes/latest/installation/ports-pool.html
+
 To enable this feature, you must set:
 
 ```yaml
