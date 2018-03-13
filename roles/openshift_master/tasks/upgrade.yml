@@ -49,4 +49,4 @@
     path: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: 'projectConfig.defaultNodeSelector'
     value: '{{ hostvars[groups.oo_first_master.0].l_osm_default_node_selector }}'
-  when: openshift_upgrade_target | version_compare('3.9' '>=')
+  when: openshift_upgrade_target | version_compare('3.9', '>=')
