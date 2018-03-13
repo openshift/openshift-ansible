@@ -104,6 +104,12 @@
     path: "/var/lib/dockershim/sandbox/"
     state: absent
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1518912
+- name: Clean up IPAM data
+  file:
+    path: "/var/lib/cni/networks/openshift-sdn/"
+    state: absent
+
 - name: Upgrade openvswitch
   package:
     name: openvswitch
@@ -185,3 +191,4 @@
 
 - include_role:
     name: openshift_node_dnsmasq
+  static: true

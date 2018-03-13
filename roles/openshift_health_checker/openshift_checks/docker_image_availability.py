@@ -40,7 +40,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     # to look for images available remotely without waiting to pull them.
     dependencies = ["python-docker-py", "skopeo"]
     # command for checking if remote registries have an image, without docker pull
-    skopeo_command = "timeout 10 skopeo inspect --tls-verify={tls} {creds} docker://{registry}/{image}"
+    skopeo_command = "{proxyvars} timeout 10 skopeo inspect --tls-verify={tls} {creds} docker://{registry}/{image}"
     skopeo_example_command = "skopeo inspect [--tls-verify=false] [--creds=<user>:<pass>] docker://<registry>/<image>"
 
     def __init__(self, *args, **kwargs):
@@ -56,7 +56,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # ordered list of registries (according to inventory vars) that docker will try for unscoped images
         regs = self.ensure_list("openshift_docker_additional_registries")
         # currently one of these registries is added whether the user wants it or not.
-        deployment_type = self.get_var("openshift_deployment_type")
+        deployment_type = self.get_var("openshift_deployment_type", default="")
         if deployment_type == "origin" and "docker.io" not in regs:
             regs.append("docker.io")
         elif deployment_type == 'openshift-enterprise' and "registry.access.redhat.com" not in regs:
@@ -64,7 +64,9 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         self.registries["configured"] = regs
 
         # for the oreg_url registry there may be credentials specified
-        components = self.get_var("oreg_url", default="").split('/')
+        oreg_url = self.get_var("oreg_url", default="")
+        oreg_url = self.template_var(oreg_url)
+        components = oreg_url.split('/')
         self.registries["oreg"] = "" if len(components) < 3 else components[0]
 
         # Retrieve and template registry credentials, if provided
@@ -72,13 +74,21 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         oreg_auth_user = self.get_var('oreg_auth_user', default='')
         oreg_auth_password = self.get_var('oreg_auth_password', default='')
         if oreg_auth_user != '' and oreg_auth_password != '':
-            if self._templar is not None:
-                oreg_auth_user = self._templar.template(oreg_auth_user)
-                oreg_auth_password = self._templar.template(oreg_auth_password)
-            self.skopeo_command_creds = "--creds={}:{}".format(quote(oreg_auth_user), quote(oreg_auth_password))
+            oreg_auth_user = self.template_var(oreg_auth_user)
+            oreg_auth_password = self.template_var(oreg_auth_password)
+            self.skopeo_command_creds = quote("--creds={}:{}".format(oreg_auth_user, oreg_auth_password))
 
         # record whether we could reach a registry or not (and remember results)
         self.reachable_registries = {}
+
+        # take note of any proxy settings needed
+        proxies = []
+        for var in ['http_proxy', 'https_proxy', 'no_proxy']:
+            # ansible vars are openshift_http_proxy, openshift_https_proxy, openshift_no_proxy
+            value = self.get_var("openshift_" + var, default=None)
+            if value:
+                proxies.append(var.upper() + "=" + quote(self.template_var(value)))
+        self.skopeo_proxy_vars = " ".join(proxies)
 
     def is_active(self):
         """Skip hosts with unsupported deployment types."""
@@ -153,6 +163,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         # template for images that run on top of OpenShift
         image_url = "{}/{}-{}:{}".format(image_info["namespace"], image_info["name"], "${component}", "${version}")
         image_url = self.get_var("oreg_url", default="") or image_url
+        image_url = self.template_var(image_url)
         if 'oo_nodes_to_config' in host_groups:
             for suffix in NODE_IMAGE_SUFFIXES:
                 required.add(image_url.replace("${component}", suffix).replace("${version}", image_tag))
@@ -160,16 +171,21 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 required.add(self._registry_console_image(image_tag, image_info))
 
         # images for containerized components
-        if self.get_var("openshift", "common", "is_containerized"):
-            components = set()
+        def add_var_or_default_img(var_name, comp_name):
+            """Returns: default image from comp_name, overridden by var_name in task_vars"""
+            default = "{}/{}:{}".format(image_info["namespace"], comp_name, image_tag)
+            required.add(self.template_var(self.get_var(var_name, default=default)))
+
+        if self.get_var("openshift", "common", "is_containerized", convert=bool):
             if 'oo_nodes_to_config' in host_groups:
-                components.update(["node", "openvswitch"])
+                add_var_or_default_img("osn_image", "node")
+                add_var_or_default_img("osn_ovs_image", "openvswitch")
             if 'oo_masters_to_config' in host_groups:  # name is "origin" or "ose"
-                components.add(image_info["name"])
-            for component in components:
-                required.add("{}/{}:{}".format(image_info["namespace"], component, image_tag))
-            if 'oo_etcd_to_config' in host_groups:  # special case, note it is the same for origin/enterprise
-                required.add("registry.access.redhat.com/rhel7/etcd")  # and no image tag
+                add_var_or_default_img("osm_image", image_info["name"])
+            if 'oo_etcd_to_config' in host_groups:
+                # special case, note default is the same for origin/enterprise and has no image tag
+                etcd_img = self.get_var("osm_etcd_image", default="registry.access.redhat.com/rhel7/etcd")
+                required.add(self.template_var(etcd_img))
 
         return required
 
@@ -247,11 +263,18 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             if not self.reachable_registries[registry]:
                 continue  # do not keep trying unreachable registries
 
-            args = dict(registry=registry, image=image)
-            args["tls"] = "false" if registry in self.registries["insecure"] else "true"
-            args["creds"] = self.skopeo_command_creds if registry == self.registries["oreg"] else ""
+            args = dict(
+                proxyvars=self.skopeo_proxy_vars,
+                tls="false" if registry in self.registries["insecure"] else "true",
+                creds=self.skopeo_command_creds if registry == self.registries["oreg"] else "",
+                registry=quote(registry),
+                image=quote(image),
+            )
 
-            result = self.execute_module_with_retries("command", {"_raw_params": self.skopeo_command.format(**args)})
+            result = self.execute_module_with_retries("command", {
+                "_uses_shell": True,
+                "_raw_params": self.skopeo_command.format(**args),
+            })
             if result.get("rc", 0) == 0 and not result.get("failed"):
                 return True
             if result.get("rc") == 124:  # RC 124 == timed out; mark unreachable
@@ -261,6 +284,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
     def connect_to_registry(self, registry):
         """Use ansible wait_for module to test connectivity from host to registry. Returns bool."""
+        if self.skopeo_proxy_vars != "":
+            # assume we can't connect directly; just waive the test
+            return True
+
         # test a simple TCP connection
         host, _, port = registry.partition(":")
         port = port or 443

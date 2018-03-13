@@ -7,6 +7,18 @@ r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }
 openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
 openshift_service_type: "{{ 'origin' if openshift_deployment_type == 'origin' else 'atomic-openshift' }}"
 
+openshift_node_syscon_auth_mounts_l:
+- type: bind
+  source: "{{ oreg_auth_credentials_path }}"
+  destination: "/root/.docker"
+  options:
+  - ro
+  - bind
+
+# If we need to add new mounts in the future, or the user wants to mount data.
+# This should be in the same format as auth_mounts_l above.
+openshift_node_syscon_add_mounts_l: []
+
 openshift_image_tag: ''
 
 default_r_openshift_node_image_prep_packages:
@@ -35,6 +47,7 @@ default_r_openshift_node_image_prep_packages:
 - yum-utils
 # gluster
 - glusterfs-fuse
+- device-mapper-multipath
 # nfs
 - nfs-utils
 - flannel

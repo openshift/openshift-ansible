@@ -537,7 +537,7 @@ def oo_parse_heat_stack_outputs(data):
     return revamped_outputs
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-nested-blocks
 def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostnames):
     """ Parses names from list of certificate hashes.
 
@@ -583,8 +583,9 @@ def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostname
             certificate['names'].append(str(cert.get_subject().commonName.decode()))
             for i in range(cert.get_extension_count()):
                 if cert.get_extension(i).get_short_name() == 'subjectAltName':
-                    for name in str(cert.get_extension(i)).replace('DNS:', '').split(', '):
-                        certificate['names'].append(name)
+                    for name in str(cert.get_extension(i)).split(', '):
+                        if 'DNS:' in name:
+                            certificate['names'].append(name.replace('DNS:', ''))
         except Exception:
             raise errors.AnsibleFilterError(("|failed to parse certificate '%s', " % certificate['certfile'] +
                                              "please specify certificate names in host inventory"))
@@ -1192,6 +1193,18 @@ that result to this filter plugin.
     return secret_name
 
 
+def oo_l_of_d_to_csv(input_list):
+    """Map a list of dictionaries, input_list, into a csv string
+    of json values.
+
+    Example input:
+    [{'var1': 'val1', 'var2': 'val2'}, {'var1': 'val3', 'var2': 'val4'}]
+    Example output:
+    u'{"var1": "val1", "var2": "val2"},{"var1": "val3", "var2": "val4"}'
+    """
+    return ','.join(json.dumps(x) for x in input_list)
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -1236,4 +1249,5 @@ class FilterModule(object):
             "oo_contains_rule": oo_contains_rule,
             "oo_selector_to_string_list": oo_selector_to_string_list,
             "oo_filter_sa_secrets": oo_filter_sa_secrets,
+            "oo_l_of_d_to_csv": oo_l_of_d_to_csv
         }

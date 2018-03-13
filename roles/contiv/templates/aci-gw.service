@@ -3,8 +3,11 @@ Description=Contiv ACI gw
 After=auditd.service systemd-user-sessions.service time-sync.target {{ openshift.docker.service_name }}.service
 
 [Service]
-ExecStart={{ bin_dir }}/aci_gw.sh start
-ExecStop={{ bin_dir }}/aci_gw.sh stop
+ExecStart={{ contiv_bin_dir }}/aci_gw.sh start
+ExecStop={{ contiv_bin_dir }}/aci_gw.sh stop
 KillMode=control-group
-Restart=on-failure
+Restart=always
 RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

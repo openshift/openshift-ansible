@@ -36,7 +36,7 @@ masterClientConnectionOverrides:
   burst: 200
   qps: 100
 {% endif %}
-masterKubeConfig: system:node:{{ openshift.common.hostname }}.kubeconfig
+masterKubeConfig: system:node:{{ openshift.common.hostname | lower }}.kubeconfig
 {% if openshift_node_use_openshift_sdn | bool %}
 networkPluginName: {{ openshift_node_sdn_network_plugin_name }}
 {% endif %}

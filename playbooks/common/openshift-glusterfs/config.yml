@@ -17,11 +17,13 @@
       tasks_from: firewall.yml
     when:
     - openshift_storage_glusterfs_is_native | default(True) | bool
+    static: true
   - include_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:
     - openshift_storage_glusterfs_is_native | default(True) | bool
+    static: true
 
 - name: Open firewall ports for GlusterFS registry nodes
   hosts: glusterfs_registry
@@ -31,11 +33,13 @@
       tasks_from: firewall.yml
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
+    static: true
   - include_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
+    static: true
 
 - name: Configure GlusterFS
   hosts: oo_first_master
@@ -44,6 +48,7 @@
     include_role:
       name: openshift_storage_glusterfs
     when: groups.oo_glusterfs_to_config | default([]) | count > 0
+    static: true
 
 - name: GlusterFS Install Checkpoint End
   hosts: oo_all_hosts

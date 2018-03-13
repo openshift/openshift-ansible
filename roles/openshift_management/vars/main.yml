@@ -30,14 +30,18 @@ __openshift_management_db_parameters:
   - DATABASE_PORT
   - DATABASE_NAME
 
-# # Commented out until we can support both CFME and MIQ
-# # openshift_management_flavor: "{{ 'cloudforms' if openshift_deployment_type == 'openshift-enterprise' else 'manageiq' }}"
-#openshift_management_flavor: cloudforms
-openshift_management_flavor: manageiq
-# TODO: Make this conditional as well based on the prior variable
-# # openshift_management_flavor_short: "{{ 'cfme' if openshift_deployment_type == 'openshift-enterprise' else 'miq' }}"
-# openshift_management_flavor_short: cfme
-openshift_management_flavor_short: miq
+__openshift_management_flavors:
+  miq:
+    short: miq
+    long: manageiq
+  cfme:
+    short: cfme
+    long: cloudforms
+
+__openshift_management_flavor: "{{ __openshift_management_flavors[openshift_management_app_template.split('-')[0]]['long'] }}"
+__openshift_management_flavor_short: "{{ __openshift_management_flavors[openshift_management_app_template.split('-')[0]]['short'] }}"
+
+__openshift_management_use_ext_db: "{{ true if 'ext-db' in openshift_management_app_template else false }}"
 
 ######################################################################
 # ACCOUNTING

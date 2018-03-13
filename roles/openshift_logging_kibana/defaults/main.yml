@@ -18,6 +18,9 @@ openshift_logging_kibana_es_port: 9200
 openshift_logging_kibana_replicas: 1
 openshift_logging_kibana_edge_term_policy: Redirect
 
+# map of env. var to add to the kibana deploymentconfig
+openshift_logging_kibana_env_vars: {}
+
 # this is used to determine if this is an operations deployment or a non-ops deployment
 # simply used for naming purposes
 openshift_logging_kibana_ops_deployment: false

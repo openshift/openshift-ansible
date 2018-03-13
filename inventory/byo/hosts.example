@@ -819,12 +819,12 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # See: https://github.com/nickhammond/ansible-logrotate
 #logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n/var/log/messages\n/var/log/secure\n/var/log/spooler\n", "options": ["daily", "rotate 7", "compress", "sharedscripts", "missingok"], "scripts": {"postrotate": "/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true"}}]
 
-# openshift-ansible will wait indefinitely for your input when it detects that the
+# The OpenShift-Ansible installer will fail when it detects that the
 # value of openshift_hostname resolves to an IP address not bound to any local
 # interfaces. This mis-configuration is problematic for any pod leveraging host
 # networking and liveness or readiness probes.
-# Setting this variable to true will override that check.
-#openshift_override_hostname_check=true
+# Setting this variable to false will override that check.
+#openshift_hostname_check=true
 
 # openshift_use_dnsmasq is deprecated.  This must be true, or installs will fail
 # in versions >= 3.6
