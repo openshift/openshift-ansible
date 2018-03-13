@@ -11,10 +11,10 @@ else
   target_branch=$PAPR_PULL_TARGET_BRANCH
 fi
 if [[ "${target_branch}" =~ ^release- ]]; then
-  target_branch="${target_branch/release-/v}"
+  target_branch="${target_branch/release-/}"
 else
   dnf install -y sed
-  target_branch="$( git describe | sed 's/^openshift-ansible-\([0-9]*\.[0-9]*\)\.[0-9]*-.*/v\1/' )"
+  target_branch="$( git describe | sed 's/^openshift-ansible-\([0-9]*\.[0-9]*\)\.[0-9]*-.*/\1/' )"
 fi
 
 pip install -r requirements.txt
@@ -35,7 +35,7 @@ trap upload_journals ERR
 ansible-playbook -vvv -i .papr.inventory playbooks/openshift-node/private/image_prep.yml
 
 # run the actual installer
-ansible-playbook -vvv -i .papr.inventory playbooks/deploy_cluster.yml -e "openshift_release=${target_release}"
+ansible-playbook -vvv -i .papr.inventory playbooks/deploy_cluster.yml -e "openshift_release=${target_branch}"
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132

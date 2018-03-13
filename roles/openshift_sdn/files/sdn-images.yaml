@@ -4,6 +4,7 @@ metadata:
   name: node:v3.9
   namespace: openshift-sdn
 tag:
+  reference: true
   from:
     kind: DockerImage
     name: openshift/node:v3.9

@@ -7,17 +7,19 @@ openshift_master_debug_level: "{{ debug_level | default(2) }}"
 r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-osm_image_default_dict:
-  origin: 'openshift/origin'
-  openshift-enterprise: 'openshift3/ose'
-osm_image_default: "{{ osm_image_default_dict[openshift_deployment_type] }}"
-osm_image: "{{ osm_image_default }}"
-
-l_openshift_master_images_dict:
+l_openshift_images_dict:
   origin: 'openshift/origin-${component}:${version}'
   openshift-enterprise: 'openshift3/ose-${component}:${version}'
-l_osm_registry_url_default: "{{ l_openshift_master_images_dict[openshift_deployment_type] }}"
-l_osm_registry_url: "{{ oreg_url_master | default(oreg_url) | default(l_osm_registry_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
+l_osm_registry_url_default: "{{ l_openshift_images_dict[openshift_deployment_type] }}"
+l_os_registry_url: "{{ oreg_url_master | default(oreg_url) | default(l_osm_registry_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
+
+l_openshift_prefix_dict:
+  origin: 'origin-${component}'
+  openshift-enterprise: 'ose-${component}'
+l_os_prefix: "{{ l_openshift_prefix_dict[openshift_deployment_type] }}"
+l_os_prefix_base: "{{ l_openshift_prefix_dict[openshift_deployment_type] | regex_replace('-${component}' | regex_escape, '') }}"
+# TODO: we should publish oreg_url component=master
+osm_image: "{{ l_os_registry_url | regex_replace(l_os_prefix | regex_escape, l_os_prefix_base) }}"
 
 system_images_registry_dict:
   openshift-enterprise: "registry.access.redhat.com"
