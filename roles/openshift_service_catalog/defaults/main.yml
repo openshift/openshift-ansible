@@ -1,6 +1,6 @@
 ---
 openshift_service_catalog_remove: false
-openshift_service_catalog_nodeselector: {"openshift-infra": "apiserver"}
+openshift_service_catalog_nodeselector: {"node-role.kubernetes.io/master":"true"}
 openshift_service_catalog_async_bindings_enabled: false
 
 openshift_use_openshift_sdn: True
