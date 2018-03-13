@@ -1,6 +1,7 @@
 ---
 
 - delegate_to: '{{ openshift_master_host }}'
+  run_once: true
   block:
     - name: Retrieve non-infra, non-master nodes that are not yet labeled compute
       oc_obj:
