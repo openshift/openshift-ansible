@@ -29,4 +29,4 @@ ExecStart=/usr/bin/docker run --net=host --privileged \
 ExecStop=-/usr/bin/docker stop calico-node
 
 [Install]
-WantedBy=multi-user.target
+WantedBy={{ openshift.docker.service_name }}.service
