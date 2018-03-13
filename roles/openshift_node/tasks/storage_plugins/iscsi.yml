@@ -19,6 +19,7 @@
   with_items:
     - multipathd
     - rpcbind
+    - iscsid
 
 - name: Template multipath configuration
   template:
