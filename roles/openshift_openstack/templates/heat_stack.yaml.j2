@@ -6,6 +6,7 @@ parameters:
 
 outputs:
 
+{% if openshift_openstack_resolve_heat_outputs|default(True)|bool %}
   etcd_names:
     description: Name of the etcds
     value: { get_attr: [ etcd, name ] }
@@ -53,6 +54,7 @@ outputs:
   infra_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
+{% endif %}
 
   public_api_ip:
     description: IP address for the API/UI endpoint

@@ -163,6 +163,9 @@ openshift_openstack_pool_end: "192.168.99.254"
 # hardcoded to `openshift`.
 ansible_user: openshift
 
+# Resolve heat stack outputs. Disabling outputs helps stack scalability. (default: True)
+#openshift_openstack_resolve_heat_outputs: True
+
 # # Use a single security group for a cluster (default: false)
 #openshift_openstack_flat_secgrp: false
 
