@@ -183,6 +183,19 @@ the Kuryr options. The following parameters should be uncommented in
 * `openshift_hosted_manage_registry`
 * `kuryr_openstack_public_subnet_id` Set to uuid of the public subnet.
 
+And if you also want to enable the ports pooling options, as well as
+preloading them, you should uncomment and set the next:
+
+* `kuryr_openstack_enable_pools: True`
+* `kuryr_openstack_pool_max: 0`
+* `kuryr_openstack_pool_min: 1`
+* `kuryr_openstack_pool_batch: 5`
+* `kuryr_openstack_pool_update_frequency: 60`
+* `openshift_kuryr_precreate_subports: 5`
+
+Note in the last variable you specify the number of subports that will
+be created per trunk port, i.e., per pool.
+
 
 ## Multi-Master Configuration
 
