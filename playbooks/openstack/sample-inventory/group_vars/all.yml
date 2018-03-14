@@ -177,11 +177,15 @@ ansible_user: openshift
 # # OpenShift node labels
 # # - in order to customise node labels for app and/or infra group, set the
 # #   openshift_openstack_cluster_node_labels variable
+# # - to enable the multi-pool driver support at Kuryr the driver for the pod
+#  #  pod vif need to be added as a node label
 #openshift_openstack_cluster_node_labels:
 #  app:
 #    region: primary
+#    pod_vif: nested-vlan
 #  infra:
 #    region: infra
+#    pod_vif: nested-vlan
 
 ## cloud config
 openshift_openstack_disable_root: true

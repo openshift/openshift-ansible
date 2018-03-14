@@ -285,6 +285,20 @@ preloading them, you should uncomment and set the next:
 Note in the last variable you specify the number of subports that will
 be created per trunk port, i.e., per pool.
 
+In order to enable the kuryr `multi-pool` driver support, we need to tag
+the nodes with their corresponding `pod_vif` labels so that the right kuryr
+pool driver is used for each VM/node. To do that, uncomment:
+
+```
+openshift_openstack_cluster_node_labels:
+  app:
+    region: primary
+    pod_vif: nested-vlan
+  infra:
+    region: infra
+    pod_vif: nested-vlan
+```
+
 
 ## Multi-Master Configuration
 
