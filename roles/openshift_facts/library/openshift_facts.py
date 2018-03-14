@@ -1066,6 +1066,17 @@ def set_container_facts_if_unset(facts):
     return facts
 
 
+def pop_obsolete_local_facts(local_facts):
+    """Remove unused keys from local_facts"""
+    keys_to_remove = {
+        'master': ('etcd_port',)
+    }
+    for role in keys_to_remove:
+        if role in local_facts:
+            for key in keys_to_remove[role]:
+                local_facts[role].pop(key, None)
+
+
 class OpenShiftFactsInternalError(Exception):
     """Origin Facts Error"""
     pass
@@ -1330,6 +1341,7 @@ class OpenShiftFacts(object):
                                       additive_facts_to_overwrite)
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
+        pop_obsolete_local_facts(new_local_facts)
 
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)
