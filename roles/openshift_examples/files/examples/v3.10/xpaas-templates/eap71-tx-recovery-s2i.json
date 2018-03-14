@@ -9,7 +9,7 @@
             "openshift.io/display-name": "JBoss EAP 7.1 (tx recovery)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Enterprise Application Server 7.1 based application, including a build configuration, application deployment configuration and insecure communication using http.  The template also demonstrates how to enable transaction recovery on scale down of application pods.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Enterprise Application Server 7.1 based application, including a build configuration, application deployment configuration and insecure communication using http.  The template also demonstrates how to enable automated transaction recovery on scale down of application pods.  Automated transaction recovery is currently Technology Preview.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
