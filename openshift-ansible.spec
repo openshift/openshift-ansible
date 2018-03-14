@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.4.0%{?dist}
+Release:        0.6.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,100 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 14 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.6.0
+- Bug 1548541- Conditional for applying defaultNodeSelector now valid
+  (fabian@fabianism.us)
+- Add support to pre-create subports at each trunk (ltomasbo@redhat.com)
+- Fix missing slash in oreg_host (rteague@redhat.com)
+- [RHDM-354] - Add RHDM 7.0 GA templates and image streams to Openshift service
+  catalog (fspolti@redhat.com)
+- Fix references to oc client (mgugino@redhat.com)
+- Enable epel-testing repo for ansible-2.4.3 until it goes live
+  (sdodson@redhat.com)
+- GlusterFS: Add HEKETI_IGNORE_STALE_OPERATIONS to templates
+  (jarrpa@redhat.com)
+- Replace ${version} with openshift_image_tag (ccoleman@redhat.com)
+- Update f27-atomic build to pull images (ccoleman@redhat.com)
+- Use internalRegistryHostname when bootstrapping (ccoleman@redhat.com)
+- In master bootstrapping mode, use the new openshift_control_plane role
+  (ccoleman@redhat.com)
+- Add a local bootstrap-node-config.yml on all bootstrap nodes
+  (ccoleman@redhat.com)
+- Switch to bootstrap script as a default var (ccoleman@redhat.com)
+- Prepare the node for dynamic bootstrapping (ccoleman@redhat.com)
+- Use an etcd static pod when master bootstrapping is set (ccoleman@redhat.com)
+- Add new openshift_control_plane and openshift_sdn roles (ccoleman@redhat.com)
+- Changing python regex method from match to search due to variable content
+  structure (ewolinet@redhat.com)
+- Adding missed line change (ewolinet@redhat.com)
+- Ensure that the aggregator is configured during all control plane upgrades
+  (sdodson@redhat.com)
+- Correctly escape the variable value for regex searching when building patch
+  (ewolinet@redhat.com)
+- [grafana] Use service account token instead of hardcoded user
+  (pep@redhat.com)
+- [grafana] Fix wrong references to service account (pep@redhat.com)
+- Revert delete tsb upgrade (mgugino@redhat.com)
+- crio: Fixup docker SELinux permissions (mrunalp@gmail.com)
+- GlusterFS: Don't copy non-existant topology file (jarrpa@redhat.com)
+- Require Ansible 2.4.3 (rteague@redhat.com)
+- Update roles and playbooks to split cri-o install types (smilner@redhat.com)
+- openshift_node: Remove hardcoded cri-o node labels (smilner@redhat.com)
+- docker_gc: map the r_docker_gc_node_selectors to pairs (vrutkovs@redhat.com)
+- [wip] system containers: ensure Atomic won't reset permissions for
+  etcd_data_dir (vrutkovs@redhat.com)
+- docker-gc: use openshift_client_binary to support Atomic
+  (vrutkovs@redhat.com)
+- Bug 1548641- upgrade now properly sets labels and selectors
+  (fabian@fabianism.us)
+- updated uninstall section (tzumainn@redhat.com)
+- re-formatted cinder sections (tzumainn@redhat.com)
+- minor formatting (tzumainn@redhat.com)
+- updated DNS section to match updated formatting; cleaned up openstack
+  configuration section (tzumainn@redhat.com)
+- removed dangling link to scale documenation (tzumainn@redhat.com)
+- Added subsection regarding OS-specific dependencies (tzumainn@redhat.com)
+- remove dangling reference to control-host-image (tzumainn@redhat.com)
+- Add section about OPENSHIFT_CLUSTER env variable (tzumainn@redhat.com)
+- fixed link (tzumainn@redhat.com)
+- Separated post-install doc from README; additional cleanup
+  (tzumainn@redhat.com)
+- Re-organized OpenStack documentation (tzumainn@redhat.com)
+- TSB upgrade remove and reinstall (mgugino@redhat.com)
+- Add .default to no_proxy list for ASB. (derekwhatley@gmail.com)
+- Updating how the whitelist works -- changing from removing the lines which
+  can cause issues when patching lines near the whitelist line to changing the
+  current source line to match the new souce line (ewolinet@redhat.com)
+- Use variables for docker_gc image (rteague@redhat.com)
+- Remove force cache during node upgrade install (mgugino@redhat.com)
+- Bug 1550148 - Don't use undefined openshift_version in
+  openshift_sanitize_inventory (spadgett@redhat.com)
+- Refactor openshift.common.deployment_type (mgugino@redhat.com)
+- firewall: allow access to DNS for flannel network (vrutkovs@redhat.com)
+- Update curator to use k8s cronjob (jkarasek@redhat.com)
+- Remove unused openshift_upgrade_config (mgugino@redhat.com)
+- Convert calico to self-hosted install (djosborne10@gmail.com)
+- Switch the default network mode to ovs-networkpolicy (ccoleman@redhat.com)
+- Allow rcpbind for CNS block in cns-secgrp (openshift_openstack).
+  (jmencak@redhat.com)
+- Change default grafana ns to openshift-grafana (pep@redhat.com)
+- Only run no_log on task that scrapes all inventory variables
+  (sdodson@redhat.com)
+- Bug 1549220 - configmap still exist after running uninstall playbook for
+  logging (nhosoi@redhat.com)
+- Fix grafana role node selector check (pep@redhat.com)
+- cri-o: configure oci-umount with CRI-O paths (gscrivan@redhat.com)
+- added note about any_errors_fatal for ansible.cfg (tzumainn@redhat.com)
+- add missing evaluate_groups (tzumainn@redhat.com)
+- change to better coding style (wmeng@redhat.com)
+- removed cleanup comment (tzumainn@redhat.com)
+- corrected rhel unsubscribe role (tzumainn@redhat.com)
+- Add openstack uninstall playbook (tzumainn@redhat.com)
+- add any_errors_fatal to openstack install playbook (tzumainn@redhat.com)
+- add any_errors_fatal to openstack playbooks (tzumainn@redhat.com)
+- cockpit-ui: Make it optional (sjr@redhat.com)
+- only annotate ops project for ops kibana when using ops (jcantril@redhat.com)
+
 * Wed Mar 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.4.0
 - During master upgrade reset loopback config (sdodson@redhat.com)
 
