@@ -138,9 +138,13 @@
   delay: 10
   retries: "{{ (grafana_timeout | int / 10) | int }}"
 
-- name: Get the prometheus SA
+- name: Get the prometheus SA token
   shell: oc sa get-token {{ grafana_prometheus_serviceaccount }} -n {{ grafana_prometheus_namespace }}
   register: prometheus_sa_token
+
+- name: Get the grafana SA token
+  shell: oc sa get-token {{ grafana_serviceaccount_name }} -n {{ grafana_namespace }}
+  register: grafana_sa_token
 
 - name: Get prometheus route
   oc_route:
@@ -149,7 +153,7 @@
     namespace: "{{ grafana_prometheus_namespace }}"
   register: prometheus_route
 
-- name: Get prometheus route
+- name: Get grafana route
   oc_route:
     state: list
     name: grafana
@@ -164,8 +168,8 @@
 - name: Add new datasource to grafana
   uri:
     url: "{{ grafana_route }}/api/datasources"
-    user: admin
-    password: admin
+    user: "{{ grafana_sa_token.stdout }}"
+    force_basic_auth: true
     method: POST
     body: '{{ payload_data }}'
     body_format: json
@@ -210,8 +214,8 @@
 - name: Add openshift dashboard
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
-    user: admin
-    password: admin
+    user: "{{ grafana_sa_token.stdout }}"
+    force_basic_auth: true
     method: POST
     body: '{{ slurpfile["content"] | b64decode }}'
     body_format: json
@@ -227,8 +231,8 @@
 - name: Add node exporter dashboard
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
-    user: admin
-    password: admin
+    user: "{{ grafana_sa_token.stdout }}"
+    force_basic_auth: true
     method: POST
     body: '{{ slurpfile["content"] | b64decode }}'
     body_format: json
