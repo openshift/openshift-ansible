@@ -182,8 +182,10 @@ Kuryr has a few additional requirements on the underlying OpenStack deployment:
 
 * The Trunk Ports extension must be enabled:
   * https://docs.openstack.org/neutron/pike/admin/config-trunking.html
+  * Make sure to restart `neutron-server` after you change the configuration
 * Neutron must use the Open vSwitch firewall driver:
   * https://docs.openstack.org/neutron/pike/admin/config-ovsfwdriver.html
+  * Make sure to restart `neutron-openvswitch-agent` after the config change
 * A Load Balancer as a Service (implementing LBaaS v2 API) must be available
   * Octavia is the only supported solution right now
   * You could try the native Neutron LBaaSv2 but it is deprecated and buggy
@@ -193,7 +195,7 @@ We recommend you use the Queens or newer release of OpenStack.
 
 ### Necessary Kuryr Options
 
-This is is the minimum you need to  set:
+This is is the minimum you need to set (in `group_vars/all.yml`):
 
 ```yaml
 openshift_use_kuryr: true
@@ -264,8 +266,8 @@ it manually afterwards. SSH to a master node and run this as root:
 oadm registry --config=/etc/origin/master/admin.kubeconfig --service-account=registry
 ```
 
-For more information, please follow the OpenShift documentation on the
-registry:
+For more information (e.g. how to use a specific storage backend), please
+follow the OpenShift documentation on the registry:
 
 https://docs.openshift.org/latest/install_config/registry/index.html
 
