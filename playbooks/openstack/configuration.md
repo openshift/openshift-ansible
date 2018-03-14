@@ -175,6 +175,7 @@ Kuryr is an SDN that uses OpenStack Neutron. This prevents the double overlay
 overhead one would get when running OpenShift on OpenStack using the default
 OpenShift SDN.
 
+https://docs.openstack.org/kuryr-kubernetes/latest/readme.html
 
 ### OpenStack Requirements
 
