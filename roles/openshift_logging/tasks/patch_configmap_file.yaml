@@ -15,27 +15,36 @@
 #                                we apply our generated patch to this file.
 # configmap_protected_lines  -- The list of variables to exclude from the diff
 
-- copy:
-    content: "{{ __configmap_output.results.results[0]['data'][configmap_current_file] }}"
-    dest: "{{ tempdir }}/current.yml"
-  when: configmap_current_file in __configmap_output.results.results[0]['data']
+- when:
+  - configmap_current_file in __configmap_output.results.results[0]['data']
+  block:
+  - copy:
+      content: "{{ __configmap_output.results.results[0]['data'][configmap_current_file] }}"
+      dest: "{{ tempdir }}/current.yml"
 
-- logging_patch:
-    original_file: "{{ tempdir }}/current.yml"
-    new_file: "{{ configmap_new_file }}"
-    whitelist: "{{ configmap_protected_lines | default([]) }}"
-  register: patch_output
-  when: configmap_current_file in __configmap_output.results.results[0]['data']
+  - logging_patch:
+      original_file: "{{ tempdir }}/current.yml"
+      new_file: "{{ configmap_new_file }}"
+      whitelist: "{{ configmap_protected_lines | default([]) }}"
+    register: patch_output
 
-- copy:
-    content: "{{ patch_output.raw_patch }}\n"
-    dest: "{{ tempdir }}/patch.patch"
-  when:
+- when:
   - patch_output.raw_patch is defined
   - patch_output.raw_patch | length > 0
+  block:
+  - slurp:
+      src: "{{ configmap_new_file }}"
+    register: new_file_slurp
 
-- command: >
-    patch --force --quiet -u "{{ configmap_new_file }}" "{{ tempdir }}/patch.patch"
-  when:
-  - patch_output.raw_patch is defined
-  - patch_output.raw_patch | length > 0
+  - local_action: copy content="{{ patch_output.raw_patch }}\n" dest={{ local_tmp.stdout }}/patch.patch
+    become: false
+
+  - local_action: copy content={{ new_file_slurp['content'] | b64decode }} dest={{ local_tmp.stdout }}/configmap_new_file
+    become: false
+
+  - local_action: command patch --force --quiet -u {{ local_tmp.stdout }}/configmap_new_file {{ local_tmp.stdout }}/patch.patch
+    become: false
+
+  - copy:
+      src: "{{ local_tmp.stdout }}/configmap_new_file"
+      dest: "{{ configmap_new_file }}"

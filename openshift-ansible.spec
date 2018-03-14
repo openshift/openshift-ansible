@@ -31,6 +31,7 @@ Requires:      java-1.8.0-openjdk-headless
 Requires:      httpd-tools
 Requires:      libselinux-python
 Requires:      python-passlib
+Requires:      patch
 
 %description
 Openshift and Atomic Enterprise Ansible
@@ -309,7 +310,7 @@ Atomic OpenShift Utilities includes
 - check for empty string in the installers deps task (john.sanda@gmail.com)
 
 * Fri Feb 23 2018 Justin Pierce <jupierce@redhat.com> 3.7.33-1
-- 
+-
 
 * Thu Feb 22 2018 Justin Pierce <jupierce@redhat.com> 3.7.32-1
 - bug 1547348. Annotate ops projects with an .operation prefix
@@ -453,7 +454,7 @@ Atomic OpenShift Utilities includes
   (bart.vanbos@kbc.be)
 
 * Mon Jan 08 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.22-1
-- 
+-
 
 * Mon Jan 08 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.21-1
 - Add origin- prefix to ASB image (fabian@fabianism.us)
@@ -462,13 +463,13 @@ Atomic OpenShift Utilities includes
 - [release-3.7] Migrate to static: true for include_role (sdodson@redhat.com)
 
 * Thu Jan 04 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.19-1
-- 
+-
 
 * Thu Jan 04 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.18-1
 - Add docker auth credentials to system container install (mgugino@redhat.com)
 
 * Mon Jan 01 2018 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.17-1
-- 
+-
 
 * Thu Dec 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.16-1
 - Add CentOS-OpenShift-Origin37 repo template. (abutcher@redhat.com)
@@ -494,7 +495,7 @@ Atomic OpenShift Utilities includes
 - Fix oreg_auth_credentials_create register var (mgugino@redhat.com)
 
 * Tue Dec 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.13-1
-- 
+-
 
 * Mon Dec 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.12-1
 - storage_glusterfs: fix typo (lmeyer@redhat.com)
@@ -551,7 +552,7 @@ Atomic OpenShift Utilities includes
 - GlusterFS: Specify resource requests (jarrpa@redhat.com)
 
 * Wed Nov 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.9-1
-- 
+-
 
 * Tue Nov 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.8-1
 - Allow disabling authorization migration check (sdodson@redhat.com)
@@ -562,16 +563,16 @@ Atomic OpenShift Utilities includes
   (kwoodson@redhat.com)
 
 * Sat Nov 11 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.7-1
-- 
+-
 
 * Fri Nov 10 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.6-1
-- 
+-
 
 * Thu Nov 09 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.5-1
-- 
+-
 
 * Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.4-1
-- 
+-
 
 * Wed Nov 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.3-1
 - Adding configuration for keeping transient namespace on error.
@@ -741,10 +742,10 @@ Atomic OpenShift Utilities includes
 - GlusterFS: Remove image option from heketi command (jarrpa@redhat.com)
 
 * Mon Oct 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.187.0
-- 
+-
 
 * Sun Oct 29 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.186.0
-- 
+-
 
 * Sat Oct 28 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.185.0
 - bug 1506073. Lower cpu request for logging when it exceeds limit
@@ -774,7 +775,7 @@ Atomic OpenShift Utilities includes
 - Refactor health check playbooks (rteague@redhat.com)
 
 * Fri Oct 27 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.183.0
-- 
+-
 
 * Thu Oct 26 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.182.0
 - Fixing documentation for the cert_key_path variable name.
@@ -848,16 +849,16 @@ Atomic OpenShift Utilities includes
   (hansmi@vshn.ch)
 
 * Mon Oct 23 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.175.0
-- 
+-
 
 * Sun Oct 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.174.0
-- 
+-
 
 * Sun Oct 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.173.0
-- 
+-
 
 * Sun Oct 22 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.172.0
-- 
+-
 
 * Sat Oct 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.171.0
 - Use "requests" for CPU resources instead of limits
@@ -881,16 +882,16 @@ Atomic OpenShift Utilities includes
   (dymurray@redhat.com)
 
 * Fri Oct 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.168.0
-- 
+-
 
 * Thu Oct 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.167.0
-- 
+-
 
 * Thu Oct 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.166.0
-- 
+-
 
 * Thu Oct 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.165.0
-- 
+-
 
 * Thu Oct 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.164.0
 - Change to service-signer.crt for template_service_broker CA_BUNDLE
@@ -913,7 +914,7 @@ Atomic OpenShift Utilities includes
 - Remove unneeded master config updates during upgrades (mgugino@redhat.com)
 
 * Wed Oct 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.161.0
-- 
+-
 
 * Wed Oct 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.160.0
 - Fix pvc selector default to be empty dict instead of string
@@ -955,16 +956,16 @@ Atomic OpenShift Utilities includes
   (jchaloup@redhat.com)
 
 * Sun Oct 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.155.0
-- 
+-
 
 * Sat Oct 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.154.0
-- 
+-
 
 * Fri Oct 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.153.0
 - default groups.oo_new_etcd_to_config to an empty list (jchaloup@redhat.com)
 
 * Fri Oct 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.152.0
-- 
+-
 
 * Fri Oct 13 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.151.0
 - updated dynamic provision section for openshift metrics to support storage
@@ -1373,7 +1374,7 @@ Atomic OpenShift Utilities includes
 - oc_atomic_container: support Skopeo output (gscrivan@redhat.com)
 
 * Tue Sep 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.125.0
-- 
+-
 
 * Tue Sep 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.124.0
 - Fix ansible_syntax check (rteague@redhat.com)
@@ -1400,7 +1401,7 @@ Atomic OpenShift Utilities includes
   (miciah.masters@gmail.com)
 
 * Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.123.0
-- 
+-
 
 * Wed Aug 30 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.122.0
 - Update openshift_hosted_routers example to be in ini format.
@@ -1462,10 +1463,10 @@ Atomic OpenShift Utilities includes
 - Add missing hostnames to registry cert (sdodson@redhat.com)
 
 * Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.115.0
-- 
+-
 
 * Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.114.0
-- 
+-
 
 * Fri Aug 25 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.113.0
 - openshift_version: enterprise accepts new style pre-release
@@ -1483,13 +1484,13 @@ Atomic OpenShift Utilities includes
 - Setup tuned profiles in /etc/tuned (jmencak@redhat.com)
 
 * Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.109.0
-- 
+-
 
 * Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.108.0
-- 
+-
 
 * Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.107.0
-- 
+-
 
 * Thu Aug 24 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.106.0
 - Add dotnet 2.0 to v3.6 (sdodson@redhat.com)
@@ -1526,13 +1527,13 @@ Atomic OpenShift Utilities includes
   (sdodson@redhat.com)
 
 * Sat Aug 19 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.103.0
-- 
+-
 
 * Fri Aug 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.102.0
-- 
+-
 
 * Fri Aug 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.101.0
-- 
+-
 
 * Fri Aug 18 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.7.0-0.100.0
 - Change memory requests and limits units (mak@redhat.com)
@@ -1831,13 +1832,13 @@ Atomic OpenShift Utilities includes
   (kwoodson@redhat.com)
 
 * Mon Jul 17 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.152-1
-- 
+-
 
 * Sun Jul 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.151-1
-- 
+-
 
 * Sun Jul 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.150-1
-- 
+-
 
 * Sat Jul 15 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.149-1
 - Config was missed before replace. (jkaur@redhat.com)
@@ -1860,7 +1861,7 @@ Atomic OpenShift Utilities includes
 - GlusterFS: Fix SSH-based heketi configuration (jarrpa@redhat.com)
 
 * Wed Jul 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.143-1
-- 
+-
 
 * Wed Jul 12 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.142-1
 - add scheduled pods check (jvallejo@redhat.com)
@@ -1885,7 +1886,7 @@ Atomic OpenShift Utilities includes
 - updating fetch tasks to be flat paths (ewolinet@redhat.com)
 
 * Mon Jul 10 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.140-1
-- 
+-
 
 * Sat Jul 08 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.139-1
 - increase implicit 300s default timeout to explicit 600s (jchaloup@redhat.com)
@@ -1933,7 +1934,7 @@ Atomic OpenShift Utilities includes
 - Fully qualify ocp ansible_service_broker_image_prefix (sdodson@redhat.com)
 
 * Wed Jul 05 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.134-1
-- 
+-
 
 * Tue Jul 04 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.133-1
 - etcd, syscontainer: fix copy of existing datastore (gscrivan@redhat.com)
@@ -1945,7 +1946,7 @@ Atomic OpenShift Utilities includes
 - Fixes to storage migration (sdodson@redhat.com)
 
 * Mon Jul 03 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.132-1
-- 
+-
 
 * Sun Jul 02 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.131-1
 - Fix upgrade (sdodson@redhat.com)
@@ -2086,7 +2087,7 @@ Atomic OpenShift Utilities includes
 - bug 1457642. Use same SG index to avoid seeding timeout (jcantril@redhat.com)
 
 * Wed Jun 21 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.122-1
-- 
+-
 
 * Tue Jun 20 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.121-1
 - Updating default from null to "" (ewolinet@redhat.com)
@@ -2130,7 +2131,7 @@ Atomic OpenShift Utilities includes
 - CloudForms 4.5 templates (simaishi@redhat.com)
 
 * Fri Jun 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.114-1
-- 
+-
 
 * Fri Jun 16 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.113-1
 - Make rollout status check best-effort, add poll (skuznets@redhat.com)
@@ -2192,7 +2193,7 @@ Atomic OpenShift Utilities includes
 - singletonize some role tasks that repeat a lot (lmeyer@redhat.com)
 
 * Wed Jun 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.109-1
-- 
+-
 
 * Wed Jun 14 2017 Jenkins CD Merge Bot <smunilla@redhat.com> 3.6.108-1
 - Upgraded Calico to 2.2.1 Release (vincent.schwarzer@yahoo.de)
@@ -2248,7 +2249,7 @@ Atomic OpenShift Utilities includes
 - Install default storageclass in AWS & GCE envs (hekumar@redhat.com)
 
 * Fri Jun 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.98-1
-- 
+-
 
 * Fri Jun 09 2017 Scott Dodson <sdodson@redhat.com> 3.6.97-1
 - Updated to using oo_random_word for secret gen (ewolinet@redhat.com)
@@ -2280,7 +2281,7 @@ Atomic OpenShift Utilities includes
   loopback kubeconfigs. (abutcher@redhat.com)
 
 * Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.2-1
-- 
+-
 
 * Tue Jun 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.89.1-1
 - Updating image for registry_console (ewolinet@redhat.com)
@@ -2527,13 +2528,13 @@ Atomic OpenShift Utilities includes
 - Fix additional master cert & client config creation. (abutcher@redhat.com)
 
 * Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.62-1
-- 
+-
 
 * Tue May 09 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.61-1
-- 
+-
 
 * Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.60-1
-- 
+-
 
 * Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.59-1
 - Updating logging and metrics to restart api, ha and controllers when updating
@@ -2546,10 +2547,10 @@ Atomic OpenShift Utilities includes
 - Moving Dockerfile content to images dir (jupierce@redhat.com)
 
 * Mon May 08 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.57-1
-- 
+-
 
 * Sun May 07 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.56-1
-- 
+-
 
 * Sat May 06 2017 Jenkins CD Merge Bot <tdawson@redhat.com> 3.6.55-1
 - Fix 1448368, and some other minors issues (ghuang@redhat.com)
