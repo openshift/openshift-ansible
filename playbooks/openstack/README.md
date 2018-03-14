@@ -148,6 +148,7 @@ additional options. These include:
 * Set Up Authentication (TODO)
 * [Multiple Masters with a load balancer][loadbalancer]
 * [External DNS][external-dns]
+* [Kuryr SDN][kuryr-sdn]
 * Multiple Clusters (TODO)
 * [Cinder Registry][cinder-registry]
 
@@ -238,3 +239,4 @@ $ ansible-playbook --user openshift \
 [log-in-using-the-command-line]: ./post-install.md#log-in-using-the-command-line
 [access-the-ui]: ./post-install.md#access-the-ui
 [dynamic]: http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html
+[kuryr-sdn]: ./configuration.md#kuryr-networking-configuration
