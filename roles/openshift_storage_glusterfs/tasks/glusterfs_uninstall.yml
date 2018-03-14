@@ -107,16 +107,7 @@
   failed_when: False
 
 - name: Delete gluster-s3 resources
-  oc_obj:
-    namespace: "{{ glusterfs_namespace }}"
-    kind: "{{ item.kind }}"
-    name: "{{ item.name | default(omit) }}"
-    selector: "{{ item.selector | default(omit) }}"
-    state: absent
-  with_items:
-  - kind: "all,svc,deploy,secret,sc,pvc"
-    selector: "gluster-s3"
-  failed_when: False
+  include_tasks: uninstall_s3.yml
 
 - name: Get GlusterFS storage devices state
   command: "pvdisplay -C --noheadings -o pv_name,vg_name {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"

@@ -1,0 +1,13 @@
+- name: Delete gluster-s3 resources
+  block:
+    - include_tasks: glusterfs_config_facts.yml
+  oc_obj:
+    namespace: "{{ glusterfs_namespace }}"
+    kind: "{{ item.kind }}"
+    name: "{{ item.name | default(omit) }}"
+    selector: "{{ item.selector | default(omit) }}"
+    state: absent
+  with_items:
+  - kind: "all,svc,deploy,secret,sc,pvc"
+    selector: "gluster-s3"
+  failed_when: False
