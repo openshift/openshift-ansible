@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.6.0%{?dist}
+Release:        0.7.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,15 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 14 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.7.0
+- Bug 1548641- Correct arguments to yedit (fabian@fabianism.us)
+- Bug 1554828- Nodes are now labeled compute after other labels have been
+  applied (fabian@fabianism.us)
+- Actually link to the Kuryr docs (tomas@sedovic.cz)
+- Link to the Kuryr docs (tomas@sedovic.cz)
+- Add link to the Kuryr port pool docs (tomas@sedovic.cz)
+- Add Kuryr documentation (tomas@sedovic.cz)
+
 * Wed Mar 14 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.6.0
 - Bug 1548541- Conditional for applying defaultNodeSelector now valid
   (fabian@fabianism.us)
