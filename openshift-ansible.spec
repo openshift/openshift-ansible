@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.8
+Version:        3.9.9
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 14 2018 Justin Pierce <jupierce@redhat.com> 3.9.9-1
+- Pop etcd_port from local_facts file (mgugino@redhat.com)
+- Bug 1554828- Nodes are now labeled compute after other labels have been
+  applied (fabian@fabianism.us)
+- GlusterFS: Add HEKETI_IGNORE_STALE_OPERATIONS to templates
+  (jarrpa@redhat.com)
+- Bug 1548641- Correct arguments to yedit (fabian@fabianism.us)
+
 * Tue Mar 13 2018 Justin Pierce <jupierce@redhat.com> 3.9.8-1
 - Bug 1548541- Conditional for applying defaultNodeSelector now valid
   (fabian@fabianism.us)
