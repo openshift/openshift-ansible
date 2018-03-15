@@ -46,7 +46,7 @@ data:
           certFile: {{ nuage_master_crt_dir }}/nuageEtcd-client.crt
           keyFile: {{ nuage_master_crt_dir }}/nuageEtcd-client.key
           urls:
-      {% for etcd_url in openshift.master.etcd_urls %}
+      {% for etcd_url in openshift_master_etcd_urls %}
               - {{ etcd_url }}
       {% endfor %}
 

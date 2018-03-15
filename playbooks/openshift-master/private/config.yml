@@ -53,13 +53,6 @@
     - node
     - .config_managed
 
-  - set_fact:
-      openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
-      openshift_master_etcd_hosts: "{{ hostvars
-                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
-                                                        | default([]))
-                                       | lib_utils_oo_collect('openshift.common.hostname')
-                                       | default(none, true) }}"
   roles:
   - openshift_facts
   post_tasks:
@@ -169,13 +162,7 @@
     openshift_master_session_auth_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_auth_secrets }}"
     openshift_master_session_encryption_secrets: "{{ hostvars[groups.oo_first_master.0].openshift.master.session_encryption_secrets }}"
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-    openshift_master_etcd_hosts: "{{ hostvars
-                                     | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                     | lib_utils_oo_collect('openshift.common.hostname')
-                                     | default(none, true) }}"
-    openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
-                                                | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
-                                                }}"
+
   roles:
   - role: openshift_master_facts
   - role: openshift_clock
