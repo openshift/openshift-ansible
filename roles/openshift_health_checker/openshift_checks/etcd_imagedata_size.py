@@ -21,9 +21,9 @@ class EtcdImageDataSize(OpenShiftCheck):
             default=int(0.5 * float(etcd_total_diskspace - etcd_avail_diskspace))
         )
 
-        etcd_is_ssl = self.get_var("openshift", "master", "etcd_use_ssl", default=False)
-        etcd_port = self.get_var("openshift", "master", "etcd_port", default=2379)
-        etcd_hosts = self.get_var("openshift", "master", "etcd_hosts")
+        etcd_is_ssl = self.get_var("openshift_master_etcd_use_ssl", default=True)
+        etcd_port = self.get_var("openshift_master_etcd_port", default=2379)
+        etcd_hosts = self.get_var("openshift_master_etcd_hosts")
 
         config_base = self.get_var("openshift", "common", "config_base")
 
