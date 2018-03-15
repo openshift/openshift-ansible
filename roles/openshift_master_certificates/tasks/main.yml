@@ -101,6 +101,7 @@
   file:
     path: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: absent
+  # Do we need this boolean here?
   when: openshift_master_etcd_hosts | length > 0
   with_items:
   - master.etcd-client.crt
