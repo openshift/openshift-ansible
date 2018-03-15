@@ -1,12 +1,18 @@
 ---
-# NOTE: requires openshift_facts be run
 - name: Determine openshift_version to configure on first master
   hosts: "{{ l_openshift_version_determine_hosts | default('oo_first_master') }}"
   tasks:
   - include_role:
       name: openshift_version
       tasks_from: first_master.yml
+
   - debug: msg="openshift_pkg_version set to {{ openshift_pkg_version | default('') }}"
+
+  # set_version_facts is a custom module in lib_utils
+  # this will set_fact booleans for openshift_verison
+  - name: set openshift_version booleans (first master)
+    set_version_facts:
+      version: "{{ openshift_current_version | default(openshift_version) }}"
 
 # NOTE: We set this even on etcd hosts as they may also later run as masters,
 # and we don't want to install wrong version of docker and have to downgrade
@@ -31,3 +37,9 @@
   - include_role:
       name: openshift_version
       tasks_from: masters_and_nodes.yml
+
+  # set_version_facts is a custom module in lib_utils
+  # this will set_fact booleans for openshift_verison
+  - name: set openshift_version booleans (masters and nodes)
+    set_version_facts:
+      version: "{{ openshift_current_version | default(openshift_version) }}"

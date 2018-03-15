@@ -12,16 +12,23 @@ kuryr_openstack_user_domain_name: default
 kuryr_openstack_project_domain_name: default
 
 # Kuryr OpenShift namespace
-kuryr_namespace: kube-system
+kuryr_namespace: openshift-infra
 
 # Whether to run the cni plugin in debug mode
 kuryr_cni_debug: "false"
+
+# Default pod-in-VM link interface
+kuryr_cni_link_interface: eth0
 
 # The version of cni binaries
 cni_version: v0.5.2
 
 # Path to bin dir (where kuryr execs get installed)
 bin_dir: /usr/bin
+
+# Default controller and CNI images
+openshift_openstack_kuryr_controller_image: kuryr/controller:latest
+openshift_openstack_kuryr_cni_image: kuryr/cni:latest
 
 # Path to the cni binaries
 cni_bin_dir: /opt/cni/bin

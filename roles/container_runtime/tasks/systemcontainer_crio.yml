@@ -94,6 +94,12 @@
     dest: /etc/sysconfig/crio-network
     src: crio-network.j2
 
+- name: Configure oci umount for CRI-O
+  lineinfile:
+    dest: /etc/oci-umount.conf
+    line: '{{ item }}'
+  with_items: "{{ container_runtime_oci_umounts }}"
+
 - name: Start the CRI-O service
   systemd:
     name: "cri-o"
@@ -106,4 +112,4 @@
 # 'docker login'
 - include_tasks: common/post.yml
   vars:
-    openshift_docker_alternative_creds: "{{ openshift_use_crio_only | bool }}"
+    openshift_docker_alternative_creds: "{{ (openshift_use_crio_only | bool) or (openshift_docker_use_system_container | bool) }}"

@@ -31,7 +31,7 @@ l_openshift_prometheus_serviceaccount_annotations:
 openshift_prometheus_additional_rules_file: null
 
 #prometheus application arguments
-openshift_prometheus_args: ['--storage.tsdb.retention=6h']
+openshift_prometheus_args: ['--storage.tsdb.retention=3d']
 
 # storage
 # One of ['emptydir', 'pvc']

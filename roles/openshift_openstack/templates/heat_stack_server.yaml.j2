@@ -1,4 +1,4 @@
-heat_template_version: 2016-10-14
+heat_template_version: pike
 
 description: OpenShift cluster server
 
@@ -68,6 +68,20 @@ parameters:
     description: Subnet resource
 {% endif %}
 
+{% if openshift_use_kuryr|default(false)|bool %}
+  pod_net:
+    type: string
+    label: Pod Net ID
+    description: Net resource
+    default: ''
+
+  pod_subnet:
+    type: string
+    label: Pod Subnet ID
+    description: Subnet resource
+    default: ''
+{% endif %}
+
 {% if openshift_use_flannel|default(False)|bool %}
   attach_data_net:
     type: boolean
@@ -94,6 +108,22 @@ parameters:
     type: comma_delimited_list
     label: Security groups
     description: Security group resources
+
+{% if openshift_use_kuryr|default(false)|bool %}
+  api_lb_pool:
+    default: ''
+    type: string
+    label: API LoadBalancer pool ID
+    description: API Loadbalancer pool resource
+{% endif %}
+
+{% if openshift_use_kuryr|default(false)|bool %}
+  pod_secgrp:
+    type: comma_delimited_list
+    label: Subports Security groups
+    description: Security group resources for subports
+    default: ''
+{% endif %}
 
   attach_float_net:
     type: boolean
@@ -180,21 +210,13 @@ resources:
 {% if openshift_use_flannel|default(False)|bool %}
         if:
           - no_data_subnet
-{% if use_trunk_ports|default(false)|bool %}
-          - - port:  { get_attr: [trunk-port, port_id] }
-{% else %}
           - - port:  { get_resource: port }
-{% endif %}
-{% if use_trunk_ports|default(false)|bool %}
-          - - port:  { get_attr: [trunk-port, port_id] }
-{% else %}
           - - port:  { get_resource: port }
             - port:  { get_resource: data_port }
-{% endif %}
 
 {% else %}
-{% if use_trunk_ports|default(false)|bool %}
-        - port:  { get_attr: [trunk-port, port_id] }
+{% if use_trunk_ports|default(False)|bool %}
+        - port:  { get_attr: [trunk_port, port_id]}
 {% else %}
         - port:  { get_resource: port }
 {% endif %}
@@ -216,11 +238,39 @@ resources:
       scheduler_hints: { get_param: scheduler_hints }
 
 {% if use_trunk_ports|default(false)|bool %}
-  trunk-port:
+  trunk_port:
     type: OS::Neutron::Trunk
     properties:
       name: { get_param: name }
       port: { get_resource: port }
+{% if openshift_kuryr_precreate_subports|default(false) %}
+      sub_ports:
+        repeat:
+          for_each:
+            <%port%>: { get_attr: [subports, subport_id] }
+            <%vlan_id%>: { get_attr: [segmentation, vlan_ids] }
+          template:
+            port: <%port%>
+            segmentation_type: vlan
+            segmentation_id: <%vlan_id%>
+          permutations: false
+
+  segmentation:
+    type: segmentation_ids.yaml
+    properties:
+      number_of_vlan_ids: {{ openshift_kuryr_precreate_subports }}
+
+  subports:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: {{ openshift_kuryr_precreate_subports }}
+      resource_def:
+        type: subports.yaml
+        properties:
+          network: { get_param: pod_net }
+          subnet: { get_param: pod_subnet }
+          pod_access_sg: { get_param: pod_secgrp }
+{% endif %}
 {% endif %}
 
   port:
@@ -269,4 +319,19 @@ resources:
     properties:
       volume_id: { get_resource: cinder_volume }
       instance_uuid: { get_resource: server }
+{% endif %}
+
+
+{% if openshift_use_kuryr|default(false)|bool %}
+  lb_member:
+    type: OS::Neutron::LBaaS::PoolMember
+    condition:
+      equals:
+        - get_param: type
+        - master
+    properties:
+      pool: { get_param: api_lb_pool }
+      protocol_port: {{ openshift_master_api_port|default(8443) }}
+      address: { get_attr: [server, first_address]}
+      subnet: { get_param: subnet }
 {% endif %}

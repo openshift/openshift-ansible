@@ -1,0 +1,224 @@
+---
+# TODO: add ability to configure certificates given either a local file to
+#       point to or certificate contents, set in default cert locations.
+
+# Authentication Variable Validation
+# TODO: validate the different identity provider kinds as well
+- fail:
+    msg: >
+      Invalid OAuth grant method: {{ openshift_master_oauth_grant_method }}
+  when:
+  - openshift_master_oauth_grant_method is defined
+  - openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
+
+- name: Open up firewall ports
+  import_tasks: firewall.yml
+
+- name: Create r_openshift_master_data_dir
+  file:
+    path: "{{ r_openshift_master_data_dir }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Create config parent directory if it does not exist
+  file:
+    path: "{{ openshift_master_config_dir }}"
+    state: directory
+
+- name: Create the policy file if it does not already exist
+  command: >
+    {{ openshift_client_binary }} adm create-bootstrap-policy-file
+      --filename={{ openshift_master_policy }}
+  args:
+    creates: "{{ openshift_master_policy }}"
+
+- name: Create the scheduler config
+  copy:
+    content: "{{ scheduler_config | to_nice_json }}"
+    dest: "{{ openshift_master_scheduler_conf }}"
+    backup: true
+
+- name: Install httpd-tools if needed
+  package: name=httpd-tools state=present
+  when:
+  - item.kind == 'HTPasswdPasswordIdentityProvider'
+  - not openshift_is_atomic | bool
+  with_items: "{{ openshift_master_identity_providers }}"
+  register: result
+  until: result is succeeded
+
+- name: Ensure htpasswd directory exists
+  file:
+    path: "{{ item.filename | dirname }}"
+    state: directory
+  when:
+  - item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: "{{ openshift_master_identity_providers }}"
+
+- name: Create the htpasswd file if needed
+  template:
+    dest: "{{ item.filename }}"
+    src: htpasswd.j2
+    backup: yes
+    mode: 0600
+  when:
+  - item.kind == 'HTPasswdPasswordIdentityProvider'
+  - openshift.master.manage_htpasswd | bool
+  with_items: "{{ openshift_master_identity_providers }}"
+
+- name: Ensure htpasswd file exists
+  copy:
+    dest: "{{ item.filename }}"
+    force: no
+    content: ""
+    mode: 0600
+  when:
+  - item.kind == 'HTPasswdPasswordIdentityProvider'
+  with_items: "{{ openshift_master_identity_providers }}"
+
+- name: Create the ldap ca file if needed
+  copy:
+    dest: "{{ item.ca if 'ca' in item and '/' in item.ca else openshift_master_config_dir ~ '/' ~ item.ca | default('ldap_ca.crt') }}"
+    content: "{{ openshift.master.ldap_ca }}"
+    mode: 0600
+    backup: yes
+  when:
+  - openshift.master.ldap_ca is defined
+  - item.kind == 'LDAPPasswordIdentityProvider'
+  with_items: "{{ openshift_master_identity_providers }}"
+
+- name: Create the openid ca file if needed
+  copy:
+    dest: "{{ item.ca if 'ca' in item and '/' in item.ca else openshift_master_config_dir ~ '/' ~ item.ca | default('openid_ca.crt') }}"
+    content: "{{ openshift.master.openid_ca }}"
+    mode: 0600
+    backup: yes
+  when:
+  - openshift.master.openid_ca is defined
+  - item.kind == 'OpenIDIdentityProvider'
+  - item.ca | default('') != ''
+  with_items: "{{ openshift_master_identity_providers }}"
+
+- name: Create the request header ca file if needed
+  copy:
+    dest: "{{ item.clientCA if 'clientCA' in item and '/' in item.clientCA else openshift_master_config_dir ~ '/' ~ item.clientCA | default('request_header_ca.crt') }}"
+    content: "{{ openshift.master.request_header_ca }}"
+    mode: 0600
+    backup: yes
+  when:
+  - openshift.master.request_header_ca is defined
+  - item.kind == 'RequestHeaderIdentityProvider'
+  - item.clientCA | default('') != ''
+  with_items: "{{ openshift_master_identity_providers }}"
+
+- name: Set fact of all etcd host IPs
+  openshift_facts:
+    role: common
+    local_facts:
+      no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
+
+- name: Update journald config
+  include_tasks: journald.yml
+
+- name: Create session secrets file
+  template:
+    dest: "{{ openshift.master.session_secrets_file }}"
+    src: sessionSecretsFile.yaml.v1.j2
+    owner: root
+    group: root
+    mode: 0600
+  when:
+  - openshift.master.session_auth_secrets is defined
+  - openshift.master.session_encryption_secrets is defined
+
+- set_fact:
+    # translate_idps is a custom filter in role lib_utils
+    translated_identity_providers: "{{ openshift_master_identity_providers | translate_idps('v1') }}"
+
+# TODO: add the validate parameter when there is a validation command to run
+- name: Create master config
+  template:
+    dest: "{{ openshift_master_config_file }}"
+    src: master.yaml.v1.j2
+    backup: true
+    owner: root
+    group: root
+    mode: 0600
+
+- include_tasks: set_loopback_context.yml
+
+- name: Create the master service env file
+  template:
+    src: "master.env.j2"
+    dest: /etc/origin/master/master.env
+    backup: true
+
+- include_tasks: static.yml
+
+- name: Start and enable self-hosting node
+  systemd:
+    name: "{{ openshift_service_type }}-node"
+    state: restarted
+    enabled: yes
+
+- name: Verify that the control plane is running
+  command: >
+    curl -k {{ openshift.master.api_url }}/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: control_plane_health
+  until: control_plane_health.stdout == 'ok'
+  retries: 60
+  delay: 5
+  changed_when: false
+  # Ignore errors so we can log troubleshooting info on failures.
+  ignore_errors: yes
+
+# Capture debug output here to simplify triage
+- when: control_plane_health.stdout != 'ok'
+  block:
+  - name: Check status in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} status --config=/etc/origin/master/admin.kubeconfig -n kube-system
+    register: control_plane_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_status.stdout_lines }}"
+  - name: Get pods in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} get pods --config=/etc/origin/master/admin.kubeconfig -n kube-system -o wide
+    register: control_plane_pods
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_pods.stdout_lines }}"
+  - name: Get events in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} get events --config=/etc/origin/master/admin.kubeconfig -n kube-system
+    register: control_plane_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_events.stdout_lines }}"
+  - name: Get API logs
+    command: >
+      /usr/local/bin/master-logs api api
+    register: control_plane_logs_api
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_logs_api.stdout_lines }}"
+  - name: Get node logs
+    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-node
+    register: control_plane_logs_node
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_logs_node.stdout_lines }}"
+
+- name: Report control plane errors
+  fail:
+    msg: Control plane install failed.
+  when: control_plane_health.stdout != 'ok'
+
+- include_tasks: bootstrap.yml

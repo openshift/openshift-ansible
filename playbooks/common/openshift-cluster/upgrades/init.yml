@@ -12,7 +12,7 @@
 - name: Ensure firewall is not switched during upgrade
   hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"
   vars:
-    openshift_master_installed_version: "{{ hostvars[groups.oo_first_master.0].openshift.common.version }}"
+    openshift_master_installed_version: "{{ hostvars[groups.oo_first_master.0].openshift_current_version }}"
   tasks:
   - name: set currently installed version
     set_fact:

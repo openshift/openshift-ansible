@@ -117,21 +117,13 @@
 
   - import_role:
       name: openshift_hosted
-      tasks_from: main
-    vars:
-      openshift_hosted_manage_registry: false
+      tasks_from: router.yml
     when:
     - l_router_dc.rc == 0
     - l_router_svc.rc == 0
     - ('router-certs' in router_secrets)
     - ('service.alpha.openshift.io/serving-cert-secret-name') not in router_service_annotations
     - ('service.alpha.openshift.io/serving-cert-signed-by') not in router_service_annotations
-
-  - name: Redeploy router
-    command: >
-      {{ openshift_client_binary }} rollout latest dc/router
-      --config={{ router_cert_redeploy_tempdir.stdout }}/admin.kubeconfig
-      -n default
 
   - name: Delete temp directory
     file:

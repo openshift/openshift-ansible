@@ -32,24 +32,33 @@ EXAMPLES = '''
 '''
 
 
-def account_for_whitelist(file_contents, white_list=None):
+def account_for_whitelist(current_file_contents, new_file_contents, white_list=None):
     """ This method will remove lines that contain whitelist values from the content
         of the file so that we aren't build a patch based on that line
 
         Usage:
 
-          for file_contents:
+        for current_file_contents:
 
             index:
-              number_of_shards: {{ es_number_of_shards | default ('1') }}
-              number_of_replicas: {{ es_number_of_replicas | default ('0') }}
+              number_of_shards: 1
+              number_of_replicas: 0
               unassigned.node_left.delayed_timeout: 2m
               translog:
                 flush_threshold_size: 256mb
                 flush_threshold_period: 5m
 
+        and new_file_contents:
 
-          and white_list:
+          index:
+            number_of_shards: 2
+            number_of_replicas: 1
+            unassigned.node_left.delayed_timeout: 2m
+            translog:
+              flush_threshold_size: 256mb
+              flush_threshold_period: 5m
+
+        and white_list:
 
             ['number_of_shards', 'number_of_replicas']
 
@@ -57,6 +66,8 @@ def account_for_whitelist(file_contents, white_list=None):
         We would end up with:
 
             index:
+              number_of_shards: 2
+              number_of_replicas: 1
               unassigned.node_left.delayed_timeout: 2m
               translog:
                 flush_threshold_size: 256mb
@@ -65,9 +76,14 @@ def account_for_whitelist(file_contents, white_list=None):
     """
 
     for line in white_list:
-        file_contents = re.sub(r".*%s:.*\n" % line, "", file_contents)
+        regex_line = r".*" + re.escape(line) + r":.*\n"
+        new_file_line = re.search(regex_line, new_file_contents)
+        if new_file_line:
+            current_file_contents = re.sub(regex_line, new_file_line.group(0), current_file_contents)
+        else:
+            current_file_contents = re.sub(regex_line, "", current_file_contents)
 
-    return file_contents
+    return current_file_contents
 
 
 def run_module():
@@ -87,13 +103,11 @@ def run_module():
     original_contents = original_fh.read()
     original_fh.close()
 
-    original_contents = account_for_whitelist(original_contents, module.params['whitelist'])
-
     new_fh = open(module.params['new_file'], "r")
     new_contents = new_fh.read()
     new_fh.close()
 
-    new_contents = account_for_whitelist(new_contents, module.params['whitelist'])
+    original_contents = account_for_whitelist(original_contents, new_contents, module.params['whitelist'])
 
     uni_diff = difflib.unified_diff(new_contents.splitlines(),
                                     original_contents.splitlines(),

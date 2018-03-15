@@ -36,9 +36,3 @@
     state: absent
     name: "{{ mktemp.stdout }}"
   changed_when: False
-
-- name: Rollout console so it discovers the template service broker is removed
-  include_role:
-    name: openshift_web_console
-    tasks_from: rollout_console.yml
-  when: openshift_web_console_install | default(true) | bool

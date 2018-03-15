@@ -35,7 +35,6 @@
       - >
         (openshift_use_system_containers | default(False)) | bool
         or (openshift_use_etcd_system_container | default(False)) | bool
-        or (openshift_use_openvswitch_system_container | default(False)) | bool
         or (openshift_use_node_system_container | default(False)) | bool
         or (openshift_use_master_system_container | default(False)) | bool
       register: result

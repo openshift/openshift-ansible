@@ -212,16 +212,7 @@
       - ReadWriteOnce
     volume_capacity: 1G
 
-- name: Search for existing Ansible Service Broker deployment config
-  oc_obj:
-    name: asb
-    namespace: openshift-ansible-service-broker
-    kind: DeploymentConfig
-    state: list
-  register: asb_dc
-
-- name: Create Ansible Service Broker deployment config
-  when: asb_dc.results.results.0 | length == 0
+- name: Set Ansible Service Broker deployment config
   oc_obj:
     force: yes
     name: asb
@@ -268,6 +259,12 @@
                   env:
                     - name: BROKER_CONFIG
                       value: /etc/ansible-service-broker/config.yaml
+                    - name: HTTP_PROXY
+                      value: "{{ openshift.common.http_proxy  | default('') }}"
+                    - name: HTTPS_PROXY
+                      value: "{{ openshift.common.https_proxy  | default('') }}"
+                    - name: NO_PROXY
+                      value: "{{ ([openshift.common.no_proxy, '.default'] | join(',')) if openshift.get('common', {}).get('no_proxy') else '' }}"
                   resources: {}
                   terminationMessagePath: /tmp/termination-log
                   readinessProbe:

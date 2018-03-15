@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: true
       hostNetwork: true
       containers:
-      - image: kuryr/controller:latest
+      - image: {{ openshift_openstack_kuryr_controller_image }}
         imagePullPolicy: IfNotPresent
         name: controller
 {% if kuryr_openstack_enable_pools | default(false) %}

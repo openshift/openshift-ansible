@@ -5,7 +5,7 @@ admissionConfig:
 apiLevels:
 - v1
 apiVersion: v1
-{% if not openshift.common.version_gte_3_9 %}
+{% if not openshift_version_gte_3_9 %}
 assetConfig:
   logoutURL: "{{ openshift.master.logout_url | default('') }}"
   masterPublicURL: {{ openshift.master.public_api_url }}
@@ -63,8 +63,8 @@ corsAllowedOrigins:
 {% for custom_origin in openshift.master.custom_cors_origins | default("") %}
   - (?i)//{{ custom_origin | regex_escape() }}(:|\z)
 {% endfor %}
-{% if 'disabled_features' in openshift.master %}
-disabledFeatures: {{ openshift.master.disabled_features | to_json }}
+{% if l_osm_disabled_features %}
+disabledFeatures: {{ l_osm_disabled_features_list | to_json }}
 {% endif %}
 {% if openshift.master.embedded_dns | bool %}
 dnsConfig:
@@ -85,7 +85,7 @@ etcdStorageConfig:
   openShiftStoragePrefix: openshift.io
   openShiftStorageVersion: v1
 imageConfig:
-  format: {{ openshift.master.registry_url }}
+  format: {{ l_osm_registry_url }}
   latest: {{ openshift_master_image_config_latest }}
 {% if 'image_policy_config' in openshift.master %}
 imagePolicyConfig:{{ openshift.master.image_policy_config | lib_utils_to_padded_yaml(level=1) }}
@@ -100,7 +100,7 @@ kubeletClientInfo:
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
-{% if r_openshift_master_etcd3_storage or ( r_openshift_master_clean_install and openshift.common.version_gte_3_6 ) %}
+{% if r_openshift_master_etcd3_storage or r_openshift_master_clean_install %}
     storage-backend:
     - etcd3
     storage-media-type:
@@ -137,7 +137,7 @@ masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
   clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
   hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
-{% if openshift.common.version_gte_3_7 | bool %}
+{% if openshift_version_gte_3_7 | bool %}
   clusterNetworks:
   - cidr: {{ openshift.master.sdn_cluster_network_cidr }}
     hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
@@ -183,7 +183,7 @@ policyConfig:
   openshiftInfrastructureNamespace: openshift-infra
   openshiftSharedResourcesNamespace: openshift
 projectConfig:
-  defaultNodeSelector: "{{ osm_default_node_selector }}"
+  defaultNodeSelector: "{{ hostvars[groups.oo_first_master.0].l_osm_default_node_selector }}"
   projectRequestMessage: "{{ osm_project_request_message }}"
   projectRequestTemplate: "{{ osm_project_request_template }}"
   securityAllocator:

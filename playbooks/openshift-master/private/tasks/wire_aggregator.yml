@@ -173,7 +173,7 @@
 
 # Only add the catalog extension script if not 3.9. From 3.9 on, the console
 # can discover if template service broker is running.
-- when: not openshift.common.version_gte_3_9
+- when: not openshift_version_gte_3_9
   block:
   - name: Setup extension file for service console UI
     template:
@@ -191,16 +191,11 @@
 #restart master serially here
 - when: yedit_output.changed or (yedit_asset_config_output is defined and yedit_asset_config_output.changed)
   block:
-  - name: restart master api
-    systemd: name={{ openshift_service_type }}-master-api state=restarted
-
-  # We retry the controllers because the API may not be 100% initialized yet.
-  - name: restart master controllers
-    command: "systemctl restart {{ openshift_service_type }}-master-controllers"
-    retries: 3
-    delay: 5
-    register: result
-    until: result.rc == 0
+  - name: restart master
+    command: /usr/local/bin/master-restart "{{ item }}"
+    with_items:
+    - api
+    - controllers
 
   - name: Verify API Server
     # Using curl here since the uri module requires python-httplib2 and

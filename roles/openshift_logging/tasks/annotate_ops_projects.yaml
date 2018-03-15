@@ -5,17 +5,29 @@
     get namespaces -o jsonpath={.items[*].metadata.name} {{ __default_logging_ops_projects | join(' ') }}
   register: __logging_ops_projects
 
-- name: Annotate Operations Projects
+- name: Annotate Operations Projects for hostname
   oc_edit:
     kind: ns
     name: "{{ project }}"
     separator: '#'
     content:
       metadata#annotations#openshift.io/logging.ui.hostname: "{{ openshift_logging_kibana_ops_hostname }}"
-      metadata#annotations#openshift.io/logging.data.prefix: ".operations"
   with_items: "{{ __logging_ops_projects.stdout.split(' ') }}"
   loop_control:
     loop_var: project
   when:
   - __logging_ops_projects.stderr | length == 0
   - openshift_logging_use_ops | default(false) | bool
+
+- name: Annotate Operations Projects for data prefix
+  oc_edit:
+    kind: ns
+    name: "{{ project }}"
+    separator: '#'
+    content:
+      metadata#annotations#openshift.io/logging.data.prefix: ".operations"
+  with_items: "{{ __logging_ops_projects.stdout.split(' ') }}"
+  loop_control:
+    loop_var: project
+  when:
+  - __logging_ops_projects.stderr | length == 0

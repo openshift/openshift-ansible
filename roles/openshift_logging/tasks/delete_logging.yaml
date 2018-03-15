@@ -13,6 +13,7 @@
     - routes
     - templates
     - ds
+    - cronjobs
 
 # return all persistent volume claims as well if purge is set
 - name: delete logging pvc objects
@@ -104,6 +105,7 @@
   with_items:
     - logging-curator
     - logging-elasticsearch
+    - logging-elasticsearch-ops
     - logging-fluentd
     - logging-mux
 
@@ -142,4 +144,4 @@
         value: ""
   when:
     - openshift_web_console_install | default(true) | bool
-    - openshift.common.version_gte_3_9
+    - openshift_version_gte_3_9

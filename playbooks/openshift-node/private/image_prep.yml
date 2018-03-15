@@ -25,6 +25,10 @@
     - import_role:
         name: openshift_node
         tasks_from: bootstrap.yml
+    - import_role:
+        name: openshift_node_group
+        tasks_from: bootstrap.yml
+
 
 - name: Re-enable excluders
   import_playbook: enable_excluders.yml

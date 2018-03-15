@@ -12,6 +12,7 @@ Entry points
 * package_docker.yml - install and setup docker container runtime.
 * systemcontainer_docker.yml - utilize docker + systemcontainer
 * systemcontainer_crio.yml - utilize crio + systemcontainer
+* package_crio.yml - install and setup crio container runtime.
 * registry_auth.yml - place docker login credentials.
 
 Requirements

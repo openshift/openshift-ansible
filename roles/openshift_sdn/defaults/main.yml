@@ -1,0 +1,6 @@
+---
+openshift_node_image_dict:
+  origin: 'openshift/node'
+  openshift-enterprise: 'openshift3/node'
+oreg_host: "{{ oreg_url.split('/')[0] ~ '/' if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
+osn_image: "{{ oreg_host }}{{ openshift_node_image_dict[openshift_deployment_type | default('origin')] }}:{{ openshift_image_tag | default('latest') }}"

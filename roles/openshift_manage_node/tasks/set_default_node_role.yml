@@ -1,0 +1,21 @@
+---
+
+- delegate_to: '{{ openshift_master_host }}'
+  run_once: true
+  block:
+    - name: Retrieve non-infra, non-master nodes that are not yet labeled compute
+      oc_obj:
+        state: list
+        kind: Node
+        selector: '{{ (openshift_hosted_infra_selector | default("region=infra")) | regex_replace("=", "!=") }},node-role.kubernetes.io/master!=true,node-role.kubernetes.io/compute!=true'
+      register: non_master_non_infra_nodes_result
+
+    - name: label non-master non-infra nodes compute
+      oc_label:
+        name: '{{ item }}'
+        kind: node
+        state: add
+        labels:
+          - key: node-role.kubernetes.io/compute
+            value: 'true'
+      with_items: "{{ non_master_non_infra_nodes_result.results.results.0['items'] | map(attribute='metadata') | map(attribute='name') | list }}"

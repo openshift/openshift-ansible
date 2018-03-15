@@ -176,6 +176,18 @@
     openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
                                                 | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
                                                 }}"
+  pre_tasks:
+  # This will be moved into the control plane role once openshift_master is removed
+  - name: Add static pod and systemd shim commands
+    import_role:
+      name: openshift_control_plane
+      tasks_from: static_shim
+  - name: Prepare the bootstrap node config on masters for self-hosting
+    import_role:
+      name: openshift_node_group
+      tasks_from: bootstrap
+    when: openshift_master_bootstrap_enabled | default(false) | bool
+
   roles:
   - role: openshift_master_facts
   - role: openshift_clock
@@ -184,6 +196,8 @@
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
   - role: nickhammond.logrotate
+
+  # DEPRECATED: begin moving away from this
   - role: openshift_master
     openshift_master_ha: "{{ (groups.oo_masters | length > 1) | bool }}"
     openshift_master_hosts: "{{ groups.oo_masters_to_config }}"
@@ -193,6 +207,10 @@
     openshift_master_default_registry_value: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value }}"
     openshift_master_default_registry_value_api: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_api }}"
     openshift_master_default_registry_value_controllers: "{{ hostvars[groups.oo_first_master.0].l_default_registry_value_controllers }}"
+    when: not ( openshift_master_bootstrap_enabled | default(false) | bool )
+
+  - role: openshift_control_plane
+    when: openshift_master_bootstrap_enabled | default(false) | bool
   - role: tuned
   - role: nuage_ca
     when: openshift_use_nuage | default(false) | bool
@@ -214,7 +232,7 @@
 
   post_tasks:
   - name: Create group for deployment type
-    group_by: key=oo_masters_deployment_type_{{ openshift.common.deployment_type }}
+    group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
     changed_when: False
 
 - name: Configure API Aggregation on masters

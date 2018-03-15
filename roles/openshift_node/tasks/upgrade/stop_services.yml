@@ -4,22 +4,20 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - "{{ openshift_service_type }}-node"
-  - openvswitch
-  failed_when: false
-
-- name: Ensure containerized services stopped before Docker restart
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
   - etcd_container
   - openvswitch
   - "{{ openshift_service_type }}-master-api"
   - "{{ openshift_service_type }}-master-controllers"
   - "{{ openshift_service_type }}-node"
   failed_when: false
-  when: openshift_is_containerized | bool
+
+- name: Ensure static containerized services stopped before Docker restart
+  command: /usr/local/bin/master-restart "{{ item }}"
+  with_items:
+  - api
+  - controllers
+  - etcd
+  failed_when: false
 
 - service:
     name: docker

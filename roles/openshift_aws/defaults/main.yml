@@ -59,7 +59,7 @@ openshift_aws_elb_dict:
         interval: 30
         unhealthy_threshold: 2
         healthy_threshold: 2
-      idle_timout: 400
+      idle_timeout: 400
       listeners:
       - protocol: tcp
         load_balancer_port: 80
@@ -81,7 +81,7 @@ openshift_aws_elb_dict:
         interval: 30
         unhealthy_threshold: 2
         healthy_threshold: 2
-      idle_timout: 400
+      idle_timeout: 400
       listeners:
       - protocol: tcp
         load_balancer_port: 80
@@ -103,7 +103,7 @@ openshift_aws_elb_dict:
         interval: 30
         unhealthy_threshold: 2
         healthy_threshold: 2
-      idle_timout: 400
+      idle_timeout: 400
       listeners:
       - protocol: tcp
         load_balancer_port: 80

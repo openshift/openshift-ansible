@@ -1,0 +1,175 @@
+---
+# Upgrade predicates
+- vars:
+    # openshift_master_facts_default_predicates is a custom lookup plugin in
+    # role lib_utils
+    prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
+    prev_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, regions_enabled=False) }}"
+    default_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', regions_enabled=False) }}"
+    # older_predicates are the set of predicates that have previously been
+    # hard-coded into openshift_facts
+    older_predicates:
+    - - name: MatchNodeSelector
+      - name: PodFitsResources
+      - name: PodFitsPorts
+      - name: NoDiskConflict
+      - name: NoVolumeZoneConflict
+      - name: MaxEBSVolumeCount
+      - name: MaxGCEPDVolumeCount
+      - name: Region
+        argument:
+          serviceAffinity:
+            labels:
+            - region
+    - - name: MatchNodeSelector
+      - name: PodFitsResources
+      - name: PodFitsPorts
+      - name: NoDiskConflict
+      - name: NoVolumeZoneConflict
+      - name: Region
+        argument:
+          serviceAffinity:
+            labels:
+            - region
+    - - name: MatchNodeSelector
+      - name: PodFitsResources
+      - name: PodFitsPorts
+      - name: NoDiskConflict
+      - name: Region
+        argument:
+          serviceAffinity:
+            labels:
+            - region
+    # older_predicates_no_region are the set of predicates that have previously
+    # been hard-coded into openshift_facts, with the Region predicate removed
+    older_predicates_no_region:
+    - - name: MatchNodeSelector
+      - name: PodFitsResources
+      - name: PodFitsPorts
+      - name: NoDiskConflict
+      - name: NoVolumeZoneConflict
+      - name: MaxEBSVolumeCount
+      - name: MaxGCEPDVolumeCount
+    - - name: MatchNodeSelector
+      - name: PodFitsResources
+      - name: PodFitsPorts
+      - name: NoDiskConflict
+      - name: NoVolumeZoneConflict
+    - - name: MatchNodeSelector
+      - name: PodFitsResources
+      - name: PodFitsPorts
+      - name: NoDiskConflict
+  block:
+
+  # Handle case where openshift_master_predicates is defined
+  - block:
+    - debug:
+        msg: "WARNING: openshift_master_scheduler_predicates is set to defaults from an earlier release of OpenShift current defaults are: {{ openshift_master_scheduler_default_predicates }}"
+      when: openshift_master_scheduler_predicates in older_predicates + older_predicates_no_region + [prev_predicates] + [prev_predicates_no_region]
+
+    - debug:
+        msg: "WARNING: openshift_master_scheduler_predicates does not match current defaults of: {{ openshift_master_scheduler_default_predicates }}"
+      when: openshift_master_scheduler_predicates != openshift_master_scheduler_default_predicates
+    when: openshift_master_scheduler_predicates | default(none) is not none
+
+  # Handle cases where openshift_master_predicates is not defined
+  - block:
+    - debug:
+        msg: "WARNING: existing scheduler config does not match previous known defaults automated upgrade of scheduler config is disabled.\nexisting scheduler predicates: {{ openshift_master_scheduler_current_predicates }}\ncurrent scheduler default predicates are: {{ openshift_master_scheduler_default_predicates }}"
+      when:
+      - openshift_master_scheduler_current_predicates != openshift_master_scheduler_default_predicates
+      - openshift_master_scheduler_current_predicates not in older_predicates + [prev_predicates]
+
+    - set_fact:
+        openshift_upgrade_scheduler_predicates: "{{ openshift_master_scheduler_default_predicates }}"
+      when:
+      - openshift_master_scheduler_current_predicates != openshift_master_scheduler_default_predicates
+      - openshift_master_scheduler_current_predicates in older_predicates + [prev_predicates]
+
+    - set_fact:
+        openshift_upgrade_scheduler_predicates: "{{ default_predicates_no_region }}"
+      when:
+      - openshift_master_scheduler_current_predicates != default_predicates_no_region
+      - openshift_master_scheduler_current_predicates in older_predicates_no_region + [prev_predicates_no_region]
+
+    when: openshift_master_scheduler_predicates | default(none) is none
+
+
+# Upgrade priorities
+- vars:
+    prev_priorities: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
+    prev_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, zones_enabled=False) }}"
+    default_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', zones_enabled=False) }}"
+    # older_priorities are the set of priorities that have previously been
+    # hard-coded into openshift_facts
+    older_priorities:
+    - - name: LeastRequestedPriority
+        weight: 1
+      - name: SelectorSpreadPriority
+        weight: 1
+      - name: Zone
+        weight: 2
+        argument:
+          serviceAntiAffinity:
+            label: zone
+    # older_priorities_no_region are the set of priorities that have previously
+    # been hard-coded into openshift_facts, with the Zone priority removed
+    older_priorities_no_zone:
+    - - name: LeastRequestedPriority
+        weight: 1
+      - name: SelectorSpreadPriority
+        weight: 1
+  block:
+
+  # Handle case where openshift_master_priorities is defined
+  - block:
+    - debug:
+        msg: "WARNING: openshift_master_scheduler_priorities is set to defaults from an earlier release of OpenShift current defaults are: {{ openshift_master_scheduler_default_priorities }}"
+      when: openshift_master_scheduler_priorities in older_priorities + older_priorities_no_zone + [prev_priorities] + [prev_priorities_no_zone]
+
+    - debug:
+        msg: "WARNING: openshift_master_scheduler_priorities does not match current defaults of: {{ openshift_master_scheduler_default_priorities }}"
+      when: openshift_master_scheduler_priorities != openshift_master_scheduler_default_priorities
+    when: openshift_master_scheduler_priorities | default(none) is not none
+
+  # Handle cases where openshift_master_priorities is not defined
+  - block:
+    - debug:
+        msg: "WARNING: existing scheduler config does not match previous known defaults automated upgrade of scheduler config is disabled.\nexisting scheduler priorities: {{ openshift_master_scheduler_current_priorities }}\ncurrent scheduler default priorities are: {{ openshift_master_scheduler_default_priorities }}"
+      when:
+      - openshift_master_scheduler_current_priorities != openshift_master_scheduler_default_priorities
+      - openshift_master_scheduler_current_priorities not in older_priorities + [prev_priorities]
+
+    - set_fact:
+        openshift_upgrade_scheduler_priorities: "{{ openshift_master_scheduler_default_priorities }}"
+      when:
+      - openshift_master_scheduler_current_priorities != openshift_master_scheduler_default_priorities
+      - openshift_master_scheduler_current_priorities in older_priorities + [prev_priorities]
+
+    - set_fact:
+        openshift_upgrade_scheduler_priorities: "{{ default_priorities_no_zone }}"
+      when:
+      - openshift_master_scheduler_current_priorities != default_priorities_no_zone
+      - openshift_master_scheduler_current_priorities in older_priorities_no_zone + [prev_priorities_no_zone]
+
+    when: openshift_master_scheduler_priorities | default(none) is none
+
+
+# Update scheduler
+- vars:
+    scheduler_config:
+      kind: Policy
+      apiVersion: v1
+      predicates: "{{ openshift_upgrade_scheduler_predicates
+                      | default(openshift_master_scheduler_current_predicates) }}"
+      priorities: "{{ openshift_upgrade_scheduler_priorities
+                      | default(openshift_master_scheduler_current_priorities) }}"
+  block:
+  - name: Update scheduler config
+    copy:
+      content: "{{ scheduler_config | to_nice_json }}"
+      dest: "{{ openshift_master_scheduler_conf }}"
+      backup: true
+  when: >
+    openshift_upgrade_scheduler_predicates is defined or
+    openshift_upgrade_scheduler_priorities is defined

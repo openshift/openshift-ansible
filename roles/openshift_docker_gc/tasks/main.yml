@@ -1,0 +1,40 @@
+---
+- name: Ensure that docker-gc will have nodes to run on
+  import_role:
+    name: openshift_master
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ r_docker_gc_node_selectors | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: docker-gc daemonset
+
+- name: Create docker-gc tempdir
+  command: mktemp -d
+  register: templates_tmpdir
+
+# NOTE: oc_adm_policy_user does not support -z (yet)
+- name: Add dockergc as priviledged
+  shell: "{{ openshift_client_binary }}  adm policy add-scc-to-user -z dockergc privileged"
+#  oc_adm_policy_user:
+#    user: dockergc
+#    resource_kind: scc
+#    resource_name: privileged
+#    state: present
+
+- name: Create dockergc DaemonSet
+  become: yes
+  template:
+    src: dockergc-ds.yaml.j2
+    dest: "{{ templates_tmpdir.stdout }}/dockergc-ds.yaml"
+
+- name: Apply dockergc DaemonSet
+  oc_obj:
+    state: present
+    kind: DaemonSet
+    name: "dockergc"
+    files:
+    - "{{ templates_tmpdir.stdout }}/dockergc-ds.yaml"
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ templates_tmpdir.stdout }}"

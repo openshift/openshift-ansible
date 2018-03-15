@@ -1,10 +1,22 @@
 ---
+# system containers create their own service unit files based on templates
+# that are part of the container image.
+# oc_atomic_container will create a systemd service unit file in
+# /etc/systemd/system/origin-node.service (origin) or
+# /etc/systemd/system/atomic-openshift-node.service (enterprise)
 
 - name: Pre-pull node system container image
   command: >
     atomic pull --storage=ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ osn_image }}:{{ openshift_image_tag }}
   register: pull_result
   changed_when: "'Pulling layer' in pull_result.stdout"
+
+# TODO: remove when system container is fixed to not include it
+- name: Ensure old system path is set
+  file:
+    state: directory
+    path: "/etc/origin/openvswitch"
+    mode: '0750'
 
 - name: Install or Update node system container
   oc_atomic_container:
