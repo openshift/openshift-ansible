@@ -19,6 +19,6 @@
   block:
   - name: Pre-pull node image when containerized
     command: >
-      docker pull {{ osn_image }}:{{ openshift_image_tag }}
+      docker pull {{ osn_image }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
