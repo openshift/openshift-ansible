@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.8.0%{?dist}
+Release:        0.9.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 15 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.9.0
+- Use oreg_url for node and master images (ccoleman@redhat.com)
+- Label master nodes with openshift-infra=apiserver (jpeeler@redhat.com)
+
 * Thu Mar 15 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.8.0
 - Enabling multi vif pool drivers (ltomasbo@redhat.com)
 - Update the examples directory for v3.10 (cdaley@redhat.com)
