@@ -20,6 +20,17 @@
   vars:
     first_master: "{{ groups.oo_first_master[0] }}"
 
+# Label rest of master nodes - will be a no-op if only one master exists
+- name: Ensure all masters are labeled with node selector for Service Catalog
+  hosts: oo_masters_to_config
+  tasks:
+  - name: Label {{ openshift.node.nodename }} for APIServer and controller deployment
+    oc_label:
+      name: "{{ openshift.node.nodename }}"
+      kind: node
+      state: add
+      labels: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) | lib_utils_oo_dict_to_list_of_dict }}"
+
 - name: Service Catalog Install Checkpoint End
   hosts: all
   gather_facts: false
