@@ -1595,7 +1595,6 @@ class OCStorageClass(OpenShiftCLI):
         self.delete()
         # pause here and attempt to wait for delete.
         # Better option would be to poll
-        import time
         time.sleep(5)
         return self.create()
 
