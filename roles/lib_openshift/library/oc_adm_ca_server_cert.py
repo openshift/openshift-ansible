@@ -1525,7 +1525,6 @@ class CAServerCert(OpenShiftCLI):
         # Added this here as a safegaurd for stomping on the
         # cert and key files if they exist
         if self.config.config_options['backup']['value']:
-            import time
             ext = time.strftime("%Y-%m-%d@%H:%M:%S", time.localtime(time.time()))
             date_str = "%s_" + "%s" % ext
 
