@@ -74,6 +74,12 @@
           semanage fcontext -a -e /var/lib/docker/overlay2 /var/lib/containers/overlay2
           restorecon -R -v /var/lib/containers/overlay2
 
+- name: Configure oci umount for CRI-O
+  lineinfile:
+    dest: /etc/oci-umount.conf
+    line: '{{ item }}'
+  with_items: "{{ container_runtime_oci_umounts }}"
+
 - name: Start the CRI-O service
   systemd:
     name: "cri-o"
