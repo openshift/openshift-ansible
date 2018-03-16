@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.105
+Version:        3.6.173.0.106
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 16 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.106-1
+- 
+
 * Sat Mar 10 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.105-1
 - package_version check: stop looking for docker (lmeyer@redhat.com)
 - During master upgrade reset loopback config (sdodson@redhat.com)
