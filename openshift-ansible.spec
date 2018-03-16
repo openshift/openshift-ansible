@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.38
+Version:        3.7.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Mar 16 2018 Justin Pierce <jupierce@redhat.com> 3.7.39-1
+- backport to 3.7 for bug 1537857 (jcantril@redhat.com)
+- Fixing how patches are generated for logging configmaps (ewolinet@redhat.com)
+- Making patching a local_action and ensuring we become:false for local_actions
+  (ewolinet@redhat.com)
+
 * Sat Mar 10 2018 Justin Pierce <jupierce@redhat.com> 3.7.38-1
 - package_version check: stop looking for docker (lmeyer@redhat.com)
 - Use explicit broker version for image tag (erik@nsk.io)
