@@ -222,7 +222,7 @@ openshift_openstack_infra_secgroup_rules:
     port_range_min: 1936
     port_range_max: 1936
 openshift_openstack_cns_secgroup_rules:
-  # Allow rcpbind for CNS block
+  # rpcbind
   - direction: ingress
     protocol: tcp
     port_range_min: 111
@@ -232,6 +232,11 @@ openshift_openstack_cns_secgroup_rules:
     protocol: tcp
     port_range_min: 2222
     port_range_max: 2222
+  # iscsi-targets
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 3260
+    port_range_max: 3260
   # heketi dialing backends
   - direction: ingress
     protocol: tcp
@@ -247,6 +252,11 @@ openshift_openstack_cns_secgroup_rules:
     protocol: tcp
     port_range_min: 24008
     port_range_max: 24008
+  # glusterblockd
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 24010
+    port_range_max: 24010
   # glusterfs_bricks
   - direction: ingress
     protocol: tcp
