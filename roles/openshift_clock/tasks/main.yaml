@@ -3,6 +3,7 @@
   command: rpm -q chrony
   failed_when: false
   register: chrony_installed
+  warn: False
 
 - name: Install ntp package
   package: name=ntp state=present
