@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.10.0%{?dist}
+Release:        0.11.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat Mar 17 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.11.0
+- 
+
 * Fri Mar 16 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.10.0
 - Bug 1553576 - Change the self_hostname to ${hostname} in openshift-ansible
   (nhosoi@redhat.com)
