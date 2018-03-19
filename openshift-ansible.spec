@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.109
+Version:        3.6.173.0.110
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 19 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.110-1
+- etcd migrate: set openshift_ca_host (vrutkovs@redhat.com)
+- etcd migrate: Set missing variables (hansmi@vshn.ch)
+- Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
+
 * Mon Mar 19 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.109-1
 - 
 
