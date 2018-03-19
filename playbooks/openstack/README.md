@@ -15,6 +15,32 @@ OpenStack-native services (storage, lbaas, baremetal as a service, dns, etc.).
 In order to run these Ansible playbooks, you'll need an Ansible host and an
 OpenStack environment.
 
+### OpenShift-Ansible container
+
+OpenShift Ansible provides a container image that can be used for deployment.
+You can build it from the root of the openshift ansible repository with support
+for running this playbook with:
+
+   docker build -t openshift/origin-ansible:openstack . \
+       --build-arg EXTRA_REPOS="centos-release-openstack-pike" \
+       --build-arg EXTRA_REPO_PKGS="python2-shade python-netaddr python2-openstackclient python2-heatclient" \
+       -f images/installer/Dockerfile
+
+Once it is built (or pulled from docker hub), you can run it like so:
+
+    docker run -u `id -u` \
+           -v $HOME/.ssh/id_rsa:/opt/app-root/src/.ssh/id_rsa:Z \
+           -v /path/to/my/inventory:/tmp/inventory \
+           -e INVENTORY_FILE=/tmp/inventory \
+           -e PLAYBOOK_FILE=playbooks/openstack/openshift-cluster/provision_install.yml \
+           -e OPTS="-v -i playbooks/openstack/inventory.py --user openshfit" \
+           --env-file /path/to/my/keystonerc \
+           -t openshift/origin-ansible
+
+Refer to the [Configuration](#configuration) section for information about
+generating the *inventory* that appears above as */path/to/my/inventory*. Note
+that the keystonerc should only have key=value entries, no bash.
+
 ### Ansible Host
 
 Start by choosing a host from which you'll run [Ansible][ansible]. This can
