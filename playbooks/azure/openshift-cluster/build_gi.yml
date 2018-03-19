@@ -12,7 +12,7 @@
       tasks_from: provision_instance.yml
 
 - name: update OS and install packages
-  hosts: nodes
+  hosts: azure
   gather_facts: yes
   remote_user: "{{ openshift_azure_vm_admin_username }}"
   become: True
@@ -50,4 +50,4 @@
       name: openshift_azure
       tasks_from: create_image_from_vm.yml
     vars:
-      openshift_azure_vm_host: "{{ groups['nodes'][0] }}"
+      openshift_azure_vm_host: "{{ groups['azure'][0] }}"
