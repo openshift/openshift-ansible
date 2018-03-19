@@ -150,10 +150,10 @@ default_r_openshift_node_image_prep_packages:
 - flannel
 - bash-completion
 # cockpit
-- cockpit-ws
-- cockpit-system
-- cockpit-bridge
-- cockpit-docker
+#- cockpit-ws
+#- cockpit-system
+#- cockpit-bridge
+#- cockpit-docker
 # iscsi
 - iscsi-initiator-utils
 # ceph
