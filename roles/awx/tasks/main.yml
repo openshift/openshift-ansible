@@ -1,0 +1,6 @@
+---
+- include_tasks: install.yml
+  when: awx_install | default(false) | bool
+
+- include_tasks: remove.yml
+  when: not (awx_install | default(false)) | bool

@@ -1,0 +1,83 @@
+---
+# Based on https://github.com/ansible/awx/blob/1.0.3/installer/openshift/tasks/main.yml
+
+- name: Ensure AWX Project Exists
+  oc_project:
+    name: "{{ awx_openshift_project }}"
+
+# This secret is created by postgresql-persistent template
+- name: Read Existing Postgres Secret
+  oc_secret:
+    state: list
+    namespace: "{{ awx_openshift_project }}"
+    name: postgresql
+    decode: true
+  register: awx_postgres_secret
+  no_log: true
+
+- name: Get or Generate AWX Postgres Password
+  set_fact:
+    pg_password: "{{ awx_postgres_secret.results.decoded['database-password'] | default(16 | lib_utils_oo_random_word) }}"
+  no_log: true
+
+- name: Deploy and Activate Postgres
+  shell: >-
+    {{ openshift_client_binary }} project {{ awx_openshift_project }};
+    {{ openshift_client_binary }} process -n openshift postgresql-persistent
+    --param MEMORY_LIMIT=512Mi
+    --param NAMESPACE=openshift
+    --param DATABASE_SERVICE_NAME=postgresql
+    --param POSTGRESQL_USER={{ pg_username }}
+    --param POSTGRESQL_PASSWORD={{ pg_password }}
+    --param POSTGRESQL_DATABASE={{ pg_database }}
+    --param VOLUME_CAPACITY=5Gi
+    --param POSTGRESQL_VERSION=9.5
+    | {{ openshift_client_binary }} apply -f -
+  register: openshift_pg_activate
+
+- name: Create temp directory for templates
+  command: mktemp -td awx-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Read Existing AWX ConfigMap
+  oc_configmap:
+    state: list
+    namespace: "{{ awx_openshift_project }}"
+    name: awx-config
+  register: awx_config
+  no_log: true
+
+- name: Get or Generate AWX secret_key
+  set_fact:
+    awx_secret_key: "{{ (awx_config.results.results[0].data | default({})).secret_key | default(16 | lib_utils_oo_random_word) }}"
+  no_log: true
+
+# TODO: other possible secrets that need (?) randomization:
+# RABBITMQ_ERLANG_COOKIE
+# RABBITMQ_DEFAULT_PASS
+# AWX_ADMIN_PASSWORD
+
+- name: Template Openshift AWX Config
+  template:
+    src: configmap.yml.j2
+    dest: "{{ mktemp.stdout }}/configmap.yml"
+    mode: '0600'
+
+- name: Template Openshift AWX Deployment
+  template:
+    src: deployment.yml.j2
+    dest: "{{ mktemp.stdout }}/deployment.yml"
+    mode: '0600'
+
+- name: Apply Configmap
+  shell: "{{ openshift_client_binary }} apply -f {{ mktemp.stdout }}/configmap.yml"
+
+- name: Apply Deployment
+  shell: "{{ openshift_client_binary }} apply -f {{ mktemp.stdout }}/deployment.yml"
+
+- name: Delete temp directory
+  file:
+    name: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: False

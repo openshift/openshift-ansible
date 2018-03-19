@@ -1,0 +1,5 @@
+---
+- name: Remove AWX namespace
+  oc_project:
+    state: absent
+    name: "{{ awx_project }}"
