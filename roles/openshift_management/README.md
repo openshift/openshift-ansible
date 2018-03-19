@@ -89,17 +89,6 @@ App is created` task, we recommend running the
 [uninstall scripts](#uninstall) first before running the installer
 again.
 
-### Beta
-
-Only required for enterprise
-(`openshift_deployment_type=openshift-enterprise`) users:
-
-* `openshift_management_install_beta` - by setting this value to
-  `true` you acknowledge that this software is currently in BETA and
-  support may be limited nonexistent. This is required to begin the
-  installation.
-
-
 # Requirements
 
 The **default** requirements are listed in the table below. These can
@@ -139,7 +128,6 @@ installer.
 | `openshift_management_project`                       | **No**   | `openshift-management`         | Namespace for the installation.     |
 | `openshift_management_project_description`           | **No**   | *CloudForms Management Engine* | Namespace/project description.      |
 | `openshift_management_install_management`            | **No**   | `false`                        | Boolean, set to `true` to install the application |
-| `openshift_management_install_beta`                  | **No**   | `false`                        | Boolean, by setting this value to `true` you acknowledge that this software is currently in BETA and support may be limited. Only required for *openshift-enterprise* users. |
 | `openshift_management_username`                      | **No**   | `admin`                        | Default management username. Changing this values **does not change the username**. Only change this value if you have changed the name already and are running integration scripts (such as the [add container provider](#container-provider) script) |
 | `openshift_management_password`                      | **No**   | `smartvm`                      | Default management password. Changing this values **does not change the password**. Only change this value if you have changed the password already and are running integration scripts (such as the [add-container-provider](#container-provider) script) |
 | **PRODUCT CHOICE**  | | | | |
