@@ -2,7 +2,7 @@
 # tests with new APIs/semantics. We want to update versions deliberately.
 ansible==2.2.2.0
 click==6.7
-pyOpenSSL==16.2.0
+pyOpenSSL==17.5.0
 # We need to disable ruamel.yaml for now because of test failures
 #ruamel.yaml
 six==1.10.0
