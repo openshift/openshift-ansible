@@ -24,6 +24,8 @@
     dest: "{{ mktemp.stdout }}/{{ item | basename }}"
   with_fileglob:
     - "files/*.yaml"
+  when:
+    - not ((item | basename == 'sdn-ovs.yaml') and openshift_use_external_openvswitch)
 
 - name: Update the image tag
   yedit:
