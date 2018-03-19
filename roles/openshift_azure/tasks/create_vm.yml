@@ -17,6 +17,8 @@
     ssh_public_keys: "{{ openshift_azure_vm_ssh_public_keys if openshift_azure_vm_ssh_public_keys != [] else omit }}"
     os_type: Linux
     image: "{{ openshift_azure_vm_base_image }}"
+    #tags:
+      #nodes: 'node'
   register: azurevm
 
 - name: dump azurevm details
@@ -25,6 +27,16 @@
     verbosity: 1
 
 - meta: refresh_inventory
+
+- name: debug inventory
+  debug:
+    msg: "{{ item }}"
+  with_items: "{{ groups['azure'] }}"
+
+- name: add azurevm to hosts
+  add_host:
+    groups: nodes,g_new_nodes_hosts
+    name: "{{ azurevm.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.publicIPAddress.properties.ipAddress }}"
 
 - name: Wait for SSH
   wait_for_connection:

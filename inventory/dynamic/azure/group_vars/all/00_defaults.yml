@@ -1,4 +1,10 @@
 ---
+openshift_deployment_type: openshift-enterprise
+openshift_master_bootstrap_enabled: True
+openshift_master_fire_handlers: False
+openshift_master_systemd_enable: no
+openshift_is_containerized: False
+
 openshift_azure_clusterid: "{{ openshift_clusterid | default('default') }}"
 
 openshift_azure_image_base_name: "{{ openshift_azure_clusterid }}_base"
@@ -10,7 +16,7 @@ openshift_azure_resource_group_name: "{{ openshift_azure_clusterid }}"
 
 openshift_azure_resource_location: eastus
 
-openshift_azure_storage_account_name: "{{ openshift_azure_clusterid }}"
+openshift_azure_storage_account_name: "openshift{{ openshift_azure_clusterid }}"
 openshift_azure_storage_account_type: Standard_LRS
 openshift_azure_subnet_prefix: 172.31.48.0/20
 openshift_azure_virtual_network_address_prefixes:
@@ -66,10 +72,12 @@ openshift_azure_vm_image:
 
 openshift_azure_vm_storage_container: "{{ openshift_azure_clusterid }}"
 
-openshift_azure_vm_ssh_public_keys: []
+#openshift_azure_vm_ssh_public_keys: []
 #- path: /root/.ssh/authorized_keys
 #  key_data: "{{ openshift_azure_public_ssh_key }}"
 
 openshift_azure_vm_size:  Standard_D4s_v3
 
 openshift_azure_use_cloud_init: False
+
+openshift_cloudprovider_kind: azure

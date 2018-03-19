@@ -59,7 +59,7 @@
 - name: enable master services
   systemd:
     name: "{{ openshift_service_type }}-master-{{ item }}"
-    enabled: yes
+    enabled: "{{ openshift_master_systemd_enable }}"
   with_items:
   - api
   - controllers
@@ -81,7 +81,7 @@
 - name: Create the master api service env file
   template:
     src: "{{ ha_svc_template_path }}/atomic-openshift-master-api.j2"
-    dest: /etc/sysconfig/{{ openshift_service_type }}-master-api
+    dest: "/etc/sysconfig/{{ openshift_service_type }}-master-api"
     backup: true
   notify:
   - restart master api
