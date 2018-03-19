@@ -233,6 +233,7 @@
           replicas: 1
           selector:
             app: openshift-ansible-service-broker
+          nodeSelector: '{{ ansible_service_broker_node_selector }}'
           strategy:
             type: Rolling
           template:
@@ -295,16 +296,7 @@
                   secret:
                     secretName: broker-etcd-auth-secret
 
-- name: Search for existing Ansible Service Broker etcd deployment config
-  oc_obj:
-    name: asb-etcd
-    namespace: openshift-ansible-service-broker
-    kind: DeploymentConfig
-    state: list
-  register: asb_etcd_dc
-
 - name: Create asb-etcd deployment config
-  when: asb_etcd_dc.results.results.0 | length == 0
   oc_obj:
     name: asb-etcd
     namespace: openshift-ansible-service-broker
@@ -324,6 +316,7 @@
           replicas: 1
           selector:
             app: etcd
+          nodeSelector: '{{ ansible_service_broker_node_selector }}'
           strategy:
             type: Rolling
           template:
