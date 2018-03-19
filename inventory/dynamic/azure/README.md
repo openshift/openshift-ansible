@@ -1,0 +1,1 @@
+This directory provides dynamic inventory for an Azure cluster configured via the Azure provisioning playbook. Set inventory to `inventory/dynamic/azure/hosts.sh` to calculate the appropriate host set.

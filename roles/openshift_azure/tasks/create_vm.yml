@@ -24,12 +24,9 @@
     var: azurevm
     verbosity: 1
 
-- name: add azurevm to hosts
-  add_host:
-    groups: nodes,g_new_nodes_hosts
-    name: "{{ azurevm.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.publicIPAddress.properties.ipAddress }}"
+- meta: refresh_inventory
 
-- name: wait for new instance to ensure connectivity
+- name: Wait for SSH
   wait_for_connection:
-    delay: 10
-    timeout: 300
+  delegate_to: '{{ item }}'
+  with_items: '{{ groups["azure"] }}'
