@@ -37,6 +37,17 @@
 
 - import_playbook: ../../openshift-node/private/image_prep.yml
 
+- name: customize image for azure
+  hosts: azure
+  gather_facts: yes
+  remote_user: "{{ openshift_azure_vm_admin_username }}"
+  become: True
+  tasks:
+  - name: azure customize waagent and cloud-init
+    import_role:
+      name: openshift_azure
+      tasks_from: customize.yml
+
 # NOTE: this isn't available until ansible 2.5
 # https://github.com/ansible/ansible/pull/32589
 # installed from https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
