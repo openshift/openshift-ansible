@@ -15,4 +15,4 @@ openshift_provisioners_image_prefix_dict:
 
 openshift_provisioners_image_version_dict:
   origin: "latest"
-  openshift-enterprise: "{{ openshift_image_tag }}"
+  openshift-enterprise: "latest"
