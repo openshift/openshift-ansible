@@ -12,7 +12,5 @@
   when: "'glusterfs_registry' in groups and groups['glusterfs_registry'] | length > 0 and not (glusterfs_s3_only_uninstall)"
 
 - name: Run glusterfs s3 uninstall role
-  block:
-    - include_tasks: glusterfs_config_facts.yml
-    - include_tasks: uninstall_s3.yml
+  include_tasks: uninstall_s3.yml
   when: glusterfs_s3_only_uninstall
