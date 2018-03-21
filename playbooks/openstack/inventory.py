@@ -162,6 +162,11 @@ def build_inventory():
         except KeyError:
             pass  # Not an API load balanced deployment
 
+        inventory['localhost']['openshift_openstack_public_api_ip'] = \
+            stout.get('public_api_ip')
+        inventory['localhost']['openshift_openstack_public_router_ip'] = \
+            stout.get('public_router_ip')
+
         try:
             inventory['OSEv3']['vars'] = _get_kuryr_vars(cloud, stout)
         except KeyError:

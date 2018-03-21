@@ -291,18 +291,81 @@ follow the OpenShift documentation on the registry:
 https://docs.openshift.org/latest/install_config/registry/index.html
 
 
-## Multi-Master Configuration
+## API and Router Load Balancing
 
-Please refer to the official documentation for the
-[multi-master setup](https://docs.openshift.com/container-platform/3.6/install_config/install/advanced_install.html#multiple-masters)
-and define the corresponding [inventory variables](https://docs.openshift.com/container-platform/3.6/install_config/install/advanced_install.html#configuring-cluster-variables)
-in `inventory/group_vars/OSEv3.yml`. For example, given a load balancer node
-under the ansible group named `ext_lb`:
+A production deployment should contain more then one master and infra node and
+have a load balancer in front of them.
 
-```
-openshift_master_cluster_hostname: "{{ groups.ext_lb.0 }}"
-openshift_master_cluster_public_hostname: "{{ groups.ext_lb.0 }}"
-```
+The playbooks will not create any load balancer by default. Even if you do
+request multiple masters.
+
+You can opt into that if you want though. There are two options: a VM-based
+load balancer and OpenStack's Load Balancer as a Service.
+
+### Load Balancer as a Service
+
+If your OpenStack supports Load Balancer as a Service (LBaaS) provided by the
+Octavia project, our playbooks can set it up automatically.
+
+Put this in your `inventory/group_vars/all.yml`:
+
+    openshift_openstack_use_lbaas_load_balancer: true
+
+This will create two load balancers: one for the API and UI console and the
+other for the OpenShift router. Each will have its own public IP address.
+
+### VM-based Load Balancer
+
+If you can't use OpenStack's LBaaS, we can create and configure a virtual
+machine running HAProxy to serve as one.
+
+Put this in your `inventory/group_vars/all.yml`:
+
+    openshift_openstack_use_vm_load_balancer: true
+
+**WARNING** this VM will only handle the API and UI requests, *not* the
+OpenShift routes.
+
+That means, if you have more than one infra node, you will have to balance them
+externally. It is not recommended to use this option in production.
+
+### No Load Balancer
+
+If you specify neither `openshift_openstack_use_lbaas_load_balancer` nor
+`openshift_openstack_use_vm_load_balancer`, the resulting OpenShift cluster
+will have no load balancing configured out of the box.
+
+This is regardless of how many master or infra nodes you create.
+
+In this mode, you are expected to configure and maintain a load balancer
+yourself.
+
+However, the cluster is usable without a load balancer as well. To talk to the
+API or UI, connect to any of the master nodes. For the OpenShift routes, use
+any of the infra nodes.
+
+### Public Cluster Endpoints
+
+In either of these cases (LBaaS, VM HAProxy, no LB) the public addresses to
+access the cluster's API and router will be printed out at the end of the
+playbook.
+
+If you want to get them out explicitly, run the following playbook with the
+same arguments (private key, inventories, etc.) as your provision/install ones:
+
+    playbooks/openstack/inventory.py openshift-ansible/playbooks/openstack/openshift-cluster/cluster-info.yml
+
+These addresses will depend on the load balancing solution. For LBaaS, they'll
+be the the floating IPs of the load balancers. In the VM-based solution,
+the API address will be the public IP of the load balancer VM and the router IP
+will be the address of the first infra node that was created. If no load
+balancer is selected, the API will be the address of the first master node and
+the router will be the address of the first infra node.
+
+This means that regardless of the load balancing solution, you can use these
+two entries to provide access to your cluster.
+
+
 
 ## Provider Network Configuration
 

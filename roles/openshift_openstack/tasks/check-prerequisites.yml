@@ -102,3 +102,12 @@
   - { image: "{{ openshift_openstack_node_image }}", flavor: "{{ openshift_openstack_node_flavor }}" }
   - { image: "{{ openshift_openstack_lb_image }}", flavor: "{{ openshift_openstack_lb_flavor }}" }
   - { image: "{{ openshift_openstack_etcd_image }}", flavor: "{{ openshift_openstack_etcd_flavor }}" }
+
+- name: Check Load Balancer options
+  fail:
+    msg: >
+      Only one of `openshift_openstack_use_lbaas_load_balancer` and
+      `openshift_openstack_use_vm_load_balancer` can be true at a time.
+  when:
+  - openshift_openstack_use_lbaas_load_balancer
+  - openshift_openstack_use_vm_load_balancer

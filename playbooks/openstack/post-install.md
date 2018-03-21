@@ -19,11 +19,16 @@ DNS configured. You should add two entries to the `/etc/hosts` file on the
 Ansible host (where you to do a quick validation. A real deployment will
 however require a DNS server with the following entries set.
 
-First, run the `openstack server list` command and note the floating IP
-addresses of the *master* and *infra* nodes (we will use `10.40.128.130` for
-master and `10.40.128.134` for infra here).
+In either case, the IP addresses for the API and routers will be printed
+out at the end of the deployment.
 
-Then add the following entries to your `/etc/hosts`:
+The first one is your API/UI address and the second one is the router address.
+Depending on your load balancer configuration they may or may not be the same.
+
+In this example, we will use `10.40.128.130` for the `public_api_ip` and
+`10.40.128.134` for `public_router_ip`.
+
+Add the following entries to your `/etc/hosts`:
 
 ```
 10.40.128.130 console.openshift.example.com

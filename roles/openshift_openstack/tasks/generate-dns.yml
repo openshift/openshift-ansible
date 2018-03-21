@@ -52,25 +52,13 @@
   with_items: "{{ groups['cluster_hosts'] }}"
   when: hostvars[item]['public_v4'] is defined
 
-- name: "Add wildcard records to the public A records"
+- name: "Add wildcard record to the public A records"
   set_fact:
-    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_openstack_app_subdomain, 'ip': hostvars[item]['public_v4'] } ] }}"
-  with_items: "{{ groups['infra_hosts'] }}"
-  when: hostvars[item]['public_v4'] is defined
+    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': '*.' + openshift_openstack_app_subdomain, 'ip': openshift_openstack_public_router_ip } ] }}"
 
-- name: "Add public master cluster hostname records to the public A records (single master)"
+- name: "Add the public API entry point record"
   set_fact:
-    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(openshift_openstack_full_dns_domain, ''))[:-1], 'ip': hostvars[groups.masters[0]].public_v4 } ] }}"
-  when:
-    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
-    - openshift_openstack_num_masters == 1
-
-- name: "Add public master cluster hostname records to the public A records (multi-master)"
-  set_fact:
-    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(openshift_openstack_full_dns_domain, ''))[:-1], 'ip': hostvars[groups.lb[0]].public_v4 } ] }}"
-  when:
-    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
-    - openshift_openstack_num_masters > 1
+    public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(openshift_openstack_full_dns_domain, ''))[:-1], 'ip': openshift_openstack_public_api_ip } ] }}"
 
 - name: "Set the public DNS server details to use the external value (if provided)"
   set_fact:
