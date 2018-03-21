@@ -4,12 +4,18 @@
 # create all the items necessary to make the VM
 - name: "Create resource group"
   hosts: localhost
-  gather_facts: no
+  gather_facts: yes
   tasks:
-  - name: "provision public ip address"
+  - name: provision public ip address
     import_role:
       name: openshift_azure
       tasks_from: provision_instance.yml
+  - name: get the openshift registry token
+    import_role:
+      name: openshift_registry_token
+    when:
+    - oreg_auth_password is not defined
+    - openshift_registry_token_api_auth_password is defined
 
 - name: update OS and install packages
   hosts: nodes
@@ -17,6 +23,14 @@
   remote_user: "{{ openshift_azure_vm_admin_username }}"
   become: True
   tasks:
+  - name: read the openshift registry token from localhost's vars
+    set_fact:
+      oreg_url: '{{ openshift_registry_token_url }}'
+      oreg_auth_user: '{{ openshift_registry_token_auth_user }}'
+      oreg_auth_password: '{{ hostvars["localhost"]["openshift_registry_token_auth_password"] }}'
+    when:
+    - oreg_auth_password is not defined
+    - openshift_registry_token_api_auth_password is defined
   - name: set the user to perform installation
     set_fact:
       ansible_ssh_user: "{{ openshift_azure_vm_admin_username | default(ansible_ssh_user) }}"

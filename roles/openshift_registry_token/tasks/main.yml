@@ -1,0 +1,15 @@
+---
+- name: Ensure we have directory to store the config file and token
+  file:
+    path: '{{ openshift_registry_token_kube_config_path | dirname }}'
+    state: directory
+
+- name: Login to the reg aws cluster
+  shell: oc --config '{{ openshift_registry_token_kube_config_path }}' login -u '{{ openshift_registry_token_auth_user }}' -p '{{ openshift_registry_token_api_auth_password }}' '{{ openshift_registry_token_api_url }}'
+
+- name: Get oreg token
+  shell: oc --config '{{ openshift_registry_token_kube_config_path }}' whoami -t > '{{ openshift_registry_token_token_path }}'
+
+- name: Read the token into variable
+  set_fact:
+    openshift_registry_token_auth_password: '{{ lookup("file", openshift_registry_token_token_path) }}'
