@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.12
+Version:        3.9.13
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 21 2018 Justin Pierce <jupierce@redhat.com> 3.9.13-1
+- EFS Provisioner: switch OCP tag to latest (vrutkovs@redhat.com)
+- Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
+
 * Mon Mar 19 2018 Justin Pierce <jupierce@redhat.com> 3.9.12-1
 - 
 
