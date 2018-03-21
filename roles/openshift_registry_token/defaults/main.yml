@@ -1,0 +1,3 @@
+---
+openshift_registry_token_kube_config_path: '{{ ansible_user_dir }}/.ocp/kube-reg-aws'
+openshift_registry_token_token_path: '{{ ansible_user_dir }}/.ocp/kube-reg-aws-token'
