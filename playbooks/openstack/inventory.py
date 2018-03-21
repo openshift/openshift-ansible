@@ -127,7 +127,7 @@ def build_inventory():
     cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
     cluster_hosts = [
         server for server in cloud.list_servers()
-        if 'metadata' in server and 'clusterid' in server.metadata and server.metadata['clusterid'] == cluster_name ]
+        if 'metadata' in server and 'clusterid' in server.metadata and server.metadata['clusterid'] == cluster_name]
 
     inventory = base_openshift_inventory(cluster_hosts)
 
