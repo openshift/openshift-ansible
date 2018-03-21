@@ -11,4 +11,4 @@ l_openshift_prometheus_image_version: "{{ openshift_prometheus_image_version | d
 l_openshift_prometheus_proxy_image_version: "{{ openshift_prometheus_proxy_image_version | default(openshift_image_tag) }}"
 l_openshift_prometheus_alertmanager_image_version: "{{ openshift_prometheus_alertmanager_image_version | default(openshift_image_tag) }}"
 l_openshift_prometheus_alertbuffer_image_version: "{{ openshift_prometheus_alertbuffer_image_version | default(openshift_image_tag) }}"
-l_openshift_prometheus_node_exporter_image_version: "{{ openshift_prometheus_node_exporter_image_version | default('v0.15.2') }}"
+l_openshift_prometheus_node_exporter_image_version: "{{ openshift_prometheus_node_exporter_image_version | default(openshift_image_tag) }}"
