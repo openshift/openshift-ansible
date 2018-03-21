@@ -1,0 +1,83 @@
+---
+- block:
+  - name: Stat for Contrail docker images
+    stat:
+      path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+    register: image
+    with_items:
+    - contrail-controller
+    - contrail-analytics
+    - contrail-analyticsdb
+    - contrail-kube-manager
+
+  - name: Copy Contrail docker images file to remote host if not present
+    copy:
+      src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+      dest: "/tmp"
+    when: item.stat.exists == False
+    with_items: "{{ image.results }}"
+
+  - name: Untar Contrail docker images file
+    unarchive:
+      src: "/tmp/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+      dest: "/tmp"
+      remote_src: True
+    when: item.stat.exists == False
+    with_items: "{{ image.results }}"
+
+  - name: Load Contrail docker images
+    docker_image:
+      name: "{{ item }}"
+      tag: "{{ contrail_version }}"
+      timeout: 300
+      load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+    with_items: "{{ image.results }}"
+    
+  - name: Add iptable rules to open ports used by Contrail services
+    command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
+    with_items:
+      - { port: '8082', service: 'contrail-config-api' }
+      - { port: '9100', service: 'contrail-config-api-backend' }
+      - { port: '8084', service: 'contrail-config-api-introspect' }
+      - { port: '8143', service: 'contrail-web-ui' }
+      - { port: '8080', service: 'contrail-web-ui-debug' }
+      - { port: '5269', service: 'contrail-control-xmpp' }
+      - { port: '8093', service: 'contrail-control-dns-xmpp' }
+      - { port: '8083', service: 'contrail-control-introspect' }
+      - { port: '8092', service: 'contrail-control-introspect-dns' }
+      - { port: '8086', service: 'contrail-analytics-collector' }
+      - { port: '8081', service: 'contrail-analytics-api' }
+      - { port: '2181', service: 'zookeeper' }
+      - { port: '2182', service: 'zookeeper' }
+      - { port: '2888:3889', service: 'zookeeper' }
+      - { port: '5672', service: 'rabbitmq' }
+      - { port: '6381', service: 'redis' }
+      - { port: '9092', service: 'kafka' }
+      - { port: '9041', service: 'cassandra' }
+      - { port: '9042', service: 'cassandra' }
+      - { port: '9160', service: 'cassandra' }
+      - { port: '9161', service: 'cassandra' }
+      - { port: '7000', service: 'cassandra' }
+      - { port: '7010', service: 'cassandra' }
+      - { port: '7199', service: 'cassandra' }
+      - { port: '7198', service: 'cassandra' }
+      - { port: '8443', service: 'ifmap' }
+
+  - name: Save iptable rules
+    command: service iptables save
+
+  - set_fact:
+      api_vip: "{{ groups.lb.0 | ipaddr }}"
+    when: groups.lb is defined
+
+  - set_fact:
+      api_vip: "{{ groups.masters.0 | ipaddr }}"
+    when: groups.lb is not defined
+
+  - name: Create Contrail single YAML file
+    template:
+      src: contrail-installer.j2
+      dest: /tmp/contrail-installer.yaml
+      owner: root
+      mode: 0644
+    run_once: true
