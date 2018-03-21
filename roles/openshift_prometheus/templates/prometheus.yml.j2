@@ -20,6 +20,9 @@ scrape_configs:
 
   kubernetes_sd_configs:
   - role: endpoints
+    namespaces:
+      names:
+      - default
 
   scheme: https
   tls_config:
@@ -30,9 +33,9 @@ scrape_configs:
   # will add targets for each API server which Kubernetes adds an endpoint to
   # the default/kubernetes service.
   relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
     action: keep
-    regex: default;kubernetes;https
+    regex: kubernetes;https
 
 # Scrape config for controllers.
 #
@@ -48,14 +51,17 @@ scrape_configs:
 
   kubernetes_sd_configs:
   - role: endpoints
+    namespaces:
+      names:
+      - default
 
   # Keep only the default/kubernetes service endpoints for the https port, and then
   # set the port to 8444. This is the default configuration for the controllers on OpenShift
   # masters.
   relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
     action: keep
-    regex: default;kubernetes;https
+    regex: kubernetes;https
   - source_labels: [__address__]
     action: replace
     target_label: __address__
@@ -226,11 +232,14 @@ scrape_configs:
 
   kubernetes_sd_configs:
   - role: endpoints
+    namespaces:
+      names:
+      - openshift-template-service-broker
 
   relabel_configs:
-  - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
     action: keep
-    regex: openshift-template-service-broker;apiserver;https
+    regex: apiserver;https
 
 
 alerting:
