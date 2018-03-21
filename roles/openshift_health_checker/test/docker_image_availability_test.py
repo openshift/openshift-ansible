@@ -206,7 +206,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'openshift/origin:vtest',
             'openshift/node:vtest',
             'openshift/openvswitch:vtest',
-            'registry.access.redhat.com/rhel7/etcd',
+            'registry.fedoraproject.org/f27/etcd',
         ])
     ),
     (  # enterprise images
