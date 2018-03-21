@@ -25,9 +25,10 @@
   command: >
     {{ openshift_client_binary }} get pods -l deploymentconfig={{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
   register: _pods
+  changed_when: false
 
 - when: not _skip_healthcheck | bool
-  name: "Waiting for ES to be ready for {{ _es_node }}"
+  name: "Waiting for ES node {{ _es_node }} health to be in ['green', 'yellow']"
   shell: >
     {{ openshift_client_binary }} exec "{{ _pod }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- es_cluster_health
   with_items: "{{ _pods.stdout.split(' ') }}"
@@ -35,6 +36,6 @@
     loop_var: _pod
   register: _pod_status
   until: (_pod_status.stdout | from_json)['status'] in ['green', 'yellow']
-  retries: 60
-  delay: 10
+  retries: "{{ __elasticsearch_ready_retries }}"
+  delay: 30
   changed_when: false
