@@ -3,6 +3,8 @@
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[item]['ansible_hostname'] + openshift_openstack_private_hostname_suffix + '.' + openshift_openstack_full_dns_domain, 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
+  when:
+    - openshift_openstack_external_nsupdate_keys['private'] is defined
 
 - name: "Add wildcard records to the private A records for infrahosts"
   set_fact:
@@ -25,7 +27,6 @@
     nsupdate_private_key_name: "{{ openshift_openstack_external_nsupdate_keys['private']['key_name'] }}"
   when:
     - openshift_openstack_external_nsupdate_keys['private'] is defined
-
 
 - name: "Generate the private Add section for DNS"
   set_fact:
