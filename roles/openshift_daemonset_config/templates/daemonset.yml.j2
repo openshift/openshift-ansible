@@ -101,9 +101,8 @@ spec:
           subPath: sys
           name: host
           readOnly: true
-        - mountPath: /var/run/docker.sock
-          subPath: var/run/docker.sock
-          name: host
+        - mountPath: /run/docker.sock
+          name: docker-sock
           readOnly: true
         - mountPath: /var/run/openvswitch
           subPath: var/run/openvswitch
@@ -150,3 +149,7 @@ spec:
       - name: host
         hostPath:
           path: /
+      - hostPath:
+          path: /run/docker.sock
+          type: ""
+        name: docker-sock
