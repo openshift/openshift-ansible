@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.39
+Version:        3.7.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,13 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 21 2018 Justin Pierce <jupierce@redhat.com> 3.7.40-1
+- Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
+- Bug 1541946- waiting for master reboot now works behind bastion
+  (fabian@fabianism.us)
+- Change openshift_client_binary to openshift.common.client_binary
+  (mgugino@redhat.com)
+
 * Fri Mar 16 2018 Justin Pierce <jupierce@redhat.com> 3.7.39-1
 - backport to 3.7 for bug 1537857 (jcantril@redhat.com)
 - Fixing how patches are generated for logging configmaps (ewolinet@redhat.com)
