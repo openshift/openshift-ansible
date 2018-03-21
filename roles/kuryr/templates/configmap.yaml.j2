@@ -231,7 +231,7 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('multi', 'noop') }}
+    vif_pool_driver = {{ kuryr_openstack_enable_pools | ternary('multi', 'noop') }}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -553,7 +553,7 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('nested', 'noop') }}
+    vif_pool_driver = {{ kuryr_openstack_enable_pools | ternary('multi', 'noop') }}
 
     [neutron]
     # Configuration options for OpenStack Neutron
