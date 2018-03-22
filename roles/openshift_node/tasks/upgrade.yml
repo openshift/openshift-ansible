@@ -33,6 +33,9 @@
 
 - include_tasks: upgrade/config_changes.yml
 
+- include_tasks: dnsmasq_install.yml
+- include_tasks: dnsmasq.yml
+
 # Restart all services
 - include_tasks: upgrade/restart.yml
 
@@ -47,9 +50,6 @@
   # Give the node two minutes to come back online.
   retries: 24
   delay: 5
-
-- include_tasks: dnsmasq_install.yml
-- include_tasks: dnsmasq.yml
 
 - include_tasks: journald.yml
 
