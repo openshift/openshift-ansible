@@ -173,6 +173,11 @@
     retries: 12
     delay: 10
     until: etcd_add_check.rc == 0
+  - name: Make sure ETCD_NAME is updated
+    lineinfile:
+      regexp: ^ETCD_NAME=
+      line: "ETCD_NAME={{ etcd_hostname }}"
+      dest: /etc/etcd/etcd.conf
   - name: Set ETCD_INITIAL_CLUSTER_STATE=existing on migrated etcd host
     lineinfile:
       regexp: ^ETCD_INITIAL_CLUSTER_STATE=
