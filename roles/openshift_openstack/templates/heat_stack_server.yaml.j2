@@ -228,7 +228,7 @@ resources:
       metadata:
         group: { get_param: group }
         environment: { get_param: cluster_env }
-        clusterid: {{ openshift_openstack_clusterid }}
+        clusterid: {{ openshift_openstack_stack_name }}
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
         node_labels: { get_param: node_labels }
