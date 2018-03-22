@@ -119,10 +119,12 @@ def _get_hostvars(server, docker_storage_mountpoints):
                 docker_storage_mountpoints[server.id])
     return hostvars
 
+
 def _get_cluster_name():
     ''' Get the cluster name.'''
     cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
     return cluster_name
+
 
 def build_inventory():
     '''Build the dynamic inventory.'''
