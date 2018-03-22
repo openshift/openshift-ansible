@@ -14,3 +14,37 @@
     sanity_checks:
       check_hosts: "{{ l_sanity_check_hosts | default(groups['oo_all_hosts']) }}"
     run_once: True
+
+# Workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1558672
+# Need to check to ensure that the control host (host running ansible-playbook)
+# has sufficient RAM due to bug in ansible 2.4.3.
+- name: Verify ansible control host RAM
+  connection: local
+  hosts: localhost
+  vars:
+    l_hosts_in_play: "{{ l_sanity_check_hosts | default('oo_all_hosts') }}"
+    l_num_hosts_in_play: "{{ groups[l_hosts_in_play] | length }}"
+    l_ram_required: "{{ 615 * l_num_hosts_in_play | int }}"
+  tasks:
+  - name: Assert localhost memory is sufficient for playbook execution
+    assert:
+      msg: >
+        Not enough memory on ansible control host. The number of hosts currently
+        in scope is {{ l_num_hosts_in_play }}. A minimum of 615 MiB free RAM is
+        required per host in playbook scope.  This number of hosts requires at
+        least {{ l_ram_required }} MiB free RAM.  You may disable this check
+        with openshift_skip_control_host_ram_check=True, however if using
+        ansible==2.4.3 your control host may run out of memory during playbook
+        execution and ansible will stop.
+      that:
+      # Ansible should be consuming around 60 MiB at this point
+      - "(ansible_memory_mb['nocache']['free'] - 60) >= (l_ram_required | int)"
+    when: not (openshift_skip_control_host_ram_check | default(False) | bool)
+    vars:
+      l_num_hosts_in_play: "{{ groups['all'] | length }}"
+  - debug:
+      var: l_ram_required
+  - debug:
+      var: l_hosts_in_play
+  - debug:
+      var: l_num_hosts_in_play
