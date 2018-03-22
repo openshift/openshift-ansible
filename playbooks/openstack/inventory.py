@@ -119,12 +119,16 @@ def _get_hostvars(server, docker_storage_mountpoints):
                 docker_storage_mountpoints[server.id])
     return hostvars
 
+def _get_cluster_name():
+    ''' Get the cluster name.'''
+    cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
+    return cluster_name
 
 def build_inventory():
     '''Build the dynamic inventory.'''
     cloud = shade.openstack_cloud()
 
-    cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
+    cluster_name = _get_cluster_name()
     cluster_hosts = [
         server for server in cloud.list_servers()
         if 'metadata' in server and 'clusterid' in server.metadata and server.metadata['clusterid'] == cluster_name]
@@ -170,7 +174,7 @@ def build_inventory():
 
 def _get_stack_outputs(cloud_client):
     """Returns a dictionary with the stack outputs"""
-    cluster_name = os.getenv('OPENSHIFT_CLUSTER', 'openshift-cluster')
+    cluster_name = _get_cluster_name()
 
     stack = cloud_client.get_stack(cluster_name)
     if stack is None or stack['stack_status'] not in (
