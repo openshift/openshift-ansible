@@ -16,6 +16,9 @@
   command: >
     atomic pull --storage=ostree {{ system_osn_image }}
   register: pull_result
+  retries: 3
+  delay: 5
+  until: pull_result.rc == 0
   changed_when: "'Pulling layer' in pull_result.stdout"
 
 - name: Install or Update node system container

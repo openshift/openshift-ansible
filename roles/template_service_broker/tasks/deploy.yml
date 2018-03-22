@@ -48,6 +48,10 @@
     {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig -f "{{ mktemp.stdout }}/{{ __tsb_rbac_file }}"
     | {{ openshift_client_binary }} auth reconcile --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 
+- name: DEBUG get pods
+  command: >
+    oc describe pods -n openshift-ansible-service-broker
+
 # Check that the TSB is running
 - name: Verify that TSB is running
   command: >
