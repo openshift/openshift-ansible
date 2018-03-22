@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.13
+Version:        3.9.14
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.14-1
+- Updating default run hour and minute for curator (ewolinet@redhat.com)
+- fixing the mounts for the daemonset config to have non subpath mount
+  (mwoodson@redhat.com)
+
 * Wed Mar 21 2018 Justin Pierce <jupierce@redhat.com> 3.9.13-1
 - EFS Provisioner: switch OCP tag to latest (vrutkovs@redhat.com)
 - Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
