@@ -46,6 +46,11 @@
     vars:
       os_update_latest_reboot: True
 
+  - name: fetch tags
+    import_role:
+      name: openshift_azure
+      tasks_from: query_tags.yml
+
   - name: clean up tasks
     import_tasks: tasks/remove_yum.yml
 
@@ -61,3 +66,4 @@
       tasks_from: create_image_from_vm.yml
     vars:
       openshift_azure_vm_host: "{{ groups['azure'][0] }}"
+      openshift_azure_os_tags: "{{ hostvars[groups['azure'][0]]['openshift_azure_os_tags'] | default({}) }}"

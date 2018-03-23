@@ -1,0 +1,28 @@
+---
+# Here is where we fetch any of the info from the host to set tags
+- name: fetch kernel version
+  set_fact:
+    openshift_azure_os_tags:
+      distribution: "{{ ansible_distribution }}"
+      major_version: "{{ ansible_distribution_major_version }}"
+      version: "{{ ansible_distribution_version }}"
+      build_date: "{{ ansible_date_time.iso8601 }}"
+      kernel: "{{ ansible_kernel }}"
+
+- when: not openshift_azure_image_build_base
+  block:
+  - name: fetch openshift version
+    repoquery:
+      name: "{{ 'origin' if openshift_deployment_type == 'origin' else 'atomic-openshift' }}-master"
+      query_type: installed
+    register: queryout
+
+  - name: dump query
+    debug:
+      msg: "{{ queryout }}"
+      verbosity: 1
+
+  - name: fetch kernel version
+    set_fact:
+      openshift_azure_openshift_tags:
+        openshift_version: "{{ queryout.results.versions.latest_full }}"

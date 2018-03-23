@@ -17,7 +17,7 @@
     - oreg_auth_password is not defined
     - openshift_registry_token_api_auth_password is defined
 
-- name: update OS and install packages
+- name: prepare node image
   hosts: nodes
   gather_facts: yes
   remote_user: "{{ openshift_azure_vm_admin_username }}"
@@ -62,6 +62,21 @@
       name: openshift_azure
       tasks_from: customize.yml
 
+  # in order to setup the masters we need openshift_release
+  #- name: import repoquery
+  #  import_role:
+  #    name: lib_utils
+
+  #- name: repoquery openshift version
+  #  repoquery:
+  #    name: "{{ openshift_service_type }}-master"
+  #    query_type: installed
+  #  register: queryout
+
+  #- name: set_fact openshift_release
+  #  set_fact:
+  #    openshift_release: "{{ queryout.results.versions.latest }}"
+
   - name: setup the system unit files
     import_role:
       name: openshift_master_facts
@@ -71,9 +86,21 @@
       name: openshift_master
       tasks_from: systemd_units.yml
 
+  - name: fetch tags
+    import_role:
+      name: openshift_azure
+      tasks_from: query_tags.yml
+
+  - debug:
+      var: openshift_azure_os_tags
+      verbosity: 1
+
+  - debug:
+      var: openshift_azure_openshift_tags
+      verbosity: 1
+
   - name: clean up tasks
     import_tasks: tasks/remove_yum.yml
-
 # NOTE: this isn't available until ansible 2.5
 # https://github.com/ansible/ansible/pull/32589
 # installed from https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
@@ -88,3 +115,5 @@
       tasks_from: create_image_from_vm.yml
     vars:
       openshift_azure_vm_host: "{{ groups['azure'][0] }}"
+      openshift_azure_os_tags: "{{ hostvars[groups['azure'][0]]['openshift_azure_os_tags'] | default({}) }}"
+      openshift_azure_openshift_tags: "{{ hostvars[groups['azure'][0]]['openshift_azure_openshift_tags'] | default({}) }}"
