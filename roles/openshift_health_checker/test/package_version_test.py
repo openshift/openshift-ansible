@@ -25,10 +25,6 @@ def test_openshift_version_not_supported():
         check.get_required_ovs_version()
     assert "no recommended version of Open vSwitch" in str(excinfo.value)
 
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.get_required_docker_version()
-    assert "no recommended version of Docker" in str(excinfo.value)
-
 
 def test_invalid_openshift_release_format():
     task_vars = dict(
@@ -69,33 +65,6 @@ def test_package_version(openshift_release):
         return return_value
 
     check = PackageVersion(execute_module, task_vars_for(openshift_release, 'origin'))
-    result = check.run()
-    assert result == return_value
-
-
-@pytest.mark.parametrize('deployment_type,openshift_release,expected_docker_version', [
-    ("origin", "3.5", "1.12"),
-    ("origin", "1.3", "1.10"),
-    ("origin", "1.1", "1.8"),
-    ("openshift-enterprise", "3.4", "1.12"),
-    ("openshift-enterprise", "3.2", "1.10"),
-    ("openshift-enterprise", "3.1", "1.8"),
-])
-def test_docker_package_version(deployment_type, openshift_release, expected_docker_version):
-
-    return_value = {"foo": object()}
-
-    def execute_module(module_name=None, module_args=None, *_):
-        assert module_name == 'aos_version'
-        assert "package_list" in module_args
-
-        for pkg in module_args["package_list"]:
-            if pkg["name"] == "docker":
-                assert pkg["version"] == expected_docker_version
-
-        return return_value
-
-    check = PackageVersion(execute_module, task_vars_for(openshift_release, deployment_type))
     result = check.run()
     assert result == return_value
 
