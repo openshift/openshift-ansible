@@ -30,6 +30,9 @@ bin_dir: /usr/bin
 openshift_openstack_kuryr_controller_image: kuryr/controller:latest
 openshift_openstack_kuryr_cni_image: kuryr/cni:latest
 
+# Enable kuryr ports pool by default
+kuryr_openstack_enable_pools: True
+
 # Path to the cni binaries
 cni_bin_dir: /opt/cni/bin
 

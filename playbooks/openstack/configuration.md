@@ -243,10 +243,10 @@ documentation:
 
 https://docs.openstack.org/kuryr-kubernetes/latest/installation/ports-pool.html
 
-To enable this feature, you must set:
+To disable this feature, you must set:
 
 ```yaml
-kuryr_openstack_enable_pools: true
+kuryr_openstack_enable_pools: false
 ```
 
 You can control the port pooling characteristics with these options:
@@ -256,31 +256,8 @@ kuryr_openstack_pool_max: 0
 kuryr_openstack_pool_min: 1
 kuryr_openstack_pool_batch: 5
 kuryr_openstack_pool_update_frequency: 20
+`openshift_kuryr_precreate_subports: 5`
 ```
-
-### Deploying OpenShift Registry
-
-Since we've disabled the OpenShift registry creation, you will have to create
-it manually afterwards. SSH to a master node and run this as root:
-
-```yaml
-oadm registry --config=/etc/origin/master/admin.kubeconfig --service-account=registry
-```
-
-For more information (e.g. how to use a specific storage backend), please
-follow the OpenShift documentation on the registry:
-
-https://docs.openshift.org/latest/install_config/registry/index.html
-
-And if you also want to enable the ports pooling options, as well as
-preloading them, you should uncomment and set the next:
-
-* `kuryr_openstack_enable_pools: True`
-* `kuryr_openstack_pool_max: 0`
-* `kuryr_openstack_pool_min: 1`
-* `kuryr_openstack_pool_batch: 5`
-* `kuryr_openstack_pool_update_frequency: 60`
-* `openshift_kuryr_precreate_subports: 5`
 
 Note in the last variable you specify the number of subports that will
 be created per trunk port, i.e., per pool.
@@ -298,6 +275,21 @@ openshift_openstack_cluster_node_labels:
     region: infra
     pod_vif: nested-vlan
 ```
+
+
+### Deploying OpenShift Registry
+
+Since we've disabled the OpenShift registry creation, you will have to create
+it manually afterwards. SSH to a master node and run this as root:
+
+```yaml
+oadm registry --config=/etc/origin/master/admin.kubeconfig --service-account=registry
+```
+
+For more information (e.g. how to use a specific storage backend), please
+follow the OpenShift documentation on the registry:
+
+https://docs.openshift.org/latest/install_config/registry/index.html
 
 
 ## Multi-Master Configuration
