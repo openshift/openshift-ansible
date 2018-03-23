@@ -2,8 +2,10 @@
 # Upgrade predicates
 - vars:
     prev_predicates: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
+    prev_predicates_cloud_provider: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, cloud_provider_enabled=False) }}"
     prev_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, regions_enabled=False) }}"
     default_predicates_no_region: "{{ lookup('openshift_master_facts_default_predicates', regions_enabled=False) }}"
+    default_predicates_cloud_provider: "{{ lookup('openshift_master_facts_default_predicates', cloud_provider_enabled=True) }}"
     # older_predicates are the set of predicates that have previously been
     # hard-coded into openshift_facts
     older_predicates:
@@ -90,14 +92,22 @@
       - openshift_master_scheduler_current_predicates != default_predicates_no_region
       - openshift_master_scheduler_current_predicates in older_predicates_no_region + [prev_predicates_no_region]
 
+    - set_fact:
+        openshift_upgrade_scheduler_predicates: "{{ default_predicates_cloud_provider }}"
+      when:
+      - openshift_master_scheduler_current_predicates != default_predicates_cloud_provider
+      - openshift_master_scheduler_current_predicates == prev_predicates_cloud_provider
+
     when: openshift_master_scheduler_predicates | default(none) is none
 
 
 # Upgrade priorities
 - vars:
     prev_priorities: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type) }}"
+    prev_priorities_cloud_provider: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, cloud_provider_enabled=True) }}"
     prev_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', short_version=openshift_upgrade_min, deployment_type=openshift_deployment_type, zones_enabled=False) }}"
     default_priorities_no_zone: "{{ lookup('openshift_master_facts_default_priorities', zones_enabled=False) }}"
+    default_priorities_cloud_provider: "{{ lookup('openshift_master_facts_default_priorities', cloud_provider_enabled=True) }}"
     # older_priorities are the set of priorities that have previously been
     # hard-coded into openshift_facts
     older_priorities:
@@ -149,6 +159,12 @@
       when:
       - openshift_master_scheduler_current_priorities != default_priorities_no_zone
       - openshift_master_scheduler_current_priorities in older_priorities_no_zone + [prev_priorities_no_zone]
+
+    - set_fact:
+        openshift_upgrade_scheduler_priorities: "{{ default_priorities_cloud_provider }}"
+      when:
+      - openshift_master_scheduler_current_priorities != default_priorities_cloud_provider
+      - openshift_master_scheduler_current_priorities == prev_priorities_cloud_provider
 
     when: openshift_master_scheduler_priorities | default(none) is none
 

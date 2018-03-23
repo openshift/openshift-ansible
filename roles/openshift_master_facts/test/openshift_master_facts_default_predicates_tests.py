@@ -66,6 +66,15 @@ REGION_PREDICATE = {
     }
 }
 
+CLOUD_PROVIDER_REGION_PREDICATE = {
+    'name': 'Region',
+    'argument': {
+        'serviceAffinity': {
+            'labels': ['failure-domain.beta.kubernetes.io/region']
+        }
+    }
+}
+
 TEST_VARS = [
     ('1.1', 'origin', DEFAULT_PREDICATES_1_1),
     ('3.1', 'openshift-enterprise', DEFAULT_PREDICATES_1_1),
@@ -82,17 +91,21 @@ TEST_VARS = [
 ]
 
 
-def assert_ok(predicates_lookup, default_predicates, regions_enabled, **kwargs):
-    results = predicates_lookup.run(None, regions_enabled=regions_enabled, **kwargs)
-    if regions_enabled:
+def assert_ok(predicates_lookup, default_predicates, regions_enabled, cloudprovider_enabled, **kwargs):
+    results = predicates_lookup.run(None, regions_enabled=regions_enabled,
+                                    cloudprovider_enabled=cloudprovider_enabled, **kwargs)
+    if regions_enabled and cloudprovider_enabled:
+        assert results == default_predicates + [CLOUD_PROVIDER_REGION_PREDICATE]
+    elif regions_enabled and not cloudprovider_enabled:
         assert results == default_predicates + [REGION_PREDICATE]
     else:
         assert results == default_predicates
 
 
-def test_openshift_version(predicates_lookup, openshift_version_fixture, regions_enabled):
+def test_openshift_version(predicates_lookup, openshift_version_fixture, regions_enabled, cloudprovider_enabled):
     facts, default_predicates = openshift_version_fixture
-    assert_ok(predicates_lookup, default_predicates, variables=facts, regions_enabled=regions_enabled)
+    assert_ok(predicates_lookup, default_predicates, variables=facts, regions_enabled=regions_enabled,
+              cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -104,9 +117,10 @@ def openshift_version_fixture(request, facts):
     return facts, default_predicates
 
 
-def test_openshift_release(predicates_lookup, openshift_release_fixture, regions_enabled):
+def test_openshift_release(predicates_lookup, openshift_release_fixture, regions_enabled, cloudprovider_enabled):
     facts, default_predicates = openshift_release_fixture
-    assert_ok(predicates_lookup, default_predicates, variables=facts, regions_enabled=regions_enabled)
+    assert_ok(predicates_lookup, default_predicates, variables=facts, regions_enabled=regions_enabled,
+              cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -117,9 +131,10 @@ def openshift_release_fixture(request, facts, release_mod):
     return facts, default_predicates
 
 
-def test_short_version(predicates_lookup, short_version_fixture, regions_enabled):
+def test_short_version(predicates_lookup, short_version_fixture, regions_enabled, cloudprovider_enabled):
     facts, default_predicates = short_version_fixture
-    assert_ok(predicates_lookup, default_predicates, variables=facts, regions_enabled=regions_enabled)
+    assert_ok(predicates_lookup, default_predicates, variables=facts, regions_enabled=regions_enabled,
+              cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -130,11 +145,12 @@ def short_version_fixture(request, facts):
     return facts, default_predicates
 
 
-def test_short_version_kwarg(predicates_lookup, short_version_kwarg_fixture, regions_enabled):
+def test_short_version_kwarg(predicates_lookup, short_version_kwarg_fixture, regions_enabled, cloudprovider_enabled):
     facts, short_version, default_predicates = short_version_kwarg_fixture
     assert_ok(
         predicates_lookup, default_predicates, variables=facts,
-        regions_enabled=regions_enabled, short_version=short_version)
+        regions_enabled=regions_enabled, short_version=short_version,
+        cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -144,11 +160,12 @@ def short_version_kwarg_fixture(request, facts):
     return facts, short_version, default_predicates
 
 
-def test_deployment_type_kwarg(predicates_lookup, deployment_type_kwarg_fixture, regions_enabled):
+def test_deployment_type_kwarg(predicates_lookup, deployment_type_kwarg_fixture, regions_enabled, cloudprovider_enabled):
     facts, deployment_type, default_predicates = deployment_type_kwarg_fixture
     assert_ok(
         predicates_lookup, default_predicates, variables=facts,
-        regions_enabled=regions_enabled, deployment_type=deployment_type)
+        regions_enabled=regions_enabled, deployment_type=deployment_type,
+        cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
@@ -159,11 +176,12 @@ def deployment_type_kwarg_fixture(request, facts):
 
 
 def test_short_version_deployment_type_kwargs(
-        predicates_lookup, short_version_deployment_type_kwargs_fixture, regions_enabled):
+        predicates_lookup, short_version_deployment_type_kwargs_fixture, regions_enabled, cloudprovider_enabled):
     short_version, deployment_type, default_predicates = short_version_deployment_type_kwargs_fixture
     assert_ok(
         predicates_lookup, default_predicates, regions_enabled=regions_enabled,
-        short_version=short_version, deployment_type=deployment_type)
+        short_version=short_version, deployment_type=deployment_type,
+        cloudprovider_enabled=cloudprovider_enabled)
 
 
 @pytest.fixture(params=TEST_VARS)
