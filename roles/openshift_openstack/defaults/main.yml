@@ -106,8 +106,9 @@ openshift_openstack_provision_user_commands: []
 openshift_openstack_disable_root: true
 openshift_openstack_user: openshift
 
-# security groups
-openshift_openstack_common_secgroup_rules:
+# security group rules
+
+openshift_openstack_base_common_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 22
@@ -116,7 +117,11 @@ openshift_openstack_common_secgroup_rules:
   - direction: ingress
     protocol: icmp
     remote_ip_prefix: "{{ openshift_openstack_ssh_ingress_cidr }}"
-openshift_openstack_master_secgroup_rules:
+openshift_openstack_extra_common_secgroup_rules: []
+openshift_openstack_common_secgroup_rules:
+  "{{ openshift_openstack_base_common_secgroup_rules }} + {{openshift_openstack_extra_common_secgroup_rules }}"
+
+openshift_openstack_base_master_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 4001
@@ -157,13 +162,21 @@ openshift_openstack_master_secgroup_rules:
     protocol: tcp
     port_range_min: 9090
     port_range_max: 9090
-openshift_openstack_etcd_secgroup_rules:
+openshift_openstack_extra_master_secgroup_rules: []
+openshift_openstack_master_secgroup_rules:
+  "{{ openshift_openstack_base_master_secgroup_rules }} + {{openshift_openstack_extra_master_secgroup_rules }}"
+
+openshift_openstack_base_etcd_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 2379
     port_range_max: 2380
     remote_mode: remote_group_id
-openshift_openstack_node_secgroup_rules:
+openshift_openstack_extra_etcd_secgroup_rules: []
+openshift_openstack_etcd_secgroup_rules:
+  "{{ openshift_openstack_base_etcd_secgroup_rules }} + {{openshift_openstack_extra_etcd_secgroup_rules }}"
+
+openshift_openstack_base_node_secgroup_rules:
   # NOTE(shadower): the 53 rules are needed for Kuryr
   - direction: ingress
     protocol: tcp
@@ -208,7 +221,11 @@ openshift_openstack_node_secgroup_rules:
     port_range_min: 30000
     port_range_max: 32767
     remote_ip_prefix: "{{ openshift_openstack_subnet_cidr }}"
-openshift_openstack_infra_secgroup_rules:
+openshift_openstack_extra_node_secgroup_rules: []
+openshift_openstack_node_secgroup_rules:
+  "{{ openshift_openstack_base_node_secgroup_rules }} + {{openshift_openstack_extra_node_secgroup_rules }}"
+
+openshift_openstack_base_infra_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 80
@@ -221,7 +238,11 @@ openshift_openstack_infra_secgroup_rules:
     protocol: tcp
     port_range_min: 1936
     port_range_max: 1936
-openshift_openstack_cns_secgroup_rules:
+openshift_openstack_extra_infra_secgroup_rules: []
+openshift_openstack_infra_secgroup_rules:
+  "{{ openshift_openstack_base_infra_secgroup_rules }} + {{openshift_openstack_extra_infra_secgroup_rules }}"
+
+openshift_openstack_base_cns_secgroup_rules:
   # Allow rcpbind for CNS block
   - direction: ingress
     protocol: tcp
@@ -252,7 +273,11 @@ openshift_openstack_cns_secgroup_rules:
     protocol: tcp
     port_range_min: 49152
     port_range_max: 49251
-openshift_openstack_lb_base_secgroup_rules:
+openshift_openstack_extra_cns_secgroup_rules: []
+openshift_openstack_cns_secgroup_rules:
+  "{{ openshift_openstack_base_cns_secgroup_rules }} + {{openshift_openstack_extra_cns_secgroup_rules }}"
+
+openshift_openstack_base_lb_secgroup_rules:
   - direction: ingress
     protocol: tcp
     port_range_min: 443
@@ -263,6 +288,9 @@ openshift_openstack_lb_base_secgroup_rules:
     port_range_min: "{{ openshift_master_api_port | default(8443) }}"
     port_range_max: "{{ openshift_master_api_port | default(8443) }}"
     remote_ip_prefix: "{{ openshift_openstack_lb_ingress_cidr }}"
+openshift_openstack_extra_lb_secgroup_rules: []
+openshift_openstack_lb_secgroup_rules:
+  "{{ openshift_openstack_base_lb_secgroup_rules }} + {{openshift_openstack_extra_lb_secgroup_rules }}"
 openshift_openstack_lb_console_secgroup_rules:
   - direction: ingress
     protocol: tcp

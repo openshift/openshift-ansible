@@ -87,6 +87,14 @@ openshift_openstack_cluster_node_labels:
   * `openshift_openstack_docker_etcd_volume_size`
   * `openshift_openstack_docker_lb_volume_size`
 * `openshift_openstack_flat_secgrp` Set to True if you experience issues with sec group rules quotas. It trades security for number of rules, by sharing the same set of firewall rules for master, node, etcd and infra nodes.
+* Extra Role Security Group Rules: empty by default, these can be set if you'd like to add extra security group rules to your roles.
+  * `openshift_openstack_extra_common_secgroup_rules`
+  * `openshift_openstack_extra_master_secgroup_rules`
+  * `openshift_openstack_extra_etcd_secgroup_rules`
+  * `openshift_openstack_extra_node_secgroup_rules`
+  * `openshift_openstack_extra_infra_secgroup_rules`
+  * `openshift_openstack_extra_cns_secgroup_rules`
+  * `openshift_openstack_extra_lb_secgroup_rules`
 * `openshift_openstack_required_packages` List of additional prerequisite packages to be installed before deploying an OpenShift cluster.
 
 

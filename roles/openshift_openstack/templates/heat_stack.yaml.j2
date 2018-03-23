@@ -419,14 +419,14 @@ resources:
       description: Security group for {{ openshift_openstack_full_dns_domain }} cluster Load Balancer
       rules:
 {% if openshift_master_console_port is defined and openshift_master_console_port != openshift_master_api_port %}
-{% for rule in openshift_openstack_lb_base_secgroup_rules|list %}
+{% for rule in openshift_openstack_lb_secgroup_rules|list %}
         - {{ rule|to_json }}
 {% endfor %}
 {% for rule in openshift_openstack_lb_console_secgroup_rules|list %}
         - {{ rule|to_json }}
 {% endfor %}
 {% else %}
-        {{ openshift_openstack_lb_base_secgroup_rules|to_json }}
+        {{ openshift_openstack_lb_secgroup_rules|to_json }}
 {% endif %}
 
   etcd:
