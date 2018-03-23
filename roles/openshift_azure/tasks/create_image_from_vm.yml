@@ -33,6 +33,9 @@
   azure_rm_image:
     resource_group: "{{ openshift_azure_resource_group_name }}"
     source: "{{ openshift_azure_vm_name }}"
-    name: "{{ openshift_azure_image_name }}-{{ ansible_date_time.epoch }}"
+    name: "{{ openshift_azure_image_name }}-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+
     os_type: Linux
+    tags: "{{ openshift_azure_image_tags | combine((openshift_azure_os_tags | default({}))) | combine((openshift_azure_openshift_tags|default({}))) }}"
+
     #source: "https://{{ openshift_azure_storage_account_name }}.blob.core.windows.net/{{ openshift_azure_vm_name }}/{{ openshift_azure_vm_name }}.vhd"
