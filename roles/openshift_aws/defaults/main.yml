@@ -192,9 +192,9 @@ openshift_aws_master_group_config:
     wait_for_instances: True
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_role_name }}"
-    policy_name: "{{ openshift_aws_iam_role_policy_name }}"
-    policy_json: "{{ openshift_aws_iam_role_policy_json }}"
+    iam_role: "{{ openshift_aws_iam_master_role_name | default(openshift_aws_iam_role_name) }}"
+    policy_name: "{{ openshift_aws_iam_master_role_policy_name | default(openshift_aws_iam_role_policy_name) }}"
+    policy_json: "{{ openshift_aws_iam_master_role_policy_json | default(openshift_aws_iam_role_policy_json) }}"
     elbs: "{{ openshift_aws_elb_dict | json_query('master.[*][0][*].name') }}"
 
 openshift_aws_node_group_config:
@@ -208,9 +208,9 @@ openshift_aws_node_group_config:
     desired_size: "{{ openshift_aws_compute_group_desired_size | default(3) }}"
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_role_name }}"
-    policy_name: "{{ openshift_aws_iam_role_policy_name }}"
-    policy_json: "{{ openshift_aws_iam_role_policy_json }}"
+    iam_role: "{{ openshift_aws_iam_node_role_name | default(openshift_aws_iam_role_name) }}"
+    policy_name: "{{ openshift_aws_iam_node_role_policy_name | default(openshift_aws_iam_role_policy_name) }}"
+    policy_json: "{{ openshift_aws_iam_node_role_policy_json | default(openshift_aws_iam_role_policy_json) }}"
   # The 'infra' key is always required here.
   infra:
     instance_type: "{{ openshift_aws_infra_group_instance_type | default('m4.xlarge') }}"
@@ -221,9 +221,9 @@ openshift_aws_node_group_config:
     desired_size: "{{ openshift_aws_infra_group_desired_size | default(2) }}"
     termination_policy: "{{ openshift_aws_node_group_termination_policy }}"
     replace_all_instances: "{{ openshift_aws_node_group_replace_all_instances }}"
-    iam_role: "{{ openshift_aws_iam_role_name }}"
-    policy_name: "{{ openshift_aws_iam_role_policy_name }}"
-    policy_json: "{{ openshift_aws_iam_role_policy_json }}"
+    iam_role: "{{ openshift_aws_iam_node_role_name | default(openshift_aws_iam_role_name) }}"
+    policy_name: "{{ openshift_aws_iam_node_role_policy_name | default(openshift_aws_iam_role_policy_name) }}"
+    policy_json: "{{ openshift_aws_iam_node_role_policy_json | default(openshift_aws_iam_role_policy_json) }}"
     elbs: "{{ openshift_aws_elb_dict | json_query('infra.[*][0][*].name') }}"
 
 # build_instance_tags is a custom filter in role lib_utils
