@@ -20,18 +20,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         (3, 9): ["2.6", "2.7", "2.8"],
     }
 
-    openshift_to_docker_version = {
-        (3, 1): "1.8",
-        (3, 2): "1.10",
-        (3, 3): "1.10",
-        (3, 4): "1.12",
-        (3, 5): "1.12",
-        (3, 6): "1.12",
-        (3, 7): "1.12",
-        (3, 8): "1.12",
-        (3, 9): ["1.12", "1.13"],
-    }
-
     def is_active(self):
         """Skip hosts that do not have package requirements."""
         group_names = self.get_var("group_names", default=[])
@@ -52,11 +40,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
                 {
                     "name": "openvswitch",
                     "version": self.get_required_ovs_version(),
-                    "check_multi": False,
-                },
-                {
-                    "name": "docker",
-                    "version": self.get_required_docker_version(),
                     "check_multi": False,
                 },
                 {
@@ -82,7 +65,3 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
     def get_required_ovs_version(self):
         """Return the correct Open vSwitch version(s) for the current OpenShift version."""
         return self.get_required_version("Open vSwitch", self.openshift_to_ovs_version)
-
-    def get_required_docker_version(self):
-        """Return the correct Docker version(s) for the current OpenShift version."""
-        return self.get_required_version("Docker", self.openshift_to_docker_version)
