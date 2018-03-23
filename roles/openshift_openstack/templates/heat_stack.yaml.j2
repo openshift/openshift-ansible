@@ -619,6 +619,7 @@ resources:
           api_lb_pool: { get_resource: api_lb_pool }
 {% endif %}
           secgrp:
+            - { get_resource: common-secgrp }
 {% if openshift_openstack_flat_secgrp|default(False)|bool %}
             - { get_resource: flat-secgrp }
 {% else %}
@@ -627,7 +628,6 @@ resources:
 {% if openshift_openstack_num_etcd|int == 0 %}
             - { get_resource: etcd-secgrp }
 {% endif %}
-            - { get_resource: common-secgrp }
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_secgrp:
             - { get_resource: pod_access_sg }
@@ -778,12 +778,12 @@ resources:
 {% endif %}
           secgrp:
 # TODO(bogdando) filter only required node rules into infra-secgrp
+            - { get_resource: common-secgrp }
 {% if openshift_openstack_flat_secgrp|default(False)|bool %}
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: node-secgrp }
             - { get_resource: infra-secgrp }
-            - { get_resource: common-secgrp }
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_secgrp:
             - { get_resource: pod_access_sg }
@@ -854,12 +854,12 @@ resources:
 {% endif %}
 {% endif %}
           secgrp:
+            - { get_resource: common-secgrp }
 {% if openshift_openstack_flat_secgrp|default(False)|bool %}
             - { get_resource: flat-secgrp }
 {% else %}
             - { get_resource: node-secgrp }
             - { get_resource: cns-secgrp }
-            - { get_resource: common-secgrp }
 {% if openshift_use_kuryr|default(false)|bool %}
           pod_secgrp:
             - { get_resource: pod_access_sg }
