@@ -329,7 +329,7 @@ resources:
 {% for rule in openshift_openstack_master_secgroup_rules|list %}
         - {{ rule|to_json }}
 {% endfor %}
-{% for rule in openshift_openstack_etcd_flat_secgroup_rules|list %}
+{% for rule in openshift_openstack_etcd_secgroup_rules|list %}
         - {{ rule|to_json }}
 {% endfor %}
 {% for rule in openshift_openstack_node_secgroup_rules|list %}
