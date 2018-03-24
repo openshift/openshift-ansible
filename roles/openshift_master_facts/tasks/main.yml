@@ -92,8 +92,8 @@
   set_fact:
     # openshift_master_facts_default_predicates is a custom lookup plugin in
     # role lib_utils
-    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates', cloudprovider_enabled=has_cloudprovider) }}"
-    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities', cloudprovider_enabled=has_cloudprovider) }}"
+    openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
+    openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
 
 - block:
   - name: Retrieve current scheduler config

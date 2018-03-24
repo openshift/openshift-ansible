@@ -43,10 +43,3 @@
     when:
     - openshift_master_scheduler_current_priorities != osm_default_priorities_no_zone
     - openshift_master_scheduler_current_priorities in osm_older_priorities_no_zone + [osm_prev_priorities_no_zone]
-
-  - name: set_fact openshift_upgrade_scheduler_priorities 3
-    set_fact:
-      openshift_upgrade_scheduler_priorities: "{{ osm_default_priorities_cloud_provider }}"
-    when:
-    - openshift_master_scheduler_current_priorities != osm_default_priorities_cloud_provider
-    - openshift_master_scheduler_current_priorities == osm_prev_priorities_cloud_provider
