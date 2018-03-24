@@ -4,7 +4,9 @@
   register: result
   until: result is succeeded
 
-- when: os_update_latest_reboot
+- when:
+  - os_update_latest_reboot
+  - result.changed
   block:
   - name: restart instance with latest updates
     shell: sleep 2 && /sbin/shutdown -r now "Ansible updates triggered"
