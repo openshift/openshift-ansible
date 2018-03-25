@@ -12,7 +12,6 @@ Environment variables may also be used.
 
 * [OpenStack Configuration](#openstack-configuration)
 * [OpenShift Configuration](#openshift-configuration)
-* [OpenShift Configuration](#openshift-configuration)
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
