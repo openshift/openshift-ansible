@@ -156,11 +156,6 @@ def zones_enabled(request):
     return request.param
 
 
-@pytest.fixture(params=[True, False])
-def cloudprovider_enabled(request):
-    return request.param
-
-
 def v_prefix(release):
     """Prefix a release number with 'v'."""
     return "v" + release

@@ -8,7 +8,7 @@ class LookupModule(LookupBase):
     # pylint: disable=too-many-branches,too-many-statements,too-many-arguments
 
     def run(self, terms, variables=None, regions_enabled=True, short_version=None,
-            cloudprovider_enabled=False, **kwargs):
+            **kwargs):
 
         predicates = []
 
@@ -80,15 +80,11 @@ class LookupModule(LookupBase):
             ])
 
         if regions_enabled:
-            if cloudprovider_enabled:
-                region_label = 'failure-domain.beta.kubernetes.io/region'
-            else:
-                region_label = 'region'
             region_predicate = {
                 'name': 'Region',
                 'argument': {
                     'serviceAffinity': {
-                        'labels': [region_label]
+                        'labels': ['region']
                     }
                 }
             }
