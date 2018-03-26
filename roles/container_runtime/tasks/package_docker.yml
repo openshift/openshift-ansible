@@ -1,9 +1,9 @@
 ---
-- include_tasks: common/pre.yml
+- import_tasks: common/pre.yml
 
 # In some cases, some services may be run as containers and docker may still
 # be installed via rpm.
-- include_tasks: common/atomic_proxy.yml
+- import_tasks: common/atomic_proxy.yml
   when:
   - >
     (openshift_use_system_containers | default(False)) | bool
@@ -20,7 +20,7 @@
   changed_when: false
 
 # Some basic checks to ensure the role will complete
-- include_tasks: docker_sanity.yml
+- import_tasks: docker_sanity.yml
 
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
@@ -157,4 +157,4 @@
 - set_fact:
     docker_service_status_changed: "{{ (r_docker_package_docker_start_result is changed) and (r_docker_already_running_result.stdout != 'ActiveState=active' ) }}"
 
-- include_tasks: common/post.yml
+- import_tasks: common/post.yml
