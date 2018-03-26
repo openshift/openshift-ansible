@@ -25,7 +25,6 @@ default_r_openshift_node_image_prep_packages:
 - "{{ openshift_service_type }}-master"
 - "{{ openshift_service_type }}-node"
 - "{{ openshift_service_type }}-docker-excluder"
-- "{{ openshift_service_type }}-sdn-ovs"
 - ansible
 - openvswitch
 - docker

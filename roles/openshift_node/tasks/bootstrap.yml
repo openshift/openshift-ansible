@@ -7,6 +7,14 @@
   register: result
   until: result | success
 
+- name: install SDN package
+  package:
+    name: "{{ openshift_service_type }}-sdn-ovs"
+    state: present
+  when: openshift_use_openshift_sdn | default(true) | bool
+  register: result
+  until: result | success
+
 - name: create the directory for node
   file:
     state: directory
