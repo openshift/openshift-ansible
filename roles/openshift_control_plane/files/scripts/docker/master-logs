@@ -9,12 +9,13 @@ if [[ -z "${1-}" || -z "${2-}" ]]; then
 fi
 
 # container name is ignored for services
-for type in ( "atomic-openshift"  "origin" ); then
+types=( "atomic-openshift" "origin" )
+for type in "${types[@]}"; do
   if systemctl cat "${type}-master-${1}.service" &>/dev/null; then
     journalctl -u "${type}-master-${1}.service" "${@:3}"
     exit 0
   fi
-fi
+done
 
 # TODO: move to cri-ctl
 # TODO: short term hack for cri-o
