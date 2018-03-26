@@ -46,7 +46,7 @@ kubeletArguments:
   cloud-provider:
   - {{ openshift_node_group_cloud_provider }}
 {% endif %}
-  node-labels: 
+  node-labels:
   - "{{ openshift_node_group_labels | join(',') }}"
   enable-controller-attach-detach:
   - 'true'
@@ -56,6 +56,7 @@ masterClientConnectionOverrides:
   contentType: application/vnd.kubernetes.protobuf
   qps: 20
 masterKubeConfig: node.kubeconfig
+nodeName: {{ openshift.node.nodename }}
 networkConfig:
   mtu: {{ openshift_node_group_network_mtu }}
   networkPluginName: {{ openshift_node_group_network_plugin }}
