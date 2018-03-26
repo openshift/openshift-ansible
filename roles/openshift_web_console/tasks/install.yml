@@ -118,7 +118,7 @@
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
     --param API_SERVER_CONFIG="{{ updated_console_config['content'] | b64decode }}"
-    --param IMAGE="{{ openshift_web_console_prefix }}{{ openshift_web_console_image_name }}:{{ openshift_web_console_version }}"
+    --param IMAGE="{{ openshift_web_console_image_name }}"
     --param NODE_SELECTOR={{ openshift_web_console_nodeselector | to_json | quote }}
     --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig

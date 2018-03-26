@@ -8,7 +8,7 @@
 - block:
   - name: Pull CLI Image
     command: >
-      docker pull {{ openshift_cli_image }}:{{ openshift_image_tag }}
+      docker pull {{ openshift_cli_image }}
     register: pull_result
     changed_when: "'Downloaded newer image' in pull_result.stdout"
 
@@ -16,7 +16,6 @@
   - name: Copy client binaries/symlinks out of CLI image for use on the host
     openshift_container_binary_sync:
       image: "{{ openshift_cli_image }}"
-      tag: "{{ openshift_image_tag }}"
       backend: "docker"
   when:
   - openshift_is_containerized | bool
@@ -25,15 +24,14 @@
 - block:
   - name: Pull CLI Image
     command: >
-      atomic pull --storage ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift_cli_image }}:{{ openshift_image_tag }}
+      atomic pull --storage ostree {{ system_openshift_cli_image }}
     register: pull_result
     changed_when: "'Pulling layer' in pull_result.stdout"
 
   # openshift_container_binary_sync is a custom module in lib_utils
   - name: Copy client binaries/symlinks out of CLI image for use on the host
     openshift_container_binary_sync:
-      image: "{{ '' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ openshift_cli_image }}"
-      tag: "{{ openshift_image_tag }}"
+      image: "{{ openshift_cli_image }}"
       backend: "atomic"
   when:
   - openshift_is_containerized | bool

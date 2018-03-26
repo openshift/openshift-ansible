@@ -9,8 +9,7 @@ metadata:
       It expects that OVS is running on the node.
     image.openshift.io/triggers: |
       [
-        {"from":{"kind":"ImageStreamTag","name":"node:v3.9"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sync\")].image"},
-        {"from":{"kind":"ImageStreamTag","name":"node:v3.9"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sdn\")].image"}
+        {"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sdn\")].image"}
       ]
 spec:
   selector:
@@ -32,98 +31,7 @@ spec:
       # as all pods.
       serviceAccountName: sdn
       hostNetwork: true
-      # Must be hostPID because it invokes operations on processes in the host space
-      hostPID: true
       containers:
-
-      # The sync container is a temporary config loop until Kubelet dynamic config is implemented. It refreshes
-      # the contents of /etc/origin/node/ with the config map ${BOOTSTRAP_CONFIG_NAME} from the openshift-node
-      # namespace. It will restart the Kubelet on the host if it detects the node-config.yaml has changed.
-      #
-      # 1. Dynamic Kubelet config must pull down a full configmap
-      # 2. Nodes must relabel themselves https://github.com/kubernetes/kubernetes/issues/59314
-      #
-      - name: sync
-        image: " "
-        command:
-        - /bin/bash
-        - -c
-        - |
-          #!/bin/bash
-          set -euo pipefail
-
-          # loop until BOOTSTRAP_CONFIG_NAME is set
-          set -o allexport
-          while true; do
-            if [[ -f /etc/sysconfig/origin-node ]]; then
-              source /etc/sysconfig/origin-node
-              if [[ -z "${BOOTSTRAP_CONFIG_NAME-}" ]]; then
-                echo "info: Waiting for BOOTSTRAP_CONFIG_NAME to be set" 2>&1
-                sleep 15
-                continue
-              fi
-              break
-            fi
-          done
-
-          # track the current state of the config
-          if [[ -f /etc/origin/node/node-config.yaml ]]; then
-            md5sum /etc/origin/node/node-config.yaml > /tmp/.old
-          else
-            touch /tmp/.old
-          fi
-
-          # periodically refresh both node-config.yaml and relabel the node
-          while true; do
-            name=${BOOTSTRAP_CONFIG_NAME}
-            if ! oc extract --config=/etc/origin/node/node.kubeconfig "cm/${BOOTSTRAP_CONFIG_NAME}" -n openshift-node --to=/etc/origin/node --confirm; then
-              echo "error: Unable to retrieve latest config for node" 2>&1
-              sleep 15
-              continue
-            fi
-            # detect whether the node-config.yaml has changed, and if so trigger a restart of the kubelet.
-            md5sum /etc/origin/node/node-config.yaml > /tmp/.new
-            if [[ "$( cat /tmp/.old )" != "$( cat /tmp/.new )" ]]; then
-              echo "info: Configuration changed, restarting kubelet" 2>&1
-              # TODO: kubelet doesn't relabel nodes, best effort for now
-              # https://github.com/kubernetes/kubernetes/issues/59314
-              if args="$(openshift start node --write-flags --config /etc/origin/node/node-config.yaml)"; then
-                labels=' --node-labels=([^ ]+) '
-                if [[ ${args} =~ ${labels} ]]; then
-                  labels="${BASH_REMATCH[1]//,/ }"
-                  echo "info: Applying node labels $labels" 2>&1
-                  if ! oc label --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" ${labels} --overwrite; then
-                    echo "error: Unable to apply labels, will retry in 10" 2>&1
-                    sleep 10
-                    continue
-                  fi
-                fi
-              fi
-              if ! pgrep -U 0 -f 'hyperkube kubelet ' | xargs kill; then
-                echo "error: Unable to restart Kubelet" 2>&1
-              fi
-            fi
-            cp -f /tmp/.new /tmp/.old
-            sleep 180
-          done
-
-        env:
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        securityContext:
-          runAsUser: 0
-          # Permission could be reduced by selecting an appropriate SELinux policy
-          privileged: true
-        volumeMounts:
-        # Directory which contains the host configuration. We write to this directory
-        - mountPath: /etc/origin/node/
-          name: host-config
-        - mountPath: /etc/sysconfig/origin-node
-          name: host-sysconfig-node
-          readOnly: true
-
       # The network container launches the openshift-sdn process, the kube-proxy, and the local DNS service.
       # It relies on an up to date node-config.yaml being present.
       - name: sdn

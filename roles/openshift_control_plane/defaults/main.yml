@@ -8,8 +8,8 @@ r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 l_openshift_images_dict:
-  origin: 'openshift/origin-${component}:${version}'
-  openshift-enterprise: 'openshift3/ose-${component}:${version}'
+  origin: 'docker.io/openshift/origin-${component}:${version}'
+  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
 l_osm_registry_url_default: "{{ l_openshift_images_dict[openshift_deployment_type] }}"
 l_os_registry_url: "{{ oreg_url_master | default(oreg_url) | default(l_osm_registry_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 
