@@ -12,4 +12,4 @@
   changed_when: "'Downloaded newer image' in pull_result.stdout"
   when: openshift_node_use_openshift_sdn | bool
 
-- include_tasks: ../container_images.yml
+- import_tasks: ../container_images.yml

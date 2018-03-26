@@ -11,18 +11,18 @@
 - when: openshift_is_containerized | bool
   block:
   - name: include node deps docker service file
-    include_tasks: config/install-node-deps-docker-service-file.yml
+    import_tasks: config/install-node-deps-docker-service-file.yml
 
   - name: include ovs service environment file
-    include_tasks: config/install-ovs-service-env-file.yml
+    import_tasks: config/install-ovs-service-env-file.yml
     when:
     - not openshift_use_external_openvswitch | bool
 
-  - include_tasks: config/install-ovs-docker-service-file.yml
+  - import_tasks: config/install-ovs-docker-service-file.yml
     when:
     - openshift_node_use_openshift_sdn | bool
     - not l_is_openvswitch_system_container | bool
     - not openshift_use_external_openvswitch | bool
 
-- include_tasks: config/configure-node-settings.yml
-- include_tasks: config/configure-proxy-settings.yml
+- import_tasks: config/configure-node-settings.yml
+- import_tasks: config/configure-proxy-settings.yml
