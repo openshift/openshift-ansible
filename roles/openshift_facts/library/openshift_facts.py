@@ -470,6 +470,8 @@ def set_aggregate_facts(facts):
             all_hostnames.add(kube_svc_ip)
             internal_hostnames.add(kube_svc_ip)
 
+            facts['node'] = {}
+
         facts['common']['all_hostnames'] = list(all_hostnames)
         facts['common']['internal_hostnames'] = list(internal_hostnames)
 
