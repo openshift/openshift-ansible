@@ -11,6 +11,7 @@
   - master.server.crt
   - openshift-master.crt
   - service-signer.crt
+  - aggregator-front-proxy.crt
   register: g_master_cert_stat_result
   when: not openshift_certificates_redeploy | default(false) | bool
 

@@ -33,7 +33,6 @@
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
 
-
 - name: "disable {{ openshift_service_type }}-node service"
   systemd:
     name: "{{ item }}"

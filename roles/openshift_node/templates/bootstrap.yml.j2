@@ -10,25 +10,9 @@
       - regex: ^listen-address
         state: present
         line: "listen-address={{ ansible_default_ipv4.address }}"
-    node_dns:
-      file: /etc/dnsmasq.d/node-dnsmasq.conf
-      lines:
-      - regex: "^server=/in-addr.arpa/127.0.0.1$"
-        line: server=/in-addr.arpa/127.0.0.1
-      - regex: "^server=/cluster.local/127.0.0.1$"
-        line: server=/cluster.local/127.0.0.1
 
   tasks:
   - include_vars: openshift_settings.yaml
-
-  - name: set the data for node_dns
-    lineinfile:
-      create: yes
-      insertafter: EOF
-      path: "{{ node_dns.file }}"
-      regexp: "{{ item.regex }}"
-      line: "{{ item.line | default(omit) }}"
-    with_items: "{{ node_dns.lines }}"
 
   - name: set the data for origin_dns
     lineinfile:

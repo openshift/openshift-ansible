@@ -13,13 +13,13 @@ openshift_pkg_version: "{{ lookup('env', 'ORIGIN_TAG') }}"
 openshift_release: "{{ lookup('env', 'ORIGIN_RELEASE') }}"
 oreg_url: "openshift/origin-${component}:{{ lookup('env', 'ORIGIN_COMMIT') }}"
 
-osm_default_node_selector: "region=infra"
+osm_default_node_selector: "node-role.kubernetes.io/infra=true"
 osm_controller_args:
   enable-hostpath-provisioner:
     - "true"
-openshift_hosted_router_selector: "region=infra"
+openshift_hosted_router_selector: "node-role.kubernetes.io/infra=true"
 openshift_hosted_router_create_certificate: true
-openshift_hosted_registry_selector: "region=infra"
+openshift_hosted_registry_selector: "node-role.kubernetes.io/infra=true"
 openshift_master_audit_config:
   enabled: true
 openshift_master_identity_providers:

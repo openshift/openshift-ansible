@@ -1,0 +1,105 @@
+---
+- name: Evaluate bootstrapped nodes
+  hosts: localhost
+  become: no
+  gather_facts: no
+  connection: local
+  tasks:
+  - name: Add all nodes that are bootstrapped
+    add_host:
+      name: "{{ item }}"
+      groups: oo_nodes_to_bootstrap
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
+    when:
+    - hostvars[item].openshift is defined
+    - hostvars[item].openshift.common is defined
+    - hostvars[item].openshift_is_bootstrapped | bool
+    - hostvars[item].openshift.node is defined
+    - hostvars[item].openshift.node.nodename is defined
+    changed_when: False
+  - name: Create a tempdir for node configs
+    command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: mktemp
+    changed_when: False
+
+- name: Copy bootstrap and CNI config
+  hosts: oo_first_master
+  tasks:
+  - name: Copy master bootstrap config locally
+    fetch:
+      src: "{{ openshift.common.config_base }}/master/bootstrap.kubeconfig"
+      dest: "{{ hostvars['localhost'].mktemp.stdout }}/bootstrap.kubeconfig"
+      flat: yes
+
+  - name: Copy master CNI settings
+    fetch:
+      src: "/etc/cni/net.d/{{ item }}"
+      dest: "{{ hostvars['localhost'].mktemp.stdout }}/{{ item }}"
+      flat: yes
+    ignore_errors: true
+    with_items:
+    - "80-openshift-network.conf"
+
+- name: Gather facts from nodes to bootstrap
+  hosts: oo_nodes_to_bootstrap
+  serial: 1
+  tasks:
+  - name: Gather node information
+    openshift_facts:
+      role: node
+      local_facts:
+        bootstrapped: true
+
+  - name: Copy master bootstrap config locally
+    slurp:
+      src: "/etc/origin/master/bootstrap.kubeconfig"
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    register: bootstrap_credentials
+
+  - name: Distribute bootstrap kubeconfig if one does not exist
+    copy:
+      src: "{{ hostvars['localhost'].mktemp.stdout }}/bootstrap.kubeconfig"
+      dest: "/etc/origin/node/bootstrap.kubeconfig"
+      mode: 0700
+      owner: root
+      group: root
+      force: no
+
+  - name: Ensure CNI config is created
+    file:
+      dest: "/etc/cni/net.d/"
+      state: directory
+      mode: 0755
+
+  - name: Distribute CNI settings
+    copy:
+      src: "{{ hostvars['localhost'].mktemp.stdout }}/{{ item }}"
+      dest: "/etc/cni/net.d/{{ item }}"
+    ignore_errors: true
+    with_items:
+    - "80-openshift-network.conf"
+
+  - name: Start and enable node
+    systemd:
+      name: "{{ openshift_service_type }}-node"
+      enabled: yes
+      state: started
+      daemon_reload: yes
+
+- name: Set node parameters
+  hosts: oo_nodes_to_bootstrap
+  roles:
+  - role: openshift_manage_node
+    openshift_master_host: "{{ groups.oo_first_master.0 }}"
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
+    openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
+
+- name: Delete temporary directory
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Delete temporary directory
+    local_action: file path="{{ mktemp.stdout }}" state=absent
+    changed_when: False

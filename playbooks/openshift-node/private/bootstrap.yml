@@ -1,0 +1,44 @@
+---
+- name: Node Preparation Checkpoint Start
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Node preparation 'In Progress'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_node:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- import_playbook: setup_bootstrap.yml
+
+- import_playbook: configure_nodes.yml
+
+- name: node bootstrap config
+  hosts: oo_nodes_to_config:!oo_exclude_nodes_to_config
+  tasks:
+  - import_role:
+      name: openshift_node
+      tasks_from: bootstrap.yml
+  - import_role:
+      name: openshift_node_group
+      tasks_from: bootstrap.yml
+  - set_fact:
+      openshift_is_bootstrapped: True
+
+- import_playbook: enable_excluders.yml
+
+- import_playbook: clean_image.yml
+
+- name: Node Preparation Checkpoint End
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Node preparation 'Complete'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_node:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

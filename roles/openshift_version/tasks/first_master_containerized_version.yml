@@ -25,14 +25,6 @@
 
 # Origin latest = pre-release version (i.e. v1.3.0-alpha.1-321-gb095e3a)
 - set_fact:
-    openshift_version: "{{ (cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2] | join('-'))[1:] }}"
-  when:
-  - openshift_version is not defined
-  - openshift_deployment_type == 'origin'
-  - cli_image_version.stdout_lines[0].split('-') | length > 1
-  - not openshift_use_crio_only
-
-- set_fact:
     openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when: openshift_version is not defined
 
@@ -48,7 +40,7 @@
   - not openshift_use_crio_only
 
 - set_fact:
-    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0:2][1:] | join('-') if openshift_deployment_type == 'origin' else cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
+    openshift_version: "{{ cli_image_version.stdout_lines[0].split(' ')[1].split('-')[0][1:] }}"
   when:
   - openshift_version is defined
   - openshift_version.split('.') | length == 2

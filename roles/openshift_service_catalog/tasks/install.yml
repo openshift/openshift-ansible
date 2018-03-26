@@ -120,7 +120,7 @@
     cors_allowed_origin: localhost
     etcd_servers: "{{ openshift.master.etcd_urls | join(',') }}"
     etcd_cafile: "{{ '/etc/origin/master/master.etcd-ca.crt' if etcd_ca_crt.stat.exists else '/etc/origin/master/ca-bundle.crt' }}"
-    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
+    node_selector: {'node-role.kubernetes.io/master': 'true'}
     # apiserver_ca is defined in generate_certs.yml
     ca_hash: "{{ apiserver_ca.content|hash('sha1') }}"
 
@@ -170,7 +170,7 @@
     image: ""
     cpu_limit: none
     memory_limit: none
-    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
+    node_selector: {'node-role.kubernetes.io/master': 'true'}
 
 - name: Set Controller Manager deployment
   oc_obj:

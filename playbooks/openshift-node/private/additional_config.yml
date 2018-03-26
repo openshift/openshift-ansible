@@ -1,6 +1,6 @@
 ---
 - name: create additional node network plugin groups
-  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
+  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}:!oo_exclude_nodes_to_config"
   tasks:
   # Creating these node groups will prevent a ton of skipped tasks.
   # Create group for flannel nodes

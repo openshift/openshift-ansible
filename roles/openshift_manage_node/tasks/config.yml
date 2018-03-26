@@ -10,6 +10,18 @@
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
 
+- set_fact:
+    l_node_labels: "{{ openshift_node_labels | default({}) }}"
+
+- set_fact:
+    l_master_labels: "{{ openshift_manage_node_is_master | ternary(openshift_master_node_labels, {}) }}"
+
+- set_fact:
+    l_all_labels: "{{ l_node_labels | combine(l_master_labels) }}"
+
+- debug:
+    msg: "{{ l_all_labels | lib_utils_oo_dict_to_list_of_dict }}"
+
 - name: Label nodes
   oc_label:
     name: "{{ openshift.node.nodename }}"
