@@ -16,52 +16,76 @@ import os
 import shade
 
 
-def base_openshift_inventory(cluster_hosts):
+def base_openshift_inventory(cluster_hosts, inventory,
+                             docker_storage_mountpoints):
     '''Set the base openshift inventory.'''
-    inventory = {}
+    nodes = set()
+    osev3 = set()
 
-    masters = [server.name for server in cluster_hosts
-               if server.metadata['host-type'] == 'master']
-
-    etcd = [server.name for server in cluster_hosts
-            if server.metadata['host-type'] == 'etcd']
-    if not etcd:
-        etcd = masters
-
-    infra_hosts = [server.name for server in cluster_hosts
-                   if server.metadata['host-type'] == 'node' and
-                   server.metadata['sub-host-type'] == 'infra']
-
-    app = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'node' and
-           server.metadata['sub-host-type'] == 'app']
-
-    cns = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'cns']
-
-    nodes = list(set(masters + infra_hosts + app + cns))
-
-    dns = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'dns']
-
-    load_balancers = [server.name for server in cluster_hosts
-                      if server.metadata['host-type'] == 'lb']
-
-    osev3 = list(set(nodes + etcd + load_balancers))
-
-    inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
-    inventory['OSEv3'] = {'hosts': osev3}
-    inventory['masters'] = {'hosts': masters}
-    inventory['etcd'] = {'hosts': etcd}
-    inventory['nodes'] = {'hosts': nodes}
-    inventory['infra_hosts'] = {'hosts': infra_hosts}
-    inventory['app'] = {'hosts': app}
-    inventory['glusterfs'] = {'hosts': cns}
-    inventory['dns'] = {'hosts': dns}
-    inventory['lb'] = {'hosts': load_balancers}
+    inventory['cluster_hosts'] = {'hosts': []}
+    inventory['masters'] = {'hosts': []}
+    inventory['etcd'] = {'hosts': []}
+    inventory['infra_hosts'] = {'hosts': []}
+    inventory['app'] = {'hosts': []}
+    inventory['glusterfs'] = {'hosts': []}
+    inventory['dns'] = {'hosts': []}
+    inventory['lb'] = {'hosts': []}
     inventory['localhost'] = {'ansible_connection': 'local'}
 
-    return inventory
+    for server in cluster_hosts:
+        if (not 'metadata' in server) or (not 'clusterid' in server.metadata):
+            continue
+        if 'group' in server.metadata:
+            group = server.metadata.get('group')
+            if group not in inventory:
+                inventory[group] = {'hosts': []}
+            inventory[group]['hosts'].append(server.name)
+
+        inventory['cluster_hosts']['hosts'].append(server.name)
+
+        if server.metadata['host-type'] == 'master':
+            inventory['masters']['hosts'].append(server.name)
+            nodes.add(server.name)
+            osev3.add(server.name)
+
+        if server.metadata['host-type'] == 'etcd':
+            inventory['etcd']['hosts'].append(server.name)
+            osev3.add(server.name)
+
+        if (server.metadata['host-type'] == 'node' and
+                server.metadata['sub-host-type'] == 'infra'):
+            inventory['infra_hosts']['hosts'].append(server.name)
+            nodes.add(server.name)
+            osev3.add(server.name)
+
+        if (server.metadata['host-type'] == 'node' and
+                server.metadata['sub-host-type'] == 'app'):
+            inventory['app']['hosts'].append(server.name)
+            nodes.add(server.name)
+            osev3.add(server.name)
+
+        if server.metadata['host-type'] == 'cns':
+            inventory['cns']['hosts'].append(server.name)
+            nodes.add(server.name)
+            osev3.add(server.name)
+
+        if server.metadata['host-type'] == 'dns':
+            inventory['dns']['hosts'].append(server.name)
+
+        if server.metadata['host-type'] == 'lb':
+            inventory['lb']['hosts'].append(server.name)
+            osev3.add(server.name)
+
+        inventory['_meta']['hostvars'][server.name] = _get_hostvars(
+            server,
+            docker_storage_mountpoints)
+
+    if not inventory['etcd']['hosts']:
+        inventory['etcd']['hosts'] = inventory['masters']['hosts']
+
+    # cast a osev3 and nodes to list.
+    inventory['OSEv3'] = {'hosts': list(osev3)}
+    inventory['nodes'] = {'hosts': list(nodes)}
 
 
 def get_docker_storage_mountpoints(volumes):
@@ -124,30 +148,16 @@ def build_inventory():
     '''Build the dynamic inventory.'''
     cloud = shade.openstack_cloud()
 
-    # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
-    # environment variable.
-    cluster_hosts = [
-        server for server in cloud.list_servers()
-        if 'metadata' in server and 'clusterid' in server.metadata]
-
-    inventory = base_openshift_inventory(cluster_hosts)
-
-    for server in cluster_hosts:
-        if 'group' in server.metadata:
-            group = server.metadata.get('group')
-            if group not in inventory:
-                inventory[group] = {'hosts': []}
-            inventory[group]['hosts'].append(server.name)
-
-    inventory['_meta'] = {'hostvars': {}}
-
     # cinder volumes used for docker storage
     docker_storage_mountpoints = get_docker_storage_mountpoints(
         cloud.list_volumes())
-    for server in cluster_hosts:
-        inventory['_meta']['hostvars'][server.name] = _get_hostvars(
-            server,
-            docker_storage_mountpoints)
+
+    inventory = {'_meta': {'hostvars': {}}}
+
+    # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
+    # environment variable.
+    base_openshift_inventory(cloud.list_servers(), inventory,
+                             docker_storage_mountpoints)
 
     stout = _get_stack_outputs(cloud)
     if stout is not None:
