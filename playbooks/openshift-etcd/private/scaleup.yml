@@ -70,9 +70,11 @@
                                      | lib_utils_oo_collect('openshift.common.hostname')
                                      | default(none, true) }}"
     openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
+  handlers:
+  - include: ../../../roles/openshift_master/handlers/main.yml
+    static: yes
   roles:
   - role: openshift_master_facts
   post_tasks:
-  - import_role:
-      name: openshift_master
-      tasks_from: update_etcd_client_urls.yml
+  - include: ../../../roles/openshift_master/tasks/update_etcd_client_urls.yml
+    static: yes
