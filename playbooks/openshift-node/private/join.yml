@@ -1,6 +1,7 @@
 ---
 - name: Evaluate bootstrapped nodes
   hosts: localhost
+  become: no
   gather_facts: no
   connection: local
   tasks:
@@ -16,6 +17,31 @@
     - hostvars[item].openshift.common is defined
     - (hostvars[item].openshift_is_bootstrapped | bool) or (hostvars[item].openshift_node_bootstrap | default(True) | bool)
     changed_when: False
+  - name: Create a tempdir for node configs
+    command: mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: mktemp
+    changed_when: False
+
+- name: Copy bootstrap and CNI config
+  hosts: oo_first_master
+  tasks:
+  - name: Copy master bootstrap config locally
+    fetch:
+      src: "{{ openshift.common.config_base }}/master/bootstrap.kubeconfig"
+      dest: "{{ hostvars['localhost'].mktemp.stdout }}/bootstrap.kubeconfig"
+      flat: yes
+
+  - name: Find CNI config files
+    find:
+      path: /etc/cni/net.d/
+    register: cni_configs
+
+  - name: Copy master CNI settings
+    fetch:
+      src: "{{ item.path }}"
+      dest: "{{ hostvars['localhost'].mktemp.stdout }}/{{ item.path | basename }}"
+      flat: yes
+    with_items: "{{ cni_configs.files }}"
 
 - name: Gather facts from nodes to bootstrap
   hosts: oo_nodes_to_bootstrap
@@ -36,7 +62,7 @@
 
   - name: Distribute bootstrap kubeconfig if one does not exist
     copy:
-      content: "{{ bootstrap_credentials.content | b64decode }}"
+      src: "{{ hostvars['localhost'].mktemp.stdout }}/bootstrap.kubeconfig"
       dest: "/etc/origin/node/bootstrap.kubeconfig"
       mode: 0700
       owner: root
@@ -44,46 +70,38 @@
       force: no
     no_log: true
 
-- name: Approve any pending CSR requests from inventory nodes
-  hosts: oo_first_master
-  gather_facts: no
-  tasks:
-  - name: Dump all candidate bootstrap hostnames
-    debug:
-      msg: "{{ groups['oo_nodes_to_bootstrap'] | default([]) }}"
+  - name: Ensure CNI config is created
+    file:
+      dest: "/etc/cni/net.d/"
+      state: directory
+      mode: 0755
 
-  - name: Find all node names
-    set_fact:
-      l_nodes_to_join: "{{ groups['oo_nodes_to_bootstrap'] | default([]) | map('extract', hostvars) | map(attribute='openshift.node.nodename') | list }}"
-
-  - name: Dump the bootstrap hostnames
-    debug:
-      msg: "{{ l_nodes_to_join }}"
-
-  - name: Approve bootstrap nodes
-    oc_adm_csr:
-      nodes: "{{ l_nodes_to_join }}"
-      timeout: 60
-      fail_on_timeout: true
-    register: approve_out
+  - name: Distribute CNI settings
+    copy:
+      src: "{{ hostvars['localhost'].mktemp.stdout }}/{{ item.path | basename }}"
+      dest: "{{ item.path }}"
     ignore_errors: true
-    when:
-    - l_nodes_to_join|length > 0
+    with_items: "{{ hostvars[groups.oo_first_master.0].cni_configs.files }}"
 
-  - when: not approve_out|succeeded
-    block:
-    - name: Get CSRs
-      command: >
-        {{ openshift_client_binary }} describe csr --config=/etc/origin/master/admin.kubeconfig
-    - name: Report approval errors
-      fail:
-        msg: Node approval failed
+  - name: Start and enable node
+    systemd:
+      name: "origin-node"
+      enabled: yes
+      state: started
+      daemon_reload: yes
 
-- name: Ensure any inventory labels are applied to the nodes
+- name: Set node parameters
   hosts: oo_nodes_to_bootstrap
-  vars:
-    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
   roles:
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
     openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
+
+- name: Delete temporary directory
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Delete temporary directory
+    local_action: file path="{{ mktemp.stdout }}" state=absent
+    changed_when: False

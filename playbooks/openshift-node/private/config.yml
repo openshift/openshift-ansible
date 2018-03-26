@@ -19,8 +19,6 @@
 
 - import_playbook: additional_config.yml
 
-- import_playbook: manage_node.yml
-
 - import_playbook: enable_excluders.yml
 
 - name: Node Install Checkpoint End
