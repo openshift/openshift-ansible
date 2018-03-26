@@ -66,13 +66,6 @@
       delay: 1
       changed_when: false
 
-    - name: Start and enable node dep
-      systemd:
-        daemon_reload: yes
-        name: "{{ openshift_service_type }}-node-dep"
-        enabled: yes
-        state: started
-
 - when: not openshift_node_bootstrap
   block:
     - name: Start and enable node
