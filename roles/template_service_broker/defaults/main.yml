@@ -2,7 +2,6 @@
 template_service_broker_remove: False
 template_service_broker_install: True
 openshift_template_service_broker_namespaces: ['openshift']
-template_service_broker_selector: "{{ openshift_hosted_infra_selector | default('region=infra') | map_from_pairs }}"
 
 __tsb_template_file: "apiserver-template.yaml"
 __tsb_config_file: "apiserver-config.yaml"
