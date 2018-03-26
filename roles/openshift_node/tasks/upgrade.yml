@@ -10,7 +10,7 @@
 # tasks file for openshift_node_upgrade
 
 - name: stop services for upgrade
-  include_tasks: upgrade/stop_services.yml
+  import_tasks: upgrade/stop_services.yml
 
 # Ensure actually install latest package.
 - name: install docker upgrade rpm
@@ -22,7 +22,7 @@
   - l_docker_upgrade | bool
 
 - name: install pre-pulled rpms.
-  include_tasks: upgrade/rpm_upgrade_install.yml
+  import_tasks: upgrade/rpm_upgrade_install.yml
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift_is_containerized | bool
@@ -31,13 +31,13 @@
 - include_tasks: "{{ node_config_hook }}"
   when: node_config_hook is defined
 
-- include_tasks: upgrade/config_changes.yml
+- import_tasks: upgrade/config_changes.yml
 
-- include_tasks: dnsmasq_install.yml
-- include_tasks: dnsmasq.yml
+- import_tasks: dnsmasq_install.yml
+- import_tasks: dnsmasq.yml
 
 # Restart all services
-- include_tasks: upgrade/restart.yml
+- import_tasks: upgrade/restart.yml
 
 - name: Wait for node to be ready
   oc_obj:
@@ -51,6 +51,6 @@
   retries: 24
   delay: 5
 
-- include_tasks: journald.yml
+- import_tasks: journald.yml
 
 - meta: flush_handlers

@@ -39,5 +39,5 @@
     dest: /etc/origin/node/node-dnsmasq.conf
 
 # Relies on ansible in order to configure static config
-- include_tasks: dnsmasq/no-network-manager.yml
+- import_tasks: dnsmasq/no-network-manager.yml
   when: not network_manager_active | bool

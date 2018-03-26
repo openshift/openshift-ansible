@@ -10,4 +10,4 @@
   register: result
   until: result is succeeded
 
-- include_tasks: network-manager.yml
+- import_tasks: network-manager.yml
