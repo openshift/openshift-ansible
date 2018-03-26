@@ -1,9 +1,9 @@
 ---
 - name: Install the systemd units
-  include_tasks: systemd_units.yml
+  import_tasks: systemd_units.yml
 
 - name: Pull container images
-  include_tasks: container_images.yml
+  import_tasks: container_images.yml
   when: openshift_is_containerized | bool
 
 - name: Start and enable openvswitch service
