@@ -665,45 +665,6 @@ an OpenShift Container Platform cluster
             classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
 
     ######################################################################
-    # Now the embedded etcd
-    ######################################################################
-    try:
-        with io.open('/etc/origin/master/master-config.yaml', 'r', encoding='utf-8') as fp:
-            cfg = yaml.load(fp)
-    except IOError:
-        # Not present
-        pass
-    else:
-        if cfg.get('etcdConfig', {}).get('servingInfo', {}).get('certFile', None) is not None:
-            # This is embedded
-            etcd_crt_name = cfg['etcdConfig']['servingInfo']['certFile']
-        else:
-            # Not embedded
-            etcd_crt_name = None
-
-        if etcd_crt_name is not None:
-            # etcd_crt_name is relative to the location of the
-            # master-config.yaml file
-            cfg_path = os.path.dirname(fp.name)
-            etcd_cert = os.path.join(cfg_path, etcd_crt_name)
-            with open(etcd_cert, 'r') as etcd_fp:
-                (cert_subject,
-                 cert_expiry_date,
-                 time_remaining,
-                 cert_serial) = load_and_handle_cert(etcd_fp.read(), now, ans_module=module)
-
-                expire_check_result = {
-                    'cert_cn': cert_subject,
-                    'path': etcd_fp.name,
-                    'expiry': cert_expiry_date,
-                    'days_remaining': time_remaining.days,
-                    'health': None,
-                    'serial': cert_serial
-                }
-
-                classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
-
-    ######################################################################
     # /Check etcd certs
     ######################################################################
 

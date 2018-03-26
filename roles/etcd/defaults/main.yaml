@@ -6,7 +6,6 @@ l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(o
 
 # runc, docker, host
 r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if openshift_is_containerized else 'host' }}"
-r_etcd_common_embedded_etcd: false
 
 osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'
 etcd_image_dict:
@@ -17,7 +16,7 @@ etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }
 # etcd run on a host => use etcdctl command directly
 # etcd run as a docker container => use docker exec
 # etcd run as a runc container => use runc exec
-r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'host' or r_etcd_common_embedded_etcd | bool else 'docker exec etcd_container etcdctl' if r_etcd_common_etcd_runtime == 'docker' else 'runc exec etcd etcdctl' }}"
+r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'host' | bool else 'docker exec etcd_container etcdctl' if r_etcd_common_etcd_runtime == 'docker' else 'runc exec etcd etcdctl' }}"
 
 # etcd server vars
 etcd_conf_dir: '/etc/etcd'
@@ -60,7 +59,7 @@ etcd_is_containerized: False
 etcd_is_thirdparty: False
 
 # etcd dir vars
-etcd_data_dir: "{{ '/var/lib/origin/openshift.local.etcd' if r_etcd_common_embedded_etcd | bool else '/var/lib/etcd/' }}"
+etcd_data_dir: "/var/lib/etcd/"
 
 # etcd ports and protocols
 etcd_client_port: 2379
