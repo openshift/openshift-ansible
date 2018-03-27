@@ -20,6 +20,16 @@ imageConfig:
   latest: false
 iptablesSyncPeriod: 30s
 kubeletArguments:
+{% if openshift_use_crio | bool %}
+  container-runtime:
+  - remote
+  container-runtime-endpoint:
+  - {{ l_crio_var_sock }}
+  image-service-endpoint:
+  - {{ l_crio_var_sock }}
+  runtime-request-timeout:
+  - 10m
+{% endif %}
   pod-manifest-path:
   - /etc/origin/node/pods
   bootstrap-kubeconfig:
@@ -30,10 +40,12 @@ kubeletArguments:
   - "true"
   cert-dir:
   - /etc/origin/node/certificates
+{% if openshift_node_group_cloud_provider is defined %}
   cloud-config:
   - /etc/origin/cloudprovider/{{ openshift_node_group_cloud_provider }}.conf
   cloud-provider:
   - {{ openshift_node_group_cloud_provider }}
+{% endif %}
   node-labels: 
   - "{{ openshift_node_group_labels | join(',') }}"
   enable-controller-attach-detach:

@@ -7,7 +7,7 @@ metadata:
     kubernetes.io/description: |
       This daemon set launches the openvswitch daemon.
     image.openshift.io/triggers: |
-      [{"from":{"kind":"ImageStreamTag","name":"node:v3.9"},"fieldPath":"spec.template.spec.containers[?(@.name==\"openvswitch\")].image"}]
+      [{"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.containers[?(@.name==\"openvswitch\")].image"}]
 spec:
   selector:
     matchLabels:

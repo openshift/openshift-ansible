@@ -22,8 +22,8 @@ openshift_master_config_dir: "{{ openshift.common.config_base | default(openshif
 openshift_cluster_domain: 'cluster.local'
 
 openshift_hosted_images_dict:
-  origin: 'openshift/origin-${component}:${version}'
-  openshift-enterprise: 'openshift3/ose-${component}:${version}'
+  origin: 'docker.io/openshift/origin-${component}:${version}'
+  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
 
 ##########
 # Router #

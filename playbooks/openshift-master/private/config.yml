@@ -221,6 +221,10 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   tasks:
+  - name: Set up automatic node config reconcilation
+    import_role:
+      name: openshift_node_group
+      tasks_from: sync
   - import_role:
       name: kuryr
       tasks_from: master
