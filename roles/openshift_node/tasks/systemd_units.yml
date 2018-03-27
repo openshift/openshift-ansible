@@ -16,7 +16,7 @@
 - when: openshift_is_containerized | bool
   block:
   - name: include node deps docker service file
-    include_tasks: config/install-node-deps-docker-service-file.yml
+    import_tasks: config/install-node-deps-docker-service-file.yml
 
-- include_tasks: config/configure-node-settings.yml
-- include_tasks: config/configure-proxy-settings.yml
+- import_tasks: config/configure-node-settings.yml
+- import_tasks: config/configure-proxy-settings.yml
