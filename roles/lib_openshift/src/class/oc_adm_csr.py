@@ -131,14 +131,16 @@ class OCcsr(OpenShiftCLI):
             # if you passed in nodes, you must have a node that matches
             if self.approve_all or (node and OCcsr.action_needed(csr, action)):
                 result = self.openshift_cmd(['certificate', action, csr['metadata']['name']], oadm=True)
-                # client should have service account name in username field
-                # server should have node name in username field
-                if node and csr['metadata']['name'] not in node['csrs']:
-                    node['csrs'][csr['metadata']['name']] = csr
+                # if we successfully approved
+                if result['returncode'] == 0:
+                    # client should have service account name in username field
+                    # server should have node name in username field
+                    if node and csr['metadata']['name'] not in node['csrs']:
+                        node['csrs'][csr['metadata']['name']] = csr
 
-                    # accept node in cluster
-                    if node['name'] in csr['spec']['username']:
-                        node['accepted'] = True
+                        # accept node in cluster
+                        if node['name'] in csr['spec']['username']:
+                            node['accepted'] = True
 
                 results.append(result)
 
