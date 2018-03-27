@@ -147,7 +147,7 @@
   - name: Start master services
     service:
       name: "{{ item }}"
-      state: started
+      state: restarted
     register: service_status
     # Sometimes the master-api, resp. master-controllers fails to start for the first time
     until: service_status.state is defined and service_status.state == "started"
