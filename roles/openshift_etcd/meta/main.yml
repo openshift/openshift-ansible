@@ -12,6 +12,5 @@ galaxy_info:
   categories:
   - cloud
 dependencies:
-- role: openshift_etcd_facts
 - role: etcd
 - role: lib_utils

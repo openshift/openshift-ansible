@@ -1,34 +1,12 @@
 ---
-- name: Gather facts
-  hosts: oo_etcd_to_config:oo_new_etcd_to_config
-  roles:
-  - openshift_etcd_facts
-  post_tasks:
-  - set_fact:
-      etcd_hostname: "{{ etcd_hostname }}"
-      etcd_ip: "{{ etcd_ip }}"
-
 - name: Configure etcd
   hosts: oo_new_etcd_to_config
   serial: 1
   any_errors_fatal: true
   pre_tasks:
-  - name: Add new etcd members to cluster
-    command: >
-      {{ r_etcd_common_etcdctl_command }}
-                       --cert-file {{ etcd_peer_cert_file }}
-                       --key-file {{ etcd_peer_key_file }}
-                       --ca-file {{ etcd_peer_ca_file }}
-                       -C {{ etcd_peer_url_scheme }}://{{ hostvars[etcd_ca_host].etcd_ip }}:{{ etcd_client_port }}
-                       member add {{ etcd_hostname }} {{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_peer_port }}
-    delegate_to: "{{ etcd_ca_host }}"
-    failed_when:
-    - etcd_add_check.rc == 1
-    - ("peerURL exists" not in etcd_add_check.stderr)
-    register: etcd_add_check
-    retries: 3
-    delay: 10
-    until: etcd_add_check.rc == 0
+  - import_role:
+      name: etcd
+      tasks_from: add_new_member.yml
   - import_role:
       name: etcd
       tasks_from: server_certificates.yml
@@ -48,6 +26,7 @@
   - role: nickhammond.logrotate
     when: etcd_add_check.rc == 0
   post_tasks:
+  # etcd_hostname fact is set in add_new_member.yml called above.
   - name: Verify cluster is stable
     command: >
       {{ r_etcd_common_etcdctl_command }}
