@@ -277,7 +277,7 @@ def haproxy_backend_masters(hosts, port):
         server = dict(name="master%s" % idx)
         server_ip = host_info['openshift']['common']['ip']
         server['address'] = "%s:%s" % (server_ip, port)
-        server['opts'] = 'check'
+        server['opts'] = 'check check-ssl verify none'
         servers.append(server)
     return servers
 
@@ -513,7 +513,8 @@ def lib_utils_oo_loadbalancer_backends(
     """TODO: Document me."""
     loadbalancer_backends = [{'name': 'atomic-openshift-api',
                               'mode': 'tcp',
-                              'option': 'tcplog',
+                              'options': ['tcplog', 'httpchk get /healthz/ready'],
+                              'http-check': 'expect status 200',
                               'balance': 'source',
                               'servers': haproxy_backend_masters(servers_hostvars, api_port)}]
     if bool(strtobool(str(use_nuage))) and nuage_rest_port is not None:
