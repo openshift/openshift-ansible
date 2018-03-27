@@ -73,7 +73,6 @@
       disabled_features: "{{ osm_disabled_features | default(None) }}"
       master_count: "{{ openshift_master_count | default(None) }}"
       admission_plugin_config: "{{openshift_master_admission_plugin_config }}"
-      kube_admission_plugin_config: "{{openshift_master_kube_admission_plugin_config | default(None) }}"  # deprecated, merged with admission_plugin_config
       oauth_always_show_provider_selection: "{{ openshift_master_oauth_always_show_provider_selection | default(None) }}"
       image_policy_config: "{{ openshift_master_image_policy_config | default(None) }}"
       dynamic_provisioning_enabled: "{{ openshift_master_dynamic_provisioning_enabled | default(None) }}"

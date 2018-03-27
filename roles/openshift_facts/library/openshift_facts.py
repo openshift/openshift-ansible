@@ -51,48 +51,6 @@ EXAMPLES = '''
 '''
 
 
-# TODO: We should add a generic migration function that takes source and destination
-# paths and does the right thing rather than one function for common, one for node, etc.
-def migrate_common_facts(facts):
-    """ Migrate facts from various roles into common """
-    params = {
-        'node': ('portal_net'),
-        'master': ('portal_net')
-    }
-    if 'common' not in facts:
-        facts['common'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                if param in facts[role]:
-                    facts['common'][param] = facts[role].pop(param)
-    return facts
-
-
-def migrate_admission_plugin_facts(facts):
-    """ Apply migrations for admission plugin facts """
-    if 'master' in facts:
-        if 'kube_admission_plugin_config' in facts['master']:
-            if 'admission_plugin_config' not in facts['master']:
-                facts['master']['admission_plugin_config'] = dict()
-            # Merge existing kube_admission_plugin_config with admission_plugin_config.
-            facts['master']['admission_plugin_config'] = merge_facts(facts['master']['admission_plugin_config'],
-                                                                     facts['master']['kube_admission_plugin_config'],
-                                                                     additive_facts_to_overwrite=[])
-            # Remove kube_admission_plugin_config fact
-            facts['master'].pop('kube_admission_plugin_config', None)
-    return facts
-
-
-def migrate_local_facts(facts):
-    """ Apply migrations of local facts """
-    migrated_facts = copy.deepcopy(facts)
-    migrated_facts = migrate_common_facts(migrated_facts)
-    migrated_facts = migrate_admission_plugin_facts(migrated_facts)
-    return migrated_facts
-
-
 def first_ip(network):
     """ Return the first IPv4 address in network
 
@@ -710,13 +668,6 @@ def is_service_running(service):
     return service_running
 
 
-def rpm_rebuilddb():
-    """
-    Runs rpm --rebuilddb to ensure the db is in good shape.
-    """
-    module.run_command(['/usr/bin/rpm', '--rebuilddb'])  # noqa: F405
-
-
 def get_version_output(binary, version_cmd):
     """ runs and returns the version output for a command """
     cmd = []
@@ -846,58 +797,6 @@ def merge_facts(orig, new, additive_facts_to_overwrite):
         else:
             facts[key] = copy.deepcopy(new[key])
     return facts
-
-
-def save_local_facts(filename, facts):
-    """ Save local facts
-
-        Args:
-            filename (str): local facts file
-            facts (dict): facts to set
-    """
-    try:
-        fact_dir = os.path.dirname(filename)
-        try:
-            os.makedirs(fact_dir)  # try to make the directory
-        except OSError as exception:
-            if exception.errno != errno.EEXIST:  # but it is okay if it is already there
-                raise  # pass any other exceptions up the chain
-        with open(filename, 'w') as fact_file:
-            fact_file.write(module.jsonify(facts))  # noqa: F405
-        os.chmod(filename, 0o600)
-    except (IOError, OSError) as ex:
-        raise OpenShiftFactsFileWriteError(
-            "Could not create fact file: %s, error: %s" % (filename, ex)
-        )
-
-
-def get_local_facts_from_file(filename):
-    """ Retrieve local facts from fact file
-
-        Args:
-            filename (str): local facts file
-        Returns:
-            dict: the retrieved facts
-    """
-    local_facts = dict()
-    try:
-        # Handle conversion of INI style facts file to json style
-        ini_facts = configparser.SafeConfigParser()
-        ini_facts.read(filename)
-        for section in ini_facts.sections():
-            local_facts[section] = dict()
-            for key, value in ini_facts.items(section):
-                local_facts[section][key] = value
-
-    except (configparser.MissingSectionHeaderError,
-            configparser.ParsingError):
-        try:
-            with open(filename, 'r') as facts_file:
-                local_facts = json.load(facts_file)
-        except (ValueError, IOError):
-            pass
-
-    return local_facts
 
 
 def sort_unique(alist):
@@ -1332,22 +1231,14 @@ class OpenShiftFacts(object):
         if facts is not None:
             facts_to_set[self.role] = facts
 
-        local_facts = get_local_facts_from_file(self.filename)
-
-        migrated_facts = migrate_local_facts(local_facts)
-
-        new_local_facts = merge_facts(migrated_facts,
-                                      facts_to_set,
+        new_local_facts = merge_facts(facts_to_set,
                                       additive_facts_to_overwrite)
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
         pop_obsolete_local_facts(new_local_facts)
 
-        if new_local_facts != local_facts:
-            self.validate_local_facts(new_local_facts)
-            changed = True
-            if not module.check_mode:  # noqa: F405
-                save_local_facts(self.filename, new_local_facts)
+        self.validate_local_facts(new_local_facts)
+
 
         self.changed = changed
         return new_local_facts
