@@ -1,4 +1,8 @@
 ---
+- name: Create the OpenStack resources for cluster installation
+  import_playbook: provision_resources.yml
+
+
 # NOTE(shadower): Bring in the host groups:
 - name: evaluate groups
   import_playbook: ../../init/evaluate_groups.yml
