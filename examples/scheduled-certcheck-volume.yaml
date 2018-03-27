@@ -31,7 +31,7 @@ spec:
             image: openshift/origin-ansible
             env:
             - name: PLAYBOOK_FILE
-              value: playbooks/certificate_expiry/html_and_json_timestamp.yaml
+              value: playbooks/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml
             - name: INVENTORY_FILE
               value: /tmp/inventory/hosts       # from configmap vol below
             - name: ANSIBLE_PRIVATE_KEY_FILE    # from secret vol below
