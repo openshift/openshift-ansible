@@ -24,7 +24,9 @@ The job expects the inventory to be provided via the *hosts* key of a [ConfigMap
 
     oc new-project certcheck
     oc create configmap inventory --from-file=hosts=/etc/ansible/hosts
-    oc secrets new-sshauth sshkey --ssh-privatekey=$HOME/.ssh/id_rsa
+    oc create secret generic sshkey \
+      --from-file=ssh-privatekey=$HOME/.ssh/id_rsa \
+      --type=kubernetes.io/ssh-auth
 
 Note that `inventory`, `hosts`, `sshkey` and `ssh-privatekey` are referenced by name from the provided example Job definition. If you use different names for the objects/attributes you will have to adjust the Job accordingly.
 
@@ -42,7 +44,9 @@ The job definition is the same and it expects the same configuration: we provide
 
     oc new-project certcheck
     oc create configmap inventory --from-file=hosts=/etc/ansible/hosts
-    oc secrets new-sshauth sshkey --ssh-privatekey=$HOME/.ssh/id_rsa
+    oc create secret generic sshkey \
+      --from-file=ssh-privatekey=$HOME/.ssh/id_rsa \
+      --type=kubernetes.io/ssh-auth
 
 And then we create the ScheduledJob:
 
@@ -65,7 +69,9 @@ To run these examples we prepare the inventory and ssh keys as in the other exam
 
     oc new-project certcheck
     oc create configmap inventory --from-file=hosts=/etc/ansible/hosts
-    oc secrets new-sshauth sshkey --ssh-privatekey=$HOME/.ssh/id_rsa
+    oc create secret generic sshkey \
+      --from-file=ssh-privatekey=$HOME/.ssh/id_rsa \
+      --type=kubernetes.io/ssh-auth
 
 Additionally we allocate a `PersistentVolumeClaim` to store the reports:
 
@@ -90,4 +96,3 @@ With that we can run the `Job` once:
 or schedule it to run periodically as a `ScheduledJob`:
 
     oc create -f examples/scheduled-certcheck-volume.yaml
-
