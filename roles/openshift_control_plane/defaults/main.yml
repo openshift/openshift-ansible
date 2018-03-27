@@ -50,9 +50,6 @@ default_r_openshift_master_os_firewall_allow:
   port: "{{ openshift_master_dns_port }}/tcp"
 - service: skydns udp
   port: "{{ openshift_master_dns_port }}/udp"
-- service: etcd embedded
-  port: 4001/tcp
-  cond: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 r_openshift_master_os_firewall_allow: "{{ default_r_openshift_master_os_firewall_allow | union(openshift_master_open_ports | default([])) }}"
 
 # oreg_url is defined by user input
