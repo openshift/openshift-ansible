@@ -28,6 +28,7 @@
   systemd:
     name: "openshift-bootstrap-update.timer"
     state: started
+    enabled: true
 
 - name: Bootstrap all nodes that were identified with bootstrap metadata
   run_once: true
