@@ -36,9 +36,7 @@ To create the Job:
 
 ### Scheduled job for certificate expiration report upload
 
-**Note**: This example uses the [ScheduledJob](https://docs.openshift.com/container-platform/3.4/dev_guide/scheduled_jobs.html) object, which has been renamed to [CronJob](https://docs.openshift.org/latest/dev_guide/cron_jobs.html) upstream and is still a Technology Preview subject to further change.
-
-The example `ScheduledJob` in [scheduled-certcheck-upload.yaml](scheduled-certcheck-upload.yaml) does the same as the `Job` example above, but it is scheduled to automatically run every first day of the month (see the `spec.schedule` value in the example).
+The example `CronJob` in [scheduled-certcheck-upload.yaml](scheduled-certcheck-upload.yaml) does the same as the `Job` example above, but it is scheduled to automatically run every first day of the month (see the `spec.schedule` value in the example).
 
 The job definition is the same and it expects the same configuration: we provide the inventory and ssh key via a ConfigMap and a Secret respectively:
 
@@ -48,16 +46,16 @@ The job definition is the same and it expects the same configuration: we provide
       --from-file=ssh-privatekey=$HOME/.ssh/id_rsa \
       --type=kubernetes.io/ssh-auth
 
-And then we create the ScheduledJob:
+And then we create the CronJob:
 
     oc create -f examples/scheduled-certcheck-upload.yaml
 
-### Job and ScheduledJob to check certificates using volumes
+### Job and CronJob to check certificates using volumes
 
 There are two additional examples:
 
  - A `Job` [certificate-check-volume.yaml](certificate-check-volume.yaml)
- - A `ScheduledJob` [scheduled-certcheck-upload.yaml](scheduled-certcheck-upload.yaml)
+ - A `CronJob` [scheduled-certcheck-upload.yaml](scheduled-certcheck-upload.yaml)
 
 These perform the same work as the two examples above, but instead of uploading the generated reports to the masters they store them in a custom path within the container that is expected to be backed by a [PersistentVolumeClaim](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html), so that the reports are actually written to storage external to the container.
 
@@ -93,6 +91,6 @@ With that we can run the `Job` once:
 
     oc create -f examples/certificate-check-volume.yaml
 
-or schedule it to run periodically as a `ScheduledJob`:
+or schedule it to run periodically as a `CronJob`:
 
     oc create -f examples/scheduled-certcheck-volume.yaml
