@@ -33,8 +33,7 @@
   azure_rm_image:
     resource_group: "{{ openshift_azure_resource_group_name }}"
     source: "{{ openshift_azure_vm_name }}"
-    name: "{{ openshift_azure_image_name }}-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
-
+    name: "{{ openshift_azure_image_name }}"
     os_type: Linux
     tags: "{{ openshift_azure_image_tags | combine((openshift_azure_os_tags | default({}))) | combine((openshift_azure_openshift_tags|default({}))) }}"
 
