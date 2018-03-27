@@ -804,7 +804,7 @@ debug_level=2
 # will be applied first, then the IP checked against one of the
 # allowed CIDRs. You should ensure this range does not overlap with
 # your nodes, pods, or service CIDRs for security reasons.
-#openshift_master_external_ip_network_cidrs=['0.0.0.0/0']
+#openshift_master_external_ip_network_cidrs=['!0.0.0.0/0']
 
 # IngressIPNetworkCIDR controls the range to assign ingress IPs from for
 # services of type LoadBalancer on bare metal. If empty, ingress IPs will not
