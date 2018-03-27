@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.13.0%{?dist}
+Release:        0.14.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,45 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Mar 26 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.14.0
+- Split the provision.yml playbook for more flexibility.
+  (jmencak@users.noreply.github.com)
+- Ensure master-logs works for both origin and enterprise (ccoleman@redhat.com)
+- Master components should not have configurable labels (ccoleman@redhat.com)
+- Remove duplicated index (thanhha.work@gmail.com)
+- Revert "Use region and zone labels added by cloudprovider for scheduling"
+  (iacopo.rozzo@amadeus.com)
+- Replacing -v with -p for template parameters in oc_process
+  (asherkho@redhat.com)
+- ensure common_secgrp is used in all server groups (tzumainn@redhat.com)
+- package_version check: stop looking for docker (lmeyer@redhat.com)
+- minor updates to cleanup secgrp rules (tzumainn@redhat.com)
+- Configure dnsmasq before waiting for node (sedgar@redhat.com)
+- parameterized flat and master/etcd/node secgroup rules (tzumainn@redhat.com)
+- parameterized common openstack secgroup rules (tzumainn@redhat.com)
+- fix the ELASTICSEARCH_URL for kibana (jcantril@redhat.com)
+- Updating default run hour and minute for curator (ewolinet@redhat.com)
+- add in password auth for logging proxy (jcantril@redhat.com)
+- Bumping up the default wait time for ES node to be yellow or green, made it
+  configurable for larger clusters (ewolinet@redhat.com)
+- Make ports pool the default when deploying with kuryr (ltomasbo@redhat.com)
+- Allow for using an external openvswitch (flaper87@gmail.com)
+- fixing the mounts for the daemonset config to have non subpath mount
+  (mwoodson@redhat.com)
+- Remove openshift_management beta acknowledement (rteague@redhat.com)
+- Add metrics-server to openshift-metrics playbook (amcdermo@redhat.com)
+- Limit Prometheus discovery to relevant namespaces (pasquier.simon@gmail.com)
+- Don't verify node exporter is running (zgalor@redhat.com)
+- roles/openshift-prometheus: fix failing prometheus service discovery scrapes
+  (pgier@redhat.com)
+- upgrade prometheus v2.0.0 -> v2.1.0 (pgier@redhat.com)
+- Use region and zone labels added by cloudprovider for scheduling
+  (iacopo.rozzo@amadeus.com)
+- Remove deployment_type parameter from default predicates and priorities
+  lookup as it was removed from the lookup plugin (iacopo.rozzo@amadeus.com)
+- use openshift_image_tag default for prometheus_node_exporter image
+  (aweiteka@redhat.com)
+
 * Tue Mar 20 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.13.0
 - EFS Provisioner: switch OCP tag to latest (vrutkovs@redhat.com)
 
