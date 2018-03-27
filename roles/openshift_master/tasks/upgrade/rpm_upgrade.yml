@@ -6,8 +6,6 @@
 # of packages into one transaction we need to do that explicitly. The ansible
 # core team tells us not to rely on yum module transaction flattening anyway.
 
-# TODO: If the sdn package isn't already installed this will install it, we
-# should fix that
 - name: Upgrade master packages - yum
   command:
     yum install -y {{ master_pkgs | join(' ') }} \
@@ -17,7 +15,7 @@
       - "{{ openshift_service_type }}{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-master{{ openshift_pkg_version | default('') }}"
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
-      - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version | default('') }}"
+      - "{{ openshift_service_type + '-sdn-ovs' + openshift_pkg_version | default('') if openshift_use_openshift_sdn | default(true) | bool else ''}}"
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }}"
   register: result
   until: result is succeeded
@@ -25,14 +23,14 @@
 
 - name: Upgrade master packages - dnf
   dnf:
-    name: "{{ master_pkgs | join(',') }}"
+    name: "{{ master_pkgs | reject('equalto', '') | join(',') }}"
     state: present
   vars:
     master_pkgs:
       - "{{ openshift_service_type }}{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-master{{ openshift_pkg_version }}"
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version }}"
-      - "{{ openshift_service_type }}-sdn-ovs{{ openshift_pkg_version }}"
+      - "{{ openshift_service_type + '-sdn-ovs' + openshift_pkg_version | default('') if openshift_use_openshift_sdn | default(true) | bool else ''}}"
       - "{{ openshift_service_type }}-clients{{ openshift_pkg_version }}"
   register: result
   until: result is succeeded
