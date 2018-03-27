@@ -171,6 +171,12 @@
   - "{{ etcd_ca_dir }}"
   when: etcd_server_certs_missing | bool
 
+- name: Unarchive etcd ca cert tarballs
+  unarchive:
+    src: "{{ g_etcd_server_mktemp.stdout }}/{{ etcd_ca_name }}.tgz"
+    dest: "{{ etcd_ca_dir }}"
+  when: etcd_server_certs_missing | bool
+
 - name: Delete temporary directory
   local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
   changed_when: False
