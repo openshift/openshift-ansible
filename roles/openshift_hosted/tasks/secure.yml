@@ -46,7 +46,7 @@
     slurp:
       src: "{{ item }}"
     with_items:
-    - "{{ docker_registry_cert_path }}"
+    - "{{ docker_registry_cert_path }}"
     - "{{ docker_registry_cacert_path }}"
     register: certificate_files
 
