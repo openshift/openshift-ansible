@@ -50,6 +50,9 @@ if [[ -f "${FILES}/credentials" ]]; then
   password=$(awk -F '=' '/secret/ {print $2}' "${FILES}/credentials" | tr -d '[:space:]')
   tenant=$(awk -F '=' '/tenant/ {print $2}' "${FILES}/credentials" | tr -d '[:space:]')
   az login --service-principal --username "$username" --password "$password" --tenant "$tenant" > /dev/null
+
+  # Ensure this profile is in the credentials file
+  export AZURE_PROFILE=azure
 else
   echo "No service account file found at ${FILES}/credentials, bypassing login"
 fi
