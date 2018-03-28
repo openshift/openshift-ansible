@@ -915,7 +915,6 @@ class OpenShiftFacts(object):
         Args:
             module (AnsibleModule): an AnsibleModule object
             role (str): role for setting local facts
-            filename (str): local facts file to use
             local_facts (dict): local facts to set
             additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                 '.' notation ex: ['master.named_certificates']
@@ -933,10 +932,9 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
-    def __init__(self, role, filename, local_facts,
+    def __init__(self, role, local_facts,
                  additive_facts_to_overwrite=None):
         self.changed = False
-        self.filename = filename
         if role not in self.known_roles:
             raise OpenShiftFactsUnsupportedRoleError(
                 "Role %s is not supported by this module" % role
@@ -1194,18 +1192,10 @@ def main():
     local_facts = module.params['local_facts']  # noqa: F405
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']  # noqa: F405
 
-    fact_file = '/etc/ansible/facts.d/openshift.fact'
-
     openshift_facts = OpenShiftFacts(role,
-                                     fact_file,
                                      local_facts,
                                      additive_facts_to_overwrite)
-
-    file_params = module.params.copy()  # noqa: F405
-    file_params['path'] = fact_file
-    file_args = module.load_file_common_arguments(file_params)  # noqa: F405
-    changed = module.set_fs_attributes_if_different(file_args,  # noqa: F405
-                                                    openshift_facts.changed)
+    changed = False
 
     return module.exit_json(changed=changed,  # noqa: F405
                             ansible_facts=openshift_facts.facts)
