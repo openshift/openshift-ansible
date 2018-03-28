@@ -8,7 +8,6 @@
 
 # pylint: disable=no-name-in-module, import-error, wrong-import-order
 import copy
-import json
 import re
 import os
 import yaml
@@ -537,69 +536,6 @@ def format_url(use_ssl, hostname, port, path=''):
     return url
 
 
-def get_current_config(facts):
-    """ Get current openshift config
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the current openshift config
-    """
-    current_config = dict()
-    roles = [role for role in facts if role not in ['common', 'provider']]
-    for role in roles:
-        if 'roles' in current_config:
-            current_config['roles'].append(role)
-        else:
-            current_config['roles'] = [role]
-
-        # TODO: parse the /etc/sysconfig/openshift-{master,node} config to
-        # determine the location of files.
-        # TODO: I suspect this isn't working right now, but it doesn't prevent
-        # anything from working properly as far as I can tell, perhaps because
-        # we override the kubeconfig path everywhere we use it?
-        # Query kubeconfig settings
-        kubeconfig_dir = '/var/lib/origin/openshift.local.certificates'
-        if role == 'node':
-            kubeconfig_dir = os.path.join(
-                kubeconfig_dir, "node-%s" % facts['common']['hostname']
-            )
-
-        kubeconfig_path = os.path.join(kubeconfig_dir, '.kubeconfig')
-        if os.path.isfile('/usr/bin/openshift') and os.path.isfile(kubeconfig_path):
-            try:
-                _, output, _ = module.run_command(  # noqa: F405
-                    ["/usr/bin/openshift", "ex", "config", "view", "-o",
-                     "json", "--kubeconfig=%s" % kubeconfig_path],
-                    check_rc=False
-                )
-                config = json.loads(output)
-
-                cad = 'certificate-authority-data'
-                try:
-                    for cluster in config['clusters']:
-                        config['clusters'][cluster][cad] = 'masked'
-                except KeyError:
-                    pass
-                try:
-                    for user in config['users']:
-                        config['users'][user][cad] = 'masked'
-                        config['users'][user]['client-key-data'] = 'masked'
-                except KeyError:
-                    pass
-
-                current_config['kubeconfig'] = config
-
-            # override pylint broad-except warning, since we do not want
-            # to bubble up any exceptions if oc config view
-            # fails
-            # pylint: disable=broad-except
-            except Exception:
-                pass
-
-    return current_config
-
-
 def build_controller_args(facts):
     """ Build master controller_args """
     cloud_cfg_path = os.path.join(facts['common']['config_base'],
@@ -1045,7 +981,6 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts,
                             local_facts,
                             additive_facts_to_overwrite)
-        facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
         facts = build_controller_args(facts)
