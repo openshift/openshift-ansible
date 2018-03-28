@@ -680,6 +680,17 @@ def map_to_pairs(source, delim="="):
     return ','.join(["{}{}{}".format(key, delim, value) for key, value in iteritems(source)])
 
 
+def lib_utils_oo_etcd_host_urls(hosts, use_ssl=True, port='2379'):
+    '''Return a list of urls for etcd hosts'''
+    urls = []
+    port = str(port)
+    proto = "https://" if use_ssl else "http://"
+    for host in hosts:
+        url_string = "{}{}:{}".format(proto, host, port)
+        urls.append(url_string)
+    return urls
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -713,4 +724,5 @@ class FilterModule(object):
             "lib_utils_oo_l_of_d_to_csv": lib_utils_oo_l_of_d_to_csv,
             "map_from_pairs": map_from_pairs,
             "map_to_pairs": map_to_pairs,
+            "lib_utils_oo_etcd_host_urls": lib_utils_oo_etcd_host_urls,
         }

@@ -420,7 +420,6 @@ def set_url_facts_if_unset(facts):
         api_hostname = cluster_hostname if cluster_hostname else hostname
         api_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
         console_path = facts['master']['console_path']
-        etcd_hosts = facts['master']['etcd_hosts']
 
         use_ssl = dict(
             api=facts['master']['api_use_ssl'],
@@ -428,7 +427,6 @@ def set_url_facts_if_unset(facts):
             loopback_api=facts['master']['api_use_ssl'],
             console=facts['master']['console_use_ssl'],
             public_console=facts['master']['console_use_ssl'],
-            etcd=facts['master']['etcd_use_ssl']
         )
 
         ports = dict(
@@ -437,20 +435,7 @@ def set_url_facts_if_unset(facts):
             loopback_api=facts['master']['api_port'],
             console=facts['master']['console_port'],
             public_console=facts['master']['console_port'],
-            etcd=facts['master']['etcd_port'],
         )
-
-        etcd_urls = []
-        if etcd_hosts != '':
-            facts['master']['etcd_port'] = ports['etcd']
-            for host in etcd_hosts:
-                etcd_urls.append(format_url(use_ssl['etcd'], host,
-                                            ports['etcd']))
-        else:
-            etcd_urls = [format_url(use_ssl['etcd'], hostname,
-                                    ports['etcd'])]
-
-        facts['master'].setdefault('etcd_urls', etcd_urls)
 
         prefix_hosts = [('api', api_hostname),
                         ('public_api', api_public_hostname),
@@ -1274,7 +1259,7 @@ def set_container_facts_if_unset(facts):
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
-        'master': ('etcd_port',)
+        'master': ('etcd_port', 'etcd_use_ssl', 'etcd_hosts')
     }
     for role in keys_to_remove:
         if role in local_facts:
@@ -1435,8 +1420,7 @@ class OpenShiftFacts(object):
                                       controllers_port='8444',
                                       console_use_ssl=True,
                                       console_path='/console',
-                                      console_port='8443', etcd_use_ssl=True,
-                                      etcd_hosts='', etcd_port='2379',
+                                      console_port='8443',
                                       portal_net='172.30.0.0/16',
                                       embedded_kube=True,
                                       embedded_dns=True,
