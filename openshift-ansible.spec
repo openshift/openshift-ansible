@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.41
+Version:        3.7.42
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.7.42-1
+- Pop etcd_port from local_facts file (mgugino@redhat.com)
+
 * Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.7.41-1
 - Migrate: make sure masters are restarted instead of started
   (vrutkovs@redhat.com)
