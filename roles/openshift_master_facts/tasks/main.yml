@@ -52,8 +52,6 @@
       session_max_seconds: "{{ openshift_master_session_max_seconds | default(None) }}"
       session_name: "{{ openshift_master_session_name | default(None) }}"
       session_secrets_file: "{{ openshift_master_session_secrets_file | default(None) }}"
-      session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(None) }}"
-      session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(None) }}"
       access_token_max_seconds: "{{ openshift_master_access_token_max_seconds | default(None) }}"
       auth_token_max_seconds: "{{ openshift_master_auth_token_max_seconds | default(None) }}"
       # oo_htpasswd_users_from_file is a custom filter in role lib_utils
