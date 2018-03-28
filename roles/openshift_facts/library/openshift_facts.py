@@ -949,20 +949,6 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
@@ -974,18 +960,8 @@ def pop_obsolete_local_facts(local_facts):
                 local_facts[role].pop(key, None)
 
 
-class OpenShiftFactsInternalError(Exception):
-    """Origin Facts Error"""
-    pass
-
-
 class OpenShiftFactsUnsupportedRoleError(Exception):
     """Origin Facts Unsupported Role Error"""
-    pass
-
-
-class OpenShiftFactsFileWriteError(Exception):
-    """Origin Facts File Write Error"""
     pass
 
 
@@ -1072,7 +1048,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_aggregate_facts(facts)
