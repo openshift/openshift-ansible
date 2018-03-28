@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.14.0%{?dist}
+Release:        0.15.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Mar 27 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.15.0
+- Remove etcd_migrate and embedded2external (mgugino@redhat.com)
+- Master: change openshift_node include_tasks to import_tasks
+  (mgugino@redhat.com)
+- Use consistent image references and split out node sync (ccoleman@redhat.com)
+- Remove complex version logic and fix f27 build (ccoleman@redhat.com)
+- CSR approval should ignore errors when retrying (ccoleman@redhat.com)
+
 * Mon Mar 26 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.14.0
 - Split the provision.yml playbook for more flexibility.
   (jmencak@users.noreply.github.com)
