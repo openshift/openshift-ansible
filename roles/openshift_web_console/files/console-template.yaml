@@ -83,6 +83,15 @@ objects:
               cpu: 100m
               memory: 100Mi
         nodeSelector: "${{NODE_SELECTOR}}"
+        tolerations:
+        - key: "webconsole"
+          operator: "Equal"
+          value: "true"
+          effect: "NoExecute"
+        - key: "webconsole"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
         volumes:
         - name: serving-cert
           secret:

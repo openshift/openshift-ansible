@@ -25,3 +25,14 @@
     l_node_labels: "{{ openshift_node_labels | default({}) }}"
     l_master_labels: "{{ openshift_manage_node_is_master | ternary(openshift_master_node_labels, {}) }}"
     l_all_labels: "{{ l_node_labels | combine(l_master_labels) }}"
+
+- name: Taint master nodes
+  shell: >
+    {{ openshift_client_binary }} adm taint nodes {{ openshift.node.nodename }} {{ item.label }}:{{ item.effect }} --overwrite
+  with_items:
+    - { effect: "NoExecute", label: "{{ l_openshift_master_webconsole_taint_noexecute_labels }}" }
+    - { effect: "NoSchedule", label: "{{ l_openshift_master_webconsole_taint_noschedule_labels }}" }
+  when:
+    - openshift_manage_node_is_master
+    - openshift_has_dedicated_nodes
+  delegate_to: "{{ openshift_master_host }}"
