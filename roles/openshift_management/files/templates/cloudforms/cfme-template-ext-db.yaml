@@ -791,6 +791,7 @@ parameters:
   displayName: Memcached Slab Page Size
   description: Memcached size of each slab page.
   value: 1m
+
 - name: ANSIBLE_SERVICE_NAME
   displayName: Ansible Service Name
   description: The name of the OpenShift Service exposed for the Ansible container.
