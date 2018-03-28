@@ -45,3 +45,29 @@
       role: node
       local_facts:
         sdn_mtu: "{{ openshift_node_sdn_mtu | default(None) }}"
+
+- name: Initialize etcd host variables
+  hosts: oo_masters_to_config
+  roles:
+  - role: openshift_facts
+  - role: lib_utils
+  tasks:
+  # This needs to run after openshift_facts common role has run on etcd hosts.
+  # lib_utils_oo_select_keys, lib_utils_oo_collect
+  # are custom filter plugins in roles/lib_utils/filter_plugins/oo_filters.py
+  - set_fact:
+      openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                  | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                  }}"
+      openshift_master_etcd_port: "{{ etcd_client_port | default('2379') }}"
+      openshift_master_etcd_hosts: "{{ hostvars
+                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config']
+                                                        | default([]))
+                                       | lib_utils_oo_collect('openshift.common.hostname')
+                                       | default(none, true) }}"
+  # This fact requires the facts set above, so needs to happen in it's own task.
+  - set_fact:
+      # lib_utils_oo_etcd_host_urls is a custom filter plugin in roles/lib_utils/filter_plugins/oo_filters.py
+      openshift_master_etcd_urls: "{{ openshift_master_etcd_hosts | lib_utils_oo_etcd_host_urls(l_use_ssl, openshift_master_etcd_port) }}"
+    vars:
+      l_use_ssl: "{{ openshift_master_etcd_use_ssl | default(True) | bool}}"
