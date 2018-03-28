@@ -160,6 +160,36 @@ class ActionModule(ActionBase):
                 raise errors.AnsibleModuleError(error_msg)
         return None
 
+    def check_session_auth_secrets(self, hostvars, host):
+        """Checks session_auth_secrets is correctly formatted"""
+        sas = self.template_var(hostvars, host,
+                                'openshift_master_session_auth_secrets')
+        ses = self.template_var(hostvars, host,
+                                'openshift_master_session_encryption_secrets')
+        # This variable isn't mandatory, only check if set.
+        if sas is None and ses is None:
+            return None
+
+        if not (
+                issubclass(type(sas), list) and issubclass(type(ses), list)
+        ) or len(sas) != len(ses):
+            raise errors.AnsibleModuleError(
+                'Expects openshift_master_session_auth_secrets and '
+                'openshift_master_session_encryption_secrets are equal length lists')
+
+        for secret in sas:
+            if len(secret) < 32:
+                raise errors.AnsibleModuleError(
+                    'Invalid secret in openshift_master_session_auth_secrets. '
+                    'Secrets must be at least 32 characters in length.')
+
+        for secret in ses:
+            if len(secret) not in [16, 24, 32]:
+                raise errors.AnsibleModuleError(
+                    'Invalid secret in openshift_master_session_encryption_secrets. '
+                    'Secrets must be 16, 24, or 32 characters in length.')
+        return None
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -170,6 +200,7 @@ class ActionModule(ActionBase):
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
         self.check_supported_ocp_version(hostvars, host, odt)
+        self.check_session_auth_secrets(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
