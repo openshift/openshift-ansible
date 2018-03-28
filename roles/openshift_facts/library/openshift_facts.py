@@ -1215,7 +1215,7 @@ values provided as a list. Hence the gratuitous use of ['foo'] below.
             # map() seems to be returning an itertools.imap object
             # instead of a list. We cast it to a list ourselves.
             # pylint: disable=unnecessary-lambda
-            labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
+            labels_str = list(map(lambda x: '='.join(map(str, x)), facts['node']['labels'].items()))
             if labels_str != '':
                 kubelet_args['node-labels'] = labels_str
 
