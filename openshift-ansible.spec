@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.40
+Version:        3.7.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,25 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.7.41-1
+- Migrate: make sure masters are restarted instead of started
+  (vrutkovs@redhat.com)
+- Master: upgrade SDN package only when openshift SDN is used
+  (vrutkovs@redhat.com)
+- node: install sdn-ovs package only when openshift SDN is used
+  (vrutkovs@redhat.com)
+- Add key check for facts_for_clusterrolebindings (nakayamakenjiro@gmail.com)
+- Add key existing check to collect facts for rolebidings
+  (nakayamakenjiro@gmail.com)
+- migrate: update ETCD_NAME for migrated hosts (vrutkovs@redhat.com)
+- Adding check in case only one ES container is in the pod for upgrades to 3.7
+  (ewolinet@redhat.com)
+- start_api_server: service catalog healthcheck doesn't require proxy
+  (vrutkovs@redhat.com)
+- Update API healthz check to use uri module (mkhan@redhat.com)
+- wire_aggregator: skip openshift_upgrade_target version check if its undefined
+  (vrutkovs@redhat.com)
+
 * Wed Mar 21 2018 Justin Pierce <jupierce@redhat.com> 3.7.40-1
 - Bump pyOpenSSL to 17.5.0 (rteague@redhat.com)
 - Bug 1541946- waiting for master reboot now works behind bastion
