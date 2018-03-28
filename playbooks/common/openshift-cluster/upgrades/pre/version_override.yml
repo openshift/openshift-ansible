@@ -18,7 +18,6 @@
         # will be modified by openshift_version; we want to ensure these
         # are initially set to first versions to ensure no accidental usage of
         # second versions (eg, 3.8 and 3.9 respectively) are used.
-        l_double_upgrade_cp_reset_version: True
         openshift_version: "{{ l_double_upgrade_first_version }}"
         openshift_release: "{{ l_double_upgrade_first_release }}"
         openshift_upgrade_target: '3.8'
