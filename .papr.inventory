@@ -25,6 +25,7 @@ osm_controller_args={"experimental-cluster-signing-duration": ["20m"]}
 openshift_node_bootstrap=true
 openshift_hosted_infra_selector="node-role.kubernetes.io/infra=true"
 osm_default_node_selector="node-role.kubernetes.io/compute=true"
+template_service_broker_install=false
 
 [masters]
 ocp-master
