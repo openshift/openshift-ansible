@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.110
+Version:        3.6.173.0.111
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,16 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.111-1
+- Migrate: make sure masters are restarted instead of started
+  (vrutkovs@redhat.com)
+- Master: upgrade SDN package only when openshift SDN is used
+  (vrutkovs@redhat.com)
+- Add key check for facts_for_clusterrolebindings (nakayamakenjiro@gmail.com)
+- Add key existing check to collect facts for rolebidings
+  (nakayamakenjiro@gmail.com)
+- migrate: update ETCD_NAME for migrated hosts (vrutkovs@redhat.com)
+
 * Mon Mar 19 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.110-1
 - etcd migrate: set openshift_ca_host (vrutkovs@redhat.com)
 - etcd migrate: Set missing variables (hansmi@vshn.ch)
