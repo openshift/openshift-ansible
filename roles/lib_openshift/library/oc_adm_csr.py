@@ -36,6 +36,7 @@ import atexit
 import copy
 import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -355,7 +356,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}.{}'.format(self.filename, time.strftime("%Y%m%dT%H%M%S")))
 
         # Try to set format attributes if supported
         try:
@@ -1637,7 +1638,6 @@ class OCcsr(OpenShiftCLI):
             all_results = []
             finished = False
             timeout = False
-            import time
             # loop for timeout or block until all nodes pass
             ctr = 0
             while True:

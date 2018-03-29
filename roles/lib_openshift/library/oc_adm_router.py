@@ -36,6 +36,7 @@ import atexit
 import copy
 import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -492,7 +493,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}.{}'.format(self.filename, time.strftime("%Y%m%dT%H%M%S")))
 
         # Try to set format attributes if supported
         try:
@@ -2956,7 +2957,6 @@ class Router(OpenShiftCLI):
         results = []
         self.needs_update()
 
-        import time
         # pylint: disable=maybe-no-member
         for kind, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:

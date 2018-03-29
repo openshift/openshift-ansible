@@ -280,7 +280,6 @@ class Router(OpenShiftCLI):
         results = []
         self.needs_update()
 
-        import time
         # pylint: disable=maybe-no-member
         for kind, oc_data in self.prepared_router.items():
             if oc_data['obj'] is not None:
