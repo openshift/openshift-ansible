@@ -20,10 +20,8 @@
     regexp: "{{ current_image.stdout }}$"
     replace: "{{ new_etcd_image }}"
 
-- lineinfile:
-    destfile: "{{ etcd_conf_file }}"
-    regexp: '^ETCD_QUOTA_BACKEND_BYTES='
-    line: "ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}"
+- include: validate_etcd_conf.yml
+  static: true
 
 - name: Restart etcd_container
   systemd:
