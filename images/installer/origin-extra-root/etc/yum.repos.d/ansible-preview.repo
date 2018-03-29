@@ -1,5 +1,0 @@
-[ansible-preview]
-name=ansible-preview
-baseurl=http://releases.ansible.com/ansible/rpm/preview/epel-7-x86_64/
-enabled=1
-gpgcheck=0
