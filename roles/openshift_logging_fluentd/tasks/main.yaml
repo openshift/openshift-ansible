@@ -120,7 +120,7 @@
     tasks_from: patch_configmap_files.yaml
   vars:
     configmap_name: "logging-fluentd"
-    configmap_namespace: "logging"
+    configmap_namespace: "{{ openshift_logging_namespace }}"
     configmap_file_names:
       - current_file: "fluent.conf"
         new_file: "{{ tempdir }}/fluent.conf"
