@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.14
+Version:        3.9.15
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,49 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 29 2018 Justin Pierce <jupierce@redhat.com> 3.9.15-1
+- PAPR: don't install TSB on Atomic (vrutkovs@redhat.com)
+- remove duplicate time import (fabian@fabianism.us)
+- fix import (fabian@fabianism.us)
+- rebuild dependent modules (fabian@fabianism.us)
+- Bug 1555426- yedit now appends an ISO8601 formatted datetime string to file
+  backups (fabian@fabianism.us)
+- Bug 1557516- ASB now scheduled on infra nodes (fabian@fabianism.us)
+- Configure dnsmasq before waiting for node (sedgar@redhat.com)
+- use openshift_image_tag default for prometheus_node_exporter image
+  (aweiteka@redhat.com)
+- ScheduledJob -> CronJob (vrutkovs@redhat.com)
+- Fix path to expiry check playbook (vrutkovs@redhat.com)
+- Use 'oc create secret' syntax instead of deprecated 'oc secrets new-sslauth'
+  (vrutkovs@redhat.com)
+- Master: upgrade SDN package only when openshift SDN is used
+  (vrutkovs@redhat.com)
+- node: install sdn-ovs package only when openshift SDN is used
+  (vrutkovs@redhat.com)
+- Change include_tasks to import_tasks (mgugino@redhat.com)
+- Replacing -v with -p for template parameters in oc_process
+  (asherkho@redhat.com)
+- package_version check: stop looking for docker (lmeyer@redhat.com)
+- cockpit-ui: Make it optional (sjr@redhat.com)
+- Remove openshift_management beta acknowledement (rteague@redhat.com)
+- Bumping up the default wait time for ES node to be yellow or green, made it
+  configurable for larger clusters (ewolinet@redhat.com)
+- Bug 1553576 - Change the self_hostname to ${hostname} in openshift-ansible
+  (nhosoi@redhat.com)
+- crio: Fixup docker SELinux permissions (mrunalp@gmail.com)
+- Allowing means to provide custom es config entries with
+  openshift_logging_es_config (ewolinet@redhat.com)
+- Remove etcd_hosts and etcd_urls from openshift_facts (mgugino@redhat.com)
+- Fix openshift_hosted_templates/examples registry_host (mgugino@redhat.com)
+- Allow rcpbind for CNS block in cns-secgrp (openshift_openstack).
+  (jmencak@redhat.com)
+- GlusterFS - Invoke oc binary with the admin.kubeconfig token rather than
+  default token from $HOME/.kube/config (“dani_comnea@yahoo.com”)
+- only annotate ops project for ops kibana when using ops (jcantril@redhat.com)
+- Change default grafana ns to openshift-grafana (pep@redhat.com)
+- Fix grafana role node selector check (pep@redhat.com)
+- Clarify node system container service unit (mgugino@redhat.com)
+
 * Thu Mar 22 2018 Justin Pierce <jupierce@redhat.com> 3.9.14-1
 - Updating default run hour and minute for curator (ewolinet@redhat.com)
 - fixing the mounts for the daemonset config to have non subpath mount
