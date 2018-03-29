@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.5.163
+Version:        3.5.164
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -276,6 +276,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Mar 29 2018 Justin Pierce <jupierce@redhat.com> 3.5.164-1
+- 
+
 * Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.5.163-1
 - Add key check for facts_for_clusterrolebindings (nakayamakenjiro@gmail.com)
 - Add key existing check to collect facts for rolebidings
