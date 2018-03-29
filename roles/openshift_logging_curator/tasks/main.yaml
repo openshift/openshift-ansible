@@ -110,7 +110,7 @@
         tasks_from: patch_configmap_files.yaml
       vars:
         configmap_name: "logging-curator"
-        configmap_namespace: "logging"
+        configmap_namespace: "{{ openshift_logging_namespace }}"
         configmap_file_names:
           - current_file: "config.yaml"
             new_file: "{{ tempdir }}/curator.yml"
@@ -179,7 +179,7 @@
         tasks_from: patch_configmap_files.yaml
       vars:
         configmap_name: "logging-curator"
-        configmap_namespace: "logging"
+        configmap_namespace: "{{ openshift_logging_namespace }}"
         configmap_file_names:
           - current_file: "actions.yaml"
             new_file: "{{ tempdir }}/actions.yaml"
