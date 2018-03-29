@@ -478,9 +478,9 @@ an OpenShift Container Platform cluster
 
     # etcd, where do you hide your certs? Used when parsing etcd.conf
     etcd_cert_params = [
-        "ETCD_CA_FILE",
+        "ETCD_TRUSTED_CA_FILE",
         "ETCD_CERT_FILE",
-        "ETCD_PEER_CA_FILE",
+        "ETCD_PEER_TRUSTED_CA_FILE",
         "ETCD_PEER_CERT_FILE",
     ]
 
