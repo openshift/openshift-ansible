@@ -52,7 +52,6 @@
     - not openshift_metrics_install_metrics | bool
 
 - include_tasks: uninstall_hosa.yaml
-  when: not openshift_metrics_install_hawkular_agent | bool
 
 - name: Delete temp directory
   local_action: file path=local_tmp.stdout state=absent
