@@ -170,7 +170,6 @@ class OCcsr(OpenShiftCLI):
             all_results = []
             finished = False
             timeout = False
-            import time
             # loop for timeout or block until all nodes pass
             ctr = 0
             while True:
