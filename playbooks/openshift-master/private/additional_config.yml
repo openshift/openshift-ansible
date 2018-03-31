@@ -21,6 +21,7 @@
   # TODO: this is currently required in order to schedule pods onto the masters, but
   #   should be moved into components once nodes are using dynamic config
   - role: openshift_sdn
+    when: openshift_use_openshift_sdn | default(True) | bool
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
   - role: openshift_examples

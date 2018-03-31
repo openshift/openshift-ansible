@@ -69,7 +69,7 @@
 
   - import_role:
       name: openshift_control_plane
-      tasks_from: upgrade.yml
+      tasks_from: upgrade
 
   - name: update vsphere provider master config
     import_role:
@@ -80,9 +80,6 @@
     - openshift_cloudprovider_kind == 'vsphere'
     - openshift_version | version_compare('3.9', '>=')
 
-  - name: Setup and enable bootstrapping options
-    import_tasks: tasks/enable_bootstrap.yml
-
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
@@ -90,11 +87,10 @@
   - include_tasks: "{{ openshift_master_upgrade_hook }}"
     when: openshift_master_upgrade_hook is defined
 
-  - name: Disable master controller
-    service:
-      name: "{{ openshift_service_type }}-master-controllers"
-      enabled: false
-    when: openshift_rolling_restart_mode | default('services') == 'system'
+  - name: Lay down the static configuration
+    import_role:
+      name: openshift_control_plane
+      tasks_from: static.yml
 
   - import_tasks: tasks/restart_hosts.yml
     when: openshift_rolling_restart_mode | default('services') == 'system'
@@ -290,43 +286,10 @@
     import_role:
       name: lib_openshift
 
-  # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
-  # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
-  # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
-  - name: Mark node unschedulable
-    oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
-      schedulable: False
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    retries: 10
-    delay: 5
-    register: node_unschedulable
-    until: node_unschedulable is succeeded
-
-  - name: Drain Node for Kubelet upgrade
-    command: >
-      {{ hostvars[groups.oo_first_master.0]['first_master_client_binary'] }} adm drain {{ openshift.node.nodename | lower }}
-      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-      --force --delete-local-data --ignore-daemonsets
-      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    register: l_upgrade_control_plane_drain_result
-    until: not (l_upgrade_control_plane_drain_result is failed)
-    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
-    delay: 5
-    failed_when:
-    - l_upgrade_control_plane_drain_result is failed
-    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
-
   roles:
   - openshift_facts
+
   post_tasks:
-  - import_role:
-      name: openshift_node
-      tasks_from: upgrade_pre.yml
-  - import_role:
-      name: openshift_node
-      tasks_from: upgrade.yml
   - import_role:
       name: openshift_manage_node
       tasks_from: config.yml

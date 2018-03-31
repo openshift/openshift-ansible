@@ -1,6 +1,6 @@
 ---
 - name: Re-enable excluder if it was previously enabled
-  hosts: oo_nodes_to_config:!oo_exclude_nodes_to_config
+  hosts: "{{ l_node_group }}"
   gather_facts: no
   roles:
   - role: openshift_excluder

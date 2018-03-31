@@ -8,15 +8,3 @@
   import_role:
     name: openshift_control_plane
     tasks_from: bootstrap.yml
-
-- name: Setup the node group config maps
-  import_role:
-    name: openshift_node_group
-  run_once: True
-
-- name: Setup the node bootstrap auto approver
-  import_role:
-    name: openshift_bootstrap_autoapprover
-  run_once: True
-  when:
-  - openshift_master_bootstrap_auto_approve | default(False) | bool

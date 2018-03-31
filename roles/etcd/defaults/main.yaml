@@ -5,18 +5,19 @@ r_etcd_common_backup_sufix_name: ''
 l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
 
 # runc, docker, host
-r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else 'docker' if openshift_is_containerized else 'host' }}"
+r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else ('docker' if openshift_is_containerized else 'host') }}"
 
-osm_etcd_image: 'registry.access.redhat.com/rhel7/etcd'
+r_etcd_default_version: "3.2.15"
+osm_etcd_image: "registry.access.redhat.com/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
 etcd_image_dict:
-  origin: "registry.fedoraproject.org/latest/etcd"
+  origin: "quay.io/coreos/etcd:v{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
   openshift-enterprise: "{{ osm_etcd_image }}"
 etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }}"
 
 # etcd run on a host => use etcdctl command directly
 # etcd run as a docker container => use docker exec
 # etcd run as a runc container => use runc exec
-r_etcd_common_etcdctl_command: "{{ 'etcdctl' if r_etcd_common_etcd_runtime == 'host' | bool else 'docker exec etcd_container etcdctl' if r_etcd_common_etcd_runtime == 'docker' else 'runc exec etcd etcdctl' }}"
+r_etcd_common_etcdctl_command: "{{ 'etcdctl' if (r_etcd_common_etcd_runtime == 'host') else ('docker exec etcd_container etcdctl' if (r_etcd_common_etcd_runtime == 'docker') else 'runc exec etcd etcdctl') }}"
 
 # etcd server vars
 etcd_conf_dir: '/etc/etcd'

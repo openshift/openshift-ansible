@@ -5,3 +5,10 @@
   tasks:
   - name: include bootstrapping tasks
     import_tasks: tasks/enable_bootstrap.yml
+
+- name: Enable bootstrapping configuration
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - name: include bootstrapping tasks
+    import_tasks: tasks/enable_bootstrap_config.yml

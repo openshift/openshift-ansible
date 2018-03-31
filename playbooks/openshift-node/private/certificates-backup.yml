@@ -14,7 +14,7 @@
       warn: no
 
 - name: Redeploy node certificates
-  hosts: oo_nodes_to_config:!oo_exclude_nodes_to_config
+  hosts: oo_nodes_to_config:!oo_nodes_to_bootstrap
   pre_tasks:
   - name: Remove CA certificate
     file:

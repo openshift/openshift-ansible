@@ -12,7 +12,6 @@
     - "files/*.yaml"
 
 - name: Update the image tag
-  run_once: true
   yedit:
     src: "{{ mktemp.stdout }}/openshift-bootstrap-images.yaml"
     key: 'tag.from.name'
@@ -25,13 +24,11 @@
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
 
 - name: Apply the config
-  run_once: true
   command: >
     {{ openshift_client_binary }} apply -f "{{ mktemp.stdout }}"
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
 
 - name: Remove temp directory
-  run_once: true
   file:
     state: absent
     name: "{{ mktemp.stdout }}"

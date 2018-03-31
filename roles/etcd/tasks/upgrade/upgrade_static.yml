@@ -1,0 +1,26 @@
+---
+# PREREQ Node service is ready to run static pods
+
+# INPUT r_etcd_upgrade_version
+- name: Verify cluster is healthy pre-upgrade
+  command: "{{ etcdctlv2 }} cluster-health"
+
+- name: Stop etcd
+  systemd:
+    name: "{{ etcd_service }}"
+    state: stopped
+
+- name: Remove old service file
+  file:
+    path: "{{ etcd_service }}"
+    state: absent
+
+- name: Configure static definition
+  import_tasks: ../static.yml
+
+- name: Verify cluster is healthy
+  command: "{{ etcdctlv2 }} cluster-health"
+  register: etcdctl
+  until: etcdctl.rc == 0
+  retries: 3
+  delay: 10

@@ -49,15 +49,3 @@
     name: "{{ mktemp.stdout }}"
     state: absent
   changed_when: False
-
-- name: Establish the default bootstrap kubeconfig for masters
-  copy:
-    remote_src: true
-    src: "/etc/origin/master/admin.kubeconfig"
-    dest: "{{ item }}"
-    mode: 0600
-  with_items:
-  # bootstrap as an admin
-  - /etc/origin/node/bootstrap.kubeconfig
-  # copy to this location to bypass initial bootstrap request
-  - /etc/origin/node/node.kubeconfig

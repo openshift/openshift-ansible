@@ -4,10 +4,7 @@
     name: "{{ item }}"
     state: stopped
   with_items:
-  - etcd_container
   - openvswitch
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
   - "{{ openshift_service_type }}-node"
   failed_when: false
 

@@ -34,10 +34,3 @@ openshift_node_sdn_mtu: 1410
 osm_cluster_network_cidr: 172.16.0.0/16
 osm_host_subnet_length: 9
 openshift_portal_net: 172.30.0.0/16
-
-# Default cluster configuration
-openshift_master_cluster_method: native
-openshift_schedulable: true
-# TODO: change to upstream conventions
-openshift_hosted_infra_selector: "role=infra"
-osm_default_node_selector: "role=app"

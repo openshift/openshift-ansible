@@ -28,6 +28,7 @@ spec:
       # as all pods.
       serviceAccountName: sdn
       hostNetwork: true
+      hostPID: true
       containers:
       - name: openvswitch
         image: " "
@@ -37,6 +38,25 @@ spec:
         - |
           #!/bin/bash
           set -euo pipefail
+
+          # if another process is listening on the cni-server socket, wait until it exits
+          trap 'kill $(jobs -p); exit 0' TERM
+          retries=0
+          while true; do
+            if /usr/share/openvswitch/scripts/ovs-ctl status &>/dev/null; then
+              echo "warning: Another process is currently managing OVS, waiting 15s ..." 2>&1
+              sleep 15 & wait
+              (( retries += 1 ))
+            else
+              break
+            fi
+            if [[ "${retries}" -gt 40 ]]; then
+              echo "error: Another process is currently managing OVS, exiting" 2>&1
+              exit 1
+            fi
+          done
+
+          # launch OVS
           function quit {
               /usr/share/openvswitch/scripts/ovs-ctl stop
               exit 0

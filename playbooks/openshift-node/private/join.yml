@@ -1,22 +1,4 @@
 ---
-- name: Evaluate bootstrapped nodes
-  hosts: localhost
-  gather_facts: no
-  connection: local
-  tasks:
-  - name: Add all nodes that are bootstrapped
-    add_host:
-      name: "{{ item }}"
-      groups: oo_nodes_to_bootstrap
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ groups.oo_nodes_to_config | default([]) }}"
-    when:
-    - hostvars[item].openshift is defined
-    - hostvars[item].openshift.common is defined
-    - (hostvars[item].openshift_is_bootstrapped | bool) or (hostvars[item].openshift_node_bootstrap | default(True) | bool)
-    changed_when: False
-
 - name: Distribute bootstrap and start nodes
   hosts: oo_nodes_to_bootstrap
   gather_facts: no

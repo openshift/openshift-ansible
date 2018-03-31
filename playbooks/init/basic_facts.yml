@@ -35,7 +35,7 @@
     register: bootstrap_node_config_path_check
   - name: initialize_facts set fact openshift_is_bootstrapped
     set_fact:
-      openshift_is_bootstrapped: "{{ bootstrap_node_config_path_check.stat.exists }}"
+      openshift_is_bootstrapped: "{{ openshift_is_bootstrapped|default(False) or bootstrap_node_config_path_check.stat.exists }}"
 
   - name: initialize_facts set fact openshift_is_atomic and openshift_is_containerized
     set_fact:
