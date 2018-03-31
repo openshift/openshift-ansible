@@ -47,6 +47,7 @@ r_crio_os_firewall_allow:
 - service: crio
   port: 10010/tcp
 
+r_crio_use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(True) }}"
 
 openshift_docker_is_node_or_master: "{{ True if inventory_hostname in (groups['oo_masters_to_config']|default([])) or inventory_hostname in (groups['oo_nodes_to_config']|default([])) else False | bool }}"
 
