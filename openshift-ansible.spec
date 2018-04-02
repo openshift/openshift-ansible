@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.15
+Version:        3.9.16
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 02 2018 Justin Pierce <jupierce@redhat.com> 3.9.16-1
+- Don't remove pvs when uninstalling openshift_management (ncarboni@redhat.com)
+- Fix GCP master haproxy install check (ccoleman@redhat.com)
+- Removing hardcoding of configmap_namespace for patching (ewolinet@redhat.com)
+
 * Thu Mar 29 2018 Justin Pierce <jupierce@redhat.com> 3.9.15-1
 - PAPR: don't install TSB on Atomic (vrutkovs@redhat.com)
 - remove duplicate time import (fabian@fabianism.us)
