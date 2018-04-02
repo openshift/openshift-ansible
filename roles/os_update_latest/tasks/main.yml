@@ -3,3 +3,18 @@
   package: name=* state=latest
   register: result
   until: result is succeeded
+
+- when:
+  - os_update_latest_reboot
+  - result.changed
+  block:
+  - name: restart instance with latest updates
+    shell: sleep 2 && /sbin/shutdown -r now "Ansible updates triggered"
+    async: 1
+    poll: 0
+    ignore_errors: true
+
+  - name: wait for server to return
+    wait_for_connection:
+      delay: 30
+      timeout: 300

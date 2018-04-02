@@ -1,0 +1,9 @@
+---
+- name: provision storage account
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: provision storage account
+    import_role:
+      name: openshift_azure
+      tasks_from: create_storage_account.yml

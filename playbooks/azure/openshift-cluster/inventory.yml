@@ -1,0 +1,10 @@
+---
+- name: Set up the connection variables for retrieving inventory from Azure
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  - name: Materialize the inventory
+    include_role:
+      name: openshift_azure
+      tasks_from: dynamic_inventory.yml

@@ -1,0 +1,76 @@
+---
+# Note: this required ansible-galaxy install Azure.azure_modules
+
+- import_playbook: prerequisites.yml
+
+# create all the items necessary to make the VM
+- name: "Create resource group"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision public ip address"
+    import_role:
+      name: openshift_azure
+      tasks_from: provision_instance.yml
+    vars:
+      openshift_azure_vm_base_image:
+        name: '{{ openshift_azure_root_image }}'
+        resource_group: '{{ openshift_azure_root_image_ns }}'
+
+- name: update OS and install packages
+  hosts: azure
+  gather_facts: yes
+  remote_user: "{{ openshift_azure_vm_admin_username }}"
+  become: True
+  tasks:
+  - name: lay down yum certs
+    copy:
+      content: "{{ item.content }}"
+      dest: "/var/lib/yum/{{ item.name }}"
+    with_items:
+    - name: client-cert.pem
+      content: "{{ yum_client_cert_contents }}"
+    - name: client-key.pem
+      content: "{{ yum_client_key_contents }}"
+
+  - name: update our /var
+    mount:
+      boot: yes
+      fstype: xfs
+      path: /var
+      state: mounted
+      src: /dev/mapper/rootvg-var
+      opts: rw,relatime,seclabel,attr2,inode64,grpquota
+
+  - name: setup yum repositories
+    import_role:
+      name: openshift_repos
+
+  - name: update OS
+    import_role:
+      name: os_update_latest
+    vars:
+      os_update_latest_reboot: True
+
+  - name: fetch tags
+    import_role:
+      name: openshift_azure
+      tasks_from: query_tags.yml
+
+  - name: clean up tasks
+    import_tasks: tasks/remove_yum.yml
+
+# NOTE: this isn't available until ansible 2.5
+# https://github.com/ansible/ansible/pull/32589
+# installed from https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
+- name: Create image
+  hosts: localhost
+  tasks:
+  - name: deprovision and prepare image
+    import_role:
+      name: openshift_azure
+      tasks_from: create_image_from_vm.yml
+    vars:
+      openshift_azure_vm_host: "{{ groups['azure'][0] }}"
+      openshift_azure_os_tags: "{{ hostvars[groups['azure'][0]]['openshift_azure_os_tags'] | default({}) }}"
+      openshift_azure_image_name: "{{ openshift_azure_base_image }}"

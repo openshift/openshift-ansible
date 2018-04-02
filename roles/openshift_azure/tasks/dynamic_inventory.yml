@@ -1,0 +1,6 @@
+---
+- name: Templatize environment script
+  template:
+    src: inventory.j2.sh
+    dest: /tmp/azure-inventory.sh
+    mode: '0755'
