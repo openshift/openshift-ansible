@@ -6,23 +6,30 @@
 .
 ├── inventory           Contains dynamic inventory scripts, and examples of
 │                       Ansible inventories.
-├── library             Contains Python modules used by the playbooks.
 ├── playbooks           Contains Ansible playbooks targeting multiple use cases.
 └── roles               Contains Ansible roles, units of shared behavior among
                         playbooks.
 ```
 
-#### Ansible plugins
+#### Ansible shared libraries and plugins
 
-These are plugins used in playbooks and roles:
+Shared libraries and plugins are located in the `lib_utils` role.
 
-```
-.
-├── ansible-profile
-├── callback_plugins
-├── filter_plugins
-└── lookup_plugins
-```
+#### Ansible playbooks
+
+The `playbooks` directory is organized such that entry point playbooks are
+located in either component sub directories or cloud provisioning subdirectories.
+
+_Cloud Provisioning_
+- aws
+- gcp
+- openstack
+
+_OpenShift Components_
+- openshift-etcd
+- openshift-master
+- openshift-node
+- openshift-<component_name>
 
 ### Scripts
 
