@@ -16,6 +16,9 @@
   command: >
     atomic pull --storage=ostree {{ system_osn_image }}
   register: pull_result
+  retries: 3
+  delay: 5
+  until: pull_result.rc == 0
   changed_when: "'Pulling layer' in pull_result.stdout"
 
 - name: Install or Update node system container
@@ -46,3 +49,11 @@
     # if we have just a ',' then both mount lists were empty, we don't want to add
     # anything to config.json
     l_node_syscon_add_mounts2: "{{ (l_node_syscon_add_mounts != ',') | bool | ternary(l_node_syscon_add_mounts,'') }}"
+
+# TODO: network manager on RHEL is failing to execute 99-origin-dns.sh with signal 13, an immediate
+# restart seems to allow the job to configure. Only occurs with system containers.
+- name: Restart network manager to ensure networking configuration is in place
+  systemd:
+    name: NetworkManager
+    enabled: yes
+    state: restarted

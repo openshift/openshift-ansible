@@ -1,7 +1,7 @@
 ---
 - name: Ensure that Heapster has nodes to run on
   import_role:
-    name: openshift_master
+    name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_metrics_heapster_nodeselector | map_to_pairs }}"

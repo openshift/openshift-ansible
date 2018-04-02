@@ -34,5 +34,18 @@
   when: "'nodename' in openshift.node"
   delegate_to: "{{ openshift_master_host }}"
 
+- name: Wait for node to be ready
+  oc_obj:
+    state: list
+    kind: node
+    name: "{{ openshift.node.nodename }}"
+  register: node_output
+  delegate_to: "{{ openshift_master_host }}"
+  when: "'nodename' in openshift.node"
+  until: node_output.results.returncode == 0 and node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  # Give the node two minutes to come back online.
+  retries: 24
+  delay: 5
+
 - include_tasks: config.yml
 - include_tasks: set_default_node_role.yml

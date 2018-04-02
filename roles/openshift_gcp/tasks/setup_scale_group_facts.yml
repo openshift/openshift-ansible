@@ -41,4 +41,4 @@
     groups: bootstrap_nodes
     openshift_node_bootstrap: True
   with_items: "{{ groups['tag_ocp-node'] | default([]) | intersect(groups['tag_ocp-bootstrap'] | default([])) }}"
-  when: not (openshift_node_bootstrap | default(False))
+  when: not (openshift_node_bootstrap | default(True))
