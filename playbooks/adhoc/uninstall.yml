@@ -98,32 +98,33 @@
   - block:
     - block:
       - name: Remove packages
-        package: name={{ item }} state=absent
-        with_items:
-        - atomic-openshift
-        - atomic-openshift-clients
-        - atomic-openshift-excluder
-        - atomic-openshift-docker-excluder
-        - atomic-openshift-node
-        - atomic-openshift-sdn-ovs
-        - cockpit-bridge
-        - cockpit-docker
-        - cockpit-system
-        - cockpit-ws
-        - kubernetes-client
-        - openshift
-        - openshift-node
-        - openshift-sdn
-        - openshift-sdn-ovs
-        - openvswitch
-        - origin
-        - origin-excluder
-        - origin-docker-excluder
-        - origin-clients
-        - origin-node
-        - origin-sdn-ovs
-        - tuned-profiles-atomic-openshift-node
-        - tuned-profiles-origin-node
+        package: name={{ node_pkgs | join(',') }} state=absent
+        vars:
+          node_pkgs:
+          - atomic-openshift
+          - atomic-openshift-clients
+          - atomic-openshift-excluder
+          - atomic-openshift-docker-excluder
+          - atomic-openshift-node
+          - atomic-openshift-sdn-ovs
+          - cockpit-bridge
+          - cockpit-docker
+          - cockpit-system
+          - cockpit-ws
+          - kubernetes-client
+          - openshift
+          - openshift-node
+          - openshift-sdn
+          - openshift-sdn-ovs
+          - openvswitch
+          - origin
+          - origin-excluder
+          - origin-docker-excluder
+          - origin-clients
+          - origin-node
+          - origin-sdn-ovs
+          - tuned-profiles-atomic-openshift-node
+          - tuned-profiles-origin-node
         register: result
         until: result is succeeded
 
@@ -361,27 +362,28 @@
     - atomic-openshift-master
 
   - name: Remove packages
-    package: name={{ item }} state=absent
+    package: name={{ master_pkgs | join (',') }} state=absent
     when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - atomic-openshift
-    - atomic-openshift-clients
-    - atomic-openshift-excluder
-    - atomic-openshift-docker-excluder
-    - atomic-openshift-master
-    - cockpit-bridge
-    - cockpit-docker
-    - cockpit-system
-    - cockpit-ws
-    - corosync
-    - kubernetes-client
-    - openshift
-    - openshift-master
-    - origin
-    - origin-clients
-    - origin-excluder
-    - origin-docker-excluder
-    - origin-master
+    vars:
+      master_pkgs:
+      - atomic-openshift
+      - atomic-openshift-clients
+      - atomic-openshift-excluder
+      - atomic-openshift-docker-excluder
+      - atomic-openshift-master
+      - cockpit-bridge
+      - cockpit-docker
+      - cockpit-system
+      - cockpit-ws
+      - corosync
+      - kubernetes-client
+      - openshift
+      - openshift-master
+      - origin
+      - origin-clients
+      - origin-excluder
+      - origin-docker-excluder
+      - origin-master
     register: result
     until: result is succeeded
 
@@ -496,7 +498,6 @@
     when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
     with_items:
     - etcd
-    - etcd3
     register: result
     until: result is succeeded
 
