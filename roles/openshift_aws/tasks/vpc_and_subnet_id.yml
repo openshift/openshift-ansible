@@ -15,7 +15,7 @@
   ec2_vpc_subnet_facts:
     region: "{{ openshift_aws_region }}"
     filters:
-      "availability_zone": "{{ openshift_aws_subnet_az }}"
+      "availability-zone": "{{ openshift_aws_subnet_az }}"
       vpc-id: "{{ vpcout.vpcs[0].id }}"
   register: subnetout
 
