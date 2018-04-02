@@ -1,0 +1,32 @@
+---
+- name: remove descheduler service account
+  oc_serviceaccount:
+    name: "{{ openshift_descheduler_service_account }}"
+    namespace: "{{ openshift_descheduler_namespace }}"
+    state: absent
+
+- name: remove descheduler cluster role
+  oc_clusterrole:
+    state: absent
+    name: "{{ openshift_descheduler_cluster_role_name }}"
+
+- name: remove binding of descheduler cluster role to its service account
+  oc_adm_policy_user:
+    state: absent
+    user: "system:serviceaccount:openshift-infra:{{ openshift_descheduler_service_account }}"
+    namespace: "{{ openshift_descheduler_namespace }}"
+    resource_kind: cluster-role
+    resource_name: "{{ openshift_descheduler_cluster_role_name }}"
+
+- name: remove descheduler policy configmap
+  oc_configmap:
+    state: absent
+    name: "{{ openshift_descheduler_policy_configmap_name }}"
+    namespace: "{{ openshift_descheduler_namespace }}"
+
+- name: "Ensure the descheduler is {{ openshift_descheduler_state }}"
+  oc_obj:
+    namespace: "{{ openshift_descheduler_namespace }}"
+    state: absent
+    kind: cronjob
+    name: "{{ openshift_descheduler_cronjob_name }}"

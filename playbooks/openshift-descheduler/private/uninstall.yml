@@ -1,0 +1,10 @@
+---
+- name: Uninstall Descheduler
+  hosts: oo_first_master
+  vars:
+    openshift_descheduler_state: absent
+  tasks:
+  - name: Run the Descheduler Uninstall Role Tasks
+    include_role:
+      name: openshift_descheduler
+      tasks_from: uninstall_descheduler
