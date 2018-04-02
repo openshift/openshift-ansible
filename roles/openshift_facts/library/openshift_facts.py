@@ -8,8 +8,6 @@
 
 # pylint: disable=no-name-in-module, import-error, wrong-import-order
 import copy
-import errno
-import json
 import re
 import os
 import yaml
@@ -19,7 +17,6 @@ import ipaddress
 from distutils.util import strtobool
 from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
-from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -49,48 +46,6 @@ requirements: [ ]
 '''
 EXAMPLES = '''
 '''
-
-
-# TODO: We should add a generic migration function that takes source and destination
-# paths and does the right thing rather than one function for common, one for node, etc.
-def migrate_common_facts(facts):
-    """ Migrate facts from various roles into common """
-    params = {
-        'node': ('portal_net'),
-        'master': ('portal_net')
-    }
-    if 'common' not in facts:
-        facts['common'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                if param in facts[role]:
-                    facts['common'][param] = facts[role].pop(param)
-    return facts
-
-
-def migrate_admission_plugin_facts(facts):
-    """ Apply migrations for admission plugin facts """
-    if 'master' in facts:
-        if 'kube_admission_plugin_config' in facts['master']:
-            if 'admission_plugin_config' not in facts['master']:
-                facts['master']['admission_plugin_config'] = dict()
-            # Merge existing kube_admission_plugin_config with admission_plugin_config.
-            facts['master']['admission_plugin_config'] = merge_facts(facts['master']['admission_plugin_config'],
-                                                                     facts['master']['kube_admission_plugin_config'],
-                                                                     additive_facts_to_overwrite=[])
-            # Remove kube_admission_plugin_config fact
-            facts['master'].pop('kube_admission_plugin_config', None)
-    return facts
-
-
-def migrate_local_facts(facts):
-    """ Apply migrations of local facts """
-    migrated_facts = copy.deepcopy(facts)
-    migrated_facts = migrate_common_facts(migrated_facts)
-    migrated_facts = migrate_admission_plugin_facts(migrated_facts)
-    return migrated_facts
 
 
 def first_ip(network):
@@ -566,69 +521,6 @@ def format_url(use_ssl, hostname, port, path=''):
     return url
 
 
-def get_current_config(facts):
-    """ Get current openshift config
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the current openshift config
-    """
-    current_config = dict()
-    roles = [role for role in facts if role not in ['common', 'provider']]
-    for role in roles:
-        if 'roles' in current_config:
-            current_config['roles'].append(role)
-        else:
-            current_config['roles'] = [role]
-
-        # TODO: parse the /etc/sysconfig/openshift-{master,node} config to
-        # determine the location of files.
-        # TODO: I suspect this isn't working right now, but it doesn't prevent
-        # anything from working properly as far as I can tell, perhaps because
-        # we override the kubeconfig path everywhere we use it?
-        # Query kubeconfig settings
-        kubeconfig_dir = '/var/lib/origin/openshift.local.certificates'
-        if role == 'node':
-            kubeconfig_dir = os.path.join(
-                kubeconfig_dir, "node-%s" % facts['common']['hostname']
-            )
-
-        kubeconfig_path = os.path.join(kubeconfig_dir, '.kubeconfig')
-        if os.path.isfile('/usr/bin/openshift') and os.path.isfile(kubeconfig_path):
-            try:
-                _, output, _ = module.run_command(  # noqa: F405
-                    ["/usr/bin/openshift", "ex", "config", "view", "-o",
-                     "json", "--kubeconfig=%s" % kubeconfig_path],
-                    check_rc=False
-                )
-                config = json.loads(output)
-
-                cad = 'certificate-authority-data'
-                try:
-                    for cluster in config['clusters']:
-                        config['clusters'][cluster][cad] = 'masked'
-                except KeyError:
-                    pass
-                try:
-                    for user in config['users']:
-                        config['users'][user][cad] = 'masked'
-                        config['users'][user]['client-key-data'] = 'masked'
-                except KeyError:
-                    pass
-
-                current_config['kubeconfig'] = config
-
-            # override pylint broad-except warning, since we do not want
-            # to bubble up any exceptions if oc config view
-            # fails
-            # pylint: disable=broad-except
-            except Exception:
-                pass
-
-    return current_config
-
-
 def build_controller_args(facts):
     """ Build master controller_args """
     cloud_cfg_path = os.path.join(facts['common']['config_base'],
@@ -693,13 +585,6 @@ def is_service_running(service):
         pass
 
     return service_running
-
-
-def rpm_rebuilddb():
-    """
-    Runs rpm --rebuilddb to ensure the db is in good shape.
-    """
-    module.run_command(['/usr/bin/rpm', '--rebuilddb'])  # noqa: F405
 
 
 def get_version_output(binary, version_cmd):
@@ -831,58 +716,6 @@ def merge_facts(orig, new, additive_facts_to_overwrite):
         else:
             facts[key] = copy.deepcopy(new[key])
     return facts
-
-
-def save_local_facts(filename, facts):
-    """ Save local facts
-
-        Args:
-            filename (str): local facts file
-            facts (dict): facts to set
-    """
-    try:
-        fact_dir = os.path.dirname(filename)
-        try:
-            os.makedirs(fact_dir)  # try to make the directory
-        except OSError as exception:
-            if exception.errno != errno.EEXIST:  # but it is okay if it is already there
-                raise  # pass any other exceptions up the chain
-        with open(filename, 'w') as fact_file:
-            fact_file.write(module.jsonify(facts))  # noqa: F405
-        os.chmod(filename, 0o600)
-    except (IOError, OSError) as ex:
-        raise OpenShiftFactsFileWriteError(
-            "Could not create fact file: %s, error: %s" % (filename, ex)
-        )
-
-
-def get_local_facts_from_file(filename):
-    """ Retrieve local facts from fact file
-
-        Args:
-            filename (str): local facts file
-        Returns:
-            dict: the retrieved facts
-    """
-    local_facts = dict()
-    try:
-        # Handle conversion of INI style facts file to json style
-        ini_facts = configparser.SafeConfigParser()
-        ini_facts.read(filename)
-        for section in ini_facts.sections():
-            local_facts[section] = dict()
-            for key, value in ini_facts.items(section):
-                local_facts[section][key] = value
-
-    except (configparser.MissingSectionHeaderError,
-            configparser.ParsingError):
-        try:
-            with open(filename, 'r') as facts_file:
-                local_facts = json.load(facts_file)
-        except (ValueError, IOError):
-            pass
-
-    return local_facts
 
 
 def sort_unique(alist):
@@ -1037,20 +870,6 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
@@ -1062,18 +881,8 @@ def pop_obsolete_local_facts(local_facts):
                 local_facts[role].pop(key, None)
 
 
-class OpenShiftFactsInternalError(Exception):
-    """Origin Facts Error"""
-    pass
-
-
 class OpenShiftFactsUnsupportedRoleError(Exception):
     """Origin Facts Unsupported Role Error"""
-    pass
-
-
-class OpenShiftFactsFileWriteError(Exception):
-    """Origin Facts File Write Error"""
     pass
 
 
@@ -1091,7 +900,6 @@ class OpenShiftFacts(object):
         Args:
             module (AnsibleModule): an AnsibleModule object
             role (str): role for setting local facts
-            filename (str): local facts file to use
             local_facts (dict): local facts to set
             additive_facts_to_overwrite (list): additive facts to overwrite in jinja
                                                 '.' notation ex: ['master.named_certificates']
@@ -1109,10 +917,9 @@ class OpenShiftFacts(object):
 
     # Disabling too-many-arguments, this should be cleaned up as a TODO item.
     # pylint: disable=too-many-arguments,no-value-for-parameter
-    def __init__(self, role, filename, local_facts,
+    def __init__(self, role, local_facts,
                  additive_facts_to_overwrite=None):
         self.changed = False
-        self.filename = filename
         if role not in self.known_roles:
             raise OpenShiftFactsUnsupportedRoleError(
                 "Role %s is not supported by this module" % role
@@ -1157,10 +964,8 @@ class OpenShiftFacts(object):
         facts = merge_facts(facts,
                             local_facts,
                             additive_facts_to_overwrite)
-        facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_aggregate_facts(facts)
@@ -1316,22 +1121,11 @@ class OpenShiftFacts(object):
         if facts is not None:
             facts_to_set[self.role] = facts
 
-        local_facts = get_local_facts_from_file(self.filename)
-
-        migrated_facts = migrate_local_facts(local_facts)
-
-        new_local_facts = merge_facts(migrated_facts,
-                                      facts_to_set,
+        new_local_facts = merge_facts({}, facts_to_set,
                                       additive_facts_to_overwrite)
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
         pop_obsolete_local_facts(new_local_facts)
-
-        if new_local_facts != local_facts:
-            self.validate_local_facts(new_local_facts)
-            changed = True
-            if not module.check_mode:  # noqa: F405
-                save_local_facts(self.filename, new_local_facts)
 
         self.changed = changed
         return new_local_facts
@@ -1352,71 +1146,6 @@ class OpenShiftFacts(object):
         for fact in facts_to_remove:
             del facts[fact]
         return facts
-
-    def validate_local_facts(self, facts=None):
-        """ Validate local facts
-
-            Args:
-                facts (dict): local facts to validate
-        """
-        invalid_facts = dict()
-        invalid_facts = self.validate_master_facts(facts, invalid_facts)
-        if invalid_facts:
-            msg = 'Invalid facts detected:\n'
-            # pylint: disable=consider-iterating-dictionary
-            for key in invalid_facts.keys():
-                msg += '{0}: {1}\n'.format(key, invalid_facts[key])
-            module.fail_json(msg=msg, changed=self.changed)  # noqa: F405
-
-    # disabling pylint errors for line-too-long since we're dealing
-    # with best effort reduction of error messages here.
-    # disabling errors for too-many-branches since we require checking
-    # many conditions.
-    # pylint: disable=line-too-long, too-many-branches
-    @staticmethod
-    def validate_master_facts(facts, invalid_facts):
-        """ Validate master facts
-
-            Args:
-                facts (dict): local facts to validate
-                invalid_facts (dict): collected invalid_facts
-
-            Returns:
-                dict: Invalid facts
-        """
-        if 'master' in facts:
-            # openshift.master.session_auth_secrets
-            if 'session_auth_secrets' in facts['master']:
-                session_auth_secrets = facts['master']['session_auth_secrets']
-                if not issubclass(type(session_auth_secrets), list):
-                    invalid_facts['session_auth_secrets'] = 'Expects session_auth_secrets is a list.'
-                elif 'session_encryption_secrets' not in facts['master']:
-                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_encryption secrets must be set '
-                                                             'if openshift_master_session_auth_secrets is provided.')
-                elif len(session_auth_secrets) != len(facts['master']['session_encryption_secrets']):
-                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_auth_secrets and '
-                                                             'openshift_master_session_encryption_secrets must be '
-                                                             'equal length.')
-                else:
-                    for secret in session_auth_secrets:
-                        if len(secret) < 32:
-                            invalid_facts['session_auth_secrets'] = ('Invalid secret in session_auth_secrets. '
-                                                                     'Secrets must be at least 32 characters in length.')
-            # openshift.master.session_encryption_secrets
-            if 'session_encryption_secrets' in facts['master']:
-                session_encryption_secrets = facts['master']['session_encryption_secrets']
-                if not issubclass(type(session_encryption_secrets), list):
-                    invalid_facts['session_encryption_secrets'] = 'Expects session_encryption_secrets is a list.'
-                elif 'session_auth_secrets' not in facts['master']:
-                    invalid_facts['session_encryption_secrets'] = ('openshift_master_session_auth_secrets must be '
-                                                                   'set if openshift_master_session_encryption_secrets '
-                                                                   'is provided.')
-                else:
-                    for secret in session_encryption_secrets:
-                        if len(secret) not in [16, 24, 32]:
-                            invalid_facts['session_encryption_secrets'] = ('Invalid secret in session_encryption_secrets. '
-                                                                           'Secrets must be 16, 24, or 32 characters in length.')
-        return invalid_facts
 
 
 def main():
@@ -1447,18 +1176,10 @@ def main():
     local_facts = module.params['local_facts']  # noqa: F405
     additive_facts_to_overwrite = module.params['additive_facts_to_overwrite']  # noqa: F405
 
-    fact_file = '/etc/ansible/facts.d/openshift.fact'
-
     openshift_facts = OpenShiftFacts(role,
-                                     fact_file,
                                      local_facts,
                                      additive_facts_to_overwrite)
-
-    file_params = module.params.copy()  # noqa: F405
-    file_params['path'] = fact_file
-    file_args = module.load_file_common_arguments(file_params)  # noqa: F405
-    changed = module.set_fs_attributes_if_different(file_args,  # noqa: F405
-                                                    openshift_facts.changed)
+    changed = False
 
     return module.exit_json(changed=changed,  # noqa: F405
                             ansible_facts=openshift_facts.facts)

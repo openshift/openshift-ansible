@@ -162,9 +162,6 @@
     owner: root
     group: root
     mode: 0600
-  when:
-  - openshift.master.session_auth_secrets is defined
-  - openshift.master.session_encryption_secrets is defined
   notify:
   - restart master api
 
