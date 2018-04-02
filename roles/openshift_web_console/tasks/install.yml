@@ -168,7 +168,7 @@
       msg: "{{ console_pods.stdout_lines }}"
   - name: Get events in the openshift-web-console namespace
     command: >
-      {{ openshift_client_binary }} get events --config={{ mktemp.stdout }}/admin.kubeconfig -n openshift-web-console
+      {{ openshift_client_binary }} get events --config={{ mktemp.stdout }}/admin.kubeconfig --sort-by='.metadata.creationTimestamp' -n openshift-web-console
     register: console_events
     ignore_errors: true
   - debug:
@@ -187,7 +187,7 @@
     name: "{{ mktemp.stdout }}"
   changed_when: False
 
-- name: Report console errors
+- name: Web console install failed
   fail:
-    msg: Console install failed.
+    msg: Web console install failed
   when: console_health.stdout != 'ok'
