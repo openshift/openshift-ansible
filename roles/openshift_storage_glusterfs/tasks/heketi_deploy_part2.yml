@@ -4,14 +4,7 @@
   register: setup_storage
 
 - name: Copy heketi-storage list
-  shell: "{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
-
-# This is used in the subsequent task
-- name: Copy the admin client config
-  command: >
-    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
-  changed_when: False
-  check_mode: no
+  shell: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} cat /tmp/heketi-storage.json > {{ mktemp.stdout }}/heketi-storage.json"
 
 # Need `command` here because heketi-storage.json contains multiple objects.
 - name: Copy heketi DB to GlusterFS volume
@@ -126,7 +119,7 @@
 
 - name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_client: "{{ openshift.common.client_binary }} rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {{ glusterfs_heketi_cli }} -s http://localhost:8080 --user admin --secret '{{ glusterfs_heketi_admin_key }}'"
+    glusterfs_heketi_client: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }} {{ glusterfs_heketi_cli }} -s http://localhost:8080 --user admin --secret '{{ glusterfs_heketi_admin_key }}'"
 
 - name: Verify heketi service
   command: "{{ glusterfs_heketi_client }} cluster list"
