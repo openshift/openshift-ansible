@@ -2,6 +2,16 @@
     "Version": "2012-10-17",
     "Statement": [
 	{
+	    "Sid": "AllowPassDescribeInstancesRole",
+	    "Effect": "Allow",
+	    "Action": [
+		"iam:PassRole"
+	    ],
+	    "Resource": [
+		"arn:aws:iam::*:role/openshift_node_describe_instances_{{ openshift_aws_clusterid }}"
+	    ]
+	},
+	{
 	    "Sid": "AllowDescribeResources",
 	    "Effect": "Allow",
 	    "Action": [
@@ -45,7 +55,7 @@
                 "StringEquals": {
                     "aws:RequestTag/clusterid": "{{ openshift_aws_clusterid }}"
                 },
-                "ForAllValues:StringEquals": {
+                "ForAnyValue:StringEquals": {
                     "aws:TagKeys": [
                         "clusterid"
                     ]
@@ -78,7 +88,7 @@
 		"StringEquals": {
 		    "aws:RequestTag/clusterid": "{{ openshift_aws_clusterid }}"
 		},
-		"ForAllValues:StringEquals": {
+		"ForAnyValue:StringEquals": {
 		    "aws:TagKeys": [
 			"clusterid"
 		    ]

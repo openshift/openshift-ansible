@@ -18,9 +18,9 @@ openshift_aws_iam_cert_name: "{{ openshift_aws_clusterid }}-master-external"
 openshift_aws_iam_cert_path: ''
 openshift_aws_iam_cert_key_path: ''
 
-openshift_aws_iam_role_name: openshift_node_describe_instances
+openshift_aws_iam_role_name: "openshift_node_describe_instances_{{ openshift_aws_clusterid }}"
 openshift_aws_iam_role_policy_json: "{{ lookup('file', 'describeinstances.json') }}"
-openshift_aws_iam_role_policy_name: "describe_instances"
+openshift_aws_iam_role_policy_name: "describe_instances_{{ openshift_aws_clusterid }}"
 
 openshift_aws_iam_kms_alias: "alias/{{ openshift_aws_clusterid }}_kms"
 openshift_aws_ami: ''
