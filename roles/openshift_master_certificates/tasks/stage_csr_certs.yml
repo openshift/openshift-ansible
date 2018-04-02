@@ -1,0 +1,401 @@
+---
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+    suffix: csr_master
+  register: csr_staging_dir_mktemp
+
+- name: Unzip the certificate tarball
+  unarchive:
+    src: "{{ openshift_csr_issued_certificates }}"
+    dest: "{{ csr_staging_dir_mktemp.path }}"
+
+# Verify admin cert
+- name: Verify that staged admin.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/admin.crt"
+  register: admin_cert
+  failed_when: not admin_cert.stat.exists
+
+- name: Verify that pending admin.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/admin.key"
+  register: admin_key
+  failed_when: not admin_key.stat.exists
+
+# Verify extensions
+- name: Verify admin.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/admin.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: admin_cert_subj
+  failed_when:
+  - admin_cert_subj.stdout != "Subject:O=system:cluster-admins,CN=system:admin"
+  - admin_cert_subj.stdout != "Subject:CN=system:admin,O=system:cluster-admins"
+  - admin_cert_subj.stdout != "Subject:CN=system:admin,O=system:cluster-admins,O=system:masters"
+  - admin_cert_subj.stdout != "Subject:CN=system:admin,O=system:masters,O=system:cluster-admins"
+  - admin_cert_subj.stdout != "Subject:O=system:cluster-admins,O=system:masters,CN=system:admin"
+  - admin_cert_subj.stdout != "Subject:O=system:masters,O=system:cluster-admins,CN=system:admin"
+  - admin_cert_subj.stdout != "Subject:CN=system:admin,O=system:cluster-admins+O=system:masters"
+  - admin_cert_subj.stdout != "Subject:CN=system:admin,O=system:masters+O=system:cluster-admins"
+  - admin_cert_subj.stdout != "Subject:O=system:cluster-admins+O=system:masters,CN=system:admin"
+  - admin_cert_subj.stdout != "Subject:O=system:masters+O=system:cluster-admins,CN=system:admin"
+
+- name: Verify admin.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/admin.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: admin_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(admin_cert_ext.stdout_lines))
+
+# Verify openshift-master cert
+- name: Verify that staged openshift-master.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/openshift-master.crt"
+  register: openshift_master_cert
+  failed_when: not openshift_master_cert.stat.exists
+
+- name: Verify that pending openshift-master.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/openshift-master.key"
+  register: openshift_master_key
+  failed_when: not openshift_master_key.stat.exists
+
+# Verify extensions
+- name: Verify openshift-master.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/openshift-master.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: openshift_master_cert_subj
+  failed_when:
+  - openshift_master_cert_subj.stdout != "Subject:O=system:masters,CN=system:openshift-master"
+  - openshift_master_cert_subj.stdout != "Subject:CN=system:openshift-master,O=system:masters"
+  - openshift_master_cert_subj.stdout != "Subject:CN=system:openshift-master,O=system:masters,O=system:openshift-master"
+  - openshift_master_cert_subj.stdout != "Subject:CN=system:openshift-master,O=system:openshift-master,O=system:masters"
+  - openshift_master_cert_subj.stdout != "Subject:O=system:masters,O=system:openshift-master,CN=system:openshift-master"
+  - openshift_master_cert_subj.stdout != "Subject:O=system:openshift-master,O=system:masters,CN=system:openshift-master"
+  - openshift_master_cert_subj.stdout != "Subject:CN=system:openshift-master,O=system:masters+O=system:openshift-master"
+  - openshift_master_cert_subj.stdout != "Subject:CN=system:openshift-master,O=system:openshift-master+O=system:masters"
+  - openshift_master_cert_subj.stdout != "Subject:O=system:masters+O=system:openshift-master,CN=system:openshift-master"
+  - openshift_master_cert_subj.stdout != "Subject:O=system:openshift-master+O=system:masters,CN=system:openshift-master"
+
+- name: Verify openshift-master.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/openshift-master.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: openshift_master_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(openshift_master_cert_ext.stdout_lines))
+
+# Verify openshift-aggregator cert on first master
+- name: Verify that staged openshift-aggregator.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/openshift-aggregator.crt"
+  register: aggregator_cert
+  failed_when: not aggregator_cert.stat.exists
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify that pending openshift-aggregator.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/openshift-aggregator.key"
+  register: aggregator_key
+  failed_when: not aggregator_key.stat.exists
+  when: inventory_hostname == groups.oo_first_master.0
+
+# Verify extensions
+- name: Verify openshift-aggregator.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/openshift-aggregator.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: aggregator_cert_subj
+  failed_when: aggregator_cert_subj.stdout != "Subject:CN=system:openshift-aggregator"
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify openshift-aggregator.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/openshift-aggregator.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: aggregator_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(aggregator_cert_ext.stdout_lines))
+  when: inventory_hostname == groups.oo_first_master.0
+
+# Verify aggregator-front-proxy on first master
+- name: Verify that staged aggregator-front-proxy.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/aggregator-front-proxy.crt"
+  register: aggregator_fp_cert
+  failed_when: not aggregator_fp_cert.stat.exists
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify that pending aggregator-front-proxy.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/aggregator-front-proxy.key"
+  register: aggregator_fp_key
+  failed_when: not aggregator_fp_key.stat.exists
+  when: inventory_hostname == groups.oo_first_master.0
+
+# Verify extensions
+- name: Verify aggregator-front-proxy.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/aggregator-front-proxy.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: aggregator_fp_cert_subj
+  failed_when: aggregator_fp_cert_subj.stdout != "Subject:CN=aggregator-front-proxy"
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify aggregator-front-proxy.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/aggregator-front-proxy.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: aggregator_fp_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(aggregator_fp_cert_ext.stdout_lines))
+  when: inventory_hostname == groups.oo_first_master.0
+
+# Verify master server cert
+- name: Verify that staged master.server.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/master.server.crt"
+  register: master_server_cert
+  failed_when: not master_server_cert.stat.exists
+
+- name: Verify that pending master.server.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/master.server.key"
+  register: master_server_key
+  failed_when: not master_server_key.stat.exists
+
+# Verify extensions
+- name: Verify master.server.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.server.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: master_server_cert_subj
+  failed_when: master_server_cert_subj.stdout != "Subject:CN=" ~ hostvars[inventory_hostname].openshift.common.ip
+
+- name: Verify master.server.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.server.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: master_server_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Server Authentication' ] is not issubset(master_server_cert_ext.stdout_lines))
+
+# Verify SANs
+- name: Get master.server.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/master.server.crt"
+  register: master_server_cert_data
+
+- set_fact:
+    master_server_cert_sans: "{{ master_server_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    master_server_expected_sans: "{{ hostvars[inventory_hostname].openshift.common.all_hostnames + [ hostvars[inventory_hostname].openshift.common.ip, hostvars[inventory_hostname].openshift.common.public_ip ] }}"
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when: master_server_expected_sans is not issubset(master_server_cert_sans)
+
+# Verify master etcd-client cert
+- name: Verify that staged master.etcd-client.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/master.etcd-client.crt"
+  register: master_etcd_cert
+  failed_when: not master_etcd_cert.stat.exists
+
+- name: Verify that pending master.etcd-client.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/master.etcd-client.key"
+  register: master_etcd_key
+  failed_when: not master_etcd_key.stat.exists
+
+# Verify extensions
+- name: Verify master.etcd-client.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.etcd-client.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: master_etcd_client_cert_subj
+  failed_when: master_etcd_client_cert_subj.stdout != "Subject:CN=" ~ hostvars[inventory_hostname].openshift.common.hostname
+
+- name: Verify master.etcd-client.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.etcd-client.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: master_etcd_client_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(master_etcd_client_cert_ext.stdout_lines))
+
+# Verify SANs
+- name: Get master.etcd-client.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/master.etcd-client.crt"
+  register: master_etcd_client_cert_data
+
+- set_fact:
+    master_etcd_client_cert_sans: "{{ master_etcd_client_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    master_etcd_client_cert_expected_sans: "{{ [ hostvars[inventory_hostname].openshift.common.ip, hostvars[inventory_hostname].openshift.common.hostname ] }}"
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when: master_etcd_client_cert_expected_sans is not issubset(master_etcd_client_cert_sans)
+
+# Verify etcd server cert on the first master
+- name: Verify that staged etcd.server.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/etcd.server.crt"
+  register: etcd_server_cert
+  failed_when: not etcd_server_cert.stat.exists
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify that pending etcd.server.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/etcd.server.key"
+  register: etcd_server_key
+  failed_when: not etcd_server_key.stat.exists
+  when: inventory_hostname == groups.oo_first_master.0
+
+# Verify extensions
+- name: Verify etcd.server.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/etcd.server.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: etcd_server_cert_subj
+  failed_when: etcd_server_cert_subj.stdout != "Subject:CN=" ~ hostvars[inventory_hostname].openshift.common.ip
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify etcd.server.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/etcd.server.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: etcd_server_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Server Authentication' ] is not issubset(etcd_server_cert_ext.stdout_lines))
+  when: inventory_hostname == groups.oo_first_master.0
+
+# Verify SANs
+- name: Get etcd.server.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/etcd.server.crt"
+  register: etcd_server_cert_data
+  when: inventory_hostname == groups.oo_first_master.0
+
+- set_fact:
+    etcd_server_cert_sans: "{{ etcd_server_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    etcd_server_expected_sans: "{{ hostvars[inventory_hostname].openshift.common.all_hostnames + [ hostvars[inventory_hostname].openshift.common.ip, hostvars[inventory_hostname].openshift.common.public_ip ] }}"
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - etcd_server_expected_sans is not issubset(etcd_server_cert_sans)
+
+# Verify master kubelet-client cert
+- name: Verify that staged master.kubelet-client.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/master.kubelet-client.crt"
+  register: master_kubelet_cert
+  failed_when: not master_kubelet_cert.stat.exists
+
+- name: Verify that pending master.kubelet-client.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/master.kubelet-client.key"
+  register: master_kubelet_key
+  failed_when: not master_kubelet_key.stat.exists
+
+# Verify extensions
+- name: Verify master.kubelet-client.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.kubelet-client.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: master_kubelet_client_cert_subj
+  failed_when:
+  - master_kubelet_client_cert_subj.stdout != "Subject:O=system:node-admins,CN=system:openshift-node-admin"
+  - master_kubelet_client_cert_subj.stdout != "Subject:CN=system:openshift-node-admin,O=system:node-admins"
+
+- name: Verify master.kubelet-client.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.kubelet-client.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: master_kubelet_client_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(master_kubelet_client_cert_ext.stdout_lines))
+
+# Verify master proxy-client cert
+- name: Verify that staged master.proxy-client.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/master.proxy-client.crt"
+  register: master_proxy_cert
+  failed_when: not master_proxy_cert.stat.exists
+
+- name: Verify that pending master.proxy-client.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/master.proxy-client.key"
+  register: master_proxy_key
+  failed_when: not master_proxy_key.stat.exists
+
+# Verify extensions
+- name: Verify master.proxy-client.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.proxy-client.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: master_proxy_client_cert_subj
+  failed_when: master_proxy_client_cert_subj.stdout != "Subject:CN=system:master-proxy"
+
+- name: Verify master.proxy-client.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/master.proxy-client.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: master_proxy_client_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(master_proxy_client_cert_ext.stdout_lines))
+
+# Verify master service-catalog cert
+- name: Stat the service-catalog dir
+  stat:
+    path: "{{ openshift.common.config_base }}/service-catalog"
+  register: sc_dir_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Verify that staged service-catalog.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/service-catalog.crt"
+  register: sc_cert_stat
+  failed_when: not sc_cert_stat.stat.exists
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+- name: Verify that pending service-catalog.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}/service-catalog.key"
+  register: sc_key_stat
+  failed_when: not sc_key_stat.stat.exists
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+# Verify extensions
+- name: Verify service-catalog.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/service-catalog.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: sc_cert_subj
+  failed_when: sc_cert_subj.stdout != "Subject:CN=apiserver.kube-service-catalog"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_cert_stat.stat.exists
+
+- name: Verify service-catalog.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/master-"{{ inventory_hostname }}"/service-catalog.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: sc_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Server Authentication' ] is not issubset(sc_cert_ext.stdout_lines))
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_cert_stat.stat.exists
+
+# Verify SANs
+- name: Get service-catalog.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}/service-catalog.crt"
+  register: sc_cert_data
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_cert_stat.stat.exists
+
+- set_fact:
+    sc_cert_sans: "{{ sc_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    sc_cert_expected_sans: "{{ [ 'apiserver.kube-service-catalog', 'apiserver.kube-service-catalog.svc', 'apiserver.kube-service-catalog.svc.cluster.local' ] }}"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_cert_stat.stat.exists
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_cert_stat.stat.exists
+  - sc_cert_expected_sans is not issubset(sc_cert_sans)

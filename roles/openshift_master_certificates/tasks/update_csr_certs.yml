@@ -1,0 +1,197 @@
+---
+- name: Get staged master certificate filenames
+  find:
+    paths: "{{ csr_staging_dir_mktemp.path }}/master-{{ inventory_hostname }}"
+    patterns: "*.crt"
+  register: certs_to_copy
+
+- name: Copy all staged master certificates
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ openshift.common.config_base }}/master/"
+    owner: root
+    mode: 0644
+    remote_src: true
+  with_items: "{{ certs_to_copy.files }}"
+
+- name: Get staged master certificate key filenames
+  find:
+    paths: "{{ openshift.common.config_base }}/csr/master-{{ inventory_hostname }}"
+    patterns: "*.key"
+  register: keys_to_copy
+
+- name: Copy all staged master certificate keys
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ openshift.common.config_base }}/master/"
+    owner: root
+    mode: 0600
+    remote_src: true
+  with_items: "{{ keys_to_copy.files }}"
+
+# Put service-catalog cert in its place
+- name: Stat the service-catalog dir
+  stat:
+    path: "{{ openshift.common.config_base }}/service-catalog"
+  register: sc_dir_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Copy staged service-catalog.crt
+  copy:
+    src: "{{ openshift.common.config_base }}/master/service-catalog.crt"
+    dest: "{{ openshift.common.config_base }}/service-catalog/apiserver.crt"
+    owner: root
+    mode: 0644
+    remote_src: true
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+- name: Copy staged service-catalog.key
+  copy:
+    src: "{{ openshift.common.config_base }}/master/service-catalog.key"
+    dest: "{{ openshift.common.config_base }}/service-catalog/apiserver.key"
+    owner: root
+    mode: 0600
+    remote_src: true
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+# Update kubeconfigs
+- name: Stat openshift-master.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/openshift-master.crt"
+  register: openshift_master_cert_stat
+
+- name: Stat openshift-master.key
+  stat:
+    path: "{{ openshift.common.config_base }}/master/openshift-master.key"
+  register: openshift_master_key_stat
+
+- name: Stat openshift-master.kubeconfig
+  stat:
+    path: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"
+  register: openshift_master_kc_stat
+
+- name: Get base64 of openshift-master cert
+  command: bash -c "cat {{ openshift.common.config_base }}/master/openshift-master.crt | base64 --wrap=0"
+  register: openshift_master_cert64
+  when:
+  - openshift_master_cert_stat.stat.exists
+  - openshift_master_key_stat.stat.exists
+  - openshift_master_kc_stat.stat.exists
+
+- name: Get base64 of openshift-master key
+  command: bash -c "cat {{ openshift.common.config_base }}/master/openshift-master.key | base64 --wrap=0"
+  register: openshift_master_key64
+  when:
+  - openshift_master_cert_stat.stat.exists
+  - openshift_master_key_stat.stat.exists
+  - openshift_master_kc_stat.stat.exists
+
+- name: Get ca cert
+  slurp:
+    src: "{{ openshift.common.config_base }}/master/ca.crt"
+  register: openshift_master_ca_data
+
+- name: Update openshift-master.kubeconfig with ca
+  kubeclient_ca:
+    client_path: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"
+    ca_data: "{{ openshift_master_ca_data.content }}"
+
+- name: Replace cert info in kubeconfig
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/openshift-master.kubeconfig"
+    edits:
+    - key: users[0].user.client-certificate-data
+      value: "{{ openshift_master_cert64.stdout }}"
+    - key: users[0].user.client-key-data
+      value: "{{ openshift_master_key64.stdout }}"
+  when: openshift_master_cert_stat.stat.exists and openshift_master_key_stat.stat.exists and openshift_master_kc_stat.stat.exists
+
+- name: Stat admin.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/admin.crt"
+  register: admin_cert_stat
+
+- name: Stat admin.key
+  stat:
+    path: "{{ openshift.common.config_base }}/master/admin.key"
+  register: admin_key_stat
+
+- name: Stat admin.kubeconfig
+  stat:
+    path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+  register: admin_kc_stat
+
+- name: Get base64 of admin cert
+  command: bash -c "cat {{ openshift.common.config_base }}/master/admin.crt | base64 --wrap=0"
+  register: admin_cert64
+  when: admin_cert_stat.stat.exists and admin_key_stat.stat.exists and admin_kc_stat.stat.exists
+
+- name: Get base64 of admin key
+  command: bash -c "cat {{ openshift.common.config_base }}/master/admin.key | base64 --wrap=0"
+  register: admin_key64
+  when: admin_cert_stat.stat.exists and admin_key_stat.stat.exists and admin_kc_stat.stat.exists
+
+- name: Update admin.kubeconfig with ca
+  kubeclient_ca:
+    client_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    ca_data: "{{ openshift_master_ca_data.content }}"
+
+- name: Replace cert info in kubeconfig
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    edits:
+    - key: users[0].user.client-certificate-data
+      value: "{{ admin_cert64.stdout }}"
+    - key: users[0].user.client-key-data
+      value: "{{ admin_key64.stdout }}"
+  when: admin_cert_stat.stat.exists and admin_key_stat.stat.exists and admin_kc_stat.stat.exists
+
+- name: Stat aggregator-front-proxy.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/aggregator-front-proxy.crt"
+  register: agg_fp_cert_stat
+
+- name: Stat aggregator-front-proxy.key
+  stat:
+    path: "{{ openshift.common.config_base }}/master/aggregator-front-proxy.key"
+  register: agg_fp_key_stat
+
+- name: Stat aggregator-front-proxy.kubeconfig
+  stat:
+    path: "{{ openshift.common.config_base }}/master/aggregator-front-proxy.kubeconfig"
+  register: agg_fp_kc_stat
+
+- name: Get base64 of aggregator-front-proxy cert
+  command: bash -c "cat {{ openshift.common.config_base }}/master/aggregator-front-proxy.crt | base64 --wrap=0"
+  register: agg_fp_cert64
+  when: agg_fp_cert_stat.stat.exists and agg_fp_key_stat.stat.exists and agg_fp_kc_stat.stat.exists
+
+- name: Get base64 of aggregator-front-proxy key
+  command: bash -c "cat {{ openshift.common.config_base }}/master/aggregator-front-proxy.key | base64 --wrap=0"
+  register: agg_fp_key64
+  when: agg_fp_cert_stat.stat.exists and agg_fp_key_stat.stat.exists and agg_fp_kc_stat.stat.exists
+
+- name: Update aggregator-front-proxy.kubeconfig with ca
+  kubeclient_ca:
+    client_path: "{{ openshift.common.config_base }}/master/aggregator-front-proxy.kubeconfig"
+    ca_data: "{{ openshift_master_ca_data.content }}"
+
+- name: Replace cert info in kubeconfig
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/aggregator-front-proxy.kubeconfig"
+    edits:
+    - key: users[0].user.client-certificate-data
+      value: "{{ agg_fp_cert64.stdout }}"
+    - key: users[0].user.client-key-data
+      value: "{{ agg_fp_key64.stdout }}"
+  when: agg_fp_cert_stat.stat.exists and agg_fp_key_stat.stat.exists and agg_fp_kc_stat.stat.exists
+
+# Cleanup
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

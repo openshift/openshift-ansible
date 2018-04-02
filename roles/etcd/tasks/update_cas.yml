@@ -1,0 +1,63 @@
+---
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+    suffix: csr_etcd
+  register: csr_staging_dir_mktemp
+
+- name: Unzip the certificate tarball
+  unarchive:
+    src: "{{ openshift_csr_issued_certificates }}"
+    dest: "{{ csr_staging_dir_mktemp.path }}"
+
+# Create a bundle to link ca.crt to for etcd. The bundle contains the old and new CAs to ease rollover
+- name: Check for ca-bundle.crt
+  stat:
+    path: "{{ etcd_cert_config_dir }}/ca-bundle.crt"
+  register: ca_bundle_stat
+
+- name: Check for current ca.crt
+  stat:
+    path: "{{ etcd_cert_config_dir }}/ca.crt"
+  register: ca_crt_stat
+
+- name: Check for staged ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/etcd-ca/ca.crt"
+  register: staged_ca_crt_stat
+
+- name: Cat staged ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/etcd-ca/ca.crt"
+  register: ca_cat
+  when: staged_ca_crt_stat.stat.exists
+
+- name: Migrate ca.crt to ca-bundle.crt
+  command: mv ca.crt ca-bundle.crt
+  args:
+    chdir: "{{ etcd_cert_config_dir }}"
+  when:
+  - ca_crt_stat.stat.isreg is defined
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+- name: Append staged CA to bundle
+  lineinfile:
+    path: "{{ etcd_cert_config_dir }}/ca-bundle.crt"
+    line: "{{ ca_cat.content | b64decode }}"
+  when: staged_ca_crt_stat.stat.exists
+
+- name: Link ca.crt to ca-bundle.crt
+  file:
+    src: "{{ etcd_cert_config_dir }}/ca-bundle.crt"
+    path: "{{ etcd_cert_config_dir }}/ca.crt"
+    state: link
+  when:
+  - ca_crt_stat.stat.isreg is defined
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

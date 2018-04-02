@@ -1,0 +1,7 @@
+---
+- name: Stage etcd certificates
+  hosts: oo_etcd_to_config
+  tasks:
+  - import_role:
+      name: etcd
+      tasks_from: stage_csr_certs.yml

@@ -1,0 +1,292 @@
+---
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+    suffix: csr_master
+  register: csr_staging_dir_mktemp
+
+- name: Unzip the certificate tarball
+  unarchive:
+    src: "{{ openshift_csr_issued_certificates }}"
+    dest: "{{ csr_staging_dir_mktemp.path }}"
+
+# Create a CA bundle for the master CA.
+- name: Check for ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/ca-bundle.crt"
+  register: ca_bundle_stat
+
+- name: Check for current ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/ca.crt"
+  register: ca_crt_stat
+
+- name: Check for staged ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/ca/ca.crt"
+  register: staged_ca_crt_stat
+
+- name: Cat staged ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/ca/ca.crt"
+  register: ca_cat
+  when: staged_ca_crt_stat.stat.exists
+
+- name: Migrate ca.crt to ca-bundle.crt
+  command: mv ca.crt ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/master"
+  when:
+  - ca_crt_stat.stat.isreg is defined
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+- name: Append staged CA to bundle
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    line: "{{ ca_cat.content | b64decode }}"
+  when: staged_ca_crt_stat.stat.exists
+
+- name: Link ca.crt to ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/master/ca.crt"
+    state: link
+  when:
+  - ca_crt_stat.stat.isreg is defined
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+# Create a CA bundle for master.etcd-ca
+- name: Check for master.etcd-ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master.etcd-ca-bundle.crt"
+  register: etcd_ca_bundle_stat
+
+- name: Check for current master.etcd-ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/master.etcd-ca.crt"
+  register: etcd_ca_crt_stat
+
+- name: Check for staged master.etcd-ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/ca/master.etcd-ca.crt"
+  register: etcd_staged_ca_crt_stat
+
+- name: Cat staged master.etcd-ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/ca/master.etcd-ca.crt"
+  register: etcd_ca_cat
+  when: etcd_staged_ca_crt_stat.stat.exists
+
+- name: Migrate master.etcd-ca.crt to master.etcd-ca-bundle.crt
+  command: mv master.etcd-ca.crt master.etcd-ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/master"
+  when:
+  - etcd_ca_crt_stat.stat.isreg is defined
+  - etcd_ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+- name: Append staged CA to bundle
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/master/master.etcd-ca-bundle.crt"
+    line: "{{ etcd_ca_cat.content | b64decode }}"
+  when: etcd_staged_ca_crt_stat.stat.exists
+
+- name: Link master.etcd-ca.crt to master.etcd-ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/master/master.etcd-ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/master/master.etcd-ca.crt"
+    state: link
+  when:
+  - etcd_ca_crt_stat.stat.isreg is defined
+  - etcd_ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+# Create a CA bundle for front-proxy-ca.
+- name: Check for front-proxy-ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/front-proxy-ca-bundle.crt"
+  register: front_proxy_ca_bundle_stat
+
+- name: Check for current front-proxy-ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/front-proxy-ca.crt"
+  register: front_proxy_ca_crt_stat
+
+- name: Check for staged front-proxy-ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/ca/front-proxy-ca.crt"
+  register: staged_front_proxy_ca_crt_stat
+
+- name: Cat staged front-proxy-ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/ca/front-proxy-ca.crt"
+  register: front_proxy_ca_cat
+  when: staged_front_proxy_ca_crt_stat.stat.exists
+
+- name: Migrate front-proxy-ca.crt to front-proxy-ca-bundle.crt
+  command: mv front-proxy-ca.crt front-proxy-ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/master"
+  when:
+  - front_proxy_ca_crt_stat.stat.isreg is defined
+  - front_proxy_ca_crt_stat.stat.isreg
+  - not front_proxy_ca_bundle_stat.stat.exists
+
+- name: Append staged front-proxy CA to bundle
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/master/front-proxy-ca-bundle.crt"
+    line: "{{ front_proxy_ca_cat.content | b64decode }}"
+  when:
+  - front_proxy_ca_crt_stat.stat.isreg is defined
+  - front_proxy_ca_crt_stat.stat.isreg
+  - not front_proxy_ca_bundle_stat.stat.exists
+
+- name: Link front-proxy-ca.crt to front-proxy-ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/master/front-proxy-ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/master/front-proxy-ca.crt"
+    state: link
+  when:
+  - front_proxy_ca_crt_stat.stat.isreg is defined
+  - front_proxy_ca_crt_stat.stat.isreg
+  - not front_proxy_ca_bundle_stat.stat.exists
+
+# Create a CA bundle for frontproxy-ca on the first master.
+- name: Check for frontproxy-ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/frontproxy-ca-bundle.crt"
+  register: frontproxy_ca_bundle_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Check for current frontproxy-ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/master/frontproxy-ca.crt"
+  register: frontproxy_ca_crt_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Check for staged frontproxy-ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/ca/frontproxy-ca.crt"
+  register: staged_frontproxy_ca_crt_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Cat staged frontproxy-ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/ca/frontproxy-ca.crt"
+  register: frontproxy_ca_cat
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - staged_frontproxy_ca_crt_stat.stat.exists
+
+- name: Migrate frontproxy-ca.crt to frontproxy-ca-bundle.crt
+  command: mv frontproxy-ca.crt frontproxy-ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/master"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - frontproxy_ca_crt_stat.stat.isreg is defined
+  - frontproxy_ca_crt_stat.stat.isreg
+  - not frontproxy_ca_bundle_stat.stat.exists
+
+- name: Append staged frontproxy CA to bundle
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/master/frontproxy-ca-bundle.crt"
+    line: "{{ frontproxy_ca_cat.content | b64decode }}"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - frontproxy_ca_crt_stat.stat.isreg is defined
+  - frontproxy_ca_crt_stat.stat.isreg
+  - not frontproxy_ca_bundle_stat.stat.exists
+
+- name: Link frontproxy-ca.crt to frontproxy-ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/master/frontproxy-ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/master/frontproxy-ca.crt"
+    state: link
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - frontproxy_ca_crt_stat.stat.isreg is defined
+  - frontproxy_ca_crt_stat.stat.isreg
+  - not frontproxy_ca_bundle_stat.stat.exists
+
+# Create a CA bundle for the service-catalog ca on the first master.
+- name: Stat the service-catalog dir
+  stat:
+    path: "{{ openshift.common.config_base }}/service-catalog"
+  register: sc_dir_stat
+  when: inventory_hostname == groups.oo_first_master.0
+
+- name: Check for service catalog ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/service-catalog/ca-bundle.crt"
+  register: sc_ca_bundle_stat
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+- name: Check for current service-catalog ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/service-catalog/ca.crt"
+  register: sc_ca_crt_stat
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+- name: Check for staged service-catalog ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/service-catalog/ca.crt"
+  register: staged_sc_ca_crt_stat
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+
+- name: Cat staged service-catalog ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/service-catalog/ca.crt"
+  register: sc_ca_cat
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - staged_sc_ca_crt_stat.stat.exists
+
+- name: Migrate ca.crt to ca-bundle.crt
+  command: mv ca.crt ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/service-catalog"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_ca_crt_stat.stat.isreg is defined
+  - sc_ca_crt_stat.stat.isreg
+  - not sc_ca_bundle_stat.stat.exists
+
+- name: Append staged service-catalog CA to bundle
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/service-catalog/ca-bundle.crt"
+    line: "{{ sc_ca_cat.content | b64decode }}"
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_ca_crt_stat.stat.isreg is defined
+  - sc_ca_crt_stat.stat.isreg
+  - not sc_ca_bundle_stat.stat.exists
+
+- name: Link ca.crt to ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/service-catalog/ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/service-catalog/ca.crt"
+    state: link
+  when:
+  - inventory_hostname == groups.oo_first_master.0
+  - sc_dir_stat.stat.exists
+  - sc_ca_crt_stat.stat.isreg is defined
+  - sc_ca_crt_stat.stat.isreg
+  - not sc_ca_bundle_stat.stat.exists
+
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

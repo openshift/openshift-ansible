@@ -1,0 +1,34 @@
+---
+- name: Get staged etcd certificate filenames
+  find:
+    paths: "{{ csr_staging_dir_mktemp.path }}/etcd-{{ inventory_hostname }}"
+    patterns: "*.crt"
+  register: certs_to_copy
+
+- name: Copy all staged etcd certificates
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ etcd_cert_config_dir }}"
+    mode: 0644
+    remote_src: true
+  with_items: "{{ certs_to_copy.files }}"
+
+- name: Get staged etcd certificate key filenames
+  find:
+    paths: "{{ openshift.common.config_base }}/csr/etcd-{{ inventory_hostname }}"
+    patterns: "*.key"
+  register: keys_to_copy
+
+- name: Copy all staged etcd certificate keys
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ etcd_cert_config_dir }}"
+    mode: 0600
+    remote_src: true
+  with_items: "{{ keys_to_copy.files }}"
+
+# Cleanup
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

@@ -1,0 +1,93 @@
+---
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+    suffix: csr_etcd
+  register: csr_staging_dir_mktemp
+
+- name: Unzip the certificate tarball
+  unarchive:
+    src: "{{ openshift_csr_issued_certificates }}"
+    dest: "{{ csr_staging_dir_mktemp.path }}"
+
+# Verify server cert
+- name: Verify that the staged server.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/etcd-{{ inventory_hostname }}/server.crt"
+  register: server_cert
+  failed_when: not server_cert.stat.exists
+
+- name: Verify that the pending server.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/etcd-{{ inventory_hostname }}/server.key"
+  register: server_key
+  failed_when: not server_key.stat.exists
+
+# Verify extensions
+- name: Verify server.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/etcd-"{{ inventory_hostname }}"/server.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: server_cert_subj
+  failed_when: server_cert_subj.stdout != "Subject:CN=" ~ hostvars[inventory_hostname].openshift.common.hostname
+
+- name: Verify server.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/etcd-"{{ inventory_hostname }}"/server.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: server_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Server Authentication' ] is not issubset(server_cert_ext.stdout_lines))
+
+# Verify SANs
+- name: Get server.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/etcd-{{ inventory_hostname }}/server.crt"
+  register: server_cert_data
+
+- set_fact:
+    server_cert_sans: "{{ server_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    server_expected_sans: "{{ [ hostvars[inventory_hostname].openshift.common.ip, hostvars[inventory_hostname].openshift.common.hostname ] }}"
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when: server_expected_sans is not issubset(server_cert_sans)
+
+# Verify peer cert
+- name: Verify that the staged peer.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/etcd-{{ inventory_hostname }}/peer.crt"
+  register: peer_cert
+  failed_when: not peer_cert.stat.exists
+
+- name: Verify that the pending peer certificate key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/etcd-{{ inventory_hostname }}/peer.key"
+  register: peer_key
+  failed_when: not peer_key.stat.exists
+
+# Verify extensions
+- name: Verify peer.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/etcd-"{{ inventory_hostname }}"/peer.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: peer_cert_subj
+  failed_when: peer_cert_subj.stdout != "Subject:CN=" ~ hostvars[inventory_hostname].openshift.common.hostname
+
+- name: Verify peer.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/etcd-"{{ inventory_hostname }}"/peer.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: peer_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication, TLS Web Server Authentication' ] is not issubset(peer_cert_ext.stdout_lines))
+
+# Verify SANs
+- name: Get peer.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/etcd-{{ inventory_hostname }}/peer.crt"
+  register: peer_cert_data
+
+- set_fact:
+    peer_cert_sans: "{{ peer_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    peer_expected_sans: "{{ [ hostvars[inventory_hostname].openshift.common.ip, hostvars[inventory_hostname].openshift.common.hostname ] }}"
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when: peer_expected_sans is not issubset(peer_cert_sans)

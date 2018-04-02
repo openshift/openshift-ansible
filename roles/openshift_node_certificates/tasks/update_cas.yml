@@ -1,0 +1,63 @@
+---
+# Create a CA bundle
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+    suffix: csr_node
+  register: csr_staging_dir_mktemp
+
+- name: Unzip the certificate tarball
+  unarchive:
+    src: "{{ openshift_csr_issued_certificates }}"
+    dest: "{{ csr_staging_dir_mktemp.path }}"
+
+- name: Check for ca-bundle.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/node/ca-bundle.crt"
+  register: ca_bundle_stat
+
+- name: Check for current client-ca.crt
+  stat:
+    path: "{{ openshift.common.config_base }}/node/client-ca.crt"
+  register: ca_crt_stat
+
+- name: Check for staged client-ca.crt
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/node-ca/client-ca.crt"
+  register: staged_ca_crt_stat
+
+- name: Cat staged client-ca.crt
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/node-ca/client-ca.crt"
+  register: ca_cat
+  when: staged_ca_crt_stat.stat.exists
+
+- name: Migrate client-ca.crt to ca-bundle.crt
+  command: mv client-ca.crt ca-bundle.crt
+  args:
+    chdir: "{{ openshift.common.config_base }}/node"
+  when:
+  - ca_crt_stat.stat.isreg is defined
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+- name: Append staged CA to bundle
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/node/ca-bundle.crt"
+    line: "{{ ca_cat.content | b64decode }}"
+  when: staged_ca_crt_stat.stat.exists
+
+- name: Link client-ca.crt to ca-bundle.crt
+  file:
+    src: "{{ openshift.common.config_base }}/node/ca-bundle.crt"
+    path: "{{ openshift.common.config_base }}/node/client-ca.crt"
+    state: link
+  when:
+  - ca_crt_stat.stat.isreg is defined
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
+
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

@@ -1,0 +1,31 @@
+manifest-version: 1
+masters:
+{% for master in master_hosts %}
+  - hostname: "{{ master }}"
+    csrs:
+      - admin: "master-{{ master }}/admin.csr"
+      - master-etcd-client: "master-{{ master }}/master.etcd-client.csr"
+      - master-server: "master-{{ master }}/master.server.csr"
+      - master-proxy-client: "master-{{ master }}/master.proxy-client.csr"
+      - master-kubelet-client: "master-{{ master }}/master.kubelet-client.csr"
+      - openshift-master: "master-{{ master }}/openshift-master.csr"
+{% if master == groups.oo_first_master.0 %}
+      - openshift-aggregator: "master-{{ master }}/openshift-aggregator.csr"
+      - aggregator-front-proxy: "master-{{ master }}/aggregator-front-proxy.csr"
+      - etcd-server: "master-{{ master }}/etcd.server.csr"
+{% endif %}
+{% endfor %}
+etcd:
+{% for etcd in etcd_hosts %}
+  - hostname: "{{ etcd }}"
+    csrs:
+      - server: "etcd-{{ etcd }}/server.csr"
+      - peer: "etcd-{{ etcd }}/peer.csr"
+{% endfor %}
+nodes:
+{% for node in node_hosts %}
+  - hostname: "{{ node }}"
+    csrs:
+      - server: "node-{{ node }}/server.csr"
+      - client: "node-{{ node }}/system:node:{{ hostvars[node].openshift.common.hostname }}.csr"
+{% endfor %}

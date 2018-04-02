@@ -1,0 +1,7 @@
+---
+- name: Ensure master certificates are backed up
+  hosts: oo_masters_to_config
+  tasks:
+  - command: >
+      tar -czvf /etc/origin/master-cert-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ openshift.common.config_base }}/master

@@ -1,0 +1,69 @@
+---
+- name: Create master CSRs
+  hosts: oo_masters_to_config
+  tasks:
+  - import_role:
+      name: openshift_master_certificates
+      tasks_from: create_csr.yml
+
+- name: Create etcd CSRs
+  hosts: oo_etcd_to_config
+  tasks:
+  - import_role:
+      name: etcd
+      tasks_from: create_csr.yml
+
+- name: Create node CSRs
+  hosts: oo_nodes_to_config
+  tasks:
+  - import_role:
+      name: openshift_node_certificates
+      tasks_from: create_csr.yml
+
+- name: Create hosted CSRs
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_hosted
+      tasks_from: create_csr.yml
+    vars:
+      openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+    when:
+    - openshift_hosted_manage_registry | default(False) | bool
+
+- name: Fetch CSRs
+  hosts: oo_first_master
+  tasks:
+  - name: Create temp dir on control host for retriving CSRs
+    local_action: command mktemp -d /tmp/openshift-ansible-XXXXXXX
+    register: g_csr_staging_mktemp
+
+  - import_role:
+      name: openshift_master_certificates
+      tasks_from: fetch_csr.yml
+    vars:
+      csr_local_staging_dir: "{{ g_csr_staging_mktemp.stdout }}"
+  - import_role:
+      name: etcd
+      tasks_from: fetch_csr.yml
+    vars:
+      csr_local_staging_dir: "{{ g_csr_staging_mktemp.stdout }}"
+  - import_role:
+      name: openshift_node_certificates
+      tasks_from: fetch_csr.yml
+    vars:
+      csr_local_staging_dir: "{{ g_csr_staging_mktemp.stdout }}"
+  - import_role:
+      name: openshift_master_certificates
+      tasks_from: manifest.yml
+    vars:
+      csr_local_staging_dir: "{{ g_csr_staging_mktemp.stdout }}"
+
+  - name: Creat CSR tarball
+    local_action: command tar -czvf ../../csr.tgz -C "{{ g_csr_staging_mktemp.stdout }}" .
+
+  - name: Remove local temp dir
+    local_action:
+      module: file
+      path: "{{ g_csr_staging_mktemp.stdout }}"
+      state: absent

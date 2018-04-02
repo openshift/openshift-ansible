@@ -1,0 +1,46 @@
+---
+
+- name: Create the wildcard router CSR openssl config
+  template:
+    src: router_openssl.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-router-openssl.cnf"
+  run_once: true
+
+- name: Create wildcard router CSR
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-router.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-router.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/openshift-router-openssl.cnf
+    -reqexts req_ext
+  run_once: true
+
+- name: Fetch the docker-registry route
+  oc_route:
+    name: docker-registry
+    namespace: default
+    state: list
+  register: docker_registry_route
+
+- name: Retrieve registry service for the clusterip
+  oc_service:
+    namespace: "{{ openshift_hosted_registry_namespace }}"
+    name: docker-registry
+    state: list
+  ignore_errors: True
+  register: docker_registry_service
+
+- name: Create the registry CSR openssl config
+  template:
+    src: registry_openssl.cnf.j2
+    dest: "{{ openshift_csr_dir }}/master-{{ inventory_hostname }}/registry-openssl.cnf"
+  run_once: true
+  when: docker_registry_service.failed != True
+
+- name: Create the registry CSR
+  shell: >
+    /bin/openssl req -multivalue-rdn -nodes -newkey rsa:2048 -keyout {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/registry.key
+    -out {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/registry.csr
+    -config {{ openshift_csr_dir }}/master-{{ inventory_hostname }}/registry-openssl.cnf
+    -reqexts req_ext
+  run_once: true
+  when: docker_registry_service.failed != True

@@ -1,0 +1,14 @@
+[req]
+prompt = no
+distinguished_name = req_distinguished_name
+
+default_md = sha256
+
+[req_distinguished_name]
+CN=system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}
+O=system:nodes
+
+[req_ext]
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature, keyEncipherment
+extendedKeyUsage=clientAuth

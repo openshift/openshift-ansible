@@ -1,0 +1,8 @@
+---
+- import_playbook: stage-csr-certificates.yml
+
+- import_playbook: stage-csr-certificates-backup.yml
+
+- import_playbook: update-csr-certificates.yml
+
+- import_playbook: restart.yml

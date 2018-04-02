@@ -1,0 +1,20 @@
+[req]
+prompt = no
+distinguished_name = req_distinguished_name
+
+default_md = sha256
+
+[req_distinguished_name]
+CN={{ docker_registry_service.results.clusterip }}
+
+[req_ext]
+subjectAltName = @alt_names
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature, keyEncipherment
+extendedKeyUsage=serverAuth
+
+[alt_names]
+{% for dns in [ docker_registry_service.results.clusterip, docker_registry_route.results[0].spec.host, openshift_hosted_registry_name ~ '.default.svc', openshift_hosted_registry_name ~ '.default.svc.' ~ openshift_cluster_domain ] %}
+DNS.{{ loop.index }} = {{ dns }}
+{% endfor %}
+IP.0 = {{ docker_registry_service.results.clusterip }}

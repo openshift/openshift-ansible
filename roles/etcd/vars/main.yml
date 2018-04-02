@@ -1,3 +1,2 @@
 ---
-registry_config_secret_name: registry-config
 openshift_csr_dir: "{{ openshift.common.config_base }}/csr"

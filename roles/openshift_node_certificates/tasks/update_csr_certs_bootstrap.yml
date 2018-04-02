@@ -1,0 +1,73 @@
+---
+- name: Move server cert
+  copy:
+    src: "{{ csr_staging_dir_mktemp.path }}/node-{{ inventory_hostname }}/server.crt"
+    dest: "{{ openshift.common.config_base }}/node/certificates/kubelet-server-replaced.pem"
+    owner: root
+    mode: 0644
+    remote_src: true
+
+- name: Slurp server key
+  slurp:
+    src: "{{ openshift.common.config_base }}/csr/node-{{ inventory_hostname }}/server.key"
+  register: server_key
+
+- name: Append server key
+  lineinfile:
+    path: "{{ openshift.common.config_base }}/node/certificates/kubelet-server-replaced.pem"
+    line: "{{ server_key.content | b64decode }}"
+
+- name: Link kubelet-server-current.pem to kubelet-server-replaced.pem
+  file:
+    src: "{{ openshift.common.config_base }}/node/certificates/kubelet-server-replaced.pem"
+    path: "{{ openshift.common.config_base }}/node/certificates/kubelet-server-current.pem"
+    state: link
+
+- name: Move client cert
+  copy:
+    src: "{{ csr_staging_dir_mktemp.path }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.crt"
+    dest: "{{ openshift.common.config_base }}/node/certificates/kubelet-client.crt"
+    owner: root
+    mode: 0644
+    remote_src: true
+
+- name: Move client key
+  copy:
+    src: "{{ openshift.common.config_base }}/csr/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.key"
+    dest: "{{ openshift.common.config_base }}/node/certificates/kubelet-client.key"
+    owner: root
+    mode: 0600
+    remote_src: true
+
+# Update kubeconfig
+- name: Stat ca
+  stat:
+    path: "{{ openshift.common.config_base }}/node/client-ca.crt"
+  register: node_ca_stat
+
+- name: Stat node kubeconfig
+  stat:
+    path: "{{ openshift.common.config_base }}/node/node.kubeconfig"
+  register: node_kc_stat
+
+- name: Get ca cert
+  slurp:
+    src: "{{ openshift.common.config_base }}/node/client-ca.crt"
+  register: node_ca_data
+  when:
+  - node_ca_stat.stat.exists
+  - node_kc_stat.stat.exists
+
+- name: Update node.kubeconfig with ca
+  kubeclient_ca:
+    client_path: "{{ openshift.common.config_base }}/node/node.kubeconfig"
+    ca_data: "{{ node_ca_data.content }}"
+  when:
+  - node_ca_stat.stat.exists
+  - node_kc_stat.stat.exists
+
+# Cleanup
+- name: Delete temp dir
+  file:
+    path: "{{ csr_staging_dir_mktemp.path }}"
+    state: absent

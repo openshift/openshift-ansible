@@ -1,0 +1,80 @@
+---
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+    suffix: csr_node
+  register: csr_staging_dir_mktemp
+
+- name: Unzip the certificate tarball
+  unarchive:
+    src: "{{ openshift_csr_issued_certificates }}"
+    dest: "{{ csr_staging_dir_mktemp.path }}"
+
+# Verify server cert
+- name: Verify that staged server.crt exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/node-{{ inventory_hostname }}/server.crt"
+  register: server_cert
+  failed_when: not server_cert.stat.exists
+
+- name: Verify that pending server.key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/node-{{ inventory_hostname }}/server.key"
+  register: server_key
+  failed_when: not server_key.stat.exists
+
+# Verify extensions
+- name: Verify server.crt subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/node-"{{ inventory_hostname }}"/server.crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: server_cert_subj
+  failed_when: server_cert_subj.stdout != "Subject:CN=" ~ hostvars[inventory_hostname].openshift.common.ip
+
+- name: Verify server.crt extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/node-"{{ inventory_hostname }}"/server.crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: server_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Server Authentication' ] is not issubset(server_cert_ext.stdout_lines))
+
+# Verify SANs
+- name: Get server.crt data to read SANs
+  slurp:
+    src: "{{ csr_staging_dir_mktemp.path }}/node-{{ inventory_hostname }}/server.crt"
+  register: server_cert_data
+
+- set_fact:
+    server_cert_sans: "{{ server_cert_data.content | b64decode | lib_utils_oo_parse_certificate_san }}"
+    server_expected_sans: "{{ [ hostvars[inventory_hostname].openshift.common.ip, hostvars[inventory_hostname].openshift.common.hostname ] }}"
+
+- name: Compare SAN
+  fail:
+    msg: "Incorrect SANs on certificate"
+  when: server_expected_sans is not issubset(server_cert_sans)
+
+# Verify node cert
+- name: Verify that staged system:node certificate exists
+  stat:
+    path: "{{ csr_staging_dir_mktemp.path }}/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.crt"
+  register: node_cert
+  failed_when: not node_cert.stat.exists
+
+- name: Verify that pending system:node key exists
+  stat:
+    path: "{{ openshift.common.config_base }}/csr/node-{{ inventory_hostname }}/system:node:{{ hostvars[inventory_hostname].openshift.common.hostname }}.key"
+  register: node_key
+  failed_when: not node_key.stat.exists
+
+# Verify extensions
+- name: Verify node cert subject
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/node-"{{ inventory_hostname }}"/system:node:"{{ hostvars[inventory_hostname].openshift.common.hostname }}".crt | grep Subject: | sed -e 's/^\s*//' -e '\/^$/d' | tr -d ' '
+  register: node_cert_subj
+  failed_when:
+  - node_cert_subj.stdout != "Subject:O=system:nodes,CN=system:node:" ~ hostvars[inventory_hostname].openshift.common.hostname
+  - node_cert_subj.stdout != "Subject:CN=system:node:" ~ hostvars[inventory_hostname].openshift.common.hostname ~ ",O=system:nodes"
+
+- name: Verify node cert extensions
+  shell: >
+    openssl x509 -text -in "{{ csr_staging_dir_mktemp.path }}"/node-"{{ inventory_hostname }}"/system:node:"{{ hostvars[inventory_hostname].openshift.common.hostname }}".crt | grep -A1 'Key Usage': | sed -e 's/^\s*//' -e '\/^$/d'
+  register: node_cert_ext
+  failed_when: ([ 'Digital Signature, Key Encipherment', 'TLS Web Client Authentication' ] is not issubset(node_cert_ext.stdout_lines))

@@ -1,0 +1,26 @@
+---
+# Replace the current certificates with ones in the tarball pointed to by
+# `openshift_csr_issued_certificates`. This tarball must contain the same
+# directory structure as the tarball created by playbooks/generate-csrs.yml,
+# with the .csr files replaced by their respective X509 PEM certificate files
+# ending in .crt. The corresponding keys for the replacement certificates are
+# copied from the pending csr directory, where they were previously generated
+# by playbooks/generate-csrs.yml.
+#
+# CA files placed in the tarball under the following paths will be appended to
+# existing CA bundles:
+# * ca/ca.crt - masters
+# * etcd-ca/ca.crt - etcd
+# * node-ca/ca.crt - nodes
+# For a single CA signer these may be the same CA certificate.
+#
+
+- import_playbook: init/main.yml
+
+- import_playbook: openshift-certificates/private/update-cas.yml
+
+- import_playbook: openshift-etcd/private/replace-csrs.yml
+
+- import_playbook: openshift-master/private/replace-csrs.yml
+
+- import_playbook: openshift-node/private/replace-csrs.yml

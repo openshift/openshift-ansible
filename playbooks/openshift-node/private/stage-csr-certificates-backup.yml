@@ -1,0 +1,7 @@
+---
+- name: Ensure node certificates are backed up
+  hosts: oo_nodes_to_config
+  tasks:
+  - command: >
+      tar -czvf /etc/origin/node-cert-backup-{{ ansible_date_time.epoch }}.tgz
+      {{ openshift.common.config_base }}/node

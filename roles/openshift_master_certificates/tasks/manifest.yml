@@ -1,0 +1,17 @@
+---
+
+- name: Create CSR manifest
+  template:
+    src: manifest.yml.j2
+    dest: "{{ csr_local_staging_dir }}/csr-manifest.yml"
+  vars:
+    - master_hosts: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_masters_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+    - node_hosts: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+    - etcd_hosts: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_etcd_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname') }}"
+  delegate_to: localhost

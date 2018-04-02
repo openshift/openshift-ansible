@@ -4,6 +4,24 @@ basicConstraints = critical,CA:FALSE
 keyUsage         = digitalSignature,keyEncipherment
 subjectAltName   = ${ENV::SAN}
 
+[ {{ etcd_req_ext }}_peer ]
+basicConstraints = critical,CA:FALSE
+keyUsage         = digitalSignature,keyEncipherment
+extendedKeyUsage = clientAuth,serverAuth
+subjectAltName   = ${ENV::SAN}
+
+[ {{ etcd_req_ext }}_server ]
+basicConstraints = critical,CA:FALSE
+keyUsage         = digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName   = ${ENV::SAN}
+
+[ {{ etcd_req_ext }}_client ]
+basicConstraints = critical,CA:FALSE
+keyUsage         = digitalSignature,keyEncipherment
+extendedKeyUsage = clientAuth
+subjectAltName   = ${ENV::SAN}
+
 [ {{ etcd_ca_name }} ]
 dir             = {{ etcd_ca_dir }}
 crl_dir         = {{ etcd_ca_crl_dir }}
