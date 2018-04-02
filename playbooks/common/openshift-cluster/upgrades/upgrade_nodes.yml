@@ -65,22 +65,18 @@
   - include_tasks: "{{ openshift_node_upgrade_hook }}"
     when: openshift_node_upgrade_hook is defined
 
-  - name: Set node schedulability
-    oc_adm_manage_node:
-      node: "{{ openshift.node.nodename | lower }}"
-      schedulable: True
-    delegate_to: "{{ groups.oo_first_master.0 }}"
-    retries: 10
-    delay: 5
-    register: node_schedulable
-    until: node_schedulable is succeeded
-    when: node_unschedulable is changed
-
   - import_role:
       name: openshift_manage_node
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
+
+  # Run the post-upgrade hook if defined:
+  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
 
 - name: Re-enable excluders
   hosts: oo_nodes_to_upgrade:!oo_masters_to_config
@@ -89,10 +85,3 @@
       name: openshift_excluder
     vars:
       r_openshift_excluder_action: enable
-
-  # Run the post-upgrade hook if defined:
-  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
-    when: openshift_node_upgrade_post_hook is defined
-
-  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
-    when: openshift_node_upgrade_post_hook is defined
