@@ -34,3 +34,4 @@
   oc_adm_csr:
     nodes: "{{ groups['all'] | map('extract', hostvars) | selectattr('gce_metadata.bootstrap', 'match', 'true') | map(attribute='gce_name') | list }}"
     timeout: 60
+  when: groups['all'] | map('extract', hostvars) | selectattr('gce_metadata.bootstrap', 'match', 'true') | map(attribute='gce_name') | list | length > 0
