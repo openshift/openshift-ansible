@@ -18,6 +18,13 @@
   - lib_openshift
   - openshift_facts
   pre_tasks:
+
+  # Run the pre-upgrade hook if defined:
+  - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+  - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
@@ -54,6 +61,13 @@
     when: openshift_node_upgrade_pre_hook is defined
 
   post_tasks:
+
+  # Run the post-upgrade hook if defined:
+  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
+  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
+
   - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
