@@ -48,8 +48,8 @@ openshift_management_storage_class: nfs
 #   configured the required inventory parameters for your cloud
 #   provider
 #
-#   Ensure 'openshift_cloudprovider_kind' is defined (aws or gce) and
-#   that the applicable cloudprovider parameters are provided.
+#   Ensure 'openshift_cloudprovider_kind' is defined (aws, azure or gce)
+#   and that the applicable cloudprovider parameters are provided.
 
 #---------------------------------------------------------------------
 # STORAGE - NFS OPTIONS
