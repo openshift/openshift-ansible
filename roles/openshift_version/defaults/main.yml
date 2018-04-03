@@ -13,3 +13,5 @@ l_first_master_version_task_file: "{{ openshift_is_containerized | ternary('firs
 
 # Used during double control plane upgrades.
 l_double_upgrade_cp_reset_version: False
+
+l_is_master_system_container: "{{ (openshift_use_master_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
