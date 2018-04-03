@@ -163,14 +163,6 @@
       value: [X-Remote-Group]
     - key: authConfig.requestHeader.extraHeaderPrefixes
       value: [X-Remote-Extra-]
-    - key: kubernetesMasterConfig.apiServerArguments.runtime-config
-      value: [apis/settings.k8s.io/v1alpha1=true]
-    - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
-      value: DefaultAdmissionConfig
-    - key: admissionConfig.pluginConfig.PodPreset.configuration.apiVersion
-      value: v1
-    - key: admissionConfig.pluginConfig.PodPreset.configuration.disable
-      value: false
   register: yedit_output
 
 # Only add the catalog extension script if not 3.9. From 3.9 on, the console
