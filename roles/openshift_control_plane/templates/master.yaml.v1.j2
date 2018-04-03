@@ -115,7 +115,10 @@ kubeletClientInfo:
   port: 10250
 {% if openshift.master.embedded_kube | bool %}
 kubernetesMasterConfig:
-  apiServerArguments: {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
+  apiServerArguments:
+    runtime-config:
+    - apis/settings.k8s.io/v1alpha1=true
+    {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
     storage-backend:
     - etcd3
     storage-media-type:
