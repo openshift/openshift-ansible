@@ -745,6 +745,9 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'aws':
                     controller_args['cloud-provider'] = ['aws']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    controller_args['cloud-provider'] = ['azure']
+                    controller_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
@@ -767,6 +770,9 @@ def build_api_server_args(facts):
                 if facts['cloudprovider']['kind'] == 'aws':
                     api_server_args['cloud-provider'] = ['aws']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                if facts['cloudprovider']['kind'] == 'azure':
+                    api_server_args['cloud-provider'] = ['azure']
+                    api_server_args['cloud-config'] = [cloud_cfg_path + '/azure.conf']
                 if facts['cloudprovider']['kind'] == 'openstack':
                     api_server_args['cloud-provider'] = ['openstack']
                     api_server_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
