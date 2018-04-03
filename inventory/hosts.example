@@ -411,7 +411,7 @@ debug_level=2
 #
 # An OpenShift router will be created during install if there are
 # nodes present with labels matching the default router selector,
-# "region=infra". Set openshift_node_labels per node as needed in
+# "node-role.kubernetes.io/infra=true". Set openshift_node_labels per node as needed in
 # order to label nodes.
 #
 # Example:
@@ -420,8 +420,8 @@ debug_level=2
 #
 # Router selector (optional)
 # Router will only be created if nodes matching this label are present.
-# Default value: 'region=infra'
-#openshift_hosted_router_selector='region=infra'
+# Default value: 'node-role.kubernetes.io/infra=true'
+#openshift_hosted_router_selector='node-role.kubernetes.io/infra=true'
 #
 # Router replicas (optional)
 # Unless specified, openshift-ansible will calculate the replica count
@@ -462,7 +462,7 @@ debug_level=2
 #
 # An OpenShift registry will be created during install if there are
 # nodes present with labels matching the default registry selector,
-# "region=infra". Set openshift_node_labels per node as needed in
+# "node-role.kubernetes.io/infra=true". Set openshift_node_labels per node as needed in
 # order to label nodes.
 #
 # Example:
@@ -471,8 +471,8 @@ debug_level=2
 #
 # Registry selector (optional)
 # Registry will only be created if nodes matching this label are present.
-# Default value: 'region=infra'
-#openshift_hosted_registry_selector='region=infra'
+# Default value: 'node-role.kubernetes.io/infra=true'
+#openshift_hosted_registry_selector='node-role.kubernetes.io/infra=true'
 #
 # Registry replicas (optional)
 # Unless specified, openshift-ansible will calculate the replica count

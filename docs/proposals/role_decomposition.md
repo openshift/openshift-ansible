@@ -330,7 +330,7 @@ in meta/main.yml without:
 ## Avoiding overly verbose roles
 When we are splitting our roles up into smaller components we want to ensure we
 avoid creating roles that are, for a lack of a better term, overly verbose. What
-do we mean by that? If we have `openshift_master` as an example, and we were to
+do we mean by that? If we have `openshift_control_plane` as an example, and we were to
 split it up, we would have a component for `etcd`, `docker`, and possibly for
 its rpms/configs. We would want to avoid creating a role that would just create
 certificates as those would make sense to be contained with the rpms and configs.

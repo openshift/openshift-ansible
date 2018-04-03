@@ -454,7 +454,7 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
 
 
 class FilterModule(object):
-    ''' Custom ansible filters for use by the openshift_master role'''
+    ''' Custom ansible filters for use by the openshift_control_plane role'''
 
     @staticmethod
     def translate_idps(idps, api_version):

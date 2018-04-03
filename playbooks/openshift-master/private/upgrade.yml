@@ -68,12 +68,12 @@
     when: openshift_master_upgrade_pre_hook is defined
 
   - import_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: upgrade.yml
 
   - name: update vsphere provider master config
     include_role:
-      name: openshift_master
+      name: openshift_control_plane
       tasks_from: update-vsphere
     when:
     - openshift_cloudprovider_kind is defined
@@ -82,7 +82,6 @@
 
   - name: Setup and enable bootstrapping options
     include_tasks: tasks/enable_bootstrap.yml
-    when: openshift_master_bootstrap_enabled | default(false) | bool
 
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
@@ -259,14 +258,6 @@
 
   - set_fact:
       reconcile_complete: True
-
-- name: Configure API aggregation on masters
-  hosts: oo_masters_to_config
-  serial: 1
-  roles:
-  - role: openshift_facts
-  tasks:
-  - include_tasks: tasks/wire_aggregator.yml
 
 ##############################################################################
 # Gate on reconcile

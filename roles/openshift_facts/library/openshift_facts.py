@@ -539,7 +539,10 @@ def set_nodename(facts):
         # elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
         #     facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
         else:
-            facts['node']['nodename'] = facts['common']['hostname'].lower()
+            if 'bootstrapped' in facts['node'] and facts['node']['bootstrapped']:
+                facts['node']['nodename'] = facts['common']['raw_hostname'].lower()
+            else:
+                facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
 
 
@@ -1186,9 +1189,12 @@ class OpenShiftFacts(object):
         hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
                            self.system_facts['ansible_fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr).lower()
+        exit_code, output, _ = module.run_command(['hostname'])  # noqa: F405
+        raw_hostname = output.strip() if exit_code == 0 else hostname
 
         defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
+                                  raw_hostname=raw_hostname,
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',

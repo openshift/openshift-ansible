@@ -32,9 +32,6 @@ upload_journals() {
 
 trap upload_journals ERR
 
-# make all nodes ready for bootstrapping
-ansible-playbook -v -i .papr.inventory playbooks/openshift-node/private/image_prep.yml
-
 # run the actual installer
 ansible-playbook -v -i .papr.inventory playbooks/deploy_cluster.yml
 

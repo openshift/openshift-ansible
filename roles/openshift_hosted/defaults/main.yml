@@ -2,7 +2,7 @@
 ##########
 # Common #
 ##########
-openshift_hosted_infra_selector: "region=infra"
+openshift_hosted_infra_selector: "node-role.kubernetes.io/infra=true"
 r_openshift_hosted_use_calico_default: "{{ openshift_use_calico | default(False) }}"
 r_openshift_hosted_use_calico: "{{ r_openshift_hosted_use_calico_default }}"
 
@@ -34,7 +34,7 @@ r_openshift_hosted_router_use_firewalld: "{{ os_firewall_use_firewalld | default
 openshift_hosted_router_selector: "{{ openshift_router_selector | default(openshift_hosted_infra_selector) }}"
 openshift_hosted_router_namespace: 'default'
 
-openshift_hosted_router_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
+openshift_hosted_router_wait: False
 
 openshift_hosted_router_edits:
 - key: spec.strategy.rollingParams.intervalSeconds
@@ -81,7 +81,7 @@ r_openshift_hosted_registry_firewall_enabled: "{{ os_firewall_enabled | default(
 r_openshift_hosted_registry_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
 openshift_hosted_registry_name: docker-registry
-openshift_hosted_registry_wait: "{{ not (openshift_master_bootstrap_enabled | default(False)) }}"
+openshift_hosted_registry_wait: False
 openshift_hosted_registry_cert_expire_days: 730
 r_openshift_hosted_registry_os_firewall_deny: []
 r_openshift_hosted_registry_os_firewall_allow:

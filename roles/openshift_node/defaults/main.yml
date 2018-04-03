@@ -98,7 +98,7 @@ openshift_node_dnsmasq_except_interfaces:
 r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+l_is_node_system_container: "{{ openshift_use_node_system_container | default(openshift_use_system_containers | default(openshift_is_containerized | default(false))) | bool }}"
 
 openshift_node_syscon_auth_mounts_l:
 - type: bind
@@ -149,7 +149,7 @@ default_r_openshift_node_image_prep_packages:
 - ceph-common
 r_openshift_node_image_prep_packages: "{{ default_r_openshift_node_image_prep_packages | union(openshift_node_image_prep_packages | default([])) }}"
 
-openshift_node_bootstrap: False
+openshift_node_bootstrap: True
 
 r_openshift_node_os_firewall_deny: []
 default_r_openshift_node_os_firewall_allow:

@@ -182,10 +182,10 @@
     - "{{ mktemp.stdout }}/controller_manager.yml"
     delete_after: yes
 
-- include_tasks: start_api_server.yml
-
 - name: Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"
     state: absent
   changed_when: False
+
+- include_tasks: start.yml
