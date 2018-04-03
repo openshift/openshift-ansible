@@ -20,13 +20,15 @@
 
 # TODO: temporary until we fix apply for image stream tags
 - name: Remove the image stream tag
-  shell: >
+  command: >
     {{ openshift_client_binary }} delete -n openshift-infra istag node:v3.10 --ignore-not-found
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
 
 - name: Apply the config
   run_once: true
-  shell: >
+  command: >
     {{ openshift_client_binary }} apply -f "{{ mktemp.stdout }}"
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
 
 - name: Remove temp directory
   run_once: true
