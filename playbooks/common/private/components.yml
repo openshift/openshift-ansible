@@ -31,6 +31,9 @@
 - import_playbook: ../../openshift-prometheus/private/config.yml
   when: openshift_hosted_prometheus_deploy | default(false) | bool
 
+- import_playbook: ../../openshift-monitoring/private/config.yml
+  when: openshift_monitoring_deploy | default(false) | bool
+
 - import_playbook: ../../openshift-service-catalog/private/config.yml
   when: openshift_enable_service_catalog | default(true) | bool
 
