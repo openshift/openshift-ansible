@@ -184,10 +184,9 @@ Elasticsearch OPS too, if using an OPS cluster:
  interface as reported by the `ansible_default_ipv4` fact.
 - `openshift_logging_mux_cpu_request`: 100m
 - `openshift_logging_mux_memory_limit`: 512Mi
-- `openshift_logging_mux_default_namespaces`: Default `["mux-undefined"]` - the
- first value in the list is the namespace to use for undefined projects,
- followed by any additional namespaces to create by default - users will
- typically not need to set this
+- `openshift_logging_mux_default_namespaces`:
+  openshift_logging_mux_default_namespaces is not supported.
+  use openshift_logging_mux_namespaces instead.
 - `openshift_logging_mux_namespaces`: Default `[]` - additional namespaces to
   create for _external_ mux clients to associate with their logs - users will
   need to set this
