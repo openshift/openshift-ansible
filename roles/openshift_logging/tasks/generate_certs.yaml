@@ -98,15 +98,15 @@
   when:
     - not ca_db_file.stat.exists
 
-- name: Checking for ca.crt.srl
-  stat: path="{{generated_certs_dir}}/ca.crt.srl"
-  register: ca_cert_srl_file
+- name: Checking for ca.crl.srl
+  stat: path="{{generated_certs_dir}}/ca.crl.srl"
+  register: ca_crl_srl_file
   check_mode: no
 
-- copy: content="" dest={{generated_certs_dir}}/ca.crt.srl
+- copy: content="" dest={{generated_certs_dir}}/ca.crl.srl
   check_mode: no
   when:
-    - not ca_cert_srl_file.stat.exists
+    - not ca_crl_srl_file.stat.exists
 
 - name: Generate PEM certs
   include_tasks: generate_pems.yaml component={{node_name}}
