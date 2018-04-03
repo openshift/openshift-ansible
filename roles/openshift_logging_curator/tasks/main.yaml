@@ -89,7 +89,6 @@
         component: "{{ curator_component }}"
         logging_component: curator
         deploy_name: "{{ curator_name }}"
-        image: "{{openshift_logging_curator_image_prefix}}logging-curator:{{openshift_logging_curator_image_version}}"
         es_host: "{{ openshift_logging_curator_es_host }}"
         es_port: "{{ openshift_logging_curator_es_port }}"
         curator_cpu_limit: "{{ openshift_logging_curator_cpu_limit }}"
@@ -153,7 +152,6 @@
         component: "{{ curator_component }}"
         logging_component: curator
         deploy_name: "{{ curator_name }}"
-        image: "{{openshift_logging_curator_image_prefix}}logging-curator:{{openshift_logging_curator_image_version}}"
         es_host: "{{ openshift_logging_curator_es_host }}"
         es_port: "{{ openshift_logging_curator_es_port }}"
         curator_cpu_limit: "{{ openshift_logging_curator_cpu_limit }}"

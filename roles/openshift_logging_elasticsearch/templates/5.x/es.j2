@@ -42,7 +42,7 @@ spec:
 {% endif %}
       containers:
         - name: "elasticsearch"
-          image: {{image}}
+          image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch5:{{ openshift_logging_elasticsearch_image_version }}"
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -137,9 +137,9 @@ spec:
             initialDelaySeconds: 10
             timeoutSeconds: 30
             periodSeconds: 5
-        - 
+        -
           name: proxy
-          image: {{ proxy_image }}
+          image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
           imagePullPolicy: IfNotPresent
           args:
            - --upstream-ca=/etc/elasticsearch/secret/admin-ca
