@@ -10,6 +10,14 @@ openshift_storageclass_defaults:
       type: gp2
       kmsKeyId: ''
       encrypted: 'false'
+
+  azure:
+    provisioner: azure-disk
+    name: azure-standard
+    parameters:
+      storageaccounttype: 'Standard_LRS'
+      kind: 'Shared'
+
   gce:
     name: standard
     provisioner: gce-pd
