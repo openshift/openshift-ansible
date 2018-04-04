@@ -4,8 +4,6 @@
     name: "etcd{{ '-' + etcd_version if etcd_version is defined else '' }}"
     state: present
   when: not etcd_is_atomic | bool
-  delegate_to: "{{ etcd_ca_host }}"
-  run_once: true
   register: result
   until: result is succeeded
 
