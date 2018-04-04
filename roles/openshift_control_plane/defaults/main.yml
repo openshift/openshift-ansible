@@ -151,3 +151,19 @@ l_osm_session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(
 
 l_osm_sess_encrypt_def: "{{ hostvars[groups.oo_first_master.0]['l_osm_session_encryption_secrets'] }}"
 l_osm_session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(l_osm_sess_encrypt_def) }}"
+
+openshift_master_access_token_max_seconds: 86400
+openshift_master_auth_token_max_seconds: 500
+
+# oo_htpasswd_users_from_file is a custom filter in role lib_utils
+l_osm_htpasswd_users_none: {}
+openshift_master_htpasswd_users: "{{ lookup('file', openshift_master_htpasswd_file) | oo_htpasswd_users_from_file if openshift_master_htpasswd_file is defined else l_osm_htpasswd_users_none }}"
+openshift_master_manage_htpasswd: True
+l_osm_request_header_none: {}
+openshift_master_request_header_ca: "{{ lookup('file', openshift_master_request_header_ca_file) if openshift_master_request_header_ca_file is defined else l_osm_request_header_none }}"
+openshift_master_oauth_grant_method: auto
+openshift_master_dynamic_provisioning_enabled: True
+openshift_master_max_requests_inflight: 500
+openshift_master_embedded_dns: True
+openshift_master_embedded_kube: True
+openshift_master_pod_eviction_timeout: ""
