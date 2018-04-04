@@ -1,6 +1,6 @@
 ---
-openshift_cluster_monitoring_operator_image: quay.io/coreos/cluster-monitoring-operator:198d25d6
-openshift_cluster_monitoring_operator_prometheus_operator_repo: quay.io/coreos/prometheus-operator-dev
+openshift_cluster_monitoring_operator_image: quay.io/coreos/cluster-monitoring-operator:f0ca8a72
+openshift_cluster_monitoring_operator_prometheus_operator_repo: quay.io/coreos/prometheus-operator
 openshift_cluster_monitoring_operator_prometheus_repo: quay.io/prometheus/prometheus
 openshift_cluster_monitoring_operator_alertmanager_repo: quay.io/prometheus/alertmanager
 openshift_cluster_monitoring_operator_prometheus_reloader_repo: quay.io/coreos/prometheus-config-reloader
