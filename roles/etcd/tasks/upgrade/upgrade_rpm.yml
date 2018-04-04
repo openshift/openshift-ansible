@@ -21,10 +21,7 @@
   register: result
   until: result | success
 
-- lineinfile:
-    destfile: "{{ etcd_conf_file }}"
-    regexp: '^ETCD_QUOTA_BACKEND_BYTES='
-    line: "ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}"
+- import_tasks: validate_etcd_conf.yml
 
 - name: Restart etcd
   service:
