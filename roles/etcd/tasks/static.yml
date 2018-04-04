@@ -20,8 +20,6 @@
   file:
     path: "{{ etcd_conf_dir }}"
     state: directory
-    owner: "etcd"
-    group: "etcd"
     mode: 0700
 
 - name: Validate permissions on the static pods dir
