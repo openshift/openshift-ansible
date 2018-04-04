@@ -5,15 +5,11 @@
   roles:
   - openshift_facts
   post_tasks:
-  - openshift_facts:
-      role: master
-      local_facts:
-        master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
   - name: Update master count
     modify_yaml:
       dest: "{{ openshift.common.config_base}}/master/master-config.yaml"
       yaml_key: 'kubernetesMasterConfig.masterCount'
-      yaml_value: "{{ openshift.master.master_count }}"
+      yaml_value: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
     notify:
     - restart master
   handlers:

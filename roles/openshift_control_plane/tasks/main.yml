@@ -124,7 +124,7 @@
 
 - name: Create session secrets file
   template:
-    dest: "{{ openshift.master.session_secrets_file }}"
+    dest: "{{ openshift_master_session_secrets_file }}"
     src: sessionSecretsFile.yaml.v1.j2
     owner: root
     group: root

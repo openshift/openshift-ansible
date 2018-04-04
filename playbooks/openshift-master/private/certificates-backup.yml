@@ -4,7 +4,6 @@
   any_errors_fatal: true
   vars:
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
-    openshift_master_count: "{{ openshift.master.master_count | default(groups.oo_masters | length) }}"
   pre_tasks:
   - stat:
       path: "{{ openshift.common.config_base }}/generated-configs"
