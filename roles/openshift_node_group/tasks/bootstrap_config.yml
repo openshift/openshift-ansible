@@ -1,0 +1,20 @@
+---
+- name: Ensure required directories are present
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  with_items:
+  - /etc/origin/node/pods
+  - /etc/origin/node/certificates
+- name: Update the sysconfig to group "{{ r_node_bootstrap_config_name }}"
+  lineinfile:
+    dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
+    line: "{{ item.line | default(omit) }}"
+    regexp: "{{ item.regexp }}"
+    state: "{{ item.state | default('present') }}"
+  with_items:
+  - line: "BOOTSTRAP_CONFIG_NAME={{ r_node_bootstrap_config_name }}"
+    regexp: "^BOOTSTRAP_CONFIG_NAME=.*"

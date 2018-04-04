@@ -167,16 +167,12 @@
     import_role:
       name: openshift_node_group
       tasks_from: bootstrap
-  # TODO: move me into a more appropriate location
-  - name: Update the sysconfig for the masters to give them bootstrap config
-    lineinfile:
-      dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
-      line: "{{ item.line | default(omit) }}"
-      regexp: "{{ item.regexp }}"
-      state: "{{ item.state | default('present') }}"
-    with_items:
-    - line: "BOOTSTRAP_CONFIG_NAME={{ openshift_node_group_master | default('node-config-master') }}"
-      regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
+  - name: Have the masters automatically pull their configuration
+    import_role:
+      name: openshift_node_group
+      tasks_from: bootstrap_config
+    vars:
+      r_node_bootstrap_config_name: "{{ openshift_node_group_master | default('node-config-master') }}"
 
   roles:
   - role: openshift_master_facts
