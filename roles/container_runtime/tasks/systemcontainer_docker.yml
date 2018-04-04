@@ -11,9 +11,9 @@
       traditional docker package install. Otherwise, comment out openshift_docker_options
       in your inventory file.
 
-- include_tasks: common/pre.yml
+- import_tasks: common/pre.yml
 
-- include_tasks: common/syscontainer_packages.yml
+- import_tasks: common/syscontainer_packages.yml
 
 # Make sure Docker is installed so we are able to use the client
 - name: Install Docker so we can use the client
@@ -37,7 +37,7 @@
   delay: 30
 
 - name: Ensure proxies are in the atomic.conf
-  include_tasks: common/atomic_proxy.yml
+  import_tasks: common/atomic_proxy.yml
 
 # Be nice and let the user see the variable result
 - debug:
@@ -45,7 +45,7 @@
 
 # Do the authentication before pulling the container engine system container
 # as the pull might be from an authenticated registry.
-- include_tasks: registry_auth.yml
+- import_tasks: registry_auth.yml
   vars:
     openshift_docker_alternative_creds: True
 
@@ -105,6 +105,6 @@
 
 # Since docker is running as a system container, docker login will fail to create
 # credentials.  Use alternate method if requiring authenticated registries.
-- include_tasks: common/post.yml
+- import_tasks: common/post.yml
   vars:
     openshift_docker_alternative_creds: True
