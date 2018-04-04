@@ -94,7 +94,7 @@ GlusterFS cluster into a new or existing OpenShift cluster:
 | openshift_storage_glusterfs_block_storageclass         | False                   | Automatically create a StorageClass for each glusterblock cluster
 | openshift_storage_glusterfs_block_storageclass_default | False                   | Sets the glusterblock StorageClass for this group as cluster-wide default
 | openshift_storage_glusterfs_s3_deploy                  | True                    | Deploy gluster-s3 service
-| openshift_storage_glusterfs_s3_image                   | 'gluster/gluster-object'| Container image to use for gluster-s3 pod, enterprise default is 'rhgs3/rhgs-gluster-s3-server-rhel7'
+| openshift_storage_glusterfs_s3_image                   | 'gluster/gluster-object'| Container image to use for gluster-s3 pod, enterprise default is 'rhgs3/rhgs-s3-server-rhel7'
 | openshift_storage_glusterfs_s3_version                 | 'latest'                | Container image version to use for gluster=s3 pod
 | openshift_storage_glusterfs_s3_account                 | Undefined               | S3 account name for the S3 service, required for S3 service deployment
 | openshift_storage_glusterfs_s3_user                    | Undefined               | S3 user name for the S3 service, required for S3 service deployment
