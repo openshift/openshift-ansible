@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.18
+Version:        3.9.19
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 04 2018 Justin Pierce <jupierce@redhat.com> 3.9.19-1
+- 
+
 * Wed Apr 04 2018 Justin Pierce <jupierce@redhat.com> 3.9.18-1
 - dockergc: use oc rather than openshift for ex subcommand
   (sjenning@redhat.com)
