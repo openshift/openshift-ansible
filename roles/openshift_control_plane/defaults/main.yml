@@ -147,7 +147,7 @@ openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.y
 openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
 
 l_osm_sess_auth_def: "{{ hostvars[groups.oo_first_master.0]['l_osm_session_auth_secrets'] }}"
-l_osm_session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(l_osm_sess_secret_def) }}"
+l_osm_session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(l_osm_sess_auth_def) }}"
 
 l_osm_sess_encrypt_def: "{{ hostvars[groups.oo_first_master.0]['l_osm_session_encryption_secrets'] }}"
 l_osm_session_encryption_secrets: "{{ openshift_master_session_encryption_secrets | default(l_osm_sess_encrypt_def) }}"
