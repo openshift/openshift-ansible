@@ -1,5 +1,6 @@
 ---
 openshift_azure_clusterid: "{{ openshift_clusterid | default('default') }}"
+openshift_azure_prefix: "{{ lookup('env', 'INSTANCE_PREFIX') | default('') }}"
 
 openshift_azure_image_build_base: "{{ not (openshift_node_bootstrap | default(False)) }}"
 openshift_azure_base_image: "{{ openshift_azure_clusterid }}_base-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
