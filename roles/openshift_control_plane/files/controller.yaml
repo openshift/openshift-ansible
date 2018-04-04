@@ -21,7 +21,7 @@ spec:
         set -o allexport
         source /etc/origin/master/master.env
       fi
-      exec openshift start master controllers --config=/etc/origin/master/master-config.yaml --listen=https://0.0.0.0:8444
+      exec openshift start master controllers --config=/etc/origin/master/master-config.yaml --listen=https://0.0.0.0:8444 --loglevel=${DEBUG_LOGLEVEL:-2}
     securityContext:
       privileged: true
     volumeMounts:
