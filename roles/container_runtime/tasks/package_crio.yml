@@ -63,6 +63,7 @@
   template:
     dest: /etc/cni/net.d/openshift-sdn.conf
     src: 80-openshift-sdn.conf.j2
+  when: r_crio_use_openshift_sdn | bool
 
 - name: Create /etc/sysconfig/crio-network
   template:
