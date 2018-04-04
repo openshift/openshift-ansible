@@ -317,7 +317,7 @@
   when:
   - glusterfs_block_deploy
   #TODO: Remove this when multipathd will be available on atomic
-  - not openshift_is_atomic | bool
+  - not openshift.common.is_atomic | bool
 
 - block:
   - name: Create heketi block secret
