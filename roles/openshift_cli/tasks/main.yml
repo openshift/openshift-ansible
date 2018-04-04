@@ -37,9 +37,6 @@
   - openshift_is_containerized | bool
   - l_use_cli_atomic_image | bool
 
-- name: Reload facts to pick up installed OpenShift version
-  openshift_facts:
-
 - name: Install bash completion for oc tools
   package: name=bash-completion state=present
   when: not openshift_is_containerized | bool
