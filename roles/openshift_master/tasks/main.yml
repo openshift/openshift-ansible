@@ -172,9 +172,8 @@
     # translate_idps is a custom filter in role lib_utils
     translated_identity_providers: "{{ openshift.master.identity_providers | translate_idps('v1') }}"
 
-
 - name: include master config tasks
-  include_task: master_config.yml
+  include_tasks: master_config.yml
 
 - include_tasks: set_loopback_context.yml
 

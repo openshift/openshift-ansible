@@ -8,7 +8,7 @@
   hosts: localhost
   gather_facts: yes
   tasks:
-  - name: provision public ip address
+  - name: provision instance
     import_role:
       name: openshift_azure
       tasks_from: provision_instance.yml
@@ -45,15 +45,8 @@
       - cloud-utils-growpart
       ansible_become: true
 
-  - name: lay down yum certs
-    copy:
-      content: "{{ item.content }}"
-      dest: "/var/lib/yum/{{ item.name }}"
-    with_items:
-    - name: client-cert.pem
-      content: "{{ yum_client_cert_contents }}"
-    - name: client-key.pem
-      content: "{{ yum_client_key_contents }}"
+  - name: lay down yum certs which will be removed later
+    import_tasks: tasks/yum_certs.yml
 
 - import_playbook: ../../openshift-node/private/image_prep.yml
 
@@ -105,7 +98,7 @@
       var: openshift_azure_openshift_tags
       verbosity: 1
 
-  - name: clean up tasks
+  - name: clean up tasks - remove yum certificates
     import_tasks: tasks/remove_yum.yml
 # NOTE: this isn't available until ansible 2.5
 # https://github.com/ansible/ansible/pull/32589

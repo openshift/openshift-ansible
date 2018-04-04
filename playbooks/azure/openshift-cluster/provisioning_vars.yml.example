@@ -44,15 +44,16 @@ openshift_azure_vm_storage_container: "{{ openshift_azure_clusterid }}"
 openshift_azure_storage_account_name: "openshift{{ openshift_azure_clusterid }}"
 
 # --------- #
-# AMI Build #
+# Image Build #
 # --------- #
-# Variables in this section apply to building a node AMI for use in your
+# Variables in this section apply to building a node image for use in your
 # openshift cluster.
 # openshift-ansible will perform the container runtime storage setup when specified
 # The current storage setup with require a drive if using a separate storage device
 # for the container runtime.
 container_runtime_docker_storage_type: overlay2
-container_runtime_docker_storage_setup_device: /dev/xvdb
+# Usually this is the 3rd drive in our setup which shows up as /dev/sdc
+container_runtime_docker_storage_setup_device: /dev/sdc
 
 # yum client certs
 yum_client_key_contents: |

@@ -17,8 +17,6 @@
     ssh_public_keys: "{{ openshift_azure_vm_ssh_public_keys if openshift_azure_vm_ssh_public_keys != [] else omit }}"
     os_type: Linux
     image: "{{ openshift_azure_vm_base_image }}"
-    #tags:
-      #nodes: 'node'
   register: azurevm
 
 - name: dump azurevm details

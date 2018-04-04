@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# pylint: skip-file
+# flake8: noqa
 #
 # Copyright (c) 2016 Matt Davis, <mdavis@ansible.com>
 #                    Chris Houseknecht, <house@redhat.com>

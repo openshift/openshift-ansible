@@ -8,7 +8,7 @@
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: "provision public ip address"
+  - name: provision instance
     import_role:
       name: openshift_azure
       tasks_from: provision_instance.yml
@@ -23,17 +23,10 @@
   remote_user: "{{ openshift_azure_vm_admin_username }}"
   become: True
   tasks:
-  - name: lay down yum certs
-    copy:
-      content: "{{ item.content }}"
-      dest: "/var/lib/yum/{{ item.name }}"
-    with_items:
-    - name: client-cert.pem
-      content: "{{ yum_client_cert_contents }}"
-    - name: client-key.pem
-      content: "{{ yum_client_key_contents }}"
+  - name: lay down yum certs which will be removed later
+    import_tasks: tasks/yum_certs.yml
 
-  - name: update our /var
+  - name: update the /var partition with grpquota
     mount:
       boot: yes
       fstype: xfs
@@ -57,7 +50,7 @@
       name: openshift_azure
       tasks_from: query_tags.yml
 
-  - name: clean up tasks
+  - name: clean up tasks - remove yum certificates
     import_tasks: tasks/remove_yum.yml
 
 # NOTE: this isn't available until ansible 2.5

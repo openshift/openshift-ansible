@@ -1,0 +1,11 @@
+---
+- name: lay down yum certs which will be removed
+  copy:
+    content: "{{ item.content }}"
+    dest: "/var/lib/yum/{{ item.name }}"
+    mode: '0600'
+  with_items:
+  - name: client-cert.pem
+    content: "{{ yum_client_cert_contents }}"
+  - name: client-key.pem
+    content: "{{ yum_client_key_contents }}"

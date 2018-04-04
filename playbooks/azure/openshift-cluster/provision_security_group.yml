@@ -1,3 +1,4 @@
+---
 - name: Create security group that allows SSH
   hosts: localhost
   gather_facts: no

@@ -74,4 +74,4 @@ openshift_azure_vm_ssh_public_keys: []
 #- path: /root/.ssh/authorized_keys
 #  key_data: "{{ openshift_azure_public_ssh_key }}"
 
-openshift_azure_vm_size:  Standard_D4s_v3
+openshift_azure_vm_size: Standard_D4s_v3
