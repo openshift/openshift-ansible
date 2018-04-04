@@ -53,7 +53,7 @@ fi
 
 if [[ "$TYPE" == 'gcp' ]]; then
   if [[ -f "${FILES}/gce.json" ]]; then
-    gcloud auth activate-service-account --key-file="${FILES}/gce.json"
+    gcloud auth activate-service-account --quiet --key-file="${FILES}/gce.json"
   else
     echo "No service account file found at ${FILES}/gce.json, bypassing login"
   fi
