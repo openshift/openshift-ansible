@@ -77,8 +77,7 @@ spec:
           done
 
           # Take over network functions on the node
-          rm -Rf /etc/cni/net.d/*
-          rm -Rf /host/opt/cni/bin/*
+          rm -Rf /etc/cni/net.d/80-openshift-network.conf
           cp -Rf /opt/cni/bin/* /host/opt/cni/bin/
 
           if [[ -f /etc/sysconfig/origin-node ]]; then
