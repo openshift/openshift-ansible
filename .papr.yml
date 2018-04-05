@@ -40,3 +40,4 @@ tests:
 
 artifacts:
   - journals/
+  - ansible.log
