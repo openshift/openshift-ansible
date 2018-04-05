@@ -28,7 +28,7 @@ spec:
         {{ fluentd_nodeselector_key }}: "{{ fluentd_nodeselector_value }}"
       containers:
       - name: "{{ daemonset_container_name }}"
-        image: "{{ openshift_logging_fluentd_image_prefix }}{{ daemonset_name }}:{{ openshift_logging_fluentd_image_version }}"
+        image: "{{ openshift_logging_fluentd_image_prefix }}logging-fluentd:{{ openshift_logging_fluentd_image_version }}"
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
@@ -79,7 +79,7 @@ spec:
         - name: dockerdaemoncfg
           mountPath: /etc/docker
           readOnly: true
-        - name: originnodecfg 
+        - name: originnodecfg
           mountPath: /etc/origin/node
           readOnly: true
         - name: filebufferstorage
@@ -237,7 +237,7 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
-      - name: originnodecfg 
+      - name: originnodecfg
         hostPath:
           path: /etc/origin/node
       - name: dockerdaemoncfg
