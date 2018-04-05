@@ -1208,16 +1208,9 @@ class OpenShiftFacts(object):
                                       console_path='/console',
                                       console_port='8443',
                                       portal_net='172.30.0.0/16',
-                                      embedded_kube=True,
-                                      embedded_dns=True,
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,
-                                      session_name='ssn',
-                                      access_token_max_seconds=86400,
-                                      auth_token_max_seconds=500,
-                                      oauth_grant_method='auto',
-                                      dynamic_provisioning_enabled=True,
-                                      max_requests_inflight=500)
+                                      session_name='ssn')
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)

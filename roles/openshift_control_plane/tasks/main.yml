@@ -8,7 +8,6 @@
     msg: >
       Invalid OAuth grant method: {{ openshift_master_oauth_grant_method }}
   when:
-  - openshift_master_oauth_grant_method is defined
   - openshift_master_oauth_grant_method not in openshift_master_valid_grant_methods
 
 - name: Open up firewall ports
@@ -68,7 +67,7 @@
     mode: 0600
   when:
   - item.kind == 'HTPasswdPasswordIdentityProvider'
-  - openshift.master.manage_htpasswd | bool
+  - openshift_master_manage_htpasswd | bool
   with_items: "{{ openshift_master_identity_providers }}"
 
 - name: Ensure htpasswd file exists
@@ -107,11 +106,11 @@
 - name: Create the request header ca file if needed
   copy:
     dest: "{{ item.clientCA if 'clientCA' in item and '/' in item.clientCA else openshift_master_config_dir ~ '/' ~ item.clientCA | default('request_header_ca.crt') }}"
-    content: "{{ openshift.master.request_header_ca }}"
+    content: "{{ openshift_master_request_header_ca }}"
     mode: 0600
     backup: yes
   when:
-  - openshift.master.request_header_ca is defined
+  - openshift_master_request_header_ca != l_osm_request_header_none
   - item.kind == 'RequestHeaderIdentityProvider'
   - item.clientCA | default('') != ''
   with_items: "{{ openshift_master_identity_providers }}"

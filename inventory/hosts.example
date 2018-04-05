@@ -982,7 +982,7 @@ debug_level=2
 #openshift_template_service_broker_namespaces=['openshift']
 
 # masterConfig.volumeConfig.dynamicProvisioningEnabled, configurable as of 1.2/3.2, enabled by default
-#openshift_master_dynamic_provisioning_enabled=False
+#openshift_master_dynamic_provisioning_enabled=True
 
 # Admission plugin config
 #openshift_master_admission_plugin_config={"ProjectRequestLimit":{"configuration":{"apiVersion":"v1","kind":"ProjectRequestLimitConfig","limits":[{"selector":{"admin":"true"}},{"maxProjects":"1"}]}},"PodNodeConstraints":{"configuration":{"apiVersion":"v1","kind":"PodNodeConstraintsConfig"}}}
@@ -992,11 +992,9 @@ debug_level=2
 
 # OpenShift Per-Service Environment Variables
 # Environment variables are added to /etc/sysconfig files for
-# each OpenShift service: node, master (api and controllers).
+# each OpenShift node.
 # API and controllers environment variables are merged in single
 # master environments.
-#openshift_master_api_env_vars={"ENABLE_HTTP2": "true"}
-#openshift_master_controllers_env_vars={"ENABLE_HTTP2": "true"}
 #openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
 # Enable API service auditing

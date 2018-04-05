@@ -24,8 +24,8 @@ authConfig:
     - X-Remote-Extra-
 apiLevels:
 - v1
-{% if openshift.master.audit_config | default(none) is not none %}
-auditConfig:{{ openshift.master.audit_config | lib_utils_to_padded_yaml(level=1) }}
+{% if openshift_master_audit_config is defined %}
+auditConfig:{{ openshift_master_audit_config | lib_utils_to_padded_yaml(level=1) }}
 {% endif %}
 controllerConfig:
   election:
@@ -40,13 +40,13 @@ corsAllowedOrigins:
 {% for origin in ['127.0.0.1', 'localhost', openshift.common.ip, openshift.common.public_ip] | union(openshift.common.all_hostnames) | unique %}
   - (?i)//{{ origin | regex_escape() }}(:|\z)
 {% endfor %}
-{% for custom_origin in openshift.master.custom_cors_origins | default("") %}
+{% for custom_origin in osm_custom_cors_origins | default("") %}
   - (?i)//{{ custom_origin | regex_escape() }}(:|\z)
 {% endfor %}
 {% if 'disabled_features' in openshift.master %}
 disabledFeatures: {{ openshift.master.disabled_features | to_json }}
 {% endif %}
-{% if openshift.master.embedded_dns | bool %}
+{% if openshift_master_embedded_dns | bool %}
 dnsConfig:
   bindAddress: {{ openshift.master.bind_addr }}:{{ openshift_master_dns_port }}
   bindNetwork: tcp4
@@ -74,7 +74,7 @@ kubeletClientInfo:
   certFile: master.kubelet-client.crt
   keyFile: master.kubelet-client.key
   port: 10250
-{% if openshift.master.embedded_kube | bool %}
+{% if openshift_master_embedded_kube | bool %}
 kubernetesMasterConfig:
   apiServerArguments: {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
     storage-backend:
@@ -84,7 +84,7 @@ kubernetesMasterConfig:
   controllerArguments: {{ openshift.master.controller_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
   masterCount: {{ openshift_master_count | default(groups.oo_masters | length) }}
   masterIP: {{ openshift.common.ip }}
-  podEvictionTimeout: {{ openshift.master.pod_eviction_timeout | default("") }}
+  podEvictionTimeout: {{ openshift_master_pod_eviction_timeout }}
   proxyClientInfo:
     certFile: master.proxy-client.crt
     keyFile: master.proxy-client.key
@@ -127,15 +127,15 @@ networkConfig:
   ingressIPNetworkCIDR: {{ openshift_master_ingress_ip_network_cidr }}
 {% endif %}
 oauthConfig:
-{% if 'oauth_always_show_provider_selection' in openshift.master %}
-  alwaysShowProviderSelection: {{ openshift.master.oauth_always_show_provider_selection }}
+{% if openshift_master_oauth_always_show_provider_selection is defined %}
+  alwaysShowProviderSelection: {{ openshift_master_oauth_always_show_provider_selection }}
 {% endif %}
 {% if l_openshift_master_oauth_templates %}
   templates:{{ l_openshift_master_oauth_templates | lib_utils_to_padded_yaml(level=2) }}
 {% endif %}
   assetPublicURL: {{ openshift.master.public_console_url }}/
   grantConfig:
-    method: {{ openshift.master.oauth_grant_method }}
+    method: {{ openshift_master_oauth_grant_method }}
   identityProviders:
 {% for line in translated_identity_providers.splitlines() %}
   {{ line }}
@@ -148,8 +148,8 @@ oauthConfig:
     sessionName: {{ openshift.master.session_name }}
     sessionSecretsFile: {{ openshift_master_session_secrets_file }}
   tokenConfig:
-    accessTokenMaxAgeSeconds: {{ openshift.master.access_token_max_seconds }}
-    authorizeTokenMaxAgeSeconds: {{ openshift.master.auth_token_max_seconds }}
+    accessTokenMaxAgeSeconds: {{ openshift_master_access_token_max_seconds }}
+    authorizeTokenMaxAgeSeconds: {{ openshift_master_auth_token_max_seconds }}
 pauseControllers: false
 policyConfig:
   bootstrapPolicyFile: {{ openshift_master_policy }}
@@ -181,7 +181,7 @@ servingInfo:
   certFile: master.server.crt
   clientCA: ca.crt
   keyFile: master.server.key
-  maxRequestsInFlight: {{ openshift.master.max_requests_inflight }}
+  maxRequestsInFlight: {{ openshift_master_max_requests_inflight }}
   requestTimeoutSeconds: 3600
 {% if openshift.master.named_certificates | default([]) | length > 0 %}
   namedCertificates:
@@ -204,4 +204,4 @@ servingInfo:
 {% endfor %}
 {% endif %}
 volumeConfig:
-  dynamicProvisioningEnabled: {{ openshift.master.dynamic_provisioning_enabled }}
+  dynamicProvisioningEnabled: {{ openshift_master_dynamic_provisioning_enabled }}
