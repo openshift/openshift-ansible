@@ -1,0 +1,11 @@
+---
+openshift_idling_excluded_default_projects:
+  - default
+  - kube-public
+  - kube-system
+  - logging
+  - openshift
+  - openshift-image-inspector
+  - openshift-infra
+  - openshift-node
+  - openshift-web-console

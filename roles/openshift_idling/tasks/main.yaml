@@ -1,0 +1,5 @@
+---
+# do any asserts here
+
+- include_tasks: idle_services.yaml
+  when: openshift_idling_idle_services | default(true) | bool

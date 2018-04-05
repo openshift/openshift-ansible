@@ -1,0 +1,37 @@
+---
+- name: Make temp directory for files
+  command: mktemp -d /tmp/idle-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy admin client config
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: false
+
+- name: Register projects to idle
+  command: >
+    {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    get svc --all-namespaces
+    -o go-template='{{ '{{' }} range .items {{ '}}' }}{{ '{{' }} .metadata.namespace {{ '}}' }}/{{ '{{' }} .metadata.name {{ '}}' }}{{ '{{' }}"\n"{{ '}}' }}{{ '{{' }} end {{ '}}' }}'
+  register: idle_services
+
+- name: Excluded projects
+  set_fact:
+    _do_not_idle_project_list: >
+      "{{ openshift_idling_excluded_default_projects }} + {{ openshift_idling_excluded_projects }}"
+
+- name: Idle non-excluded services
+  command: >
+    {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig
+    idle "{{ item.split('/')[1] }}" -n "{{ item.split('/')[0] }}"
+    --dry-run="{{ openshift_idling_dry_run | default(false) | bool }}"
+  with_items: "{{ idle_services.stdout.split('\n') }}"
+  when: not item.split('/')[0] in _do_not_idle_project_list
+  ignore_errors: yes
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False
