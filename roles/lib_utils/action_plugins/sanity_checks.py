@@ -132,7 +132,7 @@ class ActionModule(ActionBase):
                 res_temp = default_val
             res.append(to_bool(res_temp))
 
-        if sum(res) != 1:
+        if sum(res) not in (0, 1):
             plugin_str = list(zip([x[0] for x in NET_PLUGIN_LIST], res))
 
             msg = "Host Checked: {} Only one of must be true. Found: {}".format(host, plugin_str)
