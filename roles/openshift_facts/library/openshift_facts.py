@@ -19,7 +19,6 @@ import ipaddress
 from distutils.util import strtobool
 from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
-from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -31,14 +30,6 @@ from ansible.module_utils.six import iteritems, itervalues
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
 from ansible.module_utils._text import to_native
 
-HAVE_DBUS = False
-
-try:
-    from dbus import SystemBus, Interface
-    from dbus.exceptions import DBusException
-    HAVE_DBUS = True
-except ImportError:
-    pass
 
 DOCUMENTATION = '''
 ---
@@ -676,63 +667,6 @@ def build_api_server_args(facts):
     return facts
 
 
-def is_service_running(service):
-    """ Queries systemd through dbus to see if the service is running """
-    service_running = False
-    try:
-        bus = SystemBus()
-        systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
-        manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
-        service_unit = service if service.endswith('.service') else manager.GetUnit('{0}.service'.format(service))
-        service_proxy = bus.get_object('org.freedesktop.systemd1', str(service_unit))
-        service_properties = Interface(service_proxy, dbus_interface='org.freedesktop.DBus.Properties')
-        service_load_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'LoadState')
-        service_active_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'ActiveState')
-        if service_load_state == 'loaded' and service_active_state == 'active':
-            service_running = True
-    except DBusException:
-        # TODO: do not swallow exception, as it may be hiding useful debugging
-        # information.
-        pass
-
-    return service_running
-
-
-def rpm_rebuilddb():
-    """
-    Runs rpm --rebuilddb to ensure the db is in good shape.
-    """
-    module.run_command(['/usr/bin/rpm', '--rebuilddb'])  # noqa: F405
-
-
-def get_version_output(binary, version_cmd):
-    """ runs and returns the version output for a command """
-    cmd = []
-    for item in (binary, version_cmd):
-        if isinstance(item, list):
-            cmd.extend(item)
-        else:
-            cmd.append(item)
-
-    if os.path.isfile(cmd[0]):
-        _, output, _ = module.run_command(cmd)  # noqa: F405
-    return output
-
-
-# We may need this in the future.
-def get_docker_version_info():
-    """ Parses and returns the docker version info """
-    result = None
-    if is_service_running('docker') or is_service_running('container-engine'):
-        version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
-        if 'Server' in version_info:
-            result = {
-                'api_version': version_info['Server']['API version'],
-                'version': version_info['Server']['Version']
-            }
-    return result
-
-
 def apply_provider_facts(facts, provider_facts):
     """ Apply provider facts to supplied facts dict
 
@@ -867,23 +801,11 @@ def get_local_facts_from_file(filename):
         Returns:
             dict: the retrieved facts
     """
-    local_facts = dict()
     try:
-        # Handle conversion of INI style facts file to json style
-        ini_facts = configparser.SafeConfigParser()
-        ini_facts.read(filename)
-        for section in ini_facts.sections():
-            local_facts[section] = dict()
-            for key, value in ini_facts.items(section):
-                local_facts[section][key] = value
-
-    except (configparser.MissingSectionHeaderError,
-            configparser.ParsingError):
-        try:
-            with open(filename, 'r') as facts_file:
-                local_facts = json.load(facts_file)
-        except (ValueError, IOError):
-            pass
+        with open(filename, 'r') as facts_file:
+            local_facts = json.load(facts_file)
+    except (ValueError, IOError):
+        local_facts = {}
 
     return local_facts
 
@@ -1040,20 +962,6 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
 def pop_obsolete_local_facts(local_facts):
     """Remove unused keys from local_facts"""
     keys_to_remove = {
@@ -1063,11 +971,6 @@ def pop_obsolete_local_facts(local_facts):
         if role in local_facts:
             for key in keys_to_remove[role]:
                 local_facts[role].pop(key, None)
-
-
-class OpenShiftFactsInternalError(Exception):
-    """Origin Facts Error"""
-    pass
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
@@ -1163,7 +1066,6 @@ class OpenShiftFacts(object):
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
         facts = set_aggregate_facts(facts)
@@ -1374,9 +1276,6 @@ def main():
         supports_check_mode=True,
         add_file_common_args=True,
     )
-
-    if not HAVE_DBUS:
-        module.fail_json(msg="This module requires dbus python bindings")  # noqa: F405
 
     module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']  # noqa: F405
     module.params['gather_timeout'] = 10  # noqa: F405
