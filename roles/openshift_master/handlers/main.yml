@@ -6,6 +6,7 @@
   when:
   - not (master_api_service_status_changed | default(false) | bool)
   - openshift.master.cluster_method == 'native'
+  - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
   notify:
   - Verify API Server
 
@@ -19,6 +20,17 @@
   when:
   - not (master_controllers_service_status_changed | default(false) | bool)
   - openshift.master.cluster_method == 'native'
+  - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
+
+- name: restart single master
+  systemd:
+    name: "{{ openshift.common.service_type }}-master"
+    state: restarted
+  when:
+  - not (master_api_service_status_changed | default(false) | bool)
+  - groups.oo_masters_to_config | length == 1 or openshift_version | version_compare('3.7','<')
+  notify:
+  - Verify API Server
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and

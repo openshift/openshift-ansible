@@ -6,3 +6,5 @@
   notify:
   - restart master api
   - restart master controllers
+  # We need this notify for etcd migration.
+  - restart single master
