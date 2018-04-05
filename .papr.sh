@@ -36,6 +36,9 @@ upload_journals() {
 
 trap upload_journals ERR
 
+# Store ansible log separately
+export ANSIBLE_LOG_PATH=ansible.log
+
 # run the actual installer
 ansible-playbook -v -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
 
