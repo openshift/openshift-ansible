@@ -44,7 +44,7 @@
 - name: configure vsphere svc account
   hosts: oo_first_master
   tasks:
-  - include_role:
+  - import_role:
       name: openshift_cloud_provider
       tasks_from: vsphere-svc
     when:
@@ -72,7 +72,7 @@
       tasks_from: upgrade.yml
 
   - name: update vsphere provider master config
-    include_role:
+    import_role:
       name: openshift_control_plane
       tasks_from: update-vsphere
     when:
@@ -81,7 +81,7 @@
     - openshift_version | version_compare('3.9', '>=')
 
   - name: Setup and enable bootstrapping options
-    include_tasks: tasks/enable_bootstrap.yml
+    import_tasks: tasks/enable_bootstrap.yml
 
   # Run the upgrade hook prior to restarting services/system if defined:
   - debug: msg="Running master upgrade hook {{ openshift_master_upgrade_hook }}"
@@ -96,10 +96,10 @@
       enabled: false
     when: openshift_rolling_restart_mode | default('services') == 'system'
 
-  - include_tasks: tasks/restart_hosts.yml
+  - import_tasks: tasks/restart_hosts.yml
     when: openshift_rolling_restart_mode | default('services') == 'system'
 
-  - include_tasks: tasks/restart_services.yml
+  - import_tasks: tasks/restart_services.yml
     when: openshift_rolling_restart_mode | default('services') == 'services'
 
   # Run the post-upgrade hook if defined:

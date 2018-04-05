@@ -75,7 +75,7 @@
   roles:
   - role: openshift_facts
   tasks:
-  - include_tasks: verify_upgrade_targets.yml
+  - import_tasks: verify_upgrade_targets.yml
 
 - name: Verify docker upgrade targets
   hosts: "{{ l_upgrade_docker_target_hosts }}"

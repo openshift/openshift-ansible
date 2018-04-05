@@ -143,7 +143,7 @@
     group: root
     mode: 0600
 
-- include_tasks: set_loopback_context.yml
+- import_tasks: set_loopback_context.yml
 
 - name: Create the master service env file
   template:
@@ -151,7 +151,7 @@
     dest: /etc/origin/master/master.env
     backup: true
 
-- include_tasks: static.yml
+- import_tasks: static.yml
 
 - name: Start and enable self-hosting node
   systemd:
@@ -230,4 +230,4 @@
     msg: Control plane install failed.
   when: control_plane_health.stdout != 'ok'
 
-- include_tasks: bootstrap.yml
+- import_tasks: bootstrap.yml

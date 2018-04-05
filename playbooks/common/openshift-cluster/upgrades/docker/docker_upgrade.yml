@@ -88,7 +88,7 @@
     - l_docker_upgrade_drain_result is failed
     - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
-  - include_tasks: tasks/upgrade.yml
+  - import_tasks: tasks/upgrade.yml
     when:
     - l_docker_upgrade is defined
     - l_docker_upgrade | bool
