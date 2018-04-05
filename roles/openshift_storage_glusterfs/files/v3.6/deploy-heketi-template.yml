@@ -65,6 +65,7 @@ objects:
         containers:
         - name: heketi
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
+          imagePullPolicy: IfNotPresent
           env:
           - name: HEKETI_USER_KEY
             value: ${HEKETI_USER_KEY}
