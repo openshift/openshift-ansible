@@ -72,9 +72,6 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_metrics_resolution`: How often metrics should be gathered.
 
-- `openshift_metrics_install_hawkular_agent`: Install the Hawkular OpenShift Agent (HOSA). HOSA can be used
-  to collect custom metrics from your pods. This component is currently in tech-preview and is not installed by default.
-
 ## Additional variables to control resource limits
 Each metrics component (hawkular, cassandra, heapster) can specify a cpu and memory limits and requests by setting
 the corresponding role variable:
@@ -128,7 +125,7 @@ $ docker images
 REPOSITORY                                       TAG     IMAGE ID       CREATED             SIZE
 <registry>/openshift3/origin-metrics-cassandra   v3.7    f8ad8d569e27   14 hours ago        783.7 MB
 
-$ docker inspect 9c3597aeb39f 
+$ docker inspect 9c3597aeb39f
 [
     {
         . . .
@@ -141,7 +138,7 @@ $ docker inspect 9c3597aeb39f
             "Labels": {
                 . . .
                 "build-date": "2017-10-17T16:47:44.350655",
-                . . . 
+                . . .
                 "release": "0.143.4.0",
                 . . .
                 "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift3/metrics-cassandra/images/v3.7.0-0.143.4.0",
@@ -160,13 +157,13 @@ $ docker pull <registry>/openshift3/origin-metrics-cassandra:v3.7
 If there was an update, you need to run the `docker pull` on each node.
 
 It is recommended that you now rerun the `openshift_metrics` playbook to ensure that any necessary config changes are also picked up.
- 
+
 To manually redeploy your pod you can do the following:
 - for a DC you can do:
 ```
 oc rollout latest <dc_name>
 ```
-     
+
 - for a RC you can scale down and scale back up
 ```
 oc scale --replicas=0 <rc_name>
@@ -185,4 +182,4 @@ Changelog
 ---------
 
 Tue Oct 10, 2017
-- Default imagePullPolicy changed from Always to IfNotPresent 
+- Default imagePullPolicy changed from Always to IfNotPresent
