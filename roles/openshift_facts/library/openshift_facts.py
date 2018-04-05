@@ -1213,7 +1213,6 @@ class OpenShiftFacts(object):
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,
                                       session_name='ssn',
-                                      session_secrets_file='',
                                       access_token_max_seconds=86400,
                                       auth_token_max_seconds=500,
                                       oauth_grant_method='auto',

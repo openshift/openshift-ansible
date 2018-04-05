@@ -71,7 +71,6 @@
         console_url: "{{ openshift_master_console_url | default(None) }}"
         console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
-        master_count: "{{ openshift_master_count | default(groups.oo_masters | length) }}"
 
 - name: Inspect state of first master config settings
   hosts: oo_first_master
@@ -86,7 +85,6 @@
   hosts: oo_masters_to_config
   any_errors_fatal: true
   vars:
-    openshift_master_count: "{{ openshift.master.master_count }}"
     openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   pre_tasks:
   - name: Prepare the bootstrap node config on masters for self-hosting
