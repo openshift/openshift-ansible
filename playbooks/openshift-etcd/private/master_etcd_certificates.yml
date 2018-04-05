@@ -3,7 +3,6 @@
   hosts: oo_masters_to_config
   any_errors_fatal: true
   roles:
-    - role: openshift_etcd_facts
     - role: openshift_etcd_client_certificates
       etcd_cert_subdir: "openshift-master-{{ openshift.common.hostname }}"
       etcd_cert_config_dir: "{{ openshift.common.config_base }}/master"
