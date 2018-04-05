@@ -24,10 +24,10 @@ v3.5.1.3.4, v1.2-1, v1.2.3-4, v1.2.3-4.5, v1.2.3-4.5.6
 You specified openshift_image_tag={}"""
 
 ORIGIN_TAG_REGEX_ERROR = """openshift_image_tag must be in the format
-v#.#.#[-optional.#]. Examples: v1.2.3, v3.5.1-alpha.1
+v#.#[.#-optional.#]. Examples: v1.2.3, v3.5.1-alpha.1
 You specified openshift_image_tag={}"""
 
-ORIGIN_TAG_REGEX = {'re': '(^v?\\d+\\.\\d+\\.\\d+(-[\\w\\-\\.]*)?$)',
+ORIGIN_TAG_REGEX = {'re': '(^v?\\d+\\.\\d+.*)',
                     'error_msg': ORIGIN_TAG_REGEX_ERROR}
 ENTERPRISE_TAG_REGEX = {'re': '(^v\\d+\\.\\d+(\\.\\d+)*(-\\d+(\\.\\d+)*)?$)',
                         'error_msg': ENTERPRISE_TAG_REGEX_ERROR}

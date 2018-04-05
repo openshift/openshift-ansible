@@ -85,8 +85,7 @@ openshift_use_crio: False
 openshift_crio_use_rpm: False
 openshift_use_crio_only: False
 
-l_openshift_image_tag_default: "{{ openshift_release | default('latest') }}"
-l_openshift_image_tag: "{{ openshift_image_tag | default(l_openshift_image_tag_default) | string}}"
+l_openshift_image_tag: "{{ openshift_image_tag | string }}"
 
 l_required_docker_version: '1.12'
 

@@ -2,13 +2,8 @@
 - name: normalize groups
   import_playbook: ../../prerequisites.yml
   vars:
-    skip_version: True
     skip_sanity_checks: True
     skip_validate_hostnames: True
-
-- name: determine version
-  import_playbook: ../../init/version.yml
-  vars:
     l_openshift_version_determine_hosts: "oo_nodes_to_config"
     l_openshift_version_set_hosts: "all:!all"
     l_openshift_version_check_hosts: "all:!all"
