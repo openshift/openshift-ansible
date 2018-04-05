@@ -61,8 +61,6 @@
 #### Storage class plugins here ####
 - name: NFS storage plugin configuration
   import_tasks: storage_plugins/nfs.yml
-  tags:
-    - nfs
 
 - name: GlusterFS storage plugin configuration
   import_tasks: storage_plugins/glusterfs.yml
