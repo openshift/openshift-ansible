@@ -35,15 +35,12 @@ trap upload_journals ERR
 # run the actual installer
 ansible-playbook -v -i .papr.inventory playbooks/deploy_cluster.yml
 
-### DISABLING TESTS FOR NOW, SEE:
-### https://github.com/openshift/openshift-ansible/pull/6132
-
-### # run a small subset of origin conformance tests to sanity
-### # check the cluster NB: we run it on the master since we may
-### # be in a different OSP network
-### ssh ocp-master docker run --rm --net=host --privileged \
-###   -v /etc/origin/master/admin.kubeconfig:/config \
-###   registry.fedoraproject.org/fedora:27 sh -c \
-###     '"dnf install -y origin-tests && \
-###       KUBECONFIG=/config /usr/libexec/origin/extended.test --ginkgo.v=1 \
-###         --ginkgo.noColor --ginkgo.focus=\"Services.*NodePort|EmptyDir\""'
+# run a small subset of origin conformance tests to sanity
+# check the cluster NB: we run it on the master since we may
+# be in a different OSP network
+ssh ocp-master docker run --rm --net=host --privileged \
+  -v /etc/origin/master/admin.kubeconfig:/config \
+  registry.fedoraproject.org/fedora:27 sh -c \
+    '"dnf install -y origin-tests && \
+      KUBECONFIG=/config /usr/libexec/origin/extended.test --ginkgo.v=1 \
+        --ginkgo.noColor --ginkgo.focus=\"Services.*NodePort|EmptyDir\""'
