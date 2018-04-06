@@ -182,6 +182,21 @@
     - "{{ mktemp.stdout }}/controller_manager.yml"
     delete_after: yes
 
+- name: Set Controller Manager service
+  oc_service:
+    name: controller-manager
+    namespace: kube-service-catalog
+    state: present
+    ports:
+    - name: secure
+      port: 443
+      protocol: TCP
+      targetPort: 6443
+    selector:
+      app: controller-manager
+    session_affinity: None
+    service_type: ClusterIP
+
 - include_tasks: start_api_server.yml
 
 - name: Delete temp directory
