@@ -7,7 +7,6 @@
   vars:
     etcd_cert_prefix: nuageEtcd-
     etcd_cert_config_dir: "{{ cert_output_dir }}"
-    embedded_etcd: "{{ hostvars[groups.oo_first_master.0].openshift.master.embedded_etcd }}"
     etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
     etcd_cert_subdir: "openshift-nuage-{{ openshift.common.hostname }}"
 
