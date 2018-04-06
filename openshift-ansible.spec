@@ -48,8 +48,7 @@ for Openshift and Atomic Enterprise.
 mkdir -p %{buildroot}%{_datadir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/ansible/%{name}/inventory
 cp -rp inventory/dynamic %{buildroot}%{_datadir}/ansible/%{name}/inventory
-cp etc/ansible.cfg %{buildroot}%{_datadir}/ansible/%{name}/ansible.cfg
-cp etc/ansible-quiet.cfg %{buildroot}%{_datadir}/ansible/%{name}/ansible-quiet.cfg
+cp ansible.cfg %{buildroot}%{_datadir}/ansible/%{name}/ansible.cfg
 
 # openshift-ansible-bin install
 mkdir -p %{buildroot}%{_bindir}
@@ -89,7 +88,6 @@ touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
 %{_datadir}/ansible/%{name}/inventory/dynamic
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 %{_datadir}/ansible/%{name}/ansible.cfg
-%{_datadir}/ansible/%{name}/ansible-quiet.cfg
 
 # ----------------------------------------------------------------------------------
 # openshift-ansible-docs subpackage
