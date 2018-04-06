@@ -94,13 +94,13 @@
     service:
       name: "{{ openshift_service_type }}-master-controllers"
       enabled: false
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: openshift_rolling_restart_mode | default('services') == 'system'
 
   - include_tasks: tasks/restart_hosts.yml
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: openshift_rolling_restart_mode | default('services') == 'system'
 
   - include_tasks: tasks/restart_services.yml
-    when: openshift.common.rolling_restart_mode == 'services'
+    when: openshift_rolling_restart_mode | default('services') == 'services'
 
   # Run the post-upgrade hook if defined:
   - debug: msg="Running master post-upgrade hook {{ openshift_master_upgrade_post_hook }}"

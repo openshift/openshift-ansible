@@ -130,12 +130,12 @@
     service:
       name: "{{ openshift_service_type }}-master-controllers"
       state: restarted
-    when: openshift.common.rolling_restart_mode == 'services'
+    when: openshift_rolling_restart_mode | default('services') == 'services'
   - name: Re-enable master controllers to force new leader election mode
     service:
       name: "{{ openshift_service_type }}-master-controllers"
       enabled: true
-    when: openshift.common.rolling_restart_mode == 'system'
+    when: openshift_rolling_restart_mode | default('services') == 'system'
 
 
 - import_playbook: ../post_control_plane.yml
