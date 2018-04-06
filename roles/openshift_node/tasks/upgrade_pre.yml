@@ -25,9 +25,6 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- import_tasks: upgrade/containerized_upgrade_pull.yml
-  when: openshift_is_containerized | bool
-
 # Prepull the rpms for docker upgrade, but don't install
 - name: download docker upgrade rpm
   command: "{{ ansible_pkg_mgr }} install -y --downloadonly docker{{ '-' + docker_version }}"
