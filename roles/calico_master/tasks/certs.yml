@@ -39,6 +39,7 @@
 - name: Create secret
   oc_secret:
     name: calico-etcd-secrets
+    state: present
     namespace: kube-system
     files:
     - name: etcd-key
