@@ -1,0 +1,32 @@
+---
+- name: create a temporary file location
+  tempfile:
+    state: directory
+    prefix: azure
+  register: tmpout
+
+- name: fetch acs-engine files
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ tmpout.path }}/"
+    mode: '0770'
+  loop: "{{ openshift_azure_acsengine_urls }}"
+
+- name: modify the openshift.json template
+  yedit:
+    content_type: json
+    src: "{{ tmpout.path }}/openshift.json"
+    edits: "{{ openshift_azure_acsengine_template_edits }}"
+
+- name: launch an acs-engine build
+  command: |
+    {{ tmpout.path }}/acs-engine deploy \
+      --resource-group {{ openshift_azure_resource_group_name }} \
+      --location {{ openshift_azure_resource_location }} \
+      --subscription-id {{ openshift_azure_subscription_id }} \
+      --auth-method client_secret \
+      --client-id {{ openshift_azure_client_id }} \
+      --client-secret {{ openshift_azure_service_secret }} \
+      {{ tmpout.path }}/openshift.json
+  args:
+    chdir: "{{ tmpout.path }}"
