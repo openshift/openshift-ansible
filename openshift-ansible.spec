@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.15.0%{?dist}
+Release:        0.16.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -202,6 +202,79 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.16.0
+- Use long form of "scc" resource type in logging facts (hansmi@vshn.ch)
+- Add CL role and playbook for Node Problem Detector (joesmith@redhat.com)
+- Remove unused/obsolete items from openshift_master_facts (mgugino@redhat.com)
+- Allow no sdn's to be specified in sanity checks (mgugino@redhat.com)
+- Fix session secrets file and remove old facts (mgugino@redhat.com)
+- master: set DEBUG_LOGLEVEL based on openshift_master_debug_level
+  (dcbw@redhat.com)
+- Refactor openshift_version setting (mgugino@redhat.com)
+- Ensure legacy inventories continue to work for infra nodes
+  (ccoleman@redhat.com)
+- Updating for es5.x image naming and removing restriction for origin only for
+  tech preview (ewolinet@redhat.com)
+- Implement descheduler cluster lifecycle role and playbook.
+  (avagarwa@redhat.com)
+- Add resources and migration for new default CRD backend for ASB
+  (fabian@fabianism.us)
+- GlusterFS: Use custom StorageClass for S3 (jarrpa@redhat.com)
+- GlusterFS: Fix missing parameter for registry PVC (jarrpa@redhat.com)
+- Fix undefined variable in session secrets (mgugino@redhat.com)
+- Updating default image tags to be only vX.Y for origin installs
+  (ewolinet@redhat.com)
+- Don't install etcd on bootstrapped hosts (vrutkovs@redhat.com)
+- When bootstrapping automatically sync node config (ccoleman@redhat.com)
+- Fixing crlnumber file missing (bedin@redhat.com)
+- Use consistent config location in web console debugging (ccoleman@redhat.com)
+- Refactor session authentication secrets (mgugino@redhat.com)
+- [1558689] Add iproute to origin-ansible image (rteague@redhat.com)
+- catalog: turn on async bindings by default (jpeeler@redhat.com)
+- [1561247] Add kubeconfig to openshift_bootstrap_autoapprover
+  (rteague@redhat.com)
+- Add an ansible role to install OpenShift monitoring platform
+  (ealfassa@redhat.com)
+- Documents new node upgrade hooks. (jtudelag@redhat.com)
+- Skip oc_adm_csr when no bootstrapping is required on GCP
+  (ccoleman@redhat.com)
+- deploy k8s job for applying hawkular-metrics schema (john.sanda@gmail.com)
+- use new filter name for AWS availability zones (jdiaz@redhat.com)
+- Fix node upgrade hooks (sdodson@redhat.com)
+- Switch the master to always run with bootstrapping on (ccoleman@redhat.com)
+- Removing non-null default for cpu_limit for es (ewolinet@redhat.com)
+- GlusterFS: Collapse versioned files and directories (jarrpa@redhat.com)
+- Fix GCP master haproxy install check (ccoleman@redhat.com)
+- crio: don't configure openshift-sdn when disabled (phemmer@chewy.com)
+- PAPR - Don't install ASB, do install TSB (sdodson@redhat.com)
+- Ensure etcd.conf variables are updated during upgrade (rteague@redhat.com)
+- Update deprecated etcd vars in openshfit_cert_expiry (rteague@redhat.com)
+- PAPR: don't install TSB on Atomic (vrutkovs@redhat.com)
+- Removing hardcoding of configmap_namespace for patching (ewolinet@redhat.com)
+- Remove openshift_etcd_facts role (mgugino@redhat.com)
+- Cert check playbooks: remove become (vrutkovs@redhat.com)
+- Fix s3 image as rhgs3/rhgs-s3-server-rhel7 (sarumuga@redhat.com)
+- Upgrade Prometheus AlertManager to v0.14.0 (pasquier.simon@gmail.com)
+- Remove etcd_hosts and etcd_urls from openshift_facts (mgugino@redhat.com)
+- Convert node-related roles from include_tasks to import_tasks
+  (mgugino@redhat.com)
+- Bug 1557516- ASB now scheduled on infra nodes (fabian@fabianism.us)
+- remove duplicate time import (fabian@fabianism.us)
+- fix import (fabian@fabianism.us)
+- rebuild dependent modules (fabian@fabianism.us)
+- Bug 1555426- yedit now appends an ISO8601 formatted datetime string to file
+  backups (fabian@fabianism.us)
+- Don't remove pvs when uninstalling openshift_management (ncarboni@redhat.com)
+- dockergc: use oc rather than openshift for ex subcommand
+  (sjenning@redhat.com)
+- Updating default image versions to match curator (ewolinet@redhat.com)
+- OpenShift Reference Component Docs (rteague@redhat.com)
+- Fix typo in hawkular-cassandra RC (juanlu@redhat.com)
+- Adds node hooks: pre, mid and post update hook. (jtudelag@redhat.com)
+- Adjusting the default PVC size of MUX file buffer
+  (openshift_logging_mux_file_buffer_pvc_size) to the default MUX file buffer
+  size (openshift_logging_mux_file_buffer_limit == 2Gi). (nhosoi@redhat.com)
+
 * Tue Mar 27 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.15.0
 - Remove etcd_migrate and embedded2external (mgugino@redhat.com)
 - Master: change openshift_node include_tasks to import_tasks
