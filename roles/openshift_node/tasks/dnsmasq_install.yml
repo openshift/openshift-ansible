@@ -11,7 +11,9 @@
     network_manager_active: "{{ True if 'ActiveState=active' in nm_show.stdout else False }}"
 
 - name: Install dnsmasq
-  package: name=dnsmasq state=installed
+  package:
+    name: dnsmasq
+    state: installed
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
