@@ -179,7 +179,7 @@ class OpenShiftAnsiblePylint(PylintCommand):
     # pylint: disable=no-self-use
     def find_all_modules(self):
         ''' find all python files to test '''
-        exclude_dirs = ('.tox', 'utils', 'test', 'tests', 'git')
+        exclude_dirs = ('.tox', 'test', 'tests', 'git')
         modules = []
         for match in find_files(os.getcwd(), exclude_dirs, None, r'\.py$'):
             package = os.path.basename(match).replace('.py', '')
@@ -222,8 +222,7 @@ class OpenShiftAnsibleGenerateValidation(Command):
         generate_files = find_files('roles',
                                     ['inventory',
                                      'test',
-                                     'playbooks',
-                                     'utils'],
+                                     'playbooks'],
                                     None,
                                     'generate.py$')
 

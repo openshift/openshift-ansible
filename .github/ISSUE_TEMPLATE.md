@@ -17,10 +17,9 @@ If you're operating from a **git clone**:
 
 * The output of `git describe`
 
-If you're running from playbooks installed via RPM or
-`atomic-openshift-utils`
+If you're running from playbooks installed via RPM
 
-* The output of `rpm -q atomic-openshift-utils openshift-ansible`
+* The output of `rpm -q openshift-ansible`
 
 Place the output between the code block below:
 
