@@ -1,9 +1,9 @@
 ---
 # Upgrade predicates
-- include_tasks: upgrade_predicates.yml
+- import_tasks: upgrade_predicates.yml
 
 # Upgrade priorities
-- include_tasks: upgrade_priorities.yml
+- import_tasks: upgrade_priorities.yml
 
 # Update scheduler
 - name: Update scheduler config

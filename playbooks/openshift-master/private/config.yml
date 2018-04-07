@@ -128,7 +128,7 @@
     when: openshift_use_kuryr | default(false) | bool
 
   - name: setup bootstrap settings
-    include_tasks: tasks/enable_bootstrap.yml
+    import_tasks: tasks/enable_bootstrap.yml
 
   post_tasks:
   - name: Create group for deployment type

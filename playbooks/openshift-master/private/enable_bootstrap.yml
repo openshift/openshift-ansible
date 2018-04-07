@@ -4,4 +4,4 @@
   gather_facts: no
   tasks:
   - name: include bootstrapping tasks
-    include_tasks: tasks/enable_bootstrap.yml
+    import_tasks: tasks/enable_bootstrap.yml
