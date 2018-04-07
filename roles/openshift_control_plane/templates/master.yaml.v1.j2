@@ -6,7 +6,7 @@ admissionConfig:
       configuration:
         kind: DefaultAdmissionConfig
         apiVersion: v1
-        disable: false
+        disable: true
 aggregatorConfig:
   proxyClientInfo:
     certFile: aggregator-front-proxy.crt
@@ -76,7 +76,8 @@ kubeletClientInfo:
   port: 10250
 {% if openshift_master_embedded_kube | bool %}
 kubernetesMasterConfig:
-  apiServerArguments: {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
+  apiServerArguments:
+    {{ openshift.master.api_server_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
     storage-backend:
     - etcd3
     storage-media-type:
