@@ -6,7 +6,7 @@
   when:
   - not (master_api_service_status_changed | default(false) | bool)
   - openshift.master.cluster_method == 'native'
-  - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
+  - master_api_enabled.rc == 0 or openshift_version | version_compare('3.7','>=')
   notify:
   - Verify API Server
 
@@ -20,15 +20,16 @@
   when:
   - not (master_controllers_service_status_changed | default(false) | bool)
   - openshift.master.cluster_method == 'native'
-  - groups.oo_masters_to_config | length > 1 or openshift_version | version_compare('3.7','>=')
+  - master_controllers_enabled.rc == 0 or openshift_version | version_compare('3.7','>=')
 
+# For now, this handler is called only from update_etcd_client_urls.yml in case migration from previous version.
+# Thus, {{ *_service_status_changed }} like api, controllers is neither implemented nor handled.
 - name: restart single master
   systemd:
     name: "{{ openshift.common.service_type }}-master"
     state: restarted
   when:
-  - not (master_api_service_status_changed | default(false) | bool)
-  - groups.oo_masters_to_config | length == 1 or openshift_version | version_compare('3.7','<')
+  - single_master_enabled.rc == 0 or openshift_version | version_compare('3.7','<')
   notify:
   - Verify API Server
 
