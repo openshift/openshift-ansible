@@ -1,0 +1,6 @@
+---
+- name: remove security group
+  azure_rm_securitygroup:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_prefix }}-{{ openshift_azure_sg_name }}"
+    state: absent

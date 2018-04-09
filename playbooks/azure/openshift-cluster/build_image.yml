@@ -13,6 +13,7 @@
       name: openshift_azure
       tasks_from: provision_instance.yml
     vars:
+      openshift_azure_vm_name: "{{ openshift_azure_image }}"
       openshift_azure_vm_base_image:
         name: '{{ openshift_azure_base_image }}'
         resource_group: '{{ openshift_azure_base_image_ns }}'
@@ -117,3 +118,14 @@
       openshift_azure_os_tags: "{{ hostvars[groups['azure'][0]]['openshift_azure_os_tags'] | default({}) }}"
       openshift_azure_openshift_tags: "{{ hostvars[groups['azure'][0]]['openshift_azure_openshift_tags'] | default({}) }}"
       openshift_azure_image_name: "{{ openshift_azure_image }}"
+      openshift_azure_vm_name: "{{ openshift_azure_image }}"
+
+- name: "Remove instance used to build image"
+  hosts: localhost
+  tasks:
+  - name: "rm vm"
+    import_role:
+      name: openshift_azure
+      tasks_from: remove_instance.yml
+    vars:
+      openshift_azure_vm_name: "{{ openshift_azure_image }}"

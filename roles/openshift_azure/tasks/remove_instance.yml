@@ -1,9 +1,15 @@
 ---
-- name: include the network interface creation
-  import_tasks: remove_public_ip.yml
+- name: remove the vm
+  import_tasks: remove_vm.yml
 
-- name: include the network interface creation
+- name: remove the network interface
   import_tasks: remove_nic.yml
 
-- name: include the vm creation
-  import_tasks: remove_vm.yml
+- name: remove the security group
+  import_tasks: remove_security_group.yml
+
+- name: remove the virtual network
+  import_tasks: remove_virtual_network.yml
+
+- name: remove the public ip
+  import_tasks: remove_public_ip.yml
