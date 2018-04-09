@@ -1,8 +1,15 @@
 ---
+- name: Add descheduler project
+  oc_project:
+    state: present
+    name: openshift-descheduler
+    node_selector: ""
+    description: Descheduler
+
 - name: create descheduler service account
   oc_serviceaccount:
     name: "{{ openshift_descheduler_service_account }}"
-    namespace: "{{ openshift_descheduler_namespace }}"
+    namespace: openshift-descheduler
     state: present
 
 - name: create descheduler cluster role
@@ -30,7 +37,7 @@
 
 #- name: "Ensure descheduler cluster roles are {{ openshift_descheduler_state }}"
 #  oc_obj:
-#    namespace: "{{ openshift_descheduler_namespace }}"
+#    namespace: openshift-descheduler
 #    state: present
 #    kind: "{{ item.type }}"
 #    name: "{{ item.name }}"
@@ -45,8 +52,8 @@
 - name: bind descheduler cluster role to its service account
   oc_adm_policy_user:
     state: present
-    user: "system:serviceaccount:openshift-infra:{{ openshift_descheduler_service_account }}"
-    namespace: "{{ openshift_descheduler_namespace }}"
+    user: "system:serviceaccount:openshift-descheduler:{{ openshift_descheduler_service_account }}"
+    namespace: openshift-descheduler
     resource_kind: cluster-role
     resource_name: "{{ openshift_descheduler_cluster_role_name }}"
 
@@ -60,7 +67,7 @@
   oc_configmap:
     state: present
     name: "{{ openshift_descheduler_policy_configmap_name }}"
-    namespace: "{{ openshift_descheduler_namespace }}"
+    namespace: openshift-descheduler
     from_file:
       policy.yaml: "{{ openshift_descheduler_tmp_location }}/policy.yaml"
 
@@ -72,7 +79,7 @@
 
 - name: "Ensure the descheduler is {{ openshift_descheduler_state }}"
   oc_obj:
-    namespace: "{{ openshift_descheduler_namespace }}"
+    namespace: openshift-descheduler
     state: present
     kind: cronjob
     name: "{{ openshift_descheduler_cronjob_name }}"

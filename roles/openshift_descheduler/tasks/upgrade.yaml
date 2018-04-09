@@ -4,7 +4,7 @@
     state: list
     kind: cronjob
     name: "{{ openshift_descheduler_cronjob_name }}"
-    namespace: "{{ openshift_descheduler_namespace }}"
+    namespace: openshift-descheduler
   register: descheduler_cronjob
 
 - name: Upgrade descheduler cronjob
