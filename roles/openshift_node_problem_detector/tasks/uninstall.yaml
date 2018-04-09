@@ -20,7 +20,7 @@
     user: "system:serviceaccount:{{ openshift_node_problem_detector_namespace }}:{{ openshift_node_problem_detector_service_account }}"
     namespace: "{{ openshift_node_problem_detector_namespace }}"
     resource_kind: cluster-role
-    resource_name: "{{ openshift_node_problem_detector_cluster_role_name }}"
+    resource_name: "system:{{ openshift_node_problem_detector_cluster_role_name }}"
 
 - name: remove node problem detector service account
   oc_serviceaccount:
