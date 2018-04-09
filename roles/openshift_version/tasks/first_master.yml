@@ -13,7 +13,7 @@
 
 - name: Set openshift_version to openshift_release if undefined
   set_fact:
-    openshift_version: "{{ openshift_release | default('3.10') }}"
+    openshift_version: "{{ openshift_release }}"
   when:
   - openshift_version is not defined or openshift_version == ""
 
@@ -34,6 +34,20 @@
   - set_fact:
       openshift_image_tag: "v{{ openshift_version }}"
   when: openshift_image_tag is not defined
+
+- name: assert openshift_release in openshift_image_tag
+  assert:
+    that: openshift_release in openshift_image_tag
+    msg: >
+      openshift_image_tag must match same major version as openshift_release.
+      You provided: {{ openshift_release }} and {{ openshift_image_tag }}
+
+- name: assert openshift_release in openshift_pkg_version
+  assert:
+    that: openshift_release in openshift_pkg_version
+    msg: >
+      openshift_pkg_version must match same major version as openshift_release.
+      You provided: {{ openshift_release }} and {{ openshift_pkg_version }}
 
 # The end result of these three variables is quite important so make sure they are displayed and logged:
 - debug: var=openshift_release
