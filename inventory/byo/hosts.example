@@ -104,8 +104,6 @@ openshift_release=v3.7
 #openshift_docker_additional_registries=registry.example.com
 #openshift_docker_insecure_registries=registry.example.com
 #openshift_docker_blocked_registries=registry.hacker.com
-# Disable pushing to dockerhub
-#openshift_docker_disable_push_dockerhub=True
 # Use Docker inside a System Container. Note that this is a tech preview and should
 # not be used to upgrade!
 # The following options for docker are ignored:
