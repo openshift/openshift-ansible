@@ -186,6 +186,7 @@
     name: extension-apiserver-authentication
     namespace: kube-system
   when:
+  - openshift_version is defined
   - openshift_version | version_compare('3.7','<')
   - openshift_upgrade_target is defined
   - openshift_upgrade_target | version_compare('3.7','>=')
