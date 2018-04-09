@@ -12,6 +12,8 @@ openshift_openstack_num_cns: 0
 openshift_openstack_dns_nameservers: []
 openshift_openstack_nodes_to_remove: []
 
+openshift_openstack_use_lbaas_load_balancer: false
+openshift_openstack_use_vm_load_balancer: false
 
 openshift_openstack_cluster_node_labels:
   app:

@@ -109,13 +109,21 @@ parameters:
     label: Security groups
     description: Security group resources
 
-{% if openshift_use_kuryr|default(false)|bool %}
   api_lb_pool:
     default: ''
     type: string
     label: API LoadBalancer pool ID
     description: API Loadbalancer pool resource
-{% endif %}
+
+  router_lb_pool_http:
+    type: string
+    label: Router LoadBalancer pool ID for HTTP
+    default: ""
+
+  router_lb_pool_https:
+    type: string
+    label: Router LoadBalancer pool ID for HTTPS
+    default: ""
 
 {% if openshift_use_kuryr|default(false)|bool %}
   pod_secgrp:
@@ -196,6 +204,7 @@ conditions:
 {% if openshift_use_flannel|default(False)|bool %}
   no_data_subnet: {not: { get_param: attach_data_net} }
 {% endif %}
+
 
 resources:
 
@@ -322,16 +331,32 @@ resources:
 {% endif %}
 
 
-{% if openshift_use_kuryr|default(false)|bool %}
-  lb_member:
+  api_lb_member:
     type: OS::Neutron::LBaaS::PoolMember
     condition:
-      equals:
-        - get_param: type
-        - master
+      not: {equals: [{get_param: api_lb_pool}, ""]}
     properties:
       pool: { get_param: api_lb_pool }
       protocol_port: {{ openshift_master_api_port|default(8443) }}
       address: { get_attr: [server, first_address]}
       subnet: { get_param: subnet }
-{% endif %}
+
+  router_lb_pool_member_http:
+    condition:
+      not: {equals: [{get_param: router_lb_pool_http}, ""]}
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_param: router_lb_pool_http }
+      protocol_port: 80
+      address: { get_attr: [server, first_address]}
+      subnet: { get_param: subnet }
+
+  router_lb_pool_member_https:
+    condition:
+      not: {equals: [{get_param: router_lb_pool_https}, ""]}
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_param: router_lb_pool_https }
+      protocol_port: 443
+      address: { get_attr: [server, first_address]}
+      subnet: { get_param: subnet }

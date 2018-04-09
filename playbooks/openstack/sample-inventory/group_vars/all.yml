@@ -109,6 +109,13 @@ openshift_openstack_default_flavor: "m1.medium"
 # # Numerical index of nodes to remove
 # openshift_openstack_nodes_to_remove: []
 
+
+## Select a load balancer solution you desire. Only one of these can be
+## `true` at a time. If they're both `false`, no load balancer will be deployed.
+#openshift_openstack_use_lbaas_load_balancer: false
+#openshift_openstack_use_vm_load_balancer: false
+
+
 # # Docker volume size
 # # - set specific volume size for roles by uncommenting corresponding lines
 # # - note: do not remove docker_default_volume_size definition

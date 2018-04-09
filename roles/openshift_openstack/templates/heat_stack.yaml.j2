@@ -54,6 +54,26 @@ outputs:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
 
+  public_api_ip:
+    description: IP address for the API/UI endpoint
+{% if openshift_openstack_use_lbaas_load_balancer %}
+    # TODO(shadower): Handle setups without floating IPs
+    value: { get_attr: [api_lb_floating_ip, floating_ip_address] }
+{% elif openshift_openstack_use_vm_load_balancer %}
+    value: { get_attr: [loadbalancer, resource.0, floating_ip] }
+{% else %}
+    value: { get_attr: [masters, resource.0, floating_ip] }
+{% endif %}
+
+  public_router_ip:
+    description: IP address of the apps/router endpoint
+{% if openshift_openstack_use_lbaas_load_balancer %}
+    value: { get_attr: [router_lb_floating_ip, floating_ip_address] }
+{% else %}
+    # NOTE(shadower): The VM-based loadbalancer only supports master nodes
+    value: { get_attr: [infra_nodes, resource.0, floating_ip] }
+{% endif %}
+
 {% if openshift_use_kuryr|default(false)|bool %}
   vm_subnet:
     description: ID of the subnet the Pods will be on
@@ -89,8 +109,8 @@ conditions:
 
 resources:
 
-{% if not openshift_openstack_provider_network_name %}
-{% if openshift_use_kuryr|default(false)|bool %}
+# NOTE: With Kuryr, the load balancer is necessary.
+{% if openshift_openstack_use_lbaas_load_balancer or (openshift_use_kuryr|default(false)|bool and not openshift_openstack_provider_network_name) %}
   api_lb:
     type: OS::Neutron::LBaaS::LoadBalancer
     properties:
@@ -99,8 +119,12 @@ resources:
           template: openshift-ansible-cluster_id-api-lb
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
+{% if openshift_use_kuryr|default(false)|bool %}
       vip_address: {{ openshift_openstack_kuryr_service_subnet_cidr | ipaddr('1') | ipaddr('address') }}
       vip_subnet: { get_resource: service_subnet }
+{% else %}
+      vip_subnet: { get_resource: subnet }
+{% endif %}
 
   api_lb_listener:
     type: OS::Neutron::LBaaS::Listener
@@ -112,7 +136,7 @@ resources:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       loadbalancer: { get_resource: api_lb }
       protocol: HTTPS
-      protocol_port: 443
+      protocol_port: {{ openshift_master_api_port|default(8443) }}
 
   api_lb_pool:
     type: OS::Neutron::LBaaS::Pool
@@ -123,9 +147,13 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       protocol: HTTPS
+      # TODO(shadower): Make this configurable?
       lb_algorithm: ROUND_ROBIN
       listener: { get_resource: api_lb_listener }
+{% endif %}
 
+{% if not openshift_openstack_provider_network_name %}
+{% if openshift_use_kuryr|default(false)|bool %}
   pod_net:
     type: OS::Neutron::Net
     properties:
@@ -505,7 +533,7 @@ resources:
       name: infra_server_group
       policies: {{ openshift_openstack_infra_server_group_policies }}
 {% endif %}
-{% if openshift_openstack_num_masters|int > 1 %}
+{% if openshift_openstack_use_vm_load_balancer %}
   loadbalancer:
     type: OS::Heat::ResourceGroup
     properties:
@@ -594,6 +622,9 @@ resources:
           image:       {{ openshift_openstack_master_image }}
           flavor:      {{ openshift_openstack_master_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
+{% if openshift_openstack_use_lbaas_load_balancer or openshift_use_kuryr|default(false)|bool %}
+          api_lb_pool: { get_resource: api_lb_pool }
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
@@ -755,6 +786,10 @@ resources:
           image:       {{ openshift_openstack_infra_image }}
           flavor:      {{ openshift_openstack_infra_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
+{% if openshift_openstack_use_lbaas_load_balancer %}
+          router_lb_pool_http: { get_resource: router_lb_pool_http }
+          router_lb_pool_https: { get_resource: router_lb_pool_https }
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           net:         {{ openshift_openstack_provider_network_name }}
           net_name:         {{ openshift_openstack_provider_network_name }}
@@ -872,4 +907,67 @@ resources:
 {% if not openshift_openstack_provider_network_name %}
     depends_on:
       - interface
+{% endif %}
+
+
+{% if openshift_openstack_use_lbaas_load_balancer %}
+  api_lb_floating_ip:
+    condition: { not: no_floating }
+    depends_on:
+    - api_lb
+    - api_lb_listener
+    - api_lb_pool
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {{ openshift_openstack_external_network_name }}
+      port_id: { get_attr: [api_lb, vip_port_id] }
+
+
+  router_lb:
+    type: OS::Neutron::LBaaS::LoadBalancer
+    properties:
+      vip_subnet: { get_resource: subnet }
+
+  router_lb_floating_ip:
+    condition: { not: no_floating }
+    depends_on:
+    - router_lb
+    - router_lb_listener_http
+    - router_lb_pool_http
+    - router_lb_listener_https
+    - router_lb_pool_https
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {{ openshift_openstack_external_network_name }}
+      port_id: { get_attr: [router_lb, vip_port_id] }
+
+  router_lb_listener_http:
+    type: OS::Neutron::LBaaS::Listener
+    properties:
+      protocol: HTTP
+      protocol_port: 80
+      loadbalancer: { get_resource: router_lb }
+
+  router_lb_pool_http:
+    type: OS::Neutron::LBaaS::Pool
+    properties:
+      # TODO(shadower): Make this configurable?
+      lb_algorithm: ROUND_ROBIN
+      protocol: HTTP
+      listener: { get_resource: router_lb_listener_http }
+
+  router_lb_listener_https:
+    type: OS::Neutron::LBaaS::Listener
+    properties:
+      protocol: HTTPS
+      protocol_port: 443
+      loadbalancer: { get_resource: router_lb }
+
+  router_lb_pool_https:
+    type: OS::Neutron::LBaaS::Pool
+    properties:
+      # TODO(shadower): Make this configurable?
+      lb_algorithm: ROUND_ROBIN
+      protocol: HTTPS
+      listener: { get_resource: router_lb_listener_https }
 {% endif %}

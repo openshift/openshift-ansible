@@ -28,3 +28,6 @@
 
 - name: run the cluster deploy
   import_playbook: ../../deploy_cluster.yml
+
+- name: Show information about the deployed cluster
+  import_playbook: cluster-info.yml
