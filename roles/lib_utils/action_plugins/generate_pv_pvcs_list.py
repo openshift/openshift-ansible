@@ -54,7 +54,10 @@ class ActionModule(ActionBase):
         """Build pv dictionary for openstack storage type"""
         volume, size, labels, access_modes = self.build_common(varname=varname)
         filesystem = self.get_templated(str(varname) + '_openstack_filesystem')
+        volume_name = self.get_templated(str(varname) + '_volume_name')
         volume_id = self.get_templated(str(varname) + '_openstack_volumeID')
+        if volume_name and not volume_id:
+            volume_id = _try_cinder_volume_id_from_name(volume_name)
         return dict(
             name="{0}-volume".format(volume),
             capacity=size,
@@ -161,3 +164,25 @@ class ActionModule(ActionBase):
         result["persistent_volumes"] = persistent_volumes
         result["persistent_volume_claims"] = persistent_volume_claims
         return result
+
+
+def _try_cinder_volume_id_from_name(volume_name):
+    """Try to look up a Cinder volume UUID from its name.
+
+    Returns None on any failure (missing shade, auth, no such volume).
+    """
+    try:
+        import shade
+    except ImportError:
+        return None
+    try:
+        cloud = shade.openstack_cloud()
+    except shade.keystoneauth1.exceptions.ClientException:
+        return None
+    except shade.OpenStackCloudException:
+        return None
+    volume = cloud.get_volume(volume_name)
+    if volume:
+        return volume.id
+    else:
+        return None

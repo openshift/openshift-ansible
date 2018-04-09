@@ -133,17 +133,6 @@ openshift_openstack_docker_volume_size: "15"
 #openshift_openstack_master_server_group_policies: [anti-affinity]
 #openshift_openstack_infra_server_group_policies: [anti-affinity]
 
-## Create a Cinder volume and use it for the OpenShift registry.
-## NOTE: the openstack credentials and hosted registry options must be set in OSEv3.yml!
-#openshift_openstack_cinder_hosted_registry_name: cinder-registry
-#openshift_openstack_cinder_hosted_registry_size_gb: 10
-
-## Set up a filesystem on the cinder volume specified in `OSEv3.yaml`.
-## You need to specify the file system and volume ID in OSEv3 via
-## `openshift_hosted_registry_storage_openstack_filesystem` and
-## `openshift_hosted_registry_storage_openstack_volumeID`.
-## WARNING: This will delete any data on the volume!
-#openshift_openstack_prepare_and_format_registry_volume: False
 
 # The Classless Inter-Domain Routing (CIDR) for the OpenStack VM subnet.
 openshift_openstack_subnet_cidr: "192.168.99.0/24"
