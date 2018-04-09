@@ -1,4 +1,9 @@
 ---
+- name: validate openshift_node_problem_detector_image_pull_policy variable
+  fail:
+    msg: "openshift_node_problem_detector_image_pull_policy must be one of Always, Never, IfNotPresent. Got {{ openshift_node_problem_detector_image_pull_policy }}"
+  when: openshift_node_problem_detector_image_pull_policy not in ['Always', 'Never', 'IfNotPresent']
+
 - name: create Node Problem Detector service account
   oc_serviceaccount:
     name: "{{ openshift_node_problem_detector_service_account }}"

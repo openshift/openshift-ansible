@@ -21,6 +21,7 @@ openshift_node_problem_detector_image_version: "{{ openshift_node_problem_detect
 # node_problem_detector daemonset setup
 openshift_node_problem_detector_daemonset_name: node-problem-detector
 openshift_node_problem_detector_daemonset_template_file: templates/node-problem-detector-daemonset.yaml.j2
+openshift_node_problem_detector_image_pull_policy: IfNotPresent
 
 # node_problem_detector service account setup
 openshift_node_problem_detector_service_account: node-problem-detector
