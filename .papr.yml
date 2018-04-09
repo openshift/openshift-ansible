@@ -40,3 +40,20 @@ tests:
 
 artifacts:
   - journals/
+
+---
+inherit: true
+context: 'fedora/27/atomic/update'
+
+cluster:
+  hosts:
+    - name: ocp-master
+      distro: fedora/27/atomic
+      specs:
+        ram: 4096
+  container:
+    image: registry.fedoraproject.org/fedora:27
+
+env:
+  PAPR_INVENTORY: .papr.all-in-one.inventory
+  PAPR_RUN_UPDATE: "yes"

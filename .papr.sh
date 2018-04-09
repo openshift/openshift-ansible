@@ -20,20 +20,30 @@ export target_branch
 
 pip install -r requirements.txt
 
+PAPR_INVENTORY=${PAPR_INVENTORY:-.papr.inventory}
+PAPR_RUN_UPDATE=${PAPR_RUN_UPDATE:-0}
+
 # ping the nodes to check they're responding and register their ostree versions
-ansible -vvv -i .papr.inventory nodes -a 'rpm-ostree status'
+ansible -vvv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
 
 upload_journals() {
   mkdir journals
-  for node in master node1 node2; do
-    ssh ocp-$node 'journalctl --no-pager || true' > journals/ocp-$node.log
-  done
+  ansible -vvv -i $PAPR_INVENTORY all \
+    -m shell -a 'journalctl --no-pager > /tmp/journal'
+  ansible -vvv -i $PAPR_INVENTORY all \
+    -m fetch -a "src=/tmp/journal dest=journals/{{ inventory_hostname }}.log flat=yes"
 }
 
 trap upload_journals ERR
 
 # run the actual installer
-ansible-playbook -v -i .papr.inventory playbooks/deploy_cluster.yml
+ansible-playbook -v -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
+
+# Run upgrade playbook (to a minor version)
+if [[ "${PAPR_RUN_UPDATE:-0}" != "0" ]]; then
+  update_version="$(echo $target_branch | sed 's/\./_/')"
+  ansible-playbook -v -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
+fi
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132
