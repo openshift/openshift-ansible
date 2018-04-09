@@ -53,7 +53,7 @@
     - ca.crt
     - ca.key
     - ca.serial.txt
-    - ca.crl.srl
+    - ca.crt.srl
     - ca.db
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
