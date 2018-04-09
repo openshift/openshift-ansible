@@ -13,6 +13,7 @@ from collections import Mapping
 import json
 import os
 
+from keystoneauth1.exceptions.catalog import EndpointNotFound
 import shade
 
 
@@ -141,9 +142,14 @@ def build_inventory():
 
     inventory['_meta'] = {'hostvars': {}}
 
+    # Some clouds don't have Cinder. That's okay:
+    try:
+        volumes = cloud.list_volumes()
+    except EndpointNotFound:
+        volumes = []
+
     # cinder volumes used for docker storage
-    docker_storage_mountpoints = get_docker_storage_mountpoints(
-        cloud.list_volumes())
+    docker_storage_mountpoints = get_docker_storage_mountpoints(volumes)
     for server in cluster_hosts:
         inventory['_meta']['hostvars'][server.name] = _get_hostvars(
             server,
