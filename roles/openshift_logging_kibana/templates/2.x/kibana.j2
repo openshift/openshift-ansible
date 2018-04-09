@@ -26,6 +26,32 @@ spec:
         provider: openshift
         component: "{{ component }}"
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: logging-infra
+                operator: In
+                values:
+                - kibana
+            topologyKey: kubernetes.io/hostname
+{% if openshift_infra_anti_affinity_labels is defined and openshift_infra_anti_affinity_labels is iterable and openshift_infra_anti_affinity_labels | length > 0 %}
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+{% for aa_key, aa_values in openshift_infra_anti_affinity_labels.items() %}
+                  - key: "{{ aa_key }}"
+                    operator: In
+                    values:
+{% for aa_value in aa_values %}
+                    - "{{ aa_value }}"
+{% endfor %}
+{% endfor %}
+                topologyKey: kubernetes.io/hostname
+{% endif %}
       serviceAccountName: aggregated-logging-kibana
 {% if kibana_node_selector is iterable and kibana_node_selector | length > 0 %}
       nodeSelector:
