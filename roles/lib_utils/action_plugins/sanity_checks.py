@@ -42,6 +42,15 @@ you must set openshift_release or openshift_image_tag in your inventory to
 specify which version of the OpenShift component images to use.
 (Suggestion: add openshift_release="x.y" to inventory.)"""
 
+STORAGE_KIND_TUPLE = (
+    'openshift_hosted_registry_storage_kind',
+    'openshift_loggingops_storage_kind',
+    'openshift_logging_storage_kind',
+    'openshift_metrics_storage_kind',
+    'openshift_prometheus_alertbuffer_storage_kind',
+    'openshift_prometheus_alertmanager_storage_kind',
+    'openshift_prometheus_storage_kind')
+
 
 def to_bool(var_to_check):
     """Determine a boolean value given the multiple
@@ -159,6 +168,26 @@ class ActionModule(ActionBase):
                 raise errors.AnsibleModuleError(error_msg)
         return None
 
+    def check_unsupported_nfs_configs(self, hostvars, host):
+        """Fails if nfs storage is in use for any components. This check is
+           ignored if openshift_enable_unsupported_configurations=True"""
+
+        enable_unsupported = self.template_var(
+            hostvars, host, 'openshift_enable_unsupported_configurations')
+
+        if to_bool(enable_unsupported):
+            return None
+
+        for storage in STORAGE_KIND_TUPLE:
+            kind = self.template_var(hostvars, host, storage)
+            if kind == 'nfs':
+                raise errors.AnsibleModuleError(
+                    'nfs is an unsupported type for {}. '
+                    'openshift_enable_unsupported_configurations=True must'
+                    'be specified to continue with this configuration.'
+                    ''.format(storage))
+        return None
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -169,6 +198,7 @@ class ActionModule(ActionBase):
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
         self.check_supported_ocp_version(hostvars, host, odt)
+        self.check_unsupported_nfs_configs(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
