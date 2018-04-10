@@ -10,13 +10,24 @@
   set_fact:
     network_manager_active: "{{ True if 'ActiveState=active' in nm_show.stdout else False }}"
 
-- name: Install dnsmasq
-  package:
-    name: dnsmasq
-    state: installed
-  when: not openshift_is_atomic | bool
-  register: result
-  until: result is succeeded
+- when: not openshift_is_atomic | bool
+  block:
+  - name: Ensure dbus is updated before installing dnsmasq
+    package:
+      name: dbus
+      state: latest
+    register: dbus_update
+  - name: Restart dbus if it was updated
+    systemd:
+      name: dbus
+      state: restarted
+    when: dbus_update | changed
+  - name: Install dnsmasq
+    package:
+      name: dnsmasq
+      state: installed
+    register: result
+    until: result is succeeded
 
 - name: ensure origin/node directory exists
   file:
