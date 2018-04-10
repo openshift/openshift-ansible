@@ -100,6 +100,13 @@ r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }
 
 l_is_node_system_container: "{{ openshift_use_node_system_container | default(openshift_use_system_containers | default(openshift_is_containerized | default(false))) | bool }}"
 
+openshift_kubelet_mounts_l:
+- type: bind
+  source: "/var/lib/kubelet"
+  destination: "/var/lib/kubelet"
+  options:
+  - bind
+
 openshift_node_syscon_auth_mounts_l:
 - type: bind
   source: "{{ oreg_auth_credentials_path }}"
