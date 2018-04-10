@@ -42,8 +42,3 @@
   package:
     name: cloud-init
     state: absent
-
-- name: install the openshift-ansible-roles
-  package:
-    name: openshift-ansible-roles
-    state: latest

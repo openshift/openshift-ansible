@@ -29,6 +29,26 @@
 #      name: "{{ openshift_azure_vm_name }}"
 #      vm_size: "{{ openshift_azure_vm_size }}"
 
+- name: debug image tags
+  debug:
+    var: openshift_azure_image_tags
+    verbosity: 1
+
+- name: debug os tags
+  debug:
+    var: openshift_azure_os_tags
+    verbosity: 1
+
+- name: debug openshift tags
+  debug:
+    var: openshift_azure_openshift_tags
+    verbosity: 1
+
+- name: debug all tags
+  debug:
+    msg: "{{ openshift_azure_image_tags | combine((openshift_azure_os_tags | default({}))) | combine((openshift_azure_openshift_tags|default({}))) }}"
+    verbosity: 1
+
 - name: Create an image from VM
   azure_rm_image:
     resource_group: "{{ openshift_azure_resource_group_name }}"
