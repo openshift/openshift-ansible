@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.16.0%{?dist}
+Release:        0.18.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,45 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.18.0
+- Add missing 'is' in when condiditon for slurp (mgugino@redhat.com)
+- Prefix the node-problem-detector with the system: (jchaloup@redhat.com)
+- Fix wrong reference to user policy. (mrsiano@gmail.com)
+- Change include_ to import_ where possible (mgugino@redhat.com)
+- Remove extra ansible.cfg (sdodson@redhat.com)
+- Remove utils unit tests (sdodson@redhat.com)
+- Remove atomic-openshift-utils (sdodson@redhat.com)
+- Switch Node Problem Detector to only pull IfNotPresent, make it configurable
+  (joesmith@redhat.com)
+- Fix generate_session_secrets (mgugino@redhat.com)
+- Update default var to set imagePullPolicy: Always (dymurray@redhat.com)
+- Update ASB configmap to set namespace (dymurray@redhat.com)
+- Add option to create Cinder registry volume (tomas@sedovic.cz)
+- Add the OpenStack load balancer deployment options (tomas@sedovic.cz)
+- GlusterFS: enable modprobe in pods that manage bricks (ndevos@redhat.com)
+- Calico fixes (dan@projectcalico.org)
+- Cleanup node role tasks (mgugino@redhat.com)
+- Change set imagepullpolicy to allow for offline install (esauer@redhat.com)
+- Update console liveness probe (spadgett@redhat.com)
+- Remove unused task-file import (mgugino@redhat.com)
+- Remove dead code from openshift_facts (mgugino@redhat.com)
+- PAPR: install ASB after CRD backend is used (vrutkovs@redhat.com)
+- PARP: Store ansible log file separately (vrutkovs@redhat.com)
+- PAPR: remove bootstrap vars to be as close to default as possible
+  (vrutkovs@redhat.com)
+- Remove some pointless usages of openshift_facts (mgugino@redhat.com)
+- catalog: create service and ssl certs for controller manager
+  (jaboyd@redhat.com)
+- Revert "Add metrics-server to openshift-metrics playbook"
+  (amcdermo@redhat.com)
+- Remove wire_aggregator and fix runtime config (ccoleman@redhat.com)
+- ScheduledJob -> CronJob (vrutkovs@redhat.com)
+- Fix path to expiry check playbook (vrutkovs@redhat.com)
+- Use 'oc create secret' syntax instead of deprecated 'oc secrets new-sslauth'
+  (vrutkovs@redhat.com)
+- reorg provision playbooks (tzumainn@redhat.com)
+- disable adc reconciler sync for aws (hekumar@redhat.com)
+
 * Fri Apr 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.16.0
 - Use long form of "scc" resource type in logging facts (hansmi@vshn.ch)
 - Add CL role and playbook for Node Problem Detector (joesmith@redhat.com)
