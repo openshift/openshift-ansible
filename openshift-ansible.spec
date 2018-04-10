@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.19
+Version:        3.9.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.9.20-1
+- PAPR: verify minor update on all-in-one cluster (vrutkovs@redhat.com)
+- bug 1535300. Default logging namespace to openshift-logging
+  (jcantril@redhat.com)
+- Fix secret and defaultNodeSelector for Calico (dan@projectcalico.org)
+- Use long form of "scc" resource type in logging facts (hansmi@vshn.ch)
+- Fixing crlnumber file missing (bedin@redhat.com)
+- Allow no sdn's to be specified in sanity checks (mgugino@redhat.com)
+- Add iproute to origin-ansible image (rteague@redhat.com)
+- Updating default image tags to be only vX.Y for origin installs
+  (ewolinet@redhat.com)
+- Cert check playbooks: remove become (vrutkovs@redhat.com)
+- RPM upgrade: support jinja 2.7 (vrutkovs@redhat.com)
+- [1561247] Add kubeconfig to openshift_bootstrap_autoapprover
+  (rteague@redhat.com)
+- Ensure etcd.conf variables are updated during upgrade (rteague@redhat.com)
+- Update deprecated etcd vars in openshfit_cert_expiry (rteague@redhat.com)
+- Convert calico to self-hosted install (djosborne10@gmail.com)
+- Remove etcd_migrate and embedded2external (mgugino@redhat.com)
+
 * Wed Apr 04 2018 Justin Pierce <jupierce@redhat.com> 3.9.19-1
 - 
 
