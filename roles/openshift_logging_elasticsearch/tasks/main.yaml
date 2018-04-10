@@ -231,13 +231,24 @@
       tasks_from: patch_configmap_files.yaml
     vars:
       configmap_name: "{{ elasticsearch_name }}"
-      configmap_namespace: "logging"
+      configmap_namespace: "{{ openshift_logging_namespace }}"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
         new_file: "{{ tempdir }}/elasticsearch.yml"
         protected_lines: ["number_of_shards", "number_of_replicas"]
       - current_file: "logging.yml"
         new_file: "{{ tempdir }}/elasticsearch-logging.yml"
+
+  - slurp:
+      src: "{{ tempdir }}/elasticsearch.yml"
+    register: _patched_elasticsearch_config
+
+  - copy:
+      content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
+      dest: "{{ tempdir }}/elasticsearch.yml"
+    vars:
+      config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
+      override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
 
   - name: Set ES configmap
     oc_configmap:
@@ -264,12 +275,23 @@
       tasks_from: patch_configmap_files.yaml
     vars:
       configmap_name: "{{ elasticsearch_name }}"
-      configmap_namespace: "logging"
+      configmap_namespace: "{{ openshift_logging_namespace }}"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
         new_file: "{{ tempdir }}/elasticsearch.yml"
       - current_file: "log4j2.properties"
         new_file: "{{ tempdir }}/log4j2.properties"
+
+  - slurp:
+      src: "{{ tempdir }}/elasticsearch.yml"
+    register: _patched_elasticsearch_config
+
+  - copy:
+      content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
+      dest: "{{ tempdir }}/elasticsearch.yml"
+    vars:
+      config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
+      override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
 
   - name: Set ES configmap
     oc_configmap:

@@ -22,7 +22,8 @@
   register: result
   until: result is succeeded
 
-# Make sure docker is disabled. Errors are ignored.
+# Make sure docker.service from docker rpm is disabled. Errors are ignored.
+# docker runs as a system container as 'container-engine' in a later task.
 - name: Disable Docker
   systemd:
     name: docker
@@ -87,8 +88,8 @@
     dest: "{{ docker_conf_dir }}/container-daemon.json"
     src: daemon.json
 
-# Enable and start the container-engine service
-- name: Start the Container Engine service
+# Enable and start the container-engine service (docker as system container)
+- name: Start the container-engine service
   systemd:
     name: "{{ openshift_docker_service_name }}"
     enabled: yes

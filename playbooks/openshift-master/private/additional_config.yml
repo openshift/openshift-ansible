@@ -15,7 +15,7 @@
   hosts: oo_first_master
   vars:
     cockpit_plugins: "{{ osm_cockpit_plugins | default(['cockpit-kubernetes']) }}"
-    etcd_urls: "{{ openshift.master.etcd_urls }}"
+    etcd_urls: "{{ openshift_master_etcd_urls }}"
     omc_cluster_hosts: "{{ groups.oo_masters | join(' ')}}"
   roles:
   - role: openshift_project_request_template

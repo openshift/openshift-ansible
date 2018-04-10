@@ -36,6 +36,7 @@ import atexit
 import copy
 import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -359,7 +360,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}.{}'.format(self.filename, time.strftime("%Y%m%dT%H%M%S")))
 
         # Try to set format attributes if supported
         try:
@@ -982,7 +983,7 @@ class OpenShiftCLI(object):
             cmd.append(template_name)
         if params:
             param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
-            cmd.append('-v')
+            cmd.append('-p')
             cmd.extend(param_str)
 
         results = self.openshift_cmd(cmd, output=True, input_data=template_data)

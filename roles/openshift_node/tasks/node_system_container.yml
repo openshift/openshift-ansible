@@ -1,4 +1,9 @@
 ---
+# system containers create their own service unit files based on templates
+# that are part of the container image.
+# oc_atomic_container will create a systemd service unit file in
+# /etc/systemd/system/origin-node.service (origin) or
+# /etc/systemd/system/atomic-openshift-node.service (enterprise)
 
 - name: Pre-pull node system container image
   command: >

@@ -64,12 +64,23 @@
 - name: Update master etcd client urls
   hosts: oo_masters_to_config
   serial: 1
-  vars:
-    openshift_master_etcd_hosts: "{{ hostvars
-                                     | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
-                                     | lib_utils_oo_collect('openshift.common.hostname')
-                                     | default(none, true) }}"
-    openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
+  pre_tasks:
+  - set_fact:
+      openshift_master_etcd_hosts: "{{ hostvars
+                                       | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | union(groups['oo_new_etcd_to_config'] | default([]) ))
+                                       | lib_utils_oo_collect('openshift.common.hostname')
+                                       | default(none, true) }}"
+      openshift_master_etcd_port: "{{ etcd_client_port | default('2379') }}"
+      openshift_no_proxy_etcd_host_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_etcd_to_config'] | default([]))
+                                                  | lib_utils_oo_collect('openshift.common.ip') | default([]) | join(',')
+                                                  }}"
+  # This fact requires the facts set above, so needs to happen in it's own task.
+  - set_fact:
+      # lib_utils_oo_etcd_host_urls is a custom filter plugin in roles/lib_utils/filter_plugins/oo_filters.py
+      openshift_master_etcd_urls: "{{ openshift_master_etcd_hosts | lib_utils_oo_etcd_host_urls(l_use_ssl, openshift_master_etcd_port) }}"
+    vars:
+      l_use_ssl: "{{ openshift_master_etcd_use_ssl | default(True) | bool}}"
+
   roles:
   - role: openshift_master_facts
   post_tasks:

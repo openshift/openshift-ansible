@@ -1,0 +1,50 @@
+---
+- name: Calico Node | Set cert flag
+  set_fact:
+    calico_certs_provided: "{{ calico_etcd_ca_cert_file is defined or calico_etcd_cert_file is defined or calico_etcd_key_file is defined or calico_etcd_endpoints is defined | bool }}"
+
+- name: Calico Node | Error if invalid cert arguments
+  fail:
+    msg: "Must provide all or none for the following etcd params: calico_etcd_ca_cert_file, calico_etcd_cert_file, calico_etcd_key_file, calico_etcd_endpoints"
+  when:
+  - calico_certs_provided
+  - not (calico_etcd_ca_cert_file is defined and calico_etcd_cert_file is defined and calico_etcd_key_file is defined and calico_etcd_endpoints is defined)
+
+- name: Calico Node | Set etcd cert location facts
+  when: not calico_certs_provided
+  set_fact:
+    calico_etcd_ca_cert_file: "/etc/origin/master/master.etcd-ca.crt"
+    calico_etcd_cert_file: "/etc/origin/master/master.etcd-client.crt"
+    calico_etcd_key_file: "/etc/origin/master/master.etcd-client.key"
+    calico_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift_master_etcd_urls | join(',') }}"
+
+- name: Calico Node | Error if no certs set.
+  fail:
+    msg: "Invalid etcd configuration for calico."
+  when: item is not defined or item == ''
+  with_items:
+  - calico_etcd_ca_cert_file
+  - calico_etcd_cert_file
+  - calico_etcd_key_file
+  - calico_etcd_endpoints
+
+- name: Calico Node | Assure the calico certs are present
+  stat:
+    path: "{{ item }}"
+  with_items:
+  - "{{ calico_etcd_ca_cert_file }}"
+  - "{{ calico_etcd_cert_file }}"
+  - "{{ calico_etcd_key_file }}"
+
+- name: Create secret
+  oc_secret:
+    name: calico-etcd-secrets
+    state: present
+    namespace: kube-system
+    files:
+    - name: etcd-key
+      path: "{{ calico_etcd_key_file }}"
+    - name: etcd-cert
+      path: "{{ calico_etcd_cert_file }}"
+    - name: etcd-ca
+      path: "{{ calico_etcd_ca_cert_file }}"
