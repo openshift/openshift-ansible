@@ -69,6 +69,9 @@ objects:
           - name: glusterfs-ssl
             mountPath: "/etc/ssl"
             readOnly: true
+          - name: kernel-modules
+            mountPath: "/usr/lib/modules"
+            readOnly: true
           - name: glusterfs-target
             mountPath: "/etc/target"
           securityContext:
@@ -127,6 +130,9 @@ objects:
         - name: glusterfs-ssl
           hostPath:
             path: "/etc/ssl"
+        - name: kernel-modules
+          hostPath:
+            path: "/usr/lib/modules"
         - name: glusterfs-target
           hostPath:
             path: "/etc/target"
