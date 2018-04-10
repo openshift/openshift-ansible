@@ -3,6 +3,10 @@
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}:!oo_exclude_nodes_to_config"
   tasks:
   # Creating these node groups will prevent a ton of skipped tasks.
+  # Create group for custom sdn nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_custom_sdn_role is defined) | ternary('custom_sdn','nothing') }}
+    changed_when: False
   # Create group for flannel nodes
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_flannel | default(False)) | ternary('flannel','nothing') }}
@@ -27,6 +31,13 @@
 - import_playbook: etcd_client_config.yml
   vars:
     openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv:oo_nodes_use_kuryr"
+
+- name: Additional node config | custom_sdn
+  hosts: oo_nodes_use_custom_sdn
+  tasks:
+  - include_role:
+      name: "{{ openshift_custom_sdn_role }}"
+    when: openshift_custom_sdn_role is defined
 
 - name: Additional node config
   hosts: oo_nodes_use_flannel
