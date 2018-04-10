@@ -19,7 +19,6 @@
 - name: Configure the upgrade target for the common upgrade tasks 3.10
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tasks:
-  - meta: clear_facts
   - set_fact:
       openshift_upgrade_target: '3.10'
       openshift_upgrade_min: '3.9'
