@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: openshift-web-console-smoke-test-pod
+  labels:
+    app: openshift-web-console-smoke-test
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/scheme: http
+spec:
+  restartPolicy: Never
+  containers:
+  - name: openshift-web-console-smoke-test
+    image: jhadvig/origin-web-console-smoke-test:latest
+    ports:
+    - containerPort: 3000
+      protocol: TCP
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: CONSOLE_URL
+      value: {{ openshift.master.public_console_url }}
+    - name: TEST_INTERVAL
+      value: '5'
