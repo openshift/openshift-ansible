@@ -33,6 +33,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: KURYR_CNI_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         securityContext:
           privileged: true
         volumeMounts:
@@ -41,10 +45,8 @@ spec:
         - name: net-conf
           mountPath: /etc/cni/net.d
         - name: config-volume
-          mountPath: /tmp/kuryr/kuryr.conf
+          mountPath: /etc/kuryr/kuryr.conf
           subPath: kuryr-cni.conf
-        - name: etc
-          mountPath: /etc
         - name: proc
           mountPath: /host_proc
         - name: openvswitch
@@ -71,9 +73,6 @@ spec:
         - name: config-volume
           configMap:
             name: kuryr-config
-        - name: etc
-          hostPath:
-            path: /etc
         - name: proc
           hostPath:
             path: /proc
