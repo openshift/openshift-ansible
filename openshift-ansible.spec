@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.18.0%{?dist}
+Release:        0.19.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,10 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.19.0
+- Update dbus before installing dnsmasq (sdodson@redhat.com)
+- Removing clear_facts from 3.10 upgrade (rteague@redhat.com)
+
 * Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.18.0
 - Add missing 'is' in when condiditon for slurp (mgugino@redhat.com)
 - Prefix the node-problem-detector with the system: (jchaloup@redhat.com)
