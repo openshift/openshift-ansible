@@ -12,6 +12,13 @@
     path: "/etc/origin/openvswitch"
     mode: '0750'
 
+# TODO: remove when system container is fixed to not include it
+- name: Ensure old system path is set
+  file:
+    state: directory
+    path: "/var/lib/kubelet"
+    mode: '0750'
+
 - name: Pre-pull node system container image
   command: >
     atomic pull --storage=ostree {{ system_osn_image }}
@@ -40,7 +47,7 @@
     l_node_syscon_auth_mounts_l: "{{ l_bind_docker_reg_auth | ternary(openshift_node_syscon_auth_mounts_l,[]) }}"
 
     # Join any user-provided mounts and auth_mounts into a combined list.
-    l_node_syscon_add_mounts_l: "{{ openshift_node_syscon_add_mounts_l | union(l_node_syscon_auth_mounts_l) }}"
+    l_node_syscon_add_mounts_l: "{{ openshift_node_syscon_add_mounts_l | union(openshift_kubelet_mounts_l) | union(l_node_syscon_auth_mounts_l) }}"
 
     # We must prepend a ',' here to ensure the value is inserted properly into an
     # existing json list in the container's config.json
