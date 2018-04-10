@@ -12,4 +12,18 @@
   tags:
   - always
 
+# This needs to be run to ensure that etcd_urls are created for service catalog.
+- name: Run master facts
+  hosts: oo_masters_to_config
+  pre_tasks:
+  - set_fact:
+      openshift_master_etcd_port: "{{ (etcd_client_port | default('2379')) if (groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config) else none }}"
+      openshift_master_etcd_hosts: "{{ hostvars
+                                       | oo_select_keys(groups['oo_etcd_to_config']
+                                                        | default([]))
+                                       | oo_collect('openshift.common.hostname')
+                                       | default(none, true) }}"
+  roles:
+  - openshift_master_facts
+
 - include: ../../common/openshift-cluster/service_catalog.yml
