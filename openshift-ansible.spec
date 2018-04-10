@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.42
+Version:        3.7.43
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,56 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.7.43-1
+- Fixing crlnumber file missing (bedin@redhat.com)
+- openshift_facts: convert node labels to string before joining
+  (vrutkovs@redhat.com)
+- Ensure etcd.conf variables are updated during upgrade (rteague@redhat.com)
+- Update deprecated etcd vars in openshfit_cert_expiry (rteague@redhat.com)
+- is_atomic check (m.judeikis@gmail.com)
+- openshift_client_binary --> openshift.common.client_binary
+  (m.judeikis@gmail.com)
+- RPM upgrade: avoid using replace (vrutkovs@redhat.com)
+- Use long form of "scc" resource type in logging facts (hansmi@vshn.ch)
+- RPM upgrade: support jinja 2.7 (vrutkovs@redhat.com)
+- Removing hardcoding of configmap_namespace for patching (ewolinet@redhat.com)
+- Add max-time option to curl to avoid long running ansible
+  (nakayamakenjiro@gmail.com)
+- Bumping up the default wait time for ES node to be yellow or green, made it
+  configurable for larger clusters (ewolinet@redhat.com)
+- GlusterFS - Invoke oc binary with the admin.kubeconfig token rather than
+  default token from $HOME/.kube/config (“dani_comnea@yahoo.com”)
+- GlusterFS: Add HEKETI_IGNORE_STALE_OPERATIONS to templates
+  (jarrpa@redhat.com)
+- GlusterFS: Don't copy non-existant topology file (jarrpa@redhat.com)
+- Merge pull request #7322 from mjudeikis/gluster-block-iscsi
+  (sdodson@redhat.com)
+- Merge pull request #7336 from SaravanaStorageNetwork/fix_s3_service_to_s3_pod
+  (openshift-merge-robot@users.noreply.github.com)
+- Merge pull request #7320 from SaravanaStorageNetwork/fix_s3_image
+  (sdodson@redhat.com)
+- Add s3 and block uninstall sections as well. (sarumuga@redhat.com)
+- Update glusterfs-template:  - Add GB_LOGDIR  - failureThreshold as 50 secs
+  (sarumuga@redhat.com)
+- Merge pull request #7237 from jarrpa/glusterfs-kernel-mod-fix
+  (sdodson@redhat.com)
+- Fix for support multi-cluster heketi's topology (chinacoolhacker@gmail.com)
+- Merge pull request #7149 from jarrpa/uninstall-regression (openshift-merge-
+  robot@users.noreply.github.com)
+- Add target mount for gluster block (m.judeikis@gmail.com)
+- kernel module loading fix (m.judeikis@gmail.com)
+- Merge pull request #6918 from SaravanaStorageNetwork/uninstall_playbook
+  (openshift-merge-robot@users.noreply.github.com)
+- Backport changes for glusterfs, heketi, s3 and block templates
+  (sarumuga@redhat.com)
+- GlusterFS: Fix block StorageClass heketi route (jarrpa@redhat.com)
+- GlusterFS: Minor documentation update (jarrpa@redhat.com)
+- Merge pull request #6969 from mjudeikis/gluster-dynamic-invetory-bug
+  (openshift-merge-robot@users.noreply.github.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- Check for openshift attribute before using it during CNS install.
+  (jmencak@redhat.com)
+
 * Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.7.42-1
 - Pop etcd_port from local_facts file (mgugino@redhat.com)
 
