@@ -26,30 +26,11 @@
     path: "{{ generated_certs_dir }}/apiserver.key"
     state: absent
 
-- name: Delete old controllermanager.crt
-  file:
-    path: "{{ generated_certs_dir }}/controllermanager.crt"
-    state: absent
-
-- name: Delete old controllermanager.key
-  file:
-    path: "{{ generated_certs_dir }}/controllermanager.key"
-    state: absent
-
 - name: Generating API Server keys
   oc_adm_ca_server_cert:
     cert: "{{ generated_certs_dir }}/apiserver.crt"
     key: "{{ generated_certs_dir }}/apiserver.key"
     hostnames: "apiserver.kube-service-catalog.svc,apiserver.kube-service-catalog.svc.cluster.local,apiserver.kube-service-catalog"
-    signer_cert: "{{ generated_certs_dir }}/ca.crt"
-    signer_key: "{{ generated_certs_dir }}/ca.key"
-    signer_serial: "{{ generated_certs_dir }}/apiserver.serial.txt"
-
-- name: Generating Controller Manager keys
-  oc_adm_ca_server_cert:
-    cert: "{{ generated_certs_dir }}/controllermanager.crt"
-    key: "{{ generated_certs_dir }}/controllermanager.key"
-    hostnames: "controller-manager.kube-service-catalog.svc,controller-manager.kube-service-catalog.svc.cluster.local,controller-manager.kube-service-catalog"
     signer_cert: "{{ generated_certs_dir }}/ca.crt"
     signer_key: "{{ generated_certs_dir }}/ca.key"
     signer_serial: "{{ generated_certs_dir }}/apiserver.serial.txt"
@@ -64,17 +45,6 @@
       path: "{{ generated_certs_dir }}/apiserver.crt"
     - name: tls.key
       path: "{{ generated_certs_dir }}/apiserver.key"
-
-- name: Create controllermanager-ssl secret
-  oc_secret:
-    state: present
-    name: controllermanager-ssl
-    namespace: kube-service-catalog
-    files:
-    - name: tls.crt
-      path: "{{ generated_certs_dir }}/controllermanager.crt"
-    - name: tls.key
-      path: "{{ generated_certs_dir }}/controllermanager.key"
 
 - slurp:
     src: "{{ generated_certs_dir }}/ca.crt"
