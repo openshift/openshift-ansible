@@ -31,8 +31,21 @@
     state: present
   with_items:
   - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
+  when:
+  - not (openshift_is_atomic | bool)
+  - not (curr_docker_version is skipped)
+  - not (curr_docker_version.stdout != '')
+  register: result
+  until: result is succeeded
+
+- name: Install RHEL-specific Docker Packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
   - docker-rhel-push-plugin
   when:
+  - ansible_distribution == 'RedHat'
   - not (openshift_is_atomic | bool)
   - not (curr_docker_version is skipped)
   - not (curr_docker_version.stdout != '')
