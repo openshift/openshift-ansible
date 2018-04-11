@@ -19,7 +19,7 @@
         resource_group: '{{ openshift_azure_root_image_ns }}'
 
 - name: update OS and install packages
-  hosts: azure
+  hosts: nodes
   gather_facts: yes
   remote_user: "{{ openshift_azure_vm_admin_username }}"
   become: True
