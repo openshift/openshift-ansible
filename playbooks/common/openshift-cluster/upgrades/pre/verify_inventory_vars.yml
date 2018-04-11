@@ -35,3 +35,10 @@
         openshift_release is {{ openshift_release }} which is not a
         valid release for a {{ openshift_upgrade_target }} upgrade
     when: openshift_release is defined and not openshift_release | version_compare(openshift_upgrade_target ,'=')
+
+  - fail:
+      msg: >
+        No schedulable masters found, please make sure at least one master doesn't have 'openshift_schedulable=false'
+    when: True not in l_master_schedulable_setting
+    vars:
+      l_master_schedulable_setting: "{{ groups['oo_masters_to_config'] | map('extract', hostvars, 'openshift_schedulable') | map('bool') | list | default([]) }}"
