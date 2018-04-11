@@ -31,7 +31,7 @@
     - "{{ docker_registry_route.results[0].spec.host }}"
     - "{{ openshift_hosted_registry_name }}.default.svc"
     - "{{ openshift_hosted_registry_name }}.default.svc.{{ openshift_cluster_domain }}"
-    - "{{ openshift_hosted_registry_routehost | default(omit) }}"
+    - "{{ openshift_hosted_registry_routehost | default(False) }}"
     cert: "{{ docker_registry_cert_path }}"
     key: "{{ docker_registry_key_path }}"
     expire_days: "{{ openshift_hosted_registry_cert_expire_days }}"
