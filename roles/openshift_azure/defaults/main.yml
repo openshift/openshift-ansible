@@ -77,3 +77,9 @@ openshift_azure_vm_ssh_public_keys: []
 openshift_azure_vm_size: Standard_D4s_v3
 
 openshift_azure_vm_keep_storage: true
+
+openshift_azure_credentials_file: "{{ ansible_user_dir | default('/opt/app-root/src') }}/.azure/credentials"
+openshift_azure_subscription_id: "{{ lookup('ini', 'subscription_id section=default file=' + openshift_azure_credentials_file) }}"
+openshift_azure_client_id: "{{ lookup('ini', 'client_id section=default file=' + openshift_azure_credentials_file) }}"
+openshift_azure_service_secret: "{{ lookup('ini', 'secret section=default file=' + openshift_azure_credentials_file) }}"
+openshift_azure_tenant_id: "{{ lookup('ini', 'tenant section=default file=' + openshift_azure_credentials_file) }}"

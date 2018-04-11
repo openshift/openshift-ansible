@@ -2,7 +2,7 @@
 - import_playbook: prerequisites.yml
 
 - hosts: localhost
-  gather_facts: no
+  gather_facts: yes
   tasks:
   - name: call the launch from openshift_azure role
     import_role:
