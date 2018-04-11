@@ -528,6 +528,11 @@ an OpenShift Container Platform cluster
             cfg_path = os.path.dirname(fp.name)
             cert_meta['certFile'] = os.path.join(cfg_path, cfg['servingInfo']['certFile'])
             cert_meta['clientCA'] = os.path.join(cfg_path, cfg['servingInfo']['clientCA'])
+            cert_meta['serviceSigner'] = os.path.join(cfg_path, cfg['controllerConfig']['serviceServingCert']['signer']['certFile'])
+            cert_meta['etcdClientCA'] = os.path.join(cfg_path, cfg['etcdClientInfo']['ca'])
+            cert_meta['etcdClientCert'] = os.path.join(cfg_path, cfg['etcdClientInfo']['certFile'])
+            cert_meta['kubeletCert'] = os.path.join(cfg_path, cfg['kubeletClientInfo']['certFile'])
+            cert_meta['proxyClient'] = os.path.join(cfg_path, cfg['kubernetesMasterConfig']['proxyClientInfo']['certFile'])
 
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
