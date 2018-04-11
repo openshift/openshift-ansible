@@ -28,15 +28,18 @@
 # Note: The curr_docker_version.stdout check can be removed when https://github.com/ansible/ansible/issues/33187 gets fixed.
 - name: Install Docker Packages
   package:
-    name: "{{ item }}"
+    name: "{{ item.name }}"
     state: present
   with_items:
-  - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
-  - docker-rhel-push-plugin
+  - name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
+    install: True
+  - name: docker-rhel-push-plugin
+    install: "{{ openshift_deployment_type == 'openshift-enterprise' }}"
   when:
   - not (openshift_is_atomic | bool)
   - not (curr_docker_version is skipped)
   - not (curr_docker_version.stdout != '')
+  - item['install'] | bool
   register: result
   until: result is succeeded
 
