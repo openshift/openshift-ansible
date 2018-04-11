@@ -183,6 +183,7 @@
     when:
     - not is_containerized | bool
     - openshift_release is defined
+    - etcd_migration_completed is not defined and etcd_migration_in_progress is not defined
     assert:
       that:
       - openshift_version.startswith(openshift_release) | bool

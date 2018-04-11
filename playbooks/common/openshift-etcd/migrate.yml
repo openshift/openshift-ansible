@@ -5,13 +5,16 @@
 
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
-  tags:
-  - always
-  roles:
-  - role: etcd_migrate
-    r_etcd_migrate_action: check
-    r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
-    etcd_peer: "{{ ansible_default_ipv4.address }}"
+  tasks:
+  - set_fact:
+      etcd_migration_in_progress: true
+  - include_role:
+      name: etcd
+      tasks_from: migrate.pre_check
+    vars:
+      r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
+      etcd_peer: "{{ ansible_default_ipv4.address }}"
+    static: true
 
 - include: ../openshift-cluster/initialize_facts.yml
   tags:
@@ -253,5 +256,9 @@
     with_items: "{{ master_services[::-1] }}"
   - fail:
       msg: "Migration failed. The following hosts were not properly migrated: {{ etcd_migration_failed | join(',') }}"
+    when:
+    - etcd_migration_failed | length > 0
+  - set_fact:
+      etcd_migration_in_progress: false
     when:
     - etcd_migration_failed | length > 0
