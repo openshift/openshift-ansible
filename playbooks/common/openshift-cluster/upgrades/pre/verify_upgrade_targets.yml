@@ -45,7 +45,7 @@
     when:
     - (openshift_pkg_version | default('-0.0', True)).split('-')[1] is version_compare(openshift_upgrade_target, '<')
 
-- name: Fail when openshift version does not meet minium requirement for Origin upgrade
+- name: Fail when openshift version does not meet minimum requirement for Origin upgrade
   fail:
     msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
   when:
