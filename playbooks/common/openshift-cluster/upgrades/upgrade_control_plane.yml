@@ -55,6 +55,8 @@
 - import_playbook: ../../openshift-etcd/certificates.yml
   when:
   - true in hostvars | oo_select_keys(groups['oo_etcd_to_config']) | oo_collect('__etcd_cert_lacks_hostname') | default([false])
+  vars:
+    etcd_certificates_redeploy: True
 
 - name: Upgrade and backup etcd
   include: ./etcd/main.yml
