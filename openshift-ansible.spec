@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.112
+Version:        3.6.173.0.113
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 11 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.113-1
+- Ensure etcd.conf variables are updated during upgrade (rteague@redhat.com)
+- Update deprecated etcd vars in openshfit_cert_expiry (rteague@redhat.com)
+- RPM upgrade: avoid using replace (vrutkovs@redhat.com)
+- RPM upgrade: support jinja 2.7 (vrutkovs@redhat.com)
+- openshift_facts: convert node labels to string before joining
+  (vrutkovs@redhat.com)
+
 * Wed Mar 28 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.112-1
 - 
 
