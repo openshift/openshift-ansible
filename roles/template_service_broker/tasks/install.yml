@@ -69,7 +69,8 @@
     | {{ openshift_client_binary }} auth reconcile --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 
 # TSB Route
-- shell: oc get routes -n kube-service-catalog -o jsonpath='{.items[*].spec.host}{"\n"}'
+- shell: >
+    {{ openshift_client_binary }} get routes -n kube-service-catalog -o jsonpath='{.items[*].spec.host}{"\n"}'
   register: tsb_route
 
 # Check that the TSB is running
