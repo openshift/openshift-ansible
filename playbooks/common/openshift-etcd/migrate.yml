@@ -15,6 +15,8 @@
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
   tasks:
+  - set_fact:
+      etcd_migration_in_progress: true
   - include_role:
       name: etcd
       tasks_from: migrate.pre_check
@@ -255,5 +257,9 @@
     with_items: "{{ master_services[::-1] }}"
   - fail:
       msg: "Migration failed. The following hosts were not properly migrated: {{ etcd_migration_failed | join(',') }}"
+    when:
+    - etcd_migration_failed | length > 0
+  - set_fact:
+      etcd_migration_in_progress: false
     when:
     - etcd_migration_failed | length > 0
