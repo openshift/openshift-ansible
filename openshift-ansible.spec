@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.19.0%{?dist}
+Release:        0.20.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,16 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Apr 11 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.20.0
+- Upgrade to 3.10 with static pods (ccoleman@redhat.com)
+- Update PR docs and link to current bot commands. (abutcher@redhat.com)
+- Add oo_etcd_to_config to service_catalog init (mgugino@redhat.com)
+- Add missing package docker-rhel-push-plugin (mgugino@redhat.com)
+- Add nfs storage_kind check to sanity_checks (mgugino@redhat.com)
+- Add openshift-descheduler project. (avagarwa@redhat.com)
+- wait_for_pod: wait for deployment to be Complete (vrutkovs@redhat.com)
+- Fix OpenStack playbooks on clouds without Cinder (tomas@sedovic.cz)
+
 * Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.19.0
 - Update dbus before installing dnsmasq (sdodson@redhat.com)
 - Removing clear_facts from 3.10 upgrade (rteague@redhat.com)
