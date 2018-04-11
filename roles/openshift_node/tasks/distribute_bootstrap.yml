@@ -28,8 +28,8 @@
     name: "{{ openshift_service_type }}-node"
     state: restarted
     enabled: yes
+    no_block: yes
   register: node_start
-  ignore_errors: yes
 
 - when: node_start is failed
   block:
