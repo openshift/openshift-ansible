@@ -44,7 +44,7 @@ ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
 ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
 #ETCD_STRICT_RECONFIG_CHECK="false"
 #ETCD_AUTO_COMPACTION_RETENTION="0"
-#ETCD_ENABLE_V2="true"
+#ETCD_ENABLE_V2=true
 ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}
 
 #[proxy]
@@ -58,14 +58,14 @@ ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}
 #[security]
 {% if etcd_url_scheme == 'https' -%}
 ETCD_TRUSTED_CA_FILE={{ etcd_ca_file }}
-ETCD_CLIENT_CERT_AUTH="true"
+ETCD_CLIENT_CERT_AUTH=true
 ETCD_CERT_FILE={{ etcd_cert_file }}
 ETCD_KEY_FILE={{ etcd_key_file }}
 {% endif -%}
 #ETCD_AUTO_TLS="false"
 {% if etcd_peer_url_scheme == 'https' -%}
 ETCD_PEER_TRUSTED_CA_FILE={{ etcd_peer_ca_file }}
-ETCD_PEER_CLIENT_CERT_AUTH="true"
+ETCD_PEER_CLIENT_CERT_AUTH=true
 ETCD_PEER_CERT_FILE={{ etcd_peer_cert_file }}
 ETCD_PEER_KEY_FILE={{ etcd_peer_key_file }}
 {% endif -%}
