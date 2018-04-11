@@ -26,13 +26,10 @@
 # Make sure Docker is installed, but does not update a running version.
 # Docker upgrades are handled by a separate playbook.
 # Note: The curr_docker_version.stdout check can be removed when https://github.com/ansible/ansible/issues/33187 gets fixed.
-- name: Install Docker Packages
+- name: Install Docker
   package:
-    name: "{{ item }}"
+    name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
     state: present
-  with_items:
-  - "docker{{ '-' + docker_version if docker_version is defined else '' }}"
-  - docker-rhel-push-plugin
   when:
   - not (openshift_is_atomic | bool)
   - not (curr_docker_version is skipped)
