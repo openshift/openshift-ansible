@@ -1,0 +1,42 @@
+#bare minimum hostfile
+
+[OSEv3:children]
+masters
+nodes
+etcd
+
+[OSEv3:vars]
+# if your target hosts are Fedora uncomment this
+#ansible_python_interpreter=/usr/bin/python3
+openshift_deployment_type=origin
+openshift_release=v3.7
+osm_cluster_network_cidr=10.128.0.0/14
+openshift_portal_net=172.30.0.0/16
+osm_host_subnet_length=9
+# localhost likely doesn't meet the minimum requirements
+openshift_disable_check=disk_availability,memory_availability
+
+
+# https://github.com/openshift/openshift-ansible/issues/7101
+openshift_service_catalog_image_prefix=openshift/origin-
+openshift_service_catalog_image_version=latest
+
+openshift_hosted_etcd_storage_kind=nfs
+openshift_hosted_etcd_storage_nfs_options="*(rw,root_squash,sync,no_wdelay)"
+openshift_hosted_etcd_storage_nfs_directory=/opt/osev3-etcd
+openshift_hosted_etcd_storage_volume_name=etcd-vol2
+openshift_hosted_etcd_storage_access_modes=["ReadWriteOnce"]
+openshift_hosted_etcd_storage_volume_size=1G
+openshift_hosted_etcd_storage_labels={'storage': 'etcd'}
+
+ansible_service_broker_image_prefix=openshift/
+ansible_service_broker_registry_url="registry.access.redhat.com"
+
+[masters]
+os-skillz-ff
+
+[etcd]
+os-skillz-ff
+
+[nodes]
+os-skillz-ff ansible_ssh_host=10.30.30.83 openshift_schedulable=true openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
