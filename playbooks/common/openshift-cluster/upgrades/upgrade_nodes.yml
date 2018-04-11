@@ -57,6 +57,8 @@
   - import_role:
       name: openshift_node
       tasks_from: upgrade.yml
+    vars:
+      r_node_dynamic_config_name: "{{ openshift_node_group_name | default('node-config-compute') }}"
 
   # Run the upgrade hook prior to make the node schedulable again.
   - debug: msg="Running node upgrade hook {{ openshift_node_upgrade_hook }}"

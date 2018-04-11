@@ -9,8 +9,11 @@
 - name: Ensure old system path is set
   file:
     state: directory
-    path: "/etc/origin/openvswitch"
+    path: "{{ item }}"
     mode: '0750'
+  with_items:
+  - "/etc/origin/openvswitch"
+  - "/var/lib/kubelet"
 
 - name: Pre-pull node system container image
   command: >

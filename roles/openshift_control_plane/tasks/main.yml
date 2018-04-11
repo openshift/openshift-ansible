@@ -153,6 +153,18 @@
 
 - import_tasks: static.yml
 
+- name: Establish the default bootstrap kubeconfig for masters
+  copy:
+    remote_src: true
+    src: "/etc/origin/master/admin.kubeconfig"
+    dest: "{{ item }}"
+    mode: 0600
+  with_items:
+  # bootstrap as an admin
+  - /etc/origin/node/bootstrap.kubeconfig
+  # copy to this location to bypass initial bootstrap request
+  - /etc/origin/node/node.kubeconfig
+
 - name: Start and enable self-hosting node
   systemd:
     name: "{{ openshift_service_type }}-node"

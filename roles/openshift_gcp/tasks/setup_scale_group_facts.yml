@@ -3,6 +3,8 @@
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: masters, etcd
+    openshift_node_labels:
+      node-role.kubernetes.io/master: "true"
   with_items: "{{ groups['tag_ocp-master'] }}"
 
 - name: Add a master to the primary masters group
@@ -15,24 +17,21 @@
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: nodes
-    openshift_node_labels:
-      role: infra
   with_items: "{{ groups['tag_ocp-master'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
 
 - name: Add infra node instances to node group
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: nodes
+    groups: nodes, new_nodes
     openshift_node_labels:
-      role: infra
+      node-role.kubernetes.io/infra: "true"
   with_items: "{{ groups['tag_ocp-infra-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
 
 - name: Add node instances to node group
   add_host:
     name: "{{ hostvars[item].gce_name }}"
-    groups: nodes
-    openshift_node_labels:
-      role: app
+    groups: nodes, new_nodes
+    openshift_node_bootstrap: False
   with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
 
 - name: Add bootstrap node instances
@@ -40,5 +39,14 @@
     name: "{{ hostvars[item].gce_name }}"
     groups: bootstrap_nodes
     openshift_node_bootstrap: True
+    openshift_is_bootstrapped: True
   with_items: "{{ groups['tag_ocp-node'] | default([]) | intersect(groups['tag_ocp-bootstrap'] | default([])) }}"
-  when: not (openshift_node_bootstrap | default(True))
+
+- name: Add bootstrap node instances as nodes
+  add_host:
+    name: "{{ item }}"
+    groups: nodes, new_nodes
+    openshift_node_bootstrap: True
+    openshift_is_bootstrapped: True
+  with_items: "{{ groups['tag_ocp-bootstrap'] | default([]) }}"
+  when: all_nodes | default(False)

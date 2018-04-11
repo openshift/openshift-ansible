@@ -71,6 +71,10 @@
         console_url: "{{ openshift_master_console_url | default(None) }}"
         console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
+  - openshift_facts:
+      role: node
+      local_facts:
+        bootstrapped: true
 
 - name: Inspect state of first master config settings
   hosts: oo_first_master
@@ -79,7 +83,7 @@
   tasks:
   - import_role:
       name: openshift_control_plane
-      tasks_from: check_existing_config.yml
+      tasks_from: check_existing_config
 
 - name: Configure masters
   hosts: oo_masters_to_config
@@ -96,7 +100,8 @@
       name: openshift_node_group
       tasks_from: bootstrap_config
     vars:
-      r_node_bootstrap_config_name: "{{ openshift_node_group_master | default('node-config-master') }}"
+      r_node_dynamic_config_name: "{{ openshift_node_group_name | default('node-config-master') }}"
+      r_node_dynamic_config_force: True
 
   roles:
   - role: openshift_master_facts
@@ -119,6 +124,7 @@
     when: openshift_use_calico | default(false) | bool
   tasks:
   - name: Set up automatic node config reconcilation
+    run_once: True
     import_role:
       name: openshift_node_group
       tasks_from: sync
@@ -134,6 +140,22 @@
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
     changed_when: False
+
+- name: Deploy the central bootstrap configuration
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - name: setup bootstrap settings
+    import_tasks: tasks/enable_bootstrap_config.yml
+
+- name: Ensure inventory labels are assigned to masters
+  hosts: oo_masters_to_config
+  gather_facts: no
+  roles:
+  - role: openshift_manage_node
+    openshift_master_host: "{{ groups.oo_first_master.0 }}"
+    openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
+    openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
 
 - name: Re-enable excluder if it was previously enabled
   hosts: oo_masters_to_config

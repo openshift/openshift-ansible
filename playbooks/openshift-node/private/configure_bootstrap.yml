@@ -1,0 +1,18 @@
+---
+- name: node bootstrap config
+  hosts: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
+  tasks:
+  - import_role:
+      name: openshift_node
+      tasks_from: bootstrap
+  - import_role:
+      name: openshift_node_group
+      tasks_from: bootstrap
+  - name: Have the nodes automatically pull their configuration
+    import_role:
+      name: openshift_node_group
+      tasks_from: bootstrap_config
+    vars:
+      r_node_dynamic_config_name: "{{ openshift_node_group_name | default('node-config-compute') }}"
+  - set_fact:
+      openshift_is_bootstrapped: True

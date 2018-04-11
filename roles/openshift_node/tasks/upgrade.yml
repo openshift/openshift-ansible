@@ -27,7 +27,6 @@
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift_is_containerized | bool
 
-
 - include_tasks: "{{ node_config_hook }}"
   when: node_config_hook is defined
 
@@ -39,6 +38,15 @@
 # Restart all services
 - import_tasks: upgrade/restart.yml
 
+- name: Approve node certificates when bootstrapping
+  oc_adm_csr:
+    nodes: "{{ openshift.common.hostname | lower }}"
+    timeout: 180
+    fail_on_timeout: true
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  ignore_errors: true
+  when: openshift_node_bootstrap | default(True) | bool
+
 - name: Wait for node to be ready
   oc_obj:
     state: list
@@ -47,8 +55,8 @@
   register: node_output
   delegate_to: "{{ groups.oo_first_master.0 }}"
   until: node_output.results.returncode == 0 and node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
-  # Give the node two minutes to come back online.
-  retries: 24
+  # Give the node three minutes to come back online.
+  retries: 36
   delay: 5
 
 - import_tasks: journald.yml

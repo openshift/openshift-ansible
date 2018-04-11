@@ -1,8 +1,4 @@
 ---
-- name: Update systemd units
-  import_tasks: ../systemd_units.yml
-  when: openshift_is_containerized | bool
-
 - name: Update oreg value
   yedit:
     src: "{{ openshift.common.config_base }}/node/node-config.yaml"
@@ -10,53 +6,54 @@
     value: "{{ oreg_url | default(oreg_url_node) }}"
   when: oreg_url is defined or oreg_url_node is defined
 
-- name: Remove obsolete docker-sdn-ovs.conf
+- name: Ensure the node static pod directory exists
   file:
-    path: "/etc/systemd/system/docker.service.d/docker-sdn-ovs.conf"
-    state: absent
+    path: "{{ openshift.common.config_base }}/node/pods"
+    state: directory
+    mode: 0755
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1513054
-- name: Clean up dockershim data
-  file:
-    path: "/var/lib/dockershim/sandbox/"
-    state: absent
+- name: Update node-config for static pods
+  yedit:
+    src: "{{ openshift.common.config_base }}/node/node-config.yaml"
+    edits:
+    - key: kubeletArguments.pod-manifest-path
+      value:
+      - "{{ openshift.common.config_base }}/node/pods"
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1518912
-- name: Clean up IPAM data
-  file:
-    path: "/var/lib/cni/networks/openshift-sdn/"
+# - name: Clean up IPAM data
+#   file:
+#     path: "/var/lib/cni/networks/openshift-sdn/"
+#     state: absent
+
+- name: Uninstall openvswitch
+  package:
+    name: openvswitch
     state: absent
+  when: not openshift_is_atomic | bool
 
-# https://docs.openshift.com/container-platform/3.4/admin_guide/overcommit.html#disabling-swap-memory
-# swapoff is a custom module in lib_utils that comments out swap entries in
-# /etc/fstab and runs swapoff -a, if necessary.
-- name: Disable swap
-  swapoff: {}
-  when: openshift_disable_swap | default(true) | bool
-
-- name: Apply 3.6 dns config changes
-  yedit:
-    src: /etc/origin/node/node-config.yaml
-    key: "{{ item.key }}"
-    value: "{{ item.value }}"
+- name: Remove old service information
+  file:
+    path: "{{ item }}"
+    state: absent
   with_items:
-  - key: "dnsBindAddress"
-    value: "127.0.0.1:53"
-  - key: "dnsRecursiveResolvConf"
-    value: "/etc/origin/node/resolv.conf"
+  - /etc/systemd/system/docker.service.d/docker-sdn-ovs.conf
+  - /etc/systemd/system/atomic-openshift-node-dep.service
+  - /etc/systemd/system/origin-node-dep.service
+  - /etc/systemd/system/openvswitch.service
 
-- name: Install Node service file
-  template:
-    dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
-    src: "node.service.j2"
-  register: l_node_unit
-  when: not openshift_is_containerized | bool
+- name: Move existing credentials and configuration into bootstrap configuration
+  import_tasks: bootstrap_changes.yml
+  when: openshift_node_bootstrap | default(True) | bool
 
 - name: Reset selinux context
   command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes
   when:
   - ansible_selinux is defined
   - ansible_selinux.status == 'enabled'
+
+- name: Update systemd units
+  import_tasks: ../systemd_units.yml
 
 # NOTE: This is needed to make sure we are using the correct set
 #       of systemd unit files. The RPMs lay down defaults but
