@@ -13,6 +13,7 @@
       name: openshift_azure
       tasks_from: provision_instance.yml
     vars:
+      openshift_azure_vm_data_disks: []  # base image will not have disks
       openshift_azure_vm_name: "{{ openshift_azure_base_image }}"
       openshift_azure_vm_base_image:
         name: '{{ openshift_azure_root_image }}'
