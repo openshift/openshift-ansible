@@ -1,6 +1,6 @@
 ---
 - name: Configure nodes
-  hosts: oo_nodes_to_config:!oo_containerized_master_nodes
+  hosts: "{{ l_node_group }}"
   tasks:
   - name: Remove any ansible facts created during AMI creation
     file:

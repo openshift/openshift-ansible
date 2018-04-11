@@ -15,11 +15,11 @@
   vars:
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_base_packages_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
 
 - name: Configure the upgrade target for the common upgrade tasks 3.10
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
   tasks:
-  - meta: clear_facts
   - set_fact:
       openshift_upgrade_target: '3.10'
       openshift_upgrade_min: '3.9'
@@ -44,6 +44,52 @@
   tasks:
   - set_fact:
       pre_upgrade_complete: True
+
+- import_playbook: label_nodes.yml
+
+# To upgrade, we need masters to be capable of signing certificates
+- hosts: oo_masters
+  serial: 1
+  tasks:
+  - name: Enable core bootstrapping components
+    include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap.yml
+  - name: Place shim commands on the masters before we begin the upgrade
+    import_role:
+      name: openshift_control_plane
+      tasks_from: static_shim
+
+# TODO: need to verify settings about the bootstrap configs
+# 1. Does network policy match the master config
+
+- name: Configure components that must be available prior to upgrade
+  hosts: oo_first_master
+  pre_tasks:
+  - name: Enable core bootstrapping components
+    include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap_config.yml
+  - name: Ensure the master bootstrap config has bootstrapping config
+    import_role:
+      name: openshift_node_group
+      tasks_from: upgrade
+  - name: Enable node configuration reconciliation
+    import_role:
+      name: openshift_node_group
+      tasks_from: sync
+  roles:
+  - role: openshift_sdn
+    when: openshift_use_openshift_sdn | default(True) | bool
+
+- name: Update master nodes
+  hosts: oo_masters
+  serial: 1
+  tasks:
+  - import_role:
+      name: openshift_node
+      tasks_from: upgrade_pre
+  - import_role:
+      name: openshift_node
+      tasks_from: upgrade
+    vars:
+      r_node_dynamic_config_name: "{{ openshift_node_group_name | default('node-config-master') }}"
 
 - import_playbook: ../upgrade_control_plane.yml
   vars:

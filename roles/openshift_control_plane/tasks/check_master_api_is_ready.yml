@@ -1,0 +1,47 @@
+---
+- name: Wait for API to become available
+  # Using curl here since the uri module requires python-httplib2 and
+  # wait_for port doesn't provide health information.
+  command: >
+    curl --silent --tlsv1.2
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {{ openshift.master.api_url }}/healthz/ready
+  register: l_api_available_output
+  until: l_api_available_output.stdout == 'ok'
+  retries: 120
+  delay: 1
+  run_once: true
+  changed_when: false
+  failed_when: false
+
+- name: "Collect verbose curl output when API didn't become available"
+  command: >-
+    curl --verbose --tlsv1.2
+    --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
+    {{ openshift.master.api_url }}/healthz/ready
+  register: l_api_available_verbose_output
+  failed_when: false
+
+- name: "Collect API logs when API didn't become available"
+  command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-master-api
+  register: l_api_log_output
+  when:
+  - l_api_available_output.stdout != 'ok'
+
+- name: "Dump verbose curl output when the API didn't become available"
+  debug:
+    msg: "{{ l_api_available_verbose_output.stderr_lines }}"
+  when: l_api_available_output.stdout != 'ok'
+
+- name: "Dump API logs when the API didn't become availabale"
+  debug:
+    msg: "{{ l_api_log_output.stdout_lines }}"
+  when:
+  - l_api_available_output.stdout != 'ok'
+
+- fail:
+    msg: >
+      API did not become available. Verbose curl output and API logs
+      have been collected above to assist with debugging.
+  when:
+  - l_api_available_output.stdout != 'ok'

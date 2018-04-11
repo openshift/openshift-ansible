@@ -63,10 +63,6 @@
     __base_file_dir: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
     __es_version: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
 
-- set_fact:
-    openshift_logging_image_version: "techpreview"
-  when: openshift_logging_es5_techpreview | bool
-
 ## Elasticsearch
 
 - set_fact: es_indices={{ es_indices | default([]) + [item | int - 1] }}
@@ -135,6 +131,11 @@
   with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
   loop_control:
     loop_var: outer_item
+
+- set_fact:
+    __logging_scale_up: True
+  when:
+  - openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
 
 - set_fact: es_ops_indices={{ es_ops_indices | default([]) + [item | int - 1] }}
   with_sequence: count={{ openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count }}
@@ -227,6 +228,12 @@
     loop_var: outer_item
   when:
   - openshift_logging_use_ops | bool
+
+- set_fact:
+    __logging_ops_scale_up: True
+  when:
+  - openshift_logging_use_ops | bool
+  - openshift_logging_es_ops_cluster_size | int - openshift_logging_facts.elasticsearch_ops.deploymentconfigs.keys() | count > 0
 
 
 ## Kibana
@@ -332,7 +339,7 @@
 
 
 - include_tasks: update_master_config.yaml
-  when: not openshift.common.version_gte_3_9
+  when: not openshift_version_gte_3_9
 
 # Update asset config in openshift-web-console namespace
 - name: Add Kibana route information to web console asset config
@@ -345,4 +352,4 @@
       value: "https://{{ openshift_logging_kibana_hostname }}"
   when:
   - openshift_web_console_install | default(true) | bool
-  - openshift.common.version_gte_3_9
+  - openshift_version_gte_3_9

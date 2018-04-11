@@ -10,17 +10,34 @@ openshift_node_proxy_mode: iptables
 openshift_set_node_ip: False
 openshift_config_base: '/etc/origin'
 
+openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
+
+system_images_registry_dict:
+  openshift-enterprise: "registry.access.redhat.com"
+  origin: "docker.io"
+
+system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
+
+l_openshift_images_dict:
+  origin: 'docker.io/openshift/origin-${component}:${version}'
+  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+l_osm_registry_url_default: "{{ l_openshift_images_dict[openshift_deployment_type] }}"
+l_os_registry_url: "{{ oreg_url | default(l_osm_registry_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
+
+l_openshift_prefix_dict:
+  origin: 'origin-${component}'
+  openshift-enterprise: 'ose-${component}'
+l_os_prefix: "{{ l_openshift_prefix_dict[openshift_deployment_type] }}"
+# TODO: we should publish oreg_url component=node
+osn_image_default: "{{ l_os_registry_url | regex_replace(l_os_prefix | regex_escape, 'node') }}"
+osn_image: "{{ (system_images_registry == 'docker') | ternary(osn_image_default, (osn_image_default.split('/')|length==2) | ternary(system_images_registry + '/' + osn_image_default, osn_image_default)) }}"
+system_osn_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + osn_image, osn_image) }}"
+
 openshift_oreg_url_default_dict:
   origin: "openshift/origin-${component}:${version}"
   openshift-enterprise: "openshift3/ose-${component}:${version}"
 openshift_oreg_url_default: "{{ openshift_oreg_url_default_dict[openshift_deployment_type] }}"
-oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) }}"
-
-osn_ovs_image_default_dict:
-  origin: "openshift/openvswitch"
-  openshift-enterprise: "openshift3/openvswitch"
-osn_ovs_image_default: "{{ osn_ovs_image_default_dict[openshift_deployment_type] }}"
-osn_ovs_image: "{{ osn_ovs_image_default }}"
+oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 
 openshift_dns_ip: "{{ ansible_default_ipv4['address'] }}"
 
@@ -54,6 +71,12 @@ openshift_node_kubelet_args_dict:
     cloud-config:
     - "{{ openshift_config_base ~ '/cloudprovider/azure.conf' }}"
     node-labels: "{{ l_node_kubelet_node_labels }}"
+  vsphere:
+    cloud-provider:
+    - vsphere
+    cloud-config:
+    - "{{ openshift_config_base ~ '/cloudprovider/vsphere.conf' }}"
+    node-labels: "{{ l_node_kubelet_node_labels }}"
   undefined:
     node-labels: "{{ l_node_kubelet_node_labels }}"
 
@@ -75,7 +98,7 @@ openshift_node_dnsmasq_except_interfaces:
 r_openshift_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+l_is_node_system_container: "{{ openshift_use_node_system_container | default(openshift_use_system_containers | default(openshift_is_containerized | default(false))) | bool }}"
 
 openshift_node_syscon_auth_mounts_l:
 - type: bind
@@ -89,43 +112,23 @@ openshift_node_syscon_auth_mounts_l:
 # This should be in the same format as auth_mounts_l above.
 openshift_node_syscon_add_mounts_l: []
 
-
-openshift_deployment_type: "{{ openshift_deployment_type | default('origin') }}"
-
-openshift_node_image_dict:
-  origin: 'openshift/node'
-  openshift-enterprise: 'openshift3/node'
-osn_image: "{{ openshift_node_image_dict[openshift_deployment_type] }}"
-
 openshift_service_type_dict:
   origin: origin
   openshift-enterprise: atomic-openshift
 openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
 
-system_images_registry_dict:
-  openshift-enterprise: "registry.access.redhat.com"
-  origin: "docker.io"
-
-system_images_registry: "{{ system_images_registry_dict[openshift_deployment_type | default('origin')] }}"
-l_is_openvswitch_system_container: "{{ (openshift_use_openvswitch_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-
-openshift_image_tag: ''
-
 default_r_openshift_node_image_prep_packages:
-- "{{ openshift_service_type }}-master"
 - "{{ openshift_service_type }}-node"
 - "{{ openshift_service_type }}-docker-excluder"
-- "{{ openshift_service_type }}-sdn-ovs"
 - ansible
-- openvswitch
+- bash-completion
 - docker
-- etcd
 - haproxy
 - dnsmasq
 - ntp
 - logrotate
 - httpd-tools
-- bind
+- bind-utils
 - firewalld
 - libselinux-python
 - conntrack-tools
@@ -135,30 +138,18 @@ default_r_openshift_node_image_prep_packages:
 - python-dbus
 - PyYAML
 - yum-utils
-# gluster
 - glusterfs-fuse
 - device-mapper-multipath
-# nfs
 - nfs-utils
-- flannel
-- bash-completion
-# cockpit
 - cockpit-ws
 - cockpit-system
 - cockpit-bridge
 - cockpit-docker
-# iscsi
 - iscsi-initiator-utils
-# ceph
 - ceph-common
-# systemcontainer
-# - runc
-# - container-selinux
-# - atomic
-#
 r_openshift_node_image_prep_packages: "{{ default_r_openshift_node_image_prep_packages | union(openshift_node_image_prep_packages | default([])) }}"
 
-openshift_node_bootstrap: False
+openshift_node_bootstrap: True
 
 r_openshift_node_os_firewall_deny: []
 default_r_openshift_node_os_firewall_allow:
@@ -189,9 +180,30 @@ oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
 openshift_use_crio: False
+l_crio_use_new_var_sock: "{{ openshift_version | version_compare('3.9', '>=') }}"
+l_crio_var_sock: "{{ l_crio_use_new_var_sock | ternary('/var/run/crio/crio.sock', '/var/run/crio.sock') }}"
 openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False) | bool) or (openshift_use_crio_only | default(False) | bool) }}"
 
 openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+
+# These defaults assume forcing journald persistence, fsync to disk once
+# a second, rate-limiting to 10,000 logs a second, no forwarding to
+# syslog or wall, using 8GB of disk space maximum, using 10MB journal
+# files, keeping only a days worth of logs per journal file, and
+# retaining journal files no longer than a month.
+journald_vars_to_replace:
+- { var: Storage, val: persistent }
+- { var: Compress, val: yes }
+- { var: SyncIntervalSec, val: 1s }
+- { var: RateLimitInterval, val: 1s }
+- { var: RateLimitBurst, val: 10000 }
+- { var: SystemMaxUse, val: 8G }
+- { var: SystemKeepFree, val: 20% }
+- { var: SystemMaxFileSize, val: 10M }
+- { var: MaxRetentionSec, val: 1month }
+- { var: MaxFileSec, val: 1day }
+- { var: ForwardToSyslog, val: no }
+- { var: ForwardToWall, val: no }
 
 # NOTE
 # r_openshift_node_*_default may be defined external to this role.

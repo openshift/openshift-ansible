@@ -2,7 +2,7 @@
 - name: Fail when OpenShift is not installed
   fail:
     msg: Verify OpenShift is already installed
-  when: openshift.common.version is not defined
+  when: openshift_current_version is not defined
 
 - name: Update oreg_auth docker login credentials if necessary
   import_role:
@@ -21,7 +21,7 @@
   block:
   - name: Check latest available OpenShift RPM version
     repoquery:
-      name: "{{ openshift_service_type }}{{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }}"
+      name: "{{ openshift_service_type }}{{ '-' ~ openshift_version ~ '*' }}"
       ignore_excluders: true
     register: repoquery_out
 
@@ -43,11 +43,11 @@
     fail:
       msg: "OpenShift {{ avail_openshift_version }} is available, but {{ openshift_upgrade_target }} or greater is required"
     when:
-    - (openshift_pkg_version | default('-0.0', True)).split('-')[1] is version_compare(openshift_release, '<')
+    - (openshift_pkg_version | default('-0.0', True)).split('-')[1] is version_compare(openshift_upgrade_target, '<')
 
 - name: Fail when openshift version does not meet minium requirement for Origin upgrade
   fail:
     msg: "This upgrade playbook must be run against OpenShift {{ openshift_upgrade_min }} or later"
   when:
   - openshift_deployment_type == 'origin'
-  - openshift.common.version is version_compare(openshift_upgrade_min,'<')
+  - openshift_current_version is version_compare(openshift_upgrade_min,'<')

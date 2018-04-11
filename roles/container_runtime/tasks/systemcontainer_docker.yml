@@ -11,9 +11,9 @@
       traditional docker package install. Otherwise, comment out openshift_docker_options
       in your inventory file.
 
-- include_tasks: common/pre.yml
+- import_tasks: common/pre.yml
 
-- include_tasks: common/syscontainer_packages.yml
+- import_tasks: common/syscontainer_packages.yml
 
 # Make sure Docker is installed so we are able to use the client
 - name: Install Docker so we can use the client
@@ -22,7 +22,8 @@
   register: result
   until: result is succeeded
 
-# Make sure docker is disabled. Errors are ignored.
+# Make sure docker.service from docker rpm is disabled. Errors are ignored.
+# docker runs as a system container as 'container-engine' in a later task.
 - name: Disable Docker
   systemd:
     name: docker
@@ -36,7 +37,7 @@
   delay: 30
 
 - name: Ensure proxies are in the atomic.conf
-  include_tasks: common/atomic_proxy.yml
+  import_tasks: common/atomic_proxy.yml
 
 # Be nice and let the user see the variable result
 - debug:
@@ -44,7 +45,7 @@
 
 # Do the authentication before pulling the container engine system container
 # as the pull might be from an authenticated registry.
-- include_tasks: registry_auth.yml
+- import_tasks: registry_auth.yml
   vars:
     openshift_docker_alternative_creds: True
 
@@ -71,6 +72,8 @@
     name: "{{ openshift_docker_service_name }}"
     image: "{{ l_docker_image }}"
     state: latest
+    values:
+      - "ADDTL_MOUNTS={{ l_docker_additional_mounts }}"
 
 - name: Configure Container Engine Service File
   template:
@@ -85,8 +88,8 @@
     dest: "{{ docker_conf_dir }}/container-daemon.json"
     src: daemon.json
 
-# Enable and start the container-engine service
-- name: Start the Container Engine service
+# Enable and start the container-engine service (docker as system container)
+- name: Start the container-engine service
   systemd:
     name: "{{ openshift_docker_service_name }}"
     enabled: yes
@@ -102,6 +105,6 @@
 
 # Since docker is running as a system container, docker login will fail to create
 # credentials.  Use alternate method if requiring authenticated registries.
-- include_tasks: common/post.yml
+- import_tasks: common/post.yml
   vars:
     openshift_docker_alternative_creds: True

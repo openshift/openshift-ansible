@@ -15,7 +15,8 @@ NET_PLUGIN_LIST = (('openshift_use_openshift_sdn', True),
                    ('openshift_use_flannel', False),
                    ('openshift_use_nuage', False),
                    ('openshift_use_contiv', False),
-                   ('openshift_use_calico', False))
+                   ('openshift_use_calico', False),
+                   ('openshift_use_kuryr', False))
 
 ENTERPRISE_TAG_REGEX_ERROR = """openshift_image_tag must be in the format
 v#.#[.#[.#]]. Examples: v1.2, v3.4.1, v3.5.1.3,
@@ -23,20 +24,33 @@ v3.5.1.3.4, v1.2-1, v1.2.3-4, v1.2.3-4.5, v1.2.3-4.5.6
 You specified openshift_image_tag={}"""
 
 ORIGIN_TAG_REGEX_ERROR = """openshift_image_tag must be in the format
-v#.#.#[-optional.#]. Examples: v1.2.3, v3.5.1-alpha.1
+v#.#[.#-optional.#]. Examples: v1.2.3, v3.5.1-alpha.1
 You specified openshift_image_tag={}"""
 
-ORIGIN_TAG_REGEX = {'re': '(^v?\\d+\\.\\d+\\.\\d+(-[\\w\\-\\.]*)?$)',
+ORIGIN_TAG_REGEX = {'re': '(^v?\\d+\\.\\d+.*)',
                     'error_msg': ORIGIN_TAG_REGEX_ERROR}
 ENTERPRISE_TAG_REGEX = {'re': '(^v\\d+\\.\\d+(\\.\\d+)*(-\\d+(\\.\\d+)*)?$)',
                         'error_msg': ENTERPRISE_TAG_REGEX_ERROR}
 IMAGE_TAG_REGEX = {'origin': ORIGIN_TAG_REGEX,
                    'openshift-enterprise': ENTERPRISE_TAG_REGEX}
 
+UNSUPPORTED_OCP_VERSIONS = {
+    '^3.8.*$': 'OCP 3.8 is not supported and cannot be installed'
+}
+
 CONTAINERIZED_NO_TAG_ERROR_MSG = """To install a containerized Origin release,
 you must set openshift_release or openshift_image_tag in your inventory to
 specify which version of the OpenShift component images to use.
 (Suggestion: add openshift_release="x.y" to inventory.)"""
+
+STORAGE_KIND_TUPLE = (
+    'openshift_hosted_registry_storage_kind',
+    'openshift_loggingops_storage_kind',
+    'openshift_logging_storage_kind',
+    'openshift_metrics_storage_kind',
+    'openshift_prometheus_alertbuffer_storage_kind',
+    'openshift_prometheus_alertmanager_storage_kind',
+    'openshift_prometheus_storage_kind')
 
 
 def to_bool(var_to_check):
@@ -128,7 +142,7 @@ class ActionModule(ActionBase):
                 res_temp = default_val
             res.append(to_bool(res_temp))
 
-        if sum(res) != 1:
+        if sum(res) not in (0, 1):
             plugin_str = list(zip([x[0] for x in NET_PLUGIN_LIST], res))
 
             msg = "Host Checked: {} Only one of must be true. Found: {}".format(host, plugin_str)
@@ -144,6 +158,67 @@ class ActionModule(ActionBase):
                 msg = '{} must be 63 characters or less'.format(varname)
                 raise errors.AnsibleModuleError(msg)
 
+    def check_supported_ocp_version(self, hostvars, host, openshift_deployment_type):
+        """Checks that the OCP version supported"""
+        if openshift_deployment_type == 'origin':
+            return None
+        openshift_version = self.template_var(hostvars, host, 'openshift_version')
+        for regex_to_match, error_msg in UNSUPPORTED_OCP_VERSIONS.items():
+            res = re.match(regex_to_match, str(openshift_version))
+            if res is not None:
+                raise errors.AnsibleModuleError(error_msg)
+        return None
+
+    def check_session_auth_secrets(self, hostvars, host):
+        """Checks session_auth_secrets is correctly formatted"""
+        sas = self.template_var(hostvars, host,
+                                'openshift_master_session_auth_secrets')
+        ses = self.template_var(hostvars, host,
+                                'openshift_master_session_encryption_secrets')
+        # This variable isn't mandatory, only check if set.
+        if sas is None and ses is None:
+            return None
+
+        if not (
+                issubclass(type(sas), list) and issubclass(type(ses), list)
+        ) or len(sas) != len(ses):
+            raise errors.AnsibleModuleError(
+                'Expects openshift_master_session_auth_secrets and '
+                'openshift_master_session_encryption_secrets are equal length lists')
+
+        for secret in sas:
+            if len(secret) < 32:
+                raise errors.AnsibleModuleError(
+                    'Invalid secret in openshift_master_session_auth_secrets. '
+                    'Secrets must be at least 32 characters in length.')
+
+        for secret in ses:
+            if len(secret) not in [16, 24, 32]:
+                raise errors.AnsibleModuleError(
+                    'Invalid secret in openshift_master_session_encryption_secrets. '
+                    'Secrets must be 16, 24, or 32 characters in length.')
+        return None
+
+    def check_unsupported_nfs_configs(self, hostvars, host):
+        """Fails if nfs storage is in use for any components. This check is
+           ignored if openshift_enable_unsupported_configurations=True"""
+
+        enable_unsupported = self.template_var(
+            hostvars, host, 'openshift_enable_unsupported_configurations')
+
+        if to_bool(enable_unsupported):
+            return None
+
+        for storage in STORAGE_KIND_TUPLE:
+            kind = self.template_var(hostvars, host, storage)
+            if kind == 'nfs':
+                raise errors.AnsibleModuleError(
+                    'nfs is an unsupported type for {}. '
+                    'openshift_enable_unsupported_configurations=True must'
+                    'be specified to continue with this configuration.'
+                    ''.format(storage))
+        return None
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -153,6 +228,9 @@ class ActionModule(ActionBase):
         self.no_origin_image_version(hostvars, host, odt)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
+        self.check_supported_ocp_version(hostvars, host, odt)
+        self.check_session_auth_secrets(hostvars, host)
+        self.check_unsupported_nfs_configs(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)

@@ -15,8 +15,7 @@ openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_s
 
 openshift_docker_hosted_registry_insecure: False  # bool
 
-openshift_docker_hosted_registry_network_default: "{{ openshift_portal_net | default(False) }}"
-openshift_docker_hosted_registry_network: "{{ openshift_docker_hosted_registry_network_default }}"
+openshift_docker_hosted_registry_network: "{{ openshift.common.portal_net }}"
 
 openshift_docker_additional_registries: []
 openshift_docker_blocked_registries: []
@@ -48,6 +47,7 @@ r_crio_os_firewall_allow:
 - service: crio
   port: 10010/tcp
 
+r_crio_use_openshift_sdn: "{{ openshift_use_openshift_sdn | default(True) }}"
 
 openshift_docker_is_node_or_master: "{{ True if inventory_hostname in (groups['oo_masters_to_config']|default([])) or inventory_hostname in (groups['oo_nodes_to_config']|default([])) else False | bool }}"
 
@@ -82,10 +82,10 @@ docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
 openshift_use_crio: False
+openshift_crio_use_rpm: False
 openshift_use_crio_only: False
 
-l_openshift_image_tag_default: "{{ openshift_release | default('latest') }}"
-l_openshift_image_tag: "{{ openshift_image_tag | default(l_openshift_image_tag_default) | string}}"
+l_openshift_image_tag: "{{ openshift_image_tag | string }}"
 
 l_required_docker_version: '1.12'
 
@@ -107,6 +107,18 @@ l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registrie
 container_runtime_crio_additional_mounts: []
 
 l_crio_additional_mounts: "{{ ',' + (container_runtime_crio_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_crio_additional_mounts != [] else '' }}"
+
+# this is a list of dictionaries of mounts
+# container_runtime_docker_additional_mounts:
+# - destination: /test
+#   source: /var/test
+#   options:
+#   - rw
+#   - mode=755
+#   type: bind
+container_runtime_docker_additional_mounts: []
+
+l_docker_additional_mounts: "{{ ',' + (container_runtime_docker_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_docker_additional_mounts != [] else '' }}"
 
 openshift_crio_image_tag_default: "latest"
 
@@ -145,3 +157,11 @@ l_docker_image_default: "{{ l_docker_image_prepend }}:{{ l_docker_image_tag }}"
 l_docker_image: "{{ openshift_docker_systemcontainer_image_override | default(l_docker_image_default) }}"
 
 l_is_node_system_container: "{{ (openshift_use_node_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
+
+l_crio_use_new_var_sock: "{{  (l_openshift_image_tag == 'latest') or (l_openshift_image_tag | version_compare('3.9', '>='))  | bool }}"
+l_crio_var_sock: "{{ l_crio_use_new_var_sock | ternary('/var/run/crio/crio.sock', '/var/run/crio.sock') }}"
+
+container_runtime_oci_umounts:
+- '/var/lib/containers/storage/*'
+- '/run/containers/storage/*'
+- '/var/lib/origin/*'

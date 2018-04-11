@@ -51,3 +51,11 @@
   command: /sbin/iptables -t nat -A POSTROUTING -o {{ flannel_interface }}  -j MASQUERADE -m comment --comment "Allow external network access"
   notify:
     - save iptable rules
+
+- name: Allow DNS access
+  command: /sbin/iptables -A OS_FIREWALL_ALLOW -p {{ item }} -m {{ item }} --dport 53 -j ACCEPT -m comment --comment "Allow DNS {{ item }} access"
+  with_items:
+    - "tcp"
+    - "udp"
+  notify:
+    - save iptable rules

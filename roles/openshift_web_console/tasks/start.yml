@@ -1,0 +1,53 @@
+---
+- name: Verify that the web console is running
+  command: >
+    curl -k https://webconsole.openshift-web-console.svc/healthz
+  args:
+    # Disables the following warning:
+    # Consider using get_url or uri module rather than running curl
+    warn: no
+  register: endpoint_health
+  until: endpoint_health.stdout == 'ok'
+  retries: 60
+  delay: 10
+  changed_when: false
+  # Ignore errors so we can log troubleshooting info on failures.
+  ignore_errors: yes
+
+# Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment/webconsole` for troubleshooting failures.
+- when: endpoint_health.stdout != 'ok'
+  block:
+  - name: Check status in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} status --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift-web-console
+    register: endpoint_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_status.stdout_lines }}"
+  - name: Get pods in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} get pods --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift-web-console -o wide
+    register: endpoint_pods
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_pods.stdout_lines }}"
+  - name: Get events in the openshift-web-console namespace
+    command: >
+      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift-web-console
+    register: endpoint_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_events.stdout_lines }}"
+  - name: Get console pod logs
+    command: >
+      {{ openshift_client_binary }} logs deployment/webconsole --tail=50 --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift-web-console
+    register: endpoint_log
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_log.stdout_lines }}"
+
+- when: endpoint_health.stdout != 'ok'
+  block:
+  - name: Report console errors
+    fail:
+      msg: Console install failed.

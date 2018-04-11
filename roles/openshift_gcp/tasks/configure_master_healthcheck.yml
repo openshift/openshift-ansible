@@ -8,7 +8,7 @@
 - name: install haproxy
   package: name=haproxy state=present
   register: result
-  until: '"failed" not in result'
+  until: result is succeeded
   retries: 10
   delay: 10
 

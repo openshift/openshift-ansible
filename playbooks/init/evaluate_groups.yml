@@ -52,7 +52,7 @@
         for documentation on how to migrate from embedded to external etcd.
     when:
     - g_etcd_hosts | default([]) | length == 0
-    - not (openshift_node_bootstrap | default(False))
+    - not (openshift_node_bootstrap | default(True))
 
   - name: Evaluate oo_all_hosts
     add_host:
@@ -143,15 +143,23 @@
     with_items: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
     changed_when: no
 
-  # Skip adding the master to oo_nodes_to_config when g_new_node_hosts is
-  - name: Add master to oo_nodes_to_config
+  - name: Evaluate oo_nodes_to_bootstrap
     add_host:
       name: "{{ item }}"
-      groups: oo_nodes_to_config
+      groups: oo_nodes_to_bootstrap
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_master_hosts | default([]) }}"
-    when: g_nodeonmaster | default(false) | bool and not g_new_node_hosts | default(false) | bool
+    with_items: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
+    changed_when: no
+    when: hostvars[item].openshift_node_bootstrap | default(True) | bool
+
+  - name: Add masters to oo_nodes_to_bootstrap
+    add_host:
+      name: "{{ item }}"
+      groups: oo_nodes_to_bootstrap
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_masters | default([]) }}"
     changed_when: no
 
   - name: Evaluate oo_lb_to_config

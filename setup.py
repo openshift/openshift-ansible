@@ -69,12 +69,12 @@ def recursive_search(search_list, field):
     return fields_found
 
 
-def find_entrypoint_playbooks():
-    '''find entry point playbooks as defined by openshift-ansible'''
-    playbooks = set()
+def find_playbooks():
+    ''' find Ansible playbooks'''
+    all_playbooks = set()
     included_playbooks = set()
 
-    exclude_dirs = ['adhoc', 'tasks']
+    exclude_dirs = ('adhoc', 'tasks')
     for yaml_file in find_files(
             os.path.join(os.getcwd(), 'playbooks'),
             exclude_dirs, None, r'\.ya?ml$'):
@@ -85,7 +85,7 @@ def find_entrypoint_playbooks():
                     continue
                 if 'include' in task or 'import_playbook' in task:
                     # Add the playbook and capture included playbooks
-                    playbooks.add(yaml_file)
+                    all_playbooks.add(yaml_file)
                     if 'include' in task:
                         directive = task['include']
                     else:
@@ -96,11 +96,8 @@ def find_entrypoint_playbooks():
                                      included_file_name))
                     included_playbooks.add(included_file)
                 elif 'hosts' in task:
-                    playbooks.add(yaml_file)
-    # Evaluate the difference between all playbooks and included playbooks
-    entrypoint_playbooks = sorted(playbooks.difference(included_playbooks))
-    print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
-    return entrypoint_playbooks
+                    all_playbooks.add(yaml_file)
+    return all_playbooks, included_playbooks
 
 
 class OpenShiftAnsibleYamlLint(Command):
@@ -182,7 +179,7 @@ class OpenShiftAnsiblePylint(PylintCommand):
     # pylint: disable=no-self-use
     def find_all_modules(self):
         ''' find all python files to test '''
-        exclude_dirs = ['.tox', 'utils', 'test', 'tests', 'git']
+        exclude_dirs = ('.tox', 'test', 'tests', 'git')
         modules = []
         for match in find_files(os.getcwd(), exclude_dirs, None, r'\.py$'):
             package = os.path.basename(match).replace('.py', '')
@@ -225,8 +222,7 @@ class OpenShiftAnsibleGenerateValidation(Command):
         generate_files = find_files('roles',
                                     ['inventory',
                                      'test',
-                                     'playbooks',
-                                     'utils'],
+                                     'playbooks'],
                                     None,
                                     'generate.py$')
 
@@ -321,8 +317,9 @@ class OpenShiftAnsibleSyntaxCheck(Command):
 
         has_errors = False
 
+        print('#' * 60)
         print('Ansible Deprecation Checks')
-        exclude_dirs = ['adhoc', 'files', 'meta', 'vars', 'defaults', '.tox']
+        exclude_dirs = ('adhoc', 'files', 'meta', 'vars', 'defaults', '.tox')
         for yaml_file in find_files(
                 os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
@@ -340,10 +337,54 @@ class OpenShiftAnsibleSyntaxCheck(Command):
 
         if not has_errors:
             print('...PASSED')
+
+        all_playbooks, included_playbooks = find_playbooks()
+
+        print('#' * 60)
+        print('Invalid Playbook Include Checks')
+        invalid_include = []
+        for playbook in included_playbooks:
+            # Ignore imported playbooks in 'common', 'private' and 'init'. It is
+            # expected that these locations would be imported by entry point
+            # playbooks.
+            # Ignore playbooks in 'aws', 'gcp' and 'openstack' because these
+            # playbooks do not follow the same component entry point structure.
+            # Ignore deploy_cluster.yml and prerequisites.yml because these are
+            # entry point playbooks but are imported by playbooks in the cloud
+            # provisioning playbooks.
+            ignored = ('common', 'private', 'init',
+                       'aws', 'gcp', 'openstack',
+                       'deploy_cluster.yml', 'prerequisites.yml')
+            if any(x in playbook for x in ignored):
+                continue
+            invalid_include.append(playbook)
+        if invalid_include:
+            print('{}Invalid included playbook(s) found. Please ensure'
+                  ' component entry point playbooks are not included{}'.format(self.FAIL, self.ENDC))
+            invalid_include.sort()
+            for playbook in invalid_include:
+                print('{}{}{}'.format(self.FAIL, playbook, self.ENDC))
+            has_errors = True
+
+        if not has_errors:
+            print('...PASSED')
+
+        print('#' * 60)
         print('Ansible Playbook Entry Point Syntax Checks')
-        for playbook in find_entrypoint_playbooks():
+        # Evaluate the difference between all playbooks and included playbooks
+        entrypoint_playbooks = sorted(all_playbooks.difference(included_playbooks))
+        print('Entry point playbook count: {}'.format(len(entrypoint_playbooks)))
+        for playbook in entrypoint_playbooks:
             print('-' * 60)
             print('Syntax checking playbook: {}'.format(playbook))
+
+            # Error on any entry points in 'common' or 'private'
+            invalid_entry_point = ('common', 'private')
+            if any(x in playbook for x in invalid_entry_point):
+                print('{}Invalid entry point playbook or orphaned file. Entry'
+                      ' point playbooks are not allowed in \'common\' or'
+                      ' \'private\' directories{}'.format(self.FAIL, self.ENDC))
+                has_errors = True
 
             # --syntax-check each entry point playbook
             try:

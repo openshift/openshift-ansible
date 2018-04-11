@@ -42,7 +42,7 @@ spec:
 {% endif %}
       containers:
         - name: "elasticsearch"
-          image: {{image}}
+          image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch:{{ openshift_logging_elasticsearch_image_version }}"
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -131,13 +131,13 @@ spec:
             periodSeconds: 5
         -
           name: proxy
-          image: {{ proxy_image }}
+          image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
           imagePullPolicy: IfNotPresent
           args:
            - --upstream-ca=/etc/elasticsearch/secret/admin-ca
            - --https-address=:4443
            - -provider=openshift
-           - -client-id={{openshift_logging_elasticsearch_prometheus_sa}}
+           - -client-id=system:serviceaccount:{{ openshift_logging_elasticsearch_namespace }}:aggregated-logging-elasticsearch
            - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
            - -cookie-secret={{ 16 | lib_utils_oo_random_word | b64encode }}
            - -basic-auth-password={{ basic_auth_passwd }}

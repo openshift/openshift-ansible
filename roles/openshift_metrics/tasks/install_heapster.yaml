@@ -1,10 +1,11 @@
 ---
 - name: Ensure that Heapster has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for heapster - '{{ openshift_metrics_heapster_nodeselector }}'
-  when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_metrics_heapster_nodeselector)
+  import_role:
+    name: openshift_control_plane
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_metrics_heapster_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Heapster
 
 - command: >
     {{ openshift_client_binary }} -n {{ openshift_metrics_project | quote }}

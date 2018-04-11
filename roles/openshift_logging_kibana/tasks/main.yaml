@@ -9,11 +9,12 @@
     loop_var: var_file_name
 
 - name: Ensure that Kibana has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for Kibana - '{{ openshift_logging_kibana_nodeselector }}'
-  when:
-    - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_kibana_nodeselector)
+  import_role:
+    name: openshift_control_plane
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_logging_kibana_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Kibana
 
 - name: Set kibana image facts
   set_fact:
@@ -21,8 +22,6 @@
     openshift_logging_kibana_image_version: "{{ openshift_logging_kibana_image_version | default(__openshift_logging_kibana_image_version) }}"
     openshift_logging_kibana_proxy_image_prefix: "{{ openshift_logging_kibana_proxy_image_prefix | default(__openshift_logging_kibana_proxy_image_prefix) }}"
     openshift_logging_kibana_proxy_image_version: "{{ openshift_logging_kibana_proxy_image_version | default(__openshift_logging_kibana_proxy_image_version) }}"
-
-- include_tasks: determine_version.yaml
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -246,8 +245,6 @@
     component: "{{ kibana_component }}"
     logging_component: kibana
     deploy_name: "{{ kibana_name }}"
-    image: "{{ openshift_logging_kibana_image_prefix }}logging-kibana:{{ openshift_logging_kibana_image_version }}"
-    proxy_image: "{{ openshift_logging_kibana_proxy_image_prefix }}logging-auth-proxy:{{ openshift_logging_kibana_proxy_image_version }}"
     es_host: "{{ openshift_logging_kibana_es_host }}"
     es_port: "{{ openshift_logging_kibana_es_port }}"
     kibana_cpu_limit: "{{ openshift_logging_kibana_cpu_limit }}"

@@ -1,0 +1,50 @@
+---
+# descheduler common setup
+openshift_descheduler_state: present
+openshift_descheduler_tmp_location: /tmp
+openshift_descheduler_delete_config: True
+
+# descheduler image setup
+openshift_descheduler_image_dict:
+  origin:
+    prefix: "docker.io/openshift/"
+    version: v0.5.0
+  openshift-enterprise:
+    prefix: "registry.access.redhat.com/openshift3/ose-"
+    version: "{{ openshift_image_tag }}"
+
+openshift_descheduler_image_prefix: "{{ openshift_descheduler_image_dict[openshift_deployment_type]['prefix'] }}"
+openshift_descheduler_image_version: "{{ openshift_descheduler_image_dict[openshift_deployment_type]['version'] }}"
+
+# descheduler service account setup
+openshift_descheduler_service_account: descheduler-sa
+
+# descheduler cluster role setup
+openshift_descheduler_cluster_role_name: descheduler-cr
+
+# descheduler policy setup
+# by default only RemoveDuplicates strategy is enabled
+openshift_descheduler_policy_configmap_name: descheduler-policy-configmap
+openshift_descheduler_strategies_dict:
+  remove_duplicates: true
+  remove_pods_violating_inter_pod_anti_affinity: false
+  low_node_utilization: false
+
+# descheduler stratgey LowNodeUtilization setup (matters only if low_node_utilization is true)
+openshift_descheduler_strategy_low_node_utilization_dict:
+  cpu_threshold: 40
+  mem_threshold: 40
+  pods_threshold: 40
+  cpu_target_threshold: 70
+  mem_target_threshold: 70
+  pods_target_threshold: 70
+
+# descheduler cronjob setup
+openshift_descheduler_cronjob_name: descheduler-cronjob
+openshift_descheduler_cronjob_node_selector: {"type": "infra"}
+# by default (00:00) everyday
+openshift_descheduler_cronjob_schedule: "*/1 0 * * *"
+
+# descheduler container setup
+openshift_descheduler_dry_run_mode: true
+openshift_descheduler_node_selectors: null

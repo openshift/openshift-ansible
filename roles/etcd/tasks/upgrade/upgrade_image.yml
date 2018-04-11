@@ -20,10 +20,7 @@
     regexp: "{{ current_image.stdout }}$"
     replace: "{{ new_etcd_image }}"
 
-- lineinfile:
-    destfile: "{{ etcd_conf_file }}"
-    regexp: '^ETCD_QUOTA_BACKEND_BYTES='
-    line: "ETCD_QUOTA_BACKEND_BYTES={{ etcd_quota_backend_bytes }}"
+- import_tasks: validate_etcd_conf.yml
 
 - name: Restart etcd_container
   systemd:
@@ -53,10 +50,3 @@
   until: etcdctl.rc == 0
   retries: 3
   delay: 10
-
-- name: Store new etcd_image
-  # DEPENDENCY openshift_facts
-  openshift_facts:
-    role: etcd
-    local_facts:
-      etcd_image: "{{ new_etcd_image }}"

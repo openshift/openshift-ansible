@@ -3,7 +3,9 @@
   package:
     name: "etcd{{ '-' + etcd_version if etcd_version is defined else '' }}"
     state: present
-  when: not etcd_is_containerized | bool
+  when:
+  - not etcd_is_atomic | bool
+  - not openshift_is_bootstrapped | bool
   register: result
   until: result is succeeded
 
@@ -178,8 +180,6 @@
   file:
     path: "{{ item }}"
     mode: 0600
-    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
   when: etcd_url_scheme == 'https'
   with_items:
   - "{{ etcd_ca_file }}"
@@ -190,8 +190,6 @@
   file:
     path: "{{ item }}"
     mode: 0600
-    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
   when: etcd_peer_url_scheme == 'https'
   with_items:
   - "{{ etcd_peer_ca_file }}"
@@ -202,6 +200,4 @@
   file:
     path: "{{ etcd_conf_dir }}"
     state: directory
-    owner: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
-    group: "{{ 'etcd' if not etcd_is_containerized | bool else omit }}"
     mode: 0700

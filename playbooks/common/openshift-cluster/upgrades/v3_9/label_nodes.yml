@@ -1,0 +1,25 @@
+---
+
+- name: Update master/infra lables
+  hosts: oo_masters_to_config
+  roles:
+    - openshift_facts
+    - lib_openshift
+  tasks:
+    - import_role:
+        name: openshift_manage_node
+        tasks_from: config.yml
+      vars:
+        openshift_master_host: '{{ groups.oo_first_master.0 }}'
+
+- name: Update node labels to differentiate from (now-schedulable) masters
+  hosts: oo_first_master
+  roles:
+    - openshift_facts
+    - lib_openshift
+  tasks:
+    - import_role:
+        name: openshift_manage_node
+        tasks_from: set_default_node_role.yml
+      vars:
+        openshift_master_host: '{{ groups.oo_first_master.0 }}'

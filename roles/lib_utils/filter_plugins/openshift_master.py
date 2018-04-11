@@ -454,7 +454,7 @@ class GitHubIdentityProvider(IdentityProviderOauthBase):
 
 
 class FilterModule(object):
-    ''' Custom ansible filters for use by the openshift_master role'''
+    ''' Custom ansible filters for use by the openshift_control_plane role'''
 
     @staticmethod
     def translate_idps(idps, api_version):
@@ -488,6 +488,11 @@ class FilterModule(object):
         certs = ['admin.crt',
                  'admin.key',
                  'admin.kubeconfig',
+                 'aggregator-front-proxy.crt',
+                 'aggregator-front-proxy.key',
+                 'aggregator-front-proxy.kubeconfig',
+                 'front-proxy-ca.crt',
+                 'front-proxy-ca.key',
                  'master.kubelet-client.crt',
                  'master.kubelet-client.key',
                  'master.proxy-client.crt',

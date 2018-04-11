@@ -1,0 +1,35 @@
+---
+- name: Ensure the node problem detector is absent
+  oc_obj:
+    namespace: "{{ openshift_node_problem_detector_namespace }}"
+    state: absent
+    kind: daemonset
+    name: "{{ openshift_node_problem_detector_daemonset_name }}"
+
+- name: Remove privileged SCC from node problem detector service account
+  oc_adm_policy_user:
+    state: absent
+    user: "system:serviceaccount:{{ openshift_node_problem_detector_namespace }}:{{ openshift_node_problem_detector_service_account }}"
+    namespace: "{{ openshift_node_problem_detector_namespace }}"
+    resource_kind: scc
+    resource_name: privileged
+
+- name: remove binding of node-problem-detector cluster role to the node-problem-detector service account
+  oc_adm_policy_user:
+    state: absent
+    user: "system:serviceaccount:{{ openshift_node_problem_detector_namespace }}:{{ openshift_node_problem_detector_service_account }}"
+    namespace: "{{ openshift_node_problem_detector_namespace }}"
+    resource_kind: cluster-role
+    resource_name: "system:{{ openshift_node_problem_detector_cluster_role_name }}"
+
+- name: remove node problem detector service account
+  oc_serviceaccount:
+    name: "{{ openshift_node_problem_detector_service_account }}"
+    namespace: "{{ openshift_node_problem_detector_namespace }}"
+    state: absent
+
+- name: remove node problem detector configuration configmap
+  oc_configmap:
+    state: absent
+    name: "{{ openshift_node_problem_detector_configmap_name }}"
+    namespace: "{{ openshift_node_problem_detector_namespace }}"

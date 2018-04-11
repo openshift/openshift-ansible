@@ -47,8 +47,6 @@
     openshift_logging_fluentd_image_prefix: "{{ openshift_logging_fluentd_image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
     openshift_logging_fluentd_image_version: "{{ openshift_logging_fluentd_image_version | default(__openshift_logging_fluentd_image_version) }}"
 
-- include_tasks: determine_version.yaml
-
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -122,7 +120,7 @@
     tasks_from: patch_configmap_files.yaml
   vars:
     configmap_name: "logging-fluentd"
-    configmap_namespace: "logging"
+    configmap_namespace: "{{ openshift_logging_namespace }}"
     configmap_file_names:
       - current_file: "fluent.conf"
         new_file: "{{ tempdir }}/fluent.conf"

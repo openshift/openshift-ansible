@@ -1,27 +1,10 @@
 ---
 - name: Install the systemd units
-  include_tasks: systemd_units.yml
+  import_tasks: systemd_units.yml
 
-- name: Pull container images
-  include_tasks: container_images.yml
-  when: openshift_is_containerized | bool
-
-- name: Start and enable openvswitch service
-  systemd:
-    name: openvswitch.service
-    enabled: yes
-    state: started
-    daemon_reload: yes
-  when:
-    - openshift_is_containerized | bool
-    - openshift_node_use_openshift_sdn | default(true) | bool
-  register: ovs_start_result
-  until: not (ovs_start_result is failed)
-  retries: 3
-  delay: 30
-
-- set_fact:
-    ovs_service_status_changed: "{{ ovs_start_result is changed }}"
+- name: Install Node system container
+  import_tasks: node_system_container.yml
+  when: l_is_node_system_container | bool
 
 - file:
     dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
@@ -50,6 +33,12 @@
   notify:
     - restart node
 
+- name: Ensure the node static pod directory exists
+  file:
+    path: "{{ openshift.common.config_base }}/node/pods"
+    state: directory
+    mode: 0755
+
 - name: include aws provider credentials
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
@@ -76,13 +65,6 @@
       retries: 120
       delay: 1
       changed_when: false
-
-    - name: Start and enable node dep
-      systemd:
-        daemon_reload: yes
-        name: "{{ openshift_service_type }}-node-dep"
-        enabled: yes
-        state: started
 
 - when: not openshift_node_bootstrap
   block:

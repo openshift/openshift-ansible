@@ -27,3 +27,13 @@
   template:
     src: user_data.j2
     dest: "{{ user_data_template_path }}"
+
+- name: generate HOT nested subports template from jinja2 template
+  template:
+    src: heat_stack_subports.yaml.j2
+    dest: "{{ stack_template_pre.path }}/subports.yaml"
+
+- name: generate HOT nested segmentation ids template from jinja2 template
+  template:
+    src: heat_stack_segmentation_ids.yaml.j2
+    dest: "{{ stack_template_pre.path }}/segmentation_ids.yaml"

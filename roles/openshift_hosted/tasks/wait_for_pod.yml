@@ -27,8 +27,8 @@
              --config {{ openshift_master_config_dir }}/admin.kubeconfig \
              -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
     register: openshift_hosted_wfp_rc_phase
-    until: "'Running' not in openshift_hosted_wfp_rc_phase.stdout"
-    delay: 5
+    until: "'Complete' in openshift_hosted_wfp_rc_phase.stdout"
+    delay: 10
     retries: 60
     failed_when: "'Failed' in openshift_hosted_wfp_rc_phase.stdout"
     with_together:

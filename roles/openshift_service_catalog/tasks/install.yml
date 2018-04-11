@@ -118,9 +118,9 @@
     cpu_requests: none
     memory_request: none
     cors_allowed_origin: localhost
-    etcd_servers: "{{ openshift.master.etcd_urls | join(',') }}"
+    etcd_servers: "{{ openshift_master_etcd_urls | join(',') }}"
     etcd_cafile: "{{ '/etc/origin/master/master.etcd-ca.crt' if etcd_ca_crt.stat.exists else '/etc/origin/master/ca-bundle.crt' }}"
-    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
+    node_selector: {'node-role.kubernetes.io/master': 'true'}
     # apiserver_ca is defined in generate_certs.yml
     ca_hash: "{{ apiserver_ca.content|hash('sha1') }}"
 
@@ -170,7 +170,7 @@
     image: ""
     cpu_limit: none
     memory_limit: none
-    node_selector: "{{ openshift_service_catalog_nodeselector | default ({'openshift-infra': 'apiserver'}) }}"
+    node_selector: {'node-role.kubernetes.io/master': 'true'}
 
 - name: Set Controller Manager deployment
   oc_obj:
@@ -188,7 +188,8 @@
     namespace: kube-service-catalog
     state: present
     ports:
-    - port: 6443
+    - name: secure
+      port: 443
       protocol: TCP
       targetPort: 6443
     selector:
@@ -196,10 +197,10 @@
     session_affinity: None
     service_type: ClusterIP
 
-- include_tasks: start_api_server.yml
-
 - name: Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"
     state: absent
   changed_when: False
+
+- include_tasks: start.yml

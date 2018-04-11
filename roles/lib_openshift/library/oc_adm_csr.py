@@ -34,7 +34,9 @@
 from __future__ import print_function
 import atexit
 import copy
+import fcntl
 import json
+import time
 import os
 import re
 import shutil
@@ -199,14 +201,35 @@ class Yedit(object):  # pragma: no cover
 
         return True
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
-    def remove_entry(data, key, sep='.'):
+    def remove_entry(data, key, index=None, value=None, sep='.'):
         ''' remove data at location key '''
         if key == '' and isinstance(data, dict):
-            data.clear()
+            if value is not None:
+                data.pop(value)
+            elif index is not None:
+                raise YeditException("remove_entry for a dictionary does not have an index {}".format(index))
+            else:
+                data.clear()
+
             return True
+
         elif key == '' and isinstance(data, list):
-            del data[:]
+            ind = None
+            if value is not None:
+                try:
+                    ind = data.index(value)
+                except ValueError:
+                    return False
+            elif index is not None:
+                ind = index
+            else:
+                del data[:]
+
+            if ind is not None:
+                data.pop(ind)
+
             return True
 
         if not (key and Yedit.valid_key(key, sep)) and \
@@ -321,7 +344,9 @@ class Yedit(object):  # pragma: no cover
         tmp_filename = filename + '.yedit'
 
         with open(tmp_filename, 'w') as yfd:
+            fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
+            fcntl.flock(yfd, fcntl.LOCK_UN)
 
         os.rename(tmp_filename, filename)
 
@@ -331,7 +356,7 @@ class Yedit(object):  # pragma: no cover
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            shutil.copy(self.filename, '{}.{}'.format(self.filename, time.strftime("%Y%m%dT%H%M%S")))
 
         # Try to set format attributes if supported
         try:
@@ -456,7 +481,7 @@ class Yedit(object):  # pragma: no cover
 
         return (False, self.yaml_dict)
 
-    def delete(self, path):
+    def delete(self, path, index=None, value=None):
         ''' remove path from a dict'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
@@ -466,7 +491,7 @@ class Yedit(object):  # pragma: no cover
         if entry is None:
             return (False, self.yaml_dict)
 
-        result = Yedit.remove_entry(self.yaml_dict, path, self.separator)
+        result = Yedit.remove_entry(self.yaml_dict, path, index, value, self.separator)
         if not result:
             return (False, self.yaml_dict)
 
@@ -747,7 +772,7 @@ class Yedit(object):  # pragma: no cover
             if params['update']:
                 rval = yamlfile.pop(params['key'], params['value'])
             else:
-                rval = yamlfile.delete(params['key'])
+                rval = yamlfile.delete(params['key'], params['index'], params['value'])
 
             if rval[0] and params['src']:
                 yamlfile.write()
@@ -866,7 +891,7 @@ class OpenShiftCLI(object):
 
     # Pylint allows only 5 arguments to be passed.
     # pylint: disable=too-many-arguments
-    def _replace_content(self, resource, rname, content, force=False, sep='.'):
+    def _replace_content(self, resource, rname, content, edits=None, force=False, sep='.'):
         ''' replace the current object with the content '''
         res = self._get(resource, rname)
         if not res['results']:
@@ -875,13 +900,24 @@ class OpenShiftCLI(object):
         fname = Utils.create_tmpfile(rname + '-')
 
         yed = Yedit(fname, res['results'][0], separator=sep)
-        changes = []
-        for key, value in content.items():
-            changes.append(yed.put(key, value))
+        updated = False
 
-        if any([change[0] for change in changes]):
+        if content is not None:
+            changes = []
+            for key, value in content.items():
+                changes.append(yed.put(key, value))
+
+            if any([change[0] for change in changes]):
+                updated = True
+
+        elif edits is not None:
+            results = Yedit.process_edits(edits, yed)
+
+            if results['changed']:
+                updated = True
+
+        if updated:
             yed.write()
-
             atexit.register(Utils.cleanup, [fname])
 
             return self._replace(fname, force)
@@ -943,7 +979,7 @@ class OpenShiftCLI(object):
             cmd.append(template_name)
         if params:
             param_str = ["{}={}".format(key, str(value).replace("'", r'"')) for key, value in params.items()]
-            cmd.append('-v')
+            cmd.append('-p')
             cmd.extend(param_str)
 
         results = self.openshift_cmd(cmd, output=True, input_data=template_data)
@@ -959,12 +995,18 @@ class OpenShiftCLI(object):
 
         return self.openshift_cmd(['create', '-f', fname])
 
-    def _get(self, resource, name=None, selector=None):
+    def _get(self, resource, name=None, selector=None, field_selector=None):
         '''return a resource by name '''
         cmd = ['get', resource]
+
         if selector is not None:
             cmd.append('--selector={}'.format(selector))
-        elif name is not None:
+
+        if field_selector is not None:
+            cmd.append('--field-selector={}'.format(field_selector))
+
+        # Name cannot be used with selector or field_selector.
+        if selector is None and field_selector is None and name is not None:
             cmd.append(name)
 
         cmd.extend(['-o', 'json'])
@@ -1555,14 +1597,16 @@ class OCcsr(OpenShiftCLI):
             # if you passed in nodes, you must have a node that matches
             if self.approve_all or (node and OCcsr.action_needed(csr, action)):
                 result = self.openshift_cmd(['certificate', action, csr['metadata']['name']], oadm=True)
-                # client should have service account name in username field
-                # server should have node name in username field
-                if node and csr['metadata']['name'] not in node['csrs']:
-                    node['csrs'][csr['metadata']['name']] = csr
+                # if we successfully approved
+                if result['returncode'] == 0:
+                    # client should have service account name in username field
+                    # server should have node name in username field
+                    if node and csr['metadata']['name'] not in node['csrs']:
+                        node['csrs'][csr['metadata']['name']] = csr
 
-                    # accept node in cluster
-                    if node['name'] in csr['spec']['username']:
-                        node['accepted'] = True
+                        # accept node in cluster
+                        if node['name'] in csr['spec']['username']:
+                            node['accepted'] = True
 
                 results.append(result)
 
@@ -1594,7 +1638,6 @@ class OCcsr(OpenShiftCLI):
             all_results = []
             finished = False
             timeout = False
-            import time
             # loop for timeout or block until all nodes pass
             ctr = 0
             while True:

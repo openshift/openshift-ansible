@@ -3,6 +3,9 @@ apiVersion: apps/v1beta1
 metadata:
   name: bootstrap-autoapprover
   namespace: openshift-infra
+  annotations:
+    image.openshift.io/triggers: |
+      [{"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.containers[?(@.name==\"signer\")].image"}]
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -11,11 +14,13 @@ spec:
       labels:
         app: bootstrap-autoapprover
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: 'true'
       serviceAccountName: bootstrap-autoapprover
       terminationGracePeriodSeconds: 1
       containers:
       - name: signer
-        image: openshift/node:v3.7.0-rc.0
+        image: " "
         command:
         - /bin/bash
         - -c

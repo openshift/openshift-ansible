@@ -2,6 +2,7 @@
 # We should print out deprecations prior to any failures so that if a play does fail for other reasons
 # the user would also be aware of any deprecated variables they should note to adjust
 - include_tasks: deprecations.yml
+  when: not ( openshift_skip_deprecation_check | default(false) ) | bool
 
 - name: Standardize on latest variable names
   set_fact:
@@ -75,3 +76,24 @@
     - ( openshift_cloudprovider_vsphere_username is undefined or openshift_cloudprovider_vsphere_password is undefined or
         openshift_cloudprovider_vsphere_host is undefined or openshift_cloudprovider_vsphere_datacenter is undefined or
         openshift_cloudprovider_vsphere_datastore is undefined )
+
+- name: Ensure removed web console extension variables are not set
+  fail:
+    msg: >
+      The OpenShift web console extensions must now be served as URLs. You can
+      add extensions using the openshift_web_console_extension_script_urls
+      and openshift_web_console_extension_stylesheet_urls variables. The
+      following variables are no longer used: openshift_master_extension_scripts,
+      openshift_master_extension_stylesheets, openshift_master_extensions
+  when:
+    - openshift_master_extension_scripts is defined or openshift_master_extension_stylesheets is defined or openshift_master_extensions is defined
+
+- name: Ensure that web console port matches API server port
+  fail:
+    msg: >
+      The OpenShift web console port must now match the API server port. If you
+      were previoiusly running the web console on a different port than the API
+      server, please open a support ticket.
+  when:
+    - openshift_master_console_port is defined
+    - openshift_master_console_port != (openshift_master_api_port | default(8443))

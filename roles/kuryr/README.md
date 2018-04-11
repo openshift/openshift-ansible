@@ -36,6 +36,8 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``kuryr_openstack_pool_min=1``
 * ``kuryr_openstack_pool_batch=5``
 * ``kuryr_openstack_pool_update_frequency=20``
+* ``openshift_kuryr_precreate_subports=5``
+* ``openshift_kuryr_device_owner=compute:kuryr``
 
 ## Kuryr resources
 

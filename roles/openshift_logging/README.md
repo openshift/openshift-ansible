@@ -42,6 +42,7 @@ When `openshift_logging_install_logging` is set to `False` the `openshift_loggin
 - `openshift_logging_curator_run_hour`: The hour of the day that Curator will run at. Defaults to '0'.
 - `openshift_logging_curator_run_minute`: The minute of the hour that Curator will run at. Defaults to '0'.
 - `openshift_logging_curator_run_timezone`: The timezone that Curator uses for figuring out its run time. Defaults to 'UTC'.
+- `openshift_logging_curator_timeout`: The timeout for each Curator operation. Defaults to 300.
 - `openshift_logging_curator_script_log_level`: The script log level for Curator. Defaults to 'INFO'.
 - `openshift_logging_curator_log_level`: The log level for the Curator process. Defaults to 'ERROR'.
 - `openshift_logging_curator_cpu_request`: The minimum amount of CPU to allocate to Curator. Default is '100m'.
@@ -219,7 +220,7 @@ Elasticsearch OPS too, if using an OPS cluster:
 - `openshift_logging_fluentd_remote_syslog_use_record`: Set `true` to use the severity and facility from the record, defaults to `false`
 - `openshift_logging_fluentd_remote_syslog_payload_key`: If string is specified, use this field from the record as the payload on the syslog message
 
-The corresponding openshift\_logging\_mux\_* parameters are below.
+The corresponding `openshift_logging_mux_*` parameters are below.
 
 - `openshift_logging_mux_remote_syslog`: Set `true` to enable remote syslog forwarding, defaults to `false`
 - `openshift_logging_mux_remote_syslog_host`: Required, hostname or IP of remote syslog server
@@ -230,6 +231,19 @@ The corresponding openshift\_logging\_mux\_* parameters are below.
 - `openshift_logging_mux_remote_syslog_tag_key`: If string specified, use this field from the record to set the key field on the syslog message
 - `openshift_logging_mux_remote_syslog_use_record`: Set `true` to use the severity and facility from the record, defaults to `false`
 - `openshift_logging_mux_remote_syslog_payload_key`: If string is specified, use this field from the record as the payload on the syslog message
+
+Cri-o Formatted Container Logs
+------------------------------
+In order to enable cri-o logs parsing, the `openshift_logging_fluentd` role
+mounts `node-config.yaml` from the host to the fluentd container to this path:
+```
+/etc/origin/node/node-config.yaml
+```
+
+Fluentd pod on startup automatically determines from the `node-config.yaml`
+whether to setup `in_tail` plugin to parse cri-o formatted logs in
+`/var/log/containers/*` based on the
+`kubeletArguments -> container-runtime-endpoint` value.
 
 Image update procedure
 ----------------------

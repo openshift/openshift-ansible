@@ -1,19 +1,4 @@
 ---
-# Fact setting
-- name: Set default image variables based on deployment type
-  include_vars: "{{ item }}"
-  with_first_found:
-  - "{{ openshift_deployment_type | default(deployment_type) }}.yml"
-  - "default_images.yml"
-
-- name: Set openshift_web_console facts
-  set_fact:
-    openshift_web_console_prefix: "{{ openshift_web_console_prefix | default(__openshift_web_console_prefix) }}"
-    openshift_web_console_version: "{{ openshift_web_console_version | default(__openshift_web_console_version) }}"
-    openshift_web_console_image_name: "{{ openshift_web_console_image_name | default(__openshift_web_console_image_name) }}"
-    # Default the replica count to the number of masters.
-    openshift_web_console_replica_count: "{{ openshift_web_console_replica_count | default(groups.oo_masters_to_config | length) }}"
-
 - name: Ensure openshift-web-console project exists
   oc_project:
     name: openshift-web-console
@@ -38,7 +23,6 @@
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "{{ __console_template_file }}"
-  - "{{ __console_rbac_file }}"
   - "{{ __console_config_file }}"
 
 # Check if an existing webconsole-config config map exists. If so, use those
@@ -130,20 +114,21 @@
     src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
   register: updated_console_config
 
-- name: Reconcile with the web console RBAC file
-  shell: >
-    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_rbac_file }}" --config={{ mktemp.stdout }}/admin.kubeconfig
-    | {{ openshift_client_binary }} auth reconcile --config={{ mktemp.stdout }}/admin.kubeconfig -f -
-
 - name: Apply the web console template file
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
     --param API_SERVER_CONFIG="{{ updated_console_config['content'] | b64decode }}"
-    --param IMAGE="{{ openshift_web_console_prefix }}{{ openshift_web_console_image_name }}:{{ openshift_web_console_version }}"
+    --param IMAGE="{{ openshift_web_console_image_name }}"
     --param NODE_SELECTOR={{ openshift_web_console_nodeselector | to_json | quote }}
     --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+
+- name: Remove temp directory
+  file:
+    state: absent
+    name: "{{ mktemp.stdout }}"
+  changed_when: False
 
 # Wait to give the rollout time to start before verifying that the console is
 # running. Unfortunately, we can't check if the deployment revision changed
@@ -155,21 +140,4 @@
   # Skip if the project didn't exist since there was no previous deployment.
   when: not create_console_project.changed
 
-- name: Verify that the web console is running
-  command: >
-    curl -k https://webconsole.openshift-web-console.svc/healthz
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
-  register: console_health
-  until: console_health.stdout == 'ok'
-  retries: 60
-  delay: 5
-  changed_when: false
-
-- name: Remove temp directory
-  file:
-    state: absent
-    name: "{{ mktemp.stdout }}"
-  changed_when: False
+- include_tasks: start.yml

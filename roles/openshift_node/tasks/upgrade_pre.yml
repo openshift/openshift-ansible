@@ -5,7 +5,7 @@
 - set_fact:
     skip_node_svc_handlers: True
 
-- include_tasks: registry_auth.yml
+- import_tasks: registry_auth.yml
 
 - name: update package meta data to speed install later.
   command: "{{ ansible_pkg_mgr }} makecache"
@@ -25,9 +25,6 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- include_tasks: upgrade/containerized_upgrade_pull.yml
-  when: openshift_is_containerized | bool
-
 # Prepull the rpms for docker upgrade, but don't install
 - name: download docker upgrade rpm
   command: "{{ ansible_pkg_mgr }} install -y --downloadonly docker{{ '-' + docker_version }}"
@@ -37,7 +34,7 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
-- include_tasks: upgrade/rpm_upgrade.yml
+- import_tasks: upgrade/rpm_upgrade.yml
   vars:
     openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift_is_containerized | bool

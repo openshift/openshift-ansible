@@ -1,0 +1,154 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: bundles.automationbroker.io
+spec:
+  group: automationbroker.io
+  version: v1
+  scope: Namespaced
+  names:
+    plural: bundles
+    singular: bundle
+    kind: Bundle
+  validation:
+    # openAPIV3Schema is the schema for validating custom objects.
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            runtime:
+              type: integer
+              minimum: 1
+              maximum: 2
+            version:
+              type: string
+              pattern: '^[\d]+.[\d*]+$'
+            fqName:
+              type: string
+            image:
+              type: string
+            tags:
+              type: array
+              items:
+                type: string
+            bindable:
+              type: boolean
+            description:
+              type: string
+            metadata:
+              type: string
+            async:
+              type: string
+              pattern: '^(optional|required|unsupported)$'
+            plans:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  metadata:
+                    type: string
+                  free:
+                    type: boolean
+                  bindable:
+                    type: boolean
+                  updatesTo:
+                    type: array
+                    items:
+                      type: string
+                  parameters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        title:
+                          type: string
+                        type:
+                          type: string
+                        description:
+                          type: string
+                        default:
+                          type: string
+                        deprecateMaxLength:
+                          type: integer
+                        maxLength:
+                          type: integer
+                        minLength:
+                          type: integer
+                        pattern:
+                          type: string
+                        multipleOf:
+                          type: float
+                        maximum:
+                          type: float
+                        exclusiveMaximum:
+                          type: float
+                        minimum:
+                          type: float
+                        exclusiveMinimum:
+                          type: float
+                        enum:
+                          type: array
+                        items:
+                          type: string
+                        required:
+                          type: boolean
+                        updatable:
+                          type: boolean
+                        displayType:
+                          type: string
+                        displayGroup:
+                          type: string
+                  bindParameters:
+                    type: array
+                    properties:
+                      name:
+                        type: string
+                      title:
+                        type: string
+                      type:
+                        type: string
+                      description:
+                        type: string
+                      default:
+                        type: string
+                      deprecateMaxLength:
+                        type: integer
+                      maxLength:
+                        type: integer
+                      minLength:
+                        type: integer
+                      pattern:
+                        type: string
+                      multipleOf:
+                        type: float
+                      maximum:
+                        type: float
+                      exclusiveMaximum:
+                        type: float
+                      minimum:
+                        type: float
+                      exclusiveMinimum:
+                        type: float
+                      enum:
+                        type: array
+                      items:
+                        type: string
+                      required:
+                        type: boolean
+                      updatable:
+                        type: boolean
+                      displayType:
+                        type: string
+                      displayGroup:
+                        type: string
+

@@ -1,0 +1,21 @@
+---
+- name: Ensure required directories are present
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  with_items:
+  - /etc/origin/node/pods
+  - /etc/origin/node/certificates
+- name: Determine if node already has a dynamic config group
+  command: grep -E '^BOOTSTRAP_CONFIG_NAME=.+' "/etc/sysconfig/{{ openshift_service_type }}-node"
+  ignore_errors: true
+  register: existing
+- name: Update the sysconfig to group "{{ r_node_dynamic_config_name }}"
+  lineinfile:
+    dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
+    line: "BOOTSTRAP_CONFIG_NAME={{ r_node_dynamic_config_name }}"
+    regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
+  when: r_node_dynamic_config_force|default(False) or existing is failed

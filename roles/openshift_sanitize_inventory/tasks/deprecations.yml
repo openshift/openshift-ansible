@@ -1,21 +1,22 @@
 ---
-
+# Since this task scrapes all inventory variables which may contain sensitive bits
+# mark it no_log
 - name: Check for usage of deprecated variables
-  set_fact:
-    __deprecation_message: "{{ __deprecation_message | default( __deprecation_header ) }} \n\t{{ item }}"
-  when:
-  - hostvars[inventory_hostname][item] is defined
-  with_items: "{{ __warn_deprecated_vars }}"
+  check_deprecated:
+    facts: "{{ hostvars[inventory_hostname] }}"
+    vars: "{{ __warn_deprecated_vars }}"
+    header: "{{ __deprecation_header }}"
+  register: dep_check
+  no_log: true
 
 - block:
-  - debug: msg="{{__deprecation_message}}"
-  - run_once: true
-    set_stats:
+  - debug: msg="{{ dep_check.msg }}"
+  - set_stats:
       data:
         installer_phase_initialize:
-          message: "{{ __deprecation_message }}"
+          message: "{{ dep_check.msg }}"
   when:
-  - __deprecation_message | default ('') | length > 0
+  - dep_check.changed
 
 # for with_fileglob Ansible resolves the path relative to the roles/<rolename>/files directory
 - name: Assign deprecated variables to correct counterparts

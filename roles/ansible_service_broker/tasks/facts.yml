@@ -1,0 +1,29 @@
+---
+# Fact setting and validations
+- name: Set default image variables based on deployment type
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ openshift_deployment_type }}.yml"
+    - "default_images.yml"
+
+- name: set ansible_service_broker facts
+  set_fact:
+    ansible_service_broker_image_prefix: "{{ ansible_service_broker_image_prefix | default(__ansible_service_broker_image_prefix) }}"
+    ansible_service_broker_image_tag: "{{ ansible_service_broker_image_tag | default(__ansible_service_broker_image_tag) }}"
+
+    ansible_service_broker_registry_type: "{{ ansible_service_broker_registry_type | default(__ansible_service_broker_registry_type) }}"
+    ansible_service_broker_registry_name: "{{ ansible_service_broker_registry_name | default(__ansible_service_broker_registry_name) }}"
+    ansible_service_broker_registry_url: "{{ ansible_service_broker_registry_url | default(__ansible_service_broker_registry_url) }}"
+    ansible_service_broker_registry_user: "{{ ansible_service_broker_registry_user | default(__ansible_service_broker_registry_user) }}"
+    ansible_service_broker_registry_password: "{{ ansible_service_broker_registry_password | default(__ansible_service_broker_registry_password) }}"
+    ansible_service_broker_registry_organization: "{{ ansible_service_broker_registry_organization | default(__ansible_service_broker_registry_organization) }}"
+    ansible_service_broker_registry_tag: "{{ ansible_service_broker_registry_tag | default(__ansible_service_broker_registry_tag) }}"
+    ansible_service_broker_registry_whitelist: "{{ ansible_service_broker_registry_whitelist | default(__ansible_service_broker_registry_whitelist) }}"
+
+- name: set ansible-service-broker image facts using set prefix and tag
+  set_fact:
+    ansible_service_broker_image: '{{ ansible_service_broker_image | default(__ansible_service_broker_image) }}'
+  vars:
+    __ansible_service_broker_image: "{{ ansible_service_broker_image_prefix }}ansible-service-broker:{{ ansible_service_broker_image_tag }}"
+
+- include_tasks: validate_facts.yml

@@ -10,89 +10,14 @@
     - openshift_web_console_install | default(true) | bool
     - openshift_upgrade_target is version_compare('3.9','>=')
 
-- name: Upgrade default router and default registry
+# upgrade registry and router pods; we defer waiting for these pods
+# until after the next play to hopefully save some time polling.
+- import_playbook: ../../../openshift-hosted/private/upgrade.yml
+
+- name: Upgrade manageiq, templates, examples
   hosts: oo_first_master
-  vars:
-    registry_image: "{{  openshift.master.registry_url | replace( '${component}', 'docker-registry' )  |
-                         replace ( '${version}', openshift_image_tag ) }}"
-    router_image: "{{ openshift.master.registry_url | replace( '${component}', 'haproxy-router' ) |
-                      replace ( '${version}', openshift_image_tag ) }}"
-    registry_console_image: "{{ openshift.master.registry_url | regex_replace ( '(origin|ose)-\\${component}', 'registry-console') |
-                                replace ( '${version}', 'v' ~ openshift.common.short_version ) }}"
-
-  pre_tasks:
-  - name: Load lib_openshift modules
-    import_role:
-      name: lib_openshift
-
-  - name: Collect all routers
-    oc_obj:
-      state: list
-      kind: pods
-      all_namespaces: True
-      selector: 'router'
-    register: all_routers
-
-  - set_fact:
-      haproxy_routers: "{{ all_routers.results.results[0]['items'] |
-                           lib_utils_oo_pods_match_component(openshift_deployment_type, 'haproxy-router') |
-                           lib_utils_oo_select_keys_from_list(['metadata']) }}"
-    when:
-    - all_routers.results.returncode == 0
-
-  - set_fact: haproxy_routers=[]
-    when:
-    - all_routers.results.returncode != 0
-
-  - name: Update router image to current version
-    oc_edit:
-      kind: dc
-      name: "{{ item['labels']['deploymentconfig'] }}"
-      namespace: "{{ item['namespace'] }}"
-      content:
-        spec.template.spec.containers[0].image: "{{ router_image }}"
-    with_items: "{{ haproxy_routers }}"
-    when:
-    - all_routers.results.returncode == 0
-
-  - name: Check for default registry
-    oc_obj:
-      state: list
-      kind: dc
-      name: docker-registry
-    register: _default_registry
-
-  - name: Update registry image to current version
-    oc_edit:
-      kind: dc
-      name: docker-registry
-      namespace: default
-      content:
-        spec.template.spec.containers[0].image: "{{ registry_image }}"
-    when:
-    - _default_registry.results.results[0] != {}
-
-  - name: Check for registry-console
-    oc_obj:
-      state: list
-      kind: dc
-      name: registry-console
-    register: _registry_console
-    when:
-    - openshift.common.deployment_type != 'origin'
-
-  - name: Update registry-console image to current version
-    oc_edit:
-      kind: dc
-      name: registry-console
-      namespace: default
-      content:
-        spec.template.spec.containers[0].image: "{{ registry_console_image }}"
-    when:
-    - openshift.common.deployment_type != 'origin'
-    - _registry_console.results.results[0] != {}
-
   roles:
+  - lib_utils
   - openshift_manageiq
   - role: openshift_project_request_template
     when: openshift_project_request_template_manage
@@ -107,34 +32,12 @@
   # Update the existing templates
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
-    registry_url: "{{ openshift.master.registry_url }}"
     openshift_examples_import_command: replace
   - role: openshift_hosted_templates
-    registry_url: "{{ openshift.master.registry_url }}"
     openshift_hosted_templates_import_command: replace
 
-  post_tasks:
-  # Do not perform these tasks when the registry is insecure.  The default registry is insecure in openshift_hosted/defaults/main.yml
-  - when: not (openshift_docker_hosted_registry_insecure | default(True))
-    block:
-    # we need to migrate customers to the new pattern of pushing to the registry via dns
-    # Step 1: verify the certificates have the docker registry service name
-    - name: shell command to determine if the docker-registry.default.svc is found in the registry certificate
-      shell: >
-        echo -n | openssl s_client -showcerts -servername docker-registry.default.svc -connect docker-registry.default.svc:5000  | openssl x509 -text |  grep -A1 'X509v3 Subject Alternative Name:' | grep -Pq 'DNS:docker-registry\.default\.svc(,|$)'
-      register: cert_output
-      changed_when: false
-      failed_when:
-      - cert_output.rc not in [0, 1]
-
-    # Step 2: Set a fact to be used to determine if we should run the redeploy of registry certs
-    - name: set a fact to include the registry certs playbook if needed
-      set_fact:
-        openshift_hosted_rollout_certs_and_registry: "{{ cert_output.rc != 0  }}"
-
-# Run the redeploy certs based upon the certificates. Defaults to False for insecure registries
-- when: (hostvars[groups.oo_first_master.0].openshift_hosted_rollout_certs_and_registry | default(False)) | bool
-  import_playbook: ../../../openshift-hosted/private/redeploy-registry-certificates.yml
+# Poll for registry and router pods, redeploy registry certs if needed.
+- import_playbook: ../../../openshift-hosted/private/upgrade_poll_and_check_certs.yml
 
 # Check for warnings to be printed at the end of the upgrade:
 - name: Clean up and display warnings
@@ -166,9 +69,4 @@
     when:
     - __shared_resource_viewer_protected | default(false)
 
-- name: Upgrade Service Catalog
-  hosts: oo_first_master
-  roles:
-  - role: openshift_service_catalog
-    when:
-    - openshift_enable_service_catalog | default(true) | bool
+- import_playbook: upgrade_components.yml

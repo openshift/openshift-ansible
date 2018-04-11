@@ -148,14 +148,14 @@
 
 - name: Generate topology file
   template:
-    src: "{{ openshift.common.examples_content_version }}/topology.json.j2"
+    src: "topology.json.j2"
     dest: "{{ mktemp.stdout }}/topology.json"
   when:
   - glusterfs_heketi_topology_load
 
 - name: Generate heketi config file
   template:
-    src: "{{ openshift.common.examples_content_version }}/heketi.json.j2"
+    src: "heketi.json.j2"
     dest: "{{ mktemp.stdout }}/heketi.json"
   when:
   - glusterfs_heketi_is_native
@@ -238,16 +238,17 @@
 
 - name: Set heketi-cli command
   set_fact:
-    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift_client_binary }} rsh --namespace={{ glusterfs_namespace }} {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
+    glusterfs_heketi_client: "{% if glusterfs_heketi_is_native %}{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig rsh --namespace={{ glusterfs_namespace }} {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} {% endif %}{{ glusterfs_heketi_cli }} -s http://{% if glusterfs_heketi_is_native %}localhost:8080{% else %}{{ glusterfs_heketi_url }}:{{ glusterfs_heketi_port }}{% endif %} --user admin {% if glusterfs_heketi_admin_key is defined %}--secret '{{ glusterfs_heketi_admin_key }}'{% endif %}"
 
 - name: Verify heketi service
   command: "{{ glusterfs_heketi_client }} cluster list"
   changed_when: False
 
 - name: Place heketi topology on heketi Pod
-  shell: "{{ openshift_client_binary }} exec --namespace={{ glusterfs_namespace }} -i {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} -- bash -c 'mkdir -p {{ mktemp.stdout }} && cat > {{ mktemp.stdout }}/topology.json' < {{ mktemp.stdout }}/topology.json"
+  shell: "{{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig exec --namespace={{ glusterfs_namespace }} -i {%if not glusterfs_heketi_is_missing %}{{ heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% else %}{{ deploy_heketi_pod.results.results[0]['items'][0]['metadata']['name'] }}{% endif %} -- bash -c 'mkdir -p {{ mktemp.stdout }} && cat > {{ mktemp.stdout }}/topology.json' < {{ mktemp.stdout }}/topology.json"
   when:
   - glusterfs_heketi_is_native
+  - glusterfs_heketi_topology_load
 
 - name: Load heketi topology
   command: "{{ glusterfs_heketi_client }} topology load --json={{ mktemp.stdout }}/topology.json 2>&1"
@@ -299,7 +300,7 @@
 
   - name: Generate GlusterFS StorageClass file
     template:
-      src: "{{ openshift.common.examples_content_version }}/glusterfs-storageclass.yml.j2"
+      src: "glusterfs-storageclass.yml.j2"
       dest: "{{ mktemp.stdout }}/glusterfs-storageclass.yml"
 
   - name: Create GlusterFS StorageClass
@@ -351,7 +352,7 @@
 
   - name: Generate Gluster Block StorageClass file
     template:
-      src: "{{ openshift.common.examples_content_version }}/gluster-block-storageclass.yml.j2"
+      src: "gluster-block-storageclass.yml.j2"
       dest: "{{ mktemp.stdout }}/gluster-block-storageclass.yml"
 
   - name: Create Gluster Block StorageClass

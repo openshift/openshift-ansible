@@ -26,7 +26,7 @@
 
 - name: Copy initial glusterblock provisioner resource file
   copy:
-    src: "{{ openshift.common.examples_content_version }}/{{ item }}"
+    src: "{{ item }}"
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - "glusterblock-provisioner.yml"

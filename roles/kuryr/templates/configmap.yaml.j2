@@ -141,15 +141,7 @@ data:
     # Driver to use for binding and unbinding ports. (string value)
     # Deprecated group/name - [binding]/driver
     #default_driver = kuryr.lib.binding.drivers.veth
-
-    # Drivers to use for binding and unbinding ports. (list value)
-    #enabled_drivers = kuryr.lib.binding.drivers.veth
-
-    # Specifies the name of the Nova instance interface to link the virtual devices
-    # to (only applicable to some binding drivers. (string value)
-    link_iface = eth0
-
-    driver = kuryr.lib.binding.drivers.vlan
+    default_driver = kuryr.lib.binding.drivers.vlan
 
 
     [cni_daemon]
@@ -239,8 +231,7 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('nested', 'noop') }}
-
+    vif_pool_driver = {{ kuryr_openstack_enable_pools | ternary('multi', 'noop') }}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -294,6 +285,7 @@ data:
 
     [neutron_defaults]
 
+    ovs_bridge = br-int
     pod_security_groups = {{ kuryr_openstack_pod_sg_id }}
     pod_subnet = {{ kuryr_openstack_pod_subnet_id }}
     service_subnet = {{ kuryr_openstack_service_subnet_id }}
@@ -301,7 +293,7 @@ data:
     # TODO (apuimedo): Remove the duplicated line just after this one once the
     # RDO packaging contains the upstream patch
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
-    external_svc_subnet = {{ kuryr_openstack_external_svc_subnet_id }}
+    external_svc_subnet = {{ kuryr_openstack_public_subnet_id }}
 
     [pod_vif_nested]
 
@@ -336,6 +328,9 @@ data:
 
     # Minimun interval (in seconds) between pool updates (integer value)
     ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
+
+    # Pod VIF drivers vs Pool Drivers mapping allowed
+    pools_vif_drivers = nested:nested-vlan,neutron:neutron-vif
 
   kuryr-cni.conf: |+
     [DEFAULT]
@@ -466,21 +461,9 @@ data:
     # From kuryr_kubernetes
     #
 
-    # The name prefix of the veth endpoint put inside the container. (string value)
-    #veth_dst_prefix = eth
-
-    # Driver to use for binding and unbinding ports. (string value)
-    # Deprecated group/name - [binding]/driver
-    #default_driver = kuryr.lib.binding.drivers.veth
-
-    # Drivers to use for binding and unbinding ports. (list value)
-    #enabled_drivers = kuryr.lib.binding.drivers.veth
-
     # Specifies the name of the Nova instance interface to link the virtual devices
     # to (only applicable to some binding drivers. (string value)
-    link_iface = eth0
-
-    driver = kuryr.lib.binding.drivers.vlan
+    link_iface = {{ kuryr_cni_link_interface }}
 
 
     [cni_daemon]
@@ -570,7 +553,7 @@ data:
     pod_vif_driver = nested-vlan
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
-    vif_pool_driver = {{ kuryr_openstack_enable_pools | default(False) | ternary('nested', 'noop') }}
+    vif_pool_driver = {{ kuryr_openstack_enable_pools | ternary('multi', 'noop') }}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -624,6 +607,7 @@ data:
 
     [neutron_defaults]
 
+    ovs_bridge = br-int
     pod_security_groups = {{ kuryr_openstack_pod_sg_id }}
     pod_subnet = {{ kuryr_openstack_pod_subnet_id }}
     service_subnet = {{ kuryr_openstack_service_subnet_id }}
@@ -665,3 +649,10 @@ data:
 
     # Minimun interval (in seconds) between pool updates (integer value)
     ports_pool_update_frequency = {{ kuryr_openstack_pool_update_frequency | default(20) }}
+
+    [oslo_concurrency]
+
+    #
+    # From kuryr_kubernetes
+    #
+    lock_path = {{ kuryr_openstack_lock_path | default('/var/kuryr-lock') }}

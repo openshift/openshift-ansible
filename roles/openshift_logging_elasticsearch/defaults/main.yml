@@ -4,7 +4,7 @@ openshift_logging_elasticsearch_image_pull_secret: "{{ openshift_hosted_logging_
 openshift_logging_elasticsearch_namespace: logging
 
 openshift_logging_elasticsearch_nodeselector: "{{ openshift_logging_es_nodeselector | default('') }}"
-openshift_logging_elasticsearch_cpu_limit: "{{ openshift_logging_es_cpu_limit | default('') }}"
+openshift_logging_elasticsearch_cpu_limit: null
 openshift_logging_elasticsearch_cpu_request: "{{ openshift_logging_es_cpu_request | default('1000m') }}"
 openshift_logging_elasticsearch_memory_limit: "{{ openshift_logging_es_memory_limit | default('1Gi') }}"
 openshift_logging_elasticsearch_recover_after_time: "{{ openshift_logging_es_recover_after_time | default('5m') }}"
@@ -42,7 +42,7 @@ openshift_logging_elasticsearch_kibana_index_mode: 'unique'
 
 openshift_logging_elasticsearch_proxy_cpu_request: "100m"
 openshift_logging_elasticsearch_proxy_memory_limit: "64Mi"
-openshift_logging_elasticsearch_prometheus_sa: "system:serviceaccount:{{openshift_prometheus_namespace | default('prometheus')}}:prometheus"
+openshift_logging_elasticsearch_prometheus_sa: "system:serviceaccount:{{openshift_prometheus_namespace | default('openshift-metrics')}}:prometheus"
 
 # this is used to determine if this is an operations deployment or a non-ops deployment
 # simply used for naming purposes
@@ -50,9 +50,8 @@ openshift_logging_elasticsearch_ops_deployment: false
 
 openshift_logging_elasticsearch_ops_allow_cluster_reader: false
 
-# following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
-#es_logging_contents:
-#es_config_contents:
+# openshift_logging_es_config is a hash to be merged into the defaults for the elasticsearch.yaml
+openshift_logging_es_config: {}
 
 
 openshift_logging_master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"

@@ -1,9 +1,7 @@
 allowDisabledDocker: false
 apiVersion: v1
-{% if openshift.common.version_gte_3_6 %}
 dnsBindAddress: 127.0.0.1:53
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
-{% endif %}
 dnsDomain: {{ openshift.common.dns_domain }}
 dnsIP: {{ openshift_dns_ip }}
 dockerConfig:
@@ -18,12 +16,9 @@ kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_util
   container-runtime:
   - remote
   container-runtime-endpoint:
-  - /var/run/crio/crio.sock
+  - {{ l_crio_var_sock }}
   image-service-endpoint:
-  - /var/run/crio/crio.sock
-  node-labels:
-  - router=true
-  - registry=true
+  - {{ l_crio_var_sock }}
   runtime-request-timeout:
   - 10m
 {% endif %}

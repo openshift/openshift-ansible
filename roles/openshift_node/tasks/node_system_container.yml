@@ -1,15 +1,33 @@
 ---
+# system containers create their own service unit files based on templates
+# that are part of the container image.
+# oc_atomic_container will create a systemd service unit file in
+# /etc/systemd/system/origin-node.service (origin) or
+# /etc/systemd/system/atomic-openshift-node.service (enterprise)
+
+# TODO: remove when system container is fixed to not include it
+- name: Ensure old system path is set
+  file:
+    state: directory
+    path: "{{ item }}"
+    mode: '0750'
+  with_items:
+  - "/etc/origin/openvswitch"
+  - "/var/lib/kubelet"
 
 - name: Pre-pull node system container image
   command: >
-    atomic pull --storage=ostree {{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ osn_image }}:{{ openshift_image_tag }}
+    atomic pull --storage=ostree {{ system_osn_image }}
   register: pull_result
+  retries: 3
+  delay: 5
+  until: pull_result.rc == 0
   changed_when: "'Pulling layer' in pull_result.stdout"
 
 - name: Install or Update node system container
   oc_atomic_container:
     name: "{{ openshift_service_type }}-node"
-    image: "{{ 'docker:' if system_images_registry == 'docker' else system_images_registry + '/' }}{{ osn_image }}:{{ openshift_image_tag }}"
+    image: "{{ osn_image }}"
     values:
     - "DNS_DOMAIN={{ openshift.common.dns_domain }}"
     - "DOCKER_SERVICE={{ openshift_docker_service_name }}.service"
@@ -34,3 +52,11 @@
     # if we have just a ',' then both mount lists were empty, we don't want to add
     # anything to config.json
     l_node_syscon_add_mounts2: "{{ (l_node_syscon_add_mounts != ',') | bool | ternary(l_node_syscon_add_mounts,'') }}"
+
+# TODO: network manager on RHEL is failing to execute 99-origin-dns.sh with signal 13, an immediate
+# restart seems to allow the job to configure. Only occurs with system containers.
+- name: Restart network manager to ensure networking configuration is in place
+  systemd:
+    name: NetworkManager
+    enabled: yes
+    state: restarted

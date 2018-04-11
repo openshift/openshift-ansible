@@ -30,6 +30,10 @@ a set of tasks. Best practice suggests using absolute paths to the hook file to 
 openshift_master_upgrade_pre_hook=/usr/share/custom/pre_master.yml
 openshift_master_upgrade_hook=/usr/share/custom/master.yml
 openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
+
+openshift_node_upgrade_pre_hook=/usr/share/custom/pre_node.yml
+openshift_node_upgrade_hook=/usr/share/custom/node.yml
+openshift_node_upgrade_post_hook=/usr/share/custom/post_node.yml
 # <snip>
 ```
 
@@ -68,3 +72,19 @@ The file may **not** be a playbook.
 - Runs **after** each master is upgraded and has had it's service/system restart.
 - This hook runs against **each master** in serial.
 - If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+
+### openshift_node_upgrade_pre_hook
+- Runs **before** each node is upgraded.
+- This hook runs against **each node** in serial.
+- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+
+### openshift_node_upgrade_hook
+- Runs **after** each node is upgraded but **before** it's marked schedulable again..
+- This hook runs against **each node** in serial.
+- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+
+### openshift_node_upgrade_post_hook
+- Runs **after** each node is upgraded; it's the last node upgrade action.
+- This hook runs against **each node** in serial.
+- If a task needs to run against a different host, said task will need to use [``delegate_to`` or ``local_action``](http://docs.ansible.com/ansible/playbooks_delegation.html#delegation).
+

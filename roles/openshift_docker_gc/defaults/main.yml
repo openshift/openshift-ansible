@@ -1,3 +1,14 @@
 ---
-r_enable_docker_gc: "{{ openshift_crio_enable_docker_gc | default(False) }}"
-r_docker_gc_node_selectors: "{{ openshift_crio_docker_gc_node_selector | default({}) }}"
+r_enable_docker_gc: "{{ openshift_crio_enable_docker_gc | default(True) }}"
+r_docker_gc_node_selectors: "{{ openshift_crio_docker_gc_node_selector | default({'runtime': 'cri-o'}) }}"
+
+openshift_docker_gc_image_dict:
+  origin:
+    image: "openshift/origin"
+    version: "{{ openshift_image_tag }}"
+  openshift-enterprise:
+    image: "openshift3/ose"
+    version: "{{ openshift_image_tag }}"
+
+openshift_docker_gc_image: "{{ openshift_docker_gc_image_dict[openshift_deployment_type]['image'] }}"
+openshift_docker_gc_version: "{{ openshift_docker_gc_image_dict[openshift_deployment_type]['version'] }}"

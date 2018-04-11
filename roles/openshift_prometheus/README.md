@@ -14,14 +14,16 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_state`: present - install/update. absent - uninstall.
 
+- `openshift_prometheus_node_exporter_install`: true (default) or false
+
 - `openshift_prometheus_namespace`: project (i.e. namespace) where the components will be
   deployed.
 
 - `openshift_prometheus_node_selector`: Selector for the nodes prometheus will be deployed on.
 
-- `openshift_prometheus_<COMPONENT>_image_prefix`: specify image prefix for the component 
+- `openshift_prometheus_<COMPONENT>_image_prefix`: specify image prefix for the component
 
-- `openshift_prometheus_<COMPONENT>_image_version`: specify image version for the component 
+- `openshift_prometheus_<COMPONENT>_image_version`: specify image version for the component
 
 - `openshift_prometheus_args`: Modify or add arguments for prometheus application
 
@@ -74,9 +76,9 @@ NOTE: Setting `openshift_prometheus_<COMPONENT>_storage_labels` overrides `opens
 
 
 ## Additional Alert Rules file variable
-An external file with alert rules can be added by setting path to additional rules variable: 
+An external file with alert rules can be added by setting path to additional rules variable:
 ```
-openshift_prometheus_additional_rules_file: <PATH> 
+openshift_prometheus_additional_rules_file: <PATH>
 ```
 
 File content should be in prometheus alert rules format.
@@ -100,12 +102,13 @@ groups:
 Each prometheus component (prometheus, alertmanager, alert-buffer, oauth-proxy) can specify a cpu and memory limits and requests by setting
 the corresponding role variable:
 ```
-openshift_prometheus_<COMPONENT>_(limits|requests)_(memory|cpu): <VALUE>
+openshift_prometheus_<COMPONENT>_(memory|cpu)_(limit|requests): <VALUE>
 ```
 e.g
 ```
-openshift_prometheus_alertmanager_limits_memory: 1Gi
-openshift_prometheus_oath_proxy_requests_cpu: 100
+openshift_prometheus_alertmanager_memory_limit: 1Gi
+openshift_prometheus_oath_proxy_cpu_request: 100
+openshift_prometheus_node_exporter_cpu_limit: 200m
 ```
 
 Dependencies
@@ -128,4 +131,3 @@ License
 -------
 
 Apache License, Version 2.0
-

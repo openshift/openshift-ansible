@@ -102,6 +102,10 @@
                                 "value": "${DOTNET_STARTUP_PROJECT}"
                             },
                             {
+                                "name": "DOTNET_SDK_VERSION",
+                                "value": "${DOTNET_SDK_VERSION}"
+                            },
+                            {
                                 "name": "DOTNET_ASSEMBLY_NAME",
                                 "value": "${DOTNET_ASSEMBLY_NAME}"
                             },
@@ -380,6 +384,12 @@
             "displayName": "Startup Project",
             "description": "Set this to the folder containing your startup project.",
             "value": "app"
+        },
+        {
+            "name": "DOTNET_SDK_VERSION",
+            "displayName": "SDK Version",
+            "description": "Set this to configure the default SDK version. This can be set to a specific version, '' (lowest version) or 'latest' (highest version).",
+            "value": ""
         },
         {
             "name": "DOTNET_ASSEMBLY_NAME",

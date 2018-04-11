@@ -1,0 +1,54 @@
+---
+- name: Node Preparation Checkpoint Start
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Node preparation 'In Progress'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_node:
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- name: Only target nodes that have not yet been bootstrapped
+  hosts: localhost
+  tasks:
+  - add_host:
+      name: "{{ item }}"
+      groups: oo_exclude_bootstrapped_nodes
+      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+      ansible_become: "{{ g_sudo | default(omit) }}"
+    with_items: "{{ groups.oo_nodes_to_bootstrap | default([]) }}"
+    changed_when: no
+    when: hostvars[item].openshift_is_bootstrapped | default(False) | bool
+
+- import_playbook: disable_excluders.yml
+  vars:
+    l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
+
+- import_playbook: configure_nodes.yml
+  vars:
+    l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
+
+- import_playbook: configure_bootstrap.yml
+
+- import_playbook: enable_excluders.yml
+  vars:
+    l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
+
+- import_playbook: clean_image.yml
+  vars:
+    l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
+
+- name: Node Preparation Checkpoint End
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Node preparation 'Complete'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_node:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

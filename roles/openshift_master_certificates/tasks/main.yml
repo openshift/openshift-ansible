@@ -6,11 +6,13 @@
   - admin.crt
   - ca.crt
   - ca-bundle.crt
+  - front-proxy-ca.crt
   - master.kubelet-client.crt
   - master.proxy-client.crt
   - master.server.crt
   - openshift-master.crt
   - service-signer.crt
+  - aggregator-front-proxy.crt
   register: g_master_cert_stat_result
   when: not openshift_certificates_redeploy | default(false) | bool
 
@@ -101,6 +103,7 @@
   file:
     path: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: absent
+  # Do we need this boolean here?
   when: openshift_master_etcd_hosts | length > 0
   with_items:
   - master.etcd-client.crt

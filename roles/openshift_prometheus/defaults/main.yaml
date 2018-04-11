@@ -1,6 +1,7 @@
 ---
 # defaults file for openshift_prometheus
 openshift_prometheus_state: present
+openshift_prometheus_node_exporter_install: true
 
 openshift_prometheus_namespace: openshift-metrics
 
@@ -10,11 +11,12 @@ openshift_prometheus_alerts_hostname: alerts-{{openshift_prometheus_namespace}}.
 openshift_prometheus_alertmanager_hostname: alertmanager-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}
 
 
-openshift_prometheus_node_selector: {"region":"infra"}
+openshift_prometheus_node_selector: {"node-role.kubernetes.io/infra":"true"}
 
 openshift_prometheus_service_port: 443
 openshift_prometheus_service_targetport: 8443
 openshift_prometheus_service_name: prometheus
+openshift_prometheus_reader_serviceaccount_name: prometheus-reader
 openshift_prometheus_alerts_service_targetport: 9443
 openshift_prometheus_alerts_service_name: alerts
 openshift_prometheus_alertmanager_service_targetport: 10443
@@ -29,7 +31,7 @@ l_openshift_prometheus_serviceaccount_annotations:
 openshift_prometheus_additional_rules_file: null
 
 #prometheus application arguments
-openshift_prometheus_args: ['--storage.tsdb.retention=6h']
+openshift_prometheus_args: ['--storage.tsdb.retention=3d']
 
 # storage
 # One of ['emptydir', 'pvc']
@@ -73,3 +75,7 @@ openshift_prometheus_oauth_proxy_cpu_limit: null
 openshift_prometheus_oauth_proxy_memory_limit: null
 openshift_prometheus_oauth_proxy_cpu_requests: null
 openshift_prometheus_oauth_proxy_memory_requests: null
+openshift_prometheus_node_exporter_cpu_limit: 200m
+openshift_prometheus_node_exporter_memory_limit: 50Mi
+openshift_prometheus_node_exporter_cpu_requests: 100m
+openshift_prometheus_node_exporter_memory_requests: 30Mi

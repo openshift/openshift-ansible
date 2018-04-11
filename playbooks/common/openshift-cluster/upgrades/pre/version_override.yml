@@ -1,0 +1,28 @@
+---
+# This playbook overrides normal version setting during double upgrades.
+
+- name: Set proper version values for upgrade
+  hosts: "{{ l_version_override_hosts | default('all:!all') }}"
+  tasks:
+    - set_fact:
+        # All of these will either have been set by openshift_version or
+        # provided by the user; we need to save these for later.
+        l_double_upgrade_saved_version: "{{ openshift_version }}"
+        l_double_upgrade_saved_release: "{{ openshift_release | default(openshift_upgrade_target) }}"
+        l_double_upgrade_saved_tag: "{{ openshift_image_tag }}"
+        l_double_upgrade_saved_pkgv: "{{ openshift_pkg_version }}"
+    - set_fact:
+        # We already ran openshift_version for the second of two upgrades;
+        # here we need to set some variables to enable the first upgrade.
+        # openshift_version, openshift_image_tag, and openshift_pkg_version
+        # will be modified by openshift_version; we want to ensure these
+        # are initially set to first versions to ensure no accidental usage of
+        # second versions (eg, 3.8 and 3.9 respectively) are used.
+        openshift_version: "{{ l_double_upgrade_first_version }}"
+        openshift_release: "{{ l_double_upgrade_first_release }}"
+        openshift_upgrade_target: '3.8'
+        openshift_upgrade_min: '3.7'
+
+# Now that we have force-set a different version, we need to update a few things
+# to ensure we have settings that actually match what's in repos/registries.
+- import_playbook: ../../../../init/version.yml

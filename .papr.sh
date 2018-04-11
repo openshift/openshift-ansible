@@ -6,17 +6,17 @@ set -xeuo pipefail
 # specific version which quickly becomes stale.
 
 if [ -n "${PAPR_BRANCH:-}" ]; then
-    target_branch=$PAPR_BRANCH
+  target_branch=$PAPR_BRANCH
 else
-    target_branch=$PAPR_PULL_TARGET_BRANCH
+  target_branch=$PAPR_PULL_TARGET_BRANCH
 fi
-
-# this is a bit wasteful, though there's no easy way to say "only clone up to
-# the first tag in the branch" -- ideally, PAPR could help with caching here
-git clone --branch $target_branch --single-branch https://github.com/openshift/origin
-export OPENSHIFT_IMAGE_TAG=$(git -C origin describe --abbrev=0)
-
-echo "Targeting OpenShift Origin $OPENSHIFT_IMAGE_TAG"
+if [[ "${target_branch}" =~ ^release- ]]; then
+  target_branch="${target_branch/release-/}"
+else
+  dnf install -y sed
+  target_branch="$( git describe | sed 's/^openshift-ansible-\([0-9]*\.[0-9]*\)\.[0-9]*-.*/\1/' )"
+fi
+export target_branch
 
 pip install -r requirements.txt
 
@@ -32,10 +32,11 @@ upload_journals() {
 
 trap upload_journals ERR
 
+# Store ansible log separately
+export ANSIBLE_LOG_PATH=ansible.log
+
 # run the actual installer
-# FIXME: override openshift_image_tag defined in the inventory until
-# https://github.com/openshift/openshift-ansible/issues/4478 is fixed.
-ansible-playbook -vvv -i .papr.inventory playbooks/deploy_cluster.yml -e "openshift_image_tag=$OPENSHIFT_IMAGE_TAG"
+ansible-playbook -v -i .papr.inventory playbooks/deploy_cluster.yml
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132

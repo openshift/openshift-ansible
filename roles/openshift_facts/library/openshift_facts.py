@@ -17,10 +17,8 @@ import struct
 import socket
 import ipaddress
 from distutils.util import strtobool
-from distutils.version import LooseVersion
 from ansible.module_utils.six import text_type
 from ansible.module_utils.six import string_types
-from ansible.module_utils.six.moves import configparser
 
 # ignore pylint errors related to the module_utils import
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import
@@ -32,14 +30,6 @@ from ansible.module_utils.six import iteritems, itervalues
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlunparse
 from ansible.module_utils._text import to_native
 
-HAVE_DBUS = False
-
-try:
-    from dbus import SystemBus, Interface
-    from dbus.exceptions import DBusException
-    HAVE_DBUS = True
-except ImportError:
-    pass
 
 DOCUMENTATION = '''
 ---
@@ -376,33 +366,6 @@ def normalize_provider_facts(provider, metadata):
     return facts
 
 
-def set_identity_providers_if_unset(facts):
-    """ Set identity_providers fact if not already present in facts dict
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated identity providers
-            facts if they were not already present
-    """
-    if 'master' in facts:
-        deployment_type = facts['common']['deployment_type']
-        if 'identity_providers' not in facts['master']:
-            identity_provider = dict(
-                name='allow_all', challenge=True, login=True,
-                kind='AllowAllPasswordIdentityProvider'
-            )
-            if deployment_type == 'openshift-enterprise':
-                identity_provider = dict(
-                    name='deny_all', challenge=True, login=True,
-                    kind='DenyAllPasswordIdentityProvider'
-                )
-
-            facts['master']['identity_providers'] = [identity_provider]
-
-    return facts
-
-
 def set_url_facts_if_unset(facts):
     """ Set url facts if not already present in facts dict
 
@@ -420,7 +383,6 @@ def set_url_facts_if_unset(facts):
         api_hostname = cluster_hostname if cluster_hostname else hostname
         api_public_hostname = cluster_public_hostname if cluster_public_hostname else public_hostname
         console_path = facts['master']['console_path']
-        etcd_hosts = facts['master']['etcd_hosts']
 
         use_ssl = dict(
             api=facts['master']['api_use_ssl'],
@@ -428,7 +390,6 @@ def set_url_facts_if_unset(facts):
             loopback_api=facts['master']['api_use_ssl'],
             console=facts['master']['console_use_ssl'],
             public_console=facts['master']['console_use_ssl'],
-            etcd=facts['master']['etcd_use_ssl']
         )
 
         ports = dict(
@@ -437,20 +398,7 @@ def set_url_facts_if_unset(facts):
             loopback_api=facts['master']['api_port'],
             console=facts['master']['console_port'],
             public_console=facts['master']['console_port'],
-            etcd=facts['master']['etcd_port'],
         )
-
-        etcd_urls = []
-        if etcd_hosts != '':
-            facts['master']['etcd_port'] = ports['etcd']
-            for host in etcd_hosts:
-                etcd_urls.append(format_url(use_ssl['etcd'], host,
-                                            ports['etcd']))
-        else:
-            etcd_urls = [format_url(use_ssl['etcd'], hostname,
-                                    ports['etcd'])]
-
-        facts['master'].setdefault('etcd_urls', etcd_urls)
 
         prefix_hosts = [('api', api_hostname),
                         ('public_api', api_public_hostname),
@@ -519,83 +467,6 @@ def set_aggregate_facts(facts):
     return facts
 
 
-def set_deployment_facts_if_unset(facts):
-    """ Set Facts that vary based on deployment_type. This currently
-        includes master.registry_url
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated deployment_type
-            facts
-    """
-    if 'master' in facts:
-        deployment_type = facts['common']['deployment_type']
-        openshift_features = ['Builder', 'S2IBuilder', 'WebConsole']
-        if 'disabled_features' not in facts['master']:
-            if facts['common']['deployment_subtype'] == 'registry':
-                facts['master']['disabled_features'] = openshift_features
-        if 'registry_url' not in facts['master']:
-            registry_url = 'openshift/origin-${component}:${version}'
-            if deployment_type == 'openshift-enterprise':
-                registry_url = 'openshift3/ose-${component}:${version}'
-            facts['master']['registry_url'] = registry_url
-
-    return facts
-
-
-# pylint: disable=too-many-statements
-def set_version_facts_if_unset(facts):
-    """ Set version facts. This currently includes common.version and
-        common.version_gte_3_x
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with version facts.
-    """
-    if 'common' in facts:
-        openshift_version = get_openshift_version(facts)
-        if openshift_version and openshift_version != "latest":
-            version = LooseVersion(openshift_version)
-            facts['common']['version'] = openshift_version
-            facts['common']['short_version'] = '.'.join([str(x) for x in version.version[0:2]])
-            version_gte_3_6 = version >= LooseVersion('3.6')
-            version_gte_3_7 = version >= LooseVersion('3.7')
-            version_gte_3_8 = version >= LooseVersion('3.8')
-            version_gte_3_9 = version >= LooseVersion('3.9')
-            version_gte_3_10 = version >= LooseVersion('3.10')
-        else:
-            # 'Latest' version is set to True, 'Next' versions set to False
-            version_gte_3_6 = True
-            version_gte_3_7 = True
-            version_gte_3_8 = False
-            version_gte_3_9 = False
-            version_gte_3_10 = False
-        facts['common']['version_gte_3_6'] = version_gte_3_6
-        facts['common']['version_gte_3_7'] = version_gte_3_7
-        facts['common']['version_gte_3_8'] = version_gte_3_8
-        facts['common']['version_gte_3_9'] = version_gte_3_9
-        facts['common']['version_gte_3_10'] = version_gte_3_10
-
-        if version_gte_3_10:
-            examples_content_version = 'v3.10'
-        elif version_gte_3_9:
-            examples_content_version = 'v3.9'
-        elif version_gte_3_8:
-            examples_content_version = 'v3.8'
-        elif version_gte_3_7:
-            examples_content_version = 'v3.7'
-        elif version_gte_3_6:
-            examples_content_version = 'v3.6'
-        else:
-            examples_content_version = 'v1.5'
-
-        facts['common']['examples_content_version'] = examples_content_version
-
-    return facts
-
-
 def set_sdn_facts_if_unset(facts, system_facts):
     """ Set sdn facts if not already present in facts dict
 
@@ -659,7 +530,10 @@ def set_nodename(facts):
         # elif 'cloudprovider' in facts and facts['cloudprovider']['kind'] == 'openstack':
         #     facts['node']['nodename'] = facts['provider']['metadata']['hostname'].replace('.novalocal', '')
         else:
-            facts['node']['nodename'] = facts['common']['hostname'].lower()
+            if 'bootstrapped' in facts['node'] and facts['node']['bootstrapped']:
+                facts['node']['nodename'] = facts['common']['raw_hostname'].lower()
+            else:
+                facts['node']['nodename'] = facts['common']['hostname'].lower()
     return facts
 
 
@@ -760,6 +634,7 @@ def build_controller_args(facts):
                 if facts['cloudprovider']['kind'] == 'aws':
                     controller_args['cloud-provider'] = ['aws']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/aws.conf']
+                    controller_args['disable-attach-detach-reconcile-sync'] = 'true'
                 if facts['cloudprovider']['kind'] == 'openstack':
                     controller_args['cloud-provider'] = ['openstack']
                     controller_args['cloud-config'] = [cloud_cfg_path + '/openstack.conf']
@@ -791,163 +666,6 @@ def build_api_server_args(facts):
         if api_server_args != {}:
             facts = merge_facts({'master': {'api_server_args': api_server_args}}, facts, [])
     return facts
-
-
-def is_service_running(service):
-    """ Queries systemd through dbus to see if the service is running """
-    service_running = False
-    try:
-        bus = SystemBus()
-        systemd = bus.get_object('org.freedesktop.systemd1', '/org/freedesktop/systemd1')
-        manager = Interface(systemd, dbus_interface='org.freedesktop.systemd1.Manager')
-        service_unit = service if service.endswith('.service') else manager.GetUnit('{0}.service'.format(service))
-        service_proxy = bus.get_object('org.freedesktop.systemd1', str(service_unit))
-        service_properties = Interface(service_proxy, dbus_interface='org.freedesktop.DBus.Properties')
-        service_load_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'LoadState')
-        service_active_state = service_properties.Get('org.freedesktop.systemd1.Unit', 'ActiveState')
-        if service_load_state == 'loaded' and service_active_state == 'active':
-            service_running = True
-    except DBusException:
-        # TODO: do not swallow exception, as it may be hiding useful debugging
-        # information.
-        pass
-
-    return service_running
-
-
-def rpm_rebuilddb():
-    """
-    Runs rpm --rebuilddb to ensure the db is in good shape.
-    """
-    module.run_command(['/usr/bin/rpm', '--rebuilddb'])  # noqa: F405
-
-
-def get_version_output(binary, version_cmd):
-    """ runs and returns the version output for a command """
-    cmd = []
-    for item in (binary, version_cmd):
-        if isinstance(item, list):
-            cmd.extend(item)
-        else:
-            cmd.append(item)
-
-    if os.path.isfile(cmd[0]):
-        _, output, _ = module.run_command(cmd)  # noqa: F405
-    return output
-
-
-# We may need this in the future.
-def get_docker_version_info():
-    """ Parses and returns the docker version info """
-    result = None
-    if is_service_running('docker') or is_service_running('container-engine'):
-        version_info = yaml.safe_load(get_version_output('/usr/bin/docker', 'version'))
-        if 'Server' in version_info:
-            result = {
-                'api_version': version_info['Server']['API version'],
-                'version': version_info['Server']['Version']
-            }
-    return result
-
-
-def get_openshift_version(facts):
-    """ Get current version of openshift on the host.
-
-        Checks a variety of ways ranging from fastest to slowest.
-
-        Args:
-            facts (dict): existing facts
-            optional cli_image for pulling the version number
-
-        Returns:
-            version: the current openshift version
-    """
-    version = None
-
-    # No need to run this method repeatedly on a system if we already know the
-    # version
-    # TODO: We need a way to force reload this after upgrading bits.
-    if 'common' in facts:
-        if 'version' in facts['common'] and facts['common']['version'] is not None:
-            return chomp_commit_offset(facts['common']['version'])
-
-    if os.path.isfile('/usr/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])  # noqa: F405
-        version = parse_openshift_version(output)
-    else:
-        version = get_container_openshift_version(facts)
-
-    # Handle containerized masters that have not yet been configured as a node.
-    # This can be very slow and may get re-run multiple times, so we only use this
-    # if other methods failed to find a version.
-    if not version and os.path.isfile('/usr/local/bin/openshift'):
-        _, output, _ = module.run_command(['/usr/local/bin/openshift', 'version'])  # noqa: F405
-        version = parse_openshift_version(output)
-
-    return chomp_commit_offset(version)
-
-
-def chomp_commit_offset(version):
-    """Chomp any "+git.foo" commit offset string from the given `version`
-    and return the modified version string.
-
-Ex:
-- chomp_commit_offset(None)                 => None
-- chomp_commit_offset(1337)                 => "1337"
-- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
-- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
-- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
-    """
-    if version is None:
-        return version
-    else:
-        # Stringify, just in case it's a Number type. Split by '+' and
-        # return the first split. No concerns about strings without a
-        # '+', .split() returns an array of the original string.
-        return str(version).split('+')[0]
-
-
-def get_container_openshift_version(facts):
-    """
-    If containerized, see if we can determine the installed version via the
-    systemd environment files.
-    """
-    deployment_type = facts['common']['deployment_type']
-    service_type_dict = {'origin': 'origin',
-                         'openshift-enterprise': 'atomic-openshift'}
-    service_type = service_type_dict[deployment_type]
-
-    for filename in ['/etc/sysconfig/%s-master-controllers', '/etc/sysconfig/%s-node']:
-        env_path = filename % service_type
-        if not os.path.exists(env_path):
-            continue
-
-        with open(env_path) as env_file:
-            for line in env_file:
-                if line.startswith("IMAGE_VERSION="):
-                    tag = line[len("IMAGE_VERSION="):].strip()
-                    # Remove leading "v" and any trailing release info, we just want
-                    # a version number here:
-                    no_v_version = tag[1:] if tag[0] == 'v' else tag
-                    version = no_v_version.split("-")[0]
-                    return version
-    return None
-
-
-def parse_openshift_version(output):
-    """ Apply provider facts to supplied facts dict
-
-        Args:
-            string: output of 'openshift version'
-        Returns:
-            string: the version number
-    """
-    versions = dict(e.split(' v') for e in output.splitlines() if ' v' in e)
-    ver = versions.get('openshift', '')
-    # Remove trailing build number and commit hash from older versions, we need to return a straight
-    # w.x.y.z version here for use as openshift_version throughout the playbooks/roles. (i.e. 3.1.1.6-64-g80b61da)
-    ver = ver.split('-')[0]
-    return ver
 
 
 def apply_provider_facts(facts, provider_facts):
@@ -1084,23 +802,11 @@ def get_local_facts_from_file(filename):
         Returns:
             dict: the retrieved facts
     """
-    local_facts = dict()
     try:
-        # Handle conversion of INI style facts file to json style
-        ini_facts = configparser.SafeConfigParser()
-        ini_facts.read(filename)
-        for section in ini_facts.sections():
-            local_facts[section] = dict()
-            for key, value in ini_facts.items(section):
-                local_facts[section][key] = value
-
-    except (configparser.MissingSectionHeaderError,
-            configparser.ParsingError):
-        try:
-            with open(filename, 'r') as facts_file:
-                local_facts = json.load(facts_file)
-        except (ValueError, IOError):
-            pass
+        with open(filename, 'r') as facts_file:
+            local_facts = json.load(facts_file)
+    except (ValueError, IOError):
+        local_facts = {}
 
     return local_facts
 
@@ -1257,23 +963,15 @@ def set_buildoverrides_facts(facts):
     return facts
 
 
-# pylint: disable=too-many-statements
-def set_container_facts_if_unset(facts):
-    """ Set containerized facts.
-
-        Args:
-            facts (dict): existing facts
-        Returns:
-            dict: the facts dict updated with the generated containerization
-            facts
-    """
-
-    return facts
-
-
-class OpenShiftFactsInternalError(Exception):
-    """Origin Facts Error"""
-    pass
+def pop_obsolete_local_facts(local_facts):
+    """Remove unused keys from local_facts"""
+    keys_to_remove = {
+        'master': ('etcd_port', 'etcd_use_ssl', 'etcd_hosts')
+    }
+    for role in keys_to_remove:
+        if role in local_facts:
+            for key in keys_to_remove[role]:
+                local_facts[role].pop(key, None)
 
 
 class OpenShiftFactsUnsupportedRoleError(Exception):
@@ -1360,17 +1058,7 @@ class OpenShiftFacts(object):
                                             additive_facts_to_overwrite)
         roles = local_facts.keys()
 
-        if 'common' in local_facts and 'deployment_type' in local_facts['common']:
-            deployment_type = local_facts['common']['deployment_type']
-        else:
-            deployment_type = 'origin'
-
-        if 'common' in local_facts and 'deployment_subtype' in local_facts['common']:
-            deployment_subtype = local_facts['common']['deployment_subtype']
-        else:
-            deployment_subtype = 'basic'
-
-        defaults = self.get_defaults(roles, deployment_type, deployment_subtype)
+        defaults = self.get_defaults(roles)
         provider_facts = self.init_provider_facts()
         facts = apply_provider_facts(defaults, provider_facts)
         facts = merge_facts(facts,
@@ -1378,13 +1066,9 @@ class OpenShiftFacts(object):
                             additive_facts_to_overwrite)
         facts['current_config'] = get_current_config(facts)
         facts = set_url_facts_if_unset(facts)
-        facts = set_identity_providers_if_unset(facts)
-        facts = set_deployment_facts_if_unset(facts)
         facts = set_sdn_facts_if_unset(facts, self.system_facts)
-        facts = set_container_facts_if_unset(facts)
         facts = build_controller_args(facts)
         facts = build_api_server_args(facts)
-        facts = set_version_facts_if_unset(facts)
         facts = set_aggregate_facts(facts)
         facts = set_proxy_facts(facts)
         facts = set_builddefaults_facts(facts)
@@ -1392,7 +1076,7 @@ class OpenShiftFacts(object):
         facts = set_nodename(facts)
         return dict(openshift=facts)
 
-    def get_defaults(self, roles, deployment_type, deployment_subtype):
+    def get_defaults(self, roles):
         """ Get default fact values
 
             Args:
@@ -1408,11 +1092,12 @@ class OpenShiftFacts(object):
         hostname_values = [hostname_f, self.system_facts['ansible_nodename'],
                            self.system_facts['ansible_fqdn']]
         hostname = choose_hostname(hostname_values, ip_addr).lower()
+        exit_code, output, _ = module.run_command(['hostname'])  # noqa: F405
+        raw_hostname = output.strip() if exit_code == 0 else hostname
 
         defaults['common'] = dict(ip=ip_addr,
                                   public_ip=ip_addr,
-                                  deployment_type=deployment_type,
-                                  deployment_subtype=deployment_subtype,
+                                  raw_hostname=raw_hostname,
                                   hostname=hostname,
                                   public_hostname=hostname,
                                   portal_net='172.30.0.0/16',
@@ -1424,20 +1109,11 @@ class OpenShiftFacts(object):
                                       controllers_port='8444',
                                       console_use_ssl=True,
                                       console_path='/console',
-                                      console_port='8443', etcd_use_ssl=True,
-                                      etcd_hosts='', etcd_port='4001',
+                                      console_port='8443',
                                       portal_net='172.30.0.0/16',
-                                      embedded_kube=True,
-                                      embedded_dns=True,
                                       bind_addr='0.0.0.0',
                                       session_max_seconds=3600,
-                                      session_name='ssn',
-                                      session_secrets_file='',
-                                      access_token_max_seconds=86400,
-                                      auth_token_max_seconds=500,
-                                      oauth_grant_method='auto',
-                                      dynamic_provisioning_enabled=True,
-                                      max_requests_inflight=500)
+                                      session_name='ssn')
 
         if 'cloudprovider' in roles:
             defaults['cloudprovider'] = dict(kind=None)
@@ -1550,9 +1226,9 @@ class OpenShiftFacts(object):
                                       additive_facts_to_overwrite)
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
+        pop_obsolete_local_facts(new_local_facts)
 
         if new_local_facts != local_facts:
-            self.validate_local_facts(new_local_facts)
             changed = True
             if not module.check_mode:  # noqa: F405
                 save_local_facts(self.filename, new_local_facts)
@@ -1577,71 +1253,6 @@ class OpenShiftFacts(object):
             del facts[fact]
         return facts
 
-    def validate_local_facts(self, facts=None):
-        """ Validate local facts
-
-            Args:
-                facts (dict): local facts to validate
-        """
-        invalid_facts = dict()
-        invalid_facts = self.validate_master_facts(facts, invalid_facts)
-        if invalid_facts:
-            msg = 'Invalid facts detected:\n'
-            # pylint: disable=consider-iterating-dictionary
-            for key in invalid_facts.keys():
-                msg += '{0}: {1}\n'.format(key, invalid_facts[key])
-            module.fail_json(msg=msg, changed=self.changed)  # noqa: F405
-
-    # disabling pylint errors for line-too-long since we're dealing
-    # with best effort reduction of error messages here.
-    # disabling errors for too-many-branches since we require checking
-    # many conditions.
-    # pylint: disable=line-too-long, too-many-branches
-    @staticmethod
-    def validate_master_facts(facts, invalid_facts):
-        """ Validate master facts
-
-            Args:
-                facts (dict): local facts to validate
-                invalid_facts (dict): collected invalid_facts
-
-            Returns:
-                dict: Invalid facts
-        """
-        if 'master' in facts:
-            # openshift.master.session_auth_secrets
-            if 'session_auth_secrets' in facts['master']:
-                session_auth_secrets = facts['master']['session_auth_secrets']
-                if not issubclass(type(session_auth_secrets), list):
-                    invalid_facts['session_auth_secrets'] = 'Expects session_auth_secrets is a list.'
-                elif 'session_encryption_secrets' not in facts['master']:
-                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_encryption secrets must be set '
-                                                             'if openshift_master_session_auth_secrets is provided.')
-                elif len(session_auth_secrets) != len(facts['master']['session_encryption_secrets']):
-                    invalid_facts['session_auth_secrets'] = ('openshift_master_session_auth_secrets and '
-                                                             'openshift_master_session_encryption_secrets must be '
-                                                             'equal length.')
-                else:
-                    for secret in session_auth_secrets:
-                        if len(secret) < 32:
-                            invalid_facts['session_auth_secrets'] = ('Invalid secret in session_auth_secrets. '
-                                                                     'Secrets must be at least 32 characters in length.')
-            # openshift.master.session_encryption_secrets
-            if 'session_encryption_secrets' in facts['master']:
-                session_encryption_secrets = facts['master']['session_encryption_secrets']
-                if not issubclass(type(session_encryption_secrets), list):
-                    invalid_facts['session_encryption_secrets'] = 'Expects session_encryption_secrets is a list.'
-                elif 'session_auth_secrets' not in facts['master']:
-                    invalid_facts['session_encryption_secrets'] = ('openshift_master_session_auth_secrets must be '
-                                                                   'set if openshift_master_session_encryption_secrets '
-                                                                   'is provided.')
-                else:
-                    for secret in session_encryption_secrets:
-                        if len(secret) not in [16, 24, 32]:
-                            invalid_facts['session_encryption_secrets'] = ('Invalid secret in session_encryption_secrets. '
-                                                                           'Secrets must be 16, 24, or 32 characters in length.')
-        return invalid_facts
-
 
 def main():
     """ main """
@@ -1659,9 +1270,6 @@ def main():
         supports_check_mode=True,
         add_file_common_args=True,
     )
-
-    if not HAVE_DBUS:
-        module.fail_json(msg="This module requires dbus python bindings")  # noqa: F405
 
     module.params['gather_subset'] = ['hardware', 'network', 'virtual', 'facter']  # noqa: F405
     module.params['gather_timeout'] = 10  # noqa: F405

@@ -1,0 +1,57 @@
+---
+- name: Check for existing configuration
+  stat:
+    path: /etc/origin/master/master-config.yaml
+  register: master_config_stat
+
+- name: Set clean install fact
+  set_fact:
+    l_clean_install: "{{ not master_config_stat.stat.exists | bool }}"
+
+- name: Determine if etcd3 storage is in use
+  command: grep  -Pzo  "storage-backend:\n.*etcd3" /etc/origin/master/master-config.yaml -q
+  register: etcd3_grep
+  failed_when: false
+  changed_when: false
+
+- name: Set etcd3 fact
+  set_fact:
+    l_etcd3_enabled: "{{ etcd3_grep.rc == 0 | bool }}"
+
+- name: Check if atomic-openshift-master sysconfig exists yet
+  stat:
+    path: /etc/sysconfig/atomic-openshift-master
+  register: l_aom_exists
+
+- name: Preserve OPENSHIFT_DEFAULT_REGISTRY master parameter if present
+  command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master
+  register: l_default_registry_defined
+  when: l_aom_exists.stat.exists | bool
+
+- name: Check if atomic-openshift-master-api sysconfig exists yet
+  stat:
+    path: /etc/sysconfig/atomic-openshift-master-api
+  register: l_aom_api_exists
+
+- name: Preserve OPENSHIFT_DEFAULT_REGISTRY master-api parameter if present
+  command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master-api
+  register: l_default_registry_defined_api
+  when: l_aom_api_exists.stat.exists | bool
+
+- name: Check if atomic-openshift-master-controllers sysconfig exists yet
+  stat:
+    path: /etc/sysconfig/atomic-openshift-master-controllers
+  register: l_aom_controllers_exists
+
+- name: Preserve OPENSHIFT_DEFAULT_REGISTRY master-controllers parameter if present
+  command: awk '/^OPENSHIFT_DEFAULT_REGISTRY/' /etc/sysconfig/atomic-openshift-master-controllers
+  register: l_default_registry_defined_controllers
+  when: l_aom_controllers_exists.stat.exists | bool
+
+- name: Update facts with OPENSHIFT_DEFAULT_REGISTRY value
+  set_fact:
+    l_default_registry_value: "{{ l_default_registry_defined.stdout | default('') }}"
+    l_default_registry_value_api: "{{ l_default_registry_defined_api.stdout | default('') }}"
+    l_default_registry_value_controllers: "{{ l_default_registry_defined_controllers.stdout | default('') }}"
+
+- import_tasks: generate_session_secrets.yml

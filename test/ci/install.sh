@@ -15,15 +15,14 @@ ansible-playbook -vv            \
 
 echo "Running network_manager setup"
 
-playbook_base='/usr/share/ansible/openshift-ansible/playbooks/'
 if [[ -s "$1/openshift-node/network_manager.yml" ]]; then
    playbook="$1/openshift-node/network_manager.yml"
 else
    playbook="$1/byo/openshift-node/network_manager.yml"
 fi
 ansible-playbook -vv            \
-                 --inventory $1 \
-                 --e @$2        \
+                 --inventory $2 \
+                 --e @$3       \
                 ${playbook}
 
 echo "Running openshift-ansible deploy_cluster"

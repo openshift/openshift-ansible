@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+# Restart the named component by stopping its base container.
+if [[ -z "${1-}" ]]; then
+  echo "A component name like 'api', 'etcd', or 'controllers' must be specified." 1>&2
+  exit 1
+fi
+
+types=( "atomic-openshift" "origin" )
+for type in "${types[@]}"; do
+  if systemctl cat "${type}-master-${1}.service" &>/dev/null; then
+    systemctl restart "${type}-master-${1}.service"
+    exit 0
+  fi
+done
+
+# TODO: move to cri-ctl
+# TODO: short term hack for cri-o
+
+container=$(docker ps -l -q --filter "label=openshift.io/component=${1}" --filter "label=io.kubernetes.container.name=POD")
+if [[ -z "${container}" ]]; then
+  echo "Component ${1} is already stopped" 1>&2
+  exit 0
+fi
+exec docker stop "${container}" --time 30 >/dev/null

@@ -1,0 +1,35 @@
+---
+- name: evaluate groups
+  import_playbook: ../../init/evaluate_groups.yml
+
+- name: Unsubscribe RHEL instances
+  hosts: oo_all_hosts
+  become: yes
+  gather_facts: yes
+  tasks:
+  - name: Unsubscribe RHEL instances
+    import_role:
+      name: rhel_unsubscribe
+    when:
+    - ansible_distribution == "RedHat"
+    - rhsub_user is defined
+    - rhsub_pass is defined
+
+- name: Clean DNS entries
+  hosts: localhost
+  tasks:
+  - name: Clean DNS entries
+    import_role:
+      name: openshift_openstack
+      tasks_from: clean-dns.yml
+    when:
+    - openshift_openstack_external_nsupdate_keys is defined
+    - openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined
+
+- name: Remove OpenStack resources
+  hosts: localhost
+  tasks:
+  - name: Remove OpenStack resources
+    import_role:
+      name: openshift_openstack
+      tasks_from: unprovision.yml

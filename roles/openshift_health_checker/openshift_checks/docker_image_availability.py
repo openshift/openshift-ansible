@@ -117,23 +117,25 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         if unavailable_images:
             unreachable = [reg for reg, reachable in self.reachable_registries.items() if not reachable]
-            unreachable_msg = "Failed connecting to: {}\n".format(", ".join(unreachable))
-            blocked_msg = "Blocked registries: {}\n".format(", ".join(self.registries["blocked"]))
+            unreachable_msg = u"Failed connecting to: {}\n".format(u", ".join(unreachable))
+            blocked_msg = u"Blocked registries: {}\n".format(u", ".join(self.registries["blocked"]))
+            missing = u",\n    ".join(sorted(unavailable_images))
+
             msg = (
-                "One or more required container images are not available:\n    {missing}\n"
+                u"One or more required container images are not available:\n    {missing}\n"
                 "Checked with: {cmd}\n"
                 "Default registries searched: {registries}\n"
                 "{blocked}"
                 "{unreachable}"
             ).format(
-                missing=",\n    ".join(sorted(unavailable_images)),
+                missing=missing,
                 cmd=self.skopeo_example_command,
                 registries=", ".join(self.registries["configured"]),
                 blocked=blocked_msg if self.registries["blocked"] else "",
                 unreachable=unreachable_msg if unreachable else "",
             )
 
-            return dict(failed=True, msg=msg)
+            return dict(failed=True, msg=msg.encode('utf8') if six.PY2 else msg)
 
         return {}
 
@@ -158,6 +160,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         host_groups = self.get_var("group_names")
         # containerized etcd may not have openshift_image_tag, see bz 1466622
         image_tag = self.get_var("openshift_image_tag", default="latest")
+        image_tag = self.template_var(image_tag)
         image_info = DEPLOYMENT_IMAGE_INFO[deployment_type]
 
         # template for images that run on top of OpenShift
@@ -262,6 +265,10 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
                 self.reachable_registries[registry] = self.connect_to_registry(registry)
             if not self.reachable_registries[registry]:
                 continue  # do not keep trying unreachable registries
+
+            if six.PY2:
+                registry = registry.encode('utf8')
+                image = image.encode('utf8')
 
             args = dict(
                 proxyvars=self.skopeo_proxy_vars,

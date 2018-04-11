@@ -1,10 +1,11 @@
 ---
 - name: Ensure that ElasticSearch has nodes to run on
-  fail:
-    msg: |-
-      No schedulable nodes found matching node selector for Elasticsearch - '{{ openshift_logging_es_nodeselector }}'
-  when:
-  - openshift_schedulable_node_labels | lib_utils_oo_has_no_matching_selector(openshift_logging_es_nodeselector)
+  import_role:
+    name: openshift_control_plane
+    tasks_from: ensure_nodes_matching_selector.yml
+  vars:
+    openshift_master_ensure_nodes_selector: "{{ openshift_logging_es_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_service: Elasticsearch
 
 - name: Validate Elasticsearch cluster size
   fail: msg="The openshift_logging_es_cluster_size may only be scaled down manually. Please see official documentation on how to do this."
@@ -37,7 +38,7 @@
     openshift_logging_elasticsearch_image_prefix: "{{ openshift_logging_elasticsearch_image_prefix | default(__openshift_logging_elasticsearch_image_prefix) }}"
     openshift_logging_elasticsearch_image_version: "{{ openshift_logging_elasticsearch_image_version | default(__openshift_logging_elasticsearch_image_version) }}"
 
-- include_tasks: determine_version.yaml
+- include_tasks: get_es_version.yml
 
 - set_fact:
     full_restart_cluster: True
@@ -119,34 +120,56 @@
     dest: "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
   vars:
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+
+- template:
+    src: "{{ __base_file_dir }}/logging-metrics-rolebinding.j2"
+    dest: "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
+  vars:
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     role_namespace: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_namespace(openshift_logging_elasticsearch_namespace) }}"
     role_user: "{{ openshift_logging_elasticsearch_prometheus_sa | serviceaccount_name }}"
 
 - name: Create logging-metrics-reader-role
-  command: >
-    {{ openshift_client_binary }}
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    -n "{{ openshift_logging_elasticsearch_namespace }}"
-    create -f "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
-  register: prometheus_out
+  oc_obj:
+    state: present
+    name: "prometheus-metrics-viewer"
+    kind: role
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+    - "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
+    delete_after: true
+
+- name: Create logging-metrics-reader-rolebinding
+  oc_obj:
+    state: present
+    name: "prometheus-metrics-viewer"
+    kind: rolebinding
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    files:
+    - "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
+    delete_after: true
+
+- name: Checking for passwd.yml
+  stat: path="{{ generated_certs_dir }}/passwd.yml"
+  register: passwd_file
   check_mode: no
-  ignore_errors: yes
 
-- fail:
-    msg: "There was an error creating the logging-metrics-role and binding: {{prometheus_out}}"
-  when:
-  - "prometheus_out.stderr | length > 0"
-  - "'already exists' not in prometheus_out.stderr"
+- when: passwd_file.stat.exists
+  slurp:
+    src: "{{ generated_certs_dir }}/passwd.yml"
+  register: _logging_metrics_proxy_passwd
 
-- set_fact:
-    _logging_metrics_proxy_passwd: "{{ 16 | lib_utils_oo_random_word | b64encode }}"
-
-- template:
+- when: not passwd_file.stat.exists or openshift_logging_elasticsearch_prometheus_sa not in ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )
+  template:
     src: passwd.j2
-    dest: "{{mktemp.stdout}}/passwd.yml"
+    dest: "{{ generated_certs_dir }}/passwd.yml"
   vars:
     logging_user_name: "{{ openshift_logging_elasticsearch_prometheus_sa }}"
-    logging_user_passwd: "{{ _logging_metrics_proxy_passwd }}"
+    logging_user_passwd: "{{ 16 | lib_utils_oo_random_word | b64encode }}"
+
+- slurp:
+    src: "{{ generated_certs_dir }}/passwd.yml"
+  register: _logging_metrics_proxy_passwd
 
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
@@ -207,14 +230,25 @@
       name: openshift_logging
       tasks_from: patch_configmap_files.yaml
     vars:
-      configmap_name: "logging-elasticsearch"
-      configmap_namespace: "logging"
+      configmap_name: "{{ elasticsearch_name }}"
+      configmap_namespace: "{{ openshift_logging_namespace }}"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
         new_file: "{{ tempdir }}/elasticsearch.yml"
         protected_lines: ["number_of_shards", "number_of_replicas"]
       - current_file: "logging.yml"
         new_file: "{{ tempdir }}/elasticsearch-logging.yml"
+
+  - slurp:
+      src: "{{ tempdir }}/elasticsearch.yml"
+    register: _patched_elasticsearch_config
+
+  - copy:
+      content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
+      dest: "{{ tempdir }}/elasticsearch.yml"
+    vars:
+      config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
+      override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
 
   - name: Set ES configmap
     oc_configmap:
@@ -240,13 +274,24 @@
       name: openshift_logging
       tasks_from: patch_configmap_files.yaml
     vars:
-      configmap_name: "logging-elasticsearch"
-      configmap_namespace: "logging"
+      configmap_name: "{{ elasticsearch_name }}"
+      configmap_namespace: "{{ openshift_logging_namespace }}"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
         new_file: "{{ tempdir }}/elasticsearch.yml"
       - current_file: "log4j2.properties"
         new_file: "{{ tempdir }}/log4j2.properties"
+
+  - slurp:
+      src: "{{ tempdir }}/elasticsearch.yml"
+    register: _patched_elasticsearch_config
+
+  - copy:
+      content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
+      dest: "{{ tempdir }}/elasticsearch.yml"
+    vars:
+      config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
+      override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
 
   - name: Set ES configmap
     oc_configmap:
@@ -296,7 +341,7 @@
     - name: admin.jks
       path: "{{ generated_certs_dir }}/system.admin.jks"
     - name: passwd.yml
-      path: "{{mktemp.stdout}}/passwd.yml"
+      path: "{{ generated_certs_dir }}/passwd.yml"
 
 # services
 - name: Set logging-{{ es_component }}-cluster service
@@ -423,8 +468,6 @@
     component: "{{ es_component }}"
     logging_component: elasticsearch
     deploy_name: "{{ es_deploy_name }}"
-    image: "{{ openshift_logging_elasticsearch_image_prefix }}logging-elasticsearch:{{ openshift_logging_elasticsearch_image_version }}"
-    proxy_image: "{{ openshift_logging_elasticsearch_proxy_image_prefix }}oauth-proxy:{{ openshift_logging_elasticsearch_proxy_image_version }}"
     es_cpu_limit: "{{ openshift_logging_elasticsearch_cpu_limit | default('') }}"
     es_cpu_request: "{{ openshift_logging_elasticsearch_cpu_request | min_cpu(openshift_logging_elasticsearch_cpu_limit | default(none)) }}"
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
@@ -433,7 +476,7 @@
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"
     es_replicas: 1
-    basic_auth_passwd: "{{ _logging_metrics_proxy_passwd | b64decode }}"
+    basic_auth_passwd: "{{ ( _logging_metrics_proxy_passwd['content'] | b64decode | from_yaml )[openshift_logging_elasticsearch_prometheus_sa]['passwd'] | b64decode }}"
     es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
     es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
 
