@@ -1,7 +1,6 @@
 ---
 # descheduler common setup
 openshift_descheduler_state: present
-openshift_descheduler_namespace: openshift-infra
 openshift_descheduler_tmp_location: /tmp
 openshift_descheduler_delete_config: True
 

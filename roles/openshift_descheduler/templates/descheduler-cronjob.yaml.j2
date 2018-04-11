@@ -2,7 +2,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: "{{ openshift_descheduler_cronjob_name }}"
-  namespace: "{{ openshift_descheduler_namespace }}"
+  namespace: openshift-descheduler
 spec:
   schedule: "{{ openshift_descheduler_cronjob_schedule }}"
   jobTemplate:
