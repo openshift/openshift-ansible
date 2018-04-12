@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.20.0%{?dist}
+Release:        0.21.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,19 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Apr 12 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.21.0
+- fixed typo, caused unknown char error (asaf@sysbind.co.il)
+- Fix missing close parenthesis (iacopo.rozzo@amadeus.com)
+- Fix registry x509 SAN omit placeholder (mgugino@redhat.com)
+- Revert docker-rhel-push-plugin (mgugino@redhat.com)
+- upgrade prometheus 2.1.0 -> 2.2.1 (pgier@redhat.com)
+- Only install docker-rhel-push-plugin on enterprise (mgugino@redhat.com)
+- Don't block on node start when bootstrapping (ccoleman@redhat.com)
+- Cert verification: add more certs to verify (vrutkovs@redhat.com)
+- Remove obsolete openshift_docker_disable_push_dockerhub (mgugino@redhat.com)
+- Openshift facts: ensure 'disable-attach-detach-reconcile-sync' contains a
+  list value (vrutkovs@redhat.com)
+
 * Wed Apr 11 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.20.0
 - Upgrade to 3.10 with static pods (ccoleman@redhat.com)
 - Update PR docs and link to current bot commands. (abutcher@redhat.com)
