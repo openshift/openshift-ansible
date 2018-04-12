@@ -9,6 +9,7 @@
   systemd:
     name: "{{ etcd_service }}"
     state: stopped
+  when: not openshift.node.bootstrapped
 
 - name: Remove old service file
   file:
