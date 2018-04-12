@@ -47,6 +47,10 @@ openshift_node_env_vars: {}
 l_node_kubelet_node_labels: "{{ openshift_node_labels | default({}) | lib_utils_oo_dict_to_keqv_list }}"
 
 openshift_node_kubelet_args_dict:
+  feature-gates:
+  - "MountPropagation=false"
+
+openshift_node_kubelet_cloudprovider_arg_dict:
   aws:
     cloud-provider:
     - aws
@@ -80,7 +84,7 @@ openshift_node_kubelet_args_dict:
   undefined:
     node-labels: "{{ l_node_kubelet_node_labels }}"
 
-l_node_kubelet_args_default: "{{ openshift_node_kubelet_args_dict[openshift_cloudprovider_kind | default('undefined')] }}"
+l_node_kubelet_args_default: "{{ openshift_node_kubelet_args_dict | combine(openshift_node_kubelet_cloudprovider_arg_dict[openshift_cloudprovider_kind | default('undefined')], recursive=True) }}"
 
 l_openshift_node_kubelet_args: "{{ openshift_node_kubelet_args | default({}) }}"
 # Combine the default kubelet_args dictionary (based on cloud provider, if provided)
@@ -89,6 +93,7 @@ l_openshift_node_kubelet_args: "{{ openshift_node_kubelet_args | default({}) }}"
 # are present in both.
 l2_openshift_node_kubelet_args: "{{ l_node_kubelet_args_default | combine(l_openshift_node_kubelet_args, recursive=True) }}"
 openshift_node_dnsmasq_install_network_manager_hook: true
+
 
 # lo must always be present in this list or dnsmasq will conflict with
 # the node's dns service.

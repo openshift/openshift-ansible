@@ -629,6 +629,7 @@ def build_controller_args(facts):
                                   'cloudprovider')
     if 'master' in facts:
         controller_args = {}
+        controller_args['feature-gates'] = ['MountPropagation=false']
         if 'cloudprovider' in facts:
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
@@ -652,6 +653,7 @@ def build_api_server_args(facts):
                                   'cloudprovider')
     if 'master' in facts:
         api_server_args = {}
+        api_server_args['feature-gates'] = ['MountPropagation=false']
         if 'cloudprovider' in facts:
             if 'kind' in facts['cloudprovider']:
                 if facts['cloudprovider']['kind'] == 'aws':
