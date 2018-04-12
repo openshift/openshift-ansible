@@ -1,2 +1,3 @@
 ---
-- import_tasks: set_etcd_ca_host.yml
+- include: set_etcd_ca_host.yml
+  static: true
