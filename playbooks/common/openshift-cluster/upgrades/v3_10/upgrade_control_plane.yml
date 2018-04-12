@@ -58,9 +58,6 @@
       name: openshift_control_plane
       tasks_from: static_shim
 
-# TODO: need to verify settings about the bootstrap configs
-# 1. Does network policy match the master config
-
 - name: Configure components that must be available prior to upgrade
   hosts: oo_first_master
   pre_tasks:
