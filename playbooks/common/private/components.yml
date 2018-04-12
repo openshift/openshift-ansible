@@ -34,6 +34,9 @@
 - import_playbook: ../../openshift-monitoring/private/config.yml
   when: openshift_monitoring_deploy | default(false) | bool
 
+- import_playbook: ../../openshift-monitor-availability/private/config.yml
+  when: openshift_monitor_availability_install | default(false) | bool
+
 - import_playbook: ../../openshift-service-catalog/private/config.yml
   when: openshift_enable_service_catalog | default(true) | bool
 

@@ -1,0 +1,8 @@
+---
+- name: Ensure openshift-monitor-availability project
+  oc_project:
+    state: present
+    name: openshift-monitor-availability
+    description: Openshift availability monitoring applications.
+
+- import_tasks: install_monitor_app_create.yaml
