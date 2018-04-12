@@ -5,6 +5,12 @@
   changed_when: False
   check_mode: no
 
+- name: Copy the admin client config
+  command: >
+    cp {{ openshift.common.config_base }}/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+  changed_when: False
+  check_mode: no
+
 - include: glusterfs_config.yml
   when:
   - groups.glusterfs | default([]) | count > 0

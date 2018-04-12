@@ -10,7 +10,7 @@
         installer_phase_glusterfs: "In Progress"
       aggregate: false
 
-- name: Open firewall ports for GlusterFS nodes
+- name: Configure GlusterFS hosts
   hosts: glusterfs
   vars:
     os_firewall_allow:
@@ -22,19 +22,26 @@
       port: "24008/tcp"
     - service: glusterfs_bricks
       port: "49152-49251/tcp"
-  roles:
-  - role: os_firewall
-    when:
-    - openshift_storage_glusterfs_is_native | default(True) | bool
+    - service: glusterblockd
+      port: "24010/tcp"
+    - service: iscsi-targets
+      port: "3260/tcp"
+    - service: rpcbind
+      port: "111/tcp"
   tasks:
   - include_role:
+      name: os_firewall
+    when:
+    - openshift_storage_glusterfs_is_native | default(True) | bool
+    static: true
+  - include_role:
       name: openshift_storage_glusterfs
-      tasks_from: kernel_modules.yml
+      tasks_from: host_services.yml
     when:
     - openshift_storage_glusterfs_is_native | default(True) | bool
     static: true
 
-- name: Open firewall ports for GlusterFS registry nodes
+- name: Configure GlusterFS registry hosts
   hosts: glusterfs_registry
   vars:
     os_firewall_allow:
@@ -46,16 +53,31 @@
       port: "24008/tcp"
     - service: glusterfs_bricks
       port: "49152-49251/tcp"
-  roles:
-  - role: os_firewall
+    - service: glusterblockd
+      port: "24010/tcp"
+    - service: iscsi-targets
+      port: "3260/tcp"
+    - service: rpcbind
+      port: "111/tcp"
+  tasks:
+  - include_role:
+      name: os_firewall
     when:
     - openshift_storage_glusterfs_registry_is_native | default(True) | bool
+    static: true
+  - include_role:
+      name: openshift_storage_glusterfs
+      tasks_from: host_services.yml
+    when: openshift_storage_glusterfs_registry_is_native | default(True) | bool
+    static: true
+
+- name: Load kernel modules for nodes
+  hosts: oo_nodes_to_config
   tasks:
   - include_role:
       name: openshift_storage_glusterfs
       tasks_from: kernel_modules.yml
-    when:
-    - openshift_storage_glusterfs_registry_is_native | default(True) | bool
+    when: openshift_storage_glusterfs_registry_is_native | default(True) | bool
     static: true
 
 - name: Configure GlusterFS
