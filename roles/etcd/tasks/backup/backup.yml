@@ -49,17 +49,10 @@
   - l_etcd_selinux_labels.rc == 0
   - "'svirt_sandbox_file_t' not in l_etcd_selinux_labels.stdout"
 
-- name: Generate etcd backup (legacy)
+- name: Generate etcd backup
   command: >
     {{ r_etcd_common_etcdctl_command }} backup --data-dir={{ l_etcd_incontainer_data_dir }}
     --backup-dir={{ l_etcd_incontainer_backup_dir }}
-  when: r_etcd_common_skip_command_shim | default(False) | bool
-
-- name: Generate etcd backup (static pod)
-  command: >
-    /usr/local/bin/master-exec etcd etcd etcdctl backup --data-dir={{ l_etcd_incontainer_data_dir }}
-    --backup-dir={{ l_etcd_incontainer_backup_dir }}
-  when: not (r_etcd_common_skip_command_shim | default(False) | bool)
 
 # According to the docs change you can simply copy snap/db
 # https://github.com/openshift/openshift-docs/commit/b38042de02d9780842dce95cfa0ef45d53b58bc6
