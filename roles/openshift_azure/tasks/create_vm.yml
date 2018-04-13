@@ -1,8 +1,4 @@
 ---
-- name: set openshift_node_bootstrap to True when building AMI
-  set_fact:
-    openshift_node_bootstrap: True
-
 - name: Create virtual machine
   azure_rm_virtualmachine:
     resource_group: "{{ openshift_azure_resource_group_name }}"
@@ -39,4 +35,4 @@
 - name: Wait for SSH
   wait_for_connection:
   delegate_to: '{{ item }}'
-  with_items: '{{ groups["azure"] }}'
+  with_items: '{{ groups["nodes"] }}'

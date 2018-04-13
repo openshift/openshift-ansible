@@ -28,6 +28,12 @@
   - name: lay down yum certs which will be removed later
     import_tasks: tasks/yum_certs.yml
 
+  - name: enable networkmnager
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth0
+      regexp: '^NM_CONTROLLED='
+      line: 'NM_CONTROLLED=yes'
+
   - name: update the /var partition with grpquota
     mount:
       boot: yes

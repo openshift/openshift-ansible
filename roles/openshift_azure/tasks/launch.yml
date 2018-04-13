@@ -18,6 +18,10 @@
     src: "{{ tmpout.path }}/openshift.json"
     edits: "{{ openshift_azure_acsengine_template_edits }}"
 
+- debug:
+    msg: "{{ lookup('file', tmpout.path ~ '/openshift.json') | from_json }}"
+    verbosity: 1
+
 - name: launch an acs-engine build
   command: |
     {{ tmpout.path }}/acs-engine deploy \

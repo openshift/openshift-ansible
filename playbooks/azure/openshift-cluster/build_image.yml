@@ -8,6 +8,10 @@
   hosts: localhost
   gather_facts: yes
   tasks:
+  - name: set the bootstrap fact
+    set_fact:
+      openshift_node_bootstrap: True
+
   - name: provision instance
     import_role:
       name: openshift_azure

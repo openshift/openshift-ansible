@@ -90,3 +90,12 @@ openshift_azure_subscription_id: "{{ lookup('ini', 'subscription_id section=defa
 openshift_azure_client_id: "{{ lookup('ini', 'client_id section=default file=' + openshift_azure_credentials_file) }}"
 openshift_azure_service_secret: "{{ lookup('ini', 'secret section=default file=' + openshift_azure_credentials_file) }}"
 openshift_azure_tenant_id: "{{ lookup('ini', 'tenant section=default file=' + openshift_azure_credentials_file) }}"
+
+# used in launch.yml for the openshift.json
+openshift_azure_acsengine_urls: []
+
+openshift_azure_acsengine_template_dns_prefix: "{{ openshift_azure_prefix }}-{{ openshift_azure_clusterid }}"
+openshift_azure_acsengine_template_image_name: "{{ openshift_azure_image }}"
+openshift_azure_acsengine_template_image_rg: "{{ openshift_azure_base_image_ns }}"
+
+openshift_azure_acsengine_template_edits: []
