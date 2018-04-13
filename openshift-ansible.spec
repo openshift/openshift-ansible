@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.20
+Version:        3.9.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,27 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Apr 13 2018 Justin Pierce <jupierce@redhat.com> 3.9.21-1
+- Revert "bug 1535300. Default logging namespace to openshift-logging"
+  (jcantril@redhat.com)
+- Remove obsolete openshift_docker_disable_push_dockerhub (mgugino@redhat.com)
+- Cert verification: add more certs to verify (vrutkovs@redhat.com)
+- always add es and es-ops hostname to the es server cert (rmeggins@redhat.com)
+- fixed typo, caused unknown char error (asaf@sysbind.co.il)
+- Revert docker-rhel-push-plugin (mgugino@redhat.com)
+- Add nfs storage_kind check to sanity_checks (mgugino@redhat.com)
+- health checks: use etcd_image as it would work on Origin correctly
+  (vrutkovs@redhat.com)
+- Default bootstrap script file for 3.9 (ccoleman@redhat.com)
+- Add oo_etcd_to_config to service_catalog init (mgugino@redhat.com)
+- wait_for_pod: wait for deployment to be Complete (vrutkovs@redhat.com)
+- PAPR: check 3 masters install (vrutkovs@redhat.com)
+- PARP: Store ansible log file separately (vrutkovs@redhat.com)
+- Add missing package docker-rhel-push-plugin (mgugino@redhat.com)
+- Service Catalog: set log verbosity to level 3 (jaboyd@redhat.com)
+- Update dbus before installing dnsmasq (sdodson@redhat.com)
+- Change default node selector for service-catalog (jpeeler@redhat.com)
+
 * Tue Apr 10 2018 Justin Pierce <jupierce@redhat.com> 3.9.20-1
 - PAPR: verify minor update on all-in-one cluster (vrutkovs@redhat.com)
 - bug 1535300. Default logging namespace to openshift-logging
