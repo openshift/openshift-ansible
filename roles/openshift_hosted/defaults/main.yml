@@ -9,7 +9,7 @@ r_openshift_hosted_use_calico: "{{ r_openshift_hosted_use_calico_default }}"
 openshift_default_projects:
   default:
     default_node_selector: ''
-  openshift-logging:
+  logging:
     default_node_selector: ''
   openshift-infra:
     default_node_selector: ''
