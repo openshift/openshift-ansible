@@ -27,6 +27,18 @@ spec:
         component: "{{component}}"
         deployment: "{{deploy_name}}"
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: logging-infra
+                  operator: In
+                  values:
+                  - elasticsearch
+            topologyKey: kubernetes.io/hostname
       terminationGracePeriod: 600
       serviceAccountName: aggregated-logging-elasticsearch
       securityContext:
@@ -137,7 +149,7 @@ spec:
             initialDelaySeconds: 10
             timeoutSeconds: 30
             periodSeconds: 5
-        - 
+        -
           name: proxy
           image: {{ proxy_image }}
           imagePullPolicy: IfNotPresent
