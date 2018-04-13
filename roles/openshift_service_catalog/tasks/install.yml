@@ -187,6 +187,10 @@
     name: controller-manager
     namespace: kube-service-catalog
     state: present
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: controllermanager-ssl
+      prometheus.io/scrape: "true"
+      prometheus.io/scheme: https
     ports:
     - name: secure
       port: 443
