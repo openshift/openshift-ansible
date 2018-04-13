@@ -12,22 +12,23 @@
 
 - when: not openshift_is_atomic | bool
   block:
-  - name: Ensure dbus is updated before installing dnsmasq
-    package:
-      name: dbus
-      state: latest
-    register: dbus_update
-  - name: Restart dbus if it was updated
-    systemd:
-      name: dbus
-      state: restarted
-    when: dbus_update | changed
   - name: Install dnsmasq
     package:
       name: dnsmasq
       state: installed
     register: result
     until: result is succeeded
+  # This works around https://bugzilla.redhat.com/show_bug.cgi?id=1550582
+  - name: Restart dbus and systemd-logind if dnsmasq was installed
+    systemd:
+      name: "{{ item }}"
+      state: restarted
+    when: result is changed
+    with_items:
+    - dbus
+    - systemd-logind
+    register: dbussvcs_restart
+  - wait_for_connection:
 
 - name: ensure origin/node directory exists
   file:
