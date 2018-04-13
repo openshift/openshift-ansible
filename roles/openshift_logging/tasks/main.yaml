@@ -24,44 +24,13 @@
   check_mode: no
   become: false
 
-- oc_obj:
-    state: list
-    kind: dc
-    all_namespaces: true
-    selector: "logging-infra,provider=openshift"
-  register: _logging_dcs
-
-- assert:
-    that:
-    - _logging_dcs.results.results[0]['items'] | map(attribute='metadata.namespace') | list | unique | count <= 1
-    msg: "Found aggregated logging deploymentconfigs in multiple namespaces which is not supported"
-  when:
-  - _logging_dcs is defined
-  - _logging_dcs.results | count > 0
-
-- set_fact:
-    _logging_namespace: "{{ _logging_dcs.results.results[0]['items'] | map(attribute='metadata.namespace') | list | unique | join('') }}"
-  when:
-  - _logging_dcs is defined
-  - _logging_dcs.results | count > 0
-  - _logging_dcs.results.results | count > 0
-
-- debug:
-    msg: "Using the namespace '{{ _logging_namespace }}' which has an existing deployment"
-  when:
-  - _logging_namespace is defined
-  - _logging_namespace | count > 0
-
-- set_fact:
-    openshift_logging_namespace: "{{ _logging_namespace if _logging_namespace else 'openshift-logging' }}"
-
 - include_tasks: install_logging.yaml
   when:
-  - openshift_logging_install_logging | default(false) | bool
+    - openshift_logging_install_logging | default(false) | bool
 
 - include_tasks: delete_logging.yaml
   when:
-  - not openshift_logging_install_logging | default(false) | bool
+    - not openshift_logging_install_logging | default(false) | bool
 
 - name: Cleaning up local temp dir
   local_action: file path="{{local_tmp.stdout}}" state=absent
