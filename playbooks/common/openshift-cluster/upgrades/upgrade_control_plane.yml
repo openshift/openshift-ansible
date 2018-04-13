@@ -52,7 +52,7 @@
 
 # Redeploy etcd certificates when hostnames were missing from etcd
 # serving certificate SANs.
-- import_playbook: ../../openshift-etcd/certificates.yml
+- include: ../../openshift-etcd/certificates.yml
   when:
   - true in hostvars | oo_select_keys(groups['oo_etcd_to_config']) | oo_collect('__etcd_cert_lacks_hostname') | default([false])
   vars:
