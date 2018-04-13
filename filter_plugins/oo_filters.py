@@ -1205,6 +1205,19 @@ def oo_l_of_d_to_csv(input_list):
     return ','.join(json.dumps(x) for x in input_list)
 
 
+def oo_has_no_matching_selector(source, selector=None):
+    ''' Return True when selector cannot be placed
+        on nodes with labels from source '''
+    # Empty selector means any node
+    if not selector:
+        return False
+    for item in source:
+        if set(selector.items()).issubset(set(item.items())):
+            # Matching selector found
+            return False
+    return True
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -1249,5 +1262,6 @@ class FilterModule(object):
             "oo_contains_rule": oo_contains_rule,
             "oo_selector_to_string_list": oo_selector_to_string_list,
             "oo_filter_sa_secrets": oo_filter_sa_secrets,
-            "oo_l_of_d_to_csv": oo_l_of_d_to_csv
+            "oo_l_of_d_to_csv": oo_l_of_d_to_csv,
+            "oo_has_no_matching_selector": oo_has_no_matching_selector,
         }

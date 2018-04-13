@@ -1,0 +1,10 @@
+name: {{ openshift_grafana_datasource_name }}
+type: prometheus
+typeLogoUrl: ''
+access: proxy
+url: {{ prometheus_route.results[0].spec.host }}
+basicAuth: false
+withCredentials: false
+jsonData:
+  tlsSkipVerify: true
+  token: {{ prometheus_sa_token.stdout }} 
