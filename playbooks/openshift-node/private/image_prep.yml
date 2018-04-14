@@ -18,6 +18,8 @@
 
 - name: run node config
   import_playbook: configure_nodes.yml
+  vars:
+    skip_node_svc_handlers: True
 
 - name: node bootstrap config
   hosts: oo_nodes_to_config:!oo_containerized_master_nodes
