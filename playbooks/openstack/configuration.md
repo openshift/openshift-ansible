@@ -530,3 +530,13 @@ openshift_hosted_registry_storage_volume_name: registry
 
 The volume will be formatted automaticaly and it will be mounted to one of the
 infra nodes when the registry pod gets started.
+
+
+## Deploying At Scale
+
+By default, heat stack outputs are resolved.  This may cause
+problems in large scale deployments.  Querying heat stack can take
+a long time and eventually time out.  The following setting in
+`inventory/group_vars/all.yml` is recommended to prevent the timeouts:
+
+* `openshift_openstack_resolve_heat_outputs`: False
