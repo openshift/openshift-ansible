@@ -365,6 +365,7 @@ class YeditTest(unittest.TestCase):
         params = {
             'src': None,
             'backup': False,
+            'backup_ext': '',
             'separator': '.',
             'state': 'present',
             'edits': [],
@@ -388,6 +389,7 @@ class YeditTest(unittest.TestCase):
         params = {
             'src': '/tmp/test',
             'backup': False,
+            'backup_ext': '',
             'separator': '.',
             'state': 'present',
             'edits': [],
