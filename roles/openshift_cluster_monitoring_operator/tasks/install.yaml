@@ -23,13 +23,6 @@
     description: Openshift Monitoring
     node_selector: ""
 
-#TODO Remove need for cluster-admin permission
-- name: Add cluster admin permission
-  command: >
-    {{ openshift_client_binary }} adm policy add-cluster-role-to-user cluster-admin -z default
-    --config={{ mktemp.stdout }}/admin.kubeconfig
-    -n openshift-monitoring
-
 - name: Apply the cluster monitoring operator template
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout 	}}/{{ item }}"
