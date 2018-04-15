@@ -56,6 +56,7 @@ openshift_node_kubelet_args_dict:
     node-labels: "{{ l_node_kubelet_node_labels }}"
   vsphere:
     cloud-provider:
+    - ""
     - vsphere
     cloud-config:
     - "{{ openshift_config_base ~ '/cloudprovider/vsphere.conf' }}"
