@@ -13,9 +13,9 @@ metadata:
 openshift.io/provider-display-name: Red Hat, Inc.
 parameters:
 - name: OPERATOR_IMAGE
-  value: quay.io/coreos/cluster-monitoring-operator:198d25d6
+  value: quay.io/coreos/cluster-monitoring-operator:f0ca8a72
 - name: PROMETHEUS_OPERATOR_IMAGE
-  value: quay.io/coreos/prometheus-operator-dev
+  value: quay.io/coreos/prometheus-operator
 - name: ALERTMANAGER_IMAGE
   value: quay.io/prometheus/alertmanager
 - name: PROMETHEUS_IMAGE
@@ -49,18 +49,16 @@ objects:
     name: cluster-monitoring-operator
     namespace: ${NAMESPACE}
     labels:
-      k8s-app: cluster-monitoring-operator
-      managed-by-channel-operator: "true"
+      app: cluster-monitoring-operator
   spec:
     replicas: 1
     selector:
       matchLabels:
-        k8s-app: cluster-monitoring-operator
+        app: cluster-monitoring-operator
     template:
       metadata:
         labels:
-          k8s-app: cluster-monitoring-operator
-          tectonic-app-version-name: tectonic-monitoring
+          app: cluster-monitoring-operator
       spec:
         containers:
         - image: ${OPERATOR_IMAGE}
@@ -77,5 +75,3 @@ objects:
             requests:
               cpu: 20m
               memory: 50Mi
-        restartPolicy: Always
-        terminationGracePeriodSeconds: 30
