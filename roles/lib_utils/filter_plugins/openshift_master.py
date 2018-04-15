@@ -3,6 +3,7 @@
 '''
 Custom filters for use in openshift-master
 '''
+import collections
 import copy
 import sys
 
@@ -483,7 +484,8 @@ class FilterModule(object):
     @staticmethod
     def certificates_to_synchronize(hostvars, include_keys=True, include_ca=True):
         ''' Return certificates to synchronize based on facts. '''
-        if not issubclass(type(hostvars), dict):
+        if not issubclass(type(hostvars), dict) \
+                and not issubclass(type(hostvars), collections.Mapping):
             raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
         certs = ['admin.crt',
                  'admin.key',
