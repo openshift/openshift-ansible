@@ -332,6 +332,9 @@ data:
     # Pod VIF drivers vs Pool Drivers mapping allowed
     pools_vif_drivers = nested:nested-vlan,neutron:neutron-vif
 
+    [health_server]
+    port = {{ kuryr_healthcheck_port }}
+
   kuryr-cni.conf: |+
     [DEFAULT]
 
@@ -656,3 +659,9 @@ data:
     # From kuryr_kubernetes
     #
     lock_path = {{ kuryr_openstack_lock_path | default('/var/kuryr-lock') }}
+
+    [cni_health_server]
+    port = {{ kuryr_healthcheck_port }}
+
+    # Maximum memory usage (MiB) before kuryr-daemon is marked as unhealthy
+    max_memory_usage = -1

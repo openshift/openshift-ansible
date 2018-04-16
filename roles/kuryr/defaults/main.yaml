@@ -14,6 +14,9 @@ kuryr_openstack_project_domain_name: default
 # Kuryr OpenShift namespace
 kuryr_namespace: openshift-infra
 
+# Kuryr health check server port
+kuryr_healthcheck_port: 8082
+
 # Whether to run the cni plugin in debug mode
 kuryr_cni_debug: "false"
 
