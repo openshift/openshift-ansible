@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.21.0%{?dist}
+Release:        0.22.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,40 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Apr 16 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.22.0
+- Don't always update dbus but do restart dbus if dnsmasq changed
+  (sdodson@redhat.com)
+- Label all-in-one cluster as compute=true (vrutkovs@redhat.com)
+- Support azure for management storage class (arun.neelicattu@gmail.com)
+- Add storage class defaults for azure (arun.neelicattu@gmail.com)
+- Create cloud config when using azure provider (arun.neelicattu@gmail.com)
+- Create default storage class when using azure cloud provider
+  (arun.neelicattu@gmail.com)
+- Support azure cloud provider in facts (arun.neelicattu@gmail.com)
+- remove all remaining variable quotation (david_hocky@comcast.com)
+- [BZ 1564857] fix image name (john.sanda@gmail.com)
+- always add es and es-ops hostname to the es server cert (rmeggins@redhat.com)
+- remove manually created ssl cert, use service-cert instead, use default
+  service endpoint scrape (jaboyd@redhat.com)
+- cluster_monitoring_operator: Don't use cluster-admin role
+  (ealfassa@redhat.com)
+- fix certificate auth on containerized etcd (david_hocky@comcast.com)
+- Allow node-exporter port through GCP firewall (ironcladlou@gmail.com)
+- Wipe filesystem metadata from CNS block devices.
+  (jmencak@users.noreply.github.com)
+- Removing heat template outputs for stack scalability.
+  (jmencak@users.noreply.github.com)
+- Ensure user provides sane values for openshift_release (mgugino@redhat.com)
+- bug 1535300. Default logging namespace to openshift-logging
+  (jcantril@redhat.com)
+- Set the pid_max value only when lower than certain threshold.
+  (jmencak@users.noreply.github.com)
+- cluster_monitoring: Bump operator version and adjust related config
+  (IndenML@gmail.com)
+- Correct link to README.md in openshift-cluster/upgrades for v3.9
+  (amcdermo@redhat.com)
+- Specify the namespace for better idempotent (bysnupy@hotmail.com)
+
 * Thu Apr 12 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.21.0
 - fixed typo, caused unknown char error (asaf@sysbind.co.il)
 - Fix missing close parenthesis (iacopo.rozzo@amadeus.com)
