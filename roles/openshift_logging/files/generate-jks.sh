@@ -159,11 +159,29 @@ fi
 dir=$1
 SCRATCH_DIR=$dir
 PROJECT=${2:-logging}
+
+MORE_ES_NAMES=
+escomma=
 # these must already be comma delimited
-MORE_ES_NAMES=${3:-}
-escomma=${MORE_ES_NAMES:+,}
-MORE_ES_OPS_NAMES=${4:-}
-esopscomma=${MORE_ES_OPS_NAMES:+,}
+if [ -n "${3:-}" ] ; then
+    if echo "${3:-}" | egrep -q '^[0-9]|[.][0-9]' ; then
+        echo invalid ES hostname $3 - skipping adding to subject alt name
+    else
+        MORE_ES_NAMES=${3:-}
+        escomma=${MORE_ES_NAMES:+,}
+    fi
+fi
+
+MORE_ES_OPS_NAMES=
+esopscomma=
+if [ -n "${4:-}" ] ; then
+    if echo "${4:-}" | egrep -q '^[0-9]|[.][0-9]' ; then
+        echo invalid ES ops hostname $4 - skipping adding to subject alt name
+    else
+        MORE_ES_OPS_NAMES=${4:-}
+        esopscomma=${MORE_ES_OPS_NAMES:+,}
+    fi
+fi
 
 if [[ ! -f $dir/system.admin.jks || -z "$(keytool -list -keystore $dir/system.admin.jks -storepass kspass | grep sig-ca)" ]]; then
   generate_JKS_client_cert "system.admin"
