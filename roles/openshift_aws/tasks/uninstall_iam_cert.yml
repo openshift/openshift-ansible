@@ -6,7 +6,7 @@
   - openshift_aws_elb_cert_arn == ''
   block:
   - name: delete AWS IAM certificates
-    iam_cert23:
+    iam_cert:
       state: absent
       name: "{{ openshift_aws_iam_cert_name }}"
     register: elb_cert_chain
