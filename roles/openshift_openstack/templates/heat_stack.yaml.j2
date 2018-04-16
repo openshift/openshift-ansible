@@ -139,6 +139,23 @@ resources:
       loadbalancer: { get_resource: api_lb }
       protocol: HTTPS
       protocol_port: {{ openshift_master_api_port }}
+      default_pool: { get_resource: api_lb_pool }
+
+{% if openshift_use_kuryr|default(false)|bool and openshift_master_api_port|default(8443) != 443 %}
+  # 443 listener for pod access. In non-kuryr envs handled by iptables
+  internal_api_lb_listener:
+    type: OS::Neutron::LBaaS::Listener
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-api-lb-internal-listener
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      loadbalancer: { get_resource: api_lb }
+      protocol: HTTPS
+      protocol_port: 443
+      default_pool: { get_resource: api_lb_pool }
+{% endif %}
 
   api_lb_pool:
     type: OS::Neutron::LBaaS::Pool
@@ -151,7 +168,7 @@ resources:
       protocol: HTTPS
       # TODO(shadower): Make this configurable?
       lb_algorithm: ROUND_ROBIN
-      listener: { get_resource: api_lb_listener }
+      loadbalancer: { get_resource: api_lb }
 {% endif %}
 
 {% if not openshift_openstack_provider_network_name %}
