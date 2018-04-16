@@ -314,6 +314,14 @@ Put this in your `inventory/group_vars/all.yml`:
 This will create two load balancers: one for the API and UI console and the
 other for the OpenShift router. Each will have its own public IP address.
 
+This playbook defaults to using OpenStack Octavia as its LBaaSv2 provider:
+
+    openshift_openstack_lbaasv2_provider: Octavia
+
+If your cloud uses the deprecated Neutron LBaaSv2 provider set:
+
+    openshift_openstack_lbaasv2_provider: "Neutron::LBaaS"
+
 ### VM-based Load Balancer
 
 If you can't use OpenStack's LBaaS, we can create and configure a virtual

@@ -21,17 +21,20 @@
 - name: Check for Neutron trunk support
   os_network_extensions:
 
+# Gather OpenStack service catalog endpoint facts
+- name: Check for cloud service catalog endpoints
+  os_service_catalog:
+
 # Check trunk support
 - fail:
     msg: "Trunk ports enabled but support lacking in Neutron"
   when: (use_trunk_ports | default(False)) and
         ('trunk' not in openstack_network_extensions)
 
-# Check lbaasv2 support
+# Check Kuryr has LBaaSv2 available
 - fail:
-    msg: "Kuryr enabled but lacking required lbaasv2 support in Neutron"
-  when: (openshift_use_kuryr | default(False)) and
-        ('lbaasv2' not in openstack_network_extensions)
+    msg: "Kuryr enabled but OpenStack LBaaS is not."
+  when: openshift_use_kuryr | default(False) and not openshift_openstack_use_lbaas_load_balancer
 
 # Check jmespath
 - name: Try to import python module shade
@@ -111,3 +114,11 @@
   when:
   - openshift_openstack_use_lbaas_load_balancer
   - openshift_openstack_use_vm_load_balancer
+
+- name: Check LBaaS Load Balancer providers
+  fail:
+    msg: >
+      Your configured openshift_openstack_lbaasv2_provider is not supported
+      by your cloud.
+  when: (openshift_openstack_use_lbaas_load_balancer and openshift_openstack_lbaasv2_provider == 'Neutron::LBaaS' and 'lbaasv2' not in openstack_network_extensions) or
+        (openshift_openstack_use_lbaas_load_balancer and openshift_openstack_lbaasv2_provider == 'Octavia' and 'load-balancer' not in openstack_service_catalog)
