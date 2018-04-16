@@ -148,10 +148,7 @@ class ActionModule(ActionBase):
                          'openshift_hosted_etcd_storage',
                          'openshift_logging_storage',
                          'openshift_loggingops_storage',
-                         'openshift_metrics_storage',
-                         'openshift_prometheus_storage',
-                         'openshift_prometheus_alertmanager_storage',
-                         'openshift_prometheus_alertbuffer_storage']
+                         'openshift_metrics_storage']
         persistent_volumes = []
         persistent_volume_claims = []
         for varname in vars_to_check:

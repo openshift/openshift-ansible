@@ -52,26 +52,6 @@ openshift_prometheus_alertbuffer_pvc_size: 10G
 openshift_prometheus_pvc_access_modes: [ReadWriteOnce]
 ```
 
-## NFS PV Storage variables
-Each prometheus component (prometheus, alertmanager, alertbuffer) can set nfs pv by setting corresponding variable:
-```
-openshift_prometheus_<COMPONENT>_storage_kind=<VALUE>
-openshift_prometheus_<COMPONENT>_storage_(access_modes|host|labels)=<VALUE>
-openshift_prometheus_<COMPONENT>_storage_volume_(name|size)=<VALUE>
-openshift_prometheus_<COMPONENT>_storage_nfs_(directory|options)=<VALUE>
-```
-e.g
-```
-openshift_prometheus_storage_kind=nfs
-openshift_prometheus_storage_access_modes=['ReadWriteOnce']
-openshift_prometheus_storage_host=nfs.example.com #for external host
-openshift_prometheus_storage_nfs_directory=/exports
-openshift_prometheus_storage_alertmanager_nfs_options='*(rw,root_squash)'
-openshift_prometheus_storage_volume_name=prometheus
-openshift_prometheus_storage_alertbuffer_volume_size=10Gi
-openshift_prometheus_storage_labels={'storage': 'prometheus'}
-```
-
 NOTE: Setting `openshift_prometheus_<COMPONENT>_storage_labels` overrides `openshift_prometheus_<COMPONENT>_pvc_pv_selector`
 
 
