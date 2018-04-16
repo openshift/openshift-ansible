@@ -685,76 +685,15 @@ debug_level=2
 #openshift_hosted_prometheus_deploy=true
 #
 # Prometheus storage config
-# Option A - NFS Host Group
-# An NFS volume will be created with path "nfs_directory/volume_name"
-# on the host within the [nfs] host group.  For example, the volume
-# path using these options would be "/exports/prometheus"
-#openshift_prometheus_storage_kind=nfs
-#openshift_prometheus_storage_access_modes=['ReadWriteOnce']
-#openshift_prometheus_storage_nfs_directory=/exports
-#openshift_prometheus_storage_nfs_options='*(rw,root_squash)'
-#openshift_prometheus_storage_volume_name=prometheus
-#openshift_prometheus_storage_volume_size=10Gi
-#openshift_prometheus_storage_labels={'storage': 'prometheus'}
-#openshift_prometheus_storage_type='pvc'
-#openshift_prometheus_storage_class=glusterfs-storage
-# For prometheus-alertmanager
-#openshift_prometheus_alertmanager_storage_kind=nfs
-#openshift_prometheus_alertmanager_storage_access_modes=['ReadWriteOnce']
-#openshift_prometheus_alertmanager_storage_nfs_directory=/exports
-#openshift_prometheus_alertmanager_storage_nfs_options='*(rw,root_squash)'
-#openshift_prometheus_alertmanager_storage_volume_name=prometheus-alertmanager
-#openshift_prometheus_alertmanager_storage_volume_size=10Gi
-#openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
-#openshift_prometheus_alertmanager_storage_type='pvc'
-#openshift_prometheus_alertmanager_storage_class=glusterfs-storage
-# For prometheus-alertbuffer
-#openshift_prometheus_alertbuffer_storage_kind=nfs
-#openshift_prometheus_alertbuffer_storage_access_modes=['ReadWriteOnce']
-#openshift_prometheus_alertbuffer_storage_nfs_directory=/exports
-#openshift_prometheus_alertbuffer_storage_nfs_options='*(rw,root_squash)'
-#openshift_prometheus_alertbuffer_storage_volume_name=prometheus-alertbuffer
-#openshift_prometheus_alertbuffer_storage_volume_size=10Gi
-#openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
-#openshift_prometheus_alertbuffer_storage_type='pvc'
-#openshift_prometheus_alertbuffer_storage_class=glusterfs-storage
-#
-# Option B - External NFS Host
-# NFS volume must already exist with path "nfs_directory/_volume_name" on
-# the storage_host. For example, the remote volume path using these
-# options would be "nfs.example.com:/exports/prometheus"
-#openshift_prometheus_storage_kind=nfs
-#openshift_prometheus_storage_access_modes=['ReadWriteOnce']
-#openshift_prometheus_storage_host=nfs.example.com
-#openshift_prometheus_storage_nfs_directory=/exports
-#openshift_prometheus_storage_volume_name=prometheus
-#openshift_prometheus_storage_volume_size=10Gi
-#openshift_prometheus_storage_labels={'storage': 'prometheus'}
-#openshift_prometheus_storage_type='pvc'
-#openshift_prometheus_storage_class=glusterfs-storage
-# For prometheus-alertmanager
-#openshift_prometheus_alertmanager_storage_kind=nfs
-#openshift_prometheus_alertmanager_storage_access_modes=['ReadWriteOnce']
-#openshift_prometheus_alertmanager_storage_host=nfs.example.com
-#openshift_prometheus_alertmanager_storage_nfs_directory=/exports
-#openshift_prometheus_alertmanager_storage_volume_name=prometheus-alertmanager
-#openshift_prometheus_alertmanager_storage_volume_size=10Gi
-#openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
-#openshift_prometheus_alertmanager_storage_type='pvc'
-#openshift_prometheus_alertmanager_storage_class=glusterfs-storage
-# For prometheus-alertbuffer
-#openshift_prometheus_alertbuffer_storage_kind=nfs
-#openshift_prometheus_alertbuffer_storage_access_modes=['ReadWriteOnce']
-#openshift_prometheus_alertbuffer_storage_host=nfs.example.com
-#openshift_prometheus_alertbuffer_storage_nfs_directory=/exports
-#openshift_prometheus_alertbuffer_storage_volume_name=prometheus-alertbuffer
-#openshift_prometheus_alertbuffer_storage_volume_size=10Gi
-#openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
-#openshift_prometheus_alertbuffer_storage_type='pvc'
-#openshift_prometheus_alertbuffer_storage_class=glusterfs-storage
-#
-# Option C - none -- Prometheus, alertmanager and alertbuffer will use emptydir volumes
-# which are destroyed when pods are deleted
+# By default prometheus uses emptydir storage, if you want to persist you should
+# configure it to use pvc storage type. Each volume must be ReadWriteOnce.
+#openshift_prometheus_storage_type=emptydir
+#openshift_prometheus_alertmanager_storage_type=emptydir
+#openshift_prometheus_alertbuffer_storage_type=emptydir
+# Use PVCs for persistence
+#openshift_prometheus_storage_type=pvc
+#openshift_prometheus_alertmanager_storage_type=pvc
+#openshift_prometheus_alertbuffer_storage_type=pvc
 
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
