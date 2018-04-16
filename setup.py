@@ -79,7 +79,7 @@ def find_playbooks():
             os.path.join(os.getcwd(), 'playbooks'),
             exclude_dirs, None, r'\.ya?ml$'):
         with open(yaml_file, 'r') as contents:
-            for task in yaml.safe_load(contents) or {}:
+            for task in yaml.safe_load_all(contents) or {}:
                 if not isinstance(task, dict):
                     # Skip yaml files which are not a dictionary of tasks
                     continue
@@ -323,7 +323,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         for yaml_file in find_files(
                 os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
-                yaml_contents = yaml.safe_load(contents)
+                yaml_contents = yaml.safe_load_all(contents)
                 if not isinstance(yaml_contents, list):
                     continue
 
