@@ -36,3 +36,13 @@
           - key: node-role.kubernetes.io/compute
             value: 'true'
       with_items: "{{ non_master_non_infra_nodes_result.results.results.0['items'] | map(attribute='metadata') | map(attribute='name') | list }}"
+
+    - name: Label all-in-one master as a compute node
+      oc_label:
+        name: '{{ openshift.node.nodename }}'
+        kind: node
+        state: add
+        labels:
+          - key: node-role.kubernetes.io/compute
+            value: 'true'
+      when: groups['oo_nodes_to_config'] | default([]) | union(groups['oo_nodes_to_bootstrap'] | default([])) | union(groups['oo_masters_to_config']) | length == 1
