@@ -42,7 +42,7 @@ class ActionModule(ActionBase):
                 host = groups['oo_nfs_to_config'][0]
             else:
                 raise errors.AnsibleModuleError("|failed no storage host detected")
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         directory = self.get_templated(str(varname) + '_nfs_directory')
         path = directory + '/' + volume
         return dict(
@@ -57,7 +57,7 @@ class ActionModule(ActionBase):
 
     def build_pv_openstack(self, varname=None):
         """Build pv dictionary for openstack storage type"""
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         filesystem = self.get_templated(str(varname) + '_openstack_filesystem')
         volume_id = self.get_templated(str(varname) + '_openstack_volumeID')
         return dict(
@@ -72,7 +72,7 @@ class ActionModule(ActionBase):
 
     def build_pv_glusterfs(self, varname=None):
         """Build pv dictionary for glusterfs storage type"""
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         endpoints = self.get_templated(str(varname) + '_glusterfs_endpoints')
         path = self.get_templated(str(varname) + '_glusterfs_path')
         read_only = self.get_templated(str(varname) + '_glusterfs_readOnly')
