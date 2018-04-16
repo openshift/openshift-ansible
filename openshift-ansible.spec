@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.21
+Version:        3.9.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun Apr 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.22-1
+- Ensure that static upgrade test works against 3.9 (ccoleman@redhat.com)
+- Don't always update dbus but do restart dbus if dnsmasq changed
+  (sdodson@redhat.com)
+- Fix registry x509 SAN omit placeholder (mgugino@redhat.com)
+- Mount device manager socket dir path (vichoudh@redhat.com)
+- crio: don't configure openshift-sdn when disabled (phemmer@chewy.com)
+- Change set imagepullpolicy to allow for offline install (esauer@redhat.com)
+- Update console liveness probe (spadgett@redhat.com)
+- use new filter name for AWS availability zones (jdiaz@redhat.com)
+- GlusterFS: Fix missing parameter for registry PVC (jarrpa@redhat.com)
+
 * Fri Apr 13 2018 Justin Pierce <jupierce@redhat.com> 3.9.21-1
 - Revert "bug 1535300. Default logging namespace to openshift-logging"
   (jcantril@redhat.com)
