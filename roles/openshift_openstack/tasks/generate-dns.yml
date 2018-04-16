@@ -59,6 +59,8 @@
 - name: "Add the public API entry point record"
   set_fact:
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(openshift_openstack_full_dns_domain, ''))[:-1], 'ip': openshift_openstack_public_api_ip } ] }}"
+  when:
+    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
 
 - name: "Set the public DNS server details to use the external value (if provided)"
   set_fact:
