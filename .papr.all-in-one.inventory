@@ -14,6 +14,7 @@ openshift_check_min_host_memory_gb=1.9
 osm_cluster_network_cidr=10.128.0.0/14
 openshift_portal_net=172.30.0.0/16
 osm_host_subnet_length=9
+openshift_enable_service_catalog=false
 
 [all:vars]
 # bootstrap configs
