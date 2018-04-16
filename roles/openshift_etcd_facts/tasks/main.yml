@@ -1,4 +1,3 @@
 ---
-- openshift_facts:
-    role: etcd
-    local_facts: {}
+- include: set_etcd_ca_host.yml
+  static: true
