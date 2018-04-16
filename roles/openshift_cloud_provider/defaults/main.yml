@@ -3,3 +3,4 @@ openshift_gcp_project: ''
 openshift_gcp_prefix: ''
 openshift_gcp_network_name: "{{ openshift_gcp_prefix }}network"
 openshift_gcp_multizone: False
+openshift_gcp_node_tags: "{{ openshift_gcp_prefix }}ocp"
