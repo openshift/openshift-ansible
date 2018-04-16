@@ -14,8 +14,8 @@ openshift_logging_image_pull_secret: ""
 openshift_logging_es5_techpreview: False
 
 openshift_logging_curator_default_days: 30
-openshift_logging_curator_run_hour: 0
-openshift_logging_curator_run_minute: 0
+openshift_logging_curator_run_hour: 3
+openshift_logging_curator_run_minute: 30
 openshift_logging_curator_run_timezone: UTC
 openshift_logging_curator_timeout: 300
 openshift_logging_curator_script_log_level: INFO
