@@ -48,6 +48,10 @@ openshift_logging_fluentd_aggregating_cert_path: none
 openshift_logging_fluentd_aggregating_key_path: none
 openshift_logging_fluentd_aggregating_passphrase: none
 
+# set openshift_logging_use_mux=maximal by default.
+# if the cluster is not configured with mux, this default value is going to be ignored.
+openshift_logging_mux_client_mode: "maximal"
+
 ### Deprecating in 3.6
 # following can be uncommented to provide values for configmaps -- take care when providing file contents as it may cause your cluster to not operate correctly
 #fluentd_config_contents:
