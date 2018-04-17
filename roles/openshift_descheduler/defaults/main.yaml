@@ -1,8 +1,8 @@
 ---
 # descheduler common setup
-openshift_descheduler_state: present
+openshift_descheduler_install: false
 openshift_descheduler_tmp_location: /tmp
-openshift_descheduler_delete_config: True
+openshift_descheduler_delete_config: true
 
 # descheduler image setup
 openshift_descheduler_image_dict:

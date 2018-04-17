@@ -61,7 +61,7 @@
   template:
     src: policy.yaml.j2
     dest: "{{ openshift_descheduler_tmp_location }}/policy.yaml"
-  when: openshift_descheduler_state == 'present'
+  when: openshift_descheduler_install | bool
 
 - name: create descheduler policy configmap
   oc_configmap:
@@ -75,9 +75,9 @@
   template:
     src: descheduler-cronjob.yaml.j2
     dest: "{{ openshift_descheduler_tmp_location }}/descheduler-cronjob.yaml"
-  when: openshift_descheduler_state == 'present'
+  when: openshift_descheduler_install | bool
 
-- name: "Ensure the descheduler is {{ openshift_descheduler_state }}"
+- name: Ensure the descheduler is present
   oc_obj:
     namespace: openshift-descheduler
     state: present

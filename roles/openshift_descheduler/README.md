@@ -11,9 +11,23 @@ Installing Descheduler
 --------------------
 
 ```
+openshift_descheduler_install=true
+```
+
+```
 ansible-playbook -i <inventory-file> playbooks/openshift-descheduler/config.yml
 ```
 
+Uninstalling Descheduler
+--------------------
+
+```
+openshift_descheduler_install=false
+```
+
+```
+ansible-playbook -i <inventory-file> playbooks/openshift-descheduler/config.yml
+```
 
 Notes
 -----
