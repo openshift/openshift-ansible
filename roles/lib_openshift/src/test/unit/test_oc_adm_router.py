@@ -314,6 +314,7 @@ class RouterTest(unittest.TestCase):
                   'service_account': 'router',
                   'router_type': None,
                   'host_network': None,
+                  'extended_validation': True,
                   'external_host': None,
                   'external_host_vserver': None,
                   'external_host_insecure': False,

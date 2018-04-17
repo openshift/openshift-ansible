@@ -94,6 +94,12 @@ options:
     required: false
     default: haproxy-router
     aliases: []
+  extended_validation:
+    description:
+    - If true, configure the router to perform extended validation on routes before admitting them.
+    required: false
+    default: True
+    aliases: []
   external_host:
     description:
     - If the underlying router implementation connects with an external host, this is the external host's hostname.
@@ -194,8 +200,8 @@ EXAMPLES = '''
       action: put
     - key: spec.template.spec.containers[0].env
       value:
-        name: EXTENDED_VALIDATION
-        value: 'false'
+        name: ROUTER_MAX_CONNECTIONS
+        value: "10000"
       action: update
   register: router_out
   run_once: True

@@ -28,6 +28,7 @@ def main():
             service_account=dict(default='router', type='str'),
             router_type=dict(default='haproxy-router', type='str'),
             host_network=dict(default=True, type='bool'),
+            extended_validation=dict(default=True, type='bool'),
             # external host options
             external_host=dict(default=None, type='str'),
             external_host_vserver=dict(default=None, type='str'),

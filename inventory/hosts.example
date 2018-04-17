@@ -391,6 +391,11 @@ debug_level=2
 # based on the number of nodes matching the openshift router selector.
 #openshift_hosted_router_replicas=2
 #
+# Router extended route validation (optional)
+# If enabled, openshift-ansible will configure the router to perform extended
+# validation on routes before admitting them.
+#openshift_hosted_router_extended_validation=true
+#
 # Router force subdomain (optional)
 # A router path format to force on all routes used by this router
 # (will ignore the route host value)

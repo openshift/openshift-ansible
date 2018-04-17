@@ -179,6 +179,16 @@ class Router(OpenShiftCLI):
         '''modify the deployment config'''
         # We want modifications in the form of edits coming in from the module.
         # Let's apply these here
+
+        # If extended validation is enabled, set the corresponding environment
+        # variable.
+        if self.config.config_options['extended_validation']['value']:
+            if not deploymentconfig.exists_env_key('EXTENDED_VALIDATION'):
+                deploymentconfig.add_env_value('EXTENDED_VALIDATION', "true")
+            else:
+                deploymentconfig.update_env_var('EXTENDED_VALIDATION', "true")
+
+        # Apply any edits.
         edit_results = []
         for edit in self.config.config_options['edits'].get('value', []):
             if edit['action'] == 'put':
@@ -412,6 +422,7 @@ class Router(OpenShiftCLI):
                                 'service_account': {'value': params['service_account'], 'include': True},
                                 'router_type': {'value': params['router_type'], 'include': False},
                                 'host_network': {'value': params['host_network'], 'include': True},
+                                'extended_validation': {'value': params['extended_validation'], 'include': False},
                                 'external_host': {'value': params['external_host'], 'include': True},
                                 'external_host_vserver': {'value': params['external_host_vserver'],
                                                           'include': True},

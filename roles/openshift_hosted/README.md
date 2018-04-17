@@ -23,6 +23,7 @@ From this role:
 | openshift_hosted_router_replicas      | Number of nodes matching selector        | The number of replicas to configure.                                                                                     |
 | openshift_hosted_router_selector      | node-role.kubernetes.io/infra=true       | Node selector used when creating router. The OpenShift router will only be deployed to nodes matching this selector.     |
 | openshift_hosted_router_name          | router                                   | The name of the router to be created.                                                                                    |
+| openshift_hosted_router_extended_validation | True                               | Whether to configure the router to perform extended validation on routes before admitting them. |
 | openshift_hosted_registry_registryurl | 'registry.access.redhat.com/openshift3/ose-${component}:${version}' | The image to base the OpenShift registry on.                                                                             |
 | openshift_hosted_registry_replicas    | Number of nodes matching selector        | The number of replicas to configure.                                                                                     |
 | openshift_hosted_registry_selector    | node-role.kubernetes.io/infra=true                   | Node selector used when creating registry. The OpenShift registry will only be deployed to nodes matching this selector. |

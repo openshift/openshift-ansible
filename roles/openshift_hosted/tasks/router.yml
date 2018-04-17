@@ -96,6 +96,7 @@
     key_file: "{{ ('/etc/origin/master/' ~ (item.certificate.keyfile | basename)) if 'keyfile' in item.certificate else omit }}"
     cacert_file: "{{ ('/etc/origin/master/' ~ (item.certificate.cafile | basename)) if 'cafile' in item.certificate else omit }}"
     edits: "{{ openshift_hosted_router_edits | union(item.edits)  }}"
+    extended_validation: "{{ item.extended_validation | default(True) | bool }}"
     ports: "{{ item.ports }}"
     stats_port: "{{ item.stats_port }}"
   with_items: "{{ openshift_hosted_routers }}"
