@@ -31,7 +31,7 @@
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: nodes, new_nodes
-    openshift_node_bootstrap: False
+    openshift_node_bootstrap: "{{ openshift_node_bootstrap | default(True) }}"
   with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
 
 - name: Add bootstrap node instances

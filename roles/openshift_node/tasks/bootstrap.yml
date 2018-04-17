@@ -60,14 +60,12 @@
     src: bootstrap.yml.j2
     dest: /root/openshift_bootstrap/bootstrap.yml
 
-- name: symlink master ca for docker-registry
+- name: Create a symlink to the node client CA for the docker registry
   file:
-    src: "{{ item }}"
-    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/{{ item | basename }}"
+    src: "{{ openshift_node_config_dir }}/client-ca.crt"
+    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
     state: link
     force: yes
-  with_items:
-  - "{{ openshift_node_config_dir }}/client-ca.crt"
 
 - name: Remove default node-config.yaml to allow bootstrapping config
   file:

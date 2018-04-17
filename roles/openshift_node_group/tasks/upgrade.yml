@@ -8,6 +8,8 @@
       value: ""
     - key: servingInfo.keyFile
       value: ""
+    - key: servingInfo.clientCA
+      value: "client-ca.crt"
     - key: kubeletArguments.pod-manifest-path
       value:
       - /etc/origin/node/pods
@@ -23,6 +25,8 @@
     - key: kubeletArguments.cert-dir
       value:
       - /etc/origin/node/certificates
+    - key: masterKubeConfig
+      value: node.kubeconfig
     openshift_node_group_labels: "{{ node_group.labels | default([]) }}"
   with_items: "{{ openshift_node_groups }}"
   loop_control:

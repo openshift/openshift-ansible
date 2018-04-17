@@ -12,6 +12,13 @@
     state: directory
     mode: 0755
 
+- name: Update the docker-registry CA symlink
+  file:
+    src: "{{ openshift_node_config_dir }}/client-ca.crt"
+    dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+    state: link
+    force: yes
+
 - name: Update node-config for static pods
   yedit:
     src: "{{ openshift.common.config_base }}/node/node-config.yaml"
