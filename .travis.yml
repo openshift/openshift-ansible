@@ -19,5 +19,19 @@ install:
 script:
   - tox
 
+after_failure:
+  - echo "Here's a list of installed Python packages:"
+  - pip list --format=columns
+  - echo Dumping logs, because tests failed to succeed
+  - |
+      for log in `ls .tox/*/log/*.log`
+      do
+        echo Outputting $log
+        cat $log
+      done
+  - pip_debug_log=/home/travis/.cache/pip/log/debug.log
+  - echo Outputting pip debug log from $pip_debug_log
+  - cat $pip_debug_log
+
 after_success:
   - coveralls
