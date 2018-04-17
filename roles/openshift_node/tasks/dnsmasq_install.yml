@@ -19,16 +19,30 @@
     register: result
     until: result is succeeded
   # This works around https://bugzilla.redhat.com/show_bug.cgi?id=1550582
-  - name: Restart dbus and systemd-logind if dnsmasq was installed
-    systemd:
-      name: "{{ item }}"
-      state: restarted
-    when: result is changed
-    with_items:
-    - dbus
-    - systemd-logind
-    register: dbussvcs_restart
-  - wait_for_connection:
+  - name: Restart dbus and systemd-logind
+    shell: >
+      systemctl restart dbus systemd-logind && echo "done" > /tmp/openshift-ansible-dbus-restart.result
+    async: 60
+    poll: 0
+    when: result | changed
+
+  - name: Poll for restart finished file
+    stat:
+      path: /tmp/openshift-ansible-dbus-restart.result
+    # We don't become here because become will timeout if systemd-logind is
+    # not responding yet.
+    become: False
+    register: dbus_restart_results
+    until: dbus_restart_results.stat.exists
+    retries: 30
+    when: result | changed
+
+  - name: Cleanup temporary dbus restart script files
+    file:
+      path: /tmp/openshift-ansible-dbus-restart.result
+      state: absent
+    when: result | changed
+# End block
 
 - name: ensure origin/node directory exists
   file:
