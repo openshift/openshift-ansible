@@ -1,9 +1,10 @@
 ---
 # NOTE(shadower): we need to do this because some of the install tasks seem to
 # ignore openshift_hostname and rely on the actual system's hostname
-- name: Update hostname to openshift_hostname
+- name: Update hostname to match the OpenStack name
   hostname:
-    name: "{{ openshift_hostname }}"
+    name: "{{ inventory_hostname }}"
+  when: openshift_openstack_set_hostname_to_compute_name
 
 - name: "Verify SELinux is enforcing"
   fail:
