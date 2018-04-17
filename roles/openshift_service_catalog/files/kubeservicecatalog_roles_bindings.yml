@@ -182,12 +182,12 @@ objects:
 - apiVersion: authorization.openshift.io/v1
   kind: Role
   metadata:
-    name: endpoint-accessor
+    name: configmap-accessor
   rules:
   - apiGroups:
     - ""
     resources:
-    - endpoints
+    - configmaps
     verbs:
     - list
     - watch
@@ -198,9 +198,9 @@ objects:
 - apiVersion: authorization.openshift.io/v1
   kind: RoleBinding
   metadata:
-    name: endpointer-accessor-binding
+    name: configmap-accessor-binding
   roleRef:
-    name: endpoint-accessor
+    name: configmap-accessor
     namespace: kube-service-catalog
   subjects:
   - kind: ServiceAccount
