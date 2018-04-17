@@ -10,6 +10,6 @@ l_openshift_prefix_dict:
   openshift-enterprise: 'ose-${component}'
 l_os_prefix: "{{ l_openshift_prefix_dict[openshift_deployment_type] }}"
 # TODO: we should publish oreg_url component=node
-osn_image: "{{ l_os_registry_url | regex_replace(l_os_prefix | regex_escape, 'node') }}"
+osn_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'node') }}"
 
 openshift_use_external_openvswitch: false
