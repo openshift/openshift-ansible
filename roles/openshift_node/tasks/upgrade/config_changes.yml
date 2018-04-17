@@ -11,6 +11,15 @@
     path: "{{ openshift.common.config_base }}/node/pods"
     state: directory
     mode: 0755
+- name: Check for client-ca.crt
+  stat:
+    path: "{{ openshift_node_config_dir }}/client-ca.crt"
+  register: client_ca_crt
+
+- name: Ensure docker-registry directory exists
+  file:
+    state: directory
+    path: "/etc/docker/certs.d/docker-registry.default.svc:5000"
 
 - name: Update the docker-registry CA symlink
   file:
@@ -18,6 +27,7 @@
     dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
     state: link
     force: yes
+  when: client_ca_crt.stat.exists
 
 - name: Update node-config for static pods
   yedit:
