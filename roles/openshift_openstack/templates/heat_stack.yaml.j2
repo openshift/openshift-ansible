@@ -76,6 +76,18 @@ outputs:
     value: { get_attr: [infra_nodes, resource.0, floating_ip] }
 {% endif %}
 
+  private_api_ip:
+    description: >
+      The address of the private OpenShift API. This is used during OpenShift
+      deployment and for API access by the internal pods and services.
+{% if openshift_openstack_use_lbaas_load_balancer %}
+    value: { get_attr: [api_lb, vip_address] }
+{% elif openshift_openstack_use_vm_load_balancer %}
+    value: { get_attr: [loadbalancer, resource.0, private_ip] }
+{% else %}
+    value: { get_attr: [masters, resource.0, private_ip] }
+{% endif %}
+
 {% if openshift_use_kuryr|default(false)|bool %}
   vm_subnet:
     description: ID of the subnet the Pods will be on
