@@ -38,7 +38,7 @@ spec:
                   operator: In
                   values:
                   - elasticsearch
-            topologyKey: kubernetes.io/hostname
+              topologyKey: kubernetes.io/hostname
       terminationGracePeriod: 600
       serviceAccountName: aggregated-logging-elasticsearch
       securityContext:
