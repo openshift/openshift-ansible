@@ -62,6 +62,8 @@ spec:
           value: "/hawkular-cassandra-certs/tls.peer.truststore.crt"
         - name: TRUSTSTORE_CLIENT_AUTHORITIES
           value: "/hawkular-cassandra-certs/tls.client.truststore.crt"
+        - name: TAKE_SNAPSHOT
+          value: "{{ openshift_metrics_cassandra_take_snapshot }}"
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
