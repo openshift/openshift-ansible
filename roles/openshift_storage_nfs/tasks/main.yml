@@ -4,7 +4,7 @@
 
 - name: Install nfs-utils
   package: name=nfs-utils state=present
-  when: not openshift.common.is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
