@@ -172,8 +172,6 @@ debug_level=2
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
 
-# Specify exact version of etcd to configure or upgrade to.
-# etcd_version="3.1.0"
 # Enable etcd debug logging, defaults to false
 # etcd_debug=true
 # Set etcd log levels by package
