@@ -2,6 +2,7 @@
 masters
 nodes
 etcd
+nfs
 
 [OSEv3:vars]
 ansible_ssh_user=root
@@ -32,3 +33,6 @@ ocp-master
 ocp-master openshift_schedulable=true openshift_node_labels="{'node-role.kubernetes.io/infra':'true'}"
 ocp-node1
 ocp-node2
+
+[nfs]
+ocp-master
