@@ -16,7 +16,8 @@ NET_PLUGIN_LIST = (('openshift_use_openshift_sdn', True),
                    ('openshift_use_nuage', False),
                    ('openshift_use_contiv', False),
                    ('openshift_use_calico', False),
-                   ('openshift_use_kuryr', False))
+                   ('openshift_use_kuryr', False),
+                   ('openshift_use_nsx', False))
 
 ENTERPRISE_TAG_REGEX_ERROR = """openshift_image_tag must be in the format
 v#.#[.#[.#]]. Examples: v1.2, v3.4.1, v3.5.1.3,
