@@ -15,21 +15,25 @@ portion runs the pods; It is possible to containerize some things and not
 others (like etcd), but support of this kind of configuration is unknown at
 best.
 
-* rpm + docker
-* rpm + docker + crio
-* rpm + system-container-docker + crio
-* rpm + crio only
-* rpm + system-container-docker + system-container-crio
+| Current State                         | Upgraded State               | Priority |
+|---------------------------------------|------------------------------|----------|
+|* rpm + docker                         | docker,crio,node rpms + pods | highest  |
+|* rpm + docker + crio                  | docker,crio,node rpms + pods | medium   |
+|* rpm + system-container-docker + crio | docker,crio,node rpms + pods | low      |
+|* rpm + crio only |                    | docker,crio,node rpms + pods | lowest   |
+|* rpm + system-container-docker + system-container-crio | docker,crio,node rpm + pods | low |
 
 ### Containerized
 Containerized installs are normal RHEL hosts, but openshift services are
 installed via docker containers instead of using rpm packages.
 
-* containerized + docker
-* containerized + docker + crio
-* containerized + system-container-docker
-* containerized + system-container-docker + crio
-* containerized + crio only?
+| Current State                         | Upgraded State               | Priority    |
+|---------------------------------------|------------------------------|-------------|
+|* containerized + docker                  | docker,crio,node rpms + pods | medium   |
+|* containerized + docker + crio           | docker,crio,node rpms + pods | low      |
+|* containerized + system-container-docker | docker,crio,node rpms + pods | low      |
+|* containerized + system-container-docker + crio | docker,crio,node rpms + pods | low    |
+|* containerized + crio only?              | docker,crio,node rpms + pods | low      |
 
 ### Atomic
 Similar to containerized, but 100% of items run as containers or system
@@ -37,10 +41,12 @@ containers, and there is no alternative.  IMO, this will probably be the
 most straight forward group of combinations to migrate, but much of the work
 may be unique to atomic and not apply to other systems.
 
-* Atomic
-* Atomic + crio
-* Atomic + crio + system containers
-* Atomic + system containers
+| Current State                         | Upgraded State               | Priority |
+|---------------------------------------|------------------------------|----------|
+|* Atomic                               | docker on host, crio,node system containers + pods | low   |
+|* Atomic + crio                        | docker on host, crio,node system containers + pods | low   |
+|* Atomic + crio + system containers    | docker on host, crio,node system containers + pods | low   |
+|* Atomic + system containers           | docker on host, crio,node system containers + pods | low   |
 
 ### Thoughts
 In addition to the above install variants, clusters may be a combination of
