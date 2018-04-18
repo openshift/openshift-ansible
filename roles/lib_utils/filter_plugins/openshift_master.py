@@ -481,8 +481,8 @@ class FilterModule(object):
                            Dumper=AnsibleDumper))
 
     @staticmethod
-    def certificates_to_synchronize(hostvars, include_keys=True, include_ca=True):
-        ''' Return certificates to synchronize based on facts. '''
+    def certificates_to_synchronize(include_keys=True, include_ca=True):
+        ''' Return certificates to synchronize. '''
         certs = ['admin.crt',
                  'admin.key',
                  'admin.kubeconfig',
