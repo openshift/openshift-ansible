@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.23
+Version:        3.9.24
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 18 2018 Justin Pierce <jupierce@redhat.com> 3.9.24-1
+- 
+
 * Wed Apr 18 2018 Justin Pierce <jupierce@redhat.com> 3.9.23-1
 - Bug 1567767 - openshift_logging : Run JKS generation script failed
   (rmeggins@redhat.com)
