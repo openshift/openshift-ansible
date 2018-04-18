@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.22
+Version:        3.9.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,18 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 18 2018 Justin Pierce <jupierce@redhat.com> 3.9.23-1
+- Bug 1567767 - openshift_logging : Run JKS generation script failed
+  (rmeggins@redhat.com)
+- make cassandra snapshots configurable (john.sanda@gmail.com)
+- catalog: use configmap for leader election lock (jpeeler@redhat.com)
+- Revert "crio: Fixup docker SELinux permissions" (sdodson@redhat.com)
+- remove all remaining variable quotation (david_hocky@comcast.com)
+- fix certificate auth on containerized etcd (david_hocky@comcast.com)
+- etcd: rework r_etcd_common_etcdctl_command (vrutkovs@redhat.com)
+- Label all-in-one cluster as compute=true (vrutkovs@redhat.com)
+- upgrade prometheus 2.1.0 -> 2.2.1 (pgier@redhat.com)
+
 * Sun Apr 15 2018 Justin Pierce <jupierce@redhat.com> 3.9.22-1
 - Ensure that static upgrade test works against 3.9 (ccoleman@redhat.com)
 - Don't always update dbus but do restart dbus if dnsmasq changed
