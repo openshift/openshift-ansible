@@ -47,14 +47,14 @@ items:
           volumeMounts:
           - name: docker-root
             readOnly:  true
-            mountPath: /var/lib/docker
+            mountPath: /var/lib/containers/docker
           - name: docker-socket
             readOnly:  false
             mountPath: /var/run/docker.sock
         volumes:
         - name: docker-root
           hostPath:
-            path: /var/lib/docker
+            path: /var/lib/containers/docker
         - name: docker-socket
           hostPath:
             path: /var/run/docker.sock
