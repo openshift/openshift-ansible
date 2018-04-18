@@ -885,10 +885,14 @@ def oo_persistent_volume_claims(hostvars, persistent_volume_claims=None):
                     volume = params['volume']['name']
                     size = params['volume']['size']
                     access_modes = params['access']['modes']
+                    storageclass = params['volume'].get('storageclass')
+                    if storageclass is None and kind != 'dynamic':
+                        storageclass = ''
                     persistent_volume_claim = dict(
                         name="{0}-claim".format(volume),
                         capacity=size,
-                        access_modes=access_modes)
+                        access_modes=access_modes,
+                        storageclass=storageclass)
                     persistent_volume_claims.append(persistent_volume_claim)
     return persistent_volume_claims
 
