@@ -11,7 +11,7 @@ openshift_router_image: "{{ openshift_router_image_default }}"
 haproxy_frontends:
 - name: main
   binds:
-  - "*:{{ openshift_master_api_port | default(8443) }}"
+  - "*:{{ openshift_master_api_port }}"
   default_backend: default
 
 haproxy_backends:
@@ -27,7 +27,7 @@ r_openshift_loadbalancer_os_firewall_allow:
 - service: haproxy stats
   port: "9000/tcp"
 - service: haproxy balance
-  port: "{{ openshift_master_api_port | default(8443) }}/tcp"
+  port: "{{ openshift_master_api_port }}/tcp"
 - service: nuage mon
   port: "{{ nuage_mon_rest_server_port | default(9443) }}/tcp"
   cond: "{{ r_openshift_lb_use_nuage | bool }}"

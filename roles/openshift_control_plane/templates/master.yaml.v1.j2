@@ -177,7 +177,7 @@ serviceAccountConfig:
   publicKeyFiles:
   - serviceaccounts.public.key
 servingInfo:
-  bindAddress: {{ openshift.master.bind_addr }}:{{ openshift.master.api_port }}
+  bindAddress: {{ openshift.master.bind_addr }}:{{ openshift_master_api_port }}
   bindNetwork: tcp4
   certFile: master.server.crt
   clientCA: ca.crt

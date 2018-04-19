@@ -138,7 +138,7 @@ resources:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       loadbalancer: { get_resource: api_lb }
       protocol: HTTPS
-      protocol_port: {{ openshift_master_api_port|default(8443) }}
+      protocol_port: {{ openshift_master_api_port }}
 
   api_lb_pool:
     type: OS::Neutron::LBaaS::Pool

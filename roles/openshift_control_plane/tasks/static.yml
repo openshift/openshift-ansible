@@ -34,6 +34,15 @@
   - apiserver.yaml
   - controller.yaml
 
+- name: Update master static pod (api)
+  yedit:
+    src: "{{ mktemp.stdout }}/apiserver.yaml"
+    edits:
+    - key: spec.containers[0].livenessProbe.httpGet.port
+      value: "{{ openshift_master_api_port }}"
+    - key: spec.containers[0].readinessProbe.httpGet.port
+      value: "{{ openshift_master_api_port }}"
+
 - name: Update master static pods
   copy:
     remote_src: true

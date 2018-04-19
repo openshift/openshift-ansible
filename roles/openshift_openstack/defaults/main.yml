@@ -125,8 +125,8 @@ openshift_openstack_master_secgroup_rules:
     port_range_max: 4001
   - direction: ingress
     protocol: tcp
-    port_range_min: "{{ openshift_master_api_port|default(8443) }}"
-    port_range_max: "{{ openshift_master_api_port|default(8443) }}"
+    port_range_min: "{{ openshift_master_api_port }}"
+    port_range_max: "{{ openshift_master_api_port }}"
   - direction: ingress
     protocol: tcp
     port_range_min: "{{ openshift_master_console_port|default(8443) }}"
@@ -272,8 +272,8 @@ openshift_openstack_lb_base_secgroup_rules:
     remote_ip_prefix: "{{ openshift_openstack_lb_ingress_cidr }}"
   - direction: ingress
     protocol: tcp
-    port_range_min: "{{ openshift_master_api_port | default(8443) }}"
-    port_range_max: "{{ openshift_master_api_port | default(8443) }}"
+    port_range_min: "{{ openshift_master_api_port }}"
+    port_range_max: "{{ openshift_master_api_port }}"
     remote_ip_prefix: "{{ openshift_openstack_lb_ingress_cidr }}"
 openshift_openstack_lb_console_secgroup_rules:
   - direction: ingress

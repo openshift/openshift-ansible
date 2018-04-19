@@ -54,7 +54,7 @@ openshift_aws_elb_dict:
       cross_az_load_balancing: False
       health_check:
         ping_protocol: tcp
-        ping_port: "{{ openshift_master_api_port | default(8443) }}"
+        ping_port: "{{ openshift_master_api_port }}"
         response_timeout: 5
         interval: 30
         unhealthy_threshold: 2
@@ -64,11 +64,11 @@ openshift_aws_elb_dict:
       - protocol: tcp
         load_balancer_port: 80
         instance_protocol: ssl
-        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_port: "{{ openshift_master_api_port }}"
       - protocol: ssl
-        load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
+        load_balancer_port: "{{ openshift_master_api_port }}"
         instance_protocol: ssl
-        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_port: "{{ openshift_master_api_port }}"
         ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
       name: "{{ openshift_aws_elb_basename }}-master-external"
       tags: "{{ openshift_aws_kube_tags }}"
@@ -76,7 +76,7 @@ openshift_aws_elb_dict:
       cross_az_load_balancing: False
       health_check:
         ping_protocol: tcp
-        ping_port: "{{ openshift_master_api_port | default(8443) }}"
+        ping_port: "{{ openshift_master_api_port }}"
         response_timeout: 5
         interval: 30
         unhealthy_threshold: 2
@@ -88,9 +88,9 @@ openshift_aws_elb_dict:
         instance_protocol: tcp
         instance_port: 80
       - protocol: tcp
-        load_balancer_port: "{{ openshift_master_api_port | default(8443) }}"
+        load_balancer_port: "{{ openshift_master_api_port }}"
         instance_protocol: tcp
-        instance_port: "{{ openshift_master_api_port | default(8443) }}"
+        instance_port: "{{ openshift_master_api_port }}"
       name: "{{ openshift_aws_elb_basename }}-master-internal"
       tags: "{{ openshift_aws_kube_tags }}"
   infra:
@@ -269,8 +269,8 @@ openshift_aws_node_security_groups:
       to_port: 80
       cidr_ip: 0.0.0.0/0
     - proto: tcp
-      from_port: "{{ openshift_master_api_port | default(8443) }}"
-      to_port: "{{ openshift_master_api_port | default(8443) }}"
+      from_port: "{{ openshift_master_api_port }}"
+      to_port: "{{ openshift_master_api_port }}"
       cidr_ip: 0.0.0.0/0
   compute:
     name: "{{ openshift_aws_clusterid }}_compute"
@@ -284,8 +284,8 @@ openshift_aws_node_security_groups:
       to_port: 80
       cidr_ip: 0.0.0.0/0
     - proto: tcp
-      from_port: "{{ openshift_master_api_port | default(8443) }}"
-      to_port: "{{ openshift_master_api_port | default(8443) }}"
+      from_port: "{{ openshift_master_api_port }}"
+      to_port: "{{ openshift_master_api_port }}"
       cidr_ip: 0.0.0.0/0
     - proto: tcp
       from_port: 30000
