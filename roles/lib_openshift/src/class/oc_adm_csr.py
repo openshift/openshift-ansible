@@ -196,7 +196,7 @@ class OCcsr(OpenShiftCLI):
 
             for result in all_results:
                 if result['returncode'] != 0:
-                    return {'failed': True, 'msg': all_results}
+                    return {'failed': True, 'msg': all_results, 'timeout': timeout}
 
             return dict(changed=len(all_results) > 0,
                         results=all_results,
