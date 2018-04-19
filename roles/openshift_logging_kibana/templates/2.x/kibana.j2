@@ -26,6 +26,18 @@ spec:
         provider: openshift
         component: "{{ component }}"
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: logging-infra
+                  operator: In
+                  values:
+                  - kibana
+              topologyKey: kubernetes.io/hostname
       serviceAccountName: aggregated-logging-kibana
 {% if kibana_node_selector is iterable and kibana_node_selector | length > 0 %}
       nodeSelector:
