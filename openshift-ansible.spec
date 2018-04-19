@@ -85,7 +85,7 @@ touch %{buildroot}%{_datadir}/ansible/%{name}/roles/contiv/.empty_dir
 %doc README*
 %license LICENSE
 %dir %{_datadir}/ansible/%{name}
-%{_datadir}/ansible/%{name}/inventory/dynamic
+%{_datadir}/ansible/%{name}/inventory
 %ghost %{_datadir}/ansible/%{name}/playbooks/common/openshift-master/library.rpmmoved
 %{_datadir}/ansible/%{name}/ansible.cfg
 
