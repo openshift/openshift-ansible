@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.23.0%{?dist}
+Release:        0.24.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,13 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Apr 19 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.24.0
+- Correct default sdn_mtu setting (rteague@redhat.com)
+- Fix docker client-ca.crt symlink (sdodson@redhat.com)
+- oc_adm_csr - return timeout on other failures (sdodson@redhat.com)
+- Append clusterid to default iam role and policy names. (abutcher@redhat.com)
+- Allow overriding master/node iam role and policy. (abutcher@redhat.com)
+
 * Thu Apr 19 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.23.0
 - Adjust Kuryr CNI definitions for new Docker image (mdulko@redhat.com)
 - Update installation/uninstallation/upgrade of descheduler component.
