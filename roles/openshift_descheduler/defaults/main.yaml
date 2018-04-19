@@ -48,3 +48,4 @@ openshift_descheduler_cronjob_schedule: "*/1 0 * * *"
 # descheduler container setup
 openshift_descheduler_dry_run_mode: true
 openshift_descheduler_node_selectors: null
+openshift_descheduler_debug_level: "{{ debug_level | default(2) }}"

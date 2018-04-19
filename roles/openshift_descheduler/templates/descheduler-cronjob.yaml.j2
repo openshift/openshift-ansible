@@ -21,6 +21,7 @@ spec:
             - /bin/descheduler
             args:
             - --policy-config-file=/policy-dir/policy.yaml
+            - --v={{ openshift_descheduler_debug_level }}
 {% if openshift_descheduler_dry_run_mode is defined and (openshift_descheduler_dry_run_mode | bool) %}
             - --dry-run
 {% endif %}
