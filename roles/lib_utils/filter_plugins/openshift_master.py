@@ -273,9 +273,11 @@ class HTPasswdPasswordIdentityProvider(IdentityProviderBase):
             AnsibleFilterError:
     """
     def __init__(self, api_version, idp):
+        # Workaround: We used to let users specify arbitrary location of
+        # htpasswd file, but now it needs to be in specific spot.
+        idp['filename'] = '/etc/origin/master/htpasswd'
         super(HTPasswdPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
-        self._required += [['file', 'filename', 'fileName', 'file_name']]
 
     @staticmethod
     def get_default(key):
