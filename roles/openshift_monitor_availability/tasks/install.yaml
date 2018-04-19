@@ -31,6 +31,8 @@
 
 - import_tasks: install_monitor_app_create.yaml
 
+- import_tasks: install_monitor_web_console_app_create.yaml
+
 - name: Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"

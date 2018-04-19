@@ -1,0 +1,114 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: web-console-smoke-test-template
+  annotations:
+    openshift.io/display-name: Web Console Smoke Test
+    iconClass: icon-openshift
+    tags: openshift,infra
+    openshift.io/documentation-url: https://github.com/openshift/origin-web-console-smoke-test
+    openshift.io/support-url: https://access.redhat.com
+    openshift.io/provider-display-name: Red Hat, Inc.
+    description: >
+      Runs smoke tests in a headless browser against the web console at a provided URL.
+
+      For more information about using this template, see
+      https://github.com/openshift/origin-web-console-smoke-test/blob/master/README.md
+objects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: web-console-smoke-test
+    namespace: ${NAMESPACE}
+    labels:
+      app: web-console-smoke-test
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: web-console-smoke-test
+    template:
+      metadata:
+        labels:
+          app: web-console-smoke-test
+      spec:
+        containers:
+        - name: web-console-smoke-test
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          env:
+          - name: CONSOLE_URL
+            value: ${CONSOLE_URL}
+          - name: TEST_INTERVAL_MINUTES
+            value: ${TEST_INTERVAL_MINUTES}
+          - name: SELF_SIGN_CERT
+            value: ${SELF_SIGN_CERT}
+          ports:
+          - name: smoke-test-port
+            containerPort: 3000
+          restartPolicy: Always
+          volumeMounts:
+            - mountPath: /etc/tls-certs
+              name: web-console-smoke-test-serving-cert
+              readOnly: true
+        - name: kube-rbac-proxy
+          image: quay.io/coreos/kube-rbac-proxy:v0.3.0
+          args:
+          - "--secure-listen-address=:3001"
+          - "--upstream=http://127.0.0.1:3000/"
+          - "--tls-cert-file=/etc/tls/private/tls.crt"
+          - "--tls-private-key-file=/etc/tls/private/tls.key"
+          ports:
+          - name: https
+            containerPort: 3001
+            protocol: TCP
+          resources:
+            requests:
+              memory: 20Mi
+              cpu: 10m
+            limits:
+              memory: 40Mi
+              cpu: 20m
+          volumeMounts:
+          - mountPath: /etc/tls/private
+            name: tls
+        volumes:
+        - name: web-console-smoke-test-serving-cert
+          secret:
+            defaultMode: 400
+            secretName: web-console-smoke-test-serving-cert
+        - name: tls
+          secret:
+            secretName: monitor-app-create-tls
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: web-console-smoke-test
+    namespace: ${NAMESPACE}
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: web-console-smoke-test-serving-cert
+  spec:
+    ports:
+    - name: web
+      protocol: TCP
+      port: 443
+      targetPort: https
+    selector:
+      app: web-console-smoke-test
+    type: ClusterIP
+    sessionAffinity: None
+parameters:
+- name: IMAGE
+  required: true
+- name: NAMESPACE
+  value: openshift-monitor-availability
+- name: CONSOLE_URL
+  description: The location of the web console, in the format of https://<console-public-url>:8443
+  required: true
+- name: TEST_INTERVAL_MINUTES
+  description: An optional time interval to run tests, defaults to 2
+- name: SELF_SIGN_CERT
+  description: Indicator to obtain self-signed certificate from web-console upon testing. Defaults to true so the self-signed cert is obrained.
+  value: "true"

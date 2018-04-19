@@ -1,0 +1,14 @@
+---
+- name: Apply the smoke test template
+  shell: >
+    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/monitor-web-console-app-create.yaml"
+    --param CONSOLE_URL="{{ openshift.master.public_api_url  }}"
+    --param IMAGE="{{ openshift_monitor_web_console_create_image }}"
+    --param TEST_INTERVAL_MINUTES="{{ openshift_monitor_web_console_create_interval_minutes }}"
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+    | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+
+- name: Verify that web-console monitor pod is running
+  command: "{{ openshift_client_binary }} get pods --config={{ mktemp.stdout }}/admin.kubeconfig -l app=web-console-smoke-test -n openshift-monitor-availability"
+  register: get_monitor_web_console_pod_output
+  failed_when: "'No resources found.' in get_monitor_web_console_pod_output.stderr"
