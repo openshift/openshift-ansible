@@ -44,7 +44,6 @@
   vars:
     l_version_override_hosts: "oo_masters_to_config:oo_etcd_to_config"
     l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
-    l_openshift_version_check_hosts: "oo_masters_to_config:!oo_first_master"
     l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_upgrade_no_proxy_hosts: "oo_masters_to_config"
     l_upgrade_health_check_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
@@ -100,7 +99,6 @@
   # them by default.
   vars:
     l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
-    l_openshift_version_check_hosts: "oo_masters_to_config:!oo_first_master"
     l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_upgrade_no_proxy_hosts: "oo_masters_to_config"
     l_upgrade_health_check_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
