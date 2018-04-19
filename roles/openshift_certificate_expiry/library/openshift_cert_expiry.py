@@ -504,8 +504,34 @@ an OpenShift Container Platform cluster
             # = 'foo.crt' implies that 'foo.crt' is in the same
             # directory. certFile = '../foo.crt' is in the parent directory.
             cfg_path = os.path.dirname(fp.name)
-            cert_meta['certFile'] = os.path.join(cfg_path, cfg['servingInfo']['certFile'])
-            cert_meta['clientCA'] = os.path.join(cfg_path, cfg['servingInfo']['clientCA'])
+
+            servingInfoFile = cfg.get('servingInfo', {}).get('certFile')
+            if servingInfoFile:
+                cert_meta['certFile'] = os.path.join(cfg_path, servingInfoFile)
+
+            servingInfoCA = cfg.get('servingInfo', {}).get('clientCA')
+            if servingInfoCA:
+                cert_meta['clientCA'] = os.path.join(cfg_path, servingInfoCA)
+
+            serviceSigner = cfg.get('controllerConfig', {}).get('serviceServingCert', {}).get('signer', {}).get('certFile')
+            if serviceSigner:
+                cert_meta['serviceSigner'] = os.path.join(cfg_path, serviceSigner)
+
+            etcdClientCA = cfg.get('etcdClientInfo', {}).get('ca')
+            if etcdClientCA:
+                cert_meta['etcdClientCA'] = os.path.join(cfg_path, etcdClientCA)
+
+            etcdClientCert = cfg.get('etcdClientInfo', {}).get('certFile')
+            if etcdClientCert:
+                cert_meta['etcdClientCert'] = os.path.join(cfg_path, etcdClientCert)
+
+            kubeletCert = cfg.get('kubeletClientInfo', {}).get('certFile')
+            if kubeletCert:
+                cert_meta['kubeletCert'] = os.path.join(cfg_path, kubeletCert)
+
+            proxyClient = cfg.get('kubernetesMasterConfig', {}).get('proxyClientInfo', {}).get('certFile')
+            if proxyClient:
+                cert_meta['proxyClient'] = os.path.join(cfg_path, proxyClient)
 
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
