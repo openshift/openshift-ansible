@@ -57,7 +57,7 @@ masterClientConnectionOverrides:
   qps: 20
 masterKubeConfig: node.kubeconfig
 networkConfig:
-  mtu: {{ openshift_node_group_network_mtu }}
+  mtu: {{ openshift.node.sdn_mtu }}
   networkPluginName: {{ openshift_node_group_network_plugin }}
 servingInfo:
   bindAddress: 0.0.0.0:10250
