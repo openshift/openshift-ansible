@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.22.0%{?dist}
+Release:        0.23.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,59 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Apr 19 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.23.0
+- Adjust Kuryr CNI definitions for new Docker image (mdulko@redhat.com)
+- Update installation/uninstallation/upgrade of descheduler component.
+  (avagarwa@redhat.com)
+- Provide backup_ext functionality keeping backwards compatibility.
+  (kwoodson@redhat.com)
+- Add OWNERS files (sdodson@redhat.com)
+- Fixing indentation for topology keyfor antiaffinity rules
+  (ewolinet@redhat.com)
+- Cert check: skip missing entries when a list of certs to check is assembled
+  (vrutkovs@redhat.com)
+- Create docker cert dir for our registry (sdodson@redhat.com)
+- Fix up node and control-plane images (sdodson@redhat.com)
+- Revert "crio: Fixup docker SELinux permissions" (sdodson@redhat.com)
+- Output useful logs in CI on failure (wk.cvs.github@sydorenko.org.ua)
+- [BZ 1567251] make cassandra snapshots configurable (john.sanda@gmail.com)
+- Remove etcd_version (vrutkovs@redhat.com)
+- cluster_monitoring_operator: Bump to the latest build (ealfassa@redhat.com)
+- Update the docker-registry CA symlink on nodes during upgrade
+  (ccoleman@redhat.com)
+- Bug 1567767 - openshift_logging : Run JKS generation script failed
+  (rmeggins@redhat.com)
+- Fix wrong handler name masters (mgugino@redhat.com)
+- Remove all references to prometheus storage via NFS (sdodson@redhat.com)
+- HACK: disable service catalog for HA and update PAPR tests
+  (vrutkovs@redhat.com)
+- Fix undefined var in openstack dns record setting (tomas@sedovic.cz)
+- Add bootstrap and join to node scaleup (tomas@sedovic.cz)
+- upgrade: verify API server is accessible before masters upgrade
+  (vrutkovs@redhat.com)
+- Properly detect etcd version in static pod (vrutkovs@redhat.com)
+- No need to stop etcd service on bootstrapped nodes (vrutkovs@redhat.com)
+- Rework etcd backup and cmd during upgrade (vrutkovs@redhat.com)
+- Use nodename when waiting for node to be ready (vrutkovs@redhat.com)
+- Copy master-exec script (vrutkovs@redhat.com)
+- Upgrade: don't check master service status for bootstrapped nodes
+  (vrutkovs@redhat.com)
+- PAPR: check HA install and minor update on all-in-one cluster
+  (vrutkovs@redhat.com)
+- Remove deprecated networkPluginName from node config template
+  (nakayamakenjiro@gmail.com)
+- Updating to use preferred only for logging components and removing infra pod
+  concept (ewolinet@redhat.com)
+- Update queris. (mrsiano@gmail.com)
+- Add support for kuryr-controller and kuryr-cni health checks
+  (ltomasbo@redhat.com)
+- Remove iam_cert23 and use upstream iam_cert. (abutcher@redhat.com)
+- Adding anti affinity configurations for ES and kibana pods
+  (ewolinet@redhat.com)
+- Opening additional ports for CNS block in heat template.
+  (jmencak@users.noreply.github.com)
+- catalog: use configmap for leader election lock (jpeeler@redhat.com)
+
 * Mon Apr 16 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.22.0
 - Don't always update dbus but do restart dbus if dnsmasq changed
   (sdodson@redhat.com)
