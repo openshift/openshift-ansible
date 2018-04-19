@@ -3,13 +3,16 @@
   import_tasks: firewall.yml
 
 - name: Install cockpit-ws
-  package: name={{ item }} state=present
-  with_items:
-    - cockpit-ws
-    - cockpit-system
-    - cockpit-bridge
-    - cockpit-docker
-    - "{{ cockpit_plugins }}"
+  package:
+    name: "{{ cockpit_pkgs | join(',') }}"
+    state: present
+  vars:
+    - cockpit_pkgs:
+      - cockpit-ws
+      - cockpit-system
+      - cockpit-bridge
+      - cockpit-docker
+      - "{{ cockpit_plugins }}"
   when: not openshift_is_containerized | bool
   register: result
   until: result is succeeded

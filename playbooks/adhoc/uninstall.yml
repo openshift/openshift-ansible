@@ -494,10 +494,10 @@
     failed_when: false
 
   - name: Remove packages
-    package: name={{ item }} state=absent
+    package:
+      name: etcd
+      state: absent
     when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - etcd
     register: result
     until: result is succeeded
 
@@ -553,10 +553,10 @@
     - firewalld
 
   - name: Remove packages
-    package: name={{ item }} state=absent
+    package:
+      name: haproxy
+      state: absent
     when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
-    with_items:
-    - haproxy
     register: result
     until: result is succeeded
 
