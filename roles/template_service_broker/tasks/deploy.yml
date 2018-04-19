@@ -3,7 +3,7 @@
     name: openshift-template-service-broker
     state: present
     node_selector:
-    - ""
+    - 'node-role.kubernetes.io/master=true'
 
 - command: mktemp -d /tmp/tsb-ansible-XXXXXX
   register: mktemp
