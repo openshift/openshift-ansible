@@ -17,7 +17,7 @@
   until:
   - "registry_pods.results.results[0]['items'] | count > 0"
   # There must be as many matching pods with 'Ready' status True as there are expected replicas
-  - "registry_pods.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == openshift_hosted_registry_replicas | default(l_default_replicas) | int"
+  - "registry_pods.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == openshift_hosted_registry_replicas | int"
   delay: 10
   retries: "{{ (600 / 10) | int }}"
 
