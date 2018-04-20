@@ -116,3 +116,5 @@ openshift_hosted_docker_registry_insecure_default: "{{ openshift_docker_hosted_r
 openshift_hosted_docker_registry_insecure: "{{ openshift_hosted_docker_registry_insecure_default }}"
 
 openshift_hosted_registry_storage_azure_blob_realm: core.windows.net
+
+openshift_hosted_registry_replicas: 1
