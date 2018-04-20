@@ -39,6 +39,5 @@
 - import_playbook: ../init/version.yml
   vars:
     l_openshift_version_set_hosts: "oo_masters_to_config:oo_nodes_to_config:!oo_first_master"
-    l_openshift_version_check_hosts: "oo_masters_to_config:oo_nodes_to_config"
 
 - import_playbook: private/scaleup.yml
