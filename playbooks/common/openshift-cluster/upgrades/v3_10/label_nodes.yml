@@ -23,3 +23,9 @@
         tasks_from: set_default_node_role.yml
       vars:
         openshift_master_host: '{{ groups.oo_first_master.0 }}'
+    # Wait for nodes to become ready before updating hosted components
+    - import_role:
+        name: openshift_manage_node
+        tasks_from: node_ready.yml
+      vars:
+        openshift_master_host: '{{ groups.oo_first_master.0 }}'
