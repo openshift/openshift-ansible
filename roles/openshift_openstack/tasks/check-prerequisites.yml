@@ -31,11 +31,6 @@
   when: (use_trunk_ports | default(False)) and
         ('trunk' not in openstack_network_extensions)
 
-# Check Kuryr has LBaaSv2 available
-- fail:
-    msg: "Kuryr enabled but OpenStack LBaaS is not."
-  when: openshift_use_kuryr | default(False) and not openshift_openstack_use_lbaas_load_balancer
-
 # Check jmespath
 - name: Try to import python module shade
   command: python -c "import jmespath"
