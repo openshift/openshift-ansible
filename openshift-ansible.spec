@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.24.0%{?dist}
+Release:        0.25.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Apr 19 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.25.0
+- remove stray LCs on deprovision (jdiaz@redhat.com)
+
 * Thu Apr 19 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.24.0
 - Correct default sdn_mtu setting (rteague@redhat.com)
 - Fix docker client-ca.crt symlink (sdodson@redhat.com)
