@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.25.0%{?dist}
+Release:        0.26.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Apr 20 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.26.0
+- docker rootdir is different when installing crio (sjenning@redhat.com)
+- Use `inventory_hostname` not `openshift_hostname` (tomas@sedovic.cz)
+- Set OpenStack VM hostname to the entry in Nova (tomas@sedovic.cz)
+
 * Thu Apr 19 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.25.0
 - remove stray LCs on deprovision (jdiaz@redhat.com)
 
