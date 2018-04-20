@@ -16,17 +16,6 @@
   roles:
   - role: openshift_metrics
 
-# TODO: Remove when master config property is removed
-- name: OpenShift Metrics
-  hosts: oo_masters:!oo_first_master
-  serial: 1
-  tasks:
-  - name: Setup the non-first masters configs
-    import_role:
-      name: openshift_metrics
-      tasks_from: update_master_config.yaml
-    when: not openshift_version_gte_3_9
-
 - name: Metrics Install Checkpoint End
   hosts: all
   gather_facts: false

@@ -23,8 +23,6 @@
 
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
-  vars:
-    openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift_is_containerized | bool
 
 - include_tasks: "{{ node_config_hook }}"
