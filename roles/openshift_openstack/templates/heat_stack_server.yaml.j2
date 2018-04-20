@@ -337,7 +337,7 @@ resources:
       not: {equals: [{get_param: api_lb_pool}, ""]}
     properties:
       pool: { get_param: api_lb_pool }
-      protocol_port: {{ openshift_master_api_port|default(8443) }}
+      protocol_port: {{ openshift_master_api_port }}
       address: { get_attr: [server, first_address]}
       subnet: { get_param: subnet }
 

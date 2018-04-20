@@ -19,5 +19,5 @@
     host: "{{ openshift.common.hostname }}"
     state: started
     delay: 10
-    port: "{{ openshift.master.api_port }}"
+    port: "{{ openshift_master_api_port }}"
     timeout: 600

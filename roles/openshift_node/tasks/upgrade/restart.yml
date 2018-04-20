@@ -3,7 +3,7 @@
 # - openshift_service_type
 # - openshift_is_containerized
 # - openshift.common.hostname
-# - openshift.master.api_port
+# - openshift_master_api_port
 
 # NOTE: This is needed to make sure we are using the correct set
 #       of systemd unit files. The RPMs lay down defaults but
@@ -42,6 +42,6 @@
     host: "{{ openshift.common.hostname }}"
     state: started
     delay: 10
-    port: "{{ openshift.master.api_port }}"
+    port: "{{ openshift_master_api_port }}"
     timeout: 600
   when: inventory_hostname in groups.oo_masters_to_config

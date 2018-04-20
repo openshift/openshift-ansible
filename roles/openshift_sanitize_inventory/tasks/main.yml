@@ -114,4 +114,4 @@
       server, please open a support ticket.
   when:
     - openshift_master_console_port is defined
-    - openshift_master_console_port != (openshift_master_api_port | default(8443))
+    - openshift_master_console_port != openshift_master_api_port
