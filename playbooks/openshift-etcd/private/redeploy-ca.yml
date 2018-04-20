@@ -64,8 +64,8 @@
 
 - name: Distribute etcd CA to masters
   hosts: oo_masters_to_config
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  roles:
+  - openshift_facts
   tasks:
   - name: Deploy etcd CA
     copy:

@@ -13,28 +13,16 @@
 
 - import_playbook: certificates.yml
 
-- name: Disable excluders
+- name: Disable excluders and gather facts
   hosts: oo_masters_to_config
-  gather_facts: no
   roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: disable
-
-- name: Gather and set facts for master hosts
-  hosts: oo_masters_to_config
-  pre_tasks:
-  # Per https://bugzilla.redhat.com/show_bug.cgi?id=1469336
-  #
-  # When scaling up a cluster upgraded from OCP <= 3.5, ensure that
-  # OPENSHIFT_DEFAULT_REGISTRY is present as defined on the existing
-  # masters, or absent if such is the case.
-  - name: Detect if this host is a new master in a scale up
-    set_fact:
-      g_openshift_master_is_scaleup: "{{ inventory_hostname in ( groups['new_masters'] | default([]) ) }}"
-
-  - name: Scaleup Detection
-    debug:
-      var: g_openshift_master_is_scaleup
+  - openshift_facts
+  tasks:
+  - name: Disable excluders
+    import_role:
+      name: openshift_excluder
+    vars:
+      r_openshift_excluder_action: disable
 
   - name: Check for RPM generated config marker file .config_managed
     stat:
@@ -53,9 +41,6 @@
     - node
     - .config_managed
 
-  roles:
-  - openshift_facts
-  post_tasks:
   - openshift_facts:
       role: master
       local_facts:
@@ -88,8 +73,6 @@
 - name: Configure masters
   hosts: oo_masters_to_config
   any_errors_fatal: true
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
   pre_tasks:
   - name: Prepare the bootstrap node config on masters for self-hosting
     import_role:
@@ -139,6 +122,11 @@
   - name: Create group for deployment type
     group_by: key=oo_masters_deployment_type_{{ openshift_deployment_type }}
     changed_when: False
+  - name: Re-enable excluders
+    import_role:
+      name: openshift_excluder
+    vars:
+      r_openshift_excluder_action: enable
 
 - name: Deploy the central bootstrap configuration
   hosts: oo_first_master
@@ -155,13 +143,6 @@
     openshift_master_host: "{{ groups.oo_first_master.0 }}"
     openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
-
-- name: Re-enable excluder if it was previously enabled
-  hosts: oo_masters_to_config
-  gather_facts: no
-  roles:
-  - role: openshift_excluder
-    r_openshift_excluder_action: enable
 
 - name: Master Install Checkpoint End
   hosts: all
