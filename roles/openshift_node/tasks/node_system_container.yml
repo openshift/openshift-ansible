@@ -14,6 +14,7 @@
   with_items:
   - "/etc/origin/openvswitch"
   - "/var/lib/kubelet"
+  - "/opt/cni/bin"
 
 - name: Pre-pull node system container image
   command: >
