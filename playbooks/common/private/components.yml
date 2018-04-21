@@ -42,3 +42,6 @@
 
 - import_playbook: ../../openshift-descheduler/private/config.yml
   when: openshift_descheduler_install | default(false) | bool
+
+- import_playbook: ../../openshift-node-problem-detector/private/config.yml
+  when: openshift_node_problem_detector_install | default(false) | bool
