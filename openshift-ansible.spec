@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.26.0%{?dist}
+Release:        0.27.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -164,6 +164,15 @@ BuildArch:     noarch
 
 
 %changelog
+* Sat Apr 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.27.0
+- Update minimal hosts.localhost (rteague@redhat.com)
+- Ensure /opt/cni/bin exists when running a node in a system container
+  (vrutkovs@redhat.com)
+- Set default number of registry replicas to 1 (vrutkovs@redhat.com)
+- Fix references to openshift_master_api_port (mgugino@redhat.com)
+- Remove unused l_openshift_version_check_hosts (mgugino@redhat.com)
+- Hardcode htpasswd auth provider filename (mgugino@redhat.com)
+
 * Fri Apr 20 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.26.0
 - docker rootdir is different when installing crio (sjenning@redhat.com)
 - Use `inventory_hostname` not `openshift_hostname` (tomas@sedovic.cz)
