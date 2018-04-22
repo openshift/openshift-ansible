@@ -15,7 +15,7 @@ l_openshift_prefix_dict:
   openshift-enterprise: 'ose-${component}'
 l_os_prefix: "{{ l_openshift_prefix_dict[openshift_deployment_type] }}"
 # TODO: we should publish oreg_url component=node
-openshift_image_default: "{{ l_os_registry_url | regex_replace(l_os_prefix | regex_escape, 'node') }}"
+openshift_image_default: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'node') }}"
 openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary(openshift_image_default, (openshift_image_default.split('/')|length==2) | ternary(system_images_registry + '/' + openshift_image_default, openshift_image_default)) }}"
 system_openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + openshift_cli_image, openshift_cli_image) }}"
 
