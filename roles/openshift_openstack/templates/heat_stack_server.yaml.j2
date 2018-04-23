@@ -339,7 +339,9 @@ resources:
       pool: { get_param: api_lb_pool }
       protocol_port: {{ openshift_master_api_port }}
       address: { get_attr: [server, first_address]}
+{% if openshift_openstack_lbaasv2_provider != "Octavia"  %}
       subnet: { get_param: subnet }
+{% endif %}
 
   router_lb_pool_member_http:
     condition:
