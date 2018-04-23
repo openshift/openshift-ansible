@@ -265,7 +265,7 @@ In order to enable the kuryr `multi-pool` driver support, we need to tag
 the nodes with their corresponding `pod_vif` labels so that the right kuryr
 pool driver is used for each VM/node. To do that, uncomment:
 
-```
+```yaml
 openshift_openstack_cluster_node_labels:
   app:
     region: primary
@@ -289,6 +289,17 @@ For more information (e.g. how to use a specific storage backend), please
 follow the OpenShift documentation on the registry:
 
 https://docs.openshift.org/latest/install_config/registry/index.html
+
+
+### Kuryr Controller and CNI healthchecks probes
+
+By default kuryr controller and cni pods are deployed with readiness and
+liveness probes enabled. To disable them you can just uncomment:
+
+```yaml
+enable_kuryr_controller_probes: True
+enable_kuryr_cni_probes: True
+```
 
 
 ## API and Router Load Balancing

@@ -51,6 +51,7 @@ spec:
           mountPath: /host_proc
         - name: openvswitch
           mountPath: /var/run/openvswitch
+{% if enable_kuryr_cni_probes|default(true)|bool %}
         readinessProbe:
           httpGet:
             path: /ready
@@ -63,6 +64,7 @@ spec:
             path: /alive
             port: {{ kuryr_healthcheck_port }}
           initialDelaySeconds: 15
+{% endif %}
       volumes:
         - name: bin
           hostPath:

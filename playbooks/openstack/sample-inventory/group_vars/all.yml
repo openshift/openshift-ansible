@@ -71,6 +71,11 @@ openshift_openstack_external_network_name: "public"
 #
 ## You can also change the default device owner for the precreated subports
 #openshift_kuryr_device_owner: compute:kuryr
+#
+# You can also disable the kuryr controller and cni healthcheck probes by
+# uncommenting the next
+# enable_kuryr_controller_probes: False
+# enable_kuryr_cni_probes: False
 
 
 ## If you want to use a provider network, set its name here.
