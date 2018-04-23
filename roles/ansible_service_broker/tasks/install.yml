@@ -141,6 +141,10 @@
         port: 1338
         targetPort: 1338
         protocol: TCP
+      - name: port-1337
+        port: 1337
+        targetPort: 1337
+        protocol: TCP
     selector:
       app: openshift-ansible-service-broker
       service: asb
@@ -156,6 +160,17 @@
     service_name: asb
     port: 1338
     tls_termination: Reencrypt
+
+- name: create route for dashboard-redirector service
+  oc_route:
+    name: dr-1337
+    namespace: openshift-ansible-service-broker
+    state: present
+    labels:
+      app: openshift-ansible-service-broker
+      service: asb
+    service_name: asb
+    port: 1337
 
 - name: Set Ansible Service Broker deployment config
   oc_obj:

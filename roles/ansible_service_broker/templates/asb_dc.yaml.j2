@@ -22,6 +22,15 @@ spec:
       serviceAccount: asb
       containers:
         - image: {{ ansible_service_broker_image }}
+          name: dashboard-redirector
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1337
+              protocol: TCP
+          command:
+            - dashboard-redirector
+          imagePullPolicy: IfNotPresent
+        - image: {{ ansible_service_broker_image }}
           name: asb
           imagePullPolicy: IfNotPresent
           volumeMounts:
