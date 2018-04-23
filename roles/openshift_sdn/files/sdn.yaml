@@ -31,6 +31,7 @@ spec:
       # as all pods.
       serviceAccountName: sdn
       hostNetwork: true
+      hostPID: true
       containers:
       # The network container launches the openshift-sdn process, the kube-proxy, and the local DNS service.
       # It relies on an up to date node-config.yaml being present.
