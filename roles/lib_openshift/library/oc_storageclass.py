@@ -1570,7 +1570,7 @@ class OCStorageClass(OpenShiftCLI):
         return False
 
     @staticmethod
-    def provisioner_name_is_fully_qualified(provisioner_name):
+    def provisioner_name_qualified(provisioner_name):
         pattern = re.compile(r'^[a-z0-9A-Z-_.]+\/[a-z0-9A-Z-_.]+$')
         return pattern.match(provisioner_name)
 
@@ -1584,7 +1584,7 @@ class OCStorageClass(OpenShiftCLI):
         # E.g. if 'aws-efs' is provided as a provisioner, convert it to 'kubernetes.io/aws-efs'
         # but if the name is already qualified  (e.g. 'openshift.org/aws-efs') then leave it be.
         raw_provisioner_name = params['provisioner']
-        if OCStorageClass.provisioner_name_is_fully_qualified(raw_provisioner_name):
+        if OCStorageClass.provisioner_name_qualified(raw_provisioner_name):
             qualified_provisioner_name = raw_provisioner_name
         else:
             qualified_provisioner_name = "kubernetes.io/{}".format(params['provisioner'])
