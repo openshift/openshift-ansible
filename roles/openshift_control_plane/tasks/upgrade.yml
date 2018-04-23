@@ -8,6 +8,9 @@
   - "{{ openshift_service_type }}-master-controllers"
   failed_when: false
 
+# Only needed for 3.10, remove in 3.11.
+- import_tasks: migrate_idproviders.yml
+
 - import_tasks: static_shim.yml
 
 - import_tasks: upgrade/upgrade_scheduler.yml
