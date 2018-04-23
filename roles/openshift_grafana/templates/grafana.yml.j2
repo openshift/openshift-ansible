@@ -17,7 +17,7 @@ spec:
         app: grafana
       name: grafana
     spec:
-      serviceAccountName: {{ grafana_namespace }}
+      serviceAccountName: {{ grafana_serviceaccount_name }}
 {% if grafana_node_selector is iterable and grafana_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in grafana_node_selector.items() %}
@@ -50,7 +50,7 @@ spec:
         - -https-address=:{{ grafana_service_targetport }}
         - -http-address=
         - -email-domain=*
-        - -client-id=system:serviceaccount:{{ grafana_namespace }}:{{ grafana_service_name }}
+        - -client-id=system:serviceaccount:{{ grafana_namespace }}:{{ grafana_serviceaccount_name }}
         - -upstream=http://localhost:{{ grafana_container_port }}
         - -provider=openshift
 #       - '-openshift-delegate-urls={"/api/datasources": {"resource": "namespace", "verb": "get", "resourceName": "{{ grafana_namespace }}", "namespace": "{{ grafana_namespace }}"}}'
