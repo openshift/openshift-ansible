@@ -57,6 +57,10 @@ volumeDirectory: {{ openshift_node_data_dir }}/openshift.local.volumes
 proxyArguments:
   proxy-mode:
      - {{ openshift_node_proxy_mode }}
+{% if openshift_use_calico | default(False) | bool %}
+  cluster-cidr:
+    - {{ osm_cluster_network_cidr }}
+{% endif %}
 {% endif %}
 volumeConfig:
   localQuota:
