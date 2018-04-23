@@ -21,6 +21,7 @@ spec:
     spec:
       serviceAccount: asb
       containers:
+        {% if ansible_service_broker_enable_dashboard_redirector %}
         - image: {{ ansible_service_broker_image }}
           name: dashboard-redirector
           imagePullPolicy: IfNotPresent
@@ -30,6 +31,7 @@ spec:
           command:
             - dashboard-redirector
           imagePullPolicy: IfNotPresent
+        {% endif %}
         - image: {{ ansible_service_broker_image }}
           name: asb
           imagePullPolicy: IfNotPresent

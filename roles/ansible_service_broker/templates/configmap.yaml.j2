@@ -38,7 +38,9 @@ data:
       keep_namespace_on_error: {{ ansible_service_broker_keep_namespace_on_error | bool | lower }}
     broker:
       dev_broker: {{ ansible_service_broker_dev_broker | bool | lower }}
+      {% if ansible_service_broker_enable_dashboard_redirector %}
       dashboard_redirector: {{ ansible_service_broker_dashboard_redirector }}
+      {% endif %}
       bootstrap_on_startup: {{ ansible_service_broker_bootstrap_on_startup | bool | lower }}
       refresh_interval: {{ ansible_service_broker_refresh_interval }}
       launch_apb_on_bind: {{ ansible_service_broker_launch_apb_on_bind | bool | lower }}
