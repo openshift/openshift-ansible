@@ -472,9 +472,10 @@ class Utils(object):
                 version = version.split("-")[0]
 
             if version.startswith('v'):
-                versions_dict[tech + '_numeric'] = version[1:].split('+')[0]
-                # "v3.3.0.33" is what we have, we want "3.3"
-                versions_dict[tech + '_short'] = version[1:4]
+                version = version[1:]  # Remove the 'v' prefix
+                versions_dict[tech + '_numeric'] = version.split('+')[0]
+                # "3.3.0.33" is what we have, we want "3.3"
+                versions_dict[tech + '_short'] = "{}.{}".format(*version.split('.'))
 
         return versions_dict
 
