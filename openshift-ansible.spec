@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.27.0%{?dist}
+Release:        0.28.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,20 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Apr 23 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.28.0
+- master-restart: wait for container to stop before proceeding
+  (vrutkovs@redhat.com)
+- Remove meta role openshift_etcd_client_certificates (mgugino@redhat.com)
+- Add debug level for descheduler role. (avagarwa@redhat.com)
+- Add registry checks to v3.10 upgrade (agladkov@redhat.com)
+- Set cli image to origin-node / ose-node (sdodson@redhat.com)
+- Add a new monitoring availability component (ironcladlou@gmail.com)
+- Check and fix registry serviceaccount (agladkov@redhat.com)
+- Remove legacy env variables from the registry deploymentconfig if present
+  (agladkov@redhat.com)
+- spec: own playbooks/common/openshift-master (vrutkovs@redhat.com)
+- spec: own inventory dir (vrutkovs@redhat.com)
+
 * Sat Apr 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.27.0
 - Update minimal hosts.localhost (rteague@redhat.com)
 - Ensure /opt/cni/bin exists when running a node in a system container
