@@ -35,8 +35,9 @@ class OCStorageClassTest(unittest.TestCase):
 
         # run_ansible input parameters
 
-        params = {'kubeconfig': '/etc/origin/master/admin.kubeconfig',
-           'state': 'present',
+        params = {
+            'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+            'state': 'present',
             'debug': False,
             'name': 'testsc',
             'provisioner': 'aws-ebs',
