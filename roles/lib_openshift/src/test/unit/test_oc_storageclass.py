@@ -36,14 +36,15 @@ class OCStorageClassTest(unittest.TestCase):
         # run_ansible input parameters
 
         params = {'kubeconfig': '/etc/origin/master/admin.kubeconfig',
-          'state': 'present',
-          'debug': False,
-          'name': 'testsc',
-          'provisioner': 'aws-ebs',
-          'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
-          'parameters': {'type': 'gp2'},
-          'api_version': 'v1',
-          'default_storage_class': 'true'}
+           'state': 'present',
+            'debug': False,
+            'name': 'testsc',
+            'provisioner': 'aws-ebs',
+            'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
+            'parameters': {'type': 'gp2'},
+            'api_version': 'v1',
+            'default_storage_class': 'true'
+        }
 
         valid_result_json = '''{
             "kind": "StorageClass",
@@ -75,7 +76,6 @@ class OCStorageClassTest(unittest.TestCase):
         mock_oc_binary.side_effect = [
             'oc'
         ]
-
 
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
@@ -117,15 +117,17 @@ class OCStorageClassTest(unittest.TestCase):
 
         # run_ansible input parameters
 
-        params = {'kubeconfig': '/etc/origin/master/admin.kubeconfig',
-          'state': 'present',
-          'debug': False,
-          'name': 'testsc',
-          'provisioner': 'kubernetes.io/aws-ebs',
-          'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
-          'parameters': {'type': 'gp2'},
-          'api_version': 'v1',
-          'default_storage_class': 'true'}
+        params = {
+            'kubeconfig': '/etc/origin/master/admin.kubeconfig',
+            'state': 'present',
+            'debug': False,
+            'name': 'testsc',
+            'provisioner': 'kubernetes.io/aws-ebs',
+            'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
+            'parameters': {'type': 'gp2'},
+            'api_version': 'v1',
+            'default_storage_class': 'true'
+        }
 
         valid_result_json = '''{
             "kind": "StorageClass",
@@ -157,7 +159,6 @@ class OCStorageClassTest(unittest.TestCase):
         mock_oc_binary.side_effect = [
             'oc'
         ]
-
 
         mock_tmpfile_copy.side_effect = [
             '/tmp/mocked_kubeconfig',
