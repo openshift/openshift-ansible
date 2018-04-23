@@ -417,6 +417,7 @@
               host: ""
               ca_file: ""
               bearer_token_file: ""
+              namespace: openshift-ansible-service-broker
               sandbox_role: {{ ansible_service_broker_sandbox_role }}
               image_pull_policy: {{ ansible_service_broker_image_pull_policy }}
               keep_namespace: {{ ansible_service_broker_keep_namespace | bool | lower }}
