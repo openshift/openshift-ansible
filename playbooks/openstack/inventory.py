@@ -51,7 +51,7 @@ def base_openshift_inventory(cluster_hosts):
     osev3 = list(set(nodes + etcd + load_balancers))
 
     inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
-    inventory['OSEv3'] = {'hosts': osev3}
+    inventory['OSEv3'] = {'hosts': osev3, 'vars': {}}
     inventory['masters'] = {'hosts': masters}
     inventory['etcd'] = {'hosts': etcd}
     inventory['nodes'] = {'hosts': nodes}
@@ -167,6 +167,12 @@ def build_inventory():
                 stout['api_lb_sg_id']})
         except KeyError:
             pass  # Not an API load balanced deployment
+
+        try:
+            inventory['OSEv3']['vars'][
+                'openshift_master_cluster_hostname'] = stout['private_api_ip']
+        except KeyError:
+            pass  # Internal LB not specified
 
         inventory['localhost']['openshift_openstack_public_api_ip'] = \
             stout.get('public_api_ip')
