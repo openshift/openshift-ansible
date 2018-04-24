@@ -22,6 +22,8 @@ spec:
         logging-infra: "{{ daemonset_component }}"
         provider: openshift
         component: "{{ daemonset_component }}"
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       serviceAccountName: "{{ daemonset_serviceAccount }}"
       nodeSelector:
