@@ -34,7 +34,7 @@ openshift_openstack_kuryr_controller_image: kuryr/controller:latest
 openshift_openstack_kuryr_cni_image: kuryr/cni:latest
 
 # Enable kuryr ports pool by default
-kuryr_openstack_enable_pools: True
+kuryr_openstack_pool_driver: nested
 
 # Enable kuryr healthchecks probes by default
 enable_kuryr_controller_probes: True
