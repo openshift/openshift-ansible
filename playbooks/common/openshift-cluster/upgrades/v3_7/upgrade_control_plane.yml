@@ -141,4 +141,5 @@
       name: "{{ openshift.common.service_type }}-master-controllers"
       state: started
 
+- include: ../registry_upgrade.yml
 - include: ../post_control_plane.yml

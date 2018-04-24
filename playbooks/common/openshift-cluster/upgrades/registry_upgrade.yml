@@ -1,0 +1,10 @@
+---
+- name: Clean up registry environment variables and check service account permissions
+  hosts: oo_first_master
+  tasks:
+  - include_role:
+      name: openshift_hosted
+      tasks_from: registry_service_account.yml
+  - include_role:
+      name: openshift_hosted
+      tasks_from: remove_legacy_env_variables.yml
