@@ -22,6 +22,7 @@ spec:
       - image: {{ openshift_openstack_kuryr_controller_image }}
         imagePullPolicy: IfNotPresent
         name: controller
+{% if enable_kuryr_controller_probes|default(true)|bool %}
         readinessProbe:
           httpGet:
             path: /ready
@@ -33,6 +34,7 @@ spec:
             path: /alive
             port: {{ kuryr_healthcheck_port }}
           initialDelaySeconds: 15
+{% endif %}
         terminationMessagePath: "/dev/termination-log"
         # FIXME(dulek): This shouldn't be required, but without it selinux is
         #               complaining about access to kuryr.conf.

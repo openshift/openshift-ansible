@@ -36,6 +36,10 @@ openshift_openstack_kuryr_cni_image: kuryr/cni:latest
 # Enable kuryr ports pool by default
 kuryr_openstack_enable_pools: True
 
+# Enable kuryr healthchecks probes by default
+enable_kuryr_controller_probes: True
+enable_kuryr_cni_probes: True
+
 # Path to the cni binaries
 cni_bin_dir: /opt/cni/bin
 
