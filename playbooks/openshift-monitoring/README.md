@@ -1,26 +1,8 @@
 # OpenShift Monitoring
 
-This playbook installs the OpenShift Monitoring stack.
+This playbook runs the [Cluster Monitoring Operator role](../../roles/openshift_cluster_monitoring_operator). See the role
+for more information.
 
 ## GCP Development
 
-1. [Launch a GCP cluster](https://github.com/openshift/release/tree/master/cluster/test-deploy).
-
-2. Hack on the installer locally.
-
-3. Make changes, and then build a new openshift-ansible image.
-
-```shell
-# in openshift-ansible
-docker build -f images/installer/Dockerfile -t openshift-ansible .
-```
-
-4. Run the openshift-monitoring GCP installer against the cluster.
-
-```shell
-# in test-deploy
-make WHAT=dmacedev OPENSHIFT_ANSIBLE_IMAGE=openshift-ansible sh
-
-# in the resulting container shell
-ansible-playbook playbooks/openshift-monitoring/install-gcp.yml
-```
+The `install-gcp.yml` playbook is useful for ad-hoc installation in an existing GCE cluster.
