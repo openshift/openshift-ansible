@@ -59,13 +59,6 @@
   - include_tasks: "{{ openshift_node_upgrade_hook }}"
     when: openshift_node_upgrade_hook is defined
 
-  # Run the post-upgrade hook if defined:
-  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
-    when: openshift_node_upgrade_post_hook is defined
-
-  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
-    when: openshift_node_upgrade_post_hook is defined
-
   post_tasks:
   - name: Set node schedulability
     oc_adm_manage_node:
@@ -77,3 +70,10 @@
     register: node_schedulable
     until: node_schedulable|succeeded
     when: node_unschedulable|changed
+
+  # Run the post-upgrade hook if defined:
+  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined    
