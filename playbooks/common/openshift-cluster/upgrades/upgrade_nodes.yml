@@ -52,14 +52,15 @@
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
 
+
+  post_tasks:
   # Run the upgrade hook prior to make the node schedulable again.
   - debug: msg="Running node upgrade hook {{ openshift_node_upgrade_hook }}"
     when: openshift_node_upgrade_hook is defined
 
   - include: "{{ openshift_node_upgrade_hook }}"
     when: openshift_node_upgrade_hook is defined
-
-  post_tasks:
+        
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
