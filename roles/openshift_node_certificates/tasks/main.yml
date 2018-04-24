@@ -21,7 +21,7 @@
   - "system:node:{{ openshift.common.hostname | lower }}.crt"
   - "system:node:{{ openshift.common.hostname | lower }}.key"
   - "system:node:{{ openshift.common.hostname | lower }}.kubeconfig"
-  - ca.crt
+  - client-ca.crt
   - server.key
   - server.crt
   register: g_node_cert_stat_result
@@ -94,6 +94,17 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
+- name: Copy ca.crt to generated node config dir
+  copy:
+    src: "{{ openshift_ca_cert }}"
+    dest: "{{ openshift_generated_configs_dir }}/node-{{ hostvars[item].openshift.common.hostname | lower }}/client-ca.crt"
+    remote_src: true
+  with_items: "{{ hostvars
+                  | lib_utils_oo_select_keys(groups['oo_nodes_to_config'])
+                  | lib_utils_oo_collect(attribute='inventory_hostname', filters={'node_certs_missing':True}) }}"
+  delegate_to: "{{ openshift_ca_host }}"
+  run_once: true
+
 - name: Create a tarball of the node config directories
   command: >
     tar -czvf {{ openshift_node_generated_config_dir }}.tgz
@@ -140,6 +151,6 @@
     remote_src: yes
   with_items:
   - id: openshift
-    cert: "{{ openshift_node_cert_dir }}/ca.crt"
+    cert: "{{ openshift_node_cert_dir }}/client-ca.crt"
   notify:
   - update ca trust
