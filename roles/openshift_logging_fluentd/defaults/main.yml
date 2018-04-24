@@ -34,9 +34,9 @@ openshift_logging_fluentd_journal_read_from_head: "{{ openshift_hosted_logging_j
 openshift_logging_fluentd_app_client_cert: /etc/fluent/keys/cert
 openshift_logging_fluentd_app_client_key: /etc/fluent/keys/key
 openshift_logging_fluentd_app_ca: /etc/fluent/keys/ca
-openshift_logging_fluentd_ops_client_cert: /etc/fluent/keys/cert
-openshift_logging_fluentd_ops_client_key: /etc/fluent/keys/key
-openshift_logging_fluentd_ops_ca: /etc/fluent/keys/ca
+openshift_logging_fluentd_ops_client_cert: /etc/fluent/keys/ops-cert
+openshift_logging_fluentd_ops_client_key: /etc/fluent/keys/ops-key
+openshift_logging_fluentd_ops_ca: /etc/fluent/keys/ops-ca
 
 
 # used by "secure-host" and "secure-aggregator" deployments
