@@ -12,6 +12,8 @@
   oc_project:
     name: openshift-ansible-service-broker
     state: present
+    node_selector:
+      - ""
 
 - name: create ansible-service-broker serviceaccount
   oc_serviceaccount:
