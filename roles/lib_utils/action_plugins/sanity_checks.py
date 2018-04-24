@@ -219,6 +219,34 @@ class ActionModule(ActionBase):
                     ''.format(storage))
         return None
 
+    def check_htpasswd_provider(self, hostvars, host):
+        """Fails if openshift_master_identity_providers contains an entry of
+        kind HTPasswdPasswordIdentityProvider and
+        openshift_master_manage_htpasswd is False"""
+
+        idps = self.template_var(
+            hostvars, host, 'openshift_master_identity_providers')
+        if not idps:
+            # If we don't find any identity_providers, nothing for us to do.
+            return None
+        manage_pass = self.template_var(
+            hostvars, host, 'openshift_master_manage_htpasswd')
+        if to_bool(manage_pass):
+            # If we manage the file, we can just generate in the new path.
+            return None
+        old_keys = ('file', 'fileName', 'file_name', 'filename')
+        for idp in idps:
+            if idp['kind'] == 'HTPasswdPasswordIdentityProvider':
+                for old_key in old_keys:
+                    if old_key in idp is not None:
+                        raise errors.AnsibleModuleError(
+                            'openshift_master_identity_providers contains a '
+                            'provider of kind==HTPasswdPasswordIdentityProvider '
+                            'and {} is set.  Please migrate your htpasswd '
+                            'files to /etc/origin/master/htpasswd and update your '
+                            'existing master configs, and remove the {} key'
+                            'before proceeding.'.format(old_key, old_key))
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -231,6 +259,7 @@ class ActionModule(ActionBase):
         self.check_supported_ocp_version(hostvars, host, odt)
         self.check_session_auth_secrets(hostvars, host)
         self.check_unsupported_nfs_configs(hostvars, host)
+        self.check_htpasswd_provider(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)

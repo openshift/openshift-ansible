@@ -96,6 +96,17 @@
       - l_existing_config_master_config.projectConfig.defaultNodeSelector is defined
       - l_existing_config_master_config.projectConfig.defaultNodeSelector != ''
 
+    - set_fact:
+        # Take list of existing IDProviders so we can use/modify them later,
+        # especially for migrating htpasswd file.
+        openshift_master_existing_idproviders: "{{ l_existing_config_master_config.oauthConfig.identityProviders }}"
+      vars:
+        l_existing_config_master_config: "{{ (openshift_master_config_encoded_contents.content | b64decode | from_yaml) }}"
+      when:
+      - master_config_path_check.stat.exists
+      - l_existing_config_master_config.oauthConfig is defined
+      - l_existing_config_master_config.oauthConfig.identityProviders is defined
+
   - set_fact:
       # We need to setup openshift_client_binary here for special uses of delegate_to in
       # later roles and plays.
