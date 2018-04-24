@@ -32,10 +32,8 @@ openshift_logging_use_mux: "{{ openshift_logging_mux_allow_external | default(Fa
 openshift_logging_mux_hostname: "{{ 'mux.' ~ openshift_master_default_subdomain }}"
 openshift_logging_mux_port: 24284
 openshift_logging_mux_external_address: "{{ ansible_default_ipv4.address }}"
-# the namespace to use for undefined projects should come first, followed by any
-# additional namespaces to create by default - users will typically not need to set this
-openshift_logging_mux_default_namespaces: ["mux-undefined"]
-# extra namespaces to create for mux clients - users will need to set this
+# the namespace to use for undefined projects
+# namespaces to create for mux clients - users will need to set this
 openshift_logging_mux_namespaces: []
 
 openshift_logging_mux_app_client_cert: /etc/fluent/keys/cert

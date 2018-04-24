@@ -172,9 +172,7 @@ openshift_logging_mux_port: 24284
 openshift_logging_mux_cpu_limit: null
 openshift_logging_mux_memory_limit: 512Mi
 openshift_logging_mux_cpu_request: 100m
-# the namespace to use for undefined projects should come first, followed by any
-# additional namespaces to create by default - users will typically not need to set this
-openshift_logging_mux_default_namespaces: ["mux-undefined"]
+# the namespace to use for undefined projects - users will typically not need to set this
 # extra namespaces to create for mux clients - users will need to set this
 openshift_logging_mux_namespaces: []
 
