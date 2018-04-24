@@ -27,6 +27,7 @@
     with_items:
     - dbus
     - systemd-logind
+    - "{{ 'firewalld' if os_firewall_use_firewalld | default(False) else '' }}"
     register: dbussvcs_restart
   - wait_for_connection:
 
