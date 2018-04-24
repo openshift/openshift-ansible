@@ -1,4 +1,3 @@
 ---
-openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
-openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
-openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
+openshift_master_config_file: "/etc/origin/master/master-config.yaml"
+openshift_master_scheduler_conf: "/etc/origin/master/scheduler.json"

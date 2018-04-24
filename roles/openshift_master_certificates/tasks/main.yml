@@ -1,7 +1,7 @@
 ---
 - name: Check status of master certificates
   stat:
-    path: "{{ openshift_master_config_dir }}/{{ item }}"
+    path: "/etc/origin/master/{{ item }}"
   with_items:
   - admin.crt
   - ca.crt
@@ -32,7 +32,7 @@
   delegate_to: "{{ openshift_ca_host }}"
 
 - find:
-    paths: "{{ openshift_master_config_dir }}/legacy-ca/"
+    paths: "/etc/origin/master/legacy-ca/"
     patterns: ".*-ca.crt"
     use_regex: true
   register: g_master_legacy_ca_result
@@ -89,7 +89,7 @@
   run_once: true
 
 - file:
-    src: "{{ openshift_master_config_dir }}/{{ item }}"
+    src: "/etc/origin/master/{{ item }}"
     dest: "{{ openshift_master_generated_config_dir }}/{{ item }}"
     state: hard
     force: true
@@ -142,14 +142,14 @@
 
 - name: Ensure certificate directory exists
   file:
-    path: "{{ openshift_master_config_dir }}"
+    path: "/etc/origin/master"
     state: directory
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
 - name: Unarchive the tarball on the master
   unarchive:
     src: "{{ g_master_certs_mktemp.stdout }}/{{ openshift_master_cert_subdir }}.tgz"
-    dest: "{{ openshift_master_config_dir }}"
+    dest: "/etc/origin/master"
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
 
 - name: Delete local temp directory
@@ -178,7 +178,7 @@
 # the dest file, will need to make sure to ignore things that could be added
 - name: Copy the admin client config(s)
   copy:
-    src: "{{ openshift_master_config_dir }}/admin.kubeconfig"
+    src: "/etc/origin/master/admin.kubeconfig"
     dest: "~{{ item }}/.kube/config"
     remote_src: yes
     force: "{{ openshift_certificates_redeploy | default(false) }}"

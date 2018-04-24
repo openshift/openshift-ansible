@@ -10,15 +10,15 @@
 
 - name: Configure self-signed certificate file paths
   set_fact:
-    docker_registry_cert_path: "{{ openshift_master_config_dir }}/registry.crt"
-    docker_registry_key_path: "{{ openshift_master_config_dir }}/registry.key"
-    docker_registry_cacert_path: "{{ openshift_master_config_dir }}/ca.crt"
+    docker_registry_cert_path: "/etc/origin/master/registry.crt"
+    docker_registry_key_path: "/etc/origin/master/registry.key"
+    docker_registry_cacert_path: "/etc/origin/master/ca.crt"
     docker_registry_self_signed: true
 
 - name: Retrieve provided certificate files
   copy:
     backup: True
-    dest: "{{ openshift_master_config_dir }}/named_certificates/{{ item.value | basename }}"
+    dest: "/etc/origin/master/named_certificates/{{ item.value | basename }}"
     src: "{{ item.value }}"
   when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
   with_dict: "{{ openshift_hosted_registry_routecertificates }}"
@@ -32,7 +32,7 @@
     service_name: docker-registry
     tls_termination: "{{ openshift_hosted_registry_routetermination }}"
     host: "{{ openshift_hosted_registry_routehost | default(omit, true) }}"
-    cert_path: "{{ openshift_master_config_dir }}/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
-    key_path: "{{ openshift_master_config_dir }}/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
-    cacert_path: "{{ openshift_master_config_dir }}/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
-    dest_cacert_path: "{{ openshift_master_config_dir }}/ca.crt"
+    cert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
+    key_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
+    cacert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
+    dest_cacert_path: "/etc/origin/master/ca.crt"
