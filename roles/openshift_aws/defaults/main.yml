@@ -108,7 +108,7 @@ openshift_aws_elb_dict:
       - protocol: tcp
         load_balancer_port: 80
         instance_protocol: tcp
-        instance_port: 443
+        instance_port: 80
         proxy_protocol: True
       - protocol: tcp
         load_balancer_port: 443
