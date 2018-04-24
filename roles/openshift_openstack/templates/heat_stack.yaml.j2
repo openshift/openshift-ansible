@@ -126,7 +126,7 @@ resources:
 # NOTE: With Kuryr, the load balancer is necessary.
 {% if openshift_openstack_use_lbaas_load_balancer or (openshift_use_kuryr|default(false)|bool and not openshift_openstack_provider_network_name) %}
   api_lb:
-    type: OS::Neutron::LBaaS::LoadBalancer
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::LoadBalancer
     properties:
       name:
         str_replace:
@@ -141,7 +141,7 @@ resources:
 {% endif %}
 
   api_lb_listener:
-    type: OS::Neutron::LBaaS::Listener
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener
     properties:
       name:
         str_replace:
@@ -151,9 +151,26 @@ resources:
       loadbalancer: { get_resource: api_lb }
       protocol: HTTPS
       protocol_port: {{ openshift_master_api_port }}
+      default_pool: { get_resource: api_lb_pool }
+
+{% if openshift_use_kuryr|default(false)|bool and openshift_master_api_port|default(8443) != 443 %}
+  # 443 listener for pod access. In non-kuryr envs handled by iptables
+  internal_api_lb_listener:
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-api-lb-internal-listener
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      loadbalancer: { get_resource: api_lb }
+      protocol: HTTPS
+      protocol_port: 443
+      default_pool: { get_resource: api_lb_pool }
+{% endif %}
 
   api_lb_pool:
-    type: OS::Neutron::LBaaS::Pool
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Pool
     properties:
       name:
         str_replace:
@@ -163,7 +180,7 @@ resources:
       protocol: HTTPS
       # TODO(shadower): Make this configurable?
       lb_algorithm: ROUND_ROBIN
-      listener: { get_resource: api_lb_listener }
+      loadbalancer: { get_resource: api_lb }
 {% endif %}
 
 {% if not openshift_openstack_provider_network_name %}
@@ -938,7 +955,7 @@ resources:
 
 
   router_lb:
-    type: OS::Neutron::LBaaS::LoadBalancer
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::LoadBalancer
     properties:
       vip_subnet: { get_resource: subnet }
 
@@ -956,14 +973,14 @@ resources:
       port_id: { get_attr: [router_lb, vip_port_id] }
 
   router_lb_listener_http:
-    type: OS::Neutron::LBaaS::Listener
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener
     properties:
       protocol: HTTP
       protocol_port: 80
       loadbalancer: { get_resource: router_lb }
 
   router_lb_pool_http:
-    type: OS::Neutron::LBaaS::Pool
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Pool
     properties:
       # TODO(shadower): Make this configurable?
       lb_algorithm: ROUND_ROBIN
@@ -971,14 +988,14 @@ resources:
       listener: { get_resource: router_lb_listener_http }
 
   router_lb_listener_https:
-    type: OS::Neutron::LBaaS::Listener
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Listener
     properties:
       protocol: HTTPS
       protocol_port: 443
       loadbalancer: { get_resource: router_lb }
 
   router_lb_pool_https:
-    type: OS::Neutron::LBaaS::Pool
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::Pool
     properties:
       # TODO(shadower): Make this configurable?
       lb_algorithm: ROUND_ROBIN

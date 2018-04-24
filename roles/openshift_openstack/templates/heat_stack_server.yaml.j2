@@ -332,19 +332,21 @@ resources:
 
 
   api_lb_member:
-    type: OS::Neutron::LBaaS::PoolMember
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
     condition:
       not: {equals: [{get_param: api_lb_pool}, ""]}
     properties:
       pool: { get_param: api_lb_pool }
       protocol_port: {{ openshift_master_api_port }}
       address: { get_attr: [server, first_address]}
+{% if openshift_openstack_lbaasv2_provider != "Octavia"  %}
       subnet: { get_param: subnet }
+{% endif %}
 
   router_lb_pool_member_http:
     condition:
       not: {equals: [{get_param: router_lb_pool_http}, ""]}
-    type: OS::Neutron::LBaaS::PoolMember
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
     properties:
       pool: { get_param: router_lb_pool_http }
       protocol_port: 80
@@ -354,7 +356,7 @@ resources:
   router_lb_pool_member_https:
     condition:
       not: {equals: [{get_param: router_lb_pool_https}, ""]}
-    type: OS::Neutron::LBaaS::PoolMember
+    type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
     properties:
       pool: { get_param: router_lb_pool_https }
       protocol_port: 443
