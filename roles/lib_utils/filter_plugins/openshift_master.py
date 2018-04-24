@@ -278,6 +278,7 @@ class HTPasswdPasswordIdentityProvider(IdentityProviderBase):
         idp['filename'] = '/etc/origin/master/htpasswd'
         super(HTPasswdPasswordIdentityProvider, self).__init__(api_version, idp)
         self._allow_additional = False
+        self._required += [['filename']]
 
     @staticmethod
     def get_default(key):
