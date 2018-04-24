@@ -47,7 +47,7 @@ openshift.kibana.index.mode: {{es_kibana_index_mode | default('unique')}}
 
 path:
   data: /elasticsearch/persistent/${CLUSTER_NAME}/data
-  logs: /elasticsearch/${CLUSTER_NAME}/logs
+  logs: /elasticsearch/persistent/${CLUSTER_NAME}/logs
 
 searchguard:
   authcz.admin_dn:
