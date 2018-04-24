@@ -16,7 +16,7 @@
   - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
     when: openshift_node_upgrade_pre_hook is defined
 
-  - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
+  - include: "{{ openshift_node_upgrade_pre_hook }}"
     when: openshift_node_upgrade_pre_hook is defined  
 
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
@@ -56,7 +56,7 @@
   - debug: msg="Running node upgrade hook {{ openshift_node_upgrade_hook }}"
     when: openshift_node_upgrade_hook is defined
 
-  - include_tasks: "{{ openshift_node_upgrade_hook }}"
+  - include: "{{ openshift_node_upgrade_hook }}"
     when: openshift_node_upgrade_hook is defined
 
   post_tasks:
@@ -75,5 +75,5 @@
   - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
     when: openshift_node_upgrade_post_hook is defined
 
-  - include_tasks: "{{ openshift_node_upgrade_post_hook }}"
+  - include: "{{ openshift_node_upgrade_post_hook }}"
     when: openshift_node_upgrade_post_hook is defined    
