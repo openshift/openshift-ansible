@@ -6,6 +6,8 @@ metadata:
   labels:
     openshift.io/control-plane: "true"
     openshift.io/component: etcd
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
 spec:
   restartPolicy: Always
   hostNetwork: true
