@@ -20,34 +20,19 @@ def set_version_facts_if_unset(version):
     facts = {}
     if version and version != "latest":
         version = LooseVersion(version)
-        version_gte_3_7 = version >= LooseVersion('3.7')
-        version_gte_3_8 = version >= LooseVersion('3.8')
-        version_gte_3_9 = version >= LooseVersion('3.9')
         version_gte_3_10 = version >= LooseVersion('3.10')
         version_gte_3_11 = version >= LooseVersion('3.11')
     else:
         # 'Latest' version is set to True, 'Next' versions set to False
-        version_gte_3_7 = True
-        version_gte_3_8 = True
-        version_gte_3_9 = True
         version_gte_3_10 = True
         version_gte_3_11 = False
-    facts['openshift_version_gte_3_7'] = version_gte_3_7
-    facts['openshift_version_gte_3_8'] = version_gte_3_8
-    facts['openshift_version_gte_3_9'] = version_gte_3_9
     facts['openshift_version_gte_3_10'] = version_gte_3_10
     facts['openshift_version_gte_3_11'] = version_gte_3_11
 
     if version_gte_3_11:
         examples_content_version = 'v3.11'
-    elif version_gte_3_10:
-        examples_content_version = 'v3.10'
-    elif version_gte_3_9:
-        examples_content_version = 'v3.9'
-    elif version_gte_3_8:
-        examples_content_version = 'v3.8'
     else:
-        examples_content_version = 'v3.7'
+        examples_content_version = 'v3.10'
 
     facts['openshift_examples_content_version'] = examples_content_version
 
