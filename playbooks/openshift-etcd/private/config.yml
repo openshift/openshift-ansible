@@ -18,12 +18,16 @@
 - name: Configure etcd
   hosts: oo_etcd_to_config
   any_errors_fatal: true
-  roles:
-  - role: openshift_clock
-  - role: openshift_etcd
-    etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
-    etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
-  - role: nickhammond.logrotate
+  tasks:
+  - import_role:
+      name: openshift_clock
+  - import_role:
+      name: etcd
+    vars:
+      etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
+      etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
+  - import_role:
+      name: nickhammond.logrotate
 
 - name: etcd Install Checkpoint End
   hosts: all
