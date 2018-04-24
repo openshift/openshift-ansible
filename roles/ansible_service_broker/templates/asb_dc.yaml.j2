@@ -10,7 +10,6 @@ spec:
   replicas: 1
   selector:
     app: openshift-ansible-service-broker
-  nodeSelector: {{ ansible_service_broker_node_selector }}
   strategy:
     type: Rolling
   template:
@@ -19,6 +18,7 @@ spec:
         app: openshift-ansible-service-broker
         service: asb
     spec:
+      nodeSelector: {{ ansible_service_broker_node_selector }}
       serviceAccount: asb
       containers:
         - image: {{ ansible_service_broker_image }}
