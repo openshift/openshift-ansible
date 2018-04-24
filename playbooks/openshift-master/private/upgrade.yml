@@ -56,6 +56,9 @@
     failed_when:
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
+    until: l_pb_upgrade_control_plane_pre_upgrade_storage is succeeded
+    retries: 2
+    delay: 30
 
 # Set openshift_master_facts separately. In order to reconcile
 # admission_config's, we currently must run openshift_master_facts and
