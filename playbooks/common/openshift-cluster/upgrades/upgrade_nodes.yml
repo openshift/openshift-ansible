@@ -17,7 +17,7 @@
     when: openshift_node_upgrade_pre_hook is defined
 
   - include: "{{ openshift_node_upgrade_pre_hook }}"
-    when: openshift_node_upgrade_pre_hook is defined  
+    when: openshift_node_upgrade_pre_hook is defined
 
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
@@ -76,4 +76,4 @@
     when: openshift_node_upgrade_post_hook is defined
 
   - include: "{{ openshift_node_upgrade_post_hook }}"
-    when: openshift_node_upgrade_post_hook is defined    
+    when: openshift_node_upgrade_post_hook is defined
