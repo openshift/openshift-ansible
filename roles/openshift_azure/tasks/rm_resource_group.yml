@@ -1,0 +1,6 @@
+---
+- name: Delete a resource group
+  azure_rm_resourcegroup:
+    name: "{{ openshift_azure_resource_group_name }}"
+    state: absent
+    force: yes # removes all resources within the group

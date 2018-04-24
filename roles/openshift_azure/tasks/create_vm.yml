@@ -1,0 +1,38 @@
+---
+- name: Create virtual machine
+  azure_rm_virtualmachine:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_vm_name }}"
+    vm_size: "{{ openshift_azure_vm_size }}"
+    data_disks: "{{ openshift_azure_vm_data_disks }}"
+    storage_account_name: "{{ openshift_azure_storage_account_name }}"
+    admin_username: "{{ openshift_azure_vm_admin_username }}"
+    admin_password: "{{ openshift_azure_vm_admin_password | default(omit) }}"
+    ssh_password_enabled: "{{ openshift_azure_vm_ssh_pw_enabled }}"
+    network_interfaces: "{{ openshift_azure_prefix }}-{{ openshift_azure_virtual_network_name }}"
+    ssh_public_keys: "{{ openshift_azure_vm_ssh_public_keys if openshift_azure_vm_ssh_public_keys != [] else omit }}"
+    os_type: Linux
+    image: "{{ openshift_azure_vm_base_image }}"
+  register: azurevm
+
+- name: dump azurevm details
+  debug:
+    var: azurevm
+    verbosity: 1
+
+- meta: refresh_inventory
+
+- name: debug inventory
+  debug:
+    msg: "{{ item }}"
+  with_items: "{{ groups['azure'] }}"
+
+- name: add azurevm to hosts
+  add_host:
+    groups: nodes,g_new_nodes_hosts
+    name: "{{ azurevm.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.publicIPAddress.properties.ipAddress }}"
+
+- name: Wait for SSH
+  wait_for_connection:
+  delegate_to: '{{ item }}'
+  with_items: '{{ groups["nodes"] }}'

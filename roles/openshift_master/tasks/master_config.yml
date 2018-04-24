@@ -1,0 +1,16 @@
+---
+# TODO: add the validate parameter when there is a validation command to run
+- name: Create master config
+  template:
+    dest: "{{ openshift_master_config_file }}"
+    src: master.yaml.v1.j2
+    backup: true
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+  - restart master api
+  - restart master controllers
+
+- include_tasks: bootstrap_settings.yml
+  when: openshift_master_bootstrap_enabled | default(False)

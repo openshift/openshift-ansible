@@ -1,0 +1,9 @@
+---
+# lay down the base settings in order for us to provision
+- import_playbook: provision_resource_group.yml
+
+- import_playbook: provision_storage_account.yml
+
+- import_playbook: provision_virtual_network.yml
+
+- import_playbook: provision_security_group.yml

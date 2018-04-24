@@ -1,0 +1,14 @@
+---
+- name: "Create resource group"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision virtual network"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_virtual_network.yml
+
+  - name: "provision subnet in virtual network"
+    import_role:
+      name: openshift_azure
+      tasks_from: add_subnet_to_virtual_network.yml

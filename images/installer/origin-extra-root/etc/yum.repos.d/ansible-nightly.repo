@@ -1,0 +1,5 @@
+[ansible-nightly]
+name=ansible-nightly
+baseurl=https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
+enabled=1
+gpgcheck=0

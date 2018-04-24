@@ -1,0 +1,6 @@
+---
+- name: remove virtual network
+  azure_rm_virtualnetwork:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_prefix }}-{{ openshift_azure_resource_group_name }}"
+    state: absent

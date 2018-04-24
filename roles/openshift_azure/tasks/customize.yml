@@ -1,0 +1,44 @@
+---
+# turn on cloud-init
+- name: fillout waagent.conf
+  lineinfile:
+    path: /etc/waagent.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+  - regexp: 'Provisioning\.Enabled=[y|n]'
+    line: "Provisioning.Enabled={{ 'y' if not openshift_azure_use_cloud_init else 'n' }}"
+  - regexp: 'Provisioning\.UseCloudInit=[n|y]'
+    line: "Provisioning.UseCloudInit={{ 'y' if openshift_azure_use_cloud_init else 'n' }}"
+  - regexp: 'ResourceDisk\.Format=[y|n]'
+    line: "ResourceDisk.Format={{ 'y' if not openshift_azure_use_cloud_init else 'n' }}"
+  - regexp: 'ResourceDisk\.EnableSwap=[y|n]'
+    line: "ResourceDisk.EnableSwap={{ 'y' if not openshift_azure_use_cloud_init else 'n' }}"
+
+- when: openshift_azure_use_cloud_init
+  block:
+  - name: setup the 91-azure_datasource.cfg file
+    copy:
+      content: |
+        # This configuration file is provided by the WALinuxAgent package.
+        datasource_list: [ Azure ]
+      dest: /etc/cloud/cloud.cfg.d/91-azure_datasource.cfg
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: add in disk_setup and mounts to cloud_init_modules
+    yedit:
+      src: /etc/cloud/cloud.cfg
+      key: cloud_init_modules
+      update: true
+      value: "{{ item }}"
+    with_items:
+    - disk_setup
+    - mounts
+
+- when: not openshift_azure_use_cloud_init
+  name: disable cloud-init
+  package:
+    name: cloud-init
+    state: absent
