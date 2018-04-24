@@ -154,3 +154,9 @@
   - import_role:
       name: openshift_hosted
       tasks_from: migrate_default_registry_var.yml
+  - import_role:
+      name: openshift_hosted
+      tasks_from: registry_service_account.yml
+  - import_role:
+      name: openshift_hosted
+      tasks_from: remove_legacy_env_variables.yml
