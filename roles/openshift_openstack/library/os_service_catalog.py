@@ -156,13 +156,13 @@ def main():
         module.fail_json(msg='Failed to connect to the cloud')
 
     try:
-        sc = cloud.cloud_config.get_service_catalog()
+        service_catalog = cloud.cloud_config.get_service_catalog()
     # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to retrieve the service catalog')
 
     try:
-        endpoints = sc.get_endpoints()
+        endpoints = service_catalog.get_endpoints()
     # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to retrieve the service catalog '
