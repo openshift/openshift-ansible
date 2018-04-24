@@ -7,6 +7,12 @@
     region: "{{ openshift_aws_region }}"
   register: ec2sgs
 
+- fail:
+    msg: >
+      "Unable to fetch expected security groups: {{ openshift_aws_launch_config_security_groups[openshift_aws_node_group.group] }}"
+  when:
+  - (ec2sgs.security_groups | map(attribute='group_name') | list | sort) != (openshift_aws_launch_config_security_groups[openshift_aws_node_group.group] | sort)
+
 # Create the scale group config
 - name: Create the node scale group launch config
   ec2_lc:
