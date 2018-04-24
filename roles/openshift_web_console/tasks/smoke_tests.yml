@@ -1,0 +1,20 @@
+---
+- name: Create openshift-web-console-smoke-test project
+  oc_project:
+    name: "{{ openshift_web_console_smoke_test_namespace }}"
+    state: present
+
+- name: Render web console smoke test pod
+  template:
+    src: "{{ openshift_web_console_smoke_test_pod_template_file }}"
+    dest: "{{ openshift_web_console_smoke_test_tmp_location }}/smoke-test-pod.yaml"
+
+- name: Create web console smoke test pod
+  oc_obj:
+    kind: pod
+    name: "{{ openshift_web_console_smoke_test_name }}"
+    namespace: "{{ openshift_web_console_smoke_test_namespace }}"
+    state: present
+    files:
+    - "{{ openshift_web_console_smoke_test_tmp_location }}/smoke-test-pod.yaml"
+    delete_after: "{{ openshift_web_console_delete_tempfiles }}"

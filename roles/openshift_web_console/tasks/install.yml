@@ -141,3 +141,5 @@
   when: not create_console_project.changed
 
 - include_tasks: start.yml
+
+- include_tasks: smoke_tests.yml
