@@ -316,7 +316,6 @@
           replicas: 1
           selector:
             app: etcd
-          nodeSelector: '{{ ansible_service_broker_node_selector }}'
           strategy:
             type: Rolling
           template:
@@ -325,6 +324,7 @@
                 app: etcd
                 service: asb-etcd
             spec:
+              nodeSelector: '{{ ansible_service_broker_node_selector }}'
               serviceAccount: asb
               containers:
                 - image: "{{ ansible_service_broker_etcd_image }}"
