@@ -1,10 +1,9 @@
 ---
 - name: deallocate vm
-  azure_rm_virtualmachine:
-    name: vm
-    resource_group: "{{ openshift_azure_resource_group_name }}"
-    allocated: no
-  register: vm
+  command: >
+    az vm deallocate
+    -g "{{ openshift_azure_resource_group_name }}"
+    -n vm
 
 - name: generalize vm
   command: >
@@ -12,18 +11,25 @@
     -g "{{ openshift_azure_resource_group_name }}"
     -n vm
 
+- name: get vm details
+  command: >
+    az vm show
+    -g "{{ openshift_azure_resource_group_name }}"
+    -n vm
+  register: vm
+
 - name: create image resource group
   azure_rm_resourcegroup:
     name: "{{ image_resource_group }}"
     location: "{{ openshift_azure_resource_location }}"
 
-# Note: requires ansible 2.5
 - name: create image
-  azure_rm_image:
-    resource_group: "{{ image_resource_group }}"
-    name: "{{ image_name }}"
-    source: "{{ vm.ansible_facts.azure_vm.properties.storageProfile.osDisk.managedDisk.id }}"
-    os_type: Linux
+  command: >
+    az image create
+    -g "{{ image_resource_group }}"
+    -n "{{ image_name }}"
+    --source "{{ (vm.stdout | from_json).storageProfile.osDisk.managedDisk.id }}"
+    --os-type Linux
 
 - name: calculate tags
   set_fact:
