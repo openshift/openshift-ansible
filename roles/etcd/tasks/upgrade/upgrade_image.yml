@@ -22,11 +22,8 @@
 
 - import_tasks: validate_etcd_conf.yml
 
-- name: Restart etcd_container
-  systemd:
-    name: "{{ etcd_service }}"
-    daemon_reload: yes
-    state: restarted
+- name: restart etcd
+  command: /usr/local/bin/master-restart etcd
 
 ## TODO: probably should just move this into the backup playbooks, also this
 ## will fail on atomic host. We need to revisit how to do etcd backups there as
