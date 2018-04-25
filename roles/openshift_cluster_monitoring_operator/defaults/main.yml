@@ -16,7 +16,7 @@ openshift_cluster_monitoring_operator_alertmanager_config: |+
     receiver: default
     routes:
     - match:
-        alertname: DeadDansSwitch
+        alertname: DeadMansSwitch
       repeat_interval: 5m
       receiver: deadmansswitch
   receivers:
