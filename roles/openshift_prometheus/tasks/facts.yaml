@@ -6,5 +6,5 @@
   register: oc_version
 
 - set_fact:
-    kubernetes_version: "{{ oc_version.results.kubernetes_short | float }}"
+    kubernetes_version: "{{ '%.2f' | format(oc_version.results.kubernetes_short|float) }}"
     openshift_prometheus_serviceaccount_annotations: "{{ l_openshift_prometheus_serviceaccount_annotations + openshift_prometheus_serviceaccount_annotations|list }}"
