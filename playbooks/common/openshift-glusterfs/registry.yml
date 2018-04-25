@@ -23,6 +23,7 @@
       - name: "{{ openshift.hosted.registry.storage.volume.name }}-glusterfs-claim"
         capacity: "{{ openshift.hosted.registry.storage.volume.size }}"
         access_modes: "{{ openshift.hosted.registry.storage.access.modes }}"
+        storageclass: ""
     when: openshift.hosted.registry.storage.glusterfs.swap
 
 - name: Create persistent volumes
