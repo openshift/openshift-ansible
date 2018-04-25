@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.28.0%{?dist}
+Release:        0.29.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,60 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Apr 25 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.29.0
+- Add Alertmanager configuration (ironcladlou@gmail.com)
+- Fix a few remaining image expansions (sdodson@redhat.com)
+- add critical pod annotation to fluent to avoid eviction (jcantril@redhat.com)
+- Update all catalog RBAC to use upstream API (jpeeler@redhat.com)
+- update jinja for template (dymurray@redhat.com)
+- Fix BZ 1570922. (mrsiano@gmail.com)
+- Removing the extra closing parentheses. (mbruzek@gmail.com)
+- Add sanity_check for removing filepath and migrate htpasswd
+  (mgugino@redhat.com)
+- Add max-time option to curl to avoid long running ansible
+  (nakayamakenjiro@gmail.com)
+- openstack: pylint fix short var name (antonisp@celebdor.com)
+- Set the master cluster hostname under OpenStack (tomas@sedovic.cz)
+- Replace stdout with content (nakayamakenjiro@gmail.com)
+- Add no_proxy to verify to check .svc (nakayamakenjiro@gmail.com)
+- Bug 1562783 - Fix egress router setup (rpenta@redhat.com)
+- Bug 1538560 - [RFE]rename the project name mux-undefined (nhosoi@redhat.com)
+- Fix more indentation issues (contact@seandawson.info)
+- Fix oc_version oc_short to report '3.10' (jupierce@redhat.com)
+- Add EAP CD to v3.9 and v3.10 (ken@zaptillion.net)
+- Add missing attribute on htpasswd object (mgugino@redhat.com)
+- Cleanup stale version bits (mgugino@redhat.com)
+- Fix defaults (dymurray@redhat.com)
+- Add jinja blocks (dymurray@redhat.com)
+- Add remove task for route (dymurray@redhat.com)
+- Add conditional for route (dymurray@redhat.com)
+- Bug 1569220 - Add dashboard redirector feature (dymurray@redhat.com)
+- openstack: Do not use layer2 mode for Octavia LB (antonisp@celebdor.com)
+- openstack: don't check for kuryr AND lbaas (celebdor@gmail.com)
+- openstack: make master direct Octavia compatible (antonisp@celebdor.com)
+- openstack: Make LBaaSv2 backend configurable (antonisp@celebdor.com)
+- openstack/kuryr: expose origin API on 443 for pods (antonisp@celebdor.com)
+- Make Kuryr healthchecks probes optional (ltomasbo@redhat.com)
+- Fix method name that was too long (sean.dawson@environment.gov.au)
+- Fix linting issues (sean.dawson@environment.gov.au)
+- Integrate Node Problem Detector into install (joesmith@redhat.com)
+- Add libsemanage-python to base packages prerequisites (tdecacqu@redhat.com)
+- Remove meta openshift_etcd role (mgugino@redhat.com)
+- Adding missing deprecated var openshift_hosted_metrics_public_url and its
+  mapped var (ewolinet@redhat.com)
+- Update Cluster Monitoring Operator role docs (ironcladlou@gmail.com)
+- Allowing ability to specify a logging namespace and override check to install
+  in two different namespaces (ewolinet@redhat.com)
+- Allowing way to provide ops and non ops certs for their locations for fluentd
+  (ewolinet@redhat.com)
+- Forward infra elb port 80 to instance port 80. (abutcher@redhat.com)
+- Updating to use existing logging facts over role defaults if available
+  (ewolinet@redhat.com)
+- Add documentation about subports management for kuryr (ltomasbo@redhat.com)
+- Add trailing newline (sean.dawson@environment.gov.au)
+- Update unit tests to test sc changes (sean.dawson@environment.gov.au)
+- Allow fully qualified provisioner names (sean.dawson@environment.gov.au)
+
 * Mon Apr 23 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.28.0
 - master-restart: wait for container to stop before proceeding
   (vrutkovs@redhat.com)
