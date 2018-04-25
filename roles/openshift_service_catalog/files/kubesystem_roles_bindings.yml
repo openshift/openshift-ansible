@@ -4,7 +4,7 @@ metadata:
   name: kube-system-service-catalog-role-bindings
 objects:
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
     name: extension-apiserver-authentication-reader
@@ -19,14 +19,14 @@ objects:
     verbs:
     - get
 
-- apiVersion: authorization.openshift.io/v1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
     name: extension-apiserver-authentication-reader-binding
     namespace: ${KUBE_SYSTEM_NAMESPACE}
   roleRef:
+    kind: Role
     name: extension-apiserver-authentication-reader
-    namespace: ${KUBE_SYSTEM_NAMESPACE}
   subjects:
   - kind: ServiceAccount
     name: service-catalog-apiserver
