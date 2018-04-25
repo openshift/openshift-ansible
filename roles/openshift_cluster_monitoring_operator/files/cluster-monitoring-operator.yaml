@@ -24,6 +24,9 @@ parameters:
   value: quay.io/coreos/prometheus-config-reloader
 - name: CONFIG_RELOADER_IMAGE
   value: quay.io/coreos/configmap-reload
+- name: ALERTMANAGER_CONFIG
+  required: true
+  description: A complete (base64-encoded) Alertmanager configuration YAML file.
 - name: NAMESPACE
   # This namespace cannot be changed. Only `openshift-monitoring` is supported.
   value: openshift-monitoring
@@ -43,6 +46,17 @@ objects:
         baseImage: ${PROMETHEUS_IMAGE}
       alertmanagerMain:
         baseImage: ${ALERTMANAGER_IMAGE}
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: alertmanager-main
+    namespace: ${NAMESPACE}
+    labels:
+      k8s-app: alertmanager
+  data:
+    alertmanager.yaml: "${ALERTMANAGER_CONFIG}"
+
 - apiVersion: rbac.authorization.k8s.io/v1beta1
   kind: ClusterRole
   metadata: {name: cluster-monitoring-operator}

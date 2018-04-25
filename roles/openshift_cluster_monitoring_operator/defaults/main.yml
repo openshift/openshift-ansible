@@ -5,3 +5,20 @@ openshift_cluster_monitoring_operator_prometheus_repo: quay.io/prometheus/promet
 openshift_cluster_monitoring_operator_alertmanager_repo: quay.io/prometheus/alertmanager
 openshift_cluster_monitoring_operator_prometheus_reloader_repo: quay.io/coreos/prometheus-config-reloader
 openshift_cluster_monitoring_oeprator_configmap_reloader_repo: quay.io/coreos/configmap-reload
+
+openshift_cluster_monitoring_operator_alertmanager_config: |+
+  global:
+    resolve_timeout: 5m
+  route:
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 12h
+    receiver: default
+    routes:
+    - match:
+        alertname: DeadDansSwitch
+      repeat_interval: 5m
+      receiver: deadmansswitch
+  receivers:
+  - name: default
+  - name: deadmansswitch

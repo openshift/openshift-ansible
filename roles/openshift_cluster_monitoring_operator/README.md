@@ -18,6 +18,21 @@ To uninstall, set:
 openshift_cluster_monitoring_operator_install: false
 ```
 
+## Configuring Alertmanager
+
+The Monitoring Operator comes with a [default no-op Alertmanager configuration](./defaults/main.yml). To supply a new configuration, set:
+
+```yaml
+openshift_cluster_monitoring_operator_alertmanager_config: |+
+  global:
+    # ...
+  route:
+    # ...
+  receivers:
+    # ...
+```
+
+The value of the variable should be a complete [Alertmanager configuration file](https://prometheus.io/docs/alerting/configuration/).
 
 ## Monitoring new components 
 
