@@ -1,6 +1,8 @@
 ---
 
 ansible_service_broker_node_selector: "{{ openshift_hosted_infra_selector | default('region=infra') | map_from_pairs }}"
+ansible_service_broker_enable_dashboard_redirector: false
+ansible_service_broker_dashboard_redirector_route: "dr-1337-openshift-ansible-service-broker.{{ openshift_master_default_subdomain }}"
 
 ansible_service_broker_remove: false
 ansible_service_broker_install: true
