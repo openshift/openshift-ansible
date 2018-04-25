@@ -3661,7 +3661,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "drop_common_labels(sort_desc(sum without (cpu) (irate(container_cpu_usage_seconds_total{container_name=\"prometheus\"}[5m]))))",
+				  "expr": "sort_desc(sum without (cpu) (irate(container_cpu_usage_seconds_total{container_name=\"prometheus\"}[5m])))",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -3748,7 +3748,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "sort_desc(drop_common_labels(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb!~\"GET|LIST|WATCH\"}[Xs])))) > 0",
+				  "expr": "sort_desc(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb!~\"GET|LIST|WATCH\"}[Xs]))) > 0",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
@@ -3823,7 +3823,7 @@
 			  "steppedLine": false,
 			  "targets": [
 				{
-				  "expr": "sort_desc(drop_common_labels(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb=~\"GET|LIST|WATCH\"}[Xs])))) > 0",
+				  "expr": "sort_desc(sum without (instance,type,client,contentType) (irate(apiserver_request_count{verb=~\"GET|LIST|WATCH\"}[Xs]))) > 0",
 				  "format": "time_series",
 				  "intervalFactor": 2,
 				  "refId": "A",
