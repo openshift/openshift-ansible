@@ -25,6 +25,10 @@ openshift_logging_curator_memory_limit: 256Mi
 openshift_logging_curator_cpu_request: 100m
 openshift_logging_curator_nodeselector: {}
 
+openshift_logging_curator_ops_default_days: 30
+openshift_logging_curator_ops_run_hour: 3
+openshift_logging_curator_ops_run_minute: 30
+openshift_logging_curator_ops_run_timezone: UTC
 openshift_logging_curator_ops_cpu_limit: null
 openshift_logging_curator_ops_memory_limit: 256Mi
 openshift_logging_curator_ops_cpu_request: 100m
