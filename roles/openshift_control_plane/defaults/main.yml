@@ -76,10 +76,9 @@ ha_svc_template_path: "native-cluster"
 
 openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
 
-openshift_master_loopback_config: "{{ openshift_master_config_dir }}/openshift-master.kubeconfig"
+openshift_master_loopback_config: "/etc/origin/master/openshift-master.kubeconfig"
 loopback_context_string: "current-context: {{ openshift.master.loopback_context_name }}"
-openshift_master_session_secrets_file: "{{ openshift_master_config_dir }}/session-secrets.yaml"
-openshift_master_policy: "{{ openshift_master_config_dir }}/policy.json"
+openshift_master_policy: "/etc/origin/master/policy.json"
 
 scheduler_config:
   kind: Policy
@@ -131,14 +130,8 @@ r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_p
 openshift_master_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
 openshift_master_image_config_latest: "{{ openshift_master_image_config_latest_default }}"
 
-openshift_master_config_dir_default: "{{ openshift.common.config_base ~ '/master' if openshift is defined and 'common' in openshift else '/etc/origin/master' }}"
-openshift_master_config_dir: "{{ openshift_master_config_dir_default }}"
-
 openshift_master_csr_sa: node-bootstrapper
 openshift_master_csr_namespace: openshift-infra
-
-openshift_master_config_file: "{{ openshift_master_config_dir }}/master-config.yaml"
-openshift_master_scheduler_conf: "{{ openshift_master_config_dir }}/scheduler.json"
 
 l_osm_sess_auth_def: "{{ hostvars[groups.oo_first_master.0]['l_osm_session_auth_secrets'] }}"
 l_osm_session_auth_secrets: "{{ openshift_master_session_auth_secrets | default(l_osm_sess_auth_def) }}"

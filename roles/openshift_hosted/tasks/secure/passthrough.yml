@@ -2,9 +2,9 @@
 # Generate a self-signed certificate when there is no user-supplied certificate
 - name: Configure self-signed certificate file paths
   set_fact:
-    docker_registry_cert_path: "{{ openshift_master_config_dir }}/registry.crt"
-    docker_registry_key_path: "{{ openshift_master_config_dir }}/registry.key"
-    docker_registry_cacert_path: "{{ openshift_master_config_dir }}/ca.crt"
+    docker_registry_cert_path: "/etc/origin/master/registry.crt"
+    docker_registry_key_path: "/etc/origin/master/registry.key"
+    docker_registry_cacert_path: "/etc/origin/master/ca.crt"
     docker_registry_self_signed: true
   when:
   - "'certfile' not in openshift_hosted_registry_routecertificates"
@@ -17,21 +17,21 @@
   block:
   - name: Configure provided certificate file paths
     set_fact:
-      docker_registry_cert_path: "{{ openshift_master_config_dir }}/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
-      docker_registry_key_path: "{{ openshift_master_config_dir }}/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
+      docker_registry_cert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['certfile'] | basename }}"
+      docker_registry_key_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['keyfile'] | basename }}"
       docker_registry_self_signed: false
 
   # Since we end up bundling the cert, cacert and key in a .pem file, the 'cafile'
   # is optional
   - name: Configure provided ca certificate file path
     set_fact:
-      docker_registry_cacert_path: "{{ openshift_master_config_dir }}/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
+      docker_registry_cacert_path: "/etc/origin/master/named_certificates/{{ openshift_hosted_registry_routecertificates['cafile'] | basename }}"
     when: "'cafile' in openshift_hosted_registry_routecertificates"
 
   - name: Retrieve provided certificate files
     copy:
       backup: True
-      dest: "{{ openshift_master_config_dir }}/named_certificates/{{ item.value | basename }}"
+      dest: "/etc/origin/master/named_certificates/{{ item.value | basename }}"
       src: "{{ item.value }}"
     when: item.key in ['certfile', 'keyfile', 'cafile'] and item.value
     with_dict: "{{ openshift_hosted_registry_routecertificates }}"

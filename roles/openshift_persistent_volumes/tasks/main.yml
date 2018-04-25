@@ -6,7 +6,7 @@
 
 - name: Copy the admin client config(s)
   command: >
-    cp {{ openshift_master_config_dir }}/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
+    cp /etc/origin/master/admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
   changed_when: False
 
 - set_fact:

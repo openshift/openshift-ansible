@@ -63,7 +63,7 @@
   changed_when: false
 
 - slurp:
-    src: "{{ openshift_master_config_dir }}/service-signer.crt"
+    src: "/etc/origin/master/service-signer.crt"
   register: __ca_bundle
 
 # Register with broker
