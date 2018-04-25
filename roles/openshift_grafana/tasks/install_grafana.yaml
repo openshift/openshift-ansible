@@ -169,7 +169,7 @@
   uri:
     url: "{{ grafana_route }}/api/datasources"
     user: "{{ grafana_sa_token.stdout }}"
-    force_basic_auth: true
+    validate_certs: false
     method: POST
     body: '{{ payload_data }}'
     body_format: json
@@ -215,7 +215,7 @@
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
     user: "{{ grafana_sa_token.stdout }}"
-    force_basic_auth: true
+    validate_certs: false
     method: POST
     body: '{{ slurpfile["content"] | b64decode }}'
     body_format: json
@@ -232,7 +232,7 @@
   uri:
     url: "{{ grafana_route }}/api/dashboards/db"
     user: "{{ grafana_sa_token.stdout }}"
-    force_basic_auth: true
+    validate_certs: false
     method: POST
     body: '{{ slurpfile["content"] | b64decode }}'
     body_format: json
