@@ -11,7 +11,7 @@
   service:
     name: "openvswitch"
     state: stopped
-  when: not openshift_use_openshift_sdn | bool
+  when: openshift_use_openshift_sdn | bool
   failed_when: false
 
 - name: Ensure static containerized services stopped before Docker restart
@@ -49,4 +49,4 @@
   failed_when: false
   when: 
   - not openshift_is_containerized | bool
-  - not openshift_use_openshift_sdn | bool
+  - openshift_use_openshift_sdn | bool
