@@ -28,6 +28,8 @@ openshift_gcp_base_image: rhel-7
 openshift_gcp_registry_bucket_keyfile: ''
 openshift_gcp_registry_bucket_name: "{{ openshift_gcp_prefix }}-docker-registry"
 
+openshift_gcp_master_dns_ttl: 300
+
 openshift_gcp_node_group_config:
   - name: master
     suffix: m
