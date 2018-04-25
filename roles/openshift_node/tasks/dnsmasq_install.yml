@@ -10,25 +10,13 @@
   set_fact:
     network_manager_active: "{{ True if 'ActiveState=active' in nm_show.stdout else False }}"
 
-- when: not openshift_is_atomic | bool
-  block:
-  - name: Install dnsmasq
-    package:
-      name: dnsmasq
-      state: installed
-    register: result
-    until: result is succeeded
-  # This works around https://bugzilla.redhat.com/show_bug.cgi?id=1550582
-  - name: Restart dbus and systemd-logind if dnsmasq was installed
-    systemd:
-      name: "{{ item }}"
-      state: restarted
-    when: result is changed
-    with_items:
-    - dbus
-    - systemd-logind
-    register: dbussvcs_restart
-  - wait_for_connection:
+- name: Install dnsmasq
+  package:
+    name: dnsmasq
+    state: installed
+  register: result
+  until: result is succeeded
+  when: not openshift_is_atomic | bool
 
 - name: ensure origin/node directory exists
   file:
