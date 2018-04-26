@@ -63,6 +63,15 @@ spec:
           }
           trap quit SIGTERM
           /usr/share/openvswitch/scripts/ovs-ctl start --system-id=random
+
+          # Restrict the number of pthreads ovs-vswitchd creates to reduce the
+          # amount of RSS it uses on hosts with many cores
+          # https://bugzilla.redhat.com/show_bug.cgi?id=1571379
+          # https://bugzilla.redhat.com/show_bug.cgi?id=1572797
+          if [[ `nproc` -gt 12 ]]; then
+              ovs-vsctl set Open_vSwitch . other_config:n-revalidator-threads=4
+              ovs-vsctl set Open_vSwitch . other_config:n-handler-threads=10
+          fi
           while true; do sleep 5; done
         securityContext:
           runAsUser: 0
@@ -83,10 +92,10 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 200Mi
+            memory: 300Mi
           limits:
             cpu: 200m
-            memory: 300Mi
+            memory: 400Mi
 
       volumes:
       - name: host-modules
