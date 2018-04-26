@@ -18,17 +18,17 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: hawkular-services
+  name: middleware-manager
   annotations:
-    openshift.io/display-name: Hawkular Services
-    description: Hawkular-Services all-in-one (including Hawkular Metrics, Hawkular Alerts and Hawkular Inventory).
-    iconClass: icon-wildfly
-    tags: hawkular,hawkular-services,metrics,alerts,manageiq,cassandra
+    openshift.io/display-name: Middleware Manager
+    description: Middleware Manager all-in-one
+    iconClass: icon-jboss
+    tags: middleware-manager,metrics,alerts,cloudforms,cassandra
 
 parameters:
 - name: HAWKULAR_SERVICES_IMAGE
-  description: What docker image should be used for hawkular-services.
-  displayName: Hawkular Services Docker Image
+  description: What docker image should be used for Middleware Manager.
+  displayName: Middleware Manager Docker Image
   value: registry.access.redhat.com/jboss-mm-7-tech-preview/middleware-manager:latest
 - name: CASSANDRA_IMAGE
   description: What docker image should be used for cassandra node.
@@ -43,29 +43,29 @@ parameters:
   displayName: Cassandra Container Data Limit
   value: 2Gi
 - name: HAWKULAR_SERVICES_DATA_LIMIT
-  description: Maximum amount data used by hawkular-services container (mostly logging).
-  displayName: Hawkular Services Container Data Limit
+  description: Maximum amount data used by Middleware Manager container (mostly logging).
+  displayName: Middleware Manager Container Data Limit
   value: 1Gi
 - name: ROUTE_NAME
   description: Public route with this name will be created.
   displayName: Route Name
-  value: hawkular-services
+  value: middleware-manager
 - name: ROUTE_HOSTNAME
-  description: Under this hostname the Hawkular Services will be accessible, if left blank a value will be defaulted.
+  description: Under this hostname the Middleware Manager will be accessible, if left blank a value will be defaulted.
   displayName: Hostname
 - name: HAWKULAR_USER
-  description: Username that is used for accessing the Hawkular Services, if left blank a value will be generated.
-  displayName: Hawkular User
+  description: Username that is used for accessing the Middleware Manager, if left blank a value will be generated.
+  displayName: Middleware Manager User
   from: '[a-zA-Z0-9]{16}'
   generate: expression
 - name: HAWKULAR_PASSWORD
-  description: Password that is used for accessing the Hawkular Services, if left blank a value will be generated.
-  displayName: Hawkular Password
+  description: Password that is used for accessing the Middleware Manager, if left blank a value will be generated.
+  displayName: Middleware Manager Password
   from: '[a-zA-Z0-9]{16}'
   generate: expression
 labels:
-  template: hawkular-services
-message: Credentials for hawkular-services are ${HAWKULAR_USER}:${HAWKULAR_PASSWORD}
+  template: middleware-manager
+message: Credentials for Middleware Manager are ${HAWKULAR_USER}:${HAWKULAR_PASSWORD}
 
 objects:
 - apiVersion: v1
@@ -74,6 +74,7 @@ objects:
     annotations:
       description: Exposes and load balances the application pods
       service.alpha.openshift.io/dependencies: '[{"name":"hawkular-cassandra","namespace":"","kind":"Service"}]'
+      service.alpha.openshift.io/serving-cert-secret-name: hawkular-ssl-secret
     name: hawkular-services
   spec:
     ports:
@@ -81,6 +82,10 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
+    - name: https-8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
     - name: admin-9990-tcp
       port: 9990
       protocol: TCP
@@ -138,31 +143,41 @@ objects:
             value: remote
           - name: CASSANDRA_NODES
             value: hawkular-cassandra
+          - name: HAWKULAR_USE_SSL
+            value: 'true'
           - name: HAWKULAR_USER
             value: ${HAWKULAR_USER}
           - name: HAWKULAR_PASSWORD
             value: ${HAWKULAR_PASSWORD}
+          - name: HAWKULAR_PUBLIC_KEY_FILENAME
+            value: /client-secrets/tls.crt
+          - name: HAWKULAR_PRIVATE_KEY_FILENAME
+            value: /client-secrets/tls.key
           imagePullPolicy: IfNotPresent
           name: hawkular-services
           volumeMounts:
           - name: h-services-data
             mountPath: /var/opt/hawkular
+          - name: hawkular-secret-volume
+            mountPath: /client-secrets/
+            readOnly: true
           ports:
           - containerPort: 8080
+          - containerPort: 8443
           - containerPort: 9990
           livenessProbe:
             exec:
               command:
               - /opt/hawkular/bin/ready.sh
             initialDelaySeconds: 180
-            timeoutSeconds: 3
+            timeoutSeconds: 15
           readinessProbe:
             exec:
               command:
               - /opt/hawkular/bin/ready.sh
             initialDelaySeconds: 120
-            timeoutSeconds: 3
-            periodSeconds: 5
+            timeoutSeconds: 15
+            periodSeconds: 20
             successThreshold: 1
             failureThreshold: 12
           resources:
@@ -175,6 +190,9 @@ objects:
         - name: h-services-data
           persistentVolumeClaim:
             claimName: h-services-pvc
+        - name: hawkular-secret-volume
+          secret:
+            secretName: hawkular-ssl-secret
 
 - apiVersion: v1
   kind: DeploymentConfig
@@ -241,7 +259,7 @@ objects:
       - ReadWriteOnce
     resources:
       requests:
-        storage: 1Gi
+        storage: ${HAWKULAR_SERVICES_DATA_LIMIT}
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
@@ -251,4 +269,4 @@ objects:
       - ReadWriteOnce
     resources:
       requests:
-        storage: 1Gi
+        storage: ${CASSANDRA_DATA_LIMIT}
