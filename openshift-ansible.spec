@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.24
+Version:        3.9.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,26 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Apr 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.26-1
+- missing default variables cause curator to fail (jkarasek@redhat.com)
+- Registry remove legacy vars (agladkov@redhat.com)
+- adding ansible node upgrade hooks ()
+- Documents new node upgrade hooks. (jtudelag@redhat.com)
+- grafana: use openshift_client_binary instead of oc (vrutkovs@redhat.com)
+- Use service account token instead of hardcoded user (pep@redhat.com)
+- Fix wrong references to service account (pep@redhat.com)
+- Add missing namespace argument for ASB (lmadsen@redhat.com)
+- Correct default sdn_mtu setting (rteague@redhat.com)
+- Remove etcd_version (vrutkovs@redhat.com)
+- Cert check: skip missing entries when a list of certs to check is assembled
+  (vrutkovs@redhat.com)
+- Output useful logs in CI on failure (wk.cvs.github@sydorenko.org.ua)
+- Fixing indentation for topology keyfor antiaffinity rules
+  (ewolinet@redhat.com)
+- Updating to use preferred only for logging components and removing infra pod
+  concept (ewolinet@redhat.com)
+- GlusterFS: enable modprobe in pods that manage bricks (dani_comnea@yahoo.com)
+
 * Wed Apr 18 2018 Justin Pierce <jupierce@redhat.com> 3.9.24-1
 - 
 
