@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.26
+Version:        3.9.27
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,17 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Thu Apr 26 2018 Justin Pierce <jupierce@redhat.com> 3.9.27-1
+- Revert "Don't always update dbus but do restart dbus if dnsmasq changed"
+  (roignac@gmail.com)
+- Update openshift_release to 3.9 in hosts.localhost
+  (skoolstra@users.noreply.github.com)
+- Cert check: verify bootstrap config and skip certs, if it doesn't have
+  client-certificate-data (vrutkovs@redhat.com)
+- Add no_proxy to verify to check .svc (nakayamakenjiro@gmail.com)
+- Updating to use existing logging facts over role defaults if available
+  (ewolinet@redhat.com)
+
 * Wed Apr 25 2018 Justin Pierce <jupierce@redhat.com> 3.9.26-1
 - missing default variables cause curator to fail (jkarasek@redhat.com)
 - Registry remove legacy vars (agladkov@redhat.com)
