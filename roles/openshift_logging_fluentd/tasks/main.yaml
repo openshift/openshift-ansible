@@ -212,12 +212,7 @@
     openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   when: "'--all' in openshift_logging_fluentd_hosts"
 
-- include_tasks: label_and_wait.yaml
-  vars:
-    node: "{{ fluentd_host }}"
-  with_items: "{{ openshift_logging_fluentd_hosts }}"
-  loop_control:
-    loop_var: fluentd_host
+- import_tasks: label_and_wait.yaml
 
 - name: Delete temp directory
   file:
