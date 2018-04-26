@@ -20,8 +20,6 @@
   any_errors_fatal: true
   tasks:
   - import_role:
-      name: openshift_clock
-  - import_role:
       name: etcd
     vars:
       etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
