@@ -12,6 +12,13 @@
       name: lib_openshift
     static: yes
 
+  # Run the pre-upgrade hook if defined:
+  - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
+  - include: "{{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
@@ -45,6 +52,13 @@
     r_openshift_excluder_service_type: "{{ openshift.common.service_type }}"
 
   post_tasks:
+  # Run the upgrade hook prior to make the node schedulable again.
+  - debug: msg="Running node upgrade hook {{ openshift_node_upgrade_hook }}"
+    when: openshift_node_upgrade_hook is defined
+
+  - include: "{{ openshift_node_upgrade_hook }}"
+    when: openshift_node_upgrade_hook is defined
+
   - name: Set node schedulability
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
@@ -55,3 +69,10 @@
     register: node_schedulable
     until: node_schedulable|succeeded
     when: node_unschedulable|changed
+
+  # Run the post-upgrade hook if defined:
+  - debug: msg="Running node post-upgrade hook {{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
+
+  - include: "{{ openshift_node_upgrade_post_hook }}"
+    when: openshift_node_upgrade_post_hook is defined
