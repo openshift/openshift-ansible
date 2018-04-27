@@ -55,8 +55,9 @@ openshift_openstack_external_network_name: "public"
 # override this
 #kuryr_cni_link_interface: eth0
 
-## Ports pooling is enabled by default, to disable, uncomment the next:
-#kuryr_openstack_enable_pools: False
+## Ports pooling is enabled by default (with nested driver).
+## To disable, uncomment the next:
+#kuryr_openstack_pool_driver: noop
 #
 ## You can also alter the port pooling defaults here
 #kuryr_openstack_pool_max: 0

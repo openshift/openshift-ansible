@@ -242,12 +242,6 @@ documentation:
 
 https://docs.openstack.org/kuryr-kubernetes/latest/installation/ports-pool.html
 
-To disable this feature, you must set:
-
-```yaml
-kuryr_openstack_enable_pools: false
-```
-
 You can control the port pooling characteristics with these options:
 
 ```yaml
@@ -261,11 +255,30 @@ kuryr_openstack_pool_update_frequency: 20
 Note in the last variable you specify the number of subports that will
 be created per trunk port, i.e., per pool.
 
-In order to enable the kuryr `multi-pool` driver support, we need to tag
-the nodes with their corresponding `pod_vif` labels so that the right kuryr
-pool driver is used for each VM/node. To do that, uncomment:
+You need to set the pool driver you want to use, depending on the target
+environment, i.e., neutron for baremetal deployments or nested for deployments
+on top of VMs:
 
 ```yaml
+kuryr_openstack_pool_driver: neutron
+kuryr_openstack_pool_driver: nested
+```
+
+And to disable this feature, you must set:
+
+```yaml
+kuryr_openstack_pool_driver: noop
+```
+
+On the other hand, there is a multi driver support to enable hybrid
+deployments with different pools drivers. In order to enable the kuryr
+`multi-pool` driver support, we need to also tag the nodes with their
+corresponding `pod_vif` labels so that the right kuryr pool driver is used
+for each VM/node. To do that, uncomment:
+
+```yaml
+kuryr_openstack_pool_driver: multi
+
 openshift_openstack_cluster_node_labels:
   app:
     region: primary
