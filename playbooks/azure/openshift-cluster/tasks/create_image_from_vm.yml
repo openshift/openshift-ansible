@@ -1,0 +1,44 @@
+---
+- name: deallocate vm
+  command: >
+    az vm deallocate
+    -g "{{ openshift_azure_resource_group_name }}"
+    -n vm
+
+- name: generalize vm
+  command: >
+    az vm generalize
+    -g "{{ openshift_azure_resource_group_name }}"
+    -n vm
+
+- name: get vm details
+  command: >
+    az vm show
+    -g "{{ openshift_azure_resource_group_name }}"
+    -n vm
+  register: vm
+
+- name: create image resource group
+  azure_rm_resourcegroup:
+    name: "{{ image_resource_group }}"
+    location: "{{ openshift_azure_resource_location }}"
+
+- name: create image
+  command: >
+    az image create
+    -g "{{ image_resource_group }}"
+    -n "{{ image_name }}"
+    --source "{{ (vm.stdout | from_json).storageProfile.osDisk.managedDisk.id }}"
+    --os-type Linux
+
+- name: calculate tags
+  set_fact:
+    final_tags: "{{ (input_image.stdout | from_json).tags | combine(image_tags) }}"
+
+- name: tag image
+  command: >
+    az resource tag
+    --resource-type Microsoft.Compute/images
+    -g "{{ image_resource_group }}"
+    -n "{{ image_name }}"
+    --tags {% for k in final_tags %}{{ k }}={{ final_tags[k] }} {% endfor %}
