@@ -137,21 +137,6 @@ options:
     required: false
     default: None
     aliases: []
-  expose_metrics:
-    description:
-    - This is a hint to run an extra container in the pod to expose metrics - the image
-    - will either be set depending on the router implementation or provided with --metrics-image.
-    required: false
-    default: False
-    aliases: []
-  metrics_image:
-    description:
-    - If expose_metrics is specified this is the image to use to run a sidecar container
-    - in the pod exposing metrics. If not set and --expose-metrics is true the image will
-    - depend on router implementation.
-    required: false
-    default: None
-    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment:

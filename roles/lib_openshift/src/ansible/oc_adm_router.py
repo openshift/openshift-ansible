@@ -36,9 +36,6 @@ def main():
             external_host_username=dict(default=None, type='str'),
             external_host_password=dict(default=None, type='str', no_log=True),
             external_host_private_key=dict(default=None, type='str', no_log=True),
-            # Metrics
-            expose_metrics=dict(default=False, type='bool'),
-            metrics_image=dict(default=None, type='str'),
             # Stats
             stats_user=dict(default=None, type='str'),
             stats_password=dict(default=None, type='str', no_log=True),
