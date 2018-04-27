@@ -16,9 +16,19 @@
   - "/var/lib/kubelet"
   - "/opt/cni/bin"
 
-- name: Pre-pull node system container image
+- name: Check status of node image pre-pull
+  async_status:
+    jid: "{{ image_prepull.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  when:
+  - node_image is defined
+  - node_image.stdout_lines == []
+  retries: 30
+
+- name: Copy node container image to ostree storage
   command: >
-    atomic pull --storage=ostree {{ system_osn_image }}
+    atomic pull --storage=ostree docker:{{ osn_image }}
   register: pull_result
   retries: 3
   delay: 5

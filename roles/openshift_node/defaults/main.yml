@@ -10,6 +10,9 @@ openshift_node_proxy_mode: iptables
 openshift_set_node_ip: False
 openshift_config_base: '/etc/origin'
 
+
+# Assume the images are already downloaded on the machine
+system_images_registry: "docker"
 l_osn_image: "{{ (system_images_registry == 'docker') | ternary(osn_image, (osn_image.split('/')|length==2) | ternary(system_images_registry + '/' + osn_image, osn_image)) }}"
 system_osn_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + l_osn_image, l_osn_image) }}"
 
