@@ -39,6 +39,8 @@
   oc_project:
     name: openshift-ansible-service-broker
     state: present
+    node_selector:
+      - ""
 
 - name: create ansible-service-broker serviceaccount
   oc_serviceaccount:
@@ -233,7 +235,6 @@
           replicas: 1
           selector:
             app: openshift-ansible-service-broker
-          nodeSelector: '{{ ansible_service_broker_node_selector }}'
           strategy:
             type: Rolling
           template:
@@ -242,6 +243,7 @@
                 app: openshift-ansible-service-broker
                 service: asb
             spec:
+              nodeSelector: '{{ ansible_service_broker_node_selector }}'
               serviceAccount: asb
               containers:
                 - image: "{{ ansible_service_broker_image }}"
@@ -316,7 +318,6 @@
           replicas: 1
           selector:
             app: etcd
-          nodeSelector: '{{ ansible_service_broker_node_selector }}'
           strategy:
             type: Rolling
           template:
@@ -325,6 +326,7 @@
                 app: etcd
                 service: asb-etcd
             spec:
+              nodeSelector: '{{ ansible_service_broker_node_selector }}'
               serviceAccount: asb
               containers:
                 - image: "{{ ansible_service_broker_etcd_image }}"
