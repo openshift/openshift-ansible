@@ -6,8 +6,7 @@
     - role: openshift_etcd_facts
   post_tasks:
     - include_role:
-        name: etcd
-        tasks_from: server_certificates
+        name: etcd_server_certificates
       vars:
         etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
         etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
