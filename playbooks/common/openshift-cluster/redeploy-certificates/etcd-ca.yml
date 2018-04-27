@@ -60,14 +60,9 @@
   roles:
   - role: etcd_common
     r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-  tasks:
-  - include_role:
-      name: etcd
-      tasks_from: distribute_ca
-    vars:
-      r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
-      etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
-    static: true
+  - role: etcd_server_certificates
+    r_etcd_common_etcd_runtime: "{{ openshift.common.etcd_runtime }}"
+    etcd_sync_cert_dir: "{{ hostvars['localhost'].g_etcd_mktemp.stdout }}"
 
 - include: ../../openshift-etcd/restart.yml
   # Do not restart etcd when etcd certificates were previously expired.
