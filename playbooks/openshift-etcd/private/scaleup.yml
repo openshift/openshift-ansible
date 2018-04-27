@@ -81,8 +81,6 @@
     vars:
       l_use_ssl: "{{ openshift_master_etcd_use_ssl | default(True) | bool}}"
 
-  roles:
-  - role: openshift_master_facts
   post_tasks:
   - import_role:
       name: openshift_master
