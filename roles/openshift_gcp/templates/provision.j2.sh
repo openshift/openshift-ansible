@@ -239,7 +239,7 @@ while true; do
         if [[ ! -f $dns ]]; then
             gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns start -z "${dns_zone}"
         fi
-        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl 3600 --name "{{ openshift_master_cluster_public_hostname }}." --type A "$IP"
+        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl {{ openshift_gcp_master_dns_ttl }} --name "{{ openshift_master_cluster_public_hostname }}." --type A "$IP"
     else
         echo "DNS record for '{{ openshift_master_cluster_public_hostname }}' already exists"
     fi
@@ -250,7 +250,7 @@ while true; do
         if [[ ! -f $dns ]]; then
             gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns start -z "${dns_zone}"
         fi
-        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl 3600 --name "{{ openshift_master_cluster_hostname }}." --type A "$IP"
+        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl {{ openshift_gcp_master_dns_ttl }} --name "{{ openshift_master_cluster_hostname }}." --type A "$IP"
     else
         echo "DNS record for '{{ openshift_master_cluster_hostname }}' already exists"
     fi
@@ -261,8 +261,8 @@ while true; do
         if [[ ! -f $dns ]]; then
             gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns start -z "${dns_zone}"
         fi
-        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl 3600 --name "{{ wildcard_zone }}." --type A "$IP"
-        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl 3600 --name "*.{{ wildcard_zone }}." --type CNAME "{{ wildcard_zone }}."
+        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl {{ openshift_gcp_master_dns_ttl }} --name "{{ wildcard_zone }}." --type A "$IP"
+        gcloud --project "{{ openshift_gcp_project }}" dns record-sets transaction --transaction-file=$dns add -z "${dns_zone}" --ttl {{ openshift_gcp_master_dns_ttl }} --name "*.{{ wildcard_zone }}." --type CNAME "{{ wildcard_zone }}."
     else
         echo "DNS record for '{{ wildcard_zone }}' already exists"
     fi
