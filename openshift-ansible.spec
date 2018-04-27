@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.29.0%{?dist}
+Release:        0.30.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,19 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Apr 26 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.30.0
+- missing default variables cause curator to fail (jkarasek@redhat.com)
+- Add prerequisites.yml to papr.sh script (mgugino@redhat.com)
+- Cert check: verify bootstrap config and skip certs, if it doesn't have
+  client-certificate-data (vrutkovs@redhat.com)
+- Fail when unable to fetch expected security groups. (abutcher@redhat.com)
+- Remove openshift_master_config_dir variable (mgugino@redhat.com)
+- Remove openshift_clock role (mgugino@redhat.com)
+- install: verify that at least one master is schedulable (vrutkovs@redhat.com)
+- Revert "Don't always update dbus but do restart dbus if dnsmasq changed"
+  (roignac@gmail.com)
+- pre upgrade: fix typo (vrutkovs@redhat.com)
+
 * Wed Apr 25 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.29.0
 - Add Alertmanager configuration (ironcladlou@gmail.com)
 - Fix a few remaining image expansions (sdodson@redhat.com)
