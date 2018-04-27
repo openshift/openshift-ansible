@@ -61,10 +61,9 @@ fi
 
 if [[ "$TYPE" == 'azure' ]]; then
   if [[ -f "${FILES}/credentials" ]]; then
-    export AZURE_CLIENT_ID=$(sed -ne '/^client_id=/ { s/^client_id=//; p; }' "${FILES}/credentials")
-    export AZURE_SECRET=$(sed -ne '/^secret=/ { s/^secret=//; p; }' "${FILES}/credentials")
-    export AZURE_SUBSCRIPTION_ID=$(sed -ne '/^subscription_id=/ { s/^subscription_id=//; p; }' "${FILES}/credentials")
-    export AZURE_TENANT=$(sed -ne '/^tenant=/ { s/^tenant=//; p; }' "${FILES}/credentials")
+    set -a
+    . "${FILES}/credentials"
+    set +a
 
     az login --service-principal --username "$AZURE_CLIENT_ID" --password "$AZURE_SECRET" --tenant "$AZURE_TENANT" >/dev/null
 
