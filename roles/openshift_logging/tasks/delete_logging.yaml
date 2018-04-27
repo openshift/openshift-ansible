@@ -104,6 +104,7 @@
   with_items:
     - logging-curator
     - logging-elasticsearch
+    - logging-elasticsearch-ops
     - logging-fluentd
     - logging-mux
 
