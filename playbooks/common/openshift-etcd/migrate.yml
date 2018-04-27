@@ -9,8 +9,8 @@
   - set_fact:
       etcd_migration_in_progress: true
   - include_role:
-      name: etcd
-      tasks_from: migrate.pre_check
+      name: etcd_migrate
+      tasks_from: check
     vars:
       r_etcd_common_embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
       etcd_peer: "{{ ansible_default_ipv4.address }}"
