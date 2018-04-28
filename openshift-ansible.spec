@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.30.0%{?dist}
+Release:        0.31.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,18 @@ BuildArch:     noarch
 
 
 %changelog
+* Sat Apr 28 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.31.0
+- Remove openshift-ansible-catalog-console.js (sdodson@redhat.com)
+- Add EAP CD to v3.10 (ken@zaptillion.net)
+- Change filename to file in htpasswd auth (mgugino@redhat.com)
+- Allow Prometheus scraping of availability namespace (ironcladlou@gmail.com)
+- Update etcd restart command (rteague@redhat.com)
+- Enable kuryr pool driver selection (ltomasbo@redhat.com)
+- Set a lower default TTL for GCP DNS records (ccoleman@redhat.com)
+- bug 1568361. Modify persistent directory for logs (jcantril@redhat.com)
+- control plane components derived from static pods must be marked critical
+  (decarr@redhat.com)
+
 * Thu Apr 26 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.30.0
 - missing default variables cause curator to fail (jkarasek@redhat.com)
 - Add prerequisites.yml to papr.sh script (mgugino@redhat.com)
