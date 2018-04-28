@@ -70,6 +70,15 @@
         - l_atomic_docker_version.stdout | replace('"', '') is version_compare('1.12','>=')
         msg: Installation on Atomic Host requires Docker 1.12 or later. Please upgrade and restart the Atomic Host.
 
+- name: Retrieve existing master configs and validate
+  hosts: oo_masters_to_config
+  gather_facts: no
+  any_errors_fatal: true
+  tasks:
+  - import_role:
+      name: openshift_control_plane
+      tasks_from: check_existing_config.yml
+
 - name: Initialize special first-master variables
   hosts: oo_first_master
   roles:
@@ -77,35 +86,14 @@
   tasks:
   - when: not (osm_default_node_selector is defined)
     block:
-    - stat:
-        path: "/etc/origin/master/master-config.yaml"
-      register: master_config_path_check
-
-    - slurp:
-        src: "/etc/origin/master/master-config.yaml"
-      register: openshift_master_config_encoded_contents
-      when: master_config_path_check.stat.exists
-
     - set_fact:
+        # l_existing_config_master_config is set in openshift_control_plane/tasks/check_existing_config.yml
         openshift_master_config_node_selector: "{{ l_existing_config_master_config.projectConfig.defaultNodeSelector }}"
-      vars:
-        l_existing_config_master_config: "{{ (openshift_master_config_encoded_contents.content | b64decode | from_yaml) }}"
       when:
-      - master_config_path_check.stat.exists
+      - l_existing_config_master_config is defined
       - l_existing_config_master_config.projectConfig is defined
       - l_existing_config_master_config.projectConfig.defaultNodeSelector is defined
       - l_existing_config_master_config.projectConfig.defaultNodeSelector != ''
-
-    - set_fact:
-        # Take list of existing IDProviders so we can use/modify them later,
-        # especially for migrating htpasswd file.
-        openshift_master_existing_idproviders: "{{ l_existing_config_master_config.oauthConfig.identityProviders }}"
-      vars:
-        l_existing_config_master_config: "{{ (openshift_master_config_encoded_contents.content | b64decode | from_yaml) }}"
-      when:
-      - master_config_path_check.stat.exists
-      - l_existing_config_master_config.oauthConfig is defined
-      - l_existing_config_master_config.oauthConfig.identityProviders is defined
 
   - set_fact:
       # We need to setup openshift_client_binary here for special uses of delegate_to in
