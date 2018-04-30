@@ -1,6 +1,2 @@
 ---
-- include_tasks: upgrade/upgrade_static.yml
-  when: openshift_master_bootstrap_enabled | default(False) | bool
-
 - include_tasks: upgrade/upgrade_rpm.yml
-  when: not openshift_master_bootstrap_enabled | default(False) | bool
