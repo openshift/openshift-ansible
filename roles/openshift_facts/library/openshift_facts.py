@@ -1145,6 +1145,8 @@ def set_proxy_facts(facts):
             if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
+            # TODO: This is Azure specific and should be scoped out to only Azure installs
+            common['no_proxy'].append('169.254.169.254')
             # We always add local dns domain and ourselves no matter what
             common['no_proxy'].append('.' + common['dns_domain'])
             common['no_proxy'].append('.svc')
