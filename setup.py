@@ -324,7 +324,7 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         for yaml_file in find_files(
                 os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
-                yaml_contents = yaml.safe_load_all(contents)
+                yaml_contents = yaml.safe_load(contents)
                 if not isinstance(yaml_contents, list):
                     continue
 
