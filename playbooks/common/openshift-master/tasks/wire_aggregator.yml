@@ -168,7 +168,8 @@
     - key: authConfig.requestHeader.extraHeaderPrefixes
       value: [X-Remote-Extra-]
     - key: assetConfig.extensionScripts
-      value: [/etc/origin/master/openshift-ansible-catalog-console.js]
+      value: /etc/origin/master/openshift-ansible-catalog-console.js
+      action: append
     - key: kubernetesMasterConfig.apiServerArguments.runtime-config
       value: [apis/settings.k8s.io/v1alpha1=true]
     - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
