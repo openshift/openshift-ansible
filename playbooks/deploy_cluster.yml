@@ -7,7 +7,7 @@
 
 - import_playbook: common/private/components.yml
 
-# need to have a play expilicitly defined here otherwise can't add as job template in AWX/Tower.
+# need to have a play explicitly defined here otherwise can't add as job template in AWX/Tower.
 - name: noop
   hosts: localhost
   tasks:
