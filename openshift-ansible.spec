@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.113
+Version:        3.6.173.0.114
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,40 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Apr 30 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.114-1
+- Output useful logs in CI on failure (wk.cvs.github@sydorenko.org.ua)
+- etcd upgrade: move validate_etcd_conf.yml to etcd_upgrade role
+  (vrutkovs@redhat.com)
+- GlusterFS: enable modprobe in pods that manage bricks (dani_comnea@yahoo.com)
+- GlusterFS - Invoke oc binary with the admin.kubeconfig token rather than
+  default token from $HOME/.kube/config (“dani_comnea@yahoo.com”)
+- GlusterFS: Add HEKETI_IGNORE_STALE_OPERATIONS to templates
+  (jarrpa@redhat.com)
+- GlusterFS: Don't copy non-existant topology file (jarrpa@redhat.com)
+- Add s3 and block uninstall sections as well. (sarumuga@redhat.com)
+- Update glusterfs-template:  - Add GB_LOGDIR  - failureThreshold as 50 secs
+  (sarumuga@redhat.com)
+- Merge pull request #7237 from jarrpa/glusterfs-kernel-mod-fix
+  (sdodson@redhat.com)
+- Fix for support multi-cluster heketi's topology (chinacoolhacker@gmail.com)
+- Merge pull request #7149 from jarrpa/uninstall-regression (openshift-merge-
+  robot@users.noreply.github.com)
+- Add target mount for gluster block (m.judeikis@gmail.com)
+- kernel module loading fix (m.judeikis@gmail.com)
+- Merge pull request #6918 from SaravanaStorageNetwork/uninstall_playbook
+  (openshift-merge-robot@users.noreply.github.com)
+- GlusterFS: Fix block StorageClass heketi route (jarrpa@redhat.com)
+- Merge pull request #6969 from mjudeikis/gluster-dynamic-invetory-bug
+  (openshift-merge-robot@users.noreply.github.com)
+- dynamic inventory bug when group exists but its empty (m.judeikis@gmail.com)
+- Check for openshift attribute before using it during CNS install.
+  (jmencak@redhat.com)
+- Revert "GlusterFS: Remove image option from heketi command" (hansmi@vshn.ch)
+- Port glusterfs optional default (#6182) to 3.7 stable
+  (david_hocky@comcast.com)
+- Merge pull request #6317 from openshift-cherrypick-robot/cherry-pick-5723-to-
+  release-3.7 (sdodson@redhat.com)
+
 * Wed Apr 11 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.113-1
 - Ensure etcd.conf variables are updated during upgrade (rteague@redhat.com)
 - Update deprecated etcd vars in openshfit_cert_expiry (rteague@redhat.com)
