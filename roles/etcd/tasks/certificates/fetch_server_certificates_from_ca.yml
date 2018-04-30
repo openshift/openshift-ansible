@@ -171,6 +171,7 @@
 
 - name: Delete temporary directory
   local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
+  become: no
   changed_when: False
   when: etcd_server_certs_missing | bool
 

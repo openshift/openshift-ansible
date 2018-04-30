@@ -130,6 +130,7 @@
 
 - name: Delete local temp directory
   local_action: file path="/tmp/{{ inventory_hostname }}" state=absent
+  become: no
   changed_when: False
   when: node_certs_missing | bool
 
