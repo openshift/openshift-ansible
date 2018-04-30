@@ -43,7 +43,7 @@ spec:
         - "3"
         - --cors-allowed-origins
         - {{ cors_allowed_origin }}
-        - --admission-control
+        - --enable-admission-plugins
         - KubernetesNamespaceLifecycle,DefaultServicePlan,ServiceBindingsLifecycle,ServicePlanChangeValidator,BrokerAuthSarCheck
         - --feature-gates
         - OriginatingIdentity=true

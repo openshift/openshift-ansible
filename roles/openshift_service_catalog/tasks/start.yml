@@ -1,6 +1,6 @@
 ---
 # TODO: abstract me into a relatively generic task
-- name: Verify that the web console is running
+- name: Verify that the catalog api server is running
   command: >
     curl -k https://apiserver.kube-service-catalog.svc/healthz
   args:
@@ -41,7 +41,7 @@
       msg: "{{ endpoint_events.stdout_lines }}"
   - name: Get pod logs
     command: >
-      {{ openshift_client_binary }} logs daemonset/apiserver --tail=50 --config=/etc/origin/master/admin.kubeconfig -n kube-service-catalog
+      {{ openshift_client_binary }} logs daemonset/apiserver --tail=200 --config=/etc/origin/master/admin.kubeconfig -n kube-service-catalog
     register: endpoint_log
     ignore_errors: true
   - debug:

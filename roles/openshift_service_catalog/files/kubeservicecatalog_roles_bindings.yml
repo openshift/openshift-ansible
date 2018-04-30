@@ -26,8 +26,9 @@ objects:
   roleRef:
     kind: ClusterRole
     name: servicecatalog-serviceclass-viewer
-  groupNames:
-  - system:authenticated
+  subjects:
+  - kind: Group
+    name: system:authenticated
 
 - kind: ServiceAccount
   apiVersion: v1
@@ -72,6 +73,15 @@ objects:
     - ""
     resources:
     - namespaces
+    verbs:
+    - list
+    - watch
+    - get
+  - apiGroups:
+    - "admissionregistration.k8s.io"
+    resources:
+    - validatingwebhookconfigurations
+    - mutatingwebhookconfigurations
     verbs:
     - list
     - watch
@@ -208,6 +218,31 @@ objects:
   roleRef:
     kind: Role
     name: configmap-accessor
+  subjects:
+  - kind: ServiceAccount
+    namespace: kube-service-catalog
+    name: service-catalog-controller
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: cluster-info-configmap
+    namespace: kube-service-catalog
+  rules:
+  - apiGroups:     [""]
+    resources:     ["configmaps"]
+    resourceNames: ["cluster-info"]
+    verbs:         ["get","create","list","watch","update"]
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: cluster-info-configmap-binding
+    namespace: kube-service-catalog
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: cluster-info-configmap
   subjects:
   - kind: ServiceAccount
     namespace: kube-service-catalog
