@@ -27,9 +27,9 @@ spec:
               name: awx-application-config
           env:
             - name: DATABASE_USER
-              value: {{ pg_username }}
+              value: awx
             - name: DATABASE_NAME
-              value: {{ pg_database }}
+              value: awx
             - name: DATABASE_HOST
               value: {{ pg_hostname|default('postgresql') }}
             - name: DATABASE_PORT

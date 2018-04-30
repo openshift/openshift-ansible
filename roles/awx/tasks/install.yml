@@ -27,9 +27,9 @@
     --param MEMORY_LIMIT=512Mi
     --param NAMESPACE=openshift
     --param DATABASE_SERVICE_NAME=postgresql
-    --param POSTGRESQL_USER={{ pg_username }}
+    --param POSTGRESQL_USER=awx
     --param POSTGRESQL_PASSWORD={{ pg_password }}
-    --param POSTGRESQL_DATABASE={{ pg_database }}
+    --param POSTGRESQL_DATABASE=awx
     --param VOLUME_CAPACITY=5Gi
     --param POSTGRESQL_VERSION=9.5
     | {{ openshift_client_binary }} apply -f -

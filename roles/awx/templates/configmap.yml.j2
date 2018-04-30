@@ -68,11 +68,11 @@ data:
         'default': {
             'ATOMIC_REQUESTS': True,
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': "{{ pg_database }}",
-            'USER': "{{ pg_username }}",
+            'NAME': "awx",
+            'USER': "awx",
             'PASSWORD': "{{ pg_password }}",
             'HOST': "{{ pg_hostname|default('postgresql') }}",
-            'PORT': "{{ pg_port }}",
+            'PORT': "5432",
         }
     }
     CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
