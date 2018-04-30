@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: awx-config
-  namespace: {{ awx_openshift_project }}
+  namespace: {{ awx_project }}
 data:
   secret_key: {{ awx_secret_key }}
   awx_settings: |

@@ -3,13 +3,13 @@
 
 - name: Ensure AWX Project Exists
   oc_project:
-    name: "{{ awx_openshift_project }}"
+    name: "{{ awx_project }}"
 
 # This secret is created by postgresql-persistent template
 - name: Read Existing Postgres Secret
   oc_secret:
     state: list
-    namespace: "{{ awx_openshift_project }}"
+    namespace: "{{ awx_project }}"
     name: postgresql
     decode: true
   register: awx_postgres_secret
@@ -22,7 +22,7 @@
 
 - name: Deploy and Activate Postgres
   shell: >-
-    {{ openshift_client_binary }} project {{ awx_openshift_project }};
+    {{ openshift_client_binary }} project {{ awx_project }};
     {{ openshift_client_binary }} process -n openshift postgresql-persistent
     --param MEMORY_LIMIT=512Mi
     --param NAMESPACE=openshift
@@ -43,7 +43,7 @@
 - name: Read Existing AWX ConfigMap
   oc_configmap:
     state: list
-    namespace: "{{ awx_openshift_project }}"
+    namespace: "{{ awx_project }}"
     name: awx-config
   register: awx_config
   no_log: true

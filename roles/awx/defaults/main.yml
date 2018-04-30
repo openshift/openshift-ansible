@@ -1,5 +1,5 @@
 ---
-awx_openshift_project: "awx"
+awx_project: "awx"
 
 awx_web_openshift_image: "ansible/awx_web:1.0.3"
 awx_task_openshift_image: "ansible/awx_task:1.0.3"
