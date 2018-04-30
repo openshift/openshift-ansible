@@ -44,5 +44,5 @@
     name: "{{ item.launch_configuration_name }}"
     state: absent
     region: "{{ openshift_aws_region }}"
-  when: item.launch_configuration_name is match("^{{ openshift_aws_node_group.name }}.*")
+  when: item.launch_configuration_name is match("^" ~ openshift_aws_node_group.name ~ ".*")
   with_items: "{{ l_launch_config_list.launch_configurations }}"

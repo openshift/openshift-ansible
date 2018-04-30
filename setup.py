@@ -77,9 +77,9 @@ def find_playbooks():
     exclude_dirs = ('adhoc', 'tasks')
     for yaml_file in find_files(
             os.path.join(os.getcwd(), 'playbooks'),
-            exclude_dirs, None, r'\.ya?ml$'):
+            exclude_dirs, None, r'^[^\.].*\.ya?ml$'):
         with open(yaml_file, 'r') as contents:
-            for task in yaml.safe_load_all(contents) or {}:
+            for task in yaml.safe_load(contents) or {}:
                 if not isinstance(task, dict):
                     # Skip yaml files which are not a dictionary of tasks
                     continue
@@ -151,7 +151,7 @@ class OpenShiftAnsibleYamlLint(Command):
         else:
             format_method = Format.standard_color
 
-        for yaml_file in find_files(os.getcwd(), self.excludes, None, r'\.ya?ml$'):
+        for yaml_file in find_files(os.getcwd(), self.excludes, None, r'^[^\.].*\.ya?ml$'):
             first = True
             with open(yaml_file, 'r') as contents:
                 for problem in linter.run(contents, config):
@@ -321,9 +321,9 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         print('Ansible Deprecation Checks')
         exclude_dirs = ('adhoc', 'files', 'meta', 'vars', 'defaults', '.tox')
         for yaml_file in find_files(
-                os.getcwd(), exclude_dirs, None, r'\.ya?ml$'):
+                os.getcwd(), exclude_dirs, None, r'^[^\.].*\.ya?ml$'):
             with open(yaml_file, 'r') as contents:
-                yaml_contents = yaml.safe_load_all(contents)
+                yaml_contents = yaml.safe_load(contents)
                 if not isinstance(yaml_contents, list):
                     continue
 
