@@ -425,8 +425,6 @@ class Router(OpenShiftCLI):
                                                            'include': True},
                                 'external_host_private_key': {'value': params['external_host_private_key'],
                                                               'include': True},
-                                'expose_metrics': {'value': params['expose_metrics'], 'include': True},
-                                'metrics_image': {'value': params['metrics_image'], 'include': True},
                                 'stats_user': {'value': params['stats_user'], 'include': True},
                                 'stats_password': {'value': params['stats_password'], 'include': True},
                                 'stats_port': {'value': params['stats_port'], 'include': True},

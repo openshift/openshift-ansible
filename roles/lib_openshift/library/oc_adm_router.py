@@ -190,21 +190,6 @@ options:
     required: false
     default: None
     aliases: []
-  expose_metrics:
-    description:
-    - This is a hint to run an extra container in the pod to expose metrics - the image
-    - will either be set depending on the router implementation or provided with --metrics-image.
-    required: false
-    default: False
-    aliases: []
-  metrics_image:
-    description:
-    - If expose_metrics is specified this is the image to use to run a sidecar container
-    - in the pod exposing metrics. If not set and --expose-metrics is true the image will
-    - depend on router implementation.
-    required: false
-    default: None
-    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment:
@@ -3105,8 +3090,6 @@ class Router(OpenShiftCLI):
                                                            'include': True},
                                 'external_host_private_key': {'value': params['external_host_private_key'],
                                                               'include': True},
-                                'expose_metrics': {'value': params['expose_metrics'], 'include': True},
-                                'metrics_image': {'value': params['metrics_image'], 'include': True},
                                 'stats_user': {'value': params['stats_user'], 'include': True},
                                 'stats_password': {'value': params['stats_password'], 'include': True},
                                 'stats_port': {'value': params['stats_port'], 'include': True},
@@ -3217,9 +3200,6 @@ def main():
             external_host_username=dict(default=None, type='str'),
             external_host_password=dict(default=None, type='str', no_log=True),
             external_host_private_key=dict(default=None, type='str', no_log=True),
-            # Metrics
-            expose_metrics=dict(default=False, type='bool'),
-            metrics_image=dict(default=None, type='str'),
             # Stats
             stats_user=dict(default=None, type='str'),
             stats_password=dict(default=None, type='str', no_log=True),
