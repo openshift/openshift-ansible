@@ -76,14 +76,14 @@
       local_facts:
         bootstrapped: true
 
-- name: Inspect state of first master config settings
+- name: Generate or retrieve existing session secrets
   hosts: oo_first_master
   roles:
   - role: openshift_facts
   tasks:
   - import_role:
       name: openshift_control_plane
-      tasks_from: check_existing_config
+      tasks_from: generate_session_secrets.yml
 
 - name: Configure masters
   hosts: oo_masters_to_config
