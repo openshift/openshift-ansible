@@ -1,10 +1,22 @@
 ---
-- name: Label {{ node }} for Fluentd deployment
-  oc_label:
-    name: "{{ node }}"
-    kind: node
-    state: add
-    labels: "{{ openshift_logging_fluentd_nodeselector | lib_utils_oo_dict_to_list_of_dict }}"
+# This script is a special case because we need to pause between nodes while
+# labeling to avoid overloading the scheduler.
+# Also, looping over this task file (label_and_wait) causes memory to balloon
+# in some instances due to dynamic include bug in ansible, so we can't add the
+# wait in ansible directly.
+- name: Create temporary fluentd labeling script
+  template:
+    src: fluentd_label.sh.j2
+    dest: /tmp/fluentd_label.temp.sh
+    mode: "0744"
 
-# wait half a second between labels
-- local_action: command sleep {{ openshift_logging_fluentd_label_delay | default('.5') }}
+- name: Execute the fluentd temporary labeling script
+  command: "/tmp/fluentd_label.temp.sh {{ fluentd_host }}"
+  with_items: "{{ openshift_logging_fluentd_hosts }}"
+  loop_control:
+    loop_var: fluentd_host
+
+- name: Remove temporary fluentd labeling script
+  file:
+    path: /tmp/fluentd_label.temp.sh
+    state: absent
