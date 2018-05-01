@@ -485,9 +485,7 @@ class FilterModule(object):
 
     @staticmethod
     def certificates_to_synchronize(hostvars, include_keys=True, include_ca=True):
-        ''' Return certificates to synchronize based on facts. '''
-        if not issubclass(type(hostvars), dict):
-            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
+        ''' Return certificates to synchronize. '''
         certs = ['admin.crt',
                  'admin.key',
                  'admin.kubeconfig',
