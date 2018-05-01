@@ -111,8 +111,6 @@ masterClients:
   openshiftLoopbackKubeConfig: openshift-master.kubeconfig
 masterPublicURL: {{ openshift.master.public_api_url }}
 networkConfig:
-  clusterNetworkCIDR: {{ openshift.master.sdn_cluster_network_cidr }}
-  hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
   clusterNetworks:
   - cidr: {{ openshift.master.sdn_cluster_network_cidr }}
     hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
