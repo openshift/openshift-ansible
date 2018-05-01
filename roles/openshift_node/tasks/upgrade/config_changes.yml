@@ -17,6 +17,12 @@
     state: directory
     path: "/etc/docker/certs.d/docker-registry.default.svc:5000"
 
+# removing a broken link in ansible fails, so we must first remove it
+- name: Forcibly remove the old registry CA symlink
+  file:
+    path: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
+    state: absent
+
 - name: Update the docker-registry CA symlink
   file:
     src: "{{ openshift_node_config_dir }}/client-ca.crt"
