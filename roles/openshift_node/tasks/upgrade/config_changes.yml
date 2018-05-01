@@ -23,6 +23,7 @@
     dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
     state: link
     force: yes
+    follow: no
 
 - name: Update node-config for static pods
   yedit:

@@ -66,6 +66,7 @@
     dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/node-client-ca.crt"
     state: link
     force: yes
+    follow: no
 
 - name: Remove default node-config.yaml to allow bootstrapping config
   file:
