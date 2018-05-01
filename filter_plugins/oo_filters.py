@@ -607,6 +607,56 @@ def oo_parse_named_certificates(certificates, named_certs_dir, internal_hostname
     return certificates
 
 
+def oo_parse_certificate_san(certificate):
+    """ Parses SubjectAlternativeNames from a PEM certificate.
+        Ex: certificate = '''-----BEGIN CERTIFICATE-----
+                MIIEcjCCAlqgAwIBAgIBAzANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDDBZldGNk
+                LXNpZ25lckAxNTE2ODIwNTg1MB4XDTE4MDEyNDE5MDMzM1oXDTIzMDEyMzE5MDMz
+                M1owHzEdMBsGA1UEAwwUbWFzdGVyMS5hYnV0Y2hlci5jb20wggEiMA0GCSqGSIb3
+                DQEBAQUAA4IBDwAwggEKAoIBAQD4wBdWXNI3TF1M0b0bEIGyJPvdqKeGwF5XlxWg
+                NoA1Ain/Xz0N1SW5pXW2CDo9HX+ay8DyhzR532yrBa+RO3ivNCmfnexTQinfSLWG
+                mBEdiu7HO3puR/GNm74JNyXoEKlMAIRiTGq9HPoTo7tNV5MLodgYirpHrkSutOww
+                DfFSrNjH/ehqxwQtrIOnTAHigdTOrKVdoYxqXblDEMONTPLI5LMvm4/BqnAVaOyb
+                9RUzND6lxU/ei3FbUS5IoeASOHx0l1ifxae3OeSNAimm/RIRo9rieFNUFh45TzID
+                elsdGrLB75LH/gnRVV1xxVbwPN6xW1mEwOceRMuhIArJQ2G5AgMBAAGjgbYwgbMw
+                UQYDVR0jBEowSIAUXTqN88vCI6E7wONls3QJ4/63unOhJaQjMCExHzAdBgNVBAMM
+                FmV0Y2Qtc2lnbmVyQDE1MTY4MjA1ODWCCQDMaopfom6OljAMBgNVHRMBAf8EAjAA
+                MBMGA1UdJQQMMAoGCCsGAQUFBwMBMAsGA1UdDwQEAwIFoDAdBgNVHQ4EFgQU7l05
+                OYeY3HppL6/0VJSirudj8t0wDwYDVR0RBAgwBocEwKh6ujANBgkqhkiG9w0BAQsF
+                AAOCAgEAFU8sicE5EeQsUPnFEqDvoJd1cVE+8aCBqkW0++4GsVw2A/JOJ3OBJL6r
+                BV3b1u8/e8xBNi8hPi42Q+LWBITZZ/COFyhwEAK94hcr7eZLCV2xfUdMJziP4Qkh
+                /WRN7vXHTtJ6NP/d6A22SPbtnMSt9Y6G8y9qa5HBrqIqmkYbLzDw/SdZbDbuGhRk
+                xUwg2ahXNblVoE5P6rxPONgXliA94telZ1/61iyrVaiGQb1/GUP/DRfvvR4dOCrA
+                lMosW6fm37Wdi/8iYW+aDPWGS+yVK/sjSnHNjxqvrzkfGk+COa5riT9hJ7wZY0Hb
+                YiJS74SZgZt/nnr5PI2zFRUiZLECqCkZnC/sz29i+irLabnq7Cif9Mv+TUcXWvry
+                TdJuaaYdTSMRSUkDd/c9Ife8tOr1i1xhFzDNKNkZjTVRk1MBquSXndVCDKucdfGi
+                YoWm+NDFrayw8yxK/KTHo3Db3lu1eIXTHxriodFx898b//hysHr4hs4/tsEFUTZi
+                705L2ScIFLfnyaPby5GK/3sBIXtuhOFM3QV3JoYKlJB5T6wJioVoUmSLc+UxZMeE
+                t9gGVQbVxtLvNHUdW7uKQ5pd76nIJqApQf8wg2Pja8oo56fRZX2XLt8nm9cswcC4
+                Y1mDMvtfxglQATwMTuoKGdREuu1mbdb8QqdyQmZuMa72q+ax2kQ=
+                -----END CERTIFICATE-----'''
+            returns ['192.168.122.186']
+    """
+
+    if not HAS_OPENSSL:
+        raise errors.AnsibleFilterError("|missing OpenSSL python bindings")
+
+    names = []
+
+    try:
+        lcert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, certificate)
+        for i in range(lcert.get_extension_count()):
+            if lcert.get_extension(i).get_short_name() == 'subjectAltName':
+                sanstr = str(lcert.get_extension(i))
+                sanstr = sanstr.replace('DNS:', '')
+                sanstr = sanstr.replace('IP Address:', '')
+                names = sanstr.split(', ')
+    except Exception:
+        raise errors.AnsibleFilterError("|failed to parse certificate")
+
+    return names
+
+
 def oo_pretty_print_cluster(data, prefix='tag_'):
     """ Read a subset of hostvars and build a summary of the cluster
         in the following layout:
@@ -1050,6 +1100,7 @@ class FilterModule(object):
             "oo_parse_named_certificates": oo_parse_named_certificates,
             "oo_haproxy_backend_masters": oo_haproxy_backend_masters,
             "oo_pretty_print_cluster": oo_pretty_print_cluster,
+            "oo_parse_certificate_san": oo_parse_certificate_san,
             "oo_generate_secret": oo_generate_secret,
             "oo_nodes_with_label": oo_nodes_with_label,
             "oo_openshift_env": oo_openshift_env,

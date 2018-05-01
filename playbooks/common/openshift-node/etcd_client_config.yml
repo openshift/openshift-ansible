@@ -1,0 +1,10 @@
+---
+- name: etcd_client node config
+  hosts: "{{ openshift_node_scale_up_group | default('this_group_does_not_exist') }}"
+  roles:
+  - role: openshift_facts
+  - role: openshift_etcd_facts
+  - role: openshift_etcd_client_certificates
+    etcd_cert_prefix: flannel.etcd-
+    etcd_cert_subdir: "openshift-node-{{ openshift.common.hostname }}"
+    etcd_cert_config_dir: "{{ openshift.common.config_base }}/node"
