@@ -275,12 +275,15 @@ class OpenShiftAnsibleSyntaxCheck(Command):
         failed_items = []
 
         search_results = recursive_search(yaml_contents, 'when')
+        search_results.append(recursive_search(yaml_contents, 'failed_when'))
         for item in search_results:
             if isinstance(item, str):
                 if '{{' in item or '{%' in item:
                     failed_items.append(item)
             else:
                 for sub_item in item:
+                    if isinstance(sub_item, bool):
+                        continue
                     if '{{' in sub_item or '{%' in sub_item:
                         failed_items.append(sub_item)
 
