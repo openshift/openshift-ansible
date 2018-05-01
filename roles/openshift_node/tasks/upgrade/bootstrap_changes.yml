@@ -85,6 +85,7 @@
     dest: "/etc/docker/certs.d/docker-registry.default.svc:5000/{{ item | basename }}"
     state: link
     force: yes
+    follow: no
   with_items:
   - "{{ openshift.common.config_base }}/node/client-ca.crt"
 
