@@ -51,14 +51,6 @@
     recurse: True
   when: etcd_is_thirdparty | bool
 
-- name: Validate permissions on the config dir
-  file:
-    path: "{{ etcd_conf_dir }}"
-    state: directory
-    owner: "etcd"
-    group: "etcd"
-    mode: 0700
-
 - name: Write etcd global config file
   template:
     src: etcd.conf.j2
@@ -66,6 +58,9 @@
     backup: true
   notify:
   - restart etcd
+
+- name: Ensure etcd owns the files in it's config dir
+  command: "chown etcd:etcd {{ etcd_conf_dir }}/ -R"
 
 - name: Enable etcd
   systemd:

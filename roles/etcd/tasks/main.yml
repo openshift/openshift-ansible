@@ -1,3 +1,2 @@
 ---
-- name: Configure etcd with static pods
-  import_tasks: static.yml
+# This role is meant to be used with import_role and tasks_from.
