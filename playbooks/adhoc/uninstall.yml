@@ -462,6 +462,13 @@
     - /usr/local/bin/kubectl
     - /etc/flannel
 
+  - name: Remove aci files
+    file: path={{ item }} state=absent
+    with_items:
+    - /var/lib/opflex-agent-ovs
+    - /var/run/openvswitch
+    when: openshift_use_aci | default(false) | bool
+
   # Since we are potentially removing the systemd unit files for separated
   # master-api and master-controllers services, so we need to reload the
   # systemd configuration manager

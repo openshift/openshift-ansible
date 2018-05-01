@@ -23,10 +23,14 @@
   - group_by:
       key: oo_nodes_use_{{ (openshift_use_kuryr | default(False)) | ternary('kuryr','nothing') }}
     changed_when: False
+  # Create group for aci nodes
+  - group_by:
+      key: oo_nodes_use_{{ (openshift_use_aci | default(False)) | ternary('aci','nothing') }}
+    changed_when: False
 
 - import_playbook: etcd_client_config.yml
   vars:
-    openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv:oo_nodes_use_kuryr"
+    openshift_node_scale_up_group: "oo_nodes_use_flannel:oo_nodes_use_calico:oo_nodes_use_contiv:oo_nodes_use_kuryr:oo_nodes_use_aci"
 
 - name: Additional node config
   hosts: oo_nodes_use_flannel
@@ -67,3 +71,9 @@
       name: kuryr
       tasks_from: node
     when: openshift_use_kuryr | default(false) | bool
+
+- name: Configure Aci node
+  hosts: oo_nodes_use_aci
+  roles:
+  - role: aci
+    when: openshift_use_aci | default(false) | bool

@@ -1,0 +1,23 @@
+---
+- name: Validate Aci deployment variables
+  hosts: oo_first_master
+  any_errors_fatal: true
+  tasks:
+  - name: Verify Aci deployment file variable is defined
+    fail:
+      msg: >
+         The variable aci_deployment_yaml_file is not defined.
+         This value is required when the network plugin is aci.
+    when:
+    - aci_deployment_yaml_file is not defined
+
+  - name: Verify Aci deployment file exists
+    stat:
+      path: "{{ aci_deployment_yaml_file }}"
+    register: file_stat
+
+  - name: Fail if file does not exist
+    fail:
+      msg: >
+        Aci deployment file {{ aci_deployment_yaml_file }} does not exist
+    when: file_stat.stat.exists == False

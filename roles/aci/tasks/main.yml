@@ -1,0 +1,6 @@
+- name: setup firewall
+  import_tasks: firewall.yml
+
+- name: Deploy aci
+  shell: oc apply -f {{ aci_deployment_yaml_file }}
+  when: inventory_hostname == groups.oo_first_master.0

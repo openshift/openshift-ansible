@@ -150,7 +150,7 @@ networkConfig:
   - cidr: {{ openshift.master.sdn_cluster_network_cidr }}
     hostSubnetLength: {{ openshift.master.sdn_host_subnet_length }}
 {% endif %}
-{% if r_openshift_master_use_openshift_sdn or r_openshift_master_use_nuage or r_openshift_master_use_contiv or r_openshift_master_use_kuryr or r_openshift_master_sdn_network_plugin_name == 'cni' %}
+{% if r_openshift_master_use_openshift_sdn or r_openshift_master_use_nuage or r_openshift_master_use_contiv or r_openshift_master_use_kuryr or r_openshift_master_use_aci or r_openshift_master_sdn_network_plugin_name == 'cni' %}
   networkPluginName: {{ r_openshift_master_sdn_network_plugin_name_default }}
 {% endif %}
 # serviceNetworkCIDR must match kubernetesMasterConfig.servicesSubnet
