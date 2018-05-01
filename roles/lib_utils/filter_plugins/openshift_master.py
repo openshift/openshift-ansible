@@ -484,32 +484,6 @@ class FilterModule(object):
                            Dumper=AnsibleDumper))
 
     @staticmethod
-    def certificates_to_synchronize(hostvars, include_keys=True, include_ca=True):
-        ''' Return certificates to synchronize based on facts. '''
-        if not issubclass(type(hostvars), dict):
-            raise errors.AnsibleFilterError("|failed expects hostvars is a dict")
-        certs = ['admin.crt',
-                 'admin.key',
-                 'admin.kubeconfig',
-                 'aggregator-front-proxy.crt',
-                 'aggregator-front-proxy.key',
-                 'aggregator-front-proxy.kubeconfig',
-                 'front-proxy-ca.crt',
-                 'front-proxy-ca.key',
-                 'master.kubelet-client.crt',
-                 'master.kubelet-client.key',
-                 'master.proxy-client.crt',
-                 'master.proxy-client.key',
-                 'service-signer.crt',
-                 'service-signer.key']
-        if bool(include_ca):
-            certs += ['ca.crt', 'ca.key', 'ca-bundle.crt', 'client-ca-bundle.crt']
-        if bool(include_keys):
-            certs += ['serviceaccounts.private.key',
-                      'serviceaccounts.public.key']
-        return certs
-
-    @staticmethod
     def oo_htpasswd_users_from_file(file_contents):
         ''' return a dictionary of htpasswd users from htpasswd file contents '''
         htpasswd_entries = {}
@@ -532,5 +506,4 @@ class FilterModule(object):
     def filters(self):
         ''' returns a mapping of filters to methods '''
         return {"translate_idps": self.translate_idps,
-                "certificates_to_synchronize": self.certificates_to_synchronize,
                 "oo_htpasswd_users_from_file": self.oo_htpasswd_users_from_file}
