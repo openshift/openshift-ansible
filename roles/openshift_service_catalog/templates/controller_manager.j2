@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: controller-manager
-  strategy:
+  updateStrategy:
     rollingUpdate:
       maxUnavailable: 1
     type: RollingUpdate

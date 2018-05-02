@@ -1,9 +1,12 @@
 ---
-__latest_es_version: "3_6"
-__allowed_es_versions: ["3_5", "3_6", "3_7"]
 __allowed_es_types: ["data-master", "data-client", "master", "client"]
 __es_log_appenders: ['file', 'console']
 __kibana_index_modes: ["unique", "shared_ops"]
+__es_version: "2.4.4"
+
+__es_local_curl: "curl -s --cacert /etc/elasticsearch/secret/admin-ca --cert /etc/elasticsearch/secret/admin-cert --key /etc/elasticsearch/secret/admin-key"
+
+__elasticsearch_ready_retries: "{{ openshift_logging_elasticsearch_poll_timeout_minutes | default(20) | int * 2 }}"
 
 # TODO: integrate these
 openshift_master_config_dir: "{{ openshift.common.config_base }}/master"
@@ -12,3 +15,4 @@ es_min_masters_default: "{{ (openshift_logging_elasticsearch_replica_count | int
 es_min_masters: "{{ (openshift_logging_elasticsearch_replica_count == 1) | ternary(1, es_min_masters_default) }}"
 es_recover_after_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
 es_recover_expected_nodes: "{{ openshift_logging_elasticsearch_replica_count | int }}"
+full_restart_cluster: False

@@ -15,6 +15,8 @@
 - oc_project:
     name: openshift-template-service-broker
     state: present
+    node_selector:
+      - ""
 
 - command: mktemp -d /tmp/tsb-ansible-XXXXXX
   register: mktemp
@@ -45,6 +47,7 @@
     {{ openshift.common.client_binary }} process -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}"
     --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
     --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
+    --param NODE_SELECTOR={{ template_service_broker_selector | to_json | quote }}
     | {{ openshift.common.client_binary }} apply -f -
 
 # reconcile with rbac

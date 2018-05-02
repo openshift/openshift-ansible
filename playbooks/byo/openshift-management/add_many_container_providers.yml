@@ -30,6 +30,7 @@
   - include_role:
       name: openshift_management
       tasks_from: noop
+    static: true
 
   - name: print each result
     debug:

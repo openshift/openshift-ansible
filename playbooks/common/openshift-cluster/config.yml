@@ -39,6 +39,6 @@
   hosts: oo_first_master
   gather_facts: no
   tasks:
-  - debug: msg="{{__deprecation_message}}"
+  - debug: msg="{{ dep_check.msg }}"
     when:
-    - __deprecation_message | default ('') | length > 0
+    - dep_check.changed

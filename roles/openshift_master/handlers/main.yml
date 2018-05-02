@@ -6,6 +6,7 @@
   when:
   - not (master_api_service_status_changed | default(false) | bool)
   - openshift.master.cluster_method == 'native'
+  - master_api_enabled is defined and (master_api_enabled.rc == 0 or openshift_version | version_compare('3.7','>='))
   notify:
   - Verify API Server
 
@@ -19,12 +20,24 @@
   when:
   - not (master_controllers_service_status_changed | default(false) | bool)
   - openshift.master.cluster_method == 'native'
+  - master_controllers_enabled is defined and (master_controllers_enabled.rc == 0 or openshift_version | version_compare('3.7','>='))
+
+# For now, this handler is called only from update_etcd_client_urls.yml in case migration from previous version.
+# Thus, {{ *_service_status_changed }} like api, controllers is neither implemented nor handled.
+- name: restart single master
+  systemd:
+    name: "{{ openshift.common.service_type }}-master"
+    state: restarted
+  when:
+  - single_master_enabled is defined and (single_master_enabled.rc == 0 or openshift_version | version_compare('3.7','<'))
+  notify:
+  - Verify API Server
 
 - name: Verify API Server
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --tlsv1.2
+    curl --silent --tlsv1.2 --max-time 2
     {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
     --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
     {% else %}

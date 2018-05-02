@@ -47,8 +47,6 @@
     openshift_logging_fluentd_image_prefix: "{{ openshift_logging_fluentd_image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
     openshift_logging_fluentd_image_version: "{{ openshift_logging_fluentd_image_version | default(__openshift_logging_fluentd_image_version) }}"
 
-- include: determine_version.yaml
-
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
   command: mktemp -d /tmp/openshift-logging-ansible-XXXXXX
@@ -108,38 +106,28 @@
     dest: "{{ tempdir }}/fluent.conf"
   vars:
     deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
-  when: fluentd_config_contents is undefined
-  changed_when: no
 
 - copy:
     src: fluentd-throttle-config.yaml
     dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-  when: fluentd_throttle_contents is undefined
-  changed_when: no
 
 - copy:
     src: secure-forward.conf
     dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_secureforward_contents is undefined
-  changed_when: no
 
-- copy:
-    content: "{{ fluentd_config_contents }}"
-    dest: "{{ tempdir }}/fluent.conf"
-  when: fluentd_config_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ fluentd_throttle_contents }}"
-    dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
-  when: fluentd_throttle_contents is defined
-  changed_when: no
-
-- copy:
-    content: "{{ fluentd_secureforward_contents }}"
-    dest: "{{ tempdir }}/secure-forward.conf"
-  when: fluentd_secureforward_contents is defined
-  changed_when: no
+- include_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "logging-fluentd"
+    configmap_namespace: "{{ openshift_logging_namespace }}"
+    configmap_file_names:
+      - current_file: "fluent.conf"
+        new_file: "{{ tempdir }}/fluent.conf"
+      - current_file: "throttle-config.yaml"
+        new_file: "{{ tempdir }}/fluentd-throttle-config.yaml"
+      - current_file: "secure-forward.conf"
+        new_file: "{{ tempdir }}/secure-forward.conf"
 
 - name: Set Fluentd configmap
   oc_configmap:

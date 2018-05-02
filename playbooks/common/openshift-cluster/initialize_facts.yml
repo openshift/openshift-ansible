@@ -6,16 +6,23 @@
 
 - name: Initialize host facts
   hosts: oo_all_hosts
+  any_errors_fatal: true
   tasks:
   - name: load openshift_facts module
     include_role:
       name: openshift_facts
     static: yes
 
+  - name: load os_firewall module
+    include_role:
+      name: os_firewall
+    static: yes
+
   # TODO: Should this role be refactored into health_checks??
   - name: Run openshift_sanitize_inventory to set variables
     include_role:
       name: openshift_sanitize_inventory
+    static: true
 
   - name: Detecting Operating System from ostree_booted
     stat:
@@ -96,7 +103,10 @@
       - iproute
       - "{{ 'python3-dbus' if ansible_distribution == 'Fedora' else 'dbus-python' }}"
       - "{{ 'python3-PyYAML' if ansible_distribution == 'Fedora' else 'PyYAML' }}"
+      - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
       - yum-utils
+      when:
+      - item != ''
       register: result
       until: result | success
 

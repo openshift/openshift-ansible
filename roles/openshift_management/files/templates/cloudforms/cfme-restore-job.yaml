@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: postgresql
-        image: brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888/cloudforms46/cfme-openshift-postgresql:latest
+        image: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-postgresql:latest
         command:
         - "/opt/rh/cfme-container-scripts/restore_db"
         env:

@@ -10,6 +10,7 @@
 - name: Enable Container Provider Integration
   include_role:
     role: openshift_manageiq
+  static: true
 
 - name: "Ensure the Management '{{ openshift_management_project }}' namespace exists"
   oc_project:
@@ -71,15 +72,15 @@
 # CREATE APP
 - name: Note the correct ext-db template name
   set_fact:
-    openshift_management_template_name: "{{ openshift_management_flavor }}-ext-db"
+    openshift_management_template_name: "{{ __openshift_management_flavor }}-ext-db"
   when:
-    - openshift_management_app_template in ['miq-template-ext-db', 'cfme-template-ext-db']
+    - __openshift_management_use_ext_db
 
 - name: Note the correct podified db template name
   set_fact:
-    openshift_management_template_name: "{{ openshift_management_flavor }}"
+    openshift_management_template_name: "{{ __openshift_management_flavor }}"
   when:
-    - openshift_management_app_template in ['miq-template', 'cfme-template']
+    - not __openshift_management_use_ext_db
 
 - name: Ensure the Management App is created
   oc_process:
@@ -89,7 +90,7 @@
     params: "{{ openshift_management_template_parameters }}"
 
 - name: Wait for the app to come up. May take several minutes, 30s check intervals, {{ openshift_management_pod_rollout_retries }} retries
-  command: "oc logs {{ openshift_management_flavor }}-0 -n {{ openshift_management_project }}"
+  command: "oc logs {{ __openshift_management_flavor }}-0 -n {{ openshift_management_project }}"
   register: app_seeding_logs
   until: app_seeding_logs.stdout.find('Server starting complete') != -1
   delay: 30

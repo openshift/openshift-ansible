@@ -142,10 +142,11 @@
     state: absent
   changed_when: False
 
-- name: Setup extension file for service console UI
-  template:
-    src: ../templates/openshift-ansible-catalog-console.js
+# setup extension file for service console UI
+- lineinfile:
     dest: /etc/origin/master/openshift-ansible-catalog-console.js
+    line: "window.OPENSHIFT_CONSTANTS.TEMPLATE_SERVICE_BROKER_ENABLED={{ 'true' if (template_service_broker_install | default(True)) else 'false' }}"
+    create: yes
 
 - name: Update master config
   yedit:
@@ -167,7 +168,8 @@
     - key: authConfig.requestHeader.extraHeaderPrefixes
       value: [X-Remote-Extra-]
     - key: assetConfig.extensionScripts
-      value: [/etc/origin/master/openshift-ansible-catalog-console.js]
+      value: /etc/origin/master/openshift-ansible-catalog-console.js
+      action: append
     - key: kubernetesMasterConfig.apiServerArguments.runtime-config
       value: [apis/settings.k8s.io/v1alpha1=true]
     - key: admissionConfig.pluginConfig.PodPreset.configuration.kind
@@ -178,12 +180,23 @@
       value: false
   register: yedit_output
 
+# this is needed for repopulating during upgrade, so delete before restart
+- name: Delete apiserver extensionconfigmap
+  oc_configmap:
+    state: absent
+    name: extension-apiserver-authentication
+    namespace: kube-system
+  when:
+  - openshift_version is defined
+  - openshift_version | version_compare('3.7','<')
+  - openshift_upgrade_target is defined
+  - openshift_upgrade_target | version_compare('3.7','>=')
+
 #restart master serially here
 - name: restart master api
   systemd: name={{ openshift.common.service_type }}-master-api state=restarted
   when:
   - yedit_output.changed
-  - openshift.master.cluster_method == 'native'
 
 # We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
@@ -200,7 +213,7 @@
   # Using curl here since the uri module requires python-httplib2 and
   # wait_for port doesn't provide health information.
   command: >
-    curl --silent --tlsv1.2
+    curl --silent --tlsv1.2 --max-time 2
     {% if openshift.common.version_gte_3_2_or_1_2 | bool %}
     --cacert {{ openshift.common.config_base }}/master/ca-bundle.crt
     {% else %}

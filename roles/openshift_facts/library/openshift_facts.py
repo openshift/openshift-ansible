@@ -16,6 +16,7 @@ import os
 import yaml
 import struct
 import socket
+import ipaddress
 from distutils.util import strtobool
 from distutils.version import LooseVersion
 from ansible.module_utils.six import string_types, text_type
@@ -1097,7 +1098,7 @@ values provided as a list. Hence the gratuitous use of ['foo'] below.
             # map() seems to be returning an itertools.imap object
             # instead of a list. We cast it to a list ourselves.
             # pylint: disable=unnecessary-lambda
-            labels_str = list(map(lambda x: '='.join(x), facts['node']['labels'].items()))
+            labels_str = list(map(lambda x: '='.join(map(str, x)), facts['node']['labels'].items()))
             if labels_str != '':
                 kubelet_args['node-labels'] = labels_str
 
@@ -1547,6 +1548,8 @@ def set_proxy_facts(facts):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
             # We always add local dns domain and ourselves no matter what
+            kube_svc_ip = str(ipaddress.ip_network(text_type(common['portal_net']))[1])
+            common['no_proxy'].append(kube_svc_ip)
             common['no_proxy'].append('.' + common['dns_domain'])
             common['no_proxy'].append('.svc')
             common['no_proxy'].append(common['hostname'])
@@ -1740,6 +1743,17 @@ def set_installed_variant_rpm_facts(facts):
     return facts
 
 
+def pop_obsolete_local_facts(local_facts):
+    """Remove unused keys from local_facts"""
+    keys_to_remove = {
+        'master': ('etcd_port',)
+    }
+    for role in keys_to_remove:
+        if role in local_facts:
+            for key in keys_to_remove[role]:
+                local_facts[role].pop(key, None)
+
+
 class OpenShiftFactsInternalError(Exception):
     """Origin Facts Error"""
     pass
@@ -1927,7 +1941,7 @@ class OpenShiftFacts(object):
                                       console_use_ssl=True,
                                       console_path='/console',
                                       console_port='8443', etcd_use_ssl=True,
-                                      etcd_hosts='', etcd_port='4001',
+                                      etcd_hosts='', etcd_port='2379',
                                       portal_net='172.30.0.0/16',
                                       embedded_etcd=True, embedded_kube=True,
                                       embedded_dns=True,
@@ -2170,6 +2184,11 @@ class OpenShiftFacts(object):
             if metadata:
                 metadata['project']['attributes'].pop('sshKeys', None)
                 metadata['instance'].pop('serviceAccounts', None)
+        elif bios_vendor == 'Amazon EC2':
+            # Adds support for Amazon EC2 C5 instance types
+            provider = 'aws'
+            metadata_url = 'http://169.254.169.254/latest/meta-data/'
+            metadata = get_provider_metadata(metadata_url)
         elif virt_type == 'xen' and virt_role == 'guest' and re.match(r'.*\.amazon$', product_version):
             provider = 'aws'
             metadata_url = 'http://169.254.169.254/latest/meta-data/'
@@ -2330,6 +2349,7 @@ class OpenShiftFacts(object):
                 new_local_facts['docker']['log_options'] = new_local_facts['docker']['log_options'].split(',')
 
         new_local_facts = self.remove_empty_facts(new_local_facts)
+        pop_obsolete_local_facts(new_local_facts)
 
         if new_local_facts != local_facts:
             self.validate_local_facts(new_local_facts)

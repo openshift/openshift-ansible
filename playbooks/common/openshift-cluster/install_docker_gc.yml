@@ -5,3 +5,4 @@
   tasks:
     - include_role:
         name: openshift_docker_gc
+      static: true

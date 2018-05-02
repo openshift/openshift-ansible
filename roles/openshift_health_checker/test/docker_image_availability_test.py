@@ -285,15 +285,44 @@ def test_registry_console_image(task_vars, expected):
     assert expected == DockerImageAvailability(task_vars=task_vars)._registry_console_image(tag, info)
 
 
-def test_containerized_etcd():
-    task_vars = dict(
+@pytest.mark.parametrize("task_vars, expected", [
+    (
+        dict(
+            group_names=['oo_nodes_to_config'],
+            osn_ovs_image='spam/ovs',
+            openshift_image_tag="veggs",
+        ),
+        set([
+            'spam/ovs', 'openshift/node:veggs', 'cockpit/kubernetes:latest',
+            'openshift/origin-haproxy-router:veggs', 'openshift/origin-deployer:veggs',
+            'openshift/origin-docker-registry:veggs', 'openshift/origin-pod:veggs',
+        ]),
+    ), (
+        dict(
+            group_names=['oo_masters_to_config'],
+        ),
+        set(['openshift/origin:latest']),
+    ), (
+        dict(
+            group_names=['oo_etcd_to_config'],
+        ),
+        set(['registry.access.redhat.com/rhel7/etcd']),
+    ), (
+        dict(
+            group_names=['oo_etcd_to_config'],
+            osm_etcd_image='spam/etcd',
+        ),
+        set(['spam/etcd']),
+    ),
+])
+def test_containerized(task_vars, expected):
+    task_vars.update(dict(
         openshift=dict(
             common=dict(
                 is_containerized=True,
             ),
         ),
         openshift_deployment_type="origin",
-        group_names=['oo_etcd_to_config'],
-    )
-    expected = set(['registry.access.redhat.com/rhel7/etcd'])
+    ))
+
     assert expected == DockerImageAvailability(task_vars=task_vars).required_images()

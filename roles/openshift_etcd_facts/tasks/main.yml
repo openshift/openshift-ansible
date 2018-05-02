@@ -1,1 +1,3 @@
 ---
+- include: set_etcd_ca_host.yml
+  static: true

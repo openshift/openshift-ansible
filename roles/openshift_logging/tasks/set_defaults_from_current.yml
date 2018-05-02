@@ -1,0 +1,34 @@
+---
+
+## We are pulling default values from configmaps if they exist already
+## Using conditional_set_fact allows us to set the value of a variable based on
+##  the value of another one, if it is already defined. Else we don't set the
+##  left hand side (it stays undefined as well).
+
+## conditional_set_fact allows us to specify a fact source, so first we try to
+##  set variables in the logging-elasticsearch & logging-elasticsearch-ops configmaps
+##  afterwards we set the value of the variable based on the value in the inventory
+##  but fall back to using the value from a configmap as a default. If neither is set
+##  then the variable remains undefined and the role default will be used.
+
+- conditional_set_fact:
+    facts: "{{ openshift_logging_facts['elasticsearch']['configmaps']['logging-elasticsearch']['elasticsearch.yml'] | flatten_dict }}"
+    vars:
+      __openshift_logging_es_number_of_shards: index.number_of_shards
+      __openshift_logging_es_number_of_replicas: index.number_of_replicas
+  when: openshift_logging_facts['elasticsearch']['configmaps']['logging-elasticsearch'] is defined
+
+- conditional_set_fact:
+    facts: "{{ openshift_logging_facts['elasticsearch_ops']['configmaps']['logging-elasticsearch-ops']['elasticsearch.yml'] | flatten_dict }}"
+    vars:
+      __openshift_logging_es_ops_number_of_shards: index.number_of_shards
+      __openshift_logging_es_ops_number_of_replicas: index.number_of_replicas
+  when: openshift_logging_facts['elasticsearch_ops']['configmaps']['logging-elasticsearch-ops'] is defined
+
+- conditional_set_fact:
+    facts: "{{ hostvars[inventory_hostname] }}"
+    vars:
+      openshift_logging_es_number_of_shards: openshift_logging_es_number_of_shards | __openshift_logging_es_number_of_shards
+      openshift_logging_es_number_of_replicas: openshift_logging_es_number_of_replicas | __openshift_logging_es_number_of_replicas
+      openshift_logging_es_ops_number_of_shards: openshift_logging_es_ops_number_of_shards | __openshift_logging_es_ops_number_of_shards
+      openshift_logging_es_ops_number_of_replicas: openshift_logging_es_ops_number_of_replicas | __openshift_logging_es_ops_number_of_replicas

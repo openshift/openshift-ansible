@@ -112,6 +112,24 @@
     openshift_master_scheduler_default_predicates: "{{ lookup('openshift_master_facts_default_predicates') }}"
     openshift_master_scheduler_default_priorities: "{{ lookup('openshift_master_facts_default_priorities') }}"
 
+- name: Determine if master api service is enabled
+  command: >
+    systemctl -q is-enabled {{ openshift.common.service_type }}-master-api
+  register: master_api_enabled
+  failed_when: false
+
+- name: Determine if master controllers service is enabled
+  command: >
+    systemctl -q is-enabled {{ openshift.common.service_type }}-master-controllers
+  register: master_controllers_enabled
+  failed_when: false
+
+- name: Determine if single master service is enabled
+  command: >
+    systemctl -q is-enabled {{ openshift.common.service_type }}-master
+  register: single_master_enabled
+  failed_when: false
+
 - block:
   - name: Retrieve current scheduler config
     slurp:

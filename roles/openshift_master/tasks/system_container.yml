@@ -3,6 +3,7 @@
   include_role:
     name: openshift_atomic
     tasks_from: proxy
+  static: true
 
 - name: Pre-pull master system container image
   command: >

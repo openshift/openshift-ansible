@@ -1,0 +1,120 @@
+---
+## get all pods for the cluster
+- command: >
+    {{ openshift.common.client_binary }} get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
+  register: _cluster_pods
+
+### Check for cluster state before making changes -- if its red then we don't want to continue
+- name: "Checking current health for {{ _es_node }} cluster"
+  shell: >
+    {{ openshift.common.client_binary }} exec "{{ _cluster_pods.stdout.split(' ')[0] }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- es_cluster_health
+  register: _pod_status
+  when: _cluster_pods.stdout_lines | count > 0
+
+- when:
+  - _pod_status.stdout is defined
+  - (_pod_status.stdout | from_json)['status'] in ['red']
+  block:
+  - name: Set Logging message to manually restart
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_logging:
+          message: "Cluster logging-{{ _cluster_component }} was in a red state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+
+  - debug: msg="Cluster logging-{{ _cluster_component }} was in a red state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
+
+- when: _pod_status.stdout is undefined or (_pod_status.stdout | from_json)['status'] in ['green', 'yellow']
+  block:
+  # Disable external communication for {{ _cluster_component }}
+  - name: Disable external communication for logging-{{ _cluster_component }}
+    oc_service:
+      state: present
+      name: "logging-{{ _cluster_component }}"
+      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+      selector:
+        component: "{{ _cluster_component }}"
+        provider: openshift
+        connection: blocked
+      labels:
+        logging-infra: 'support'
+      ports:
+      - port: 9200
+        targetPort: "restapi"
+    when:
+    - full_restart_cluster | bool
+
+  - name: "Disable shard balancing for logging-{{ _cluster_component }} cluster"
+    command: >
+      {{ openshift.common.client_binary }} exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_cluster/settings' -d '{ "transient": { "cluster.routing.allocation.enable" : "none" } }'
+    register: _disable_output
+    changed_when: "'\"acknowledged\":true' in _disable_output.stdout"
+    when: _cluster_pods.stdout_lines | count > 0
+
+  # Flush ES
+  - name: "Flushing for logging-{{ _cluster_component }} cluster"
+    command: >
+      {{ openshift.common.client_binary }} exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_flush/synced'
+    register: _flush_output
+    changed_when: "'\"acknowledged\":true' in _flush_output.stdout"
+    when:
+    - _cluster_pods.stdout_lines | count > 0
+    - full_restart_cluster | bool
+
+  - command: >
+      {{ openshift.common.client_binary }} get dc -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+    register: _cluster_dcs
+
+  # If we are currently restarting the "es" cluster we want to check if we are scaling up the number of es nodes
+  # If we are currently restarting the "es-ops" cluster we want to check if we are scaling up the number of ops nodes
+  # If we've created a new node for that cluster then the appropriate variable will be true, otherwise we default to false
+  - set_fact:
+      _skip_healthcheck: "{{ ( __logging_scale_up | default(false) ) if _cluster_component == 'es' else ( __logging_ops_scale_up | default(false) ) }}"
+
+  ## restart all dcs for full restart
+  - name: "Restart ES node {{ _es_node }}"
+    include: restart_es_node.yml
+    with_items: "{{ _cluster_dcs.stdout_lines }}"
+    loop_control:
+      loop_var: _es_node
+    when:
+    - full_restart_cluster | bool
+
+  ## restart the node if it's dc is in the list of nodes to restart?
+  - name: "Restart ES node {{ _es_node }}"
+    include: restart_es_node.yml
+    with_items: "{{ _restart_logging_nodes }}"
+    loop_control:
+      loop_var: _es_node
+    when:
+    - not full_restart_cluster | bool
+    - _es_node in _cluster_dcs.stdout
+
+  ## we may need a new first pod to run against -- fetch them all again
+  - command: >
+      {{ openshift.common.client_binary }} get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
+    register: _cluster_pods
+
+  - name: "Enable shard balancing for logging-{{ _cluster_component }} cluster"
+    command: >
+      {{ openshift.common.client_binary }} exec {{ _cluster_pods.stdout.split(' ')[0] }} -c elasticsearch -n {{ openshift_logging_elasticsearch_namespace }} -- {{ __es_local_curl }} -XPUT 'https://localhost:9200/_cluster/settings' -d '{ "transient": { "cluster.routing.allocation.enable" : "all" } }'
+    register: _enable_output
+    changed_when: "'\"acknowledged\":true' in _enable_output.stdout"
+    when: _cluster_pods.stdout != ""
+
+  # Reenable external communication for {{ _cluster_component }}
+  - name: Reenable external communication for logging-{{ _cluster_component }}
+    oc_service:
+      state: present
+      name: "logging-{{ _cluster_component }}"
+      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+      selector:
+        component: "{{ _cluster_component }}"
+        provider: openshift
+      labels:
+        logging-infra: 'support'
+      ports:
+      - port: 9200
+        targetPort: "restapi"
+    when:
+    - full_restart_cluster | bool

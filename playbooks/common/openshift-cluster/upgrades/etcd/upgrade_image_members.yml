@@ -16,3 +16,4 @@
     when:
     - etcd_container_version | default('99') | version_compare(etcd_upgrade_version,'<')
     - openshift.common.is_containerized | bool
+    static: true

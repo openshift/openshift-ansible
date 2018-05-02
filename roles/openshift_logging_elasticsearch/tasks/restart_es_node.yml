@@ -1,0 +1,41 @@
+---
+- name: "Rolling out new pod(s) for {{ _es_node }}"
+  command: >
+    {{ openshift.common.client_binary }} rollout latest {{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }}
+
+- when: not _skip_healthcheck | bool
+  name: "Waiting for {{ _es_node }} to finish scaling up"
+  oc_obj:
+    state: list
+    name: "{{ _es_node }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    kind: dc
+  register: _dc_output
+  until:
+    - _dc_output.results.results[0].status is defined
+    - _dc_output.results.results[0].status.readyReplicas is defined
+    - _dc_output.results.results[0].status.readyReplicas > 0
+    - _dc_output.results.results[0].status.updatedReplicas is defined
+    - _dc_output.results.results[0].status.updatedReplicas > 0
+  retries: 60
+  delay: 30
+
+- when: not _skip_healthcheck | bool
+  name: Gettings name(s) of replica pod(s)
+  command: >
+    {{ openshift.common.client_binary }} get pods -l deploymentconfig={{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+  register: _pods
+  changed_when: false
+
+- when: not _skip_healthcheck | bool
+  name: "Waiting for ES node {{ _es_node }} health to be in ['green', 'yellow']"
+  shell: >
+    {{ openshift.common.client_binary }} exec "{{ _pod }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- es_cluster_health
+  with_items: "{{ _pods.stdout.split(' ') }}"
+  loop_control:
+    loop_var: _pod
+  register: _pod_status
+  until: (_pod_status.stdout | from_json)['status'] in ['green', 'yellow']
+  retries: "{{ __elasticsearch_ready_retries }}"
+  delay: 30
+  changed_when: false

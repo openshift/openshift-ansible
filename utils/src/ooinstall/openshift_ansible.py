@@ -122,7 +122,7 @@ def write_inventory_vars(base_inventory, lb):
     if CFG.deployment.variables['ansible_ssh_user'] != 'root':
         base_inventory.write('ansible_become=yes\n')
 
-    base_inventory.write('openshift_override_hostname_check=true\n')
+    base_inventory.write('openshift_hostname_check=false\n')
 
     if lb is not None:
         base_inventory.write('openshift_master_cluster_method=native\n')
