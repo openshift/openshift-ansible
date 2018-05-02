@@ -198,9 +198,8 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'openshift/origin-haproxy-router:vtest',
             'cockpit/kubernetes:latest',
             # containerized component images
-            'openshift/origin:vtest',
-            'openshift/node:vtest',
-            'openshift/openvswitch:vtest',
+            'openshift/origin-control-plane:vtest',
+            'openshift/origin-node:vtest',
             'registry.access.redhat.com/rhel7/etcd',
         ])
     ),
@@ -214,8 +213,7 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             # registry-console is not constructed/versioned the same as the others.
             'openshift3/registry-console:vtest',
             # containerized images aren't built from oreg_url
-            'openshift3/node:vtest',
-            'openshift3/openvswitch:vtest',
+            'openshift3/ose-node:vtest',
         ])
     ),
     (
@@ -280,11 +278,10 @@ def test_registry_console_image(task_vars, expected):
     (
         dict(
             group_names=['oo_nodes_to_config'],
-            osn_ovs_image='spam/ovs',
             openshift_image_tag="veggs",
         ),
         set([
-            'spam/ovs', 'openshift/node:veggs', 'cockpit/kubernetes:latest',
+            'openshift/origin-node:veggs', 'cockpit/kubernetes:latest',
             'openshift/origin-haproxy-router:veggs', 'openshift/origin-deployer:veggs',
             'openshift/origin-docker-registry:veggs', 'openshift/origin-pod:veggs',
         ]),
@@ -292,7 +289,7 @@ def test_registry_console_image(task_vars, expected):
         dict(
             group_names=['oo_masters_to_config'],
         ),
-        set(['openshift/origin:latest']),
+        set(['openshift/origin-control-plane:latest']),
     ), (
         dict(
             group_names=['oo_etcd_to_config'],

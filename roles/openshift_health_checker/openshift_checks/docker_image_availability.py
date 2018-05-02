@@ -181,10 +181,9 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
 
         if self.get_var("openshift_is_containerized", convert=bool):
             if 'oo_nodes_to_config' in host_groups:
-                add_var_or_default_img("osn_image", "node")
-                add_var_or_default_img("osn_ovs_image", "openvswitch")
+                add_var_or_default_img("osn_image", image_info["name"] + "-node")
             if 'oo_masters_to_config' in host_groups:  # name is "origin" or "ose"
-                add_var_or_default_img("osm_image", image_info["name"])
+                add_var_or_default_img("osm_image", image_info["name"] + "-control-plane")
             if 'oo_etcd_to_config' in host_groups:
                 # special case, note default is the same for origin/enterprise and has no image tag
                 etcd_img = self.get_var("osm_etcd_image", default="registry.access.redhat.com/rhel7/etcd")
