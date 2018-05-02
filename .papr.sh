@@ -18,6 +18,9 @@ else
 fi
 export target_branch
 
+# Rebase existing branch on the latest code locally, as PAPR running doesn't do merges
+git fetch origin ${target_branch} && git rebase origin/${target_branch}
+
 pip install -r requirements.txt
 
 PAPR_INVENTORY=${PAPR_INVENTORY:-.papr.inventory}
