@@ -55,7 +55,7 @@
         resources: ["networkpolicies"]
         verbs: ["create", "delete"]
       - apiGroups: ["automationbroker.io"]
-        resources: ["bundles", "jobstates", "servicebindings", "serviceinstances"]
+        resources: ["bundles", "bundlebindings", "bundleinstances"]
         verbs: ["*"]
 
 - name: Create asb-access cluster role
