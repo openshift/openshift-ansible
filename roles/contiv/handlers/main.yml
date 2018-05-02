@@ -6,13 +6,11 @@
   service:
     name: netmaster
     state: restarted
-  when: netmaster_started.changed == false
 
 - name: restart netplugin
   service:
     name: netplugin
     state: restarted
-  when: netplugin_started.changed == false
 
 - name: Save iptables rules
   command: service iptables save

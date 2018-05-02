@@ -102,6 +102,9 @@
   command: systemctl daemon-reload
   when: docker_updated is changed
 
+- name: Netplugin | Flush handlers
+  meta: flush_handlers
+
 - name: Netplugin | Restart docker
   service:
     name: "{{ contiv_openshift_docker_service_name }}"
@@ -121,5 +124,4 @@
   service:
     name: netplugin
     state: started
-  register: netplugin_started
 # notify: restart kubelet
