@@ -18,3 +18,4 @@ openshift_use_crio_only: False
 openshift_crio_use_rpm: False
 
 l_use_cli_atomic_image: "{{ (openshift_use_crio_only | bool and not openshift_crio_use_rpm | bool) }}"
+l_openshift_cli_image_backend: "{{ (l_use_cli_atomic_image | bool) | ternary('atomic', 'docker') }}"
