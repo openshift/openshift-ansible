@@ -1,8 +1,4 @@
 ---
-- name: set openshift_node_bootstrap to True when building AMI
-  set_fact:
-    openshift_node_bootstrap: True
-
 - include_tasks: vpc_and_subnet_id.yml
 
 - name: create instance for ami creation

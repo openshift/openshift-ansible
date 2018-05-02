@@ -20,8 +20,6 @@
     owner: root
     group: root
     mode: 0600
-  notify:
-    - restart node
 
 - name: Configure Node Environment Variables
   lineinfile:
@@ -30,8 +28,6 @@
     line: "{{ item.key }}={{ item.value }}"
     create: true
   with_dict: "{{ openshift_node_env_vars }}"
-  notify:
-    - restart node
 
 - name: Ensure the node static pod directory exists
   file:
@@ -42,53 +38,3 @@
 - name: include aws provider credentials
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))
-
-# Necessary because when you're on a node that's also a master the master will be
-# restarted after the node restarts docker and it will take up to 60 seconds for
-# systemd to start the master again
-- when:
-    - openshift_is_containerized | bool
-    - not openshift_node_bootstrap
-  block:
-    - name: Wait for master API to become available before proceeding
-      # Using curl here since the uri module requires python-httplib2 and
-      # wait_for port doesn't provide health information.
-      command: >
-        curl --silent --tlsv1.2 --max-time 2
-        --cacert {{ openshift.common.config_base }}/node/ca.crt
-        {{ openshift_node_master_api_url }}/healthz/ready
-      args:
-        # Disables the following warning:
-        # Consider using get_url or uri module rather than running curl
-        warn: no
-      register: api_available_output
-      until: api_available_output.stdout == 'ok'
-      retries: 120
-      delay: 1
-      changed_when: false
-
-- when: not openshift_node_bootstrap
-  block:
-    - name: Start and enable node
-      systemd:
-        name: "{{ openshift_service_type }}-node"
-        enabled: yes
-        state: started
-        daemon_reload: yes
-      register: node_start_result
-      until: not node_start_result is failed
-      retries: 1
-      delay: 30
-      ignore_errors: true
-
-    - name: Dump logs from node service if it failed
-      command: journalctl --no-pager -n 100 -u {{ openshift_service_type }}-node
-      when: node_start_result is failed
-
-    - name: Abort if node failed to start
-      fail:
-        msg: Node failed to start please inspect the logs and try again
-      when: node_start_result is failed
-
-    - set_fact:
-        node_service_status_changed: "{{ node_start_result is changed }}"

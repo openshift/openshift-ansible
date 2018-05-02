@@ -43,7 +43,6 @@
     fail_on_timeout: true
   delegate_to: "{{ groups.oo_first_master.0 }}"
   ignore_errors: true
-  when: openshift_node_bootstrap | default(True) | bool
 
 - name: Wait for node to be ready
   oc_obj:

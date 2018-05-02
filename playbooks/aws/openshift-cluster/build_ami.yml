@@ -27,7 +27,6 @@
   - name: set the user to perform installation
     set_fact:
       ansible_ssh_user: "{{ openshift_aws_build_ami_ssh_user | default(ansible_ssh_user) }}"
-      openshift_node_bootstrap: True
       openshift_node_image_prep_packages:
       - cloud-utils-growpart
 

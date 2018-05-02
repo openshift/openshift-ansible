@@ -37,4 +37,3 @@
 
 - import_playbook: private/bootstrap.yml
 - import_playbook: private/join.yml
-- import_playbook: private/config.yml

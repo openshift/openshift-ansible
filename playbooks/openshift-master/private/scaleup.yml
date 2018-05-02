@@ -36,12 +36,12 @@
 
 - import_playbook: set_network_facts.yml
 
+- import_playbook: ../../openshift-node/private/bootstrap.yml
+
 - import_playbook: ../../openshift-etcd/private/master_etcd_certificates.yml
 
 - import_playbook: config.yml
 
+- import_playbook: ../../openshift-node/private/join.yml
+
 - import_playbook: ../../openshift-loadbalancer/private/config.yml
-
-- import_playbook: ../../openshift-node/private/certificates.yml
-
-- import_playbook: ../../openshift-node/private/config.yml
