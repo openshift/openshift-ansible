@@ -23,7 +23,10 @@
 - set_fact:
     ovs_service_status_changed: "{{ ovs_start_result is changed }}"
 
-- file:
+# If this tasks fails, you may have a malformed openshift_node_kubelet_args
+# or openshift_node_labels.  Those variables must be dictionaries.
+- name: Create kublet args config dir
+  file:
     dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
     state: directory
   when: ('config' in l2_openshift_node_kubelet_args) | bool
