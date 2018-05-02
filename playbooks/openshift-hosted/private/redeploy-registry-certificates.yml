@@ -4,6 +4,7 @@
   vars:
   roles:
   - lib_openshift
+  - openshift_facts
   tasks:
   - name: Create temp directory for kubeconfig
     command: mktemp -d /tmp/openshift-ansible-XXXXXX
@@ -57,7 +58,7 @@
       changed_when: false
 
     - set_fact:
-        docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ (openshift.master.default_subdomain | default('router.default.svc.cluster.local', true)) }}"
+        docker_registry_route_hostname: "{{ 'docker-registry-default.' ~ openshift_master_default_subdomain }}"
       changed_when: false
 
     - name: Generate registry certificate
