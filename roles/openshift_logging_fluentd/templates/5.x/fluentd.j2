@@ -61,7 +61,7 @@ spec:
         - name: varlog
           mountPath: /var/log
         - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
+          mountPath: /var/lib/docker
           readOnly: true
         - name: config
           mountPath: /etc/fluent/configs.d/user
@@ -220,7 +220,7 @@ spec:
           path: /var/log
       - name: varlibdockercontainers
         hostPath:
-          path: /var/lib/docker/containers
+          path: /var/lib/docker
       - name: config
         configMap:
           name: logging-fluentd
