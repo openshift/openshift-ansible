@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.31.0%{?dist}
+Release:        0.32.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,34 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue May 01 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.32.0
+- Fix redeploy cert for openshift registry (mgugino@redhat.com)
+- Remove old content (sdodson@redhat.com)
+- Remove older playbooks (sdodson@redhat.com)
+- Re-add etcd rpm install path for external etcd (mgugino@redhat.com)
+- Remove orphaned byo 3.9 upgrade playbooks (rteague@redhat.com)
+- Add templating check in failed_when conditions (rteague@redhat.com)
+- Workaround ansible/ansible #39558 (sdodson@redhat.com)
+- router - depricate -expose-metrics --metrics-image (pcameron@redhat.com)
+- Remove dynamic include in logging_fluentd role (mgugino@redhat.com)
+- Add master config filepath checking (mgugino@redhat.com)
+- README: add a note about ansible 2.5 version (vrutkovs@redhat.com)
+- uninstall node group: fix deprecated syntax (vrutkovs@redhat.com)
+- setup.py: exclude ymls which start with a dot (vrutkovs@redhat.com)
+- setup.py: revert safe_load_all change (vrutkovs@redhat.com)
+- Flush ansible handlers before running restart service tasks in contiv
+  (zhang.lei.fly@gmail.com)
+- sdn: fix OOM issues with ovs-vswitchd on many-core machines (dcbw@redhat.com)
+- etcd scaleup: removed openshift_master_facts role; seems uncessary
+  (mwoodson@redhat.com)
+- Add auto-heal role and playbooks (jhernand@redhat.com)
+- Getting intersection of __default_ops_projects and all projects currently
+  installed for case where we reuse installation into logging namespace and
+  openshift-logging isnt available (ewolinet@redhat.com)
+- sync examples (bparees@redhat.com)
+- Remove unused v39 upgrade (mgugino@redhat.com)
+- dnsmasq - increase dns-forward-max, cache-size (pcameron@redhat.com)
+
 * Sat Apr 28 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.31.0
 - Remove openshift-ansible-catalog-console.js (sdodson@redhat.com)
 - Add EAP CD to v3.10 (ken@zaptillion.net)
