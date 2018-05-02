@@ -23,7 +23,7 @@
     state: list
     kind: dc
     all_namespaces: true
-    selector: "logging-infra,provider=openshift"
+    selector: "logging-infra,provider=openshift,component!=eventrouter"
   register: _logging_dcs
 
 - set_fact:
