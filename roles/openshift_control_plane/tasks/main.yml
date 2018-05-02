@@ -205,5 +205,3 @@
   fail:
     msg: Control plane install failed.
   when: control_plane_health.stdout != 'ok'
-
-- import_tasks: bootstrap.yml

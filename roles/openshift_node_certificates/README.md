@@ -15,7 +15,6 @@ From `openshift_ca`:
 
 | Name                                | Default value                                                           | Description                                                                                                               |
 |-------------------------------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| openshift_ca_host                   | None (Required)                                                         | The hostname of the system where the OpenShift CA will be (or has been) created.                                          |
 
 From this role:
 
@@ -40,7 +39,6 @@ Example Playbook
   hosts: nodes
   roles:
   - role: openshift_node_certificates
-    openshift_ca_host: master1.example.com
 ```
 
 License

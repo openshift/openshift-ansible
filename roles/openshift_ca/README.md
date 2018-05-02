@@ -35,7 +35,6 @@ Example Playbook
   hosts: localhost
   roles:
   - role: openshift_ca
-    openshift_ca_host: master1.example.com
 ```
 
 License

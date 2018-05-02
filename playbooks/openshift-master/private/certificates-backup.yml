@@ -2,8 +2,8 @@
 - name: Backup and remove master cerftificates
   hosts: oo_masters_to_config
   any_errors_fatal: true
-  vars:
-    openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+  roles:
+  - openshift_facts
   pre_tasks:
   - stat:
       path: "{{ openshift.common.config_base }}/generated-configs"
