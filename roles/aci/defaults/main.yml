@@ -1,3 +1,4 @@
+---
 r_aci_node_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_aci_node_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
