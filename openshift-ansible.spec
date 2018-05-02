@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.114
+Version:        3.6.173.0.115
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,32 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 02 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.115-1
+- EFS Provisioner: switch OCP tag to latest (vrutkovs@redhat.com)
+- Use etcd_migrate/check instead of etcd/migrate.pre (vrutkovs@redhat.com)
+- Use etcd_server_certificates roles instead of distribute_ca task
+  (vrutkovs@redhat.com)
+- etcd: point to etcd_server_certificates role instead of tasks from etcd roles
+  (vrutkovs@redhat.com)
+- Add certificates playbook for openshift-etcd (vrutkovs@redhat.com)
+- Delete server tarball too (vrutkovs@redhat.com)
+- etcd tarball: remove existing tarball if etcd certs need to be regenerated
+  (vrutkovs@redhat.com)
+- etcd migrate: skip openshift version check during migration
+  (vrutkovs@redhat.com)
+- Use include rather than import_playbook for ansible 2.3 compat
+  (sdodson@redhat.com)
+- Force redeploy (sdodson@redhat.com)
+- Determine which etcd host is the etcd_ca_host rather than assume it is the
+  first host in the etcd host group. (abutcher@redhat.com)
+- Redeploy etcd certificates during upgrade when etcd hostname not present in
+  etcd serving cert SAN. (abutcher@redhat.com)
+- Backport oo_parse_certificate_san (sdodson@redhat.com)
+- Cert check: skip missing entries when a list of certs to check is assembled
+  (vrutkovs@redhat.com)
+- Cert verification: add more certs to verify (vrutkovs@redhat.com)
+- Change set imagepullpolicy to allow for offline install (esauer@redhat.com)
+
 * Mon Apr 30 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.114-1
 - Output useful logs in CI on failure (wk.cvs.github@sydorenko.org.ua)
 - etcd upgrade: move validate_etcd_conf.yml to etcd_upgrade role
