@@ -60,6 +60,22 @@ env:
 
 ---
 inherit: true
+context: 'fedora/27/atomic/upgrade_3.9'
+
+cluster:
+  hosts:
+    - name: ocp-master
+      distro: fedora/27/atomic
+      specs:
+        ram: 4096
+  container:
+    image: registry.fedoraproject.org/fedora:27
+env:
+  PAPR_INVENTORY: .papr.all-in-one.inventory
+  PAPR_UPGRADE_FROM: "3.9"
+  PAPR_RUN_UPDATE: "yes"
+---
+inherit: true
 context: 'fedora/27/atomic/master-ha'
 
 cluster:
