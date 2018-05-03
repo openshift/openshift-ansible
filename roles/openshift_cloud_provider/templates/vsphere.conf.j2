@@ -1,15 +1,21 @@
 [Global]
 user = "{{ openshift_cloudprovider_vsphere_username }}"
 password = "{{ openshift_cloudprovider_vsphere_password }}"
-server = "{{ openshift_cloudprovider_vsphere_host }}"
-port = 443
-insecure-flag = 1
-datacenter = {{ openshift_cloudprovider_vsphere_datacenter }}
-datastore = {{ openshift_cloudprovider_vsphere_datastore }}
-{% if openshift_cloudprovider_vsphere_folder is defined %}
-working-dir = /{{ openshift_cloudprovider_vsphere_datacenter }}/vm/{{ openshift_cloudprovider_vsphere_folder }}/
-{% else %}
-working-dir = /{{ openshift_cloudprovider_vsphere_datacenter }}/vm/
+port = "{{ openshift_cloudprovider_vsphere_port | default(443, true) }}"
+insecure-flag = "{{ openshift_cloudprovider_vsphere_insecure | default(1, true) }}"
+datacenters = "{{ openshift_cloudprovider_vsphere_datacenters | join(', ') }}"
+
+[Workspace]
+server = "{{ openshift_cloudprovider_vsphere_workspace_server | default(false) or openshift_cloudprovider_vsphere_virtualcenters | first }}"
+datacenter = "{{ openshift_cloudprovider_vsphere_workspace_datacenter | default(false) or openshift_cloudprovider_vsphere_datacenters | first }}"
+folder = "{{ openshift_cloudprovider_vsphere_workspace_folder | default('', true) }}"
+{% if openshift_cloudprovider_vsphere_workspace_default_datastore is defined %}
+default-datastore = "{{ openshift_cloudprovider_vsphere_workspace_default_datastore }}"
 {% endif %}
+
+{% for vc in openshift_cloudprovider_vsphere_virtualcenters %}
+[VirtualCenter "{{ vc }}"]
+
+{% endfor %}
 [Disk]
 scsicontrollertype = pvscsi

@@ -296,15 +296,19 @@ debug_level=2
 #openshift_gcp_prefix=
 #openshift_gcp_multizone=False
 #
-# vSphere
+# vSphere (VirtualCenter sections overrides not implemented)
 #openshift_cloudprovider_kind=vsphere
 #openshift_cloudprovider_vsphere_username=username
 #openshift_cloudprovider_vsphere_password=password
-#openshift_cloudprovider_vsphere_host=vcenter_host or vsphere_host
-#openshift_cloudprovider_vsphere_datacenter=datacenter
-#openshift_cloudprovider_vsphere_datastore=datastore
-#openshift_cloudprovider_vsphere_folder=optional_folder_name
-
+#openshift_cloudprovider_vsphere_datacenters=['First DataCenter', 'Second DataCenter']
+#openshift_cloudprovider_vsphere_virtualcenters=['first.vcenter.example.com', 'second.vcenter.example.com']
+# vSphere optional with default values
+#openshift_cloudprovider_vsphere_port=443
+#openshift_cloudprovider_vsphere_insecure=1
+#openshift_cloudprovider_vsphere_workspace_server=first.vcenter.example.com
+#openshift_cloudprovider_vsphere_workspace_datacenter='First DataCenter'
+#openshift_cloudprovider_vsphere_workspace_folder=''
+#openshift_cloudprovider_vsphere_workspace_default_datastore=omitted if not defined
 
 # Project Configuration
 #osm_project_request_message=''
