@@ -6,6 +6,10 @@ metadata:
     provider: openshift
     component: "{{ daemonset_component }}"
     logging-infra: "{{ daemonset_component }}"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "24231"
+    prometheus.io/scheme: "http"
 spec:
   selector:
     matchLabels:
