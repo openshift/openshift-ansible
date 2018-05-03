@@ -783,6 +783,10 @@ debug_level=2
 #
 # Detected names may be overridden by specifying the "names" key
 #openshift_master_named_certificates=[{"certfile": "/path/to/custom1.crt", "keyfile": "/path/to/custom1.key", "names": ["public-master-host.com"], "cafile": "/path/to/custom-ca1.crt"}]
+#
+# Add a trusted CA to all pods, copies from the control host, may be multiple
+# certs in one file
+#openshift_additional_ca=/path/to/additional-ca.crt
 
 # Session options
 #openshift_master_session_name=ssn
