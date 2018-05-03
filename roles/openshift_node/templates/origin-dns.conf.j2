@@ -1,6 +1,10 @@
 no-resolv
 domain-needed
+{% if openshift_node_dnsmasq_no_negcache %}
 no-negcache
+{% else %}
+neg-ttl={{ openshift_node_dnsmasq_neg_ttl }}
+{% endif %}
 max-cache-ttl=1
 enable-dbus
 dns-forward-max=10000
