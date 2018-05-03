@@ -10,6 +10,7 @@ if [ -n "${PAPR_BRANCH:-}" ]; then
 else
   target_branch=$PAPR_PULL_TARGET_BRANCH
 fi
+target_branch_in=${target_branch}
 if [[ "${target_branch}" =~ ^release- ]]; then
   target_branch="${target_branch/release-/}"
 else
@@ -18,8 +19,12 @@ else
 fi
 export target_branch
 
+# Need to define some git variables for rebase.
+git config --global user.email "ci@openshift.org"
+git config --global user.name "OpenShift Atomic CI"
+
 # Rebase existing branch on the latest code locally, as PAPR running doesn't do merges
-git fetch origin ${target_branch} && git rebase origin/${target_branch}
+git fetch origin ${target_branch_in} && git rebase origin/${target_branch_in}
 
 pip install -r requirements.txt
 
