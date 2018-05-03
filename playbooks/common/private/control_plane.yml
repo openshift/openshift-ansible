@@ -19,8 +19,6 @@
 # 2. The master has an /etc/origin/master/admin.kubeconfig file that gives cluster-admin
 #    access.
 
-- import_playbook: ../../openshift-checks/private/install.yml
-
 - import_playbook: ../../openshift-etcd/private/config.yml
 
 - import_playbook: ../../openshift-nfs/private/config.yml

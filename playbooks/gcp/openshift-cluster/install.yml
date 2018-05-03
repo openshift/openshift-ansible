@@ -11,6 +11,8 @@
 - name: run the init
   import_playbook: ../../init/main.yml
 
+- import_playbook: ../../openshift-checks/private/install.yml
+
 - name: ensure master nodes are ready for bootstrapping
   import_playbook: ../../openshift-node/private/bootstrap.yml
 
