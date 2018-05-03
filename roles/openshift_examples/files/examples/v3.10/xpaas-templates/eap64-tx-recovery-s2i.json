@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss EAP 6.4 (tx recovery)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 6 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap64-tx-recovery-s2i",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new EAP 6 based application has been created in your project.",
     "parameters": [
@@ -266,7 +266,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap64-openshift:1.7"
+                            "name": "jboss-eap64-openshift:1.8"
                         }
                     }
                 },
