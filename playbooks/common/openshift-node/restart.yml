@@ -21,13 +21,20 @@
     openshift_facts:
       role: docker
 
+  - name: Restart openvswitch service
+    service:
+      name: openvswitch
+      state: started
+    when:
+    - openshift_is_containerized | bool
+    - openshift_use_openshift_sdn | bool
+
   - name: Restart containerized services
     service:
       name: "{{ item }}"
       state: started
     with_items:
     - etcd_container
-    - openvswitch
     - "{{ openshift.common.service_type }}-master-api"
     - "{{ openshift.common.service_type }}-master-controllers"
     - "{{ openshift.common.service_type }}-node"

@@ -12,13 +12,16 @@
 
 - include: registry_auth.yml
 
-- name: Stop node and openvswitch services
+- name: Stop openvswitch service
   service:
-    name: "{{ item }}"
+    name: openvswitch
     state: stopped
-  with_items:
-  - "{{ openshift.common.service_type }}-node"
-  - openvswitch
+  when: openshift_use_openshift_sdn | bool
+
+- name: Stop node service
+  service:
+    name: "{{ openshift.common.service_type }}-node"
+    state: stopped
   failed_when: false
 
 - name: Stop additional containerized services
@@ -75,13 +78,19 @@
 - include: containerized_node_upgrade.yml
   when: openshift.common.is_containerized | bool
 
+- name: Ensure openvswitch service is stopped
+  service:
+    name: openvswitch
+    state: stopped
+  when:
+  - openshift_use_openshift_sdn | bool
+
 - name: Ensure containerized services stopped before Docker restart
   service:
     name: "{{ item }}"
     state: stopped
   with_items:
   - etcd_container
-  - openvswitch
   - "{{ openshift.common.service_type }}-master-api"
   - "{{ openshift.common.service_type }}-master-controllers"
   - "{{ openshift.common.service_type }}-node"
@@ -90,11 +99,8 @@
 
 - name: Stop rpm based services
   service:
-    name: "{{ item }}"
+    name: "{{ openshift.common.service_type }}-node"
     state: stopped
-  with_items:
-  - "{{ openshift.common.service_type }}-node"
-  - openvswitch
   failed_when: false
   when: not openshift.common.is_containerized | bool
 
@@ -114,7 +120,9 @@
   package:
     name: openvswitch
     state: latest
-  when: not openshift.common.is_containerized | bool
+  when:
+  - openshift_use_openshift_sdn | bool
+  - not openshift.common.is_containerized | bool
   register: result
   until: result | success
 
