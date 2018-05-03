@@ -1,0 +1,24 @@
+---
+- name: Check if etcd service exists
+  systemd:
+    name: "etcd"
+  ignore_errors: true
+  register: etcd_service
+
+- set_fact:
+    r_etcd_common_etcd_runtime: host
+  when: etcd_service.status['ActiveState'] == "active" | bool
+
+- name: Check if etcd service exists
+  systemd:
+    name: "etcd_container"
+  ignore_errors: true
+  register: etcd_container_service
+
+- set_fact:
+    r_etcd_common_etcd_runtime: docker
+  when: etcd_container_service.status['ActiveState'] == "active" | bool and not l_is_etcd_system_container
+
+- set_fact:
+    r_etcd_common_etcd_runtime: runc
+  when: etcd_container_service.status['ActiveState'] == "active" | bool and l_is_etcd_system_container
