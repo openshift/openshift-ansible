@@ -1,7 +1,6 @@
 ---
 # node_problem_detector common setup
 openshift_node_problem_detector_state: present
-openshift_node_problem_detector_namespace: openshift-infra
 openshift_node_problem_detector_tmp_location: /tmp
 openshift_node_problem_detector_delete_tempfiles: True
 
