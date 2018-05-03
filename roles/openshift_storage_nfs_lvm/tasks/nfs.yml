@@ -1,7 +1,7 @@
 ---
 - name: Install NFS server
   package: name=nfs-utils state=present
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
