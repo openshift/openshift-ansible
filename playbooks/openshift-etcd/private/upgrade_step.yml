@@ -8,42 +8,6 @@
 
 - import_playbook: upgrade_rpm_members.yml
   vars:
-    etcd_upgrade_version: '2.1'
-
-- import_playbook: upgrade_rpm_members.yml
-  vars:
-    etcd_upgrade_version: '2.2'
-
-- import_playbook: upgrade_image_members.yml
-  vars:
-    etcd_upgrade_version: '2.2.5'
-
-- import_playbook: upgrade_rpm_members.yml
-  vars:
-    etcd_upgrade_version: '2.3'
-
-- import_playbook: upgrade_image_members.yml
-  vars:
-    etcd_upgrade_version: '2.3.7'
-
-- import_playbook: upgrade_rpm_members.yml
-  vars:
-    etcd_upgrade_version: '3.0'
-
-- import_playbook: upgrade_image_members.yml
-  vars:
-    etcd_upgrade_version: '3.0.15'
-
-- import_playbook: upgrade_rpm_members.yml
-  vars:
-    etcd_upgrade_version: '3.1'
-
-- import_playbook: upgrade_image_members.yml
-  vars:
-    etcd_upgrade_version: '3.1.3'
-
-- import_playbook: upgrade_rpm_members.yml
-  vars:
     etcd_upgrade_version: '3.2'
 
 - import_playbook: upgrade_image_members.yml

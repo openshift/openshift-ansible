@@ -51,9 +51,17 @@
       name: etcd
       tasks_from: drop_etcdctl.yml
 
+# We only want to upgrade with the old method if the host is not part of
+# master host.
 - name: Perform etcd upgrade
   import_playbook: upgrade_step.yml
-  when: openshift_etcd_upgrade | default(true) | bool
+  when:
+  - openshift_etcd_upgrade | default(true) | bool
+  - inventory_hostname not in groups['oo_masters']
+
+# Upgrade / convert etcd to static pods
+- name: Upgrade etcd static pods
+  import_playbook: upgrade_static.yml
 
 - name: Backup etcd
   import_playbook: upgrade_backup.yml

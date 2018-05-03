@@ -2,7 +2,6 @@
 ###############################################################################
 # Upgrade Control Plane
 ###############################################################################
-
 - name: Backup and upgrade etcd
   import_playbook: ../../../openshift-etcd/private/upgrade_main.yml
 
