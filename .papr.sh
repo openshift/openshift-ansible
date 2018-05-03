@@ -18,6 +18,10 @@ export OPENSHIFT_IMAGE_TAG=$(git -C origin describe --abbrev=0)
 
 echo "Targeting OpenShift Origin $OPENSHIFT_IMAGE_TAG"
 
+git config --global user.email "ci@openshift.org"
+git config --global user.name "OpenShift Atomic CI"
+git fetch origin ${target_branch} && git rebase origin/${target_branch}
+
 pip install -r requirements.txt
 
 # ping the nodes to check they're responding and register their ostree versions
