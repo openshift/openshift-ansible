@@ -123,7 +123,7 @@
   command: >
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-    annotate project/{{ project }} openshift.io/logging.ui.hostname-
+    annotate namespace/{{ project }} openshift.io/logging.ui.hostname-
   with_items: "{{ __logging_ops_projects }}"
   loop_control:
     loop_var: project
