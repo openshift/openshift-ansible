@@ -5,7 +5,7 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.4.8-1
+XPAAS_VERSION=ose-v1.4.12
 ORIGIN_VERSION=${1:-v3.7}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
@@ -33,7 +33,8 @@ mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BA
 # as soon as they use the same branch/tag names
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 mv application-templates-GA/quickstarts/* ${EXAMPLES_BASE}/xpaas-templates/
-find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' ! -wholename '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
+find application-templates-${XPAAS_VERSION}/ -name '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-streams/ \;
 find 3scale-amp-openshift-templates-${RHAMP_TAG}/ -name '*.yml' -exec mv {} ${EXAMPLES_BASE}/quickstart-templates/ \;
 popd
 
