@@ -14,13 +14,6 @@ openshift_check_min_host_memory_gb=1.9
 openshift_portal_net=172.30.0.0/16
 openshift_enable_service_catalog=false
 
-[all:vars]
-# bootstrap configs
-openshift_master_bootstrap_auto_approve=true
-openshift_master_bootstrap_auto_approver_node_selector={"node-role.kubernetes.io/master":"true"}
-osm_controller_args={"experimental-cluster-signing-duration": ["20m"]}
-osm_default_node_selector="node-role.kubernetes.io/compute=true"
-
 [masters]
 ocp-master1
 ocp-master2
