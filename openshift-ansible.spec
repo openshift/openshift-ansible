@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.115
+Version:        3.6.173.0.116
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.116-1
+- Allow for PVCs to specify storage class (jarrpa@redhat.com)
+- remove all remaining variable quotation (david_hocky@comcast.com)
+- fix certificate auth on containerized etcd (david_hocky@comcast.com)
+
 * Wed May 02 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.115-1
 - EFS Provisioner: switch OCP tag to latest (vrutkovs@redhat.com)
 - Use etcd_migrate/check instead of etcd/migrate.pre (vrutkovs@redhat.com)
