@@ -32,6 +32,9 @@ pip install -r requirements.txt
 PAPR_INVENTORY=${PAPR_INVENTORY:-.papr.inventory}
 PAPR_RUN_UPDATE=${PAPR_RUN_UPDATE:-0}
 
+# Human-readable output
+export ANSIBLE_STDOUT_CALLBACK=debug
+
 # ping the nodes to check they're responding and register their ostree versions
 ansible -vvv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
 
