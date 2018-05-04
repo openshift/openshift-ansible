@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.44
+Version:        3.7.45
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,66 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.7.45-1
+- GlusterFS: Move uninstall playbook location (jarrpa@redhat.com)
+- Stop and start openvswitch only if openshift_use_openshift_sdn
+  (vrutkovs@redhat.com)
+- Add undefined variables check (nakayamakenjiro@gmail.com)
+- Bug 1549220 - configmap still exist after running uninstall playbook for
+  logging (nhosoi@redhat.com)
+- Only enable TSB in console when TSB and SC are enabled (sdodson@redhat.com)
+- Delete server tarball too (vrutkovs@redhat.com)
+- Fix oc_version oc_short to report '3.10' (jupierce@redhat.com)
+- etcd tarball: remove existing tarball if etcd certs need to be regenerated
+  (vrutkovs@redhat.com)
+- fix bz 1550271: restore mpath defaults config (hchen@redhat.com)
+- Allow for PVCs to specify storage class (jarrpa@redhat.com)
+- catalog: change image version latest (jpeeler@redhat.com)
+- Bug 1541129 - Don't overwrite openshift_master_extension_scripts
+  (spadgett@redhat.com)
+- Adding missing deprecated var openshift_hosted_metrics_public_url and its
+  mapped var (ewolinet@redhat.com)
+- fixing yaml lint error ()
+- fixing syntax error ()
+- fixing trailing spaces ()
+- using include instead of include_tasks ()
+- adding post upgrade hook after rescheduling nodes ()
+- fixing wrong code ()
+- Documents new node upgrade hooks. (jtudelag@redhat.com)
+- adding ansible node upgrade hooks ()
+- Cert check: skip missing entries when a list of certs to check is assembled
+  (vrutkovs@redhat.com)
+- Output useful logs in CI on failure (wk.cvs.github@sydorenko.org.ua)
+- make cassandra snapshots configurable (john.sanda@gmail.com)
+- remove all remaining variable quotation (david_hocky@comcast.com)
+- fix certificate auth on containerized etcd (david_hocky@comcast.com)
+- Remove obsolete openshift_docker_disable_push_dockerhub (mgugino@redhat.com)
+- fixed typo, caused unknown char error (asaf@sysbind.co.il)
+- Cert verification: add more certs to verify (vrutkovs@redhat.com)
+- Use include rather than import_playbook for ansible 2.3 compat
+  (sdodson@redhat.com)
+- Use include instead of import_playbook (vrutkovs@redhat.com)
+- etcd migrate: skip openshift version check during migration
+  (vrutkovs@redhat.com)
+- Set efs provisioner image version to latest (nakayamakenjiro@gmail.com)
+- Force redeploy (sdodson@redhat.com)
+- Determine which etcd host is the etcd_ca_host rather than assume it is the
+  first host in the etcd host group. (abutcher@redhat.com)
+- Redeploy etcd certificates during upgrade when etcd hostname not present in
+  etcd serving cert SAN. (abutcher@redhat.com)
+- Backport oo_parse_certificate_san (sdodson@redhat.com)
+- [3.7] Ensure etcd_urls are created for service_catalog (mgugino@redhat.com)
+- GlusterFS: enable modprobe in pods that manage bricks (dani_comnea@yahoo.com)
+- fixing Master Scaleup process ()
+- Change to checking service is enable or not for restart handler
+  (nakayamakenjiro@gmail.com)
+- Install latest node package (rteague@redhat.com)
+- Add restart single master handler for etcdv3 upgrade from embedded etcd
+  (nakayamakenjiro@gmail.com)
+- Updating default run hour and minute for curator (ewolinet@redhat.com)
+- Bug 1536651 - logging-mux not working in 3.7.z when logging installed with
+  openshift_logging_use_mux=true (nhosoi@redhat.com)
+
 * Thu Apr 12 2018 Justin Pierce <jupierce@redhat.com> 3.7.44-1
 - 
 
