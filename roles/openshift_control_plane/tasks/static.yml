@@ -53,6 +53,14 @@
   - apiserver.yaml
   - controller.yaml
 
+- name: Remove old files in /etc/sysconfig
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - /etc/sysconfig/{{ openshift_service_type }}-api
+  - /etc/sysconfig/{{ openshift_service_type }}-controllers
+
 - name: Remove temporary directory
   file:
     name: "{{ mktemp.stdout }}"
