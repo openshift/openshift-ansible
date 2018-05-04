@@ -4,4 +4,5 @@
 
 - name: Deploy aci
   shell: oc apply -f {{ aci_deployment_yaml_file }}
-  when: inventory_hostname == groups.oo_first_master.0
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  run_once: True
