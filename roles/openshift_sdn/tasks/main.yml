@@ -48,3 +48,18 @@
     state: absent
     name: "{{ mktemp.stdout }}"
   changed_when: False
+
+- name: Wait for bootstrap autoapprover pod to start
+  oc_obj:
+    namespace: openshift-infra
+    kind: pod
+    state: list
+    selector: "app=bootstrap-autoapprover"
+  register: bootstrap_autoapprover
+  until:
+  - "bootstrap_autoapprover.results.results[0]['items'] | count > 0"
+  # Pod's 'Ready' status must be True
+  - "bootstrap_autoapprover.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
+  delay: 10
+  retries: 60
+  when: openshift_master_bootstrap_auto_approve | default(False) | bool
