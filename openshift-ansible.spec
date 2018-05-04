@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.33.0%{?dist}
+Release:        0.34.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,15 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.34.0
+- Remove outdated api/controllers settings in - /etc/sysconfig
+  (vrutkovs@redhat.com)
+- Mask and disable etcd service and remove etcd system container
+  (vrutkovs@redhat.com)
+- Setup node in system container when updating 3.9 to 3.10
+  (vrutkovs@redhat.com)
+- service catalog: update for v0.1.16 (jaboyd@redhat.com)
+
 * Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.33.0
 - Updating to remove annotations from namespace rather than project
   (ewolinet@redhat.com)
