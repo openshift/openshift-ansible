@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.32.0%{?dist}
+Release:        0.33.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,40 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.33.0
+- Updating to remove annotations from namespace rather than project
+  (ewolinet@redhat.com)
+- Fix papr.sh target branch for rebase (mgugino@redhat.com)
+- Convert etcd to static pods on upgrade (mgugino@redhat.com)
+- Resurrect scale group upgrade (rteague@redhat.com)
+- docker_image_availability: bz 1570479 (lmeyer@redhat.com)
+- PAPR: try to rebase on the latest code (vrutkovs@redhat.com)
+- Annotating fluentd pods for promethrus scraping (ewolinet@redhat.com)
+- Excluding the eventrouter component when looking for namespaces logging is
+  installed in (ewolinet@redhat.com)
+- Cleanup master related plays and variables (mgugino@redhat.com)
+- bump xpaas to 1.4.12 (rcernich@redhat.com)
+- Rework Openshift CLI image pulling (vrutkovs@redhat.com)
+- Remove certificates_to_synchronize filter module (rteague@redhat.com)
+- Remove clusterNetworkCIDR/hostSubnetLength from default config
+  (jtanenba@redhat.com)
+- Add support for adding an additional trusted CA (sdodson@redhat.com)
+- no_negcache set to default (cdigiovanni@gmail.com)
+- azure: add metadata server IP to no_proxy list (mfojtik@redhat.com)
+- Fix issue with dnsmasq not caching NXDOMAIN (cdigiovanni@drwholdings.com)
+- adding permisions for different resource names (smhurley00@gmail.com)
+- Bug 1566924 - Renaming CRDs (smhurley00@gmail.com)
+- GlusterFS: Fix setting heketi route (jarrpa@redhat.com)
+- Move Node Problem Detector to its own ns, make the ns hard-coded
+  (joesmith@redhat.com)
+- cadvisor metrics are missing due to worng kubernetes version.
+  (mrsiano@gmail.com)
+- Fix alert name typo (ironcladlou@gmail.com)
+- override cluster default node selector with empty project selector
+  (fabian@fabianism.us)
+- Bug 1571385- Node selector on pod rather than DC (fabian@fabianism.us)
+- Remove system_container image from openshift_cli (mgugino@redhat.com)
+
 * Tue May 01 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.32.0
 - Fix redeploy cert for openshift registry (mgugino@redhat.com)
 - Remove old content (sdodson@redhat.com)
