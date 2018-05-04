@@ -1706,6 +1706,9 @@ class OCRoute(OpenShiftCLI):
         elif 'routes \"%s\" not found' % self.config.name in result['stderr']:
             result['returncode'] = 0
             result['results'] = [{}]
+        elif 'namespaces \"%s\" not found' % self.config.namespace in result['stderr']:
+            result['returncode'] = 0
+            result['results'] = [{}]
 
         return result
 
