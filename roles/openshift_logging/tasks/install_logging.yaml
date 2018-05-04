@@ -1,4 +1,7 @@
 ---
+- debug: var=openshift_logging
+- debug: var={{blah.blah}}
+
 - name: Gather OpenShift Logging Facts
   openshift_logging_facts:
     oc_bin: "{{openshift_client_binary}}"
