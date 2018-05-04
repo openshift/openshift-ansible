@@ -38,6 +38,13 @@
 # mirrored packages on your own because only the GA and latest versions are
 # available in the repos. So for Fedora we'll simply skip this, sorry.
 
+- name: Detect etcd runtime
+  hosts: oo_etcd_hosts_to_upgrade
+  tasks:
+  - import_role:
+      name: etcd
+      tasks_from: runtime.yml
+
 - name: Backup etcd before upgrading anything
   import_playbook: upgrade_backup.yml
   vars:

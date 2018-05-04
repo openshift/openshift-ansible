@@ -4,6 +4,7 @@
     src: openshift-node
     dest: /usr/local/bin/openshift-node
     mode: 0500
+
 - name: Install Node service file
   template:
     dest: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
@@ -12,6 +13,16 @@
   notify:
   - reload systemd units
   - restart node
+
+- block:
+  - name: Remove existing systemd service
+    file:
+      path: "/etc/systemd/system/{{ openshift_service_type }}-node.service"
+      state: absent
+    when: not openshift_is_bootstrapped
+  - name: Install node system container
+    import_tasks: node_system_container.yml
+  when: l_is_node_system_container | bool
 
 - import_tasks: config/configure-node-settings.yml
 - import_tasks: config/configure-proxy-settings.yml

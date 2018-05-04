@@ -2,8 +2,25 @@
 # PREREQ Node service is ready to run static pods
 
 # INPUT r_etcd_upgrade_version
+
+- include_tasks: runtime.yml
+
 - name: Verify cluster is healthy pre-upgrade
   command: "{{ etcdctlv2 }} cluster-health"
+
+# We removed the ability to detect what was previously 'containerized'
+# Need to stop and disable this service, but might not be present.
+- name: Stop, disable and mask old etcd service
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+    masked: yes
+    daemon_reload: yes
+  with_items:
+  - etcd
+  - etcd_container
+  failed_when: False
 
 - name: Remove old etcd service files
   file:
@@ -13,33 +30,18 @@
   - "/etc/systemd/system/etcd.service"
   - "/etc/systemd/system/etcd_container.service"
 
-# We removed the ability to detect what was previously 'containerized'
-# Need to stop and disable this service, but might not be present.
-- name: Stop, disable old etcd services
-  systemd:
-    name: "{{ item }}"
-    state: stopped
-    enabled: no
-  failed_when: False
-  with_items:
-  - etcd
-  - etcd_container
-
-- name: Mask old etcd services
-  command: "systemctl mask {{ etcd_service }}"
-  with_items:
-  - etcd
-  - etcd_container
-
-- name: Reload systemd daemon
-  command: "systemctl daemon-reload"
+- name: Remove nonexistent services
+  command: "systemctl reset-failed"
 
 - name: Configure static definition
   import_tasks: static.yml
 
+- set_fact:
+    r_etcd_common_etcd_runtime: static_pod
+
 - name: Verify cluster is healthy
   command: "{{ etcdctlv2 }} cluster-health"
   register: etcdctl
-  until: etcdctl.rc == 0
+  until: etcdctl.rc == 0 and 'stopped' not in etcdctl.stderr
   retries: 30
   delay: 10
