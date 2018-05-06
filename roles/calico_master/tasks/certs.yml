@@ -48,3 +48,4 @@
       path: "{{ calico_etcd_cert_file }}"
     - name: etcd-ca
       path: "{{ calico_etcd_ca_cert_file }}"
+  run_once: true
