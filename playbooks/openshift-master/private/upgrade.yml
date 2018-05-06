@@ -141,7 +141,7 @@
 # Reconcile Cluster Roles, Cluster Role Bindings and Security Context Constraints
 ###############################################################################
 
-- name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
+- name: Reconcile Cluster Roles and Cluster Role Bindings
   hosts: oo_masters_to_config
   roles:
   - { role: openshift_cli }
@@ -149,15 +149,6 @@
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
-  - name: Reconcile Security Context Constraints
-    command: >
-      {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --confirm --additive-only=true -o name
-    register: reconcile_scc_result
-    changed_when:
-    - reconcile_scc_result.stdout != ''
-    - reconcile_scc_result.rc == 0
-    run_once: true
-
   - name: Migrate storage post policy reconciliation
     command: >
       {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
