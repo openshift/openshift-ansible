@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.27
+Version:        3.9.28
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,42 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun May 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.28-1
+- bump xpaas to 1.4.12 (rcernich@redhat.com)
+- PAPR: try to rebase on the latest code (vrutkovs@redhat.com)
+- docker rootdir is different when installing crio (sjenning@redhat.com)
+- Add helfup comment for error-prone task (mgugino@redhat.com)
+- Update the upgrade playbooks readme to point to the right 3_9 readme file
+  (dani_comnea@yahoo.com)
+- azure: append .vhd to name of blobs written during image build process. Azure
+  publishing portal requires input blob names to end in .vhd.
+  (jminter@redhat.com)
+- Fix redeploy cert for openshift registry (mgugino@redhat.com)
+- Remove dynamic include in logging_fluentd role (mgugino@redhat.com)
+- Flush ansible handlers before running restart service tasks in contiv
+  (zhang.lei.fly@gmail.com)
+- setup.py: exclude ymls which start with a dot (vrutkovs@redhat.com)
+- setup.py: revert safe_load_all change (vrutkovs@redhat.com)
+- etcd scaleup: removed openshift_master_facts role; seems uncessary
+  (mwoodson@redhat.com)
+- source azure credentials file (jminter@redhat.com)
+- bug 1568361. Modify persistent directory for logs (jcantril@redhat.com)
+- Azure: rollback module usage to support ansible 2.4 (jminter@redhat.com)
+- Azure: add playbook (kwoodson@redhat.com)
+- Allowing way to provide ops and non ops certs for their locations for fluentd
+  (ewolinet@redhat.com)
+- Fix oc_version oc_short to report '3.10' (jupierce@redhat.com)
+- override cluster default node selector with empty project selector
+  (fabian@fabianism.us)
+- make same change for etcd dc (fabian@fabianism.us)
+- Bug 1557516- Node selector on pod rather than DC (fabian@fabianism.us)
+- Adding missing deprecated var openshift_hosted_metrics_public_url and its
+  mapped var (ewolinet@redhat.com)
+- Add max-time option to curl to avoid long running ansible
+  (nakayamakenjiro@gmail.com)
+- Bug 1549220 - configmap still exist after running uninstall playbook for
+  logging (nhosoi@redhat.com)
+
 * Thu Apr 26 2018 Justin Pierce <jupierce@redhat.com> 3.9.27-1
 - Revert "Don't always update dbus but do restart dbus if dnsmasq changed"
   (roignac@gmail.com)
