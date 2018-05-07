@@ -24,8 +24,8 @@ openshift_logging_fluentd_deployment_type: "hosted"
 openshift_logging_fluentd_app_host: "logging-es"
 openshift_logging_fluentd_app_port: 9200
 # Destination for the operations based logs
-openshift_logging_fluentd_ops_host: "{{ openshift_logging_fluentd_app_host }}"
-openshift_logging_fluentd_ops_port: "{{ openshift_logging_fluentd_app_port }}"
+openshift_logging_fluentd_infra_host: "{{ openshift_logging_fluentd_app_host }}"
+openshift_logging_fluentd_infra_port: "{{ openshift_logging_fluentd_app_port }}"
 
 ### Used by "hosted" and "secure-aggregator" deployments
 openshift_logging_fluentd_journal_source: "{{ openshift_hosted_logging_journal_source | default('') }}"
@@ -34,9 +34,9 @@ openshift_logging_fluentd_journal_read_from_head: "{{ openshift_hosted_logging_j
 openshift_logging_fluentd_app_client_cert: /etc/fluent/keys/cert
 openshift_logging_fluentd_app_client_key: /etc/fluent/keys/key
 openshift_logging_fluentd_app_ca: /etc/fluent/keys/ca
-openshift_logging_fluentd_ops_client_cert: /etc/fluent/keys/ops-cert
-openshift_logging_fluentd_ops_client_key: /etc/fluent/keys/ops-key
-openshift_logging_fluentd_ops_ca: /etc/fluent/keys/ops-ca
+openshift_logging_fluentd_infra_client_cert: /etc/fluent/keys/infra-cert
+openshift_logging_fluentd_infra_client_key: /etc/fluent/keys/infra-key
+openshift_logging_fluentd_infra_ca: /etc/fluent/keys/infra-ca
 
 
 # used by "secure-host" and "secure-aggregator" deployments

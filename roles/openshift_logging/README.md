@@ -1,7 +1,5 @@
 ## openshift_logging Role
 
-### Please note this role is still a work in progress
-
 This role is used for installing the Aggregated Logging stack. It should be run against
 a single host, it will create any missing certificates and API objects that the current
 [logging deployer](https://github.com/openshift/origin-aggregated-logging/tree/master/deployer) does.
@@ -12,7 +10,156 @@ generation for Elasticsearch (it uses JKS) as well as openssl to sign certificat
 As part of the installation, it is recommended that you add the Fluentd node selector label
 to the list of persisted [node labels](https://docs.openshift.org/latest/install_config/install/advanced_install.html#configuring-node-host-labels).
 
-### Required vars:
+### Change to variable structure and deployment structure:
+
+Previously, the EFK stack was deployed as either an all-in-one or a split (apps and ops) deployment based on the boolean variable
+`openshift_logging_use_ops`. This has been phased out in favor of being able to configure multiple (currently up to two is supported)
+ES clusters.
+
+To be able to accomplish this, the old variable naming structure has been revamped to follow a dictionary structure as such:
+
+```yaml
+openshift_logging:
+  cluster_names: ['es']
+  fluentd:
+    nodeselector: {'logging-infra-fluentd': 'true'}
+    cpu_limit: null
+    cpu_request: 100m
+    memory_limit: 512Mi
+    journal_source: ""
+    journal_read_from_head: ""
+    hosts: ['--all']
+    buffer_queue_limit: 32
+    buffer_size_limit: 8m
+    app:
+      host: logging-es
+      port: 9200
+      client_cert: /etc/fluent/keys/cert
+      client_key: /etc/fluent/keys/key
+      ca: /etc/fluent/keys/ca
+
+    infra:
+      host: logging-es
+      port: 9200
+      client_cert: /etc/fluent/keys/infra-cert
+      client_key: /etc/fluent/keys/infra-key
+      ca: /etc/fluent/keys/infra-ca
+
+  mux:
+    allow_external: False
+    use_mux: "{{ openshift_logging_mux_allow_external | default(False) }}"
+    hostname: "{{ 'mux.' ~ openshift_master_default_subdomain}}"
+    port: 24284
+    cpu_limit: null
+    memory_limit: 512Mi
+    cpu_request: 100m
+    # the namespace to use for undefined projects - users will typically not need to set this
+    # extra namespaces to create for mux clients - users will need to set this
+    namespaces: []
+
+  es:
+    install: False
+    master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"
+    master_public_url: "{{ 'https://' + openshift_master_cluster_public_hostname | default(openshift.common.public_hostname, true) + ':' ~ openshift_master_api_port }}"
+    nodeselector: null
+    labels: {}
+    purge_logging: False
+    image_pull_secret: ""
+
+    curator:
+      default_days: 30
+      run_hour: 3
+      run_minute: 30
+      run_timezone: UTC
+      timeout: 300
+      script_log_level: INFO
+      log_error: ERROR
+      cpu_limit: null
+      cpu_request: 100m
+      memory_limit: 256Mi
+      node_selector: {}
+
+    kibana:
+      hostname: "{{ 'kibana.' ~ openshift_master_default_subdomain }}"
+      cpu_limit: null
+      cpu_request: 100m
+      memory_limit: 736Mi
+      replica_count: 1
+      edge_term_policy: Redirect
+      nodeselector: {}
+      cert: ""
+      key: ""
+      ca: ""
+      proxy:
+        debug: false
+        cpu_limit: null
+        cpu_request: 100m
+        memory_limit: 256Mi
+
+    elasticsearch:
+      host: logging-es
+      port: 9200
+      ca: /etc/fluent/keys/ca
+      client_cert: /etc/fluent/keys/cert
+      client_key: /etc/fluent/keys/key
+      cluster_size: 1
+      cpu_limit: null
+      cpu_request: "1"
+      # the logging appenders for the root loggers to write ES logs. Valid values: 'file', 'console'
+      log_appenders: ['file']
+      memory_limit: "8Gi"
+      pv_selector: "{{ openshift_logging_storage_labels | default('') }}"
+      pvc_dynamic: "{{ openshift_logging_elasticsearch_pvc_dynamic | default(False) }}"
+      pvc_size: ''
+      pvc_prefix: "{{ openshift_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
+      recover_after_time: 5m
+      storage_group: "65534"
+      nodeselector: {}
+      # openshift_logging_es_config is a hash to be merged into the defaults for the elasticsearch.yaml
+      config: {}
+
+      # for exposing es to external (outside of the cluster) clients
+      allow_external: False
+      hostname: "{{ 'es.' ~ openshift_master_default_subdomain }}"
+
+      #The absolute path on the control node to the cert file to use
+      #for the public facing es certs
+      cert: ""
+
+      #The absolute path on the control node to the key file to use
+      #for the public facing es certs
+      key: ""
+
+      #The absolute path on the control node to the CA file to use
+      #for the public facing es certs
+      ca_ext: ""
+
+      # allow cluster-admin or cluster-reader to view operations index
+      # This is really only applicable for your infra cluster
+      allow_cluster_reader: False
+```
+
+To deploy two clusters, one for apps and one for infra logs, with defaults as was previously accomplished using `openshift_logging_use_ops`,
+you would specify multiple cluster names like this:
+
+```yaml
+openshift_logging:
+  cluster_names: ['es', 'es-ops']
+  fluentd:
+    app:
+      host: logging-es
+
+    infra:
+      host: logging-es-ops
+
+  es:
+    install: True
+
+  es-ops:
+    install: True
+```
+
+### Required vars (Deprecated):
 
 - `openshift_logging_install_logging`: When `True` the `openshift_logging` role will install Aggregated Logging.
 
