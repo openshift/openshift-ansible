@@ -1,0 +1,8 @@
+#!/bin/bash
+
+{{ openshift.common.client_binary }} --config=/etc/origin/master/admin.kubeconfig \
+  label --overwrite node $1 \
+  {% for k, v in openshift_logging_fluentd_nodeselector.items() %} {{ k }}={{ v }} {% endfor %}
+
+# We sleep here because scheduler will get overwhelmed if we label all nodes at once.
+sleep {{ openshift_logging_fluentd_label_delay }}

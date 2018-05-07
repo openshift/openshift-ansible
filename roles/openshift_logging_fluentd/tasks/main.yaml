@@ -205,11 +205,6 @@
   when: "'--all' in openshift_logging_fluentd_hosts"
 
 - include: label_and_wait.yaml
-  vars:
-    node: "{{ fluentd_host }}"
-  with_items: "{{ openshift_logging_fluentd_hosts }}"
-  loop_control:
-    loop_var: fluentd_host
 
 - name: Delete temp directory
   file:
