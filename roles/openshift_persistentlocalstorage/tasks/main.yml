@@ -37,7 +37,7 @@
     user: "system:serviceaccount:{{ persistentlocalstorage_project }}:local-volume-provisioner"
     namespace: "{{ persistentlocalstorage_project }}"
     resource_kind: scc
-    resource_name: hostmount-anyuid
+    resource_name: privileged
     state: present
 
 - name: Give rights to local-volume-provisioner to manage volumes
