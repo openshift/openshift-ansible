@@ -31,14 +31,12 @@
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: nodes, new_nodes
-    openshift_node_bootstrap: "{{ openshift_node_bootstrap | default(True) }}"
   with_items: "{{ groups['tag_ocp-node'] | default([]) | difference(groups['tag_ocp-bootstrap'] | default([])) }}"
 
 - name: Add bootstrap node instances
   add_host:
     name: "{{ hostvars[item].gce_name }}"
     groups: bootstrap_nodes
-    openshift_node_bootstrap: True
     openshift_is_bootstrapped: True
   with_items: "{{ groups['tag_ocp-node'] | default([]) | intersect(groups['tag_ocp-bootstrap'] | default([])) }}"
 
@@ -46,7 +44,6 @@
   add_host:
     name: "{{ item }}"
     groups: nodes, new_nodes
-    openshift_node_bootstrap: True
     openshift_is_bootstrapped: True
   with_items: "{{ groups['tag_ocp-bootstrap'] | default([]) }}"
   when: all_nodes | default(False)

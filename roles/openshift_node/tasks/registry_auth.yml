@@ -15,8 +15,6 @@
   retries: 3
   delay: 5
   until: node_oreg_auth_credentials_create.rc == 0
-  notify:
-    - restart node
 
 # docker_creds is a custom module from lib_utils
 # 'docker login' requires a docker.service running on the local host, this is an
@@ -33,8 +31,6 @@
     - oreg_auth_user is defined
     - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
   register: node_oreg_auth_credentials_create_alt
-  notify:
-    - restart node
 
 # Container images may need the registry credentials
 - name: Setup ro mount of /root/.docker for containerized hosts

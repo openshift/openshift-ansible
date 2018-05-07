@@ -57,7 +57,6 @@
 
 - name: Move existing credentials and configuration into bootstrap configuration
   import_tasks: bootstrap_changes.yml
-  when: openshift_node_bootstrap | default(True) | bool
 
 - name: Reset selinux context
   command: restorecon -RF {{ openshift_node_data_dir }}/openshift.local.volumes

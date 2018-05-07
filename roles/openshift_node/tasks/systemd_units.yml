@@ -12,7 +12,6 @@
   when: not l_is_node_system_container | bool
   notify:
   - reload systemd units
-  - restart node
 
 - block:
   - name: Remove existing systemd service

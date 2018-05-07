@@ -13,5 +13,3 @@
   - regex: '^NO_PROXY='
     line: "NO_PROXY={{ openshift.common.no_proxy | default([]) }},{{ openshift.common.portal_net }},{{ hostvars[groups.oo_first_master.0].openshift.master.sdn_cluster_network_cidr }}"
   when: ('http_proxy' in openshift.common and openshift.common.http_proxy != '')
-  notify:
-  - restart node

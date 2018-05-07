@@ -14,19 +14,6 @@
   when:
   - (not skip_node_svc_handlers | default(False) | bool)
 
-- name: restart node
-  systemd:
-    name: "{{ openshift_service_type }}-node"
-    state: restarted
-  register: l_openshift_node_restart_node_result
-  until: not (l_openshift_node_restart_node_result is failed)
-  retries: 3
-  delay: 30
-  when:
-  - (not skip_node_svc_handlers | default(False) | bool)
-  - not (node_service_status_changed | default(false) | bool)
-  - not openshift_node_bootstrap
-
 - name: reload systemd units
   command: systemctl daemon-reload
   when:

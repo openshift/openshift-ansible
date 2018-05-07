@@ -26,7 +26,6 @@
   tasks:
   - name: Set facts
     set_fact:
-      openshift_node_bootstrap: True
       openshift_master_unsupported_embedded_etcd: True
 
   - name: Create the image instance disk
@@ -77,12 +76,6 @@
   gather_facts: no
   tasks:
   - wait_for_connection:
-
-- hosts: nodes
-  tasks:
-  - name: Set facts
-    set_fact:
-      openshift_node_bootstrap: True
 
 # This is the part that installs all of the software and configs for the instance
 # to become a node.

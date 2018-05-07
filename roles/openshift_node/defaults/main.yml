@@ -149,8 +149,6 @@ default_r_openshift_node_image_prep_packages:
 - ceph-common
 r_openshift_node_image_prep_packages: "{{ default_r_openshift_node_image_prep_packages | union(openshift_node_image_prep_packages | default([])) }}"
 
-openshift_node_bootstrap: True
-
 r_openshift_node_os_firewall_deny: []
 default_r_openshift_node_os_firewall_allow:
 - service: Kubernetes kubelet
