@@ -40,6 +40,37 @@ EXAMPLES = '''
 class ActionModule(ActionBase):
     """Action plugin to execute deprecated var checks."""
 
+    def set_dict_value(self, var_first_name, var_last_name, local_facts, var_list, var_dict_name, facts, changed):
+        if var_first_name not in local_facts:
+            if var_first_name in facts:
+                local_facts[var_first_name] = facts[var_first_name]
+            else:
+                local_facts[var_first_name] = {}
+
+        var_dict = local_facts
+
+        other_vars = var_list.replace(" ", "")
+
+        for other_var in other_vars.split('|'):
+            if other_var in facts:
+                for name in var_dict_name:
+                    if name == var_last_name:
+                        if name in var_dict:
+                            if var_dict[name] != facts[other_var]:
+                                var_dict[name] = facts[other_var]
+                                changed = True
+                                return
+                        else:
+                            var_dict[name] = facts[other_var]
+                            changed = True
+                            return
+
+                    if name not in var_dict:
+                        var_dict[name] = {}
+                        changed = True
+
+                    var_dict = var_dict[name]
+
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
         result['changed'] = False
@@ -54,38 +85,11 @@ class ActionModule(ActionBase):
             var_dict_name = param.split(".")
 
             var_first_name = var_dict_name[0]
+            var_last_name = var_dict_name[len(var_dict_name) - 1]
 
-            if var_first_name not in local_facts:
-                if var_first_name in facts:
-                    local_facts[var_first_name] = facts[var_first_name]
-                else:
-                    local_facts[var_first_name] = {}
+            self.set_dict_value(var_first_name, var_last_name, local_facts, var_list[param], var_dict_name, facts, changed)
 
-            var_dict = local_facts
-
-            other_vars = var_list[param].replace(" ", "")
-
-            for other_var in other_vars.split('|'):
-                if other_var in facts:
-                    for name in var_dict_name:
-                        if name == var_dict_name[len(var_dict_name) - 1]:
-                            if name in var_dict:
-                                if var_dict[name] != facts[other_var]:
-                                    var_dict[name] = facts[other_var]
-                                    changed = True
-                                    break
-                            else:
-                                var_dict[name] = facts[other_var]
-                                changed = True
-                                break
-
-                        if name not in var_dict:
-                            var_dict[name] = {}
-                            changed = True
-
-                        var_dict = var_dict[name]
-
-        if local_facts:
+        if changed:
             result['changed'] = True
 
         result['ansible_facts'] = local_facts

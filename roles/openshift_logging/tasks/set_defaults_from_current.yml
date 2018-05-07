@@ -249,58 +249,58 @@
     facts: "{{ hostvars[inventory_hostname] }}"
     vars:
       # Elasticsearch
-      openshift_logging.es.number_of_shards: openshift_logging_es_number_of_shards | __openshift_logging_es_number_of_shards
-      openshift_logging.es.number_of_replicas: openshift_logging_es_number_of_replicas | __openshift_logging_es_number_of_replicas
-      openshift_logging.es.recover_after_time: openshift_logging_es_recover_after_time | __openshift_logging_es_recover_after_time
-      openshift_logging.es.cpu_limit: openshift_logging_elasticsearch_cpu_limit | __openshift_logging_elasticsearch_cpu_limit
-      openshift_logging.es.cpu_request: openshift_logging_elasticsearch_cpu_request | __openshift_logging_elasticsearch_cpu_request
-      openshift_logging.es.memory_limit: openshift_logging_elasticsearch_memory_limit | __openshift_logging_elasticsearch_memory_limit
-      openshift_logging.es.proxy.cpu_request: openshift_logging_elasticsearch_proxy_cpu_request | __openshift_logging_elasticsearch_proxy_cpu_request
-      openshift_logging.es.proxy.memory_limit: openshift_logging_elasticsearch_proxy_memory_limit | __openshift_logging_elasticsearch_proxy_memory_limit
+      openshift_logging.es.elasticsearch.number_of_shards: openshift_logging_es_number_of_shards | __openshift_logging_es_number_of_shards
+      openshift_logging.es.elasticsearch.number_of_replicas: openshift_logging_es_number_of_replicas | __openshift_logging_es_number_of_replicas
+      openshift_logging.es.elasticsearch.recover_after_time: openshift_logging_es_recover_after_time | __openshift_logging_es_recover_after_time
+      openshift_logging.es.elasticsearch.cpu_limit: openshift_logging_elasticsearch_cpu_limit | __openshift_logging_elasticsearch_cpu_limit
+      openshift_logging.es.elasticsearch.cpu_request: openshift_logging_elasticsearch_cpu_request | __openshift_logging_elasticsearch_cpu_request
+      openshift_logging.es.elasticsearch.memory_limit: openshift_logging_elasticsearch_memory_limit | __openshift_logging_elasticsearch_memory_limit
+      openshift_logging.es.elasticsearch.proxy.cpu_request: openshift_logging_elasticsearch_proxy_cpu_request | __openshift_logging_elasticsearch_proxy_cpu_request
+      openshift_logging.es.elasticsearch.proxy.memory_limit: openshift_logging_elasticsearch_proxy_memory_limit | __openshift_logging_elasticsearch_proxy_memory_limit
 
       # Elasticsearch Ops
-      openshift_logging.es-ops.number_of_shards: openshift_logging_es_ops_number_of_shards | __openshift_logging_es_ops_number_of_shards
-      openshift_logging.es-ops.number_of_replicas: openshift_logging_es_ops_number_of_replicas | __openshift_logging_es_ops_number_of_replicas
-      openshift_logging.es-ops.recover_after_time: openshift_logging_es_ops_recover_after_time | __openshift_logging_es_ops_recover_after_time
-      openshift_logging.es-ops.cpu_limit: openshift_logging_es_ops_cpu_limit | __openshift_logging_es_ops_cpu_limit
-      openshift_logging.es-ops.cpu_request: openshift_logging_es_ops_cpu_request | __openshift_logging_es_ops_cpu_request
-      openshift_logging.es-ops.memory_limit: openshift_logging_es_ops_memory_limit | __openshift_logging_es_ops_memory_limit
-      openshift_logging.es-ops.proxy.cpu_request: openshift_logging_es_ops_proxy_cpu_request | __openshift_logging_es_ops_proxy_cpu_request
-      openshift_logging.es-ops.proxy.memory_limit: openshift_logging_es_ops_proxy_memory_limit | __openshift_logging_es_ops_proxy_memory_limit
+      openshift_logging.es-ops.elasticsearch.number_of_shards: openshift_logging_es_ops_number_of_shards | __openshift_logging_es_ops_number_of_shards
+      openshift_logging.es-ops.elasticsearch.number_of_replicas: openshift_logging_es_ops_number_of_replicas | __openshift_logging_es_ops_number_of_replicas
+      openshift_logging.es-ops.elasticsearch.recover_after_time: openshift_logging_es_ops_recover_after_time | __openshift_logging_es_ops_recover_after_time
+      openshift_logging.es-ops.elasticsearch.cpu_limit: openshift_logging_es_ops_cpu_limit | __openshift_logging_es_ops_cpu_limit
+      openshift_logging.es-ops.elasticsearch.cpu_request: openshift_logging_es_ops_cpu_request | __openshift_logging_es_ops_cpu_request
+      openshift_logging.es-ops.elasticsearch.memory_limit: openshift_logging_es_ops_memory_limit | __openshift_logging_es_ops_memory_limit
+      openshift_logging.es-ops.elasticsearch.proxy.cpu_request: openshift_logging_es_ops_proxy_cpu_request | __openshift_logging_es_ops_proxy_cpu_request
+      openshift_logging.es-ops.elasticsearch.proxy.memory_limit: openshift_logging_es_ops_proxy_memory_limit | __openshift_logging_es_ops_proxy_memory_limit
 
       # Kibana
-      openshift_logging.kibana.cpu_limit: openshift_logging_kibana_cpu_limit | __openshift_logging_kibana_cpu_limit
-      openshift_logging.kibana.cpu_request: openshift_logging_kibana_cpu_request | __openshift_logging_kibana_cpu_request
-      openshift_logging.kibana.memory_limit: openshift_logging_kibana_memory_limit | __openshift_logging_kibana_memory_limit
-      openshift_logging.kibana.proxy.cpu_limit: openshift_logging_kibana_proxy_cpu_limit | __openshift_logging_kibana_proxy_cpu_limit
-      openshift_logging.kibana.proxy.cpu_request: openshift_logging_kibana_proxy_cpu_request | __openshift_logging_kibana_proxy_cpu_request
-      openshift_logging.kibana.proxy.memory_limit: openshift_logging_kibana_proxy_memory_limit | __openshift_logging_kibana_proxy_memory_limit
+      openshift_logging.es.kibana.cpu_limit: openshift_logging_kibana_cpu_limit | __openshift_logging_kibana_cpu_limit
+      openshift_logging.es.kibana.cpu_request: openshift_logging_kibana_cpu_request | __openshift_logging_kibana_cpu_request
+      openshift_logging.es.kibana.memory_limit: openshift_logging_kibana_memory_limit | __openshift_logging_kibana_memory_limit
+      openshift_logging.es.kibana.proxy.cpu_limit: openshift_logging_kibana_proxy_cpu_limit | __openshift_logging_kibana_proxy_cpu_limit
+      openshift_logging.es.kibana.proxy.cpu_request: openshift_logging_kibana_proxy_cpu_request | __openshift_logging_kibana_proxy_cpu_request
+      openshift_logging.es.kibana.proxy.memory_limit: openshift_logging_kibana_proxy_memory_limit | __openshift_logging_kibana_proxy_memory_limit
 
       # Kibana Ops
-      openshift_logging.kibana-ops.cpu_limit: openshift_logging_kibana_ops_cpu_limit | __openshift_logging_kibana_ops_cpu_limit
-      openshift_logging.kibana-ops.cpu_request: openshift_logging_kibana_ops_cpu_request | __openshift_logging_kibana_ops_cpu_request
-      openshift_logging.kibana-ops.memory_limit: openshift_logging_kibana_ops_memory_limit | __openshift_logging_kibana_ops_memory_limit
-      openshift_logging.kibana-ops.proxy.cpu_limit: openshift_logging_kibana_ops_proxy_cpu_limit | __openshift_logging_kibana_ops_proxy_cpu_limit
-      openshift_logging.kibana-ops.proxy.cpu_request: openshift_logging_kibana_ops_proxy_cpu_request | __openshift_logging_kibana_ops_proxy_cpu_request
-      openshift_logging.kibana-ops.proxy.memory_limit: openshift_logging_kibana_ops_proxy_memory_limit | __openshift_logging_kibana_ops_proxy_memory_limit
+      openshift_logging.es-ops.kibana.cpu_limit: openshift_logging_kibana_ops_cpu_limit | __openshift_logging_kibana_ops_cpu_limit
+      openshift_logging.es-ops.kibana.cpu_request: openshift_logging_kibana_ops_cpu_request | __openshift_logging_kibana_ops_cpu_request
+      openshift_logging.es-ops.kibana.memory_limit: openshift_logging_kibana_ops_memory_limit | __openshift_logging_kibana_ops_memory_limit
+      openshift_logging.es-ops.kibana.proxy.cpu_limit: openshift_logging_kibana_ops_proxy_cpu_limit | __openshift_logging_kibana_ops_proxy_cpu_limit
+      openshift_logging.es-ops.kibana.proxy.cpu_request: openshift_logging_kibana_ops_proxy_cpu_request | __openshift_logging_kibana_ops_proxy_cpu_request
+      openshift_logging.es-ops.kibana.proxy.memory_limit: openshift_logging_kibana_ops_proxy_memory_limit | __openshift_logging_kibana_ops_proxy_memory_limit
 
       # Curator
-      openshift_logging.curator.default_days: openshift_logging_curator_default_days | __openshift_logging_curator_default_days
-      openshift_logging.curator.run_hour: openshift_logging_curator_run_hour | __openshift_logging_curator_run_hour
-      openshift_logging.curator.run_minute: openshift_logging_curator_run_minute | __openshift_logging_curator_run_minute
-      openshift_logging.curator.run_timezone: openshift_logging_curator_run_timezone | __openshift_logging_curator_run_timezone
-      openshift_logging.curator.cpu_limit: openshift_logging_curator_cpu_limit | __openshift_logging_curator_cpu_limit
-      openshift_logging.curator.cpu_request: openshift_logging_curator_cpu_request | __openshift_logging_curator_cpu_request
-      openshift_logging.curator.memory_limit: openshift_logging_curator_memory_limit | __openshift_logging_curator_memory_limit
+      openshift_logging.es.curator.default_days: openshift_logging_curator_default_days | __openshift_logging_curator_default_days
+      openshift_logging.es.curator.run_hour: openshift_logging_curator_run_hour | __openshift_logging_curator_run_hour
+      openshift_logging.es.curator.run_minute: openshift_logging_curator_run_minute | __openshift_logging_curator_run_minute
+      openshift_logging.es.curator.run_timezone: openshift_logging_curator_run_timezone | __openshift_logging_curator_run_timezone
+      openshift_logging.es.curator.cpu_limit: openshift_logging_curator_cpu_limit | __openshift_logging_curator_cpu_limit
+      openshift_logging.es.curator.cpu_request: openshift_logging_curator_cpu_request | __openshift_logging_curator_cpu_request
+      openshift_logging.es.curator.memory_limit: openshift_logging_curator_memory_limit | __openshift_logging_curator_memory_limit
 
       # Curator Ops
-      openshift_logging.curator-ops.default_days: openshift_logging_curator_ops_default_days | __openshift_logging_curator_ops_default_days
-      openshift_logging.curator-ops.run_hour: openshift_logging_curator_ops_run_hour | __openshift_logging_curator_ops_run_hour
-      openshift_logging.curator-ops.run_minute: openshift_logging_curator_ops_run_minute | __openshift_logging_curator_ops_run_minute
-      openshift_logging.curator-ops.run_timezone: openshift_logging_curator_ops_run_timezone | __openshift_logging_curator_ops_run_timezone
-      openshift_logging.curator-ops.cpu_limit: openshift_logging_curator_ops_cpu_limit | __openshift_logging_curator_ops_cpu_limit
-      openshift_logging.curator-ops.cpu_request: openshift_logging_curator_ops_cpu_request | __openshift_logging_curator_ops_cpu_request
-      openshift_logging.curator-ops.memory_limit: openshift_logging_curator_ops_memory_limit | __openshift_logging_curator_ops_memory_limit
+      openshift_logging.es-ops.curator.default_days: openshift_logging_curator_ops_default_days | __openshift_logging_curator_ops_default_days
+      openshift_logging.es-ops.curator.run_hour: openshift_logging_curator_ops_run_hour | __openshift_logging_curator_ops_run_hour
+      openshift_logging.es-ops.curator.run_minute: openshift_logging_curator_ops_run_minute | __openshift_logging_curator_ops_run_minute
+      openshift_logging.es-ops.curator.run_timezone: openshift_logging_curator_ops_run_timezone | __openshift_logging_curator_ops_run_timezone
+      openshift_logging.es-ops.curator.cpu_limit: openshift_logging_curator_ops_cpu_limit | __openshift_logging_curator_ops_cpu_limit
+      openshift_logging.es-ops.curator.cpu_request: openshift_logging_curator_ops_cpu_request | __openshift_logging_curator_ops_cpu_request
+      openshift_logging.es-ops.curator.memory_limit: openshift_logging_curator_ops_memory_limit | __openshift_logging_curator_ops_memory_limit
 
       # Fluentd
       openshift_logging.fluentd.cpu_limit: openshift_logging_fluentd_cpu_limit | __openshift_logging_fluentd_cpu_limit
