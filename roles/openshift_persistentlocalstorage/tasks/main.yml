@@ -119,11 +119,19 @@
                 name: provisioner
                 securityContext:
                   runAsUser: 0
+                  seLinuxOptions:
+                    level: "s0:c0.c1023"
                 volumeMounts:
                 - mountPath: "{{ persistentlocalstorage_path }}"
                   name: local-storage
+                - mountPath: /etc/provisioner/config
+                  name: provisioner-config
+                  readOnly: true
               serviceAccountName: local-volume-provisioner
               volumes:
               - hostPath:
                   path: "{{ persistentlocalstorage_path }}"
                 name: local-storage
+              - configMap:
+                  name: local-volume-provisioner-config
+                name: provisioner-config
