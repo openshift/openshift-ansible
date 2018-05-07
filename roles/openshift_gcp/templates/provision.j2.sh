@@ -104,7 +104,7 @@ fi ) &
     if ! gcloud --project "{{ openshift_gcp_project }}" compute instance-templates describe "{{ openshift_gcp_prefix }}instance-template-{{ node_group.name }}" &>/dev/null; then
         gcloud --project "{{ openshift_gcp_project }}" compute instance-templates create "{{ openshift_gcp_prefix }}instance-template-{{ node_group.name }}" \
                 --machine-type "{{ node_group.machine_type }}" --network "{{ openshift_gcp_network_name }}" \
-                --tags "{{ openshift_gcp_prefix }}ocp,ocp,{{ 'ocp-bootstrap,' if (node_group.bootstrap | default(False)) else '' }}{{ node_group.tags }}" \
+                --tags "{{ openshift_gcp_prefix }}ocp,ocp,ocp-bootstrap,{{ node_group.tags }}" \
                 --boot-disk-size "{{ node_group.boot_disk_size }}" --boot-disk-type "pd-ssd" \
                 --scopes "logging-write,monitoring-write,useraccounts-ro,service-control,service-management,storage-ro,compute-rw" \
                 --image "{{ node_group.image | default('${image}') }}" ${metadata}  \
