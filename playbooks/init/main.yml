@@ -13,6 +13,8 @@
     set_stats:
       data:
         installer_phase_initialize:
+          title: "Initialization"
+          playbook: ""
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 

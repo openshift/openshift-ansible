@@ -28,52 +28,6 @@ The installer_checkpoint.py callback plugin extends the Ansible
 display the status of each phase which was run.  The INSTALLER STATUS report is
 displayed immediately following the PLAY RECAP.
 
-Phases of cluster installation are mapped to the steps in the
-[common/openshift-cluster/config.yml][openshift_cluster_config] playbook.
-
-To correctly display the order of the installer phases, the `installer_phases`
-variable defines the phase or component order.
-
-```python
-        # Set the order of the installer phases
-        installer_phases = [
-            'installer_phase_initialize',
-            'installer_phase_etcd',
-            'installer_phase_nfs',
-            'installer_phase_loadbalancer',
-            'installer_phase_master',
-            'installer_phase_master_additional',
-            'installer_phase_node',
-            'installer_phase_glusterfs',
-            'installer_phase_hosted',
-            'installer_phase_metrics',
-            'installer_phase_logging',
-            'installer_phase_servicecatalog',
-        ]
-```
-
-Additional attributes, such as display title and component playbook, of each
-phase are stored in the `phase_attributes` variable.
-
-```python
-        # Define the attributes of the installer phases
-        phase_attributes = {
-            'installer_phase_initialize': {
-                'title': 'Initialization',
-                'playbook': ''
-            },
-            'installer_phase_etcd': {
-                'title': 'etcd Install',
-                'playbook': 'playbooks/openshift-etcd/config.yml'
-            },
-            'installer_phase_nfs': {
-                'title': 'NFS Install',
-                'playbook': 'playbooks/openshift-nfs/config.yml'
-            },
-            #...
-        }
-```
-
 Usage
 -----
 
@@ -82,26 +36,27 @@ added to the beginning of the main playbook for the component to set the phase
 status to "In Progress".  Additionally, a play must be added after the last play
 for that component to set the phase status to "Complete".  
 
-The following example shows the first play of the 'installer phase' loading the
-`installer_checkpoint` role, as well as the `set_stats` task for setting
-`installer_phase_initialize` to "In Progress".  Various plays are run for the
-phase/component and then a final play for setting `installer_hase_initialize` to
-"Complete".
+The following example shows the first play of the etcd install using the
+`set_stats` module for setting the required checkpoint data points.
+
+* `title` - Name of the component phase
+* `playbook` - Entry point playbook used to run only this component
+* `status` - "In Progress" or "Complete"
 
 ```yaml
-# init/main.yml
+# playbooks/openshift-etcd/private/config.yml
 ---
-- name: Initialization Checkpoint Start
+- name: etcd Install Checkpoint Start
   hosts: all
   gather_facts: false
-  roles:
-  - installer_checkpoint
   tasks:
-  - name: Set install initialization 'In Progress'
+  - name: Set etcd install 'In Progress'
     run_once: true
     set_stats:
       data:
-        installer_phase_initialize:
+        installer_phase_etcd:
+          title: "etcd Install"
+          playbook: "playbooks/openshift-etcd/config.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
@@ -109,25 +64,19 @@ phase/component and then a final play for setting `installer_hase_initialize` to
 # Various plays here
 #...
 
-- name: Initialization Checkpoint End
+- name: etcd Install Checkpoint End
   hosts: all
   gather_facts: false
   tasks:
-  - name: Set install initialization 'Complete'
+  - name: Set etcd install 'Complete'
     run_once: true
     set_stats:
       data:
-        installer_phase_initialize:
+        installer_phase_etcd:
           status: "Complete"
           end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 ``` 
 
-Each phase or component of the installer will follow a similar pattern, with the
-exception that the `installer_checkpoint` role does not need to be called since
-it was already loaded by the play in `init/main.yml`.  It is important to
-place the 'In Progress' and 'Complete' plays as the first and last plays of the
-phase or component.
- 
 Examples
 --------
 
@@ -164,4 +113,3 @@ Master Additional Install  : In Progress (0:20:04)
 ```
 
 [set_stats]: http://docs.ansible.com/ansible/latest/set_stats_module.html
-[openshift_cluster_config]: https://github.com/openshift/openshift-ansible/blob/master/playbooks/common/openshift-cluster/config.yml

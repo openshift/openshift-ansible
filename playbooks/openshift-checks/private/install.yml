@@ -8,6 +8,8 @@
     set_stats:
       data:
         installer_phase_health:
+          title: "Health Check"
+          playbook: "playbooks/openshift-checks/pre-install.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
