@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.45
+Version:        3.7.46
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sun May 06 2018 Justin Pierce <jupierce@redhat.com> 3.7.46-1
+- 
+
 * Fri May 04 2018 Justin Pierce <jupierce@redhat.com> 3.7.45-1
 - GlusterFS: Move uninstall playbook location (jarrpa@redhat.com)
 - Stop and start openvswitch only if openshift_use_openshift_sdn
