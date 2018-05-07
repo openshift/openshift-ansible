@@ -42,25 +42,6 @@ EXAMPLES = '''
 '''
 
 
-# TODO: We should add a generic migration function that takes source and destination
-# paths and does the right thing rather than one function for common, one for node, etc.
-def migrate_common_facts(facts):
-    """ Migrate facts from various roles into common """
-    params = {
-        'node': ('portal_net'),
-        'master': ('portal_net')
-    }
-    if 'common' not in facts:
-        facts['common'] = {}
-    # pylint: disable=consider-iterating-dictionary
-    for role in params.keys():
-        if role in facts:
-            for param in params[role]:
-                if param in facts[role]:
-                    facts['common'][param] = facts[role].pop(param)
-    return facts
-
-
 def migrate_admission_plugin_facts(facts):
     """ Apply migrations for admission plugin facts """
     if 'master' in facts:
@@ -79,7 +60,6 @@ def migrate_admission_plugin_facts(facts):
 def migrate_local_facts(facts):
     """ Apply migrations of local facts """
     migrated_facts = copy.deepcopy(facts)
-    migrated_facts = migrate_common_facts(migrated_facts)
     migrated_facts = migrate_admission_plugin_facts(migrated_facts)
     return migrated_facts
 
