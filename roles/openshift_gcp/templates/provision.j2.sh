@@ -45,7 +45,7 @@ fi
 
 # Create network
 if ! gcloud --project "{{ openshift_gcp_project }}" compute networks describe "{{ openshift_gcp_network_name }}" &>/dev/null; then
-    gcloud --project "{{ openshift_gcp_project }}" compute networks create "{{ openshift_gcp_network_name }}" --mode "auto"
+    gcloud --project "{{ openshift_gcp_project }}" compute networks create "{{ openshift_gcp_network_name }}" --subnet-mode "auto"
 else
     echo "Network '{{ openshift_gcp_network_name }}' already exists"
 fi
