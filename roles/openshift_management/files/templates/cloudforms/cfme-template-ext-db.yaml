@@ -26,6 +26,24 @@ objects:
   metadata:
     name: cfme-httpd
 - apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: view
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: cfme-orchestrator
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: edit
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: cfme-orchestrator
+- apiVersion: v1
   kind: Secret
   metadata:
     name: "${NAME}-secrets"
@@ -457,7 +475,7 @@ objects:
         RewriteRule ^/ http://${NAME}%{REQUEST_URI} [P,QSA,L]
         ProxyPassReverse / http://${NAME}/
 
-        # Ensures httpd stdout/stderr are seen by docker logs.
+        # Ensures httpd stdout/stderr are seen by 'docker logs'.
         ErrorLog  "| /usr/bin/tee /proc/1/fd/2 /var/log/httpd/error_log"
         CustomLog "| /usr/bin/tee /proc/1/fd/1 /var/log/httpd/access_log" common
       </VirtualHost>
