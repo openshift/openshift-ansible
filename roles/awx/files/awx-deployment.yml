@@ -1,0 +1,111 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: awx-deployment
+parameters:
+- name: NAMESPACE
+- name: AWX_WEB_IMAGE
+- name: AWX_TASK_IMAGE
+
+objects:
+
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: awx
+    namespace: ${NAMESPACE}
+  spec:
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          name: awx-web-deploy
+          service: django
+      spec:
+        containers:
+          - name: awx-web
+            image: ${AWX_WEB_IMAGE}
+            ports:
+              - containerPort: 8052
+            volumeMounts:
+              - mountPath: /etc/tower
+                name: awx-application-config
+          - name: awx-celery
+            image: ${AWX_TASK_IMAGE}
+            volumeMounts:
+              - mountPath: /etc/tower
+                name: awx-application-config
+            env:
+              - name: DATABASE_USER
+                value: awx
+              - name: DATABASE_NAME
+                value: awx
+              - name: DATABASE_HOST
+                value: postgresql
+              - name: DATABASE_PORT
+                value: "5432"
+              - name: DATABASE_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgresql
+                    key: database-password
+              - name: AWX_ADMIN_USER
+                value: admin
+              - name: AWX_ADMIN_PASSWORD
+                value: password # TODO
+          - name: awx-rabbit
+            image: rabbitmq:3
+            env:
+              - name: RABBITMQ_ERLANG_COOKIE
+                value: secretb
+              - name: RABBITMQ_NODENAME
+                value: rabbitmq
+              - name: RABBITMQ_DEFAULT_USER
+                value: awx
+              - name: RABBITMQ_DEFAULT_PASS
+                value: abcdefg
+              - name: RABBITMQ_DEFAULT_VHOST
+                value: awx
+          - name: awx-memcached
+            image: memcached
+        volumes:
+          - name: awx-application-config
+            configMap:
+              name: awx-config
+              items:
+                - key: awx_settings
+                  path: settings.py
+                - key: secret_key
+                  path: SECRET_KEY
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: awx-web-svc
+    namespace: ${NAMESPACE}
+    labels:
+      name: awx-web-svc
+  spec:
+    type: "NodePort"
+    ports:
+      - name: http
+        port: 8052
+    selector:
+      name: awx-web-deploy
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: awx-web-svc
+    namespace: ${NAMESPACE}
+  spec:
+    port:
+      targetPort: http
+    tls:
+      insecureEdgeTerminationPolicy: Allow
+      termination: edge
+    to:
+      kind: Service
+      name: awx-web-svc
+      weight: 100
+    wildcardPolicy: None

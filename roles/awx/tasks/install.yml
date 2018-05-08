@@ -21,6 +21,7 @@
   no_log: true
 
 - name: Deploy and Activate Postgres
+  # Note: NAMESPACE param is where to look for postgresql ImageStream.
   shell: >-
     {{ openshift_client_binary }} project {{ awx_project }};
     {{ openshift_client_binary }} process -n openshift postgresql-persistent
@@ -40,6 +41,13 @@
   register: mktemp
   changed_when: False
 
+- name: Copy files to temp directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ mktemp.stdout }}/{{ item }}"
+  with_items:
+  - awx-deployment.yml
+
 - name: Read Existing AWX ConfigMap
   oc_configmap:
     state: list
@@ -58,23 +66,22 @@
 # RABBITMQ_DEFAULT_PASS
 # AWX_ADMIN_PASSWORD
 
-- name: Template Openshift AWX Config
+- name: Template AWX Config
   template:
     src: configmap.yml.j2
     dest: "{{ mktemp.stdout }}/configmap.yml"
     mode: '0600'
 
-- name: Template Openshift AWX Deployment
-  template:
-    src: deployment.yml.j2
-    dest: "{{ mktemp.stdout }}/deployment.yml"
-    mode: '0600'
-
 - name: Apply Configmap
   shell: "{{ openshift_client_binary }} apply -f {{ mktemp.stdout }}/configmap.yml"
 
-- name: Apply Deployment
-  shell: "{{ openshift_client_binary }} apply -f {{ mktemp.stdout }}/deployment.yml"
+- name: Apply the AWX Deployment Template
+  shell: >-
+    {{ openshift_client_binary }} process -f {{ mktemp.stdout }}/awx-deployment.yml
+    --param NAMESPACE={{ awx_project }}
+    --param AWX_WEB_IMAGE={{ awx_web_openshift_image }}
+    --param AWX_TASK_IMAGE={{ awx_task_openshift_image }}
+    | {{ openshift_client_binary }} apply -f -
 
 - name: Delete temp directory
   file:
