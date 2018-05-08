@@ -36,6 +36,10 @@ kubeletArguments:
   - /etc/origin/node/bootstrap.kubeconfig
   feature-gates:
   - RotateKubeletClientCertificate=true,RotateKubeletServerCertificate=true
+{% if openshift_node_group_use_persistentlocalvolumes | bool %}
+  - PersistentLocalVolumes=true
+  - VolumeScheduling=true
+{% endif %}
   rotate-certificates:
   - "true"
   cert-dir:
@@ -50,10 +54,6 @@ kubeletArguments:
   - "{{ openshift_node_group_labels | join(',') }}"
   enable-controller-attach-detach:
   - 'true'
-{% if openshift_node_group_use_persistentlocalvolumes | bool %}
-  feature-gates:
-  - PersistentLocalVolumes=true
-{% endif %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
   burst: 40
