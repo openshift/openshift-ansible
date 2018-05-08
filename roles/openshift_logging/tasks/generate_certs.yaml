@@ -36,6 +36,8 @@
     - top_dir: '{{generated_certs_dir}}'
   when: not signing_conf_file.stat.exists
 
+# TODO: move the other cert generation into the roles that require it... we just need to ensure we have our CA/Cert/Key in place for the cluster...?
+
 - include_tasks: procure_server_certs.yaml
   loop_control:
     loop_var: cert_info

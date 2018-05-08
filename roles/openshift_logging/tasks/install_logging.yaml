@@ -7,45 +7,39 @@
 ## This is include vs import because we need access to group/inventory variables
 - include_tasks: set_defaults_from_current.yml
 
-- debug: var=openshift_logging
+- include_tasks: install_cluster.yml
+  vars:
+    __cluster: "{{ __default_openshift_logging[cluster] | combine(openshift_logging[cluster], recursive=True) }}"
+    __cluster_name: "{{ cluster }}"
+  with_items: "{{ openshift_logging.cluster_names | default([]) }}"
+  loop_control:
+    loop_var: cluster
+
 - debug: var={{blah.blah}}
 
 - name: Set logging project
   oc_project:
     state: present
-    name: "{{ openshift_logging_namespace }}"
-    node_selector: "{{ openshift_logging_nodeselector | default(null) }}"
+    name: "{{ openshift_logging.namespace }}"
+    node_selector: "{{ openshift_logging.nodeselector | default(null) }}"
 
 - name: Labeling logging project
   oc_label:
     state: present
     kind: namespace
-    name: "{{ openshift_logging_namespace }}"
+    name: "{{ openshift_logging.namespace }}"
     labels:
     - key: "{{ item.key }}"
       value: "{{ item.value }}"
-  with_dict: "{{ openshift_logging_labels | default({}) }}"
+  with_dict: "{{ openshift_logging.labels | default({}) }}"
   when:
-  - openshift_logging_labels is defined
-  - openshift_logging_labels is dict
-
-- name: Labeling logging project
-  oc_label:
-    state: present
-    kind: namespace
-    name: "{{ openshift_logging_namespace }}"
-    labels:
-    - key: "{{ openshift_logging_label_key }}"
-      value: "{{ openshift_logging_label_value }}"
-  when:
-  - openshift_logging_label_key is defined
-  - openshift_logging_label_key != ""
-  - openshift_logging_label_value is defined
+  - openshift_logging.labels is defined
+  - openshift_logging.labels is dict
 
 - name: Annotate Logging Project to allow overcommit
   oc_edit:
     kind: ns
-    name: "{{ openshift_logging_namespace }}"
+    name: "{{ openshift_logging.namespace }}"
     separator: '#'
     content:
       metadata#annotations#quota.openshift.io/cluster-resource-override-enabled: "false"
@@ -61,10 +55,6 @@
 - include_tasks: generate_certs.yaml
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-
-- set_fact:
-    __base_file_dir: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
-    __es_version: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
 
 ## Elasticsearch
 

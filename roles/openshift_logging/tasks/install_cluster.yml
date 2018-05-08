@@ -1,0 +1,47 @@
+---
+# Vars for when this is called:
+# __cluster is the variable to use when pulling out variables
+# __cluster will be set to be openshift_logging.es or openshift_logging.es-ops, etc
+# __cluster_name is the name of that cluster -- es, es-ops, etc
+
+- debug: var=__cluster
+- debug: var=__cluster_name
+
+- name: Set logging project
+  oc_project:
+    state: present
+    name: "{{ __cluster.namespace }}"
+    node_selector: "{{ __cluster.nodeselector | default(null) }}"
+
+- name: Labeling logging project
+  oc_label:
+    state: present
+    kind: namespace
+    name: "{{ __cluster.namespace }}"
+    labels:
+    - key: "{{ item.key }}"
+      value: "{{ item.value }}"
+  with_dict: "{{ __cluster.labels | default({}) }}"
+  when:
+  - __cluster.labels is defined
+  - __cluster.labels is dict
+
+- name: Annotate Logging Project to allow overcommit
+  oc_edit:
+    kind: ns
+    name: "{{ __cluster.namespace }}"
+    separator: '#'
+    content:
+      metadata#annotations#quota.openshift.io/cluster-resource-override-enabled: "false"
+
+- name: Create logging cert directory
+  file:
+    path: "{{ openshift.common.config_base }}/logging/{{ __cluster_name }}"
+    state: directory
+    mode: 0755
+  changed_when: False
+  check_mode: no
+
+- include_tasks: generate_certs.yaml
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging/{{ __cluster_name }}"

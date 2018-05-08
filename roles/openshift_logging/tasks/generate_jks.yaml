@@ -94,7 +94,7 @@
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
 
 - name: Run JKS generation script
-  local_action: script generate-jks.sh {{local_tmp.stdout}} {{openshift_logging_namespace}} {{openshift_logging_es_hostname | default()}} {{openshift_logging_es_ops_hostname | default()}}
+  local_action: script generate-jks.sh {{local_tmp.stdout}} {{ __cluster.namespace }} {{openshift_logging_es_hostname | default()}} {{openshift_logging_es_ops_hostname | default()}}
   check_mode: no
   become: false
   when: not elasticsearch_jks.stat.exists or not logging_es_jks.stat.exists or not system_admin_jks.stat.exists or not truststore_jks.stat.exists
