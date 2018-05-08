@@ -9,9 +9,7 @@ etcd
 # if your target hosts are Fedora uncomment this
 #ansible_python_interpreter=/usr/bin/python3
 openshift_deployment_type=origin
-osm_cluster_network_cidr=10.128.0.0/14
 openshift_portal_net=172.30.0.0/16
-osm_host_subnet_length=9
 # localhost likely doesn't meet the minimum requirements
 openshift_disable_check=disk_availability,memory_availability
 

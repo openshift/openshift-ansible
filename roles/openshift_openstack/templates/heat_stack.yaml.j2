@@ -276,7 +276,7 @@ resources:
     properties:
       name: openshift-ansible-{{ openshift_openstack_full_dns_domain }}-data-subnet
       network: { get_resource: data_net }
-      cidr: {{ osm_cluster_network_cidr|default('10.128.0.0/14') }}
+      cidr: {{ openshift_cluster_network_cidr }}
       gateway_ip: null
 {% endif %}
 
