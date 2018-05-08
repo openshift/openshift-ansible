@@ -1,0 +1,94 @@
+---
+# Note: this required ansible-galaxy install Azure.azure_modules
+
+# create all the items necessary to make the VM
+
+- name: "Create resource group"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision resource group"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_resource_group.yml
+
+- name: "Create storage account"
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision storage account"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_storage_account.yml  
+
+- name: Create virtual network
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision virtual network"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_virtual_network.yml  
+
+- name: Add subnet
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision subnet in virtual network"
+    import_role:
+      name: openshift_azure
+      tasks_from: add_subnet_to_virtual_network.yml
+
+- name: Create public ip
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision public ip address"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_public_ip.yml
+
+
+- name: Create security group that allows SSH
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision security group allowing SSH"
+    import_role: 
+      name: openshift_azure
+      tasks_from: create_security_group.yml
+
+- name: Create NIC
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision network interface card"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_nic.yml
+
+
+- name: Create virtual machine
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "provision vm"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_vm.yml
+
+#
+# TODO: do OpenShifty stuff to the VM
+#
+
+# NOTE: this isn't available until ansible 2.5
+# https://github.com/ansible/ansible/pull/32589
+# installed from https://releases.ansible.com/ansible/rpm/nightly/devel/epel-7-x86_64/
+- name: Create image
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: "create image"
+    import_role:
+      name: openshift_azure
+      tasks_from: create_image_from_vm.yml

@@ -1,0 +1,9 @@
+---
+- name: Create NIC
+  azure_rm_networkinterface:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    name: "{{ openshift_azure_resource_group_name }}"
+    virtual_network: "{{ openshift_azure_resource_group_name }}"
+    subnet: "{{ openshift_azure_resource_group_name }}"
+    public_ip_name: "{{ openshift_azure_resource_group_name }}"
+    security_group: "{{ openshift_azure_resource_group_name }}"

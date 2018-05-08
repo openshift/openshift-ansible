@@ -1,0 +1,24 @@
+---
+# taken from tests in https://github.com/ansible/ansible/pull/32589/files
+# not sure if this is completely necessary but initial attempts
+# errored because VM was not generalized and this seems to work around it.
+- name: Deallocate the virtual machine
+  azure_rm_virtualmachine:
+      resource_group: "{{ openshift_azure_resource_group_name }}"
+      name: "{{ openshift_azure_vm_name }}"
+      allocated: no 
+      vm_size: "{{ openshift_azure_vm_size }}"
+
+- name: Start the virtual machine
+  azure_rm_virtualmachine:
+      resource_group: "{{ openshift_azure_resource_group_name }}"
+      name: "{{ openshift_azure_vm_name }}"
+      vm_size: "{{ openshift_azure_vm_size }}"
+
+- name: Create an image from VM
+  azure_rm_image:
+      resource_group: "{{ openshift_azure_resource_group_name }}"
+      source: "https://{{ openshift_azure_resource_group_name }}.blob.core.windows.net/{{ openshift_azure_vm_name }}/{{ openshift_azure_vm_storage_container }}"
+      name: "{{ openshift_azure_image_name }}"
+      os_type: Linux  
+

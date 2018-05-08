@@ -1,0 +1,6 @@
+---
+- name: Create public ip
+  azure_rm_publicipaddress:
+    resource_group: "{{ openshift_azure_resource_group_name }}"
+    allocation_method: Static
+    name: "{{ openshift_azure_resource_group_name }}" #this needs to be a better name
