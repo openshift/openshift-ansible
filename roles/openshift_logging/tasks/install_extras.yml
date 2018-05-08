@@ -1,0 +1,25 @@
+---
+# Vars for when this is called:
+# __component is the variable to use when pulling out variables
+# __component will be set to be openshift_logging.mux or openshift_logging.eventrouter, etc
+# __cluster_name is the name of that component -- mux, eventrouter, etc
+
+
+## Mux
+- when: openshift_logging.mux.install | default(False) | bool
+- import_role:
+    name: openshift_logging_mux
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging"
+    openshift_logging_mux_ops_host: "{{ ( openshift_logging_use_ops | bool ) | ternary('logging-es-ops', 'logging-es') }}"
+    openshift_logging_mux_namespace: "{{ openshift_logging_namespace }}"
+    openshift_logging_mux_master_url: "{{ openshift_logging_master_url }}"
+    openshift_logging_mux_image_pull_secret: "{{ openshift_logging_image_pull_secret }}"
+  when:
+  - openshift_logging_use_mux | bool
+
+
+## EventRouter
+- when: openshift_logging.eventrouter.install | default(False) | bool
+  import_role:
+    name: openshift_logging_eventrouter

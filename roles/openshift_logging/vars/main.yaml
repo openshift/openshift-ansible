@@ -10,8 +10,12 @@ __default_logging_ops_projects: ['default', 'openshift', 'openshift-infra', 'kub
 
 __default_openshift_logging:
   cluster_names: ['es']
+  aggregators: ['fluentd']
   fluentd:
+    namespace: openshift-logging
     nodeselector: {'logging-infra-fluentd': 'true'}
+    master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"
+    master_public_url: "{{ 'https://' + openshift_master_cluster_public_hostname | default(openshift.common.public_hostname, true) + ':' ~ openshift_master_api_port }}"
     cpu_limit: null
     cpu_request: 100m
     memory_limit: 512Mi

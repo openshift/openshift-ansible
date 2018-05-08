@@ -4,8 +4,6 @@
 # __cluster will be set to be openshift_logging.es or openshift_logging.es-ops, etc
 # __cluster_name is the name of that cluster -- es, es-ops, etc
 
-- debug: var=__cluster
-- debug: var=__cluster_name
 
 - set_fact:
     __base_file_dir: "2.x"
@@ -141,3 +139,15 @@
     openshift_logging_kibana_es_host: "{{ __cluster.elasticsearch.host }}"
     openshift_logging_kibana_es_port: "{{ __cluster.elasticsearch.port }}"
     openshift_logging_kibana_image_pull_secret: "{{ __cluster.image_pull_secret }}"
+
+# Curator
+- when: __cluster.curator.install | default(True) | bool
+  import_role:
+    name: openshift_logging_curator
+  vars:
+    generated_certs_dir: "{{openshift.common.config_base}}/logging/{{ __cluster_name }}"
+    openshift_logging_curator_namespace: "{{ __cluster.namespace }}"
+    openshift_logging_curator_es_host: "{{ __cluster.elasticsearch.host }}"
+    openshift_logging_curator_es_port: "{{ __cluster.elasticsearch.port }}"
+    openshift_logging_curator_master_url: "{{ __cluster.master_url }}"
+    openshift_logging_curator_image_pull_secret: "{{ __cluster.image_pull_secret }}"
