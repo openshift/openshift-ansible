@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.36.0%{?dist}
+Release:        0.37.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,10 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon May 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.37.0
+- fix (sdodson@redhat.com)
+- Configure NetworkManager to ignore calico interfaces (dan@projectcalico.org)
+
 * Mon May 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.36.0
 - Remove non-bootstrap code (mgugino@redhat.com)
 
