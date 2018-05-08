@@ -20,7 +20,7 @@
 
 - name: Validate permissions on the static pods dir
   file:
-    path: "/etc/origin/node/pods/"
+    path: "{{ etcd_static_pod_location }}"
     state: directory
     owner: "root"
     group: "root"
@@ -58,7 +58,7 @@
   copy:
     remote_src: true
     src: "{{ mktemp.stdout }}/{{ item }}"
-    dest: "/etc/origin/node/pods/"
+    dest: "{{ etcd_static_pod_location }}"
     mode: 0600
   with_items:
   - etcd.yaml

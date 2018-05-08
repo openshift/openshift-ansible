@@ -20,6 +20,8 @@
       openshift_node_bootstrap: True
       skip_node_svc_handlers: True
       openshift_additional_repos: "{{ azure_node_repos[ansible_distribution] }}"
+      openshift_node_include_control_plane: True
+      openshift_control_plane_static_pod_location: /etc/origin/node/disabled/
 
   - set_fact:
       openshift_additional_repos: "{{ openshift_additional_repos + [{'name': 'install_repo', 'baseurl': openshift_azure_install_repo, 'enabled': true, 'gpgcheck': false}] }}"
@@ -54,9 +56,9 @@
     register: yum
 
   - name: run waagent deprovision
-    command: waagent -deprovision+user -force
-    args:
-      chdir: /
+    shell: sleep 2 && waagent -deprovision+user -force
+    async: 1
+    poll: 0
 
 - hosts: localhost
   gather_facts: no
