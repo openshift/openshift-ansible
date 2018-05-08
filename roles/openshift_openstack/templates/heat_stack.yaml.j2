@@ -101,6 +101,16 @@ outputs:
     description: ID of the subnet the services will be on
     value: { get_resource: service_subnet }
 
+  pod_router:
+    description: ID of the router where the pod subnet will be connected
+    value: { get_resource: router }
+
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+  pod_subnet_pool:
+    description: ID of the subnet pool to use for the pod_subnets CIDRs
+    value: { get_resource: pod_subnet_pool }
+{% endif %}
+
   pod_access_sg_id:
     description: Id of the security group for services to be able to reach pods
     value: { get_resource: pod_access_sg }
@@ -194,11 +204,28 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
 
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+  pod_subnet_pool:
+    type: OS::Neutron::SubnetPool
+    properties:
+      prefixes: [ {{ openshift_openstack_kuryr_pod_subnet_cidr }} ]
+      default_prefixlen: 24
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-pod-subnet-pool
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+{% endif %}
+
   pod_subnet:
     type: OS::Neutron::Subnet
     properties:
       network_id: { get_resource: pod_net }
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+      subnetpool: { get_resource: pod_subnet_pool }
+{% else %}
       cidr: {{ openshift_openstack_kuryr_pod_subnet_cidr }}
+{% endif %}
       enable_dhcp: False
       name:
         str_replace:
