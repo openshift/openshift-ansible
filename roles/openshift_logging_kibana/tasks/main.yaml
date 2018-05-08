@@ -47,7 +47,7 @@
   oc_serviceaccount:
     state: present
     name: "aggregated-logging-kibana"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
   when: openshift_logging_image_pull_secret != ''
 
@@ -55,7 +55,7 @@
   oc_serviceaccount:
     state: present
     name: "aggregated-logging-kibana"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
   when:
     - openshift_logging_image_pull_secret == ''
 
@@ -161,7 +161,7 @@
   oc_obj:
     state: present
     name: "{{ kibana_name }}"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     kind: route
     files:
       - "{{ tempdir }}/templates/kibana-route.yaml"
@@ -171,7 +171,7 @@
   oc_obj:
     state: list
     name: kibana-proxy
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     kind: oauthclient
   register: oauth_client_list
 
@@ -190,7 +190,7 @@
   oc_obj:
     state: present
     name: "kibana-proxy"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     kind: oauthclient
     files:
       - "{{ tempdir }}/templates/oauth-client.yml"
@@ -201,7 +201,7 @@
   oc_secret:
     state: present
     name: "logging-kibana"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     files:
       - name: ca
         path: "{{ generated_certs_dir }}/ca.crt"
@@ -215,7 +215,7 @@
   oc_secret:
     state: present
     name: "logging-kibana-proxy"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     # TODO: when possible to have both files and contents for oc_secret use this
     #files:
     #- name: server-key
@@ -261,7 +261,7 @@
   oc_obj:
     state: present
     name: "{{ kibana_name }}"
-    namespace: "{{ openshift_logging_namespace }}"
+    namespace: "{{ openshift_logging_kibana_namespace }}"
     kind: dc
     files:
       - "{{ tempdir }}/templates/kibana-dc.yaml"

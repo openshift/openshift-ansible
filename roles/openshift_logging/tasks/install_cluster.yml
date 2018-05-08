@@ -127,3 +127,17 @@
       __logging_scale_up: True
     when:
     - openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
+
+# Kibana
+- when: __cluster.kibana.install | default(True) | bool
+  import_role:
+    name: openshift_logging_kibana
+  vars:
+    generated_certs_dir: "{{ openshift.common.config_base }}/logging/{{ __cluster_name }}"
+    openshift_logging_kibana_namespace: "{{ __cluster.namespace }}"
+    openshift_logging_kibana_master_url: "{{ __cluster.master_url }}"
+    openshift_logging_kibana_master_public_url: "{{ __cluster.master_public_url }}"
+    openshift_logging_kibana_replicas: "{{ __cluster.kibana.replica_count }}"
+    openshift_logging_kibana_es_host: "{{ __cluster.elasticsearch.host }}"
+    openshift_logging_kibana_es_port: "{{ __cluster.elasticsearch.port }}"
+    openshift_logging_kibana_image_pull_secret: "{{ __cluster.image_pull_secret }}"
