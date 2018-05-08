@@ -2,7 +2,7 @@
 apiVersion: v1
 data:
 {% for class in persistentlocalstorage_classes %}
-  {{class}}: '{ "hostDir": "{{ openshift_persistentlocalstorage_path }}/{{ class }}", "mountDir" : "{{ openshift_persistentlocalstorage_path }}/{{ class }}" }'
+  {{class}}: '{ "hostDir": "{{ persistentlocalstorage_path }}/{{ class }}", "mountDir" : "{{ persistentlocalstorage_path }}/{{ class }}" }'
 {% endfor %}
 kind: ConfigMap
 metadata:
