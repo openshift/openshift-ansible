@@ -7,6 +7,9 @@
 - debug: var=__cluster
 - debug: var=__cluster_name
 
+- set_fact:
+    __base_file_dir: "2.x"
+
 - name: Set logging project
   oc_project:
     state: present
@@ -45,3 +48,82 @@
 - include_tasks: generate_certs.yaml
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging/{{ __cluster_name }}"
+
+# Elasticsearch
+- when: __cluster.elasticsearch.install | default(True) | bool
+  block:
+  - set_fact:
+      es_indices: "{{ es_indices | default([]) + [item | int - 1] }}"
+    with_sequence: count={{ openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
+    when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
+
+  # Is this needed? Can we drop the when from above?
+  - set_fact:
+      es_indices: []
+    when: openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count == 0
+
+  - set_fact:
+      openshift_logging_es_pvc_prefix: "logging-es"
+    when: openshift_logging_es_pvc_prefix == ""
+
+  # Using this module for setting this fact because otherwise we were getting a value of "" trying to
+  # use default() in the set_fact after this which caused us to not correctly evaluate
+  # openshift_logging_elasticsearch_storage_type
+  - conditional_set_fact:
+      facts: "{{ hostvars[inventory_hostname] }}"
+      vars:
+        elasticsearch_storage_type: openshift_logging_elasticsearch_storage_type
+
+  - set_fact:
+      default_elasticsearch_storage_type: "{{ 'pvc' if ( openshift_logging_es_pvc_dynamic | bool or openshift_logging_storage_kind | default('') == 'nfs' or openshift_logging_es_pvc_size | length > 0)  else 'emptydir' }}"
+
+  - include_role:
+      name: openshift_logging_elasticsearch
+    vars:
+      generated_certs_dir: "{{ openshift.common.config_base }}/logging/{{ __cluster_name }}"
+      openshift_logging_elasticsearch_namespace: "{{ __cluster.namespace }}"
+      openshift_logging_elasticsearch_deployment_name: "{{ outer_item.0.name }}"
+      openshift_logging_elasticsearch_pvc_name: "{{ outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim.claimName if outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim is defined else openshift_logging_es_pvc_prefix ~ '-' ~ outer_item.2 if outer_item.1 is none else outer_item.1 }}"
+      openshift_logging_elasticsearch_pvc_size: "{{ __cluster.elasticsearch.pvc_size }}"
+      openshift_logging_elasticsearch_replica_count: "{{ __cluster.elasticsearch.cluster_size | int }}"
+
+      openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type | default('pvc' if outer_item.0.volumes['elasticsearch-storage'].persistentVolumeClaim is defined else 'hostmount' if outer_item.0.volumes['elasticsearch-storage'].hostPath is defined else 'emptydir' if outer_item.0.volumes['elasticsearch-storage'].emptyDir is defined else default_elasticsearch_storage_type) }}"
+      openshift_logging_elasticsearch_hostmount_path: "{{ outer_item.0.volumes['elasticsearch-storage'].hostPath.path if outer_item.0.volumes['elasticsearch-storage'].hostPath is defined else '' }}"
+      openshift_logging_elasticsearch_pvc_pv_selector: "{{ __cluster.elasticsearch.pv_selector }}"
+      openshift_logging_elasticsearch_pvc_storage_class_name: "{{ __cluster.elasticsearch.pvc_storage_class_name | default() }}"
+      openshift_logging_elasticsearch_nodeselector: "{{ __cluster.elasticsearch.nodeselector if outer_item.0.nodeSelector | default(None) is none else outer_item.0.nodeSelector }}"
+      openshift_logging_elasticsearch_storage_group: "{{ [__cluster.elasticsearch.storage_group] if outer_item.0.storageGroups | default([]) | length == 0 else outer_item.0.storageGroups }}"
+      _es_containers: "{{ outer_item.0.containers}}"
+      _es_configmap: "{{ openshift_logging_facts | walk('elasticsearch#configmaps#logging-elasticsearch#elasticsearch.yml', '{}', delimiter='#') | from_yaml }}"
+
+    with_together:
+    - "{{ openshift_logging_facts.elasticsearch.deploymentconfigs.values() | list }}"
+    - "{{ openshift_logging_facts.elasticsearch.pvcs }}"
+    - "{{ es_indices }}"
+    loop_control:
+      loop_var: outer_item
+    when:
+    - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0
+
+  # Create any new DC that may be required
+  - include_role:
+      name: openshift_logging_elasticsearch
+    vars:
+      generated_certs_dir: "{{openshift.common.config_base}}/logging/{{ __cluster_name }}"
+      openshift_logging_elasticsearch_namespace: "{{ __cluster.namespace }}"
+      openshift_logging_elasticsearch_pvc_name: "{{ __cluster.elasticsearch.pvc_prefix }}-{{ outer_item | int + openshift_logging_facts.elasticsearch.deploymentconfigs | count - 1 }}"
+      openshift_logging_elasticsearch_pvc_size: "{{ __cluster.elasticsearch.pvc_size }}"
+      openshift_logging_elasticsearch_replica_count: "{{ __cluster.elasticsearch.cluster_size | int }}"
+
+      openshift_logging_elasticsearch_storage_type: "{{ elasticsearch_storage_type | default( default_elasticsearch_storage_type ) }}"
+      openshift_logging_elasticsearch_pvc_pv_selector: "{{ __cluster.elasticsearch.pv_selector }}"
+      openshift_logging_elasticsearch_pvc_storage_class_name: "{{ __cluster.elasticsearch.pvc_storage_class_name | default() }}"
+
+    with_sequence: count={{ openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count }}
+    loop_control:
+      loop_var: outer_item
+
+  - set_fact:
+      __logging_scale_up: True
+    when:
+    - openshift_logging_es_cluster_size | int - openshift_logging_facts.elasticsearch.deploymentconfigs.keys() | count > 0

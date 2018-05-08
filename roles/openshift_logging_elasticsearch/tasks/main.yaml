@@ -231,7 +231,7 @@
       tasks_from: patch_configmap_files.yaml
     vars:
       configmap_name: "{{ elasticsearch_name }}"
-      configmap_namespace: "{{ openshift_logging_namespace }}"
+      configmap_namespace: "{{ openshift_logging_elasticsearch_namespace }}"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
         new_file: "{{ tempdir }}/elasticsearch.yml"
@@ -275,7 +275,7 @@
       tasks_from: patch_configmap_files.yaml
     vars:
       configmap_name: "{{ elasticsearch_name }}"
-      configmap_namespace: "{{ openshift_logging_namespace }}"
+      configmap_namespace: "{{ openshift_logging_elasticsearch_namespace }}"
       configmap_file_names:
       - current_file: "elasticsearch.yml"
         new_file: "{{ tempdir }}/elasticsearch.yml"

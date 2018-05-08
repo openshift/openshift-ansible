@@ -101,7 +101,7 @@ __default_openshift_logging:
       pv_selector: "{{ openshift_logging_storage_labels | default('') }}"
       pvc_dynamic: "{{ openshift_logging_elasticsearch_pvc_dynamic | default(False) }}"
       pvc_size: ''
-      pvc_prefix: "{{ openshift_logging_elasticsearch_pvc_prefix | default('logging-es') }}"
+      pvc_prefix: "logging-es"
       recover_after_time: 5m
       storage_group: "65534"
       nodeselector: {}
