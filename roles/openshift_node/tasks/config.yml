@@ -2,10 +2,6 @@
 - name: Install the systemd units
   import_tasks: systemd_units.yml
 
-- name: Install Node system container
-  import_tasks: node_system_container.yml
-  when: l_is_node_system_container | bool
-
 - file:
     dest: "{{ l2_openshift_node_kubelet_args['config'] }}"
     state: directory

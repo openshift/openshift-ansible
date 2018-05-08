@@ -35,4 +35,4 @@
   - l_docker_upgrade | bool
 
 - import_tasks: upgrade/rpm_upgrade.yml
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
