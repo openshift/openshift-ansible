@@ -26,4 +26,3 @@
     r_etcd_common_etcd_runtime: runc
   when: etcd_container_service.status.ActiveState == 'active' and l_is_etcd_system_container
 
-- pause: prompt=test
