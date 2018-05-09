@@ -44,7 +44,7 @@ artifacts:
 
 ---
 inherit: true
-context: 'fedora/27/atomic/update'
+context: 'fedora/27/atomic/upgrade_minor'
 
 cluster:
   hosts:
@@ -60,7 +60,7 @@ env:
 
 ---
 inherit: true
-context: 'fedora/27/atomic/upgrade_3.9'
+context: 'fedora/27/atomic/upgrade_major'
 
 cluster:
   hosts:
