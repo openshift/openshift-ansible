@@ -1,11 +1,4 @@
 ---
-# TODO: Much of this file is shared with container engine tasks
-- name: Check we are not using node as a Docker container with CRI-O
-  fail: msg='Cannot use CRI-O with node configured as a Docker container'
-  when:
-    - openshift_is_containerized | bool
-    - not l_is_node_system_container | bool
-
 - import_tasks: common/pre.yml
 
 - import_tasks: common/syscontainer_packages.yml

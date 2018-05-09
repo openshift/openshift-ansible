@@ -23,7 +23,7 @@
 
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
 
 - include_tasks: "{{ node_config_hook }}"
   when: node_config_hook is defined
