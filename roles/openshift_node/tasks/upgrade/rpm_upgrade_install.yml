@@ -16,4 +16,9 @@
     openshift_node_upgrade_rpm_list:
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
       - "PyYAML"
-      - "openvswitch"
+
+- name: install new openvswitch
+  command: "{{ ansible_pkg_mgr }} install -y openvswitch }}"
+  register: result
+  until: result is succeeded
+  when: openshift_use_openshift-sdn | bool

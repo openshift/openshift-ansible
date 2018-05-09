@@ -1,6 +1,15 @@
 ---
 # We need docker service up to remove all the images, but these services will keep
 # trying to re-start and thus re-pull the images we're trying to delete.
+
+- name: Stop openvswitch service
+  service:
+    name: openvswitch
+    state: stopped
+  when:
+    - openshift_is_containerized | bool
+    - openshift_use_openshift_sdn | bool
+
 - name: Stop containerized services
   service: name={{ item }} state=stopped
   with_items:
@@ -8,7 +17,6 @@
     - "{{ openshift_service_type }}-master-controllers"
     - "{{ openshift_service_type }}-node"
     - etcd_container
-    - openvswitch
   failed_when: false
   when: openshift_is_containerized | bool
 
