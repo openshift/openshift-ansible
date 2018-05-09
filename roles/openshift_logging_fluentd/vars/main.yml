@@ -1,3 +1,75 @@
 ---
 __allowed_fluentd_types: ["hosted", "secure-aggregator", "secure-host"]
 __allowed_mux_client_modes: ["minimal", "maximal"]
+
+__default_fluentd:
+  ### General logging settings
+  image_pull_secret: ""
+  master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"
+  namespace: openshift-logging
+
+  ### Common settings
+  # map_from_pairs is a custom filter plugin in role lib_utils
+  nodeselector: {'logging-infra-fluentd': 'true'}
+  cpu_limit: null
+  cpu_request: 100m
+  memory_limit: 512Mi
+  hosts: ['--all']
+
+  # float time in seconds to wait between node labelling
+  label_delay: '0.5'
+
+  # Fluentd deployment type
+  deployment_type: "hosted"
+
+  ### Used by "hosted" and "secure-host" deployments
+
+  ### Used by "hosted" and "secure-aggregator" deployments
+  journal_source: ""
+  journal_read_from_head: ""
+
+  app:
+    # Destination for the application based logs
+    host: "logging-es"
+    port: 9200
+    #cert_path:
+    #key_path:
+    #ca_path:
+
+  infra:
+    # Destination for the operations based logs
+    host: "logging-es"
+    port: 9200
+    #cert_path:
+    #key_path:
+    #ca_path:
+
+
+  # used by "secure-host" and "secure-aggregator" deployments
+  shared_key: "{{ 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' | random_word(128) }}"
+  aggregating:
+    port: 24284
+    host: "${HOSTNAME}"
+    secure: "no"
+    strict: "no"
+    cert_path: none
+    key_path: none
+    passphrase: none
+
+  remote_syslog:
+    use_remote_syslog: False
+
+  # set openshift_logging_use_mux=maximal by default.
+  # if the cluster is not configured with mux, this default value is going to be ignored.
+  # TODO: remove this from fluentd?
+  mux_client_mode: "maximal"
+
+  file_buffer_limit: 256Mi
+
+  # Configure fluentd to tail audit log file and filter out container engine's logs from there
+  # These logs are then stored in ES operation index
+  audit_container_engine: False
+  audit:
+    container_engine: False
+    log_file: ""
+    pos_log_file: ""

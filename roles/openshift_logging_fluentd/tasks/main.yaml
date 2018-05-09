@@ -1,39 +1,4 @@
 ---
-- fail:
-    msg: The ES_COPY feature is no longer supported. Please remove the variable from your inventory
-  when: openshift_logging_fluentd_es_copy is defined
-- fail:
-    msg: Only one Fluentd nodeselector key pair should be provided
-  when: openshift_logging_fluentd_nodeselector.keys() | count > 1
-
-- fail:
-    msg: Application logs destination is required
-  when: not openshift_logging_fluentd_app_host or openshift_logging_fluentd_app_host == ''
-
-- fail:
-    msg: Operations logs destination is required
-  when: not openshift_logging_fluentd_ops_host or openshift_logging_fluentd_ops_host == ''
-
-- fail:
-    msg: Invalid deployment type, one of ['hosted', 'secure-aggregator', 'secure-host'] allowed
-  when: not openshift_logging_fluentd_deployment_type in __allowed_fluentd_types
-
-- debug:
-    msg: openshift_logging_fluentd_use_journal is deprecated.  Fluentd will automatically detect which logging driver is being used.
-  when: openshift_logging_fluentd_use_journal is defined
-
-- debug:
-    msg: openshift_hosted_logging_use_journal is deprecated.  Fluentd will automatically detect which logging driver is being used.
-  when: openshift_hosted_logging_use_journal is defined
-
-- fail:
-    msg: Invalid openshift_logging_mux_client_mode [{{ openshift_logging_mux_client_mode }}], one of {{ __allowed_mux_client_modes }} allowed
-  when: openshift_logging_mux_client_mode is defined and not openshift_logging_mux_client_mode in __allowed_mux_client_modes
-
-- debug:
-    msg: WARNING Use of openshift_logging_mux_client_mode=minimal is not recommended due to current scaling issues
-  when: openshift_logging_mux_client_mode is defined and openshift_logging_mux_client_mode == 'minimal'
-
 - name: Set default image variables based on openshift_deployment_type
   include_vars: "{{ var_file_name }}"
   with_first_found:
@@ -44,8 +9,46 @@
 
 - name: Set fluentd image facts
   set_fact:
-    openshift_logging_fluentd_image_prefix: "{{ openshift_logging_fluentd_image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
-    openshift_logging_fluentd_image_version: "{{ openshift_logging_fluentd_image_version | default(__openshift_logging_fluentd_image_version) }}"
+      __fluentd_image:
+        image_prefix: "{{ openshift_logging.fluentd.image_prefix | default(__openshift_logging_fluentd_image_prefix) }}"
+        image_version: "{{ openshift_logging.fluentd.image_version | default(__openshift_logging_fluentd_image_version) }}"
+
+- set_fact:
+    __default_fluentd: "{{ __default_fluentd | combine( __fluentd_image, recursive=True) }}"
+
+- set_fact:
+    __fluentd: "{{ __default_fluentd | combine( openshift_logging.fluentd, recursive=True) }}"
+
+- assert:
+    that: __fluentd.nodeselector.keys() | count <= 1
+    msg: Only one Fluentd nodeselector key pair should be provided
+
+- assert:
+    that:
+      - __fluentd.app.host
+      - __fluentd.app.host != ''
+    msg: Application logs destination is required
+
+- assert:
+    that:
+      - __fluentd.infra.host
+      - __fluentd.infra.host != ''
+    msg: Operations (infra) logs destination is required
+
+- assert:
+    that: __fluentd.deployment_type in __allowed_fluentd_types
+    msg: Invalid deployment type, one of ['hosted', 'secure-aggregator', 'secure-host'] allowed
+
+- assert:
+    that: __fluentd.mux_client_mode in __allowed_mux_client_modes
+    msg: Invalid openshift_logging_mux_client_mode [{{ __fluentd.mux_client_mode }}], one of {{ __allowed_mux_client_modes }} allowed
+  when: __fluentd.mux_client_mode is defined
+
+- debug:
+    msg: WARNING Use of __fluentd.mux_client_mode=minimal is not recommended due to current scaling issues
+  when:
+    - __fluentd.mux_client_mode is defined
+    - __fluentd.mux_client_mode == 'minimal'
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -70,42 +73,42 @@
   oc_serviceaccount:
     state: present
     name: "aggregated-logging-fluentd"
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
-    image_pull_secrets: "{{ openshift_logging_image_pull_secret }}"
-  when: openshift_logging_image_pull_secret != ''
+    namespace: "{{ __fluentd.namespace }}"
+    image_pull_secrets: "{{ __fluentd.image_pull_secret }}"
+  when: __fluentd.image_pull_secret != ''
 
 - name: Create Fluentd service account
   oc_serviceaccount:
     state: present
     name: "aggregated-logging-fluentd"
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    namespace: "{{ __fluentd.namespace }}"
   when:
-    - openshift_logging_image_pull_secret == ''
+    - __fluentd.image_pull_secret == ''
 
 # set service account scc
 - name: Set privileged permissions for Fluentd
   oc_adm_policy_user:
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    namespace: "{{ __fluentd.namespace }}"
     resource_kind: scc
     resource_name: privileged
     state: present
-    user: "system:serviceaccount:{{ openshift_logging_fluentd_namespace }}:aggregated-logging-fluentd"
+    user: "system:serviceaccount:{{ __fluentd.namespace }}:aggregated-logging-fluentd"
 
 # set service account permissions
 - name: Set cluster-reader permissions for Fluentd
   oc_adm_policy_user:
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    namespace: "{{ __fluentd.namespace }}"
     resource_kind: cluster-role
     resource_name: cluster-reader
     state: present
-    user: "system:serviceaccount:{{ openshift_logging_fluentd_namespace }}:aggregated-logging-fluentd"
+    user: "system:serviceaccount:{{ __fluentd.namespace }}:aggregated-logging-fluentd"
 
 # create Fluentd configmap
 - template:
     src: "{{ __base_file_dir }}/fluent.conf.j2"
     dest: "{{ tempdir }}/fluent.conf"
   vars:
-    deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
+    deploy_type: "{{ __fluentd.deployment_type }}"
 
 - copy:
     src: "{{ __base_file_dir }}/fluentd-throttle-config.yaml"
@@ -120,7 +123,7 @@
     tasks_from: patch_configmap_files.yaml
   vars:
     configmap_name: "logging-fluentd"
-    configmap_namespace: "{{ openshift_logging_fluentd_namespace }}"
+    configmap_namespace: "{{ __fluentd.namespace }}"
     configmap_file_names:
       - current_file: "fluent.conf"
         new_file: "{{ tempdir }}/fluent.conf"
@@ -133,7 +136,7 @@
   oc_configmap:
     state: present
     name: "logging-fluentd"
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    namespace: "{{ __fluentd.namespace }}"
     from_file:
       fluent.conf: "{{ tempdir }}/fluent.conf"
       throttle-config.yaml: "{{ tempdir }}/fluentd-throttle-config.yaml"
@@ -147,20 +150,20 @@
   oc_secret:
     state: present
     name: logging-fluentd
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    namespace: "{{ __fluentd.namespace }}"
     files:
       - name: ca
-        path: "{{ openshift_logging_fluentd_ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
+        path: "{{ __fluentd.app.ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
       - name: key
-        path: "{{ openshift_logging_fluentd_key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
+        path: "{{ __fluentd.app.key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
       - name: cert
-        path: "{{ openshift_logging_fluentd_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
+        path: "{{ __fluentd.app.cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
       - name: ops-ca
-        path: "{{ openshift_logging_fluentd_ops_ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
+        path: "{{ __fluentd.infra.ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
       - name: ops-key
-        path: "{{ openshift_logging_fluentd_ops_key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
+        path: "{{ __fluentd.infra.key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
       - name: ops-cert
-        path: "{{ openshift_logging_fluentd_ops_cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
+        path: "{{ __fluentd.infra.cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
 
 # create Fluentd daemonset
 # this should change based on the type of fluentd deployment to be done...
@@ -174,18 +177,17 @@
     daemonset_component: fluentd
     daemonset_container_name: fluentd-elasticsearch
     daemonset_serviceAccount: aggregated-logging-fluentd
-    app_host: "{{ openshift_logging_fluentd_app_host }}"
-    app_port: "{{ openshift_logging_fluentd_app_port }}"
-    ops_host: "{{ openshift_logging_fluentd_ops_host }}"
-    ops_port: "{{ openshift_logging_fluentd_ops_port }}"
-    fluentd_nodeselector_key: "{{ openshift_logging_fluentd_nodeselector.keys() | first }}"
-    fluentd_nodeselector_value: "{{ openshift_logging_fluentd_nodeselector.values() | first }}"
-    fluentd_cpu_limit: "{{ openshift_logging_fluentd_cpu_limit }}"
-    fluentd_cpu_request: "{{ openshift_logging_fluentd_cpu_request | min_cpu(openshift_logging_fluentd_cpu_limit | default(none)) }}"
-    fluentd_memory_limit: "{{ openshift_logging_fluentd_memory_limit }}"
-    audit_container_engine: "{{ openshift_logging_fluentd_audit_container_engine | default(False) | bool }}"
-    audit_log_file: "{{ openshift_logging_fluentd_audit_file | default() }}"
-    audit_pos_log_file: "{{ openshift_logging_fluentd_audit_pos_file | default() }}"
+    app_host: "{{ __fluentd.app.host }}"
+    app_port: "{{ __fluentd.app.port }}"
+    ops_host: "{{ __fluentd.infra.host }}"
+    ops_port: "{{ __fluentd.infra.port }}"
+    fluentd_nodeselector: "{{ __fluentd.nodeselector | to_yaml }}"
+    fluentd_cpu_limit: "{{ __fluentd.cpu_limit }}"
+    fluentd_cpu_request: "{{ __fluentd.cpu_request | min_cpu(__fluentd.cpu_limit | default(none)) }}"
+    fluentd_memory_limit: "{{ __fluentd.memory_limit }}"
+    audit_container_engine: "{{ __fluentd.audit_container_engine | default(False) | bool }}"
+    audit_log_file: "{{ __fluentd.audit_file | default() }}"
+    audit_pos_log_file: "{{ __fluentd.audit_pos_file | default() }}"
   check_mode: no
   changed_when: no
 
@@ -193,7 +195,7 @@
   oc_obj:
     state: present
     name: logging-fluentd
-    namespace: "{{ openshift_logging_fluentd_namespace }}"
+    namespace: "{{ __fluentd.namespace }}"
     kind: daemonset
     files:
       - "{{ tempdir }}/templates/logging-fluentd.yaml"
@@ -204,14 +206,18 @@
   oc_obj:
     state: list
     kind: node
-  when: "'--all' in openshift_logging_fluentd_hosts"
+  when: "'--all' in __fluentd.hosts"
   register: fluentd_hosts
 
 - name: Set openshift_logging_fluentd_hosts
   set_fact:
-    openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
-  when: "'--all' in openshift_logging_fluentd_hosts"
+    __fluentd_hosts:
+      hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
+  when: "'--all' in __fluentd.hosts"
 
+- set_fact:
+    __fluentd: "{{ __fluentd | combine( __fluentd_hosts, recursive=True ) }}"
+  when: "'--all' in __fluentd.hosts"
 - import_tasks: label_and_wait.yaml
 
 - name: Delete temp directory

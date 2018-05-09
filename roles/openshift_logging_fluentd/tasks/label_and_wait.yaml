@@ -12,7 +12,7 @@
 
 - name: Execute the fluentd temporary labeling script
   command: "/tmp/fluentd_label.temp.sh {{ fluentd_host }}"
-  with_items: "{{ openshift_logging_fluentd_hosts }}"
+  with_items: "{{ __fluentd.hosts }}"
   loop_control:
     loop_var: fluentd_host
 

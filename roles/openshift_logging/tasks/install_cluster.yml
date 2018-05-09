@@ -4,10 +4,6 @@
 # __cluster will be set to be openshift_logging.es or openshift_logging.es-ops, etc
 # __cluster_name is the name of that cluster -- es, es-ops, etc
 
-
-- set_fact:
-    __base_file_dir: "2.x"
-
 - name: Set logging project
   oc_project:
     state: present

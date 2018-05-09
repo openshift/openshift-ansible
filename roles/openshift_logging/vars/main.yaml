@@ -27,16 +27,16 @@ __default_openshift_logging:
     app:
       host: logging-es
       port: 9200
-      client_cert: /etc/fluent/keys/cert
-      client_key: /etc/fluent/keys/key
-      ca: /etc/fluent/keys/ca
+      #cert_path:
+      #key_path:
+      #ca_path:
 
     infra:
       host: logging-es
       port: 9200
-      client_cert: /etc/fluent/keys/infra-cert
-      client_key: /etc/fluent/keys/infra-key
-      ca: /etc/fluent/keys/infra-ca
+      #cert_path:
+      #key_path:
+      #ca_path:
 
   mux:
     allow_external: False
@@ -49,6 +49,9 @@ __default_openshift_logging:
     # the namespace to use for undefined projects - users will typically not need to set this
     # extra namespaces to create for mux clients - users will need to set this
     namespaces: []
+
+  eventrouter:
+    install: False
 
   es:
     install: False
