@@ -168,21 +168,21 @@
   block:
   - name: Check status in the kube-system namespace
     command: >
-      {{ openshift_client_binary }} status --config=/etc/origin/master/admin.kubeconfig -n kube-system
+      {{ openshift_client_binary }} status --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
     register: control_plane_status
     ignore_errors: true
   - debug:
       msg: "{{ control_plane_status.stdout_lines }}"
   - name: Get pods in the kube-system namespace
     command: >
-      {{ openshift_client_binary }} get pods --config=/etc/origin/master/admin.kubeconfig -n kube-system -o wide
+      {{ openshift_client_binary }} get pods --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system -o wide
     register: control_plane_pods
     ignore_errors: true
   - debug:
       msg: "{{ control_plane_pods.stdout_lines }}"
   - name: Get events in the kube-system namespace
     command: >
-      {{ openshift_client_binary }} get events --config=/etc/origin/master/admin.kubeconfig -n kube-system
+      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
     register: control_plane_events
     ignore_errors: true
   - debug:

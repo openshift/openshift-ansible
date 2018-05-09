@@ -51,7 +51,7 @@
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
   command: >
-    {{ openshift_client_binary }} annotate --overwrite -n {{ openshift_prometheus_namespace }}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig annotate --overwrite -n {{ openshift_prometheus_namespace }}
     serviceaccount {{ openshift_prometheus_service_name }} {{ item }}
   with_items:
     "{{ openshift_prometheus_serviceaccount_annotations }}"

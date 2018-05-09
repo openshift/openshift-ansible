@@ -25,7 +25,8 @@
 # TODO remove this when annotations are supported by oc_serviceaccount
 - name: annotate serviceaccount
   command: >
-    {{ openshift_client_binary }} annotate --overwrite -n {{ grafana_namespace }}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    annotate --overwrite -n {{ grafana_namespace }}
     serviceaccount {{ grafana_serviceaccount_name }} {{ item }}
   with_items:
     "{{ grafana_serviceaccount_annotations }}"

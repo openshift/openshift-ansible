@@ -5,7 +5,7 @@
     command: |
       {{ openshift_client_binary }} rollout status deploymentconfig {{ item.name }} \
                         --namespace {{ item.namespace | default('default') }} \
-                        --config /etc/origin/master/admin.kubeconfig
+                        --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     async: 600
     poll: 5
     with_items: "{{ l_openshift_hosted_wfp_items }}"
@@ -15,7 +15,7 @@
     command: |
       {{ openshift_client_binary }} get deploymentconfig {{ item.name }} \
              --namespace {{ item.namespace }} \
-             --config /etc/origin/master/admin.kubeconfig \
+             --config={{ openshift.common.config_base }}/master/admin.kubeconfig \
              -o jsonpath='{ .status.latestVersion }'
     register: l_openshift_hosted_wfp_latest_version
     with_items: "{{ l_openshift_hosted_wfp_items }}"
@@ -24,7 +24,7 @@
     command: |
       {{ openshift_client_binary }} get replicationcontroller {{ item.0.name }}-{{ item.1.stdout }} \
              --namespace {{ item.0.namespace }} \
-             --config /etc/origin/master/admin.kubeconfig \
+             --config={{ openshift.common.config_base }}/master/admin.kubeconfig \
              -o jsonpath='{ .metadata.annotations.openshift\.io/deployment\.phase }'
     register: openshift_hosted_wfp_rc_phase
     until: "'Complete' in openshift_hosted_wfp_rc_phase.stdout"
