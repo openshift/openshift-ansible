@@ -74,10 +74,25 @@
   hosts: oo_masters_to_config
   gather_facts: no
   any_errors_fatal: true
+  roles:
+  - openshift_facts
   tasks:
   - import_role:
       name: openshift_control_plane
       tasks_from: check_existing_config.yml
+
+  - set_fact:
+      osm_cluster_network_cidr: "{{ l_existing_clusternet_cidr }}"
+      osm_host_subnet_length: "{{ l_existing_clusternet_len }}"
+      openshift_portal_net: "{{ l_existing_config_master_config.networkConfig.serviceNetworkCIDR }}"
+    vars:
+      # networkConfig.clusterNetworks may not be present in upgraded clusters
+      l_clusternet_list: "{{ l_existing_config_master_config.networkConfig.clusterNetworks is defined | bool }}"
+      l_existing_clusternet_cidr: "{{ l_clusternet_list | ternary((l_existing_config_master_config.networkConfig.clusterNetworks[0].cidr | default('')), l_existing_config_master_config.networkConfig.clusterNetworkCIDR) }}"
+      l_existing_clusternet_len: "{{ l_clusternet_list | ternary((l_existing_config_master_config.networkConfig.clusterNetworks[0].hostSubnetLength | default('')), l_existing_config_master_config.networkConfig.hostSubnetLength) }}"
+    when:
+    - l_existing_config_master_config is defined
+    - l_existing_config_master_config.networkConfig is defined
 
 - name: Initialize special first-master variables
   hosts: oo_first_master

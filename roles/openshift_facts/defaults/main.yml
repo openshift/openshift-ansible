@@ -14,6 +14,7 @@ openshift_cli_image: "{{ osm_image | default(openshift_cli_image_dict[openshift_
 osm_default_subdomain: "router.default.svc.cluster.local"
 openshift_master_default_subdomain: "{{ osm_default_subdomain }}"
 
+openshift_portal_net: "{{ openshift_master_portal_net | default(None) }}"
 openshift_cluster_network_cidr: "{{ osm_cluster_network_cidr | default('10.128.0.0/14') }}"
 openshift_host_subnet_length: " {{ osm_host_subnet_length | default('9') }}"
 
