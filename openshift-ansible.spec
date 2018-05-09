@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.37.0%{?dist}
+Release:        0.38.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,49 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed May 09 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.38.0
+- Ensure existing network facts are set (mgugino@redhat.com)
+- Fix etcd runtime detection (sdodson@redhat.com)
+- Update cloudforms templates to be in sync with
+  roles/openshift_management/files/templates/cloudforms (simaishi@redhat.com)
+- Update to CloudForms 4.6.2 templates (simaishi@redhat.com)
+- azure: append .vhd to name of blobs written during image build process. Azure
+  publishing portal requires input blob names to end in .vhd.
+  (jminter@redhat.com)
+- Azure: rollback module usage to support ansible 2.4 (jminter@redhat.com)
+- Azure: add playbook (kwoodson@redhat.com)
+- Fix other configuration for node... (diego.abelenda@camptocamp.com)
+- Enable missing feature-gate for VolumeScheduling (also use already defined
+  feature-gate entry for node config) (diego.abelenda@camptocamp.com)
+- Use local variable instead of global one in template
+  (diego.abelenda@camptocamp.com)
+- Fix openshift_facts migrated_facts (mgugino@redhat.com)
+- Add the EAP CD imagestream to 3.10 (ken@zaptillion.net)
+- Bug 1575508 - typo in file name during a rename. (smhurley00@gmail.com)
+- Modify rights to allow serviceaccount to change SELinux context of volumes
+  (diego.abelenda@camptocamp.com)
+- Update daemonset to follow changes in openshift storage example:
+  (diego.abelenda@camptocamp.com)
+- Add example for local persistent storage image and path
+  (diego.abelenda@camptocamp.com)
+- Correct Undefined variable (diego.abelenda@camptocamp.com)
+- Parametrize provisionner image (diego.abelenda@camptocamp.com)
+- Remove redundant default value definition (diego.abelenda@camptocamp.com)
+- Copy pasted too fast, "item" variable is not defined outside mkdir loop
+  (diego.abelenda@camptocamp.com)
+- Parametrize the path for local storage (diego.abelenda@camptocamp.com)
+- Add default to False to avoid error when variable is not defined
+  (diego.abelenda@camptocamp.com)
+- Add possibility to enable Persistent Local Storage using Ansible
+  (diego.abelenda@camptocamp.com)
+- add run_once for create secret task in calico_master role
+  (zhang.lei.fly@gmail.com)
+- Convert SDN master facts to openshift_facts defaults (rteague@redhat.com)
+- Check console ready replicas instead of curling service (spadgett@redhat.com)
+- Remove vendored docker_container module (vrutkovs@redhat.com)
+- Compatible with the new prometheus-node-exporter (mmascia@redhat.com)
+- Move openshift-checks before node bootstrapping (rteague@redhat.com)
+
 * Mon May 07 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.37.0
 - fix (sdodson@redhat.com)
 - Configure NetworkManager to ignore calico interfaces (dan@projectcalico.org)
