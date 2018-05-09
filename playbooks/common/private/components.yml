@@ -25,6 +25,9 @@
 - import_playbook: ../../openshift-web-console/private/config.yml
   when: openshift_web_console_install | default(true) | bool
 
+- import_playbook: ../../openshift-console/private/config.yml
+  when: openshift_console_install | default(true) | bool
+
 - import_playbook: ../../openshift-metrics/private/config.yml
   when: openshift_metrics_install_metrics | default(false) | bool
 
