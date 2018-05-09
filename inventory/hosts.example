@@ -619,6 +619,13 @@ debug_level=2
 # openshift_storageclass_name=gp2
 # openshift_storageclass_parameters={'type': 'gp2', 'encrypted': 'false'}
 #
+# PersistentLocalStorage
+# If Persistent Local Storage is wanted, this boolean can be defined to True.
+# This will create all necessary configuration to use persistent storage on nodes.
+#openshift_persistentlocalstorage_enabled=False
+#openshift_persistentlocalstorage_classes=[]
+#openshift_persistentlocalstorage_path=/mnt/local-storage
+#openshift_persistentlocalstorage_provisionner_image=quay.io/external_storage/local-volume-provisioner:v1.0.1
 
 # Logging deployment
 #
