@@ -153,17 +153,17 @@
     namespace: "{{ __fluentd.namespace }}"
     files:
       - name: ca
-        path: "{{ __fluentd.app.ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
+        path: "{{ __fluentd.app.ca_path | default(generated_certs_dir ~ '/' ~ __fluentd.app.host ~ '/ca.crt') }}"
       - name: key
-        path: "{{ __fluentd.app.key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
+        path: "{{ __fluentd.app.key_path | default(generated_certs_dir ~ '/' ~ __fluentd.app.host ~ '/system.logging.fluentd.key') }}"
       - name: cert
-        path: "{{ __fluentd.app.cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
+        path: "{{ __fluentd.app.cert_path | default(generated_certs_dir ~ '/' ~ __fluentd.app.host ~ '/system.logging.fluentd.crt') }}"
       - name: ops-ca
-        path: "{{ __fluentd.infra.ca_path | default(generated_certs_dir ~ '/ca.crt') }}"
+        path: "{{ __fluentd.infra.ca_path | default(generated_certs_dir ~ '/' ~ __fluentd.infra.host ~ '/ca.crt') }}"
       - name: ops-key
-        path: "{{ __fluentd.infra.key_path | default(generated_certs_dir ~ '/system.logging.fluentd.key') }}"
+        path: "{{ __fluentd.infra.key_path | default(generated_certs_dir ~ '/' ~ __fluentd.infra.host ~ '/system.logging.fluentd.key') }}"
       - name: ops-cert
-        path: "{{ __fluentd.infra.cert_path | default(generated_certs_dir ~ '/system.logging.fluentd.crt') }}"
+        path: "{{ __fluentd.infra.cert_path | default(generated_certs_dir ~ '/' ~ __fluentd.infra.host ~ '/system.logging.fluentd.crt') }}"
 
 # create Fluentd daemonset
 # this should change based on the type of fluentd deployment to be done...

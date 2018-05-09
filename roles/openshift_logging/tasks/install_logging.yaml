@@ -7,8 +7,6 @@
 ## This is include vs import because we need access to group/inventory variables
 - include_tasks: set_defaults_from_current.yml
 
-- debug: var=openshift_logging
-
 - set_fact:
     __base_file_dir: "2.x"
 
@@ -16,13 +14,13 @@
 - set_fact:
     openshift_logging: "{{ __default_openshift_logging | combine( openshift_logging, recursive=True) }}"
 
-#- include_tasks: install_cluster.yml
-#  vars:
-#    __cluster: "{{ openshift_logging[cluster] }}"
-#    __cluster_name: "{{ cluster }}"
-#  with_items: "{{ openshift_logging.cluster_names | default([]) }}"
-#  loop_control:
-#    loop_var: cluster
+- include_tasks: install_cluster.yml
+  vars:
+    __cluster: "{{ openshift_logging[cluster] }}"
+    __cluster_name: "{{ cluster }}"
+  with_items: "{{ openshift_logging.cluster_names | default([]) }}"
+  loop_control:
+    loop_var: cluster
 
 - include_tasks: install_aggregators.yml
   vars:

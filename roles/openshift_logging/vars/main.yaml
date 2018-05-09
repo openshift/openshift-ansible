@@ -9,7 +9,7 @@ es_log_appenders: ['file', 'console']
 __default_logging_ops_projects: ['default', 'openshift', 'openshift-infra', 'kube-system', 'openshift-logging']
 
 __default_openshift_logging:
-  cluster_names: ['es']
+  cluster_names: ['logging-es']
   aggregators: ['fluentd']
   fluentd:
     namespace: openshift-logging
@@ -53,7 +53,7 @@ __default_openshift_logging:
   eventrouter:
     install: False
 
-  es:
+  logging-es:
     install: False
     namespace: openshift-logging
     master_url: "https://kubernetes.default.svc.{{ openshift.common.dns_domain }}"

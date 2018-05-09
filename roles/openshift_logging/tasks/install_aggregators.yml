@@ -11,8 +11,3 @@
     name: openshift_logging_fluentd
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
-    openshift_logging_fluentd_ops_host: "{{ openshift_logging.fluentd.infra.host }}"
-    openshift_logging_fluentd_ops_port: "{{ openshift_logging.fluentd.infra.port }}"
-    openshift_logging_fluentd_image_pull_secret: "{{ openshift_logging.fluentd.image_pull_secret }}"
-    openshift_logging_fluentd_master_url: "{{ openshift_logging.fluentd.master_url }}"
-    openshift_logging_fluentd_namespace: "{{ openshift_logging.fluentd.namespace }}"
