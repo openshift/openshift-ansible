@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.46
+Version:        3.7.47
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 08 2018 Justin Pierce <jupierce@redhat.com> 3.7.47-1
+- Remove dynamic include in logging_fluentd role (mgugino@redhat.com)
+- bump xpaas to 1.4.12 (rcernich@redhat.com)
+- PAPR: try to rebase on the latest code (vrutkovs@redhat.com)
+
 * Sun May 06 2018 Justin Pierce <jupierce@redhat.com> 3.7.46-1
 - 
 
