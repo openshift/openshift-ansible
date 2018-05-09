@@ -19,7 +19,6 @@ else
 fi
 export target_branch
 
-
 # Need to define some git variables for rebase.
 git config --global user.email "ci@openshift.org"
 git config --global user.name "OpenShift Atomic CI"
@@ -46,7 +45,12 @@ pip install -r requirements.txt
 export ANSIBLE_STDOUT_CALLBACK=debug
 
 # ping the nodes to check they're responding and register their ostree versions
-ansible -vvv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
+ansible -vv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
+
+# Make sure hostname -f returns correct node name
+ansible -vv -i $PAPR_INVENTORY nodes -m setup
+ansible -vv -i $PAPR_INVENTORY nodes -a "hostnamectl set-hostname {{ ansible_default_ipv4.address }}"
+ansible -vv -i $PAPR_INVENTORY nodes -m setup -a "gather_subset=min"
 
 upload_journals() {
   mkdir journals
