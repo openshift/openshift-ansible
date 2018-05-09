@@ -350,13 +350,13 @@ class OpenShiftAnsibleSyntaxCheck(Command):
             # Ignore imported playbooks in 'common', 'private' and 'init'. It is
             # expected that these locations would be imported by entry point
             # playbooks.
-            # Ignore playbooks in 'aws', 'gcp' and 'openstack' because these
+            # Ignore playbooks in 'aws', 'azure', 'gcp' and 'openstack' because these
             # playbooks do not follow the same component entry point structure.
             # Ignore deploy_cluster.yml and prerequisites.yml because these are
             # entry point playbooks but are imported by playbooks in the cloud
             # provisioning playbooks.
             ignored = ('common', 'private', 'init',
-                       'aws', 'gcp', 'openstack',
+                       'aws', 'azure', 'gcp', 'openstack',
                        'deploy_cluster.yml', 'prerequisites.yml')
             if any(x in playbook for x in ignored):
                 continue
