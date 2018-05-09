@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.8.40
+Version:        3.8.41
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -204,6 +204,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 09 2018 Justin Pierce <jupierce@redhat.com> 3.8.41-1
+- 
+
 * Wed May 09 2018 Justin Pierce <jupierce@redhat.com> 3.8.40-1
 - 
 
