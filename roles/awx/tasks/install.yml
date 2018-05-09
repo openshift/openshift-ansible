@@ -48,6 +48,7 @@
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - awx-deployment.yml
+  - settings.py
 
 - name: Read Existing AWX ConfigMap
   oc_configmap:
@@ -61,22 +62,20 @@
   set_fact:
     awx_secret_key: "{{ (awx_config.results.results[0].data | default({})).secret_key | default(16 | lib_utils_oo_random_word) }}"
   no_log: true
-
 # TODO: other possible secrets that need (?) randomization:
 # RABBITMQ_ERLANG_COOKIE
 # RABBITMQ_DEFAULT_PASS
 # AWX_ADMIN_PASSWORD
 
-- name: Template AWX Config
-  template:
-    src: configmap.yml.j2
-    dest: "{{ mktemp.stdout }}/configmap.yml"
-    mode: '0600'
-
-- name: Apply Configmap
-  shell: "{{ openshift_client_binary }} apply -f {{ mktemp.stdout }}/configmap.yml"
-  register: apply
-  changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"
+- name: AWX ConfigMap
+  oc_configmap:
+    name: awx-config
+    namespace: "{{ awx_project }}"
+    from_literal:
+      secret_key: "{{ awx_secret_key }}"
+    from_file:
+      awx_settings: "{{ mktemp.stdout }}/settings.py"
+  no_log: true
 
 - name: Apply the AWX Deployment Template
   shell: >-

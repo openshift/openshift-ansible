@@ -30,6 +30,12 @@ objects:
             volumeMounts:
               - mountPath: /etc/tower
                 name: awx-application-config
+            env:
+              - name: DATABASE_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgresql
+                    key: database-password
           - name: awx-celery
             image: ${AWX_TASK_IMAGE}
             volumeMounts:
