@@ -26,6 +26,24 @@ objects:
   metadata:
     name: cfme-httpd
 - apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: view
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: cfme-orchestrator
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: edit
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: cfme-orchestrator
+- apiVersion: v1
   kind: Secret
   metadata:
     name: "${NAME}-secrets"
@@ -147,7 +165,7 @@ objects:
         RewriteRule ^/ http://${NAME}%{REQUEST_URI} [P,QSA,L]
         ProxyPassReverse / http://${NAME}/
 
-        # Ensures httpd stdout/stderr are seen by docker logs.
+        # Ensures httpd stdout/stderr are seen by 'docker logs'.
         ErrorLog  "| /usr/bin/tee /proc/1/fd/2 /var/log/httpd/error_log"
         CustomLog "| /usr/bin/tee /proc/1/fd/1 /var/log/httpd/access_log" common
       </VirtualHost>
@@ -639,7 +657,7 @@ objects:
           - name: cfme-pgdb-volume
             mountPath: "/var/lib/pgsql/data"
           - name: cfme-pg-configs
-            mountPath: "${POSTGRESQL_CONFIG_DIR}"
+            mountPath: "/opt/app-root/src/postgresql-cfg/"
           env:
           - name: POSTGRESQL_USER
             value: "${DATABASE_USER}"
@@ -654,8 +672,6 @@ objects:
             value: "${POSTGRESQL_MAX_CONNECTIONS}"
           - name: POSTGRESQL_SHARED_BUFFERS
             value: "${POSTGRESQL_SHARED_BUFFERS}"
-          - name: POSTGRESQL_CONFIG_DIR
-            value: "${POSTGRESQL_CONFIG_DIR}"
           resources:
             requests:
               memory: "${POSTGRESQL_MEM_REQ}"
@@ -928,10 +944,6 @@ parameters:
   displayName: Memcached Slab Page Size
   description: Memcached size of each slab page.
   value: 1m
-- name: POSTGRESQL_CONFIG_DIR
-  displayName: PostgreSQL Configuration Overrides
-  description: Directory used to store PostgreSQL configuration overrides.
-  value: "/var/lib/pgsql/conf.d"
 - name: POSTGRESQL_MAX_CONNECTIONS
   displayName: PostgreSQL Max Connections
   description: PostgreSQL maximum number of database connections allowed.
@@ -1030,7 +1042,7 @@ parameters:
 - name: POSTGRESQL_IMG_NAME
   displayName: PostgreSQL Image Name
   description: This is the PostgreSQL image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-postgresql
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-postgresql
 - name: POSTGRESQL_IMG_TAG
   displayName: PostgreSQL Image Tag
   description: This is the PostgreSQL image tag/version requested to deploy.
@@ -1038,7 +1050,7 @@ parameters:
 - name: MEMCACHED_IMG_NAME
   displayName: Memcached Image Name
   description: This is the Memcached image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-memcached
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-memcached
 - name: MEMCACHED_IMG_TAG
   displayName: Memcached Image Tag
   description: This is the Memcached image tag/version requested to deploy.
@@ -1046,11 +1058,11 @@ parameters:
 - name: FRONTEND_APPLICATION_IMG_NAME
   displayName: Frontend Application Image Name
   description: This is the Frontend Application image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-app-ui
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-app-ui
 - name: BACKEND_APPLICATION_IMG_NAME
   displayName: Backend Application Image Name
   description: This is the Backend Application image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-app
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-app
 - name: FRONTEND_APPLICATION_IMG_TAG
   displayName: Front end Application Image Tag
   description: This is the CloudForms Frontend Application image tag/version requested to deploy.
@@ -1062,7 +1074,7 @@ parameters:
 - name: ANSIBLE_IMG_NAME
   displayName: Ansible Image Name
   description: This is the Ansible image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-embedded-ansible
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-embedded-ansible
 - name: ANSIBLE_IMG_TAG
   displayName: Ansible Image Tag
   description: This is the Ansible image tag/version requested to deploy.
@@ -1103,7 +1115,7 @@ parameters:
 - name: HTTPD_IMG_NAME
   displayName: Apache httpd Image Name
   description: This is the httpd image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46-beta/cfme-openshift-httpd
+  value: registry.access.redhat.com/cloudforms46/cfme-openshift-httpd
 - name: HTTPD_IMG_TAG
   displayName: Apache httpd Image Tag
   description: This is the httpd image tag/version requested to deploy.
