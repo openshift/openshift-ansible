@@ -34,7 +34,8 @@
     --param VOLUME_CAPACITY=5Gi
     --param POSTGRESQL_VERSION=9.5
     | {{ openshift_client_binary }} apply -f -
-  register: openshift_pg_activate
+  register: apply
+  changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"
 
 - name: Create temp directory for templates
   command: mktemp -td awx-ansible-XXXXXX
@@ -74,6 +75,8 @@
 
 - name: Apply Configmap
   shell: "{{ openshift_client_binary }} apply -f {{ mktemp.stdout }}/configmap.yml"
+  register: apply
+  changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"
 
 - name: Apply the AWX Deployment Template
   shell: >-
@@ -82,6 +85,8 @@
     --param AWX_WEB_IMAGE={{ awx_web_openshift_image }}
     --param AWX_TASK_IMAGE={{ awx_task_openshift_image }}
     | {{ openshift_client_binary }} apply -f -
+  register: apply
+  changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"
 
 - name: Delete temp directory
   file:
