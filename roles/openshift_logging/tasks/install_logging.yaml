@@ -30,7 +30,7 @@
   loop_control:
     loop_var: component
 
-- include_tasks: install_cluster.yml
+- include_tasks: install_extras.yml
   vars:
     __component: "{{ openshift_logging[component] }}"
     __component_name: "{{ component }}"
