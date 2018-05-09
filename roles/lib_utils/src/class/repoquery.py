@@ -117,7 +117,7 @@ class Repoquery(RepoqueryCLI):
             with open("/etc/yum.conf", "r") as file_handler:
                 yum_conf_lines = file_handler.readlines()
 
-            yum_conf_lines = ["exclude=" if l.startswith("exclude=") else l for l in yum_conf_lines]
+            yum_conf_lines = [l for l in yum_conf_lines if not l.startswith("exclude=")]
 
             with open(self.tmp_file.name, "w") as file_handler:
                 file_handler.writelines(yum_conf_lines)
