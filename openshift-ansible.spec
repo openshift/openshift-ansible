@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.28
+Version:        3.9.29
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 09 2018 Justin Pierce <jupierce@redhat.com> 3.9.29-1
+- Update Dockerfile (sdodson@redhat.com)
+- Fix papr.sh target branch for rebase (mgugino@redhat.com)
+
 * Sun May 06 2018 Justin Pierce <jupierce@redhat.com> 3.9.28-1
 - bump xpaas to 1.4.12 (rcernich@redhat.com)
 - PAPR: try to rebase on the latest code (vrutkovs@redhat.com)
