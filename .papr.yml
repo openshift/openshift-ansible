@@ -41,7 +41,6 @@ tests:
 
 artifacts:
   - journals/
-  - ansible_logs/
 
 ---
 inherit: true

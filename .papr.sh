@@ -52,15 +52,15 @@ upload_journals() {
 trap upload_journals ERR
 
 # run the prerequisites play
-ansible-playbook -v -i $PAPR_INVENTORY playbooks/prerequisites.yml
+ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/prerequisites.yml
 
 # run the actual installer
-ansible-playbook -v -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
+ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
 
 # Run upgrade playbook (to a minor version)
 if [[ "${PAPR_RUN_UPDATE}" != "0" ]]; then
   update_version="$(echo $target_branch | sed 's/\./_/')"
-  ansible-playbook -v -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
+  ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
 fi
 
 upload_journals
