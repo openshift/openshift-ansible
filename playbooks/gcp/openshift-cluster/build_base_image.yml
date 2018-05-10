@@ -134,20 +134,23 @@
     command: subscription-manager repos --enable="rhel-7-server-rpms" --enable="rhel-7-server-extras-rpms"
     when: using_rhel_subscriptions
   - name: Install common image prerequisites
-    package: name={{ item }} state=latest
-    with_items:
-    # required by Ansible
-    - PyYAML
-    - google-compute-engine
-    - google-compute-engine-init
-    - google-config
-    - wget
-    - git
-    - net-tools
-    - bind-utils
-    - iptables-services
-    - bridge-utils
-    - bash-completion
+    package:
+      name: "{{ img_prereqs | join(',) }}"
+      state: latest
+    vars:
+      - img_prereqs:
+        # required by Ansible
+        - PyYAML
+        - google-compute-engine
+        - google-compute-engine-init
+        - google-config
+        - wget
+        - git
+        - net-tools
+        - bind-utils
+        - iptables-services
+        - bridge-utils
+        - bash-completion
   - name: Clean yum metadata
     command: yum clean all
     args:

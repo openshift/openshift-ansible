@@ -37,6 +37,16 @@
   roles:
   - openshift_facts
   tasks:
+  - name: Wait for first master go Ready
+    oc_obj:
+      state: list
+      kind: node
+      name: "{{ openshift.node.nodename | lower }}"
+    register: node_output
+    until: node_output.results.returncode == 0 and node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+    # Give the node two minutes to come back online.
+    retries: 24
+    delay: 5
   - name: Upgrade all storage
     command: >
       {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
@@ -46,6 +56,9 @@
     failed_when:
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
+    until: l_pb_upgrade_control_plane_pre_upgrade_storage is succeeded
+    retries: 2
+    delay: 30
 
 # Set openshift_master_facts separately. In order to reconcile
 # admission_config's, we currently must run openshift_master_facts and
