@@ -44,10 +44,13 @@ class DiagnosticCheck(OpenShiftCheck):
         }
         
         pod_image_prefix = self.get_var('openshift_health_check_pod_image_prefix')
+        pod_image_version = self.get_var("openshift_image_tag")
 
         if diagnostic == "NetworkCheck":
-            args["extra_args"].append("--pod-image=%sopenshift/origin-deployer:v3.9.0" % pod_image_prefix)
-            args["extra_args"].append("--test-pod-image=%sopenshift/origin-deployer:v3.9.0" % pod_image_prefix)
+            args["extra_args"].append("--pod-image=%sopenshift/origin-deployer:%s"
+                                      % (pod_image_prefix, pod_image_version))
+            args["extra_args"].append("--test-pod-image=%sopenshift/origin-deployer:%s"
+                                      % (pod_image_prefix, pod_image_version))
 
         if diagnostic == "DiagnosticPod":
             args["extra_args"].append("--images=%sopenshift/origin-${component}:${version}" % pod_image_prefix)
