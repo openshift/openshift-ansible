@@ -42,6 +42,18 @@ class DiagnosticCheck(OpenShiftCheck):
             "cmd": "adm diagnostics",
             "extra_args": [diagnostic],
         }
+        
+        pod_image_prefix = self.get_var('openshift_health_check_pod_image_prefix')
+
+        if diagnostic == "NetworkCheck":
+            args["extra_args"].append("--pod-image=%sopenshift/origin-deployer:v3.9.0" % pod_image_prefix)
+            args["extra_args"].append("--test-pod-image=%sopenshift/origin-deployer:v3.9.0" % pod_image_prefix)
+
+        if diagnostic == "DiagnosticPod":
+            args["extra_args"].append("--images=%sopenshift/origin-${component}:${version}" % pod_image_prefix)
+
+        if diagnostic == "AppCreate":
+            args["extra_args"].append("--app-image=%sopenshift/origin-${component}:${version}" % pod_image_prefix)
 
         result = self.execute_module("ocutil", args, save_as_name=diagnostic + ".failure.json")
         self.register_file(diagnostic + ".txt", result['result'])
