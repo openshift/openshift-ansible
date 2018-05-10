@@ -42,7 +42,7 @@ class DiagnosticCheck(OpenShiftCheck):
             "cmd": "adm diagnostics",
             "extra_args": [diagnostic],
         }
-        
+
         pod_image_prefix = self.get_var('openshift_health_check_pod_image_prefix')
         pod_image_version = self.get_var("openshift_image_tag")
 
