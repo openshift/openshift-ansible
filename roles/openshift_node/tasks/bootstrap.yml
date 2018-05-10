@@ -70,11 +70,6 @@
     force: yes
     follow: no
 
-- name: Remove default node-config.yaml to allow bootstrapping config
-  file:
-    path: "/etc/origin/node/node-config.yaml"
-    state: absent
-
 - when: rpmgenerated_config.stat.exists
   block:
   - name: Remove RPM generated config files if present
