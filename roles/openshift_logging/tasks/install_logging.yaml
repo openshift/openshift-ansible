@@ -16,7 +16,7 @@
 
 - include_tasks: install_cluster.yml
   vars:
-    __cluster: "{{ openshift_logging[cluster] }}"
+    __cluster: "{{ __default_openshift_logging['logging-es'] | combine ( openshift_logging[cluster] ) }}"
     __cluster_name: "{{ cluster }}"
   with_items: "{{ openshift_logging.cluster_names | default([]) }}"
   loop_control:

@@ -4,11 +4,14 @@
 # __cluster will be set to be openshift_logging.es or openshift_logging.es-ops, etc
 # __cluster_name is the name of that cluster -- es, es-ops, etc
 
+- debug: var=__cluster
+- debug: var=__cluster_name
+
 - name: Set logging project
   oc_project:
     state: present
     name: "{{ __cluster.namespace }}"
-    node_selector: "{{ __cluster.nodeselector | default(null) }}"
+    node_selector: "{{ __cluster.nodeselector | default(none) }}"
 
 - name: Labeling logging project
   oc_label:
