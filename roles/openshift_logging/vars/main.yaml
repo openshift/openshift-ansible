@@ -74,7 +74,7 @@ __default_openshift_logging:
       cpu_limit: null
       cpu_request: 100m
       memory_limit: 256Mi
-      node_selector: {}
+      nodeselector: {}
 
     kibana:
       hostname: "{{ 'kibana.' ~ openshift_master_default_subdomain }}"
@@ -96,9 +96,6 @@ __default_openshift_logging:
     elasticsearch:
       host: logging-es
       port: 9200
-      ca: /etc/fluent/keys/ca
-      client_cert: /etc/fluent/keys/cert
-      client_key: /etc/fluent/keys/key
       cluster_size: 1
       cpu_limit: null
       cpu_request: "1"
