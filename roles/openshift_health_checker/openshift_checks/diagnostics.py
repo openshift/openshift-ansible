@@ -43,8 +43,9 @@ class DiagnosticCheck(OpenShiftCheck):
             "extra_args": [diagnostic],
         }
 
-        pod_image_prefix = self.get_var('openshift_health_check_pod_image_prefix')
-        pod_image_version = self.get_var("openshift_image_tag")
+        pod_image_prefix = self.get_var("openshift_health_check_pod_image_prefix", default="")
+        pod_image_version = self.get_var("openshift_health_check_pod_image_version",
+                                         default=self.get_var("openshift_image_tag"))
 
         if diagnostic == "NetworkCheck":
             args["extra_args"].append("--pod-image=%sopenshift/origin-deployer:%s"
