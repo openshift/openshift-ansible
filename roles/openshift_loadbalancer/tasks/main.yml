@@ -1,36 +1,21 @@
 ---
+- name: Fail if atomic
+  fail:
+    msg: "Load balancers on atomic host are no longer supported"
+  when: openshift_is_atomic
+
 - name: setup firewall
   import_tasks: firewall.yml
 
 - name: Install haproxy
   package: name=haproxy state=present
-  when: not openshift_is_containerized | bool
   register: result
   until: result is succeeded
-
-- name: Pull haproxy image
-  command: >
-    docker pull {{ openshift_router_image }}:{{ openshift_image_tag }}
-  when: openshift_is_containerized | bool
-
-- name: Create config directory for haproxy
-  file:
-    path: /etc/haproxy
-    state: directory
-  when: openshift_is_containerized | bool
-
-- name: Create the systemd unit files
-  template:
-    src: "haproxy.docker.service.j2"
-    dest: "/etc/systemd/system/haproxy.service"
-  when: openshift_is_containerized | bool
-  notify: restart haproxy
 
 - name: Configure systemd service directory for haproxy
   file:
     path: /etc/systemd/system/haproxy.service.d
     state: directory
-  when: not openshift_is_containerized | bool
 
 # Work around ini_file create option in 2.2 which defaults to no
 - name: Create limits.conf file
@@ -41,7 +26,6 @@
     owner: root
     group: root
   changed_when: false
-  when: not openshift_is_containerized | bool
 
 - name: Configure the nofile limits for haproxy
   ini_file:
@@ -50,7 +34,6 @@
     option: LimitNOFILE
     value: "{{ openshift_loadbalancer_limit_nofile | default(100000) }}"
   notify: restart haproxy
-  when: not openshift_is_containerized | bool
 
 - name: Configure haproxy
   template:
