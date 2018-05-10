@@ -312,7 +312,7 @@
     - /etc/systemd/system/origin-node-dep.service
     - /etc/systemd/system/origin-node.service
     - /etc/systemd/system/origin-node.service.wants
-    - /var/lib/docker
+    - /var/lib/docker/*
 
   - name: Rebuild ca-trust
     command: update-ca-trust
