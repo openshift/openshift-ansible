@@ -26,13 +26,3 @@
   when:
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
-
-- name: Stop rpm based services
-  service:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-  - "{{ openshift_service_type }}-node"
-  - openvswitch
-  failed_when: false
-  when: not openshift_is_containerized | bool

@@ -35,16 +35,3 @@
   register: master_oreg_auth_credentials_create_alt
   notify:
   - restart master
-
-# Container images may need the registry credentials
-- name: Setup ro mount of /root/.docker for containerized hosts
-  set_fact:
-    l_bind_docker_reg_auth: True
-  when:
-  - openshift_is_containerized | bool
-  - oreg_auth_user is defined
-  - >
-      (master_oreg_auth_credentials_stat.stat.exists
-      or oreg_auth_credentials_replace
-      or master_oreg_auth_credentials_create.changed
-      or master_oreg_auth_credentials_create_alt.changed) | bool

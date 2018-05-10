@@ -1,7 +1,7 @@
 ---
 - name: Install clients
   package: name={{ openshift_service_type }}-clients{{ openshift_pkg_version | default('') }} state=present
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
@@ -23,10 +23,10 @@
     openshift_container_binary_sync:
       image: "{{ openshift_cli_image }}"
       backend: "{{ l_openshift_cli_image_backend }}"
-  when: openshift_is_containerized | bool
+  when: openshift_is_atomic | bool
 
 - name: Install bash completion for oc tools
   package: name=bash-completion state=present
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
