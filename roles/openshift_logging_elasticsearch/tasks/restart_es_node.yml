@@ -1,7 +1,7 @@
 ---
 - name: "Rolling out new pod(s) for {{ _es_node }}"
   command: >
-    {{ openshift_client_binary }} rollout latest {{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig rollout latest {{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }}
 
 - when: not _skip_healthcheck | bool
   name: "Waiting for {{ _es_node }} to finish scaling up"
@@ -23,14 +23,14 @@
 - when: not _skip_healthcheck | bool
   name: Gettings name(s) of replica pod(s)
   command: >
-    {{ openshift_client_binary }} get pods -l deploymentconfig={{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig get pods -l deploymentconfig={{ _es_node }} -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[*].metadata.name}
   register: _pods
   changed_when: false
 
 - when: not _skip_healthcheck | bool
   name: "Waiting for ES node {{ _es_node }} health to be in ['green', 'yellow']"
   shell: >
-    {{ openshift_client_binary }} exec "{{ _pod }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- es_cluster_health
+    {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig exec "{{ _pod }}" -c elasticsearch -n "{{ openshift_logging_elasticsearch_namespace }}" -- es_cluster_health
   with_items: "{{ _pods.stdout.split(' ') }}"
   loop_control:
     loop_var: _pod

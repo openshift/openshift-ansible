@@ -37,7 +37,7 @@
     block:
     - name: Get CSRs
       command: >
-        {{ openshift_client_binary }} describe csr --config=/etc/origin/master/admin.kubeconfig
+        {{ openshift_client_binary }} describe csr --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     - name: Report approval errors
       fail:
         msg: Node approval failed
