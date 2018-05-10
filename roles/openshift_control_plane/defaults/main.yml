@@ -69,12 +69,12 @@ oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_ur
 oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
 oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
-openshift_docker_alternative_creds: "{{ (openshift_docker_use_system_container | default(False) | bool) or (openshift_use_crio_only | default(False)) }}"
+openshift_docker_alternative_creds: "{{ openshift_use_crio_only | bool }}"
 
 containerized_svc_dir: "/usr/lib/systemd/system"
 ha_svc_template_path: "native-cluster"
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+openshift_docker_service_name: "docker"
 
 openshift_master_loopback_config: "/etc/origin/master/openshift-master.kubeconfig"
 loopback_context_string: "current-context: {{ openshift.master.loopback_context_name }}"

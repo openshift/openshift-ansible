@@ -14,7 +14,6 @@ openshift_image_default: "{{ l_os_registry_url | regex_replace('${component}' | 
 openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary(openshift_image_default, (openshift_image_default.split('/')|length==2) | ternary(system_images_registry + '/' + openshift_image_default, openshift_image_default)) }}"
 system_openshift_cli_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + openshift_cli_image, openshift_cli_image) }}"
 
-openshift_use_crio_only: False
 openshift_crio_use_rpm: False
 
 l_use_cli_atomic_image: "{{ (openshift_use_crio_only | bool and not openshift_crio_use_rpm | bool) }}"

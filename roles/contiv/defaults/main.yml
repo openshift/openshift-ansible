@@ -127,7 +127,7 @@ contiv_h1_gw_default: "10.129.0.1"
 # contiv default private subnet for ext access
 contiv_private_ext_subnet: "10.130.0.0/16"
 
-contiv_openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+contiv_openshift_docker_service_name: "docker"
 
 contiv_api_proxy_port: 10000
 contiv_api_proxy_port_proto: tcp
