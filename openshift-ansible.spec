@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.38.0%{?dist}
+Release:        0.39.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,13 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu May 10 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.39.0
+- Fix tox (sdodson@redhat.com)
+- Remove debugging code from #8304 (sdodson@redhat.com)
+- Fix upgrade containerized to bootstrap (mgugino@redhat.com)
+- Remove bootstrap boolean from gcp provision (mgugino@redhat.com)
+- Fix and simplify Installer Checkpoint (rteague@redhat.com)
+
 * Wed May 09 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.38.0
 - Ensure existing network facts are set (mgugino@redhat.com)
 - Fix etcd runtime detection (sdodson@redhat.com)
