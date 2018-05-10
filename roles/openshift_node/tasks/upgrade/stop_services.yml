@@ -1,11 +1,17 @@
 ---
-- name: Stop node and openvswitch services
+- name: Stop node
   service:
     name: "{{ item }}"
     state: stopped
   with_items:
-  - openvswitch
   - "{{ openshift_service_type }}-node"
+  failed_when: false
+
+- name: Stop openvswitch services
+  service:
+    name: "openvswitch"
+    state: stopped
+  when: openshift_use_openshift_sdn | bool
   failed_when: false
 
 - name: Ensure static containerized services stopped before Docker restart
@@ -33,6 +39,14 @@
     state: stopped
   with_items:
   - "{{ openshift_service_type }}-node"
-  - openvswitch
   failed_when: false
   when: not openshift_is_containerized | bool
+
+- name: Stop ovs rpm based services
+  service:
+    name: "openvswitch"
+    state: stopped
+  failed_when: false
+  when: 
+  - not openshift_is_containerized | bool
+  - openshift_use_openshift_sdn | bool
