@@ -216,19 +216,20 @@ openshift_node_open_ports:
 - service: dns udp
   port: 53/udp
 
-kuryr_openstack_public_subnet_id: <public/external subnet UUID>
+kuryr_openstack_public_net_id: <public/external net UUID>
 ```
 
-The `kuryr_openstack_public_subnet_id` value must be set to the UUID of the
-public subnet in your OpenStack. In other words, the subnet with the Floating
+The `kuryr_openstack_public_net_id` value must be set to the UUID of the
+public net in your OpenStack. In other words, the net with the Floating
 IP range defined. It corresponds to the public network, which is often called
 `public`, `external` or `ext-net`.
 
-**NOTE**: A lot of OpenStack deployments do not make the public subnet
-accessible to regular users. We will add an option to enter the network here
-instead. This issue is tracked at:
+Additionally, if the public net has different subnet, you can specify the
+specific one with `kuryr_openstack_public_subnet_id`, whose value must be set
+to the UUID of the public subnet in your OpenStack.
 
-https://github.com/openshift/openshift-ansible/issues/7383
+**NOTE**: A lot of OpenStack deployments do not make the public subnet
+accessible to regular users.
 
 ### Port pooling
 
