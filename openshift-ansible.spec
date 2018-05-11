@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.47
+Version:        3.7.48
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,11 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri May 11 2018 Justin Pierce <jupierce@redhat.com> 3.7.48-1
+- Revert "[release-3.7] Adding missing deprecated var
+  openshift_hosted_metrics_public_url" (ewolinet@redhat.com)
+- invoke wire_aggregator (jaboyd@redhat.com)
+
 * Tue May 08 2018 Justin Pierce <jupierce@redhat.com> 3.7.47-1
 - Remove dynamic include in logging_fluentd role (mgugino@redhat.com)
 - bump xpaas to 1.4.12 (rcernich@redhat.com)
