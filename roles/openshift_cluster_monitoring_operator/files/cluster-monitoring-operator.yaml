@@ -27,10 +27,15 @@ parameters:
 - name: ALERTMANAGER_CONFIG
   required: true
   description: A complete (base64-encoded) Alertmanager configuration YAML file.
+- name: CLUSTER_ID
+  description: Identifies the cluster being monitored; the value is added to a `cluster` label in every alert.
+  required: true
 - name: NAMESPACE
   # This namespace cannot be changed. Only `openshift-monitoring` is supported.
   value: openshift-monitoring
+
 objects:
+# Configures the Cluster Monitoring Operator.
 - apiVersion: v1
   kind: ConfigMap
   metadata:
@@ -44,9 +49,12 @@ objects:
         configReloaderBaseImage: ${CONFIG_RELOADER_IMAGE}
       prometheusK8s:
         baseImage: ${PROMETHEUS_IMAGE}
+        externalLabels:
+          cluster: ${CLUSTER_ID}
       alertmanagerMain:
         baseImage: ${ALERTMANAGER_IMAGE}
 
+# Configures Alertmanager.
 - apiVersion: v1
   kind: Secret
   metadata:
