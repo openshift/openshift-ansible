@@ -34,15 +34,6 @@ ENTERPRISE_TAG_REGEX = {'re': '(^v\\d+\\.\\d+(\\.\\d+)*(-\\d+(\\.\\d+)*)?$)',
 IMAGE_TAG_REGEX = {'origin': ORIGIN_TAG_REGEX,
                    'openshift-enterprise': ENTERPRISE_TAG_REGEX}
 
-UNSUPPORTED_OCP_VERSIONS = {
-    '^3.8.*$': 'OCP 3.8 is not supported and cannot be installed'
-}
-
-CONTAINERIZED_NO_TAG_ERROR_MSG = """To install a containerized Origin release,
-you must set openshift_release or openshift_image_tag in your inventory to
-specify which version of the OpenShift component images to use.
-(Suggestion: add openshift_release="x.y" to inventory.)"""
-
 STORAGE_KIND_TUPLE = (
     'openshift_hosted_registry_storage_kind',
     'openshift_loggingops_storage_kind',
@@ -114,23 +105,6 @@ class ActionModule(ActionBase):
             msg = msg.format(str(openshift_image_tag))
             raise errors.AnsibleModuleError(msg)
 
-    def no_origin_image_version(self, hostvars, host, openshift_deployment_type):
-        """Ensure we can determine what image version to use with origin
-          fail when:
-          - openshift_is_containerized
-          - openshift_deployment_type == 'origin'
-          - openshift_release is not defined
-          - openshift_image_tag is not defined"""
-        if not openshift_deployment_type == 'origin':
-            return None
-        oic = self.template_var(hostvars, host, 'openshift_is_containerized')
-        if not to_bool(oic):
-            return None
-        orelease = self.template_var(hostvars, host, 'openshift_release')
-        oitag = self.template_var(hostvars, host, 'openshift_image_tag')
-        if not orelease and not oitag:
-            raise errors.AnsibleModuleError(CONTAINERIZED_NO_TAG_ERROR_MSG)
-
     def network_plugin_check(self, hostvars, host):
         """Ensure only one type of network plugin is enabled"""
         res = []
@@ -157,17 +131,6 @@ class ActionModule(ActionBase):
             if var_value and len(var_value) > 63:
                 msg = '{} must be 63 characters or less'.format(varname)
                 raise errors.AnsibleModuleError(msg)
-
-    def check_supported_ocp_version(self, hostvars, host, openshift_deployment_type):
-        """Checks that the OCP version supported"""
-        if openshift_deployment_type == 'origin':
-            return None
-        openshift_version = self.template_var(hostvars, host, 'openshift_version')
-        for regex_to_match, error_msg in UNSUPPORTED_OCP_VERSIONS.items():
-            res = re.match(regex_to_match, str(openshift_version))
-            if res is not None:
-                raise errors.AnsibleModuleError(error_msg)
-        return None
 
     def check_session_auth_secrets(self, hostvars, host):
         """Checks session_auth_secrets is correctly formatted"""
@@ -253,10 +216,8 @@ class ActionModule(ActionBase):
         odt = self.check_openshift_deployment_type(hostvars, host)
         self.check_python_version(hostvars, host, distro)
         self.check_image_tag_format(hostvars, host, odt)
-        self.no_origin_image_version(hostvars, host, odt)
         self.network_plugin_check(hostvars, host)
         self.check_hostname_vars(hostvars, host)
-        self.check_supported_ocp_version(hostvars, host, odt)
         self.check_session_auth_secrets(hostvars, host)
         self.check_unsupported_nfs_configs(hostvars, host)
         self.check_htpasswd_provider(hostvars, host)

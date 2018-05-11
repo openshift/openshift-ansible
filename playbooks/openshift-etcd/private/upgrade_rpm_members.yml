@@ -1,7 +1,6 @@
 ---
 # INPUT etcd_upgrade_version
 # INPUT etcd_rpm_version
-# INPUT openshift_is_containerized
 - name: Upgrade to {{ etcd_upgrade_version }}
   hosts: oo_etcd_hosts_to_upgrade
   serial: 1
@@ -15,4 +14,3 @@
     when:
     - etcd_rpm_version.stdout | default('99') is version_compare(etcd_upgrade_version, '<')
     - ansible_distribution == 'RedHat'
-    - not openshift_is_containerized | bool

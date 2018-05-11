@@ -37,7 +37,7 @@
   set_fact:
     l_bind_docker_reg_auth: True
   when:
-    - openshift_is_containerized | bool
+    - openshift_is_atomic | bool
     - oreg_auth_user is defined
     - >
         (node_oreg_auth_credentials_stat.stat.exists

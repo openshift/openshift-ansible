@@ -4,7 +4,6 @@
 # - openshift_is_atomic
 # - node_config_hook
 # - openshift_pkg_version
-# - openshift_is_containerized
 # - openshift_release
 
 # tasks file for openshift_node_upgrade

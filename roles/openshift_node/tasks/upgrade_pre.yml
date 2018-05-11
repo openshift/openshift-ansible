@@ -11,7 +11,7 @@
   command: "{{ ansible_pkg_mgr }} makecache"
   register: result
   until: result is succeeded
-  when: not openshift_is_containerized | bool
+  when: not openshift_is_atomic | bool
 
 - name: Check Docker image count
   shell: "docker images -aq | wc -l"

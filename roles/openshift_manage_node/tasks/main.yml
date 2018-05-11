@@ -18,7 +18,7 @@
   retries: 120
   delay: 1
   changed_when: false
-  when: openshift_is_containerized | bool
+  when: openshift_is_atomic | bool
   delegate_to: "{{ openshift_master_host }}"
   run_once: true
 

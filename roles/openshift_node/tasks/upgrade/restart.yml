@@ -1,7 +1,6 @@
 ---
 # input variables:
 # - openshift_service_type
-# - openshift_is_containerized
 # - openshift.common.hostname
 # - openshift_master_api_port
 
