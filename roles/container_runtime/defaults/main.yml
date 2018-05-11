@@ -8,9 +8,8 @@ openshift_docker_alternative_creds: False
 oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
 oreg_auth_credentials_replace: False
 
-openshift_docker_use_system_container: False
 openshift_docker_selinux_enabled: True
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+openshift_docker_service_name: "docker"
 
 openshift_docker_hosted_registry_insecure: False  # bool
 
@@ -81,91 +80,7 @@ docker_https_proxy: "{{ openshift.common.https_proxy | default('') }}"
 docker_no_proxy: "{{ openshift.common.no_proxy | default('') }}"
 
 openshift_use_crio: False
-openshift_crio_use_rpm: False
-openshift_use_crio_only: False
-
-l_openshift_image_tag: "{{ openshift_image_tag | string }}"
 
 l_required_docker_version: '1.13'
 
-# --------------------- #
-# systemcontainers_crio #
-# --------------------- #
-l_insecure_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l2_docker_insecure_registries)) }}"
-l_crio_registries: "{{ l2_docker_additional_registries + ['docker.io'] }}"
-l_additional_crio_registries: "{{ '\"{}\"'.format('\", \"'.join(l_crio_registries)) }}"
-
-# this is a list of dictionaries of mounts
-# container_runtime_crio_additional_mounts:
-# - destination: /test
-#   source: /var/test
-#   options:
-#   - rw
-#   - mode=755
-#   type: bind
-container_runtime_crio_additional_mounts: []
-
-l_crio_additional_mounts: "{{ ',' + (container_runtime_crio_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_crio_additional_mounts != [] else '' }}"
-
-# this is a list of dictionaries of mounts
-# container_runtime_docker_additional_mounts:
-# - destination: /test
-#   source: /var/test
-#   options:
-#   - rw
-#   - mode=755
-#   type: bind
-container_runtime_docker_additional_mounts: []
-
-l_docker_additional_mounts: "{{ ',' + (container_runtime_docker_additional_mounts | lib_utils_oo_l_of_d_to_csv) if container_runtime_docker_additional_mounts != [] else '' }}"
-
-openshift_crio_image_tag_default: "latest"
-
-l_crt_crio_image_tag_dict:
-  openshift-enterprise: "{{ l_openshift_image_tag }}"
-  origin: "{{ openshift_crio_image_tag | default(openshift_crio_image_tag_default) }}"
-
-l_crt_crio_image_dict:
-  Fedora: "registry.fedoraproject.org/latest/cri-o"
-  CentOS: "registry.centos.org/projectatomic/cri-o"
-  RedHat: "registry.access.redhat.com/openshift3/cri-o"
-
-l_crio_image_name: "{{ l_crt_crio_image_dict[ansible_distribution] }}"
-l_crio_image_tag: "{{ l_crt_crio_image_tag_dict[openshift_deployment_type] }}"
-
-l_crio_image_default: "{{ l_crio_image_name }}:{{ l_crio_image_tag }}"
-l_crio_image: "{{ openshift_crio_systemcontainer_image_override | default(l_crio_image_default) }}"
-
-l_crio_pause_images_dict:
-  origin: 'docker.io/openshift/origin-${component}:${version}'
-  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
-l_pause_registry_url_default: "{{ l_crio_pause_images_dict[openshift_deployment_type] }}"
-l_os_registry_url: "{{ oreg_url_master | default(oreg_url) | default(l_pause_registry_url_default) | regex_replace('${version}' | regex_escape, l_openshift_image_tag | default('${version}')) }}"
-
-pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"
-
-# ----------------------- #
-# systemcontainers_docker #
-# ----------------------- #
-l_crt_docker_image_dict:
-  Fedora: "registry.fedoraproject.org/latest/docker"
-  CentOS: "registry.centos.org/projectatomic/docker"
-  RedHat: "registry.access.redhat.com/openshift3/container-engine"
-
-openshift_docker_image_tag_default: "latest"
-l_crt_docker_image_tag_dict:
-  openshift-enterprise: "{{ l_openshift_image_tag }}"
-  origin: "{{ openshift_docker_image_tag | default(openshift_docker_image_tag_default) }}"
-
-l_docker_image_prepend: "{{ l_crt_docker_image_dict[ansible_distribution] }}"
-l_docker_image_tag: "{{ l_crt_docker_image_tag_dict[openshift_deployment_type] }}"
-
-l_docker_image_default: "{{ l_docker_image_prepend }}:{{ l_docker_image_tag }}"
-l_docker_image: "{{ openshift_docker_systemcontainer_image_override | default(l_docker_image_default) }}"
-
 l_crio_var_sock: "/var/run/crio/crio.sock"
-
-container_runtime_oci_umounts:
-- '/var/lib/containers/storage/*'
-- '/run/containers/storage/*'
-- '/var/lib/origin/*'

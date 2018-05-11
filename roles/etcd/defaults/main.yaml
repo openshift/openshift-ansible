@@ -4,8 +4,8 @@ r_etcd_common_backup_sufix_name: ''
 
 l_etcd_bootstrapped: '{{ openshift.node.bootstrapped }}'
 
+# TODO(michaelgugino): Remove these in 3.11
 l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-
 l_etcd_static_pod: "{{ not (r_etcd_common_skip_command_shim is defined and r_etcd_common_skip_command_shim) or l_etcd_bootstrapped }}"
 
 # runc, docker, static pod, host
@@ -109,7 +109,7 @@ r_etcd_os_firewall_allow:
 # set the backend quota to 4GB by default
 etcd_quota_backend_bytes: 4294967296
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+openshift_docker_service_name: "docker"
 
 etcd_ca_host: "{{ groups['oo_etcd_to_config'].0 }}"
 

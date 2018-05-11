@@ -80,18 +80,7 @@ debug_level=2
 # This could potentially trigger an upgrade and downtime, so be careful with modifying this value after the cluster is set up.
 #openshift_pkg_version=-3.9.0
 
-# This enables all the system containers except for docker:
-#openshift_use_system_containers=False
-#
-# But you can choose separately each component that must be a
-# system container:
-#
-#openshift_use_openvswitch_system_container=False
-#openshift_use_node_system_container=False
-#openshift_use_master_system_container=False
-#openshift_use_etcd_system_container=False
-#
-# In either case, system_images_registry must be specified to be able to find the system images
+# If using Atomic Host, you may specify system container image registry for the nodes:
 #system_images_registry="docker.io"
 # when openshift_deployment_type=='openshift-enterprise'
 #system_images_registry="registry.access.redhat.com"
@@ -128,25 +117,8 @@ debug_level=2
 #openshift_docker_additional_registries=registry.example.com
 #openshift_docker_insecure_registries=registry.example.com
 #openshift_docker_blocked_registries=registry.hacker.com
-# Use Docker inside a System Container. Note that this is a tech preview and should
-# not be used to upgrade!
-# The following options for docker are ignored:
-# - docker_version
-# - docker_upgrade
-# The following options must not be used
-# - openshift_docker_options
-#openshift_docker_use_system_container=False
-# Install and run cri-o. By default this will install cri-o as a system container.
+# Install and run cri-o.
 #openshift_use_crio=False
-# You can install cri-o as an rpm by setting the following variable:
-#openshift_crio_use_rpm=False
-# NOTE: This uses openshift_docker_systemcontainer_image_registry_override as it's override
-# just as container-engine does.
-# Force the registry to use for the container-engine/crio system container. By default the registry
-# will be built off of the deployment type and ansible_distribution. Only
-# use this option if you are sure you know what you are doing!
-#openshift_docker_systemcontainer_image_override="registry.example.com/container-engine:latest"
-#openshift_crio_systemcontainer_image_override="registry.example.com/cri-o:latest"
 # The following two variables are used when openshift_use_crio is True
 # and cleans up after builds that pass through docker. When openshift_use_crio is True
 # these variables are set to the defaults shown. You may override them here.

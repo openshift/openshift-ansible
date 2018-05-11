@@ -27,10 +27,7 @@
 # re-run prerequisites
 - import_playbook: ../prerequisites.yml
   vars:
-    # We need to ensure container_runtime is only processed for containerized
-    # etcd hosts by setting l_build_container_groups_hosts and l_etcd_scale_up_hosts
-    l_build_container_groups_hosts: "oo_new_etcd_to_config"
-    l_etcd_scale_up_hosts: "oo_hosts_containerized_managed_true"
+    l_etcd_scale_up_crt_hosts: "all:!all"
     l_scale_up_hosts: "oo_new_etcd_to_config"
     l_base_packages_hosts: "oo_new_etcd_to_config"
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config:oo_new_etcd_to_config"

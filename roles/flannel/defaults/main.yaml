@@ -6,4 +6,4 @@ etcd_peer_ca_file: "{{ openshift.common.config_base }}/node/flannel.etcd-ca.crt"
 etcd_peer_cert_file: "{{ openshift.common.config_base }}/node/flannel.etcd-client.crt"
 etcd_peer_key_file: "{{ openshift.common.config_base }}/node/flannel.etcd-client.key"
 
-openshift_docker_service_name: "{{ 'container-engine' if (openshift_docker_use_system_container | default(False) | bool) else 'docker' }}"
+openshift_docker_service_name: "docker"

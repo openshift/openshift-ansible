@@ -42,20 +42,3 @@
       when: item != ''
       register: result
       until: result is succeeded
-
-    - name: Ensure various deps for running system containers are installed
-      package:
-        name: "{{ item }}"
-        state: present
-      with_items:
-      - atomic
-      - ostree
-      - runc
-      when:
-      - >
-        (openshift_use_system_containers | default(False)) | bool
-        or (openshift_use_etcd_system_container | default(False)) | bool
-        or (openshift_use_node_system_container | default(False)) | bool
-        or (openshift_use_master_system_container | default(False)) | bool
-      register: result
-      until: result is succeeded
