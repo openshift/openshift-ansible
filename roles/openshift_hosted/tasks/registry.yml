@@ -45,7 +45,6 @@
 - name: set openshift_hosted facts
   set_fact:
     openshift_hosted_registry_replicas: "{{ openshift.hosted.registry.replicas | default(l_default_replicas) }}"
-    openshift_hosted_registry_namespace: "{{ openshift.hosted.registry.namespace | default('default') }}"
     openshift_hosted_registry_selector: "{{ openshift.hosted.registry.selector }}"
     openshift_hosted_registry_images: "{{ openshift.hosted.registry.registryurl | default('openshift3/ose-${component}:${version}')}}"
     openshift_hosted_registry_storage_glusterfs_ips: "{%- set gluster_ips = [] %}{% if groups.glusterfs_registry is defined %}{% for node in groups.glusterfs_registry %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% elif groups.glusterfs is defined %}{% for node in groups.glusterfs %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% else %}{{ openshift.hosted.registry.storage.glusterfs.ips }}{% endif %}"

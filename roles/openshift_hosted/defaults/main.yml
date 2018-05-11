@@ -92,6 +92,8 @@ openshift_hosted_registry_edits:
     updatePeriodSeconds: 1
   action: put
 
+openshift_hosted_registry_namespace: default
+
 openshift_hosted_registry_force:
 - False
 
