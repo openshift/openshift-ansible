@@ -141,15 +141,27 @@ signature_policy = ""
 # The valid values are mkdir and ignore.
 image_volumes = "mkdir"
 
+{% macro normalize_repo_var(repo_list_or_csv) -%}
+    {% if ',' in repo_list_or_csv -%} ## Legacy CSV format
+        {% set _registries = repo_list_or_csv | split(',') %}
+    {%- else -%}          ## Modern list of strings format
+        {% set _registries = repo_list_or_csv %}
+    {%- endif %}
+    {% for _registry in _registries -%}
+        {% set _registry | trim %}   ## Leading/Trailing CSV item whitespace
+        {% if _registry | length -%}  ## Ignore empty CSV items
+            {{ '    ' }}"{{ _registry }}",  ## include leading whitespace
+        {%- end if %}
+    {%- endfor %}
 # insecure_registries is used to skip TLS verification when pulling images.
 insecure_registries = [
-{{ l_insecure_crio_registries|default("") }}
+    {{ normalize_repo_var(l_insecure_crio_registries) }}
 ]
 
 # registries is used to specify a comma separated list of registries to be used
 # when pulling an unqualified image (e.g. fedora:rawhide).
 registries = [
-{{ l_additional_crio_registries|default("") }}
+    {{ normalize_repo_var(l_additional_crio_registries | default([])) }}
 ]
 
 # The "crio.network" table contains settings pertaining to the
