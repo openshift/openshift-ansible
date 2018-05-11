@@ -41,3 +41,8 @@
   until: status.stdout | from_json == "success"
   retries: 120
   delay: 30
+
+- name: revoke disk sas url
+  command: >
+    az disk revoke-access
+    --ids "{{ (vm.stdout | from_json).storageProfile.osDisk.managedDisk.id }}"
