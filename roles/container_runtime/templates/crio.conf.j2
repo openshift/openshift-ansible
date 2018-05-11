@@ -143,13 +143,23 @@ image_volumes = "mkdir"
 
 # insecure_registries is used to skip TLS verification when pulling images.
 insecure_registries = [
-{{ l_insecure_crio_registries|default("") }}
+{% set _ins_crio_regs = l2_docker_insecure_registries | default([]) %}
+{% if _ins_crio_regs | length %}
+    {% for _ins_crio_reg in _ins_crio_regs %}
+    "{{ _ins_crio_reg }}",
+    {% endfor %}
+{% endif %}
 ]
 
 # registries is used to specify a comma separated list of registries to be used
 # when pulling an unqualified image (e.g. fedora:rawhide).
 registries = [
-{{ l_additional_crio_registries|default("") }}
+{% set _add_crio_regs = l2_docker_additional_registries | default([]) %}
+{% if _add_crio_regs | length %}
+    {% for _add_crio_reg in _add_crio_regs %}
+    "{{ _add_crio_reg }}",
+    {% endfor %}
+{% endif %}
 ]
 
 # The "crio.network" table contains settings pertaining to the
