@@ -38,6 +38,7 @@
 
 # Poll for registry and router pods, redeploy registry certs if needed.
 - import_playbook: ../../../openshift-hosted/private/upgrade_poll_and_check_certs.yml
+  when: openshift_hosted_manage_registry | default(True)
 
 # Check for warnings to be printed at the end of the upgrade:
 - name: Clean up and display warnings
