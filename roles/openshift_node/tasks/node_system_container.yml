@@ -32,7 +32,6 @@
     values:
     - "DNS_DOMAIN={{ openshift.common.dns_domain }}"
     - "DOCKER_SERVICE={{ openshift_docker_service_name }}.service"
-    - "MASTER_SERVICE={{ openshift_service_type }}-master-controllers.service"
     - 'ADDTL_MOUNTS={{ l_node_syscon_add_mounts2 }}'
     state: latest
   vars:
