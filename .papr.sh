@@ -19,6 +19,7 @@ else
 fi
 export target_branch
 
+
 # Need to define some git variables for rebase.
 git config --global user.email "ci@openshift.org"
 git config --global user.name "OpenShift Atomic CI"
@@ -31,6 +32,9 @@ pip install -r requirements.txt
 PAPR_INVENTORY=${PAPR_INVENTORY:-.papr.inventory}
 PAPR_RUN_UPDATE=${PAPR_RUN_UPDATE:-0}
 
+# Human-readable output
+export ANSIBLE_STDOUT_CALLBACK=debug
+
 # ping the nodes to check they're responding and register their ostree versions
 ansible -vvv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
 
@@ -40,24 +44,26 @@ upload_journals() {
     -m shell -a 'journalctl --no-pager > /tmp/journal'
   ansible -vvv -i $PAPR_INVENTORY all \
     -m fetch -a "src=/tmp/journal dest=journals/{{ inventory_hostname }}.log flat=yes"
+
+  # Split large files into parts, extracting a basename and preserving extention
+  find . -iname "*.log" -execdir sh -c 'split -b 4m --numeric-suffixes --additional-suffix=.log {} $(basename {} .log)_' \; -execdir rm -rf {} \;
 }
 
 trap upload_journals ERR
 
-# Store ansible log separately
-export ANSIBLE_LOG_PATH=ansible.log
-
 # run the prerequisites play
-ansible-playbook -v -i $PAPR_INVENTORY playbooks/prerequisites.yml
+ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/prerequisites.yml
 
 # run the actual installer
-ansible-playbook -v -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
+ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/deploy_cluster.yml
 
 # Run upgrade playbook (to a minor version)
-if [[ "${PAPR_RUN_UPDATE:-0}" != "0" ]]; then
+if [[ "${PAPR_RUN_UPDATE}" != "0" ]]; then
   update_version="$(echo $target_branch | sed 's/\./_/')"
-  ansible-playbook -v -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
+  ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
 fi
+
+upload_journals
 
 ### DISABLING TESTS FOR NOW, SEE:
 ### https://github.com/openshift/openshift-ansible/pull/6132

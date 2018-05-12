@@ -32,6 +32,7 @@ packages:
   - libffi-devel
   - openssl-devel
   - redhat-rpm-config
+  - findutils
 
 context: 'fedora/27/atomic'
 
@@ -40,7 +41,6 @@ tests:
 
 artifacts:
   - journals/
-  - ansible.log
 
 ---
 inherit: true
