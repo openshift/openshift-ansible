@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.39.0%{?dist}
+Release:        0.40.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,35 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri May 11 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.40.0
+- Readd crio registry variables (mgugino@redhat.com)
+- Add in crio pause image code back (umohnani@redhat.com)
+- azure: revoke sas url before deleting resource group (jminter@redhat.com)
+- Replace and refactor openshift_is_containerized in places
+  (mgugino@redhat.com)
+- Remove kuryr leftovers before removing the stack (ltomasbo@redhat.com)
+- Fix crio pause image syntax (umohnani@redhat.com)
+- Using existing nodeselectors for logging components as more sane defaults
+  (ewolinet@redhat.com)
+- Update playbooks/adhoc/uninstall.yml
+  (29396710+drmagel@users.noreply.github.com)
+- Remove duplicate slurp of session_secrets (mgugino@redhat.com)
+- Cleanup systemcontainer bits (mgugino@redhat.com)
+- Add critical pod annotation so that descheduler does not evict itself or does
+  not get evicted by others. (avagarwa@redhat.com)
+- Make SDN read config file from sysconfig (vrutkovs@redhat.com)
+- Don't remove node-config yaml when bootstrapping (vrutkovs@redhat.com)
+- Fix undefined variable for existing network config (mgugino@redhat.com)
+- Remove containerized lb support (mgugino@redhat.com)
+- Fix hard-coded version in master config imageConfig.format
+  (mgugino@redhat.com)
+- Switch from public subnet id to network id at kuryr (ltomasbo@redhat.com)
+- Fixes #8316 - upgrade from 3.9 w/o ASB to 3.10 with ASB fails
+  (jmontleo@redhat.com)
+- Ensure we're running with admin kubeconfig in several locations
+  (sdodson@redhat.com)
+- Update cri-o pause image and pause command (umohnani@redhat.com)
+
 * Thu May 10 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.39.0
 - Fix tox (sdodson@redhat.com)
 - Remove debugging code from #8304 (sdodson@redhat.com)
