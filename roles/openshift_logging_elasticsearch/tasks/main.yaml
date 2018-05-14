@@ -395,7 +395,7 @@
       metadata#annotations#service.alpha.openshift.io/serving-cert-secret-name: "prometheus-tls"
       metadata#annotations#prometheus.io/scrape: "true"
       metadata#annotations#prometheus.io/scheme: "https"
-      metadata#annotations#prometheus.io/path: "_prometheus/metrics"
+      metadata#annotations#prometheus.io/path: "/_prometheus/metrics"
 
 - name: Check to see if PVC already exists
   oc_obj:
