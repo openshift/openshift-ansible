@@ -62,10 +62,6 @@
   set_fact:
     awx_secret_key: "{{ (awx_config.results.results[0].data | default({})).secret_key | default(16 | lib_utils_oo_random_word) }}"
   no_log: true
-# TODO: other possible secrets that need (?) randomization:
-# RABBITMQ_ERLANG_COOKIE
-# RABBITMQ_DEFAULT_PASS
-# AWX_ADMIN_PASSWORD
 
 - name: AWX ConfigMap
   oc_configmap:
@@ -77,12 +73,27 @@
       awx_settings: "{{ mktemp.stdout }}/settings.py"
   no_log: true
 
+- name: Read Existing AWX Secret
+  oc_secret:
+    state: list
+    namespace: "{{ awx_project }}"
+    name: awx
+    decode: true
+  register: awx_secret
+  no_log: true
+
+- name: Get or Generate AWX admin Password
+  set_fact:
+    awx_admin_password: "{{ awx_secret.results.decoded['admin_password'] | default(16 | lib_utils_oo_random_word) }}"
+  no_log: true
+
 - name: Apply the AWX Deployment Template
   shell: >-
     {{ openshift_client_binary }} process -f {{ mktemp.stdout }}/awx-deployment.yml
     --param NAMESPACE={{ awx_project }}
     --param AWX_WEB_IMAGE={{ awx_web_openshift_image }}
     --param AWX_TASK_IMAGE={{ awx_task_openshift_image }}
+    --param AWX_ADMIN_PASSWORD={{ awx_admin_password }}
     | {{ openshift_client_binary }} apply -f -
   register: apply
   changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"

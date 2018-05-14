@@ -6,8 +6,17 @@ parameters:
 - name: NAMESPACE
 - name: AWX_WEB_IMAGE
 - name: AWX_TASK_IMAGE
+- name: AWX_ADMIN_PASSWORD
 
 objects:
+
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: awx
+    namespace: ${NAMESPACE}
+  stringData:
+    admin_password: ${AWX_ADMIN_PASSWORD}
 
 - apiVersion: extensions/v1beta1
   kind: Deployment
@@ -58,7 +67,10 @@ objects:
               - name: AWX_ADMIN_USER
                 value: admin
               - name: AWX_ADMIN_PASSWORD
-                value: password # TODO
+                valueFrom:
+                  secretKeyRef:
+                    name: awx
+                    key: admin_password
           - name: awx-rabbit
             image: rabbitmq:3
             env:
