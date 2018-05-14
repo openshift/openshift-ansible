@@ -92,7 +92,7 @@ objects:
     labels:
       name: awx-web-svc
   spec:
-    type: "NodePort"
+    type: ClusterIP
     ports:
       - name: http
         port: 8052
