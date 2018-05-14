@@ -8,6 +8,11 @@ metadata:
   labels:
     tier: node
     app: kuryr
+  annotations:
+    image.openshift.io/triggers: |
+      [
+        {"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.initContainers[?(@.name==\"install-cni-plugins\")].image"}
+      ]
 spec:
   template:
     metadata:
@@ -21,6 +26,23 @@ spec:
         operator: Exists
         effect: NoSchedule
       serviceAccountName: kuryr-controller
+      initContainers:
+      - name: install-cni-plugins
+        image: " "
+        command:
+        - /bin/bash
+        - -c
+        - |
+          #!/bin/bash
+          set -ex
+          # Take over network functions on the node
+          rm -Rf /host-cni-bin/*
+          cp -Rf /opt/cni/bin/* /host-cni-bin/
+        volumeMounts:
+        - name: bin
+          mountPath: /host-cni-bin
+        securityContext:
+          privileged: true
       containers:
       - name: kuryr-cni
         image: {{ openshift_openstack_kuryr_cni_image }}
