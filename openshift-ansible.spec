@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.41.0%{?dist}
+Release:        0.42.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,21 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon May 14 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.42.0
+- Don't validate registry certificates when registry is disabled
+  (sdodson@redhat.com)
+- Node system container no longer depends on master services
+  (sdodson@redhat.com)
+- Install node-dnsmasq configuration file (vrutkovs@redhat.com)
+- repoquery: Omit exclude lines when ignoring excluders
+  (mbarnes@fedoraproject.org)
+- PAPR: make ansible output verbose and drop ansible.log (vrutkovs@redhat.com)
+- PAPR: human-readable output (vrutkovs@redhat.com)
+- PAPR: set debug_level (vrutkovs@redhat.com)
+- PAPR: always upload systemd logs, use verbose output and split systemd logs
+  (vrutkovs@redhat.com)
+- Kuryr: Copy CNI plugins as DaemonSet initContainer (mdulko@redhat.com)
+
 * Fri May 11 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.41.0
 - 
 
