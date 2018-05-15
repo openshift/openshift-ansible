@@ -88,11 +88,10 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
-- file:
+- copy:
     src: "/etc/origin/master/{{ item }}"
     dest: "{{ openshift_master_generated_config_dir }}/{{ item }}"
-    state: hard
-    force: true
+    remote_src: yes
   with_items:
   - admin.crt
   - admin.key
