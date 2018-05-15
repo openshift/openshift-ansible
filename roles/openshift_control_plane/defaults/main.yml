@@ -156,3 +156,8 @@ openshift_master_max_requests_inflight: 500
 openshift_master_embedded_dns: True
 openshift_master_embedded_kube: True
 openshift_master_pod_eviction_timeout: ""
+
+# TODO(michaelgugino): Remove in 3.11
+l_new_config_clusterNetworks:
+- cidr: "{{ openshift_cluster_network_cidr }}"
+  hostSubnetLength: "{{ openshift_host_subnet_length }}"

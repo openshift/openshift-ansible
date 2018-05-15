@@ -71,6 +71,26 @@
       value: "{{ item | regex_replace('^OPENSHIFT_DEFAULT_REGISTRY=\\s*([^#\\s]+).*','\\1') }}"
     with_items: "{{ (sysconfig.content | b64decode).split('\n') | select('match','^OPENSHIFT_DEFAULT_REGISTRY=\\s*.+') | list }}"
 
+# TODO(michaelgugino): Remove in 3.11
+- name: Add new network config section to master conf
+  yedit:
+    src: /etc/origin/master/master-config.yml
+    key: networkConfig.clusterNetworks
+    value: "{{ l_new_config_clusterNetworks }}"
+  # l_existing_config_master_config is set via playbooks/init/basic_facts.yml
+  when: l_existing_config_master_config.networkConfig.clusterNetworks is not defined
+
+# TODO(michaelgugino): Remove in 3.11
+- name: Remove old network config section in master conf
+  yedit:
+    src: /etc/origin/master/master-config.yaml
+    key: "{{ item }}"
+    state: absent
+  with_items:
+  - networkConfig.clusterNetworkCIDR
+  - networkConfig.hostSubnetLength
+
+
 - name: Create the master service env file if it does not exist
   template:
     src: "master.env.j2"
