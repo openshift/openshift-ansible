@@ -1,3 +1,8 @@
+# This file is not part of openshift-ansible code, it's mounted into awx
+# and just happens to be written in Python.  Based on
+# https://github.com/ansible/awx/blob/1.0.3/installer/openshift/templates/configmap.yml.j2
+# pylint: skip-file
+
 import os
 import socket
 ADMINS = ()
