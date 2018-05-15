@@ -124,6 +124,6 @@
     - l_master_schedulable | length > 0
     - false in l_master_schedulable
   vars:
-    l_masters_group: "{{ ('oo_masters_to_config' in groups) | ternary('oo_masters_to_config', 'oo_nodes_to_bootstrap') }}"
-    l_openshift_schedulable: "{{ groups[l_masters_group] | map('extract', hostvars, 'openshift_schedulable') | select('defined') | list }}"
+    l_masters: "{{ groups['oo_masters_to_config'] | default([]) }}"
+    l_openshift_schedulable: "{{ l_masters | map('extract', hostvars, 'openshift_schedulable') | select('defined') | list }}"
     l_master_schedulable: "{{ l_openshift_schedulable | map('bool') | list }}"
