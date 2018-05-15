@@ -134,14 +134,7 @@ class Host(object):
         """ Will this host be a node marked as schedulable. """
         if not self.is_node():
             return False
-        if not self.is_master():
-            return True
-
-        masters = [host for host in all_hosts if host.is_master()]
-        nodes = [host for host in all_hosts if host.is_node()]
-        if len(masters) == len(nodes):
-            return True
-        return False
+        return True
 
 
 class Role(object):

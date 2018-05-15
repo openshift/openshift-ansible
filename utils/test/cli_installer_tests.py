@@ -788,7 +788,7 @@ class AttendedCliTests(OOCliFixture):
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(
-            inventory, 'nodes', '10.0.0.1', 'openshift_schedulable=False')
+            inventory, 'nodes', '10.0.0.1', 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(
             inventory, 'nodes', '10.0.0.2', 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(
@@ -915,11 +915,11 @@ class AttendedCliTests(OOCliFixture):
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.1',
-                                       'openshift_schedulable=False')
+                                       'openshift_schedulable=True')
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.2',
-                                       'openshift_schedulable=False')
+                                       'openshift_schedulable=True')
         self.assert_inventory_host_var(inventory, 'nodes', '10.0.0.3',
-                                       'openshift_schedulable=False')
+                                       'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(inventory, 'nodes', '10.0.0.4',
                                              'openshift_schedulable=True')
 
@@ -1088,7 +1088,7 @@ class AttendedCliTests(OOCliFixture):
         inventory = configparser.ConfigParser(allow_no_value=True)
         inventory.read(os.path.join(self.work_dir, 'hosts'))
         self.assert_inventory_host_var(
-            inventory, 'nodes', '10.0.0.1', 'openshift_schedulable=False')
+            inventory, 'nodes', '10.0.0.1', 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(
             inventory, 'nodes', '10.0.0.2', 'openshift_schedulable=True')
         self.assert_inventory_host_var_unset(
