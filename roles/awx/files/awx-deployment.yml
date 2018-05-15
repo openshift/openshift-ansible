@@ -13,10 +13,11 @@ objects:
 - kind: Secret
   apiVersion: v1
   metadata:
-    name: awx
+    name: admin-credentials
     namespace: ${NAMESPACE}
   stringData:
-    admin_password: ${AWX_ADMIN_PASSWORD}
+    username: admin
+    password: ${AWX_ADMIN_PASSWORD}
 
 - apiVersion: extensions/v1beta1
   kind: Deployment
@@ -65,12 +66,15 @@ objects:
                     name: postgresql
                     key: database-password
               - name: AWX_ADMIN_USER
-                value: admin
+                valueFrom:
+                  secretKeyRef:
+                    name: admin-credentials
+                    key: username
               - name: AWX_ADMIN_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: awx
-                    key: admin_password
+                    name: admin-credentials
+                    key: password
           - name: awx-rabbit
             image: rabbitmq:3
             env:

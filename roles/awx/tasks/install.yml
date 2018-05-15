@@ -77,14 +77,14 @@
   oc_secret:
     state: list
     namespace: "{{ awx_project }}"
-    name: awx
+    name: admin-credentials
     decode: true
   register: awx_secret
   no_log: true
 
 - name: Get or Generate AWX admin Password
   set_fact:
-    awx_admin_password: "{{ awx_secret.results.decoded['admin_password'] | default(16 | lib_utils_oo_random_word) }}"
+    awx_admin_password: "{{ awx_secret.results.decoded['password'] | default(16 | lib_utils_oo_random_word) }}"
   no_log: true
 
 - name: Apply the AWX Deployment Template
