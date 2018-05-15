@@ -19,3 +19,15 @@ galaxy_info:
   - prometheus
 dependencies:
 - role: lib_utils
+- role: awx
+  when: openshift_autoheal_deploy_awx | default(false) | bool
+  vars:
+    awx_install: true
+    awx_project: openshift-autoheal-awx
+    openshift_autoheal_config: |+
+      awx:
+        address: "https://awx.openshift-autoheal-awx.svc/api"
+        credentialsRef:
+          namespace: "openshift-autoheal-awx"
+          name: "admin-credentials"
+        project: "Auto-heal"
