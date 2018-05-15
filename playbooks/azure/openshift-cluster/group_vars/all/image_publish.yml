@@ -1,0 +1,29 @@
+---
+azure_image_publish:
+  rhel:
+    offer: acsengine
+    offer_force: True
+    templ_display_text: Openshift for acsengine
+    templ_sku_summary: Openshift on Red Hat Enterprise Linux on Azure
+    templ_sku_description: Openshift on Red Hat Enterprise Linux
+    templ_offer_id: acsengine
+    templ_plan_id: rhel74
+    templ_title: Openshift on Red Hat Enterprise Linux
+    templ_os: rhel7
+    templ_description: Openshift image baked on Rhel
+    templ_summary: Openshift for Rhel
+    templ_marketing_url_id: openshift-acsengine
+
+  centos:
+    offer: origin-acsengine
+    offer_force: True
+    templ_display_text: origin for acsengine
+    templ_sku_description: Openshift Origin on CentOS 7
+    templ_sku_summary: Openshift Origin on CentOS on Azure
+    templ_offer_id: origin-acsengine
+    templ_plan_id: centos7
+    templ_title: CentOS 7 for Origin
+    templ_os: CentOS
+    templ_description: Openshift Origin on CentOS
+    templ_summary: Openshift Origin on CentOS
+    templ_marketing_url_id: origin-acsengine
