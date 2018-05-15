@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.43.0%{?dist}
+Release:        0.44.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,10 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue May 15 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.44.0
+- Conditionally use upgraded version of Calico for different versions
+  (mleung975@gmail.com)
+
 * Mon May 14 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.43.0
 - Fix path annotation for the Prometheus (lukas.vlcek@gmail.com)
 
