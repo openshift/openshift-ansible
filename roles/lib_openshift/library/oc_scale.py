@@ -1531,8 +1531,8 @@ spec:
 
         env_vars_array = self.get_env_vars()
         modified = False
-        idx = None
         for key in keys:
+            idx = None
             for env_idx, env_var in enumerate(env_vars_array):
                 if env_var['name'] == key:
                     idx = env_idx
