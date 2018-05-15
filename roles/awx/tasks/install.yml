@@ -48,7 +48,7 @@
     dest: "{{ mktemp.stdout }}/{{ item }}"
   with_items:
   - awx-deployment.yml
-  - settings.py
+  - settings.py.awx
 
 - name: Read Existing AWX ConfigMap
   oc_configmap:
@@ -70,7 +70,7 @@
     from_literal:
       secret_key: "{{ awx_secret_key }}"
     from_file:
-      awx_settings: "{{ mktemp.stdout }}/settings.py"
+      awx_settings: "{{ mktemp.stdout }}/settings.py.awx"
   no_log: true
 
 - name: Read Existing AWX Secret
