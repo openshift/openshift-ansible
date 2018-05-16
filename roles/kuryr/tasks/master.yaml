@@ -7,6 +7,12 @@
   command: mktemp -d
   register: manifests_tmpdir
 
+- name: Create OpenShift node's ImageStreamTag manifest
+  become: yes
+  template:
+    src: node-images.yaml.j2
+    dest: "{{ manifests_tmpdir.stdout }}/node-images.yaml"
+
 - name: Create kuryr ConfigMap manifest
   become: yes
   template:
@@ -24,6 +30,17 @@
   template:
     src: cni-daemonset.yaml.j2
     dest: "{{ manifests_tmpdir.stdout }}/cni-daemonset.yaml"
+
+- name: Apply OpenShift node's ImageStreamTag manifest
+  oc_obj:
+    state: present
+    kind: ImageStreamTag
+    name: "node:v3.10"
+    namespace: "{{ kuryr_namespace }}"
+    files:
+    - "{{ manifests_tmpdir.stdout }}/node-images.yaml"
+  run_once: true
+  ignore_errors: yes
 
 - name: Apply ConfigMap manifest
   oc_obj:
