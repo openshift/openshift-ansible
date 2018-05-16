@@ -21,4 +21,4 @@
   command: "{{ ansible_pkg_mgr }} install -y openvswitch }}"
   register: result
   until: result is succeeded
-  when: openshift_use_openshift-sdn | bool
+  when: openshift_use_openshift_sdn | bool
