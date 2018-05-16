@@ -3,6 +3,22 @@
 # Upgrade Masters
 ###############################################################################
 
+# Some change makes critical outage on current cluster.
+- name: Confirm upgrade will not make critical changes
+  hosts: oo_first_master
+  tasks:
+  - name: Confirm Reconcile Security Context Constraints will not change current SCCs
+    command: >
+      {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --additive-only=true -o name
+    register: check_reconcile_scc_result
+    when: openshift_reconcile_sccs_reject_change | default(true) | bool
+
+  - fail:
+      msg: "Trying to change SCCs. Run \"{{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig\" and confirm SCCs which will be changed."
+    when:
+    - openshift_reconcile_sccs_reject_change
+    - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
+
 # Create service signer cert when missing. Service signer certificate
 # is added to master config in the master_config_upgrade hook.
 - name: Determine if service signer cert must be created
