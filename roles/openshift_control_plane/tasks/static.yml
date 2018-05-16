@@ -58,8 +58,8 @@
     name: "{{ item }}"
     state: absent
   with_items:
-  - /etc/sysconfig/{{ openshift_service_type }}-api
-  - /etc/sysconfig/{{ openshift_service_type }}-controllers
+  - /etc/sysconfig/{{ openshift_service_type }}-master-api
+  - /etc/sysconfig/{{ openshift_service_type }}-master-controllers
 
 - name: Remove temporary directory
   file:
