@@ -6,6 +6,8 @@ openshift_cluster_monitoring_operator_alertmanager_repo: quay.io/prometheus/aler
 openshift_cluster_monitoring_operator_prometheus_reloader_repo: quay.io/coreos/prometheus-config-reloader
 openshift_cluster_monitoring_oeprator_configmap_reloader_repo: quay.io/coreos/configmap-reload
 
+openshift_cluster_monitoring_operator_cluster_id: "{{ openshift_clusterid | default(openshift_master_cluster_public_hostname, true) | default(openshift_master_cluster_hostname, true) | default('openshift', true) }}"
+
 openshift_cluster_monitoring_operator_alertmanager_config: |+
   global:
     resolve_timeout: 5m

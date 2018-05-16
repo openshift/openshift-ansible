@@ -33,6 +33,7 @@
     --param PROMETHEUS_CONFIG_RELOADER_IMAGE="{{ openshift_cluster_monitoring_operator_prometheus_reloader_repo }}"
     --param CONFIG_RELOADER_IMAGE="{{ openshift_cluster_monitoring_oeprator_configmap_reloader_repo }}"
     --param ALERTMANAGER_CONFIG="{{ openshift_cluster_monitoring_operator_alertmanager_config | b64encode }}"
+    --param CLUSTER_ID="{{ openshift_cluster_monitoring_operator_cluster_id }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
   with_items:
