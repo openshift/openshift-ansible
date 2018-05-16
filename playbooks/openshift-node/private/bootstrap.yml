@@ -39,10 +39,6 @@
   vars:
     l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
 
-- import_playbook: clean_image.yml
-  vars:
-    l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
-
 - name: Node Preparation Checkpoint End
   hosts: all
   gather_facts: false
