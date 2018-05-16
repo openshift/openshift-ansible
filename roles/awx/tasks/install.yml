@@ -23,7 +23,6 @@
 - name: Deploy and Activate Postgres
   # Note: NAMESPACE param is where to look for postgresql ImageStream.
   shell: >-
-    {{ openshift_client_binary }} project {{ awx_project }};
     {{ openshift_client_binary }} process -n openshift postgresql-persistent
     --param MEMORY_LIMIT=512Mi
     --param NAMESPACE=openshift
@@ -33,7 +32,7 @@
     --param POSTGRESQL_DATABASE=awx
     --param VOLUME_CAPACITY=5Gi
     --param POSTGRESQL_VERSION=9.5
-    | {{ openshift_client_binary }} apply -f -
+    | {{ openshift_client_binary }} apply -f - -n {{ awx_project }}
   register: apply
   changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"
 
