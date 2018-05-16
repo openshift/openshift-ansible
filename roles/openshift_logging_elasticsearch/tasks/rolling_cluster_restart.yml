@@ -1,0 +1,26 @@
+---
+# If we are currently restarting the "es" cluster we want to check if we are scaling up the number of es nodes
+# If we are currently restarting the "es-ops" cluster we want to check if we are scaling up the number of ops nodes
+# If we've created a new node for that cluster then the appropriate variable will be true, otherwise we default to false
+- set_fact:
+    _skip_healthcheck: "{{ ( __logging_scale_up | default(false) ) if _cluster_component == 'es' else ( __logging_ops_scale_up | default(false) ) }}"
+
+# Flush ES
+# It is possible for this to fail on a brand new cluster, so don't fail then
+- name: "Flushing for logging-{{ _cluster_component }} cluster"
+  command: >
+    curl -s -k
+    --cert {{ _logging_handler_tempdir.stdout }}/admin-cert
+    --key {{ _logging_handler_tempdir.stdout }}/admin-key
+    -XPOST 'https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_flush/synced'
+  register: _flush_output
+  changed_when:
+  - "_flush_output.stdout != ''"
+  - (_flush_output.stdout | from_json)['_shards']['successful'] > 0
+  failed_when: false
+
+# Loop over each DC for restart_es_node.yml
+- include_tasks: restart_es_node.yml
+  with_items: "{{ logging_restart_cluster_dcs }}"
+  loop_control:
+    loop_var: _es_node
