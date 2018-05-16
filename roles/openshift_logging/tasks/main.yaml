@@ -28,7 +28,15 @@
     - not openshift_logging_install_logging | default(false) | bool
 
 - name: Cleaning up local temp dir
-  local_action: file path="{{local_tmp.stdout}}" state=absent
+  local_action: file path="{{ local_tmp.stdout }}" state=absent
+  tags: logging_cleanup
+  changed_when: False
+  become: false
+
+- name: Cleaning up temp dir
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
   tags: logging_cleanup
   changed_when: False
   become: false
