@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.46.0%{?dist}
+Release:        0.47.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue May 15 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.47.0
+- Updating fluentd docker container mount path (ewolinet@redhat.com)
+
 * Tue May 15 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.46.0
 - source azure credentials file (jminter@redhat.com)
 - Copy files from openshift_master_generated_config_dir instead using hardlinks
