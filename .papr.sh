@@ -33,10 +33,12 @@ PAPR_EXTRAVARS=""
 
 # Replace current branch with PAPR_UPGRADE_FROM
 if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
+  cp $PAPR_INVENTORY /tmp
   git branch new-code
   git checkout release-${PAPR_UPGRADE_FROM}
   git clean -fdx
   PAPR_EXTRAVARS="-e openshift_release=${PAPR_UPGRADE_FROM}"
+  cp /tmp/$PAPR_INVENTORY .
 fi
 
 pip install -r requirements.txt
