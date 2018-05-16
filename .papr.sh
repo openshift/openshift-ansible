@@ -37,7 +37,7 @@ if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
   git branch new-code
   git checkout release-${PAPR_UPGRADE_FROM}
   git clean -fdx
-  PAPR_EXTRAVARS="-e openshift_release=${PAPR_UPGRADE_FROM}"
+  PAPR_EXTRAVARS="-e openshift_release=${PAPR_UPGRADE_FROM} -e openshift_image_tag=v${PAPR_UPGRADE_FROM}"
   cp /tmp/$PAPR_INVENTORY .
 fi
 
