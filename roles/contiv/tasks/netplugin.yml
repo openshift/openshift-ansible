@@ -27,6 +27,7 @@
     src: "{{ contiv_current_release_directory }}/netplugin"
     dest: "{{ contiv_bin_dir }}/netplugin"
     state: link
+    force: yes
 
 - name: Netplugin | Ensure contiv_cni_bin_dir exists
   file:
@@ -39,6 +40,7 @@
     src: "{{ contiv_current_release_directory }}/contivk8s"
     dest: "{{ contiv_cni_bin_dir }}/contivk8s"
     state: link
+    force: yes
 
 - name: Netplugin | Copy CNI loopback bin
   copy:
