@@ -12,7 +12,7 @@
     register: elb_cert_chain
     retries: 20
     delay: 10
-    until: elb_cert_chain | succeeded
+    until: elb_cert_chain is succeeded
     ignore_errors: yes
 
   - debug:
@@ -22,4 +22,4 @@
   - name: check for iam cert error
     fail:
       msg: "Couldn't delete IAM cert {{ openshift_aws_iam_cert_name }}"
-    when: not elb_cert_chain | succeeded
+    when: elb_cert_chain is failed

@@ -59,7 +59,7 @@
   - fail: msg="Master running {{ openshift_current_version }} must be upgraded to {{ openshift_version }} before node upgrade can be run."
     when:
     - l_upgrade_nodes_only | default(False) | bool
-    - not (openshift_current_version | default('0.0') | match(openshift_version))
+    - not (openshift_current_version | default('0.0') is match(openshift_version))
 
 # If we're only upgrading nodes, skip this.
 - import_playbook: ../../../../openshift-master/private/validate_restart.yml

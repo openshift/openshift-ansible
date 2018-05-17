@@ -33,7 +33,7 @@
     when:
     - l_nodes_to_join|length > 0
 
-  - when: not approve_out|succeeded
+  - when: approve_out is failed
     block:
     - name: Get CSRs
       command: >
