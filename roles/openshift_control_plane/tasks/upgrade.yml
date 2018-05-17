@@ -57,7 +57,9 @@
     - origin-master-api
     - origin-master-controllers
   register: sysconfigs
-- when: sysconfigs|succeeded and sysconfigs.matched > 0
+- when:
+  - sysconfigs is succeeded
+  - sysconfigs.matched > 0
   name: Migrate OPENSHIFT_DEFAULT_REGISTRY from master sysconfig to master-config.yaml
   block:
   - name: Get master sysconfig contents
@@ -110,7 +112,7 @@
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: 'projectConfig.defaultNodeSelector'
     value: '{{ hostvars[groups.oo_first_master.0].l_osm_default_node_selector }}'
-  when: openshift_upgrade_target | version_compare('3.9', '>=')
+  when: openshift_upgrade_target is version_compare('3.9', '>=')
 
 - name: Remove use of pod presets from master config
   yedit:
