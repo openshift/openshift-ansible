@@ -9,14 +9,14 @@
   - name: Pull CLI Image (docker)
     docker_image:
       name: "{{ openshift_cli_image }}"
-    when: not l_use_cli_atomic_image | bool
+    when: not openshift_use_crio_only | bool
 
   - name: Pull CLI Image (atomic)
     command: >
       atomic pull --storage ostree {{ system_openshift_cli_image }}
     register: pull_result
     changed_when: "'Pulling layer' in pull_result.stdout"
-    when: l_use_cli_atomic_image | bool
+    when: openshift_use_crio_only | bool
 
   # openshift_container_binary_sync is a custom module in lib_utils
   - name: Copy client binaries/symlinks out of CLI image for use on the host
