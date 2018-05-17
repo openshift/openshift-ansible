@@ -18,7 +18,7 @@ spec:
         app: openshift-ansible-service-broker
         service: asb
     spec:
-      nodeSelector: {{ ansible_service_broker_node_selector }}
+      nodeSelector: {{ ansible_service_broker_node_selector | to_json }}
       serviceAccount: asb
       containers:
 {% if ansible_service_broker_enable_dashboard_redirector %}
@@ -78,4 +78,3 @@ spec:
         - name: asb-tls
           secret:
             secretName: asb-tls
-
