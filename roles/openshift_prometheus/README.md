@@ -27,11 +27,13 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 Each prometheus component (prometheus, alertmanager, alertbuffer) can set pv claim by setting corresponding role variable:
 ```
 openshift_prometheus_<COMPONENT>_storage_type: <VALUE> (pvc, emptydir)
+openshift_prometheus_<COMPONENT>_storage_class: <VALUE>
 openshift_prometheus_<COMPONENT>_pvc_(name|size|access_modes|pv_selector): <VALUE>
 ```
 e.g
 ```
 openshift_prometheus_storage_type: pvc
+openshift_prometheus_storage_class: glusterfs-storage
 openshift_prometheus_alertmanager_pvc_name: alertmanager
 openshift_prometheus_alertbuffer_pvc_size: 10G
 openshift_prometheus_pvc_access_modes: [ReadWriteOnce]

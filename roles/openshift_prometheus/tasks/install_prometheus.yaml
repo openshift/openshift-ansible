@@ -128,6 +128,7 @@
     access_modes: "{{ openshift_prometheus_pvc_access_modes }}"
     volume_capacity: "{{ openshift_prometheus_pvc_size }}"
     selector: "{{ openshift_prometheus_pvc_pv_selector }}"
+    storage_class_name: "{{ openshift_prometheus_sc_name }}"
   when: openshift_prometheus_storage_type == 'pvc'
 
 - name: create alertmanager pvc
@@ -137,6 +138,7 @@
     access_modes: "{{ openshift_prometheus_alertmanager_pvc_access_modes }}"
     volume_capacity: "{{ openshift_prometheus_alertmanager_pvc_size }}"
     selector: "{{ openshift_prometheus_alertmanager_pvc_pv_selector }}"
+    storage_class_name: "{{ openshift_prometheus_alertmanager_sc_name }}"
   when: openshift_prometheus_alertmanager_storage_type == 'pvc'
 
 - name: create alertbuffer pvc
@@ -146,6 +148,7 @@
     access_modes: "{{ openshift_prometheus_alertbuffer_pvc_access_modes }}"
     volume_capacity: "{{ openshift_prometheus_alertbuffer_pvc_size }}"
     selector: "{{ openshift_prometheus_alertbuffer_pvc_pv_selector }}"
+    storage_class_name: "{{ openshift_prometheus_alertbuffer_sc_name }}"
   when: openshift_prometheus_alertbuffer_storage_type == 'pvc'
 
 # create prometheus stateful set
