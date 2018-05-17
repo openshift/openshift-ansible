@@ -16,7 +16,7 @@
   - fail:
       msg: "Trying to change SCCs. Run \"{{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig\" and confirm SCCs which will be changed."
     when:
-    - openshift_reconcile_sccs_reject_change
+    - openshift_reconcile_sccs_reject_change | default(true) | bool
     - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
 
 # Create service signer cert when missing. Service signer certificate
