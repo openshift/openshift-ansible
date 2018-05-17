@@ -539,8 +539,8 @@ resources:
           floating_network:
             if:
               - no_floating
-              - ''
               - {{ openshift_openstack_external_network_name }}
+              - ''
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
