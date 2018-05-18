@@ -23,13 +23,34 @@ if [[ -n "{{ openshift_gcp_ssh_private_key }}" ]]; then
         pub_key=$(cut -d ' ' -f 2 <  "${pub_file}")
     fi
     key_tmp_file='/tmp/ocp-gce-keys'
-    if ! gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep -q "$pub_key"; then
-        if gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep -q ssh-rsa; then
-            gcloud --project "{{ openshift_gcp_project }}" compute project-info describe | grep ssh-rsa | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/value: //' > "$key_tmp_file"
+    echo -n 'cloud-user:' >> "$key_tmp_file"
+    cat "${pub_file}" >> "$key_tmp_file"
+
+    # Set up ssh keys for the builder instance.
+    (
+        build_instance="{{ openshift_gcp_prefix }}build-image-instance"
+        if ! metadata=$(gcloud --project "{{ openshift_gcp_project }}" compute instances describe "${build_instance}" --zone "{{ openshift_gcp_zone }}" --format='value[](metadata.items.ssh-keys)'); then
+            exit 0
         fi
-        echo -n 'cloud-user:' >> "$key_tmp_file"
-        cat "${pub_file}" >> "$key_tmp_file"
-        gcloud --project "{{ openshift_gcp_project }}" compute project-info add-metadata --metadata-from-file "sshKeys=${key_tmp_file}"
-        rm -f "$key_tmp_file"
-    fi
+        if ! echo "${metadata}" | grep -q "${pub_key}"; then
+            gcloud --project "{{ openshift_gcp_project }}" compute instances add-metadata "${build_instance}" --zone "{{ openshift_gcp_zone }}" --metadata-from-file ssh-keys="${key_tmp_file}"
+        fi
+    ) &
+
+    # Set up ssh keys for all instances in all groups.
+    {% for node_group in openshift_gcp_node_group_config %}
+    (
+        if ! instances=($( gcloud --project "{{ openshift_gcp_project }}" compute instance-groups managed list-instances "{{ openshift_gcp_prefix }}ig-{{ node_group.suffix }}" --zone "{{ openshift_gcp_zone }}" --format='value[terminator=" "](instance)' 2>/dev/null )); then
+            exit 0
+        fi
+        for instance in ${instances[@]+"${instances[@]}"}; do
+            if ! gcloud --project "{{ openshift_gcp_project }}" compute instances describe "${instance}" --zone "{{ openshift_gcp_zone }}" --format='value[](metadata.items.ssh-keys)' | grep -q "${pub_key}"; then
+                gcloud --project "{{ openshift_gcp_project }}" compute instances add-metadata "${instance}" --zone "{{ openshift_gcp_zone }}" --metadata-from-file ssh-keys="${key_tmp_file}" &
+            fi
+        done
+        for i in `jobs -p`; do wait $i; done
+    ) &
+    {% endfor %}
+    for i in `jobs -p`; do wait $i; done
+    rm -f "$key_tmp_file"
 fi
