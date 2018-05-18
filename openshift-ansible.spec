@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.47.0%{?dist}
+Release:        0.48.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,57 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri May 18 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.48.0
+- API liveness probe: set timeout to 10 sec to prevent API restart if the
+  system is busy (vrutkovs@redhat.com)
+- removing dnsmasq-node.conf.j2 since nothing is referencing it.
+  (kwoodson@redhat.com)
+- Fixup SELinux permissions for docker when using a different graph path
+  (mrunalp@gmail.com)
+- bug 1579723: use ansible_service_broker_dashboard_redirector_route in ASB
+  configmap (jiazha@redhat.com)
+- RPM is currently the only way to install CRIO (vrutkovs@redhat.com)
+- Mention openshift_crio_only in hosts.example (vrutkovs@redhat.com)
+- openshift_checks: ignore docker_storage check if only CRIO is used
+  (vrutkovs@redhat.com)
+- Bug 1579269 - Updating the CRD resource names for migration.
+  (smhurley00@gmail.com)
+- Adding image publishing capability to azure playbooks. (kwoodson@redhat.com)
+- Update Jinja tests used as filters (rteague@redhat.com)
+- Add patch to installer image (sdodson@redhat.com)
+- Enable monitoring upgrades (ironcladlou@gmail.com)
+- Adding support for node images on 3.10 for azure. (kwoodson@redhat.com)
+- ASB nodeselector needs to be converted to json to avoid possible python
+  unicode issues (vrutkovs@redhat.com)
+- Revert "Install node-dnsmasq configuration file" (sdodson@redhat.com)
+- Force creating hard- and softlinks (vrutkovs@redhat.com)
+- Add default value to openshift_reconcile_sccs_reject_change
+  (nakayamakenjiro@gmail.com)
+- Stop upgrade when existing sccs will be changed (nakayamakenjiro@gmail.com)
+- fix descheduler pod should be critical pod (wjiang@redhat.com)
+- pass cluster cidr to proxy (dan@projectcalico.org)
+- Fix unwanted removal of openshift.fact file (mgugino@redhat.com)
+- Implicitly create node's IST in Kuryr's namespace (mdulko@redhat.com)
+- openshift-node: sync script with origin (gscrivan@redhat.com)
+- oc_system_container: remove existing service file (vrutkovs@redhat.com)
+- Remove correct files when converting to master configs to static
+  (vrutkovs@redhat.com)
+- PARP: make sure FQDN matches internal IP (vrutkovs@redhat.com)
+- PAPR: rename upgrade tasks (vrutkovs@redhat.com)
+- PAPR: run upgrade from 3.9 branch (vrutkovs@redhat.com)
+- Add new key and remove deprecated key for master network conf
+  (mgugino@redhat.com)
+- Remove double_upgrade bits (mgugino@redhat.com)
+- Add static cluster id label to alerts (ironcladlou@gmail.com)
+- Fixes #7009: Hardcoded namespace default in lib_openshift/oc_adm_router
+  (jkr@adorsys.de)
+- Update requirements.txt (lukasz.gogolin@gmail.com)
+- Bug 1561485- get now returns empty instead of error when the namespace is
+  missing (fabian@fabianism.us)
+- Update generate_pv_pvcs_list.py (davis.phillips@gmail.com)
+- add support for vsphere-volume registry and other services
+  (davis.phillips@gmail.com)
+
 * Tue May 15 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.47.0
 - Updating fluentd docker container mount path (ewolinet@redhat.com)
 
