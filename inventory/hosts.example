@@ -119,6 +119,7 @@ debug_level=2
 #openshift_docker_blocked_registries=registry.hacker.com
 # Install and run cri-o.
 #openshift_use_crio=False
+#openshift_use_crio_only=False
 # The following two variables are used when openshift_use_crio is True
 # and cleans up after builds that pass through docker. When openshift_use_crio is True
 # these variables are set to the defaults shown. You may override them here.
