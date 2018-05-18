@@ -44,6 +44,22 @@
     when: openshift_node_group_edits|length > 0
     run_once: true
 
+  - name: create volume config template
+    template:
+      src: volume-config.yaml.j2
+      dest: "{{ mktempout.stdout }}/volume-config.yaml"
+    when:
+    - configout.results.results.0 == {} and openshift_node_group_name != "" and openshift_node_local_quota_per_fsgroup is defined and openshift_node_local_quota_per_fsgroup != ""
+    run_once: true
+
+  - name: lay down the volume config from the existing configmap
+    copy:
+      content: "{{ configout.results.results.0.data['volume-config.yaml'] }}"
+      dest: "{{ mktempout.stdout }}/volume-config.yaml"
+    when:
+    - configout.results.results.0 != {} and openshift_node_group_name != "" and openshift_node_local_quota_per_fsgroup is defined and openshift_node_local_quota_per_fsgroup != ""
+    run_once: true
+
   - debug: var=yeditout
     run_once: true
 
@@ -53,6 +69,19 @@
       namespace: "{{ openshift_node_group_namespace }}"
       from_file:
         node-config.yaml: "{{ mktempout.stdout }}/node-config.yaml"
+    when:
+    - openshift_node_local_quota_per_fsgroup is undefined or openshift_node_local_quota_per_fsgroup == ""
+    run_once: true
+
+  - name: create node-config.yaml and volume-config.yaml configmap
+    oc_configmap:
+      name: "{{ openshift_node_group_name }}"
+      namespace: "{{ openshift_node_group_namespace }}"
+      from_file:
+        node-config.yaml: "{{ mktempout.stdout }}/node-config.yaml"
+        volume-config.yaml: "{{ mktempout.stdout }}/volume-config.yaml"
+    when:
+    - openshift_node_local_quota_per_fsgroup is defined and openshift_node_local_quota_per_fsgroup != ""
     run_once: true
 
   - name: remove templated files
