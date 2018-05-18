@@ -51,6 +51,7 @@ objects:
         baseImage: ${PROMETHEUS_IMAGE}
         externalLabels:
           cluster: ${CLUSTER_ID}
+        resources: {}
       alertmanagerMain:
         baseImage: ${ALERTMANAGER_IMAGE}
 
