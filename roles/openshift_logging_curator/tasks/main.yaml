@@ -12,10 +12,6 @@
     openshift_logging_curator_image_prefix: "{{ openshift_logging_curator_image_prefix | default(__openshift_logging_curator_image_prefix) }}"
     openshift_logging_curator_image_version: "{{ openshift_logging_curator_image_version | default(__openshift_logging_curator_image_version) }}"
 
-- name: Detect running upgrade
-  set_fact:
-    is_upgrade: "{{ openshift_logging_facts['curator']['configmaps']['logging-curator'] is defined }}"
-
 - name: Ensure that Logging Curator has nodes to run on
   import_role:
     name: openshift_control_plane
@@ -77,6 +73,10 @@
 - set_fact:
     curator_name: "{{ 'logging-curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
     curator_component: "{{ 'curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
+
+- name: Detect running upgrade
+  set_fact:
+    is_upgrade: "{{ openshift_logging_facts['curator' ~ ( (openshift_logging_curator_ops_deployment | default(false) | bool) | ternary('_ops', '') )]['deploymentconfigs'][curator_name] is defined }}"
 
 # Deployment Config - v2.x
 - when: not openshift_logging_es5_techpreview
