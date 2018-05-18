@@ -39,7 +39,7 @@ data:
     broker:
       dev_broker: {{ ansible_service_broker_dev_broker | bool | lower }}
 {% if ansible_service_broker_enable_dashboard_redirector %}
-      dashboard_redirector: {{ ansible_service_broker_dashboard_redirector }}
+      dashboard_redirector: {{ ansible_service_broker_dashboard_redirector_route }}
 {% endif %}
       bootstrap_on_startup: {{ ansible_service_broker_bootstrap_on_startup | bool | lower }}
       refresh_interval: {{ ansible_service_broker_refresh_interval }}
