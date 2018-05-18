@@ -173,21 +173,9 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
             if self.get_var("osm_use_cockpit", default=True, convert=bool):
                 required.add(self._registry_console_image(image_tag, image_info))
 
-        # images for containerized components
-        def add_var_or_default_img(var_name, comp_name):
-            """Returns: default image from comp_name, overridden by var_name in task_vars"""
-            default = "{}/{}:{}".format(image_info["namespace"], comp_name, image_tag)
-            required.add(self.template_var(self.get_var(var_name, default=default)))
-
-        if self.get_var("openshift_is_containerized", convert=bool):
+        if self.get_var("openshift_is_atomic", convert=bool):
             if 'oo_nodes_to_config' in host_groups:
-                add_var_or_default_img("osn_image", image_info["name"] + "-node")
-            if 'oo_masters_to_config' in host_groups:  # name is "origin" or "ose"
-                add_var_or_default_img("osm_image", image_info["name"] + "-control-plane")
-            if 'oo_etcd_to_config' in host_groups:
-                # special case, note default is the same for origin/enterprise and has no image tag
-                etcd_img = self.get_var("osm_etcd_image", default="registry.access.redhat.com/rhel7/etcd")
-                required.add(self.template_var(etcd_img))
+                required.add(self.template_var(self.get_var('osn_image', default='')))
 
         return required
 

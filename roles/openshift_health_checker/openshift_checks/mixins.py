@@ -10,8 +10,8 @@ class NotContainerizedMixin(object):
 
     def is_active(self):
         """Only run on non-containerized hosts."""
-        openshift_is_containerized = self.get_var("openshift_is_containerized")
-        return super(NotContainerizedMixin, self).is_active() and not openshift_is_containerized
+        openshift_is_atomic = self.get_var("openshift_is_atomic")
+        return super(NotContainerizedMixin, self).is_active() and not openshift_is_atomic
 
 
 class DockerHostMixin(object):
@@ -23,8 +23,6 @@ class DockerHostMixin(object):
         """Only run on hosts that depend on Docker."""
         group_names = set(self.get_var("group_names", default=[]))
         needs_docker = set(["oo_nodes_to_config"])
-        if self.get_var("openshift_is_containerized"):
-            needs_docker.update(["oo_masters_to_config", "oo_etcd_to_config"])
         return super(DockerHostMixin, self).is_active() and bool(group_names.intersection(needs_docker))
 
     def ensure_dependencies(self):

@@ -3,16 +3,16 @@ import pytest
 from openshift_checks.package_availability import PackageAvailability
 
 
-@pytest.mark.parametrize('pkg_mgr,openshift_is_containerized,is_active', [
+@pytest.mark.parametrize('pkg_mgr,openshift_is_atomic,is_active', [
     ('yum', False, True),
     ('yum', True, False),
     ('dnf', True, False),
     ('dnf', False, False),
 ])
-def test_is_active(pkg_mgr, openshift_is_containerized, is_active):
+def test_is_active(pkg_mgr, openshift_is_atomic, is_active):
     task_vars = dict(
         ansible_pkg_mgr=pkg_mgr,
-        openshift_is_containerized=openshift_is_containerized,
+        openshift_is_atomic=openshift_is_atomic,
     )
     assert PackageAvailability(None, task_vars).is_active() == is_active
 
