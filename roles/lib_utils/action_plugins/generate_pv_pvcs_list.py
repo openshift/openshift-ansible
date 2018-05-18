@@ -18,12 +18,17 @@ class ActionModule(ActionBase):
         volume = self.get_templated(str(varname) + '_volume_name')
         size = self.get_templated(str(varname) + '_volume_size')
         labels = self.task_vars.get(str(varname) + '_labels')
+        annotations = self.task_vars.get(str(varname) + '_annotations')
         if labels:
             labels = self._templar.template(labels)
         else:
             labels = dict()
+        if annotations:
+            annotations = self._templar.template(annotations)
+        else:
+            annotations = list()
         access_modes = self.get_templated(str(varname) + '_access_modes')
-        return (volume, size, labels, access_modes)
+        return (volume, size, labels, annotations, access_modes)
 
     def build_pv_nfs(self, varname=None):
         """Build pv dictionary for nfs storage type"""
@@ -37,7 +42,7 @@ class ActionModule(ActionBase):
                 host = groups['oo_nfs_to_config'][0]
             else:
                 raise errors.AnsibleModuleError("|failed no storage host detected")
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         directory = self.get_templated(str(varname) + '_nfs_directory')
         path = directory + '/' + volume
         return dict(
@@ -52,7 +57,7 @@ class ActionModule(ActionBase):
 
     def build_pv_openstack(self, varname=None):
         """Build pv dictionary for openstack storage type"""
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         filesystem = self.get_templated(str(varname) + '_openstack_filesystem')
         volume_name = self.get_templated(str(varname) + '_volume_name')
         volume_id = self.get_templated(str(varname) + '_openstack_volumeID')
@@ -70,7 +75,7 @@ class ActionModule(ActionBase):
 
     def build_pv_glusterfs(self, varname=None):
         """Build pv dictionary for glusterfs storage type"""
-        volume, size, labels, access_modes = self.build_common(varname=varname)
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
         endpoints = self.get_templated(str(varname) + '_glusterfs_endpoints')
         path = self.get_templated(str(varname) + '_glusterfs_path')
         read_only = self.get_templated(str(varname) + '_glusterfs_readOnly')
@@ -101,7 +106,7 @@ class ActionModule(ActionBase):
                 elif kind == 'glusterfs':
                     return self.build_pv_glusterfs(varname=varname)
 
-                elif not (kind == 'object' or kind == 'dynamic'):
+                elif not (kind == 'object' or kind == 'dynamic' or kind == 'vsphere'):
                     msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
                         kind,
                         varname)
@@ -120,7 +125,7 @@ class ActionModule(ActionBase):
                 if create_pvc:
                     create_pvc = self._templar.template(create_pvc)
                     if kind != 'object' and create_pv and create_pvc:
-                        volume, size, _, access_modes = self.build_common(varname=varname)
+                        volume, size, _, annotations, access_modes = self.build_common(varname=varname)
                         storageclass = self.task_vars.get(str(varname) + '_storageclass')
                         if storageclass:
                             storageclass = self._templar.template(storageclass)
@@ -129,6 +134,7 @@ class ActionModule(ActionBase):
                         return dict(
                             name="{0}-claim".format(volume),
                             capacity=size,
+                            annotations=annotations,
                             access_modes=access_modes,
                             storageclass=storageclass)
         return None
