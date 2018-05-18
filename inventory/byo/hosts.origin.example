@@ -886,6 +886,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # where as this would not
 # openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=50
 #
+# A timeout to wait for nodes to drain pods can be specified to ensure that the
+# upgrade continues even if nodes fail to drain pods in the allowed time. The
+# default value of 0 will wait indefinitely allowing the admin to investigate
+# the root cause and ensuring that disruption budgets are respected. If the
+# a timeout of 0 is used there will also be one attempt to re-try draining the
+# node. If a non zero timeout is specified there will be no attempt to retry.
+# openshift_upgrade_nodes_drain_timeout=0
+#
 # Multiple data migrations take place and if they fail they will fail the upgrade
 # You may wish to disable these or make them non fatal
 #
