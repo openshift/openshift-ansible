@@ -93,7 +93,7 @@ class CAServerCert(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_adm_ca_server_cert module'''
 
         # Filter non-strings from hostnames list (Such as boolean: False)
         params['hostnames'] = [host for host in params['hostnames'] if isinstance(host, string_types)]

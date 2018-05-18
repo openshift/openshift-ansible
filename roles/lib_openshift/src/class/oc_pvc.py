@@ -82,7 +82,7 @@ class OCPVC(OpenShiftCLI):
     # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_pvc module'''
         pconfig = PersistentVolumeClaimConfig(params['name'],
                                               params['namespace'],
                                               params['kubeconfig'],

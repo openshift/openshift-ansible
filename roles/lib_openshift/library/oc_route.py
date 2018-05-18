@@ -1746,7 +1746,7 @@ class OCRoute(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
-        ''' run the idempotent asnible code
+        ''' run the oc_route module
 
             params comes from the ansible portion for this module
             files: a dictionary for the certificates

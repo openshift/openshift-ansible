@@ -3060,7 +3060,7 @@ class Router(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run ansible idempotent code'''
+        '''run the oc_adm_router module'''
 
         rconfig = RouterConfig(params['name'],
                                params['namespace'],

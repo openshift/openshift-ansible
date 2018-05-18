@@ -191,7 +191,7 @@ class OCLabel(OpenShiftCLI):
     # pylint: disable=too-many-branches,too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode=False):
-        ''' run the idempotent ansible code
+        ''' run the oc_label module
 
             prams comes from the ansible portion of this module
             check_mode: does the module support check mode. (module.check_mode)

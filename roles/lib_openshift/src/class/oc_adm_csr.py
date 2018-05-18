@@ -148,7 +148,7 @@ class OCcsr(OpenShiftCLI):
 
     @staticmethod
     def run_ansible(params, check_mode=False):
-        '''run the idempotent ansible code'''
+        '''run the oc_adm_csr module'''
 
         client = OCcsr(params['nodes'],
                        params['approve_all'],
@@ -207,4 +207,3 @@ class OCcsr(OpenShiftCLI):
 
         return {'failed': True,
                 'msg': 'Unknown state passed. %s' % state}
-
