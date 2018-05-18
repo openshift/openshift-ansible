@@ -137,6 +137,17 @@
   changed_when: False
   register: r_docker_already_running_result
 
+- name: Check for docker_storage_path/overlay2
+  stat:
+    path: "{{ docker_storage_path }}/overlay2"
+  register: dsp_stat
+
+- name: Fixup SELinux permissions for docker
+  shell: |
+           semanage fcontext -a -e /var/lib/docker/overlay2 "{{ docker_storage_path }}/overlay2"
+           restorecon -R -v "{{ docker_storage_path }}/overlay2"
+  when: dsp_stat.stat.exists
+
 - name: Start the Docker service
   systemd:
     name: docker
