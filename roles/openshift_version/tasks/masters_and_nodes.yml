@@ -37,3 +37,5 @@
 - debug: var=openshift_image_tag
 
 - debug: var=openshift_pkg_version
+
+- debug: var=openshift_version

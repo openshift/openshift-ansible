@@ -1,7 +1,7 @@
 ---
-- name: Get available {{ openshift_service_type}} version
+- name: Get available RPM version
   repoquery:
-    name: "{{ openshift_service_type}}{{ '-' ~ openshift_release ~ '*' if openshift_release is defined else '' }}"
+    name: "{{ openshift_service_type }}{% if openshift_version is defined %}-{{ openshift_version }}*{% elif openshift_release is defined %}-{{ openshift_release }}*{% endif %}"
     ignore_excluders: true
   register: rpm_results
 

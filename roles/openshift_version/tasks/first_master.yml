@@ -14,7 +14,7 @@
 - include_tasks: "{{ l_first_master_version_task_file }}"
 
 # When double upgrade is in process, we want to set everything to match
-# openshift_verison.
+# openshift_version.
 - block:
   - debug:
       msg: "openshift_pkg_version was not defined. Falling back to -{{ openshift_version }}"
@@ -24,7 +24,7 @@
   - openshift_pkg_version is not defined or l_double_upgrade_cp_reset_version
 
 # When double upgrade is in process, we want to set everything to match
-# openshift_verison.
+# openshift_version.
 - block:
   - debug:
       msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
@@ -32,7 +32,7 @@
       openshift_image_tag: "v{{ openshift_version }}"
   when: openshift_image_tag is not defined or l_double_upgrade_cp_reset_version
 
-# The end result of these three variables is quite important so make sure they are displayed and logged:
+# The end result of these variables is quite important so make sure they are displayed and logged:
 - debug: var=openshift_release
 
 - debug: var=openshift_image_tag
