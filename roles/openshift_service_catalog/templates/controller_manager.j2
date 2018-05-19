@@ -38,6 +38,7 @@ spec:
         - kube-service-catalog
         - --leader-elect-resource-lock
         - configmaps
+        - --cluster-id-configmap-namespace=kube-service-catalog
         - --broker-relist-interval
         - "5m"
         - --feature-gates
