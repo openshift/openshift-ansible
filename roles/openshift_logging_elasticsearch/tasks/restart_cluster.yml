@@ -1,16 +1,12 @@
 ---
 ## get all pods for the cluster
 - command: >
-<<<<<<< HEAD
-    {{ openshift.common.client_binary }} get pod -l component={{ _cluster_component }},provider=openshift -n {{ openshift_logging_elasticsearch_namespace }} -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
-=======
     {{ openshift_client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     get pod
     -l component={{ _cluster_component }},provider=openshift
     -n {{ openshift_logging_elasticsearch_namespace }}
     -o jsonpath={.items[?(@.status.phase==\"Running\")].metadata.name}
->>>>>>> 770bc1d3d... Updating process for doing a rolling and full cluster upgrades
   register: _cluster_pods
 
 # make a temp dir for admin certs

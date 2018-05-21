@@ -62,7 +62,7 @@
 # evaluate the RC for _dc_output
 - name: Evaluating status of rolled out pod
   assert:
-    that: not _dc_output.failed
+    that: _dc_output.failed is undefined or not _dc_output.failed
     msg: "Node {{ _es_node}} in cluster logging-{{ _cluster_component }} was unable to rollout. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
 
 - when: not _skip_healthcheck | bool
@@ -93,5 +93,5 @@
 
 - name: Evaluating cluster health
   assert:
-    that: not _pod_status.failed
+    that: _pod_status.failed is undefined or not _pod_status.failed
     msg: "Cluster logging-{{ _cluster_component }} was unable to recover to a green state. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
