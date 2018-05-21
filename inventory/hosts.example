@@ -94,8 +94,7 @@ debug_level=2
 
 # Configure extensions in the master config for console customization
 # See: https://docs.openshift.org/latest/install_config/web_console_customization.html#serving-static-files
-#openshift_master_oauth_templates:
-#  login: /path/to/login-template.html
+#openshift_master_oauth_templates={'login': '/path/to/login-template.html'}
 # openshift_master_oauth_template is deprecated.  Use openshift_master_oauth_templates instead.
 #openshift_master_oauth_template=/path/to/login-template.html
 
