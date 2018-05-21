@@ -22,6 +22,9 @@
       openshift_additional_repos: "{{ azure_node_repos[ansible_distribution] }}"
       openshift_node_include_control_plane: True
       openshift_control_plane_static_pod_location: /etc/origin/node/disabled/
+      openshift_node_image_prep_packages:
+      - insights-client
+      - strace
 
   - set_fact:
       openshift_additional_repos: "{{ openshift_additional_repos + [{'name': 'install_repo', 'baseurl': openshift_azure_install_repo, 'enabled': true, 'gpgcheck': false}] }}"
