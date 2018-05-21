@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.49.0%{?dist}
+Release:        0.50.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon May 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.50.0
+- 
+
 * Mon May 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.49.0
 - Adding strace and insights-client (kwoodson@redhat.com)
 - Updating process for doing a rolling and full cluster upgrades
