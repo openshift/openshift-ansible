@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.48.0%{?dist}
+Release:        0.49.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,16 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon May 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.49.0
+- Adding strace and insights-client (kwoodson@redhat.com)
+- Updating process for doing a rolling and full cluster upgrades
+  (ewolinet@redhat.com)
+- fix  The error was: KeyError: 'userNames' (jcantril@redhat.com)
+- catalog:  add -cluster-id-configmap-namespace=kube-service-catalog flag
+  (jaboyd@redhat.com)
+- Specify service port for Prometheus scraping (lukas.vlcek@gmail.com)
+- avoid drop_colomun in query. (mrsiano@gmail.com)
+
 * Fri May 18 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.48.0
 - API liveness probe: set timeout to 10 sec to prevent API restart if the
   system is busy (vrutkovs@redhat.com)
