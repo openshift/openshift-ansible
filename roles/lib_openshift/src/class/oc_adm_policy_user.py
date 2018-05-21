@@ -108,7 +108,7 @@ class PolicyUser(OpenShiftCLI):
 
         for binding in bindings:
             if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
-                    binding['userNames'] is not None and \
+                    'userNames' in binding and binding['userNames'] is not None and \
                     self.config.config_options['user']['value'] in binding['userNames']:
                 self.role_binding = binding
                 return True
