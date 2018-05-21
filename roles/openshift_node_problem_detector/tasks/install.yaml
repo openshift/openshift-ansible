@@ -8,6 +8,8 @@
   oc_project:
     name: openshift-node-problem-detector
     state: present
+    node_selector:
+    - ""
 
 - name: create Node Problem Detector service account
   oc_serviceaccount:
