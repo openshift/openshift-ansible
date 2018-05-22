@@ -1,7 +1,5 @@
 ---
-- name: Setup the node group config maps
-  import_role:
-    name: openshift_node_group
+- import_tasks: node_config.yml
 
 - name: Setup the node bootstrap auto approver
   import_role:
