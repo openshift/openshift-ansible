@@ -14,7 +14,12 @@
     when: openshift_reconcile_sccs_reject_change | default(true) | bool
 
   - fail:
-      msg: "Trying to change SCCs. Run \"{{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig\" and confirm SCCs which will be changed."
+      msg: >
+        Changes to bootstrapped SCCs have been detected. Please review the changes by running
+        "{{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
+        After reviewing the changes please apply those changes by adding the '--confirm' flag.
+        Do not modify the default SCCs. Customizing the default SCCs will cause this check to fail when upgrading.
+        If you require non standard SCCs please refer to https://docs.openshift.org/latest/admin_guide/manage_scc.html
     when:
     - openshift_reconcile_sccs_reject_change | default(true) | bool
     - check_reconcile_scc_result.stdout != '' or check_reconcile_scc_result.rc != 0
