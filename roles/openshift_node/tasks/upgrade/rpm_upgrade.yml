@@ -10,6 +10,8 @@
   command: "{{ ansible_pkg_mgr }} install -y --downloadonly {{ openshift_node_upgrade_rpm_list | join(' ')}}"
   register: result
   until: result is succeeded
+  failed_when:
+    - result.stdout is search(".*No package .* available.*") or result is failed
   vars:
     openshift_node_upgrade_rpm_list:
       - "{{ openshift_service_type }}-node{{ openshift_pkg_version | default('') }}"
