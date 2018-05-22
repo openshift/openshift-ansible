@@ -30,6 +30,8 @@ spec:
               protocol: TCP
           command:
             - dashboard-redirector
+            - --namespace
+            - "openshift-ansible-service-broker"
           imagePullPolicy: IfNotPresent
 {% endif %}
         - image: {{ ansible_service_broker_image }}
