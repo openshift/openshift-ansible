@@ -92,6 +92,7 @@
       {{ openshift_client_binary }} rollout latest dc/docker-registry
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default
+    when: l_docker_registry_dc.rc == 0
 
   - name: Delete temp directory
     file:
