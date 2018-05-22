@@ -75,9 +75,8 @@
     - not full_restart_cluster | bool
 
 # remove temp dir
-- name: Cleaning up local temp dir
+- name: Cleaning up temp dir
   file:
     path: "{{ _logging_handler_tempdir.stdout }}"
     state: absent
   changed_when: False
-  become: false
