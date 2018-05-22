@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.119
+Version:        3.6.173.0.120
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,12 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue May 22 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.120-1
+- Add the ability to specify a timeout for node drain operations
+  (dani_comnea@yahoo.com)
+- Force creating hard- and softlinks (vrutkovs@redhat.com)
+- update xpaas imagestreams to explicitly import tags (bparees@redhat.com)
+
 * Thu May 10 2018 Justin Pierce <jupierce@redhat.com> 3.6.173.0.119-1
 - 
 
