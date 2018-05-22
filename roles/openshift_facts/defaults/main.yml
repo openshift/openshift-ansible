@@ -115,3 +115,4 @@ openshift_service_type_dict:
 openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
 openshift_master_api_port: "8443"
 openshift_ca_host: "{{ groups.oo_first_master.0 }}"
+openshift_use_openshift_sdn: true
