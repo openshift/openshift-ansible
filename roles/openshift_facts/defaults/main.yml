@@ -100,3 +100,4 @@ openshift_service_type_dict:
   openshift-enterprise: atomic-openshift
 
 openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_type] }}"
+openshift_use_openshift_sdn: true
