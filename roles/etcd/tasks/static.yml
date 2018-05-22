@@ -54,6 +54,25 @@
   with_items:
   - etcd.yaml
 
+- name: Set etcd host as a probe target host
+  yedit:
+    src: "{{ mktemp.stdout }}/{{ item }}"
+    edits:
+    - key: spec.containers[0].livenessProbe.exec.command
+      value:
+      - "etcdctl"
+      - "--cert-file"
+      - "{{ etcd_peer_cert_file }}"
+      - "--key-file"
+      - "{{ etcd_peer_key_file }}"
+      - "--ca-file"
+      - "{{ etcd_peer_ca_file }}"
+      - "-C"
+      - "{{ etcd_peer_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_port }}"
+      - "cluster-health"
+  with_items:
+  - etcd.yaml
+
 - name: Deploy etcd static pod
   copy:
     remote_src: true
