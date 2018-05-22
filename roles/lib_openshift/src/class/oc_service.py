@@ -90,7 +90,7 @@ class OCService(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
-        '''Run the idempotent ansible code'''
+        '''Run the oc_service module'''
         oc_svc = OCService(params['name'],
                            params['namespace'],
                            params['labels'],

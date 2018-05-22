@@ -107,7 +107,7 @@ class OCObject(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode=False):
-        '''perform the ansible idempotent code'''
+        '''run the oc_obj module'''
 
         ocobj = OCObject(params['kind'],
                          params['namespace'],

@@ -73,7 +73,7 @@ class OCEnv(OpenShiftCLI):
     # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_env module'''
 
         ocenv = OCEnv(params['namespace'],
                       params['kind'],

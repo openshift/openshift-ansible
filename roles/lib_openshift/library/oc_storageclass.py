@@ -1622,7 +1622,7 @@ class OCStorageClass(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     # TODO: This function should be refactored into its individual parts.
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''run the oc_storageclass module'''
 
         # Make sure that the provisioner is fully qualified before using it
         # E.g. if 'aws-efs' is provided as a provisioner, convert it to 'kubernetes.io/aws-efs'

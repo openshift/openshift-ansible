@@ -118,7 +118,7 @@ class OCProcess(OpenShiftCLI):
     # pylint: disable=too-many-return-statements
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the ansible idempotent code'''
+        '''run the oc_process module'''
 
         ocprocess = OCProcess(params['namespace'],
                               params['template_name'],
@@ -182,4 +182,3 @@ class OCProcess(OpenShiftCLI):
                 return {"failed": True, "changed": update, "msg": rval, "state": state}
 
         return {"changed": update, "results": rval, "state": state}
-

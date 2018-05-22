@@ -81,7 +81,7 @@ class OCClusterRole(OpenShiftCLI):
     # pylint: disable=too-many-return-statements,too-many-branches
     @staticmethod
     def run_ansible(params, check_mode):
-        '''run the idempotent ansible code'''
+        '''run the oc_clusterrole module'''
 
         oc_clusterrole = OCClusterRole(params['name'],
                                        params['rules'],
