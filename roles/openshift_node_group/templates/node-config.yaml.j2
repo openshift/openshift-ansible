@@ -44,7 +44,7 @@ kubeletArguments:
   - "true"
   cert-dir:
   - /etc/origin/node/certificates
-{% if openshift_node_group_cloud_provider is defined %}
+{% if openshift_node_group_cloud_provider != '' %}
   cloud-config:
   - /etc/origin/cloudprovider/{{ openshift_node_group_cloud_provider }}.conf
   cloud-provider:
