@@ -4,4 +4,5 @@
   gather_facts: no
   tasks:
   - name: include openshift node config
-    import_tasks: tasks/node_config.yml
+    import_role:
+      name: openshift_node_group

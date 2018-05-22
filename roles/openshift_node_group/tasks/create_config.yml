@@ -8,7 +8,8 @@
   run_once: true
 
 - name: debug node config
-  debug: var=configout
+  debug:
+    var: configout
   run_once: true
 
 - when:
@@ -44,12 +45,20 @@
     when: openshift_node_group_edits|length > 0
     run_once: true
 
+  - name: show the yeditout debug var
+    debug:
+      var: yeditout
+    run_once: true
+
   - name: create volume config template
     template:
       src: volume-config.yaml.j2
       dest: "{{ mktempout.stdout }}/volume-config.yaml"
     when:
-    - configout.results.results.0 == {} and openshift_node_group_name != "" and openshift_node_local_quota_per_fsgroup is defined and openshift_node_local_quota_per_fsgroup != ""
+    - "'data' not in configout['results']['results'][0] or 'volume-config.yaml' not in configout['results']['results'][0]['data']"
+    - openshift_node_group_name != ""
+    - openshift_node_local_quota_per_fsgroup is defined
+    - openshift_node_local_quota_per_fsgroup != ""
     run_once: true
 
   - name: lay down the volume config from the existing configmap
@@ -57,10 +66,28 @@
       content: "{{ configout.results.results.0.data['volume-config.yaml'] }}"
       dest: "{{ mktempout.stdout }}/volume-config.yaml"
     when:
-    - configout.results.results.0 != {} and openshift_node_group_name != "" and openshift_node_local_quota_per_fsgroup is defined and openshift_node_local_quota_per_fsgroup != ""
+    - "'data' in configout['results']['results'][0]"
+    - "'volume-config.yaml' in configout['results']['results'][0]['data']"
+    - openshift_node_group_name != ""
+    - openshift_node_local_quota_per_fsgroup is defined
+    - openshift_node_local_quota_per_fsgroup != ""
     run_once: true
 
-  - debug: var=yeditout
+  - name: "specialize the volume config for {{ openshift_node_group_name }}"
+    yedit:
+      content:
+      src: "{{ mktempout.stdout }}/volume-config.yaml"
+      key: localQuota.perFSGroup
+      value: "{{ openshift_node_local_quota_per_fsgroup }}"
+    register: volume_yeditout
+    when:
+    - openshift_node_local_quota_per_fsgroup is defined
+    - openshift_node_local_quota_per_fsgroup != ""
+    run_once: true
+
+  - name: show the volume_yeditout debug var
+    debug:
+      var: volume_yeditout
     run_once: true
 
   - name: create node-config.yaml configmap
