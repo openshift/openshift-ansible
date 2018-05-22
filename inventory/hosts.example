@@ -889,13 +889,10 @@ debug_level=2
 # Enable template service broker (requires service catalog to be enabled, above)
 #template_service_broker_install=true
 
-# Force a specific prefix (IE: registry) to use when pulling the service catalog image
-# NOTE: The registry all the way up to the start of the image name must be provided. Two examples
-# below are provided.
-#openshift_service_catalog_image_prefix=docker.io/openshift/origin-
-#openshift_service_catalog_image_prefix=registry.access.redhat.com/openshift3/ose-
-# Force a specific image version to use when pulling the service catalog image
-#openshift_service_catalog_image_version=v3.9
+# Specify an openshift_service_catalog image
+# (defaults for origin and openshift-enterprise, repsectively)
+#openshift_service_catalog_image="docker.io/openshift/origin-service-catalog:{{ openshift_image_tag }}""
+#openshift_service_catalog_image="registry.access.redhat.com/openshift3/ose-service-catalog:{{ openshift_image_tag }}"
 
 # TSB image tag
 #template_service_broker_version='v3.9'
