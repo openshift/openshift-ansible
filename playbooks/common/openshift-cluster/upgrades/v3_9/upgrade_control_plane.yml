@@ -154,9 +154,12 @@
   - import_role:
       name: openshift_hosted
       tasks_from: migrate_default_registry_var.yml
+    when: openshift_hosted_manage_registry | default(True) | bool
   - import_role:
       name: openshift_hosted
       tasks_from: registry_service_account.yml
+    when: openshift_hosted_manage_registry | default(True) | bool
   - import_role:
       name: openshift_hosted
       tasks_from: remove_legacy_env_variables.yml
+    when: openshift_hosted_manage_registry | default(True) | bool
