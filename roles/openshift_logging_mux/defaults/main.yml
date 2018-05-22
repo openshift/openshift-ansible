@@ -5,6 +5,8 @@ openshift_logging_mux_master_url: "https://kubernetes.default.svc.{{ openshift.c
 openshift_logging_mux_master_public_url: "{{ openshift_hosted_logging_master_public_url | default('https://' + openshift.common.public_hostname + ':' ~ openshift_master_api_port) }}"
 openshift_logging_mux_namespace: logging
 
+openshift_logging_mux_image: "{{ openshift_logging_fluentd_image }}"
+
 ### Common settings
 # map_from_pairs is a custom filter plugin in role lib_utils
 openshift_logging_mux_nodeselector: "{{ openshift_hosted_logging_mux_nodeselector_label | default('') | map_from_pairs }}"

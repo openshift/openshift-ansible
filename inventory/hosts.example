@@ -584,12 +584,18 @@ debug_level=2
 # Currently, you may only alter the hostname portion of the url, alterting the
 # `/hawkular/metrics` path will break installation of metrics.
 #openshift_metrics_hawkular_hostname=hawkular-metrics.example.com
-# Configure the prefix and version for the component images
-#openshift_metrics_image_prefix=docker.io/openshift/origin-
-#openshift_metrics_image_version=v3.9
+# Configure the metrics component images # Note, these will be modified by oreg_url by default
+#openshift_metrics_cassandra_image="docker.io/openshift/origin-metrics-cassandra:{{ openshift_image_tag }}"
+#openshift_metrics_hawkular_agent_image="docker.io/openshift/origin-metrics-hawkular-openshift-agent:{{ openshift_image_tag }}"
+#openshift_metrics_hawkular_metrics_image="docker.io/openshift/origin-metrics-hawkular-metrics:{{ openshift_image_tag }}"
+#openshift_metrics_schema_installer_image="docker.io/openshift/origin-metrics-schema-installer:{{ openshift_image_tag }}"
+#openshift_metrics_heapster_image="docker.io/openshift/origin-metrics-heapster:{{ openshift_image_tag }}"
 # when openshift_deployment_type=='openshift-enterprise'
-#openshift_metrics_image_prefix=registry.access.redhat.com/openshift3/
-#openshift_metrics_image_version=v3.9
+#openshift_metrics_cassandra_image="registry.access.redhat.com/openshift3/metrics-cassandra:{{ openshift_image_tag }}"
+#openshift_metrics_hawkular_agent_image="registry.access.redhat.com/openshift3/metrics-hawkular-openshift-agent:{{ openshift_image_tag }}"
+#openshift_metrics_hawkular_metrics_image="registry.access.redhat.com/openshift3/metrics-hawkular-metrics:{{ openshift_image_tag }}"
+#openshift_metrics_schema_installer_image="registry.access.redhat.com/openshift3/metrics-schema-installer:{{ openshift_image_tag }}"
+#openshift_metrics_heapster_image="registry.access.redhat.com/openshift3/metrics-heapster:{{ openshift_image_tag }}"
 #
 # StorageClass
 # openshift_storageclass_name=gp2

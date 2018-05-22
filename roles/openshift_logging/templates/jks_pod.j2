@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
   - name: jks-cert-gen
-    image: {{openshift_logging_image_prefix}}logging-deployer:{{openshift_logging_image_version}}
+    image: {{ openshift_logging_image }}
     imagePullPolicy: IfNotPresent
     command: ["sh",  "{{generated_certs_dir}}/generate-jks.sh"]
     securityContext:

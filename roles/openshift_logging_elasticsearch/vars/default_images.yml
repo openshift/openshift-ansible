@@ -1,8 +1,0 @@
----
-# unable to escape characters in here for some reason -- ideally would be '^[v]?\d\.\d+'
-__openshift_logging_image_tag: "{{ openshift_image_tag | regex_search('^[v]?[0-9].[0-9]+') }}"
-
-__openshift_logging_elasticsearch_image_prefix: "{{ openshift_logging_image_prefix | default('docker.io/openshift/origin-') }}"
-__openshift_logging_elasticsearch_image_version: "{{ openshift_logging_image_version | default(__openshift_logging_image_tag) }}"
-__openshift_logging_elasticsearch_proxy_image_prefix: "{{ openshift_logging_image_prefix | default('docker.io/openshift/') }}"
-__openshift_logging_elasticsearch_proxy_image_version: "{{ openshift_logging_image_version | default('v1.0.0') }}"

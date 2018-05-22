@@ -11,8 +11,6 @@ A pod forwarding kubernetes events to EFK aggregated logging stack.
 
 Configuration variables:
 
-- `openshift_logging_eventrouter_image_prefix`: The prefix for the eventrouter logging image. Defaults to `openshift_logging_image_prefix`.
-- `openshift_logging_eventrouter_image_version`: The image version for the logging eventrouter. Defaults to 'latest'.
 - `openshift_logging_eventrouter_sink`: Select a sink for eventrouter, supported 'stdout' and 'glog'. Defaults to 'stdout'.
 - `openshift_logging_eventrouter_nodeselector`: A map of labels (e.g. {"node":"infra","region":"west"} to select the nodes where the pod will land.
 - `openshift_logging_eventrouter_cpu_request`: The minimum amount of CPU to allocate to eventrouter. Defaults to '100m'.

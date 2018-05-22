@@ -1,17 +1,4 @@
 ---
-- name: Set default image variables based on deployment_type
-  include_vars: "{{ var_file_name }}"
-  with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
-    - "default_images.yml"
-  loop_control:
-    loop_var: var_file_name
-
-- name: Set curator image facts
-  set_fact:
-    openshift_logging_curator_image_prefix: "{{ openshift_logging_curator_image_prefix | default(__openshift_logging_curator_image_prefix) }}"
-    openshift_logging_curator_image_version: "{{ openshift_logging_curator_image_version | default(__openshift_logging_curator_image_version) }}"
-
 - name: Ensure that Logging Curator has nodes to run on
   import_role:
     name: openshift_control_plane

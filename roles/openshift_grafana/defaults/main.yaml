@@ -1,4 +1,7 @@
 ---
+# We should probably use something more official here.
+openshift_grafana_image: "docker.io/mrsiano/grafana-ocp:latest"
+openshift_grafana_proxy_image: "{{ l2_os_logging_proxy_image }}"
 
 openshift_grafana_state: present
 openshift_grafana_namespace: openshift-grafana

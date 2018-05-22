@@ -37,7 +37,7 @@ spec:
       containers:
         -
           name: "curator"
-          image: "{{openshift_logging_curator_image_prefix}}logging-curator:{{openshift_logging_curator_image_version}}"
+          image: "{{ openshift_logging_curator_image }}"
           imagePullPolicy: IfNotPresent
 {% if (curator_memory_limit is defined and curator_memory_limit is not none and curator_memory_limit != "") or (curator_cpu_limit is defined and curator_cpu_limit is not none and curator_cpu_limit != "") or (curator_cpu_request is defined and curator_cpu_request is not none and curator_cpu_request != "") %}
           resources:

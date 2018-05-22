@@ -15,7 +15,7 @@ spec:
           #name: hawkular-metrics
       containers:
       - name: hawkular-metrics-schema
-        image: {{openshift_metrics_image_prefix}}metrics-schema-installer:{{openshift_metrics_image_version}}
+        image: {{ openshift_metrics_schema_installer_image }}
         imagePullPolicy: IfNotPresent
         env:
           - name: TRUSTSTORE_AUTHORITIES
