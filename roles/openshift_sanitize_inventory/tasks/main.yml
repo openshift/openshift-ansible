@@ -26,7 +26,7 @@
   fail:
     msg: |-
       openshift_release is "{{ openshift_release }}" which is not a valid version string.
-      Please set it to a version string like "3.4".
+      Please set openshift_release to a version string and ensure that the value is quoted, ex: openshift_release="3.4".
 
 - include_tasks: unsupported.yml
   when:
