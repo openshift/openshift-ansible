@@ -979,6 +979,10 @@ class OpenShiftCLI(object):
         if results['returncode'] != 0 or not create:
             return results
 
+        # Correctly process templates formatted as '<namespace>//<name>'
+        if '//' in template_name:
+            _, template_name = template_name.split('//')
+
         fname = Utils.create_tmpfile(template_name + '-')
         yed = Yedit(fname, results['results'])
         yed.write()
@@ -996,6 +1000,11 @@ class OpenShiftCLI(object):
 
         if field_selector is not None:
             cmd.append('--field-selector={}'.format(field_selector))
+
+        # If resourse is a template it may be in 'template//name' format
+        if resource == 'template' and '//' in name:
+            namespace, name = name.split('//')
+            cmd.extend(['-n', namespace])
 
         # Name cannot be used with selector or field_selector.
         if selector is None and field_selector is None and name is not None:
@@ -1454,7 +1463,6 @@ class OpenShiftCLIConfig(object):
                 rval.append('--{}={}'.format(key.replace('_', '-'), val))
 
         return rval
-
 
 # -*- -*- -*- End included fragment: lib/base.py -*- -*- -*-
 
