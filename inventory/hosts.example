@@ -1155,6 +1155,9 @@ debug_level=2
 #openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
 #openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
 
+# Service port node range
+#openshift_node_port_range=30000-32767
+
 # Enable unsupported configurations, things that will yield a partially
 # functioning cluster but would not be supported for production use
 #openshift_enable_unsupported_configurations=false
