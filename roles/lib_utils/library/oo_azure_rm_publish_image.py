@@ -20,6 +20,7 @@ from __future__ import print_function  # noqa: F401
 # import httplib
 import json
 import os
+import time
 import requests
 
 from ansible.module_utils.basic import AnsibleModule
@@ -50,6 +51,7 @@ class AzurePublisher(object):
         self.api_version = 'api-version={}'.format(api_version)
         self.debug = debug
         # if self.debug:
+        # import httplib
         # httplib.HTTPSConnection.debuglevel = 1
         # httplib.HTTPConnection.debuglevel = 1
 
@@ -120,6 +122,18 @@ class AzurePublisher(object):
 
         return self.prepare_action(url, 'POST')
 
+    def publish(self, offer, emails):
+        ''' publish an offer '''
+        url = '/offers/{0}/publish?{1}'.format(offer, self.api_version)
+
+        data = {
+            'metadata': {
+                'notification-emails': ','.join(emails),
+            }
+        }
+
+        return self.prepare_action(url, 'POST', data=data)
+
     def go_live(self, offer):
         ''' create or modify an offer '''
         url = '/offers/{0}/golive?{1}'.format(offer, self.api_version)
@@ -160,12 +174,31 @@ class AzurePublisher(object):
 
         return AzurePublisher.request(action.upper(), self.server + url, data, headers)
 
+    def cancel_and_wait_for_operation(self, params):
+        '''cancel the current publish operation and wait for operation to complete'''
+
+        # cancel the publish operation
+        self.cancel_operation(offer=params['offer'])
+
+        # we need to wait here for 'submissionState' to move to 'canceled'
+        while True:
+            # fetch operations
+            ops = self.get_operations(params['offer'])
+            if self.debug:
+                print(ops.json())
+            if ops.json()[0]['submissionState'] == 'canceled':
+                break
+
+            time.sleep(5)
+
+        return ops
+
     def manage_offer(self, params):
         ''' handle creating or modifying offers'''
         # fetch the offer to verify it exists:
         results = self.get_offers(offer=params['offer'])
 
-        if (results.status_code == 200 or results.status_code == 404) and params['force']:
+        if results.status_code == 200 and params['force']:
             return self.create_or_modify_offer(offer=params['offer'], data=params['offer_data'], modify=True)
 
         return self.create_or_modify_offer(offer=params['offer'], data=params['offer_data'])
@@ -194,16 +227,19 @@ class AzurePublisher(object):
 
         if params['state'] == 'offer':
             results = apc.manage_offer(params)
+        elif params['state'] == 'publish':
+            results = apc.publish(offer=params['offer'], emails=params['emails'])
+            results.json = lambda: ''
         elif params['state'] == 'cancel_op':
-            results = apc.cancel_operation(offer=params['offer'])
+            results = apc.cancel_and_wait_for_operation(params)
         elif params['state'] == 'go_live':
             results = apc.go_live(offer=params['offer'])
         else:
-            raise AzurePublisherException('Unsupported query type: {}'.format(params['query']))
+            raise AzurePublisherException('Unsupported query type: {}'.format(params['state']))
 
         changed = False
 
-        if results.status_code in [200, 201]:
+        if results.status_code in [200, 201, 202]:
             changed = True
 
         return {'data': results.json(), 'changed': changed, 'status_code': results.status_code}
@@ -215,7 +251,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec=dict(
-            state=dict(default='offer', choices=['offer', 'cancel_op', 'go_live']),
+            state=dict(default='offer', choices=['offer', 'cancel_op', 'go_live', 'publish']),
             force=dict(default=False, type='bool'),
             publisher=dict(default='redhat', type='str'),
             debug=dict(default=False, type='bool'),
@@ -223,8 +259,13 @@ def main():
             client_id=dict(default=os.environ.get('AZURE_CLIENT_ID'), type='str'),
             client_secret=dict(default=os.environ.get('AZURE_CLIENT_SECRET'), type='str'),
             offer=dict(default=None, type='str'),
-            offer_data=dict(required=True, type='dict'),
+            offer_data=dict(default=None, type='dict'),
+            emails=dict(default=None, type='list'),
         ),
+
+        required_if=[
+            ["state", "offer", ["offer_data"]],
+        ],
     )
 
     # Verify we recieved either a valid key or edits with valid keys when receiving a src file.

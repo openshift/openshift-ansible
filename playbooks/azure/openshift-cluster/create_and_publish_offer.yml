@@ -76,8 +76,20 @@
         msg: "{{ yeditout }}"
         verbosity: 1
 
-  - name: create an offer in cloudpartner portal
+    # this cancel operation returns a 202 whether it cancelled or not.
+    - name: cancel publish operation
+      oo_azure_rm_publish_image:
+        offer: "{{ azure_image_publish[image_type].offer }}"
+        state: cancel_op
+
+  - name: create|update an offer in cloudpartner portal
     oo_azure_rm_publish_image:
       offer: "{{ azure_image_publish[image_type].offer }}"
       offer_data: "{{ (lookup('template', 'offer.yml.j2') | from_yaml) if 'skipped' in yeditout and yeditout.skipped or not yeditout.changed else yeditout.results[0].result[0].edit }}"
-      force: "{{ openshift_azure_offer_force |default(False)}}"
+      force: True
+
+  - name: publish this offer
+    oo_azure_rm_publish_image:
+      state: publish
+      offer: "{{ azure_image_publish[image_type].offer }}"
+      emails: "{{ openshift_azure_image_publish_emails }}"
