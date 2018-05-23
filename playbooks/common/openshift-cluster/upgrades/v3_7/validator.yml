@@ -15,6 +15,7 @@
   - name: Confirm OpenShift authorization objects are in sync
     command: >
       {{ openshift.common.client_binary }} adm migrate authorization
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     when:
     - openshift_currently_installed_version | version_compare('3.7','<')
     - openshift_upgrade_pre_authorization_migration_enabled | default(true) | bool
