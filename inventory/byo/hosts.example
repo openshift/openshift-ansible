@@ -1078,6 +1078,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
 #openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
 
+# Service port node range
+#openshift_node_port_range=30000-32767
+
 # host group for masters
 [masters]
 ose3-master[1:3]-ansible.test.example.com
