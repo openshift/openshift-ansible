@@ -31,8 +31,9 @@ spec:
      - mountPath: /var/lib/etcd/
        name: master-data
     livenessProbe:
-      tcpSocket:
-        port: 2379
+      exec:
+      initialDelaySeconds: 15
+      timeoutSeconds: 10
   volumes:
   - name: master-config
     hostPath:
