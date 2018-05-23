@@ -21,6 +21,13 @@
   # TODO: To better handle re-trying failed upgrades, it would be nice to check if the node
   # or docker actually needs an upgrade before proceeding. Perhaps best to save this until
   # we merge upgrade functionality into the base roles and a normal config.yml playbook run.
+  # Run the pre-upgrade hook if defined:
+  - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
+  - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
+    when: openshift_node_upgrade_pre_hook is defined
+
   - name: Mark node unschedulable
     oc_adm_manage_node:
       node: "{{ openshift.node.nodename | lower }}"
@@ -46,12 +53,6 @@
     - l_upgrade_nodes_drain_result is failed
     - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
-  # Run the pre-upgrade hook if defined:
-  - debug: msg="Running node pre-upgrade hook {{ openshift_node_upgrade_pre_hook }}"
-    when: openshift_node_upgrade_pre_hook is defined
-
-  - include_tasks: "{{ openshift_node_upgrade_pre_hook }}"
-    when: openshift_node_upgrade_pre_hook is defined
 
   post_tasks:
   - import_role:
