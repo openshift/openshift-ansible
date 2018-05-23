@@ -47,6 +47,11 @@
                                              | union(groups['oo_etcd_to_config'] | default([])))
                                          | lib_utils_oo_collect('openshift.common.hostname') | default([]) | join (',')
                                          }}"
+        no_proxy_master_ips: "{{ hostvars | lib_utils_oo_select_keys(groups['oo_masters_to_config']
+                                          | default([]))
+                                          | lib_utils_oo_collect('openshift.common.ip')
+                                          | default([]) | join (',')
+                              }}"
     when:
     - openshift_http_proxy is defined or openshift_https_proxy is defined
     - openshift_generate_no_proxy_hosts | default(True) | bool

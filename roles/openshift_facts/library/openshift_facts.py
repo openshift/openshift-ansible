@@ -816,6 +816,11 @@ def set_proxy_facts(facts):
                 if isinstance(common['no_proxy_etcd_host_ips'], string_types):
                     common['no_proxy'].extend(common['no_proxy_etcd_host_ips'].split(','))
 
+            # Master IPs should be added to no proxy lists to make liveness probes to pass
+            if 'no_proxy_master_ips' in common:
+                if isinstance(common['no_proxy_master_ips'], string_types):
+                    common['no_proxy'].extend(common['no_proxy_master_ips'].split(','))
+
             if 'generate_no_proxy_hosts' in common and safe_get_bool(common['generate_no_proxy_hosts']):
                 if 'no_proxy_internal_hostnames' in common:
                     common['no_proxy'].extend(common['no_proxy_internal_hostnames'].split(','))
