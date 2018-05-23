@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.48
+Version:        3.7.49
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,20 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed May 23 2018 Justin Pierce <jupierce@redhat.com> 3.7.49-1
+- Upgrade fails with client authentication error (dani_comnea@yahoo.com)
+- Document the openshift_node_port_range variable (dani_comnea@yahoo.com)
+- Add the ability to specify a timeout for node drain operations
+  (dani_comnea@yahoo.com)
+- GlusterFS: Fix setting heketi route (jarrpa@redhat.com)
+- Force creating hard- and softlinks (vrutkovs@redhat.com)
+- Move openshift_hosted_registry_namespace up to role defaults
+  (sdodson@redhat.com)
+- Registry remove legacy vars (agladkov@redhat.com)
+- oc_env: Fix deletion of several environment variables (agladkov@redhat.com)
+- Add support for storage classes to openshift_prometheus role.
+  (jmencak@redhat.com)
+
 * Fri May 11 2018 Justin Pierce <jupierce@redhat.com> 3.7.48-1
 - Revert "[release-3.7] Adding missing deprecated var
   openshift_hosted_metrics_public_url" (ewolinet@redhat.com)
