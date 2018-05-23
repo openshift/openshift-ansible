@@ -23,41 +23,38 @@
       tls_termination: passthrough
     register: registry_console_cockpit_kube
 
-  # XXX: Required for items still using command
-  - name: Create temp directory for kubeconfig
-    command: mktemp -d /tmp/openshift-ansible-XXXXXX
-    register: mktemp
-    changed_when: False
+  - name: Set registry-console params
+    set_fact:
+      l_registry_console_params:
+        OPENSHIFT_OAUTH_PROVIDER_URL: "{{ openshift.master.public_api_url }}"
+        REGISTRY_HOST: "{{ docker_registry_route.results[0].spec.host }}"
+        COCKPIT_KUBE_URL: "https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
+        NODE_SELECTOR: "{{ openshift_hosted_registry_console_nodeselector | map_from_pairs }}"
 
-  - set_fact:
-      openshift_hosted_kubeconfig: "{{ mktemp.stdout }}/admin.kubeconfig"
+  - name: Set image prefix
+    set_fact:
+      l_registry_console_params: >
+       {{ l_registry_console_params | combine({"IMAGE_PREFIX": openshift_cockpit_deployer_prefix }) }}
+    when: openshift_cockpit_deployer_prefix is defined
 
-  - name: Copy the admin client config(s)
-    command: >
-      cp /etc/origin/master/admin.kubeconfig {{ openshift_hosted_kubeconfig }}
-    changed_when: False
+  - name: Set image basename
+    set_fact:
+      l_registry_console_params: >
+        {{ l_registry_console_params | combine({"IMAGE_BASENAME": openshift_cockpit_deployer_basename }) }}
+    when: openshift_cockpit_deployer_basename is defined
+
+  - name: Set image version
+    set_fact:
+      l_registry_console_params: >
+        {{ l_registry_console_params | combine({"IMAGE_VERSION": openshift_cockpit_deployer_version }) }}
+    when: openshift_cockpit_deployer_version is defined
 
   - name: Deploy registry-console
-    command: >
-      {{ openshift_client_binary }} new-app --template=registry-console
-      {% if openshift_cockpit_deployer_prefix is defined  %}-p IMAGE_PREFIX="{{ openshift_cockpit_deployer_prefix }}"{% endif %}
-      {% if openshift_cockpit_deployer_basename is defined  %}-p IMAGE_BASENAME="{{ openshift_cockpit_deployer_basename }}"{% endif %}
-      {% if openshift_cockpit_deployer_version is defined  %}-p IMAGE_VERSION="{{ openshift_cockpit_deployer_version }}"{% endif %}
-      -p OPENSHIFT_OAUTH_PROVIDER_URL="{{ openshift.master.public_api_url }}"
-      -p REGISTRY_HOST="{{ docker_registry_route.results[0].spec.host }}"
-      -p COCKPIT_KUBE_URL="https://{{ registry_console_cockpit_kube.results.results[0].spec.host }}"
-      --config={{ openshift_hosted_kubeconfig }}
-      -n default
-    register: deploy_registry_console
-    changed_when: "'already exists' not in deploy_registry_console.stderr"
-    failed_when:
-    - "'already exists' not in deploy_registry_console.stderr"
-    - "deploy_registry_console.rc != 0"
+    oc_process:
+      namespace: "default"
+      # use registry-console template from openshift namespace
+      template_name: "openshift//registry-console"
+      create: True
+      params: "{{ l_registry_console_params }}"
 
-  - name: Delete temp directory
-    file:
-      name: "{{ mktemp.stdout }}"
-      state: absent
-    changed_when: False
-    # XXX: End required for items still using command
   run_once: true

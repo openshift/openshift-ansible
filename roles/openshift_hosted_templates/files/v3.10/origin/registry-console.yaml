@@ -25,6 +25,7 @@ objects:
           labels:
             name: "registry-console"
         spec:
+          nodeSelector: "${{NODE_SELECTOR}}"
           containers:
             - name: registry-console
               image: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
@@ -124,4 +125,7 @@ parameters:
     value: "cockpit-oauth-client"
   - description: "The integrated registry hostname exposed via route, e.g. registry.example.com"
     name: REGISTRY_HOST
+    required: true
+  - description: "Node selector to limit registry console"
+    name: NODE_SELECTOR
     required: true
