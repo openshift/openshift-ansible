@@ -38,7 +38,7 @@
     {{ openshift_client_binary }} process --config={{ mktemp.stdout }}/admin.kubeconfig
     -f "{{ mktemp.stdout }}/{{ __tsb_template_file }}" -n openshift-template-service-broker
     --param API_SERVER_CONFIG="{{ config['content'] | b64decode }}"
-    --param IMAGE="{{ template_service_broker_prefix }}{{ template_service_broker_image_name }}:{{ template_service_broker_version }}"
+    --param IMAGE="{{ template_service_broker_image }}"
     --param NODE_SELECTOR={{ {'node-role.kubernetes.io/master':'true'} | to_json | quote }}
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
 

@@ -5,17 +5,6 @@
   register: mktemp
   changed_when: False
 
-- name: Set default image variables based on openshift_deployment_type
-  include_vars: "{{ item }}"
-  with_first_found:
-  - "{{ openshift_deployment_type }}.yml"
-  - "default_images.yml"
-
-- name: Set service_catalog image facts
-  set_fact:
-    openshift_service_catalog_image_prefix: "{{ openshift_service_catalog_image_prefix | default(__openshift_service_catalog_image_prefix) }}"
-    openshift_service_catalog_image_version: "{{ openshift_service_catalog_image_version | default(__openshift_service_catalog_image_version) }}"
-
 - name: Set Service Catalog namespace
   oc_project:
     state: present
