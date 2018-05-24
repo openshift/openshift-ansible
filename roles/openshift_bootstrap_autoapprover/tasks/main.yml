@@ -18,15 +18,58 @@
     value: "{{ osn_image }}"
 
 # TODO: temporary until we fix apply for image stream tags
-- name: Remove the image stream tag
-  command: >
-    {{ openshift_client_binary }} delete -n openshift-infra istag node:v3.10 --ignore-not-found
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+- name: Remove the image stream
+  oc_obj:
+    name: "node"
+    kind: ImageStream
+    state: absent
+    namespace: openshift-infra
 
-- name: Apply the config
-  command: >
-    {{ openshift_client_binary }} apply -f "{{ mktemp.stdout }}"
-    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+- name: Create imagestreamtag
+  oc_obj:
+    state: present
+    kind: ImageStreamTag
+    name: "node:v3.10"
+    namespace: "openshift-infra"
+    files:
+      - "{{ mktemp.stdout }}/openshift-bootstrap-images.yaml"
+
+- name: Create service account
+  oc_obj:
+    state: present
+    kind: ServiceAccount
+    name: "bootstrap-autoapprover"
+    namespace: "openshift-infra"
+    files:
+      - "{{ mktemp.stdout }}/openshift-bootstrap-controller-serviceaccount.yaml"
+
+- name: Create cluster role
+  oc_obj:
+    state: present
+    force: true
+    kind: ClusterRole
+    name: "system:node-bootstrap-autoapprover"
+    files:
+      - "{{ mktemp.stdout }}/openshift-bootstrap-controller-role.yaml"
+
+- name: Create ClusterRoleBinding
+  oc_obj:
+    state: present
+    force: true
+    kind: ClusterRoleBinding
+    name: "bootstrap-autoapprover"
+    files:
+      - "{{ mktemp.stdout }}/openshift-bootstrap-controller-policy.yaml"
+
+- name: Create statefulset
+  oc_obj:
+    state: present
+    force: true
+    kind: StatefulSet
+    name: "bootstrap-autoapprover"
+    namespace: "openshift-infra"
+    files:
+      - "{{ mktemp.stdout }}/openshift-bootstrap-controller.yaml"
 
 - name: Remove temp directory
   file:
