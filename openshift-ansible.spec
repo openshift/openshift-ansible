@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.50.0%{?dist}
+Release:        0.51.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,51 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed May 23 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.51.0
+- Adding publish to the oo_azure module. (kwoodson@redhat.com)
+- Add master IPs to no proxy list so that liveness checks would pass
+  (vrutkovs@redhat.com)
+- Fix master scaleup play init_fact hosts (mgugino@redhat.com)
+- etcd: use etcdctl cluster-health cmd for liveness probe (vrutkovs@redhat.com)
+- Package pre-downloads should cause failure if required packages can not be
+  found (tbielawa@redhat.com)
+- Correct conditional for cloud provider (rteague@redhat.com)
+- Quote openshift_release in example inventory. (abutcher@redhat.com)
+- Maintaining the same user for removing temp dir (ewolinet@redhat.com)
+- Default openshift_use_openshift_sdn to True in openshift_facts
+  (vrutkovs@redhat.com)
+- Refactor template_service_broker_image (mgugino@redhat.com)
+- Cleanup ansible_service_broker_image (mgugino@redhat.com)
+- Unify openshift_service_catalog image to standard format (mgugino@redhat.com)
+- Pre-pull images before starting API and controller (vrutkovs@redhat.com)
+- Install python-docker in prerequisites (vrutkovs@redhat.com)
+- Run registry migrations when openshift_hosted_manage_registry
+  (vrutkovs@redhat.com)
+- Redeploy docker-registry during upgrade only if dc exists
+  (vrutkovs@redhat.com)
+- etcd runtime: system container can be etcd too (vrutkovs@redhat.com)
+- update to oo_glusterfs_to_config as other hosts already configured with NTP.
+  (sarumuga@redhat.com)
+- bug 1581052: specify the namespace (jiazha@redhat.com)
+- Document the openshift_node_port_range variable (dani_comnea@yahoo.com)
+- Adding checks to make sure we dont fail if .failed doesnt exist
+  (ewolinet@redhat.com)
+- Remove old openshift binaries from containerized upgragde
+  (mgugino@redhat.com)
+- Fix hosts.example openshift_master_oauth_templates (mgugino@redhat.com)
+- include base_package playbook in glusterfs config and registry playbooks by
+  means of variables. This way NTP will be set using timedatectl in all the
+  nodes. (sarumuga@redhat.com)
+- Consolidate image diciontaries and strings (mgugino@redhat.com)
+- Changing what we check for with is_upgrade set_fact in curator main
+  (ewolinet@redhat.com)
+- add volume config generation (sjenning@redhat.com)
+- Ensure sanity checks are run during upgrade (mgugino@redhat.com)
+- Update lib_openshift doc strings to reflect module name (mgugino@redhat.com)
+- NTP service is a pre-requisite for glusterfs. Ensure it is enabled and
+  started in host. (sarumuga@redhat.com)
+- Add openshift_openstack_heat_template_version option (tzumainn@redhat.com)
+
 * Mon May 21 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.50.0
 - 
 
