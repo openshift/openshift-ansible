@@ -38,6 +38,4 @@
   - l_docker_upgrade | bool
 
 - import_tasks: upgrade/rpm_upgrade.yml
-  vars:
-    openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift_is_containerized | bool
