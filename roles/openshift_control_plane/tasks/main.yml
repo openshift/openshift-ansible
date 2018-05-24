@@ -181,7 +181,7 @@
     warn: no
   register: control_plane_health
   until: control_plane_health.stdout == 'ok'
-  retries: 60
+  retries: 120
   delay: 5
   changed_when: false
   # Ignore errors so we can log troubleshooting info on failures.
