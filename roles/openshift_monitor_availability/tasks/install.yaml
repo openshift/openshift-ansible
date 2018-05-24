@@ -15,21 +15,38 @@
     src: "{{ role_path }}/files/"
     dest: "{{ mktemp.stdout }}"
 
-- name: Copy admin client config
-  copy:
-    src: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
-    dest: "{{ mktemp.stdout }}/admin.kubeconfig"
-    remote_src: yes
-
 - name: Ensure Prometheus role exists
-  command: >
-    {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f {{ mktemp.stdout }}/prometheus-k8s-role.yaml
+  oc_obj:
+    name: prometheus-k8s
+    namespace: openshift-monitor-availability
+    kind: Role
+    state: present
+    - "{{ mktemp.stdout }}/prometheus-k8s-role.yaml"
 
 - name: Ensure Prometheus role binding exists
-  command: >
-    {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f {{ mktemp.stdout }}/prometheus-k8s-role-binding.yaml
+  oc_obj:
+    name: prometheus-k8s
+    namespace: openshift-monitor-availability
+    kind: RoleBinding
+    state: present
+    - "{{ mktemp.stdout }}/prometheus-k8s-role-binding.yaml"
 
-- import_tasks: install_monitor_app_create.yaml
+- name: Create Monitor app template
+  oc_obj:
+    name: openshift-monitor-app-create
+    namespace: openshift-monitor-availability
+    kind: Template
+    state: present
+    - "{{ mktemp.stdout }}/monitor-app-create.yaml"
+
+- name: Create Monitor app
+    namespace: openshift-monitor-availability
+    template_name: openshift-monitor-app-create
+    params:
+      IMAGE: "{{ openshift_monitor_app_create_image }}"
+      RUN_INTERVAL: "{{ openshift_monitor_app_create_run_interval }}"
+      TIMEOUT: "{{ openshift_monitor_app_create_timeout }}"
+      LOG_LEVEL: "{{ openshift_monitor_app_create_log_level }}"
 
 - name: Delete temp directory
   file:
