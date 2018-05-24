@@ -12,6 +12,7 @@
   register: mktemp
   changed_when: False
 
+# This kubeconfig is required in start.yml
 - name: Copy admin client config
   command: >
     cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
@@ -114,15 +115,25 @@
     src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
   register: updated_console_config
 
-- name: Apply the web console template file
-  shell: >
-    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
-    --param API_SERVER_CONFIG="{{ updated_console_config['content'] | b64decode }}"
-    --param IMAGE="{{ openshift_web_console_image_name }}"
-    --param NODE_SELECTOR={{ openshift_web_console_nodeselector | to_json | quote }}
-    --param REPLICA_COUNT="{{ openshift_web_console_replica_count }}"
-    --config={{ mktemp.stdout }}/admin.kubeconfig
-    | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+- name: Create the template
+  oc_obj:
+    namespace: openshift-web-console
+    name: openshift-web-console
+    kind: Template
+    force: True
+    files:
+    - "{{ mktemp.stdout }}/{{ __console_template_file }}"
+
+- name: Deploy webconsole
+  oc_process:
+    namespace: openshift-web-console
+    template_name: openshift-web-console
+    create: True
+    params:
+      API_SERVER_CONFIG: "{{ updated_console_config['content'] | b64decode }}"
+      IMAGE: "{{ openshift_web_console_image_name }}"
+      NODE_SELECTOR: "{{ openshift_web_console_nodeselector | to_json }}"
+      REPLICA_COUNT: "{{ openshift_web_console_replica_count }}"
 
 - name: Remove temp directory
   file:
