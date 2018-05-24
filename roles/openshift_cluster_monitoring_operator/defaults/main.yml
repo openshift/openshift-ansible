@@ -1,5 +1,5 @@
 ---
-openshift_cluster_monitoring_operator_image: quay.io/coreos/cluster-monitoring-operator:v0.0.1
+openshift_cluster_monitoring_operator_image: quay.io/coreos/cluster-monitoring-operator:v0.0.3
 openshift_cluster_monitoring_operator_prometheus_operator_repo: quay.io/coreos/prometheus-operator
 openshift_cluster_monitoring_operator_prometheus_repo: quay.io/prometheus/prometheus
 openshift_cluster_monitoring_operator_alertmanager_repo: quay.io/prometheus/alertmanager
