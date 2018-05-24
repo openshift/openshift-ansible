@@ -2,11 +2,6 @@ kind: MasterConfig
 apiVersion: v1
 admissionConfig:
   pluginConfig:{{ openshift.master.admission_plugin_config | default(None) | lib_utils_to_padded_yaml(level=2) }}
-    PodPreset:
-      configuration:
-        kind: DefaultAdmissionConfig
-        apiVersion: v1
-        disable: true
 aggregatorConfig:
   proxyClientInfo:
     certFile: aggregator-front-proxy.crt
