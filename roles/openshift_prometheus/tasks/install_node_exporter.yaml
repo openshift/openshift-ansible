@@ -15,11 +15,6 @@
   register: mktemp
   changed_when: False
 
-- name: Copy admin client config
-  command: >
-    cp {{ openshift.common.config_base }}/master//admin.kubeconfig {{ mktemp.stdout }}/admin.kubeconfig
-  changed_when: false
-
 # create clusterrolebinding for prometheus-node-exporter serviceaccount
 - name: Set hostaccess SCC for prometheus-node-exporter
   oc_adm_policy_user:
@@ -36,17 +31,24 @@
   with_items:
     - "{{ __node_exporter_template_file }}"
 
-- name: Apply the node exporter template file
-  shell: >
-    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __node_exporter_template_file }}"
-    --param IMAGE="{{ l_openshift_prometheus_node_exporter_image_prefix }}prometheus-node-exporter:{{ l_openshift_prometheus_node_exporter_image_version }}"
-    --param MEMORY_REQUESTS="{{ openshift_prometheus_node_exporter_memory_requests }}"
-    --param CPU_REQUESTS="{{ openshift_prometheus_node_exporter_cpu_requests }}"
-    --param MEMORY_LIMITS="{{ openshift_prometheus_node_exporter_memory_limit }}"
-    --param CPU_LIMITS="{{ openshift_prometheus_node_exporter_cpu_limit }}"
-    --config={{ mktemp.stdout }}/admin.kubeconfig
-    -n "{{ openshift_prometheus_namespace }}"
-    | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f - -n "{{ openshift_prometheus_namespace }}"
+- name: Create node exporter template
+  oc_obj:
+    namespace: "{{ openshift_prometheus_namespace }}"
+    name: prometheus-node-exporter
+    kind: Template
+    files:
+      - "{{ mktemp.stdout }}/{{ __node_exporter_template_file }}"
+
+- name: Apply the template
+  oc_process:
+    namespace: "{{ openshift_prometheus_namespace }}"
+    template_name: prometheus-node-exporter
+    params:
+      IMAGE: "{{ l_openshift_prometheus_node_exporter_image_prefix }}prometheus-node-exporter:{{ l_openshift_prometheus_node_exporter_image_version }}"
+      MEMORY_REQUESTS: "{{ openshift_prometheus_node_exporter_memory_requests }}"
+      CPU_REQUESTS: "{{ openshift_prometheus_node_exporter_cpu_requests }}"
+      MEMORY_LIMITS: "{{ openshift_prometheus_node_exporter_memory_limit }}"
+      CPU_LIMITS: "{{ openshift_prometheus_node_exporter_cpu_limit }}"
 
 - name: Remove temp directory
   file:
