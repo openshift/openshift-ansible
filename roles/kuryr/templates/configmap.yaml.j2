@@ -191,7 +191,7 @@ data:
     #
 
     # The root URL of the Kubernetes API (string value)
-    api_root = {{ openshift.master.api_url }}
+    api_root = https://{{ kuryr_openstack_api_lb_ip }}:{{openshift_master_api_port}}
 
     # Absolute path to client cert to connect to HTTPS K8S_API (string value)
     # ssl_client_crt_file = /etc/kuryr/controller.crt
@@ -520,7 +520,7 @@ data:
     #
 
     # The root URL of the Kubernetes API (string value)
-    api_root = {{ openshift.master.api_url }}
+    api_root = https://{{ kuryr_openstack_api_lb_ip }}:{{openshift_master_api_port}}
 
     # Absolute path to client cert to connect to HTTPS K8S_API (string value)
     # ssl_client_crt_file = /etc/kuryr/controller.crt
