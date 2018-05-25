@@ -19,6 +19,11 @@ openshift_node_group_edits: []
 openshift_node_group_namespace: openshift-node
 openshift_node_group_labels: []
 
+openshift_node_labels_edit:
+- key: kubeletArguments.node-labels
+  value:
+  - "{{ openshift_node_group_labels | join(',') }}"
+
 openshift_use_crio: False
 l_crio_var_sock: "/var/run/crio/crio.sock"
 
