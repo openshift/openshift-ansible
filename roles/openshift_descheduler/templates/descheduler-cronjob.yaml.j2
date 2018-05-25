@@ -15,7 +15,7 @@ spec:
         spec:
           containers:
           - name: descheduler
-            image: "{{ openshift_descheduler_image_prefix }}descheduler:{{ openshift_descheduler_image_version }}"
+            image: "{{ openshift_descheduler_image }}"
             volumeMounts:
             - mountPath: /policy-dir
               name: policy-volume
