@@ -48,7 +48,7 @@ spec:
       containers:
         -
           name: "kibana"
-          image: "{{ openshift_logging_kibana_image_prefix }}logging-kibana5:{{ openshift_logging_kibana_image_version }}"
+          image: "{{ openshift_logging_kibana_image }}"
           imagePullPolicy: IfNotPresent
 {% if (kibana_memory_limit is defined and kibana_memory_limit is not none and kibana_memory_limit != "") or (kibana_cpu_limit is defined and kibana_cpu_limit is not none and kibana_cpu_limit != "") or (kibana_cpu_request is defined and kibana_cpu_request is not none and kibana_cpu_request != "") %}
           resources:
@@ -93,7 +93,7 @@ spec:
             periodSeconds: 5
         -
           name: "kibana-proxy"
-          image: "{{ openshift_logging_kibana_proxy_image_prefix }}logging-auth-proxy:{{ openshift_logging_kibana_proxy_image_version }}"
+          image: "{{ openshift_logging_kibana_proxy_image }}"
           imagePullPolicy: IfNotPresent
 {% if (kibana_proxy_memory_limit is defined and kibana_proxy_memory_limit is not none and kibana_proxy_memory_limit != "") or (kibana_proxy_cpu_limit is defined and kibana_proxy_cpu_limit is not none and kibana_proxy_cpu_limit != "") or (kibana_proxy_cpu_request is defined and kibana_proxy_cpu_request is not none and kibana_proxy_cpu_request != "") %}
           resources:

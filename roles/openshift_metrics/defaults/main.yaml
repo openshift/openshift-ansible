@@ -1,4 +1,10 @@
 ---
+openshift_metrics_cassandra_image: "{{ l_os_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'metrics-cassandra') }}"
+openshift_metrics_hawkular_agent_image: "{{ l_os_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'metrics-hawkular-openshift-agent') }}"
+openshift_metrics_hawkular_metrics_image: "{{ l_os_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'metrics-hawkular-metrics') }}"
+openshift_metrics_schema_installer_image: "{{ l_os_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'metrics-schema-installer') }}"
+openshift_metrics_heapster_image: "{{ l_os_registry_url | regex_replace(l_openshift_logging_search | regex_escape, 'metrics-heapster') }}"
+
 openshift_metrics_start_cluster: True
 openshift_metrics_install_metrics: False
 openshift_metrics_startup_timeout: 500

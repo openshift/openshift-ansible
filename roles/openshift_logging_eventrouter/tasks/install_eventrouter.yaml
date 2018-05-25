@@ -51,7 +51,7 @@
     template_name: eventrouter-template
     namespace: "{{ openshift_logging_eventrouter_namespace }}"
     params:
-      IMAGE: "{{openshift_logging_eventrouter_image_prefix}}logging-eventrouter:{{openshift_logging_eventrouter_image_version}}"
+      IMAGE: "{{ openshift_logging_eventrouter_image }}"
       REPLICAS: "{{ openshift_logging_eventrouter_replicas }}"
       CPU: "{{ openshift_logging_eventrouter_cpu_request }}"
       MEMORY: "{{ openshift_logging_eventrouter_memory_limit }}"

@@ -23,21 +23,6 @@
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
-- name: Set default image variables based on openshift_deployment_type
-  include_vars: "{{ var_file_name }}"
-  with_first_found:
-  - "{{ openshift_deployment_type }}.yml"
-  - "default_images.yml"
-  loop_control:
-    loop_var: var_file_name
-
-- name: Set elasticsearch image facts
-  set_fact:
-    openshift_logging_elasticsearch_proxy_image_prefix: "{{ openshift_logging_elasticsearch_proxy_image_prefix | default(__openshift_logging_elasticsearch_proxy_image_prefix) }}"
-    openshift_logging_elasticsearch_proxy_image_version: "{{ openshift_logging_elasticsearch_proxy_image_version | default(__openshift_logging_elasticsearch_proxy_image_version) }}"
-    openshift_logging_elasticsearch_image_prefix: "{{ openshift_logging_elasticsearch_image_prefix | default(__openshift_logging_elasticsearch_image_prefix) }}"
-    openshift_logging_elasticsearch_image_version: "{{ openshift_logging_elasticsearch_image_version | default(__openshift_logging_elasticsearch_image_version) }}"
-
 - include_tasks: get_es_version.yml
 
 - set_fact:

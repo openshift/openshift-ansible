@@ -21,10 +21,6 @@ For default values, see [`defaults/main.yaml`](defaults/main.yaml).
 
 - `openshift_prometheus_node_selector`: Selector for the nodes prometheus will be deployed on.
 
-- `openshift_prometheus_<COMPONENT>_image_prefix`: specify image prefix for the component
-
-- `openshift_prometheus_<COMPONENT>_image_version`: specify image version for the component
-
 - `openshift_prometheus_args`: Modify or add arguments for prometheus application
 
 - `openshift_prometheus_hostname`: specify the hostname for the route to prometheus `prometheus-{{openshift_prometheus_namespace}}.{{openshift_master_default_subdomain}}`

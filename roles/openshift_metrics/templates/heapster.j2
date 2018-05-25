@@ -26,7 +26,7 @@ spec:
 {% endif %}
       containers:
       - name: heapster
-        image: {{openshift_metrics_image_prefix}}metrics-heapster:{{openshift_metrics_image_version}}
+        image: {{ openshift_metrics_heapster_image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8082

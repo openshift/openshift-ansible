@@ -18,3 +18,4 @@ dependencies:
 - role: lib_openshift
 - role: lib_utils
 - role: openshift_facts
+- role: openshift_logging_defaults

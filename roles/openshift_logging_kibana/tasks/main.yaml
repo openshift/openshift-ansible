@@ -1,12 +1,5 @@
 ---
 # fail is we don't have an endpoint for ES to connect to?
-- name: Set default image variables based on openshift_deployment_type
-  include_vars: "{{ var_file_name }}"
-  with_first_found:
-    - "{{ openshift_deployment_type }}.yml"
-    - "default_images.yml"
-  loop_control:
-    loop_var: var_file_name
 
 - name: Ensure that Kibana has nodes to run on
   import_role:
@@ -15,13 +8,6 @@
   vars:
     openshift_master_ensure_nodes_selector: "{{ openshift_logging_kibana_nodeselector | map_to_pairs }}"
     openshift_master_ensure_nodes_service: Kibana
-
-- name: Set kibana image facts
-  set_fact:
-    openshift_logging_kibana_image_prefix: "{{ openshift_logging_kibana_image_prefix | default(__openshift_logging_kibana_image_prefix) }}"
-    openshift_logging_kibana_image_version: "{{ openshift_logging_kibana_image_version | default(__openshift_logging_kibana_image_version) }}"
-    openshift_logging_kibana_proxy_image_prefix: "{{ openshift_logging_kibana_proxy_image_prefix | default(__openshift_logging_kibana_proxy_image_prefix) }}"
-    openshift_logging_kibana_proxy_image_version: "{{ openshift_logging_kibana_proxy_image_version | default(__openshift_logging_kibana_proxy_image_version) }}"
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in

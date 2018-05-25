@@ -16,7 +16,7 @@ osm_etcd_image: "registry.access.redhat.com/rhel7/etcd:{{ r_etcd_upgrade_version
 etcd_image_dict:
   origin: "quay.io/coreos/etcd:v{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
   openshift-enterprise: "{{ osm_etcd_image }}"
-etcd_image: "{{ etcd_image_dict[openshift_deployment_type | default('origin')] }}"
+etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
 
 # etcd run on a host => use etcdctl command directly
 # etcd run as a docker container => use docker exec

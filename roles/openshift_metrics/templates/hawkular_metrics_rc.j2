@@ -24,7 +24,7 @@ spec:
 {% endfor %}
 {% endif %}
       containers:
-      - image: {{openshift_metrics_image_prefix}}metrics-hawkular-metrics:{{openshift_metrics_image_version}}
+      - image: {{ openshift_metrics_hawkular_metrics_image }}
         imagePullPolicy: IfNotPresent
         name: hawkular-metrics
         ports:

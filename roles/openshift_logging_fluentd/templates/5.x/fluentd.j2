@@ -34,7 +34,7 @@ spec:
         {{ fluentd_nodeselector_key }}: "{{ fluentd_nodeselector_value }}"
       containers:
       - name: "{{ daemonset_container_name }}"
-        image: "{{ openshift_logging_fluentd_image_prefix }}logging-fluentd:{{ openshift_logging_fluentd_image_version }}"
+        image: "{{ openshift_logging_fluentd_image }}"
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
