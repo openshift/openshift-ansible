@@ -23,7 +23,7 @@
   when: control_plane_image.stdout_lines == []
   # 10 minutes to pull the image
   async: 600
-  poll: 10
+  poll: 0
   register: image_prepull
 
 - name: Open up firewall ports
