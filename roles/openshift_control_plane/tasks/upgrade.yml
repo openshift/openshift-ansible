@@ -53,7 +53,7 @@
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: "imagePolicyConfig.internalRegistryHostname"
-    value: "docker-registry.default.svc.cluster.local:5000"
+    value: "docker-registry.default.svc:5000"
 
 # TODO(michaelgugino): Remove in 3.11
 - name: Add new network config section to master conf
