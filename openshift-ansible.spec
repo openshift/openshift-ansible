@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.51.0%{?dist}
+Release:        0.52.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,20 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri May 25 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.52.0
+- Set imagePolicyConfig.internalRegistryHostname (sdodson@redhat.com)
+- docker: Fixup graph directory labels after docker starts (mrunalp@gmail.com)
+- fixed volume-config bug; this wasn't being applied appropriately
+  (mwoodson@redhat.com)
+- Upgrade to cluster-monitoring-operator:v0.0.3 (ironcladlou@gmail.com)
+- Revert "openshift_monitor_availability: use oc_obj and oc_process"
+  (vrutkovs@redhat.com)
+- openshift_monitor_availability: use oc_obj and oc_process
+  (vrutkovs@redhat.com)
+- Remove insights from origin node image build. (kwoodson@redhat.com)
+- Cleaned up openshift_node_group; fixed the labels; added a playbook to invoke
+  just the openshift_node_group (mwoodson@redhat.com)
+
 * Wed May 23 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.51.0
 - Adding publish to the oo_azure module. (kwoodson@redhat.com)
 - Add master IPs to no proxy list so that liveness checks would pass
