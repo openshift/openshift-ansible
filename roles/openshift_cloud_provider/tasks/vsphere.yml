@@ -3,4 +3,19 @@
   template:
     dest: "{{ openshift.common.config_base }}/cloudprovider/vsphere.conf"
     src: vsphere.conf.j2
-  when: openshift_cloudprovider_vsphere_username is defined and openshift_cloudprovider_vsphere_password is defined and openshift_cloudprovider_vsphere_host is defined and openshift_cloudprovider_vsphere_datacenter is defined and openshift_cloudprovider_vsphere_datastore is defined
+  when:
+  - openshift_cloudprovider_vsphere_username is defined
+  - openshift_cloudprovider_vsphere_password is defined
+  - openshift_cloudprovider_vsphere_host is defined
+  - openshift_cloudprovider_vsphere_datacenter is defined
+  - openshift_cloudprovider_vsphere_datastore is defined
+
+- name: Configure vsphere svc account
+  import_tasks: vsphere-svc.yml
+  when:
+  - openshift_version | version_compare('3.9', '>=')
+  - inventory_hostname == openshift_master_hosts[0]
+
+- name: Modify controller args
+  import_tasks: update-vsphere.yml
+  notify: restart master
