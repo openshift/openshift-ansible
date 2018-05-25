@@ -99,7 +99,7 @@ debug_level=2
 #openshift_master_oauth_template=/path/to/login-template.html
 
 # Configure imagePolicyConfig in the master config
-# See: https://godoc.org/github.com/openshift/origin/pkg/cmd/server/api#ImagePolicyConfig
+# See: https://docs.openshift.org/latest/admin_guide/image_policy.html
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
 
 # Configure master API rate limits for external clients

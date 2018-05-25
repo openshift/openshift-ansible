@@ -47,32 +47,13 @@
     force: yes
   when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
-- name: Find existing master sysconfig
-  find:
-    paths:
-    - /etc/sysconfig
-    patterns:
-    - openshift-master-api
-    - openshift-master-controllers
-    - origin-master-api
-    - origin-master-controllers
-  register: sysconfigs
-- when:
-  - sysconfigs is succeeded
-  - sysconfigs.matched > 0
-  name: Migrate OPENSHIFT_DEFAULT_REGISTRY from master sysconfig to master-config.yaml
-  block:
-  - name: Get master sysconfig contents
-    slurp:
-      src: "{{ sysconfigs.files[0].path }}"
-    register: sysconfig
-  # TODO: surely there is a better way
-  - name: Update imagePolicyConfig.internalRegistryHostname
-    yedit:
-      src: "{{ openshift.common.config_base }}/master/master-config.yaml"
-      key: "imagePolicyConfig.internalRegistryHostname"
-      value: "{{ item | regex_replace('^OPENSHIFT_DEFAULT_REGISTRY=\\s*([^#\\s]+).*','\\1') }}"
-    with_items: "{{ (sysconfig.content | b64decode).split('\n') | select('match','^OPENSHIFT_DEFAULT_REGISTRY=\\s*.+') | list }}"
+# Anyone upgrading to 3.7 or 3.9 should've had their certs updated to be
+# compatible with this so this is the only valid value for internal registry
+- name: Update imagePolicyConfig.internalRegistryHostname
+  yedit:
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
+    key: "imagePolicyConfig.internalRegistryHostname"
+    value: "docker-registry.default.svc.cluster.local:5000"
 
 # TODO(michaelgugino): Remove in 3.11
 - name: Add new network config section to master conf
