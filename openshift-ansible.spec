@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.52.0%{?dist}
+Release:        0.53.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,15 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri May 25 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.53.0
+- Use registry short name rather than fqdn (sdodson@redhat.com)
+- Upgrade to cluster-monitoring-operator:v0.0.4 (ironcladlou@gmail.com)
+- Improve the wording when we block SCC reconciliation (sdodson@redhat.com)
+- azure: tag working resource groups with "now", so that they will be pruned if
+  necessary (jminter@redhat.com)
+- Refactor logging image strings (mgugino@redhat.com)
+- master config: remove PodPreset (vrutkovs@redhat.com)
+
 * Fri May 25 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.52.0
 - Set imagePolicyConfig.internalRegistryHostname (sdodson@redhat.com)
 - docker: Fixup graph directory labels after docker starts (mrunalp@gmail.com)
