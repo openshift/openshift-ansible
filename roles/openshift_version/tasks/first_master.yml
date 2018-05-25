@@ -26,8 +26,6 @@
   when:
   - openshift_pkg_version is not defined
 
-# When double upgrade is in process, we want to set everything to match
-# openshift_verison.
 - block:
   - debug:
       msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
@@ -49,7 +47,7 @@
       openshift_pkg_version must match same major version as openshift_release.
       You provided: {{ openshift_release }} and {{ openshift_pkg_version }}
 
-# The end result of these three variables is quite important so make sure they are displayed and logged:
+# The end result of these variables is quite important so make sure they are displayed and logged:
 - debug: var=openshift_release
 
 - debug: var=openshift_image_tag
