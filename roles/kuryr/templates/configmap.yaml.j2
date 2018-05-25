@@ -247,6 +247,12 @@ data:
     # Deprecated group/name - [neutron]/auth_plugin
     auth_type = password
 
+{% if kuryr_ca_certificate is defined %}
+    # PEM encoded Certificate Authority to use when verifying HTTPs connections.
+    # (string value)
+    cafile = /etc/ssl/certs/kuryr-ca-bundle.crt
+{% endif %}
+
     # Domain ID to scope to (string value)
     user_domain_name = {{ kuryr_openstack_user_domain_name }}
 

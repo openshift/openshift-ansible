@@ -45,9 +45,16 @@ spec:
         - name: config-volume
           mountPath: "/etc/kuryr/kuryr.conf"
           subPath: kuryr.conf
+        - name: certificates-volume
+          mountPath: "/etc/ssl/certs/kuryr-ca-bundle.crt"
+          subPath: kuryr-ca-bundle.crt
+          readOnly: true
       volumes:
       - name: config-volume
         configMap:
           name: kuryr-config
           defaultMode: 0666
+      - name: certificates-volume
+        secret:
+          secretName: kuryr-certificates
       restartPolicy: Always
