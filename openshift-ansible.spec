@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.29
+Version:        3.9.30
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,61 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Sat May 26 2018 Justin Pierce <jupierce@redhat.com> 3.9.30-1
+- Fix master scaleup play init_fact hosts (mgugino@redhat.com)
+- Specify package versions for all related node packages (rteague@redhat.com)
+- [1579513] Fix RPM version query (rteague@redhat.com)
+- Document the openshift_node_port_range variable (dani_comnea@yahoo.com)
+- Default openshift_use_openshift_sdn to True in openshift_facts
+  (vrutkovs@redhat.com)
+- update to oo_glusterfs_to_config as other hosts already configured with NTP.
+  (sarumuga@redhat.com)
+- include base_package playbook in glusterfs config and registry playbooks by
+  means of variables. This way NTP will be set using timedatectl in all the
+  nodes. (sarumuga@redhat.com)
+- NTP service is a pre-requisite for glusterfs. Ensure it is enabled and
+  started in host. (sarumuga@redhat.com)
+- Run registry migrations when openshift_hosted_manage_registry
+  (vrutkovs@redhat.com)
+- Redeploy docker-registry during upgrade only if dc exists
+  (vrutkovs@redhat.com)
+- Fix hosts.example openshift_master_oauth_templates (mgugino@redhat.com)
+- Add patch to installer image (sdodson@redhat.com)
+- GlusterFS: Fix setting heketi route (jarrpa@redhat.com)
+- Force creating hard- and softlinks (vrutkovs@redhat.com)
+- Bug 1561485- get now returns empty instead of error when the namespace is
+  missing (fabian@fabianism.us)
+- Fixes #7009: Hardcoded namespace default in lib_openshift/oc_adm_router
+  (jkr@adorsys.de)
+- Correct openshift_use_openshift_sdn (ghuang@redhat.com)
+- Copy files from openshift_master_generated_config_dir instead using hardlinks
+  (mail@jkroepke.de)
+- Fix path annotation for the Prometheus (lukas.vlcek@gmail.com)
+- quick installer: make all nodes schedulable (vrutkovs@redhat.com)
+- Skip "At least one master is schedulable" when no masters are set in
+  oo_masters_to_config (vrutkovs@redhat.com)
+- add run_once for create secret task in calico_master role
+  (zhang.lei.fly@gmail.com)
+- repoquery: Omit exclude lines when ignoring excluders
+  (mbarnes@fedoraproject.org)
+- Don't validate registry certificates when registry is disabled
+  (sdodson@redhat.com)
+- Update playbooks/adhoc/uninstall.yml
+  (29396710+drmagel@users.noreply.github.com)
+- azure: revoke sas url before deleting resource group (jminter@redhat.com)
+- install: verify that at least one master is schedulable (vrutkovs@redhat.com)
+- pre upgrade: fix typo (vrutkovs@redhat.com)
+- Fix crio pause image syntax (umohnani@redhat.com)
+- Remove vendored docker_container module (vrutkovs@redhat.com)
+- Compatible with the new prometheus-node-exporter (mmascia@redhat.com)
+- Update cri-o pause image and pause command (umohnani@redhat.com)
+- Conditionally use upgraded version of Calico for different versions
+  (mleung975@gmail.com)
+- Install and update openvswitch only when openshift_use_openshift_sdn is set
+  (vrutkovs@redhat.com)
+- Stop and start openvswitch only if openshift_use_openshift_sdn
+  (vrutkovs@redhat.com)
+
 * Wed May 09 2018 Justin Pierce <jupierce@redhat.com> 3.9.29-1
 - Update Dockerfile (sdodson@redhat.com)
 - Fix papr.sh target branch for rebase (mgugino@redhat.com)
