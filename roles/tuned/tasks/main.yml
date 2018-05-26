@@ -40,5 +40,4 @@
       state: restarted
       daemon_reload: yes
       name: tuned
-
-  when: tuned_installed.rc == 0 | bool
+    when: tuned_installed.rc == 0 | bool
