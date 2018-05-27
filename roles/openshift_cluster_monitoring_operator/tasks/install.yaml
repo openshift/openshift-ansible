@@ -39,6 +39,13 @@
   with_items:
   - cluster-monitoring-operator.yaml
 
+- name: Wait for the ServiceMonitor CRD to be created
+  command: "{{ openshift_client_binary }} get crd servicemonitors.monitoring.coreos.com -n openshift-monitoring --config={{ mktemp.stdout }}/admin.kubeconfig"
+  register: crd
+  until: crd.rc == 0
+  delay: 30
+  retries: 30
+
 - name: Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"
