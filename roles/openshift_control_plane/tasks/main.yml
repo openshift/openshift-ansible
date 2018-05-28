@@ -180,60 +180,24 @@
   - fail:
       msg: Node start failed.
 
-- name: Verify that the control plane is running
-  command: >
-    curl -k {{ openshift.master.api_url }}/healthz/ready
-  args:
-    # Disables the following warning:
-    # Consider using get_url or uri module rather than running curl
-    warn: no
+- name: Wait for all control plane pods to be ready
+  oc_obj:
+    state: list
+    kind: pod
+    name: "master-{{ item }}-{{ openshift.node.nodename | lower }}"
+    namespace: kube-system
   register: control_plane_health
-  until: control_plane_health.stdout == 'ok'
+  until:
+  - "'results' in control_plane_health"
+  - "'results' in control_plane_health.results"
+  - control_plane_health.results.results | length > 0
+  - "'status' in control_plane_health.results.results[0]"
+  - "'conditions' in control_plane_health.results.results[0].status"
+  - control_plane_health.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  # Give the node two minutes to come back online.
   retries: 60
   delay: 5
-  changed_when: false
-  # Ignore errors so we can log troubleshooting info on failures.
-  ignore_errors: yes
-
-# Capture debug output here to simplify triage
-- when: control_plane_health.stdout != 'ok'
-  block:
-  - name: Check status in the kube-system namespace
-    command: >
-      {{ openshift_client_binary }} status --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
-    register: control_plane_status
-    ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_status.stdout_lines }}"
-  - name: Get pods in the kube-system namespace
-    command: >
-      {{ openshift_client_binary }} get pods --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system -o wide
-    register: control_plane_pods
-    ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_pods.stdout_lines }}"
-  - name: Get events in the kube-system namespace
-    command: >
-      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
-    register: control_plane_events
-    ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_events.stdout_lines }}"
-  - name: Get API logs
-    command: >
-      /usr/local/bin/master-logs api api
-    register: control_plane_logs_api
-    ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_logs_api.stdout_lines }}"
-  - name: Get node logs
-    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-node
-    register: control_plane_logs_node
-    ignore_errors: true
-  - debug:
-      msg: "{{ control_plane_logs_node.stdout_lines }}"
-
-- name: Report control plane errors
-  fail:
-    msg: Control plane install failed.
-  when: control_plane_health.stdout != 'ok'
+  with_items:
+  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else omit }}"
+  - api
+  - controllers
