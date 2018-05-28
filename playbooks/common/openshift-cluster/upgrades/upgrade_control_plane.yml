@@ -383,7 +383,7 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} adm drain {{ openshift.node.nodename | lower }}
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }}
       --config={{ openshift.common.config_base }}/master/admin.kubeconfig
       --force --delete-local-data --ignore-daemonsets
       --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
