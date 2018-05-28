@@ -16,7 +16,7 @@
   - fail:
       msg: >
         Changes to bootstrapped SCCs have been detected. Please review the changes by running
-        "{{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig"
+        "{{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --additive-only=true"
         After reviewing the changes please apply those changes by adding the '--confirm' flag.
         Do not modify the default SCCs. Customizing the default SCCs will cause this check to fail when upgrading.
         If you require non standard SCCs please refer to https://docs.openshift.org/latest/admin_guide/manage_scc.html
