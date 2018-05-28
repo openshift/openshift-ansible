@@ -153,6 +153,14 @@
   when: control_plane_image.stdout_lines == []
   retries: 30
 
+- name: Check status of etcd image pre-pull
+  async_status:
+    jid: "{{ etcd_prepull.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  when: etcd_image_exists.stdout_lines == []
+  retries: 30
+
 - name: Start and enable self-hosting node
   systemd:
     name: "{{ openshift_service_type }}-node"
