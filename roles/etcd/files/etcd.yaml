@@ -32,7 +32,7 @@ spec:
        name: master-data
     livenessProbe:
       exec:
-      initialDelaySeconds: 15
+      initialDelaySeconds: 45
       timeoutSeconds: 10
   volumes:
   - name: master-config
