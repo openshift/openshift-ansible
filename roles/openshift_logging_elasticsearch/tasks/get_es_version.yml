@@ -42,6 +42,8 @@
     selector: component=es-ops
   register: ops_pod_list
 
+# 3.6 logging installations only have one container for the ES pod
+# if we are upgrading from 3.6 we only want to check the status of one container
 - set_fact:
     available_ops_pod: "{{ item.metadata.name }}"
   with_items: "{{ ops_pod_list.results.results[0]['items'] }}"
@@ -49,6 +51,18 @@
   - ops_pod_list.results.results is defined
   - item.status.phase == "Running"
   - item.status.containerStatuses[0].ready == true
+  - not item.status.containerStatuses[1] is defined
+
+# As of 3.7 logging installations we have two containers for the ES pod
+# we want to check the status of both containers to make sure they're ready
+- set_fact:
+    available_ops_pod: "{{ item.metadata.name }}"
+  with_items: "{{ ops_pod_list.results.results[0]['items'] }}"
+  when:
+  - ops_pod_list.results.results is defined
+  - item.status.phase == "Running"
+  - item.status.containerStatuses[0].ready == true
+  - item.status.containerStatuses[1] is defined
   - item.status.containerStatuses[1].ready == true
 
 - name: "Getting ES version for logging-es-ops cluster"
