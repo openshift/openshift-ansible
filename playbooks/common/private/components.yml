@@ -19,6 +19,9 @@
 
 - import_playbook: ../../openshift-hosted/private/config.yml
 
+- import_playbook: ../../openshift-monitoring/private/config.yml
+  when: openshift_monitoring_deploy | default(false) | bool
+
 - import_playbook: ../../openshift-web-console/private/config.yml
   when: openshift_web_console_install | default(true) | bool
 
@@ -30,9 +33,6 @@
 
 - import_playbook: ../../openshift-prometheus/private/config.yml
   when: openshift_hosted_prometheus_deploy | default(false) | bool
-
-- import_playbook: ../../openshift-monitoring/private/config.yml
-  when: openshift_monitoring_deploy | default(false) | bool
 
 - import_playbook: ../../openshift-monitor-availability/private/config.yml
   when: openshift_monitor_availability_install | default(false) | bool
