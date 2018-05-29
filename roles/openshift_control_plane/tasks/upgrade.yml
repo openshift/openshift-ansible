@@ -58,7 +58,7 @@
 # TODO(michaelgugino): Remove in 3.11
 - name: Add new network config section to master conf
   yedit:
-    src: /etc/origin/master/master-config.yml
+    src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: networkConfig.clusterNetworks
     value: "{{ l_new_config_clusterNetworks }}"
   # l_existing_config_master_config is set via playbooks/init/basic_facts.yml
