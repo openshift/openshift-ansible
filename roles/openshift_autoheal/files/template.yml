@@ -24,6 +24,8 @@ objects:
     name: autoheal
     labels:
       app: autoheal
+  secrets:
+  - name: awx-admin-credentials
 
 - apiVersion: authorization.openshift.io/v1
   kind: Role
@@ -38,6 +40,7 @@ objects:
     - secrets
     resourceNames:
     - autoheal-config
+    - awx-admin-credentials
     verbs:
     - get
 
