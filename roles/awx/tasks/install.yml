@@ -76,7 +76,7 @@
   oc_secret:
     state: list
     namespace: "{{ awx_project }}"
-    name: admin-credentials
+    name: awx-admin-credentials
     decode: true
   register: awx_secret
   no_log: true

@@ -13,7 +13,7 @@ objects:
 - kind: Secret
   apiVersion: v1
   metadata:
-    name: admin-credentials
+    name: awx-admin-credentials
     namespace: ${NAMESPACE}
   stringData:
     username: admin
@@ -68,12 +68,12 @@ objects:
               - name: AWX_ADMIN_USER
                 valueFrom:
                   secretKeyRef:
-                    name: admin-credentials
+                    name: awx-admin-credentials
                     key: username
               - name: AWX_ADMIN_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: admin-credentials
+                    name: awx-admin-credentials
                     key: password
           - name: awx-rabbit
             image: rabbitmq:3
