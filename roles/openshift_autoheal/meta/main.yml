@@ -29,5 +29,5 @@ dependencies:
         address: "https://awx.openshift-autoheal.svc/api"
         credentialsRef:
           namespace: "openshift-autoheal"
-          name: "admin-credentials"
+          name: "awx-admin-credentials"
         project: "Auto-heal"
