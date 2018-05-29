@@ -16,7 +16,7 @@
       targetPort: "restapi"
 
 - command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     get pod
     -l component={{ _cluster_component }},provider=openshift
@@ -26,7 +26,7 @@
 
 - name: "Disable shard balancing for logging-{{ _cluster_component }} cluster"
   command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
@@ -41,7 +41,7 @@
 # This is documented as a best effort, if it fails, we are okay with that
 - name: "Flushing for logging-{{ _cluster_component }} cluster"
   command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
@@ -56,11 +56,11 @@
 # Stop all nodes, then rollout all nodes
 - name: Ready all nodes for scale down
   shell: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     -n {{ openshift_logging_elasticsearch_namespace }}
     annotate "dc/{{ _es_node }}"
-    prior-replica-count=$({{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n {{ openshift_logging_elasticsearch_namespace }} get "dc/{{ _es_node }}" -o jsonpath='{.spec.replicas}')
+    prior-replica-count=$({{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n {{ openshift_logging_elasticsearch_namespace }} get "dc/{{ _es_node }}" -o jsonpath='{.spec.replicas}')
     --overwrite
   with_items: "{{ logging_restart_cluster_dcs }}"
   loop_control:
@@ -78,7 +78,7 @@
 
 - name: Rollout all updated DCs
   command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     rollout latest {{ _es_node }}
     -n {{ openshift_logging_elasticsearch_namespace }}
@@ -88,11 +88,11 @@
 
 - name: Scale up all nodes to previous replicas
   shell: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     -n {{ openshift_logging_elasticsearch_namespace }}
     scale "dc/{{ _es_node }}"
-    --replicas=$({{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n {{ openshift_logging_elasticsearch_namespace }} get "dc/{{ _es_node }}" -o jsonpath='{.metadata.annotations.prior-replica-count}')
+    --replicas=$({{ openshift.common.client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n {{ openshift_logging_elasticsearch_namespace }} get "dc/{{ _es_node }}" -o jsonpath='{.metadata.annotations.prior-replica-count}')
   with_items: "{{ logging_restart_cluster_dcs }}"
   loop_control:
     loop_var: _es_node
@@ -129,7 +129,7 @@
         message: "Node in cluster logging-{{ _cluster_component }} was unable to rollout. Please see documentation regarding recovering during a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
 
 - command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     get pod
     -l component={{ _cluster_component }},provider=openshift
@@ -139,7 +139,7 @@
 
 - name: Wait for cluster to be in at least yellow state
   command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
@@ -165,7 +165,7 @@
 
 - name: "Enable shard balancing for logging-{{ _cluster_component }} cluster"
   command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
@@ -179,7 +179,7 @@
 # Skip healthcheck for a full cluster restart always since it could take a long time to recover?
 - name: "Waiting for ES node {{ _es_node }} health to be in ['green']"
   command: >
-    {{ openshift_client_binary }}
+    {{ openshift.common.client_binary }}
     --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     exec {{ _cluster_pods.stdout.split(' ')[0] }}
     -c elasticsearch
