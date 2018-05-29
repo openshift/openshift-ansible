@@ -1,7 +1,6 @@
 import pytest
 
 from openshift_checks.package_version import PackageVersion
-from openshift_checks import OpenShiftCheckException
 
 
 def task_vars_for(openshift_release, deployment_type):
@@ -15,29 +14,6 @@ def task_vars_for(openshift_release, deployment_type):
         openshift_image_tag='v' + openshift_release,
         openshift_deployment_type=deployment_type,
     )
-
-
-def test_openshift_version_not_supported():
-    check = PackageVersion(None, task_vars_for("1.2.3", 'origin'))
-    check.get_major_minor_version = lambda: (3, 4, 1)  # won't be in the dict
-
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.get_required_ovs_version()
-    assert "no recommended version of Open vSwitch" in str(excinfo.value)
-
-
-def test_invalid_openshift_release_format():
-    task_vars = dict(
-        ansible_pkg_mgr='yum',
-        openshift_service_type='origin',
-        openshift_image_tag='v0',
-        openshift_deployment_type='origin',
-    )
-
-    check = PackageVersion(lambda *_: {}, task_vars)
-    with pytest.raises(OpenShiftCheckException) as excinfo:
-        check.run()
-    assert "invalid version" in str(excinfo.value)
 
 
 @pytest.mark.parametrize('openshift_release', [

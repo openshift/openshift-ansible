@@ -10,17 +10,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
     name = "package_version"
     tags = ["preflight"]
 
-    # NOTE: versions outside those specified are mapped to least/greatest
-    openshift_to_ovs_version = {
-        (3, 4): "2.4",
-        (3, 5): ["2.6", "2.7"],
-        (3, 6): ["2.6", "2.7", "2.8", "2.9"],
-        (3, 7): ["2.6", "2.7", "2.8", "2.9"],
-        (3, 8): ["2.6", "2.7", "2.8", "2.9"],
-        (3, 9): ["2.6", "2.7", "2.8", "2.9"],
-        (3, 10): ["2.6", "2.7", "2.8", "2.9"],
-    }
-
     def is_active(self):
         """Skip hosts that do not have package requirements."""
         group_names = self.get_var("group_names", default=[])
@@ -38,11 +27,6 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         args = {
             "package_mgr": self.get_var("ansible_pkg_mgr"),
             "package_list": [
-                {
-                    "name": "openvswitch",
-                    "version": self.get_required_ovs_version(),
-                    "check_multi": False,
-                },
                 {
                     "name": "{}".format(rpm_prefix),
                     "version": openshift_release,
@@ -62,7 +46,3 @@ class PackageVersion(NotContainerizedMixin, OpenShiftCheck):
         }
 
         return self.execute_module_with_retries("aos_version", args)
-
-    def get_required_ovs_version(self):
-        """Return the correct Open vSwitch version(s) for the current OpenShift version."""
-        return self.get_required_version("Open vSwitch", self.openshift_to_ovs_version)
