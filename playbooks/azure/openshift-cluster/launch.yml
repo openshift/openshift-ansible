@@ -36,6 +36,8 @@
         value: demo
       - key: properties.orchestratorProfile.openShiftConfig.clusterPassword
         value: "{{ 16 | lib_utils_oo_random_word }}"
+      - key: properties.orchestratorProfile.orchestratorVersion
+        value: unstable
       # azProfile
       - key: properties.azProfile.tenantId
         value: "{{ lookup('env', 'AZURE_TENANT') }}"
