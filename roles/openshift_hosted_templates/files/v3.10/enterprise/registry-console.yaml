@@ -17,6 +17,14 @@ objects:
     spec:
       triggers:
       - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - "registry-console"
+          from:
+            kind: ImageStreamTag
+            name: registry-console:${IMAGE_VERSION}
       replicas: 1
       selector:
         name: "registry-console"
@@ -27,7 +35,7 @@ objects:
         spec:
           containers:
             - name: registry-console
-              image: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
+              image: ""
               ports:
                 - containerPort: 9090
                   protocol: TCP
@@ -78,6 +86,19 @@ objects:
           targetPort: 9090
       selector:
         name: "registry-console"
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: registry-console
+      annotations:
+        description: Atomic Registry console
+    spec:
+      tags:
+        - annotations: null
+          from:
+            kind: DockerImage
+            name: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
+          name: ${IMAGE_VERSION}
   - kind: OAuthClient
     apiVersion: v1
     metadata:
