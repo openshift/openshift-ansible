@@ -32,11 +32,11 @@
     --key {{ _logging_handler_tempdir.stdout }}/admin-key
     https://logging-{{ _cluster_component }}.{{ openshift_logging_elasticsearch_namespace }}.svc:9200/_cluster/health?pretty
   register: _pod_status
-  when: _cluster_pods.stdout_lines | count > 0
+  when: _cluster_pods.stdout.split(' ') | count > 0
 
 - when:
   - _pod_status.stdout is defined
-  - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout_lines | count
+  - (_pod_status.stdout | from_json)['status'] in ['yellow', 'red'] or (_pod_status.stdout | from_json)['number_of_nodes'] != _cluster_pods.stdout.split(' ') | count
   block:
   - name: Set Logging message to manually restart
     run_once: true
@@ -47,7 +47,7 @@
 
   - debug: msg="Cluster logging-{{ _cluster_component }} was not in an optimal state and will not be automatically restarted. Please see documentation regarding doing a {{ 'full' if full_restart_cluster | bool else 'rolling'}} cluster restart."
 
-- when: _pod_status.stdout is undefined or ( (_pod_status.stdout | from_json)['status'] in ['green'] and (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout_lines | count )
+- when: _pod_status.stdout is undefined or ( (_pod_status.stdout | from_json)['status'] in ['green'] and (_pod_status.stdout | from_json)['number_of_nodes'] == _cluster_pods.stdout.split(' ') | count )
   block:
   - command: >
       {{ openshift_client_binary }}
