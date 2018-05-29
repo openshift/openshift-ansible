@@ -23,6 +23,15 @@
     description: Openshift Monitoring
     node_selector: ""
 
+- name: Label monitoring namespace
+  oc_label:
+    state: present
+    kind: namespace
+    name: openshift-monitoring
+    labels:
+    - key: openshift.io/cluster-monitoring
+      value: "true"
+
 - name: Apply the cluster monitoring operator template
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout 	}}/{{ item }}"

@@ -101,6 +101,30 @@ objects:
         availabilityRoute: django-psql-persistent
         parameters: # Empty, use template defaults
 
+- apiVersion: monitoring.coreos.com/v1
+  kind: ServiceMonitor
+  metadata:
+    name: monitor-app-create
+    namespace: ${NAMESPACE}
+    labels:
+      k8s-app: monitor-app-create
+  spec:
+    jobLabel: k8s-app
+    endpoints:
+    - port: http-metrics
+      interval: 30s
+      scheme: https
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      tlsConfig:
+        caFile: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+        serverName: monitor-app-create.openshift-monitor-availability.svc
+    selector:
+      matchLabels:
+        k8s-app: monitor-app-create
+    namespaceSelector:
+      matchNames:
+      - openshift-monitor-availability
+
 - apiVersion: extensions/v1beta1
   kind: Deployment
   metadata:
