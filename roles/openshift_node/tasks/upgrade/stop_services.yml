@@ -47,6 +47,6 @@
     name: "openvswitch"
     state: stopped
   failed_when: false
-  when: 
+  when:
   - not openshift_is_containerized | bool
   - openshift_use_openshift_sdn | bool
