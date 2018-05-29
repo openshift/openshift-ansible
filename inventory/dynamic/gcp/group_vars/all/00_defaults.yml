@@ -3,6 +3,7 @@
 ansible_become: yes
 
 openshift_deployment_type: origin
+osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
 
 # Debugging settings
 debug_level: 2
