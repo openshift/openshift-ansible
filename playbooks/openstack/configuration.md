@@ -120,53 +120,152 @@ your deployment, you must set `OPENSHIFT_CLUSTER` to your stack name to avoid er
 
 ## DNS Configuration
 
-Note that the provisioning playbooks update the original Neutron subnet
-created with the Heat stack to point to the configured DNS servers.
-So the provisioned cluster nodes will start using those natively as
-default nameservers. Technically, this allows the deployment of OpenShift
-clusters without dnsmasq proxies.
+OpenStack deployments require an external DNS server for now. This
+server must be able to resolve the the OpenShift node names to their
+internal IP addresses.
 
-In `inventory/group_vars/all.yml`:
+We will be looking into using the internal Neutron DNS and/or the
+Designate project in the future.
+
+While we do not create a DNS for you, if it supports nsupdate (RFC
+2136[nsupdate-rfc]), we can populate it with the cluster records
+automatically.
+
+[nsupdate-rfc]: https://www.ietf.org/rfc/rfc2136.txt
+
+### OpenShift Cluster Domain
+
+To set up the domain name of your OpenShift cluster, set these
+parameters in `inventory/group_vars/all.yml`:
 
 * `openshift_openstack_clusterid` Defaults to `openshift`
 * `openshift_openstack_public_dns_domain` Defaults to `example.com`
 
-These two parameters together form the cluster's public DNS domain that all
-the servers will be under; by default this domain will be `openshift.example.com`.
+Together, they form the cluster's public DNS domain that all the
+servers will be under; by default this domain will be
+`openshift.example.com`.
 
-* `openshift_openstack_app_subdomain` Subdomain for workloads. Defaults to `apps`.
+They're split so you can deploy multiple clusters under the same
+domain with a single inventory change: e.g. `testing.example.com` and
+`production.example.com`.
+
+You will also want to put the IP addresses of your DNS server(s) in
+the `openshift_openstack_dns_nameservers` array in the same file.
+
+This will configure the Neutron subnet with all the OpenShift nodes to forward
+to these DNS servers. Which means that any server running in that subnet will
+use the DNS automatically, without any extra configuration.
+
+
+### Adding the DNS Records Automatically
+
+If your DNS supports nsupdate, you can set up the
+`openshift_openstack_external_nsupdate_keys` variable and all the
+necessary DNS records will be added during the provisioning phase
+(after the OpenShift nodes are created, but before we install anything
+on them).
+
+Add this to your `inventory/group_vars/all.yml`:
+
+```
+    openshift_openstack_external_nsupdate_keys:
+      private:
+        key_secret: <some nsupdate key>
+        key_algorithm: 'hmac-md5'
+        key_name: 'update-key'
+        server: <private DNS server IP>
+```
+
+Make sure that all four values (key secret, algorithm, key name and
+the DNS IP address) are correct.
+
+This will create the records for the internal OpenShift communication.
+If you also want public records for external access, add another
+section called `public` with the same structure.
+
+If you want to use the same DNS server for both public and private
+records, you must set at least one of:
 
 * `openshift_openstack_public_hostname_suffix` Empty by default.
 * `openshift_openstack_private_hostname_suffix` Empty by default.
 
-If you want to use two sets of hostnames for public and private/prefixed DNS
-records for your externally managed public DNS server, you can specify the
-`openshift_openstack_*_hostname_suffix` parameters. These suffixes are added to
-the nsupdate records sent to the external DNS server. Note that the real hostnames,
-Nova servers, and ansible hostnames and inventory variables are not be updated.
-The deployment may be done on arbitrary named hosts with the hostnames managed by
-cloud-init. Inventory hostnames will ignore these suffixes.
+Otherwise the private records will be overwritten by the public ones.
 
-* `openshift_openstack_dns_nameservers` List of DNS servers accessible from all the created Nova servers. These will provide the internal name resolution for your OpenShift nodes (as well as upstream name resolution for installing packages, etc.).
+Note that these suffixes are only applied to the OpenShift Node names
+as they appear in the DNS. They will not affect the actual hostnames.
 
-* `openshift_use_dnsmasq` Controls whether dnsmasq is deployed or not.By default, dnsmasq is deployed and comes as the hosts' /etc/resolv.conf file first nameserver entry that points to the local host instance of the dnsmasq daemon that in turn proxies DNS requests to the authoritative DNS server. When Network Manager is enabled for provisioned cluster nodes, which is normally the case, you should not change the defaults and always deploy dnsmasq.
+It is recommended that you use two separate servers for the private
+and public access instead.
 
-* `openshift_openstack_external_nsupdate_keys` Describes an external authoritative DNS server(s) processing dynamic records updates in the public only cluster view. For example:
+If your nsupdate zone differs from the full OpenShift DNS name (e.g.
+your DNS' zone is "example.com" but you want your cluster to be at
+"openshift.example.com"), you can specify the zone in this parameter:
+
+* `openshift_openstack_nsupdate_zone`
+
+If left out, it will be equal to the OpenShift cluster DNS.
+
+Don't forget to put your the internal (private) DNS servers to the
+`openshift_openstack_dns_nameservers` array.
+
+
+### Custom DNS Records Configuration
+
+If you're unable (or do not want) to use nsupdate, you will have to
+create your DNS records out-of-band.
+
+To do that, you will have to split the deployment into three phases:
+
+1. Provision (creates the OpenShift servers)
+2. Create DNS records (this is your responsibility)
+3. Installation (installs OpenShift on the servers)
+
+To do this, run the `provision.yml` and `install.yml` playbooks
+instead of the all-in-one `provision_install.yml` and add your DNS
+records between the runs.
+
+You still need to set the `openshift_openstack_dns_nameservers` with
+your (private/internal) DNS servers in `inventory/group_vars/all.yml`.
+
+Next, you need to create a DNS record for every OpenShift node that
+was created. This record must point to the node's **private** IP
+address (not the floating IP).
+
+You can see the server names and their private floating IP addresses
+by running `openstack server list`.
+
+For example with the following output:
 
 ```
-    openshift_openstack_external_nsupdate_keys:
-      public:
-        key_secret: <some nsupdate key>
-        key_algorithm: 'hmac-md5'
-        key_name: 'update-key'
-        server: <public DNS server IP>
+$ openstack server list
++--------------------------------------+--------------------------------------+---------+----------------------------------------------------------------------------+---------+-----------+
+| ID                                   | Name                                 | Status  | Networks                                                                   | Image   | Flavor    |
++--------------------------------------+--------------------------------------+---------+----------------------------------------------------------------------------+---------+-----------+
+| 8445bd74-aaf1-4c54-b6fe-e98efa6e47de | master-0.openshift.example.com     | ACTIVE  | openshift-ansible-openshift.example.com-net=192.168.99.10, 10.40.128.136 | centos7 | m1.medium |
+| 635f0a24-bde7-488d-aa0d-c31e0a01e7c4 | infra-node-0.openshift.example.com | ACTIVE  | openshift-ansible-openshift.example.com-net=192.168.99.4, 10.40.128.130  | centos7 | m1.medium |
+| 04657a99-29b1-48c8-8979-3c88ee1c1615 | app-node-0.openshift.example.com   | ACTIVE  | openshift-ansible-openshift.example.com-net=192.168.99.6, 10.40.128.132  | centos7 | m1.medium |
++--------------------------------------+--------------------------------------+---------+----------------------------------------------------------------------------+---------+-----------+
 ```
 
-Here, for the public view section, we specified another key algorithm and
-optional `key_name`, which normally defaults to the cluster's DNS domain.
-This just illustrates a compatibility mode with a DNS service deployed
-by OpenShift on OSP10 reference architecture, and used in a mixed mode with
-another external DNS server.
+You will need to create these A records:
+
+```
+master-0.openshift.cool.       192.168.99.10
+infra-node-0.openshift.cool.   192.168.99.4
+app-node-0.openshift.cool.     192.168.99.16
+```
+
+For the public access, you'll need to create 2 records: one for the
+API access and the other for the OpenShift apps running on the
+cluster.
+
+```
+console.openshift.cool.    10.40.128.137
+*.apps.openshift.cool.     10.40.128.129
+```
+
+These must point to the publicly-accessible IP addresses of your
+master and infra nodes or preferably to the load balancers.
 
 
 ## Kuryr Networking Configuration
