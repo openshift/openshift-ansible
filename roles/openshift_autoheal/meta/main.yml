@@ -23,11 +23,11 @@ dependencies:
   when: openshift_autoheal_deploy_awx | default(false) | bool
   vars:
     awx_install: true
-    awx_project: openshift-autoheal-awx
+    awx_project: openshift-autoheal
     openshift_autoheal_config: |+
       awx:
-        address: "https://awx.openshift-autoheal-awx.svc/api"
+        address: "https://awx.openshift-autoheal.svc/api"
         credentialsRef:
-          namespace: "openshift-autoheal-awx"
+          namespace: "openshift-autoheal"
           name: "admin-credentials"
         project: "Auto-heal"
