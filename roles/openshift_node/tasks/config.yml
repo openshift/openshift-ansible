@@ -12,7 +12,7 @@
   when: node_image.stdout_lines == []
   # 10 minutes to pull the image
   async: 600
-  poll: 10
+  poll: 0
   register: image_prepull
 
 - name: Install the systemd units
