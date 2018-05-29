@@ -73,6 +73,8 @@ r_openshift_node_os_firewall_deny: []
 default_r_openshift_node_os_firewall_allow:
 - service: Kubernetes kubelet
   port: 10250/tcp
+- service: Kubernetes kube-proxy health check for service load balancers
+  port: 10256/tcp
 - service: http
   port: 80/tcp
 - service: https
