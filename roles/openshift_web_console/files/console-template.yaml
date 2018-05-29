@@ -87,11 +87,11 @@ objects:
         volumes:
         - name: serving-cert
           secret:
-            defaultMode: 400
+            defaultMode: 0440
             secretName: webconsole-serving-cert
         - name: webconsole-config
           configMap:
-            defaultMode: 440
+            defaultMode: 0440
             name: webconsole-config
 
 # to create the config for the web console
