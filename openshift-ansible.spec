@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.53.0%{?dist}
+Release:        0.54.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,20 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue May 29 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.54.0
+- cluster_monitoring_operator: Wait for CRD to be created (ealfassa@redhat.com)
+- Fix master-config.yaml typo (sdodson@redhat.com)
+- Drop OVS from package version check (vrutkovs@redhat.com)
+- Prepull etcd image (vrutkovs@redhat.com)
+- prepull: set async to 0 so that task wouldn't block others
+  (vrutkovs@redhat.com)
+- Fix wrong command suggestion for oc adm policy reconcile-sccs
+  (nakayamakenjiro@gmail.com)
+- Update openshift.json acsengine file with unstable for master.
+  (kwoodson@redhat.com)
+- Specify all node packages and versions for upgrade (rteague@redhat.com)
+- Enable metrics scraping of availability apps (ironcladlou@gmail.com)
+
 * Fri May 25 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.53.0
 - Use registry short name rather than fqdn (sdodson@redhat.com)
 - Upgrade to cluster-monitoring-operator:v0.0.4 (ironcladlou@gmail.com)
