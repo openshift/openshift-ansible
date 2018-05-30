@@ -305,3 +305,8 @@
   with_items: "{{ l_core_api_list }}"
   retries: 60
   delay: 5
+
+- name: Remove oc cache to refresh a list of APIs
+  file:
+    path: "~/.kube/cache"
+    state: absent
