@@ -16,6 +16,9 @@ objects:
     name: awx-admin-credentials
     namespace: ${NAMESPACE}
   stringData:
+    # Note: username should not be changed at runtime.  If you do, after awx restart that
+    # would create a new superuser but will *not* delete the previous one.
+    # username field is here for openshift-autoheal to know how to connect to awx.
     username: admin
     password: ${AWX_ADMIN_PASSWORD}
 
