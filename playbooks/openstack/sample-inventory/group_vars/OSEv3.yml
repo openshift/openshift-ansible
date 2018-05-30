@@ -4,9 +4,22 @@ openshift_deployment_type: origin
 #openshift_repos_enable_testing: true
 #openshift_deployment_type: openshift-enterprise
 #openshift_release: v3.5
-openshift_master_default_subdomain: "apps.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
 
-openshift_master_cluster_public_hostname: "console.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
+# Default domain to access the applications running on OpenShift.
+# This uses the `openshift_openstack_clusterid`
+# and `openshift_openstack_public_dns_domain` values from all.yml.
+# It will be set to `apps.openshift.example.com` by default.
+# Feel free to change this to a value you prefer. It should be under the
+# domain the OpenShift cluster is configured, though.
+openshift_master_default_subdomain: "apps.{{ (openshift_openstack_clusterid|trim == '') | ternary(openshift_openstack_public_dns_domain, openshift_openstack_clusterid + '.' + openshift_openstack_public_dns_domain) }}"
+
+# Domain to access the OpenShift UI and API.
+# This uses the `openshift_openstack_clusterid`
+# and `openshift_openstack_public_dns_domain` values from all.yml.
+# It will be set to `console.openshift.example.com` by default.
+# Feel free to change this to a value you prefer. It should be under the
+# domain the OpenShift cluster is configured, though.
+openshift_master_cluster_public_hostname: "console.{{ (openshift_openstack_clusterid|trim == '') | ternary(openshift_openstack_public_dns_domain, openshift_openstack_clusterid + '.' + openshift_openstack_public_dns_domain) }}"
 
 osm_default_node_selector: 'region=primary'
 
