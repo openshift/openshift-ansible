@@ -78,7 +78,9 @@ REMOVED_VARIABLES = (
     ('openshift_descheduler_image_prefix', 'openshift_descheduler_image'),
     ('openshift_descheduler_image_version', 'openshift_descheduler_image'),
     ('openshift_docker_gc_version', 'openshift_docker_gc_image'),
-    ('openshift_prometheus_node_exporter_image_version', 'openshift_prometheus_node_exporter_image'),
+    ('openshift_web_console_prefix', 'openshift_web_console_image'),
+    ('openshift_web_console_version', 'openshift_web_console_image'),
+    ('openshift_web_console_image_name', 'openshift_web_console_image'),
 )
 
 
