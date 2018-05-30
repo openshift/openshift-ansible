@@ -180,7 +180,59 @@
   - fail:
       msg: Node start failed.
 
-- name: Wait for all control plane pods to be ready
+- name: Wait for control plane pods to appear
+  oc_obj:
+    state: list
+    kind: pod
+    name: "master-{{ item }}-{{ openshift.node.nodename | lower }}"
+    namespace: kube-system
+  register: control_plane_pods
+  until:
+  - "'results' in control_plane_pods"
+  - "'results' in control_plane_pods.results"
+  - control_plane_pods.results.results | length > 0
+  retries: 60
+  delay: 5
+  with_items:
+  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else omit }}"
+  - api
+  - controllers
+  ignore_errors: true
+
+- when: control_plane_pods is failed
+  block:
+  - name: Check status in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} status --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
+    register: control_plane_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_status.stdout_lines }}"
+  - name: Get pods in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} get pods --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system -o wide
+    register: control_plane_pods_list
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_pods_list.stdout_lines }}"
+  - name: Get events in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
+    register: control_plane_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_events.stdout_lines }}"
+  - name: Get node logs
+    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-node
+    register: logs_node
+    ignore_errors: true
+  - debug:
+      msg: "{{ logs_node.stdout_lines }}"
+  - name: Report control plane errors
+    fail:
+      msg: Control plane pods didn't come up
+
+- name: Wait for all control plane pods to become ready
   oc_obj:
     state: list
     kind: pod
@@ -194,10 +246,53 @@
   - "'status' in control_plane_health.results.results[0]"
   - "'conditions' in control_plane_health.results.results[0].status"
   - control_plane_health.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
-  # Give the node two minutes to come back online.
   retries: 60
   delay: 5
   with_items:
   - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else omit }}"
   - api
   - controllers
+
+- when: control_plane_health is failed
+  block:
+  - debug:
+      msg: "{{ control_plane_pods_list.stdout_lines }}"
+  - name: Get events in the kube-system namespace
+    command: >
+      {{ openshift_client_binary }} get events --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n kube-system
+    register: control_plane_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_events.stdout_lines }}"
+  - name: Get node logs
+    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-node
+    register: logs_node
+    ignore_errors: true
+  - debug:
+      msg: "{{ logs_node.stdout_lines }}"
+  - name: Get API logs
+    command: >
+      /usr/local/bin/master-logs api api
+    register: control_plane_logs_api
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_logs_api.stdout_lines }}"
+  - name: Get controllers logs
+    command: >
+      /usr/local/bin/master-logs controllers controllers
+    register: control_plane_logs_controllers
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_logs_controllers.stdout_lines }}"
+  - name: Get etcd logs
+    command: >
+      /usr/local/bin/master-logs etcd etcd
+    register: control_plane_logs_etcd
+    when: inventory_hostname in groups['oo_etcd_to_config']
+    ignore_errors: true
+  - debug:
+      msg: "{{ control_plane_logs_controllers.stdout_lines }}"
+    when: inventory_hostname in groups['oo_etcd_to_config']
+  - name: Report control plane errors
+    fail:
+      msg: Control plane pods didn't pass health check
