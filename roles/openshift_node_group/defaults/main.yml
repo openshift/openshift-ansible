@@ -13,16 +13,7 @@ openshift_node_groups:
   - 'node-role.kubernetes.io/compute=true'
   edits: []
 
-l_openshift_node_group_master: "{{ openshift_node_group_master | default('node-config-master') }}"
-
-openshift_node_group_edits: []
 openshift_node_group_namespace: openshift-node
-openshift_node_group_labels: []
-
-openshift_node_labels_edit:
-- key: kubeletArguments.node-labels
-  value:
-  - "{{ openshift_node_group_labels | join(',') }}"
 
 openshift_use_crio: False
 l_crio_var_sock: "/var/run/crio/crio.sock"
