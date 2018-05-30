@@ -706,6 +706,29 @@ def lib_utils_mutate_htpass_provider(idps):
     return idps
 
 
+def lib_utils_oo_etcd_image(osm_etcd_image_default, oreg_url):
+    '''Converts default etcd image string to utilize oreg_url, if defined.
+       oreg_url should be passed in as string "None" if undefined.
+
+       Example input:  "quay.io/coreos/etcd:v99",
+                       "example.com/openshift/origin-${component}:${version}"
+       Example output: "example.com/coreos/etcd:v99"'''
+    # if no oreg_url is specified, we just return the original default
+    if oreg_url == 'None':
+        return osm_etcd_image_default
+    oreg_parts = oreg_url.split('/')
+    if len(oreg_parts) < 2:
+        raise errors.AnsibleFilterError("oreg_url malformed: {}".format(oreg_url))
+    if not (len(oreg_parts) >= 3 and '.' in oreg_parts[0]):
+        # oreg_url does not include host information; we'll just return etcd default
+        return osm_etcd_image_default
+
+    etcd_image_parts = osm_etcd_image_default.split('/')
+    if len(etcd_image_parts) < 3:
+        raise errors.AnsibleFilterError("etcd_image_dict malformed, do not adjust this value.")
+    return '/'.join([oreg_parts[0], etcd_image_parts[1], etcd_image_parts[2]])
+
+
 class FilterModule(object):
     """ Custom ansible filter mapping """
 
@@ -741,4 +764,5 @@ class FilterModule(object):
             "map_to_pairs": map_to_pairs,
             "lib_utils_oo_etcd_host_urls": lib_utils_oo_etcd_host_urls,
             "lib_utils_mutate_htpass_provider": lib_utils_mutate_htpass_provider,
+            "lib_utils_oo_etcd_image": lib_utils_oo_etcd_image,
         }
