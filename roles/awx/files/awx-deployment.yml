@@ -7,6 +7,8 @@ parameters:
 - name: AWX_WEB_IMAGE
 - name: AWX_TASK_IMAGE
 - name: AWX_ADMIN_PASSWORD
+- name: RABBITMQ_ERLANG_COOKIE
+- name: RABBITMQ_DEFAULT_PASS
 
 objects:
 
@@ -21,6 +23,15 @@ objects:
     # username field is here for openshift-autoheal to know how to connect to awx.
     username: admin
     password: ${AWX_ADMIN_PASSWORD}
+
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: rabbitmq
+    namespace: ${NAMESPACE}
+  stringData:
+    .erlang.cookie: ${RABBITMQ_ERLANG_COOKIE}
+    default_pass: ${RABBITMQ_DEFAULT_PASS}
 
 - apiVersion: extensions/v1beta1
   kind: Deployment
@@ -82,13 +93,19 @@ objects:
             image: rabbitmq:3
             env:
               - name: RABBITMQ_ERLANG_COOKIE
-                value: secretb
+                valueFrom:
+                  secretKeyRef:
+                    name: rabbitmq
+                    key: .erlang.cookie
               - name: RABBITMQ_NODENAME
                 value: rabbitmq
               - name: RABBITMQ_DEFAULT_USER
                 value: awx
               - name: RABBITMQ_DEFAULT_PASS
-                value: abcdefg
+                valueFrom:
+                  secretKeyRef:
+                    name: rabbitmq
+                    key: default_pass
               - name: RABBITMQ_DEFAULT_VHOST
                 value: awx
           - name: awx-memcached

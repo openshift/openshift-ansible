@@ -86,6 +86,27 @@
     awx_admin_password: "{{ awx_secret.results.decoded['password'] | default(16 | lib_utils_oo_random_word) }}"
   no_log: true
 
+# AWX pod is single instance, doesn't expose RabbitMQ externally (at least in 1.0.3).
+# Randomizing its secrets, just in case.
+- name: Read Existing RabbitMQ Secret
+  oc_secret:
+    state: list
+    namespace: "{{ awx_project }}"
+    name: rabbitmq
+    decode: true
+  register: rabbitmq_secret
+  no_log: true
+
+- name: Get or Generate RabbitMQ Erlang Cookie
+  set_fact:
+    rabbitmq_erlang_cookie: "{{ rabbitmq_secret.results.decoded['.erlang.cookie'] | default(16 | lib_utils_oo_random_word) }}"
+  no_log: true
+
+- name: Get or Generate RabbitMQ Default Password
+  set_fact:
+    rabbitmq_default_pass: "{{ rabbitmq_secret.results.decoded['default_pass'] | default(16 | lib_utils_oo_random_word) }}"
+  no_log: true
+
 - name: Apply the AWX Deployment Template
   shell: >-
     {{ openshift_client_binary }} process -f {{ mktemp.stdout }}/awx-deployment.yml
@@ -93,6 +114,8 @@
     --param AWX_WEB_IMAGE={{ awx_web_openshift_image }}
     --param AWX_TASK_IMAGE={{ awx_task_openshift_image }}
     --param AWX_ADMIN_PASSWORD={{ awx_admin_password }}
+    --param RABBITMQ_ERLANG_COOKIE={{ rabbitmq_erlang_cookie }}
+    --param RABBITMQ_DEFAULT_PASS={{ rabbitmq_default_pass }}
     | {{ openshift_client_binary }} apply -f -
   register: apply
   changed_when: "'created' in apply.stdout or 'configured' in apply.stdout"
