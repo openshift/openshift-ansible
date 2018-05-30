@@ -152,3 +152,17 @@ l_new_config_clusterNetworks:
 # added so that it can lay down the static pod definitions in a configurable place
 openshift_control_plane_static_pod_location: /etc/origin/node/pods/
 openshift_control_plane_apply_cluster_signing_config: True
+
+l_core_api_list:
+- "apps.openshift.io"
+- "authorization.openshift.io"
+- "build.openshift.io"
+- "image.openshift.io"
+- "network.openshift.io"
+- "oauth.openshift.io"
+- "project.openshift.io"
+- "quota.openshift.io"
+- "route.openshift.io"
+- "security.openshift.io"
+- "template.openshift.io"
+- "user.openshift.io"
