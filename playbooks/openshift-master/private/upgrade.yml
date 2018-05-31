@@ -107,7 +107,7 @@
 
   - name: update vsphere provider master config
     import_role:
-      name: openshift_control_plane
+      name: openshift_cloud_provider
       tasks_from: update-vsphere
     when:
     - openshift_cloudprovider_kind is defined
