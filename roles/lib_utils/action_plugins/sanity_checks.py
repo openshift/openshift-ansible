@@ -43,6 +43,46 @@ STORAGE_KIND_TUPLE = (
     'openshift_prometheus_alertmanager_storage_kind',
     'openshift_prometheus_storage_kind')
 
+REMOVED_VARIABLES = (
+    # TODO(michaelgugino): Remove these in 3.11
+    ('openshift_metrics_image_prefix', 'openshift_metrics_<component>_image'),
+    ('openshift_metrics_image_version', 'openshift_metrics_<component>_image'),
+    ('openshift_grafana_proxy_image_prefix', 'openshift_grafana_proxy_image'),
+    ('openshift_grafana_proxy_image_version', 'openshift_grafana_proxy_image'),
+    ('openshift_logging_image_prefix', 'openshift_logging_image'),
+    ('openshift_logging_image_verion', 'openshift_logging_image'),
+    ('openshift_logging_curator_image_prefix', 'openshift_logging_curator_image'),
+    ('openshift_logging_curator_image_version', 'openshift_logging_curator_image'),
+    ('openshift_logging_elasticsearch_image_prefix', 'openshift_logging_elasticsearch_image'),
+    ('openshift_logging_elasticsearch_image_version', 'openshift_logging_elasticsearch_image'),
+    ('openshift_logging_elasticsearch_proxy_image_prefix', 'openshift_logging_elasticsearch_proxy_image'),
+    ('openshift_logging_elasticsearch_proxy_image_version', 'openshift_logging_elasticsearch_proxy_image'),
+    ('openshift_logging_fluentd_image_prefix', 'openshift_logging_fluentd_image'),
+    ('openshift_logging_fluentd_image_version', 'openshift_logging_fluentd_image'),
+    ('openshift_logging_kibana_image_prefix', 'openshift_logging_kibana_image'),
+    ('openshift_logging_kibana_image_version', 'openshift_logging_kibana_image'),
+    ('openshift_logging_kibana_proxy_image_prefix', 'openshift_logging_kibana_proxy_image'),
+    ('openshift_logging_kibana_proxy_image_version', 'openshift_logging_kibana_proxy_image'),
+    ('openshift_logging_mux_image_prefix', 'openshift_logging_mux_image'),
+    ('openshift_logging_mux_image_version', 'openshift_logging_mux_image'),
+    ('openshift_prometheus_image_prefix', 'openshift_prometheus_image'),
+    ('openshift_prometheus_image_version', 'openshift_prometheus_image'),
+    ('openshift_prometheus_proxy_image_prefix', 'openshift_prometheus_proxy_image'),
+    ('openshift_prometheus_proxy_image_version', 'openshift_prometheus_proxy_image'),
+    ('openshift_prometheus_altermanager_image_prefix', 'openshift_prometheus_altermanager_image'),
+    ('openshift_prometheus_altermanager_image_version', 'openshift_prometheus_altermanager_image'),
+    ('openshift_prometheus_alertbuffer_image_prefix', 'openshift_prometheus_alertbuffer_image'),
+    ('openshift_prometheus_alertbuffer_image_version', 'openshift_prometheus_alertbuffer_image'),
+    ('openshift_prometheus_node_exporter_image_prefix', 'openshift_prometheus_node_exporter_image'),
+    ('openshift_prometheus_node_exporter_image_version', 'openshift_prometheus_node_exporter_image'),
+    ('openshift_descheduler_image_prefix', 'openshift_descheduler_image'),
+    ('openshift_descheduler_image_version', 'openshift_descheduler_image'),
+    ('openshift_docker_gc_version', 'openshift_docker_gc_image'),
+    ('openshift_web_console_prefix', 'openshift_web_console_image'),
+    ('openshift_web_console_version', 'openshift_web_console_image'),
+    ('openshift_web_console_image_name', 'openshift_web_console_image'),
+)
+
 
 def to_bool(var_to_check):
     """Determine a boolean value given the multiple
@@ -52,6 +92,21 @@ def to_bool(var_to_check):
                 "Yes", "yes", "Y", "y", "YES",
                 "on", "ON", "On")
     return var_to_check in yes_list
+
+
+def check_for_removed_vars(hostvars, host):
+    """Fails if removed variables are found"""
+    found_removed = []
+    for item in REMOVED_VARIABLES:
+        if item in hostvars[host]:
+            found_removed.append(item)
+
+    if found_removed:
+        msg = "Found removed variables: "
+        for item in found_removed:
+            msg += "{} is replaced by {}; ".format(item[0], item[1])
+        raise errors.AnsibleModuleError(msg)
+    return None
 
 
 class ActionModule(ActionBase):
@@ -221,6 +276,7 @@ class ActionModule(ActionBase):
         self.check_session_auth_secrets(hostvars, host)
         self.check_unsupported_nfs_configs(hostvars, host)
         self.check_htpasswd_provider(hostvars, host)
+        check_for_removed_vars(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
