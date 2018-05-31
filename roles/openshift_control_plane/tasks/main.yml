@@ -158,7 +158,10 @@
     jid: "{{ etcd_prepull.ansible_job_id }}"
   register: job_result
   until: job_result.finished
-  when: etcd_image_exists.stdout_lines == []
+  when:
+  - etcd_image_exists is defined
+  - "'stdout_lines' in etcd_image_exists"
+  - etcd_image_exists.stdout_lines == []
   retries: 30
 
 - name: Start and enable self-hosting node
