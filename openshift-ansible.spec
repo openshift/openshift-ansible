@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.54.0%{?dist}
+Release:        0.56.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,38 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu May 31 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.56.0
+- Replace csr 'accepted' field with '{server,client}_accepted' fields and wait
+  for server and client requests to be approved. (abutcher@redhat.com)
+- added certain vars to openshift_node_group/vars/main.yml
+  (mwoodson@redhat.com)
+- Remove openshift_web_console_image_name and related (mgugino@redhat.com)
+- Refactor etcd_image to support oreg_url (mgugino@redhat.com)
+- Bug 1584285 - remove extra space from hostSubnetLength (bleanhar@redhat.com)
+- fixed node label bug (mwoodson@redhat.com)
+- Skip prepull status check when etcd is being scaled up (vrutkovs@redhat.com)
+- Add openshift_facts dependency to TSB role (rteague@redhat.com)
+- Clean oc caches after openshift APIs have registered (vrutkovs@redhat.com)
+- Wait for Openshift APIs to register themselves (vrutkovs@redhat.com)
+- Add steps to debug control plane pods state if components didn't come up
+  (vrutkovs@redhat.com)
+- Update etcd pod liveness check params (vrutkovs@redhat.com)
+- Wait for all control plane pods to become ready (vrutkovs@redhat.com)
+- Revert deletion of imagestream and point it from deploymentconfig
+  (nakayamakenjiro@gmail.com)
+- Add sanity checks for removed component image variables (mgugino@redhat.com)
+- Refactor various components to utilize oreg_url (mgugino@redhat.com)
+- Port 10256 must be open for service load balancers to work
+  (ccoleman@redhat.com)
+- Change file permissions on console serving cert (spadgett@redhat.com)
+- Remove unused imagestream of registry-console (nakayamakenjiro@gmail.com)
+- sync: don't match the script PID when attempting to kill kubelet
+  (vrutkovs@redhat.com)
+- Create default project nodeSelector for NPD to run on all nodes (including
+  masters) (joesmith@redhat.com)
+- Ensure public net id is configured for Kuryr SDN (ltomasbo@redhat.com)
+- Prometheus nodeselector defaults to hosted nodeselector (vrutkovs@redhat.com)
+
 * Tue May 29 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.54.0
 - cluster_monitoring_operator: Wait for CRD to be created (ealfassa@redhat.com)
 - Fix master-config.yaml typo (sdodson@redhat.com)
