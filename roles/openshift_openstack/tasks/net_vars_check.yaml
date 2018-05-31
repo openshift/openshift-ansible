@@ -12,3 +12,10 @@
   when:
     - openstack_private_data_network_name is defined
     - not openshift_use_flannel|default(False)|bool
+
+- name: Check the kuryr public net configuration
+  fail:
+    msg: "kuryr_openstack_public_net_id must be set when using Kuryr SDN"
+  when:
+    - openshift_use_kuryr|default(False)|bool
+    - not kuryr_openstack_public_net_id is defined
