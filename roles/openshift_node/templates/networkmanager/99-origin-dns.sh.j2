@@ -17,7 +17,7 @@
 #   node
 #
 # Test it:
-# host kubernetes.default.svc.cluster.local
+# host kubernetes.default.svc.{{openshift.common.dns_domain}}
 # host google.com
 #
 # TODO: I think this would be easy to add as a config option in NetworkManager
@@ -51,7 +51,7 @@ if [[ $2 =~ ^(up|dhcp4-change|dhcp6-change)$ ]]; then
       cat << EOF > /etc/dnsmasq.d/origin-dns.conf
 no-resolv
 domain-needed
-server=/cluster.local/172.30.0.1
+server=/{{openshift.common.dns_domain}}/172.30.0.1
 server=/30.172.in-addr.arpa/172.30.0.1
 enable-dbus
 dns-forward-max=5000
@@ -115,10 +115,10 @@ EOF
       sed -e '/^nameserver.*$/d' /etc/resolv.conf >> ${NEW_RESOLV_CONF}
       echo "nameserver "${def_route_ip}"" >> ${NEW_RESOLV_CONF}
       if ! grep -qw search ${NEW_RESOLV_CONF}; then
-        echo 'search cluster.local' >> ${NEW_RESOLV_CONF}
-      elif ! grep -q 'search cluster.local' ${NEW_RESOLV_CONF}; then
-        # cluster.local should be in first three DNS names so that glibc resolver would work
-        sed -i -e 's/^search \(.\+\)\( cluster\.local\)\{0,1\}$/search cluster.local \1/' ${NEW_RESOLV_CONF}
+        echo 'search {{openshift.common.dns_domain}}' >> ${NEW_RESOLV_CONF}
+      elif ! grep -q 'search {{openshift.common.dns_domain}}' ${NEW_RESOLV_CONF}; then
+        # {{openshift.common.dns_domain}} should be in first three DNS names so that glibc resolver would work
+        sed -i -e 's/^search \(.\+\)\( {{openshift.common.dns_domain}}\)\{0,1\}$/search {{openshift.common.dns_domain}} \1/' ${NEW_RESOLV_CONF}
       fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi

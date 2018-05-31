@@ -1,7 +1,7 @@
 ---
 - name: Install network manager dispatch script
-  copy:
-    src: networkmanager/99-origin-dns.sh
+  template:
+    src: networkmanager/99-origin-dns.sh.j2
     dest: /etc/NetworkManager/dispatcher.d/
     mode: 0755
   notify: restart NetworkManager
