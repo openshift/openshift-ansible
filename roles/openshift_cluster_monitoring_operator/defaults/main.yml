@@ -1,10 +1,12 @@
 ---
-openshift_cluster_monitoring_operator_image: quay.io/coreos/cluster-monitoring-operator:v0.0.4
+openshift_cluster_monitoring_operator_image: quay.io/coreos/cluster-monitoring-operator:v0.0.6
 openshift_cluster_monitoring_operator_prometheus_operator_repo: quay.io/coreos/prometheus-operator
 openshift_cluster_monitoring_operator_prometheus_repo: quay.io/prometheus/prometheus
 openshift_cluster_monitoring_operator_alertmanager_repo: quay.io/prometheus/alertmanager
 openshift_cluster_monitoring_operator_prometheus_reloader_repo: quay.io/coreos/prometheus-config-reloader
-openshift_cluster_monitoring_oeprator_configmap_reloader_repo: quay.io/coreos/configmap-reload
+openshift_cluster_monitoring_operator_configmap_reloader_repo: quay.io/coreos/configmap-reload
+openshift_cluster_monitoring_operator_prometheus_storage_capacity: "50Gi"
+openshift_cluster_monitoring_operator_alertmanager_storage_capacity: "2Gi"
 
 openshift_cluster_monitoring_operator_cluster_id: "{{ openshift_clusterid | default(openshift_master_cluster_public_hostname, true) | default(openshift_master_cluster_hostname, true) | default('openshift', true) }}"
 
