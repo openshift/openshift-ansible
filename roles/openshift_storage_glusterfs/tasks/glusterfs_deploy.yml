@@ -92,7 +92,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_image }}"
-      IMAGE_VERSION: "{{ glusterfs_version }}"
       NODE_LABELS: "{{ glusterfs_nodeselector }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
       GB_GLFS_LRU_COUNT: "{{ glusterfs_block_host_vol_max }}"

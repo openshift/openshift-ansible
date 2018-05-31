@@ -82,7 +82,7 @@ objects:
         serviceAccountName: glusterblock-${CLUSTER_NAME}-provisioner
         containers:
         - name: glusterblock-provisioner
-          image: ${IMAGE_NAME}:${IMAGE_VERSION}
+          image: ${IMAGE_NAME}
           imagePullPolicy: IfNotPresent
           env:
           - name: PROVISIONER_NAME
@@ -90,9 +90,6 @@ objects:
 parameters:
 - name: IMAGE_NAME
   displayName: glusterblock provisioner container image name
-  required: True
-- name: IMAGE_VERSION
-  displayName: glusterblock provisioner container image version
   required: True
 - name: NAMESPACE
   displayName: glusterblock provisioner namespace

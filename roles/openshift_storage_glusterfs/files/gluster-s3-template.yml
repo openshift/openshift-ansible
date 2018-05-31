@@ -62,7 +62,7 @@ objects:
       spec:
         containers:
         - name: gluster-s3
-          image: ${IMAGE_NAME}:${IMAGE_VERSION}
+          image: ${IMAGE_NAME}
           imagePullPolicy: IfNotPresent
           ports:
           - name: gluster
@@ -106,9 +106,6 @@ objects:
 parameters:
 - name: IMAGE_NAME
   displayName: glusterblock provisioner container image name
-  required: True
-- name: IMAGE_VERSION
-  displayName: glusterblock provisioner container image version
   required: True
 - name: CLUSTER_NAME
   displayName: GlusterFS cluster name
