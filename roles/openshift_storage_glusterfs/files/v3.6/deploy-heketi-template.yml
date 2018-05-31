@@ -64,7 +64,7 @@ objects:
         serviceAccountName: heketi-${CLUSTER_NAME}-service-account
         containers:
         - name: heketi
-          image: ${IMAGE_NAME}:${IMAGE_VERSION}
+          image: ${IMAGE_NAME}
           imagePullPolicy: IfNotPresent
           env:
           - name: HEKETI_USER_KEY
@@ -126,9 +126,6 @@ parameters:
   value: "heketi-glusterfs"
 - name: IMAGE_NAME
   displayName: heketi container image name
-  required: True
-- name: IMAGE_VERSION
-  displayName: heketi container image version
   required: True
 - name: CLUSTER_NAME
   displayName: GlusterFS cluster name

@@ -33,7 +33,7 @@ objects:
         hostNetwork: true
         containers:
         - name: glusterfs
-          image: ${IMAGE_NAME}:${IMAGE_VERSION}
+          image: ${IMAGE_NAME}
           imagePullPolicy: IfNotPresent
           env:
           - name: GB_GLFS_LRU_COUNT
@@ -147,9 +147,6 @@ parameters:
   value: '{ "glusterfs": "storage-host" }'
 - name: IMAGE_NAME
   displayName: GlusterFS container image name
-  required: True
-- name: IMAGE_VERSION
-  displayName: GlusterFS container image version
   required: True
 - name: CLUSTER_NAME
   displayName: GlusterFS cluster name

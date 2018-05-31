@@ -51,6 +51,29 @@ STORAGE_KIND_TUPLE = (
     'openshift_prometheus_alertmanager_storage_kind',
     'openshift_prometheus_storage_kind')
 
+REMOVED_VARIABLES = (
+    # TODO(michaelgugino): Remove these in 3.11
+    ('openshift_storage_glusterfs_version', 'openshift_storage_glusterfs_image'),
+    ('openshift_storage_glusterfs_block_version', 'openshift_storage_glusterfs_block_image'),
+    ('openshift_storage_glusterfs_s3_version', 'openshift_storage_glusterfs_s3_image'),
+    ('openshift_storage_glusterfs_heketi_version', 'openshift_storage_glusterfs_heketi_image'),
+    ('openshift_storage_glusterfs_registry_version', 'openshift_storage_glusterfs_registry_image'),
+    ('openshift_storage_glusterfs_registry_block_version', 'openshift_storage_glusterfs_registry_block_image'),
+    ('openshift_storage_glusterfs_registry_s3_version', 'openshift_storage_glusterfs_registry_s3_image'),
+    ('openshift_storage_glusterfs_registry_heketi_version', 'openshift_storage_glusterfs_registry_heketi_image'),
+)
+
+# TODO(michaelgugino): Remove in 3.11
+CHANGED_IMAGE_VARS = (
+    'openshift_storage_glusterfs_image',
+    'openshift_storage_glusterfs_block_image',
+    'openshift_storage_glusterfs_s3_image',
+    'openshift_storage_glusterfs_heketi_image',
+    'openshift_storage_glusterfs_registry_image',
+    'openshift_storage_glusterfs_registry_block_image',
+    'openshift_storage_glusterfs_registry_s3_image',
+    'openshift_storage_glusterfs_registry_heketi_image',
+)
 
 def to_bool(var_to_check):
     """Determine a boolean value given the multiple
@@ -188,6 +211,54 @@ class ActionModule(ActionBase):
                     ''.format(storage))
         return None
 
+    def check_htpasswd_provider(self, hostvars, host):
+        """Fails if openshift_master_identity_providers contains an entry of
+        kind HTPasswdPasswordIdentityProvider and
+        openshift_master_manage_htpasswd is False"""
+
+        idps = self.template_var(
+            hostvars, host, 'openshift_master_identity_providers')
+        if not idps:
+            # If we don't find any identity_providers, nothing for us to do.
+            return None
+        manage_pass = self.template_var(
+            hostvars, host, 'openshift_master_manage_htpasswd')
+        if to_bool(manage_pass):
+            # If we manage the file, we can just generate in the new path.
+            return None
+        old_keys = ('file', 'fileName', 'file_name', 'filename')
+        for idp in idps:
+            if idp['kind'] == 'HTPasswdPasswordIdentityProvider':
+                for old_key in old_keys:
+                    if old_key in idp is not None:
+                        raise errors.AnsibleModuleError(
+                            'openshift_master_identity_providers contains a '
+                            'provider of kind==HTPasswdPasswordIdentityProvider '
+                            'and {} is set.  Please migrate your htpasswd '
+                            'files to /etc/origin/master/htpasswd and update your '
+                            'existing master configs, and remove the {} key'
+                            'before proceeding.'.format(old_key, old_key))
+
+    def check_contains_version(self, hostvars, host):
+        """Fails if variable has old format not containing image version"""
+        found_incorrect = []
+        for img_var in CHANGED_IMAGE_VARS:
+            img_string = self.template_var(hostvars, host, img_var)
+            if not img_string:
+                return None
+            # split the image string by '/' to account for something like docker://
+            img_string_parts = img_string.split('/')
+            if ':' not in img_string_parts[-1]:
+                found_incorrect.append((img_var, img_string))
+
+        if found_incorrect:
+            msg = ("Found image variables without version.  Please ensure any image"
+                   "defined contains ':someversion'; ")
+            for item in found_incorrect:
+                msg += "{} was: {}; ".format(item[0], item[1])
+            raise errors.AnsibleModuleError(msg)
+        return None
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -199,6 +270,9 @@ class ActionModule(ActionBase):
         self.check_hostname_vars(hostvars, host)
         self.check_supported_ocp_version(hostvars, host, odt)
         self.check_unsupported_nfs_configs(hostvars, host)
+        self.check_htpasswd_provider(hostvars, host)
+        check_for_removed_vars(hostvars, host)
+        self.check_contains_version(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)

@@ -90,7 +90,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_s3_image }}"
-      IMAGE_VERSION: "{{ glusterfs_s3_version }}"
       S3_ACCOUNT: "{{ glusterfs_s3_account }}"
       S3_USER: "{{ glusterfs_s3_user }}"
       S3_PASSWORD: "{{ glusterfs_s3_password }}"

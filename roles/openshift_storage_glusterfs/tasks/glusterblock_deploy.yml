@@ -47,7 +47,6 @@
     create: True
     params:
       IMAGE_NAME: "{{ glusterfs_block_image }}"
-      IMAGE_VERSION: "{{ glusterfs_block_version }}"
       NAMESPACE: "{{ glusterfs_namespace }}"
       CLUSTER_NAME: "{{ glusterfs_name }}"
 
