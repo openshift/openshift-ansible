@@ -32,8 +32,8 @@ spec:
        name: master-data
     livenessProbe:
       exec:
-      initialDelaySeconds: 15
-      timeoutSeconds: 10
+      initialDelaySeconds: 45
+    terminationGracePeriodSeconds: 0
   volumes:
   - name: master-config
     hostPath:
