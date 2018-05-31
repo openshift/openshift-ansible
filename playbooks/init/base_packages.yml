@@ -39,7 +39,7 @@
       - "{{ 'python-ipaddress' if ansible_distribution != 'Fedora' else '' }}"
       - libsemanage-python
       - yum-utils
-      - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker' }}"
+      - "{{ 'python3-docker' if ansible_distribution == 'Fedora' else 'python-docker-py' }}"
       when: item != ''
       register: result
       until: result is succeeded
