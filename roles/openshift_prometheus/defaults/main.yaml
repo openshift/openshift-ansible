@@ -46,7 +46,7 @@ l_openshift_prometheus_alertmanager_image_version: "{{ openshift_prometheus_aler
 l_openshift_prometheus_alertbuffer_image_version: "{{ openshift_prometheus_alertbuffer_image_version | default('v0.0.2') }}"
 l_openshift_prometheus_node_exporter_image_version: "{{ openshift_prometheus_node_exporter_image_version | default('v0.15.2') }}"
 
-openshift_prometheus_node_selector: {"node-role.kubernetes.io/infra":"true"}
+openshift_prometheus_node_selector: "{{ openshift_hosted_infra_selector | default('node-role.kubernetes.io/infra=true') | map_from_pairs }}"
 
 openshift_prometheus_service_port: 443
 openshift_prometheus_service_targetport: 8443
