@@ -145,6 +145,10 @@ scrape_configs:
     - source_labels: [__meta_kubernetes_service_name]
       action: drop
       regex: 'prometheus-node-exporter'
+    # drop infrastructure components managed by other scrape targets
+    - source_labels: [__meta_kubernetes_service_name]
+      action: drop
+      regex: 'router'
     # only those that have requested scraping
     - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
       action: keep
@@ -232,6 +236,22 @@ scrape_configs:
     action: keep
     regex: openshift-template-service-broker;apiserver;https
 
+
+# Scrape config for the router
+- job_name: 'openshift-router'
+  scheme: http
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: router;1936-tcp
 
 alerting:
   alertmanagers:
