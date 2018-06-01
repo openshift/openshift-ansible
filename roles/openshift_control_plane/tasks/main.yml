@@ -152,6 +152,8 @@
   until: job_result.finished
   when: control_plane_image.stdout_lines == []
   retries: 30
+  delay: 10
+  failed_when: false
 
 - name: Check status of etcd image pre-pull
   async_status:
@@ -163,6 +165,8 @@
   - "'stdout_lines' in etcd_image_exists"
   - etcd_image_exists.stdout_lines == []
   retries: 30
+  delay: 10
+  failed_when: false
 
 - name: Start and enable self-hosting node
   systemd:
