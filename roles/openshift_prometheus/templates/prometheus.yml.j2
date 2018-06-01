@@ -237,6 +237,25 @@ scrape_configs:
     action: keep
     regex: apiserver;https
 
+# Scrape config for the router
+- job_name: 'openshift-router'
+  scheme: https
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+    server_name: router.default.svc
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    action: keep
+    regex: router;1936-tcp
+
 alerting:
   alertmanagers:
   - scheme: http

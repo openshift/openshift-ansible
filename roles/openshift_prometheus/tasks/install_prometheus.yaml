@@ -56,14 +56,27 @@
   with_items:
     "{{ openshift_prometheus_serviceaccount_annotations }}"
 
+# add required permissions to prometheus for scraping router metrics
+- name: Create router-metrics cluster role
+  oc_clusterrole:
+    state: present
+    name: router-metrics
+    rules:
+    - apiGroups: ["route.openshift.io"]
+      resources: ["routers/metrics"]
+      verbs: ["get"]
+
 # create clusterrolebinding for prometheus serviceaccount
-- name: Set cluster-reader permissions for prometheus
+- name: Set clusterrole permissions for prometheus
   oc_adm_policy_user:
     state: present
     namespace: "{{ openshift_prometheus_namespace }}"
     resource_kind: cluster-role
-    resource_name: cluster-reader
+    resource_name: "{{ item }}"
     user: "system:serviceaccount:{{ openshift_prometheus_namespace }}:{{ openshift_prometheus_service_name }}"
+  with_items:
+  - cluster-reader
+  - router-metrics
 
 # create view role for prometheus-reader serviceaccount
 - name: Set view permissions for prometheus reader
