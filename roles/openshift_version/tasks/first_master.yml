@@ -19,6 +19,15 @@
 
 - block:
   - debug:
+      msg: "openshift_pkg_version was defined without leading hyphen. Adding it to beginning of {{ openshift_pkg_version }}"
+  - set_fact:
+      # We append an '*' here because yum is not flexible.
+      openshift_pkg_version: "-{{ openshift_pkg_version }}*"
+  when:
+  - openshift_pkg_version is defined and openshift_pkg_version is not match("^-")
+
+- block:
+  - debug:
       msg: "openshift_pkg_version was not defined. Falling back to -{{ openshift_version }}"
   - set_fact:
       # We append an '*' here because yum is not flexible.
