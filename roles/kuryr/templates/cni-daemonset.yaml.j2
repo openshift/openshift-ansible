@@ -77,14 +77,14 @@ spec:
         readinessProbe:
           httpGet:
             path: /ready
-            port: {{ kuryr_healthcheck_port }}
+            port: {{ kuryr_cni_healthcheck_port }}
             scheme: HTTP
           initialDelaySeconds: 15
           timeoutSeconds: 5
         livenessProbe:
           httpGet:
             path: /alive
-            port: {{ kuryr_healthcheck_port }}
+            port: {{ kuryr_cni_healthcheck_port }}
           initialDelaySeconds: 15
 {% endif %}
       volumes:
