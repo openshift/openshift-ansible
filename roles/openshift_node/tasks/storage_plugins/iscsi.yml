@@ -29,6 +29,6 @@
   when: not openshift_is_atomic | bool
 
 #enable multipath
-- name: Enable multipath
-  command: "mpathconf --enable"
+- name: Enable and start multipath
+  command: "mpathconf --enable --with_multipathd y"
   when: not openshift_is_atomic | bool
