@@ -60,3 +60,5 @@
   - node_image.stdout_lines == []
   - not openshift_is_atomic | bool
   retries: 30
+  delay: 10
+  failed_when: false
