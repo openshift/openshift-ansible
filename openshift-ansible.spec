@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.56.0%{?dist}
+Release:        0.57.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,14 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Jun 01 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.57.0
+- Ensure that vsphere is configured for master services
+  (davis.phillips@gmail.com)
+- Refactor gluster image to use oreg_url (mgugino@redhat.com)
+- Approve node CSRs during node upgrade (vrutkovs@redhat.com)
+- Update Prometheus to scrape the router metrics (spasquie@redhat.com)
+- Avoid kuryr healthcheck ports collision (ltomasbo@redhat.com)
+
 * Thu May 31 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.56.0
 - Replace csr 'accepted' field with '{server,client}_accepted' fields and wait
   for server and client requests to be approved. (abutcher@redhat.com)
