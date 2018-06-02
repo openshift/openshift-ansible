@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.57.0%{?dist}
+Release:        0.58.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,24 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Jun 01 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.58.0
+- Fix dockergc images (sdodson@redhat.com)
+- iSCSI: Start multipathd (jarrpa@redhat.com)
+- cri-o: If defaulting to openshift_release prefix it with v
+  (sdodson@redhat.com)
+- Updating kibana proxy image to match reg url pattern of other components
+  (ewolinet@redhat.com)
+- Increase the delay between checking for image pull success
+  (sdodson@redhat.com)
+- Initialise repos before installing packages (tomas@sedovic.cz)
+- fix typo for component (wjiang@redhat.com)
+- fix descheduler image version typo (wjiang@redhat.com)
+- Splitting output over using stdout_lines due to name formatting
+  (ewolinet@redhat.com)
+- Adding a placeholder for etcd_ip. (kwoodson@redhat.com)
+- Updating logic when we are scaling up to skip health checks
+  (ewolinet@redhat.com)
+
 * Fri Jun 01 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.57.0
 - Ensure that vsphere is configured for master services
   (davis.phillips@gmail.com)
