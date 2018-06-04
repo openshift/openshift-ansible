@@ -17,14 +17,6 @@ objects:
     spec:
       triggers:
       - type: ConfigChange
-      - type: ImageChange
-        imageChangeParams:
-          automatic: true
-          containerNames:
-          - "registry-console"
-          from:
-            kind: ImageStreamTag
-            name: registry-console:${IMAGE_VERSION}
       replicas: 1
       selector:
         name: "registry-console"
@@ -35,7 +27,7 @@ objects:
         spec:
           containers:
             - name: registry-console
-              image: ""
+              image: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
               ports:
                 - containerPort: 9090
                   protocol: TCP
