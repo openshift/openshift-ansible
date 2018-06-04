@@ -34,5 +34,12 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
+- name: Stage cri-o updates
+  command: "{{ ansible_pkg_mgr }} install -y --downloadonly cri-o"
+  register: result
+  until: result is succeeded
+  when:
+  - openshift_use_crio | default(False)
+
 - import_tasks: upgrade/rpm_upgrade.yml
   when: not openshift_is_atomic | bool
