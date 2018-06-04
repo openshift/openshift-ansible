@@ -12,11 +12,11 @@ data:
     kubernetes:
       tenant: ${POD:namespace_name}
     hawkular_server:
-      url: https://hawkular-metrics.openshift-infra.svc.cluster.local       
+      url: https://hawkular-metrics.{{ openshift_metrics_project }}.svc.cluster.local       
       credentials:
-        username: secret:openshift-infra/hawkular-metrics-account/hawkular-metrics.username
-        password: secret:openshift-infra/hawkular-metrics-account/hawkular-metrics.password
-      ca_cert_file: secret:openshift-infra/hawkular-metrics-certs/ca.crt
+        username: secret:{{ openshift_metrics_project }}/hawkular-metrics-account/hawkular-metrics.username
+        password: secret:{{ openshift_metrics_project }}/hawkular-metrics-account/hawkular-metrics.password
+      ca_cert_file: secret:{{ openshift_metrics_project }}/hawkular-metrics-certs/ca.crt
     emitter:
       status_enabled: false
     collector:
