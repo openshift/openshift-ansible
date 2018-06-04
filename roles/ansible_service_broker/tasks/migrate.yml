@@ -73,6 +73,7 @@
               parallelism: 1
               completions: 1
               backoffLimit: 3
+              activeDeadlineSeconds: "{{ asb_migration_timeout | default(600) | int }}"
               template:
                 metadata:
                   name: asb-etcd-migration
