@@ -24,8 +24,8 @@
   when:
   - node_image is defined
   - node_image.stdout_lines == []
-  retries: 30
-  delay: 10
+  retries: 20
+  delay: 30
   failed_when: false
 
 - name: Copy node container image to ostree storage

@@ -151,8 +151,8 @@
   register: job_result
   until: job_result.finished
   when: control_plane_image.stdout_lines == []
-  retries: 30
-  delay: 10
+  retries: 20
+  delay: 30
   failed_when: false
 
 - name: Check status of etcd image pre-pull
@@ -164,8 +164,8 @@
   - etcd_image_exists is defined
   - "'stdout_lines' in etcd_image_exists"
   - etcd_image_exists.stdout_lines == []
-  retries: 30
-  delay: 10
+  retries: 20
+  delay: 30
   failed_when: false
 
 - name: Start and enable self-hosting node
