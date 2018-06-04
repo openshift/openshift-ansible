@@ -33,7 +33,7 @@
 - name: Install cri-o
   package:
     name: "{{ crio_pkgs | join(',') }}"
-    state: present
+    state: latest
   register: result
   until: result is succeeded
   vars:
