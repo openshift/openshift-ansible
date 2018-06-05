@@ -61,7 +61,7 @@
   - name: Place shim commands on the masters before we begin the upgrade
     import_role:
       name: openshift_control_plane
-      tasks_from: static_shim
+      tasks_from: static_shim.yml
 
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
@@ -74,11 +74,11 @@
   - name: Ensure the master bootstrap config has bootstrapping config
     import_role:
       name: openshift_node_group
-      tasks_from: upgrade
+      tasks_from: upgrade.yml
   - name: Enable node configuration reconciliation
     import_role:
       name: openshift_node_group
-      tasks_from: sync
+      tasks_from: sync.yml
   roles:
   - role: openshift_sdn
     when: openshift_use_openshift_sdn | default(True) | bool
@@ -89,10 +89,10 @@
   tasks:
   - import_role:
       name: openshift_node
-      tasks_from: upgrade_pre
+      tasks_from: upgrade_pre.yml
   - import_role:
       name: openshift_node
-      tasks_from: upgrade
+      tasks_from: upgrade.yml
 
 - import_playbook: ../upgrade_control_plane.yml
   vars:
@@ -104,7 +104,7 @@
   tasks:
   - import_role:
       name: openshift_web_console
-      tasks_from: remove_old_asset_config
+      tasks_from: remove_old_asset_config.yml
 
 # This is a one time migration. No need to save it in the 3.11.
 # https://bugzilla.redhat.com/show_bug.cgi?id=1565736

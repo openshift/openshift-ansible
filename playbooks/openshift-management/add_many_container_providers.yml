@@ -29,7 +29,7 @@
   # Include openshift_management for access to filter_plugins.
   - import_role:
       name: openshift_management
-      tasks_from: noop
+      tasks_from: noop.yml
 
   - name: print each result
     debug:

@@ -7,4 +7,4 @@
   - name: Run the Node Problem Detector Uninstall Role Tasks
     include_role:
       name: openshift_node_problem_detector
-      tasks_from: uninstall
+      tasks_from: uninstall.yaml

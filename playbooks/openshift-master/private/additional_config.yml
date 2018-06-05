@@ -45,7 +45,7 @@
   tasks:
   - import_role:
       name: openshift_cloud_provider
-      tasks_from: vsphere-svc
+      tasks_from: vsphere-svc.yml
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'
@@ -56,7 +56,7 @@
   tasks:
   - import_role:
       name: openshift_cloud_provider
-      tasks_from: update-vsphere
+      tasks_from: update-vsphere.yml
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'

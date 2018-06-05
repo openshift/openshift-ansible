@@ -96,7 +96,7 @@
   tasks:
   - import_role:
       name: openshift_cloud_provider
-      tasks_from: vsphere-svc
+      tasks_from: vsphere-svc.yml
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'
@@ -118,12 +118,12 @@
 
   - import_role:
       name: openshift_control_plane
-      tasks_from: upgrade
+      tasks_from: upgrade.yml
 
   - name: update vsphere provider master config
     import_role:
       name: openshift_cloud_provider
-      tasks_from: update-vsphere
+      tasks_from: update-vsphere.yml
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'
