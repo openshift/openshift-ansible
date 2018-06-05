@@ -114,6 +114,13 @@
     src: "{{ mktemp.stdout }}/{{ __console_config_file }}"
   register: updated_console_config
 
+# Avoids an issue where existing replica sets can be orphaned due to the label selector changing.
+- name: Apply the app label to pods and replica sets
+  shell: >
+    {{ openshift_client_binary }} label rs,pods -l webconsole=true app=openshift-web-console --overwrite=true -n openshift-web-console
+    --config={{ mktemp.stdout }}/admin.kubeconfig
+  when: not create_console_project.changed
+
 - name: Apply the web console template file
   shell: >
     {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/{{ __console_template_file }}"
