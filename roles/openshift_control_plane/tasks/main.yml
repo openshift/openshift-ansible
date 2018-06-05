@@ -256,9 +256,11 @@
   retries: 60
   delay: 5
   with_items:
-  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else omit }}"
+  - "{{ 'etcd' if inventory_hostname in groups['oo_etcd_to_config'] else '' }}"
   - api
   - controllers
+  when:
+  - item != ''
 
 - when: control_plane_health is failed
   block:
