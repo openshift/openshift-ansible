@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.58.0%{?dist}
+Release:        0.59.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,18 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Jun 05 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.59.0
+- Don't verify java-1.8.0-openjdk (sdodson@redhat.com)
+- Stage cri-o packages (sdodson@redhat.com)
+- Upgrade cri-o during node upgrade (sdodson@redhat.com)
+- Wait up to 10 minutes on image pulls (sdodson@redhat.com)
+- Bug 1585648- Set timeout for ASB migration job (workaround for
+  kubernetes/kubernetes#62382) (fabian@fabianism.us)
+- Revert "Remove unused imagestream of registry-console" (sdodson@redhat.com)
+- crio-network: fix definition for systemd (gscrivan@redhat.com)
+- container_runtime: do not depend on iptables when using firewalld
+  (arun.neelicattu@gmail.com)
+
 * Fri Jun 01 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.58.0
 - Fix dockergc images (sdodson@redhat.com)
 - iSCSI: Start multipathd (jarrpa@redhat.com)
