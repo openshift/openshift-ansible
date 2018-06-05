@@ -191,6 +191,17 @@ records, you must set at least one of:
 
 Otherwise the private records will be overwritten by the public ones.
 
+For example by leaving the *private* suffix empty and setting the *public* one
+to:
+
+```
+openshift_openstack_public_hostname_suffix: -public
+```
+
+The internal access to the first master node would be available with:
+`master-0.openshift.example.com`, while the public access using the floating IP
+address would be under `master-0-public.openshift.example.com`.
+
 Note that these suffixes are only applied to the OpenShift Node names
 as they appear in the DNS. They will not affect the actual hostnames.
 
@@ -201,7 +212,7 @@ If your nsupdate zone differs from the full OpenShift DNS name (e.g.
 your DNS' zone is "example.com" but you want your cluster to be at
 "openshift.example.com"), you can specify the zone in this parameter:
 
-* `openshift_openstack_nsupdate_zone`
+* `openshift_openstack_nsupdate_zone: example.com`
 
 If left out, it will be equal to the OpenShift cluster DNS.
 
