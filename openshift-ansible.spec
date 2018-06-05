@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.59.0%{?dist}
+Release:        0.60.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Tue Jun 05 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.60.0
+- 
+
 * Tue Jun 05 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.59.0
 - Don't verify java-1.8.0-openjdk (sdodson@redhat.com)
 - Stage cri-o packages (sdodson@redhat.com)
