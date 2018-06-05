@@ -13,6 +13,17 @@
     src: node-images.yaml.j2
     dest: "{{ manifests_tmpdir.stdout }}/node-images.yaml"
 
+- name: Set certificate contents as fact
+  set_fact:
+    kuryr_ca_certificate: "{{ lookup('file', kuryr_openstack_ca | default(lookup('env', 'OS_CACERT'))) }}"
+  ignore_errors: yes
+
+- name: Create Kuryr certificates Secret manifest
+  become: yes
+  template:
+    src: certificates-secret.yaml.j2
+    dest: "{{ manifests_tmpdir.stdout }}/certificates-secret.yaml"
+
 - name: Create kuryr ConfigMap manifest
   become: yes
   template:
@@ -41,6 +52,16 @@
     - "{{ manifests_tmpdir.stdout }}/node-images.yaml"
   run_once: true
   ignore_errors: yes
+
+- name: Apply Kuryr certificates Secret
+  oc_obj:
+    state: present
+    kind: Secret
+    name: "kuryr-certificates"
+    namespace: "{{ kuryr_namespace }}"
+    files:
+    - "{{ manifests_tmpdir.stdout }}/certificates-secret.yaml"
+  run_once: true
 
 - name: Apply ConfigMap manifest
   oc_obj:
