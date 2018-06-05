@@ -20,6 +20,22 @@
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
 
+- name: Ensure cri-o is updated
+  package:
+    name: cri-o
+    state: latest
+  when:
+  - openshift_use_crio | default(False)
+  register: crio_update
+
+- name: Restart cri-o
+  systemd:
+    name: cri-o
+    state: restarted
+  when:
+  - openshift_use_crio | default(False)
+  - crio_update is changed
+
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
   when: not openshift_is_atomic | bool
