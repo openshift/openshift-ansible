@@ -1,8 +1,8 @@
 ---
-# l_scale_up_hosts may be passed in via prerequisites.yml during scaleup plays.
+# l_repo_hosts is passed in via prerequisites.yml.
 
 - name: Setup yum repositories for all hosts
-  hosts: "{{ l_scale_up_hosts | default('oo_all_hosts') }}"
+  hosts: "{{ l_repo_hosts | default('all:!all') }}"
   gather_facts: no
   tasks:
   - name: subscribe instances to Red Hat Subscription Manager
