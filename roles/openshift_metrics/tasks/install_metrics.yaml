@@ -1,6 +1,12 @@
 ---
 - include_tasks: pre_install.yaml
 
+- name: Set metrics project
+  oc_project:
+    state: present
+    name: "{{ openshift_metrics_project }}"
+    node_selector: ""
+
 - name: Install Metrics
   include_tasks: "install_{{ include_file }}.yaml"
   with_items:
