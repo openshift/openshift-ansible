@@ -13,13 +13,17 @@ metadata:
 openshift.io/provider-display-name: Red Hat, Inc.
 parameters:
 - name: OPERATOR_IMAGE
-  value: quay.io/coreos/cluster-monitoring-operator:v0.0.1
+  value: quay.io/coreos/cluster-monitoring-operator:v0.0.6
 - name: PROMETHEUS_OPERATOR_IMAGE
   value: quay.io/coreos/prometheus-operator
 - name: ALERTMANAGER_IMAGE
   value: quay.io/prometheus/alertmanager
+- name: ALERTMANAGER_STORAGE_CAPACITY
+  required: true
 - name: PROMETHEUS_IMAGE
   value: quay.io/prometheus/prometheus
+- name: PROMETHEUS_STORAGE_CAPACITY
+  required: true
 - name: PROMETHEUS_CONFIG_RELOADER_IMAGE
   value: quay.io/coreos/prometheus-config-reloader
 - name: CONFIG_RELOADER_IMAGE
@@ -51,8 +55,18 @@ objects:
         baseImage: ${PROMETHEUS_IMAGE}
         externalLabels:
           cluster: ${CLUSTER_ID}
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: "${PROMETHEUS_STORAGE_CAPACITY}"
       alertmanagerMain:
         baseImage: ${ALERTMANAGER_IMAGE}
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: "${ALERTMANAGER_STORAGE_CAPACITY}"
 
 # Configures Alertmanager.
 - apiVersion: v1
@@ -148,7 +162,7 @@ objects:
     resources: [customresourcedefinitions]
     verbs: ['*']
   - apiGroups: [monitoring.coreos.com]
-    resources: [alertmanagers, prometheuses, prometheuses/finalizers, alertmanagers/finalizers, servicemonitors]
+    resources: [alertmanagers, prometheuses, prometheuses/finalizers, alertmanagers/finalizers, servicemonitors, prometheusrules]
     verbs: ['*']
   - apiGroups: [apps]
     resources: [statefulsets]
