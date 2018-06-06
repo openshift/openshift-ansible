@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.60.0%{?dist}
+Release:        0.61.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,18 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Jun 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.61.0
+- Apply app label to console replica sets and pods (spadgett@redhat.com)
+- Only look for etcd pod on etcd hosts that are colocated w/ master
+  (sdodson@redhat.com)
+- include tcpdump in azure images (jminter@redhat.com)
+- Add a prerequisite check for the nsupdate var (tomas@sedovic.cz)
+- Add examples to the documentation (tomas@sedovic.cz)
+- Allow empty openshift_openstack_clusterid (tomas@sedovic.cz)
+- Update the DNS documentation (tomas@sedovic.cz)
+- Decouple the zone from the full cluster dns name (tomas@sedovic.cz)
+- Add option to pass OpenStack CA cert to Kuryr (mdulko@redhat.com)
+
 * Tue Jun 05 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.60.0
 - 
 
