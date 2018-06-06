@@ -32,10 +32,15 @@
 
 - name: Install cri-o
   package:
-    name: "cri-o"
-    state: present
+    name: "{{ crio_pkgs | join(',') }}"
+    state: latest
   register: result
   until: result is succeeded
+  vars:
+    crio_pkgs:
+      - "cri-o"
+      - "cri-tools"
+      - "podman"
 
 - name: Remove CRI-O default configuration files
   file:
