@@ -80,7 +80,7 @@ outputs:
     description: >
       The address of the private OpenShift API. This is used during OpenShift
       deployment and for API access by the internal pods and services.
-{% if openshift_openstack_use_lbaas_load_balancer %}
+{% if openshift_openstack_use_lbaas_load_balancer or openshift_use_kuryr|default(false)|bool %}
     value: { get_attr: [api_lb, vip_address] }
 {% elif openshift_openstack_use_vm_load_balancer %}
     value: { get_attr: [loadbalancer, resource.0, private_ip] }

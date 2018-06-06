@@ -40,6 +40,21 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``openshift_kuryr_precreate_subports=5``
 * ``openshift_kuryr_device_owner=compute:kuryr``
 
+## OpenShift API loadbalancer
+
+Kuryr is connecting to OpenShift API through the load balancer created by
+OpenStack playbook. Both Octavia and Neutron LBaaS v2 hardcode 50 seconds as
+client and server inactivity timeout. This is a low value for Kuryr, which is
+watching K8s API forever. If connection will get closed by the LB, Kuryr will
+restart it with some messages about it in the logs.
+
+If you have access to your OpenStack cloud configuration you can disable the
+timeouts by providing custom HA proxy templates to your LBaaS v2 or Octavia
+installations. It's controlled by ``[haproxy]jinja_config_template`` option in
+Neutron LBaaS v2 and ``[haproxy_amphora]haproxy_template`` in Octavia's config.
+Please note that such configuration change will affect all the load balancers
+created in the cloud.
+
 ## Kuryr resources
 
 * [Kuryr documentation](https://docs.openstack.org/kuryr-kubernetes/latest/)

@@ -210,6 +210,7 @@ def _get_kuryr_vars(cloud_client, data):
     settings['kuryr_openstack_pod_sg_id'] = data['pod_access_sg_id']
     settings['kuryr_openstack_pod_project_id'] = (
         cloud_client.current_project_id)
+    settings['kuryr_openstack_api_lb_ip'] = data['private_api_ip']
 
     settings['kuryr_openstack_auth_url'] = cloud_client.auth['auth_url']
     settings['kuryr_openstack_username'] = cloud_client.auth['username']
