@@ -9,7 +9,7 @@
     key_algorithm: "{{ item.0.key_algorithm }}"
     server: "{{ item.0.server }}"
     zone: "{{ item.0.zone }}"
-    record: "{{ item.1.hostname }}"
+    record: "{{ item.1.fqdn | replace('.' + openshift_openstack_nsupdate_zone, '') }}"
     value: "{{ item.1.ip }}"
     type: "{{ item.1.type }}"
     state: absent
