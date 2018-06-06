@@ -1,0 +1,16 @@
+---
+- include: ../openshift-cluster/initialize_groups.yml
+
+- include: ../../common/openshift-loadbalancer/config.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+
+- include: ../../common/openshift-node/scaleup.yml
+  vars:
+    openshift_cluster_id: "{{ cluster_id | default('default') }}"
+    openshift_debug_level: "{{ debug_level | default(2) }}"
+    openshift_master_etcd_hosts: "{{ groups.etcd | default([]) }}"
+    openshift_master_etcd_port: 2379
+  when:
+  - g_new_node_hosts | default([]) | length != 0
