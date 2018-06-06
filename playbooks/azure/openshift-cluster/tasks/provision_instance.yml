@@ -31,7 +31,7 @@
     -g "{{ openshift_azure_resource_group_name }}"
     --size Standard_D4s_v3
     --image "{{ (input_image.stdout | from_json).id }}"
-    --storage-sku Standard_LRS
+    --storage-sku Premium_LRS
     --admin-username cloud-user
     --ssh-dest-key-path /home/cloud-user/.ssh/authorized_keys
     --ssh-key-value "{{ openshift_azure_vm_ssh_public_key }}"
