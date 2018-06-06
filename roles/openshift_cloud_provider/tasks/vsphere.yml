@@ -11,11 +11,11 @@
   - openshift_cloudprovider_vsphere_datastore is defined
 
 - name: Configure vsphere svc account
-  import_tasks: vsphere-svc.yml
+  include_tasks: vsphere-svc.yml
   when:
   - openshift_version | version_compare('3.9', '>=')
   - inventory_hostname == openshift_master_hosts[0]
 
 - name: Modify controller args
-  import_tasks: update-vsphere.yml
+  include_tasks: update-vsphere.yml
   notify: restart master
