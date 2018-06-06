@@ -30,6 +30,12 @@
   retries: 3
   delay: 30
 
+- name: Restart cri-o
+  service:
+    name: cri-o
+    state: started
+  when: openshift_use_crio | default(False)
+
 - name: Start node service
   service:
     name: "{{ openshift_service_type }}-node"
