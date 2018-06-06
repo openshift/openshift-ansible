@@ -49,7 +49,7 @@
         value: "{{ openshift_azure_resource_location }}"
       # masterProfile
       - key: properties.masterProfile.dnsPrefix
-        value: "a{{ 16 | lib_utils_oo_random_word }}a"
+        value: "{{ openshift_azure_resource_group_name }}"
       - key: properties.masterProfile.imageReference.name
         value: "{{ (input_image.stdout | from_json).name }}"
       - key: properties.masterProfile.imageReference.resourceGroup
@@ -75,16 +75,18 @@
       - key: properties.servicePrincipalProfile.secret
         value: "{{ lookup('env', 'AZURE_SECRET') }}"
 
-  - name: run acs-engine deploy
+  - name: generate ARM templates
     command: |
-      {{ tmp.path }}/acs-engine deploy \
+      {{ tmp.path }}/acs-engine generate {{ tmp.path }}/openshift.json \
+      --output-directory {{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}
+
+  - name: deploy ARM templates
+    command: |
+      az group deployment create \
+        --name {{ openshift_azure_resource_group_name }} \
         --resource-group {{ openshift_azure_resource_group_name }} \
-        --location {{ openshift_azure_resource_location }} \
-        --subscription-id {{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }} \
-        --auth-method client_secret \
-        --client-id {{ lookup('env', 'AZURE_CLIENT_ID') }} \
-        --client-secret {{ lookup('env', 'AZURE_SECRET') }} \
-        {{ tmp.path }}/openshift.json
+        --template-file {{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}/azuredeploy.json
+        --parameters {{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}/azuredeploy.parameters.json
     ignore_errors: yes
     register: deploy
 
