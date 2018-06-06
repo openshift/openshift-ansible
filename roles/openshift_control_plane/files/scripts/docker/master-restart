@@ -15,7 +15,7 @@ for type in "${types[@]}"; do
   fi
 done
 
-pod=$(crictl pods -l -q --label "openshift.io/component=${1}" --label "io.kubernetes.container.name=POD 2>/dev/null")
+pod=$(crictl pods -l -q --label "openshift.io/component=${1}" --label "io.kubernetes.container.name=POD" 2>/dev/null)
 if [[ -z "${pod}" ]]; then
   echo "Component ${1} is already stopped" 1>&2
   exit 0
