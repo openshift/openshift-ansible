@@ -9,6 +9,18 @@
   register: generation_init
   failed_when: false
   changed_when: no
+  when: namespace is defined
+
+- name: Checking generation of {{file_content.kind}} {{file_content.metadata.name}}
+  command: >
+    {{ openshift_client_binary }}
+    --config={{ kubeconfig }}
+    get {{file_content.kind}} {{file_content.metadata.name}}
+    -o jsonpath='{.metadata.resourceVersion}'
+  register: generation_init_no_ns
+  failed_when: false
+  changed_when: no
+  when: namespace is not defined
 
 - name: Applying {{file_name}}
   command: >
@@ -18,6 +30,16 @@
   register: generation_apply
   failed_when: "'error' in generation_apply.stderr or (generation_apply.rc | int != 0)"
   changed_when: no
+  when: namespace is defined
+
+- name: Applying {{file_name}}
+  command: >
+    {{ openshift_client_binary }} --config={{ kubeconfig }}
+    apply -f {{ file_name }}
+  register: generation_apply
+  failed_when: "'error' in generation_apply.stderr or (generation_apply.rc | int != 0)"
+  changed_when: no
+  when: namespace is not defined
 
 - name: Determine change status of {{file_content.kind}} {{file_content.metadata.name}}
   command: >
@@ -30,3 +52,17 @@
     init_version: "{{ (generation_init is defined) | ternary(generation_init.stdout, '0') }}"
   failed_when: "'error' in version_changed.stderr or version_changed.rc | int != 0"
   changed_when: version_changed.stdout | int  > init_version | int
+  when: namespace is defined
+
+
+- name: Determine change status of {{file_content.kind}} {{file_content.metadata.name}}
+  command: >
+    {{ openshift_client_binary }} --config={{ kubeconfig }}
+    get {{file_content.kind}} {{file_content.metadata.name}}
+    -o jsonpath='{.metadata.resourceVersion}'
+  register: version_changed
+  vars:
+    init_version: "{{ (generation_init_no_ns is defined) | ternary(generation_init_no_ns.stdout, '0') }}"
+  failed_when: "'error' in version_changed.stderr or version_changed.rc | int != 0"
+  changed_when: version_changed.stdout | int  > init_version | int
+  when: namespace is not defined

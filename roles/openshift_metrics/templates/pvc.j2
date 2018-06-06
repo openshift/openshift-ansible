@@ -18,6 +18,9 @@ metadata:
 {% endfor %}
 {% endif %}
 spec:
+{% if volume_name is defined %}
+  volumeName: {{volume_name}}
+{% endif %}
 {% if pv_selector is defined and pv_selector is mapping %}
   selector:
     matchLabels:
