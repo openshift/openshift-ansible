@@ -9,3 +9,9 @@
   - scripts/docker/master-exec
   - scripts/docker/master-logs
   - scripts/docker/master-restart
+
+- name: Ensure cri-tools installed
+  package:
+    name: cri-tools
+    state: present
+  when: not openshift_is_atomic | bool
