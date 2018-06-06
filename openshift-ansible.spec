@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.10.0
-Release:        0.61.0%{?dist}
+Release:        0.63.0%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,12 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Jun 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.63.0
+- Bug 1586366 - Use include_tasks for dynamic task file includes
+  (rteague@redhat.com)
+- Make prometheus use persistent storage by default (ironcladlou@gmail.com)
+- Make Kuryr connect to OpenShift API through LB (mdulko@redhat.com)
+
 * Wed Jun 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.61.0
 - Apply app label to console replica sets and pods (spadgett@redhat.com)
 - Only look for etcd pod on etcd hosts that are colocated w/ master
