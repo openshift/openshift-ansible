@@ -7,6 +7,8 @@
     all_namespaces: true
   register: svc_output
   ignore_errors: true
+  when:
+    - openshift_use_kuryr|default(false) == true
 
 - name: Delete kuryr LoadBalancers (cascading)
   os_lbaas_deletion:
