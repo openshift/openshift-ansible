@@ -50,7 +50,10 @@ kubeletArguments:
   cloud-provider:
   - {{ openshift_node_group_cloud_provider }}
 {% endif %}
-  node-labels: []
+{% if l_openshift_node_group_labels is defined %}
+  node-labels:
+  - {{ l_openshift_node_group_labels | join(',') }}
+{% endif %}
   enable-controller-attach-detach:
   - 'true'
 masterClientConnectionOverrides:

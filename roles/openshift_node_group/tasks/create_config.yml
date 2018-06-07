@@ -1,7 +1,7 @@
 ---
 - name: fetch node configmap
   oc_configmap:
-    name: "{{ openshift_node_group_name }}"
+    name: "{{ l_openshift_node_group_name }}"
     namespace: "{{ openshift_node_group_namespace }}"
     state: list
   register: configout
@@ -13,7 +13,7 @@
   run_once: true
 
 - when:
-  - configout.results.results.0 == {} or (configout.results.results.0 != {} and (openshift_node_group_edits|length > 0 or openshift_node_group_labels|length > 0))
+  - configout.results.results.0 == {} or (configout.results.results.0 != {} and (l_openshift_node_group_edits|length > 0))
   block:
   - name: create a temp dir for this work
     command: mktemp -d /tmp/openshift_node_config-XXXXXX
@@ -36,13 +36,14 @@
     - configout.results.results.0 != {}
     run_once: true
 
-  - name: "specialize the generated configs for {{ openshift_node_group_name }}"
+  - name: "specialize the generated configs for {{ l_openshift_node_group_name }}"
     yedit:
       content:
       src: "{{ mktempout.stdout }}/node-config.yaml"
-      edits: "{{ openshift_node_group_edits | union(openshift_node_labels_edit) }}"
+      edits: "{{ l_openshift_node_group_edits }}"
     register: yeditout
     run_once: true
+    when: l_openshift_node_group_edits != []
 
   - name: show the yeditout debug var
     debug:
@@ -55,7 +56,7 @@
       dest: "{{ mktempout.stdout }}/volume-config.yaml"
     when:
     - "'data' not in configout['results']['results'][0] or 'volume-config.yaml' not in configout['results']['results'][0]['data']"
-    - openshift_node_group_name != ""
+    - l_openshift_node_group_name != ""
     - openshift_node_local_quota_per_fsgroup is defined
     - openshift_node_local_quota_per_fsgroup != ""
     run_once: true
@@ -67,12 +68,12 @@
     when:
     - "'data' in configout['results']['results'][0]"
     - "'volume-config.yaml' in configout['results']['results'][0]['data']"
-    - openshift_node_group_name != ""
+    - l_openshift_node_group_name != ""
     - openshift_node_local_quota_per_fsgroup is defined
     - openshift_node_local_quota_per_fsgroup != ""
     run_once: true
 
-  - name: "specialize the volume config for {{ openshift_node_group_name }}"
+  - name: "specialize the volume config for {{ l_openshift_node_group_name }}"
     yedit:
       content:
       src: "{{ mktempout.stdout }}/volume-config.yaml"
@@ -91,7 +92,7 @@
 
   - name: create node-config.yaml configmap
     oc_configmap:
-      name: "{{ openshift_node_group_name }}"
+      name: "{{ l_openshift_node_group_name }}"
       namespace: "{{ openshift_node_group_namespace }}"
       from_file:
         node-config.yaml: "{{ mktempout.stdout }}/node-config.yaml"
@@ -101,7 +102,7 @@
 
   - name: create node-config.yaml and volume-config.yaml configmap
     oc_configmap:
-      name: "{{ openshift_node_group_name }}"
+      name: "{{ l_openshift_node_group_name }}"
       namespace: "{{ openshift_node_group_namespace }}"
       from_file:
         node-config.yaml: "{{ mktempout.stdout }}/node-config.yaml"

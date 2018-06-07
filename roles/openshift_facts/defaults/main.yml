@@ -116,3 +116,17 @@ openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_typ
 openshift_master_api_port: "8443"
 openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 openshift_use_openshift_sdn: true
+
+openshift_node_groups:
+  - name: node-config-master
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+    edits: []
+  - name: node-config-compute
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+    edits: []
