@@ -27,6 +27,10 @@
       path: "{{ tmp.path }}/acs-engine"
       mode: 0755
 
+  - name: set dns prefix
+    set_fact:
+      dns_prefix: "{{ openshift_azure_resource_group_name | regex_replace('_', '-') }}"
+
   - name: configure acs-engine
     yedit:
       content_type: json
@@ -49,7 +53,7 @@
         value: "{{ openshift_azure_resource_location }}"
       # masterProfile
       - key: properties.masterProfile.dnsPrefix
-        value: "{{ openshift_azure_resource_group_name }}"
+        value: "{{ dns_prefix }}"
       - key: properties.masterProfile.imageReference.name
         value: "{{ (input_image.stdout | from_json).name }}"
       - key: properties.masterProfile.imageReference.resourceGroup
@@ -78,15 +82,15 @@
   - name: generate ARM templates
     command: |
       {{ tmp.path }}/acs-engine generate {{ tmp.path }}/openshift.json \
-      --output-directory {{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}
+      --output-directory {{ tmp.path }}/_output/{{ dns_prefix }}
 
   - name: deploy ARM templates
     command: |
       az group deployment create \
-        --name {{ openshift_azure_resource_group_name }} \
+        --name {{ dns_prefix }} \
         --resource-group {{ openshift_azure_resource_group_name }} \
-        --template-file {{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}/azuredeploy.json
-        --parameters {{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}/azuredeploy.parameters.json
+        --template-file {{ tmp.path }}/_output/{{ dns_prefix }}/azuredeploy.json
+        --parameters {{ tmp.path }}/_output/{{ dns_prefix }}/azuredeploy.parameters.json
     ignore_errors: yes
     register: deploy
 
