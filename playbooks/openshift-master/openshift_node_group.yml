@@ -1,0 +1,6 @@
+---
+- name: Setup node-group configmaps
+  hosts: oo_first_master
+  tasks:
+  - debug:
+      msg: "openshift_node_group play ran"
