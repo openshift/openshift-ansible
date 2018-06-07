@@ -17,7 +17,7 @@
   when:
     - openshift_openstack_lbaasv2_provider == "Octavia"
     - not (item.metadata.name == "kubernetes")
-    - openshift_use_kuryr|default(false) == true
+    - openshift_use_kuryr | default(false) | bool
     - item.metadata.annotations is defined
 
 - name: Remove trunk subports
@@ -25,7 +25,7 @@
     trunk_name: "{{ item }}"
   with_items: "{{ groups['cluster_hosts'] }}"
   when:
-    - openshift_use_kuryr|default(false) == true
+    - openshift_use_kuryr | default(false) | bool
 
 - name: Delete the Stack
   ignore_errors: False
