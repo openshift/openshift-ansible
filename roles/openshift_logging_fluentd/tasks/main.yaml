@@ -204,7 +204,17 @@
     openshift_logging_fluentd_hosts: "{{ fluentd_hosts.results.results[0]['items'] | map(attribute='metadata.name') | list }}"
   when: "'--all' in openshift_logging_fluentd_hosts"
 
-- include: label_and_wait.yaml
+# We need to pause between nodes while labeling to avoid overloading the scheduler.
+- name: Label OCP nodes for Fluentd
+  shell: >
+    {{ openshift_client_binary }} --config=/etc/origin/master/admin.kubeconfig \
+    label --overwrite node {{ fluentd_host }} \
+    {% for k, v in openshift_logging_fluentd_nodeselector.items() %} {{ k }}={{ v }} {% endfor %} \
+    && \
+    sleep {{ openshift_logging_fluentd_label_delay }}
+  with_items: "{{ openshift_logging_fluentd_hosts }}"
+  loop_control:
+    loop_var: fluentd_host
 
 - name: Delete temp directory
   file:
