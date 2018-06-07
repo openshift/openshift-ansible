@@ -40,6 +40,26 @@
   - role: flannel_register
     when: openshift_use_flannel | default(false) | bool
 
+- name: configure vsphere svc account
+  hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_cloud_provider
+      tasks_from: vsphere-svc
+    when:
+    - openshift_cloudprovider_kind is defined
+    - openshift_cloudprovider_kind == 'vsphere'
+    - openshift_version | version_compare('3.9', '>=')
+
+- name: update vsphere provider master config
+  hosts: oo_masters_to_config
+  import_role:
+    name: openshift_cloud_provider
+    tasks_from: update-vsphere
+  when:
+  - openshift_cloudprovider_kind is defined
+  - openshift_cloudprovider_kind == 'vsphere'
+
 - name: Master Additional Install Checkpoint End
   hosts: all
   gather_facts: false
