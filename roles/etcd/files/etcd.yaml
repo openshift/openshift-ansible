@@ -33,7 +33,6 @@ spec:
     livenessProbe:
       exec:
       initialDelaySeconds: 45
-    terminationGracePeriodSeconds: 0
   volumes:
   - name: master-config
     hostPath:
