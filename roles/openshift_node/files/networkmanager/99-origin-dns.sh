@@ -13,8 +13,6 @@
 #   8053 to avoid conflicts on port 53 and open port 8053 in the firewall
 # - Drop this script in /etc/NetworkManager/dispatcher.d/
 # - systemctl restart NetworkManager
-# - Configure node-config.yaml to set dnsIP: to the ip address of this
-#   node
 #
 # Test it:
 # host kubernetes.default.svc.cluster.local

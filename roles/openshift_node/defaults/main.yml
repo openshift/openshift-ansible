@@ -22,8 +22,6 @@ openshift_oreg_url_default_dict:
 openshift_oreg_url_default: "{{ openshift_oreg_url_default_dict[openshift_deployment_type] }}"
 oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 
-openshift_dns_ip: "{{ ansible_default_ipv4['address'] }}"
-
 openshift_node_env_vars: {}
 
 # Create list of 'k=v' pairs.

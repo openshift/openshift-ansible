@@ -3,7 +3,7 @@ apiVersion: v1
 dnsBindAddress: 127.0.0.1:53
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
 dnsDomain: {{ openshift.common.dns_domain }}
-dnsIP: {{ openshift_dns_ip }}
+dnsIP: 0.0.0.0
 dockerConfig:
   execHandlerName: ""
 iptablesSyncPeriod: "{{ openshift_node_iptables_sync_period }}"
