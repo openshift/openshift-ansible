@@ -27,6 +27,10 @@
       path: "{{ tmp.path }}/acs-engine"
       mode: 0755
 
+  - name: set dns prefix
+    set_fact:
+      dns_prefix: "{{ openshift_azure_resource_group_name | regex_replace('_', '-') }}"
+
   - name: configure acs-engine
     yedit:
       content_type: json
@@ -49,7 +53,7 @@
         value: "{{ openshift_azure_resource_location }}"
       # masterProfile
       - key: properties.masterProfile.dnsPrefix
-        value: "a{{ 16 | lib_utils_oo_random_word }}a"
+        value: "{{ dns_prefix }}"
       - key: properties.masterProfile.imageReference.name
         value: "{{ (input_image.stdout | from_json).name }}"
       - key: properties.masterProfile.imageReference.resourceGroup
@@ -75,16 +79,18 @@
       - key: properties.servicePrincipalProfile.secret
         value: "{{ lookup('env', 'AZURE_SECRET') }}"
 
-  - name: run acs-engine deploy
+  - name: generate ARM templates
     command: |
-      {{ tmp.path }}/acs-engine deploy \
+      {{ tmp.path }}/acs-engine generate {{ tmp.path }}/openshift.json \
+      --output-directory {{ tmp.path }}/_output/{{ dns_prefix }}
+
+  - name: deploy ARM templates
+    command: |
+      az group deployment create \
+        --name {{ dns_prefix }} \
         --resource-group {{ openshift_azure_resource_group_name }} \
-        --location {{ openshift_azure_resource_location }} \
-        --subscription-id {{ lookup('env', 'AZURE_SUBSCRIPTION_ID') }} \
-        --auth-method client_secret \
-        --client-id {{ lookup('env', 'AZURE_CLIENT_ID') }} \
-        --client-secret {{ lookup('env', 'AZURE_SECRET') }} \
-        {{ tmp.path }}/openshift.json
+        --template-file {{ tmp.path }}/_output/{{ dns_prefix }}/azuredeploy.json
+        --parameters {{ tmp.path }}/_output/{{ dns_prefix }}/azuredeploy.parameters.json
     ignore_errors: yes
     register: deploy
 
