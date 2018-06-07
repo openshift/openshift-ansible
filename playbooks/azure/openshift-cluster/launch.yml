@@ -85,8 +85,15 @@
         --client-id {{ lookup('env', 'AZURE_CLIENT_ID') }} \
         --client-secret {{ lookup('env', 'AZURE_SECRET') }} \
         {{ tmp.path }}/openshift.json
+    no_log: true
     ignore_errors: yes
     register: deploy
+
+  - debug:
+      msg: "{{ deploy.stdout }}"
+
+  - debug:
+      msg: "{{ deploy.stderr }}"
 
   - name: delete temporary directory
     file:
