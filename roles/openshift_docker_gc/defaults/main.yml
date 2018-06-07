@@ -4,7 +4,7 @@ r_docker_gc_node_selectors: "{{ openshift_crio_docker_gc_node_selector | default
 
 openshift_docker_gc_image_dict:
   origin: "origin"
-  openshift-enterprise: "ose"
+  openshift-enterprise: "ose-control-plane"
 
 l_os_dockergc_reg_search_dict:
   origin: "origin-${component}"
