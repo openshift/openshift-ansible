@@ -130,3 +130,4 @@ openshift_node_groups:
     labels:
       - 'node-role.kubernetes.io/compute=true'
     edits: []
+openshift_master_manage_htpasswd: True
