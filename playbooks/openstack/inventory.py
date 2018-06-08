@@ -9,7 +9,6 @@ environment.
 
 from __future__ import print_function
 
-from collections import Mapping
 import json
 import os
 
