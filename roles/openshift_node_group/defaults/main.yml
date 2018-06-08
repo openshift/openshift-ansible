@@ -1,6 +1,4 @@
 ---
-openshift_node_group_namespace: openshift-node
-
 openshift_use_crio: False
 l_crio_var_sock: "/var/run/crio/crio.sock"
 
@@ -14,3 +12,5 @@ openshift_imageconfig_format: "{{ oreg_url | default(l_osm_registry_url_default)
 
 openshift_node_group_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"
 openshift_node_group_name: 'node-config-compute'
+
+l_openshift_node_group_labels: []

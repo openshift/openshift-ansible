@@ -80,6 +80,8 @@ fi
 # Run upgrade playbook
 if [[ "${PAPR_RUN_UPDATE}" != "0" ]]; then
   update_version="$(echo $target_branch | sed 's/\./_/')"
+  # Create basic node-group configmaps for upgrade
+  ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS playbooks/openshift-master/openshift_node_group.yml
   ansible-playbook -vvv -i $PAPR_INVENTORY playbooks/byo/openshift-cluster/upgrades/v${update_version}/upgrade.yml
 fi
 
