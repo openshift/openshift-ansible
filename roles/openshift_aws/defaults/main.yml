@@ -154,7 +154,7 @@ openshift_aws_master_group:
   group: master
   tags:
     host-type: master
-    sub-host-type: default
+    sub-host-type: master
     runtime: docker
 
 openshift_aws_node_groups:
@@ -171,6 +171,11 @@ openshift_aws_node_groups:
     host-type: node
     sub-host-type: infra
     runtime: docker
+
+openshift_aws_node_group_mappings:
+  master: 'node-config-master'
+  compute: 'node-config-compute'
+  infra: 'node-config-infra'
 
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
