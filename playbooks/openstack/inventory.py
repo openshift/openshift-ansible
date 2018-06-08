@@ -105,13 +105,8 @@ def _get_hostvars(server, docker_storage_mountpoints):
     if server.metadata['host-type'] == 'cns':
         hostvars['glusterfs_devices'] = ['/dev/nvme0n1']
 
-    node_labels = server.metadata.get('node_labels')
-    # NOTE(shadower): the node_labels value must be a dict not string
-    if not isinstance(node_labels, Mapping):
-        node_labels = json.loads(node_labels)
-
-    if node_labels:
-        hostvars['openshift_node_labels'] = node_labels
+    group_name = server.metadata.get('openshift_node_group_name')
+    hostvars['openshift_node_group_name'] = group_name
 
     # check for attached docker storage volumes
     if 'os-extended-volumes:volumes_attached' in server:

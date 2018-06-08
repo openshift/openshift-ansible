@@ -650,6 +650,7 @@ resources:
                 k8s_type: masters
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        master
+          openshift_node_group_name: node-config-master
           image:       {{ openshift_openstack_master_image }}
           flavor:      {{ openshift_openstack_master_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
@@ -738,10 +739,7 @@ resources:
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        node
           subtype:     app
-          node_labels:
-{% for k, v in openshift_openstack_cluster_node_labels.app.items() %}
-            {{ k|e }}: {{ v|e }}
-{% endfor %}
+          openshift_node_group_name: node-config-compute
           image:       {{ openshift_openstack_node_image }}
           flavor:      {{ openshift_openstack_node_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
@@ -810,10 +808,7 @@ resources:
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        node
           subtype:     infra
-          node_labels:
-{% for k, v in openshift_openstack_cluster_node_labels.infra.items() %}
-            {{ k|e }}: {{ v|e }}
-{% endfor %}
+          openshift_node_group_name: node-config-infra
           image:       {{ openshift_openstack_infra_image }}
           flavor:      {{ openshift_openstack_infra_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}

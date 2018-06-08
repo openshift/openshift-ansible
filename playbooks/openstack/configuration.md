@@ -56,15 +56,6 @@ In `inventory/group_vars/all.yml`:
   * `openshift_openstack_lb_hostname` Defaults to `lb`.
   * `openshift_openstack_etcd_hostname` Defaults to `etcd`.
 * `openshift_openstack_external_network_name` OpenStack network providing external connectivity.
-* `openshift_openstack_cluster_node_labels` Custom labels for openshift cluster node groups; currently supports app and infra node groups.
-The default value of this variable sets `region: primary` to app nodes and `region: infra` to infra nodes. An example of setting a customized label:
-
-```
-openshift_openstack_cluster_node_labels:
-  app:
-    mylabel: myvalue
-```
-
 * `openshift_openstack_provision_user_commands` Allows users to execute shell commands via cloud-init for all of the created Nova servers in the Heat stack, before they are available for SSH connections. Note that you should use [custom Ansible playbooks](./post-install.md#run-custom-post-provision-actions) whenever possible. User specified shell commands for cloud-init need to be either strings or lists:
 
 ```
@@ -386,18 +377,28 @@ On the other hand, there is a multi driver support to enable hybrid
 deployments with different pools drivers. In order to enable the kuryr
 `multi-pool` driver support, we need to also tag the nodes with their
 corresponding `pod_vif` labels so that the right kuryr pool driver is used
-for each VM/node. To do that, uncomment:
+for each VM/node.
+
+To do that, set this in `inventory/group_vars/OSEv3.yml`:
 
 ```yaml
 kuryr_openstack_pool_driver: multi
 
-openshift_openstack_cluster_node_labels:
-  app:
-    region: primary
-    pod_vif: nested-vlan
-  infra:
-    region: infra
-    pod_vif: nested-vlan
+openshift_node_groups:
+  - name: node-config-master
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+      - 'pod_vif=nested-vlan'
+    edits: []
+  - name: node-config-compute
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+      - 'pod_vif=nested-vlan'
+    edits: []
 ```
 
 
