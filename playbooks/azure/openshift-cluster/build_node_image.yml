@@ -79,6 +79,12 @@
     - { regexp: '^ResourceDisk\.MountPoint=', line: 'ResourceDisk.MountPoint=/var/lib/docker' }
     - { regexp: '^ResourceDisk\.MountOptions=', line: 'ResourceDisk.MountOptions=rw,relatime,seclabel,attr2,inode64,grpquota' }
 
+  - name: persist oreg_url
+    copy:
+      dest: "/etc/origin/oreg_url"
+      content: |
+        "{{ oreg_url }}"
+
   - name: run waagent deprovision
     shell: sleep 2 && waagent -deprovision+user -force
     async: 1
