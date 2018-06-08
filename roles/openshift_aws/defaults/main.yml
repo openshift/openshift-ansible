@@ -121,21 +121,21 @@ openshift_aws_elb_dict:
 openshift_aws_node_group_config_master_volumes:
 - device_name: /dev/sda1
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: False
 - device_name: /dev/sdb
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: False
 
 openshift_aws_node_group_config_node_volumes:
 - device_name: /dev/sda1
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: True
 - device_name: /dev/sdb
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: True
 
 # build_instance_tags is a custom filter in role lib_utils
