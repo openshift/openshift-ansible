@@ -9,7 +9,7 @@
     warn: no
   register: endpoint_health
   until: endpoint_health.stdout == 'ok'
-  retries: 60
+  retries: "{{ openshift_service_catalog_retries }}"
   delay: 10
   changed_when: false
   # Ignore errors so we can log troubleshooting info on failures.
