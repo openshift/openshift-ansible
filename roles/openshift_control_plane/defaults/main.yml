@@ -134,7 +134,6 @@ openshift_master_auth_token_max_seconds: 500
 # oo_htpasswd_users_from_file is a custom filter in role lib_utils
 l_osm_htpasswd_users_none: {}
 openshift_master_htpasswd_users: "{{ lookup('file', openshift_master_htpasswd_file) | oo_htpasswd_users_from_file if openshift_master_htpasswd_file is defined else l_osm_htpasswd_users_none }}"
-openshift_master_manage_htpasswd: True
 l_osm_request_header_none: {}
 openshift_master_request_header_ca: "{{ lookup('file', openshift_master_request_header_ca_file) if openshift_master_request_header_ca_file is defined else l_osm_request_header_none }}"
 openshift_master_oauth_grant_method: auto
