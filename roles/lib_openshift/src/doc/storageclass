@@ -57,6 +57,18 @@ options:
     required: false
     default: v1
     aliases: []
+  mount_options:
+    description:
+    - A list of mount options to pass when mounting volumes of this storage class.
+    required: false
+    default: None
+    aliases: []
+  reclaim_policy:
+    description:
+    - The reclaim policy to use for this storage class.
+    required: false
+    default: None
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []

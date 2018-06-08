@@ -54,10 +54,21 @@
         type: gp2
         encrypted: "true"
       default_storage_class: "true"
+      mount_options:
+      - debug
+      reclaim_policy: Delete
     register: sc_out
 
   - assert:
       that: "sc_out.results.results[0]['parameters']['encrypted'] == 'true'"
+      msg: storageclass update failed
+
+  - assert:
+      that: "sc_out.results.results[0]['reclaimPolicy'] == 'Delete'"
+      msg: storageclass update failed
+
+  - assert:
+      that: "sc_out.results.results[0]['mountOptions'] == ['debug']"
       msg: storageclass update failed
 
   - name: oc delete storageclass

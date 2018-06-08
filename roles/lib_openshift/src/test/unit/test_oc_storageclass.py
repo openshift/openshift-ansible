@@ -44,7 +44,9 @@ class OCStorageClassTest(unittest.TestCase):
             'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
             'parameters': {'type': 'gp2'},
             'api_version': 'v1',
-            'default_storage_class': 'true'
+            'default_storage_class': 'true',
+            'mount_options': ['debug'],
+            'reclaim_policy': 'Delete'
         }
 
         valid_result_json = '''{
@@ -59,7 +61,9 @@ class OCStorageClassTest(unittest.TestCase):
                 "annotations": {"storageclass.beta.kubernetes.io/is-default-class": "true"}
             },
             "provisioner": "kubernetes.io/aws-ebs",
-            "parameters": {"type": "gp2"}
+            "parameters": {"type": "gp2"},
+            "mountOptions": ['debug'],
+            "reclaimPolicy": "Delete"
         }'''
 
         # Return values of our mocked function call. These get returned once per call.
@@ -127,7 +131,9 @@ class OCStorageClassTest(unittest.TestCase):
             'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
             'parameters': {'type': 'gp2'},
             'api_version': 'v1',
-            'default_storage_class': 'true'
+            'default_storage_class': 'true',
+            'mount_options': ['debug'],
+            'reclaim_policy': 'Delete'
         }
 
         valid_result_json = '''{
@@ -142,7 +148,9 @@ class OCStorageClassTest(unittest.TestCase):
                 "annotations": {"storageclass.beta.kubernetes.io/is-default-class": "true"}
             },
             "provisioner": "kubernetes.io/aws-ebs",
-            "parameters": {"type": "gp2"}
+            "parameters": {"type": "gp2"},
+            "mountOptions": ['debug'],
+            "reclaimPolicy": "Delete"
         }'''
 
         # Return values of our mocked function call. These get returned once per call.

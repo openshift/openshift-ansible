@@ -17,6 +17,8 @@ def main():
             provisioner=dict(required=True, type='str'),
             api_version=dict(default='v1', type='str'),
             default_storage_class=dict(default="false", type='str'),
+            mount_options=dict(default=None, type='list'),
+            reclaim_policy=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
     )

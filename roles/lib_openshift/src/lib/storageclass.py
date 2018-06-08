@@ -13,7 +13,9 @@ class StorageClassConfig(object):
                  annotations=None,
                  default_storage_class="false",
                  api_version='v1',
-                 kubeconfig='/etc/origin/master/admin.kubeconfig'):
+                 kubeconfig='/etc/origin/master/admin.kubeconfig',
+                 mount_options=None,
+                 reclaim_policy=None):
         ''' constructor for handling storageclass options '''
         self.name = name
         self.parameters = parameters
@@ -22,6 +24,8 @@ class StorageClassConfig(object):
         self.api_version = api_version
         self.default_storage_class = str(default_storage_class).lower()
         self.kubeconfig = kubeconfig
+        self.mount_options = mount_options
+        self.reclaim_policy = reclaim_policy
         self.data = {}
 
         self.create_dict()
@@ -50,6 +54,11 @@ class StorageClassConfig(object):
         else:
             self.data['parameters']['type'] = 'gp2'
 
+        self.data['mountOptions'] = self.mount_options or []
+
+        if self.reclaim_policy is not None:
+            self.data['reclaimPolicy'] = self.reclaim_policy
+
 
 
 # pylint: disable=too-many-instance-attributes,too-many-public-methods
@@ -58,6 +67,8 @@ class StorageClass(Yedit):
     annotations_path = "metadata.annotations"
     provisioner_path = "provisioner"
     parameters_path = "parameters"
+    mount_options_path = "mountOptions"
+    reclaim_policy_path = "reclaimPolicy"
     kind = 'StorageClass'
 
     def __init__(self, content):
@@ -71,3 +82,11 @@ class StorageClass(Yedit):
     def get_parameters(self):
         ''' get the service selector'''
         return self.get(StorageClass.parameters_path) or {}
+
+    def get_mount_options(self):
+        ''' get mount options'''
+        return self.get(StorageClass.mount_options_path) or []
+
+    def get_reclaim_policy(self):
+        ''' get reclaim policy'''
+        return self.get(StorageClass.reclaim_policy_path)
