@@ -1,0 +1,31 @@
+apiVersion: "elasticsearch.redhat.com/v1alpha1"
+kind: "Elasticsearch"
+metadata:
+  name: "{{ es_cluster_name }}"
+spec:
+  nodes:
+{% for node in es_cluster_nodes %}
+    - nodeRole: clientdatamaster
+      replicas: {{ node['replicas'] }}
+      resources:
+        limits:
+{% if node['containers']['elasticsearch']['resources']['limits']['cpu'] is defined %}
+          cpu: "{{ node['containers']['elasticsearch']['resources']['limits']['cpu'] }}"
+{% endif %}
+          memory: "{{ node['containers']['elasticsearch']['resources']['limits']['memory'] }}"
+        requests:
+          cpu: "{{ node['containers']['elasticsearch']['resources']['requests']['cpu'] }}"
+          memory: "{{ node['containers']['elasticsearch']['resources']['requests']['memory'] }}"
+      elasticsearchConfig:
+        image: "{{ node['containers']['elasticsearch']['image'] }}"
+{% if node['nodeSelector'] is defined and node['nodeSelector'] is iterable %}
+      nodeSelector:
+{% for key, value in node['nodeSelector'].items() %}
+        {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+      storage:
+{% if node['volumes']['elasticsearch-storage'] is defined %}
+          {{ node['volumes']['elasticsearch-storage'] | to_yaml }}
+{% endif %}
+{% endfor %}
