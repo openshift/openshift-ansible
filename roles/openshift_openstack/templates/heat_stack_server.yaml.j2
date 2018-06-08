@@ -159,10 +159,10 @@ parameters:
       - range: { min: 1, max: 1024 }
         description: must be between 1 and 1024 Gb.
 
-  node_labels:
-    type: json
-    description: OpenShift Node Labels
-    default: {"region": "default" }
+  openshift_node_group_name:
+    type: string
+    default: ''
+    description: The openshift node group name for this server.
 
   scheduler_hints:
     type: json
@@ -240,7 +240,7 @@ resources:
         clusterid: { get_param: cluster_id }
         host-type: { get_param: type }
         sub-host-type:    { get_param: subtype }
-        node_labels: { get_param: node_labels }
+        openshift_node_group_name: { get_param: openshift_node_group_name }
 {% if openshift_openstack_dns_nameservers %}
         openshift_hostname: { get_param: name }
 {% endif %}
