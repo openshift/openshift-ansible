@@ -9,14 +9,19 @@ openshift_azure_resource_location: eastus
 # input image resource group
 openshift_azure_input_image_ns: images
 
-# input image prefix, e.g. centos7-root or centos7-base
+# input image prefix, needed by base and node image building playbooks,
+# e.g. centos7-root or centos7-base
 openshift_azure_input_image_prefix:
+
+# complete name of input image, needed by launch.yml playbook,
+# e.g. centos7-3.10-201806071434
+openshift_azure_input_image_name:
 
 # output image resource group
 openshift_azure_output_image_ns: images
 
-# output image prefix, e.g. centos7-base or centos7
-openshift_azure_output_image_prefix:
+# complete name of output image, e.g. centos7-base-201806071412 or centos7-3.10-201806071434
+openshift_azure_output_image_name:
 
 # ssh public key for VMs created by playbook; private key must be accessible to
 # ansible
