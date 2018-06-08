@@ -45,6 +45,9 @@ openshift_aws_s3_mode: create
 openshift_aws_s3_bucket_name: "{{ openshift_aws_clusterid }}-docker-registry"
 
 openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}"
+openshift_aws_elb_master_external_name: "{{ openshift_aws_elb_basename }}-master-external"
+openshift_aws_elb_master_internal_name: "{{ openshift_aws_elb_basename }}-master-internal"
+openshift_aws_elb_infra_name: "{{ openshift_aws_elb_basename }}-infra"
 
 openshift_aws_elb_cert_arn: ''
 
@@ -70,7 +73,7 @@ openshift_aws_elb_dict:
         instance_protocol: ssl
         instance_port: "{{ openshift_master_api_port }}"
         ssl_certificate_id: "{{ openshift_aws_elb_cert_arn }}"
-      name: "{{ openshift_aws_elb_basename }}-master-external"
+      name: "{{ openshift_aws_elb_master_external_name }}"
       tags: "{{ openshift_aws_kube_tags }}"
     internal:
       cross_az_load_balancing: False
@@ -91,7 +94,7 @@ openshift_aws_elb_dict:
         load_balancer_port: "{{ openshift_master_api_port }}"
         instance_protocol: tcp
         instance_port: "{{ openshift_master_api_port }}"
-      name: "{{ openshift_aws_elb_basename }}-master-internal"
+      name: "{{ openshift_aws_elb_master_internal_name }}"
       tags: "{{ openshift_aws_kube_tags }}"
   infra:
     external:
@@ -115,7 +118,7 @@ openshift_aws_elb_dict:
         instance_protocol: tcp
         instance_port: 443
         proxy_protocol: True
-      name: "{{ openshift_aws_elb_basename }}-infra"
+      name: "{{ openshift_aws_elb_infra_name }}"
       tags: "{{ openshift_aws_kube_tags }}"
 
 openshift_aws_node_group_config_master_volumes:
