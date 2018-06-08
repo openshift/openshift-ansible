@@ -67,6 +67,12 @@
       list: installed
     register: yum
 
+  - name: persist oreg_url
+    copy:
+      dest: "/etc/origin/oreg_url"
+      content: |
+        "{{ oreg_url }}"
+
   - name: run waagent deprovision
     command: waagent -deprovision+user -force
     args:
