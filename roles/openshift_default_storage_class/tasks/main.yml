@@ -9,3 +9,7 @@
     mount_options: "{{ openshift_storageclass_mount_options }}"
     reclaim_policy: "{{ openshift_storageclass_reclaim_policy | default(None) }}"
   run_once: true
+
+- when: openshift_cloudprovider_kind == 'azure'
+  include_tasks: azure.yml
+  run_once: true
