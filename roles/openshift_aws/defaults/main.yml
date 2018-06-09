@@ -121,21 +121,21 @@ openshift_aws_elb_dict:
 openshift_aws_node_group_config_master_volumes:
 - device_name: /dev/sda1
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: False
 - device_name: /dev/sdb
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: False
 
 openshift_aws_node_group_config_node_volumes:
 - device_name: /dev/sda1
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: True
 - device_name: /dev/sdb
   volume_size: 100
-  device_type: gp2
+  volume_type: gp2
   delete_on_termination: True
 
 # build_instance_tags is a custom filter in role lib_utils
@@ -154,7 +154,7 @@ openshift_aws_master_group:
   group: master
   tags:
     host-type: master
-    sub-host-type: default
+    sub-host-type: master
     runtime: docker
 
 openshift_aws_node_groups:
@@ -171,6 +171,11 @@ openshift_aws_node_groups:
     host-type: node
     sub-host-type: infra
     runtime: docker
+
+openshift_aws_node_group_mappings:
+  master: 'node-config-master'
+  compute: 'node-config-compute'
+  infra: 'node-config-infra'
 
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
