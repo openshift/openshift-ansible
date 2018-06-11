@@ -90,6 +90,26 @@ class ActionModule(ActionBase):
                     path=path,
                     readOnly=read_only)))
 
+    def build_pv_hostpath(self, varname=None):
+        """Build pv dictionary for hostpath storage type"""
+        volume, size, labels, _, access_modes = self.build_common(varname=varname)
+        # hostpath only supports ReadWriteOnce
+        if access_modes[0] != 'ReadWriteOnce':
+            msg = "Hostpath storage only supports 'ReadWriteOnce' Was given {}."
+            raise errors.AnsibleModuleError(msg.format(access_modes.join(', ')))
+        path = self.get_templated(str(varname) + '_hostpath_path')
+        return dict(
+            name="{0}-volume".format(volume),
+            capacity=size,
+            labels=labels,
+            access_modes=access_modes,
+            storage=dict(
+                hostPath=dict(
+                    path=path
+                )
+            )
+        )
+
     def build_pv_dict(self, varname=None):
         """Check for the existence of PV variables"""
         kind = self.task_vars.get(str(varname) + '_kind')
@@ -105,6 +125,9 @@ class ActionModule(ActionBase):
 
                 elif kind == 'glusterfs':
                     return self.build_pv_glusterfs(varname=varname)
+
+                elif kind == 'hostpath':
+                    return self.build_pv_hostpath(varname=varname)
 
                 elif not (kind == 'object' or kind == 'dynamic' or kind == 'vsphere'):
                     msg = "|failed invalid storage kind '{0}' for component '{1}'".format(
