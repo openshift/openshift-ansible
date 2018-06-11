@@ -30,7 +30,7 @@
   oc_adm_ca_server_cert:
     cert: "{{ generated_certs_dir }}/apiserver.crt"
     key: "{{ generated_certs_dir }}/apiserver.key"
-    hostnames: "apiserver.kube-service-catalog.svc,apiserver.kube-service-catalog.svc.cluster.local,apiserver.kube-service-catalog"
+    hostnames: "apiserver.kube-service-catalog.svc,apiserver.kube-service-catalog.svc.{{openshift.common.dns_domain}},apiserver.kube-service-catalog"
     signer_cert: "{{ generated_certs_dir }}/ca.crt"
     signer_key: "{{ generated_certs_dir }}/ca.key"
     signer_serial: "{{ generated_certs_dir }}/apiserver.serial.txt"

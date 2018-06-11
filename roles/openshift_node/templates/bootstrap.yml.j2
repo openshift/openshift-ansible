@@ -1,22 +1,22 @@
 {% raw %}
 #!/usr/bin/ansible-playbook
 ---
-- hosts: localhost
-  gather_facts: yes
-  vars:
-    origin_dns:
-      file: /etc/dnsmasq.d/origin-dns.conf
-      lines:
-      - regex: ^listen-address
-        state: present
-        line: "listen-address={{ ansible_default_ipv4.address }}"
-    node_dns:
-      file: /etc/dnsmasq.d/node-dnsmasq.conf
-      lines:
-      - regex: "^server=/in-addr.arpa/127.0.0.1$"
-        line: server=/in-addr.arpa/127.0.0.1
-      - regex: "^server=/cluster.local/127.0.0.1$"
-        line: server=/cluster.local/127.0.0.1
+	- hosts: localhost
+	  gather_facts: yes
+	  vars:
+	    origin_dns:
+	      file: /etc/dnsmasq.d/origin-dns.conf
+	      lines:
+	      - regex: ^listen-address
+	        state: present
+	        line: "listen-address={{ ansible_default_ipv4.address }}"
+	    node_dns:
+	      file: /etc/dnsmasq.d/node-dnsmasq.conf
+	      lines:
+	      - regex: "^server=/in-addr.arpa/127.0.0.1$"
+	        line: server=/in-addr.arpa/127.0.0.1
+	      - regex: "^server=/{{openshift.common.dns_domain}}/127.0.0.1$"
+	        line: server=/{{openshift.common.dns_domain}}/127.0.0.1
 
   tasks:
   - include_vars: openshift_settings.yaml

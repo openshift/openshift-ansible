@@ -12,7 +12,7 @@ data:
     kubernetes:
       tenant: ${POD:namespace_name}
     hawkular_server:
-      url: https://hawkular-metrics.openshift-infra.svc.cluster.local       
+      url: https://hawkular-metrics.openshift-infra.svc.{{openshift.common.dns_domain}}       
       credentials:
         username: secret:openshift-infra/hawkular-metrics-account/hawkular-metrics.username
         password: secret:openshift-infra/hawkular-metrics-account/hawkular-metrics.password

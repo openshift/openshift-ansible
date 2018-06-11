@@ -11,7 +11,7 @@ repoquery_installed: "{{ (ansible_pkg_mgr == 'dnf') | ternary('dnf repoquery --l
 openshift_cli_image: "{{ osm_image | default(openshift_cli_image_dict[openshift_deployment_type]) }}"
 
 # osm_default_subdomain is an old migrated fact, can probably be removed.
-osm_default_subdomain: "router.default.svc.cluster.local"
+osm_default_subdomain: "router.default.svc.{{ openshift.common.dns_domain }}"
 openshift_master_default_subdomain: "{{ osm_default_subdomain }}"
 
 openshift_hosted_etcd_storage_nfs_directory: '/exports'

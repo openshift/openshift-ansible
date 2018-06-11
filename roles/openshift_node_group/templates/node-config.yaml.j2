@@ -6,7 +6,7 @@ authConfig:
   authorizationCacheSize: 1000
   authorizationCacheTTL: 5m
 dnsBindAddress: "127.0.0.1:53"
-dnsDomain: cluster.local
+dnsDomain: {{openshift.common.dns_domain}}
 dnsIP: 0.0.0.0
 dnsNameservers: null
 dnsRecursiveResolvConf: /etc/origin/node/resolv.conf
