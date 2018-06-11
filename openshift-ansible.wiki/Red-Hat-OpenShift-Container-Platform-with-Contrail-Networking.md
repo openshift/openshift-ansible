@@ -137,7 +137,7 @@ METHOD 1:
        
        
   METHOD2:
-  *Download installer tar ball from Juniper Website (click_here)
+  *Download installer tar ball from Juniper Website [here](https://www.juniper.net/support/downloads/?p=contrail#sw)
        
        Step1:
        Download the Openshift Install package (contrail-openshift-deployer-5.0.0-0.40.tar) from the juniper website.
