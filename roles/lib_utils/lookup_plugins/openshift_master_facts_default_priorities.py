@@ -27,13 +27,13 @@ class LookupModule(LookupBase):
                 # pylint: disable=line-too-long
                 raise AnsibleError("Either OpenShift needs to be installed or openshift_release needs to be specified")
 
-        if short_version not in ['3.6', '3.7', '3.8', '3.9', '3.10', 'latest']:
+        if short_version not in ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11', 'latest']:
             raise AnsibleError("Unknown short_version %s" % short_version)
 
         if short_version == 'latest':
-            short_version = '3.10'
+            short_version = '3.11'
 
-        if short_version in ['3.6', '3.7', '3.8', '3.9', '3.10']:
+        if short_version in ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']:
             priorities.extend([
                 {'name': 'SelectorSpreadPriority', 'weight': 1},
                 {'name': 'InterPodAffinityPriority', 'weight': 1},

@@ -5,7 +5,7 @@ metadata:
   namespace: openshift-infra
   annotations:
     image.openshift.io/triggers: |
-      [{"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.containers[?(@.name==\"signer\")].image"}]
+      [{"from":{"kind":"ImageStreamTag","name":"node:v3.11"},"fieldPath":"spec.template.spec.containers[?(@.name==\"signer\")].image"}]
 spec:
   updateStrategy:
     type: RollingUpdate
@@ -60,7 +60,7 @@ spec:
             if ! echo "\${text}" | openssl x509 -noout; then
               echo "error: Unable to parse certificate" 2>&1
               exit 1
-            fi 
+            fi
             if ! echo "\${text}" | openssl x509 -checkend -60 > /dev/null; then
               echo "Certificate is expired, deleting"
               oc delete csr "\${name}"

@@ -46,7 +46,7 @@
   oc_obj:
     state: present
     kind: ImageStreamTag
-    name: "node:v3.10"
+    name: "node:v3.11"
     namespace: "{{ kuryr_namespace }}"
     files:
     - "{{ manifests_tmpdir.stdout }}/node-images.yaml"
