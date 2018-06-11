@@ -2,6 +2,10 @@
 - hosts: localhost
   gather_facts: no
   tasks:
+  - name: calculate input image
+    command: az image list -g "{{ openshift_azure_input_image_ns }}" --query "[?starts_with(name, '{{ openshift_azure_input_image_prefix }}-') && tags.valid=='true'] | sort_by(@, &name) | [-1]"
+    register: input_image
+
   - name: provision resource group
     import_tasks: tasks/provision_instance.yml
     vars:
@@ -80,7 +84,7 @@
       image_resource_group: "{{ openshift_azure_output_image_ns }}"
       image_name: "{{ openshift_azure_output_image_name }}"
       image_tags:
-        base_image: "{{ openshift_azure_input_image_name }}"
+        base_image: "{{ (input_image.stdout | from_json).name }}"
         kernel: "{{ hostvars[groups['nodes'][0]]['ansible_kernel'] }}"
         openshift: "{{ openshift_rpm.name }}-{{ openshift_rpm.version }}-{{ openshift_rpm.release }}.{{ openshift_rpm.arch }}"
 
