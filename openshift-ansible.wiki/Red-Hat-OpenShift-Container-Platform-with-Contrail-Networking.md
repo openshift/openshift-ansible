@@ -134,28 +134,32 @@ METHOD 1:
 
        (ansible-node)# cd /root
        (ansible-node)# git clone https://github.com/Juniper/openshift-ansible -b release-3.7-contrail
- METHOD 2:
-Step1:
-Download the Openshift Install package (contrail-openshift-deployer-5.0.0-0.40.tar) from the juniper website.
- 
-Step2:
-Copy the downloaded package to the node from where the ansible deployment will be executed
-*Please note: This node will need password less access to Openshift Master and Slave Nodes, Read the Pre-requisites carefully
-eg:  scp contrail-openshift-deployer-5.0.0-0.40.tar <openshift-ansible-node>:/root/.
- 
- 
-Step3:
-Untar the package using the command as below
-tar -xvf  contrail-openshift-deployer-5.0.0-0.40.tar -C /root/
- 
-Step4:
-Verify the contents of the openshift-ansible directory
-cd /root/openshift-ansible/
+       
+       
+  METHOD2:
+  *Download installer tar ball from Juniper Website (click_here)
+       
+       Step1:
+       Download the Openshift Install package (contrail-openshift-deployer-5.0.0-0.40.tar) from the juniper website.
+       
+       Step2:
+       Copy the downloaded package to the node from where the ansible deployment will be executed
+       *Please note: This node will need password less access to Openshift Master and Slave Nodes, Read the Pre-requisites carefully
+       eg:  scp contrail-openshift-deployer-5.0.0-0.40.tar <openshift-ansible-node>:/root/.
+       
+       Step3:
+       Untar the package using the command as below
+       tar -xvf  contrail-openshift-deployer-5.0.0-0.40.tar -C /root/
+       
+       Step4:
+       Verify the contents of the openshift-ansible directory
+       cd /root/openshift-ansible/
+       
+       Step5
+       Modify the inventory file to match your own Openshift environment.  
+       cd /root/openshift-ansible/
+       vi inventory/byo/ose-install 
 
-Step5
-Modify the inventory file to match your own Openshift environment.  
-cd /root/openshift-ansible/
-vi inventory/byo/ose-install 
 
 * Populate the install file with Contrail related information
 
