@@ -95,10 +95,12 @@ sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 ```
 ## Node Group Definition and Mapping
-In 3.10 and newer all members of the [nodes] inventory group must be assigned a
+In 3.10 and newer all members of the [nodes] inventory group must be assigned an
 `openshift_node_group_name`. This value is used to select the configmap that
 configures each node. By default there are three node groups defined
-`node-config-master` `node-config-infra` `node-config-compute`.
+`node-config-master` `node-config-infra` `node-config-compute`. It's important
+to note that the configmap is also the authoritative definition of node labels,
+the old `openshift_node_labels` value is effectively ignored.
 
 The default set of node groups is defined in
 [roles/openshift_facts/defaults/main.yml] like so
@@ -119,10 +121,10 @@ openshift_node_groups:
     edits: []
 ```
 
-When configuring this in the INI based inventory this must be translated into
-JSON. Here's an example of a group named `node-config-all-in-one` which is
-suitable for an All-In-One installation with kubeletArguments.pods-per-core set
-to 20
+When configuring this in the INI based inventory this must be translated into a
+Python dictionary. Here's an example of a group named `node-config-all-in-one`
+which is suitable for an All-In-One installation with
+kubeletArguments.pods-per-core set to 20
 
 ```
 openshift_node_groups=[{'name': 'node-config-all-in-one', 'labels': ['node-role.kubernetes.io/master=true', 'node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true'], 'edits': [{ 'key': 'kubeletArguments.pods-per-core','value': ['20']}]}]
