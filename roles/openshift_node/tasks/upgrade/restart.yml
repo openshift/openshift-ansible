@@ -15,7 +15,7 @@
 - name: Restart support services
   service:
     name: "{{ item }}"
-    state: restarted
+    state: started
     enabled: True
   with_items:
     - NetworkManager
