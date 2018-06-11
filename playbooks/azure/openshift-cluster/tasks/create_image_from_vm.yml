@@ -32,7 +32,7 @@
     --os-type Linux
 
 - name: get input image tags
-  command: az image show -g "{{ openshift_azure_input_image_ns }}" -n "{{ openshift_azure_input_image_name }}"
+  command: az image show -g "{{ openshift_azure_input_image_ns }}" -n "{{ (input_image.stdout | from_json).name }}"
   register: input_image_tags
 
 - name: remove valid tag from input image tags
