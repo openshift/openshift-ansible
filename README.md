@@ -131,7 +131,10 @@ openshift_node_groups=[{'name': 'node-config-all-in-one', 'labels': ['node-role.
 ```
 
 For upgrades, the upgrade process will block until you have the required
-configmaps created in the openshift-node namespace. Please
+configmaps created in the openshift-node namespace. Please define
+`openshift_node_groups` as explained above or accept the defaults and run the
+playbooks/openshift-master/openshift_node_group.yml playbook to have them
+created for you automatically.
 
 
 ## Complete Production Installation Documentation:
