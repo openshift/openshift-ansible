@@ -1,6 +1,11 @@
 ---
 - include: ../openshift-cluster/initialize_groups.yml
 
+- name: Gather facts
+  hosts: oo_etcd_to_config:oo_masters_to_config:oo_nodes_to_config
+  roles:
+  - openshift_facts
+
 - include: ../../common/openshift-loadbalancer/config.yml
   vars:
     openshift_cluster_id: "{{ cluster_id | default('default') }}"
