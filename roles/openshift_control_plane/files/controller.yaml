@@ -31,6 +31,8 @@ spec:
        name: master-config
      - mountPath: /etc/origin/cloudprovider/
        name: master-cloud-provider
+     - mountPath: /etc/containers/registries.d/
+       name: signature-import
     livenessProbe:
       httpGet:
         scheme: HTTPS
@@ -45,3 +47,6 @@ spec:
   - name: master-cloud-provider
     hostPath:
       path: /etc/origin/cloudprovider
+  - hostPath:
+      path: /etc/containers/registries.d
+    name: signature-import
