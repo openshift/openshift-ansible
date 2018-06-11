@@ -94,6 +94,43 @@ cd openshift-ansible
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 ```
+## Node Group Definition and Mapping
+In 3.10 and newer all members of the [nodes] inventory group must be assigned a
+`openshift_node_group_name`. This value is used to select the configmap that
+configures each node. By default there are three node groups defined
+`node-config-master` `node-config-infra` `node-config-compute`.
+
+The default set of node groups is defined in
+[roles/openshift_facts/defaults/main.yml] like so
+
+```
+openshift_node_groups:
+  - name: node-config-master
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+    edits: []
+  - name: node-config-compute
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+    edits: []
+```
+
+When configuring this in the INI based inventory this must be translated into
+JSON. Here's an example of a group named `node-config-all-in-one` which is
+suitable for an All-In-One installation with kubeletArguments.pods-per-core set
+to 20
+
+```
+openshift_node_groups=[{'name': 'node-config-all-in-one', 'labels': ['node-role.kubernetes.io/master=true', 'node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true'], 'edits': [{ 'key': 'kubeletArguments.pods-per-core','value': ['20']}]}]
+```
+
+For upgrades, the upgrade process will block until you have the required
+configmaps created in the openshift-node namespace. Please
+
 
 ## Complete Production Installation Documentation:
 
