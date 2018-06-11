@@ -21,11 +21,51 @@ spec:
 {% if node['nodeSelector'] is defined and node['nodeSelector'] is iterable %}
       nodeSelector:
 {% for key, value in node['nodeSelector'].items() %}
-        {{key}}: "{{value}}"
+        {{ key }}: "{{ value }}"
 {% endfor %}
 {% endif %}
       storage:
 {% if node['volumes']['elasticsearch-storage'] is defined %}
           {{ node['volumes']['elasticsearch-storage'] | to_yaml }}
+{% endif %}
+{% endfor %}
+{% for node in range(es_additional_nodes | int) %}
+    - nodeRole: clientdatamaster
+      replicas: 1
+      resources:
+        limits:
+{% if es_cpu_limit is defined and es_cpu_limit is not none and es_cpu_limit != '' %}
+          cpu: "{{ es_cpu_limit }}"
+{% endif %}
+          memory: "{{ es_memory_limit }}"
+        requests:
+          cpu: "{{ es_cpu_request }}"
+          memory: "{{ es_memory_limit }}"
+      elasticsearchConfig:
+        image: "{{ openshift_logging_elasticsearch_image }}"
+{% if es_node_selector is iterable and es_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in es_node_selector.items() %}
+        {{key}}: "{{value}}"
+{% endfor %}
+{% endif %}
+      storage:
+{% if openshift_logging_elasticsearch_storage_type == 'pvc' %}
+          volumeClaimTemplate:
+          - metadata:
+              name: "{{ pvc_name }}"
+            spec:
+              accessModes: "{{ pvc_access_modes }}"
+{% if pvc_storage_class_name is defined and pvc_storage_class_name is not none and pvc_storage_class_name != '' %}
+              storageClassName: "{{ pvc_storage_class_name }}"
+{% endif %}
+              resources:
+                requests:
+                  storage: "{{ pvc_size }}"
+{% elif openshift_logging_elasticsearch_storage_type == 'hostmount' %}
+          hostPath:
+            path: {{ openshift_logging_elasticsearch_hostmount_path }}
+{% else %}
+          emptydir: {}
 {% endif %}
 {% endfor %}

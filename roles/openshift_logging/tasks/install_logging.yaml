@@ -7,13 +7,6 @@
 ## This is include vs import because we need access to group/inventory variables
 - include_tasks: set_defaults_from_current.yml
 
-- template:
-    src: operator_adopt.j2
-    dest: "{{ mktemp.stdout }}/operator_adopt.yml"
-  vars:
-    es_cluster_nodes: "{{ openshift_logging_facts['elasticsearch']['deploymentconfigs'].values() | list }}"
-    es_cluster_name: logging-es
-
 - name: Set logging project
   oc_project:
     state: present

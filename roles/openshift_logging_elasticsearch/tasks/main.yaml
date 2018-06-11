@@ -23,6 +23,7 @@
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
+- include_tasks: migrate_cluster.yml
 - include_tasks: get_es_version.yml
   run_once: true
 
