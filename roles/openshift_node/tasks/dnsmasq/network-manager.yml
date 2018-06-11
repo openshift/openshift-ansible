@@ -2,7 +2,7 @@
 - name: Install network manager dispatch script
   template:
     src: networkmanager/99-origin-dns.sh.j2
-    dest: /etc/NetworkManager/dispatcher.d/
+    dest: /etc/NetworkManager/dispatcher.d/99-origin-dns.sh
     mode: 0755
   notify: restart NetworkManager
   when: openshift_node_dnsmasq_install_network_manager_hook | default(true) | bool
