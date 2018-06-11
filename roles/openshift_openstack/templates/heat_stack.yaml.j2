@@ -27,7 +27,7 @@ outputs:
     description: IPs of the masters
     value: { get_attr: [ masters, private_ip ] }
 
-  {% if openshift_openstack_master_floating_ip|default(True)|bool %}
+  {% if openshift_openstack_master_floating_ip | default(True) | bool %}
   master_floating_ips:
     description: Floating IPs of the masters
     value: { get_attr: [ masters, floating_ip ] }
@@ -41,7 +41,7 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ compute_nodes, private_ip ] }
 
-  {% if openshift_openstack_app_floating_ip|default(True)|bool %}
+  {% if openshift_openstack_app_floating_ip | default(True) | bool %}
   node_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ compute_nodes, floating_ip ] }
@@ -55,7 +55,7 @@ outputs:
     description: IPs of the nodes
     value: { get_attr: [ infra_nodes, private_ip ] }
 
-  {% openshift_openstack_infra_floating_ip|default(True)|bool %}
+  {% if openshift_openstack_infra_floating_ip | default(True) | bool %}
   infra_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
