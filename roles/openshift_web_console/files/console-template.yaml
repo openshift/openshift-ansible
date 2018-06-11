@@ -37,7 +37,10 @@ objects:
   spec:
     replicas: "${{REPLICA_COUNT}}"
     strategy:
-      type: Recreate
+      type: RollingUpdate
+      rollingUpdate:
+        # behave like a recreate deployment, but don't wait for pods to terminate
+        maxUnavailable: 100%
     template:
       metadata:
         name: webconsole

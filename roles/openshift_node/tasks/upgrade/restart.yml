@@ -34,7 +34,7 @@
   service:
     name: "{{ openshift_service_type }}-node"
     state: started
-  async: 1
+  async: 100
   poll: 0
   register: node_service
   failed_when: false

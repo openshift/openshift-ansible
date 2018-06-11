@@ -69,8 +69,10 @@ REMOVED_VARIABLES = (
     ('openshift_prometheus_image_version', 'openshift_prometheus_image'),
     ('openshift_prometheus_proxy_image_prefix', 'openshift_prometheus_proxy_image'),
     ('openshift_prometheus_proxy_image_version', 'openshift_prometheus_proxy_image'),
-    ('openshift_prometheus_altermanager_image_prefix', 'openshift_prometheus_altermanager_image'),
-    ('openshift_prometheus_altermanager_image_version', 'openshift_prometheus_altermanager_image'),
+    ('openshift_prometheus_altermanager_image_prefix', 'openshift_prometheus_alertmanager_image'),
+    # A typo was introduced at some point, need to warn for this older version.
+    ('openshift_prometheus_altermanager_image_prefix', 'openshift_prometheus_alertmanager_image'),
+    ('openshift_prometheus_alertmanager_image_version', 'openshift_prometheus_alertmanager_image'),
     ('openshift_prometheus_alertbuffer_image_prefix', 'openshift_prometheus_alertbuffer_image'),
     ('openshift_prometheus_alertbuffer_image_version', 'openshift_prometheus_alertbuffer_image'),
     ('openshift_prometheus_node_exporter_image_prefix', 'openshift_prometheus_node_exporter_image'),

@@ -34,7 +34,7 @@
 
 - name: Apply the cluster monitoring operator template
   shell: >
-    {{ openshift_client_binary }} process -f "{{ mktemp.stdout 	}}/{{ item }}"
+    {{ openshift_client_binary }} process -n openshift-monitoring -f "{{ mktemp.stdout 	}}/{{ item }}"
     --param OPERATOR_IMAGE="{{ openshift_cluster_monitoring_operator_image }}"
     --param PROMETHEUS_OPERATOR_IMAGE="{{ openshift_cluster_monitoring_operator_prometheus_operator_repo }}"
     --param ALERTMANAGER_IMAGE="{{ openshift_cluster_monitoring_operator_alertmanager_repo }}"

@@ -10,19 +10,12 @@
   with_items: "{{ groups['infra_hosts'] }}"
   when: openshift_openstack_public_router_ip is defined
 
-- name: "Add public master cluster hostname records to the private A records (single master)"
+- name: "Add public master cluster hostname records to the private A records"
   set_fact:
-    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[groups.masters[0]].openshift_master_cluster_public_hostname, 'ip': hostvars[groups.masters[0]].private_v4 } ] }}"
+    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[groups.masters[0]].openshift_master_cluster_public_hostname, 'ip': openshift_openstack_private_api_ip } ] }}"
   when:
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
-    - openshift_openstack_num_masters == 1
-
-- name: "Add public master cluster hostname records to the private A records (multi-master)"
-  set_fact:
-    private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[groups.masters[0]].openshift_master_cluster_public_hostname, 'ip': hostvars[groups.lb[0]].private_v4 } ] }}"
-  when:
-    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
-    - openshift_openstack_num_masters > 1
+    - openshift_openstack_private_api_ip is defined
 
 - name: "Set the private DNS server to use the external value (if provided)"
   set_fact:
@@ -63,6 +56,7 @@
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[groups.masters[0]].openshift_master_cluster_public_hostname, 'ip': openshift_openstack_public_api_ip } ] }}"
   when:
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
+    - openshift_openstack_public_api_ip is defined
 
 - name: "Set the public DNS server details to use the external value (if provided)"
   set_fact:

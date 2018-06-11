@@ -84,9 +84,6 @@
     import_role:
       name: openshift_node_group
       tasks_from: bootstrap_config
-    vars:
-      r_node_dynamic_config_name: "{{ openshift_node_group_name | default('node-config-master') }}"
-      r_node_dynamic_config_force: True
 
   roles:
   - role: openshift_master_facts

@@ -117,9 +117,8 @@ spec:
               # TODO: kubelet doesn't relabel nodes, best effort for now
               # https://github.com/kubernetes/kubernetes/issues/59314
               if args="$(openshift start node --write-flags --config /etc/origin/node/node-config.yaml)"; then
-                labels=' --node-labels=([^ ]+) '
-                if [[ ${args} =~ ${labels} ]]; then
-                  labels="${BASH_REMATCH[1]//,/ }"
+                labels=$(tr ' ' '\n' <<<$args | sed -ne '/^--node-labels=/ { s/^--node-labels=//; p; }' | tr ',\n' ' ')
+                if [[ -n "${labels}" ]]; then
                   echo "info: Applying node labels $labels" 2>&1
                   if ! oc label --config=/etc/origin/node/node.kubeconfig "node/${NODE_NAME}" ${labels} --overwrite; then
                     echo "error: Unable to apply labels, will retry in 10" 2>&1

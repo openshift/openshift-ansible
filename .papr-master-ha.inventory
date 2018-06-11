@@ -15,6 +15,13 @@ openshift_portal_net=172.30.0.0/16
 openshift_enable_service_catalog=false
 debug_level=4
 
+my_node_group1_labels=['node-role.kubernetes.io/master=true', 'node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true']
+my_node_group1={'name': 'node-config-all-in-one', 'labels': {{ my_node_group1_labels }} }
+
+openshift_node_groups=[{{ my_node_group1 }}]
+
+openshift_node_group_name="node-config-all-in-one"
+
 [all:vars]
 # bootstrap configs
 openshift_master_bootstrap_auto_approve=true
@@ -33,6 +40,6 @@ ocp-master2
 ocp-master3
 
 [nodes]
-ocp-master1 openshift_schedulable=true openshift_node_labels="{'node-role.kubernetes.io/infra':'true'}"
+ocp-master1 openshift_schedulable=true
 ocp-master2
 ocp-master3
