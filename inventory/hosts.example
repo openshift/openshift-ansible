@@ -144,6 +144,12 @@ debug_level=2
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
 
+# Specify a list of block devices to be formatted and mounted on the nodes
+# during prerequisites.yml. For each hash, "device", "path", "filesystem" are
+# required. To add devices only on certain classes of node, redefine
+# container_runtime_extra_storage as a group var.
+#container_runtime_extra_storage='[{"device":"/dev/vdc","path":"/var/lib/origin/openshift.local.volumes","filesystem":"xfs","options":"gquota"}]'
+
 # Enable etcd debug logging, defaults to false
 # etcd_debug=true
 # Set etcd log levels by package

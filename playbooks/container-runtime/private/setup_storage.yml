@@ -19,3 +19,6 @@
       when:
         - container_runtime_docker_storage_type|default('') == "overlay2"
         - openshift_docker_is_node_or_master | bool
+    - import_role:
+        name: container_runtime
+        tasks_from: extra_storage_setup.yml

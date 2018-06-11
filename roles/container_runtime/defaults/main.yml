@@ -65,6 +65,7 @@ docker_storage_extra_options:
 - "{{ '--storage-opt overlay2.size=' ~ docker_storage_size if container_runtime_docker_storage_setup_device is defined and container_runtime_docker_storage_setup_device != '' else '' }}"
 - "--graph={{ docker_storage_path}}"
 
+container_runtime_extra_storage: []
 
 # Set local versions of facts that must be in json format for container-daemon.json
 # NOTE: When jinja2.9+ is used the container-daemon.json file can move to using tojson
