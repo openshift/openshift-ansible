@@ -8,14 +8,6 @@
   - "{{ openshift_service_type }}-node"
   failed_when: false
 
-- name: Ensure static containerized services stopped before Docker restart
-  command: /usr/local/bin/master-restart "{{ item }}"
-  with_items:
-  - api
-  - controllers
-  - etcd
-  failed_when: false
-
 - service:
     name: docker
     state: stopped
@@ -26,3 +18,16 @@
   when:
   - l_docker_upgrade is defined
   - l_docker_upgrade | bool
+
+- name: Stop crio
+  service:
+    name: cri-o
+    state: stopped
+  when: openshift_use_crio | default(False)
+
+# TODO: Need to determine if this is needed long term or just 3.9 to 3.10
+# Upgrading cri-o, at least from 1.9 to 1.10, requires that all
+# pods be stopped
+- name: Clean up cri-o pods
+  script: clean-up-crio-pods.sh
+  when: openshift_use_crio | default(False)
