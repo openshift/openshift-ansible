@@ -7,7 +7,7 @@ write_files:
   owner: 'root:root'
   permissions: '0640'
   content: |
-    openshift_group_type: {{ openshift_aws_node_group.group }}
+    openshift_node_config_name: {{ openshift_aws_node_group.node_group_config | default('unset') }}
 {%   if openshift_aws_node_group.group != 'master' %}
 - path: /etc/origin/node/bootstrap.kubeconfig
   owner: 'root:root'

@@ -23,7 +23,8 @@
     tags:
     - "{{ openshift_aws_node_group_config_tags
           | combine(openshift_aws_node_group.tags)
-          | combine({'deployment_serial': l_deployment_serial, 'ami': openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami)}) }}"
+          | combine({'deployment_serial': l_deployment_serial, 'ami': openshift_aws_ami_map[openshift_aws_node_group.group] | default(openshift_aws_ami)})
+          | combine({'openshift-node-group-config': openshift_aws_node_group.node_group_config | default('unset') }) }}"
 
 - name: append the asg name to the openshift_aws_created_asgs fact
   set_fact:
