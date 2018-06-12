@@ -94,6 +94,49 @@ cd openshift-ansible
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/prerequisites.yml
 sudo ansible-playbook -i inventory/hosts.localhost playbooks/deploy_cluster.yml
 ```
+## Node Group Definition and Mapping
+In 3.10 and newer all members of the [nodes] inventory group must be assigned an
+`openshift_node_group_name`. This value is used to select the configmap that
+configures each node. By default there are three configmaps created; one for
+each node group defined in `openshift_node_groups` and they're named
+`node-config-master` `node-config-infra` `node-config-compute`. It's important
+to note that the configmap is also the authoritative definition of node labels,
+the old `openshift_node_labels` value is effectively ignored.
+
+The default set of node groups is defined in
+[roles/openshift_facts/defaults/main.yml] like so
+
+```
+openshift_node_groups:
+  - name: node-config-master
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+    edits: []
+  - name: node-config-compute
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+    edits: []
+```
+
+When configuring this in the INI based inventory this must be translated into a
+Python dictionary. Here's an example of a group named `node-config-all-in-one`
+which is suitable for an All-In-One installation with
+kubeletArguments.pods-per-core set to 20
+
+```
+openshift_node_groups=[{'name': 'node-config-all-in-one', 'labels': ['node-role.kubernetes.io/master=true', 'node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true'], 'edits': [{ 'key': 'kubeletArguments.pods-per-core','value': ['20']}]}]
+```
+
+For upgrades, the upgrade process will block until you have the required
+configmaps in the openshift-node namespace. Please define
+`openshift_node_groups` as explained above or accept the defaults and run the
+playbooks/openshift-master/openshift_node_group.yml playbook to have them
+created for you automatically.
+
 
 ## Complete Production Installation Documentation:
 

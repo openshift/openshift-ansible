@@ -56,6 +56,8 @@
 
 - name: install openshift
   import_playbook: ../../openshift-node/private/image_prep.yml
+  vars:
+    etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
 
 - hosts: nodes
   tasks:
@@ -66,6 +68,16 @@
     yum:
       list: installed
     register: yum
+
+  - name: setup data disk
+    lineinfile:
+      path: /etc/waagent.conf
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+    - { regexp: '^ResourceDisk\.Filesystem=', line: 'ResourceDisk.Filesystem=xfs' }
+    - { regexp: '^ResourceDisk\.MountPoint=', line: 'ResourceDisk.MountPoint=/var/lib/docker' }
+    - { regexp: '^ResourceDisk\.MountOptions=', line: 'ResourceDisk.MountOptions=rw,relatime,seclabel,attr2,inode64,grpquota' }
 
   - name: run waagent deprovision
     shell: sleep 2 && waagent -deprovision+user -force

@@ -12,6 +12,8 @@
       {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --additive-only=true -o name
     register: check_reconcile_scc_result
     when: openshift_reconcile_sccs_reject_change | default(true) | bool
+    until: check_reconcile_scc_result.rc == 0
+    retries: 3
 
   - fail:
       msg: >
@@ -67,6 +69,19 @@
     failed_when:
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
+    retries: 2
+    delay: 30
+
+  - name: Migrate legacy HPA scale target refs
+    command: >
+      {{ openshift_client_binary }} adm --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      migrate legacy-hpa --confirm
+    register: migrate_legacy_hpa_result
+    when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
+    failed_when:
+    - migrate_legacy_hpa_result.rc != 0
+    - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
+
 
 # Set openshift_master_facts separately. In order to reconcile
 # admission_config's, we currently must run openshift_master_facts and
@@ -189,6 +204,8 @@
     failed_when:
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool
+    retries: 2
+    delay: 30
 
   - set_fact:
       reconcile_complete: True
