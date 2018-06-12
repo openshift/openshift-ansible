@@ -29,8 +29,9 @@
     changed_when: false
     failed_when: false
     register: service_iptables_status
+    check_mode: no
 
   - name: Set fact os_firewall_use_firewalld FALSE for iptables
     set_fact:
       os_firewall_use_firewalld: false
-    when: "'Active: active' in service_iptables_status.stdout"
+    when: service_iptables_status.rc != 0
