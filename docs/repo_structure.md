@@ -65,4 +65,6 @@ environment and test scripts defined in a YAML file.
 ├── .papr.yml
 ├── .papr.sh
 └── .papr.inventory
+├── .papr.all-in-one.inventory
+└── .papr-master-ha.inventory
 ```
