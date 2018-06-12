@@ -60,3 +60,8 @@ openshift_gcp_startup_script_file: "{{ role_path }}/files/bootstrap-script.sh"
 openshift_gcp_user_data_file: ''
 
 openshift_gcp_multizone: False
+
+openshift_gcp_node_group_mapping:
+  masters: 'node-config-master'
+  infra: 'node-config-infra'
+  compute: 'node-config-compute'

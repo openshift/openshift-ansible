@@ -20,10 +20,6 @@
     virtual_network: vnet
     address_prefix: 192.168.0.0/24
 
-- name: calculate input image
-  command: az image list -g "{{ image_resource_group }}" --query "[?starts_with(name, '{{ image_prefix }}-') && tags.valid=='true'] | sort_by(@, &name) | [-1]"
-  register: input_image
-
 - name: create vm
   command: >
     az vm create

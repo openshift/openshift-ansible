@@ -94,25 +94,8 @@
     path: "{{ openshift.common.config_base }}/node/certificates"
     state: absent
 
-- name: Determine if node already has a dynamic config group
-  command: grep -E '^BOOTSTRAP_CONFIG_NAME=.+' "/etc/sysconfig/{{ openshift_service_type }}-node"
-  ignore_errors: true
-  register: existing
-
-- name: Update the sysconfig to group "{{ r_node_dynamic_config_name }}"
+- name: Update the sysconfig to group "{{ openshift_node_group_name }}"
   lineinfile:
     dest: "/etc/sysconfig/{{ openshift_service_type }}-node"
-    line: "BOOTSTRAP_CONFIG_NAME={{ r_node_dynamic_config_name }}"
+    line: "BOOTSTRAP_CONFIG_NAME={{ openshift_node_group_name }}"
     regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
-  when: r_node_dynamic_config_force|default(False) or existing is failed
-
-- name: Set up node-config.yml if dynamic configuration is off
-  copy:
-    remote_src: true
-    src: "{{ openshift.common.config_base }}/node/bootstrap-node-config.yaml"
-    dest: "{{ openshift.common.config_base }}/node/node-config.yaml"
-    force: no
-    owner: root
-    group: root
-    mode: 0600
-  when: r_node_dynamic_config_name|length == 0

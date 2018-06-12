@@ -5,10 +5,6 @@
   - import_role:
       name: lib_utils
 
-  - name: calculate input image
-    command: az image list -g "{{ openshift_azure_input_image_ns }}" --query "[?starts_with(name, '{{ openshift_azure_input_image_prefix }}-') && tags.valid=='true'] | sort_by(@, &name) | [-1]"
-    register: input_image
-
   - name: create temporary directory
     tempfile:
       state: directory
@@ -51,17 +47,17 @@
       - key: properties.masterProfile.dnsPrefix
         value: "a{{ 16 | lib_utils_oo_random_word }}a"
       - key: properties.masterProfile.imageReference.name
-        value: "{{ (input_image.stdout | from_json).name }}"
+        value: "{{ openshift_azure_input_image_name }}"
       - key: properties.masterProfile.imageReference.resourceGroup
         value: "{{ openshift_azure_input_image_ns }}"
       # agentpool compute
       - key: properties.agentPoolProfiles[0].imageReference.name
-        value: "{{ (input_image.stdout | from_json).name }}"
+        value: "{{ openshift_azure_input_image_name }}"
       - key: properties.agentPoolProfiles[0].imageReference.resourceGroup
         value: "{{ openshift_azure_input_image_ns }}"
       # agentpool infra
       - key: properties.agentPoolProfiles[1].imageReference.name
-        value: "{{ (input_image.stdout | from_json).name }}"
+        value: "{{ openshift_azure_input_image_name }}"
       - key: properties.agentPoolProfiles[1].imageReference.resourceGroup
         value: "{{ openshift_azure_input_image_ns }}"
       # linuxprofile

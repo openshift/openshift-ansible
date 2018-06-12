@@ -1,7 +1,7 @@
 ---
 - name: Apply the app template
   shell: >
-    {{ openshift_client_binary }} process -f "{{ mktemp.stdout }}/monitor-app-create.yaml"
+    {{ openshift_client_binary }} process -n openshift-monitor-availability -f "{{ mktemp.stdout }}/monitor-app-create.yaml"
     --param IMAGE="{{ openshift_monitor_app_create_image }}"
     --param RUN_INTERVAL="{{ openshift_monitor_app_create_run_interval }}"
     --param TIMEOUT="{{ openshift_monitor_app_create_timeout }}"

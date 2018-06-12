@@ -12,8 +12,8 @@ ose3-master[1:3].test.example.com
 
 [nodes]
 ose3-master[1:3].test.example.com
-ose3-infra[1:2].test.example.com openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
-ose3-node[1:2].test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+ose3-infra[1:2].test.example.com
+ose3-node[1:2].test.example.com
 
 [nfs]
 ose3-master1.test.example.com
@@ -143,6 +143,12 @@ debug_level=2
 
 # Skip upgrading Docker during an OpenShift upgrade, leaves the current Docker version alone.
 # docker_upgrade=False
+
+# Specify a list of block devices to be formatted and mounted on the nodes
+# during prerequisites.yml. For each hash, "device", "path", "filesystem" are
+# required. To add devices only on certain classes of node, redefine
+# container_runtime_extra_storage as a group var.
+#container_runtime_extra_storage='[{"device":"/dev/vdc","path":"/var/lib/origin/openshift.local.volumes","filesystem":"xfs","options":"gquota"}]'
 
 # Enable etcd debug logging, defaults to false
 # etcd_debug=true
@@ -367,12 +373,11 @@ debug_level=2
 #
 # An OpenShift router will be created during install if there are
 # nodes present with labels matching the default router selector,
-# "node-role.kubernetes.io/infra=true". Set openshift_node_labels per node as needed in
-# order to label nodes.
+# "node-role.kubernetes.io/infra=true".
 #
 # Example:
 # [nodes]
-# node.example.com openshift_node_labels="{'region': 'infra'}"
+# node.example.com openshift_node_group_name="node-config-infra"
 #
 # Router selector (optional)
 # Router will only be created if nodes matching this label are present.
@@ -418,12 +423,11 @@ debug_level=2
 #
 # An OpenShift registry will be created during install if there are
 # nodes present with labels matching the default registry selector,
-# "node-role.kubernetes.io/infra=true". Set openshift_node_labels per node as needed in
-# order to label nodes.
+# "node-role.kubernetes.io/infra=true".
 #
 # Example:
 # [nodes]
-# node.example.com openshift_node_labels="{'region': 'infra'}"
+# node.example.com openshift_node_group_name="node-config-infra"
 #
 # Registry selector (optional)
 # Registry will only be created if nodes matching this label are present.

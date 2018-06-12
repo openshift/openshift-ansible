@@ -9,7 +9,6 @@ environment.
 
 from __future__ import print_function
 
-from collections import Mapping
 import json
 import os
 
@@ -105,13 +104,8 @@ def _get_hostvars(server, docker_storage_mountpoints):
     if server.metadata['host-type'] == 'cns':
         hostvars['glusterfs_devices'] = ['/dev/nvme0n1']
 
-    node_labels = server.metadata.get('node_labels')
-    # NOTE(shadower): the node_labels value must be a dict not string
-    if not isinstance(node_labels, Mapping):
-        node_labels = json.loads(node_labels)
-
-    if node_labels:
-        hostvars['openshift_node_labels'] = node_labels
+    group_name = server.metadata.get('openshift_node_group_name')
+    hostvars['openshift_node_group_name'] = group_name
 
     # check for attached docker storage volumes
     if 'os-extended-volumes:volumes_attached' in server:
@@ -174,6 +168,8 @@ def build_inventory():
         except KeyError:
             pass  # Internal LB not specified
 
+        inventory['localhost']['openshift_openstack_private_api_ip'] = \
+            stout.get('private_api_ip')
         inventory['localhost']['openshift_openstack_public_api_ip'] = \
             stout.get('public_api_ip')
         inventory['localhost']['openshift_openstack_public_router_ip'] = \
