@@ -706,7 +706,7 @@ def lib_utils_mutate_htpass_provider(idps):
     return idps
 
 
-def lib_utils_oo_oreg_image(image_default, oreg_url):
+def lib_utils_oo_oreg_image(image_default, oreg_url, ignore_filter=False):
     '''Converts default image string to utilize oreg_url, if defined.
        oreg_url should be passed in as string "None" if undefined.
 
@@ -714,7 +714,7 @@ def lib_utils_oo_oreg_image(image_default, oreg_url):
                        "example.com/openshift/origin-${component}:${version}"
        Example output: "example.com/coreos/etcd:v99"'''
     # if no oreg_url is specified, we just return the original default
-    if oreg_url == 'None':
+    if oreg_url == 'None' or ignore_filter:
         return image_default
     oreg_parts = oreg_url.split('/')
     if len(oreg_parts) < 2:
