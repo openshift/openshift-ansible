@@ -572,17 +572,17 @@ infra nodes when the registry pod gets started.
 You can use OpenStack Swift or Ceph Rados GW to store your OpenShift registry.
 In order to do so, set the following in `inventory/group_vars/OSEv3.yml`:
 
-* `openshift_hosted_registry_storage_kind: object
-* `openshift_hosted_registry_storage_provider: swift
-* `openshift_hosted_registry_storage_swift_container: "openshift-registry" _#can be any name_
-* `openshift_hosted_registry_storage_swift_authurl: "{{ lookup('env','OS_AUTH_URL') }}"
-* `openshift_hosted_registry_storage_swift_username: "{{ lookup('env','OS_USERNAME') }}"
-* `openshift_hosted_registry_storage_swift_password: "{{ lookup('env','OS_PASSWORD') }}"
-* `openshift_hosted_registry_storage_swift_region: "{{ lookup('env', 'OS_REGION_NAME') }}" _# optional_
-* `openshift_hosted_registry_storage_swift_tenant: "{{ lookup('env','OS_PROJECT_NAME') }}" _# can also specify tenantid_
-* `openshift_hosted_registry_storage_swift_tenantid: "{{ lookup('env','OS_PROJECT_ID') }}" _# can also specify tenant_
-* `openshift_hosted_registry_storage_swift_domain: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}" _# optional; can also specifiy domainid_
-* `openshift_hosted_registry_storage_swift_domainid: "{{ lookup('env','OS_USER_DOMAIN_ID') }}" _# optional; can also specifiy domain_
+* `openshift_hosted_registry_storage_kind`: object
+* `openshift_hosted_registry_storage_provider`: swift
+* `openshift_hosted_registry_storage_swift_container`: "openshift-registry" _#can be any name_
+* `openshift_hosted_registry_storage_swift_authurl`: "{{ lookup('env','OS_AUTH_URL') }}"
+* `openshift_hosted_registry_storage_swift_username`: "{{ lookup('env','OS_USERNAME') }}"
+* `openshift_hosted_registry_storage_swift_password`: "{{ lookup('env','OS_PASSWORD') }}"
+* `openshift_hosted_registry_storage_swift_region`: "{{ lookup('env', 'OS_REGION_NAME') }}" _# optional_
+* `openshift_hosted_registry_storage_swift_tenant`: "{{ lookup('env','OS_PROJECT_NAME') }}" _# can also specify tenantid_
+* `openshift_hosted_registry_storage_swift_tenantid`: "{{ lookup('env','OS_PROJECT_ID') }}" _# can also specify tenant_
+* `openshift_hosted_registry_storage_swift_domain`: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}" _# optional; can also specifiy domainid_
+* `openshift_hosted_registry_storage_swift_domainid`: "{{ lookup('env','OS_USER_DOMAIN_ID') }}" _# optional; can also specifiy domain_
 
 Note that the exact environment variable names may vary depending on the contents of
 your OpenStack RC file. If you use Keystone v2, you may not need to set all of these
