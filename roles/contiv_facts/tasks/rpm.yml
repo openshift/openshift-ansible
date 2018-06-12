@@ -7,16 +7,15 @@
   check_mode: no
 
 - name: RPM | Determine if firewalld enabled
-  command: "systemctl status firewalld.service"
+  systemd:
+    name: "firewalld"
+  ignore_errors: true
   register: ss
-  changed_when: false
-  failed_when: false
-  check_mode: no
 
 - name: Set the contiv_has_firewalld fact
   set_fact:
     contiv_has_firewalld: true
-  when: s.rc == 0 and ss.rc == 0
+  when: s.rc == 0 and ss.status.ActiveState == 'active'
 
 - name: Determine if iptables-services installed
   command: "rpm -q iptables-services"
