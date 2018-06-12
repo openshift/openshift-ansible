@@ -626,7 +626,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name or not openshift_openstack_load_balencer_floating_ip %}
+{% if openshift_openstack_provider_network_name or not openshift_openstack_load_balencer_floating_ip | default(True) | bool %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_lb_volume_size }}
