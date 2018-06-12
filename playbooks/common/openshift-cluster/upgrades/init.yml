@@ -15,6 +15,7 @@
   - import_role:
       name: openshift_node_group
       tasks_from: check_for_configs.yml
+    when: openshift_current_version | version_compare('3.10', '>=')
 
 - name: Ensure firewall is not switched during upgrade
   hosts: "{{ l_upgrade_no_switch_firewall_hosts | default('oo_all_hosts') }}"
