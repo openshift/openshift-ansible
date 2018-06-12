@@ -547,7 +547,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name | not openshift_openstack_etcd_floating_ip %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_etcd_volume_size }}
@@ -624,7 +624,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name | not openshift_openstack_load_balencer_floating_ip %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_lb_volume_size }}
@@ -707,7 +707,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name | not openshift_openstack_master_floating_ip %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_master_volume_size }}
@@ -782,7 +782,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name | not openshift_openstack_compute_floating_ip %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_node_volume_size }}
@@ -861,7 +861,7 @@ resources:
               - no_floating
               - ''
               - {{ openshift_openstack_external_network_name }}
-{% if openshift_openstack_provider_network_name %}
+{% if openshift_openstack_provider_network_name | not openshift_openstack_infra_floating_ip %}
           attach_float_net: false
 {% endif %}
           volume_size: {{ openshift_openstack_infra_volume_size }}
