@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.30
+Version:        3.9.32
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,39 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jun 12 2018 Scott Dodson <sdodson@redhat.com> 3.9.32-1
+- Remove unused registry-console's imagestream (nakayamakenjiro@gmail.com)
+- [WIP] Azure: calculate input image for base and node image
+  (pschiffe@redhat.com)
+- iSCSI: Start multipathd (jarrpa@redhat.com)
+- Updating fluentd label and wait to be in a single shell rather than running a
+  script from /tmp (ewolinet@redhat.com)
+- [WIP] azure - do not tag node images as valid automatically
+  (pschiffe@redhat.com)
+- Don't verify java-1.8.0-openjdk-headless (sdodson@redhat.com)
+- Apply app label to console replica sets and pods (spadgett@redhat.com)
+- Check console pod readiness rather than /healthz endpoint
+  (spadgett@redhat.com)
+- cri-o: If defaulting to openshift_release prefix it with v
+  (sdodson@redhat.com)
+- Update Prometheus to scrape the router metrics (spasquie@redhat.com)
+- Splitting output over using stdout_lines due to name formatting
+  (ewolinet@redhat.com)
+- Rework Contiv nodes hosts (mchappel@redhat.com)
+- Change file permissions on console serving cert (spadgett@redhat.com)
+- Splitting output over using stdout_lines due to name formatting
+  (ewolinet@redhat.com)
+- Force acs-engine template file to use 3.9 when on 3.9 branch.
+  (kwoodson@redhat.com)
+- Updating logic when we are scaling up to skip health checks
+  (ewolinet@redhat.com)
+- Maintaining the same user for removing temp dir (ewolinet@redhat.com)
+- Adding checks to make sure we dont fail if .failed doesnt exist
+  (ewolinet@redhat.com)
+- Updating process for doing a rolling and full cluster upgrades
+  (ewolinet@redhat.com)
+- Prometheus nodeselector defaults to hosted nodeselector (vrutkovs@redhat.com)
+
 * Sat May 26 2018 Justin Pierce <jupierce@redhat.com> 3.9.30-1
 - Fix master scaleup play init_fact hosts (mgugino@redhat.com)
 - Specify package versions for all related node packages (rteague@redhat.com)
