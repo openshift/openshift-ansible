@@ -56,6 +56,8 @@
 
 - name: install openshift
   import_playbook: ../../openshift-node/private/image_prep.yml
+  vars:
+    etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
 
 - hosts: nodes
   tasks:
