@@ -3,21 +3,32 @@ kind: "Elasticsearch"
 metadata:
   name: "{{ es_cluster_name }}"
 spec:
+  elasticsearchConfig:
+    image: "{{ openshift_logging_elasticsearch_image }}"
+    resources:
+      limits:
+{% if es_cpu_limit is defined and es_cpu_limit is not none and es_cpu_limit != '' %}
+        cpu: "{{ es_cpu_limit }}"
+{% endif %}
+        memory: "{{ es_memory_limit }}"
+      requests:
+        cpu: "{{ es_cpu_request }}"
+        memory: "{{ es_memory_limit }}"
   nodes:
 {% for node in es_cluster_nodes %}
     - nodeRole: clientdatamaster
       replicas: {{ node['replicas'] }}
-      resources:
-        limits:
-{% if node['containers']['elasticsearch']['resources']['limits']['cpu'] is defined %}
-          cpu: "{{ node['containers']['elasticsearch']['resources']['limits']['cpu'] }}"
-{% endif %}
-          memory: "{{ node['containers']['elasticsearch']['resources']['limits']['memory'] }}"
-        requests:
-          cpu: "{{ node['containers']['elasticsearch']['resources']['requests']['cpu'] }}"
-          memory: "{{ node['containers']['elasticsearch']['resources']['requests']['memory'] }}"
       elasticsearchConfig:
         image: "{{ node['containers']['elasticsearch']['image'] }}"
+        resources:
+          limits:
+{% if node['containers']['elasticsearch']['resources']['limits']['cpu'] is defined %}
+            cpu: "{{ node['containers']['elasticsearch']['resources']['limits']['cpu'] }}"
+{% endif %}
+            memory: "{{ node['containers']['elasticsearch']['resources']['limits']['memory'] }}"
+          requests:
+            cpu: "{{ node['containers']['elasticsearch']['resources']['requests']['cpu'] }}"
+            memory: "{{ node['containers']['elasticsearch']['resources']['requests']['memory'] }}"
 {% if node['nodeSelector'] is defined and node['nodeSelector'] is iterable %}
       nodeSelector:
 {% for key, value in node['nodeSelector'].items() %}
@@ -32,17 +43,6 @@ spec:
 {% for node in range(es_additional_nodes | int) %}
     - nodeRole: clientdatamaster
       replicas: 1
-      resources:
-        limits:
-{% if es_cpu_limit is defined and es_cpu_limit is not none and es_cpu_limit != '' %}
-          cpu: "{{ es_cpu_limit }}"
-{% endif %}
-          memory: "{{ es_memory_limit }}"
-        requests:
-          cpu: "{{ es_cpu_request }}"
-          memory: "{{ es_memory_limit }}"
-      elasticsearchConfig:
-        image: "{{ openshift_logging_elasticsearch_image }}"
 {% if es_node_selector is iterable and es_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in es_node_selector.items() %}
