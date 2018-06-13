@@ -24,6 +24,7 @@ _Cloud Provisioning_
 - aws
 - gcp
 - openstack
+- rhv
 
 _OpenShift Components_
 - openshift-etcd

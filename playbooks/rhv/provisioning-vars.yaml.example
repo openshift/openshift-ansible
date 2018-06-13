@@ -1,0 +1,180 @@
+---
+###########################
+# Engine Connection
+###########################
+compatibility_version: 4.2
+engine_url: #https://engine.example.com/ovirt-engine/api
+engine_user: #admin@internal
+engine_password: #secret
+
+# CA file copied from engine:/etc/pki/ovirt-engine/ca.pem
+# path is relative to openshift-cluster directory
+engine_cafile: ../ca.pem
+
+data_center_name: Default
+rhv_cluster: Default
+rhv_data_storage: #vmstore
+root_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+nsupdate_server: #localhost
+
+##########################
+# Template Creation
+# https://github.com/oVirt/ovirt-ansible-image-template
+##########################
+qcow_url: # https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2c
+image_path: "{{ lookup('env', 'HOME') }}/Downloads/{{ template_name }}.qcow2"
+template_name: centos7
+template_cluster: "{{ rhv_cluster }}"
+template_memory: 8GiB
+template_cpu: 1
+template_disk_storage: "{{ rhv_data_storage }}"
+template_disk_size: 60GiB
+template_nics:
+  - name: nic1
+    profile_name: ovirtmgmt
+    interface: virtio
+
+##########################
+# Virtual Machines
+##########################
+debug_vm_create: true
+wait_for_ip: true
+vm_infra_wait_for_ip_retries: 10
+vm_infra_wait_for_ip_delay: 40
+
+master_vm:
+  cluster: "{{ rhv_cluster }}"
+  template: "{{ template_name }}"
+  memory: 16GiB
+  cores: 2
+  high_availability: true
+  disks:
+    - size: 15GiB
+      storage_domain: "{{ rhv_data_storage }}"
+      name: docker_disk
+      interface: virtio
+    - size: 30GiB
+      storage_domain: "{{ rhv_data_storage }}"
+      name: localvol_disk
+      interface: virtio
+    - size: 25GiB
+      storage_domain: "{{ rhv_data_storage }}"
+      name: etcd_disk
+      interface: virtio
+  state: running
+
+node_vm:
+  cluster: "{{ rhv_cluster }}"
+  template: "{{ template_name }}"
+  memory: 8GiB
+  cores: 2
+  disks:
+    - size: 15GiB
+      storage_domain: "{{ rhv_data_storage }}"
+      name: docker_disk
+      interface: virtio
+    - size: 30GiB
+      storage_domain: "{{ rhv_data_storage }}"
+      name: localvol_disk
+      interface: virtio
+  state: running
+
+vms:
+  # Master VMs
+  - name: "master0.{{ public_hosted_zone }}"
+    profile: "{{ master_vm }}"
+    tag: openshift_master
+    cloud_init:
+      host_name: "master0.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+  - name: "master1.{{ public_hosted_zone }}"
+    tag: openshift_master
+    profile: "{{ master_vm }}"
+    cloud_init:
+      host_name: "master1.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+  - name: "master2.{{ public_hosted_zone }}"
+    tag: openshift_master
+    profile: "{{ master_vm }}"
+    cloud_init:
+      host_name: "master2.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+
+  # Infra VMs
+  - name: "infra0.{{ public_hosted_zone }}"
+    tag: openshift_infra
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "infra0.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+  - name: "infra1.{{ public_hosted_zone }}"
+    tag: openshift_infra
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "infra1.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+  - name: "infra2.{{ public_hosted_zone }}"
+    tag: openshift_infra
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "infra2.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+
+  # Node VMs
+  - name: "app0.{{ public_hosted_zone }}"
+    tag: openshift_node
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "app0.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+  - name: "app1.{{ public_hosted_zone }}"
+    tag: openshift_node
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "app1.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+  - name: "app2.{{ public_hosted_zone }}"
+    tag: openshift_node
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "app2.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+
+  # Load balancer
+  - name: "lb.{{ public_hosted_zone }}"
+    tag: openshift_lb
+    profile: "{{ node_vm }}"
+    cloud_init:
+      host_name: "lb.{{ public_hosted_zone }}"
+      authorized_ssh_keys: "{{ root_ssh_key }}"
+
+affinity_groups:
+  - name: masters_ag
+    cluster: "{{ rhv_cluster }}"
+    vm_enforcing: false
+    vm_rule: negative
+    vms:
+      - "master0.{{ public_hosted_zone }}"
+      - "master1.{{ public_hosted_zone }}"
+      - "master2.{{ public_hosted_zone }}"
+    wait: true
+  - name: infra_ag
+    cluster: "{{ rhv_cluster }}"
+    vm_enforcing: false
+    vm_rule: negative
+    vms:
+      - "infra0.{{ public_hosted_zone }}"
+      - "infra1.{{ public_hosted_zone }}"
+      - "infra2.{{ public_hosted_zone }}"
+    wait: true
+
+  - name: app_ag
+    cluster: "{{ rhv_cluster }}"
+    vm_enforcing: false
+    vm_rule: negative
+    vms:
+      - "app0.{{ public_hosted_zone }}"
+      - "app1.{{ public_hosted_zone }}"
+      - "app2.{{ public_hosted_zone }}"
+...

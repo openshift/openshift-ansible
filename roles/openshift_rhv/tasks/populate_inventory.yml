@@ -1,0 +1,36 @@
+---
+- name: Log in to oVirt
+  ovirt_auth:
+    url: "{{ engine_url }}"
+    username: "{{ engine_user }}"
+    password: "{{ engine_password }}"
+    ca_file: "{{ engine_cafile | default(omit) }}"
+    insecure: "{{ engine_insecure | default(true) }}"
+  tags:
+    - always
+    - openshift_rhv
+
+- name: Grab IPs from oVirt
+  ovirt_vms_facts:
+    auth: "{{ ovirt_auth }}"
+    fetch_nested: true
+    nested_attributes: ips
+  tags:
+    - openshift_rhv
+
+- name: Logout from oVirt
+  ovirt_auth:
+    state: absent
+    ovirt_auth: "{{ ovirt_auth }}"
+  tags:
+    - always
+    - openshift_rhv
+
+- name: Add new VMs to inventory
+  add_host:
+    name: "{{ item.name }}"
+    ansible_host: "{{ item.reported_devices[0].ips[0].address }}"
+  with_items: "{{ ovirt_vms }}"
+  tags:
+    - openshift_rhv
+...

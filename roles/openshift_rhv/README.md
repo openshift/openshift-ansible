@@ -1,0 +1,94 @@
+OpenShift RHV
+=============
+
+OpenShift Provisioned on Red Hat Virtualization and oVirt
+
+Requirements
+------------
+
+* oVirt-ansible roles in Ansible role path. See the [oVirt Ansible Roles page](https://github.com/ovirt/ovirt-ansible/) for installation details.
+  * oVirt.image-template
+  * oVirt.vm-infra
+* External DNS server to provide name resolution to nodes and applications. See the [OpenShift Installation Documentation](https://docs.openshift.com/container-platform/3.9/install_config/install/prerequisites.html#prereq-dns) for details.
+
+Role Tasks
+----------
+
+* `build_vm_list.yml`: Creates a list of virtual machine definitions based on a simple manifest
+* `generate_dns.yml`: Creates files with hostname to IP mapping either for use with nsupdate, or a Unix hosts style for dnsmasq.
+* `populate_inventory.yml`: Queries the RHV engine to determine IP addresses of virtual machines managed on the cluster.
+
+Role Variables
+--------------
+
+For default values, see [`defaults/main.yaml`](defaults/main.yaml).
+
+For documentation on virtual machine profile options, see the [oVirt Ansible VM-Infra Documentation](https://github.com/oVirt/ovirt-ansible-vm-infra)
+
+- `openshift_rhv_vm_profile`: Dictionary of dictionaries providing common VM parameters for virtual machine creation.
+- `openshift_rhv_vm_manifest`: List of dictionaries specifying node base name, count, and which of the above profiles to apply. The default creates three master nodes, three infrastructure nodes, three application nodes, and a load balancer.
+
+```
+openshift_rhv_vm_manifest:
+  - name: 'master'
+    count: 3
+    profile: 'master'
+  - name: 'infra'
+    count: 3
+    profile: 'node'
+  - name: 'compute'
+    count: 3
+    profile: 'node'
+  - name: 'lb'
+    count: 1
+    profile: 'node'
+```
+
+To automatically update DNS using `nsupdate`, ensure the following variables are defined:
+
+- `app_dns_prefix`: Part of the default subdomain for wildcard entries. e.g. `apps` in `*.apps.example.com`.
+- `public_hosted_zone`: The default subdomain added to the end of most entries, e.g. `example.com`.
+- `openshift_rhv_nsupdate_server`: Server name to send nsupdate updates.
+- `openshift_rhv_nsupdate_key`: Dictionary made up of parameters found in the rndc key of the nsupdate server.
+
+```
+openshift_rhv_nsupdate_server: localhost
+openshift_rhv_nsupdate_key:
+  name: rndc-key
+  secret: 'XYXYXYXYXYXYXYXYXYXY+h=='
+  algorithm: hmac-md5
+```
+
+Role Requirements
+-----------------
+
+The `populate_inventory.yml` task requires the following variables to provide a connection to the RHV/oVirt Engine:
+
+* `engine_url`: The URL of the engine's administrative API, in the form, `https://engine.example.com/ovirt-engine/api`
+* `engine_user`: The username of a user with privileges to create and remove virtual machines, typically `admin@internal`
+* `engine_password`: The password of the `engine_user`
+* `engine_cafile`: The certifiate authority of the engine. The `engine_cafile` may be downloaded by:
+
+```
+$ curl --output ca.pem 'http://engine.example.com/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA'
+```
+
+Example Playbook
+----------------
+
+```
+- name: Create dns nsupdate or hosts files for admin use
+  hosts: localhost
+  tasks:
+    - import_role:
+        name: openshift_rhv
+        tasks_from: populate_inventory.yml
+    - import_role:
+        name: openshift_rhv
+        tasks_from: generate_dns.yml
+```
+
+License
+-------
+
+Apache License, Version 2.0

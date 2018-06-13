@@ -1,0 +1,10 @@
+---
+- name: Unregister VMs
+  gather_facts: true
+  hosts:
+    - nodes
+  tasks:
+    - import_role:
+        name: rhel_unsubscribe
+      ignore_errors: yes
+...

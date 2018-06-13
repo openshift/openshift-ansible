@@ -1,0 +1,25 @@
+---
+# Creates a dictionary for use with oVirt.vm-infra role
+# https://github.com/oVirt/ovirt-ansible-vm-infra
+- name: Create virtual machine list fact
+  set_fact:
+    vms: >-
+      {{ vms|default([]) }} + [
+      {% for iter in range(item.count) -%}
+      {% if iter > 0 -%},{% endif -%}
+      {
+      'name': '{{ item.name }}{{ iter }}.{{ public_hosted_zone }}',
+      'tag': 'openshift_{{ item.profile }}',
+      'cloud_init':
+      {
+      'host_name': '{{ item.name }}{{ iter }}.{{ public_hosted_zone }}',
+      'authorized_ssh_keys': '{{ root_ssh_key }}'
+      },
+      'profile':  {{ openshift_rhv_vm_profile[ item.profile ] }} ,
+      }
+      {% endfor -%}
+      ]
+  with_items: "{{ openshift_rhv_vm_manifest }}"
+  tags:
+  - openshift_rhv
+...
