@@ -104,11 +104,6 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   tasks:
-  - name: Set up automatic node config reconcilation
-    run_once: True
-    import_role:
-      name: openshift_node_group
-      tasks_from: sync
   - import_role:
       name: kuryr
       tasks_from: master
@@ -133,6 +128,16 @@
   tasks:
   - name: setup bootstrap settings
     import_tasks: tasks/enable_bootstrap_config.yml
+
+- name: Create sync daemonset
+  hosts: oo_first_master
+  gather_facts: no
+  tasks:
+  - name: Set up automatic node config reconcilation
+    run_once: True
+    import_role:
+      name: openshift_node_group
+      tasks_from: sync
 
 - name: Ensure inventory labels are assigned to masters
   hosts: oo_masters_to_config
