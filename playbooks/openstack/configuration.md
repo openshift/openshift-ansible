@@ -297,7 +297,7 @@ We recommend you use the Queens or newer release of OpenStack.
 
 ### Necessary Kuryr Options
 
-This is is the minimum you need to set (in `group_vars/all.yml`):
+This is the minimum you need to set (in `group_vars/all.yml`):
 
 ```yaml
 openshift_use_kuryr: true
