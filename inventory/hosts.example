@@ -61,7 +61,8 @@ openshift_master_default_subdomain=apps.test.example.com
 #Set cluster_hostname to point at your load balancer
 openshift_master_cluster_hostname=ose3-lb.test.example.com
 
-
+# Change cluster domain from cluster.local
+#dns_domain="cluster1.example.com"
 
 ###############################################################################
 # Additional configuration variables follow                                   #
