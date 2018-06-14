@@ -43,7 +43,7 @@
       image_tags:
         root_image: "{{ (input_image.stdout | from_json).name }}"
         kernel: "{{ hostvars[groups['nodes'][0]]['ansible_kernel'] }}"
-        valid: true
+        valid: "true"
 
   - name: create blob
     import_tasks: tasks/create_blob_from_vm.yml
