@@ -13,4 +13,5 @@ bind-dynamic
 {% for interface in openshift_node_dnsmasq_except_interfaces %}
 except-interface={{ interface }}
 {% endfor %}
+server=/{{ openshift.common.dns_domain }}/127.0.0.1
 # End of config
