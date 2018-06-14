@@ -1,4 +1,8 @@
 ---
+- name: ensure pkg version are valid
+  set_fact:
+   openshift_pkg_version: "{{ openshift_pkg_version.replace('v', '') }}"
+
 - name: Install node, clients, and conntrack packages
   package:
     name: "{{ item.name }}"

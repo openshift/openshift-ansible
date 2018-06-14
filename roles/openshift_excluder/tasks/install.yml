@@ -6,6 +6,10 @@
 
   block:
 
+  - name: ensure pkg version are valid
+    set_fact:
+      openshift_pkg_version: "{{ openshift_pkg_version.replace('v', '') }}"
+
   - name: Install docker excluder - yum
     package:
       name: "{{ r_openshift_excluder_service_type }}-docker-excluder{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) +  '*' }}"
