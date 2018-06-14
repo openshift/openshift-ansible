@@ -305,11 +305,8 @@ The options here define a new OpenShift node group that has the labels for all
 three roles: master, infra and compute. And we create a single node and assign
 this new group to it.
 
-It doesn't matter which node role you choose. You can do the equivalent by
-setting `openshift_openstack_num_infra: 1` and
-`openshift_openstack_infra_group_name: node-config-all-in-one` or
-`openshift_openstack_num_nodes: 1` and `openshift_openstack_compute_group_name:
-node-config-all-in-one`.
+Note that the "all in one" node must be the "master". openshift-ansible
+expects at least one node in the `masters` Ansible group.
 
 
 
