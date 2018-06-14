@@ -25,6 +25,8 @@ objects:
           labels:
             name: "registry-console"
         spec:
+          nodeSelector:
+            node-role.kubernetes.io/master: 'true'
           containers:
             - name: registry-console
               image: ${IMAGE_PREFIX}${IMAGE_BASENAME}:${IMAGE_VERSION}
