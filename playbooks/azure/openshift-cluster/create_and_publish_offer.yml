@@ -58,7 +58,7 @@
 
     - debug:
         msg: "{{ lookup('template', 'offer.yml.j2') }}"
-      verbosity: 1
+        verbosity: 1
 
     - name: bring along the previous offer versions and combine with incoming
       yedit:
