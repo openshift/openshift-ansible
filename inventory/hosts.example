@@ -487,6 +487,14 @@ debug_level=2
 #openshift_hosted_registry_storage_openstack_volumeID=3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
 #openshift_hosted_registry_storage_volume_size=10Gi
 #
+# hostPath (local filesystem storage)
+# Suitable for "all-in-one" or proof of concept deployments
+# Must not be used for high-availability and production deployments
+#openshift_hosted_registry_storage_kind=hostpath
+#openshift_hosted_registry_storage_access_modes=['ReadWriteOnce']
+#openshift_hosted_registry_storage_hostpath_path=/var/lib/openshift_volumes
+#openshift_hosted_registry_storage_volume_size=10Gi
+#
 # AWS S3
 # S3 bucket must already exist.
 #openshift_hosted_registry_storage_kind=object
