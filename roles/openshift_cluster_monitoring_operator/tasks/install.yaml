@@ -32,6 +32,23 @@
     - key: openshift.io/cluster-monitoring
       value: "true"
 
+- when: os_sdn_network_plugin_name == 'redhat/openshift-ovs-multitenant'
+  block:
+  - name: Waiting for netnamespace openshift-monitoring to be ready
+    oc_obj:
+      kind: netnamespace
+      name: openshift-monitoring
+      state: list
+    register: get_output
+    until: not get_output.results.stderr is defined
+    retries: 30
+    delay: 1
+    changed_when: false
+
+  - name: Make openshift-monitoring project network global
+    command: >
+      {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig adm pod-network make-projects-global openshift-monitoring
+
 - name: Apply the cluster monitoring operator template
   shell: >
     {{ openshift_client_binary }} process -n openshift-monitoring -f "{{ mktemp.stdout 	}}/{{ item }}"
