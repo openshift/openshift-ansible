@@ -446,6 +446,8 @@ debug_level=2
 #openshift_hosted_manage_registry=true
 # Manage the OpenShift Registry Console (optional)
 #openshift_hosted_manage_registry_console=true
+# Regsitry Console node selector
+#openshift_hosted_registry_console_nodeselector='node-role.kubernetes.io/infra=true'
 #
 # Registry Storage Options
 #

@@ -1,2 +1,3 @@
 ---
 openshift_config_base: "/etc/origin"
+openshift_hosted_registry_console_nodeselector: "{{ openshift_hosted_infra_selector | default('node-role.kubernetes.io/infra=true') }}"
