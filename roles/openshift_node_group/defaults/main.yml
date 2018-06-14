@@ -14,3 +14,5 @@ openshift_node_group_use_persistentlocalvolumes: "{{ openshift_persistentlocalst
 openshift_node_group_name: 'node-config-compute'
 
 l_openshift_node_group_labels: []
+
+openshift_node_iptables_sync_period: '30s'
