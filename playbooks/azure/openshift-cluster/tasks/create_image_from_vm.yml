@@ -43,7 +43,7 @@
 
 - name: calculate final tags
   set_fact:
-    final_tags: "{{ input_image_tags_no_valid | combine(image_tags) }}"
+    final_tags: "{{ input_image_tags_no_valid | default({}) | combine(image_tags) }}"
 
 - name: tag image
   command: >
