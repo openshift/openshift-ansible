@@ -29,6 +29,7 @@ ExecStart=/usr/bin/docker run --name {{ openshift_service_type }}-node \
   -v /:/rootfs:ro,rslave -e CONFIG_FILE=${CONFIG_FILE} -e OPTIONS=${OPTIONS} \
   -e HOST=/rootfs -e HOST_ETC=/host-etc \
   -v {{ openshift_node_data_dir }}:{{ openshift_node_data_dir }}:rslave \
+  -v {{ openshift_flexvolume_container_directory_default }}:{{ openshift_flexvolume_container_directory_default }}:rslave \
   -v {{ openshift.common.config_base }}/node:{{ openshift.common.config_base }}/node \
   {% if openshift_cloudprovider_kind | default('') != '' -%} -v {{ openshift.common.config_base }}/cloudprovider:{{ openshift.common.config_base}}/cloudprovider {% endif -%} \
   -v /etc/localtime:/etc/localtime:ro -v /etc/machine-id:/etc/machine-id:ro \
