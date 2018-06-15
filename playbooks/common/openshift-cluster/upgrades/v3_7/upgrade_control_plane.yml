@@ -149,4 +149,7 @@
       state: started
 
 - include: ../registry_upgrade.yml
+  when:
+  - openshift_hosted_manage_registry | default(True) | bool
+
 - include: ../post_control_plane.yml
