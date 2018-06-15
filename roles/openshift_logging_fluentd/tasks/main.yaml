@@ -89,17 +89,17 @@
 
 # create Fluentd configmap
 - template:
-    src: "{{ __base_file_dir }}/fluent.conf.j2"
+    src: "fluent.conf.j2"
     dest: "{{ tempdir }}/fluent.conf"
   vars:
     deploy_type: "{{ openshift_logging_fluentd_deployment_type }}"
 
 - copy:
-    src: "{{ __base_file_dir }}/fluentd-throttle-config.yaml"
+    src: "fluentd-throttle-config.yaml"
     dest: "{{ tempdir }}/fluentd-throttle-config.yaml"
 
 - copy:
-    src: "{{ __base_file_dir }}/secure-forward.conf"
+    src: "secure-forward.conf"
     dest: "{{ tempdir }}/secure-forward.conf"
 
 - import_role:
@@ -154,7 +154,7 @@
 # TODO: pass in aggregation configurations
 - name: Generate logging-fluentd daemonset definition
   template:
-    src: "{{ __base_file_dir }}/fluentd.j2"
+    src: "fluentd.j2"
     dest: "{{ tempdir }}/templates/logging-fluentd.yaml"
   vars:
     daemonset_name: logging-fluentd

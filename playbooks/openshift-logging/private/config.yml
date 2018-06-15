@@ -17,33 +17,29 @@
   hosts: all
   gather_facts: false
   tasks:
-  - when:
-    - openshift_logging_es5_techpreview | default(false) | bool
-    - openshift_deployment_type in ['origin']
-    block:
-    - name: Checking vm max_map_count value
-      command:
-        cat /proc/sys/vm/max_map_count
-      register: _vm_max_map_count
+  - name: Checking vm max_map_count value
+    command:
+      cat /proc/sys/vm/max_map_count
+    register: _vm_max_map_count
 
-    - stat:
-        path: /etc/sysctl.d/99-elasticsearch.conf
-      register: _99_es_conf
+  - stat:
+      path: /etc/sysctl.d/99-elasticsearch.conf
+    register: _99_es_conf
 
-    - name: Check for current value of vm.max_map_count in 99-elasticsearch.conf
-      command: >
-        sed /etc/sysctl.d/99-elasticsearch.conf -e 's/vm.max_map_count=\(.*\)/\1/'
-      register: _curr_vm_max_map_count
-      when: _99_es_conf.stat.exists
+  - name: Check for current value of vm.max_map_count in 99-elasticsearch.conf
+    command: >
+      sed /etc/sysctl.d/99-elasticsearch.conf -e 's/vm.max_map_count=\(.*\)/\1/'
+    register: _curr_vm_max_map_count
+    when: _99_es_conf.stat.exists
 
-    - name: Updating vm.max_map_count value
-      sysctl:
-        name: vm.max_map_count
-        value: 262144
-        sysctl_file: "/etc/sysctl.d/99-elasticsearch.conf"
-        reload: yes
-      when:
-      - _vm_max_map_count.stdout | default(0) | int < 262144 | int or _curr_vm_max_map_count.stdout | default(0) | int < 262144
+  - name: Updating vm.max_map_count value
+    sysctl:
+      name: vm.max_map_count
+      value: 262144
+      sysctl_file: "/etc/sysctl.d/99-elasticsearch.conf"
+      reload: yes
+    when:
+    - _vm_max_map_count.stdout | default(0) | int < 262144 | int or _curr_vm_max_map_count.stdout | default(0) | int < 262144
 
 - name: OpenShift Aggregated Logging
   hosts: oo_first_master

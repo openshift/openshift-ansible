@@ -59,10 +59,6 @@
   vars:
     generated_certs_dir: "{{openshift.common.config_base}}/logging"
 
-- set_fact:
-    __base_file_dir: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
-    __es_version: "{{ '5.x' if openshift_logging_es5_techpreview | bool else '2.x' }}"
-
 ## Elasticsearch
 
 - set_fact: es_indices={{ es_indices | default([]) + [item | int - 1] }}
