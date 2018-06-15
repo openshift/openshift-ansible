@@ -119,7 +119,7 @@ openshift_master_api_port: "8443"
 openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 openshift_use_openshift_sdn: true
 
-openshift_node_groups:
+openshift_default_node_groups:
   - name: node-config-master
     labels:
       - 'node-role.kubernetes.io/master=true'
@@ -140,4 +140,7 @@ openshift_node_groups:
     labels:
       - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true,node-role.kubernetes.io/compute=true'
     edits: []
+
+openshift_node_groups: "{{ openshift_default_node_groups }} + {{ openshift_additional_node_groups | default([]) }}"
+
 openshift_master_manage_htpasswd: True

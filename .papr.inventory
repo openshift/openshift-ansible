@@ -15,6 +15,12 @@ openshift_portal_net=172.30.0.0/16
 debug_level=4
 
 [all:vars]
+# custom node config group
+my_node_group1_labels=['node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true']
+my_node_group1={'name': 'node-config-compute-infra', 'labels': {{ my_node_group1_labels }} }
+
+openshift_additional_node_groups=[{{ my_node_group1 }}]
+
 # bootstrap configs
 openshift_master_bootstrap_auto_approve=true
 openshift_master_bootstrap_auto_approver_node_selector={"node-role.kubernetes.io/master":"true"}
@@ -29,5 +35,5 @@ ocp-master
 
 [nodes]
 ocp-master openshift_schedulable=true openshift_node_group_name="node-config-master-infra"
-ocp-node1 openshift_node_group_name="node-config-infra" openshift_node_group_name="node-config-compute"
-ocp-node2 openshift_node_group_name="node-config-infra" openshift_node_group_name="node-config-compute"
+ocp-node1 openshift_node_group_name="node-config-compute-infra"
+ocp-node2 openshift_node_group_name="node-config-compute-infra"
