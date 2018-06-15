@@ -48,7 +48,9 @@
   delay: 30
 
 - name: Upgrade Docker
-  package: name=docker{{ '-' + docker_version }} state=present
+  package:
+    name: "docker{{ '-' + docker_version }}"
+    state: latest
   register: result
   until: result is succeeded
 

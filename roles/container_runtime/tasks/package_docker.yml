@@ -23,7 +23,7 @@
 - name: Install Docker
   package:
     name: "docker{{ '-' + docker_version if docker_version is defined else '' }}"
-    state: present
+    state: latest
   when:
   - not (openshift_is_atomic | bool)
   - not (curr_docker_version is skipped)

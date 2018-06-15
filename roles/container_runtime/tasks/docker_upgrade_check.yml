@@ -47,9 +47,8 @@
     - pkg_check.rc == 0
     - avail_docker_version.stdout == "" or avail_docker_version.stdout is version_compare(l_required_docker_version,'<')
 
-# Default l_docker_upgrade to False, we'll set to True if an upgrade is required:
 - set_fact:
-    l_docker_upgrade: False
+    l_docker_upgrade: True
 
 # Make sure a docker_version is set if none was requested:
 - set_fact:
