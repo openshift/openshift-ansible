@@ -62,7 +62,7 @@ openshift_master_default_subdomain=apps.test.example.com
 openshift_master_cluster_hostname=ose3-lb.test.example.com
 
 # Change cluster domain from cluster.local
-#dns_domain="cluster1.example.com"
+#openshift_dns_domain="cluster1.example.com"
 
 ###############################################################################
 # Additional configuration variables follow                                   #
