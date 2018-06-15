@@ -1,17 +1,6 @@
 ---
 # We need docker service up to remove all the images, but these services will keep
 # trying to re-start and thus re-pull the images we're trying to delete.
-- name: Stop containerized services
-  service: name={{ item }} state=stopped
-  with_items:
-  - "{{ openshift_service_type }}-master-api"
-  - "{{ openshift_service_type }}-master-controllers"
-  - "{{ openshift_service_type }}-node"
-  - etcd_container
-  - openvswitch
-  failed_when: false
-  when: openshift_is_containerized | bool
-
 - name: Restart static master services
   command: /usr/local/bin/master-restart "{{ item }}"
   with_items:
@@ -19,25 +8,6 @@
   - controllers
   - etcd
   failed_when: false
-
-- name: Check Docker image count
-  shell: "docker images -aq | wc -l"
-  register: docker_image_count
-
-- debug: var=docker_image_count.stdout
-
-- name: Remove all containers and images
-  script: nuke_images.sh
-  register: nuke_images_result
-  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-- name: Check Docker image count
-  shell: "docker images -aq | wc -l"
-  register: docker_image_count
-  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
-
-- debug: var=docker_image_count.stdout
-  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
 
 - service:
     name: docker
@@ -49,7 +19,7 @@
 
 - name: Upgrade Docker
   package:
-    name: "docker{{ '-' + docker_version }}"
+    name: "docker"
     state: latest
   register: result
   until: result is succeeded
