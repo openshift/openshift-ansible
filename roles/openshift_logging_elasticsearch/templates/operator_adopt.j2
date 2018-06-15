@@ -3,7 +3,7 @@ kind: "Elasticsearch"
 metadata:
   name: "{{ es_cluster_name }}"
 spec:
-  elasticsearchConfig:
+  nodeSpec:
     image: "{{ openshift_logging_elasticsearch_image }}"
     resources:
       limits:
@@ -16,9 +16,12 @@ spec:
         memory: "{{ es_memory_limit }}"
   nodes:
 {% for node in es_cluster_nodes %}
-    - nodeRole: clientdatamaster
+    - roles:
+      - client
+      - data
+      - master
       replicas: {{ node['replicas'] }}
-      elasticsearchConfig:
+      nodeSpec:
         image: "{{ node['containers']['elasticsearch']['image'] }}"
         resources:
           limits:
@@ -41,7 +44,10 @@ spec:
 {% endif %}
 {% endfor %}
 {% for node in range(es_additional_nodes | int) %}
-    - nodeRole: clientdatamaster
+    - roles:
+      - client
+      - data
+      - master
       replicas: 1
 {% if es_node_selector is iterable and es_node_selector | length > 0 %}
       nodeSelector:
