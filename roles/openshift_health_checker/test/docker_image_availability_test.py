@@ -167,13 +167,13 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
 
 @pytest.mark.parametrize("deployment_type, openshift_is_atomic, groups, oreg_url, expected", [
     (  # standard set of stuff required on nodes
-        "origin", False, ['oo_nodes_to_config'], "",
+        "origin", False, ['oo_nodes_to_config'], "docker.io/openshift/origin-${component}:${version}",
         set([
-            'openshift/origin-pod:vtest',
-            'openshift/origin-deployer:vtest',
-            'openshift/origin-docker-registry:vtest',
-            'openshift/origin-haproxy-router:vtest',
-            'cockpit/kubernetes:latest',  # origin version of registry-console
+            'docker.io/openshift/origin-pod:vtest',
+            'docker.io/openshift/origin-deployer:vtest',
+            'docker.io/openshift/origin-docker-registry:vtest',
+            'docker.io/openshift/origin-haproxy-router:vtest',
+            'docker.io/cockpit/kubernetes:latest',  # origin version of registry-console
         ])
     ),
     (  # set a different URL for images
@@ -183,20 +183,20 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'foo.io/openshift/origin-deployer:vtest',
             'foo.io/openshift/origin-docker-registry:vtest',
             'foo.io/openshift/origin-haproxy-router:vtest',
-            'cockpit/kubernetes:latest',  # AFAICS this is not built from the URL
+            'docker.io/cockpit/kubernetes:latest',  # AFAICS this is not built from the URL
         ])
     ),
     (
-        "origin", True, ['oo_nodes_to_config', 'oo_masters_to_config', 'oo_etcd_to_config'], "",
+        "origin", True, ['oo_nodes_to_config', 'oo_masters_to_config', 'oo_etcd_to_config'], "docker.io/openshift/origin-${component}:${version}",
         set([
             # images running on top of openshift
-            'openshift/origin-pod:vtest',
-            'openshift/origin-deployer:vtest',
-            'openshift/origin-docker-registry:vtest',
-            'openshift/origin-haproxy-router:vtest',
-            'cockpit/kubernetes:latest',
+            'docker.io/openshift/origin-pod:vtest',
+            'docker.io/openshift/origin-deployer:vtest',
+            'docker.io/openshift/origin-docker-registry:vtest',
+            'docker.io/openshift/origin-haproxy-router:vtest',
+            'docker.io/cockpit/kubernetes:latest',
             # containerized component images
-            'openshift3/ose-node:vtest',
+            'registry.access.redhat.com/openshift3/ose-node:vtest',
         ])
     ),
     (  # enterprise images
@@ -207,9 +207,9 @@ def test_registry_availability(image, registries, connection_test_failed, skopeo
             'foo.io/openshift3/ose-docker-registry:f13ac45',
             'foo.io/openshift3/ose-haproxy-router:f13ac45',
             # registry-console is not constructed/versioned the same as the others.
-            'openshift3/registry-console:vtest',
+            'registry.access.redhat.com/openshift3/registry-console:vtest',
             # containerized images aren't built from oreg_url
-            'openshift3/ose-node:vtest',
+            'registry.access.redhat.com/openshift3/ose-node:vtest',
         ])
     ),
 
@@ -221,7 +221,7 @@ def test_required_images(deployment_type, openshift_is_atomic, groups, oreg_url,
         group_names=groups,
         oreg_url=oreg_url,
         openshift_image_tag='vtest',
-        osn_image='openshift3/ose-node:vtest',
+        osn_image='registry.access.redhat.com/openshift3/ose-node:vtest',
     )
 
     assert expected == DockerImageAvailability(task_vars=task_vars).required_images()
@@ -233,13 +233,13 @@ def test_required_images(deployment_type, openshift_is_atomic, groups, oreg_url,
             openshift_deployment_type="origin",
             openshift_image_tag="vtest",
         ),
-        "cockpit/kubernetes:latest",
+        "docker.io/cockpit/kubernetes:latest",
     ), (
         dict(
             openshift_deployment_type="openshift-enterprise",
             openshift_image_tag="vtest",
         ),
-        "openshift3/registry-console:vtest",
+        "registry.access.redhat.com/openshift3/registry-console:vtest",
     ), (
         dict(
             openshift_deployment_type="openshift-enterprise",
@@ -268,12 +268,12 @@ def test_registry_console_image(task_vars, expected):
         dict(
             group_names=['oo_nodes_to_config'],
             openshift_image_tag="veggs",
-            osn_image="openshift3/ose-node:vtest",
+            osn_image="registry.access.redhat.com/openshift3/ose-node:vtest",
         ),
         set([
-            'openshift3/ose-node:vtest', 'cockpit/kubernetes:latest',
-            'openshift/origin-haproxy-router:veggs', 'openshift/origin-deployer:veggs',
-            'openshift/origin-docker-registry:veggs', 'openshift/origin-pod:veggs',
+            'registry.access.redhat.com/openshift3/ose-node:vtest', 'docker.io/cockpit/kubernetes:latest',
+            'docker.io/openshift/origin-haproxy-router:veggs', 'docker.io/openshift/origin-deployer:veggs',
+            'docker.io/openshift/origin-docker-registry:veggs', 'docker.io/openshift/origin-pod:veggs',
         ]),
     ), (
         dict(
@@ -285,6 +285,7 @@ def test_registry_console_image(task_vars, expected):
 def test_containerized(task_vars, expected):
     task_vars.update(dict(
         openshift_is_atomic=True,
+        oreg_url="docker.io/openshift/origin-${component}:${version}",
         openshift_deployment_type="origin",
     ))
 

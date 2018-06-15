@@ -4,7 +4,7 @@ metadata:
   name: template-service-broker-apiserver
 parameters:
 - name: IMAGE
-  value: openshift/origin-template-service-broker:latest
+  value: docker.io/openshift/origin-template-service-broker:latest
 - name: NAMESPACE
   value: openshift-template-service-broker
 - name: LOGLEVEL
