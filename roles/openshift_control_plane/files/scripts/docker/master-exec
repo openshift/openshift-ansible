@@ -14,13 +14,12 @@ if [[ ! -d /etc/origin/node/pods || -z "$( ls -A /etc/origin/node/pods )" ]]; th
   exec "${@:3}"
 fi
 
-# TODO: move to cri-ctl
-# TODO: short term hack for cri-o
+pod=$(crictl pods -l -q --label "openshift.io/component=${1}" --label "io.kubernetes.container.name=POD" 2>/dev/null)
+uid=$(crictl inspectp ${pod} 2>/dev/null | python -c 'import sys, json; print json.load(sys.stdin)["status"]["labels"]["io.kubernetes.pod.uid"]')
 
-uid=$(docker ps -l -a --filter "label=openshift.io/component=${1}" --filter "label=io.kubernetes.container.name=POD" --format '{{ .Label "io.kubernetes.pod.uid" }}')
 if [[ -z "${uid}" ]]; then
   echo "Component ${1} is stopped or not running" 1>&2
   exit 0
 fi
-container=$(docker ps -l -a -q --filter "label=io.kubernetes.pod.uid=${uid}" --filter "label=io.kubernetes.container.name=${2}")
-exec docker exec "${container}" "${@:3}"
+container=$(crictl ps -l -q --label "io.kubernetes.pod.uid=${uid}" --label "io.kubernetes.container.name=${2}" 2>/dev/null)
+exec crictl exec "${container}" "${@:3}"
