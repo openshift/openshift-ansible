@@ -4,10 +4,11 @@
   with_items:
   - api
   - controllers
-  when:
-  - not (master_api_service_status_changed | default(false) | bool)
-  notify:
-  - verify API server
+  retries: 5
+  delay: 5
+  register: result
+  until: result.rc == 0
+  notify: verify API server
 
 - name: verify API server
   # Using curl here since the uri module requires python-httplib2 and
