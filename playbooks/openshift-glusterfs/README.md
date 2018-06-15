@@ -85,6 +85,15 @@ This playbook is intended for admins who want to deploy a hosted Docker
 registry with GlusterFS backend storage on an existing OpenShift cluster. It
 has all the same requirements and behaviors as `config.yml`.
 
+## Playbook: uninstall.yml
+
+This playbook is intended to uninstall all GlusterFS related resources
+on an existing OpenShift cluster.
+It has all the same requirements and behaviors as `config.yml`.
+
+If the variable `openshift_storage_glusterfs_wipe` is set as True,
+it clears the backend data as well.
+
 ## Role: openshift_storage_glusterfs
 
 The bulk of the work is done by the `openshift_storage_glusterfs` role. This
@@ -99,12 +108,3 @@ See the documentation in the role's directory for further details.
 The `openshift_hosted` role recognizes `glusterfs` as a possible storage
 backend for a hosted docker registry. It will also, if configured, handle the
 swap of an existing registry's backend storage to a GlusterFS volume.
-
-## Playbook: uninstall.yml
-
-This playbook is intended to uninstall all GlusterFS related resources
-on an existing OpenShift cluster.
-It has all the same requirements and behaviors as `config.yml`.
-
-If the variable `openshift_storage_glusterfs_wipe` is set as True,
-it clears the backend data as well.
