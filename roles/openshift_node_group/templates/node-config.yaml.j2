@@ -20,6 +20,10 @@ imageConfig:
   latest: false
 iptablesSyncPeriod: "{{ openshift_node_iptables_sync_period }}"
 kubeletArguments:
+  kube-api-qps:
+  - "100"
+  kube-api-burst:
+  - "200"
 {% if openshift_use_crio | bool %}
   container-runtime:
   - remote
