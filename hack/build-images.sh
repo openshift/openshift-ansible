@@ -36,7 +36,7 @@ done
 
 # allow ENV to take precedent over switches
 prefix="${PREFIX:-$prefix}"
-version="${OS_TAG:-$version}" 
+version="${OS_TAG:-$version}"
 
 if [ "$help" = true ]; then
   echo "Builds the docker images for openshift-ansible"
@@ -44,12 +44,12 @@ if [ "$help" = true ]; then
   echo "Options: "
   echo "  --prefix=PREFIX"
   echo "  The prefix to use for the image names."
-  echo "  default: openshift/origin-ansible"
+  echo "  default: docker.io/openshift/origin-ansible"
   echo
   echo "  --version=VERSION"
   echo "  The version used to tag the image (can be a comma-separated list)"
   echo "  default: latest"
-  echo 
+  echo
   echo "  --no-cache"
   echo "  If set will perform the build without a cache."
   echo
