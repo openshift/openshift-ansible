@@ -328,8 +328,8 @@
       dest=/etc/sysconfig/docker
       regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
 
-  - name: Umount docker storage
-    shell: umount /var/lib/docker/volumes
+  - name: Umount docker storage if mounted
+    shell: umount /var/lib/docker
     register: umount_result
     failed_when: umount_result.rc != 0 and "not mounted" not in umount_result.stderr
 
