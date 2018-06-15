@@ -18,7 +18,7 @@ enableUnidling: true
 imageConfig:
   format: "{{ openshift_imageconfig_format }}"
   latest: false
-iptablesSyncPeriod: 30s
+iptablesSyncPeriod: "{{ openshift_node_iptables_sync_period }}"
 kubeletArguments:
 {% if openshift_use_crio | bool %}
   container-runtime:
