@@ -35,6 +35,7 @@
     dest: "{{ tempdir }}/templates/eventrouter-template.yaml"
   vars:
     node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) }}"
+    cpu_limit: "{{ openshift_logging_eventrouter_cpu_limit }}"
 
 - name: Create EventRouter template
   oc_obj:
@@ -54,6 +55,7 @@
       IMAGE: "{{ openshift_logging_eventrouter_image }}"
       REPLICAS: "{{ openshift_logging_eventrouter_replicas }}"
       CPU: "{{ openshift_logging_eventrouter_cpu_request }}"
+      CPU_LIMIT: "{{ openshift_logging_eventrouter_cpu_limit }}"
       MEMORY: "{{ openshift_logging_eventrouter_memory_limit }}"
       NAMESPACE: "{{ openshift_logging_eventrouter_namespace }}"
       SINK: "{{ openshift_logging_eventrouter_sink }}"
