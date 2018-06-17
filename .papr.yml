@@ -72,7 +72,7 @@ cluster:
     image: registry.fedoraproject.org/fedora:27
 env:
   PAPR_INVENTORY: .papr.all-in-one.inventory
-  PAPR_UPGRADE_FROM: "3.9"
+  PAPR_UPGRADE_FROM: "3.10"
   PAPR_RUN_UPDATE: "yes"
 ---
 inherit: true
