@@ -890,6 +890,7 @@ resources:
                 k8s_type: cns
                 cluster_id: {{ openshift_openstack_full_dns_domain }}
           type:        cns
+          openshift_node_group_name: node-config-compute
           image:       {{ openshift_openstack_cns_image }}
           flavor:      {{ openshift_openstack_cns_flavor }}
           key_name:    {{ openshift_openstack_keypair_name }}
