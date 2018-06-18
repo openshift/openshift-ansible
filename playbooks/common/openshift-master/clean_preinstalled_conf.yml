@@ -1,0 +1,20 @@
+---
+- name: Clean master hosts
+  hosts: oo_masters_to_config
+  tasks:
+  - name: Check for RPM generated config marker file .config_managed
+    stat:
+      path: /etc/origin/.config_managed
+    register: rpmgenerated_config
+
+  - name: Remove RPM generated config files if present
+    file:
+      path: "/etc/origin/{{ item }}"
+      state: absent
+    when:
+    - rpmgenerated_config.stat.exists == true
+    - deployment_type == 'openshift-enterprise'
+    with_items:
+    - master
+    - node
+    - .config_managed
