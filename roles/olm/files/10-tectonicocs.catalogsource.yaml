@@ -1,0 +1,19 @@
+##---
+# Source: olm/templates/10-tectonicocs.catalogsource.yaml
+
+#! validate-crd: ./deploy/chart/templates/05-catalogsource.crd.yaml
+#! parse-kind: CatalogSource
+apiVersion: app.coreos.com/v1alpha1
+kind: CatalogSource-v1
+metadata:
+  name: tectonic-ocs
+  namespace: operator-lifecycle-manager
+  annotations:
+    tectonic-operators.coreos.com/upgrade-strategy: 'DeleteAndRecreate'
+spec:
+  name: tectonic-ocs
+  sourceType: internal
+  configMap: tectonic-ocs
+  displayName: Tectonic Open Cloud Services
+  publisher: CoreOS, Inc.
+

@@ -51,6 +51,9 @@
 - import_playbook: ../../openshift-service-catalog/private/config.yml
   when: openshift_enable_service_catalog | default(true) | bool
 
+- import_playbook: ../../olm/private/config.yml
+  when: openshift_enable_olm | default(false) | bool
+
 - import_playbook: ../../openshift-management/private/config.yml
   when: openshift_management_install_management | default(false) | bool
 
