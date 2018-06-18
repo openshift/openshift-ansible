@@ -277,12 +277,12 @@
   - shell: systemctl daemon-reload
     changed_when: False
 
-  - name: restart container-engine
+  - name: Stop container-engine service
     service: name=container-engine state=stopped enabled=no
     failed_when: false
     register: container_engine
 
-  - name: restart docker
+  - name: Stop docker service
     service: name=docker state=stopped enabled=no
     failed_when: false
     when: not (container_engine is changed)
@@ -312,7 +312,6 @@
     - /etc/systemd/system/origin-node-dep.service
     - /etc/systemd/system/origin-node.service
     - /etc/systemd/system/origin-node.service.wants
-    - /var/lib/docker/*
 
   - name: Rebuild ca-trust
     command: update-ca-trust
@@ -329,21 +328,11 @@
       dest=/etc/sysconfig/docker
       regexp='(ADD_REGISTRY|BLOCK_REGISTRY|INSECURE_REGISTRY)=.*'
 
-  - name: Detect Docker storage configuration
-    shell: vgs -o name | grep docker
-    register: docker_vg_name
-    failed_when: false
-    changed_when: false
+  - name: Remove docker storage contents
+    shell: rm -rf /var/lib/docker
 
-  - name: Wipe out Docker storage contents
-    command: vgremove -f {{ item }}
-    with_items: "{{ docker_vg_name.stdout_lines }}"
-    when: docker_vg_name.rc == 0
-
-  - name: Wipe out Docker storage configuration
-    file: path=/etc/sysconfig/docker-storage state=absent
-    when: docker_vg_name.rc == 0
-
+  - name: Reset docker-storage-setup
+    shell: docker-storage-setup --reset
 
 - hosts: masters
   become: yes
