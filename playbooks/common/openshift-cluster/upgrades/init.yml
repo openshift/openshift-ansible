@@ -24,13 +24,15 @@
   - name: set currently installed version
     set_fact:
       openshift_currently_installed_version: "{{ openshift_master_installed_version }}"
-  - name: Check if iptables is running
-    command: systemctl status iptables
-    changed_when: false
-    failed_when: false
-    register: service_iptables_status
+
+  - name: Get iptable service details
+    systemd:
+      name: "iptables"
+    ignore_errors: true
+    register: iptables_service
 
   - name: Set fact os_firewall_use_firewalld FALSE for iptables
     set_fact:
       os_firewall_use_firewalld: false
-    when: "'Active: active' in service_iptables_status.stdout"
+    when:
+    - iptables_service.status.ActiveState != 'active'
