@@ -142,7 +142,7 @@
         msg: "openshift_image_tag was not defined. Falling back to v{{ openshift_version }}"
 
     - set_fact:
-        openshift_image_tag: v{{ openshift_version }}
+        openshift_image_tag: v{{ ( openshift_version ).split('-') }}
 
     when: openshift_image_tag is not defined
 
