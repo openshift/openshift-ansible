@@ -21,6 +21,8 @@
 
 - import_playbook: ../../openshift-checks/private/install.yml
 
+- import_playbook: ../../openshift-master/private/clean_preinstalled_conf.yml
+
 - import_playbook: ../../openshift-etcd/private/config.yml
 
 - import_playbook: ../../openshift-nfs/private/config.yml
