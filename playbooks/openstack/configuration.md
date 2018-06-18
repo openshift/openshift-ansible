@@ -14,6 +14,7 @@ Environment variables may also be used.
 * [OpenShift Configuration](#openshift-configuration)
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
+* [All-in-one Deployment Configuration](#all-in-one-deployment-configuration)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
@@ -268,6 +269,45 @@ console.openshift.cool.    10.40.128.137
 
 These must point to the publicly-accessible IP addresses of your
 master and infra nodes or preferably to the load balancers.
+
+
+## All-in-one Deployment Configuration
+
+If you want to deploy OpenShift on a single node (e.g. for quick evaluation),
+you can do so with a few configuration changes.
+
+First, set the node counts and labels like so in
+`inventory/group_vars/all.yml`:
+
+```
+openshift_openstack_num_masters: 1
+openshift_openstack_num_infra: 0
+openshift_openstack_num_nodes: 0
+
+openshift_openstack_master_group_name: node-config-all-in-one
+```
+
+Next, define the `node-config-all-in-one` group in `OSEv3.yml`:
+
+```
+openshift_node_groups:
+- name: node-config-all-in-one
+  labels:
+  - 'node-role.kubernetes.io/master=true'
+  - 'node-role.kubernetes.io/infra=true'
+  - 'node-role.kubernetes.io/compute=true'
+```
+
+Then run the deployment playbooks as usual. At the end, you will have an
+OpenShift running on a single OpenStack VM.
+
+The options here define a new OpenShift node group that has the labels for all
+three roles: master, infra and compute. And we create a single node and assign
+this new group to it.
+
+Note that the "all in one" node must be the "master". openshift-ansible
+expects at least one node in the `masters` Ansible group.
+
 
 
 ## Kuryr Networking Configuration
