@@ -5,6 +5,7 @@
     grafana_timeout: "{{ openshift_grafana_pod_timeout }}"
     grafana_prometheus_namespace: "{{ openshift_grafana_prometheus_namespace }}"
     grafana_prometheus_serviceaccount: "{{ openshift_grafana_prometheus_serviceaccount }}"
+    grafana_prometheus_route: "{{ openshift_grafana_prometheus_route }}"
     grafana_serviceaccount_name: "{{ openshift_grafana_serviceaccount_name }}"
     grafana_datasource_name: "{{ openshift_grafana_datasource_name }}"
     grafana_node_exporter: "{{ openshift_grafana_node_exporter }}"
