@@ -97,7 +97,7 @@ parameters:
     value: "registry-console"
   - description: 'Specify image version; e.g. for "registry.access.redhat.com/openshift3/registry-console:v3.10", set version "v3.10"'
     name: IMAGE_VERSION
-    value: "v3.11"
+    value: "v3.10"
   - description: "The public URL for the Openshift OAuth Provider, e.g. https://openshift.example.com:8443"
     name: OPENSHIFT_OAUTH_PROVIDER_URL
     required: true
