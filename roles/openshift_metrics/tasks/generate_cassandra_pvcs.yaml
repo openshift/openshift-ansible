@@ -1,23 +1,17 @@
 ---
-- name: Check to see if PVC already exists in actual namespace
+- name: Check to see if PVC already exists
   oc_obj:
     state: list
     kind: pvc
     name: "{{ openshift_metrics_cassandra_pvc_prefix }}-{{ metrics_pvc_index }}"
-    namespace: "{{openshift_metrics_project}}"
-  register: metrics_pvc
-
-# Migration process for PV to another namespace.
-- name: Check if we need to move cassandra PV to another namespace.
-  include_tasks: migrate_cassandra_pvcs.yaml
+    namespace: "{{ openshift_metrics_project }}"
+  register: _metrics_pvc
 
 # _metrics_pvc.results.results | length > 0 returns a false positive
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
-
-# No PVC exist (either new or old namespace), so it's a new installation
 - when:
-    - metrics_pvc.results.stderr is defined and not openshift_metrics_migrate_namespace
+    - _metrics_pvc.results.stderr is defined
   block:
     - name: generate hawkular-cassandra persistent volume claims
       template:
