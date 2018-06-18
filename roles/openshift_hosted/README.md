@@ -29,7 +29,7 @@ From this role:
 | openshift_hosted_registry_cert_expire_days | `730` (2 years)                     | Validity of the certificates in days. Works only with OpenShift version 1.5 (3.5) and later.                             |
 | openshift_hosted_registry_clusterip   | None                                     | Cluster IP for registry service                                                                                          |
 
-If you specify `openshift_hosted_registry_kind=glusterfs`, the following
+If you specify `openshift_hosted_registry_storage_kind=glusterfs`, the following
 variables also control configuration behavior:
 
 | Name                                         | Default value | Description                                                                  |
