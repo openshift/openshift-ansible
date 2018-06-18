@@ -13,7 +13,7 @@
 # We retry the controllers because the API may not be 100% initialized yet.
 - name: restart master controllers
   command: "systemctl restart {{ openshift_service_type }}-master-controllers"
-  retries: 3
+  retries: 5
   delay: 5
   register: result
   until: result.rc == 0
