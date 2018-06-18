@@ -11,6 +11,8 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
+- import_playbook: config-sebool.yml
+
 - name: Setup CFME
   hosts: oo_first_master
   pre_tasks:
