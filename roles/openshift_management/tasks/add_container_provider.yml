@@ -46,7 +46,7 @@
   oc_route:
     state: list
     name: httpd
-    namespace: openshift-management
+    namespace: "{{ openshift_management_project }}"
   register: route
 
 - name: Ensure the management service route is saved
