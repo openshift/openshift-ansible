@@ -31,6 +31,20 @@
   register: result
   until: result is succeeded
 
+- name: Install cri-tools
+  package:
+    name: "cri-tools"
+    state: latest
+
+- name: Configure cri-tools for dockershim
+  copy:
+    contents: |
+      runtime-endpoint: unix:///var/run/dockershim.sock
+      image-endpoint: unix:///var/run/dockershim.sock
+    dest: /etc/crictl.yaml
+  when:
+  - not (openshift_use_crio | bool)
+
 - block:
   # Extend the default Docker service unit file when using iptables-services
   - name: Ensure docker.service.d directory exists
