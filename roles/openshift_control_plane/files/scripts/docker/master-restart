@@ -34,4 +34,4 @@ if [[ -z "${child_container}" ]]; then
   echo "Component ${1} is already stopped" 1>&2
   exit 0
 fi
-exec timeout 60 docker wait $child_container
+exec timeout 60 docker rm -f $child_container
