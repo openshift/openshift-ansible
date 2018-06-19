@@ -1,0 +1,29 @@
+---
+- name: Install master services files
+  template:
+    src: "master-service.j2"
+    dest: "/etc/systemd/system/{{ openshift_service_type }}-master-{{ service }}.service"
+    owner: root
+    group: root
+    mode: 600
+  vars:
+    service: "{{ item.service }}"
+    service_description: "{{ item.service_description }}"
+  with_items:
+  - service: api
+    service_description: "OpenShift master API"
+  - service: controllers
+    service_description: "OpenShift master controllers"
+  - service: etcd
+    service_description: "OpenShift etcd"
+  notify:
+  - reload systemd units
+
+- name: Enable service files
+  service:
+    name: "{{ openshift_service_type }}-{{ item }}"
+    enabled: true
+  with_items:
+  - master-api
+  - master-controllers
+  - master-etcd

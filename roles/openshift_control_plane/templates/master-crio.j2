@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -euo pipefail
+
+pods_dir=/etc/origin/node/pods
+pods_disabled_dir=/etc/origin/node/pods.disabled
+
+static_pod_file={{static_pod_filename}}.yaml
+
+# Make sure both directories exist
+mkdir -p $pods_dir $pods_disabled_dir
+
+function get_container_values() {
+    pod=$(crictl pods -l -q --label "openshift.io/component={{ name }}" --label "io.kubernetes.container.name=POD" 2>/dev/null)
+    uid=$(crictl inspectp ${pod} 2>/dev/null | python -c 'import sys, json; print json.load(sys.stdin)["status"]["labels"]["io.kubernetes.pod.uid"]')
+    container=$(crictl ps -l -q --label "io.kubernetes.pod.uid=${uid}" --label "io.kubernetes.container.name={{ name }}" 2>/dev/null)
+}
+
+
+# See how we were called.
+case "$1" in
+start)
+    # See if {{ name }} is started
+    if [ -f "${pods_dir}/${static_pod_file}" ]; then
+        echo "{{ name }} already started"
+        exit 0
+    fi
+
+    # Start the {{ name }} pod
+    mv "${pods_disabled_dir}/${static_pod_file}" "${pods_dir}"
+
+    sleep 1 # avoid race condition
+
+    # Wait for the pod to come up
+    while ! crictl pods -l -q --label "openshift.io/component={{ name }}" &> /dev/null ; do
+        sleep 1
+    done
+
+    get_container_values
+    crictl logs --follow "$container"
+    exit $?
+    ;;
+
+stop)
+    # See if {{ name }} is started
+    if [ -f "${pods_disabled_dir}/${static_pod_file}" ]; then
+        echo "{{ name }} already stopped"
+        exit 0
+    fi
+
+    get_container_values
+
+    # Start the {{ name }} pod
+    mv "${pods_dir}/${static_pod_file}" "${pods_disabled_dir}"
+
+    exec timeout 600 crictl stopp "${pod}" >/dev/null
+    ;;
+
+# No status or restart as systemd handles those for us.
+
+*)
+    echo $"Usage: $0 {start|stop}"
+    exit 2
+esac

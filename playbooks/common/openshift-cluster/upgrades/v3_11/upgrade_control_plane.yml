@@ -62,6 +62,10 @@
     import_role:
       name: openshift_control_plane
       tasks_from: static_shim
+  - name: Place systemd shims on the master before we begin the upgrade
+    import_role:
+      name: openshift_control_plane
+      tasks_from: systemd_units
 
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config

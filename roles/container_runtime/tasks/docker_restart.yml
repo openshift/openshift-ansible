@@ -7,11 +7,13 @@
   delay: 30
 
 - name: Restart static master services
-  command: /usr/local/bin/master-restart "{{ item }}"
+  service:
+    name: "{{ item }}"
+    state: restarted
   with_items:
-  - api
-  - controllers
-  - etcd
+  - "{{ openshift_service_type }}-master-api"
+  - "{{ openshift_service_type }}-master-controllers"
+  - "{{ openshift_service_type }}-master-etcd"
   failed_when: false
 
 - name: Restart node service
