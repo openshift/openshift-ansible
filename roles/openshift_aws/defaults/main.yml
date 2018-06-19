@@ -29,6 +29,7 @@ openshift_aws_ami_encrypt: False
 openshift_aws_ami_copy_src_region: "{{ openshift_aws_region }}"
 openshift_aws_ami_name: openshift-gi
 openshift_aws_base_ami_name: ami_base
+openshift_aws_instance_type: m4.xlarge
 
 openshift_aws_launch_config_bootstrap_token: ''
 
@@ -191,7 +192,7 @@ openshift_aws_scale_group_health_check:
 openshift_aws_master_group_config:
   # The 'master' key is always required here.
   master:
-    instance_type: "{{ openshift_aws_master_group_instance_type | default('m4.xlarge') }}"
+    instance_type: "{{ openshift_aws_master_group_instance_type | default(openshift_aws_instance_type) }}"
     volumes: "{{ openshift_aws_node_group_config_master_volumes }}"
     health_check: "{{ openshift_aws_scale_group_health_check }}"
     min_size: "{{ openshift_aws_master_group_min_size | default(3) }}"
@@ -208,7 +209,7 @@ openshift_aws_master_group_config:
 openshift_aws_node_group_config:
   # The 'compute' key is always required here.
   compute:
-    instance_type: "{{ openshift_aws_compute_group_instance_type | default('m4.xlarge') }}"
+    instance_type: "{{ openshift_aws_compute_group_instance_type | default(openshift_aws_instance_type) }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
     health_check: "{{ openshift_aws_scale_group_health_check }}"
     min_size: "{{ openshift_aws_compute_group_min_size | default(3) }}"
@@ -221,7 +222,7 @@ openshift_aws_node_group_config:
     policy_json: "{{ openshift_aws_iam_node_role_policy_json | default(openshift_aws_iam_role_policy_json) }}"
   # The 'infra' key is always required here.
   infra:
-    instance_type: "{{ openshift_aws_infra_group_instance_type | default('m4.xlarge') }}"
+    instance_type: "{{ openshift_aws_infra_group_instance_type | default(openshift_aws_instance_type) }}"
     volumes: "{{ openshift_aws_node_group_config_node_volumes }}"
     health_check: "{{ openshift_aws_scale_group_health_check }}"
     min_size: "{{ openshift_aws_infra_group_min_size | default(2) }}"
