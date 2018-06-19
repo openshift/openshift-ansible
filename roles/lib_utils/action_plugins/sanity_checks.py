@@ -275,6 +275,8 @@ class ActionModule(ActionBase):
             # If we don't find any identity_providers, nothing for us to do.
             return None
         old_keys = ('file', 'fileName', 'file_name', 'filename')
+        if not isinstance(idps, list):
+            raise errors.AnsibleModuleError("| not a list")
         for idp in idps:
             if idp['kind'] == 'HTPasswdPasswordIdentityProvider':
                 for old_key in old_keys:
