@@ -157,8 +157,9 @@ openshift_aws_master_group:
   group: master
   tags:
     host-type: master
-    sub-host-type: master
+    sub-host-type: default
     runtime: docker
+    openshift-node-group-config: node-config-master
 
 openshift_aws_node_groups:
 - name: "{{ openshift_aws_clusterid }} compute group"
@@ -167,6 +168,7 @@ openshift_aws_node_groups:
     host-type: node
     sub-host-type: compute
     runtime: docker
+    openshift-node-group-config: node-config-compute
 
 - name: "{{ openshift_aws_clusterid }} infra group"
   group: infra
@@ -174,11 +176,7 @@ openshift_aws_node_groups:
     host-type: node
     sub-host-type: infra
     runtime: docker
-
-openshift_aws_node_group_mappings:
-  master: 'node-config-master'
-  compute: 'node-config-compute'
-  infra: 'node-config-infra'
+    openshift-node-group-config: node-config-infra
 
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []
