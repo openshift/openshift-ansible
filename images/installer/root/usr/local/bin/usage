@@ -28,6 +28,6 @@ docker run -tu `id -u` \
        -e INVENTORY_FILE=/tmp/inventory \
        -e OPTS="-v" \
        -e PLAYBOOK_FILE=playbooks/byo/openshift_facts.yml \
-       openshift/origin-ansible
+       docker.io/openshift/origin-ansible
 
 EOF

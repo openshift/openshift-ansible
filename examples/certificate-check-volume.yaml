@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: openshift-ansible
-        image: openshift/origin-ansible
+        image: docker.io/openshift/origin-ansible
         env:
         - name: PLAYBOOK_FILE
           value: playbooks/openshift-checks/certificate_expiry/html_and_json_timestamp.yaml

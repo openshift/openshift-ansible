@@ -12,7 +12,7 @@ metadata:
     openshift.io/provider-display-name: Red Hat, Inc.
 parameters:
 - name: IMAGE
-  value: openshift/origin-web-console:latest
+  value: docker.io/openshift/origin-web-console:latest
 - name: NAMESPACE
   # This namespace cannot be changed. Only `openshift-web-console` is supported.
   value: openshift-web-console
