@@ -44,7 +44,7 @@
         line: "{{ item.line }}"
         regexp: "{{ item.regexp }}"
       with_items:
-      - line: "BOOTSTRAP_CONFIG_NAME=node-config-{{ openshift_group_type }}"
+      - line: "BOOTSTRAP_CONFIG_NAME={{ openshift_node_config_name }}"
         regexp: "^BOOTSTRAP_CONFIG_NAME=.*"
 {% endraw %}
 
