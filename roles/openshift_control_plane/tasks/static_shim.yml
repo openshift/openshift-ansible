@@ -1,16 +1,21 @@
 ---
 # TODO: package this?
-- name: Copy static master scripts
+- name: Copy static master exec scripts
   copy:
-    src: "{{ item }}"
+    src: "scripts/{{ l_runtime }}/master-exec"
     dest: "/usr/local/bin/"
     mode: 0500
-  with_items:
-  - "scripts/{{ l_runtime }}/master-exec"
-  - "scripts/{{ l_runtime }}/master-logs"
-  - "scripts/{{ l_runtime }}/master-restart"
   vars:
     l_runtime: "{{ 'crio' if openshift_use_crio | default(False) else 'docker' }}"
+
+- name: Copy needed master api scripts
+  template:
+    src: "{{ item }}.j2"
+    dest: "/usr/local/bin/{{ openshift_service_type }}-{{ item }}"
+  with_items:
+  - master-api
+  - master-controllers
+  - master-etcd
 
 - name: Ensure cri-tools installed
   package:

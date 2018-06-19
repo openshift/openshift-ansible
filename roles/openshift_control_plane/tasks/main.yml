@@ -32,6 +32,9 @@
 - name: Prepare static pod scripts
   import_tasks: static_shim.yml
 
+- name: Prepare systemd scripts
+  import_tasks: systemd_units.yml
+
 - name: Create r_openshift_master_data_dir
   file:
     path: "{{ r_openshift_master_data_dir }}"
@@ -280,22 +283,19 @@
   - debug:
       msg: "{{ logs_node.stdout_lines }}"
   - name: Get API logs
-    command: >
-      /usr/local/bin/master-logs api api
+    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-master-api
     register: control_plane_logs_api
     ignore_errors: true
   - debug:
       msg: "{{ control_plane_logs_api.stdout_lines }}"
   - name: Get controllers logs
-    command: >
-      /usr/local/bin/master-logs controllers controllers
+    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-master-controllers
     register: control_plane_logs_controllers
     ignore_errors: true
   - debug:
       msg: "{{ control_plane_logs_controllers.stdout_lines }}"
   - name: Get etcd logs
-    command: >
-      /usr/local/bin/master-logs etcd etcd
+    command: journalctl --no-pager -n 300 -u {{ openshift_service_type }}-master-etcd
     register: control_plane_logs_etcd
     when: inventory_hostname in groups['oo_etcd_to_config']
     ignore_errors: true
