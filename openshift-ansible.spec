@@ -9,8 +9,8 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.0
-Release:        0.63.0%{?dist}
+Version:        3.11.0
+Release:        0.1.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,118 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Jun 15 2018 Scott Dodson <sdodson@redhat.com> 3.11.0-0.1.0
+- Initial 3.11 support (sdodson@redhat.com)
+- bump to 3.11 (tbielawa@redhat.com)
+- Branch for v3.11 (ccoleman@redhat.com)
+- Standardize master restart (rteague@redhat.com)
+- Enable monitoring to scrape across namespaces (ironcladlou@gmail.com)
+- Fix to pass quoted unsafe strings (with characters like *,<,%%) correctly to
+  kubelet (avesh.ncsu@gmail.com)
+- Bug 1584609 - Update iptablesSyncPeriod in node-config.yaml
+  (rteague@redhat.com)
+- Bug 1591186 - Skip version and sanity checks for openshift_node_group.yml
+  (rteague@redhat.com)
+- registry-console: limit pods to masters (vrutkovs@redhat.com)
+- Align node startup async tasks with the ExecStartTimeout value
+  (sdodson@redhat.com)
+- bug 1572493. Update default logging NS in openshift_health_checker
+  (jcantril@redhat.com)
+- Fix minor indentation (rteague@redhat.com)
+- azure: pass image_name into tasks/create_blob_from_vm.yml
+  (jminter@redhat.com)
+- azure: tag image as valid=true, not valid=True (jminter@redhat.com)
+- azure: don't try to print deployment failure message when there isn't one
+  (jminter@redhat.com)
+- Azure: use empty dict if input image has no tags (pschiffe@redhat.com)
+- No code in openshift-ansible should be using CONFIG_FILE
+  (ccoleman@redhat.com)
+- Add support for hostpath persistent volume definitions (dmsimard@redhat.com)
+- Revert "Make SDN read config file from sysconfig" (ccoleman@redhat.com)
+- Sync daemonset should start after node configmaps are created to avoid race
+  conditions (vrutkovs@redhat.com)
+- Switch papr to use our new composite groups (sdodson@redhat.com)
+- fix typo to leave only one (wjiang@redhat.com)
+- Fix hostname check failure message (mgugino@redhat.com)
+- Add retries to SCC check on upgrade (rteague@redhat.com)
+- mount host signature lookaside configuration (bparees@redhat.com)
+- checks for . (erj826@bu.edu)
+- Adding etcd image variables to fix azure deployments. (kwoodson@redhat.com)
+- Add master-infra and all-in-one node-configs (sdodson@redhat.com)
+- Fix the docs, add additional .parr file description (teleyic@gmail.com)
+- Move openshift_node_group to private play (mgugino@redhat.com)
+- Don't restart dnsmasq during upgrade (rteague@redhat.com)
+- Fix ansible_service_broker role, needs openshift_facts (rteague@redhat.com)
+- Migrate HPA scale target refs in storage migration (sross@redhat.com)
+- fixes (sdodson@redhat.com)
+- Add a bit of detail about how to get configmaps during upgrade
+  (sdodson@redhat.com)
+- Deploy shim scripts based on the runtime in use (sdodson@redhat.com)
+- Upgrade cri-o (sdodson@redhat.com)
+- Fix quoting (sdodson@redhat.com)
+- roles: openshift_control_plane: move docker scripts to crictl
+  (runcom@redhat.com)
+- Install cri-tools even when crio isn't in use (sdodson@redhat.com)
+- suggestions (sdodson@redhat.com)
+- GlusterFS: Add GlusterFS hosts to openshift-hosted/config.yml playbook
+  (jarrpa@redhat.com)
+- Add some openshift_node_group and openshift_node_group_name docs
+  (sdodson@redhat.com)
+- Fix sanity_checks typos (mgugino@redhat.com)
+- Upgrade router and registry only when these are managed (vrutkovs@redhat.com)
+- [WIP] Azure: calculate input image for base and node image
+  (pschiffe@redhat.com)
+- Migrate hawkular metrics to a new namespace (ruben.vp8510@gmail.com)
+- Set openshift_node_group_name for AWS hosts. (abutcher@redhat.com)
+- Device_type is deprecated for block devices. Use volume_type instead.
+  (abutcher@redhat.com)
+- Fix flaky use of `oc process` (ironcladlou@gmail.com)
+- Bug 1589015 - Switch to rolling deployment for web console
+  (spadgett@redhat.com)
+- Move openshift_master_manage_htpasswd into openshift_facts
+  (sdodson@redhat.com)
+- Bug 1586197 - Increase async timeout (rteague@redhat.com)
+- Make the number of service catalog retries configurable (dyasny@gmail.com)
+- Remove default selector from sample inventory (tomas@sedovic.cz)
+- Check for node-group configmaps during upgrades (mgugino@redhat.com)
+- Fix the flake8 and pylint errors (tomas@sedovic.cz)
+- Add kuryr label examples to the sample inventory (tomas@sedovic.cz)
+- Remove podman from install it creates problems (sdodson@redhat.com)
+- Set openshift_node_group_name in OpenStack inventory (tomas@sedovic.cz)
+- [WIP] azure - do not tag node images as valid automatically
+  (pschiffe@redhat.com)
+- Add placeholder for openshift_node_group play (mgugino@redhat.com)
+- Check for undefined node_output.results (sdodson@redhat.com)
+- Updating fluentd label and wait to be in a single shell rather than running a
+  script from /tmp (ewolinet@redhat.com)
+- Add Luis Tomas to Kuryr and OpenStack owners (tomas@sedovic.cz)
+- add task to import_role (davis.phillips@gmail.com)
+- remove svc creation and master config from base tasks in vsphere cloud
+  provider (davis.phillips@gmail.com)
+- azure: add no_log: true to acs-engine deploy task (jminter@redhat.com)
+- allow node config sync controller to handle multiple node labels
+  (jminter@redhat.com)
+- Fix multimaster OpenStack deployment failure (tomas@sedovic.cz)
+- Force openshift_node_group_name for all nodes (mgugino@redhat.com)
+- Update ansible_service_broker_node_selector to new version
+  (mgugino@redhat.com)
+- azure: always build images using ssd-backed VM (jminter@redhat.com)
+- azure: ensure cloud provider config is laid down in bootstrap node config
+  (jminter@redhat.com)
+- Ensure repos only run during prerequisites.yml (mgugino@redhat.com)
+- dockergc: change image name to ose-control-plane (gscrivan@redhat.com)
+- Remove openshift_dns_ip configuration, not valid in 3.10 (sdodson@redhat.com)
+- Do not force-terminate etcd (kargakis@protonmail.ch)
+- typo (faust64@gmail.com)
+- Remove unused registry-console's imagestream (nakayamakenjiro@gmail.com)
+- Ensure packages are latest (sdodson@redhat.com)
+- Install cri-tools and podman (sdodson@redhat.com)
+- Generalized storage setup for nodes (cwilkers@redhat.com)
+- azure: format data disk for docker use (jminter@redhat.com)
+- update azure OWNERS (jminter@redhat.com)
+- Added container_manage_cgroup in order for systemd to run in pods due to
+  update in selinux policy (dluong@redhat.com)
+
 * Wed Jun 06 2018 Justin Pierce <jupierce@redhat.com> 3.10.0-0.63.0
 - Bug 1586366 - Use include_tasks for dynamic task file includes
   (rteague@redhat.com)

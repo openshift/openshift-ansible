@@ -40,7 +40,7 @@
   service:
     name: "{{ openshift_service_type }}-node"
     state: started
-  async: 100
+  async: 300
   poll: 0
   register: node_service
   failed_when: false
@@ -58,6 +58,7 @@
   register: job_result
   until: job_result.finished
   retries: 30
+  delay: 10
 
 - name: Wait for master API to come back online
   wait_for:

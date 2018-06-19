@@ -79,11 +79,11 @@
   - name: Prepare the bootstrap node config on masters for self-hosting
     import_role:
       name: openshift_node_group
-      tasks_from: bootstrap
+      tasks_from: bootstrap.yml
   - name: Have the masters automatically pull their configuration
     import_role:
       name: openshift_node_group
-      tasks_from: bootstrap_config
+      tasks_from: bootstrap_config.yml
 
   roles:
   - role: openshift_master_facts
@@ -104,14 +104,9 @@
   - role: calico_master
     when: openshift_use_calico | default(false) | bool
   tasks:
-  - name: Set up automatic node config reconcilation
-    run_once: True
-    import_role:
-      name: openshift_node_group
-      tasks_from: sync
   - import_role:
       name: kuryr
-      tasks_from: master
+      tasks_from: master.yaml
     when: openshift_use_kuryr | default(false) | bool
 
   - name: setup bootstrap settings
@@ -133,6 +128,11 @@
   tasks:
   - name: setup bootstrap settings
     import_tasks: tasks/enable_bootstrap_config.yml
+  - name: setup automatic node config reconcilation
+    run_once: True
+    import_role:
+      name: openshift_node_group
+      tasks_from: sync.yml
 
 - name: Ensure inventory labels are assigned to masters
   hosts: oo_masters_to_config

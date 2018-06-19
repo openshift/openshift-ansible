@@ -1,0 +1,120 @@
+---
+#
+# Control Plane Upgrade Playbook
+#
+# Upgrades masters and Docker (only on standalone etcd hosts)
+#
+# This upgrade does not include:
+# - node service running on masters
+# - docker running on masters
+# - node service running on dedicated nodes
+#
+# You can run the upgrade_nodes.yml playbook after this to upgrade these components separately.
+#
+- import_playbook: ../init.yml
+  vars:
+    l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_base_packages_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+
+- name: Configure the upgrade target for the common upgrade tasks 3.11
+  hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config
+  tasks:
+  - set_fact:
+      openshift_upgrade_target: '3.11'
+      openshift_upgrade_min: '3.10'
+      openshift_release: '3.11'
+
+- import_playbook: ../pre/config.yml
+  # These vars a meant to exclude oo_nodes from plays that would otherwise include
+  # them by default.
+  vars:
+    l_openshift_version_set_hosts: "oo_etcd_to_config:oo_masters_to_config:!oo_first_master"
+    l_upgrade_repo_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_upgrade_no_proxy_hosts: "oo_masters_to_config"
+    l_upgrade_health_check_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_upgrade_verify_targets_hosts: "oo_masters_to_config"
+    l_upgrade_docker_target_hosts: "oo_masters_to_config:oo_etcd_to_config"
+    l_upgrade_excluder_hosts: "oo_masters_to_config"
+    openshift_protect_installed_version: False
+
+# Need to run sanity checks after version has been run.
+- import_playbook: ../../../../init/sanity_checks.yml
+  vars:
+    # oo_lb_to_config might not be present; Can't use !oo_nodes because masters are nodes.
+    l_sanity_check_hosts: "{{ groups['oo_etcd_to_config'] | union(groups['oo_masters_to_config']) | union(groups['oo_lb_to_config'] | default([]) ) }}"
+
+- name: Flag pre-upgrade checks complete for hosts without errors
+  hosts: oo_masters_to_config:oo_etcd_to_config
+  tasks:
+  - set_fact:
+      pre_upgrade_complete: True
+
+- import_playbook: label_nodes.yml
+
+# To upgrade, we need masters to be capable of signing certificates
+- hosts: oo_masters
+  serial: 1
+  tasks:
+  - name: Enable core bootstrapping components
+    include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap.yml
+  - name: Place shim commands on the masters before we begin the upgrade
+    import_role:
+      name: openshift_control_plane
+      tasks_from: static_shim
+
+# TODO: need to verify settings about the bootstrap configs
+# 1. Does network policy match the master config
+
+- name: Configure components that must be available prior to upgrade
+  hosts: oo_first_master
+  pre_tasks:
+  - name: Enable core bootstrapping components
+    include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap_config.yml
+  - name: Ensure the master bootstrap config has bootstrapping config
+    import_role:
+      name: openshift_node_group
+      tasks_from: upgrade
+  - name: Enable node configuration reconciliation
+    import_role:
+      name: openshift_node_group
+      tasks_from: sync
+  roles:
+  - role: openshift_sdn
+    when: openshift_use_openshift_sdn | default(True) | bool
+
+- name: Update master nodes
+  hosts: oo_masters
+  serial: 1
+  tasks:
+  - import_role:
+      name: openshift_node
+      tasks_from: upgrade_pre
+  - import_role:
+      name: openshift_node
+      tasks_from: upgrade
+
+- import_playbook: ../upgrade_control_plane.yml
+  vars:
+    openshift_release: '3.11'
+
+- import_playbook: ../post_control_plane.yml
+
+- hosts: oo_masters
+  tasks:
+  - import_role:
+      name: openshift_web_console
+      tasks_from: remove_old_asset_config
+
+# This is a one time migration. No need to save it in the 3.11.
+# https://bugzilla.redhat.com/show_bug.cgi?id=1565736
+- hosts: oo_first_master
+  tasks:
+  - import_role:
+      name: openshift_hosted
+      tasks_from: registry_service_account.yml
+    when: openshift_hosted_manage_registry | default(True) | bool
+  - import_role:
+      name: openshift_hosted
+      tasks_from: remove_legacy_env_variables.yml
+    when: openshift_hosted_manage_registry | default(True) | bool

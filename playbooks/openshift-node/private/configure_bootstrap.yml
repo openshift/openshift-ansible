@@ -4,13 +4,13 @@
   tasks:
   - import_role:
       name: openshift_node
-      tasks_from: bootstrap
+      tasks_from: bootstrap.yml
   - import_role:
       name: openshift_node_group
-      tasks_from: bootstrap
+      tasks_from: bootstrap.yml
   - name: Have the nodes automatically pull their configuration
     import_role:
       name: openshift_node_group
-      tasks_from: bootstrap_config
+      tasks_from: bootstrap_config.yml
   - set_fact:
       openshift_is_bootstrapped: True

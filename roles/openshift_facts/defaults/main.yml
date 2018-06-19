@@ -55,8 +55,10 @@ openshift_hosted_registry_storage_glusterfs_readOnly: False
 openshift_hosted_registry_storage_glusterfs_swap: False
 openshift_hosted_registry_storage_glusterfs_swapcopy: True
 openshift_hosted_registry_storage_glusterfs_ips: []
+openshift_hosted_registry_storage_hostpath_path: /var/lib/openshift_volumes
+# Default to ReadWriteOnce if using hostpath, else default to ReadWriteMany
 openshift_hosted_registry_storage_access_modes:
-  - 'ReadWriteMany'
+  - "{{ (openshift_hosted_registry_storage_kind == 'hostpath') | ternary('ReadWriteOnce', 'ReadWriteMany') }}"
 
 openshift_logging_storage_nfs_directory: '/exports'
 openshift_logging_storage_nfs_options: '*(rw,root_squash)'
@@ -129,5 +131,13 @@ openshift_node_groups:
   - name: node-config-compute
     labels:
       - 'node-role.kubernetes.io/compute=true'
+    edits: []
+  - name: node-config-master-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-all-in-one
+    labels:
+      - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true,node-role.kubernetes.io/compute=true'
     edits: []
 openshift_master_manage_htpasswd: True

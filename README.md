@@ -103,6 +103,11 @@ each node group defined in `openshift_node_groups` and they're named
 to note that the configmap is also the authoritative definition of node labels,
 the old `openshift_node_labels` value is effectively ignored.
 
+There are also two configmaps that label nodes into multiple roles, these are
+not recommended for production clusters, however they're named
+`node-config-all-in-one` and `node-config-master-infra` if you'd like to use
+them to deploy non production clusters.
+
 The default set of node groups is defined in
 [roles/openshift_facts/defaults/main.yml] like so
 
@@ -119,6 +124,14 @@ openshift_node_groups:
   - name: node-config-compute
     labels:
       - 'node-role.kubernetes.io/compute=true'
+    edits: []
+  - name: node-config-master-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-all-in-one
+    labels:
+      - 'node-role.kubernetes.io/infra=true,node-role.kubernetes.io/master=true,node-role.kubernetes.io/compute=true'
     edits: []
 ```
 

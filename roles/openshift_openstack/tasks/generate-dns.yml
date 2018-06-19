@@ -3,19 +3,32 @@
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[item]['ansible_hostname'] + openshift_openstack_private_hostname_suffix + '.' + openshift_openstack_full_dns_domain, 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
+  when:
+    - hostvars[item]['private_v4'] is defined
+    - hostvars[item]['private_v4'] is not none
+    - hostvars[item]['private_v4'] | string
 
 - name: "Add wildcard records to the private A records for infrahosts"
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': '*.' + hostvars[groups.masters[0]].openshift_master_default_subdomain, 'ip': hostvars[item]['private_v4'] } ] }}"
   with_items: "{{ groups['infra_hosts'] }}"
-  when: openshift_openstack_public_router_ip is defined
+  when:
+    - groups.masters
+    - hostvars[groups.masters[0]].openshift_master_default_subdomain is defined
+    - openshift_openstack_public_router_ip is defined
+    - openshift_openstack_public_router_ip is not none
+    - openshift_openstack_public_router_ip | string
 
+- debug: var=openshift_openstack_private_api_ip
 - name: "Add public master cluster hostname records to the private A records"
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[groups.masters[0]].openshift_master_cluster_public_hostname, 'ip': openshift_openstack_private_api_ip } ] }}"
   when:
+    - groups.masters
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
     - openshift_openstack_private_api_ip is defined
+    - openshift_openstack_private_api_ip is not none
+    - openshift_openstack_private_api_ip | string
 
 - name: "Set the private DNS server to use the external value (if provided)"
   set_fact:
@@ -39,24 +52,35 @@
         entries: "{{ private_records }}"
   when:
     - openshift_openstack_external_nsupdate_keys['private'] is defined
+    - private_records is defined
 
 - name: "Generate list of public A records"
   set_fact:
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[item]['ansible_hostname'] + openshift_openstack_public_hostname_suffix + '.' + openshift_openstack_full_dns_domain, 'ip': hostvars[item]['public_v4'] } ] }}"
   with_items: "{{ groups['cluster_hosts'] }}"
-  when: hostvars[item]['public_v4'] is defined
+  when:
+    - hostvars[item]['public_v4'] is defined
+    - hostvars[item]['public_v4'] | string
 
 - name: "Add wildcard record to the public A records"
   set_fact:
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'fqdn': '*.' + hostvars[groups.masters[0]].openshift_master_default_subdomain, 'ip': openshift_openstack_public_router_ip } ] }}"
-  when: openshift_openstack_public_router_ip is defined
+  when:
+    - groups.masters
+    - hostvars[groups.masters[0]].openshift_master_default_subdomain is defined
+    - openshift_openstack_public_router_ip is defined
+    - openshift_openstack_public_router_ip is not none
+    - openshift_openstack_public_router_ip | string
 
 - name: "Add the public API entry point record"
   set_fact:
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[groups.masters[0]].openshift_master_cluster_public_hostname, 'ip': openshift_openstack_public_api_ip } ] }}"
   when:
+    - groups.masters
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
     - openshift_openstack_public_api_ip is defined
+    - openshift_openstack_public_api_ip is not none
+    - openshift_openstack_public_api_ip | string
 
 - name: "Set the public DNS server details to use the external value (if provided)"
   set_fact:
@@ -79,6 +103,7 @@
         entries: "{{ public_records }}"
   when:
     - openshift_openstack_external_nsupdate_keys['public'] is defined
+    - public_records is defined
 
 
 - name: "Generate the final openshift_openstack_dns_records"

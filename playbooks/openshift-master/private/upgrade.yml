@@ -66,6 +66,7 @@
       migrate storage --include=* --confirm
     register: l_pb_upgrade_control_plane_pre_upgrade_storage
     when: openshift_upgrade_pre_storage_migration_enabled | default(true) | bool
+    until: l_pb_upgrade_control_plane_pre_upgrade_storage.rc == 0
     failed_when:
     - l_pb_upgrade_control_plane_pre_upgrade_storage.rc != 0
     - openshift_upgrade_pre_storage_migration_fatal | default(true) | bool
@@ -96,7 +97,7 @@
   tasks:
   - import_role:
       name: openshift_cloud_provider
-      tasks_from: vsphere-svc
+      tasks_from: vsphere-svc.yml
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'
@@ -118,12 +119,12 @@
 
   - import_role:
       name: openshift_control_plane
-      tasks_from: upgrade
+      tasks_from: upgrade.yml
 
   - name: update vsphere provider master config
     import_role:
       name: openshift_cloud_provider
-      tasks_from: update-vsphere
+      tasks_from: update-vsphere.yml
     when:
     - openshift_cloudprovider_kind is defined
     - openshift_cloudprovider_kind == 'vsphere'
@@ -201,6 +202,7 @@
     run_once: true
     register: l_pb_upgrade_control_plane_post_upgrade_storage
     when: openshift_upgrade_post_storage_migration_enabled | default(true) | bool
+    until: l_pb_upgrade_control_plane_post_upgrade_storage.rc == 0
     failed_when:
     - l_pb_upgrade_control_plane_post_upgrade_storage.rc != 0
     - openshift_upgrade_post_storage_migration_fatal | default(false) | bool

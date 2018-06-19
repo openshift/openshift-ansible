@@ -9,7 +9,7 @@ metadata:
       It expects that OVS is running on the node.
     image.openshift.io/triggers: |
       [
-        {"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sdn\")].image"}
+        {"from":{"kind":"ImageStreamTag","name":"node:v3.11"},"fieldPath":"spec.template.spec.containers[?(@.name==\"sdn\")].image"}
       ]
 spec:
   selector:
@@ -37,7 +37,7 @@ spec:
       # It relies on an up to date node-config.yaml being present.
       - name: sdn
         image: " "
-        command:
+        command: 
         - /bin/bash
         - -c
         - |
@@ -63,23 +63,7 @@ spec:
           # if the node config doesn't exist yet, wait until it does
           retries=0
           while true; do
-            file=/etc/sysconfig/origin-node
-            if [[ -f /etc/sysconfig/atomic-openshift-node ]]; then
-              file=/etc/sysconfig/atomic-openshift-node
-            elif [[ -f /etc/sysconfig/origin-node ]]; then
-              file=/etc/sysconfig/origin-node
-            else
-              echo "info: Waiting for the node sysconfig file to be created" 2>&1
-              sleep 15 & wait
-              continue
-            fi
-            config_file="$(sed -nE 's|^CONFIG_FILE=([^#].+)|\1|p' "${file}" | head -1)"
-            if [[ -z "${config_file}" ]]; then
-              echo "info: Waiting for CONFIG_FILE to be set" 2>&1
-              sleep 15 & wait
-              continue
-            fi
-            if [[ ! -f ${config_file} ]]; then
+            if [[ ! -f /etc/origin/node/node-config.yaml ]]; then
               echo "warning: Cannot find existing node-config.yaml, waiting 15s ..." 2>&1
               sleep 15 & wait
               (( retries += 1 ))
@@ -118,7 +102,7 @@ spec:
           oc config --config=/tmp/kubeconfig set-credentials sa "--token=$( cat /var/run/secrets/kubernetes.io/serviceaccount/token )"
           oc config --config=/tmp/kubeconfig set-context "$( oc config --config=/tmp/kubeconfig current-context )" --user=sa
           # Launch the network process
-          exec openshift start network --config=${config_file} --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
+          exec openshift start network --config=/etc/origin/node/node-config.yaml --kubeconfig=/tmp/kubeconfig --loglevel=${DEBUG_LOGLEVEL:-2}
 
         securityContext:
           runAsUser: 0

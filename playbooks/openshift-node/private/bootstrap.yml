@@ -1,15 +1,15 @@
 ---
-- name: Node Preparation Checkpoint Start
+- name: Node Bootstrap Preparation Checkpoint Start
   hosts: all
   gather_facts: false
   tasks:
-  - name: Set Node preparation 'In Progress'
+  - name: Set Node Bootstrap Preparation 'In Progress'
     run_once: true
     set_stats:
       data:
-        installer_phase_node:
-          title: "Node Preparation"
-          playbook: "(no entry point playbook)"
+        installer_phase_node_bootstrap:
+          title: "Node Bootstrap Preparation"
+          playbook: "playbooks/openshift-node/bootstrap.yml"
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
@@ -39,14 +39,14 @@
   vars:
     l_node_group: oo_nodes_to_bootstrap:!oo_exclude_bootstrapped_nodes
 
-- name: Node Preparation Checkpoint End
+- name: Node Bootstrap Preparation Checkpoint End
   hosts: all
   gather_facts: false
   tasks:
-  - name: Set Node preparation 'Complete'
+  - name: Set Node Bootstrap Preparation 'Complete'
     run_once: true
     set_stats:
       data:
-        installer_phase_node:
+        installer_phase_node_bootstrap:
           status: "Complete"
           end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"

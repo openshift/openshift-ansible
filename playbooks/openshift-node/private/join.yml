@@ -1,4 +1,18 @@
 ---
+- name: Node Join Checkpoint Start
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Node Join 'In Progress'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_node_join:
+          title: "Node Join"
+          playbook: "playbooks/openshift-node/join.yml"
+          status: "In Progress"
+          start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
 - name: Distribute bootstrap and start nodes
   hosts: oo_nodes_to_bootstrap
   gather_facts: no
@@ -50,3 +64,15 @@
   - role: openshift_manage_node
     openshift_master_host: "{{ groups.oo_first_master.0 }}"
     openshift_manage_node_is_master: "{{ ('oo_masters_to_config' in group_names) | bool }}"
+
+- name: Node Join Checkpoint End
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Set Node Join 'Complete'
+    run_once: true
+    set_stats:
+      data:
+        installer_phase_node_join:
+          status: "Complete"
+          end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
