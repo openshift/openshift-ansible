@@ -264,15 +264,15 @@ class ActionModule(ActionBase):
         kind HTPasswdPasswordIdentityProvider and
         openshift_master_manage_htpasswd is False"""
 
-        idps = self.template_var(
-            hostvars, host, 'openshift_master_identity_providers')
-        if not idps:
-            # If we don't find any identity_providers, nothing for us to do.
-            return None
         manage_pass = self.template_var(
             hostvars, host, 'openshift_master_manage_htpasswd')
         if to_bool(manage_pass):
             # If we manage the file, we can just generate in the new path.
+            return None
+        idps = self.template_var(
+            hostvars, host, 'openshift_master_identity_providers')
+        if not idps:
+            # If we don't find any identity_providers, nothing for us to do.
             return None
         old_keys = ('file', 'fileName', 'file_name', 'filename')
         for idp in idps:
