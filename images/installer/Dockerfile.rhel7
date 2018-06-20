@@ -5,7 +5,7 @@ MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 USER root
 
 # Playbooks, roles, and their dependencies are installed from packages.
-RUN INSTALL_PKGS="openshift-ansible atomic-openshift-clients python-boto python2-boto3 python2-crypto openssl httpd-tools google-cloud-sdk" \
+RUN INSTALL_PKGS="openshift-ansible atomic-openshift-clients python-boto python2-boto3 python2-crypto openssl iproute httpd-tools google-cloud-sdk" \
  && yum repolist > /dev/null \
  && yum-config-manager --enable rhel-7-server-ose-3.7-rpms \
  && yum-config-manager --enable rhel-7-server-rh-common-rpms \
