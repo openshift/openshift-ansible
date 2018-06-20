@@ -59,9 +59,6 @@
   when: node_config_hook is defined
 
 - include: rpm_upgrade.yml
-  vars:
-    component: "node"
-    openshift_version: "{{ openshift_pkg_version | default('') }}"
   when: not openshift.common.is_containerized | bool
 
 - name: Remove obsolete docker-sdn-ovs.conf
