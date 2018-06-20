@@ -49,5 +49,3 @@
   changed_when: False
   check_mode: no
   become: false
-
-- include_tasks: clean_old_namespace.yaml
