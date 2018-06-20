@@ -1,0 +1,3 @@
+---
+- include: ~/openshift-ansible/playbooks/prerequisites.yml
+- include: ~/openshift-ansible/playbooks/deploy_cluster.yml
