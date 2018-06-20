@@ -75,3 +75,6 @@ __warn_deprecated_vars:
   - 'openshift_hosted_metrics_deployer_prefix'
   - 'openshift_hosted_metrics_deployer_version'
   - 'openshift_hosted_metrics_public_url'
+  # labels and kubelet args
+  - 'openshift_node_labels'
+  - 'openshift_node_kubelet_args'
