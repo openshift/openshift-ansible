@@ -156,14 +156,16 @@ openshift_aws_ami_map:
 openshift_aws_master_group:
 - name: "{{ openshift_aws_clusterid }} master group"
   group: master
+  node_group_config: node-config-master
   tags:
     host-type: master
-    sub-host-type: master
+    sub-host-type: default
     runtime: docker
 
 openshift_aws_node_groups:
 - name: "{{ openshift_aws_clusterid }} compute group"
   group: compute
+  node_group_config: node-config-compute
   tags:
     host-type: node
     sub-host-type: compute
@@ -171,15 +173,11 @@ openshift_aws_node_groups:
 
 - name: "{{ openshift_aws_clusterid }} infra group"
   group: infra
+  node_group_config: node-config-infra
   tags:
     host-type: node
     sub-host-type: infra
     runtime: docker
-
-openshift_aws_node_group_mappings:
-  master: 'node-config-master'
-  compute: 'node-config-compute'
-  infra: 'node-config-infra'
 
 openshift_aws_created_asgs: []
 openshift_aws_current_asgs: []

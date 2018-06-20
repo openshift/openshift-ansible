@@ -26,7 +26,7 @@
     groups: "{{ openshift_aws_masters_groups }}"
     name: "{{ item.public_dns_name }}"
     hostname: "{{ openshift_aws_clusterid }}-master-{{ item.instance_id[:-5] }}"
-    openshift_node_group_name: "{{ openshift_aws_node_group_mappings[item.tags['sub-host-type']] }}"
+    openshift_node_group_name: "{{ item.tags['openshift-node-group-config'] | default('unset') }}"
   with_items: "{{ instancesout.instances }}"
 
 - name: wait for ssh to become available
