@@ -11,7 +11,7 @@ metadata:
   annotations:
     image.openshift.io/triggers: |
       [
-        {"from":{"kind":"ImageStreamTag","name":"node:v3.10"},"fieldPath":"spec.template.spec.initContainers[?(@.name==\"install-cni-plugins\")].image"}
+        {"from":{"kind":"ImageStreamTag","name":"node:v3.11"},"fieldPath":"spec.template.spec.initContainers[?(@.name==\"install-cni-plugins\")].image"}
       ]
 spec:
   template:
