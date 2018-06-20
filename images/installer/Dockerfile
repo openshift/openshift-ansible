@@ -8,8 +8,9 @@ USER root
 COPY images/installer/origin-extra-root /
 
 # install ansible and deps
-RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl java-1.8.0-openjdk-headless python2-passlib httpd-tools openssh-clients origin-clients" \
+RUN INSTALL_PKGS="python-lxml pyOpenSSL python2-cryptography openssl python2-passlib httpd-tools openssh-clients origin-clients" \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
+ && yum install -y java-1.8.0-openjdk-headless \
  && EPEL_PKGS="ansible python2-boto" \
  && yum install -y epel-release \
  && yum install -y --setopt=tsflags=nodocs $EPEL_PKGS \
