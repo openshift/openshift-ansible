@@ -11,7 +11,7 @@ openshift_node_port_range: '30000-32000'
 # to test specific versions of openshift.
 openshift_pkg_version: "{{ lookup('env', 'ORIGIN_TAG') }}"
 openshift_release: "{{ lookup('env', 'ORIGIN_RELEASE') }}"
-oreg_url: "openshift/origin-${component}:{{ lookup('env', 'ORIGIN_COMMIT') }}"
+oreg_url: "docker.io/openshift/origin-${component}:{{ lookup('env', 'ORIGIN_COMMIT') }}"
 
 osm_default_node_selector: "node-role.kubernetes.io/infra=true"
 osm_controller_args:

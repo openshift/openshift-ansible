@@ -44,14 +44,14 @@ beginning of the installation process ensuring that these settings are applied
 before attempting to pull any of the following images.
 
     Origin
-        openshift/origin
-        openshift/node (node + openshift-sdn + openvswitch rpm for client tools)
-        openshift/openvswitch (centos7 + openvswitch rpm, runs ovsdb ovsctl processes)
+        docker.io/openshift/origin
+        docker.io/openshift/node (node + openshift-sdn + openvswitch rpm for client tools)
+        docker.io/openshift/openvswitch (centos7 + openvswitch rpm, runs ovsdb ovsctl processes)
         registry.access.redhat.com/rhel7/etcd
     OpenShift Enterprise
-        openshift3/ose
-        openshift3/node
-        openshift3/openvswitch
+        registry.access.redhat.com/openshift3/ose
+        registry.access.redhat.com/openshift3/node
+        registry.access.redhat.com/openshift3/openvswitch
         registry.access.redhat.com/rhel7/etcd
 
   * note openshift3/* images come from registry.access.redhat.com and

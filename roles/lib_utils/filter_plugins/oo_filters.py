@@ -438,9 +438,9 @@ def lib_utils_oo_pods_match_component(pods, deployment_type, component):
     if not isinstance(component, string_types):
         raise errors.AnsibleFilterError("failed expects component to be a string")
 
-    image_prefix = 'openshift/origin-'
+    image_prefix = 'docker.io/openshift/origin-'
     if deployment_type == 'openshift-enterprise':
-        image_prefix = 'openshift3/ose-'
+        image_prefix = 'registry.access.redhat.com/openshift3/ose-'
 
     matching_pods = []
     image_regex = image_prefix + component + r'.*'

@@ -109,7 +109,7 @@ class RouterTest(unittest.TestCase):
                         "containers": [
                             {
                                 "name": "router",
-                                "image": "openshift3/ose-haproxy-router:v3.5.0.39",
+                                "image": "registry.access.redhat.com/openshift3/ose-haproxy-router:v3.5.0.39",
                                 "ports": [
                                     {
                                         "containerPort": 80

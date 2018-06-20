@@ -12,14 +12,14 @@ DEPLOYMENT_IMAGE_INFO = {
     "origin": {
         "namespace": "openshift",
         "name": "origin",
-        "registry_console_prefix": "cockpit/",
+        "registry_console_prefix": "docker.io/cockpit/",
         "registry_console_basename": "kubernetes",
         "registry_console_default_version": "latest",
     },
     "openshift-enterprise": {
         "namespace": "openshift3",
         "name": "ose",
-        "registry_console_prefix": "openshift3/",
+        "registry_console_prefix": "registry.access.redhat.com/openshift3/",
         "registry_console_basename": "registry-console",
         "registry_console_default_version": "${short_version}",
     },
@@ -142,15 +142,17 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
     def required_images(self):
         """
         Determine which images we expect to need for this host.
-        Returns: a set of required images like 'openshift/origin:v3.6'
+        Returns: a set of required images like 'docker.io/openshift/origin:v3.6'
 
         The thorny issue of determining the image names from the variables is under consideration
         via https://github.com/openshift/openshift-ansible/issues/4415
 
         For now we operate as follows:
-        * For containerized components (master, node, ...) we look at the deployment type and
-          use openshift/origin or openshift3/ose as the base for those component images. The
-          version is openshift_image_tag as determined by the openshift_version role.
+        * For containerized components (master, node, ...) we look at the deployment
+          type and use docker.io/openshift/origin or
+          registry.access.redhat.com/openshift3/ose as the base for those component
+          images. The version is openshift_image_tag as determined by the
+          openshift_version role.
         * For OpenShift-managed infrastructure (router, registry...) we use oreg_url if
           it is defined; otherwise we again use the base that depends on the deployment type.
         Registry is not included in constructed images. It may be in oreg_url or etcd image.

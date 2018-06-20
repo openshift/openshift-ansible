@@ -13,7 +13,7 @@ spec:
   hostNetwork: true
   containers:
   - name: controllers
-    image: openshift/origin:v3.10.0
+    image: docker.io/openshift/origin:v3.10.0
     command: ["/bin/bash", "-c"]
     args:
     - |
