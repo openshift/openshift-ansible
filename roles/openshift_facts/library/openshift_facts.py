@@ -834,7 +834,7 @@ def set_proxy_facts(facts):
             common['no_proxy'].append(common['hostname'])
             if 'master' in facts:
                 if 'cluster_hostname' in facts['master']:
-                    common['no_proxy'].extend(facts['master']['cluster_hostname'])
+                    common['no_proxy'].append(facts['master']['cluster_hostname'])
             common['no_proxy'] = ','.join(sort_unique(common['no_proxy']))
         facts['common'] = common
 
