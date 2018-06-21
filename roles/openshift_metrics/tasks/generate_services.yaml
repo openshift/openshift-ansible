@@ -31,3 +31,9 @@
   - cassandra
   - cassandra-nodes
   changed_when: no
+
+- name: Generate service for metrics-server
+  template:
+    src: metrics-server-service.j2
+    dest: "{{ mktemp.stdout }}/templates/metrics-server-service.yaml"
+  changed_when: no
