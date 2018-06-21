@@ -61,7 +61,7 @@
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/scheme: https
-      prometheus.io/port: "{{ grafana_service_targetport }}"
+      prometheus.io/port: "{{ grafana_service_targetport | int }}"
       service.alpha.openshift.io/serving-cert-secret-name: grafana-tls
     ports:
     - name: grafana
