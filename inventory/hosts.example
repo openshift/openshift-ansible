@@ -690,6 +690,9 @@ debug_level=2
 #openshift_prometheus_alertmanager_storage_type=pvc
 #openshift_prometheus_alertbuffer_storage_type=pvc
 
+# Grafana deployment, requires Prometheus
+#openshift_hosted_grafana_deploy=true
+
 # Configure the multi-tenant SDN plugin (default is 'redhat/openshift-ovs-subnet')
 # os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 

@@ -34,6 +34,11 @@
 - import_playbook: ../../openshift-prometheus/private/config.yml
   when: openshift_hosted_prometheus_deploy | default(false) | bool
 
+- import_playbook: ../../openshift-grafana/private/config.yml
+  when:
+  - openshift_hosted_prometheus_deploy | default(false) | bool
+  - openshift_hosted_grafana_deploy | default(false) | bool
+
 - import_playbook: ../../openshift-monitor-availability/private/config.yml
   when: openshift_monitor_availability_install | default(false) | bool
 
