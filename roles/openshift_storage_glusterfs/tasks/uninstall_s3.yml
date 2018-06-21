@@ -1,3 +1,5 @@
+# To uninstall all s3 resources created
+---
 - name: Delete gluster-s3 resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"

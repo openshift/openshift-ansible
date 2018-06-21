@@ -94,7 +94,6 @@ openshift_storage_glusterfs_registry_heketi_ssh_user: "{{ openshift_storage_glus
 openshift_storage_glusterfs_registry_heketi_ssh_sudo: "{{ openshift_storage_glusterfs_heketi_ssh_sudo }}"
 openshift_storage_glusterfs_registry_heketi_ssh_keyfile: "{{ openshift_storage_glusterfs_heketi_ssh_keyfile | default(omit) }}"
 openshift_storage_glusterfs_registry_heketi_fstab: "{{ '/var/lib/heketi/fstab' | quote if openshift_storage_glusterfs_registry_heketi_executor == 'kubernetes' else '/etc/fstab' | quote }}"
-openshift_storage_glusterfs_s3_only_uninstall: False
 
 r_openshift_storage_glusterfs_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_storage_glusterfs_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"

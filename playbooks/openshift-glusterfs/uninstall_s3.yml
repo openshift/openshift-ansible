@@ -1,0 +1,4 @@
+---
+- import_playbook: ../init/main.yml
+
+- import_playbook: private/uninstall_s3.yml
