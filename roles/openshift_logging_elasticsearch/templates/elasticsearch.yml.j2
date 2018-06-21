@@ -20,7 +20,7 @@ cloud:
     namespace: ${NAMESPACE}
 
 discovery.zen:
-  hosts_provider: kubernetes
+  ping.unicast.hosts: {{ es_unicast_host }}
   minimum_master_nodes: ${NODE_QUORUM}
 
 gateway:
