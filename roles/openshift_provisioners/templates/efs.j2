@@ -46,6 +46,18 @@ spec:
               value: "{{openshift_provisioners_efs_region}}"
             - name: PROVISIONER_NAME
               value: "{{openshift_provisioners_efs_name}}"
+{% if openshift_provisioners_efs_http_proxy is defined %}
+            - name: HTTP_PROXY
+              value: "{{openshift_provisioners_efs_http_proxy}}"
+{% endif %}
+{% if openshift_provisioners_efs_https_proxy is defined %}
+            - name: HTTPS_PROXY
+              value: "{{openshift_provisioners_efs_https_proxy}}"
+{% endif %}
+{% if openshift_provisioners_efs_no_proxy is defined %}
+            - name: NO_PROXY
+              value: "{{openshift_provisioners_efs_no_proxy}}"
+{% endif %}
           volumeMounts:
             - name: pv-volume
               mountPath: /persistentvolumes
