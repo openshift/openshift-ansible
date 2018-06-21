@@ -151,7 +151,7 @@
 - name: Get prometheus route
   oc_route:
     state: list
-    name: prometheus
+    name: "{{ grafana_prometheus_route }}"
     namespace: "{{ grafana_prometheus_namespace }}"
   register: prometheus_route
 
