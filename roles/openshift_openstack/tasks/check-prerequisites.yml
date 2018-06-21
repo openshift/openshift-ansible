@@ -126,4 +126,4 @@
   when:
   - openshift_openstack_nsupdate_zone is defined
   - openshift_openstack_full_dns_domain is defined
-  - openshift_openstack_full_dns_domain is not match(".*\." + openshift_openstack_nsupdate_zone + "$")
+  - openshift_openstack_full_dns_domain is not match("(.*\.)*" + openshift_openstack_nsupdate_zone + "$")
