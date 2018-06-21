@@ -117,9 +117,6 @@
     file_content: "{{ item.content | b64decode | from_yaml }}"
   with_items: "{{ apiextension_object_defs.results }}"
 
-- include_tasks: update_master_config.yaml
-  when: not openshift_version_gte_3_9
-
 # Update asset config in openshift-web-console namespace
 - name: Add metrics route information to web console asset config
   include_role:

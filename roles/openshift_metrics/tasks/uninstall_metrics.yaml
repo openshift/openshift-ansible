@@ -30,7 +30,6 @@
         value: ""
   when:
     - openshift_web_console_install | default(true) | bool
-    - openshift_version_gte_3_9
 
 - name: remove metrics server components
   command: >
