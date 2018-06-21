@@ -831,7 +831,7 @@ debug_level=2
 # options like 'strict-order' to alter dnsmasq configuration.
 #openshift_node_dnsmasq_additional_config_file=/home/bob/ose-dnsmasq.conf
 
-# Global Proxy Configuration
+# Global Proxy Configuration*
 # These options configure HTTP_PROXY, HTTPS_PROXY, and NOPROXY environment
 # variables for docker and master services.
 #
@@ -841,6 +841,11 @@ debug_level=2
 #openshift_http_proxy=http://USER:PASSWORD@IPADDR:PORT
 #openshift_https_proxy=https://USER:PASSWORD@IPADDR:PORT
 #openshift_no_proxy='.hosts.example.com,some-host.com'
+#
+# When using EFS Provisioners the container will boot and check if the efs-id is valid but will hang in an environment with a proxy:
+#openshift_provisioners_efs_http_proxy=http://USER:PASSWORD@IPADDR:PORT
+#openshift_provisioners_efs_https_proxy=https://USER:PASSWORD@IPADDR:PORT
+#openshift_provisioners_efs_no_proxy='.cluster.local,.svc,169.254.169.254,plus your own exclusions'
 #
 # Most environments don't require a proxy between openshift masters, nodes, and
 # etcd hosts. So automatically add those hostnames to the openshift_no_proxy list.
