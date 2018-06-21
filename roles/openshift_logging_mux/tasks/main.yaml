@@ -83,12 +83,12 @@
 
 # create Mux configmap
 - copy:
-    src: "{{ __base_file_dir }}/fluent.conf"
+    src: "fluent.conf"
     dest: "{{mktemp.stdout}}/fluent-mux.conf"
   changed_when: no
 
 - copy:
-    src: "{{ __base_file_dir }}/secure-forward.conf"
+    src: "secure-forward.conf"
     dest: "{{mktemp.stdout}}/secure-forward-mux.conf"
   changed_when: no
 
@@ -167,7 +167,7 @@
 # create Mux DC
 - name: Generating mux deploymentconfig
   template:
-    src: "{{ __base_file_dir }}/mux.j2"
+    src: "mux.j2"
     dest: "{{mktemp.stdout}}/templates/logging-mux-dc.yaml"
   vars:
     component: mux

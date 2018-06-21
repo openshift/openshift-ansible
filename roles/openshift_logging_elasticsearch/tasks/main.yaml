@@ -24,18 +24,21 @@
     es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
 
 - include_tasks: get_es_version.yml
+  run_once: true
 
 - set_fact:
     full_restart_cluster: True
   when:
   - _es_installed_version is defined
   - _es_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+  - not openshift_logging_elasticsearch_ops_deployment | default(false) | bool
 
 - set_fact:
     full_restart_cluster: True
   when:
   - _es_ops_installed_version is defined
   - _es_ops_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+  - openshift_logging_elasticsearch_ops_deployment | default(false) | bool
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in
@@ -101,13 +104,13 @@
 
 # logging-metrics-reader role
 - template:
-    src: "{{ __base_file_dir }}/logging-metrics-role.j2"
+    src: "logging-metrics-role.j2"
     dest: "{{mktemp.stdout}}/templates/logging-metrics-role.yml"
   vars:
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
 
 - template:
-    src: "{{ __base_file_dir }}/logging-metrics-rolebinding.j2"
+    src: "logging-metrics-rolebinding.j2"
     dest: "{{mktemp.stdout}}/templates/logging-metrics-rolebinding.yml"
   vars:
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
@@ -159,7 +162,7 @@
 # View role and binding
 - name: Generate logging-elasticsearch-view-role
   template:
-    src: "{{ __base_file_dir }}/rolebinding.j2"
+    src: "rolebinding.j2"
     dest: "{{mktemp.stdout}}/logging-elasticsearch-view-role.yaml"
   vars:
     obj_name: logging-elasticsearch-view-role
@@ -192,102 +195,54 @@
     msg: "The openshift_logging_es_log_appenders '{{ openshift_logging_es_log_appenders }}' has an unrecognized option and only supports the following as a list: {{ __es_log_appenders | join(', ') }}"
 
 - template:
-    src: "{{ __base_file_dir }}/elasticsearch.yml.j2"
+    src: "elasticsearch.yml.j2"
     dest: "{{ tempdir }}/elasticsearch.yml"
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
-    es_number_of_shards: "{{ openshift_logging_es_number_of_shards | default(1) }}"
-    es_number_of_replicas: "{{ openshift_logging_es_number_of_replicas| default(0) }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
   changed_when: no
 
 # create diff between current configmap files and our current files
-- when: not openshift_logging_es5_techpreview
-  block:
-  - template:
-      src: "{{ __base_file_dir }}/elasticsearch-logging.yml.j2"
-      dest: "{{ tempdir }}/elasticsearch-logging.yml"
-    vars:
-      root_logger: "{{openshift_logging_es_log_appenders | join(', ')}}"
-    changed_when: no
+- template:
+    src: "log4j2.properties.j2"
+    dest: "{{ tempdir }}/log4j2.properties"
+  vars:
+    root_logger: "{{ openshift_logging_es_log_appenders | list }}"
+  changed_when: no
 
-  - include_role:
-      name: openshift_logging
-      tasks_from: patch_configmap_files.yaml
-    vars:
-      configmap_name: "{{ elasticsearch_name }}"
-      configmap_namespace: "{{ openshift_logging_namespace }}"
-      configmap_file_names:
-      - current_file: "elasticsearch.yml"
-        new_file: "{{ tempdir }}/elasticsearch.yml"
-        protected_lines: ["number_of_shards", "number_of_replicas"]
-      - current_file: "logging.yml"
-        new_file: "{{ tempdir }}/elasticsearch-logging.yml"
+- include_role:
+    name: openshift_logging
+    tasks_from: patch_configmap_files.yaml
+  vars:
+    configmap_name: "{{ elasticsearch_name }}"
+    configmap_namespace: "{{ openshift_logging_namespace }}"
+    configmap_file_names:
+    - current_file: "elasticsearch.yml"
+      new_file: "{{ tempdir }}/elasticsearch.yml"
+    - current_file: "log4j2.properties"
+      new_file: "{{ tempdir }}/log4j2.properties"
 
-  - slurp:
-      src: "{{ tempdir }}/elasticsearch.yml"
-    register: _patched_elasticsearch_config
+- slurp:
+    src: "{{ tempdir }}/elasticsearch.yml"
+  register: _patched_elasticsearch_config
 
-  - copy:
-      content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
-      dest: "{{ tempdir }}/elasticsearch.yml"
-    vars:
-      config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
-      override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
+- copy:
+    content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
+    dest: "{{ tempdir }}/elasticsearch.yml"
+  vars:
+    config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
+    override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
 
-  - name: Set ES configmap
-    oc_configmap:
-      state: present
-      name: "{{ elasticsearch_name }}"
-      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-      from_file:
-        elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
-        logging.yml: "{{ tempdir }}/elasticsearch-logging.yml"
-    register: es_config_creation
-    notify: "restart elasticsearch"
-
-- when: openshift_logging_es5_techpreview | bool
-  block:
-  - template:
-      src: "{{ __base_file_dir }}/log4j2.properties.j2"
-      dest: "{{ tempdir }}/log4j2.properties"
-    vars:
-      root_logger: "{{ openshift_logging_es_log_appenders | list }}"
-    changed_when: no
-
-  - include_role:
-      name: openshift_logging
-      tasks_from: patch_configmap_files.yaml
-    vars:
-      configmap_name: "{{ elasticsearch_name }}"
-      configmap_namespace: "{{ openshift_logging_namespace }}"
-      configmap_file_names:
-      - current_file: "elasticsearch.yml"
-        new_file: "{{ tempdir }}/elasticsearch.yml"
-      - current_file: "log4j2.properties"
-        new_file: "{{ tempdir }}/log4j2.properties"
-
-  - slurp:
-      src: "{{ tempdir }}/elasticsearch.yml"
-    register: _patched_elasticsearch_config
-
-  - copy:
-      content: "{{ config_source | combine(override_config, recursive=True) | to_nice_yaml(indent=2) }}"
-      dest: "{{ tempdir }}/elasticsearch.yml"
-    vars:
-      config_source: "{{ _patched_elasticsearch_config['content'] | b64decode | from_yaml }}"
-      override_config: "{{ openshift_logging_es_config | default({}) | from_yaml }}"
-
-  - name: Set ES configmap
-    oc_configmap:
-      state: present
-      name: "{{ elasticsearch_name }}"
-      namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-      from_file:
-        elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
-        log4j2.properties: "{{ tempdir }}/log4j2.properties"
-    register: es_config_creation
-    notify: "restart elasticsearch"
+- name: Set ES configmap
+  oc_configmap:
+    state: present
+    name: "{{ elasticsearch_name }}"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    from_file:
+      elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
+      log4j2.properties: "{{ tempdir }}/log4j2.properties"
+  register: es_config_creation
+  notify: "restart elasticsearch"
 
 - when: es_config_creation.changed | bool
   block:
@@ -402,7 +357,7 @@
   # storageclasses with the storageClassName set to "" in pvc.j2
   - name: Creating ES storage template - static
     template:
-      src: "{{ __base_file_dir }}/pvc.j2"
+      src: "pvc.j2"
       dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
     vars:
       obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
@@ -416,7 +371,7 @@
   # Storageclasses are used by default if configured
   - name: Creating ES storage template - dynamic
     template:
-      src: "{{ __base_file_dir }}/pvc.j2"
+      src: "pvc.j2"
       dest: "{{ tempdir }}/templates/logging-es-pvc.yml"
     vars:
       obj_name: "{{ openshift_logging_elasticsearch_pvc_name }}"
@@ -447,7 +402,7 @@
 # DC
 - name: Set ES dc templates
   template:
-    src: "{{ __base_file_dir }}/es.j2"
+    src: "es.j2"
     dest: "{{ tempdir }}/templates/logging-es-dc.yml"
   vars:
     es_cluster_name: "{{ es_component }}"
@@ -523,7 +478,7 @@
 
 - name: Generating Elasticsearch {{ es_component }} route template
   template:
-    src: "{{ __base_file_dir }}/route_reencrypt.j2"
+    src: "route_reencrypt.j2"
     dest: "{{mktemp.stdout}}/templates/logging-{{ es_component }}-route.yaml"
   vars:
     obj_name: "logging-{{ es_component }}"

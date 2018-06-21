@@ -31,7 +31,7 @@
 # create EventRouter deployment config
 - name: Generate EventRouter template
   template:
-    src: "{{ __base_file_dir }}/eventrouter-template.j2"
+    src: "eventrouter-template.j2"
     dest: "{{ tempdir }}/templates/eventrouter-template.yaml"
   vars:
     node_selector: "{{ openshift_logging_eventrouter_nodeselector | default({}) }}"

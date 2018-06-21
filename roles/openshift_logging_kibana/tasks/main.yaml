@@ -125,7 +125,7 @@
 
 - name: Generating Kibana route template
   template:
-    src: "{{ __base_file_dir }}/route_reencrypt.j2"
+    src: "route_reencrypt.j2"
     dest: "{{ tempdir }}/templates/kibana-route.yaml"
   vars:
     obj_name: "{{ kibana_name }}"
@@ -166,7 +166,7 @@
 # create oauth client
 - name: Create oauth-client template
   template:
-    src: "{{ __base_file_dir }}/oauth-client.j2"
+    src: "oauth-client.j2"
     dest: "{{ tempdir }}/templates/oauth-client.yml"
   vars:
     kibana_hostnames: "{{ proxy_hostnames | unique }}"
@@ -225,7 +225,7 @@
 # create Kibana DC
 - name: Generate Kibana DC template
   template:
-    src: "{{ __base_file_dir }}/kibana.j2"
+    src: "kibana.j2"
     dest: "{{ tempdir }}/templates/kibana-dc.yaml"
   vars:
     component: "{{ kibana_component }}"
