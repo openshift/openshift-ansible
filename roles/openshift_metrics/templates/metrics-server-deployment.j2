@@ -23,7 +23,7 @@ spec:
       serviceAccountName: metrics-server
       containers:
       - name: metrics-server
-        image: {{openshift_metrics_image_prefix}}metrics-server:{{openshift_metrics_image_version}}
+        image: {{ openshift_metrics_server_image }}
         command:
           - /usr/bin/metrics-server
           - "--source=kubernetes.summary_api:?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
