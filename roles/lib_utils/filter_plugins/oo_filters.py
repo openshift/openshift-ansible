@@ -431,6 +431,8 @@ def lib_utils_to_padded_yaml(data, level=0, indent=2, **kw):
 def lib_utils_oo_pods_match_component(pods, deployment_type, component):
     """ Filters a list of Pods and returns the ones matching the deployment_type and component
     """
+    # TODO: michaelgugino -- need to find a better method than matching on image
+    # this will break with some of the recent oreg_url changes.
     if not isinstance(pods, list):
         raise errors.AnsibleFilterError("failed expects to filter on a list")
     if not isinstance(deployment_type, string_types):
@@ -443,7 +445,7 @@ def lib_utils_oo_pods_match_component(pods, deployment_type, component):
         image_prefix = 'registry.access.redhat.com/openshift3/ose-'
 
     matching_pods = []
-    image_regex = image_prefix + component + r'.*'
+    image_regex = r'.*' + image_prefix + component + r'.*'
     for pod in pods:
         for container in pod['spec']['containers']:
             if re.search(image_regex, container['image']):
