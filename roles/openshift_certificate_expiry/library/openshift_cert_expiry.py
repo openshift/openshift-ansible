@@ -151,7 +151,7 @@ platforms missing the Python OpenSSL library.
                 continue
 
             elif l.startswith('Subject:'):
-                # O=system:nodes, CN=system:node:m01.example.com
+                # O = system:nodes, CN = system:node:m01.example.com
                 self.subject = FakeOpenSSLCertificateSubjects(l.partition(': ')[-1])
 
     def get_serial_number(self):
@@ -218,7 +218,7 @@ object"""
         """
         self.subjects = []
         for s in subject_string.split(', '):
-            name, _, value = s.partition('=')
+            name, _, value = s.partition(' = ')
             self.subjects.append((name, value))
 
     def get_components(self):
