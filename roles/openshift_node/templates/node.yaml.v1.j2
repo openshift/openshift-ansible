@@ -22,10 +22,15 @@ kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_util
   runtime-request-timeout:
   - 10m
 {% endif %}
-{% if openshift_node_use_persistentlocalvolumes | bool %}
+{% if openshift_node_use_persistentlocalvolumes | bool or openshift_node_use_ephemeralstorage | bool %}
   feature-gates:
+{% if openshift_node_use_persistentlocalvolumes | bool %}
   - PersistentLocalVolumes=true
   - VolumeScheduling=true
+{% endif %}
+{% if openshift_node_use_ephemeralstorage | bool %}
+  - LocalStorageCapacityIsolation=true
+{% endif %}
 {% endif %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
