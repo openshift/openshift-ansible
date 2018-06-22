@@ -67,6 +67,14 @@
       list: installed
     register: yum
 
+  - name: disable waagent data disk management
+    lineinfile:
+      path: /etc/waagent.conf
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+    - { regexp: '^ResourceDisk\.Format=', line: 'ResourceDisk.Format=n' }
+
   - name: persist oreg_url
     copy:
       dest: "/etc/origin/oreg_url"
