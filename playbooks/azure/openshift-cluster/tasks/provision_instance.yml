@@ -25,7 +25,7 @@
     az vm create
     -n vm
     -g "{{ openshift_azure_resource_group_name }}"
-    --size Standard_D4s_v3
+    --size "{{ openshift_azure_vm_size | default('Standard_D4s_v3') }}"
     --image "{{ (input_image.stdout | from_json).id }}"
     --storage-sku Premium_LRS
     --admin-username cloud-user
