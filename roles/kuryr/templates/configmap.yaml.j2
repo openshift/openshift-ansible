@@ -568,6 +568,9 @@ data:
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
     vif_pool_driver = {{ kuryr_openstack_pool_driver }}
 
+    # Time (in seconds) the watcher retries watching for. (integer value)
+    watch_retry_timeout = 3600
+
     [neutron]
     # Configuration options for OpenStack Neutron
 
