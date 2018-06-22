@@ -23,6 +23,9 @@ openshift_azure_output_image_ns: images
 # complete name of output image, e.g. centos7-base-201806071412 or centos7-3.10-201806071434
 openshift_azure_output_image_name:
 
+# azure vm image size, defaults to Standard_D4s_v3
+openshift_azure_vm_size:
+
 # ssh public key for VMs created by playbook; private key must be accessible to
 # ansible
 openshift_azure_vm_ssh_public_key: ssh-rsa ...
@@ -53,3 +56,4 @@ openshift_azure_vm_ssh_public_key: ssh-rsa ...
 
 # container within storage account to hold image blob
 #openshift_azure_container:
+
