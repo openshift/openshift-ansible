@@ -50,16 +50,22 @@
         value: "{{ openshift_azure_input_image_name }}"
       - key: properties.masterProfile.imageReference.resourceGroup
         value: "{{ openshift_azure_input_image_ns }}"
+      - key: properties.masterProfile.vmSize
+        value: "{{ openshift_azure_vm_size | default('Standard_D4s_v3') }}"
       # agentpool compute
       - key: properties.agentPoolProfiles[0].imageReference.name
         value: "{{ openshift_azure_input_image_name }}"
       - key: properties.agentPoolProfiles[0].imageReference.resourceGroup
         value: "{{ openshift_azure_input_image_ns }}"
+      - key: properties.agentPoolProfiles[0].vmSize
+        value: "{{ openshift_azure_vm_size | default('Standard_D4s_v3') }}"
       # agentpool infra
       - key: properties.agentPoolProfiles[1].imageReference.name
         value: "{{ openshift_azure_input_image_name }}"
       - key: properties.agentPoolProfiles[1].imageReference.resourceGroup
         value: "{{ openshift_azure_input_image_ns }}"
+      - key: properties.agentPoolProfiles[1].vmSize
+        value: "{{ openshift_azure_vm_size | default('Standard_D4s_v3') }}"
       # linuxprofile
       - key: properties.linuxProfile.adminUsername
         value: "cloud-user"
