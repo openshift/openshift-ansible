@@ -27,6 +27,10 @@ kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_util
   - PersistentLocalVolumes=true
   - VolumeScheduling=true
 {% endif %}
+{% if openshift_node_use_ephemeralstorage | bool %}
+  feature-gates:
+  - LocalStorageCapacityIsolation=true
+{% endif %}
 masterClientConnectionOverrides:
   acceptContentTypes: application/vnd.kubernetes.protobuf,application/json
   contentType: application/vnd.kubernetes.protobuf

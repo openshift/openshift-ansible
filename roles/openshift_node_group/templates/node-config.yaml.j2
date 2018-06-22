@@ -40,6 +40,9 @@ kubeletArguments:
   - PersistentLocalVolumes=true
   - VolumeScheduling=true
 {% endif %}
+{% if openshift_node_group_use_ephemeralstorage | bool %}
+  - LocalStorageCapacityIsolation=true
+{% endif %}
   rotate-certificates:
   - "true"
   cert-dir:

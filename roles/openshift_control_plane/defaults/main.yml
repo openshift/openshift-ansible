@@ -116,6 +116,8 @@ r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_p
 
 openshift_master_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"
 
+openshift_master_use_ephemeralstorage: "{{ openshift_ephemeralstorage_enabled | default(False) | bool }}"
+
 openshift_master_image_config_latest_default: "{{ openshift_image_config_latest | default(False) }}"
 openshift_master_image_config_latest: "{{ openshift_master_image_config_latest_default }}"
 

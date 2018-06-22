@@ -82,11 +82,19 @@ kubernetesMasterConfig:
     - PersistentLocalVolumes=true
     - VolumeScheduling=true
 {% endif %}
+{% if openshift_master_use_ephemeralstorage | bool %}
+    feature-gates:
+    - LocalStorageCapacityIsolation=true
+{% endif %}
   controllerArguments: {{ openshift.master.controller_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
 {% if openshift_master_use_persistentlocalvolumes | bool %}
     feature-gates:
     - PersistentLocalVolumes=true
     - VolumeScheduling=true
+{% endif %}
+{% if openshift_master_use_ephemeralstorage | bool %}
+    feature-gates:
+    - LocalStorageCapacityIsolation=true
 {% endif %}
   masterCount: {{ openshift_master_count | default(groups.oo_masters | length) }}
   masterIP: {{ openshift.common.ip }}
