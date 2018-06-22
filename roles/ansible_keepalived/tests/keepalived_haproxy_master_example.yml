@@ -1,0 +1,130 @@
+---
+# Copyright 2015, Jean-Philippe Evrard <jean-philippe@evrard.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+keepalived_sync_groups:
+  # You can have multiple sync groups. Here is an example of just one.
+  haproxy:
+    # Each group can have muliple instances
+    instances:
+      - external
+      - internal
+    # Uncomment this to have a notification script, triggered on state change.
+    # all the *_scripts can be a direct command, or a path to a script
+    # For the latter, you MUST define a script that will be used a source in
+    # src_*_script (available on the deployment host).
+    # The src_*_script will be uploaded to your destination host at the _script
+    # location
+    #notify_script: /etc/keepalived/haproxy_notify.sh
+    #src_notify_script: <path to source script if notify_script is not a command>
+    # If instead of one notification script handling all types of events, you
+    # want to define script per type of notification, please uncomment this.
+    # They will act before the general notification script.
+    # Their deployment and configuration are like the notify_script
+    #notify_master:
+    #src_notify_master:
+    #notify_backup:
+    #src_notify_backup:
+    #notify_fault:
+    #src_notify_fault:
+
+# Uncomment this to have keepalived status checking. They will run on all the hosts
+# whether it's master or backup. You can have multiple scripts.
+#keepalived_scripts:
+  #haproxy_check_script:
+    # Here is an example with a command instead of a script.
+    # Add src_check_script if you want to run a script instead of a command
+    # and upload it from your deploy host
+    #check_script: "killall -0 haproxy"
+  #pingable_check_script:
+    #check_script: "ping -c 1 193.0.14.129 1>&2"
+    # Interval is the time in seconds between each check
+    #interval: 10
+    # Fall is the time to mark the keepalived status as not ok
+    #fall: 2
+    # Rise is the time to mark the keepalived status as back to ok
+    #rise: 4
+    # Allow the check script to complete within a timeout
+    #timeout: 2
+
+keepalived_instances:
+  #This dict name is the same as the one above, in keepalived_sync_groups.
+  external:
+    #remember you can use ansible variables here.
+    interface: eth0
+    state: MASTER
+    virtual_router_id: 10
+    priority: 100
+    # Please set this if you want to use authentication in your VRRP
+    # instance. If more than 8 characters, it will be truncated.
+    # The password must be the same per router_id (so backup and
+    # master should have the same password).
+    #authentication_password: "your_password"
+    vips:
+      - "{{keepalived_external_vip_cidr}} dev eth0"
+    # Optional Scripts for tracking the current status of the keepalived instance
+    #track_scripts:
+    #  - haproxy_check_script
+    #  - pingable_check_script
+    # Optional Interfaces for tracking the link status of the interfaces listed
+    #track_interfaces:
+    #  - eth1
+    #  - eth2
+  internal:
+    interface: eth1
+    state: MASTER
+    virtual_router_id: 11
+    priority: 100
+    # Please set this if you want to use authentication in your VRRP
+    # instance. If more than 8 characters, it will be truncated.
+    # The password must be the same per router_id (so backup and
+    # master should have the same password).
+    #authentication_password: "your_password"
+    # Optional Scripts for tracking the current status of the keepalived instance
+    #track_scripts:
+    #  - haproxy_check_script
+    #  - pingable_check_script
+    # Optional Interfaces for tracking the link status of the interfaces listed
+    #track_interfaces:
+    #  - eth1
+    #  - eth2
+    vips:
+      - "{{keepalived_internal_vip_cidr}} dev eth1"
+
+# Uncomment and adjust to make use of keepalived's virtual_server functions.
+#keepalived_virtual_servers:
+#  # Example with recycled {{ keepalived_internal_vip_cidr }}
+#  - ip: "{{ keepalived_internal_vip_cidr | ipaddr('address') }}"
+#    port: '53'
+#    protocol: 'UDP'
+#    lvs_method: 'NAT'
+#    # Optional, set false or omit to not use it.
+#    ha_suspend: true
+#    real_servers:
+#      - ip: '8.8.8.8'
+#        port: '53'
+#        # Currently on MISC_CHECK is supported. Section is optional.
+#        misc_check:
+#            - misc_path: '/usr/bin/host -W 1 github.com 8.8.8.8'
+#              # Role default is 3
+#              misc_timeout: '2'
+#      - ip: '8.8.4.4'
+#        port: '53'
+#        misc_check:
+#            - misc_path: '/usr/bin/host -W 1 github.com 8.8.4.4'
+#              misc_timeout: '10'
+#              # Optinal, set false or omit to not use it.
+#              warmup: true
+#              # Optinal, set false or omit to not use it.
+#              misc_dynamic: true

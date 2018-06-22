@@ -1,0 +1,27 @@
+---
+# Copyright 2017, Jean-Philippe Evrard <jean-philippe@evrard.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+keepalived_sync_groups:
+  haproxy:
+    instances:
+      - internal
+keepalived_instances:
+  internal:
+    interface: "{{ vrrp_nic }}"
+    state: "{{ (play_hosts.index(inventory_hostname) == 0) | ternary('MASTER','BACKUP') }}"
+    virtual_router_id: 42
+    priority: "{{ (play_hosts.index(inventory_hostname) == 0) | ternary('100','50') }}"
+    vips:
+      - "192.168.33.2/24 dev {{ vrrp_nic }}"

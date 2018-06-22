@@ -1,0 +1,53 @@
+---
+- hosts: keepalived2
+  gather_facts: no
+  tasks:
+    - raw: sudo apt-get install -y python
+
+- hosts: all
+  gather_facts: yes
+  become: true
+  become_method: sudo
+  pre_tasks:
+    - name: Ensure the vrrp nics are up
+      shell: ip link set dev {{ vrrp_nic }} up || true
+      changed_when: false
+    - name: Display the configuration
+      debug:
+        var: keepalived_instances
+  roles:
+    - ../ansible-keepalived
+
+- name: Check if first node is master
+  hosts: keepalived1
+  gather_facts: yes
+  become: true
+  become_method: sudo
+  tasks:
+    - assert:
+        that:
+          - "'ipv4_secondaries' in ansible_eth1"
+          - "ansible_eth1['ipv4_secondaries'][0]['address'] == '192.168.33.2'"
+
+- name: Check if failover works
+  hosts: all
+  gather_facts: yes
+  become: true
+  become_method: sudo
+  tasks:
+    - shell: ifconfig {{ vrrp_nic }} down || true
+      changed_when: false
+      when: inventory_hostname != ansible_play_hosts[2]
+    - name: The VRRP state needs to adapt the topo change
+      wait_for:
+        timeout: 12
+    - setup:
+        gather_subset: network
+    - debug:
+        var: ansible_all_ipv4_addresses
+    - assert:
+        that:
+          - "'192.168.33.2' in ansible_all_ipv4_addresses"
+      when: inventory_hostname == ansible_play_hosts[2]
+    #- shell: ifconfig {{ vrrp_nic }} up || true
+    #  changed_when: false

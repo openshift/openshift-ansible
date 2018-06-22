@@ -1,0 +1,159 @@
+#jinja2: lstrip_blocks: True
+# Copyright 2015, Jean-Philippe Evrard <jean-philippe@evrard.me>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{% for name, sync_group in keepalived_sync_groups.items() %}
+vrrp_sync_group {{ name }} {
+  group {
+    {% for instance in sync_group.instances %}
+    {{ instance }}
+    {% endfor %}
+  }
+  {% if sync_group.notify_script is defined %}
+  notify "{{ sync_group.notify_script }}"
+  {% endif %}
+  {% if sync_group.notify_master is defined %}
+  notify_master "{{ sync_group.notify_master }}"
+  {% endif %}
+  {% if sync_group.notify_backup is defined %}
+  notify_backup "{{ sync_group.notify_backup }}"
+  {% endif %}
+  {% if sync_group.notify_fault is defined %}
+  notify_fault "{{ sync_group.notify_fault }}"
+  {% endif %}
+}
+{% endfor %}
+
+{% if keepalived_scripts is defined %}
+{% for name, details in keepalived_scripts.items() %}
+vrrp_script {{ name }} {
+  script "{{ details.check_script }}"
+  interval {{ details.interval | default(5) }}   # checking every {{ details.interval | default(5) }} seconds (default: 5 seconds)
+  fall {{ details.fall | default(3) }}           # require {{ details.fall | default(3) }} failures for KO (default: 3)
+  rise {{ details.rise | default(6) }}           # require {{ details.rise | default(6) }} successes for OK (default: 6)
+  {% if details.timeout is defined %}
+  timeout {{ details.timeout }}                  # allow scripts like ping to succeed, before timing out
+  {% endif %}
+}
+{% endfor %}
+{% endif %}
+
+{% for name, instance in keepalived_instances.items() %}
+vrrp_instance {{ name }} {
+  interface {{ instance.interface }}
+  state {{ instance.state }}
+  virtual_router_id {{ instance.virtual_router_id }}
+  priority {{ instance.priority }}
+  {% if instance.nopreempt is defined and instance.nopreempt | bool %}
+  nopreempt                                        # Override VRRP RFC preemption default
+  {% endif %}
+  {% if instance.preempt_delay is defined %}
+  preempt_delay {{ instance.preempt_delay }}       # Seconds after startup until preemption. 0 (default) to 1,000.
+  {% endif %}
+  {% if instance.authentication_password is defined %}
+  authentication {
+    auth_type PASS
+    auth_pass {{instance.authentication_password}}
+  }
+  {% endif %}
+  {% if instance.unicast_src_ip is defined and instance.unicast_peers|length > 0 %}
+  unicast_src_ip {{ instance.unicast_src_ip }}
+  unicast_peer {
+  {% for peer in instance.unicast_peers %}
+    {{ peer }}
+  {% endfor %}
+  }
+  {% endif %}
+  virtual_ipaddress {
+    {% for vip in instance.vips %}
+    {{ vip }}
+    {% endfor %}
+  }
+  {% if instance.virtual_routes is defined %}
+  virtual_routes {
+  {% for route in instance.virtual_routes %}
+    {{ route }}
+  {% endfor %}
+  }
+  {% endif %}
+  {% if instance.track_scripts is defined %}
+  track_script {
+    {% for track_script in instance.track_scripts %}
+    {{ track_script }}
+    {% endfor %}
+  }
+  {% endif %}
+
+  {% if instance.track_interfaces is defined %}
+  track_interface {
+    {% for track_interface in instance.track_interfaces %}
+    {{ track_interface }}
+    {% endfor %}
+  }
+  {% endif %}
+
+  {% if instance.notify_script is defined %}
+  notify "{{ instance.notify_script }}"
+  {% endif %}
+  {% if instance.notify_master is defined %}
+  notify_master "{{ instance.notify_master }}"
+  {% endif %}
+  {% if instance.notify_backup is defined %}
+  notify_backup "{{ instance.notify_backup }}"
+  {% endif %}
+  {% if instance.notify_fault is defined %}
+  notify_fault "{{ instance.notify_fault }}"
+  {% endif %}
+  {% if instance.notify_stop is defined %}
+  notify_stop "{{ instance.notify_stop }}"
+  {% endif %}
+}
+{% endfor %}
+
+{% if keepalived_virtual_servers is defined %}
+{% for vserver in keepalived_virtual_servers %}
+virtual_server {{ vserver.ip }} {{ vserver.port }} {
+  ip_family {{ vserver.ip_family | default('inet') }}
+  {% if vserver.delay_loop is defined %}
+  delay_loop {{ vserver.delay_loop }}
+  {% endif %}
+  lvs_sched {{ vserver.lvs_sched | default ('rr') }}
+  lvs_method {{ vserver.lvs_method | default ('DR') }}
+  protocol {{ vserver.protocol | default ('TCP') }}
+  {% if vserver.ha_suspend is defined and vserver.ha_suspend %}
+  ha_suspend
+  {% endif %}
+
+  {% for rserver in vserver.real_servers %}
+  real_server {{ rserver.ip }} {{ rserver.port }} {
+    {% if rserver.misc_check is defined %}
+    {% for mcheck in rserver.misc_check %}
+    MISC_CHECK {
+      misc_path "{{ mcheck.misc_path }}"
+      misc_timeout {{ mcheck.misc_timeout | default('3') }}
+      {% if mcheck.warmup is defined and mcheck.warmup %}
+      warmup {{ mcheck.warmup }}
+      {% endif %}
+      {% if mcheck.misc_dynamic is defined and mcheck.misc_dynamic %}
+      misc_dynamic
+      {% endif %}
+    }
+    {% endfor %}
+    {% endif %}
+  }
+  {% endfor %}
+
+}
+{% endfor %}
+{% endif %}

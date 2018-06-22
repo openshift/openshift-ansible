@@ -1,0 +1,2 @@
+- Starting from 2.0, you must use keepalived_use_external_repo instead of keepalived_use_latest_stable_ppa in order to use an external repository
+- Starting from 2.0, the external repo is hard set for the user.
