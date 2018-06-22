@@ -47,6 +47,10 @@ spec:
         - --feature-gates
         - AsyncBindingOperations=true
 {% endif %}
+{% if openshift_ephemeralstorage_enabled |default(false) | bool %}
+        - --feature-gates
+        - LocalStorageCapacityIsolation={{ openshift_ephemeralstorage_enabled }}
+{% endif %}
         image: {{ openshift_service_catalog_image }}
         command: ["/usr/bin/service-catalog"]
         imagePullPolicy: IfNotPresent

@@ -21,6 +21,7 @@ From this role:
 | oreg_url                                 | UNDEF (Optional)      | Default docker registry to use                           |
 | oreg_url_node                            | UNDEF (Optional)      | Default docker registry to use, specifically on the node |
 | openshift_persistentlocalstorage_enabled | false                 | Enable the persistent local storage                      |
+| openshift_ephemeralstorage_enabled          | false              | Enable ephemeral storage accounting                      |
 
 openshift_node_start_options can be used for passing any start node option, e.g.:
 

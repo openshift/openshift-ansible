@@ -39,7 +39,7 @@ kubeletArguments:
   bootstrap-kubeconfig:
   - /etc/origin/node/bootstrap.kubeconfig
   feature-gates:
-  - RotateKubeletClientCertificate=true,RotateKubeletServerCertificate=true
+  - "RotateKubeletClientCertificate=true,RotateKubeletServerCertificate=true{% if (openshift_node_group_use_ephemeralstorage) %},LocalStorageCapacityIsolation={{openshift_node_group_use_ephemeralstorage}}{% endif %}"
 {% if openshift_node_group_use_persistentlocalvolumes | bool %}
   - PersistentLocalVolumes=true
   - VolumeScheduling=true

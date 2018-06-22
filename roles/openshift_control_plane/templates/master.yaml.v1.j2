@@ -77,20 +77,26 @@ kubernetesMasterConfig:
     - etcd3
     storage-media-type:
     - application/vnd.kubernetes.protobuf
-{% if openshift_master_use_persistentlocalvolumes | bool %}
+{% if (openshift_master_use_persistentlocalvolumes | bool) or (openshift_master_use_ephemeralstorage | bool) %}
     feature-gates:
+{% if (openshift_master_use_persistentlocalvolumes | bool) %}
     - PersistentLocalVolumes=true
     - VolumeScheduling=true
+{% endif %}
+{% if (openshift_master_use_ephemeralstorage | bool) %}
+    - LocalStorageCapacityIsolation={{ openshift_master_use_ephemeralstorage }}
+{% endif %}
 {% endif %}
   controllerArguments: {{ openshift.master.controller_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
-{% if openshift_is_atomic | bool %}
-    flex-volume-plugin-dir:
-    - "{{ openshift_flexvolume_container_directory_default }}/volume/exec"
-{% endif %}
-{% if openshift_master_use_persistentlocalvolumes | bool %}
+{% if (openshift_master_use_persistentlocalvolumes | bool) or (openshift_master_use_ephemeralstorage | bool) %}
     feature-gates:
+{% if (openshift_master_use_persistentlocalvolumes | bool) %}
     - PersistentLocalVolumes=true
     - VolumeScheduling=true
+{% endif %}
+{% if (openshift_master_use_ephemeralstorage | bool) %}
+    - LocalStorageCapacityIsolation={{ openshift_master_use_ephemeralstorage }}
+{% endif %}
 {% endif %}
   masterCount: {{ openshift_master_count | default(groups.oo_masters | length) }}
   masterIP: {{ openshift.common.ip }}

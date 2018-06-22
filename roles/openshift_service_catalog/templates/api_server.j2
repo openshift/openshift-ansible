@@ -46,7 +46,7 @@ spec:
         - --enable-admission-plugins
         - KubernetesNamespaceLifecycle,DefaultServicePlan,ServiceBindingsLifecycle,ServicePlanChangeValidator,BrokerAuthSarCheck
         - --feature-gates
-        - OriginatingIdentity=true
+        - OriginatingIdentity=true{% if use_ephemeralstorage | bool %},LocalStorageCapacityIsolation={{ use_ephemeralstorage }}{% endif %}
         image: {{ openshift_service_catalog_image }}
         command: ["/usr/bin/service-catalog"]
         imagePullPolicy: IfNotPresent
