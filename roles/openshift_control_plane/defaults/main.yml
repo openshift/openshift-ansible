@@ -111,7 +111,7 @@ r_openshift_master_use_kuryr: "{{ r_openshift_master_use_kuryr_default }}"
 r_openshift_master_data_dir_default: "{{ openshift_data_dir | default('/var/lib/origin') }}"
 r_openshift_master_data_dir: "{{ r_openshift_master_data_dir_default }}"
 
-r_openshift_master_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
+r_openshift_master_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name }}"
 r_openshift_master_sdn_network_plugin_name: "{{ r_openshift_master_sdn_network_plugin_name_default }}"
 
 openshift_master_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"

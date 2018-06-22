@@ -181,7 +181,7 @@ journald_vars_to_replace:
 openshift_node_use_openshift_sdn_default: "{{ openshift_use_openshift_sdn | default(True) }}"
 openshift_node_use_openshift_sdn: "{{ openshift_node_use_openshift_sdn_default }}"
 
-openshift_node_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name | default('redhat/openshift-ovs-subnet') }}"
+openshift_node_sdn_network_plugin_name_default: "{{ os_sdn_network_plugin_name }}"
 openshift_node_sdn_network_plugin_name: "{{ openshift_node_sdn_network_plugin_name_default }}"
 
 openshift_node_use_calico_default: "{{ openshift_use_calico | default(False) }}"
