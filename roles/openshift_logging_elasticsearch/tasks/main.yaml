@@ -200,6 +200,7 @@
   vars:
     allow_cluster_reader: "{{ openshift_logging_elasticsearch_ops_allow_cluster_reader | lower | default('false') }}"
     es_kibana_index_mode: "{{ openshift_logging_elasticsearch_kibana_index_mode | default('unique') }}"
+    es_unicast_host: "logging-{{ es_component }}-cluster"
   changed_when: no
 
 # create diff between current configmap files and our current files
@@ -289,6 +290,9 @@
     state: present
     name: "logging-{{ es_component }}-cluster"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    clusterip: 'None'
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
     selector:
       component: "{{ es_component }}"
       provider: openshift
@@ -296,6 +300,16 @@
       logging-infra: 'support'
     ports:
     - port: 9300
+
+# equivalent to the unready-endpoints annotation
+- name: Edit logging-{{ es_component }}-cluster service
+  oc_edit:
+    state: present
+    kind: service
+    name: "logging-{{ es_component }}-cluster"
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    content:
+      spec.publishNotReadyAddresses: "{{ true | bool }}"
 
 - name: Set logging-{{ es_component }} service
   oc_service:
