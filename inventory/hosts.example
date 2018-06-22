@@ -196,7 +196,7 @@ debug_level=2
 
 # If the image for etcd needs to be pulled from anywhere else than registry.access.redhat.com, e.g. in
 # a disconnected and containerized installation, use osm_etcd_image to specify the image to use:
-#osm_etcd_image=rhel7/etcd
+#osm_etcd_image=registry.example.com/rhel7/etcd
 
 # htpasswd auth
 #openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
