@@ -77,6 +77,12 @@
     with_items:
     - { regexp: '^ResourceDisk\.Format=', line: 'ResourceDisk.Format=n' }
 
+  - name: persist oreg_url
+    copy:
+      dest: "/etc/origin/oreg_url"
+      content: |
+        "{{ oreg_url }}"
+
   - name: run waagent deprovision
     shell: sleep 2 && waagent -deprovision+user -force
     async: 1
