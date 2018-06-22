@@ -76,6 +76,7 @@ class OCBaseCommand(object):
         try:
             process = Popen(cmd, stdout=PIPE, stderr=PIPE)   # noqa: F405
             out, err = process.communicate(cmd)
+            err = err.decode(encoding='utf8', errors='replace')
             if len(err) > 0:
                 if 'not found' in err:
                     return {'items': []}
