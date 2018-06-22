@@ -6,3 +6,7 @@
 - name: restart docker
   become: yes
   systemd: name=docker state=restarted
+
+- name: save iptable rules
+  become: yes
+  command: 'iptables-save'
