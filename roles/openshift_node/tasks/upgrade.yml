@@ -39,7 +39,7 @@
   with_items:
   - "/etc/cni/net.d/200-loopback.conf"
   - "/etc/cni/net.d/100-crio-bridge.conf"
-  when: crio_update | changed
+  when: crio_update is changed
 
 - name: install pre-pulled rpms.
   import_tasks: upgrade/rpm_upgrade_install.yml
