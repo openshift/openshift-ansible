@@ -52,3 +52,15 @@
     -g "{{ image_resource_group }}"
     -n "{{ image_name }}"
     --tags {% for k in final_tags %}{{ k }}={{ final_tags[k] }} {% endfor %}
+
+- name: log image resource group and name
+  debug:
+    msg: "{{ item }}"
+  with_items:
+  - "Resource group: {{ image_resource_group }}"
+  - "Image name: {{ image_name }}"
+
+- name: log image tag information
+  debug:
+    msg: "{{ item.key }}: {{ item.value }}"
+  with_dict: "{{ final_tags }}"
