@@ -64,7 +64,11 @@
       - "{{ openshift.common.config_base }}/node/certificates"
     - key: kubeletArguments.feature-gates
       value:
+{% if openshift_node_use_ephemeralstorage | bool %}
+      - RotateKubeletClientCertificate=true,RotateKubeletServerCertificate=true,LocalStorageCapacityIsolation=true
+{% else %}
       - RotateKubeletClientCertificate=true,RotateKubeletServerCertificate=true
+{% endif %}
     - key: masterKubeConfig
       value: node.kubeconfig
 

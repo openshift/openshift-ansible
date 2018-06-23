@@ -47,6 +47,10 @@ spec:
         - KubernetesNamespaceLifecycle,DefaultServicePlan,ServiceBindingsLifecycle,ServicePlanChangeValidator,BrokerAuthSarCheck
         - --feature-gates
         - OriginatingIdentity=true
+{% if openshift_master_use_ephemeralstorage | bool %}
+        - --feature-gates
+        - LocalStorageCapacityIsolation=true
+{% endif %}
         image: {{ openshift_service_catalog_image }}
         command: ["/usr/bin/service-catalog"]
         imagePullPolicy: IfNotPresent
