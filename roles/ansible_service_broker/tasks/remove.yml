@@ -99,11 +99,11 @@
 
 - name: remove custom resource definitions for asb
   oc_obj:
-    name: '{{ crd.metadata.name }}'
+    name: '{{ asb_crd.metadata.name }}'
     kind: CustomResourceDefinition
     state: absent
   vars:
-    crd: "{{ lookup('file', item) | from_yaml }}"
+    asb_crd: "{{ lookup('file', item) | from_yaml }}"
   with_fileglob:
     - 'files/*.automationbroker.io.yaml'
 
