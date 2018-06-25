@@ -97,6 +97,18 @@
   - debug:
       msg: "{{ deploy.stderr }}"
 
+  # This code attempts to persist the data to /var/tmp which is bind
+  # mounted into the calling container.  This enables the CI to reuse
+  # the cluster created in the previous steps to perform the e2e tests
+  - name: persist the parameters file
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    when: openshift_ci_persist_artifacts | default(False)
+    with_items:
+    - src: "{{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}/apimodel.json"
+      dest: "/var/tmp/{{ openshift_azure_resource_group_name }}.json"
+
   - name: delete temporary directory
     file:
       path: "{{ tmp.path }}"
