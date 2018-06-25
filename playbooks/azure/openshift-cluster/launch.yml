@@ -15,8 +15,8 @@
       url: "{{ item }}"
       dest: "{{ tmp.path }}/"
     with_list:
-    - "http://acs-engine-build-acs-engine-build.svc.ci.openshift.org/acs-engine"
-    - "http://acs-engine-build-acs-engine-build.svc.ci.openshift.org/openshift.json"
+    - "http://acs-engine-build-azure.svc.ci.openshift.org/acs-engine"
+    - "http://acs-engine-build-azure.svc.ci.openshift.org/openshift.json"
 
   - name: make acs-engine executable
     file:
