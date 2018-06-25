@@ -35,9 +35,9 @@ IMAGE_TAG_REGEX = {'origin': ORIGIN_TAG_REGEX,
                    'openshift-enterprise': ENTERPRISE_TAG_REGEX}
 
 PKG_VERSION_REGEX_ERROR = """openshift_pkg_version must be in the format
--3.#.#[-optional.release]. Examples: -3.6.0, -3.7.0-0.126.0.git.0.9351aae.el7 -3.11*
+-[optional.release]. Examples: -3.6.0, -3.7.0-0.126.0.git.0.9351aae.el7 -3.11*
 You specified openshift_pkg_version={}"""
-PKG_VERSION_REGEX = {'re': '((^-\\d+\\.\\d+\\.\\d+((-\\d+.*))?$)|(.*\\*$))',
+PKG_VERSION_REGEX = {'re': '(^-.*)',
                      'error_msg': PKG_VERSION_REGEX_ERROR}
 
 RELEASE_REGEX_ERROR = """openshift_release must be in the format
