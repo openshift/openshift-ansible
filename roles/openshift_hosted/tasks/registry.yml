@@ -13,8 +13,13 @@
     openshift_hosted_registry_storage_glusterfs_ips: "{%- set gluster_ips = [] %}{% if groups.glusterfs_registry is defined %}{% for node in groups.glusterfs_registry %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% elif groups.glusterfs is defined %}{% for node in groups.glusterfs %}{%- set _ = gluster_ips.append(hostvars[node].glusterfs_ip | default(hostvars[node].openshift.common.ip)) %}{% endfor %}{{ gluster_ips }}{% else %}{{ openshift_hosted_registry_storage_glusterfs_ips }}{% endif %}"
 
 - name: Update registry environment variables when pushing via dns
+  # OPENSHIFT_DEFAULT_REGISTRY is deprecated - keep until 3.11
   set_fact:
-    openshift_hosted_registry_env_vars: "{{ openshift_hosted_registry_env_vars | combine({'REGISTRY_OPENSHIFT_SERVER_ADDR':'docker-registry.default.svc:5000'}) }}"
+    openshift_hosted_registry_env_vars: "{{ {'OPENSHIFT_DEFAULT_REGISTRY': item,
+                                             'REGISTRY_OPENSHIFT_SERVER_ADDR': item}
+                                           | combine(openshift_hosted_registry_env_vars) }}"
+  with_items:
+  - "docker-registry.default.svc:5000"
   when: openshift_push_via_dns | bool
 
 - name: Update registry proxy settings for dc/docker-registry

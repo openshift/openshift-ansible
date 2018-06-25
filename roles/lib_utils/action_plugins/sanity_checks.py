@@ -2,10 +2,14 @@
 Ansible action plugin to ensure inventory variables are set
 appropriately and no conflicting options have been provided.
 """
+import json
 import re
 
 from ansible.plugins.action import ActionBase
 from ansible import errors
+# pylint: disable=import-error,no-name-in-module
+from ansible.module_utils.six.moves.urllib.parse import urlparse
+
 
 # Valid values for openshift_deployment_type
 VALID_DEPLOYMENT_TYPES = ('origin', 'openshift-enterprise')
@@ -42,6 +46,9 @@ STORAGE_KIND_TUPLE = (
     'openshift_prometheus_alertbuffer_storage_kind',
     'openshift_prometheus_alertmanager_storage_kind',
     'openshift_prometheus_storage_kind')
+
+IMAGE_POLICY_CONFIG_VAR = "openshift_master_image_policy_config"
+ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_import"
 
 REMOVED_VARIABLES = (
     # TODO(michaelgugino): Remove these in 3.11
@@ -156,6 +163,79 @@ class ActionModule(ActionBase):
             msg = "openshift_deployment_type must be defined and one of {}".format(type_strings)
             raise errors.AnsibleModuleError(msg)
         return openshift_deployment_type
+
+    def get_allowed_registries(self, hostvars, host):
+        """Returns a list of configured allowedRegistriesForImport as a list of patterns"""
+        allowed_registries_for_import = self.template_var(hostvars, host, ALLOWED_REGISTRIES_VAR)
+        if allowed_registries_for_import is None:
+            image_policy_config = self.template_var(hostvars, host, IMAGE_POLICY_CONFIG_VAR)
+            if not image_policy_config:
+                return image_policy_config
+
+            if isinstance(image_policy_config, str):
+                try:
+                    image_policy_config = json.loads(image_policy_config)
+                except Exception:
+                    raise errors.AnsibleModuleError(
+                        "{} is not a valid json string".format(IMAGE_POLICY_CONFIG_VAR))
+
+            if not isinstance(image_policy_config, dict):
+                raise errors.AnsibleModuleError(
+                    "expected dictionary for {}, not {}".format(
+                        IMAGE_POLICY_CONFIG_VAR, type(image_policy_config)))
+
+            detailed = image_policy_config.get("allowedRegistriesForImport", None)
+            if not detailed:
+                return detailed
+
+            if not isinstance(detailed, list):
+                raise errors.AnsibleModuleError("expected list for {}['{}'], not {}".format(
+                    IMAGE_POLICY_CONFIG_VAR, "allowedRegistriesForImport",
+                    type(allowed_registries_for_import)))
+
+            try:
+                return [i["domainName"] for i in detailed]
+            except Exception:
+                raise errors.AnsibleModuleError(
+                    "each item of allowedRegistriesForImport must be a dictionary with 'domainName' key")
+
+        if not isinstance(allowed_registries_for_import, list):
+            raise errors.AnsibleModuleError("expected list for {}, not {}".format(
+                IMAGE_POLICY_CONFIG_VAR, type(allowed_registries_for_import)))
+
+        return allowed_registries_for_import
+
+    def check_whitelisted_registries(self, hostvars, host):
+        """Ensure defined registries are whitelisted"""
+        allowed = self.get_allowed_registries(hostvars, host)
+        if allowed is None:
+            return
+
+        unmatched_registries = []
+        for regvar in (
+                "oreg_url_master", "oreg_url_node", "oreg_url"
+                "openshift_cockpit_deployer_prefix",
+                "openshift_metrics_image_prefix",
+                "openshift_logging_image_prefix",
+                "openshift_service_catalog_image_prefix",
+                "openshift_docker_insecure_registries"):
+            value = self.template_var(hostvars, host, regvar)
+            if not value:
+                continue
+            if isinstance(value, list):
+                registries = value
+            else:
+                registries = [value]
+
+            for reg in registries:
+                if not any(is_registry_match(reg, pat) for pat in allowed):
+                    unmatched_registries.append((regvar, reg))
+
+        if unmatched_registries:
+            registry_list = ", ".join(["{}:{}".format(n, v) for n, v in unmatched_registries])
+            raise errors.AnsibleModuleError(
+                "registry hostnames of the following image prefixes are not whitelisted by image"
+                " policy configuration: {}".format(registry_list))
 
     def check_python_version(self, hostvars, host, distro):
         """Ensure python version is 3 for Fedora and python 2 for others"""
@@ -311,6 +391,7 @@ class ActionModule(ActionBase):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
         odt = self.check_openshift_deployment_type(hostvars, host)
+        self.check_whitelisted_registries(hostvars, host)
         self.check_python_version(hostvars, host, distro)
         self.check_image_tag_format(hostvars, host, odt)
         self.network_plugin_check(hostvars, host)
@@ -363,3 +444,34 @@ class ActionModule(ActionBase):
         result["msg"] = "Sanity Checks passed"
 
         return result
+
+
+def is_registry_match(item, pattern):
+    """returns True if the registry matches the given whitelist pattern
+
+    Unlike in OpenShift, the comparison is done solely on hostname part
+    (excluding the port part) since the latter is much more difficult due to
+    vague definition of port defaulting based on insecure flag. Moreover, most
+    of the registries will be listed without the port and insecure flag.
+    """
+    item = "schema://" + item.split('://', 1)[-1]
+    return is_match(urlparse(item).hostname, pattern.rsplit(':', 1)[0])
+
+
+# taken from https://leetcode.com/problems/wildcard-matching/discuss/17845/python-dp-solution
+# (the same source as for openshift/origin/pkg/util/strings/wildcard.go)
+def is_match(item, pattern):
+    """implements DP algorithm for string matching"""
+    length = len(item)
+    if len(pattern) - pattern.count('*') > length:
+        return False
+    matches = [True] + [False] * length
+    for i in pattern:
+        if i != '*':
+            for index in reversed(range(length)):
+                matches[index + 1] = matches[index] and (i == item[index] or i == '?')
+        else:
+            for index in range(1, length + 1):
+                matches[index] = matches[index - 1] or matches[index]
+        matches[0] = matches[0] and i == '*'
+    return matches[-1]

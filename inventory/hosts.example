@@ -101,6 +101,8 @@ debug_level=2
 # Configure imagePolicyConfig in the master config
 # See: https://docs.openshift.org/latest/admin_guide/image_policy.html
 #openshift_master_image_policy_config={"maxImagesBulkImportedPerRepository": 3, "disableScheduledImport": true}
+# This setting overrides allowedRegistriesForImport in openshift_master_image_policy_config. By default, all registries are allowed.
+#openshift_master_image_policy_allowed_registries_for_import=["docker.io", "*.docker.io", "*.redhat.com", "gcr.io", "quay.io", "registry.centos.org", "registry.redhat.io", "*.amazonaws.com"]
 
 # Configure master API rate limits for external clients
 #openshift_master_external_ratelimit_qps=200
