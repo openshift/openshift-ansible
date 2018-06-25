@@ -1,4 +1,9 @@
 ---
+- openshift_facts:
+    role: master
+    local_facts:
+      cluster_hostname: "{{ openshift_master_cluster_hostname | default(None) }}"
+
 - name: Configure Proxy Settings
   lineinfile:
     dest: /etc/sysconfig/{{ openshift_service_type }}-node
