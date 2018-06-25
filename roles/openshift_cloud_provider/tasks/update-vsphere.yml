@@ -15,4 +15,6 @@
     - key: kubernetesMasterConfig.apiServerArguments.cloud-provider
       value:
       - vsphere
-  notify: restart master
+  notify:
+    - restart master api
+    - restart master controllers

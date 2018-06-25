@@ -12,6 +12,7 @@
   template:
     src: "{{ item }}.j2"
     dest: "/usr/local/bin/{{ openshift_service_type }}-{{ item }}"
+    mode: 0755
   with_items:
   - master-api
   - master-controllers
