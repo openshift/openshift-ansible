@@ -26,6 +26,7 @@ def test_template_var(hostvars, host, varname, result):
     ({"example.com": {"openshift_pkg_version": "-3.7.0-0.126.0.git.0.9351aae.el7"}}, "example.com", None),
     ({"example.com": {"openshift_pkg_version": "-3.9.0-2.fc28"}}, "example.com", None),
     ({"example.com": {"openshift_pkg_version": "-3.11*"}}, "example.com", None),
+    ({"example.com": {"openshift_pkg_version": "-3"}}, "example.com", None),
 ])
 def test_valid_check_pkg_version_format(hostvars, host, result):
     task = FakeTask('sanity_checks', {'checks': []})
@@ -36,7 +37,6 @@ def test_valid_check_pkg_version_format(hostvars, host, result):
 
 @pytest.mark.parametrize('hostvars, host, result', [
     ({"example.com": {"openshift_pkg_version": "3.11.0"}}, "example.com", None),
-    ({"example.com": {"openshift_pkg_version": "-3.11"}}, "example.com", None),
     ({"example.com": {"openshift_pkg_version": "v3.11.0"}}, "example.com", None),
 ])
 def test_invalid_check_pkg_version_format(hostvars, host, result):
