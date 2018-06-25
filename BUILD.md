@@ -18,6 +18,7 @@ tito build --test --rpm
 ```
 tito tag
 ```
+
 - Follow the on screen tito instructions to push the tags
 - Build a new package based on the latest tag information
 ```
