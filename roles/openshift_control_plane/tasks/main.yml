@@ -45,6 +45,12 @@
     path: "/etc/origin/master"
     state: directory
 
+- name: Create flexvolume directory when containerized
+  file:
+    state: directory
+    path: "{{ openshift_flexvolume_container_directory_default }}/volume/exec"
+    mode: '0750'
+
 - name: Create the policy file if it does not already exist
   command: >
     {{ openshift_client_binary }} adm create-bootstrap-policy-file
