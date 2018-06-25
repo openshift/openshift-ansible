@@ -87,6 +87,7 @@ openshift_openstack_private_network: >-
   {%- else -%}
   {{ openshift_openstack_private_network_name | default ('openshift-ansible-' + openshift_openstack_stack_name + '-net') }}
   {%- endif -%}
+openshift_openstack_node_run_bootstrap_startup: true
 openshift_openstack_master_server_group_policies: []
 openshift_openstack_infra_server_group_policies: []
 openshift_openstack_docker_volume_size: 15

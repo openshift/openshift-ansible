@@ -15,6 +15,7 @@ Environment variables may also be used.
 * [Stack Name Configuration](#stack-name-configuration)
 * [DNS Configuration](#dns-configuration)
 * [All-in-one Deployment Configuration](#all-in-one-deployment-configuration)
+* [Building Node Images](#building-node-images)
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
@@ -308,6 +309,43 @@ this new group to it.
 Note that the "all in one" node must be the "master". openshift-ansible
 expects at least one node in the `masters` Ansible group.
 
+
+## Building Node Images
+
+It is possible to build the OpenShift images in advance (instead of installing
+the dependencies during the deployment). This will reduce the disk and network
+throughput as well as speed up the installation.
+
+To do this, the inventory must already exist and be configured.
+
+Set the `openshift_openstack_default_image_name` value in
+`inventory/group_vars/all.yml` to a name you want this new image to be called
+(e.g. `origin-node`). This name must not exist in OpenStack yet.
+
+Next, set `openshift_openstack_build_base_image` to a name of an *existing*
+image that you want to use as a base. This should be the cloud image you would
+normally use for the deployment.
+
+And finally, run the `build_image.yml` playbook:
+
+    ansible-playbook -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/build_image.yml
+
+This will create a temporary Neutron network, subnet and router, launch a
+server in that subnet, install all the packages and pull the necessary
+container images and upload an image with the name set in
+`openshift_openstack_default_image_name`.
+
+All the extra OpenStack resources (network, subnet, router) will then be
+deleted.
+
+Note that the subnet's CIDR will be `192.168.23.0/24`. If you need to use a
+different value, set `openshift_openstack_build_network_cidr` before running
+the `build_image` playbook.
+
+If you don't want to be setting the build variables in your inventory, you can
+pass them to ansible-playbook directly:
+
+    ansible-playbook -i inventory openshift-ansible/playbooks/openstack/openshift-cluster/build_image.yml -e openshift_openstack_build_base_image=CentOS-7-x86_64-GenericCloud-1805 -e openshift_openstack_build_network_cidr=192.168.42.0/24
 
 
 ## Kuryr Networking Configuration
