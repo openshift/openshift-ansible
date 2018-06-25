@@ -148,6 +148,7 @@
     - iptables-services
     - bridge-utils
     - bash-completion
+    - atomic
   - name: Clean yum metadata
     command: yum clean all
     args:
