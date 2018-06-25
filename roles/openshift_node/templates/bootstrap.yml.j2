@@ -25,9 +25,8 @@
     with_items: "{{ origin_dns.lines }}"
 
   - when:
-    - openshift_group_type is defined
-    - openshift_group_type != ''
-    - openshift_group_type != 'master'
+    - openshift_node_config_name is defined
+    - openshift_node_config_name != ''
     block:
     - name: determine the openshift_service_type
       stat:
