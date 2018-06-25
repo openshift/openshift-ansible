@@ -43,14 +43,14 @@
 
     - name: Create custom resource definitions for asb
       oc_obj:
-        name: '{{ crd.metadata.name }}'
+        name: '{{ asb_crd.metadata.name }}'
         kind: CustomResourceDefinition
         state: present
         content:
-          path: /tmp/{{ crd.metadata.name }}
-          data: '{{ crd }}'
+          path: /tmp/{{ asb_crd.metadata.name }}
+          data: '{{ asb_crd }}'
       vars:
-        crd: "{{ lookup('file', item) | from_yaml }}"
+        asb_crd: "{{ lookup('file', item) | from_yaml }}"
       with_fileglob:
         - 'files/*.automationbroker.io.yaml'
 
