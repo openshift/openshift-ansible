@@ -1,0 +1,25 @@
+apiVersion: "elasticsearch.redhat.com/v1alpha1"
+kind: "Elasticsearch"
+metadata:
+  name: "elastic1"
+spec:
+  nodeSpec:
+    image: docker.io/t0ffel/elasticsearch5
+  nodes:
+    - roles:
+      - master
+      replicas: 1
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          memory: 512Mi
+    - roles:
+      - client
+      - data
+      replicas: 1
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          memory: 512Mi

@@ -1,0 +1,9 @@
+---
+- set_fact:
+    es_component: "{{ 'es' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '') ) }}"
+
+- oc_obj:
+    state: absent
+    kind: "dc"
+    namespace: "{{ openshift_logging_namespace }}"
+    selector: "logging-infra=logging-{{ es_component }}"

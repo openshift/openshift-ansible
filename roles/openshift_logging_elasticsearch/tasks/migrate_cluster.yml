@@ -7,7 +7,7 @@
 
 - template:
     src: operator_adopt.j2
-    dest: "{{ mktemp.stdout }}/operator_adopt.yml"
+    dest: "{{ tempdir }}/operator_adopt.yml"
   vars:
     es_cluster_nodes: "{{ openshift_logging_facts[es_fact_name]['deploymentconfigs'].values() | list }}"
     es_additional_nodes: "{{ openshift_logging_elasticsearch_replica_count | int - openshift_logging_facts[es_fact_name]['deploymentconfigs'].keys() | count }}"
@@ -20,5 +20,3 @@
     pvc_size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
     pvc_access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
     pvc_storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
-
-- debug: var={{ blah.blah }}
