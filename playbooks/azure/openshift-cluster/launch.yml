@@ -86,6 +86,7 @@
         --auth-method client_secret \
         --client-id {{ lookup('env', 'AZURE_CLIENT_ID') }} \
         --client-secret {{ lookup('env', 'AZURE_SECRET') }} \
+        --output-directory {{ tmp.path }}/deploy \
         {{ tmp.path }}/openshift.json
     no_log: true
     ignore_errors: yes
@@ -100,14 +101,11 @@
   # This code attempts to persist the data to /var/tmp which is bind
   # mounted into the calling container.  This enables the CI to reuse
   # the cluster created in the previous steps to perform the e2e tests
-  - name: persist the parameters file
+  - name: persist the acs-engine generated artifacts
     copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
+      src: "{{ tmp.path }}/deploy"
+      dest: /var/tmp/
     when: openshift_ci_persist_artifacts | default(False)
-    with_items:
-    - src: "{{ tmp.path }}/_output/{{ openshift_azure_resource_group_name }}/apimodel.json"
-      dest: "/var/tmp/{{ openshift_azure_resource_group_name }}.json"
 
   - name: delete temporary directory
     file:
