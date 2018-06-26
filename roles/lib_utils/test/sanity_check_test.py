@@ -71,6 +71,34 @@ def test_invalid_check_release_format(hostvars, host, result):
         plugin.check_release_format(hostvars, host)
 
 
+@pytest.mark.parametrize('hostvars, host, result', [
+    ({"example.com": {"openshift_builddefaults_json": "{}"}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '[]'}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '{"a": []}'}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '{"a": [], "b": "c"}'}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '{"a": [], "b": {"c": "d"}}'}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '["a", "b", "c"]'}}, "example.com", None),
+    ({"example.com": {"NOT_IN_JSON_FORMAT_VARIABLES": '{"invalid"}'}}, "example.com", None),
+])
+def test_valid_valid_json_format_vars(hostvars, host, result):
+    task = FakeTask('sanity_checks', {'checks': []})
+    plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
+    check = plugin.validate_json_format_vars(hostvars, host)
+    assert check == result
+
+
+@pytest.mark.parametrize('hostvars, host, result', [
+    ({"example.com": {"openshift_builddefaults_json": '{"a"}'}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '{"a": { '}}, "example.com", None),
+    ({"example.com": {"openshift_builddefaults_json": '{"a": [ }'}}, "example.com", None),
+])
+def test_invalid_valid_json_format_vars(hostvars, host, result):
+    with pytest.raises(errors.AnsibleModuleError):
+        task = FakeTask('sanity_checks', {'checks': []})
+        plugin = ActionModule(task, None, PlayContext(), None, Templar(None, None, None), None)
+        plugin.validate_json_format_vars(hostvars, host)
+
+
 def fake_execute_module(*args):
     raise AssertionError('this function should not be called')
 
