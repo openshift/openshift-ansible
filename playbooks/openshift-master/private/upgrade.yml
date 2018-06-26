@@ -140,6 +140,11 @@
     import_role:
       name: openshift_control_plane
       tasks_from: static.yml
+  - name: Copy systemd shims
+    import_role:
+      name: openshift_control_plane
+      tasks_from: systemd_units.yml
+
 
   - import_tasks: tasks/restart_hosts.yml
     when: openshift_rolling_restart_mode | default('services') == 'system'
