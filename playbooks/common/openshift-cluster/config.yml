@@ -1,6 +1,8 @@
 ---
 - include: ../openshift-checks/install.yml
 
+- include: ../openshift-master/clean_preinstalled_conf.yml
+
 - include: ../openshift-etcd/config.yml
 
 - include: ../openshift-nfs/config.yml
