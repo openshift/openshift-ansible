@@ -90,14 +90,12 @@ spec:
         volumeMounts:
         - mountPath: "/root/go/src/github.com/grafana/grafana/data"
           name: grafana-data
-        - mountPath: "/root/go/src/github.com/grafana/grafana/conf"
+        - mountPath: "/usr/share/grafana/conf"
           name: grafana-config
         - mountPath: /etc/tls/private
           name: grafana-tls-secret
         - mountPath: /etc/proxy/secrets
           name: grafana-proxy-secrets
-        command:
-         - "./bin/grafana-server"
 
       volumes:
       - name: grafana-config

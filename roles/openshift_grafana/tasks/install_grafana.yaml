@@ -164,7 +164,7 @@
 
 - name: set facts
   set_fact:
-    payload_data: "{{ grafana_datasource_json | regex_replace('grafana_name', grafana_datasource_name ) | regex_replace('prometheus_url', prometheus_route.results[0].spec.host ) | regex_replace('satoken',  prometheus_sa_token.stdout ) }}"
+    payload_data: "{{ grafana_datasource_json | regex_replace('grafana_name', grafana_datasource_name ) | regex_replace('prometheus_url', prometheus_route.results[0].spec.host ) | regex_replace('Bearer',  'Bearer ' + prometheus_sa_token.stdout) }}"
     grafana_route: "https://{{ grafana_route.results[0].spec.host }}"
 
 - name: Add new datasource to grafana
