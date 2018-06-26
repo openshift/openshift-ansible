@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: elasticsearch-operator
+  template:
+    metadata:
+      labels:
+        name: elasticsearch-operator
+    spec:
+      containers:
+        - name: elasticsearch-operator
+          image: quay.io/t0ffel/elasticsearch-operator
+          command:
+          - elasticsearch-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
