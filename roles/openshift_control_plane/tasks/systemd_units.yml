@@ -12,3 +12,12 @@
   - master-etcd.service
   notify:
   - reload systemd units
+
+- name: Enable service files
+  service:
+    name: "{{ openshift_service_type }}-{{ item }}"
+    enabled: true
+  with_items:
+  - master-api
+  - master-controllers
+  - master-etcd
