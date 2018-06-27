@@ -6,11 +6,10 @@ After=docker.service
 [Service]
 Type=simple
 TimeoutStartSec=10m
-ExecStart="/usr/local/bin/{{ openshift_service_type }}-master-api start"
-ExecStop="-/usr/local/bin/{{ openshift_service_type }}-master-api stop"
+ExecStart=/bin/bash /usr/local/bin/{{ openshift_service_type }}-master-api start
+ExecStop=-/bin/bash /usr/local/bin/{{ openshift_service_type }}-master-api stop
 Restart=always
 RestartSec=30
 
 [Install]
 WantedBy=default.target
-
