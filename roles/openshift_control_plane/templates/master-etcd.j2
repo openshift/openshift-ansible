@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 set -euo pipefail
 
@@ -46,7 +46,7 @@ stop)
         echo "etcd already stopped"
         exit 0
     fi
-   
+
     get_container_values
 
     # Start the etcd pod
@@ -61,5 +61,3 @@ stop)
     echo $"Usage: $0 {start|stop}"
     exit 2
 esac
-
-
