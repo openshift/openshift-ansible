@@ -5,33 +5,33 @@ set -euo pipefail
 pods_dir=/etc/origin/node/pods
 pods_disabled_dir=/etc/origin/node/pods.disabled
 
-static_pod_file=controller.yaml
+static_pod_file={{static_pod_filename}}.yaml
 
 # Make sure both directories exist
 mkdir -p $pods_dir $pods_disabled_dir
 
 function get_container_values() {
-    child_container=$(docker ps -q --filter "label=io.kubernetes.container.name=controllers" --latest)
-    container=$(docker ps -q --filter "label=openshift.io/component=controllers" --filter "label=io.kubernetes.container.name=POD" --latest)
+    child_container=$(docker ps -q --filter "label=io.kubernetes.container.name={{ name }}" --latest)
+    container=$(docker ps -q --filter "label=openshift.io/component={{ name }}" --filter "label=io.kubernetes.container.name=POD" --latest)
 }
 
 
 # See how we were called.
 case "$1" in
 start)
-    # See if controllers pod is started
+    # See if {{ name }} is started
     if [ -f "${pods_dir}/${static_pod_file}" ]; then
-        echo "controllers already started"
+        echo "{{ name }} already started"
         exit 0
     fi
 
-    # Start the controllers pod
+    # Start the {{ name }} pod
     mv "${pods_disabled_dir}/${static_pod_file}" "${pods_dir}"
 
     sleep 1 # avoid race condition
 
     # Wait for the pod to come up
-    while ! docker ps -q --filter "label=io.kubernetes.container.name=controllers" &> /dev/null ; do
+    while ! docker ps -q --filter "label=io.kubernetes.container.name={{ name }}" &> /dev/null ; do
         sleep 1
     done
 
@@ -41,15 +41,15 @@ start)
     ;;
 
 stop)
-    # See if controllers pod is started
+    # See if {{ name }} is started
     if [ -f "${pods_disabled_dir}/${static_pod_file}" ]; then
-        echo "controllers already stopped"
+        echo "{{ name }} already stopped"
         exit 0
     fi
 
     get_container_values
 
-    # Start the controllers pod
+    # Start the {{ name }} pod
     mv "${pods_dir}/${static_pod_file}" "${pods_disabled_dir}"
 
     exec timeout 600 docker wait $child_container

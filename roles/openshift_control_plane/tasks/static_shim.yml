@@ -10,13 +10,19 @@
 
 - name: Copy needed master api scripts
   template:
-    src: "{{ item }}.j2"
-    dest: "/usr/local/bin/{{ openshift_service_type }}-{{ item }}"
+    src: "master-script.j2"
+    dest: "/usr/local/bin/{{ openshift_service_type }}-master-{{ name }}"
     mode: 0755
+  vars:
+    static_pod_filename: "{{ item.static_pod_filename }}"
+    name: "{{ item.name }}"
   with_items:
-  - master-api
-  - master-controllers
-  - master-etcd
+  - name: api
+    static_pod_filename: apiserver
+  - name: controllers
+    static_pod_filename: controller
+  - name: etcd
+    static_pod_filename: etcd
 
 - name: Ensure cri-tools installed
   package:
