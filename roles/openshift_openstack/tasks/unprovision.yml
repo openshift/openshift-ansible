@@ -27,6 +27,28 @@
   when:
     - openshift_use_kuryr | default(false) | bool
 
+- name: Get kuryr net CRDs
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+  oc_obj:
+    kind: kuryrnets
+    state: list
+    all_namespaces: true
+  register: svc_output
+  ignore_errors: true
+
+# NOTE(ltomasbo) This only works for nested deployments.
+# Moreover the pods should not have FIPs attached
+- name: Detach namespace subnets from router
+  os_namespace_resources_deletion:
+    router_id: "{{ item.spec.routerId }}"
+    subnet_id: "{{ item.spec.subnetId }}"
+    net_id: "{{ item.spec.netId }}"
+  with_items: "{{ svc_output.results.results[0]['items'] if 'results' in svc_output else [] }}"
+  when:
+    - openshift_use_kuryr|default(false) == true
+    - openshift_kuryr_subnet_driver|default("default") == 'namespace'
+    - item.metadata.annotations is defined
+
 - name: Delete the Stack
   ignore_errors: False
   os_stack:

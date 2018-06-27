@@ -216,7 +216,7 @@ data:
     service_project_driver = default
 
     # The driver to determine Neutron subnets for pod ports (string value)
-    pod_subnets_driver = default
+    pod_subnets_driver = {{ openshift_kuryr_subnet_driver|default('default') }}
 
     # The driver to determine Neutron subnets for services (string value)
     service_subnets_driver = default
@@ -232,6 +232,14 @@ data:
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
     vif_pool_driver = {{ kuryr_openstack_pool_driver }}
+
+    # The comma-separated handlers that should be registered for watching
+    # in the pipeline. (list value)
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+    enabled_handlers = vif,lb,lbaasspec,namespace
+{% else %}
+    enabled_handlers = vif,lb,lbaasspec
+{% endif %}
 
     [neutron]
     # Configuration options for OpenStack Neutron
@@ -304,6 +312,11 @@ data:
     external_svc_subnet = {{ kuryr_openstack_public_subnet_id }}
 {% endif %}
 
+{% if openshift_kuryr_subnet_driver|default('default') == 'namespace' %}
+    [namespace_subnet]
+    pod_subnet_pool = {{ kuryr_openstack_pod_subnet_pool_id }}
+    pod_router = {{ kuryr_openstack_pod_router_id }}
+{% endif %}
 
     [pod_vif_nested]
 

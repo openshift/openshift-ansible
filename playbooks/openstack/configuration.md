@@ -442,6 +442,19 @@ openshift_node_groups:
 ```
 
 
+### Namespace Subnet driver
+
+By default, kuryr is configured with the default subnet driver where all the
+pods are deployed on the same Neutron subnet. However, there is an option of
+enabling a different subnet driver, named namespace, which makes pods to be
+allocated on different subnets depending on the namespace they belong to. To
+enable this new kuryr subnet driver you need to uncomment:
+
+```yaml
+openshift_kuryr_subnet_driver: namespace
+```
+
+
 ### Deploying OpenShift Registry
 
 Since we've disabled the OpenShift registry creation, you will have to create

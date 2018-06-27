@@ -42,6 +42,13 @@
     src: cni-daemonset.yaml.j2
     dest: "{{ manifests_tmpdir.stdout }}/cni-daemonset.yaml"
 
+- name: Create kuryrnet CRD manifest
+  become: yes
+  template:
+    src: kuryrnet.yaml.j2
+    dest: "{{ manifests_tmpdir.stdout }}/kuryrnet.yaml"
+  when: openshift_kuryr_subnet_driver|default("default") == 'namespace'
+
 - name: Apply OpenShift node's ImageStreamTag manifest
   oc_obj:
     state: present
@@ -92,3 +99,13 @@
     files:
     - "{{ manifests_tmpdir.stdout }}/cni-daemonset.yaml"
   run_once: true
+
+- name: Apply kuryrnet CRD manifest
+  oc_obj:
+    state: present
+    kind: CustomResourceDefinition
+    name: "kuryrnets"
+    files:
+    - "{{ manifests_tmpdir.stdout }}/kuryrnet.yaml"
+  run_once: true
+  when: openshift_kuryr_subnet_driver|default("default") == 'namespace'

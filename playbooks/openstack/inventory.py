@@ -201,6 +201,10 @@ def _get_kuryr_vars(cloud_client, data):
     """Returns a dictionary of Kuryr variables resulting of heat stacking"""
     settings = {}
     settings['kuryr_openstack_pod_subnet_id'] = data['pod_subnet']
+    if 'pod_subnet_pool' in data:
+        settings['kuryr_openstack_pod_subnet_pool_id'] = data[
+            'pod_subnet_pool']
+    settings['kuryr_openstack_pod_router_id'] = data['pod_router']
     settings['kuryr_openstack_worker_nodes_subnet_id'] = data['vm_subnet']
     settings['kuryr_openstack_service_subnet_id'] = data['service_subnet']
     settings['kuryr_openstack_pod_sg_id'] = data['pod_access_sg_id']

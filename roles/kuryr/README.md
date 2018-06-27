@@ -29,6 +29,8 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``kuryr_openstack_ca=/etc/ssl/ca.crt` (defaults to ``OS_CACERT`` env var)
 * ``kuryr_openstack_pod_sg_id=pod_security_group_uuid``
 * ``kuryr_openstack_pod_subnet_id=pod_subnet_uuid``
+* ``kuryr_openstack_pod_subnet_pool_id=pod_subnet_pool_uuid``
+* ``kuryr_openstack_pod_router_id=pod_router_uuid``
 * ``kuryr_openstack_pod_service_id=service_subnet_uuid``
 * ``kuryr_openstack_pod_project_id=pod_project_uuid``
 * ``kuryr_openstack_worker_nodes_subnet_id=worker_nodes_subnet_uuid``
@@ -39,6 +41,7 @@ pods. This allows to have interconnectivity between pods and OpenStack VMs.
 * ``kuryr_openstack_pool_update_frequency=20``
 * ``openshift_kuryr_precreate_subports=5``
 * ``openshift_kuryr_device_owner=compute:kuryr``
+* ``openshift_kuryr_subnet_driver=default``
 
 ## OpenShift API loadbalancer
 
