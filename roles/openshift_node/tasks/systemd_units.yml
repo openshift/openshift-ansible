@@ -19,4 +19,4 @@
 
 
 - import_tasks: config/configure-node-settings.yml
-- import_tasks: config/configure-proxy-settings.yml
+- import_tasks: configure-proxy-settings.yml
