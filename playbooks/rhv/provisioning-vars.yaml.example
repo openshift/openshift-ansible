@@ -41,7 +41,7 @@ template_nics:
 debug_vm_create: true
 wait_for_ip: true
 vm_infra_wait_for_ip_retries: 10
-vm_infra_wait_for_ip_delay: 40
+vm_infra_wait_for_ip_delay: 8
 
 master_vm:
   cluster: "{{ rhv_cluster }}"

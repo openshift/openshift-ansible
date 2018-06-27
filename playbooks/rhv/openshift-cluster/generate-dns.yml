@@ -4,7 +4,10 @@
   tasks:
     - import_role:
         name: openshift_rhv
-        tasks_from: populate_inventory.yml
+        tasks_from: build_vm_list.yml
+    - import_role:
+        name: oVirt.vm-infra
+        tasks_from: create_inventory.yml
     - import_role:
         name: openshift_rhv
         tasks_from: generate_nsupdate.yml

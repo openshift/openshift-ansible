@@ -3,6 +3,7 @@
   gather_facts: true
   hosts:
     - nodes
+    - lb
   tasks:
     - import_role:
         name: rhel_unsubscribe

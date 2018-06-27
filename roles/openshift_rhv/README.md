@@ -16,7 +16,6 @@ Role Tasks
 
 * `build_vm_list.yml`: Creates a list of virtual machine definitions based on a simple manifest
 * `generate_dns.yml`: Creates files with hostname to IP mapping either for use with nsupdate, or a Unix hosts style for dnsmasq.
-* `populate_inventory.yml`: Queries the RHV engine to determine IP addresses of virtual machines managed on the cluster.
 
 Role Variables
 --------------
@@ -62,17 +61,6 @@ openshift_rhv_nsupdate_key:
 Role Requirements
 -----------------
 
-The `populate_inventory.yml` task requires the following variables to provide a connection to the RHV/oVirt Engine:
-
-* `engine_url`: The URL of the engine's administrative API, in the form, `https://engine.example.com/ovirt-engine/api`
-* `engine_user`: The username of a user with privileges to create and remove virtual machines, typically `admin@internal`
-* `engine_password`: The password of the `engine_user`
-* `engine_cafile`: The certifiate authority of the engine. The `engine_cafile` may be downloaded by:
-
-```
-$ curl --output ca.pem 'http://engine.example.com/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA'
-```
-
 Example Playbook
 ----------------
 
@@ -81,8 +69,8 @@ Example Playbook
   hosts: localhost
   tasks:
     - import_role:
-        name: openshift_rhv
-        tasks_from: populate_inventory.yml
+        name: oVirt.vm-infra
+        tasks_from: create_inventory.yml
     - import_role:
         name: openshift_rhv
         tasks_from: generate_dns.yml

@@ -1,6 +1,8 @@
 ---
 - name: Subscribe nodes
-  hosts: nodes
+  hosts:
+    - nodes
+    - lb
   vars:
     openshift_version: "{{openshift_release|string}}"
   tasks:

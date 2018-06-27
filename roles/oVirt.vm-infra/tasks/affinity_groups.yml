@@ -1,0 +1,22 @@
+---
+#########################################
+# Affinity groups
+#########################################
+- name: Create affinity groups
+  ovirt_affinity_groups:
+    auth: "{{ ovirt_auth }}"
+    cluster: "{{ item.cluster | default(omit) }}"
+    description: "{{ item.description | default(omit) }}"
+    host_enforcing: "{{ item.host_enforcing | default(omit) }}"
+    host_rule: "{{ item.host_rule | default(omit) }}"
+    hosts: "{{ item.hosts | default(omit) }}"
+    name: "{{ item.name }}"
+    state: "{{ item.state | default(omit) }}"
+    vm_enforcing: "{{ item.vm_enforcing | default(omit) }}"
+    vm_rule: "{{ item.vm_rule | default(omit) }}"
+    vms: "{{ item.vms | default([]) }}"
+    wait: "{{ item.wait | default(omit) }}"
+  with_items:
+    - "{{ affinity_groups | default([]) }}"
+  tags:
+    - affinity_groups

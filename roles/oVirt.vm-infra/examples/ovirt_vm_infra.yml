@@ -1,0 +1,46 @@
+---
+- name: oVirt infra
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    # Contains encrypted `engine_password` varibale using ansible-vault
+    - passwords.yml
+
+  vars:
+    #engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    #engine_user: admin@internal
+    #engine_cafile: /etc/pki/ovirt-engine/ca.pem
+
+    debug_vm_create: yes
+    db_vm:
+      state: running
+      cluster: mycluster
+      template: centos7
+      memory: 1GiB
+      memory_max: 2GiB
+      cores: 1
+      tag:
+        - db
+        - dbvm
+      disks:
+        - size: 1GiB
+          name: data
+          storage_domain: data
+          interface: virtio
+
+    vms:
+      - name: postgresql-vm-0
+        memory: 2GiB
+        cloud_init:
+          host_name: ps.example.com
+          root_password: '123456'
+          authorized_ssh_keys: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjjbwFT/R0WicrlDHcuQjr11jmvb/0uQ46gbRZFpdes/1+xANwSRTaZh9yvZj6TRuH0aAHoVptfATEoXZ62hOfQaA0OOtWF5VOSFBTL+tCfSIGUSVkLJXL/ZxpaZnQ9usha1cpaE57V4lONBq0noj7kB4ks6ZMsI0qzAuYNiii2dEPGPZEX1wsq1OliJdwF9xdbQKp5Sg7JsoHvAV+I/hWcJ6wKj4vckuyn9X7+qftOC5es+zsLLp5PgLGxayYRcrieE5aQhQMAXa72Eutn6f0X0QXn9EqyjL/4T97htP+t+2pkR5/Bn6Ho4sUK164Jquzphh/Lmqu9OLUFWMh2LGx ondra@ondra
+        profile: "{{ db_vm }}"
+        tag:
+          - pgsql
+          - httpd
+
+  roles:
+    - oVirt.vm-infra

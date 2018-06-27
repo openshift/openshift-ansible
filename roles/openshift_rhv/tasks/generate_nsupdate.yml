@@ -1,8 +1,7 @@
 ---
 # Generate nsupdate information based on inventory facts
 # Requirements:
-#   - hosts added to ansible inventory through populate_inventory tasks in this
-#     directory
+#   - hosts added to ansible inventory through oVirt.vm-infra
 #   - vars
 #     openshift_rhv_nsupdate_server: localhost
 #     openshift_rhv_nsupdate_key:
@@ -32,6 +31,7 @@
       ]
   with_items:
     - "{{ groups['nodes'] }}"
+    - "{{ groups['lb'] }}"
   tags:
     - openshift_rhv
 
@@ -76,6 +76,7 @@
       ]
   with_items:
     - "{{ groups['nodes'] }}"
+    - "{{ groups['lb'] }}"
   tags:
     - openshift_rhv
 ...

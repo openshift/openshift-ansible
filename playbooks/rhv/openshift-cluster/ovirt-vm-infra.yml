@@ -24,24 +24,16 @@
     - oVirt.vm-infra
 
   post_tasks:
-    - name: Query oVirt for VM IP addresses
-      ovirt_vms_facts:
-        auth: "{{ ovirt_auth }}"
-        fetch_nested: true
-        nested_attributes: ips
-
+    - debug:
+        var: "hostvars[item]"
+      with_items:
+        - "{{ groups['ovirt_vm'] }}"
     - name: Logout from oVirt
       ovirt_auth:
         state: absent
         ovirt_auth: "{{ ovirt_auth }}"
       tags:
         - always
-
-    - name: Add new VMs to inventory
-      add_host:
-        name: "{{ item.name }}"
-        ansible_host: "{{ item.reported_devices[0].ips[0].address }}"
-      with_items: "{{ ovirt_vms }}"
 
     - name: Generate DNS entries
       import_role:

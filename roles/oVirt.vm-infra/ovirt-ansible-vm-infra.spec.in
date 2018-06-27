@@ -1,0 +1,79 @@
+%global rolename vm-infra
+%global roleprefix oVirt.
+%global roleprefix_legacy ovirt-
+%global ansible_roles_dir ansible/roles
+
+Name: @PACKAGE_NAME@
+Summary: Ansible role to create virtual machine infrastructure
+Version: @RPM_VERSION@
+Release: @RPM_RELEASE@%{?release_suffix}%{?dist}
+Source0: http://resources.ovirt.org/pub/src/@PACKAGE_NAME@/@PACKAGE_NAME@-@PACKAGE_VERSION@.tar.gz
+License: ASL 2.0
+Group:          Virtualization/Management
+BuildArch:      noarch
+Url:            http://www.ovirt.org
+
+Requires: ansible >= 2.5
+
+%description
+This Ansible role provide funtionality to create virtual machine infrastructure.
+
+%pretrans -p <lua>
+-- Remove the legacy directory before installing the symlink. This is known issue in RPM:
+-- https://fedoraproject.org/wiki/Packaging:Directory_Replacement
+path = "%{_datadir}/%{ansible_roles_dir}/%{roleprefix_legacy}%{rolename}"
+st = posix.stat(path)
+if st and st.type == "directory" then
+  os.execute('rm -rf "'..path..'"')
+end
+
+%prep
+%setup -c -q
+
+%build
+
+%install
+export PKG_DATA_DIR_ORIG=%{_datadir}/%{ansible_roles_dir}/%{roleprefix}%{rolename}
+export PKG_DATA_DIR=%{buildroot}$PKG_DATA_DIR_ORIG
+export PKG_DOC_DIR=%{buildroot}%{_pkgdocdir}
+export ROLENAME_LEGACY=%{buildroot}%{_datadir}/%{ansible_roles_dir}/%{roleprefix_legacy}%{rolename}
+sh build.sh install
+
+%files
+%{_datadir}/%{ansible_roles_dir}/%{roleprefix}%{rolename}
+%{_datadir}/%{ansible_roles_dir}/%{roleprefix_legacy}%{rolename}
+
+%doc README.md
+%doc examples/
+
+%license LICENSE
+
+%changelog
+* Wed May 30 2018 Ondra Machacek <omachace@redhat.com> - 1.1.8-1
+- Added clone and template_version to role.
+- Support legacy cloud init.
+- Improve vm-infra parameters support.
+
+* Thu Apr 26 2018 Ondra Machacek <omachace@redhat.com> - 1.1.7-1
+- Non administrator accounts can't use tag attribute
+  rhbz#1570153, rhbz#1549082
+
+* Tue Apr 10 2018 Ondra Machacek <omachace@redhat.com> - 1.1.6-1
+- Require Ansible 2.5.
+
+* Tue Feb 20 2018 Ondra Machacek <omachace@redhat.com> - 1.1.5-1
+- Change wait_for_ip to false by default.
+- Add nics attribute to vms list.
+- Change default state to present. (rhbz#1539722, rhbz#1491010)
+
+* Wed Jan 17 2018 Ondra Machacek <omachace@redhat.com> - 1.1.4-1
+- Support RHV credentials for Ansible Tower/AWX.
+
+* Mon Dec 04 2017 Ondra Machacek <omachace@redhat.com> - 1.1.3-1
+- Add %pretrans scriplet to remove legacy role name.
+
+* Wed Nov 29 2017 Ondra Machacek <omachace@redhat.com> - 1.1.2-1
+- Rename prefix ovirt. to oVirt. to sync with galaxy
+
+* Mon Nov 27 2017 Ondra Machacek <omachace@redhat.com> - 1.1.0-1
+- Initial release

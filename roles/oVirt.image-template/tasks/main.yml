@@ -1,0 +1,8 @@
+---
+- name: Fail when invalid parameters
+  fail:
+    msg: "You must either specify qcow_url or glance_image"
+  when: "glance_image is defined and qcow_url is defined"
+
+- name: Image upload
+  include_tasks: "{{ (glance_image is defined) | ternary('glance', 'qcow2') }}_image.yml"

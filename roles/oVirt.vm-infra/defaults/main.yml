@@ -1,0 +1,13 @@
+---
+debug_vm_create: false
+wait_for_ip: false
+
+# Create VMs timeouts:
+vm_infra_create_single_timeout: 180
+vm_infra_create_poll_interval: 15
+vm_infra_create_all_timeout: "{{ vm_infra_create_single_timeout * (vms | length)|int }}"
+
+# Wait for IPs timeouts:
+vm_infra_wait_for_ip_retries: 5
+vm_infra_wait_for_ip_delay: 5
+vms_passwords: []
