@@ -16,5 +16,5 @@
       value:
       - vsphere
   notify:
-    - restart master api
-    - restart master controllers
+  - restart master api
+  - restart master controllers

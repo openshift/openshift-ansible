@@ -10,5 +10,5 @@
       value:
       - /etc/origin/master/ca.key
   notify:
-    - restart master api
-    - restart master controllers
+  - restart master api
+  - restart master controllers
