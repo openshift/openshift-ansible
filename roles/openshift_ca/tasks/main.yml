@@ -7,7 +7,7 @@
   package:
     name: "{{ openshift_service_type }}{{ openshift_pkg_version | default('') | lib_utils_oo_image_tag_to_rpm_version(include_dash=True) }}"
     state: present
-  when: not openshift_is_atomic | bool
+  when: not hostvars[openshift_ca_host].openshift_is_atomic | bool
   register: install_result
   until: install_result is succeeded
   delegate_to: "{{ openshift_ca_host }}"
