@@ -16,17 +16,6 @@ openshift_openstack_use_lbaas_load_balancer: false
 openshift_openstack_lbaasv2_provider: Octavia
 openshift_openstack_use_vm_load_balancer: false
 
-openshift_openstack_install_debug_packages: false
-openshift_openstack_required_packages:
-  - NetworkManager
-openshift_openstack_debug_packages:
-  - bash-completion
-  - bind-utils
-  - bridge-utils
-  - git
-  - net-tools
-  - vim-enhanced
-  - wget
 
 # container-storage-setup
 openshift_openstack_container_storage_setup:
