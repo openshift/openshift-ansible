@@ -20,6 +20,13 @@
       state: absent
       namespace: openshift-web-console
 
+  - name: Remove service annotation
+    command: >
+      {{ openshift_client_binary }} annotate service/webconsole
+      service.alpha.openshift.io/serving-cert-signed-by-
+      --config=/etc/origin/master/admin.kubeconfig
+      -n openshift-web-console
+
   - name: Verify that the console is running
     oc_obj:
       namespace: openshift-web-console
