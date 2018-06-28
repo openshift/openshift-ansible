@@ -40,11 +40,13 @@ class OCcsr(OpenShiftCLI):
         for node in nodes:
             nodes_list.append(dict(name=node, csrs={}, server_accepted=False, client_accepted=False, denied=False))
 
-            # Nodes that we were able to retrieve via "oc get nodes" are approved so mark them approved.
+            # Ready nodes have already been accepted. Mark client and server as accepted.
             for ocnode in results:
-                if node in ocnode['metadata']['name']:
-                    nodes_list[-1]['server_accepted'] = True
-                    nodes_list[-1]['client_accepted'] = True
+                if ocnode['metadata']['name'] == node:
+                    for condition in ocnode['status']['conditions']:
+                        if condition['type'] == 'Ready' and condition['status'] == 'True':
+                            nodes_list[-1]['server_accepted'] = True
+                            nodes_list[-1]['client_accepted'] = True
 
         return nodes_list
 
