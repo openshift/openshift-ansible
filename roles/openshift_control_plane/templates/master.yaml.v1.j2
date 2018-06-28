@@ -83,8 +83,10 @@ kubernetesMasterConfig:
     - VolumeScheduling=true
 {% endif %}
   controllerArguments: {{ openshift.master.controller_args | default(None) | lib_utils_to_padded_yaml( level=2 ) }}
+{% if openshift_is_atomic | bool %}
     flex-volume-plugin-dir:
     - "{{ openshift_flexvolume_container_directory_default }}/volume/exec"
+{% end %}
 {% if openshift_master_use_persistentlocalvolumes | bool %}
     feature-gates:
     - PersistentLocalVolumes=true

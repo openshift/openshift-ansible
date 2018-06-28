@@ -33,7 +33,7 @@ spec:
        name: master-cloud-provider
      - mountPath: /etc/containers/registries.d/
        name: signature-import
-     - mountPath: /etc/origin/kubelet-plugins
+     - mountPath: /usr/libexec/kubernetes/kubelet-plugins
        name: kubelet-plugins
     livenessProbe:
       httpGet:
@@ -54,4 +54,4 @@ spec:
     name: signature-import
   - name: kubelet-plugins
     hostPath:
-      path: /etc/origin/kubelet-plugins
+      path: /usr/libexec/kubernetes/kubelet-plugins
