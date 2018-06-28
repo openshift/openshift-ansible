@@ -65,6 +65,8 @@ objects:
         containers:
         - image: ${IMAGE}
           name: node-exporter
+          args:
+          - --no-collector.wifi
           ports:
           - containerPort: 9100
             name: scrape
