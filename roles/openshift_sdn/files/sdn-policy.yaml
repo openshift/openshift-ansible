@@ -26,4 +26,14 @@ items:
   - kind: ServiceAccount
     name: sdn
     namespace: openshift-sdn
+- apiVersion: authorization.openshift.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: sdn-node-proxier
+  roleRef:
+    name: system:node-proxier
+  subjects:
+  - kind: ServiceAccount
+    name: sdn
+    namespace: openshift-sdn
 # TODO: PSP binding
