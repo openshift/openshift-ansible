@@ -231,7 +231,10 @@ resources:
 {% endif %}
 {% endif %}
       user_data:
-        get_file: user-data
+        str_replace:
+          template: {get_file: user-data}
+          params:
+            "%OPENSHIFT_NODE_CONFIG_NAME%": { get_param: openshift_node_group_name }
       user_data_format: RAW
       user_data_update_policy: IGNORE
       metadata:
