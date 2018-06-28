@@ -125,6 +125,17 @@
         msg: "{{ (message.stdout | from_json).error.details[0].message }}"
       when: message.stdout != ""
 
+    - name: get azure activity log
+      command: >
+        az monitor activity-log list
+        --resource-group "{{ openshift_azure_resource_group_name }}"
+        --status Failed
+      register: activity_log
+
+    - debug:
+        msg: "{{ activity_log.stdout }}"
+      when: activity_log.stdout != ""
+
     - assert:
         that: "{{ not deploy.failed }}"
 
