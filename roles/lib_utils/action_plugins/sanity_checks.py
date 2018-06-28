@@ -456,6 +456,8 @@ class ActionModule(ActionBase):
                     json.loads(json_var)
                 except ValueError:
                     found_invalid_json.append([var, json_var])
+                except BaseException:
+                    pass
 
         if found_invalid_json:
             msg = "Found invalid json format variables:\n"
