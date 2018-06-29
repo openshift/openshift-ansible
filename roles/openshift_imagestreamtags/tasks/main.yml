@@ -1,0 +1,12 @@
+---
+- name: Ensure openshift project exists
+  oc_project:
+    name: openshift
+    state: present
+    node_selector:
+    - ""
+
+- name: Tag image into an image stream in the openshift namespace
+  command: >
+    {{ openshift_client_binary }} tag --source=docker {{oreg_url}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig openshift/{{ openshift_ist }}
+  changed_when: False
