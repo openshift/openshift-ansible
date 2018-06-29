@@ -59,12 +59,12 @@ openshift_openstack_kuryr_service_subnet_cidr: "172.30.0.0/16"
 openshift_openstack_kuryr_service_pool_start: "172.30.128.1"
 openshift_openstack_kuryr_service_pool_end: "172.30.255.253"
 openshift_openstack_kuryr_pod_subnet_cidr: "10.11.0.0/16"
-openshift_openstack_master_hostname: master
-openshift_openstack_infra_hostname: infra-node
-openshift_openstack_cns_hostname: cns
-openshift_openstack_node_hostname: app-node
-openshift_openstack_lb_hostname: lb
-openshift_openstack_etcd_hostname: etcd
+openshift_openstack_master_hostname: openshift-master
+openshift_openstack_infra_hostname: openshift-infra
+openshift_openstack_cns_hostname: openshift-cns
+openshift_openstack_node_hostname: openshift-compute
+openshift_openstack_lb_hostname: openshift-lb
+openshift_openstack_etcd_hostname: openshift-etcd
 openshift_openstack_set_hostname_to_compute_name: true
 openshift_openstack_keypair_name: openshift
 openshift_openstack_lb_flavor: "{{ openshift_openstack_default_flavor }}"
