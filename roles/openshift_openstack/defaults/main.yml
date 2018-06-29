@@ -285,7 +285,7 @@ openshift_openstack_lb_console_secgroup_rules:
 
 
 # OpenStack resource names
-openshift_openstack_node_network_name: "openshift-{{ openshift_openstack_full_dns_domain }}-net"
-openshift_openstack_node_subnet_name: "openshift-{{ openshift_openstack_full_dns_domain }}-subnet"
-openshift_openstack_node_router_name: "openshift-{{ openshift_openstack_full_dns_domain }}-router"
-openshift_openstack_node_security_group_name: "openshift-{{ openshift_openstack_full_dns_domain }}-sg"
+openshift_openstack_node_network_name: "openshift-{{ openshift_openstack_full_dns_domain }}-node-net"
+openshift_openstack_node_subnet_name: "openshift-{{ openshift_openstack_full_dns_domain }}-node-subnet"
+openshift_openstack_node_router_name: "openshift-{{ openshift_openstack_full_dns_domain }}-node-router"
+openshift_openstack_node_security_group_name: "openshift-{{ openshift_openstack_full_dns_domain }}-node-sg"
