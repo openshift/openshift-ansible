@@ -10,12 +10,13 @@
 
 - name: Copy needed master api scripts
   template:
-    src: "master-script.j2"
+    src: "master-{{ l_runtime }}.j2"
     dest: "/usr/local/bin/{{ openshift_service_type }}-master-{{ name }}"
     mode: 0755
   vars:
     static_pod_filename: "{{ item.static_pod_filename }}"
     name: "{{ item.name }}"
+    l_runtime: "{{ 'crio' if openshift_use_crio | default(False) else 'docker' }}"
   with_items:
   - name: api
     static_pod_filename: apiserver
