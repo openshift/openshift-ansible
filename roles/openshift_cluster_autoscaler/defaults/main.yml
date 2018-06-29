@@ -1,21 +1,21 @@
 ---
 openshift_cluster_autoscaler_name: cluster-autoscaler
-openshift_cluster_autoscaler_version: 4
+openshift_cluster_autoscaler_loglevel: 4
 
 openshift_cluster_autoscaler_template_location: /tmp
 openshift_cluster_autoscaler_template_name: "{{ openshift_cluster_autoscaler_name }}"
 
 openshift_cluster_autoscaler_node_selector:
-  type: infra
+  node-role.kubernetes.io/infra: "true"
 
 openshift_cluster_autoscaler_state: present
-openshift_cluster_autoscaler_namespace: openshift-infra
+openshift_cluster_autoscaler_namespace: openshift-autoscaler
 openshift_cluster_autoscaler_delete_config: True
 openshift_cluster_autoscaler_skip_nodes_local_storage: False
 openshift_cluster_autoscaler_serviceaccount: cluster-autoscaler
 openshift_cluster_autoscaler_region: us-east-1
 
-openshift_cluster_autoscaler_image: docker.io/openshift/kubernetes-autoscaler:v0.6.1
+openshift_cluster_autoscaler_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'cluster-autoscaler') }}"
 
 openshift_cluster_autoscaler_cloud_provider: aws
 
@@ -33,8 +33,10 @@ openshift_cluster_autoscaler_aws_env_vars:
 
 openshift_cluster_autoscaler_env_vars: []
 
+# TODO(frobware) - this is hardcoded; need to figure out how to get this dynamically.
+openshift_cluster_autoscaler_node_group_name: "{{ openshift_aws_clusterid }} compute group 1"
 
 openshift_cluster_autoscaler_node_groups:
-- min: 3
-  max: 10
-  name: "{{ openshift_cluster_autoscaler_node_group_name | default(openshift_clusterid ~ ' openshift compute') }}"
+- min: 1
+  max: 5
+  name: "{{ openshift_cluster_autoscaler_node_group_name | default(openshift_clusterid ~ ' compute group') }}"
