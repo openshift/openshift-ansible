@@ -7,3 +7,6 @@
 
 - name: Provision nodes
   include_tasks: provision-nodes.yml
+
+- name: Add the new nodes to the inventory
+  meta: refresh_inventory
