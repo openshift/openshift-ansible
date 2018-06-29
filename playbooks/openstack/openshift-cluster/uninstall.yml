@@ -30,6 +30,6 @@
   hosts: localhost
   tasks:
   - name: Remove OpenStack resources
-    import_role:
+    include_role:
       name: openshift_openstack
-      tasks_from: unprovision-heat.yml
+      tasks_from: unprovision-{{ openshift_openstack_provisioner|default('heat') }}.yml

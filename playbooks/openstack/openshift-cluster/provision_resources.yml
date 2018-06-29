@@ -7,6 +7,6 @@
     set_fact:
       openshift_openstack_stack_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER') | ternary (lookup('env', 'OPENSHIFT_CLUSTER'), omit) }}"
   - name: provision cluster
-    import_role:
+    include_role:
       name: openshift_openstack
-      tasks_from: provision-heat.yml
+      tasks_from: provision-{{ openshift_openstack_provisioner|default('heat') }}.yml
