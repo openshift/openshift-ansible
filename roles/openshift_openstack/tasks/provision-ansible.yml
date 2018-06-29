@@ -1,0 +1,9 @@
+---
+- name: Provision networking
+  include_tasks: provision-networking.yml
+
+- name: Provision the control plane
+  include_tasks: provision-ctlplane.yml
+
+- name: Provision nodes
+  include_tasks: provision-nodes.yml

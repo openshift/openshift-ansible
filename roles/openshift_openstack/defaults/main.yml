@@ -282,3 +282,10 @@ openshift_openstack_lb_console_secgroup_rules:
     port_range_min: "{{ openshift_master_console_port | default(8443) }}"
     port_range_max: "{{ openshift_master_console_port | default(8443) }}"
     remote_ip_prefix: "{{ openshift_openstack_lb_ingress_cidr }}"
+
+
+# OpenStack resource names
+openshift_openstack_node_network_name: "openshift-{{ openshift_openstack_full_dns_domain }}-net"
+openshift_openstack_node_subnet_name: "openshift-{{ openshift_openstack_full_dns_domain }}-subnet"
+openshift_openstack_node_router_name: "openshift-{{ openshift_openstack_full_dns_domain }}-router"
+openshift_openstack_node_security_group_name: "openshift-{{ openshift_openstack_full_dns_domain }}-sg"

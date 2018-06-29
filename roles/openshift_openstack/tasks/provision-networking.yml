@@ -1,0 +1,65 @@
+---
+- name: Create control plane network
+  os_network:
+    name: "{{ openshift_openstack_node_network_name }}"
+    state: "{{ state|default('present') }}"
+  register: net
+
+- debug: var=net
+
+- name: Create control plane subnet
+  os_subnet:
+    name: "{{ openshift_openstack_node_subnet_name }}"
+    state: "{{ state|default('present') }}"
+    network_name: "{{ net.id }}"
+    dns_nameservers: "{{ openshift_openstack_dns_nameservers }}"
+    cidr: "{{ openshift_openstack_subnet_cidr }}"
+    allocation_pool_start: "{{ openshift_openstack_pool_start }}"
+    allocation_pool_end: "{{ openshift_openstack_pool_end }}"
+  register: subnet
+
+- debug: var=subnet
+
+- name: Route the control plane to the external network
+  os_router:
+    name: "{{ openshift_openstack_node_router_name }}"
+    state: "{{ state|default('present') }}"
+    network: "{{ openshift_openstack_external_network_name }}"
+    interfaces:
+    - "{{ subnet.id }}"
+  register: router
+
+- debug: var=router
+
+- name: Create cluster-wide security group
+  os_security_group:
+    name: "{{ openshift_openstack_node_security_group_name }}"
+    state: "{{ state|default('present') }}"
+    description: Security group for all the OpenShift nodes
+  register: security_group
+
+- debug: var=security_group
+
+- name: Allow ICPM traffic on the security group
+  os_security_group_rule:
+    state: "{{ state|default('present') }}"
+    security_group: "{{ security_group.id }}"
+    protocol: icmp
+    port_range_min: -1
+    port_range_max: -1
+
+- name: Allow TCP traffic on the security group
+  os_security_group_rule:
+    state: "{{ state|default('present') }}"
+    security_group: "{{ security_group.id }}"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 65535
+
+- name: Allow UDP traffic on the security group
+  os_security_group_rule:
+    state: "{{ state|default('present') }}"
+    security_group: "{{ security_group.id }}"
+    protocol: udp
+    port_range_min: 22
+    port_range_max: 65535
