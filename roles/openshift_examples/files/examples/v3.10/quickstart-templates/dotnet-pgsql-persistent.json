@@ -128,12 +128,12 @@
                                 "value": "${DOTNET_CONFIGURATION}"
                             },
                             {
-                                "name": "DOTNET_PUBLISH",
-                                "value": "true"
-                            },
-                            {
                                 "name": "DOTNET_RESTORE_SOURCES",
                                 "value": "${DOTNET_RESTORE_SOURCES}"
+                            },
+                            {
+                                "name": "DOTNET_TOOLS",
+                                "value": "${DOTNET_TOOLS}"
                             }
                         ]
                     }
@@ -438,20 +438,20 @@
             "displayName": "Memory Limit",
             "required": true,
             "description": "Maximum amount of memory the .NET Core container can use.",
-            "value": "512Mi"
+            "value": "128Mi"
         },
         {
             "name": "MEMORY_POSTGRESQL_LIMIT",
             "displayName": "Memory Limit (PostgreSQL)",
             "required": true,
             "description": "Maximum amount of memory the PostgreSQL container can use.",
-            "value": "512Mi"
+            "value": "128Mi"
         },
         {
             "name": "VOLUME_CAPACITY",
             "displayName": "Volume Capacity",
             "description": "Volume space available for data, e.g. 512Mi, 2Gi",
-            "value": "1Gi",
+            "value": "256Mi",
             "required": true
         },
         {
@@ -459,7 +459,7 @@
             "displayName": ".NET builder",
             "required": true,
             "description": "The image stream tag which is used to build the code.",
-            "value": "dotnet:2.0"
+            "value": "dotnet:2.1"
         },
         {
             "name": "NAMESPACE",
@@ -479,7 +479,7 @@
             "name": "SOURCE_REPOSITORY_REF",
             "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "rel/2.0-example"
+            "value": "rel/2.1-example"
         },
         {
             "name": "CONTEXT_DIR",
@@ -502,6 +502,11 @@
             "name": "DOTNET_ASSEMBLY_NAME",
             "displayName": "Startup Assembly",
             "description": "Set this when the assembly name is overridden in the project file."
+        },
+        {
+            "name": "DOTNET_TOOLS",
+            "displayName": ".NET Tools",
+            "description": "Set this to a space separated list of .NET tools needed to publish."
         },
         {
             "name": "DOTNET_NPM_TOOLS",
