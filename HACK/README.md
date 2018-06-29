@@ -9,19 +9,19 @@ My deployment looks like:
 
 	$ ansible-playbook -i provision.ini \
 		~/openshift-ansible/playbooks/aws/openshift-cluster/prerequisites.yml \
-		-e @~/src/aws-cluster/vars.yaml 
+		-e @vars.yaml 
 
 	$ ansible-playbook -i provision.ini \
 		~/openshift-ansible/playbooks/aws/openshift-cluster/provision.yml \
-		-e @~/src/aws-cluster/vars.yaml 
+		-e @vars.yaml 
 
 	$ ansible-playbook -i provision.ini \
 		~/openshift-ansible/playbooks/aws/openshift-cluster/install.yml \
-		-e @~/src/aws-cluster/vars.yaml 
+		-e @vars.yaml 
 
 	$ ansible-playbook -i provision.ini \
 		~/openshift-ansible/playbooks/aws/openshift-cluster/provision_nodes.yml \
-		-e @~/src/aws-cluster/vars.yaml 
+		-e @vars.yaml 
 
 Once this runs to completion I have a cluster that looks like:
 
