@@ -17,7 +17,8 @@
   register: local_tmp
   changed_when: False
   check_mode: no
-  become: false
+  vars:
+    ansible_become: false
 
 - oc_obj:
     state: list
