@@ -13,7 +13,9 @@
     timeout: 600
 
 - name: restart master controllers
-  command: "systemctl restart {{ openshift_service_type }}-master-controllers"
+  service:
+    name: "{{ openshift_service_type }}-master-controllers"
+    state: restarted
   retries: 5
   delay: 5
   register: result
