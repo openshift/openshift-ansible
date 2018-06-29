@@ -1,5 +1,6 @@
 ---
-- os_server:
+- name: Create OpenStack virtual server
+  os_server:
     name: "{{ server_name }}"
     network: "{{ openshift_openstack_node_network_name }}"
     auto_floating_ip: true

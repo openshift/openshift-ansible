@@ -1,5 +1,6 @@
 ---
-- include_tasks: provision-server.yml
+- name: Create the master nodes
+  include_tasks: provision-server.yml
   vars:
     server_name: "{{ openshift_openstack_master_hostname }}-{{ item }}.{{ openshift_openstack_full_dns_domain }}"
     flavor: "{{ openshift_openstack_master_flavor }}"

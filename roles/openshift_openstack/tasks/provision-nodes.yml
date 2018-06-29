@@ -1,0 +1,22 @@
+---
+- name: Create the infra nodes
+  include_tasks: provision-server.yml
+  vars:
+    server_name: "{{ openshift_openstack_infra_hostname }}-{{ item }}.{{ openshift_openstack_full_dns_domain }}"
+    flavor: "{{ openshift_openstack_infra_flavor }}"
+    image: "{{ openshift_openstack_infra_image }}"
+    host_type: node
+    sub_host_type: infra
+    node_group_name: "{{ openshift_openstack_infra_group_name }}"
+  with_items: "{{ range(openshift_openstack_num_infra)|list }}"
+
+- name: Create the compute nodes
+  include_tasks: provision-server.yml
+  vars:
+    server_name: "{{ openshift_openstack_node_hostname }}-{{ item }}.{{ openshift_openstack_full_dns_domain }}"
+    flavor: "{{ openshift_openstack_node_flavor }}"
+    image: "{{ openshift_openstack_node_image }}"
+    host_type: node
+    sub_host_type: app
+    node_group_name: "{{ openshift_openstack_compute_group_name }}"
+  with_items: "{{ range(openshift_openstack_num_nodes)|list }}"
