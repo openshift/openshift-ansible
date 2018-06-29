@@ -50,6 +50,13 @@
     - item.metadata.annotations is defined
 
 
+- name: Delete all OpenShift servers
+  os_server:
+    name: "{{ item }}"
+    delete_fip: true
+    state: absent
+  with_inventory_hostnames: cluster_hosts
+
 - os_security_group:
     name: "{{ openshift_openstack_node_security_group_name }}"
     state: absent
