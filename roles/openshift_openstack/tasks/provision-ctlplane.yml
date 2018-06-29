@@ -3,8 +3,8 @@
     name: "{{ server_name }}"
     network: "{{ openshift_openstack_node_network_name }}"
     auto_floating_ip: true
-    flavor: "{{ openshift_openstack_master_flavor }}"
-    image: "{{ openshift_openstack_master_image }}"
+    flavor: "{{ flavor }}"
+    image: "{{ image }}"
     key_name: "{{ openshift_openstack_keypair_name }}"
     security_groups:
     - "{{ openshift_openstack_node_security_group_name }}"
@@ -12,9 +12,9 @@
       group: "masters.{{ openshift_openstack_full_dns_domain }}"
       environment: "{{ openshift_openstack_public_dns_domain }}"
       clusterid: "{{ openshift_openstack_full_dns_domain }}"
-      host-type: "master"
-      sub-host-type: "default"
-      openshift_node_group_name: "{{ openshift_openstack_master_group_name }}"
+      host-type: "{{ host_type }}"
+      sub-host-type: "{{ sub_host_type }}"
+      openshift_node_group_name: "{{ node_group_name }}"
       openshift_hostname: "{{ openshift_openstack_dns_nameservers | ternary(server_name, omit) }}"
     userdata: |
       #cloud-config
@@ -35,7 +35,7 @@
           owner: 'root:root'
           permissions: '0640'
           content: |
-              openshift_node_config_name: "{{ openshift_openstack_master_group_name }}"
+              openshift_node_config_name: "{{ node_group_name }}"
 
       {% if openshift_openstack_provision_user_commands %}
         - path: /root/ansible_install.sh
@@ -58,7 +58,12 @@
         - [ ansible-playbook, /root/openshift_bootstrap/bootstrap.yml]
       {% endif %}
   vars:
-    server_name: "openshift-master-{{ item }}-{{ openshift_openstack_full_dns_domain }}"
+    server_name: "{{ openshift_openstack_master_hostname }}-{{ item }}.{{ openshift_openstack_full_dns_domain }}"
+    flavor: "{{ openshift_openstack_master_flavor }}"
+    image: "{{ openshift_openstack_master_image }}"
+    host_type: master
+    sub_host_type: default
+    node_group_name: "{{ openshift_openstack_master_group_name }}"
   with_items: "{{ range(openshift_openstack_num_masters)|list }}"
   register: master_servers
 
