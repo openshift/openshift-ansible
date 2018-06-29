@@ -22,7 +22,8 @@
   register: local_tmp
   changed_when: False
   check_mode: no
-  become: false
+  vars:
+    ansible_become: false
 
 - include_tasks: install_logging.yaml
   when:
