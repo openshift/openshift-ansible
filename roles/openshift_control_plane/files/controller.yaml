@@ -33,6 +33,9 @@ spec:
        name: master-cloud-provider
      - mountPath: /etc/containers/registries.d/
        name: signature-import
+     - mountPath: /usr/libexec/kubernetes/kubelet-plugins
+       name: kubelet-plugins
+       mountPropagation: "HostToContainer"
     livenessProbe:
       httpGet:
         scheme: HTTPS
@@ -50,3 +53,6 @@ spec:
   - hostPath:
       path: /etc/containers/registries.d
     name: signature-import
+  - name: kubelet-plugins
+    hostPath:
+      path: /usr/libexec/kubernetes/kubelet-plugins

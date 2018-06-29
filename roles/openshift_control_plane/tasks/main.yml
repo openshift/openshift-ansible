@@ -45,6 +45,20 @@
     path: "/etc/origin/master"
     state: directory
 
+- name: Create flexvolume directory when on atomic hosts
+  file:
+    state: directory
+    path: "{{ openshift_flexvolume_container_directory_default }}/volume/exec"
+    mode: '0750'
+  when: openshift_is_atomic | bool
+
+- name: Flex volume directory on non-atomic host
+  file:
+    state: directory
+    path: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec/"
+    mode: '0750'
+  when: not openshift_is_atomic | bool
+
 - name: Create the policy file if it does not already exist
   command: >
     {{ openshift_client_binary }} adm create-bootstrap-policy-file
