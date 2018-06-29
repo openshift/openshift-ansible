@@ -9,4 +9,4 @@
   - name: provision cluster
     import_role:
       name: openshift_openstack
-      tasks_from: provision.yml
+      tasks_from: provision-heat.yml

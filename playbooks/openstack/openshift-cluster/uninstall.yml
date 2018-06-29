@@ -32,4 +32,4 @@
   - name: Remove OpenStack resources
     import_role:
       name: openshift_openstack
-      tasks_from: unprovision.yml
+      tasks_from: unprovision-heat.yml
