@@ -111,13 +111,6 @@ debug_level=2
 #openshift_master_loopback_ratelimit_qps=300
 #openshift_master_loopback_ratelimit_burst=600
 
-# Docker Configuration
-# Add additional, insecure, and blocked registries to global docker configuration
-# For enterprise deployment types we ensure that registry.access.redhat.com is
-# included if you do not include it
-#openshift_docker_additional_registries=registry.example.com
-#openshift_docker_insecure_registries=registry.example.com
-#openshift_docker_blocked_registries=registry.hacker.com
 # Install and run cri-o.
 #openshift_use_crio=False
 #openshift_use_crio_only=False
@@ -174,15 +167,19 @@ debug_level=2
 # Tasks to run after each master is upgraded and system/services have been restarted.
 # openshift_master_upgrade_post_hook=/usr/share/custom/post_master.yml
 
-# Alternate image format string, useful if you've got your own registry mirror
-# Configure this setting just on node or master
-#oreg_url_master=example.com/openshift3/ose-${component}:${version}
-#oreg_url_node=example.com/openshift3/ose-${component}:${version}
-# For setting the configuration globally
+# Cluster Image Source (registry) configuration
+# openshift-enterprise default is 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+# origin default is 'docker.io/openshift/origin-${component}:${version}'
 #oreg_url=example.com/openshift3/ose-${component}:${version}
 # If oreg_url points to a registry other than registry.access.redhat.com we can
 # modify image streams to point at that registry by setting the following to true
 #openshift_examples_modify_imagestreams=true
+# Add insecure and blocked registries to global docker configuration
+#openshift_docker_insecure_registries=registry.example.com
+#openshift_docker_blocked_registries=registry.hacker.com
+# You may also configure additional default registries for docker, however this
+# is discouraged. Instead you should make use of fully qualified image names.
+#openshift_docker_additional_registries=registry.example.com
 
 # If oreg_url points to a registry requiring authentication, provide the following:
 #oreg_auth_user=some_user
