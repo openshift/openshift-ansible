@@ -112,6 +112,27 @@ REMOVED_VARIABLES = (
     ('openshift_storage_glusterfs_registry_heketi_version', 'openshift_storage_glusterfs_registry_heketi_image'),
 )
 
+# JSON_FORMAT_VARIABLES does not intende to cover all json variables, but
+# complicated json variables in hosts.example are covered.
+JSON_FORMAT_VARIABLES = (
+    'openshift_builddefaults_json',
+    'openshift_buildoverrides_json',
+    'openshift_master_admission_plugin_config',
+    'openshift_master_audit_config',
+    'openshift_crio_docker_gc_node_selector',
+    'openshift_master_image_policy_allowed_registries_for_import',
+    'openshift_master_image_policy_config',
+    'openshift_master_oauth_templates',
+    'container_runtime_extra_storage',
+    'openshift_additional_repos',
+    'openshift_master_identity_providers',
+    'openshift_master_htpasswd_users',
+    'openshift_additional_projects',
+    'openshift_hosted_routers',
+    'openshift_node_open_ports',
+    'openshift_master_open_ports',
+)
+
 # TODO(michaelgugino): Remove in 3.11
 CHANGED_IMAGE_VARS = (
     'openshift_storage_glusterfs_image',
@@ -425,6 +446,26 @@ class ActionModule(ActionBase):
             raise errors.AnsibleModuleError(msg)
         return None
 
+    def validate_json_format_vars(self, hostvars, host):
+        """Fails if invalid json format are found"""
+        found_invalid_json = []
+        for var in JSON_FORMAT_VARIABLES:
+            if var in hostvars[host]:
+                json_var = self.template_var(hostvars, host, var)
+                try:
+                    json.loads(json_var)
+                except ValueError:
+                    found_invalid_json.append([var, json_var])
+                except BaseException:
+                    pass
+
+        if found_invalid_json:
+            msg = "Found invalid json format variables:\n"
+            for item in found_invalid_json:
+                msg += "    {} specified in {} is invalid json format\n".format(item[1], item[0])
+            raise errors.AnsibleModuleError(msg)
+        return None
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -441,6 +482,7 @@ class ActionModule(ActionBase):
         self.check_htpasswd_provider(hostvars, host)
         check_for_removed_vars(hostvars, host)
         self.check_contains_version(hostvars, host)
+        self.validate_json_format_vars(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
