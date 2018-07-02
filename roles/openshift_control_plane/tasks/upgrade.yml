@@ -11,6 +11,7 @@
 # Only needed for 3.10, remove in 3.11.
 - import_tasks: migrate_idproviders.yml
 
+- import_tasks: systemd_units.yml
 - import_tasks: static_shim.yml
 
 - import_tasks: upgrade/upgrade_scheduler.yml

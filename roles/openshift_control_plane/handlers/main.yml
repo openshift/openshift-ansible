@@ -26,3 +26,6 @@
   retries: 120
   delay: 1
   changed_when: false
+
+- name: reload systemd units
+  command: systemctl daemon-reload

@@ -12,6 +12,16 @@
   vars:
     l_runtime: "{{ 'crio' if openshift_use_crio | default(False) else 'docker' }}"
 
+- name: Copy needed master api scripts
+  template:
+    src: "{{ item }}.j2"
+    dest: "/usr/local/bin/{{ openshift_service_type }}-{{ item }}"
+    mode: 755
+  with_items:
+  - master-api
+  - master-controllers
+  - master-etcd
+
 - name: Ensure cri-tools installed
   package:
     name: cri-tools

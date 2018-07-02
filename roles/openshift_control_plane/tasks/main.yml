@@ -32,6 +32,9 @@
 - name: Prepare static pod scripts
   import_tasks: static_shim.yml
 
+- name: Prepare systemd scripts
+  import_tasks: systemd_units.yml
+
 - name: Create r_openshift_master_data_dir
   file:
     path: "{{ r_openshift_master_data_dir }}"
