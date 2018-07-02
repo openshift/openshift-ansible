@@ -12,5 +12,3 @@
   when: ansible_selinux.config_mode != "enforcing"
 
 - include_tasks: container-storage-setup.yml
-
-- include_tasks: node-network.yml

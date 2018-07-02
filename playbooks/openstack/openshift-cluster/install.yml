@@ -16,11 +16,6 @@
   become: yes
   gather_facts: yes
   tasks:
-  - name: Install dependencies
-    import_role:
-      name: openshift_openstack
-      tasks_from: node-packages.yml
-
   - name: Configure Node
     import_role:
       name: openshift_openstack
