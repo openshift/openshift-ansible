@@ -58,10 +58,6 @@
   tasks:
   - name: Enable core bootstrapping components
     include_tasks: ../../../../openshift-master/private/tasks/enable_bootstrap.yml
-  - name: Place shim commands on the masters before we begin the upgrade
-    import_role:
-      name: openshift_control_plane
-      tasks_from: static_shim.yml
 
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
