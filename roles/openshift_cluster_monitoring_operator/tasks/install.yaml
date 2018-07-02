@@ -32,7 +32,7 @@
     - key: openshift.io/cluster-monitoring
       value: "true"
 
-- when: os_sdn_network_plugin_name == 'redhat/openshift-ovs-multitenant'
+- when: {{ os_sdn_network_plugin_name | default('') }} == 'redhat/openshift-ovs-multitenant'
   block:
   - name: Waiting for netnamespace openshift-monitoring to be ready
     oc_obj:
