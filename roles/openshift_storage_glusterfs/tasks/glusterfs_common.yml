@@ -172,7 +172,7 @@
   set_fact:
     glusterfs_heketi_admin_key: "{{ glusterfs_heketi_admin_secret.results.decoded.key }}"
   when:
-  - glusterfs_is_native
+  - glusterfs_heketi_is_native
   - glusterfs_heketi_admin_secret.results.results[0]
 
 - name: Generate heketi admin key
