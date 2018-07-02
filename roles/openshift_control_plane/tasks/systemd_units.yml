@@ -19,9 +19,10 @@
   notify:
   - reload systemd units
 
-- name: Enable service files
+- name: Enable and start service files
   service:
     name: "{{ openshift_service_type }}-{{ item }}"
+    state: started
     enabled: true
   with_items:
   - master-api
