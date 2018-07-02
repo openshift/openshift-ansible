@@ -50,7 +50,7 @@
 - name: Create flexvolume directory when running on atomic
   file:
     state: directory
-    path: "{{ openshift_flexvolume_container_directory_default }}/volume/exec"
+    path: "/etc/origin/kubelet-plugins/volume/exec"
     mode: '0750'
   when: openshift_is_atomic | bool
 
