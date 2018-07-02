@@ -31,12 +31,13 @@ start)
 
     sleep 1 # avoid race condition
 
+    get_container_values
     # Wait for the pod to come up
-    while ! crictl pods -l -q --label "openshift.io/component={{ name }}" &> /dev/null ; do
+    while -z $(child_container) ; do
         sleep 1
+        get_container_values
     done
 
-    get_container_values
     crictl logs --follow "$container"
     exit $?
     ;;
