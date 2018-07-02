@@ -47,12 +47,11 @@ spec:
           {{ node['volumes']['elasticsearch-storage'] | to_yaml }}
 {% endif %}
 {% endfor %}
-{% for node in range(es_additional_nodes | int) %}
     - roles:
       - client
       - data
       - master
-      replicas: 1
+      replicas: {{ es_additional_nodes | int }}
 {% if es_node_selector is iterable and es_node_selector | length > 0 %}
       nodeSelector:
 {% for key, value in es_node_selector.items() %}
@@ -78,4 +77,3 @@ spec:
 {% else %}
           emptydir: {}
 {% endif %}
-{% endfor %}
