@@ -1,0 +1,15 @@
+[Unit]
+Description={{ service_description }}
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+TimeoutStartSec=10m
+ExecStart=/bin/bash /usr/local/bin/{{ openshift_service_type }}-master-{{ service }} start
+ExecStop=-/bin/bash /usr/local/bin/{{ openshift_service_type }}-master-{{ service }} stop
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

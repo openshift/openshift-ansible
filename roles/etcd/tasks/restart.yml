@@ -1,3 +1,5 @@
 ---
 - name: restart etcd
-  command: /usr/local/bin/master-restart etcd
+  service:
+    name: "{{ openshift_service_type }}-master-etcd"
+    status: restarted

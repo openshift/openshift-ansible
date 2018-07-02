@@ -95,7 +95,7 @@ etcd_listen_client_urls: "{{ etcd_url_scheme }}://{{ etcd_ip }}:{{ etcd_client_p
 #etcd_peer: 127.0.0.1
 etcdctlv2: "{{ r_etcd_common_etcdctl_command }} --cert-file {{ etcd_peer_cert_file }} --key-file {{ etcd_peer_key_file }} --ca-file {{ etcd_peer_ca_file }} -C https://{{ etcd_peer }}:{{ etcd_client_port }}"
 
-etcd_service: etcd
+etcd_service: "{{ l_etcd_restart_is_pod | ternary(openshift_service_type + '-etcd', 'etcd') }}"
 # Location of the service file is fixed and not meant to be changed
 etcd_service_file: "/etc/systemd/system/{{ etcd_service }}.service"
 
@@ -118,6 +118,5 @@ openshift_docker_service_name: "docker"
 etcd_ca_host: "{{ groups['oo_etcd_to_config'].0 }}"
 
 l_etcd_restart_is_pod: "{{ (inventory_hostname in groups['oo_masters']) | bool }}"
-l_etcd_restart_command: "{{ l_etcd_restart_is_pod | ternary('/usr/local/bin/master-restart etcd', 'systemctl restart etcd') }}"
 
 etcd_static_pod_location: "{{ openshift_control_plane_static_pod_location | default('/etc/origin/node/pods/') }}"

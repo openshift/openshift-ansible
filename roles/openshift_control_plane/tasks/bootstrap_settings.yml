@@ -9,4 +9,6 @@
     - key: kubernetesMasterConfig.controllerArguments.cluster-signing-key-file
       value:
       - /etc/origin/master/ca.key
-  notify: restart master
+  notify:
+  - restart master api
+  - restart master controllers
