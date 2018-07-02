@@ -1,4 +1,11 @@
 ---
+# These lines cause this to actually show up in Ansible Tower as a valid playbook
+- name: AnsibleAWX header
+  hosts: all
+  run_once: true
+  connection: local
+  gather_facts: no
+
 - import_playbook: init/main.yml
 
 - import_playbook: openshift-checks/private/install.yml
