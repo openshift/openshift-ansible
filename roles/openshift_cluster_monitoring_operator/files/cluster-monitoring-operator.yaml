@@ -79,7 +79,7 @@ objects:
   data:
     alertmanager.yaml: "${ALERTMANAGER_CONFIG}"
 
-- apiVersion: rbac.authorization.k8s.io/v1beta1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata: {name: cluster-monitoring-operator}
   rules:
@@ -187,7 +187,7 @@ objects:
   metadata:
     name: cluster-monitoring-operator
     namespace: ${NAMESPACE}
-- apiVersion: rbac.authorization.k8s.io/v1beta1
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRoleBinding
   metadata:
     name: cluster-monitoring-operator
