@@ -848,6 +848,8 @@ def get_openshift_version(facts):
             version: the current openshift version
     """
     version = None
+    image_type_dict = {'origin': 'openshift/origin',
+                       'openshift-enterprise': 'openshift3/ose'}
 
     # No need to run this method repeatedly on a system if we already know the
     # version
@@ -860,7 +862,13 @@ def get_openshift_version(facts):
         _, output, _ = module.run_command(['/usr/bin/openshift', 'version'])  # noqa: F405
         version = parse_openshift_version(output)
     else:
-        version = get_container_openshift_version(facts)
+        deployment_type = facts['common']['deployment_type']
+        image_tag = get_container_openshift_version(deployment_type)
+        if image_tag is None:
+            return version
+        cli_image = image_type_dict[deployment_type] + ":" + image_tag
+        _, output, _ = module.run_command(['docker', 'run', '--rm', cli_image, 'version'])  # noqa: F405
+        version = parse_openshift_version(output)
 
     # Handle containerized masters that have not yet been configured as a node.
     # This can be very slow and may get re-run multiple times, so we only use this
@@ -892,12 +900,11 @@ Ex:
         return str(version).split('+')[0]
 
 
-def get_container_openshift_version(facts):
+def get_container_openshift_version(deployment_type):
     """
     If containerized, see if we can determine the installed version via the
     systemd environment files.
     """
-    deployment_type = facts['common']['deployment_type']
     service_type_dict = {'origin': 'origin',
                          'openshift-enterprise': 'atomic-openshift'}
     service_type = service_type_dict[deployment_type]
@@ -910,12 +917,7 @@ def get_container_openshift_version(facts):
         with open(env_path) as env_file:
             for line in env_file:
                 if line.startswith("IMAGE_VERSION="):
-                    tag = line[len("IMAGE_VERSION="):].strip()
-                    # Remove leading "v" and any trailing release info, we just want
-                    # a version number here:
-                    no_v_version = tag[1:] if tag[0] == 'v' else tag
-                    version = no_v_version.split("-")[0]
-                    return version
+                    return line[len("IMAGE_VERSION="):].strip()
     return None
 
 
