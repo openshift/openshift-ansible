@@ -37,12 +37,15 @@
   - name: set the image_type
     set_fact:
       image_type: "{{ 'rhel' if 'rhel' in image_tags.base_image else 'centos' }}"
+      image_x: "{{ image_tags.openshift.split('.')[0] }}"
+      image_y: "{{ image_tags.openshift.split('.')[1] }}"
+      image_z: "{{ image_tags.openshift.split('.')[2] }}"
       image_vm_images: |-
-        { "{{ image_tags.openshift | regex_search('([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})') }}": {"osVhdUrl": "{{ openshift_azure_sas_url }}" } }
+        { "{{ image_x }}{{ image_y }}.{{ image_z }}.{{ (image_name | regex_search('([0-9]{12})'))[:8] }}": {"osVhdUrl": "{{ openshift_azure_sas_url }}" } }
 
   - name: fetch the current offer and update the versions
     oo_azure_rm_publish_image_facts:
-      offer: "{{ azure_image_publish[image_type].offer }}"
+      offer: osa
     register: offerout
 
   - when:
@@ -79,17 +82,17 @@
     # this cancel operation returns a 202 whether it cancelled or not.
     - name: cancel publish operation
       oo_azure_rm_publish_image:
-        offer: "{{ azure_image_publish[image_type].offer }}"
+        offer: osa
         state: cancel_op
 
   - name: create|update an offer in cloudpartner portal
     oo_azure_rm_publish_image:
-      offer: "{{ azure_image_publish[image_type].offer }}"
+      offer: osa
       offer_data: "{{ (lookup('template', 'offer.yml.j2') | from_yaml) if 'skipped' in yeditout and yeditout.skipped or not yeditout.changed else yeditout.results[0].result[0].edit }}"
       force: True
 
   - name: publish this offer
     oo_azure_rm_publish_image:
       state: publish
-      offer: "{{ azure_image_publish[image_type].offer }}"
+      offer: osa
       emails: "{{ openshift_azure_image_publish_emails }}"

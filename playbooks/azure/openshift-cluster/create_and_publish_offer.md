@@ -39,8 +39,15 @@ openshift_azure_container: images
 openshift_azure_storage_account: openshiftimages
 image_name: rhel7-3.9-201805211419
 openshift_azure_image_publish_emails:
-- support@redhat.com
+- your.name@email.com
 openshift_azure_templ_allowed_subscriptions:
 - <subcription id1>
 - <subcription id2>
+openshift_azure_templ_restricted_audience_manual_entries:
+- type: subscriptionId
+  id: <subcription id1>
+  description: <description1>
+- type: subscriptionId
+  id: <subcription id2>
+  description: <description2>
 ```

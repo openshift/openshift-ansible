@@ -63,9 +63,11 @@ class AzurePublisher(object):
     @property
     def token(self):
         '''property for the access_token
-            curl -d \
-            'client_id=<id>&client_secret=<sec>&grant_type=client_credentials&resource=https://cloudpartner.azure.com' \
-            https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/token
+            curl --data-urlencode "client_id=$AZURE_CLIENT_ID" \
+                --data-urlencode "client_secret=$AZURE_CLIENT_SECRET" \
+                --data-urlencode "grant_type=client_credentials" \
+                --data-urlencode "resource=https://cloudpartner.azure.com" \
+                https://login.microsoftonline.com/$AZURE_TENANT_ID/oauth2/token
         '''
         if self._access_token is None:
             url = 'https://login.microsoftonline.com/{}/oauth2/token'.format(self.client_info['tenant_id'])
