@@ -9,7 +9,7 @@
   tasks:
   - name: Confirm Reconcile Security Context Constraints will not change current SCCs
     command: >
-      {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --additive-only=true -o name
+      {{ openshift_client_binary }} adm policy --config={{ openshift.common.config_base }}/master/admin.kubeconfig reconcile-sccs --confirm --additive-only=true -o name
     register: check_reconcile_scc_result
     when: openshift_reconcile_sccs_reject_change | default(true) | bool
     until: check_reconcile_scc_result.rc == 0
