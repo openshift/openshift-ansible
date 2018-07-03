@@ -32,7 +32,7 @@
   with_items:
   - fname: clusterrole.yml
     type: clusterrole
-    name: "system:{{ openshift_cluster_autoscaler_name }}"
+    name: "{{ openshift_cluster_autoscaler_name }}"
   - fname: role.yml
     type: role
     name: "{{ openshift_cluster_autoscaler_name }}"

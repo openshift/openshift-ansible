@@ -2,12 +2,11 @@
 apiVersion: v1
 kind: ClusterRole
 metadata:
-  name: system:cluster-autoscaler
+  name: cluster-autoscaler
 rules:
 - apiGroups:
   - ""
   resources:
-  - nodes
   - persistentvolumeclaims
   - persistentvolumes
   - pods
@@ -17,6 +16,28 @@ rules:
   - get
   - list
   - watch
+  attributeRestrictions: null
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - create
+  attributeRestrictions: null
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
   attributeRestrictions: null
 - apiGroups:
   - extensions
