@@ -34,7 +34,8 @@
   local_action: command mktemp -d
   register: local_tmp
   changed_when: False
-  become: false
+  vars:
+    ansible_become: false
 
 - name: Copy the admin client config(s)
   command: >
@@ -59,4 +60,5 @@
   tags: metrics_cleanup
   changed_when: False
   check_mode: no
-  become: false
+  vars:
+    ansible_become: false
