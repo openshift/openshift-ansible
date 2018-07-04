@@ -2,7 +2,7 @@
 - name: "Generate list of private A records"
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[item]['ansible_hostname'] + openshift_openstack_private_hostname_suffix + '.' + openshift_openstack_full_dns_domain, 'ip': hostvars[item]['private_v4'] } ] }}"
-  with_items: "{{ groups['cluster_hosts'] }}"
+  with_items: "{{ groups['OSEv3'] }}"
   when:
     - hostvars[item]['private_v4'] is defined
     - hostvars[item]['private_v4'] is not none
@@ -11,7 +11,7 @@
 - name: "Add wildcard records to the private A records for infrahosts"
   set_fact:
     private_records: "{{ private_records | default([]) + [ { 'type': 'A', 'fqdn': '*.' + hostvars[groups.masters[0]].openshift_master_default_subdomain, 'ip': hostvars[item]['private_v4'] } ] }}"
-  with_items: "{{ groups['infra_hosts'] }}"
+  with_items: "{{ groups['openstack_infra_nodes'] }}"
   when:
     - groups.masters
     - hostvars[groups.masters[0]].openshift_master_default_subdomain is defined
@@ -57,7 +57,7 @@
 - name: "Generate list of public A records"
   set_fact:
     public_records: "{{ public_records | default([]) + [ { 'type': 'A', 'fqdn': hostvars[item]['ansible_hostname'] + openshift_openstack_public_hostname_suffix + '.' + openshift_openstack_full_dns_domain, 'ip': hostvars[item]['public_v4'] } ] }}"
-  with_items: "{{ groups['cluster_hosts'] }}"
+  with_items: "{{ groups['OSEv3'] }}"
   when:
     - hostvars[item]['public_v4'] is defined
     - hostvars[item]['public_v4'] | string

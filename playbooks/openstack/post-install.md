@@ -155,18 +155,17 @@ You can also create your own custom playbook. Here are a few examples:
 
 This example runs against app nodes. The list of options include:
 
-  - cluster_hosts (all hosts: app, infra, masters, dns, lb)
-  - OSEv3 (app, infra, masters)
-  - app
-  - dns
-  - masters
-  - infra_hosts
+  - OSEv3 (all created hosts: app, infra, masters, etcd, glusterfs, lb, nfs)
+  - openstack_nodes (all OpenShift hosts: app, infra, masters, etcd)
+  - openstack_compute_nodes
+  - openstack_master_nodes
+  - openstack_infra_nodes
 
 ### Attach Additional RHN Pools
 
 ```
 ---
-- hosts: cluster_hosts
+- hosts: OSEv3
   tasks:
   - name: Attach additional RHN pool
     become: true

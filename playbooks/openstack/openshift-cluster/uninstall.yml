@@ -1,5 +1,8 @@
 ---
-- name: evaluate groups
+- name: Evaluate basic OpenStack groups
+  import_playbook: evaluate_groups.yml
+
+- name: Evaluate remaining cluster groups
   import_playbook: ../../init/evaluate_groups.yml
 
 - name: Unsubscribe RHEL instances

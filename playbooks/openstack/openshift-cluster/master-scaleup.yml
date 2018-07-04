@@ -1,0 +1,36 @@
+---
+- name: Save groups before scaling
+  any_errors_fatal: true
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  become: no
+  tasks:
+  - name: Save the node groups to openshift_openstack_existing
+    set_fact:
+      openshift_openstack_existing: "{{ groups }}"
+
+- name: Create the new OpenStack resources
+  import_playbook: provision.yml
+
+- name: Set the new_nodes and new_masters groups
+  import_playbook: evaluate_groups.yml
+
+# TODO: run DNS update and RHEL registration only on new_nodes here. That
+# means we can call `provision_resources.yml` above.
+
+- name: Configure the new OpenStack nodes
+  import_playbook: configure-new-nodes.yml
+
+- import_playbook: ../../prerequisites.yml
+  vars:
+    l_scale_up_hosts: "oo_nodes_to_config:oo_masters_to_config"
+    l_base_packages_hosts: "oo_nodes_to_config:oo_masters_to_config"
+    l_init_fact_hosts: "oo_masters:oo_etcd_to_config:oo_lb_to_config:oo_nodes_to_config"
+    l_sanity_check_hosts: "{{ groups['oo_nodes_to_config'] | union(groups['oo_masters']) }}"
+
+- import_playbook: ../../init/version.yml
+  vars:
+    l_openshift_version_set_hosts: "oo_masters_to_config:oo_nodes_to_config:!oo_first_master"
+
+- import_playbook: ../../openshift-master/private/scaleup.yml

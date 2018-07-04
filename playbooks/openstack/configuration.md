@@ -1009,6 +1009,43 @@ Where `<count>` is the number of the pods you want (i.e. the number of your
 infra nodes).
 
 
+### Scaling the Master Nodes
+
+Adding master nodes is similar to adding compute/infra nodes, but we need to
+run a different playbook at the end.
+
+You must have a fully working OpenShift cluster before you start scaling.
+
+#### 1. Adding Extra Master Nodes
+
+Edit your `inventory/group_vars/all.yml` and set the new master node total in
+`openshift_openstack_num_masters`.
+
+For example if you started with a single master node and you want to add two
+more (for a grand total of three), you should set:
+
+    openshift_openstack_num_masters: 3
+
+#### 2. Scaling the Cluster
+
+Then run the `master-scaleup.yml` playbook:
+
+```
+$ ansible-playbook --user openshift \
+  -i openshift-ansible/playbooks/openstack/inventory.py \
+  -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
+```
+
+This will create the new OpenStack nodes, optionally create the DNS records
+and subscribe them to RHN, configure the `new_masters`, `new_nodes` and
+`new_etcd` groups and run the OpenShift master scaleup tasks.
+
+When the playbook finishes, you should have new master nodes up and running.
+
+Run `oc get nodes` to verify.
+
+
 ## Deploying At Scale
 
 By default, heat stack outputs are resolved.  This may cause

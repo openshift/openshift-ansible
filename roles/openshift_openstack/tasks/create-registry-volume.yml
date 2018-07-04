@@ -6,5 +6,5 @@
     display_description: "Storage for the OpenShift registry"
   register: cinder_registry_volume
   vars:
-    cinder_registry_volume_name: "{{ hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_volume_name }}"
-    cinder_registry_volume_size: "{{ hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_volume_size | regex_replace('[A-Z]i$') }}"
+    cinder_registry_volume_name: "{{ hostvars[groups.openstack_infra_nodes.0].openshift_hosted_registry_storage_volume_name }}"
+    cinder_registry_volume_size: "{{ hostvars[groups.openstack_infra_nodes.0].openshift_hosted_registry_storage_volume_size | regex_replace('[A-Z]i$') }}"
