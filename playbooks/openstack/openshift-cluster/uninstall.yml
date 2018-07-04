@@ -29,6 +29,9 @@
 - name: Remove OpenStack resources
   hosts: localhost
   tasks:
+  - name: retrieve cluster name from the environment if present
+    set_fact:
+      openshift_openstack_stack_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER') | ternary (lookup('env', 'OPENSHIFT_CLUSTER'), omit) }}"
   - name: Remove OpenStack resources
     import_role:
       name: openshift_openstack
