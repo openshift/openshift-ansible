@@ -62,6 +62,14 @@
   - name: deconfigure yum repositories
     import_tasks: tasks/remove_yum.yml
 
+  - name: add get-node-logs script
+    copy:
+      src: files/get-node-logs
+      dest: /usr/local/bin/get-node-logs
+      owner: root
+      group: root
+      mode: 0755
+
   - name: record installed rpms
     yum:
       list: installed
