@@ -42,9 +42,12 @@
     with_items:
     - atomic-openshift-node
     - openshift-node
-    - openvswitch
     - origin-node
     failed_when: false
+  - name: Stop OVS service
+    service: name=openvswitch state=stopped
+    failed_when: false
+    when: openshift_use_openshift_sdn | default(True) | bool
 
 - hosts: masters
   become: yes
@@ -115,7 +118,6 @@
         - openshift-node
         - openshift-sdn
         - openshift-sdn-ovs
-        - openvswitch
         - origin
         - origin-excluder
         - origin-docker-excluder
@@ -126,6 +128,12 @@
         - tuned-profiles-origin-node
         register: result
         until: result is succeeded
+
+      - name: Remove OVS package
+        package: name=openvswitch state=absent
+        register: result
+        until: result is succeeded
+        when: openshift_use_openshift_sdn | default(True) | bool
 
       - name: Remove flannel package
         package: name=flannel state=absent
@@ -144,6 +152,7 @@
       shell: ovs-vsctl del-br br0
       changed_when: False
       failed_when: False
+      when: openshift_use_openshift_sdn | default(True) | bool
 
     - name: Remove linux interfaces
       shell: ip link del "{{ item }}"
@@ -153,6 +162,7 @@
       - lbr0
       - vlinuxbr
       - vovsbr
+      when: openshift_use_openshift_sdn | default(True) | bool
 
     - name: Remove virtual devices
       command: nmcli delete device "{{ item }}"
@@ -160,6 +170,7 @@
       with_items:
       - tun0
       - docker0
+      when: openshift_use_openshift_sdn | default(True) | bool
 
     when: openshift_remove_all | default(true) | bool
 
@@ -196,7 +207,13 @@
     failed_when: False
     with_items:
     - etcd
+
+  - shell: atomic uninstall "{{ item }}"
+    changed_when: False
+    failed_when: False
+    with_items:
     - openvswitch
+    when: openshift_use_openshift_sdn | default(True) | bool
 
   - shell: find /var/lib/origin/openshift.local.volumes -type d -exec umount {} \; 2>/dev/null || true
     changed_when: False
@@ -250,8 +267,12 @@
       file: path={{ item }} state=absent
       with_items:
       - /etc/sysconfig/openshift-node
-      - /etc/sysconfig/openvswitch
       - /run/openshift-sdn
+
+    - name: Remove files owned by OVS RPM
+      file: path=/etc/sysconfig/openvswitch state=absent
+      when: openshift_use_openshift_sdn | default(True) | bool
+
     when: openshift_remove_all | default(True) | bool
 
   - find: path={{ item }} file_type=file
@@ -308,10 +329,15 @@
     - /etc/systemd/system/atomic-openshift-node.service
     - /etc/systemd/system/atomic-openshift-node.service.wants
     - /etc/systemd/system/docker.service.d/docker-sdn-ovs.conf
-    - /etc/systemd/system/openvswitch.service
     - /etc/systemd/system/origin-node-dep.service
     - /etc/systemd/system/origin-node.service
     - /etc/systemd/system/origin-node.service.wants
+
+  - name: Remove remaining OVS files
+    file: path={{ item }} state=absent
+    with_items:
+    - /etc/systemd/system/openvswitch.service
+    when: openshift_use_openshift_sdn | default(True) | bool
 
   - name: Rebuild ca-trust
     command: update-ca-trust
@@ -382,10 +408,17 @@
 
   - name: Remove files owned by RPMs
     file: path={{ item }} state=absent
-    when: openshift_remove_all | default(True) | bool
     with_items:
     - /etc/sysconfig/atomic-openshift-master
+    when: openshift_remove_all | default(True) | bool
+
+  - name: Remove files owned by OVS RPM
+    file: path={{ item }} state=absent
+    with_items:
     - /etc/sysconfig/openvswitch
+    when:
+    - openshift_remove_all | default(True) | bool
+    - openshift_use_openshift_sdn | default(True) | bool
 
   - find: path={{ item }} file_type=file
     register: files
@@ -430,7 +463,6 @@
     - /etc/systemd/system/origin-master.service
     - /etc/systemd/system/origin-master-api.service
     - /etc/systemd/system/origin-master-controllers.service
-    - /etc/systemd/system/openvswitch.service
     - /etc/sysconfig/atomic-openshift-master-api
     - /etc/sysconfig/atomic-openshift-master-controllers
     - /etc/sysconfig/origin-master
@@ -450,6 +482,12 @@
     - /usr/local/bin/oc
     - /usr/local/bin/kubectl
     - /etc/flannel
+
+  - name: Remove remaining OVS files
+    file: path={{ item }} state=absent
+    with_items:
+    - /etc/systemd/system/openvswitch.service
+    when: openshift_use_openshift_sdn | default(True) | bool
 
   # Since we are potentially removing the systemd unit files for separated
   # master-api and master-controllers services, so we need to reload the
