@@ -49,7 +49,7 @@ spec:
           username=\${4}
 
           # auto approve
-          if [[ -z "\${condition}" && ("\${username}" == "system:serviceaccount:openshift-infra:node-bootstrapper" || "\${username}" == "system:node:"* ) ]]; then
+          if [[ -z "\${condition}" && ("\${username}" == "system:serviceaccount:openshift-infra:node-bootstrapper" || "\${username}" == "system:node:"* || "\${username}" == "system:admin" ) ]]; then
             oc adm certificate approve "\${name}"
             exit 0
           fi
