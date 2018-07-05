@@ -4,7 +4,7 @@ metadata:
   name: "{{ es_cluster_name }}"
 spec:
   securityConfig:
-    certificatesSecret: " {{ es_secret_name }}"
+    certificatesSecret: "{{ es_secret_name }}"
   configMapName: "{{ es_configmap_name }}"
   serviceAccountName: "aggregated-logging-elasticsearch"
   nodeSpec:
