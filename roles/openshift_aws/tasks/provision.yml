@@ -29,3 +29,18 @@
     search_regex: OpenSSH
   with_items: "{{ instancesout.instances }}"
   when: openshift_aws_wait_for_ssh | bool
+
+- when: openshift_aws_restart_after_creation | default(false) | bool
+  block:
+  - name: restart host
+    ec2:
+      instance_id: "{{ item.instance_id }}"
+      state: restarted
+      region: "{{ openshift_aws_region }}"
+    with_items: "{{ instancesout.instances }}"
+
+  - name: wait for ssh to become available
+    wait_for_connection:
+    delegate_to: "{{ item.public_dns_name }}"
+    with_items: "{{ instancesout.instances }}"
+    when: openshift_aws_wait_for_ssh | bool
