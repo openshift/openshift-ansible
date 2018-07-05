@@ -15,7 +15,7 @@ Role Variables
 
 | Name                                | Default value                                                  |                                          |
 |-------------------------------------|----------------------------------------------------------------|------------------------------------------|
-| oreg_url      | Needs to be passed in | The docker registry url to the image that serves as the source for the tag operation                |
+| docker_image_url      | Needs to be passed in | The docker registry url to the image that serves as the source for the tag operation                |
 | openshift_ist        | Needs to be passed in    | The image stream name and image stream tag ID                  |
 
 

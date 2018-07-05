@@ -1,7 +1,4 @@
 ---
 - import_playbook: ../init/main.yml
   
-- name: Update image stream tag
-  hosts: all
-  roles:
-    - openshift_imagestreamtags
+- import_playbook: private/update_imagestreamtags.yml

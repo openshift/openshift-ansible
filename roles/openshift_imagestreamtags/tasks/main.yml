@@ -8,5 +8,5 @@
 
 - name: Tag image into an image stream in the openshift namespace
   command: >
-    {{ openshift_client_binary }} tag --source=docker {{oreg_url}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig openshift/{{ openshift_ist }}
+    {{ openshift_client_binary }} tag --source=docker {{docker_image_url}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig openshift/{{ openshift_ist }}
   changed_when: False

@@ -1,0 +1,5 @@
+---
+- name: Update image stream tag
+  hosts: all
+  roles:
+    - openshift_imagestreamtags
