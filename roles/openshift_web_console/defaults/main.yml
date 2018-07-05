@@ -14,7 +14,7 @@ openshift_web_console_image_dict:
     version: "{{ openshift_image_tag }}"
     image_name: "web-console"
 
-openshift_web_console_prefix: "{{ openshift_web_console_image_dict[openshift_deployment_type]['prefix'] }}"
+openshift_web_console_prefix: "{{ oreg_url | default(openshift_web_console_image_dict[openshift_deployment_type]['prefix']) }}"
 openshift_web_console_version: "{{ openshift_web_console_image_dict[openshift_deployment_type]['version'] }}"
 openshift_web_console_image_name: "{{ openshift_web_console_image_dict[openshift_deployment_type]['image_name'] }}"
 # Default the replica count to the number of masters.
