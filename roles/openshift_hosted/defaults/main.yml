@@ -22,7 +22,7 @@ openshift_cluster_domain: 'cluster.local'
 
 openshift_hosted_images_dict:
   origin: 'docker.io/openshift/origin-${component}:${version}'
-  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+  openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
 
 ##########
 # Router #

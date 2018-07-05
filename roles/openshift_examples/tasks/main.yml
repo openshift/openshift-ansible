@@ -61,9 +61,9 @@
   failed_when: "'already exists' not in oex_imagestream_import_secret.stderr and oex_imagestream_import_secret.rc != 0"
   changed_when: false
 
-- name: Modify registry paths if registry_url is not registry.access.redhat.com
+- name: Modify registry paths if registry_url is not registry.redhat.io
   shell: >
-    find {{ examples_base }} -type f | xargs -n 1 sed -i 's|registry.access.redhat.com|{{ registry_host | quote }}|g'
+    find {{ examples_base }} -type f | xargs -n 1 sed -i 's|registry.redhat.io|{{ registry_host | quote }}|g'
   when: registry_host != '' and openshift_examples_modify_imagestreams | default(False) | bool
 
 # RHEL and Centos image streams are mutually exclusive

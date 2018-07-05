@@ -65,7 +65,7 @@ def test_all_images_available_remotely(task_vars, available_locally):
             return {'images': [], 'failed': available_locally}
         return {}
 
-    task_vars['openshift_docker_additional_registries'] = ["docker.io", "registry.access.redhat.com"]
+    task_vars['openshift_docker_additional_registries'] = ["docker.io", "registry.redhat.io"]
     task_vars['openshift_image_tag'] = 'v3.4'
     check = DockerImageAvailability(execute_module, task_vars)
     check._module_retry_interval = 0

@@ -24,7 +24,7 @@ ansible_service_broker_local_registry_whitelist: []
 
 l_asb_default_images_dict:
   origin: 'docker.io/ansibleplaybookbundle/origin-ansible-service-broker:latest'
-  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-ansible-service-broker:${version}'
+  openshift-enterprise: 'registry.redhat.io/openshift3/ose-ansible-service-broker:${version}'
 
 l_asb_default_images_default: "{{ l_asb_default_images_dict[openshift_deployment_type] }}"
 l_asb_image_url: "{{ oreg_url | default(l_asb_default_images_default) | regex_replace('${version}' | regex_escape, openshift_image_tag) }}"

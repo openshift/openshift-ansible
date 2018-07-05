@@ -884,7 +884,7 @@ parameters:
 - name: MEMCACHED_IMG_NAME
   displayName: Memcached Image Name
   description: This is the Memcached image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46/cfme-openshift-memcached
+  value: registry.redhat.io/cloudforms46/cfme-openshift-memcached
 - name: MEMCACHED_IMG_TAG
   displayName: Memcached Image Tag
   description: This is the Memcached image tag/version requested to deploy.
@@ -892,11 +892,11 @@ parameters:
 - name: FRONTEND_APPLICATION_IMG_NAME
   displayName: Frontend Application Image Name
   description: This is the Frontend Application image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46/cfme-openshift-app-ui
+  value: registry.redhat.io/cloudforms46/cfme-openshift-app-ui
 - name: BACKEND_APPLICATION_IMG_NAME
   displayName: Backend Application Image Name
   description: This is the Backend Application image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46/cfme-openshift-app
+  value: registry.redhat.io/cloudforms46/cfme-openshift-app
 - name: FRONTEND_APPLICATION_IMG_TAG
   displayName: Front end Application Image Tag
   description: This is the CloudForms Frontend Application image tag/version requested to deploy.
@@ -908,7 +908,7 @@ parameters:
 - name: ANSIBLE_IMG_NAME
   displayName: Ansible Image Name
   description: This is the Ansible image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46/cfme-openshift-embedded-ansible
+  value: registry.redhat.io/cloudforms46/cfme-openshift-embedded-ansible
 - name: ANSIBLE_IMG_TAG
   displayName: Ansible Image Tag
   description: This is the Ansible image tag/version requested to deploy.
@@ -944,7 +944,7 @@ parameters:
 - name: HTTPD_IMG_NAME
   displayName: Apache httpd Image Name
   description: This is the httpd image name requested to deploy.
-  value: registry.access.redhat.com/cloudforms46/cfme-openshift-httpd
+  value: registry.redhat.io/cloudforms46/cfme-openshift-httpd
 - name: HTTPD_IMG_TAG
   displayName: Apache httpd Image Tag
   description: This is the httpd image tag/version requested to deploy.

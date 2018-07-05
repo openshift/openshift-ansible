@@ -10,7 +10,7 @@ openshift_node_problem_detector_image_dict:
     prefix: "docker.io/openshift/"
     version: "{{ openshift_image_tag }}"
   openshift-enterprise:
-    prefix: "registry.access.redhat.com/openshift3/ose-"
+    prefix: "registry.redhat.io/openshift3/ose-"
     version: "{{ openshift_image_tag }}"
 
 openshift_node_problem_detector_image_prefix: "{{ openshift_node_problem_detector_image_dict[openshift_deployment_type]['prefix'] }}"
