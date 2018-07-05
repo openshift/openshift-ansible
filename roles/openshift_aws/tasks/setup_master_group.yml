@@ -7,7 +7,7 @@
   debug:
     msg: "openshift_aws_region={{ openshift_aws_region }}"
 
-- name: fetch newly created instances
+- name: fetch master instances
   ec2_instance_facts:
     region: "{{ openshift_aws_region }}"
     filters:

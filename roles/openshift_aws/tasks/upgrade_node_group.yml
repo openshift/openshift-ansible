@@ -2,8 +2,6 @@
 - include_tasks: provision_nodes.yml
   vars:
     openshift_aws_node_group_upgrade: True
-  when:
-  - openshift_aws_upgrade_provision_nodes | default(True)
 
 - debug: var=openshift_aws_current_asgs
 - debug: var=openshift_aws_created_asgs
