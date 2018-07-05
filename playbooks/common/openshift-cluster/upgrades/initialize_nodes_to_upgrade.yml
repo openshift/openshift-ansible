@@ -42,5 +42,8 @@
       groups: oo_nodes_to_upgrade
       ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
       ansible_become: "{{ g_sudo | default(omit) }}"
+    when: item not in dedicated_etcds
+    vars:
+      dedicated_etcds: "{{ groups['oo_etcd_to_config'] | difference(groups['oo_masters']) }}"
     with_items: "{{ groups['temp_nodes_to_upgrade'] | default(groups['oo_nodes_to_config']) }}"
     changed_when: False
