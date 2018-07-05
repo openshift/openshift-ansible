@@ -240,7 +240,7 @@
       elasticsearch.yml: "{{ tempdir }}/elasticsearch.yml"
       log4j2.properties: "{{ tempdir }}/log4j2.properties"
   register: es_config_creation
-  notify: "restart elasticsearch"
+#  notify: "restart elasticsearch"
 
 #- when: es_config_creation.changed | bool
 #  block:
