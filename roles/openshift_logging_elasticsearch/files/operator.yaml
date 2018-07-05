@@ -12,12 +12,13 @@ spec:
       labels:
         name: elasticsearch-operator
     spec:
+      serviceAccountName: aggregated-logging-elasticsearch-operator
       containers:
         - name: elasticsearch-operator
           image: quay.io/t0ffel/elasticsearch-operator
           command:
           - elasticsearch-operator
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
               valueFrom:

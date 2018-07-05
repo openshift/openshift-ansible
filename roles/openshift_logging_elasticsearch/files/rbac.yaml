@@ -30,16 +30,29 @@ rules:
   - statefulsets
   verbs:
   - "*"
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - "*"
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aggregated-logging-elasticsearch-operator
 
 ---
 
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: default-account-elasticsearch-operator
+  name: elasticsearch-operator-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: aggregated-logging-elasticsearch-operator
 roleRef:
   kind: Role
   name: elasticsearch-operator
