@@ -1,0 +1,57 @@
+#!/bin/sh
+
+SCALE_UP_FAILURE=0
+SCALE_DOWN_FAILURE=0
+
+# get nodes (only one compute node expected)
+NODE_COUNT=$(oc get nodes -o json | jq '.items[] | select(.metadata.labels["node-role.kubernetes.io/compute"]=="true") | .metadata.name' | wc -l)
+echo "Found $NODE_COUNT compute nodes, expected 1"
+
+oc create -n {{ openshift_cluster_autoscaler_namespace }} -f {{ openshift_cluster_autoscaler_scale_up_spec }}
+
+retry=0
+# Wait for 5 minutes at most
+while [[ $retry -le 150 ]]; do
+        NODE_COUNT=$(oc get nodes -o json | jq '.items[] | select((.metadata.labels["node-role.kubernetes.io/compute"]=="true") and (.status.conditions[].type=="Ready")) | .metadata.name' | wc -l)
+        echo "$(date): Got $NODE_COUNT compute nodes, waiting for 5"
+        if [[ ${NODE_COUNT} -ne 5 ]]; then
+                retry=$((retry+1))
+                sleep 2s
+                continue
+        fi
+        break
+done
+
+echo "Got $NODE_COUNT compute nodes, expected for 5"
+
+if [[ $NODE_COUNT -ne 5 ]]; then
+        SCALE_UP_FAILURE=1
+fi
+
+# Scale down
+oc delete -n {{ openshift_cluster_autoscaler_namespace }} -f {{ openshift_cluster_autoscaler_scale_up_spec }}
+
+retry=0
+# Wait for 5 minutes at most
+while [[ $retry -le 150 ]]; do
+        NODE_COUNT=$(oc get nodes -o json | jq '.items[] | select((.metadata.labels["node-role.kubernetes.io/compute"]=="true") and (.status.conditions[].type=="Ready")) | .metadata.name' | wc -l)
+        echo "$(date): Got $NODE_COUNT compute nodes, waiting for 1"
+        if [[ ${NODE_COUNT} -ne 1 ]]; then
+                retry=$((retry+1))
+                sleep 2s
+                continue
+        fi
+        break
+done
+
+echo "Got $NODE_COUNT compute nodes, expected for 1"
+
+if [[ $NODE_COUNT -ne 1 ]]; then
+
+        SCALE_DOWN_FAILURE=1
+fi
+
+if [[ ${SCALE_UP_FAILURE} -eq 1 ]] || [[ ${SCALE_DOWN_FAILURE} -eq 1 ]]; then
+        echo "The autoscaler did not scale up/down properly"
+        exit 1
+fi

@@ -18,6 +18,14 @@
   roles:
   - role: openshift_cluster_autoscaler
 
+- name: Test OpenShift Cluster Auto Scaler
+  hosts: oo_first_master
+  tasks:
+  - include_role:
+      name: openshift_cluster_autoscaler
+      tasks_from: test
+    when: openshift_cluster_autoscaler_run_test | default(false) | bool
+
 - name: Cluster Auto Scaler Install Checkpoint End
   hosts: all
   gather_facts: false
