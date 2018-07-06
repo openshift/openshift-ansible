@@ -54,6 +54,7 @@
 # serving certificate SANs.
 - include: ../../openshift-etcd/certificates.yml
   when:
+  - oo_etcd_to_config is defined
   - true in hostvars | oo_select_keys(groups['oo_etcd_to_config']) | oo_collect('__etcd_cert_lacks_hostname') | default([false])
   vars:
     etcd_certificates_redeploy: True
