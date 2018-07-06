@@ -89,13 +89,14 @@ class OCcsr(OpenShiftCLI):
             if node['name'] in self.get_csr_request(csr['spec']['request']):
                 node['csrs'][csr['metadata']['name']] = csr
 
-                # server: check that the username is the node and type is 'Approved'
-                if node['name'] in csr['spec']['username'] and csr['status']:
-                    if csr['status']['conditions'][0]['type'] == 'Approved':
+                # client certs may come in as either the service_account or as the node during upgrade
+                # server certs always come in as the node
+                if ((node['name'] in csr['spec']['username'] or
+                     csr['spec']['username'] in [self.service_account, 'system:admin']) and
+                        csr['status'] and csr['status']['conditions'][0]['type'] == 'Approved'):
+                    if 'server auth' in csr['spec']['usages']:
                         node['server_accepted'] = True
-                # client: check that the username is not the node and type is 'Approved'
-                if node['name'] not in csr['spec']['username'] and csr['status']:
-                    if csr['status']['conditions'][0]['type'] == 'Approved':
+                    if 'client auth' in csr['spec']['usages']:
                         node['client_accepted'] = True
                 # check type is 'Denied' and mark node as such
                 if csr['status'] and csr['status']['conditions'][0]['type'] == 'Denied':
@@ -146,11 +147,12 @@ class OCcsr(OpenShiftCLI):
 
                     # mark node as accepted in our list of nodes
                     # we will use {client,server}_accepted fields to determine if we're finished
-                    if node['name'] not in csr['spec']['username']:
-                        node['client_accepted'] = True
-
-                    if node['name'] in csr['spec']['username']:
-                        node['server_accepted'] = True
+                    if (node['name'] in csr['spec']['username'] or
+                            csr['spec']['username'] in [self.service_account, 'system:admin']):
+                        if 'server auth' in csr['spec']['usages']:
+                            node['server_accepted'] = True
+                        if 'client auth' in csr['spec']['usages']:
+                            node['client_accepted'] = True
 
                 results.append(result)
 
