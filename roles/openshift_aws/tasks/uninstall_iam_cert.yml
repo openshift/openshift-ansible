@@ -1,6 +1,6 @@
 ---
 - when:
-  - openshift_aws_create_iam_cert | bool
+  - openshift_aws_delete_iam_cert | bool
   - openshift_aws_iam_cert_path != ''
   - openshift_aws_iam_cert_key_path != ''
   - openshift_aws_elb_cert_arn == ''
