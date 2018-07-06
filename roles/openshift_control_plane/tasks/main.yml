@@ -320,14 +320,7 @@
     fail:
       msg: Control plane pods didn't pass health check
 
-- name: Wait for Openshift APIs to register themselves
-  command: >
-    {{ openshift_client_binary }} get --raw /apis/{{ item }}/v1
-  register: openshift_apis
-  until: openshift_apis.rc == 0
-  with_items: "{{ l_core_api_list }}"
-  retries: 60
-  delay: 5
+- import_tasks: check_master_api_is_ready.yml
 
 - name: Remove oc cache to refresh a list of APIs
   file:
