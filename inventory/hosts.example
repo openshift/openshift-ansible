@@ -549,8 +549,9 @@ debug_level=2
 #openshift_metrics_install_metrics=true
 #
 # metrics-server deployment
-# By default, metrics-server is not automatically deployed.  Deploying metrics-server
-# is necessary to use the HorizontalPodAutoscaler.  Set this to enable it.
+# By default, metrics-server is not automatically deployed, unless metrics is also
+# deployed.  Deploying metrics-server is necessary to use the HorizontalPodAutoscaler.
+# Set this to enable it.
 #openshift_metrics_server_install=true
 #
 # Storage Options

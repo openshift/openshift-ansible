@@ -66,6 +66,14 @@
 # TODO: need to verify settings about the bootstrap configs
 # 1. Does network policy match the master config
 
+- name: Ensure metrics-server is installed before upgrading the controller-manager
+  hosts: oo_first_master
+  roles:
+  - role: metrics_server
+    # a default is set on the actual variable in the role, so no fancy logic is needed here
+    when: openshift_metrics_server_install | default(true) | bool
+
+
 - name: Configure components that must be available prior to upgrade
   hosts: oo_first_master
   pre_tasks:
