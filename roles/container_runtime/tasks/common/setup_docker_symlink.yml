@@ -13,6 +13,8 @@
 
     - name: "Set the selinux context on {{ docker_alt_storage_path }}"
       command: "semanage fcontext -a -e {{ docker_default_storage_path }} {{ docker_alt_storage_path }}"
+      environment:
+        LANG: C
       register: results
       failed_when:
         - results.rc == 1
