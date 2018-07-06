@@ -9,8 +9,13 @@ environment.
 
 from __future__ import print_function
 
+import argparse
 import json
 import os
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
 
 from keystoneauth1.exceptions.catalog import EndpointNotFound
 import shade
@@ -233,5 +238,60 @@ def _get_kuryr_vars(cloud_client, data):
     return settings
 
 
+def output_inventory(inventory, output_file):
+    """Outputs inventory into a file in ini format"""
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+
+    host_meta_vars = _get_host_meta_vars_as_dict(inventory)
+
+    for key in sorted(inventory.keys()):
+        if key == 'localhost':
+            config.add_section('localhost')
+            config.set('localhost', 'localhost')
+            config.add_section('localhost:vars')
+            for var, value in inventory['localhost'].items():
+                config.set('localhost:vars', var, value)
+        elif key not in ('localhost', '_meta'):
+            if 'hosts' in inventory[key]:
+                config.add_section(key)
+                for host in inventory[key]['hosts']:
+                    if host in host_meta_vars.keys():
+                        config.set(key, host + " " + host_meta_vars[host])
+                    else:
+                        config.set(key, host)
+            if 'vars' in inventory[key]:
+                config.add_section(key + ":vars")
+                for var, value in inventory[key]['vars'].items():
+                    config.set(key + ":vars", var, value)
+
+    with open(output_file, 'w') as configfile:
+        config.write(configfile)
+
+
+def _get_host_meta_vars_as_dict(inventory):
+    """parse host meta vars from inventory as dict"""
+    host_meta_vars = {}
+    if '_meta' in inventory.keys():
+        if 'hostvars' in inventory['_meta']:
+            for host in inventory['_meta']['hostvars'].keys():
+                host_meta_vars[host] = ' '.join(
+                    '{}={}'.format(key, val) for key, val in inventory['_meta']['hostvars'][host].items())
+    return host_meta_vars
+
+
+def parse_args():
+    """parse arguments to script"""
+    parser = argparse.ArgumentParser(description="Create ansible inventory.")
+    parser.add_argument('--static', type=str, default='',
+                        help='File to store a static inventory in.')
+    parser.add_argument('--list', action="store_true", default=False,
+                        help='List inventory.')
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    print(json.dumps(build_inventory(), indent=4, sort_keys=True))
+    if parse_args().static:
+        output_inventory(build_inventory(), parse_args().static)
+    else:
+        print(json.dumps(build_inventory(), indent=4, sort_keys=True))
