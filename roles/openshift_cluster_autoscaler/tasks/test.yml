@@ -10,9 +10,9 @@
   - deployment_result.results.results | length > 0
   - deployment_result.results.results[0].status.readyReplicas is defined
   - deployment_result.results.results[0].status.readyReplicas > 0
-  # Wait for 20 minutes (the autoscaler sometimes crashes due to SDN issues)
+  # Wait for 2 minutes
   delay: 10
-  retries: 120
+  retries: 12
 
 - name: Upload scale-up.yaml workload definition
   copy:

@@ -13,6 +13,42 @@
           status: "In Progress"
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1591281
+- name: Update container-selinux on all nodes
+  hosts: oo_nodes_to_config
+  tasks:
+  - name: Update container-selinux package
+    package:
+      name: container-selinux
+      state: latest
+
+  - name: Restart all nodes
+    # https://github.com/ansible/ansible/issues/10616
+    shell: sleep 2 && shutdown -r now "OpenShift Ansible master rolling restart"
+    async: 1
+    poll: 0
+    ignore_errors: true
+    become: yes
+  # Workaround for https://github.com/ansible/ansible/issues/21269
+  - set_fact:
+      wait_for_host: "{{ ansible_host }}"
+
+  # Ansible's blog documents this *without* the port, which appears to now
+  # just wait until the timeout value and then proceed without checking anything.
+  # port is now required.
+  #
+  # However neither ansible_ssh_port or ansible_port are reliably defined, likely
+  # only if overridden. Assume a default of 22.
+  - name: Wait for nodes to restart
+    local_action:
+      module: wait_for
+        host="{{ wait_for_host }}"
+        state=started
+        delay=10
+        timeout=600
+        port="{{ ansible_port | default(ansible_ssh_port | default(22,boolean=True),boolean=True) }}"
+    become: no
+
 - name: OpenShift Cluster Auto Scaler
   hosts: oo_first_master
   roles:
