@@ -74,12 +74,26 @@
   - networkConfig.clusterNetworkCIDR
   - networkConfig.hostSubnetLength
 
+# TODO(michaelgugino): Remove in 3.11
+- name: Check for old master env file
+  stat:
+    path: "/etc/sysconfig/{{ openshift_service_type }}-master-api"
+  register: old_env
 
-- name: Create the master service env file if it does not exist
-  template:
-    src: "master.env.j2"
+# TODO(michaelgugino): Remove in 3.11
+- name: Migrate old master env file to new location
+  master_env_config_migrate:
+    src: "/etc/sysconfig/{{ openshift_service_type }}-master-api"
     dest: "{{ openshift.common.config_base }}/master/master.env"
-    force: no
+  when: old_env.stat.exists
+
+# TODO(michaelgugino): Remove in 3.11
+- name: mv old master env file to .backup
+  command: "mv {{ l_old_env_file }} {{ l_old_env_file_backup }}"
+  vars:
+    l_old_env_file: "/etc/sysconfig/{{ openshift_service_type }}-master-api"
+    l_old_env_file_backup: "/etc/sysconfig/{{ openshift_service_type }}-master-api.backup"
+  when: old_env.stat.exists
 
 - name: Update oreg value
   yedit:
