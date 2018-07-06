@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -20,14 +20,18 @@ spec:
     spec:
       containers:
       - args:
+        - /bin/cluster-autoscaler
         - --alsologtostderr
-        - --v={{ openshift_cluster_autoscaler_version }}
+        - --v={{ openshift_cluster_autoscaler_loglevel }}
         - --skip-nodes-with-local-storage={{ openshift_cluster_autoscaler_skip_nodes_local_storage }}
         - --leader-elect-resource-lock=configmaps
         - --namespace={{ openshift_cluster_autoscaler_namespace }}
 {% if openshift_cluster_autoscaler_scale_down_delay is defined %}
         - --scale-down-delay={{ openshift_cluster_autoscaler_scale_down_delay }}
 {% endif %}
+        - --scale-down-delay-after-failure=10s # TODO(frobware) for demo
+        - --scale-down-unneeded-time=10s       # TODO(frobware) for demo
+        - --scale-down-delay-after-add=10s     # TODO(frobware) for demo
         - --cloud-provider={{ openshift_cluster_autoscaler_cloud_provider }}
 {% for group in openshift_cluster_autoscaler_node_groups %}
         - --nodes={{ group.min }}:{{ group.max }}:{{ group.name }}

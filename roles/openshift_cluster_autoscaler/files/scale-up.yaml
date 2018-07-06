@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: scale-up
+  labels:
+    app: scale-up
+spec:
+  replicas: 50
+  selector:
+    matchLabels:
+      app: scale-up
+  template:
+    metadata:
+      labels:
+        app: scale-up
+    spec:
+      containers:
+      - name: busybox
+        image: docker.io/library/busybox
+        resources:
+          requests:
+            memory: 2Gi
+        command:
+        - /bin/sh
+        - "-c"
+        - "echo 'this should be in the logs' && sleep 86400"
+      terminationGracePeriodSeconds: 0

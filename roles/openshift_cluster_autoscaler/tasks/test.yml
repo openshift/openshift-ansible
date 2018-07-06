@@ -1,0 +1,36 @@
+---
+- name: Wait until the autoscaler pod is running
+  oc_obj:
+    namespace: "{{ openshift_cluster_autoscaler_namespace }}"
+    state: list
+    kind: deployment
+    name: "{{ openshift_cluster_autoscaler_name }}"
+  register: deployment_result
+  until:
+  - deployment_result.results.results | length > 0
+  - deployment_result.results.results[0].status.readyReplicas is defined
+  - deployment_result.results.results[0].status.readyReplicas > 0
+  # Wait for 2 minutes
+  delay: 10
+  retries: 12
+
+- name: Upload scale-up.yaml workload definition
+  copy:
+    src: scale-up.yaml
+    dest: "{{ openshift_cluster_autoscaler_template_location }}/scale-up.yaml"
+
+- set_fact:
+    openshift_cluster_autoscaler_scale_up_spec: "{{ openshift_cluster_autoscaler_template_location }}/scale-up.yaml"
+
+- name: Upload test-autoscaler.sh script
+  template:
+    src: test-autoscaler.sh.j2
+    dest: "{{ openshift_cluster_autoscaler_template_location }}/test-autoscaler.sh"
+    mode: +xr
+
+- name: Run the test
+  command: |-
+    "{{ openshift_cluster_autoscaler_template_location }}/test-autoscaler.sh"
+  register: test_output
+
+- debug: var=test_output

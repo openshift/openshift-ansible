@@ -1,0 +1,60 @@
+openshift_deployment_type: openshift-enterprise
+
+openshift_aws_ami: ami-788cd307
+
+# ami-fedc8781 is aos-3.10.10-1-201806290433 and as of (Fri 29 Jun
+# 14:56:38 BST 2018) does not work for me.
+#
+# openshift_aws_ami: ami-fedc8781
+
+openshift_aws_region: us-east-1
+
+openshift_aws_clusterid: amcdermo-autoasg
+openshift_release: "3.10"
+
+openshift_aws_ssh_key_name: libra
+openshift_aws_create_s3: false
+
+openshift_aws_node_group_config_master_volumes:
+- device_name: /dev/sda1
+  volume_size: 30
+  volume_type: gp2
+  delete_on_termination: False
+- device_name: /dev/sdb
+  volume_size: 200
+  volume_type: gp2
+  delete_on_termination: False
+
+openshift_aws_node_group_config_node_volumes:
+- device_name: /dev/sda1
+  volume_size: 30
+  volume_type: gp2
+  delete_on_termination: True
+- device_name: /dev/sdb
+  volume_size: 200
+  volume_type: gp2
+  delete_on_termination: True
+
+openshift_aws_create_iam_role: True
+
+openshift_aws_master_group_min_size: 1
+openshift_aws_master_group_max_size: 1
+openshift_aws_master_group_desired_size: 1
+
+openshift_aws_infra_group_min_size: 1
+openshift_aws_infra_group_max_size: 1
+openshift_aws_infra_group_desired_size: 1
+
+openshift_aws_compute_group_min_size: 1
+openshift_aws_compute_group_max_size: 10
+openshift_aws_compute_group_desired_size: 1
+
+# custom certificates are required for the ELB
+openshift_aws_create_iam_cert: True
+
+openshift_aws_iam_cert_path: /home/aim/wildcard.amcdermo-autoasg.openshift.com.crt
+openshift_aws_iam_cert_key_path: /home/aim/wildcard.amcdermo-autoasg.openshift.com.key
+openshift_aws_iam_cert_chain_path: /home/aim/chain.ca.crt
+
+openshift_aws_instance_type: m4.large
+openshift_cluster_autoscaler_deploy: true

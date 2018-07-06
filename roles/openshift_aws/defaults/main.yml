@@ -1,6 +1,7 @@
 ---
 openshift_aws_create_s3: True
 openshift_aws_create_iam_cert: True
+openshift_aws_delete_iam_cert: "{{ openshift_aws_create_iam_cert }}"
 openshift_aws_create_iam_role: False
 openshift_aws_create_security_groups: True
 openshift_aws_create_launch_config: True
