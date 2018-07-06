@@ -37,13 +37,16 @@
     register: new_file_slurp
 
   - local_action: copy content="{{ patch_output.raw_patch }}\n" dest={{ local_tmp.stdout }}/patch.patch
-    become: false
+    vars:
+      ansible_become: false
 
   - local_action: copy content={{ new_file_slurp['content'] | b64decode }} dest={{ local_tmp.stdout }}/configmap_new_file
-    become: false
+    vars:
+      ansible_become: false
 
   - local_action: command patch --force --quiet -u {{ local_tmp.stdout }}/configmap_new_file {{ local_tmp.stdout }}/patch.patch
-    become: false
+    vars:
+      ansible_become: false
 
   - copy:
       src: "{{ local_tmp.stdout }}/configmap_new_file"
