@@ -29,7 +29,7 @@
     register: openshift_hosted_wfp_rc_phase
     until: "'Complete' in openshift_hosted_wfp_rc_phase.stdout"
     delay: 10
-    retries: 60
+    retries: 18
     failed_when: "'Failed' in openshift_hosted_wfp_rc_phase.stdout"
     with_together:
     - "{{ l_openshift_hosted_wfp_items }}"
