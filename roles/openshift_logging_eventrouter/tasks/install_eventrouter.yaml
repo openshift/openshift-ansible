@@ -60,6 +60,17 @@
       NAMESPACE: "{{ openshift_logging_eventrouter_namespace }}"
       SINK: "{{ openshift_logging_eventrouter_sink }}"
 
+- name: Wait for ElasticSearch eventrouter deploy to complete
+  import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "{{ openshift_logging_eventrouter_namespace }}"
+    l_deployment_name: "logging-eventrouter"
+    l_kind: deploymentconfig
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Elasticsearch eventrouter"
+
 ## Placeholder for migration when necessary ##
 
 - name: Delete temp directory

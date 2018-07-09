@@ -208,6 +208,17 @@
     - "{{ tempdir }}/templates/logging-mux-dc.yaml"
     delete_after: true
 
+- name: Wait for logging-mux deploy to complete
+  import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "{{ openshift_logging_mux_namespace }}"
+    l_deployment_name: "logging-mux"
+    l_kind: deploymentconfig
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "logging-mux"
+
 - name: Add mux namespaces
   oc_project:
     state: present

@@ -253,6 +253,17 @@
       - "{{ tempdir }}/templates/kibana-dc.yaml"
     delete_after: true
 
+- name: Wait for Kibana deploy to complete
+  import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "{{ openshift_logging_namespace }}"
+    l_deployment_name: "{{ kibana_name }}"
+    l_kind: deploymentconfig
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Kibana"
+
 # update master configs?
 
 - name: Delete temp directory

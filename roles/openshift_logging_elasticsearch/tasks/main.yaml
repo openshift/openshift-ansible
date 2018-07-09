@@ -521,6 +521,17 @@
     - "{{ tempdir }}/templates/logging-{{ es_component }}-route.yaml"
   when: openshift_logging_es_allow_external | bool
 
+- name: Wait for ElasticSearch deploy to complete
+  import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    l_deployment_name: "{{ es_deploy_name }}"
+    l_kind: deployment
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Elasticsearch"
+
 ## Placeholder for migration when necessary ##
 
 - name: Delete temp directory
