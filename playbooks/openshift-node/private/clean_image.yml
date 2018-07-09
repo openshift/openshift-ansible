@@ -8,3 +8,7 @@
       state: absent
     with_items:
     - openshift.fact
+  - name: Clean cloud-init path
+    file:
+      state: absent
+      path: "/var/lib/cloud/"
