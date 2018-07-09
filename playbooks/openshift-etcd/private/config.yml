@@ -29,6 +29,10 @@
     - openshift_is_atomic | bool
     - not inventory_hostname in groups['oo_masters']
 
+  - import_role:
+      name: etcd
+      tasks_from: set_facts.yml
+
   # Setup etcd as a static pod if collocated with a master
   - import_role:
       name: etcd
