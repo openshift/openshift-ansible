@@ -23,16 +23,6 @@
     state: directory
   when: ('config' in l2_openshift_node_kubelet_args) | bool
 
-# TODO: add the validate parameter when there is a validation command to run
-- name: Create the Node config
-  template:
-    dest: "{{ openshift.common.config_base }}/node/node-config.yaml"
-    src: node.yaml.v1.j2
-    backup: true
-    owner: root
-    group: root
-    mode: 0600
-
 - name: Configure Node Environment Variables
   lineinfile:
     dest: /etc/sysconfig/{{ openshift_service_type }}-node
