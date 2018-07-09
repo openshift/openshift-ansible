@@ -11,20 +11,26 @@
       tasks_from: set_fact_workaround.yml
   - import_role:
       name: openshift_hosted
-      tasks_from: wait_for_pod.yml
+      tasks_from: deployment.yml
     vars:
-      l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_router_wait }}"
-      l_openshift_hosted_wfp_items: "{{ openshift_hosted_routers }}"
+      l_namespace: default
+      l_deployment_name: router
+      l_kind: deploymentconfig
+      l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+      l_component: "Router"
     when:
     - openshift_hosted_manage_router | default(True) | bool
     - openshift_hosted_router_registryurl is defined
 
   - import_role:
       name: openshift_hosted
-      tasks_from: wait_for_pod.yml
+      tasks_from: deployment.yml
     vars:
-      l_openshift_hosted_wait_for_pod: "{{ openshift_hosted_registry_wait }}"
-      l_openshift_hosted_wfp_items: "{{ r_openshift_hosted_registry_list }}"
+      l_namespace: default
+      l_deployment_name: docker-registry
+      l_kind: deploymentconfig
+      l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+      l_component: "Docker registry"
     when:
     - openshift_hosted_manage_registry | default(True) | bool
     - openshift_hosted_registry_registryurl is defined

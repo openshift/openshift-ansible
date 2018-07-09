@@ -12,3 +12,15 @@
                             replace ( '${version}', openshift_image_tag ) }}"
   when:
   - openshift_hosted_routers | length > 0
+
+- import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: default
+    l_deployment_name: router
+    l_kind: deploymentconfig
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Router"
+  when:
+  - openshift_hosted_routers | length > 0

@@ -137,14 +137,11 @@
     name: "{{ mktemp.stdout }}"
   changed_when: False
 
-# Wait to give the rollout time to start before verifying that the console is
-# running. Unfortunately, we can't check if the deployment revision changed
-# because it's possible applying the template did not result in any changes to
-# the pod template spec, which would skip a new revision.
-- name: Pause for the web console deployment to start
-  pause:
-    seconds: 30
-  # Skip if the project didn't exist since there was no previous deployment.
-  when: not create_console_project.changed
-
-- include_tasks: start.yml
+- import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: openshift-web-console
+    l_deployment_name: webconsole
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Openshift Web Console"

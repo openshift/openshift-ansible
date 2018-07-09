@@ -1,0 +1,69 @@
+# INPUT l_namespace
+# INPUT l_deployment_name
+# INPUT l_kind
+# INPUT l_component
+# INPUT l_kubeconfig_path
+
+---
+- name: Verify that the deployment is running
+  oc_obj:
+    namespace: "{{ l_namespace }}"
+    kind: "{{ l_kind | default('deployment') }}"
+    state: list
+    name: "{{ l_deployment_name }}"
+  register: l_deployment
+  until:
+  - l_deployment.results.results[0].status.readyReplicas is defined
+  - l_deployment.results.results[0].status.replicas is defined
+  - l_deployment.results.results[0].status.readyReplicas == l_deployment.results.results[0].status.replicas
+  retries: 60
+  delay: 10
+  changed_when: false
+  # Ignore errors so we can log troubleshooting info on failures.
+  failed_when: false
+
+# Log the result of `oc status`, `oc get pods`, `oc get events`, and `oc logs deployment` for troubleshooting failures.
+- when: l_deployment is failed
+  block:
+  - name: Check status in the namespace
+    command: "{{ l_cmd }} status"
+    register: endpoint_status
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_status.stdout_lines }}"
+  - name: Get pods in the namespace
+    command: "{{ l_cmd }} get pods -o wide"
+    register: endpoint_pods
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_pods.stdout_lines }}"
+  - name: Get events in the namespace
+    command: "{{ l_cmd }} get events"
+    register: endpoint_events
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_events.stdout_lines }}"
+  - name: Get pod logs
+    command: "{{ l_cmd }} logs {{ l_kind | default('deployment') }}/{{ l_deployment_name }} --tail=50 --all-containers"
+    register: endpoint_log
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_log.stdout_lines }}"
+  - name: Get PVs in the namespace
+    command: "{{ l_cmd }} get pv"
+    register: endpoint_pvs
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_pvs.stdout_lines }}"
+  - name: Get PVCs in the namespace
+    command: "{{ l_cmd }} get pvc"
+    register: endpoint_pvcs
+    ignore_errors: true
+  - debug:
+      msg: "{{ endpoint_pvcs.stdout_lines }}"
+
+  - name: Report deployment errors
+    fail:
+      msg: "{{ l_component }} install failed."
+  vars:
+    l_cmd: "{{ openshift_client_binary }} --config={{ l_kubeconfig_path }} -n {{ l_namespace }}"
