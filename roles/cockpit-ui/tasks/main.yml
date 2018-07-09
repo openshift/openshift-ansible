@@ -54,6 +54,17 @@
     - "'already exists' not in deploy_registry_console.stderr"
     - "deploy_registry_console.rc != 0"
 
+  - import_role:
+      name: openshift_hosted
+      tasks_from: deployment.yml
+    vars:
+      l_namespace: default
+      l_deployment_name: registry-console
+      l_kind: deploymentconfig
+      l_kubeconfig_path: "{{ openshift_hosted_kubeconfig }}"
+      l_component: "Registry console"
+
+
   - name: Delete temp directory
     file:
       name: "{{ mktemp.stdout }}"
