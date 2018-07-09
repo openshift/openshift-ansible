@@ -44,6 +44,16 @@
       CONFIG: "{{ openshift_autoheal_config | b64encode }}"
       SECRET: "{{ secret.stdout }}"
 
+- import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: openshift-autoheal
+    l_deployment_name: autoheal
+    l_kind: deployment
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Openshift Autoheal"
+
 - name: Delete the temporary directory
   file:
     name: "{{ tmpdir.stdout }}"
