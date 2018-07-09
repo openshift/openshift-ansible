@@ -70,3 +70,14 @@
     delete_after: "{{ openshift_cluster_autoscaler_delete_config }}"
     files:
     - "{{ openshift_cluster_autoscaler_template_location }}/{{ openshift_cluster_autoscaler_template_name }}"
+
+- import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "{{ openshift_cluster_autoscaler_namespace }}"
+    l_deployment_name: "{{ openshift_cluster_autoscaler_name }}"
+    l_kind: deployment
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Cluster autoscaler"
+  when: openshift_cluster_autoscaler_state == "present"
