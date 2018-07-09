@@ -49,6 +49,18 @@
 ######################################################################
 # Begin image streams
 
+- name: Create imagestream import secret
+  command: >
+    {{ openshift_client_binary }} create secret docker-registry imagestreamsecret --docker-server={{ registry_host }} --docker-username={{ oreg_auth_user }} --docker-email=openshift@openshift.com --docker-password={{ oreg_auth_password }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift
+  when:
+    - openshift_examples_load_rhel | bool
+    - oreg_auth_password is defined
+  with_items:
+    - "{{ rhel_image_streams }}"
+  register: oex_imagestream_import_secret
+  failed_when: "'already exists' not in oex_imagestream_import_secret.stderr and oex_imagestream_import_secret.rc != 0"
+  changed_when: false
+
 - name: Modify registry paths if registry_url is not registry.access.redhat.com
   shell: >
     find {{ examples_base }} -type f | xargs -n 1 sed -i 's|registry.access.redhat.com|{{ registry_host | quote }}|g'
