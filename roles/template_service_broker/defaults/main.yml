@@ -3,4 +3,4 @@
 template_service_broker_remove: False
 template_service_broker_install: True
 openshift_template_service_broker_namespaces: ['openshift']
-template_service_broker_selector: { "region": "infra" }
+template_service_broker_selector: "{{ openshift_hosted_infra_selector | default('region=infra') | map_from_pairs }}"
