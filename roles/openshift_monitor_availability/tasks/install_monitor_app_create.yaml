@@ -7,3 +7,14 @@
     --param TIMEOUT="{{ openshift_monitor_app_create_timeout }}"
     --param LOG_LEVEL="{{ openshift_monitor_app_create_log_level }}"
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
+
+- name: Wait for OpenShift Availability Monitoring deploy to complete
+  import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "openshift-monitor-availability"
+    l_deployment_name: "monitor-app-create"
+    l_kind: deployment
+    l_kubeconfig_path: "{{ mktemp.stdout }}/admin.kubeconfig"
+    l_component: "OpenShift Availability Monitoring"
