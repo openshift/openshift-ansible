@@ -126,19 +126,16 @@
   with_items:
   - "{{ grafana_dashboards }}"
 
-- name: Wait for grafana pod
-  oc_obj:
-    namespace: "{{ grafana_namespace }}"
-    kind: pod
-    state: list
-    selector: "app=grafana"
-  register: grafana_pod
-  until:
-  - "grafana_pod.results.results[0]['items'] | count > 0"
-  # Pod's 'Ready' status must be True
-  - "grafana_pod.results.results[0]['items'] | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Ready'}) | map('bool') | select | list | count == 1"
-  delay: 10
-  retries: "{{ (grafana_timeout | int / 10) | int }}"
+- name: Wait for Grafana deploy to complete
+  import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: "{{ grafana_namespace }}"
+    l_deployment_name: grafana
+    l_kind: deployment
+    l_kubeconfig_path: "{{ openshift.common.config_base }}/master/admin.kubeconfig"
+    l_component: "Grafana"
 
 - name: Get the prometheus SA token
   shell: oc sa get-token {{ grafana_prometheus_serviceaccount }} -n {{ grafana_prometheus_namespace }}
