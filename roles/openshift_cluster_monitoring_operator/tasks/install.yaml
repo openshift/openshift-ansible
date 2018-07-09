@@ -74,6 +74,16 @@
   delay: 30
   retries: 30
 
+- import_role:
+    name: openshift_hosted
+    tasks_from: deployment.yml
+  vars:
+    l_namespace: openshift-monitoring
+    l_deployment_name: cluster-monitoring-operator
+    l_kind: deployment
+    l_kubeconfig_path: "{{ mktemp.stdout }}/admin.kubeconfig"
+    l_component: "Cluster Monitoring operator"
+
 - name: Delete temp directory
   file:
     name: "{{ mktemp.stdout }}"
