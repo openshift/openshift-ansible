@@ -4,12 +4,10 @@ r_etcd_common_backup_sufix_name: ''
 
 l_etcd_bootstrapped: '{{ openshift.node.bootstrapped }}'
 
-# TODO(michaelgugino): Remove these in 3.11
-l_is_etcd_system_container: "{{ (openshift_use_etcd_system_container | default(openshift_use_system_containers | default(false)) | bool) }}"
-l_etcd_static_pod: "{{ not (r_etcd_common_skip_command_shim is defined and r_etcd_common_skip_command_shim) or l_etcd_bootstrapped }}"
+l_etcd_static_pod: "{{ (inventory_hostname in groups['oo_masters']) | bool }}"
 
 # runc, docker, static pod, host
-r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else ('static_pod' if l_etcd_static_pod else ('docker' if openshift_is_containerized else 'host')) }}"
+r_etcd_common_etcd_runtime: "{{ 'static_pod' if l_etcd_static_pod  else 'host' }}"
 
 r_etcd_default_version: "3.2.22"
 # lib_utils_oo_oreg_image is a custom filter defined in roles/lib_utils/filter_plugins/oo_filters.py
@@ -23,14 +21,10 @@ etcd_image_dict:
 etcd_image: "{{ osm_etcd_image }}"
 
 # etcd run on a host => use etcdctl command directly
-# etcd run as a docker container => use docker exec
-# etcd run as a runc container => use runc exec
 etcdctl_dict:
   host: 'etcdctl'
-  docker: 'docker exec etcd_container etcdctl'
   static_pod: '/usr/local/bin/master-exec etcd etcd etcdctl'
-  runc: 'runc exec etcd etcdctl'
-r_etcd_common_etcdctl_command: "{{ etcdctl_dict[r_etcd_common_etcd_runtime | default('runc')] }}"
+r_etcd_common_etcdctl_command: "{{ etcdctl_dict[r_etcd_common_etcd_runtime] }}"
 
 # etcd server vars
 etcd_conf_dir: '/etc/etcd'
@@ -117,7 +111,6 @@ openshift_docker_service_name: "docker"
 
 etcd_ca_host: "{{ groups['oo_etcd_to_config'].0 }}"
 
-l_etcd_restart_is_pod: "{{ (inventory_hostname in groups['oo_masters']) | bool }}"
-l_etcd_restart_command: "{{ l_etcd_restart_is_pod | ternary('/usr/local/bin/master-restart etcd', 'systemctl restart etcd') }}"
+l_etcd_restart_command: "{{ l_etcd_static_pod | ternary('/usr/local/bin/master-restart etcd', 'systemctl restart etcd') }}"
 
 etcd_static_pod_location: "{{ openshift_control_plane_static_pod_location | default('/etc/origin/node/pods/') }}"

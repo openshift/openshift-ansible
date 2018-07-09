@@ -9,20 +9,3 @@
 - import_playbook: upgrade_rpm_members.yml
   vars:
     etcd_upgrade_version: '3.2'
-
-- import_playbook: upgrade_image_members.yml
-  vars:
-    etcd_upgrade_version: '3.2.7'
-
-- name: Upgrade fedora to latest
-  hosts: oo_etcd_hosts_to_upgrade
-  serial: 1
-  tasks:
-  - import_role:
-      name: etcd
-      tasks_from: upgrade_image.yml
-    vars:
-      etcd_peer: "{{ openshift.common.hostname }}"
-    when:
-    - ansible_distribution == 'Fedora'
-    - not openshift_is_containerized | bool
