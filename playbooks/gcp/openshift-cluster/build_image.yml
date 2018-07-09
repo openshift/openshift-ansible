@@ -77,6 +77,15 @@
   tasks:
   - wait_for_connection:
 
+- name: Add custom repositories
+  hosts: nodes
+  handlers:
+  - import_tasks: ../../roles/openshift_repos/handlers/main.yml
+  tasks:
+  - include_role:
+      name: openshift_gcp
+      tasks_from: add_custom_repositories.yml
+
 # This is the part that installs all of the software and configs for the instance
 # to become a node.
 - import_playbook: ../../openshift-node/private/image_prep.yml
