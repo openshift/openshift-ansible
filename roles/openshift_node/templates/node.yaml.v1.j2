@@ -14,7 +14,7 @@ kind: NodeConfig
 kubeletArguments: {{  l2_openshift_node_kubelet_args  | default(None) | lib_utils_to_padded_yaml(level=1) }}
 {% if openshift_is_atomic | bool %}
   volume-plugin-dir:
-  - "{{ openshift_flexvolume_container_directory_default }}/volume/exec"
+  - "/etc/origin/kubelet-plugins/volume/exec"
 {% endif %}
 {% if openshift_use_crio | bool %}
   container-runtime:
