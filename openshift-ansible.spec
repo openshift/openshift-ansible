@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.6.173.0.125
+Version:        3.6.173.0.126
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -285,6 +285,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 09 2018 Tim Bielawa <tbielawa@redhat.com> 3.6.173.0.126-1
+- Assign openshift_version from openshift_pkg_version with correct format
+  (nakayamakenjiro@gmail.com)
+
 * Thu Jun 28 2018 Tim Bielawa <tbielawa@redhat.com> 3.6.173.0.125-1
 - Don't verify java-1.8.0-openjdk (sdodson@redhat.com)
 - Bug 1539021 - Specfify all packages during upgrade (rteague@redhat.com)
