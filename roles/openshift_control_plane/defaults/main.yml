@@ -143,11 +143,6 @@ openshift_master_embedded_dns: True
 openshift_master_embedded_kube: True
 openshift_master_pod_eviction_timeout: ""
 
-# TODO(michaelgugino): Remove in 3.11
-l_new_config_clusterNetworks:
-- cidr: "{{ openshift_cluster_network_cidr }}"
-  hostSubnetLength: "{{ openshift_host_subnet_length }}"
-
 # added so that it can lay down the static pod definitions in a configurable place
 openshift_control_plane_static_pod_location: /etc/origin/node/pods/
 openshift_control_plane_apply_cluster_signing_config: True

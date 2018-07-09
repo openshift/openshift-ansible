@@ -30,14 +30,3 @@
   when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
-
-# TODO(michaelgugino) Remove in 3.11.
-- name: Ensure binaries from containerized deployments are cleaned up.
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-  - /usr/local/bin/oc
-  - /usr/local/bin/openshift
-  - /usr/local/bin/kubectl
-  when: not openshift_is_atomic

@@ -63,53 +63,8 @@ IMAGE_POLICY_CONFIG_VAR = "openshift_master_image_policy_config"
 ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_import"
 
 REMOVED_VARIABLES = (
-    # TODO(michaelgugino): Remove these in 3.11
-    ('openshift_metrics_image_prefix', 'openshift_metrics_<component>_image'),
-    ('openshift_metrics_image_version', 'openshift_metrics_<component>_image'),
-    ('openshift_grafana_proxy_image_prefix', 'openshift_grafana_proxy_image'),
-    ('openshift_grafana_proxy_image_version', 'openshift_grafana_proxy_image'),
-    ('openshift_logging_image_prefix', 'openshift_logging_image'),
-    ('openshift_logging_image_verion', 'openshift_logging_image'),
-    ('openshift_logging_curator_image_prefix', 'openshift_logging_curator_image'),
-    ('openshift_logging_curator_image_version', 'openshift_logging_curator_image'),
-    ('openshift_logging_elasticsearch_image_prefix', 'openshift_logging_elasticsearch_image'),
-    ('openshift_logging_elasticsearch_image_version', 'openshift_logging_elasticsearch_image'),
-    ('openshift_logging_elasticsearch_proxy_image_prefix', 'openshift_logging_elasticsearch_proxy_image'),
-    ('openshift_logging_elasticsearch_proxy_image_version', 'openshift_logging_elasticsearch_proxy_image'),
-    ('openshift_logging_fluentd_image_prefix', 'openshift_logging_fluentd_image'),
-    ('openshift_logging_fluentd_image_version', 'openshift_logging_fluentd_image'),
-    ('openshift_logging_kibana_image_prefix', 'openshift_logging_kibana_image'),
-    ('openshift_logging_kibana_image_version', 'openshift_logging_kibana_image'),
-    ('openshift_logging_kibana_proxy_image_prefix', 'openshift_logging_kibana_proxy_image'),
-    ('openshift_logging_kibana_proxy_image_version', 'openshift_logging_kibana_proxy_image'),
-    ('openshift_logging_mux_image_prefix', 'openshift_logging_mux_image'),
-    ('openshift_logging_mux_image_version', 'openshift_logging_mux_image'),
-    ('openshift_prometheus_image_prefix', 'openshift_prometheus_image'),
-    ('openshift_prometheus_image_version', 'openshift_prometheus_image'),
-    ('openshift_prometheus_proxy_image_prefix', 'openshift_prometheus_proxy_image'),
-    ('openshift_prometheus_proxy_image_version', 'openshift_prometheus_proxy_image'),
-    ('openshift_prometheus_altermanager_image_prefix', 'openshift_prometheus_alertmanager_image'),
-    # A typo was introduced at some point, need to warn for this older version.
-    ('openshift_prometheus_altermanager_image_prefix', 'openshift_prometheus_alertmanager_image'),
-    ('openshift_prometheus_alertmanager_image_version', 'openshift_prometheus_alertmanager_image'),
-    ('openshift_prometheus_alertbuffer_image_prefix', 'openshift_prometheus_alertbuffer_image'),
-    ('openshift_prometheus_alertbuffer_image_version', 'openshift_prometheus_alertbuffer_image'),
-    ('openshift_prometheus_node_exporter_image_prefix', 'openshift_prometheus_node_exporter_image'),
-    ('openshift_prometheus_node_exporter_image_version', 'openshift_prometheus_node_exporter_image'),
-    ('openshift_descheduler_image_prefix', 'openshift_descheduler_image'),
-    ('openshift_descheduler_image_version', 'openshift_descheduler_image'),
-    ('openshift_docker_gc_version', 'openshift_docker_gc_image'),
-    ('openshift_web_console_prefix', 'openshift_web_console_image'),
-    ('openshift_web_console_version', 'openshift_web_console_image'),
-    ('openshift_web_console_image_name', 'openshift_web_console_image'),
-    ('openshift_storage_glusterfs_version', 'openshift_storage_glusterfs_image'),
-    ('openshift_storage_glusterfs_block_version', 'openshift_storage_glusterfs_block_image'),
-    ('openshift_storage_glusterfs_s3_version', 'openshift_storage_glusterfs_s3_image'),
-    ('openshift_storage_glusterfs_heketi_version', 'openshift_storage_glusterfs_heketi_image'),
-    ('openshift_storage_glusterfs_registry_version', 'openshift_storage_glusterfs_registry_image'),
-    ('openshift_storage_glusterfs_registry_block_version', 'openshift_storage_glusterfs_registry_block_image'),
-    ('openshift_storage_glusterfs_registry_s3_version', 'openshift_storage_glusterfs_registry_s3_image'),
-    ('openshift_storage_glusterfs_registry_heketi_version', 'openshift_storage_glusterfs_registry_heketi_image'),
+    # Leaving example as this code might be used again in future.
+    # ('old_var', 'new_var')
 )
 
 # JSON_FORMAT_VARIABLES does not intende to cover all json variables, but
@@ -131,18 +86,6 @@ JSON_FORMAT_VARIABLES = (
     'openshift_hosted_routers',
     'openshift_node_open_ports',
     'openshift_master_open_ports',
-)
-
-# TODO(michaelgugino): Remove in 3.11
-CHANGED_IMAGE_VARS = (
-    'openshift_storage_glusterfs_image',
-    'openshift_storage_glusterfs_block_image',
-    'openshift_storage_glusterfs_s3_image',
-    'openshift_storage_glusterfs_heketi_image',
-    'openshift_storage_glusterfs_registry_image',
-    'openshift_storage_glusterfs_registry_block_image',
-    'openshift_storage_glusterfs_registry_s3_image',
-    'openshift_storage_glusterfs_registry_heketi_image',
 )
 
 
@@ -426,26 +369,6 @@ class ActionModule(ActionBase):
                             'existing master configs, and remove the {} key'
                             'before proceeding.'.format(old_key, old_key))
 
-    def check_contains_version(self, hostvars, host):
-        """Fails if variable has old format not containing image version"""
-        found_incorrect = []
-        for img_var in CHANGED_IMAGE_VARS:
-            img_string = self.template_var(hostvars, host, img_var)
-            if not img_string:
-                return None
-            # split the image string by '/' to account for something like docker://
-            img_string_parts = img_string.split('/')
-            if ':' not in img_string_parts[-1]:
-                found_incorrect.append((img_var, img_string))
-
-        if found_incorrect:
-            msg = ("Found image variables without version.  Please ensure any image"
-                   "defined contains ':someversion'; ")
-            for item in found_incorrect:
-                msg += "{} was: {}; ".format(item[0], item[1])
-            raise errors.AnsibleModuleError(msg)
-        return None
-
     def validate_json_format_vars(self, hostvars, host):
         """Fails if invalid json format are found"""
         found_invalid_json = []
@@ -481,7 +404,6 @@ class ActionModule(ActionBase):
         self.check_unsupported_nfs_configs(hostvars, host)
         self.check_htpasswd_provider(hostvars, host)
         check_for_removed_vars(hostvars, host)
-        self.check_contains_version(hostvars, host)
         self.validate_json_format_vars(hostvars, host)
 
     def run(self, tmp=None, task_vars=None):
