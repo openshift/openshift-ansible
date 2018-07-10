@@ -466,6 +466,34 @@ class ActionModule(ActionBase):
             raise errors.AnsibleModuleError(msg)
         return None
 
+    def check_for_oreg_password(self, hostvars, host, odt):
+        """Ensure oreg_password is defined when using registry.redhat.io"""
+        reg_to_check = 'registry.redhat.io'
+        err_msg = ("oreg_user and oreg_password must be provided when"
+                   "deploying openshift-enterprise")
+        err_msg2 = ("oreg_user and oreg_password must be provided when using"
+                    "{}".format(reg_to_check))
+
+        oreg_password = self.template_var(hostvars, host, 'oreg_password')
+        if oreg_password is not None:
+            # A password is defined, so we're good to go.
+            return None
+
+        oreg_url = self.template_var(hostvars, host, 'oreg_url')
+        oreg_url_master = self.template_var(hostvars, host, 'oreg_url_master')
+        oreg_url_node = self.template_var(hostvars, host, 'oreg_url_node')
+        oreg_url_found = False
+        for url in (oreg_url, oreg_url_master, oreg_url_node):
+            if url is not None:
+                oreg_url_found = True
+                if reg_to_check in url:
+                    raise errors.AnsibleModuleError(err_msg2)
+
+        if not oreg_url_found and odt == 'openshift-enterprise':
+            # We're not using an oreg_url, we're using default enterprise
+            # registry.  We require oreg_user and oreg_password
+            raise errors.AnsibleModuleError(err_msg)
+
     def run_checks(self, hostvars, host):
         """Execute the hostvars validations against host"""
         distro = self.template_var(hostvars, host, 'ansible_distribution')
@@ -483,6 +511,7 @@ class ActionModule(ActionBase):
         check_for_removed_vars(hostvars, host)
         self.check_contains_version(hostvars, host)
         self.validate_json_format_vars(hostvars, host)
+        self.check_for_oreg_password(hostvars, host, odt)
 
     def run(self, tmp=None, task_vars=None):
         result = super(ActionModule, self).run(tmp, task_vars)
