@@ -1,0 +1,6 @@
+---
+- name: Create hosts from vm list using dig for IP
+  add_host:
+    name: "{{ item.name }}"
+    ansible_host: "{{ lookup('dig', item.name) }}"
+  with_items: "{{ vms }}"

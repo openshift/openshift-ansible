@@ -1,0 +1,30 @@
+---
+- name: Remove DNS entries for cluster before uninstall
+  hosts: localhost
+  tasks:
+    - import_role:
+        name: openshift_rhv
+        tasks_from: build_vm_list.yml
+    - import_role:
+        name: openshift_rhv
+        tasks_from: hosts_from_dns.yml
+    - import_role:
+        name: openshift_rhv
+        tasks_from: generate_nsupdate.yml
+      when:
+        - openshift_rhv_nsupdate_server is defined
+        - openshift_rhv_nsupdate_key is defined
+    - nsupdate:
+        key_name: "{{ openshift_rhv_nsupdate_key.name }}"
+        key_secret: "{{ openshift_rhv_nsupdate_key.secret }}"
+        server: "{{ openshift_rhv_nsupdate_server }}"
+        zone: "{{ item.zone }}"
+        record: "{{ item.record }}"
+        value: "{{ item.value }}"
+        type: "{{ item.type|default(omit) }}"
+        state: absent
+      with_items:
+        - "{{ records }}"
+      when:
+        - openshift_rhv_nsupdate_server is defined
+        - openshift_rhv_nsupdate_key is defined
