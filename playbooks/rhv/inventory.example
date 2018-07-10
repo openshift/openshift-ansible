@@ -33,16 +33,8 @@ openshift_enable_service_catalog=False
 # openshift_cloudprovider_ovirt_username=
 # openshift_cloudprovider_ovirt_password=
 
-# Docker
-container_runtime_docker_storage_setup_device=/dev/vdb
-container_runtime_docker_storage_type=overlay2
-openshift_docker_use_system_container=False
-openshift_node_local_quota_per_fsgroup=512Mi
-openshift_use_system_containers=False
-
 # Pod Networking
 os_sdn_network_plugin_name=redhat/openshift-ovs-networkpolicy
-
 
 # Registry
 openshift_hosted_registry_replicas=1
@@ -63,9 +55,21 @@ rhsub_user="{{ vault_rhsub_user }}"
 rhsub_password="{{ vault_rhsub_password }}"
 
 # Load Balancer Config
-# Using yaml style syntax here as this looks horrible in embedded json
 openshift_loadbalancer_additional_frontends=[{"name":"apps-http","option":"tcplog","binds":["*:80"],"default_backend":"apps-http"},{"name":"apps-https","option":"tcplog","binds":["*:443"],"default_backend":"apps-http"}]
 openshift_loadbalancer_additional_backends=[{"name":"apps-http","balance":"source","servers":[{"name":"infra0","address":"{{ groups['infras'].0 }}:80","opts":"check"},{"name":"infra1","address":"{{ groups['infras'].1 }}:80","opts":"check"},{"name":"infra2","address":"{{ groups['infras'].2 }}:80","opts":"check"}]},{"name":"apps-https","balance":"source","servers":[{"name":"infra0","address":"{{ groups['infras'].0 }}:443","opts":"check"},{"name":"infra1","address":"{{ groups['infras'].1 }}:443","opts":"check"},{"name":"infra2","address":"{{ groups['infras'].2 }}:443","opts":"check"}]}]
+
+# Docker
+container_runtime_docker_storage_setup_device=/dev/vdb
+container_runtime_docker_storage_type=overlay2
+openshift_docker_use_system_container=False
+openshift_node_local_quota_per_fsgroup=512Mi
+openshift_use_system_containers=False
+
+[masters:vars]
+container_runtime_extra_storage="[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}, {'device': '/dev/vdd', 'path': '/var/lib/etcd', 'hosts': 'masters', 'filesystem': 'xfs', 'format': 'True'}]"
+
+[nodes:vars]
+container_runtime_extra_storage="[{'device': '/dev/vdc', 'path': '/var/lib/origin/openshift.local.volumes', 'options': 'gquota', 'filesystem': 'xfs', 'format': 'True'}]"
 
 [masters]
 master0.example.com
