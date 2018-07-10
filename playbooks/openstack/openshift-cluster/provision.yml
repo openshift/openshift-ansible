@@ -30,10 +30,12 @@
   any_errors_fatal: true
   hosts: localhost
   tasks:
-  - name: Populate DNS entries
+  - name: Add the DNS records
     import_role:
       name: openshift_openstack
       tasks_from: populate-dns.yml
+    vars:
+      l_openshift_openstack_dns_update_nodes: "{{ groups.OSEv3 }}"
     when:
     - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined
