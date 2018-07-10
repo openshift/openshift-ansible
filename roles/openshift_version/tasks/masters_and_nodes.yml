@@ -10,7 +10,9 @@
     # Both versions have the same string representation
     when: rpm_results.results.versions.available_versions.0 != openshift_version
   # block when
-  when: not openshift_is_atomic | bool
+  when:
+  - not openshift_is_atomic | bool
+  - not openshift_is_containerized | bool
 
 # We can't map an openshift_release to full rpm version like we can with containers; make sure
 # the rpm version we looked up matches the release requested and error out if not.
