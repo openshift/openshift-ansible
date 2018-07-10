@@ -132,7 +132,9 @@
       register: migration_status
       ignore_errors: true
       until:
-        - "'results' in migration_status.results and migration_status.results.results | count > 0"
+        - "'results' in migration_status"
+        - "'results' in migration_status.results"
+        - "migration_status.results.results | count > 0"
         # Pod's 'Complete' status must be True
         - "migration_status.results.results | lib_utils_oo_collect(attribute='status.conditions') | lib_utils_oo_collect(attribute='status', filters={'type': 'Complete'}) | map('bool') | select | list | count == 1"
       delay: 10
