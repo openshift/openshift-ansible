@@ -28,10 +28,6 @@
       etcd_initial_cluster: "{{ etcd_add_check.stdout_lines[3] | regex_replace('ETCD_INITIAL_CLUSTER=','') | regex_replace('\"','') }}"
       etcd_ca_setup: False
 
-  - import_role:
-      name: nickhammond.logrotate
-    when: etcd_add_check.rc == 0
-
   # etcd_hostname fact is set in add_new_member.yml called above.
   - name: Verify cluster is stable
     command: >
