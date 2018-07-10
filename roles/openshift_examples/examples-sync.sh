@@ -42,6 +42,7 @@ mv rhpam-7-openshift-image-${RHPAM70_VERSION}/rhpam70-image-streams.yaml ${EXAMP
 # as soon as they use the same branch/tag names
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 mv application-templates-GA/quickstarts/* ${EXAMPLES_BASE}/xpaas-templates/
+mv application-templates-GA/fis-console-namespace-template.json application-templates-GA/fis-console-cluster-template.json ${EXAMPLES_BASE}/xpaas-templates/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' ! -wholename '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 find application-templates-${XPAAS_VERSION}/ -name '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-streams/ \;
 find rhdm-7-openshift-image-${RHDM70_VERSION}/templates -name '*.yaml' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
