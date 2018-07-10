@@ -19,6 +19,22 @@
       }
       {% endfor -%}
       ]
+    affinity_groups: >-
+      {{ affinity_groups|default([]) }} + [
+      {% if item.count > 1 -%}
+      {
+      'name': '{{ item.name }}_ag',
+      'cluster': '{{ rhv_cluster }}',
+      'vm_enforcing': 'false',
+      'vm_rule': 'negative',
+      'vms': [
+      {% for iter in range(item.count) -%}
+      '{{ item.name }}{{ iter }}.{{ public_hosted_zone }}',
+      {% endfor -%}
+      ]
+      }
+      {% endif -%}
+      ]
   with_items: "{{ openshift_rhv_vm_manifest }}"
   tags:
   - openshift_rhv
