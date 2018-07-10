@@ -23,7 +23,7 @@ ETCD_LISTEN_CLIENT_URLS={{ etcd_listen_client_urls }}
 
 #[cluster]
 ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
-{% if etcd_is_thirdparty %}
+{% if etcd_is_thirdparty | bool %}
 # TODO: This needs to be altered to support the correct etcd instances
 ETCD_INITIAL_CLUSTER={{ etcd_hostname}}={{ etcd_initial_advertise_peer_urls }}
 ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}

@@ -39,7 +39,7 @@
     template:
       dest: "{{ etcd_systemd_dir }}/custom.conf"
       src: custom.conf.j2
-  when: etcd_is_thirdparty
+  when: etcd_is_thirdparty | bool
 
 - name: Ensure etcd datadir ownership for thirdparty datadir
   file:
