@@ -777,6 +777,29 @@ enable_kuryr_cni_probes: True
 enable_kuryr_cni_probes: True
 ```
 
+### kuryr-controller in HA mode
+
+Since Rocky version of Kuryr-Kubernetes it is possible to run
+kuryr-controller in Active/Passive HA mode. This means that each
+kuryr-controller pod will run additional leader-elector container that
+will be responsible for providing it with current leader name.
+
+To enable HA you need to set:
+
+```yaml
+kuryr_controller_replicas: <desired-number-of-replicas>
+```
+
+You can also tweak container image used to run leader-elector container
+and the port it's binding to (note that kuryr-controller pod runs with
+host networking, so if you already have a process listening on the
+default port, you might want to change it:
+
+```yaml
+openshift_openstack_kuryr_elector_image: gcr.io/google_containers/leader-elector:0.5
+kuryr_controller_leader_elector_port: 16401
+```
+
 ## API and Router Load Balancing
 
 A production deployment should contain more then one master and infra node and

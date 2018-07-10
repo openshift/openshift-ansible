@@ -6,12 +6,14 @@ metadata:
   name: kuryr-controller
   namespace: {{ kuryr_namespace }}
 spec:
-  replicas: 1
+  replicas: {{ kuryr_controller_replicas }}
   strategy:
     type: RollingUpdate
+{% if (kuryr_controller_replicas|default(1)|int == 1) %}
     rollingUpdate:
       maxSurge: 0
       maxUnavailable: 1
+{% endif %}
   template:
     metadata:
       labels:
@@ -53,6 +55,18 @@ spec:
           mountPath: "/etc/ssl/certs/kuryr-ca-bundle.crt"
           subPath: kuryr-ca-bundle.crt
           readOnly: true
+{% if (kuryr_controller_replicas|default(1)|int > 1) %}
+      - image: {{ openshift_openstack_kuryr_elector_image }}
+        name: leader-elector
+        args:
+        - "--election=kuryr-controller"
+        - "--http=0.0.0.0:{{ kuryr_controller_leader_elector_port }}"
+        - "--election-namespace={{ kuryr_namespace }}"
+        - "--ttl=5s"
+        ports:
+        - containerPort: {{ kuryr_controller_leader_elector_port }}
+          protocol: TCP
+{% endif %}
       volumes:
       - name: config-volume
         configMap:
