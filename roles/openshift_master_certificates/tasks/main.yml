@@ -92,7 +92,7 @@
     remote_src: yes
   with_items:
   # certificates_to_synchronize is a custom filter in lib_utils
-  - "{{ hostvars[inventory_hostname] | certificates_to_synchronize }}"
+  - "{{ hostvars[inventory_hostname]['ansible_facts'] | certificates_to_synchronize }}"
   when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
