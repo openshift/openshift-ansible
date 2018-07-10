@@ -1,6 +1,6 @@
 ---
 - name: delete the node group sgs
-  oo_ec2_group:
+  ec2_group:
     state: absent
     name: "{{ item.value.name}}"
     region: "{{ openshift_aws_region }}"
@@ -17,7 +17,7 @@
   when: sg_delete_result is failed
 
 - name: delete the k8s sgs for the node group
-  oo_ec2_group:
+  ec2_group:
     state: absent
     name: "{{ item.value.name }}_k8s"
     region: "{{ openshift_aws_region }}"
