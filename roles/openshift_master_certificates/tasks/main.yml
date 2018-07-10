@@ -28,7 +28,9 @@
     path: "{{ openshift_master_generated_config_dir }}"
     state: directory
     mode: 0700
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  when:
+  - master_certs_missing | bool
+  - inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - find:
@@ -113,7 +115,9 @@
   - client-ca-bundle.crt
   - serviceaccounts.private.key
   - serviceaccounts.public.key
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  when:
+  - master_certs_missing | bool
+  - inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Remove generated etcd client certs when using external etcd
@@ -144,7 +148,9 @@
       -C {{ openshift_master_generated_config_dir }} .
   args:
     creates: "{{ openshift_master_generated_config_dir }}.tgz"
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  when:
+  - master_certs_missing | bool
+  - inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Retrieve the master cert tarball from the master
@@ -154,20 +160,26 @@
     flat: yes
     fail_on_missing: yes
     validate_checksum: yes
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  when:
+  - master_certs_missing | bool
+  - inventory_hostname != openshift_ca_host
   delegate_to: "{{ openshift_ca_host }}"
 
 - name: Ensure certificate directory exists
   file:
     path: "/etc/origin/master"
     state: directory
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  when:
+  - master_certs_missing | bool
+  - inventory_hostname != openshift_ca_host
 
 - name: Unarchive the tarball on the master
   unarchive:
     src: "{{ g_master_certs_mktemp.stdout }}/{{ openshift_master_cert_subdir }}.tgz"
     dest: "/etc/origin/master"
-  when: master_certs_missing | bool and inventory_hostname != openshift_ca_host
+  when:
+  - master_certs_missing | bool
+  - inventory_hostname != openshift_ca_host
 
 - name: Delete local temp directory
   local_action: file path="{{ g_master_certs_mktemp.stdout }}" state=absent
@@ -227,7 +239,9 @@
   command: mv ca.crt ca-bundle.crt
   args:
     chdir: "{{ openshift.common.config_base }}/master"
-  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+  when:
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
 
 - name: Link ca.crt to ca-bundle.crt
   file:
@@ -235,4 +249,6 @@
     path: "{{ openshift.common.config_base }}/master/ca.crt"
     state: link
     force: yes
-  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+  when:
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists

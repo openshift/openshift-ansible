@@ -69,6 +69,8 @@
     {{ openshift_client_binary}} adm --config={{ mktemp.stdout }}/admin.kubeconfig policy
     add-scc-to-user anyuid system:serviceaccount:{{openshift_provisioners_project}}:provisioners-efs
   register: efs_output
-  failed_when: efs_output.rc == 1 and 'exists' not in efs_output.stderr
+  failed_when:
+    - efs_output.rc == 1
+    - "'exists' not in efs_output.stderr"
   check_mode: no
   when: efs_anyuid.stdout.find("system:serviceaccount:" + openshift_provisioners_project + ":provisioners-efs") == -1

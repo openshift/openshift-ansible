@@ -377,7 +377,9 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
     with_items:
     - atomic-openshift
     - atomic-openshift-clients
@@ -520,7 +522,9 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
+    when:
+    - openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
     with_items:
     - etcd
     - etcd3
@@ -580,7 +584,9 @@
 
   - name: Remove packages
     package: name={{ item }} state=absent
-    when: not openshift_is_atomic | bool and openshift_remove_all | default(True) | bool
+    when:
+    - not openshift_is_atomic | bool
+    - openshift_remove_all | default(True) | bool
     with_items:
     - haproxy
     register: result

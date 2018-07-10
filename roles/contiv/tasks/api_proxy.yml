@@ -72,7 +72,9 @@
   vars:
     key: "{{ lookup('file', contiv_api_proxy_key) }}"
     cert: "{{ lookup('file', contiv_api_proxy_cert) }}"
-  when: contiv_api_proxy_cert is defined and contiv_api_proxy_key is defined
+  when:
+    - contiv_api_proxy_cert is defined
+    - contiv_api_proxy_key is defined
   delegate_to: "{{ groups.oo_masters_to_config.0 }}"
   run_once: true
 

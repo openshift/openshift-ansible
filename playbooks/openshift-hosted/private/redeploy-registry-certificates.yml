@@ -45,7 +45,11 @@
       OPENSHIFT_KEY_DATA="$(cat /etc/origin/master/openshift-registry.key)"
       --config={{ mktemp.stdout }}/admin.kubeconfig
       -n default
-    when: l_docker_registry_dc.rc == 0 and 'OPENSHIFT_CA_DATA' in docker_registry_env_vars and 'OPENSHIFT_CERT_DATA' in docker_registry_env_vars and 'OPENSHIFT_KEY_DATA' in docker_registry_env_vars
+    when:
+    - l_docker_registry_dc.rc == 0
+    - "'OPENSHIFT_CA_DATA' in docker_registry_env_vars"
+    - "'OPENSHIFT_CERT_DATA' in docker_registry_env_vars"
+    - "'OPENSHIFT_KEY_DATA' in docker_registry_env_vars"
 
   # Replace dc/docker-registry certificate secret contents if set.
   - block:
@@ -85,7 +89,11 @@
         - name: registry.key
           path: "{{ openshift.common.config_base }}/master/registry.key"
       run_once: true
-    when: l_docker_registry_dc.rc == 0 and 'registry-certificates' in docker_registry_secrets and 'REGISTRY_HTTP_TLS_CERTIFICATE' in docker_registry_env_vars and 'REGISTRY_HTTP_TLS_KEY' in docker_registry_env_vars
+    when:
+    - l_docker_registry_dc.rc == 0
+    - "'registry-certificates' in docker_registry_secrets"
+    - "'REGISTRY_HTTP_TLS_CERTIFICATE' in docker_registry_env_vars"
+    - "'REGISTRY_HTTP_TLS_KEY' in docker_registry_env_vars"
 
   - name: Redeploy docker registry
     command: >

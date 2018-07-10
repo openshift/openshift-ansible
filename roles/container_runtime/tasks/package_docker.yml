@@ -111,7 +111,9 @@
       {% if docker_options is defined %} {{ docker_options }}{% endif %} \
       {% if openshift_docker_options %} {{ openshift_docker_options }}{% endif %} \
       --signature-verification={{ openshift_docker_signature_verification | bool }}'"
-  when: docker_check.stat.isreg is defined and docker_check.stat.isreg
+  when:
+  - docker_check.stat.isreg is defined
+  - docker_check.stat.isreg
   notify:
   - restart container runtime
 

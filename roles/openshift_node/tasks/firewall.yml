@@ -1,5 +1,7 @@
 ---
-- when: r_openshift_node_firewall_enabled | bool and not r_openshift_node_use_firewalld | bool
+- when:
+  - r_openshift_node_firewall_enabled | bool
+  - not r_openshift_node_use_firewalld | bool
   block:
   - name: Add iptables allow rules
     os_firewall_manage_iptables:
@@ -19,7 +21,9 @@
     when: item.cond | default(True)
     with_items: "{{ r_openshift_node_os_firewall_deny }}"
 
-- when: r_openshift_node_firewall_enabled | bool and r_openshift_node_use_firewalld | bool
+- when:
+  - r_openshift_node_firewall_enabled | bool
+  - r_openshift_node_use_firewalld | bool
   block:
   - name: Add firewalld allow rules
     firewalld:

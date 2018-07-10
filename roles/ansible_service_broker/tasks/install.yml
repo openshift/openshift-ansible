@@ -190,7 +190,9 @@
   set_fact:
     ansible_service_broker_registry_auth_type: "secret"
     ansible_service_broker_registry_auth_name: "asb-registry-auth"
-  when: ansible_service_broker_registry_user != "" and ansible_service_broker_registry_password != ""
+  when:
+    - ansible_service_broker_registry_user != ""
+    - ansible_service_broker_registry_password != ""
 
 # TODO: saw a oc_configmap in the library, but didn't understand how to get it to do the following:
 - name: Create config map for ansible-service-broker
@@ -212,7 +214,9 @@
         data: "{{ ansible_service_broker_registry_user }}"
       - path: password
         data: "{{ ansible_service_broker_registry_password }}"
-  when: ansible_service_broker_registry_user != "" and ansible_service_broker_registry_password != ""
+  when:
+    - ansible_service_broker_registry_user != ""
+    - ansible_service_broker_registry_password != ""
 
 - name: Create the Broker resource in the catalog
   oc_obj:

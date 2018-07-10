@@ -7,20 +7,21 @@
   - name: Load group name mapping variables
     include_vars: vars/cluster_hosts.yml
 
-  - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
-    fail:
-      msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
-    when: g_etcd_hosts is not defined and g_new_etcd_hosts is not defined
+  - when:
+    - g_etcd_hosts is not defined
+    - g_new_etcd_hosts is not defined
+    block:
+    - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
+      fail:
+        msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
 
-  - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
-    fail:
-      msg: This playbook requires g_master_hosts or g_new_master_hosts to be set
-    when: g_master_hosts is not defined and g_new_master_hosts is not defined
+    - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
+      fail:
+        msg: This playbook requires g_master_hosts or g_new_master_hosts to be set
 
-  - name: Evaluate groups - g_node_hosts or g_new_node_hosts required
-    fail:
-      msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
-    when: g_node_hosts is not defined and g_new_node_hosts is not defined
+    - name: Evaluate groups - g_node_hosts or g_new_node_hosts required
+      fail:
+        msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
 
   - name: Evaluate groups - g_lb_hosts required
     fail:

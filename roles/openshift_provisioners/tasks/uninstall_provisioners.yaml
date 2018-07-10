@@ -10,7 +10,9 @@
   with_items:
     - dc
   register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
+  changed_when:
+    - delete_result.stdout.find("deleted") != -1
+    - delete_result.rc == 0
 
 # delete our old secrets
 - name: delete provisioner secrets
@@ -21,7 +23,9 @@
     - provisioners-efs
   ignore_errors: yes
   register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
+  changed_when:
+    - delete_result.stdout.find("deleted") != -1
+    - delete_result.rc == 0
 
 # delete cluster role bindings
 - name: delete cluster role bindings
@@ -31,7 +35,9 @@
   with_items:
     - run-provisioners-efs
   register: delete_result
-  changed_when: delete_result.stdout.find("deleted") != -1 and delete_result.rc == 0
+  changed_when:
+    - delete_result.stdout.find("deleted") != -1
+    - delete_result.rc == 0
 
 # delete our service accounts
 - name: delete service accounts

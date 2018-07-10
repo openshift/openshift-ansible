@@ -34,7 +34,9 @@
   command: mv ca.crt ca-bundle.crt
   args:
     chdir: "{{ openshift.common.config_base }}/master"
-  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+  when:
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
 
 - name: Link ca.crt to ca-bundle.crt
   file:
@@ -42,7 +44,9 @@
     path: "{{ openshift.common.config_base }}/master/ca.crt"
     state: link
     force: yes
-  when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
+  when:
+  - ca_crt_stat.stat.isreg
+  - not ca_bundle_stat.stat.exists
 
 # Anyone upgrading to 3.7 or 3.9 should've had their certs updated to be
 # compatible with this so this is the only valid value for internal registry

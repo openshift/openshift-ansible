@@ -1,19 +1,21 @@
 ---
-- name: Check that EFS File System ID is set
-  fail: msg='the openshift_provisioners_efs_fsid variable is required'
-  when: (openshift_provisioners_efs | bool) and openshift_provisioners_efs_fsid is not defined
+- when: openshift_provisioners_efs | bool
+  block:
+  - name: Check that EFS File System ID is set
+    fail: msg='the openshift_provisioners_efs_fsid variable is required'
+    when: openshift_provisioners_efs_fsid is not defined
 
-- name: Check that EFS region is set
-  fail: msg='the openshift_provisioners_efs_region variable is required'
-  when: (openshift_provisioners_efs | bool) and openshift_provisioners_efs_region is not defined
+  - name: Check that EFS region is set
+    fail: msg='the openshift_provisioners_efs_region variable is required'
+    when: openshift_provisioners_efs_region is not defined
 
-- name: Check that EFS AWS access key id is set
-  fail: msg='the openshift_provisioners_efs_aws_access_key_id variable is required'
-  when: (openshift_provisioners_efs | bool) and openshift_provisioners_efs_aws_access_key_id is not defined
+  - name: Check that EFS AWS access key id is set
+    fail: msg='the openshift_provisioners_efs_aws_access_key_id variable is required'
+    when: openshift_provisioners_efs_aws_access_key_id is not defined
 
-- name: Check that EFS AWS secret access key is set
-  fail: msg='the openshift_provisioners_efs_aws_secret_access_key variable is required'
-  when: (openshift_provisioners_efs | bool) and openshift_provisioners_efs_aws_secret_access_key is not defined
+  - name: Check that EFS AWS secret access key is set
+    fail: msg='the openshift_provisioners_efs_aws_secret_access_key variable is required'
+    when: openshift_provisioners_efs_aws_secret_access_key is not defined
 
 - name: Ensure that Provisioners has nodes to run on
   import_role:

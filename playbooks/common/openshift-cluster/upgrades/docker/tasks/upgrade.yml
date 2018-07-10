@@ -26,18 +26,19 @@
 
 - debug: var=docker_image_count.stdout
 
-- name: Remove all containers and images
-  script: nuke_images.sh
-  register: nuke_images_result
-  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+- when:
+  - docker_upgrade_nuke_images is defined
+  - docker_upgrade_nuke_images | bool
+  block:
+  - name: Remove all containers and images
+    script: nuke_images.sh
+    register: nuke_images_result
 
-- name: Check Docker image count
-  shell: "docker images -aq | wc -l"
-  register: docker_image_count
-  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+  - name: Check Docker image count
+    shell: "docker images -aq | wc -l"
+    register: docker_image_count
 
-- debug: var=docker_image_count.stdout
-  when: docker_upgrade_nuke_images is defined and docker_upgrade_nuke_images | bool
+  - debug: var=docker_image_count.stdout
 
 - service:
     name: docker

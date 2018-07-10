@@ -74,7 +74,10 @@
       -f {{ mktemp.stdout }}/calico.yml
       --config={{ openshift.common.config_base }}/master/admin.kubeconfig
     register: calico_create_output
-    failed_when: "('already exists' not in calico_create_output.stderr) and ('created' not in calico_create_output.stdout) and calico_create_output.rc != 0"
+    failed_when:
+    - "'already exists' not in calico_create_output.stderr"
+    - "'created' not in calico_create_output.stdout"
+    - calico_create_output.rc != 0
     changed_when: ('created' in calico_create_output.stdout)
 
   - name: Delete old policy controller

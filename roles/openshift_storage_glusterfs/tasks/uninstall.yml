@@ -3,10 +3,14 @@
   block:
     - include_tasks: glusterfs_config_facts.yml
     - include_tasks: glusterfs_uninstall.yml
-  when: "'glusterfs' in groups and groups['glusterfs'] | length > 0"
+  when:
+    - "'glusterfs' in groups"
+    - groups['glusterfs'] | length > 0
 
 - name: uninstall glusterfs registry
   block:
     - include_tasks: glusterfs_registry_facts.yml
     - include_tasks: glusterfs_uninstall.yml
-  when: "'glusterfs_registry' in groups and groups['glusterfs_registry'] | length > 0"
+  when:
+    - "'glusterfs_registry' in groups"
+    - groups['glusterfs_registry'] | length > 0

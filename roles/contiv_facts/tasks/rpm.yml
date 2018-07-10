@@ -15,7 +15,9 @@
 - name: Set the contiv_has_firewalld fact
   set_fact:
     contiv_has_firewalld: true
-  when: s.rc == 0 and ss.status.ActiveState == 'active'
+  when:
+  - s.rc == 0
+  - ss.status.ActiveState == 'active'
 
 - name: Determine if iptables-services installed
   command: "rpm -q iptables-services"

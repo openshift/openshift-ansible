@@ -1,5 +1,7 @@
 ---
-- when: r_openshift_hosted_router_firewall_enabled | bool and not r_openshift_hosted_router_use_firewalld | bool
+- when:
+  - r_openshift_hosted_router_firewall_enabled | bool
+  - not r_openshift_hosted_router_use_firewalld | bool
   block:
   - name: Add iptables allow rules
     os_firewall_manage_iptables:
@@ -19,7 +21,9 @@
     when: item.cond | default(True)
     with_items: "{{ l_openshift_hosted_fw_deny }}"
 
-- when: l_openshift_hosted_firewall_enabled | bool and l_openshift_hosted_use_firewalld | bool
+- when:
+  - l_openshift_hosted_firewall_enabled | bool
+  - l_openshift_hosted_use_firewalld | bool
   block:
   - name: Add firewalld allow rules
     firewalld:

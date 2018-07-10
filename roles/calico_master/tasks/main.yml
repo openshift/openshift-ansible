@@ -41,13 +41,17 @@
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
     src: calico.yml.j2
-  when: node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version < '3.0.0'
+  when:
+  - node_version | regex_search('^[0-9]\.[0-9]\.[0-9]')
+  - node_version < '3.0.0'
 
 - name: Calico Master | Write Calico v3
   template:
     dest: "{{ mktemp.stdout }}/calico.yml"
     src: calicov3.yml.j2
-  when: (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]') and node_version >= '3.0.0') or node_version == 'master'
+  when:
+  - (node_version | regex_search('^[0-9]\.[0-9]\.[0-9]')
+  - node_version >= '3.0.0' or node_version == 'master'
 
 - name: Calico Master | Launch Calico
   command: >

@@ -38,7 +38,9 @@
 - name: Modify registry paths if registry_url is not registry.redhat.io
   shell: >
     find {{ hosted_base }} -type f | xargs -n 1 sed -i 's|registry.redhat.io|{{ registry_host | quote }}|g'
-  when: registry_host != '' and openshift_hosted_modify_imagestreams | default(openshift_examples_modify_imagestreams | default(False)) | bool
+  when:
+  - registry_host != ''
+  - openshift_hosted_modify_imagestreams | default(openshift_examples_modify_imagestreams | default(False)) | bool
 
 - name: Create temp directory for kubeconfig
   command: mktemp -d /tmp/openshift-ansible-XXXXXX
@@ -61,7 +63,9 @@
     --config={{ openshift_hosted_templates_kubeconfig }}
     -n openshift
   register: oht_import_templates
-  failed_when: "'already exists' not in oht_import_templates.stderr and oht_import_templates.rc != 0"
+  failed_when:
+  - "'already exists' not in oht_import_templates.stderr"
+  - oht_import_templates.rc != 0
   changed_when: "'created' in oht_import_templates.stdout"
 
 - name: Delete temp directory

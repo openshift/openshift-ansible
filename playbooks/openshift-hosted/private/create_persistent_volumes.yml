@@ -26,4 +26,6 @@
       state: directory
       setype: svirt_sandbox_file_t
     with_items: "{{ openshift_persistentlocalstorage_classes }}"
-    when: openshift_persistentlocalstorage_classes | default([]) | length > 0 and openshift_persistentlocalstorage_enabled | bool
+    when:
+    - openshift_persistentlocalstorage_classes | default([]) | length > 0
+    - openshift_persistentlocalstorage_enabled | bool

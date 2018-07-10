@@ -12,4 +12,6 @@
 
 - name: Migrate from etcd to CRDs
   import_tasks: migrate.yml
-  when: broker_configmap is defined and broker_configmap.dao.get('type') != 'crd'
+  when:
+  - broker_configmap is defined
+  - broker_configmap.dao.get('type') != 'crd'

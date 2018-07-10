@@ -28,11 +28,15 @@
 
 - fail:
     msg: Invalid openshift_logging_mux_client_mode [{{ openshift_logging_mux_client_mode }}], one of {{ __allowed_mux_client_modes }} allowed
-  when: openshift_logging_mux_client_mode is defined and not openshift_logging_mux_client_mode in __allowed_mux_client_modes
+  when:
+    - openshift_logging_mux_client_mode is defined
+    - not openshift_logging_mux_client_mode in __allowed_mux_client_modes
 
 - debug:
     msg: WARNING Use of openshift_logging_mux_client_mode=minimal is not recommended due to current scaling issues
-  when: openshift_logging_mux_client_mode is defined and openshift_logging_mux_client_mode == 'minimal'
+  when:
+    - openshift_logging_mux_client_mode is defined
+    - openshift_logging_mux_client_mode == 'minimal'
 
 # allow passing in a tempdir
 - name: Create temp directory for doing work in

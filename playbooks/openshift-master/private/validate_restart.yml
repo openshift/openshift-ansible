@@ -6,7 +6,9 @@
   tasks:
   - fail:
       msg: "openshift_rolling_restart_mode must be set to either 'services' or 'system'"
-    when: openshift_rolling_restart_mode is defined and openshift_rolling_restart_mode not in ["services", "system"]
+    when:
+    - openshift_rolling_restart_mode is defined
+    - openshift_rolling_restart_mode not in ["services", "system"]
 
 # Creating a temp file on localhost, we then check each system that will
 # be rebooted to see if that file exists, if so we know we're running

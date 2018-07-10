@@ -2,7 +2,9 @@
 - name: Verify required variables are set
   fail:
     msg: openshift_master_default_subdomain must be set to deploy metrics
-  when: openshift_hosted_metrics_deploy | default(false) | bool and openshift_master_default_subdomain == ""
+  when:
+  - openshift_hosted_metrics_deploy | default(false) | bool
+  - openshift_master_default_subdomain == ""
 
 # NOTE: These metrics variables are unfortunately needed by both the master and the metrics roles
 # to properly configure the master-config.yaml file.

@@ -56,4 +56,6 @@
   when: contiv_has_rpm
 
 - include_tasks: fedora-install.yml
-  when: not openshift_is_atomic and ansible_distribution == "Fedora"
+  when:
+  - not openshift_is_atomic
+  - ansible_distribution == "Fedora"

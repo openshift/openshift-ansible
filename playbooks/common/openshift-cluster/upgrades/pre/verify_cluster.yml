@@ -31,7 +31,9 @@
 
   - set_fact:
       openshift_release: "{{ openshift_release[1:] }}"
-    when: openshift_release is defined and openshift_release[0] == 'v'
+    when:
+    - openshift_release is defined
+    - openshift_release[0] == 'v'
 
   - fail:
       msg: >

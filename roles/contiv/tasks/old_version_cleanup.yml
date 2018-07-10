@@ -37,7 +37,9 @@
     - /etc/systemd/system/contiv-etcd.service.d
 
 - include_tasks: old_version_cleanup_iptables.yml
-  when: not contiv_has_firewalld and contiv_has_iptables
+  when:
+    - not contiv_has_firewalld
+    - contiv_has_iptables
 
 - include_tasks: old_version_cleanup_firewalld.yml
   when: contiv_has_firewalld

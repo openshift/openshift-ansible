@@ -58,13 +58,17 @@
   with_items:
     - "{{ rhel_image_streams }}"
   register: oex_imagestream_import_secret
-  failed_when: "'already exists' not in oex_imagestream_import_secret.stderr and oex_imagestream_import_secret.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_imagestream_import_secret.stderr"
+    - oex_imagestream_import_secret.rc != 0
   changed_when: false
 
 - name: Modify registry paths if registry_url is not registry.redhat.io
   shell: >
     find {{ examples_base }} -type f | xargs -n 1 sed -i 's|registry.redhat.io|{{ registry_host | quote }}|g'
-  when: registry_host != '' and openshift_examples_modify_imagestreams | default(False) | bool
+  when:
+    - registry_host != ''
+    - openshift_examples_modify_imagestreams | default(False) | bool
 
 # RHEL and Centos image streams are mutually exclusive
 - name: Import RHEL streams
@@ -74,7 +78,9 @@
   with_items:
     - "{{ rhel_image_streams }}"
   register: oex_import_rhel_streams
-  failed_when: "'already exists' not in oex_import_rhel_streams.stderr and oex_import_rhel_streams.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_import_rhel_streams.stderr"
+    - oex_import_rhel_streams.rc != 0
   changed_when: false
 
 - name: Import Centos Image streams
@@ -84,7 +90,9 @@
   with_items:
     - "{{ centos_image_streams }}"
   register: oex_import_centos_streams
-  failed_when: "'already exists' not in oex_import_centos_streams.stderr and oex_import_centos_streams.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_import_centos_streams.stderr"
+    - oex_import_centos_streams.rc != 0
   changed_when: false
 
 - name: Import db templates
@@ -92,7 +100,9 @@
     {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ db_templates_base }}
   when: openshift_examples_load_db_templates | bool
   register: oex_import_db_templates
-  failed_when: "'already exists' not in oex_import_db_templates.stderr and oex_import_db_templates.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_import_db_templates.stderr"
+    - oex_import_db_templates.rc != 0
   changed_when: false
 
 - name: Remove defunct quickstart template files
@@ -113,7 +123,9 @@
     - dancer-example
     - django-example
   register: oex_delete_defunct_quickstart_templates
-  failed_when: "'not found' not in oex_delete_defunct_quickstart_templates.stderr and oex_delete_defunct_quickstart_templates.rc != 0"
+  failed_when:
+    - "'not found' not in oex_delete_defunct_quickstart_templates.stderr"
+    - oex_delete_defunct_quickstart_templates.rc != 0
   changed_when: false
 
 - name: Import quickstart-templates
@@ -121,7 +133,9 @@
     {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ quickstarts_base }}
   when: openshift_examples_load_quickstarts | bool
   register: oex_import_quickstarts
-  failed_when: "'already exists' not in oex_import_quickstarts.stderr and oex_import_quickstarts.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_import_quickstarts.stderr"
+    - oex_import_quickstarts.rc != 0
   changed_when: false
 
 - name: Remove old xPaas template files
@@ -136,7 +150,9 @@
   with_items:
     - sso70-basic
   register: oex_delete_old_xpaas_templates
-  failed_when: "'not found' not in oex_delete_old_xpaas_templates.stderr and oex_delete_old_xpaas_templates.rc != 0"
+  failed_when:
+    - "'not found' not in oex_delete_old_xpaas_templates.stderr"
+    - oex_delete_old_xpaas_templates.rc != 0
   changed_when: false
 
 - name: Import xPaas image streams
@@ -144,7 +160,9 @@
     {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ xpaas_image_streams }}
   when: openshift_examples_load_xpaas | bool
   register: oex_import_xpaas_streams
-  failed_when: "'already exists' not in oex_import_xpaas_streams.stderr and oex_import_xpaas_streams.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_import_xpaas_streams.stderr"
+    - oex_import_xpaas_streams.rc != 0
   changed_when: false
 
 - name: Import xPaas templates
@@ -152,5 +170,7 @@
     {{ openshift_client_binary }} {{ openshift_examples_import_command }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig -n openshift -f {{ xpaas_templates_base }}
   when: openshift_examples_load_xpaas | bool
   register: oex_import_xpaas_templates
-  failed_when: "'already exists' not in oex_import_xpaas_templates.stderr and oex_import_xpaas_templates.rc != 0"
+  failed_when:
+    - "'already exists' not in oex_import_xpaas_templates.stderr"
+    - oex_import_xpaas_templates.rc != 0
   changed_when: false
