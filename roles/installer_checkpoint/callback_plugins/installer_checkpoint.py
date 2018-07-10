@@ -36,6 +36,7 @@ class CallbackModule(CallbackBase):
             'installer_phase_logging',
             'installer_phase_prometheus',
             'installer_phase_servicecatalog',
+            'installer_phase_olm',
             'installer_phase_management',
         ]
 
@@ -100,6 +101,10 @@ class CallbackModule(CallbackBase):
             'installer_phase_servicecatalog': {
                 'title': 'Service Catalog Install',
                 'playbook': 'playbooks/openshift-service-catalog/config.yml'
+            },
+            'installer_phase_olm': {
+                'title': 'Operator Lifecycle Manager Install',
+                'playbook': 'playbooks/olm/config.yml'
             },
             'installer_phase_management': {
                 'title': 'Management Install',

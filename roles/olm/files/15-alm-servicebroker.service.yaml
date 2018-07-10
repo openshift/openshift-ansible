@@ -1,0 +1,21 @@
+##---
+# Source: olm/templates/15-alm-servicebroker.service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alm-service-broker
+  namespace: operator-lifecycle-manager
+  labels:
+    app: alm-service-broker
+    tectonic-operators.coreos.com/managed-by: tectonic-x-operator
+spec:
+  type: ClusterIP
+  ports:
+    - name: healthz
+      port: 8080
+    - name: broker
+      port: 8005
+  selector:
+    app: alm-service-broker
+
