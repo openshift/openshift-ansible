@@ -292,12 +292,6 @@
     when:
     - glusterfs_heketi_is_native
 
-  - name: Determine StorageClass heketi URL
-    set_fact:
-      glusterfs_heketi_route: "{{ heketi_route.results.results[0]['spec']['host'] }}"
-    when:
-    - glusterfs_heketi_is_native
-
   - name: Generate GlusterFS StorageClass file
     template:
       src: "glusterfs-storageclass.yml.j2"
@@ -339,12 +333,6 @@
       state: list
       name: "heketi-{{ glusterfs_name }}"
     register: heketi_route
-    when:
-    - glusterfs_heketi_is_native
-
-  - name: Determine StorageClass heketi URL
-    set_fact:
-      glusterfs_heketi_route: "{{ heketi_route.results.results[0]['spec']['host'] }}"
     when:
     - glusterfs_heketi_is_native
 
