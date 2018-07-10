@@ -6,6 +6,7 @@ __kibana_index_modes: ["unique", "shared_ops"]
 __es_local_curl: "curl -s --cacert /etc/elasticsearch/secret/admin-ca --cert /etc/elasticsearch/secret/admin-cert --key /etc/elasticsearch/secret/admin-key"
 
 __elasticsearch_ready_retries: "{{ openshift_logging_elasticsearch_poll_timeout_minutes | default(60) | int * 2 }}"
+__es_major_version: 5
 
 # TODO: integrate these
 es_node_quorum: "{{ openshift_logging_elasticsearch_replica_count | int/2 + 1 }}"

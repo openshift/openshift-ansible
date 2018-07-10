@@ -30,14 +30,14 @@
     full_restart_cluster: True
   when:
   - _es_installed_version is defined
-  - _es_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+  - _es_installed_version.split('.')[0] | int < __es_major_version
   - not openshift_logging_elasticsearch_ops_deployment | default(false) | bool
 
 - set_fact:
     full_restart_cluster: True
   when:
   - _es_ops_installed_version is defined
-  - _es_ops_installed_version.split('.')[0] | int < __es_version.split('.')[0] | int
+  - _es_ops_installed_version.split('.')[0] | int < __es_major_version
   - openshift_logging_elasticsearch_ops_deployment | default(false) | bool
 
 # allow passing in a tempdir
