@@ -20,7 +20,6 @@
       openshift_deployment_type: "{{ 'openshift-enterprise' if ansible_distribution == 'RedHat' else 'origin' }}"
       openshift_enable_origin_repo: False
       openshift_node_bootstrap: True
-      skip_node_svc_handlers: True
       openshift_additional_repos: "{{ azure_node_repos[ansible_distribution] }}"
       openshift_node_include_control_plane: True
       openshift_control_plane_static_pod_location: /etc/origin/node/disabled/
@@ -29,11 +28,24 @@
       - strace
       - tcpdump
       etcd_ip: ETCD_IP_REPLACE
+      skip_node_svc_handlers: True
+      i_openshift_additional_repos_key: "{{ ansible_distribution }}-{{ openshift_azure_release }}"     
 
-  - name: add insights-client to package installs when on rhel
+  - name: add rhel specific variables
     set_fact:
       openshift_node_image_prep_packages: "{{ openshift_node_image_prep_packages | union(['insights-client']) }}"
+      openshift_additional_repos: "{{ openshift_additional_repos | union(azure_node_repos[i_openshift_additional_repos_key]) }}"
+    no_log: true
     when: openshift_deployment_type == 'openshift-enterprise'
+
+#  - name: set pre-release registry
+#    set_fact:
+#      oreg_url: "registry.reg-aws.openshift.com:443/openshift3/ose-${component}:${version}"
+#      oreg_auth_user: "{{ openshift_azure_oreg_auth_user }}"
+#      oreg_auth_password: "{{ openshift_azure_oreg_auth_password }}"
+#    when:
+#    - openshift_deployment_type == 'openshift-enterprise'
+#    - openshift_azure_release == openshift_azure_release_latest
 
   - set_fact:
       openshift_additional_repos: "{{ openshift_additional_repos + [{'name': 'install_repo', 'baseurl': openshift_azure_install_repo, 'enabled': true, 'gpgcheck': false}] }}"
@@ -58,6 +70,8 @@
   import_playbook: ../../openshift-node/private/image_prep.yml
   vars:
     etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
+    openshift_image_tag: "v{{ openshift_azure_release }}"
+    openshift_version: "{{ openshift_azure_release }}"
 
 - hosts: nodes
   tasks:

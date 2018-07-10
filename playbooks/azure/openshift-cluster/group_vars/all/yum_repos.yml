@@ -40,6 +40,7 @@ azure_node_repos:
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
+  RedHat-3.9:
   - name: rhel-7-server-ansible-2.4-rpms
     baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.4-rpms/
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
@@ -47,12 +48,29 @@ azure_node_repos:
     sslclientkey: /var/lib/yum/client-key.pem
     enabled: yes
 
-  #- name: rhel-server-7-ose-3.10
-  #  baseurl: https://mirror.openshift.com/libra/rhui-rhel-server-7-ose-3.10/
-  #  gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-  #  sslclientcert: /var/lib/yum/client-cert.pem
-  #  sslclientkey: /var/lib/yum/client-key.pem
-  #  enabled: yes
+  - name: rhel-server-7-ose-3.9
+    baseurl: https://mirror.openshift.com/enterprise/all/3.9/latest/x86_64/os
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslclientcert: /var/lib/yum/client-cert.pem
+    sslclientkey: /var/lib/yum/client-key.pem
+    enabled: yes
+
+  RedHat-3.10:
+  - name: rhel-7-server-ansible-2.4-rpms
+    baseurl: https://mirror.openshift.com/enterprise/rhel/rhel-7-server-ansible-2.4-rpms/
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    sslclientcert: /var/lib/yum/client-cert.pem
+    sslclientkey: /var/lib/yum/client-key.pem
+    enabled: yes
+
+  - name: rhel-server-7-ose-3.10
+    baseurl: https://mirror.openshift.com/enterprise/all/3.10/latest/x86_64/os
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    #TODO: remove me before go live!
+    gpgcheck: false
+    sslclientcert: /var/lib/yum/client-cert.pem
+    sslclientkey: /var/lib/yum/client-key.pem
+    enabled: yes
 
   CentOS:
   # TODO: should be using a repo which only provides prerequisites
