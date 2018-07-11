@@ -510,9 +510,9 @@
     src: "{{ template }}"
     dest: "{{ tempdir }}/{{ template }}"
   with_items:
-    - crd.yaml
-    - operator.yaml
-    - rbac.yaml
+  - crd.yaml
+  - operator.yaml
+  - rbac.yaml
   loop_control:
     loop_var: template
 
