@@ -29,6 +29,7 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+      priorityClassName: system-cluster-critical
       serviceAccountName: "{{ daemonset_serviceAccount }}"
       nodeSelector:
         {{ fluentd_nodeselector_key }}: "{{ fluentd_nodeselector_value }}"

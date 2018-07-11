@@ -29,6 +29,7 @@ spec:
       serviceAccountName: sdn
       hostNetwork: true
       hostPID: true
+      priorityClassName: system-node-critical
       containers:
       - name: openvswitch
         image: " "
