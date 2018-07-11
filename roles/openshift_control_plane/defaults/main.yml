@@ -1,7 +1,4 @@
 ---
-# openshift_master_defaults_in_use is a workaround to detect if we are consuming
-# the plays from the role or outside of the role.
-openshift_master_defaults_in_use: True
 openshift_master_debug_level: "{{ debug_level | default(2) }}"
 
 r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
@@ -23,13 +20,6 @@ l_osm_id_providers_dict:
 
 openshift_master_identity_providers: "{{ l_osm_id_providers_dict[openshift_deployment_type] }}"
 
-l_osm_disabled_features: "{{ openshift_deployment_subtype == 'registry' | bool }}"
-l_osm_disabled_features_list:
-- Builder
-- S2IBuilder
-- WebConsole
-
-
 openshift_master_dns_port: 8053
 osm_project_request_template: ''
 osm_mcs_allocator_range: 's0:/2'
@@ -38,8 +28,6 @@ osm_uid_allocator_range: '1000000000-1999999999/10000'
 osm_project_request_message: ''
 
 openshift_node_ips: []
-r_openshift_master_clean_install: false
-r_openshift_master_os_firewall_enable: true
 r_openshift_master_os_firewall_deny: []
 default_r_openshift_master_os_firewall_allow:
 - service: api server https
@@ -53,9 +41,6 @@ default_r_openshift_master_os_firewall_allow:
 r_openshift_master_os_firewall_allow: "{{ default_r_openshift_master_os_firewall_allow | union(openshift_master_open_ports | default([])) }}"
 
 oreg_auth_credentials_path: "{{ r_openshift_master_data_dir }}/.docker"
-
-containerized_svc_dir: "/usr/lib/systemd/system"
-ha_svc_template_path: "native-cluster"
 
 openshift_docker_service_name: "docker"
 
@@ -77,8 +62,6 @@ openshift_master_valid_grant_methods:
 - auto
 - prompt
 - deny
-
-openshift_master_is_scaleup_host: False
 
 # openshift_master_oauth_template is deprecated.  Should be added to deprecations
 # and removed.
