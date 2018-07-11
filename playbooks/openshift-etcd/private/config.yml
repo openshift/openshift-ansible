@@ -50,9 +50,6 @@
       etcd_peers: "{{ groups.oo_etcd_to_config | default([], true) }}"
       etcd_certificates_etcd_hosts: "{{ groups.oo_etcd_to_config | default([], true) }}"
 
-  - import_role:
-      name: nickhammond.logrotate
-
 - name: etcd Install Checkpoint End
   hosts: all
   gather_facts: false
