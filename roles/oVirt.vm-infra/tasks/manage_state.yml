@@ -1,0 +1,46 @@
+---
+########################################################################
+# Legacy modification of cloud_init:
+########################################################################
+- set_fact:
+    cloud_init: "{{ current_vm.cloud_init | default(current_vm.profile.cloud_init) | default({}) }}"
+
+- set_fact:
+    cloud_init: "{{ cloud_init | combine({'user_name': cloud_init.user_name | default('root') }) }}"
+
+- set_fact:
+    cloud_init: "{{ cloud_init | combine({'authorized_ssh_keys': current_vm.ssh_key | default(current_vm.profile.ssh_key)}) }}"
+  when: current_vm.profile.ssh_key is defined or current_vm.ssh_key is defined
+
+- set_fact:
+    cloud_init: "{{ cloud_init | combine({'root_password': current_vm.root_password | default(current_vm.profile.root_password)}) }}"
+  when: current_vm.profile.root_password is defined or current_vm.root_password is defined
+
+- set_fact:
+    cloud_init: "{{ cloud_init | combine({'host_name': current_vm.name~'.'~current_vm.domain | default(current_vm.profile.domain)}) }}"
+  when: current_vm.profile.domain is defined or current_vm.domain is defined
+
+- name: Define vm/password dictionary
+  no_log: true
+  set_fact:
+    vms_passwords: "{{ vms_passwords + [{'name': current_vm.name, 'root_password': cloud_init.root_password}] }}"
+  when: "'root_password' in cloud_init"
+########################################################################
+########################################################################
+
+- name: "Manage VM '{{ current_vm.name }}' state"
+  ovirt_vms:
+    auth: "{{ ovirt_auth }}"
+    state: "{{ current_vm.state | default(current_vm.profile.state) | default('present') }}"
+    name: "{{ current_vm.name }}"
+    cloud_init: "{{ (cloud_init | length > 0) | ternary(cloud_init, omit) }}"
+    cloud_init_persist: "{{ current_vm.cloud_init_persist | default(current_vm.profile.cloud_init_persist) | default(omit) }}"
+    cloud_init_nics: "{{ current_vm.cloud_init_nics | default(current_vm.profile.cloud_init_nics)  | default(omit) }}"
+    timeout: "{{ vm_infra_create_single_timeout }}"
+  changed_when: false
+  async: "{{ vm_infra_create_single_timeout }}"
+  poll: 0
+  register: started_vm
+
+- set_fact:
+    started_vms: "{{ started_vms | default([]) + [started_vm] }}"

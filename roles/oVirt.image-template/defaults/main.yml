@@ -1,0 +1,17 @@
+---
+image_path: /tmp
+image_cache_download: true
+template_cluster: Default
+template_name: mytemplate
+template_memory: 2GiB
+template_cpu: 1
+template_disk_size: 10GiB
+template_operating_system: rhel_7x64
+template_timeout: 600
+template_disk_interface: virtio
+template_nics:
+  - name: nic1
+    profile_name: ovirtmgmt
+    interface: virtio
+
+disk_storage_domain: null
