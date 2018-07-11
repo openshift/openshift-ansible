@@ -19,62 +19,62 @@
   tasks:
   - when: openshift_logging_install_logging | default(false) | bool
     block:
-      - assert:
-          that: openshift_logging_es_nodeselector is defined
-          msg: "A node selector is required for Elasticsearch pods, please specify one with openshift_logging_es_nodeselector"
+    - assert:
+        that: openshift_logging_es_nodeselector is defined
+        msg: "A node selector is required for Elasticsearch pods, please specify one with openshift_logging_es_nodeselector"
 
-      - name: Ensure that ElasticSearch has nodes to run on
+    - name: Ensure that ElasticSearch has nodes to run on
+      import_role:
+        name: openshift_control_plane
+        tasks_from: ensure_nodes_matching_selector.yml
+      vars:
+        openshift_master_ensure_nodes_selector: "{{ openshift_logging_es_nodeselector | map_to_pairs }}"
+        openshift_master_ensure_nodes_service: Elasticsearch
+
+    - command: >
+        {{ openshift_client_binary }}
+        --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+        get nodes
+        -l {{ openshift_logging_es_nodeselector | map_to_pairs }}
+        -o jsonpath={.items[*].metadata.name}
+      register: openshift_logging_es_hosts
+
+    - when: openshift_logging_use_ops | default(false) | bool
+      block:
+      - assert:
+          that: openshift_logging_es_ops_nodeselector is defined
+          msg: "A node selector is required for Elasticsearch Ops pods, please specify one with openshift_logging_es_ops_nodeselector"
+
+      - name: Ensure that ElasticSearch Ops has nodes to run on
         import_role:
           name: openshift_control_plane
           tasks_from: ensure_nodes_matching_selector.yml
         vars:
-          openshift_master_ensure_nodes_selector: "{{ openshift_logging_es_nodeselector | map_to_pairs }}"
-          openshift_master_ensure_nodes_service: Elasticsearch
+          openshift_master_ensure_nodes_selector: "{{ openshift_logging_es_ops_nodeselector | map_to_pairs }}"
+          openshift_master_ensure_nodes_service: "Elasticsearch Ops"
 
       - command: >
           {{ openshift_client_binary }}
           --config={{ openshift.common.config_base }}/master/admin.kubeconfig
           get nodes
-          -l {{ openshift_logging_es_nodeselector | map_to_pairs }}
+          -l {{ openshift_logging_es_ops_nodeselector | map_to_pairs }}
           -o jsonpath={.items[*].metadata.name}
-        register: openshift_logging_es_hosts
+        register: openshift_logging_es_ops_hosts
 
-      - when: openshift_logging_use_ops | default(false) | bool
-        block:
-          - assert:
-              that: openshift_logging_es_ops_nodeselector is defined
-              msg: "A node selector is required for Elasticsearch Ops pods, please specify one with openshift_logging_es_ops_nodeselector"
+    - set_fact:
+        openshift_logging_elasticsearch_hosts: "{{ ( openshift_logging_es_hosts.stdout.split(' ') | default([]) + (openshift_logging_es_ops_hosts.stdout.split(' ') if openshift_logging_es_ops_hosts.stdout is defined else []) ) | unique }}"
 
-          - name: Ensure that ElasticSearch Ops has nodes to run on
-            import_role:
-              name: openshift_control_plane
-              tasks_from: ensure_nodes_matching_selector.yml
-            vars:
-              openshift_master_ensure_nodes_selector: "{{ openshift_logging_es_ops_nodeselector | map_to_pairs }}"
-              openshift_master_ensure_nodes_service: "Elasticsearch Ops"
-
-          - command: >
-              {{ openshift_client_binary }}
-              --config={{ openshift.common.config_base }}/master/admin.kubeconfig
-              get nodes
-              -l {{ openshift_logging_es_ops_nodeselector | map_to_pairs }}
-              -o jsonpath={.items[*].metadata.name}
-            register: openshift_logging_es_ops_hosts
-
-      - set_fact:
-          openshift_logging_elasticsearch_hosts: "{{ ( openshift_logging_es_hosts.stdout.split(' ') | default([]) + (openshift_logging_es_ops_hosts.stdout.split(' ') if openshift_logging_es_ops_hosts.stdout is defined else []) ) | unique }}"
-
-      - name: Evaluate oo_elasticsearch_nodes
-        add_host:
-          name: "{{ item }}"
-          groups: oo_elasticsearch_nodes
-          ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-          ansible_become: "{{ g_sudo | default(omit) }}"
-        with_items: "{{ openshift_logging_elasticsearch_hosts }}"
-        changed_when: no
-        run_once: true
-        delegate_to: localhost
-        connection: local
+    - name: Evaluate oo_elasticsearch_nodes
+      add_host:
+        name: "{{ item }}"
+        groups: oo_elasticsearch_nodes
+        ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
+        ansible_become: "{{ g_sudo | default(omit) }}"
+      with_items: "{{ openshift_logging_elasticsearch_hosts }}"
+      changed_when: no
+      run_once: true
+      delegate_to: localhost
+      connection: local
 
 - name: Update vm.max_map_count for ES 5.x
   hosts: oo_elasticsearch_nodes
@@ -82,19 +82,19 @@
   tasks:
   - when: openshift_logging_install_logging | default(false) | bool
     block:
-      - name: Checking vm max_map_count value
-        command:
-          cat /proc/sys/vm/max_map_count
-        register: _vm_max_map_count
+    - name: Checking vm max_map_count value
+      command:
+        cat /proc/sys/vm/max_map_count
+      register: _vm_max_map_count
 
-      - name: Updating vm.max_map_count value
-        sysctl:
-          name: vm.max_map_count
-          value: 262144
-          sysctl_file: "/etc/sysctl.d/99-elasticsearch.conf"
-          reload: yes
-        when:
-        - _vm_max_map_count.stdout | default(0) | int < 262144 | int
+    - name: Updating vm.max_map_count value
+      sysctl:
+        name: vm.max_map_count
+        value: 262144
+        sysctl_file: "/etc/sysctl.d/99-elasticsearch.conf"
+        reload: yes
+      when:
+      - _vm_max_map_count.stdout | default(0) | int < 262144 | int
 
 - name: Remove created 99-elasticsearch sysctl
   hosts: all
