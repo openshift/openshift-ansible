@@ -22,6 +22,9 @@
 - import_playbook: ../../openshift-monitoring/private/config.yml
   when: openshift_monitoring_deploy | default(false) | bool
 
+- import_playbook: ../../openshift-metering/private/config.yml
+  when: openshift_metering_install | default(false) | bool
+
 - import_playbook: ../../openshift-web-console/private/config.yml
   when: openshift_web_console_install | default(true) | bool
 

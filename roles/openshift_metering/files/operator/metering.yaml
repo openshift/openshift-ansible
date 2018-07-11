@@ -1,0 +1,5 @@
+apiVersion: chargeback.coreos.com/v1alpha1
+kind: Metering
+metadata:
+  name: openshift-metering
+spec:
