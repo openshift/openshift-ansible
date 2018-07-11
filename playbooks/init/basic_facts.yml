@@ -87,14 +87,6 @@
         osm_host_subnet_length: "{{ l_existing_config_master_config.networkConfig.clusterNetworks[0].hostSubnetLength }}"
       when:
       - l_existing_config_master_config.networkConfig.clusterNetworks is defined
-
-    # TODO(michaelgugino): Remove in 3.11
-    # Use deprecated config variables if newer ones not found above.
-    - set_fact:
-        osm_cluster_network_cidr: "{{ l_existing_config_master_config.networkConfig.clusterNetworkCIDR }}"
-        osm_host_subnet_length: "{{ l_existing_config_master_config.networkConfig.hostSubnetLength }}"
-      when:
-      - l_existing_config_master_config.networkConfig.clusterNetworks is not defined
       # End block
 
 - name: Initialize special first-master variables

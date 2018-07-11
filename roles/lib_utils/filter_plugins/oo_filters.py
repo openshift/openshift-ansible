@@ -9,7 +9,6 @@ import json
 import os
 import pdb
 import random
-import re
 
 from base64 import b64encode
 from collections import Mapping
@@ -428,33 +427,6 @@ def lib_utils_to_padded_yaml(data, level=0, indent=2, **kw):
         raise errors.AnsibleFilterError('Failed to convert: %s' % my_e)
 
 
-def lib_utils_oo_pods_match_component(pods, deployment_type, component):
-    """ Filters a list of Pods and returns the ones matching the deployment_type and component
-    """
-    # TODO: michaelgugino -- need to find a better method than matching on image
-    # this will break with some of the recent oreg_url changes.
-    if not isinstance(pods, list):
-        raise errors.AnsibleFilterError("failed expects to filter on a list")
-    if not isinstance(deployment_type, string_types):
-        raise errors.AnsibleFilterError("failed expects deployment_type to be a string")
-    if not isinstance(component, string_types):
-        raise errors.AnsibleFilterError("failed expects component to be a string")
-
-    image_prefix = 'docker.io/openshift/origin-'
-    if deployment_type == 'openshift-enterprise':
-        image_prefix = 'registry.access.redhat.com/openshift3/ose-'
-
-    matching_pods = []
-    image_regex = r'.*' + image_prefix + component + r'.*'
-    for pod in pods:
-        for container in pod['spec']['containers']:
-            if re.search(image_regex, container['image']):
-                matching_pods.append(pod)
-                break  # stop here, don't add a pod more than once
-
-    return matching_pods
-
-
 def lib_utils_oo_image_tag_to_rpm_version(version, include_dash=False):
     """ Convert an image tag string to an RPM version if necessary
         Empty strings and strings that are already in rpm version format
@@ -528,26 +500,6 @@ def lib_utils_oo_loadbalancer_backends(
     return loadbalancer_backends
 
 
-def lib_utils_oo_chomp_commit_offset(version):
-    """Chomp any "+git.foo" commit offset string from the given `version`
-    and return the modified version string.
-
-Ex:
-- chomp_commit_offset(None)                 => None
-- chomp_commit_offset(1337)                 => "1337"
-- chomp_commit_offset("v3.4.0.15+git.derp") => "v3.4.0.15"
-- chomp_commit_offset("v3.4.0.15")          => "v3.4.0.15"
-- chomp_commit_offset("v1.3.0+52492b4")     => "v1.3.0"
-    """
-    if version is None:
-        return version
-    else:
-        # Stringify, just in case it's a Number type. Split by '+' and
-        # return the first split. No concerns about strings without a
-        # '+', .split() returns an array of the original string.
-        return str(version).split('+')[0]
-
-
 def lib_utils_oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
     """Generates a random string of given length from a set of alphanumeric characters.
        The default source uses [a-z][A-Z][0-9]
@@ -556,21 +508,6 @@ def lib_utils_oo_random_word(length, source='abcdefghijklmnopqrstuvwxyzABCDEFGHI
        - lib_utils_oo_random_word(4, source='012')  => 0123
     """
     return ''.join(random.choice(source) for i in range(length))
-
-
-def lib_utils_oo_contains_rule(source, apiGroups, resources, verbs):
-    '''Return true if the specified rule is contained within the provided source'''
-
-    rules = source['rules']
-
-    if rules:
-        for rule in rules:
-            if set(rule['apiGroups']) == set(apiGroups):
-                if set(rule['resources']) == set(resources):
-                    if set(rule['verbs']) == set(verbs):
-                        return True
-
-    return False
 
 
 def lib_utils_oo_selector_to_string_list(user_dict):
@@ -740,7 +677,6 @@ class FilterModule(object):
         return {
             "lib_utils_oo_select_keys": lib_utils_oo_select_keys,
             "lib_utils_oo_select_keys_from_list": lib_utils_oo_select_keys_from_list,
-            "lib_utils_oo_chomp_commit_offset": lib_utils_oo_chomp_commit_offset,
             "lib_utils_oo_collect": lib_utils_oo_collect,
             "lib_utils_oo_pdb": lib_utils_oo_pdb,
             "lib_utils_oo_prepend_strings_in_list": lib_utils_oo_prepend_strings_in_list,
@@ -751,14 +687,12 @@ class FilterModule(object):
             "lib_utils_oo_parse_named_certificates": lib_utils_oo_parse_named_certificates,
             "lib_utils_oo_parse_certificate_san": lib_utils_oo_parse_certificate_san,
             "lib_utils_oo_generate_secret": lib_utils_oo_generate_secret,
-            "lib_utils_oo_pods_match_component": lib_utils_oo_pods_match_component,
             "lib_utils_oo_image_tag_to_rpm_version": lib_utils_oo_image_tag_to_rpm_version,
             "lib_utils_oo_hostname_from_url": lib_utils_oo_hostname_from_url,
             "lib_utils_oo_loadbalancer_frontends": lib_utils_oo_loadbalancer_frontends,
             "lib_utils_oo_loadbalancer_backends": lib_utils_oo_loadbalancer_backends,
             "lib_utils_to_padded_yaml": lib_utils_to_padded_yaml,
             "lib_utils_oo_random_word": lib_utils_oo_random_word,
-            "lib_utils_oo_contains_rule": lib_utils_oo_contains_rule,
             "lib_utils_oo_selector_to_string_list": lib_utils_oo_selector_to_string_list,
             "lib_utils_oo_filter_sa_secrets": lib_utils_oo_filter_sa_secrets,
             "lib_utils_oo_l_of_d_to_csv": lib_utils_oo_l_of_d_to_csv,
