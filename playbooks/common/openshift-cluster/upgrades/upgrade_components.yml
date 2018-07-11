@@ -25,3 +25,6 @@
 
 - import_playbook: ../../../openshift-monitor-availability/private/config.yml
   when: openshift_monitor_availability_install | default(false) | bool
+
+- import_playbook: ../../../openshift-node-problem-detector/private/config.yml
+  when: openshift_node_problem_detector_install | default(false) | bool
