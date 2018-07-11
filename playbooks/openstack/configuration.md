@@ -23,6 +23,8 @@ Environment variables may also be used.
 * [OpenStack Credential Configuration](#openstack-credential-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
+* [Swift or Ceph Rados GW Backed Registry Configuration](#swift-or-ceph-rados-gw-backed-registry-configuration)
+* [Deploying At Scale](#deploying-at-scale)
 
 
 ## OpenStack Configuration
@@ -767,6 +769,26 @@ openshift_hosted_registry_storage_volume_name: registry
 The volume will be formatted automaticaly and it will be mounted to one of the
 infra nodes when the registry pod gets started.
 
+## Swift or Ceph Rados GW Backed Registry Configuration
+
+You can use OpenStack Swift or Ceph Rados GW to store your OpenShift registry.
+In order to do so, set the following in `inventory/group_vars/OSEv3.yml`:
+
+* `openshift_hosted_registry_storage_kind`: object
+* `openshift_hosted_registry_storage_provider`: swift
+* `openshift_hosted_registry_storage_swift_container`: "openshift-registry" _#can be any name_
+* `openshift_hosted_registry_storage_swift_authurl`: "{{ lookup('env','OS_AUTH_URL') }}"
+* `openshift_hosted_registry_storage_swift_username`: "{{ lookup('env','OS_USERNAME') }}"
+* `openshift_hosted_registry_storage_swift_password`: "{{ lookup('env','OS_PASSWORD') }}"
+* `openshift_hosted_registry_storage_swift_region`: "{{ lookup('env', 'OS_REGION_NAME') }}" _# optional_
+* `openshift_hosted_registry_storage_swift_tenant`: "{{ lookup('env','OS_PROJECT_NAME') }}" _# can also specify tenantid_
+* `openshift_hosted_registry_storage_swift_tenantid`: "{{ lookup('env','OS_PROJECT_ID') }}" _# can also specify tenant_
+* `openshift_hosted_registry_storage_swift_domain`: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}" _# optional; can also specifiy domainid_
+* `openshift_hosted_registry_storage_swift_domainid`: "{{ lookup('env','OS_USER_DOMAIN_ID') }}" _# optional; can also specifiy domain_
+
+Note that the exact environment variable names may vary depending on the contents of
+your OpenStack RC file. If you use Keystone v2, you may not need to set all of these
+parameters.
 
 ## Deploying At Scale
 
