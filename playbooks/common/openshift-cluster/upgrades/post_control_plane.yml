@@ -9,6 +9,13 @@
     when:
     - openshift_web_console_install | default(true) | bool
 
+- name: Install admin console
+  hosts: oo_first_master
+  roles:
+  - role: openshift_console
+    when:
+    - openshift_console_install | default(true) | bool
+
 # upgrade registry and router pods; we defer waiting for these pods
 # until after the next play to hopefully save some time polling.
 - import_playbook: ../../../openshift-hosted/private/upgrade.yml
