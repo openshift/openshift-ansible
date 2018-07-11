@@ -55,6 +55,7 @@ openshift_hosted_routers:
   selector: "{{ openshift_hosted_router_selector | default(None) }}"
   images: "{{ openshift_hosted_router_registryurl }}"
   edits: "{{ openshift_hosted_router_edits }}"
+  extended_validation: "{{ openshift_hosted_router_extended_validation | default(True) | bool }}"
   stats_port: 1936
   ports:
   - 80:80
