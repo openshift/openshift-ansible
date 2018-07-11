@@ -1,13 +1,13 @@
-FROM rhel7.3:7.3-released
+FROM rhel7.5:7.5-released
 
 MAINTAINER OpenShift Team <dev@lists.openshift.redhat.com>
 
 USER root
 
 # Playbooks, roles, and their dependencies are installed from packages.
-RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto python2-boto3 python2-crypto openssl iproute httpd-tools google-cloud-sdk" \
+RUN INSTALL_PKGS="atomic-openshift-utils atomic-openshift-clients python-boto python2-boto3 python2-crypto openssl iproute hostname httpd-tools google-cloud-sdk" \
  && yum repolist > /dev/null \
- && yum-config-manager --enable rhel-7-server-ose-3.7-rpms \
+ && yum-config-manager --enable rhel-7-server-ose-3.9-rpms \
  && yum-config-manager --enable rhel-7-server-rh-common-rpms \
  && yum install -y java-1.8.0-openjdk-headless \
  && yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
@@ -23,7 +23,7 @@ LABEL name="openshift3/ose-ansible" \
       io.openshift.expose-services="" \
       io.openshift.tags="openshift,install,upgrade,ansible" \
       com.redhat.component="aos3-installation-docker" \
-      version="v3.6.0" \
+      version="v3.9.0" \
       release="1" \
       architecture="x86_64" \
       atomic.run="once"
