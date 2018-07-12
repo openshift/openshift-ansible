@@ -83,7 +83,7 @@ debug_level=2
 # If using Atomic Host, you may specify system container image registry for the nodes:
 #system_images_registry="docker.io"
 # when openshift_deployment_type=='openshift-enterprise'
-#system_images_registry="registry.access.redhat.com"
+#system_images_registry="registry.redhat.io"
 
 # Manage openshift example imagestreams and templates during install and upgrade
 #openshift_install_examples=true
@@ -171,7 +171,7 @@ debug_level=2
 # openshift-enterprise default is 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
 # origin default is 'docker.io/openshift/origin-${component}:${version}'
 #oreg_url=example.com/openshift3/ose-${component}:${version}
-# If oreg_url points to a registry other than registry.access.redhat.com we can
+# If oreg_url points to a registry other than registry.redhat.io we can
 # modify image streams to point at that registry by setting the following to true
 #openshift_examples_modify_imagestreams=true
 # Add insecure and blocked registries to global docker configuration
@@ -193,7 +193,7 @@ debug_level=2
 #openshift_additional_repos=[{'id': 'openshift-origin-copr', 'name': 'OpenShift Origin COPR', 'baseurl': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/epel-7-$basearch/', 'enabled': 1, 'gpgcheck': 1, 'gpgkey': 'https://copr-be.cloud.fedoraproject.org/results/maxamillion/origin-next/pubkey.gpg'}]
 #openshift_repos_enable_testing=false
 
-# If the image for etcd needs to be pulled from anywhere else than registry.access.redhat.com, e.g. in
+# If the image for etcd needs to be pulled from anywhere else than registry.redhat.io, e.g. in
 # a disconnected and containerized installation, use osm_etcd_image to specify the image to use:
 #osm_etcd_image=registry.example.com/rhel7/etcd
 
@@ -613,11 +613,11 @@ debug_level=2
 #openshift_metrics_schema_installer_image="docker.io/openshift/origin-metrics-schema-installer:{{ openshift_image_tag }}"
 #openshift_metrics_heapster_image="docker.io/openshift/origin-metrics-heapster:{{ openshift_image_tag }}"
 # when openshift_deployment_type=='openshift-enterprise'
-#openshift_metrics_cassandra_image="registry.access.redhat.com/openshift3/metrics-cassandra:{{ openshift_image_tag }}"
-#openshift_metrics_hawkular_agent_image="registry.access.redhat.com/openshift3/metrics-hawkular-openshift-agent:{{ openshift_image_tag }}"
-#openshift_metrics_hawkular_metrics_image="registry.access.redhat.com/openshift3/metrics-hawkular-metrics:{{ openshift_image_tag }}"
-#openshift_metrics_schema_installer_image="registry.access.redhat.com/openshift3/metrics-schema-installer:{{ openshift_image_tag }}"
-#openshift_metrics_heapster_image="registry.access.redhat.com/openshift3/metrics-heapster:{{ openshift_image_tag }}"
+#openshift_metrics_cassandra_image="registry.redhat.io/openshift3/metrics-cassandra:{{ openshift_image_tag }}"
+#openshift_metrics_hawkular_agent_image="registry.redhat.io/openshift3/metrics-hawkular-openshift-agent:{{ openshift_image_tag }}"
+#openshift_metrics_hawkular_metrics_image="registry.redhat.io/openshift3/metrics-hawkular-metrics:{{ openshift_image_tag }}"
+#openshift_metrics_schema_installer_image="registry.redhat.io/openshift3/metrics-schema-installer:{{ openshift_image_tag }}"
+#openshift_metrics_heapster_image="registry.redhat.io/openshift3/metrics-heapster:{{ openshift_image_tag }}"
 #
 # StorageClass
 # openshift_storageclass_name=gp2
@@ -909,7 +909,7 @@ debug_level=2
 # Specify an openshift_service_catalog image
 # (defaults for origin and openshift-enterprise, repsectively)
 #openshift_service_catalog_image="docker.io/openshift/origin-service-catalog:{{ openshift_image_tag }}""
-#openshift_service_catalog_image="registry.access.redhat.com/openshift3/ose-service-catalog:{{ openshift_image_tag }}"
+#openshift_service_catalog_image="registry.redhat.io/openshift3/ose-service-catalog:{{ openshift_image_tag }}"
 
 # TSB image tag
 #template_service_broker_version='v3.9'

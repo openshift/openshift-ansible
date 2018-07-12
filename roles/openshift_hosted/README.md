@@ -68,7 +68,7 @@ Example Playbook
       certfile: /path/to/my-router.crt
       keyfile: /path/to/my-router.key
       cafile: /path/to/my-router-ca.crt
-    openshift_hosted_router_registryurl: 'registry.access.redhat.com/openshift3/ose-haproxy-router:v3.0.2.0'
+    openshift_hosted_router_registryurl: 'registry.redhat.io/openshift3/ose-haproxy-router:v3.0.2.0'
     openshift_hosted_router_selector: 'type=infra'
     openshift_hosted_registry_storage_kind=glusterfs
     openshift_hosted_registry_storage_glusterfs_path=external_glusterfs_volume_name

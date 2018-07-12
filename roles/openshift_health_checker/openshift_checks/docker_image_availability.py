@@ -59,8 +59,8 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         deployment_type = self.get_var("openshift_deployment_type", default="")
         if deployment_type == "origin" and "docker.io" not in regs:
             regs.append("docker.io")
-        elif deployment_type == 'openshift-enterprise' and "registry.access.redhat.com" not in regs:
-            regs.append("registry.access.redhat.com")
+        elif deployment_type == 'openshift-enterprise' and "registry.redhat.io" not in regs:
+            regs.append("registry.redhat.io")
         self.registries["configured"] = regs
 
         # for the oreg_url registry there may be credentials specified
@@ -240,7 +240,7 @@ class DockerImageAvailability(DockerHostMixin, OpenShiftCheck):
         registries = self.registries["configured"]
         # If image already includes a registry, only use that.
         # NOTE: This logic would incorrectly identify images that do not use a namespace, e.g.
-        # registry.access.redhat.com/rhel7 as if the registry were a namespace.
+        # registry.redhat.io/rhel7 as if the registry were a namespace.
         # It's not clear that there's any way to distinguish them, but fortunately
         # the current set of images all look like [registry/]namespace/name[:version].
         if image.count("/") > 1:

@@ -19,7 +19,7 @@ openshift_docker_additional_registries: []
 openshift_docker_blocked_registries: []
 openshift_docker_insecure_registries: []
 
-openshift_docker_ent_reg: 'registry.access.redhat.com'
+openshift_docker_ent_reg: 'registry.redhat.io'
 
 openshift_docker_options: False  # str
 openshift_docker_log_driver: False  # str
@@ -88,7 +88,7 @@ l_openshift_image_tag: "{{ openshift_image_tag | default(l_openshift_image_tag_d
 
 l_crio_pause_images_dict:
   origin: 'docker.io/openshift/origin-${component}:${version}'
-  openshift-enterprise: 'registry.access.redhat.com/openshift3/ose-${component}:${version}'
+  openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
 l_pause_registry_url_default: "{{ l_crio_pause_images_dict[openshift_deployment_type] }}"
 
 pause_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'pod') }}"

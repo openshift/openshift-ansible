@@ -1,7 +1,7 @@
 ---
 __ansible_service_broker_registry_type: rhcc
 __ansible_service_broker_registry_name: rh
-__ansible_service_broker_registry_url: "https://registry.access.redhat.com"
+__ansible_service_broker_registry_url: "https://registry.redhat.io"
 __ansible_service_broker_registry_user: null
 __ansible_service_broker_registry_password: null
 __ansible_service_broker_registry_organization: null

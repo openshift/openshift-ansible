@@ -47,14 +47,14 @@ before attempting to pull any of the following images.
         docker.io/openshift/origin
         docker.io/openshift/node (node + openshift-sdn + openvswitch rpm for client tools)
         docker.io/openshift/openvswitch (centos7 + openvswitch rpm, runs ovsdb ovsctl processes)
-        registry.access.redhat.com/rhel7/etcd
+        registry.redhat.io/rhel7/etcd
     OpenShift Enterprise
         registry.access.redhat.com/openshift3/ose
         registry.access.redhat.com/openshift3/node
         registry.access.redhat.com/openshift3/openvswitch
-        registry.access.redhat.com/rhel7/etcd
+        registry.redhat.io/rhel7/etcd
 
-  * note openshift3/* images come from registry.access.redhat.com and
+  * note openshift3/* images come from registry.redhat.io and
 rely on the --additional-repository flag being set appropriately.
 
 ### Starting and Stopping Containers

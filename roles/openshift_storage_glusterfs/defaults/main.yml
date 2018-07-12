@@ -5,22 +5,22 @@
 # becomes "oreg.example.com/rhgs3/rhgs-server-rhel7:latest"
 l_gluster_image_dict:
   origin: "docker.io/gluster/gluster-centos:latest"
-  openshift-enterprise: "registry.access.redhat.com/rhgs3/rhgs-server-rhel7:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-server-rhel7:latest"
 openshift_storage_glusterfs_image: "{{ l_gluster_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 
 l_gluster_block_image_dict:
   origin: "docker.io/gluster/glusterblock-provisioner:latest"
-  openshift-enterprise: "registry.access.redhat.com/rhgs3/rhgs-gluster-block-prov-rhel7:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-gluster-block-prov-rhel7:latest"
 openshift_storage_glusterfs_block_image: "{{ l_gluster_block_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 
 l_gluster_s3_image_dict:
   origin: "docker.io/gluster/gluster-object:latest"
-  openshift-enterprise: "registry.access.redhat.com/rhgs3/rhgs-s3-server-rhel7:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-s3-server-rhel7:latest"
 openshift_storage_glusterfs_s3_image: "{{ l_gluster_s3_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 
 l_gluster_heketi_image_dict:
   origin: "docker.io/heketi/heketi:latest"
-  openshift-enterprise: "registry.access.redhat.com/rhgs3/rhgs-volmanager-rhel7:latest"
+  openshift-enterprise: "registry.redhat.io/rhgs3/rhgs-volmanager-rhel7:latest"
 openshift_storage_glusterfs_heketi_image: "{{ l_gluster_heketi_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 
 openshift_storage_glusterfs_timeout: 300

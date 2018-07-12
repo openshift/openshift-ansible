@@ -135,7 +135,7 @@ $ docker inspect 9c3597aeb39f
                 . . .
                 "release": "0.143.4.0",
                 . . .
-                "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift3/metrics-cassandra/images/v3.7.0-0.143.4.0",
+                "url": "https://access.redhat.com/containers/#/registry.redhat.io/openshift3/metrics-cassandra/images/v3.7.0-0.143.4.0",
                 . . .
                 "version": "v3.7.0"
             }

@@ -17,7 +17,7 @@ r_etcd_default_version: "3.2.22"
 osm_etcd_image: "{{ etcd_image_dict[openshift_deployment_type] | lib_utils_oo_oreg_image((oreg_url | default('None'))) }}"
 etcd_image_dict:
   origin: "quay.io/coreos/etcd:v{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
-  openshift-enterprise: "registry.access.redhat.com/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
+  openshift-enterprise: "registry.redhat.io/rhel7/etcd:{{ r_etcd_upgrade_version | default(r_etcd_default_version) }}"
 etcd_image: "{{ osm_etcd_image }}"
 
 # etcd run on a host => use etcdctl command directly

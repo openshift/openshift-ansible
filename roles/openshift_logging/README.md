@@ -262,7 +262,7 @@ $ docker inspect ff2e249fc45a
                 . . .
                 "release": "0.143.3.0",
                 . . .
-                "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/openshift3/logging-fluentd/images/v3.7.0-0.143.3.0",
+                "url": "https://access.redhat.com/containers/#/registry.redhat.io/openshift3/logging-fluentd/images/v3.7.0-0.143.3.0",
                 . . .
                 "version": "v3.7.0"
             }
