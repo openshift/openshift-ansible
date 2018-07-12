@@ -148,7 +148,6 @@ objects:
     labels:
       app: openshift-console
   stringData:
-    clientID: ${OAUTH_CLIENT_ID}
     clientSecret: ${OAUTH_SECRET}
 
 # to be able to assign powers to the process
