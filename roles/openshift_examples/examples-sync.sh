@@ -9,7 +9,7 @@ XPAAS_VERSION=ose-v1.4.14
 RHDM70_VERSION=ose-v1.4.8-1
 RHPAM70_VERSION=7.0.0.GA
 ORIGIN_VERSION=${1:-v3.10}
-ORIGIN_BRANCH=${2:-master}
+ORIGIN_BRANCH=${2:-release-3.10}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
