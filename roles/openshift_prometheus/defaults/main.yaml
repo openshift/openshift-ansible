@@ -109,3 +109,12 @@ openshift_prometheus_node_exporter_cpu_limit: 200m
 openshift_prometheus_node_exporter_memory_limit: 50Mi
 openshift_prometheus_node_exporter_cpu_requests: 100m
 openshift_prometheus_node_exporter_memory_requests: 30Mi
+
+# Firewall settings
+r_openshift_prometheus_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
+r_openshift_prometheus_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
+r_openshift_prometheus_os_firewall_deny: []
+r_openshift_prometheus_os_firewall_allow:
+  - service: node-exporter
+    port: "9100/tcp"
+    cond: "{{ openshift_prometheus_node_exporter_install | bool }}"
