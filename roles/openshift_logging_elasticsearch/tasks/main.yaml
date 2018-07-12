@@ -222,6 +222,7 @@
       new_file: "{{ tempdir }}/elasticsearch.yml"
     - current_file: "log4j2.properties"
       new_file: "{{ tempdir }}/log4j2.properties"
+  when: not full_restart_cluster | default(false) | bool
 
 - slurp:
     src: "{{ tempdir }}/elasticsearch.yml"
