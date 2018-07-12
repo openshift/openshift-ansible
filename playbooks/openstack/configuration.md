@@ -25,6 +25,7 @@ Environment variables may also be used.
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 * [Swift or Ceph Rados GW Backed Registry Configuration](#swift-or-ceph-rados-gw-backed-registry-configuration)
 * [Deploying At Scale](#deploying-at-scale)
+* [Using A Static Inventory](#using-a-static-inventory)
 
 
 ## OpenStack Configuration
@@ -798,3 +799,23 @@ a long time and eventually time out.  The following setting in
 `inventory/group_vars/all.yml` is recommended to prevent the timeouts:
 
 * `openshift_openstack_resolve_heat_outputs`: False
+
+
+## Using A Static Inventory
+
+The playbooks default to using a dynamic inventory in `openshift-ansible/playbooks/openstack/inventory.py`.
+You can also create a static inventory after the provision step, and
+then use that inventory for the install step. The steps to do so are as
+follows:
+
+```bash
+$ ansible-playbook --user openshift \
+  -i openshift-ansible/playbooks/openstack/inventory.py \
+  -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/provision.yml
+$ python openshift-ansible/playbooks/openstack/inventory.py --static hosts
+$ ansible-playbook --user openshift \
+  -i hosts \
+  -i inventory \
+  openshift-ansible/playbooks/openstack/openshift-cluster/install.yml
+```
