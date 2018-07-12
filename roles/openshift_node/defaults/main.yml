@@ -129,5 +129,3 @@ openshift_node_config_dir_default: "/etc/origin/node"
 openshift_node_config_dir: "{{ openshift_node_config_dir_default }}"
 
 openshift_node_use_instance_profiles: False
-
-openshift_node_use_persistentlocalvolumes: "{{ openshift_persistentlocalstorage_enabled | default(False) | bool }}"
