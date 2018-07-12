@@ -106,9 +106,6 @@ openshift_hosted_registry_edits:
 openshift_hosted_registry_force:
 - False
 
-# TODO: this flag should be removed when master bootstrapping is enforced
-openshift_push_via_dns: True
-
 # NOTE: settting openshift_docker_hosted_registry_insecure may affect other roles
 openshift_hosted_docker_registry_insecure_default: "{{ openshift_docker_hosted_registry_insecure | default(False) }}"
 openshift_hosted_docker_registry_insecure: "{{ openshift_hosted_docker_registry_insecure_default }}"
