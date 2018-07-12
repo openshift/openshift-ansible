@@ -18,4 +18,9 @@ items:
       storage: "{{ volume.capacity }}"
     accessModes: {{ volume.access_modes | lib_utils_to_padded_yaml(2, 2) }}
     {{ (volume.storage.keys() | list)[0] }}: {{ volume.storage[(volume.storage.keys() | list)[0]] | lib_utils_to_padded_yaml(3, 2) }}
+{% if 'claimName' in volume.storage %}
+    claimRef:
+      name: {{ volume.storage.claimName }}
+      namespace: default
+{% endif %}
 {% endfor %}
