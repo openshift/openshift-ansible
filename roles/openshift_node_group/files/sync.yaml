@@ -34,6 +34,7 @@ spec:
       hostPID: true
       # Must be hostNetwork in order to schedule before any network plugins are loaded.
       hostNetwork: true
+      priorityClassName: system-node-critical
       containers:
 
       # The sync container is a temporary config loop until Kubelet dynamic config is implemented. It refreshes

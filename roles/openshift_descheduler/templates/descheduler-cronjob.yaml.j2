@@ -13,6 +13,7 @@ spec:
             scheduler.alpha.kubernetes.io/critical-pod: ''
           name: "{{ openshift_descheduler_cronjob_name }}"
         spec:
+          priorityClassName: system-cluster-critical
           containers:
           - name: descheduler
             image: "{{ openshift_descheduler_image }}"

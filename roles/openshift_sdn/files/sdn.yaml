@@ -32,6 +32,7 @@ spec:
       serviceAccountName: sdn
       hostNetwork: true
       hostPID: true
+      priorityClassName: system-node-critical
       containers:
       # The network container launches the openshift-sdn process, the kube-proxy, and the local DNS service.
       # It relies on an up to date node-config.yaml being present.
