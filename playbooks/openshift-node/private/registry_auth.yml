@@ -1,0 +1,47 @@
+---
+# This playbook is intended to be included from playbooks/updates/registry_auth.yml
+
+- name: Update registry authentication credentials
+  hosts: oo_nodes_to_config
+  tasks:
+  - import_role:
+      name: openshift_node
+      tasks_from: registry_auth.yml
+  # If there were previously no authenticated registries, the credential file
+  # won't be mounted in the system container;  Need to rerun this step to ensure
+  # additional mounts are provided.
+  - import_role:
+      name: openshift_node
+      tasks_from: node_system_container_install.yml
+    when: openshift_is_atomic
+
+- name: Restart nodes
+  hosts: oo_nodes_to_config
+  serial: "{{ openshift_restart_nodes_serial | default(1) }}"
+  roles:
+  - lib_openshift
+  - openshift_facts
+  tasks:
+  - name: restart node
+    service:
+      name: "{{ openshift_service_type }}-node"
+      state: restarted
+      daemon-reload: yes
+
+  - name: Wait for node to be ready
+    oc_obj:
+      state: list
+      kind: node
+      name: "{{ openshift.node.nodename | lower }}"
+    register: node_output
+    delegate_to: "{{ groups.oo_first_master.0 }}"
+    when: inventory_hostname in groups.oo_nodes_to_config
+    until:
+    - node_output.results is defined
+    - node_output.results.returncode is defined
+    - node_output.results.results is defined
+    - node_output.results.returncode == 0
+    - node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+    # Give the node three minutes to come back online.
+    retries: 36
+    delay: 5
