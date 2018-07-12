@@ -1,3 +1,1 @@
 ---
-openshift_master_node_labels:
-  node-role.kubernetes.io/master: 'true'
