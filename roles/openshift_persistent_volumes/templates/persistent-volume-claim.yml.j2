@@ -18,7 +18,7 @@ items:
     resources:
       requests:
         storage: "{{ claim.capacity }}"
-{% if claim.storageclass %}
+{% if claim.storageclass is not none %}
     storageClassName: "{{ claim.storageclass }}"
 {% endif %}
 {% endfor %}
