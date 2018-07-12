@@ -255,4 +255,3 @@
       tasks_from: config.yml
     vars:
       openshift_master_host: "{{ groups.oo_first_master.0 }}"
-      openshift_manage_node_is_master: true
