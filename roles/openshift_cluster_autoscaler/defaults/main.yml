@@ -1,21 +1,21 @@
 ---
 openshift_cluster_autoscaler_name: cluster-autoscaler
-openshift_cluster_autoscaler_version: 4
+openshift_cluster_autoscaler_loglevel: 4
 
 openshift_cluster_autoscaler_template_location: /tmp
 openshift_cluster_autoscaler_template_name: "{{ openshift_cluster_autoscaler_name }}"
 
 openshift_cluster_autoscaler_node_selector:
-  type: infra
+  node-role.kubernetes.io/infra: "true"
 
 openshift_cluster_autoscaler_state: present
-openshift_cluster_autoscaler_namespace: openshift-infra
+openshift_cluster_autoscaler_namespace: openshift-autoscaler
 openshift_cluster_autoscaler_delete_config: True
 openshift_cluster_autoscaler_skip_nodes_local_storage: False
 openshift_cluster_autoscaler_serviceaccount: cluster-autoscaler
 openshift_cluster_autoscaler_region: us-east-1
 
-openshift_cluster_autoscaler_image: docker.io/openshift/kubernetes-autoscaler:v0.6.1
+openshift_cluster_autoscaler_image: "{{ l_os_registry_url | regex_replace('${component}' | regex_escape, 'cluster-autoscaler') }}"
 
 openshift_cluster_autoscaler_cloud_provider: aws
 

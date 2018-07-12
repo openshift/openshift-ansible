@@ -28,6 +28,8 @@
     when: openshift_project_request_template_manage
   - role: openshift_examples
     when: openshift_install_examples | default(true) | bool
+  - role: openshift_cluster_autoscaler
+    when: openshift_cluster_autoscaler_deploy | default(false) | bool
   - role: openshift_hosted_templates
   - role: openshift_manageiq
     when: openshift_use_manageiq | default(true) | bool
