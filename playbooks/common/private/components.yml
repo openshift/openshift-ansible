@@ -62,3 +62,6 @@
 
 - import_playbook: ../../openshift-autoheal/private/config.yml
   when: openshift_autoheal_deploy | default(false) | bool
+
+- import_playbook: ../../openshift-cluster-autoscaler/private/config.yml
+  when: openshift_cluster_autoscaler_install | default(false) | bool
