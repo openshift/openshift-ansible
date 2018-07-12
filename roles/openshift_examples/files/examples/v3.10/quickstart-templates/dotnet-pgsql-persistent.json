@@ -1,43 +1,43 @@
 {
-    "kind": "Template",
     "apiVersion": "v1",
-    "metadata": {
-        "name": "dotnet-pgsql-persistent",
-        "annotations": {
-            "openshift.io/display-name": ".NET Core + PostgreSQL (Persistent)",
-            "description": "An example .NET Core application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore.",
-            "tags": "quickstart,dotnet",
-            "iconClass": "icon-dotnet",
-            "template.openshift.io/provider-display-name": "Red Hat, Inc.",
-            "template.openshift.io/documentation-url": "https://github.com/redhat-developer/s2i-dotnetcore",
-            "template.openshift.io/support-url": "https://access.redhat.com"
-        }
-    },
-    "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore.",
+    "kind": "Template",
     "labels": {
         "template": "dotnet-pgsql-persistent"
     },
+    "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore.",
+    "metadata": {
+        "annotations": {
+            "description": "An example .NET Core application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore.",
+            "iconClass": "icon-dotnet",
+            "openshift.io/display-name": ".NET Core + PostgreSQL (Persistent)",
+            "tags": "quickstart,dotnet",
+            "template.openshift.io/documentation-url": "https://github.com/redhat-developer/s2i-dotnetcore",
+            "template.openshift.io/provider-display-name": "Red Hat, Inc.",
+            "template.openshift.io/support-url": "https://access.redhat.com"
+        },
+        "name": "dotnet-pgsql-persistent"
+    },
     "objects": [
         {
-            "kind": "Secret",
             "apiVersion": "v1",
+            "kind": "Secret",
             "metadata": {
                 "name": "${NAME}"
             },
             "stringData": {
-                "database-password": "${DATABASE_PASSWORD}",
-                "connect-string": "Host=${DATABASE_SERVICE_NAME};Database=${DATABASE_NAME};Username=${DATABASE_USER};Password=${DATABASE_PASSWORD}"
+                "connect-string": "Host=${DATABASE_SERVICE_NAME};Database=${DATABASE_NAME};Username=${DATABASE_USER};Password=${DATABASE_PASSWORD}",
+                "database-password": "${DATABASE_PASSWORD}"
             }
         },
         {
-            "kind": "Service",
             "apiVersion": "v1",
+            "kind": "Service",
             "metadata": {
-                "name": "${NAME}",
                 "annotations": {
                     "description": "Exposes and load balances the application pods",
                     "service.alpha.openshift.io/dependencies": "[{\"name\": \"${DATABASE_SERVICE_NAME}\", \"kind\": \"Service\"}]"
-                }
+                },
+                "name": "${NAME}"
             },
             "spec": {
                 "ports": [
@@ -53,8 +53,8 @@
             }
         },
         {
-            "kind": "Route",
             "apiVersion": "v1",
+            "kind": "Route",
             "metadata": {
                 "name": "${NAME}"
             },
@@ -67,41 +67,42 @@
             }
         },
         {
-            "kind": "ImageStream",
             "apiVersion": "v1",
+            "kind": "ImageStream",
             "metadata": {
-                "name": "${NAME}",
                 "annotations": {
                     "description": "Keeps track of changes in the application image"
-                }
+                },
+                "name": "${NAME}"
             }
         },
         {
-            "kind": "BuildConfig",
             "apiVersion": "v1",
+            "kind": "BuildConfig",
             "metadata": {
-                "name": "${NAME}",
                 "annotations": {
                     "description": "Defines how to build the application"
-                }
+                },
+                "name": "${NAME}"
             },
             "spec": {
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${NAME}:latest"
+                    }
+                },
+                "postCommit": {},
                 "source": {
-                    "type": "Git",
+                    "contextDir": "${CONTEXT_DIR}",
                     "git": {
-                        "uri": "${SOURCE_REPOSITORY_URL}",
-                        "ref": "${SOURCE_REPOSITORY_REF}"
+                        "ref": "${SOURCE_REPOSITORY_REF}",
+                        "uri": "${SOURCE_REPOSITORY_URL}"
                     },
-                    "contextDir": "${CONTEXT_DIR}"
+                    "type": "Git"
                 },
                 "strategy": {
-                    "type": "Source",
                     "sourceStrategy": {
-                        "from": {
-                            "kind": "ImageStreamTag",
-                            "namespace": "${NAMESPACE}",
-                            "name": "${DOTNET_IMAGE_STREAM_TAG}"
-                        },
                         "env": [
                             {
                                 "name": "DOTNET_STARTUP_PROJECT",
@@ -128,21 +129,21 @@
                                 "value": "${DOTNET_CONFIGURATION}"
                             },
                             {
-                                "name": "DOTNET_RESTORE_SOURCES",
-                                "value": "${DOTNET_RESTORE_SOURCES}"
+                                "name": "DOTNET_PUBLISH",
+                                "value": "true"
                             },
                             {
-                                "name": "DOTNET_TOOLS",
-                                "value": "${DOTNET_TOOLS}"
+                                "name": "DOTNET_RESTORE_SOURCES",
+                                "value": "${DOTNET_RESTORE_SOURCES}"
                             }
-                        ]
-                    }
-                },
-                "output": {
-                    "to": {
-                        "kind": "ImageStreamTag",
-                        "name": "${NAME}:latest"
-                    }
+                        ],
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "${DOTNET_IMAGE_STREAM_TAG}",
+                            "namespace": "${NAMESPACE}"
+                        }
+                    },
+                    "type": "Source"
                 },
                 "triggers": [
                     {
@@ -152,91 +153,61 @@
                         "type": "ConfigChange"
                     },
                     {
-                        "type": "GitHub",
                         "github": {
                             "secret": "${GITHUB_WEBHOOK_SECRET}"
-                        }
+                        },
+                        "type": "GitHub"
                     }
-                ],
-                "postCommit": {}
+                ]
             }
         },
         {
-            "kind": "DeploymentConfig",
             "apiVersion": "v1",
+            "kind": "DeploymentConfig",
             "metadata": {
-                "name": "${NAME}",
                 "annotations": {
                     "description": "Defines how to deploy the application server"
-                }
+                },
+                "name": "${NAME}"
             },
             "spec": {
-                "strategy": {
-                    "type": "Rolling",
-                    "rollingParams": {
-                        "updatePeriodSeconds": 1,
-                        "intervalSeconds": 1,
-                        "timeoutSeconds": 600,
-                        "maxUnavailable": "25%",
-                        "maxSurge": "25%"
-                    },
-                    "resources": {}
-                },
-                "triggers": [
-                    {
-                        "type": "ImageChange",
-                        "imageChangeParams": {
-                            "automatic": true,
-                            "containerNames": [
-                                "dotnet-pgsql-persistent"
-                            ],
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "name": "${NAME}:latest"
-                            }
-                        }
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ],
                 "replicas": 1,
                 "selector": {
                     "name": "${NAME}"
                 },
+                "strategy": {
+                    "resources": {},
+                    "rollingParams": {
+                        "intervalSeconds": 1,
+                        "maxSurge": "25%",
+                        "maxUnavailable": "25%",
+                        "timeoutSeconds": 600,
+                        "updatePeriodSeconds": 1
+                    },
+                    "type": "Rolling"
+                },
                 "template": {
                     "metadata": {
-                        "name": "${NAME}",
                         "labels": {
                             "name": "${NAME}"
-                        }
+                        },
+                        "name": "${NAME}"
                     },
                     "spec": {
                         "containers": [
                             {
-                                "name": "dotnet-pgsql-persistent",
-                                "image": " ",
-                                "ports": [
-                                    {
-                                        "containerPort": 8080
-                                    }
-                                ],
                                 "env": [
                                     {
                                         "name": "ConnectionString",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "${NAME}",
-                                                "key": "connect-string"
+                                                "key": "connect-string",
+                                                "name": "${NAME}"
                                             }
                                         }
                                     }
                                 ],
-                                "resources": {
-                                    "limits": {
-                                        "memory": "${MEMORY_LIMIT}"
-                                    }
-                                },
+                                "image": " ",
                                 "livenessProbe": {
                                     "httpGet": {
                                         "path": "/",
@@ -246,6 +217,12 @@
                                     "initialDelaySeconds": 40,
                                     "timeoutSeconds": 10
                                 },
+                                "name": "dotnet-pgsql-persistent",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080
+                                    }
+                                ],
                                 "readinessProbe": {
                                     "httpGet": {
                                         "path": "/",
@@ -254,16 +231,39 @@
                                     },
                                     "initialDelaySeconds": 10,
                                     "timeoutSeconds": 30
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
                                 }
                             }
                         ]
                     }
-                }
+                },
+                "triggers": [
+                    {
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "dotnet-pgsql-persistent"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${NAME}:latest"
+                            }
+                        },
+                        "type": "ImageChange"
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
             }
         },
         {
-            "kind": "PersistentVolumeClaim",
             "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
             "metadata": {
                 "name": "${DATABASE_SERVICE_NAME}"
             },
@@ -279,13 +279,13 @@
             }
         },
         {
-            "kind": "Service",
             "apiVersion": "v1",
+            "kind": "Service",
             "metadata": {
-                "name": "${DATABASE_SERVICE_NAME}",
                 "annotations": {
                     "description": "Exposes the database server"
-                }
+                },
+                "name": "${DATABASE_SERVICE_NAME}"
             },
             "spec": {
                 "ports": [
@@ -301,91 +301,32 @@
             }
         },
         {
-            "kind": "DeploymentConfig",
             "apiVersion": "v1",
+            "kind": "DeploymentConfig",
             "metadata": {
-                "name": "${DATABASE_SERVICE_NAME}",
                 "annotations": {
                     "description": "Defines how to deploy the database"
-                }
+                },
+                "name": "${DATABASE_SERVICE_NAME}"
             },
             "spec": {
-                "strategy": {
-                    "type": "Recreate"
-                },
-                "triggers": [
-                    {
-                        "type": "ImageChange",
-                        "imageChangeParams": {
-                            "automatic": true,
-                            "containerNames": [
-                                "postgresql"
-                            ],
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "namespace": "openshift",
-                                "name": "postgresql:9.5"
-                            }
-                        }
-                    },
-                    {
-                        "type": "ConfigChange"
-                    }
-                ],
                 "replicas": 1,
                 "selector": {
                     "name": "${DATABASE_SERVICE_NAME}"
                 },
+                "strategy": {
+                    "type": "Recreate"
+                },
                 "template": {
                     "metadata": {
-                        "name": "${DATABASE_SERVICE_NAME}",
                         "labels": {
                             "name": "${DATABASE_SERVICE_NAME}"
-                        }
+                        },
+                        "name": "${DATABASE_SERVICE_NAME}"
                     },
                     "spec": {
-                        "volumes": [
-                            {
-                                "name": "${DATABASE_SERVICE_NAME}-data",
-                                "persistentVolumeClaim": {
-                                    "claimName": "${DATABASE_SERVICE_NAME}"
-                                }
-                            }
-                        ],
                         "containers": [
                             {
-                                "name": "postgresql",
-                                "image": " ",
-                                "ports": [
-                                    {
-                                        "containerPort": 5432
-                                    }
-                                ],
-                                "readinessProbe": {
-                                    "timeoutSeconds": 1,
-                                    "initialDelaySeconds": 5,
-                                    "exec": {
-                                        "command": [
-                                            "/bin/sh",
-                                            "-i",
-                                            "-c",
-                                            "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"
-                                        ]
-                                    }
-                                },
-                                "livenessProbe": {
-                                    "timeoutSeconds": 1,
-                                    "initialDelaySeconds": 30,
-                                    "tcpSocket": {
-                                        "port": 5432
-                                    }
-                                },
-                                "volumeMounts": [
-                                    {
-                                        "name": "${DATABASE_SERVICE_NAME}-data",
-                                        "mountPath": "/var/lib/pgsql/data"
-                                    }
-                                ],
                                 "env": [
                                     {
                                         "name": "POSTGRESQL_USER",
@@ -395,8 +336,8 @@
                                         "name": "POSTGRESQL_PASSWORD",
                                         "valueFrom": {
                                             "secretKeyRef": {
-                                                "name": "${NAME}",
-                                                "key": "database-password"
+                                                "key": "database-password",
+                                                "name": "${NAME}"
                                             }
                                         }
                                     },
@@ -413,167 +354,221 @@
                                         "value": "${POSTGRESQL_SHARED_BUFFERS}"
                                     }
                                 ],
+                                "image": " ",
+                                "livenessProbe": {
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 5432
+                                    },
+                                    "timeoutSeconds": 1
+                                },
+                                "name": "postgresql",
+                                "ports": [
+                                    {
+                                        "containerPort": 5432
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/sh",
+                                            "-i",
+                                            "-c",
+                                            "psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'"
+                                        ]
+                                    },
+                                    "initialDelaySeconds": 5,
+                                    "timeoutSeconds": 1
+                                },
                                 "resources": {
                                     "limits": {
                                         "memory": "${MEMORY_POSTGRESQL_LIMIT}"
                                     }
+                                },
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/pgsql/data",
+                                        "name": "${DATABASE_SERVICE_NAME}-data"
+                                    }
+                                ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "${DATABASE_SERVICE_NAME}-data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${DATABASE_SERVICE_NAME}"
                                 }
                             }
                         ]
                     }
-                }
+                },
+                "triggers": [
+                    {
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "postgresql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "postgresql:9.5",
+                                "namespace": "openshift"
+                            }
+                        },
+                        "type": "ImageChange"
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
             }
         }
     ],
     "parameters": [
         {
-            "name": "NAME",
-            "displayName": "Name",
             "description": "The name assigned to all of the frontend objects defined in this template.",
+            "displayName": "Name",
+            "name": "NAME",
             "required": true,
             "value": "musicstore"
         },
         {
-            "name": "MEMORY_LIMIT",
-            "displayName": "Memory Limit",
-            "required": true,
             "description": "Maximum amount of memory the .NET Core container can use.",
-            "value": "128Mi"
+            "displayName": "Memory Limit",
+            "name": "MEMORY_LIMIT",
+            "required": true,
+            "value": "512Mi"
         },
         {
-            "name": "MEMORY_POSTGRESQL_LIMIT",
-            "displayName": "Memory Limit (PostgreSQL)",
-            "required": true,
             "description": "Maximum amount of memory the PostgreSQL container can use.",
-            "value": "128Mi"
+            "displayName": "Memory Limit (PostgreSQL)",
+            "name": "MEMORY_POSTGRESQL_LIMIT",
+            "required": true,
+            "value": "512Mi"
         },
         {
-            "name": "VOLUME_CAPACITY",
-            "displayName": "Volume Capacity",
             "description": "Volume space available for data, e.g. 512Mi, 2Gi",
-            "value": "256Mi",
-            "required": true
+            "displayName": "Volume Capacity",
+            "name": "VOLUME_CAPACITY",
+            "required": true,
+            "value": "1Gi"
         },
         {
-            "name": "DOTNET_IMAGE_STREAM_TAG",
-            "displayName": ".NET builder",
-            "required": true,
             "description": "The image stream tag which is used to build the code.",
-            "value": "dotnet:2.1"
+            "displayName": ".NET builder",
+            "name": "DOTNET_IMAGE_STREAM_TAG",
+            "required": true,
+            "value": "dotnet:2.0"
         },
         {
-            "name": "NAMESPACE",
-            "displayName": "Namespace",
-            "required": true,
             "description": "The OpenShift Namespace where the .NET builder ImageStream resides.",
+            "displayName": "Namespace",
+            "name": "NAMESPACE",
+            "required": true,
             "value": "openshift"
         },
         {
-            "name": "SOURCE_REPOSITORY_URL",
-            "displayName": "Git Repository URL",
-            "required": true,
             "description": "The URL of the repository with your application source code.",
+            "displayName": "Git Repository URL",
+            "name": "SOURCE_REPOSITORY_URL",
+            "required": true,
             "value": "https://github.com/redhat-developer/s2i-aspnet-musicstore-ex.git"
         },
         {
-            "name": "SOURCE_REPOSITORY_REF",
-            "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "rel/2.1-example"
+            "displayName": "Git Reference",
+            "name": "SOURCE_REPOSITORY_REF",
+            "value": "rel/2.0-example"
         },
         {
-            "name": "CONTEXT_DIR",
+            "description": "Set this to the relative path to your project if it is not in the root of your repository.",
             "displayName": "Context Directory",
-            "description": "Set this to the relative path to your project if it is not in the root of your repository."
+            "name": "CONTEXT_DIR"
         },
         {
-            "name": "DOTNET_STARTUP_PROJECT",
-            "displayName": "Startup Project",
             "description": "Set this to a project file (e.g. csproj) or a folder containing a single project file.",
+            "displayName": "Startup Project",
+            "name": "DOTNET_STARTUP_PROJECT",
             "value": "samples/MusicStore"
         },
         {
-            "name": "DOTNET_SDK_VERSION",
-            "displayName": "SDK Version",
             "description": "Set this to configure the default SDK version. This can be set to a specific version, '' (lowest version) or 'latest' (highest version).",
+            "displayName": "SDK Version",
+            "name": "DOTNET_SDK_VERSION",
             "value": ""
         },
         {
-            "name": "DOTNET_ASSEMBLY_NAME",
+            "description": "Set this when the assembly name is overridden in the project file.",
             "displayName": "Startup Assembly",
-            "description": "Set this when the assembly name is overridden in the project file."
+            "name": "DOTNET_ASSEMBLY_NAME"
         },
         {
-            "name": "DOTNET_TOOLS",
-            "displayName": ".NET Tools",
-            "description": "Set this to a space separated list of .NET tools needed to publish."
-        },
-        {
-            "name": "DOTNET_NPM_TOOLS",
+            "description": "Set this to a space separated list of npm tools needed to publish.",
             "displayName": "Npm Tools",
-            "description": "Set this to a space separated list of npm tools needed to publish."
+            "name": "DOTNET_NPM_TOOLS"
         },
         {
-            "name": "DOTNET_TEST_PROJECTS",
+            "description": "Set this to a space separated list of test projects to run before publishing.",
             "displayName": "Test projects",
-            "description": "Set this to a space separated list of test projects to run before publishing."
+            "name": "DOTNET_TEST_PROJECTS"
         },
         {
-            "name": "DOTNET_CONFIGURATION",
-            "displayName": "Configuration",
             "description": "Set this to configuration (Release/Debug).",
+            "displayName": "Configuration",
+            "name": "DOTNET_CONFIGURATION",
             "value": "Release"
         },
         {
-            "name": "DOTNET_RESTORE_SOURCES",
+            "description": "Set this to override the NuGet.config sources.",
             "displayName": "NuGet package sources",
-            "description": "Set this to override the NuGet.config sources."
+            "name": "DOTNET_RESTORE_SOURCES"
         },
         {
-            "name": "APPLICATION_DOMAIN",
-            "displayName": "Application Hostname",
             "description": "The exposed hostname that will route to the .NET Core service, if left blank a value will be defaulted.",
+            "displayName": "Application Hostname",
+            "name": "APPLICATION_DOMAIN",
             "value": ""
         },
         {
-            "name": "GITHUB_WEBHOOK_SECRET",
-            "displayName": "GitHub Webhook Secret",
             "description": "A secret string used to configure the GitHub webhook.",
+            "displayName": "GitHub Webhook Secret",
+            "from": "[a-zA-Z0-9]{40}",
             "generate": "expression",
-            "from": "[a-zA-Z0-9]{40}"
+            "name": "GITHUB_WEBHOOK_SECRET"
         },
         {
+            "displayName": "Database Service Name",
             "name": "DATABASE_SERVICE_NAME",
             "required": true,
-            "displayName": "Database Service Name",
             "value": "postgresql"
         },
         {
-            "name": "DATABASE_USER",
             "displayName": "Database Username",
+            "from": "user[A-Z0-9]{3}",
             "generate": "expression",
-            "from": "user[A-Z0-9]{3}"
+            "name": "DATABASE_USER"
         },
         {
-            "name": "DATABASE_PASSWORD",
             "displayName": "Database Password",
+            "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
-            "from": "[a-zA-Z0-9]{8}"
+            "name": "DATABASE_PASSWORD"
         },
         {
+            "displayName": "Database Name",
             "name": "DATABASE_NAME",
             "required": true,
-            "displayName": "Database Name",
             "value": "musicstore"
         },
         {
-            "name": "POSTGRESQL_MAX_CONNECTIONS",
             "displayName": "Maximum Database Connections",
+            "name": "POSTGRESQL_MAX_CONNECTIONS",
             "value": "100"
         },
         {
-            "name": "POSTGRESQL_SHARED_BUFFERS",
             "displayName": "Shared Buffer Amount",
+            "name": "POSTGRESQL_SHARED_BUFFERS",
             "value": "12MB"
         }
     ]
