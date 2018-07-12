@@ -1,4 +1,14 @@
 ---
+- name: Check that openshift_cluster_autoscaler_aws_key is set
+  fail:
+    msg: "openshift_cluster_autoscaler_aws_key is not set"
+  when: openshift_cluster_autoscaler_aws_key == ""
+
+- name: Check that openshift_cluster_autoscaler_aws_secret_key is set
+  fail:
+    msg: "openshift_cluster_autoscaler_aws_secret_key is not set"
+  when: openshift_cluster_autoscaler_aws_secret_key == ""
+
 - when: openshift_cluster_autoscaler_cloud_provider == 'aws'
   block:
   - name: laydown the aws-credentials
