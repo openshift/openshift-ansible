@@ -553,6 +553,12 @@ debug_level=2
 # By default metrics are not automatically deployed, set this to enable them
 #openshift_metrics_install_metrics=true
 #
+# metrics-server deployment
+# By default, metrics-server is not automatically deployed, unless metrics is also
+# deployed.  Deploying metrics-server is necessary to use the HorizontalPodAutoscaler.
+# Set this to enable it.
+#openshift_metrics_server_install=true
+#
 # Storage Options
 # If openshift_metrics_storage_kind is unset then metrics will be stored
 # in an EmptyDir volume and will be deleted when the cassandra pod terminates.

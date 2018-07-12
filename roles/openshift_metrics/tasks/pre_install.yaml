@@ -69,10 +69,3 @@
     openshift_metrics_namespace_uid is not defined or
     openshift_metrics_namespace_selinux is not defined or
     openshift_metrics_namespace_fsgroup is not defined
-- name: list existing metrics server secrets
-  command: >
-    {{ openshift_client_binary }} -n {{ openshift_metrics_server_project }}
-    --config={{ mktemp.stdout }}/admin.kubeconfig
-    get secrets -o name
-  register: existing_metrics_server_secrets
-  changed_when: false

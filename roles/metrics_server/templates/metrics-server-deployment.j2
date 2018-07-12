@@ -6,7 +6,7 @@ metadata:
   labels:
     k8s-app: metrics-server
     kubernetes.io/cluster-service: "true"
-    metrics-infra: metrics-server
+    metrics-server-infra: metrics-server
 spec:
   selector:
     matchLabels:
@@ -29,6 +29,7 @@ spec:
           - "--source=kubernetes.summary_api:?useServiceAccount=true&kubeletHttps=true&kubeletPort=10250"
           - "--tls-cert-file=/certs/tls.crt"
           - "--tls-private-key-file=/certs/tls.key"
+          - "--metric_resolution={{ openshift_metrics_server_resolution }}"
           - --secure-port=8443
         ports:
         - containerPort: 8443

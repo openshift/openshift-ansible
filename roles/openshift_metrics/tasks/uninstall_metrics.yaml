@@ -30,19 +30,3 @@
         value: ""
   when:
     - openshift_web_console_install | default(true) | bool
-
-- name: remove metrics server components
-  command: >
-    {{ openshift_client_binary }} -n {{ openshift_metrics_server_project }} --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete --ignore-not-found --selector=metrics-infra
-    all,sa,secrets,rolebindings,clusterrolebindings,clusterrole,apiservice,deployment
-  register: delete_metrics
-  changed_when: delete_metrics.stdout != 'No resources found'
-
-- name: remove metrics server system components
-  command: >
-    {{ openshift_client_binary }} -n kube-system --config={{ mktemp.stdout }}/admin.kubeconfig
-    delete --ignore-not-found --selector=metrics-infra
-    rolebindings
-  register: delete_metrics
-  changed_when: delete_metrics.stdout != 'No resources found'
