@@ -45,7 +45,7 @@ class ActionModule(ActionBase):
         volume, size, labels, _, access_modes = self.build_common(varname=varname)
         directory = self.get_templated(str(varname) + '_nfs_directory')
         path = directory + '/' + volume
-        return dict(
+        result = dict(
             name="{0}-volume".format(volume),
             capacity=size,
             labels=labels,
@@ -54,6 +54,11 @@ class ActionModule(ActionBase):
                 nfs=dict(
                     server=host,
                     path=path)))
+        # Add claimref for NFS as default storageclass can be different
+        create_pvc = self.task_vars.get(str(varname) + '_create_pvc')
+        if create_pvc and self._templar.template(create_pvc):
+            result['storage']['claimName'] = "{0}-claim".format(volume)
+        return result
 
     def build_pv_openstack(self, varname=None):
         """Build pv dictionary for openstack storage type"""
@@ -150,10 +155,15 @@ class ActionModule(ActionBase):
                     if kind != 'object' and create_pv and create_pvc:
                         volume, size, _, annotations, access_modes = self.build_common(varname=varname)
                         storageclass = self.task_vars.get(str(varname) + '_storageclass')
+                        # if storageclass is specified => use it
+                        # if kind is 'nfs' => set to empty
+                        # if any other kind => set to none
                         if storageclass:
                             storageclass = self._templar.template(storageclass)
-                        elif storageclass is None and kind != 'dynamic':
+                        elif kind == 'nfs':
                             storageclass = ''
+                        if kind == 'dynamic':
+                            storageclass = None
                         return dict(
                             name="{0}-claim".format(volume),
                             capacity=size,
