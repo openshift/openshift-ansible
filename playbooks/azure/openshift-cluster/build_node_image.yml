@@ -88,8 +88,7 @@
   - name: persist oreg_url
     copy:
       dest: "/etc/origin/oreg_url"
-      content: |
-        "{{ oreg_url }}"
+      content: "{{ oreg_url }}"
     when: oreg_url is defined
 
   - name: run waagent deprovision
