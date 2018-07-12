@@ -6,7 +6,6 @@ osn_storage_plugin_deps:
 - glusterfs
 - iscsi
 openshift_node_local_quota_per_fsgroup: ""
-openshift_set_node_ip: False
 openshift_config_base: '/etc/origin'
 
 
