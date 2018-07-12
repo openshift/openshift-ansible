@@ -21,3 +21,5 @@
     import_role:
       name: openshift_aws
       tasks_from: provision.yml
+
+- import_playbook: provision_dns.yml

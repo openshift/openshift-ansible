@@ -1,0 +1,17 @@
+---
+- import_role: name='lib_dyn'
+
+#- name: creating dyn zone
+#  route53_zone:
+#    comment: "{{ l_dns_dict_item.value['zone'] }}"
+#    state: present
+#    vpc_id: "{{ (l_dns_dict_item.key == 'internal') | ternary(vpcout.vpcs.0.id,'') }}"
+#    vpc_region: "{{ openshift_aws_region }}"
+#    zone: "{{ l_dns_dict_item.value['zone'] }}"
+#  register: dyn_zone
+
+- name: creating dyn record
+  include_tasks: dns_dyn_record.yml
+  with_items: "{{ l_dns_dict_item.value['records'] }}"
+  loop_control:
+    loop_var: l_dnsrecords_dict_item

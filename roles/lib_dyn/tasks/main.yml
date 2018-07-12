@@ -1,0 +1,5 @@
+---
+- name: Make sure python-dyn is installed
+  pip: name=dyn state=present
+  tags:
+    - lib_dyn
