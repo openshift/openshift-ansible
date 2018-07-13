@@ -61,7 +61,7 @@
 # gen session_secret if necessary
 - name: Generate session secret
   copy:
-    content: "{{ 200 | lib_utils_oo_random_word }}"
+    content: "{{ 32 | lib_utils_oo_random_word }}"
     dest: "{{ generated_certs_dir }}/session_secret"
   when:
     - not session_secret_file.stat.exists
