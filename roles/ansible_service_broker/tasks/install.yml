@@ -60,6 +60,15 @@
         resources: ["bundles", "bundlebindings", "bundleinstances"]
         verbs: ["*"]
 
+- name: Create aggregate rule for user authorization
+  oc_obj:
+    name: asb-user-access
+    state: present
+    kind: ClusterRole
+    content:
+      path: /tmp/useraccessout
+      data: "{{ lookup('template', 'broker-user-auth.clusterrole.yaml.j2') | from_yaml }}"
+
 - name: Create asb-access cluster role
   oc_clusterrole:
     state: present
