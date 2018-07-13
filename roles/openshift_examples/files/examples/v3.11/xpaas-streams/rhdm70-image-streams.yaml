@@ -25,6 +25,8 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm70-decisioncentral-openshift:1.0
+      referencePolicy:
+        type: Local
     - name: '1.1'
       annotations:
         description: Red Hat Decision Manager 7.0 - Decision Central image.
@@ -35,6 +37,8 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm70-decisioncentral-openshift:1.1
+      referencePolicy:
+        type: Local
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -54,6 +58,8 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm70-kieserver-openshift:1.0
+      referencePolicy:
+        type: Local
     - name: '1.1'
       annotations:
         description: Red Hat Decision Manager 7.0 - KIE Server image.
@@ -64,3 +70,5 @@ items:
       from:
         kind: DockerImage
         name: registry.redhat.io/rhdm-7/rhdm70-kieserver-openshift:1.1
+      referencePolicy:
+        type: Local

@@ -37,6 +37,9 @@
                             "version": "1.2",
                             "openshift.io/display-name": "Red Hat JBoss BRMS 6.2 decision server"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-decisionserver-6/decisionserver62-openshift:1.2"

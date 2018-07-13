@@ -9,7 +9,7 @@
         }
     },
     "items": [
-    {
+        {
             "kind": "ImageStream",
             "apiVersion": "v1",
             "metadata": {
@@ -38,6 +38,9 @@
                             "version": "latest",
                             "openshift.io/display-name": "JBoss EAP continuous delivery (Tech Preview)"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-7-tech-preview/eap-cd-openshift:latest"
@@ -56,10 +59,12 @@
                             "version": "13",
                             "openshift.io/display-name": "JBoss EAP continuous delivery (Tech Preview)"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "ImageStreamTag",
                             "name": "13.0"
-
                         }
                     },
                     {
@@ -75,10 +80,12 @@
                             "version": "12",
                             "openshift.io/display-name": "JBoss EAP continuous delivery (Tech Preview)"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "ImageStreamTag",
                             "name": "12.0"
-
                         }
                     },
                     {
@@ -93,6 +100,9 @@
                             "sampleRef": "openshift",
                             "version": "12.0",
                             "openshift.io/display-name": "JBoss EAP continuous delivery (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -111,6 +121,9 @@
                             "sampleRef": "openshift",
                             "version": "13.0",
                             "openshift.io/display-name": "JBoss EAP continuous delivery (Tech Preview)"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",

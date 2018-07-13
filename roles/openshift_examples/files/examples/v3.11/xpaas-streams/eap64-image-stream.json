@@ -38,6 +38,9 @@
                             "version": "latest",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:latest"
@@ -55,6 +58,9 @@
                             "sampleRef": "6.4.x",
                             "version": "1.1",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -74,6 +80,9 @@
                             "version": "1.2",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:1.2"
@@ -91,6 +100,9 @@
                             "sampleRef": "6.4.x",
                             "version": "1.3",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -110,6 +122,9 @@
                             "version": "1.4",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:1.4"
@@ -127,6 +142,9 @@
                             "sampleRef": "6.4.x",
                             "version": "1.5",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -146,6 +164,9 @@
                             "version": "1.6",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:1.6"
@@ -164,6 +185,9 @@
                             "version": "1.7",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/jboss-eap-6/eap64-openshift:1.7"
@@ -181,6 +205,9 @@
                             "sampleRef": "6.4.x",
                             "version": "1.8",
                             "openshift.io/display-name": "Red Hat JBoss EAP 6.4"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
