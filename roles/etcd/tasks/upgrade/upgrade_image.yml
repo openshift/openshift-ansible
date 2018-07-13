@@ -23,7 +23,7 @@
 - import_tasks: validate_etcd_conf.yml
 
 - name: restart etcd
-  command: /usr/local/bin/master-restart etcd
+  command: "{{ l_etcd_restart_command }}"
 
 - name: Verify cluster is healthy
   command: "{{ etcdctlv2 }} cluster-health"

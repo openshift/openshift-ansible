@@ -305,6 +305,9 @@ data:
 {% endif %}
 
 
+    # Time (in seconds) that Kuryr controller waits for LBaaS to be activated
+    lbaas_activation_timeout = 1200
+
     [pod_vif_nested]
 
     worker_nodes_subnet = {{ kuryr_openstack_worker_nodes_subnet_id }}
@@ -567,6 +570,9 @@ data:
 
     # The driver that manages VIFs pools for Kubernetes Pods (string value)
     vif_pool_driver = {{ kuryr_openstack_pool_driver }}
+
+    # Time (in seconds) the watcher retries watching for. (integer value)
+    watch_retry_timeout = 3600
 
     [neutron]
     # Configuration options for OpenStack Neutron

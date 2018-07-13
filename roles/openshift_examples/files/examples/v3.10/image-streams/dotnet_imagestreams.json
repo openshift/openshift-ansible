@@ -29,11 +29,29 @@
                           "supports":"dotnet",
                           "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
                           "sampleContextDir": "app",
-                          "sampleRef": "dotnetcore-2.0"
+                          "sampleRef": "dotnetcore-2.1"
                         },
                         "from": {
                           "kind": "ImageStreamTag",
-                          "name": "2.0"
+                          "name": "2.1"
+                        }
+                    },
+                    {
+                        "name": "2.1",
+                        "annotations": {
+                            "openshift.io/display-name": ".NET Core 2.1",
+                            "description": "Build and run .NET Core 2.1 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.1/build/README.md.",
+                            "iconClass": "icon-dotnet",
+                            "tags": "builder,.net,dotnet,dotnetcore,rh-dotnet21",
+                            "supports":"dotnet:2.1,dotnet",
+                            "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
+                            "sampleContextDir": "app",
+                            "sampleRef": "dotnetcore-2.1",
+                            "version": "2.1"
+                        },
+                        "from": {
+                          "kind": "DockerImage",
+                          "name": "registry.access.redhat.com/dotnet/dotnet-21-rhel7:2.1"
                         }
                     },
                     {
@@ -115,7 +133,22 @@
                         },
                         "from": {
                           "kind": "ImageStreamTag",
-                          "name": "2.0"
+                          "name": "2.1"
+                        }
+                    },
+                    {
+                        "name": "2.1",
+                        "annotations": {
+                            "openshift.io/display-name": ".NET Core 2.1 Runtime",
+                            "description": "Run .NET Core applications on RHEL 7. For more information about using this image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.1/runtime/README.md.",
+                            "iconClass": "icon-dotnet",
+                            "tags": "runtime,.net-runtime,dotnet-runtime,dotnetcore-runtime",
+                            "supports":"dotnet-runtime",
+                            "version": "2.1"
+                        },
+                        "from": {
+                          "kind": "DockerImage",
+                          "name": "registry.access.redhat.com/dotnet/dotnet-21-runtime-rhel7:2.1"
                         }
                     },
                     {

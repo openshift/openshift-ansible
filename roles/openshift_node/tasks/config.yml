@@ -47,6 +47,13 @@
     state: directory
     mode: 0755
 
+- name: Create flexvolume directory when running on atomic
+  file:
+    state: directory
+    path: "/etc/origin/kubelet-plugins/volume/exec"
+    mode: '0750'
+  when: openshift_is_atomic | bool
+
 - name: include aws provider credentials
   import_tasks: aws.yml
   when: not (openshift_node_use_instance_profiles | default(False))

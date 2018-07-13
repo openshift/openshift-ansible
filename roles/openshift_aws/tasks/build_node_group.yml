@@ -27,26 +27,33 @@
     l_epoch_time: "{{ ansible_date_time.epoch }}"
 #
 # query asg's and determine if we need to create the others.
-# if we find more than 1 for each type, then exit
+# if we find more than 1 for each type, and this isn't an upgrade, then exit
 - name: query all asg's for this cluster
   ec2_asg_facts:
     region: "{{ openshift_aws_region }}"
     tags: "{{ {'kubernetes.io/cluster/' ~ openshift_aws_clusterid: openshift_aws_clusterid} | combine(openshift_aws_node_group.tags) }}"
   register: asgs
 
+- debug:
+    msg: "{{ asgs }}"
+
 - fail:
     msg: "Found more than 1 auto scaling group that matches the query for group: {{ openshift_aws_node_group }}"
   when:
+  - not openshift_aws_node_group_upgrade
   - asgs.results|length > 1
 
-- debug:
-    msg: "{{ asgs }}"
+- fail:
+    msg: "Upgrade: Found more than 2 auto scaling group that matches the query for group: {{ openshift_aws_node_group }}"
+  when:
+  - openshift_aws_node_group_upgrade
+  - asgs.results|length > 2
 
 - name: set the value for the deployment_serial and the current asgs
   set_fact:
     # scale_groups_serial is a custom filter in role lib_utils
     l_deployment_serial: "{{  openshift_aws_node_group_deployment_serial if openshift_aws_node_group_deployment_serial is defined else asgs.results | scale_groups_serial(openshift_aws_node_group_upgrade) }}"
-    openshift_aws_current_asgs: "{{ asgs.results | map(attribute='auto_scaling_group_name') | list | union(openshift_aws_current_asgs) }}"
+    openshift_aws_current_asgs: "{{ openshift_aws_current_asgs + [asgs.results[0]['auto_scaling_group_name']] if asgs.results else openshift_aws_current_asgs }}"
 
 - name: dump deployment serial
   debug:
@@ -56,11 +63,25 @@
   debug:
     msg: "openshift_aws_current_asgs: {{ openshift_aws_current_asgs }}"
 
-- when: openshift_aws_create_iam_role
+- name: set appropriate vars for upgrade resume
+  set_fact:
+    openshift_aws_created_asgs: "{{ [openshift_aws_node_group.name ~ ' ' ~  l_deployment_serial]
+                                    | union(openshift_aws_created_asgs) | list }}"
+  when:
+  - openshift_aws_node_group_upgrade | default(False)
+  - asgs.results|length == 2
+
+- when:
+  - openshift_aws_create_iam_role
+  - asgs.results|length != 2
   include_tasks: iam_role.yml
 
-- when: openshift_aws_create_launch_config
+- when:
+  - openshift_aws_create_launch_config
+  - asgs.results|length != 2
   include_tasks: launch_config.yml
 
-- when: openshift_aws_create_scale_group
+- when:
+  - openshift_aws_create_scale_group
+  - asgs.results|length != 2
   include_tasks: scale_group.yml

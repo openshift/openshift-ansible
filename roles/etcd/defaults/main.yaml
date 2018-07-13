@@ -11,7 +11,7 @@ l_etcd_static_pod: "{{ not (r_etcd_common_skip_command_shim is defined and r_etc
 # runc, docker, static pod, host
 r_etcd_common_etcd_runtime: "{{ 'runc' if l_is_etcd_system_container else ('static_pod' if l_etcd_static_pod else ('docker' if openshift_is_containerized else 'host')) }}"
 
-r_etcd_default_version: "3.2.15"
+r_etcd_default_version: "3.2.22"
 # lib_utils_oo_oreg_image is a custom filter defined in roles/lib_utils/filter_plugins/oo_filters.py
 # This filter attempts to combine oreg_url host with project/component from etcd_image_dict.
 # "oreg.example.com/openshift3/ose-${component}:${version}"

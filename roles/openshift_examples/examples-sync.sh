@@ -5,12 +5,12 @@
 #
 # This script should be run from openshift-ansible/roles/openshift_examples
 
-XPAAS_VERSION=ose-v1.4.12
+XPAAS_VERSION=ose-v1.4.14
 RHDM70_VERSION=ose-v1.4.8-1
 RHPAM70_VERSION=7.0.0.GA
 DG_72_VERSION=datagrid72-dev
-ORIGIN_VERSION=${1:-v3.9}
-ORIGIN_BRANCH=${2:-master}
+ORIGIN_VERSION=${1:-v3.10}
+ORIGIN_BRANCH=${2:-release-3.10}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
 find ${EXAMPLES_BASE} -name '*.json' -delete
@@ -46,6 +46,7 @@ mv jboss-datagrid-7-openshift-image-${DG_72_VERSION}/templates/datagrid72-image-
 # as soon as they use the same branch/tag names
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
 mv application-templates-GA/quickstarts/* ${EXAMPLES_BASE}/xpaas-templates/
+mv application-templates-GA/fis-console-namespace-template.json application-templates-GA/fis-console-cluster-template.json ${EXAMPLES_BASE}/xpaas-templates/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' ! -wholename '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 find application-templates-${XPAAS_VERSION}/ -name '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-streams/ \;
 find rhdm-7-openshift-image-${RHDM70_VERSION}/templates -name '*.yaml' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;

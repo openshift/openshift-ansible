@@ -15,8 +15,8 @@
       url: "{{ item }}"
       dest: "{{ tmp.path }}/"
     with_list:
-    - "http://acs-engine-build-acs-engine-build.svc.ci.openshift.org/acs-engine"
-    - "http://acs-engine-build-acs-engine-build.svc.ci.openshift.org/openshift.json"
+    - "http://acs-engine-build-azure.svc.ci.openshift.org/acs-engine"
+    - "http://acs-engine-build-azure.svc.ci.openshift.org/openshift.json"
 
   - name: make acs-engine executable
     file:
@@ -86,6 +86,7 @@
         --auth-method client_secret \
         --client-id {{ lookup('env', 'AZURE_CLIENT_ID') }} \
         --client-secret {{ lookup('env', 'AZURE_SECRET') }} \
+        --output-directory {{ tmp.path }}/deploy \
         {{ tmp.path }}/openshift.json
     no_log: true
     ignore_errors: yes
@@ -96,6 +97,15 @@
 
   - debug:
       msg: "{{ deploy.stderr }}"
+
+  # This code attempts to persist the data to /var/tmp which is bind
+  # mounted into the calling container.  This enables the CI to reuse
+  # the cluster created in the previous steps to perform the e2e tests
+  - name: persist the acs-engine generated artifacts
+    copy:
+      src: "{{ tmp.path }}/deploy"
+      dest: /var/tmp/
+    when: openshift_ci_persist_artifacts | default(False)
 
   - name: delete temporary directory
     file:

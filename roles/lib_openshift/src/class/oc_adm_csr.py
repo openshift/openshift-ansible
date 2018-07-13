@@ -40,11 +40,13 @@ class OCcsr(OpenShiftCLI):
         for node in nodes:
             nodes_list.append(dict(name=node, csrs={}, server_accepted=False, client_accepted=False, denied=False))
 
-            # Nodes that we were able to retrieve via "oc get nodes" are approved so mark them approved.
+            # Ready nodes have already been accepted. Mark client and server as accepted.
             for ocnode in results:
-                if node in ocnode['metadata']['name']:
-                    nodes_list[-1]['server_accepted'] = True
-                    nodes_list[-1]['client_accepted'] = True
+                if ocnode['metadata']['name'] == node:
+                    for condition in ocnode['status']['conditions']:
+                        if condition['type'] == 'Ready' and condition['status'] == 'True':
+                            nodes_list[-1]['server_accepted'] = True
+                            nodes_list[-1]['client_accepted'] = True
 
         return nodes_list
 
@@ -87,13 +89,14 @@ class OCcsr(OpenShiftCLI):
             if node['name'] in self.get_csr_request(csr['spec']['request']):
                 node['csrs'][csr['metadata']['name']] = csr
 
-                # server: check that the username is the node and type is 'Approved'
-                if node['name'] in csr['spec']['username'] and csr['status']:
-                    if csr['status']['conditions'][0]['type'] == 'Approved':
+                # client certs may come in as either the service_account or as the node during upgrade
+                # server certs always come in as the node
+                if ((node['name'] in csr['spec']['username'] or
+                     csr['spec']['username'] in [self.service_account, 'system:admin']) and
+                        csr['status'] and csr['status']['conditions'][0]['type'] == 'Approved'):
+                    if 'server auth' in csr['spec']['usages']:
                         node['server_accepted'] = True
-                # client: check that the username is not the node and type is 'Approved'
-                if node['name'] not in csr['spec']['username'] and csr['status']:
-                    if csr['status']['conditions'][0]['type'] == 'Approved':
+                    if 'client auth' in csr['spec']['usages']:
                         node['client_accepted'] = True
                 # check type is 'Denied' and mark node as such
                 if csr['status'] and csr['status']['conditions'][0]['type'] == 'Denied':
@@ -144,11 +147,12 @@ class OCcsr(OpenShiftCLI):
 
                     # mark node as accepted in our list of nodes
                     # we will use {client,server}_accepted fields to determine if we're finished
-                    if node['name'] not in csr['spec']['username']:
-                        node['client_accepted'] = True
-
-                    if node['name'] in csr['spec']['username']:
-                        node['server_accepted'] = True
+                    if (node['name'] in csr['spec']['username'] or
+                            csr['spec']['username'] in [self.service_account, 'system:admin']):
+                        if 'server auth' in csr['spec']['usages']:
+                            node['server_accepted'] = True
+                        if 'client auth' in csr['spec']['usages']:
+                            node['client_accepted'] = True
 
                 results.append(result)
 
