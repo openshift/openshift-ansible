@@ -40,7 +40,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-eap-7/eap71-openshift:latest"
+                            "name": "registry.redhat.io/jboss-eap-7/eap71-openshift:latest"
                         }
                     },
                     {
@@ -58,7 +58,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-eap-7/eap71-openshift:1.1"
+                            "name": "registry.redhat.io/jboss-eap-7/eap71-openshift:1.1"
                         }
                     },
                     {
@@ -76,7 +76,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-eap-7/eap71-openshift:1.2"
+                            "name": "registry.redhat.io/jboss-eap-7/eap71-openshift:1.2"
                         }
                     },
                     {
@@ -94,7 +94,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-eap-7/eap71-openshift:1.3"
+                            "name": "registry.redhat.io/jboss-eap-7/eap71-openshift:1.3"
                         }
                     }
                 ]

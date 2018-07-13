@@ -27,7 +27,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-fuse-6/fis-java-openshift:1.0"
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-java-openshift:1.0"
                         }
                     },
                     {
@@ -41,7 +41,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-fuse-6/fis-java-openshift:2.0"
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-java-openshift:2.0"
                         }
                     }
                 ]
@@ -66,7 +66,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-fuse-6/fis-karaf-openshift:1.0"
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-karaf-openshift:1.0"
                         }
                     },
                     {
@@ -80,7 +80,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-fuse-6/fis-karaf-openshift:2.0"
+                            "name": "registry.redhat.io/jboss-fuse-6/fis-karaf-openshift:2.0"
                         }
                     }
                 ]

@@ -39,7 +39,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat8-openshift:1.1"
+                            "name": "registry.redhat.io/jboss-webserver-3/webserver30-tomcat8-openshift:1.1"
                         }
                     },
                     {
@@ -56,7 +56,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat8-openshift:1.2"
+                            "name": "registry.redhat.io/jboss-webserver-3/webserver30-tomcat8-openshift:1.2"
                         }
                     },
                     {
@@ -73,7 +73,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat8-openshift:1.3"
+                            "name": "registry.redhat.io/jboss-webserver-3/webserver30-tomcat8-openshift:1.3"
                         }
                     }
                 ]

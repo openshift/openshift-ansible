@@ -51,7 +51,7 @@
                         },
                         "from": {
                           "kind": "DockerImage",
-                          "name": "registry.access.redhat.com/dotnet/dotnet-20-rhel7:2.0"
+                          "name": "registry.redhat.io/dotnet/dotnet-20-rhel7:2.0"
                         }
                     },
                     {
@@ -69,7 +69,7 @@
                         },
                         "from": {
                           "kind": "DockerImage",
-                          "name": "registry.access.redhat.com/dotnet/dotnetcore-11-rhel7:1.1"
+                          "name": "registry.redhat.io/dotnet/dotnetcore-11-rhel7:1.1"
                         }
                     },
                     {
@@ -87,7 +87,7 @@
                         },
                         "from": {
                           "kind": "DockerImage",
-                          "name": "registry.access.redhat.com/dotnet/dotnetcore-10-rhel7:1.0"
+                          "name": "registry.redhat.io/dotnet/dotnetcore-10-rhel7:1.0"
                         }
                     }
                 ]
@@ -130,7 +130,7 @@
                         },
                         "from": {
                           "kind": "DockerImage",
-                          "name": "registry.access.redhat.com/dotnet/dotnet-20-runtime-rhel7:2.0"
+                          "name": "registry.redhat.io/dotnet/dotnet-20-runtime-rhel7:2.0"
                         }
                     }
                 ]

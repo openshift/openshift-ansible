@@ -39,7 +39,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.0"
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.0"
                         }
                     },
                     {
@@ -56,7 +56,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.1"
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.1"
                         }
                     },
                     {
@@ -73,7 +73,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.2"
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.2"
                         }
                     },
                     {
@@ -90,7 +90,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.3"
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.3"
                         }
                     },
                     {
@@ -107,7 +107,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.4"
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:1.4"
                         }
                     }
                 ]
@@ -143,7 +143,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:latest"
+                            "name": "registry.redhat.io/redhat-openjdk-18/openjdk18-openshift:latest"
                         }
                     },
                     {

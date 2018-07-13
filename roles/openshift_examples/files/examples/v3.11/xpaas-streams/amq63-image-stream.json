@@ -37,7 +37,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-amq-6/amq63-openshift:1.0"
+                            "name": "registry.redhat.io/jboss-amq-6/amq63-openshift:1.0"
                         }
                     },
                     {
@@ -52,7 +52,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-amq-6/amq63-openshift:1.1"
+                            "name": "registry.redhat.io/jboss-amq-6/amq63-openshift:1.1"
                         }
                     },
                     {
@@ -67,7 +67,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-amq-6/amq63-openshift:1.2"
+                            "name": "registry.redhat.io/jboss-amq-6/amq63-openshift:1.2"
                         }
                     },
                     {
@@ -82,7 +82,7 @@
                         },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-amq-6/amq63-openshift:1.3"
+                            "name": "registry.redhat.io/jboss-amq-6/amq63-openshift:1.3"
                         }
                     }
                 ]
