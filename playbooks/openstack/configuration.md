@@ -221,12 +221,22 @@ do not have it either. Nor should they use any other internal DNS server.
 Put this in your `inventory/group_vars/all.yml`:
 
 ```yaml
-openshift_openstack_fqdn_nodes = false
-penshift_openstack_dns_nameservers: []
+openshift_openstack_fqdn_nodes: false
+openshift_openstack_dns_nameservers: []
 ```
 
-Also make sure that you don't have the `private` section of
-`openshift_openstack_external_nsupdate_keys` set (the `public` one is okay).
+The nodes will now be called `master-0` instead of
+`master-0.openshift.example.com`. Neutron's DNS resolution requires these short
+hostnames.
+
+If you were using a private DNS before, you'll also want to remove the
+`private` section of `openshift_openstack_external_nsupdate_keys` (the `public`
+one is okay). The internal name resolution is handled by Neutron so the DNS and
+its private records are no longer necessary.
+
+If you're setting `openshift_master_cluster_hostname` to a master node, it must
+be updated accordingly, too (e.g. `openshift_master_cluster_hostname:
+master-0`).
 
 And finally, run the `provision_install.yml` playbooks as you normally would.
 
