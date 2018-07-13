@@ -23,7 +23,10 @@ openshift_docker_ent_reg: 'registry.redhat.io'
 
 openshift_docker_options: False  # str
 openshift_docker_log_driver: False  # str
-openshift_docker_log_options: []
+openshift_docker_log_options_defaults:
+  json:
+  - "max-size=50m"
+openshift_docker_log_options: "{{ openshift_docker_log_options_defaults[openshift_docker_log_driver] | default([]) }}"
 
 # The l2_docker_* variables convert csv strings to lists, if
 # necessary.  These variables should be used in place of their respective
