@@ -26,10 +26,13 @@
                           "description": "Build and run .NET Core applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/build/README.md.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of .NET Core available on OpenShift, including major versions updates.",
                           "iconClass": "icon-dotnet",
                           "tags": "builder,.net,dotnet,dotnetcore",
-                          "supports":"dotnet",
+                          "supports": "dotnet",
                           "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
                           "sampleContextDir": "app",
                           "sampleRef": "dotnetcore-2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                           "kind": "ImageStreamTag",
@@ -43,11 +46,14 @@
                             "description": "Build and run .NET Core 2.0 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/build/README.md.",
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnet20",
-                            "supports":"dotnet:2.0,dotnet",
+                            "supports": "dotnet:2.0,dotnet",
                             "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
                             "sampleContextDir": "app",
                             "sampleRef": "dotnetcore-2.0",
                             "version": "2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                           "kind": "DockerImage",
@@ -61,11 +67,14 @@
                             "description": "Build and run .NET Core 1.1 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/1.1/README.md.",
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore11",
-                            "supports":"dotnet:1.1,dotnet",
+                            "supports": "dotnet:1.1,dotnet",
                             "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
                             "sampleContextDir": "app",
                             "sampleRef": "dotnetcore-1.1",
                             "version": "1.1"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                           "kind": "DockerImage",
@@ -79,11 +88,14 @@
                             "description": "Build and run .NET Core 1.0 applications on RHEL 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/1.0/README.md.",
                             "iconClass": "icon-dotnet",
                             "tags": "builder,.net,dotnet,dotnetcore,rh-dotnetcore10",
-                            "supports":"dotnet:1.0,dotnet",
+                            "supports": "dotnet:1.0,dotnet",
                             "sampleRepo": "https://github.com/redhat-developer/s2i-dotnetcore-ex.git",
                             "sampleContextDir": "app",
                             "sampleRef": "dotnetcore-1.0",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                           "kind": "DockerImage",
@@ -111,7 +123,10 @@
                           "description": "Run .NET Core applications on RHEL 7. For more information about using this image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/runtime/README.md.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of .NET Core Runtime available on OpenShift, including major versions updates.",
                           "iconClass": "icon-dotnet",
                           "tags": "runtime,.net-runtime,dotnet-runtime,dotnetcore-runtime",
-                          "supports":"dotnet-runtime"
+                          "supports": "dotnet-runtime"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                           "kind": "ImageStreamTag",
@@ -125,8 +140,11 @@
                             "description": "Run .NET Core applications on RHEL 7. For more information about using this image, including OpenShift considerations, see https://github.com/redhat-developer/s2i-dotnetcore/tree/master/2.0/runtime/README.md.",
                             "iconClass": "icon-dotnet",
                             "tags": "runtime,.net-runtime,dotnet-runtime,dotnetcore-runtime",
-                            "supports":"dotnet-runtime",
+                            "supports": "dotnet-runtime",
                             "version": "2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                           "kind": "DockerImage",
