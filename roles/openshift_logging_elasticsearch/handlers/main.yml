@@ -5,7 +5,7 @@
   with_items: "{{ _restart_logging_components }}"
   loop_control:
     loop_var: _cluster_component
-  when: not logging_elasticsearch_rollout_override | bool
+  when: not logging_elasticsearch_rollout_override | default(false) | bool
 
 ## Stop this from running more than once
 - set_fact:
