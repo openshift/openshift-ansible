@@ -8,5 +8,6 @@
 
 - name: Tag image into an image stream in the openshift namespace
   command: >
-    {{ openshift_client_binary }} tag --source=docker {{docker_image_url}} --config={{ openshift.common.config_base }}/master/admin.kubeconfig openshift/{{ openshift_ist }}
+    {{ openshift_client_binary }} tag --source=docker {{ item.key }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig openshift/{{ item.value }}
   changed_when: False
+  with_dict: "{{ openshift_image_stream_tags }}"
