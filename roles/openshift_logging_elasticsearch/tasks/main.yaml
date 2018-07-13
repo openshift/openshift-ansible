@@ -4,7 +4,7 @@
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
-    openshift_master_ensure_nodes_selector: "{{ openshift_logging_es_nodeselector | map_to_pairs }}"
+    openshift_master_ensure_nodes_selector: "{{ openshift_logging_elasticsearch_nodeselector | map_to_pairs }}"
     openshift_master_ensure_nodes_service: Elasticsearch
 
 - name: Validate Elasticsearch cluster size
