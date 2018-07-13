@@ -13,13 +13,13 @@ openshift_console_hostname: "console.{{openshift_master_default_subdomain}}"
 
 openshift_console_auth_ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
-# The logo to use in the masthead.
-l_openshift_logo_image_names_dict:
+# Determines the logo and title used throughout the console.
+l_openshift_console_branding_dict:
   origin: 'origin'
   openshift-enterprise: 'ocp'
-openshift_console_logo_image_name: "{{ l_openshift_logo_image_names_dict[openshift_deployment_type] }}"
+openshift_console_branding: "{{ l_openshift_console_branding_dict[openshift_deployment_type] }}"
 
-l_openshift_documentation_url_dict:
+l_openshift_console_documentation_url_dict:
   origin: 'https://docs.openshift.org/3.11/'
   openshift-enterprise: 'https://docs.openshift.com/container-platform/3.11/'
-openshift_console_documentation_base_url: "{{ l_openshift_documentation_url_dict[openshift_deployment_type] }}"
+openshift_console_documentation_base_url: "{{ l_openshift_console_documentation_url_dict[openshift_deployment_type] }}"
