@@ -1,0 +1,10 @@
+---
+- name: Check openshift_openstack_router_name is defined
+  assert:
+    that: openshift_openstack_router_name is defined and openshift_openstack_router_name
+    msg: "openshift_openstack_use_no_floating_ip: openshift_openstack_router_name must be defined"
+
+- name: Check openshift_openstack_node_subnet_name is defined
+  assert:
+    that: openshift_openstack_node_subnet_name is defined and openshift_openstack_node_subnet_name
+    msg: "openshift_openstack_use_no_floating_ip: openshift_openstack_node_subnet_name must be defined"

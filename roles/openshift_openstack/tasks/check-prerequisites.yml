@@ -17,6 +17,39 @@
     that: 'shade_result.rc == 0'
     msg: "Python module shade is not installed"
 
+- include_tasks: prerequisites/provider-network-check.yml
+  when: openshift_openstack_use_provider_network
+
+- include_tasks: prerequisites/neutron-internal-dns-check.yml
+  when: openshift_openstack_use_neutron_internal_dns
+
+- include_tasks: prerequisites/nsupdate-check.yml
+  when: openshift_openstack_use_nsupdate
+
+- include_tasks: prerequisites/no-floating-ip-check.yml
+  when: openshift_openstack_use_no_floating_ip
+
+- include_tasks: prerequisites/cloud-provider-check.yml
+  when: openshift_use_cinder_persistent_volume or openshift_use_cinder_registry or openshift_use_kuryr
+
+- include_tasks: prerequisites/openstack-ssl-check.yml
+  when: openshift_use_openstack_ssl
+
+- include_tasks: prerequisites/kuryr-check.yml
+  when: openshift_use_kuryr
+
+- include_tasks: prerequisites/all-in-one-cluster-deployment-check.yml
+  when: openshift_use_all_in_one_cluster_deployment
+
+- include_tasks: prerequisites/cinder-persistent-volume-check.yml
+  when: openshift_use_cinder_persistent_volume
+
+- include_tasks: prerequisites/cinder-registry-check.yml
+  when: openshift_use_cinder_registry
+
+- include_tasks: prerequisites/swift-registry-check.yml
+  when: openshift_use_swift_registry
+
 # Gather Neutron extension facts
 - name: Check for Neutron trunk support
   os_network_extensions:
@@ -91,7 +124,7 @@
     msg: "Keypair {{ openshift_openstack_keypair_name }} is not available"
 
 # Check flavors and images
-- include_tasks: image-and-flavor-check.yml
+- include_tasks: prerequisites/image-and-flavor-check.yml
   with_items:
   - { image: "{{ openshift_openstack_default_image_name }}", flavor: "{{ openshift_openstack_default_flavor }}" }
   - { image: "{{ openshift_openstack_master_image }}", flavor: "{{ openshift_openstack_master_flavor }}" }

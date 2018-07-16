@@ -1,0 +1,35 @@
+---
+- name: Check openshift_use_openshift_sdn is false
+  assert:
+    that: not openshift_use_openshift_sdn
+    msg: "openshift_use_kuryr: openshift_use_openshift_sdn must be false"
+
+- name: Check use_trunk_ports is true
+  assert:
+    that: use_trunk_ports
+    msg: "openshift_use_kuryr: use_trunk_ports must be true"
+
+- name: Check os_sdn_network_plugin_name is set to cni
+  assert:
+    that: os_sdn_network_plugin_name == 'cni'
+    msg: "openshift_use_kuryr: os_sdn_network_plugin_name must be set to cni"
+
+- name: Check openshift_node_proxy_mode is set to userspace
+  assert:
+    that: openshift_node_proxy_mode == 'userspace'
+    msg: "openshift_use_kuryr: openshift_node_proxy_mode must be set to userspace"
+
+- name: Check openshift_master_open_ports is set
+  assert:
+    that: openshift_master_open_ports is defined
+    msg: "openshift_use_kuryr: openshift_master_open_ports must be defined"
+
+- name: Check openshift_node_open_ports is set
+  assert:
+    that: openshift_node_open_ports is defined
+    msg: "openshift_use_kuryr: openshift_node_open_ports must be defined"
+
+- name: Check kuryr_openstack_public_net_id is set
+  assert:
+    that: kuryr_openstack_public_net_id is defined
+    msg: "openshift_use_kuryr: kuryr_openstack_public_net_id must be defined"

@@ -1,0 +1,34 @@
+---
+# add localhost to OSEv3 so we can access OSEv3 inventory variables
+- name: Add localhost to OSEv3
+  add_host:
+    hostname: 'localhost'
+    groupname: 'OSEv3'
+
+- name: Check openshift_hosted_registry_storage_kind value
+  assert:
+    that: openshift_hosted_registry_storage_kind == 'openstack'
+    msg: "openshift_use_cinder_registry: openshift_hosted_registry_storage_kind must be set to openstack"
+
+- name: Check openshift_hosted_registry_storage_access_modes is set
+  assert:
+    that: openshift_hosted_registry_storage_access_modes is defined
+    msg: "openshift_use_cinder_registry: openshift_hosted_registry_storage_access_modes must be defined"
+
+- name: Check openshift_hosted_registry_storage_openstack_filesystem is set
+  assert:
+    that: openshift_hosted_registry_storage_openstack_filesystem is defined
+    msg: "openshift_use_cinder_registry: openshift_hosted_registry_storage_openstack_filesystem must be defined"
+
+- name: Check openshift_hosted_registry_storage_volume_size is set
+  assert:
+    that: openshift_hosted_registry_storage_volume_size is defined
+    msg: "openshift_use_cinder_registry: openshift_hosted_registry_storage_volume_size must be defined"
+
+- name: Either openshift_hosted_registry_storage_openstack_volumeID or openshift_hosted_registry_storage_volume_name must be defined
+  assert:
+    that: openshift_hosted_registry_storage_openstack_volumeID is defined or openshift_hosted_registry_storage_volume_name is defined
+    msg: "openshift_use_cinder_registry: Either openshift_hosted_registry_storage_openstack_volumeID or openshift_hosted_registry_storage_volume_name must be defined"
+
+- name: Clear inventory
+  meta: refresh_inventory
