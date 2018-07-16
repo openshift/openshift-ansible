@@ -13,7 +13,7 @@ l_os_logging_non_standard_reg_search_dict:
 l_os_logging_non_standard_reg_search: "{{ l_os_logging_non_standard_reg_search_dict[openshift_deployment_type] }}"
 
 l_os_logging_proxy_image_version_dict:
-  origin: 'v1.0.0'
+  origin: 'v1.1.0'
   openshift-enterprise: "{{ openshift_image_tag }}"
 l_os_logging_proxy_image_version: "{{ l_os_logging_proxy_image_version_dict[openshift_deployment_type] }}"
 
