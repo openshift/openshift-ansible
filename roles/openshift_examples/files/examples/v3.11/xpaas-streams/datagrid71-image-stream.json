@@ -35,9 +35,12 @@
                             "version": "1.0",
                             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-datagrid-7/datagrid71-openshift:1.0"
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid71-openshift:1.0"
                         }
                     },
                     {
@@ -50,9 +53,12 @@
                             "version": "1.1",
                             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-datagrid-7/datagrid71-openshift:1.1"
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid71-openshift:1.1"
                         }
                     },
                     {
@@ -65,9 +71,12 @@
                             "version": "1.2",
                             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-datagrid-7/datagrid71-openshift:1.2"
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid71-openshift:1.2"
                         }
                     },
                     {
@@ -80,9 +89,12 @@
                             "version": "1.3",
                             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-datagrid-7/datagrid71-openshift:1.3"
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid71-openshift:1.3"
                         }
                     }
                 ]
@@ -113,9 +125,12 @@
                             "version": "1.0",
                             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1 Client Modules for EAP"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-datagrid-7/datagrid71-client-openshift:1.0"
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid71-client-openshift:1.0"
                         }
                     }
                 ]

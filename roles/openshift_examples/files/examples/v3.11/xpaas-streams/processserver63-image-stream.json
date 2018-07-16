@@ -38,9 +38,12 @@
                             "version": "1.3",
                             "openshift.io/display-name": "Red Hat JBoss BPM Suite 6.3 intelligent process server"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-processserver-6/processserver63-openshift:1.3"
+                            "name": "registry.redhat.io/jboss-processserver-6/processserver63-openshift:1.3"
                         }
                     },
                     {
@@ -56,9 +59,12 @@
                             "version": "1.4",
                             "openshift.io/display-name": "Red Hat JBoss BPM Suite 6.3 intelligent process server"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-processserver-6/processserver63-openshift:1.4"
+                            "name": "registry.redhat.io/jboss-processserver-6/processserver63-openshift:1.4"
                         }
                     }
                 ]
