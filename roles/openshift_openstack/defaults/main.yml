@@ -54,6 +54,7 @@ openshift_openstack_cns_hostname: cns
 openshift_openstack_node_hostname: app-node
 openshift_openstack_lb_hostname: lb
 openshift_openstack_etcd_hostname: etcd
+openshift_openstack_fqdn_nodes: true
 openshift_openstack_set_hostname_to_compute_name: true
 openshift_openstack_keypair_name: openshift
 openshift_openstack_lb_flavor: "{{ openshift_openstack_default_flavor }}"
