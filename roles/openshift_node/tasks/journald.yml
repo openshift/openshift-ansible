@@ -21,9 +21,7 @@
 # I need to restart journald immediatelly, otherwise it gets into way during
 # further steps in ansible
 - name: Restart journald
-  command: "systemctl restart systemd-journald"
-  retries: 3
-  delay: 5
-  register: result
-  until: result.rc == 0
+  service:
+    name: systemd-journald
+    state: restarted
   when: journald_update is changed
