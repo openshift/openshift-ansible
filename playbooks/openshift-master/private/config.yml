@@ -58,10 +58,6 @@
         console_url: "{{ openshift_master_console_url | default(None) }}"
         console_use_ssl: "{{ openshift_master_console_use_ssl | default(None) }}"
         public_console_url: "{{ openshift_master_public_console_url | default(None) }}"
-  - openshift_facts:
-      role: node
-      local_facts:
-        bootstrapped: true
 
 - name: Generate or retrieve existing session secrets
   hosts: oo_first_master
