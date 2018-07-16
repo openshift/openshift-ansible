@@ -149,7 +149,7 @@ parameters:
   availability_zone:
     type: string
     description: The Availability Zone to launch the instance.
-    default: nova
+    default: cn-north-1b
 
   volume_size:
     type: number
@@ -199,29 +199,20 @@ outputs:
 {% endif %}
         - addr
 
-conditions:
-  no_floating: {not: { get_param: attach_float_net} }
-{% if openshift_use_flannel|default(False)|bool %}
-  no_data_subnet: {not: { get_param: attach_data_net} }
-{% endif %}
-
-
 resources:
 
   server:
     type: OS::Nova::Server
     properties:
+      availability_zone: { get_param: availability_zone }
       name:      { get_param: name }
       key_name:  { get_param: key_name }
       image:     { get_param: image }
       flavor:    { get_param: flavor }
       networks:
 {% if openshift_use_flannel|default(False)|bool %}
-        if:
-          - no_data_subnet
-          - - port:  { get_resource: port }
-          - - port:  { get_resource: port }
-            - port:  { get_resource: data_port }
+        - port:  { get_resource: port }
+        - port:  { get_resource: data_port }
 
 {% else %}
 {% if use_trunk_ports|default(False)|bool %}
@@ -298,7 +289,6 @@ resources:
 {% if openshift_use_flannel|default(False)|bool %}
   data_port:
     type: OS::Neutron::Port
-    condition: { not: no_data_subnet }
     properties:
       network: { get_param: data_net }
       port_security_enabled: false
@@ -310,7 +300,6 @@ resources:
 
 {% if not openshift_openstack_provider_network_name %}
   floating-ip:
-    condition: { not: no_floating }
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: floating_network }
@@ -333,11 +322,9 @@ resources:
       instance_uuid: { get_resource: server }
 {% endif %}
 
-
+{% if openshift_openstack_use_lbaas_load_balancer %}
   api_lb_member:
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
-    condition:
-      not: {equals: [{get_param: api_lb_pool}, ""]}
     properties:
       pool: { get_param: api_lb_pool }
       protocol_port: {{ openshift_master_api_port }}
@@ -347,8 +334,6 @@ resources:
 {% endif %}
 
   router_lb_pool_member_http:
-    condition:
-      not: {equals: [{get_param: router_lb_pool_http}, ""]}
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
     properties:
       pool: { get_param: router_lb_pool_http }
@@ -357,11 +342,10 @@ resources:
       subnet: { get_param: subnet }
 
   router_lb_pool_member_https:
-    condition:
-      not: {equals: [{get_param: router_lb_pool_https}, ""]}
     type: OS::{{ openshift_openstack_lbaasv2_provider }}::PoolMember
     properties:
       pool: { get_param: router_lb_pool_https }
       protocol_port: 443
       address: { get_attr: [server, first_address]}
       subnet: { get_param: subnet }
+{% endif %}

@@ -18,8 +18,8 @@
     msg: "Python module shade is not installed"
 
 # Gather Neutron extension facts
-- name: Check for Neutron trunk support
-  os_network_extensions:
+# - name: Check for Neutron trunk support
+#   os_network_extensions:
 
 # Gather OpenStack service catalog endpoint facts
 - name: Check for cloud service catalog endpoints

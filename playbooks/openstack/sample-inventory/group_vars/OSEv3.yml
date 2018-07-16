@@ -3,7 +3,7 @@
 openshift_deployment_type: origin
 #openshift_repos_enable_testing: true
 #openshift_deployment_type: openshift-enterprise
-#openshift_release: v3.5
+openshift_release: 3.9
 
 # Default domain to access the applications running on OpenShift.
 # This uses the `openshift_openstack_clusterid`
@@ -76,7 +76,7 @@ openshift_hostname_check: false
 
 # For POCs or demo environments that are using smaller instances than
 # the official recommended values for RAM and DISK, uncomment the line below.
-#openshift_disable_check: disk_availability,memory_availability
+openshift_disable_check: disk_availability,memory_availability,docker_storage
 
 # NOTE(shadower): Always switch to root on the OSEv3 nodes.
 # openshift-ansible requires an explicit `become`.

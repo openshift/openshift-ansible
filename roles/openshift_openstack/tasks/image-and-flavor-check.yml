@@ -23,5 +23,5 @@
   assert:
     that:
     - "flavor_result.ansible_facts.openstack_flavors[0].ram >= image_result.ansible_facts.openstack_image.min_ram"
-    - "flavor_result.ansible_facts.openstack_flavors[0].disk >= image_result.ansible_facts.openstack_image.min_disk"
+    #- "flavor_result.ansible_facts.openstack_flavors[0].disk >= image_result.ansible_facts.openstack_image.min_disk"
     msg: "Flavor {{ item.flavor }} does not meet the size requirements for image {{ item.image }}."
