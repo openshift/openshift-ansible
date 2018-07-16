@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss,hidden",
-            "version": "1.4.10",
+            "version": "1.5.0",
             "openshift.io/display-name": "JBoss EAP CD + Single Sign-On (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Enterprise Application Platform continuous delivery application Single Sign-On application. For more information about using this template, see https://github.com/jboss-container-images/jboss-eap-7-openshift-image/blob/eap-cd/README.adoc",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap-cd-sso-s2i",
-        "xpaas": "1.4.10"
+        "xpaas": "1.5.0"
     },
     "message": "A new JBoss EAP CD based application with SSL and SSO support has been created in your project. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -58,21 +58,21 @@
         },
         {
             "displayName": "Queues",
-            "description": "Queue names",
+            "description": "Queue names, separated by commas. These queues will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all queues used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
             "name": "MQ_QUEUES",
             "value": "",
             "required": false
         },
         {
             "displayName": "Topics",
-            "description": "Topic names",
+            "description": "Topic names, separated by commas. These topics will be automatically created when the broker starts. Also, they will be made accessible as JNDI resources in EAP. Note that all topics used by the application *must* be specified here in order to be created automatically on the remote AMQ broker.",
             "name": "MQ_TOPICS",
             "value": "",
             "required": false
         },
         {
-            "displayName": "A-MQ cluster password",
-            "description": "A-MQ cluster admin password",
+            "displayName": "AMQ cluster password",
+            "description": "AMQ cluster admin password",
             "name": "MQ_CLUSTER_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
@@ -486,7 +486,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "eap-cd-openshift:12"
+                            "name": "eap-cd-openshift:13"
                         },
                         "env": [
                             {
