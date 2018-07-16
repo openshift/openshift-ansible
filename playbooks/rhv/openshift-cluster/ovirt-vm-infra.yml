@@ -24,10 +24,6 @@
     - oVirt.vm-infra
 
   post_tasks:
-    - debug:
-        var: "hostvars[item]"
-      with_items:
-        - "{{ groups['ovirt_vm'] }}"
     - name: Logout from oVirt
       ovirt_auth:
         state: absent
