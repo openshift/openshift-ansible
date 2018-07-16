@@ -128,6 +128,10 @@
                             {
                                 "name": "DOTNET_PACK",
                                 "value": "true"
+                            },
+                            {
+                                "name": "DOTNET_TOOLS",
+                                "value": "${DOTNET_TOOLS}"
                             }
                         ]
                     }
@@ -318,21 +322,21 @@
             "displayName": "Memory Limit",
             "description": "Maximum amount of memory the container can use.",
             "required": true,
-            "value": "512Mi"
+            "value": "128Mi"
         },
         {
             "name": "DOTNET_RUNTIME_IMAGE_STREAM_TAG",
             "displayName": ".NET Runtime Imagestream Tag",
             "description": "The image stream tag which is used to run the application.",
             "required": true,
-            "value": "dotnet-runtime:2.0"
+            "value": "dotnet-runtime:2.1"
         },
         {
             "name": "DOTNET_BUILD_IMAGE_STREAM_TAG",
             "displayName": ".NET builder",
             "required": true,
             "description": "The image stream tag which is used to build the application.",
-            "value": "dotnet:2.0"
+            "value": "dotnet:2.1"
         },
         {
             "name": "NAMESPACE",
@@ -358,7 +362,7 @@
             "name": "SOURCE_REPOSITORY_REF",
             "displayName": "Git Reference",
             "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch.",
-            "value": "dotnetcore-2.0"
+            "value": "dotnetcore-2.1"
         },
         {
             "name": "CONTEXT_DIR",
@@ -397,10 +401,14 @@
             "description": "Set this when the assembly name is overridden in the project file."
         },
         {
+            "name": "DOTNET_TOOLS",
+            "displayName": ".NET Tools",
+            "description": "Set this to a space separated list of .NET tools needed to publish."
+        },
+        {
             "name": "DOTNET_NPM_TOOLS",
             "displayName": "Npm Tools",
-            "description": "Set this to a space separated list of npm tools needed to publish.",
-            "value": "bower gulp"
+            "description": "Set this to a space separated list of npm tools needed to publish."
         },
         {
             "name": "DOTNET_TEST_PROJECTS",
