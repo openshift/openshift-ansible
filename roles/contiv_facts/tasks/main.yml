@@ -29,7 +29,11 @@
     state: directory
 
 - name: Determine if has rpm
-  stat: path=/usr/bin/rpm
+  stat:
+    path: /usr/bin/rpm
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: s
   changed_when: false
   check_mode: no

@@ -19,6 +19,9 @@
   - name: Detecting Operating System from ostree_booted
     stat:
       path: /run/ostree-booted
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: ostree_booted
 
   # TODO(michaelgugino) remove this line once CI is updated.
@@ -71,6 +74,9 @@
     block:
     - stat:
         path: "/etc/origin/master/master-config.yaml"
+        get_checksum: false
+        get_attributes: false
+        get_mime: false
       register: master_config_path_check
 
     - slurp:

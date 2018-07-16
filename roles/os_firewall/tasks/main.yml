@@ -2,6 +2,9 @@
 - name: Detecting Atomic Host Operating System
   stat:
     path: /run/ostree-booted
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: r_os_firewall_ostree_booted
 
 - name: Set fact r_os_firewall_is_atomic

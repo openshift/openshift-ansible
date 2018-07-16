@@ -26,6 +26,9 @@
 
     - stat:
         path: /etc/sysctl.d/99-elasticsearch.conf
+        get_checksum: false
+        get_attributes: false
+        get_mime: false
       register: _99_es_conf
 
     - name: Check for current value of vm.max_map_count in 99-elasticsearch.conf

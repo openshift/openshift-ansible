@@ -5,6 +5,9 @@
   tasks:
   - stat:
       path: "{{ openshift.common.config_base }}/master/master-config.yaml"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: g_master_config_stat
   - slurp:
       src: "{{ openshift.common.config_base }}/master/master-config.yaml"

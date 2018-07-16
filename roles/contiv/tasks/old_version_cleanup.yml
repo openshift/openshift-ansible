@@ -2,6 +2,9 @@
 - name: Old version cleanup | Check if old auth proxy service exists
   stat:
     path: /etc/systemd/system/auth-proxy.service
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: auth_proxy_stat
 
 - name: Old version cleanup | Stop old auth proxy
@@ -16,6 +19,9 @@
 - name: Old version cleanup | Check if old contiv-etcd service exists
   stat:
     path: /etc/systemd/system/contiv-etcd.service
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: contiv_etcd_stat
 
 - name: Old version cleanup | Stop old contiv-etcd

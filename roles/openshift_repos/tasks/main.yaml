@@ -2,6 +2,9 @@
 - name: openshift_repos detect ostree
   stat:
     path: /run/ostree-booted
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: ostree_booted
 
 - when: not ostree_booted.stat.exists

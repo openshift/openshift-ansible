@@ -5,6 +5,9 @@
   - name: Check legacy upgrade exists
     stat:
       path: /lib/systemd/system/calico.service
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: sym
   - fail:
       msg: No service to upgrade

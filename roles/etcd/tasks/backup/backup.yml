@@ -32,6 +32,9 @@
 - name: Detecting Atomic Host Operating System
   stat:
     path: /run/ostree-booted
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: l_ostree_booted
 
 - name: Check selinux label of '{{ etcd_data_dir }}'
@@ -59,6 +62,9 @@
 - name: Check for v3 data store
   stat:
     path: "{{ etcd_data_dir }}/member/snap/db"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: l_v3_db
 
 - name: Copy etcd v3 data store

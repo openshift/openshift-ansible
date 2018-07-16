@@ -2,6 +2,9 @@
 - name: Check for credentials file for registry auth
   stat:
     path: "{{ docker_cli_auth_config_path }}/config.json"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   when: oreg_auth_user is defined
   register: docker_cli_auth_credentials_stat
 
