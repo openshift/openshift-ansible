@@ -17,7 +17,12 @@ rhv_data_storage: # vmstore
 root_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
 # If desired to create DNS entries automatically
-nsupdate_server:  # localhost
+#nsupdate_server:  localhost
+#openshift_rhv_nsupdate_key:
+#  name: rndc-key
+#  secret: 'XYXYXYXYXYXYXYXYXYXY+h=='
+#  algorithm: hmac-md5
+#
 
 ##########################
 # Template Creation
