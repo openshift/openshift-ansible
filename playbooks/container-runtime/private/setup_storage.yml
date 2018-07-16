@@ -3,9 +3,8 @@
 # l_etcd_scale_up_crt_hosts may be passed in via prerequisites.yml during etcd
 # scaleup plays.
 
-- hosts: "{{ l_etcd_scale_up_crt_hosts | default(l_scale_up_hosts) | default(l_default_container_storage_hosts) }}"
+- hosts: "{{ l_etcd_scale_up_crt_hosts | default(l_scale_up_hosts) | default('oo_nodes_to_config') }}"
   vars:
-    l_default_container_storage_hosts: "oo_nodes_to_config"
     l_chg_temp: "{{ hostvars[groups['oo_first_master'][0]]['openshift_containerized_host_groups'] | default([]) }}"
     l_containerized_host_groups: "{{ (['oo_nodes_to_config'] | union(l_chg_temp)) | join(':') }}"
   # role: container_runtime is necessary  here to bring role default variables
