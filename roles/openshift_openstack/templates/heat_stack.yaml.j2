@@ -128,8 +128,6 @@ outputs:
     value: { get_attr: [api_lb, show, provider] }
 {% endif %}
 
-conditions:
-  no_floating: {% if openshift_openstack_provider_network_name %}true{% else %}false{% endif %}
 
 resources:
 
@@ -566,11 +564,7 @@ resources:
           pod_secgrp:
             - { get_resource: pod_access_sg }
 {% endif %}
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+          floating_network: {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -643,11 +637,7 @@ resources:
           pod_secgrp:
             - { get_resource: pod_access_sg }
 {% endif %}
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+          floating_network: {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -726,11 +716,7 @@ resources:
             - { get_resource: pod_access_sg }
 {% endif %}
 {% endif %}
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+          floating_network: {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -801,11 +787,7 @@ resources:
           pod_secgrp:
             - { get_resource: pod_access_sg }
 {% endif %}
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+          floating_network: {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -880,11 +862,7 @@ resources:
             - { get_resource: pod_access_sg }
 {% endif %}
 {% endif %}
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+          floating_network: {{ openshift_openstack_external_network_name }}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -969,7 +947,6 @@ resources:
 
 {% if openshift_openstack_use_lbaas_load_balancer %}
   api_lb_floating_ip:
-    condition: { not: no_floating }
     depends_on:
     - api_lb
     - api_lb_listener
@@ -986,7 +963,6 @@ resources:
       vip_subnet: { get_resource: subnet }
 
   router_lb_floating_ip:
-    condition: { not: no_floating }
     depends_on:
     - router_lb
     - router_lb_listener_http
