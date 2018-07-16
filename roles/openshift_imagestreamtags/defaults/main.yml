@@ -1,0 +1,5 @@
+---
+# any keys sould be the docker image url used as the source for the tag operation
+# and their values the image stream tag in the openshift namespace the source is
+# tagged into
+openshift_image_stream_tags: {}
