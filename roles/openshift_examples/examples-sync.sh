@@ -6,7 +6,7 @@
 # This script should be run from openshift-ansible/roles/openshift_examples
 
 XPAAS_VERSION=ose-v1.4.14
-RHDM70_VERSION=ose-v1.4.8-1
+RHDM70_VERSION=7.0.1.GA
 RHPAM70_VERSION=7.0.0.GA
 DG_72_VERSION=datagrid72-dev
 ORIGIN_VERSION=${1:-v3.9}
