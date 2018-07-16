@@ -44,6 +44,7 @@ openshift_hosted_registry_storage_host=
 openshift_hosted_registry_storage_nfs_directory=/var/lib/exports
 openshift_hosted_registry_storage_volume_name=registryvol
 openshift_hosted_registry_storage_volume_size=20Gi
+openshift_enable_unsupported_configurations=True
 
 # Authentication
 openshift_master_identity_providers="[{'name': 'htpasswd_auth', 'login': 'True', 'challenge': 'True', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]"
@@ -99,6 +100,4 @@ infra2.example.com openshift_hostname=infra2.example.com openshift_node_group_na
 compute0.example.com openshift_hostname=compute0.example.com openshift_node_group_name=node-config-compute
 compute1.example.com openshift_hostname=compute1.example.com openshift_node_group_name=node-config-compute
 compute2.example.com openshift_hostname=compute2.example.com openshift_node_group_name=node-config-compute
-lb0.example.com
-
 # vim: set syntax=dosini
