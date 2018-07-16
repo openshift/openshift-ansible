@@ -59,6 +59,9 @@
 - name: Check for v3 data store
   stat:
     path: "{{ etcd_data_dir }}/member/snap/db"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: l_v3_db
 
 - name: Copy etcd v3 data store

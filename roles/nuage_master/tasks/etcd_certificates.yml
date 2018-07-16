@@ -13,6 +13,9 @@
 - name: Error if etcd certs are not copied
   stat:
     path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "{{ cert_output_dir }}/nuageEtcd-ca.crt"
   - "{{ cert_output_dir }}/nuageEtcd-client.crt"

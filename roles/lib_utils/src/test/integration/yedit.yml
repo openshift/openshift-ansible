@@ -299,6 +299,9 @@
   - name: stat file
     stat:
       path: "{{ test_file }}.orig"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: statout
 
   - assert:
@@ -320,6 +323,9 @@
   - name: stat file
     stat:
       path: "{{ test_file }}{{ date_str }}"
+      get_checksum: false
+      get_attributes: false
+      get_mime: false
     register: statout
 
   - assert:

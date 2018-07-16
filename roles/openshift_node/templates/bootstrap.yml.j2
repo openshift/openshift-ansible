@@ -31,6 +31,9 @@
     - name: determine the openshift_service_type
       stat:
         path: /etc/sysconfig/atomic-openshift-node
+        get_checksum: false
+        get_attributes: false
+        get_mime: false
       register: service_type_results
 
     - name: set openshift_service_type fact based on stat results

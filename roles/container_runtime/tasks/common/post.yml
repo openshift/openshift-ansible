@@ -18,6 +18,8 @@
 - name: stat the docker data dir
   stat:
     path: "{{ docker_default_storage_path }}"
+    get_checksum: false
+    get_mime: false
   register: dockerstat
 
 - import_tasks: setup_docker_symlink.yml

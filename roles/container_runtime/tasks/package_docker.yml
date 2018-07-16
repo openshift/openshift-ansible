@@ -46,7 +46,10 @@
     - restart container runtime
   when: not (os_firewall_use_firewalld | default(False)) | bool
 
-- stat: path=/etc/sysconfig/docker
+- stat:
+    path: /etc/sysconfig/docker
+    get_checksum: false
+    get_mime: false
   register: docker_check
 
 - name: Set registry params
@@ -115,7 +118,10 @@
   notify:
   - restart container runtime
 
-- stat: path=/etc/sysconfig/docker-network
+- stat:
+    path: /etc/sysconfig/docker-network
+    get_checksum: false
+    get_mime: false
   register: sysconfig_docker_network_check
 
 - name: Configure Docker Network OPTIONS

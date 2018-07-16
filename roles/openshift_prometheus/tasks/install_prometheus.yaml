@@ -200,6 +200,9 @@
 
 - stat:
     path: "{{ tempdir }}/prometheus.additional.rules"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: additional_rules_stat
 
 - template:

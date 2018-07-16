@@ -2,6 +2,9 @@
 - name: Check for credentials file for registry auth
   stat:
     path: "{{ oreg_auth_credentials_path }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   when: oreg_auth_user is defined
   register: node_oreg_auth_credentials_stat
 

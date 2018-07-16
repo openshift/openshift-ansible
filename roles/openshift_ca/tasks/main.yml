@@ -28,6 +28,9 @@
 - name: Determine if CA must be created
   stat:
     path: "{{ openshift_ca_config_dir }}/{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: g_master_ca_stat_result
   with_items:
   - ca-bundle.crt
@@ -39,6 +42,9 @@
 - name: Determine if front-proxy CA must be created
   stat:
     path: "{{ openshift_ca_config_dir }}/{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: g_master_front_proxy_ca_stat_result
   with_items:
   - front-proxy-ca.crt
