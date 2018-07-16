@@ -16,7 +16,11 @@
   delegate_to: "{{ nuage_ca_master }}"
 
 - name: Check if the CA key already exists
-  stat: path="{{ nuage_ca_key }}"
+  stat:
+    path: "{{ nuage_ca_key }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: nuage_ca_key_check
   delegate_to: "{{ nuage_ca_master }}"
 
@@ -27,7 +31,11 @@
   when: nuage_ca_key_check.stat.exists is defined and nuage_ca_key_check.stat.exists == False
 
 - name: Check if the CA crt already exists
-  stat: path="{{ nuage_ca_crt }}"
+  stat:
+    path: "{{ nuage_ca_crt }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: nuage_ca_crt_check
   delegate_to: "{{ nuage_ca_master }}"
 

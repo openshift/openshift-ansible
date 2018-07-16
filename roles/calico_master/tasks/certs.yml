@@ -31,6 +31,9 @@
 - name: Calico Node | Assure the calico certs are present
   stat:
     path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   with_items:
   - "{{ calico_etcd_ca_cert_file }}"
   - "{{ calico_etcd_cert_file }}"

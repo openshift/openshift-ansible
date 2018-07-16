@@ -56,6 +56,9 @@
 - name: Determine if scheduler config present
   stat:
     path: "{{ openshift_master_scheduler_conf }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: scheduler_config_stat
 
 - name: Set Default scheduler predicates and priorities

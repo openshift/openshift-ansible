@@ -31,22 +31,38 @@
         msg: "Elasticsearch external hostname {{ openshift_logging_es_ops_hostname }} contains invalid characters for certificate subject Alt Name.  Not adding to Elasticsearch certificate."
 
 - name: Checking for elasticsearch.jks
-  stat: path="{{generated_certs_dir}}/elasticsearch.jks"
+  stat:
+    path: "{{generated_certs_dir}}/elasticsearch.jks"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: elasticsearch_jks
   check_mode: no
 
 - name: Checking for logging-es.jks
-  stat: path="{{generated_certs_dir}}/logging-es.jks"
+  stat:
+    path: "{{generated_certs_dir}}/logging-es.jks"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: logging_es_jks
   check_mode: no
 
 - name: Checking for system.admin.jks
-  stat: path="{{generated_certs_dir}}/system.admin.jks"
+  stat:
+    path: "{{generated_certs_dir}}/system.admin.jks"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: system_admin_jks
   check_mode: no
 
 - name: Checking for truststore.jks
-  stat: path="{{generated_certs_dir}}/truststore.jks"
+  stat:
+    path: "{{generated_certs_dir}}/truststore.jks"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
   register: truststore_jks
   check_mode: no
 
