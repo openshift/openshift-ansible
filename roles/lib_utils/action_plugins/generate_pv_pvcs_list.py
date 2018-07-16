@@ -84,7 +84,7 @@ class ActionModule(ActionBase):
         endpoints = self.get_templated(str(varname) + '_glusterfs_endpoints')
         path = self.get_templated(str(varname) + '_glusterfs_path')
         read_only = self.get_templated(str(varname) + '_glusterfs_readOnly')
-        return dict(
+        result = dict(
             name="{0}-volume".format(volume),
             capacity=size,
             labels=labels,
@@ -94,6 +94,11 @@ class ActionModule(ActionBase):
                     endpoints=endpoints,
                     path=path,
                     readOnly=read_only)))
+        # Add claimref for glusterfs as default storageclass can be different
+        create_pvc = self.task_vars.get(str(varname) + '_create_pvc')
+        if create_pvc and self._templar.template(create_pvc):
+            result['storage']['claimName'] = "{0}-claim".format(volume)
+        return result
 
     def build_pv_hostpath(self, varname=None):
         """Build pv dictionary for hostpath storage type"""
