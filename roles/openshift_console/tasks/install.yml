@@ -57,8 +57,8 @@
       value: "{{ openshift_console_auth_ca_file }}"
     - key: auth#logoutRedirect
       value: "{{ openshift.master.logout_url | default('') }}"
-    - key: customization#logoImageName
-      value: "{{ openshift_console_logo_image_name }}"
+    - key: customization#branding
+      value: "{{ openshift_console_branding }}"
     - key: customization#documentationBaseURL
       value: "{{ openshift_console_documentation_base_url }}"
     separator: '#'

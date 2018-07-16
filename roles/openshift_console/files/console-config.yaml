@@ -10,4 +10,4 @@ auth:
   clientID: openshift-console
   clientSecretFile: /var/oauth-config/clientSecret
 customization:
-  logoImageName: os-origin
+  branding: origin
