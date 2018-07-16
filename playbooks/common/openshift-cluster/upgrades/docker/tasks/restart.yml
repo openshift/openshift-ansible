@@ -15,7 +15,7 @@
     name: openvswitch
     state: started
   when:
-    - openshift_is_containerized | bool
+    - openshift.common.is_containerized | bool
     - openshift_use_openshift_sdn | bool
 
 - name: Restart containerized services

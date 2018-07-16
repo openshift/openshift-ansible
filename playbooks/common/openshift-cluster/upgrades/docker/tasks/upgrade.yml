@@ -7,7 +7,7 @@
     name: openvswitch
     state: stopped
   when:
-    - openshift_is_containerized | bool
+    - openshift.common.is_containerized | bool
     - openshift_use_openshift_sdn | bool
 
 - name: Stop containerized services
