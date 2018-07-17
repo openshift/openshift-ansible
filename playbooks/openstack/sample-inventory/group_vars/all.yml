@@ -1,4 +1,5 @@
 ---
+openshift_openstack_stackname: "{{ lookup('env', 'OPENSHIFT_CLUSTER')|default(None) }}"
 openshift_openstack_clusterid: "openshift"
 openshift_openstack_public_dns_domain: "example.com"
 openshift_openstack_dns_nameservers: []

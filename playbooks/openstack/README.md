@@ -184,7 +184,7 @@ Then run the provision + install playbook -- this will create the OpenStack
 resources:
 
 ```bash
-$ ansible-playbook --user openshift \
+$ OPENSHIFT_CLUSTER=openshift.example.com ansible-playbook --user openshift \
   -i openshift-ansible/playbooks/openstack/inventory.py \
   -i inventory \
   openshift-ansible/playbooks/openstack/openshift-cluster/provision_install.yml

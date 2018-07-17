@@ -10,7 +10,9 @@ environment.
 from __future__ import print_function
 
 from collections import Mapping
+import argparse
 import json
+import os
 
 import shade
 
@@ -20,31 +22,31 @@ def base_openshift_inventory(cluster_hosts):
     inventory = {}
 
     masters = [server.name for server in cluster_hosts
-               if server.metadata['host-type'] == 'master']
+               if server.metadata.get('host-type', None) == 'master']
 
     etcd = [server.name for server in cluster_hosts
-            if server.metadata['host-type'] == 'etcd']
+            if server.metadata.get('host-type', None) == 'etcd']
     if not etcd:
         etcd = masters
 
     infra_hosts = [server.name for server in cluster_hosts
-                   if server.metadata['host-type'] == 'node' and
-                   server.metadata['sub-host-type'] == 'infra']
+                   if server.metadata.get('host-type', None) == 'node' and
+                   server.metadata.get('sub-host-type', None) == 'infra']
 
     app = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'node' and
-           server.metadata['sub-host-type'] == 'app']
+           if server.metadata.get('host-type', None) == 'node' and
+           server.metadata.get('sub-host-type', None) == 'app']
 
     cns = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'cns']
+           if server.metadata.get('host-type', None) == 'cns']
 
     nodes = list(set(masters + infra_hosts + app + cns))
 
     dns = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'dns']
+           if server.metadata.get('host-type', None) == 'dns']
 
     load_balancers = [server.name for server in cluster_hosts
-                      if server.metadata['host-type'] == 'lb']
+                      if server.metadata.get('host-type', None) == 'lb']
 
     osev3 = list(set(nodes + etcd + load_balancers))
 
@@ -75,7 +77,7 @@ def get_docker_storage_mountpoints(volumes):
     return docker_storage_mountpoints
 
 
-def build_inventory():
+def build_inventory(clusterid):
     '''Build the dynamic inventory.'''
     cloud = shade.openstack_cloud()
 
@@ -83,7 +85,9 @@ def build_inventory():
     # environment variable.
     cluster_hosts = [
         server for server in cloud.list_servers()
-        if 'metadata' in server and 'clusterid' in server.metadata]
+        if not clusterid or 'metadata' in server and
+        server.metadata.get('clusterid', None) and
+        server.metadata['clusterid'] == clusterid]
 
     inventory = base_openshift_inventory(cluster_hosts)
 
@@ -123,12 +127,12 @@ def build_inventory():
                 'openshift_hostname', server.private_v4)
         hostvars['openshift_public_hostname'] = server.name
 
-        if server.metadata['host-type'] == 'cns':
+        if server.metadata.get('host-type', None) == 'cns':
             hostvars['glusterfs_devices'] = ['/dev/nvme0n1']
 
         node_labels = server.metadata.get('node_labels')
         # NOTE(shadower): the node_labels value must be a dict not string
-        if not isinstance(node_labels, Mapping):
+        if node_labels and not isinstance(node_labels, Mapping):
             node_labels = json.loads(node_labels)
 
         if node_labels:
@@ -143,5 +147,26 @@ def build_inventory():
     return inventory
 
 
+def _parse_args():
+    parser = argparse.ArgumentParser(description='OpenStack dynamic inventory')
+    parser.add_argument('--openshift_cluster', help='OpenShift cluster ID',
+                        default=os.getenv('OPENSHIFT_CLUSTER', None))
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--list', action='store_true',
+                       help='List active servers')
+    group.add_argument('--host', help='List details about the specific host')
+
+    args = parser.parse_args()
+    if args.host:
+        parser.error('Host option not implemented.')
+    return args
+
+
+def main():
+    '''Inventory main function.'''
+    args = _parse_args()
+    print(json.dumps(build_inventory(args.openshift_cluster), indent=4, sort_keys=True))
+
+
 if __name__ == '__main__':
-    print(json.dumps(build_inventory(), indent=4, sort_keys=True))
+    main()
