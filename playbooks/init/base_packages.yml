@@ -27,6 +27,10 @@
     command: timedatectl set-ntp true
     when: openshift_clock_enabled | default(True) | bool
 
+  - name: Debug time sync status
+    command: timedatectl status
+    when: openshift_clock_enabled | default(True) | bool
+
   - when:
     - not openshift_is_atomic | bool
     block:
