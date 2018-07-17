@@ -149,13 +149,10 @@ default_r_openshift_node_os_firewall_allow:
 r_openshift_node_os_firewall_allow: "{{ default_r_openshift_node_os_firewall_allow | union(openshift_node_open_ports | default([])) }}"
 
 # oreg_url is defined by user input
-oreg_host: "{{ oreg_url.split('/')[0] if (oreg_url is defined and '.' in oreg_url.split('/')[0]) else '' }}"
 oreg_auth_credentials_path: "{{ openshift_node_data_dir }}/.docker"
-oreg_auth_credentials_replace: False
 l_bind_docker_reg_auth: False
 openshift_use_crio: False
 l_crio_var_sock: "/var/run/crio/crio.sock"
-openshift_docker_alternative_creds: "{{ openshift_use_crio_only | bool }}"
 
 openshift_docker_service_name: "docker"
 

@@ -1,36 +1,29 @@
 ---
+# There might be other settings in this file besides auth; we want to ensure it
+# will always be bind-mounted into the node for system containers (atomic).
 - name: Check for credentials file for registry auth
   stat:
     path: "{{ oreg_auth_credentials_path }}"
   when: oreg_auth_user is defined
   register: node_oreg_auth_credentials_stat
 
-- name: Create credentials for registry auth
-  command: "docker --config={{ oreg_auth_credentials_path }} login -u {{ oreg_auth_user }} -p {{ oreg_auth_password }} {{ oreg_host }}"
-  when:
-    - not (openshift_docker_alternative_creds | default(False))
-    - oreg_auth_user is defined
-    - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-  register: node_oreg_auth_credentials_create
-  retries: 3
-  delay: 5
-  until: node_oreg_auth_credentials_create.rc == 0
-
 # docker_creds is a custom module from lib_utils
 # 'docker login' requires a docker.service running on the local host, this is an
-# alternative implementation for non-docker hosts.  This implementation does not
-# check the registry to determine whether or not the credentials will work.
-- name: Create credentials for registry auth (alternative)
+# alternative implementation that operates directly on config.json
+- name: Create credentials for registry auth
   docker_creds:
     path: "{{ oreg_auth_credentials_path }}"
     registry: "{{ oreg_host }}"
     username: "{{ oreg_auth_user }}"
     password: "{{ oreg_auth_password }}"
+    # Test that we can actually connect with provided info
+    test_login: "{{ oreg_test_login | default(True) }}"
   when:
-    - openshift_docker_alternative_creds | bool
     - oreg_auth_user is defined
-    - (not node_oreg_auth_credentials_stat.stat.exists or oreg_auth_credentials_replace) | bool
-  register: node_oreg_auth_credentials_create_alt
+  register: node_oreg_auth_credentials_create
+  retries: 3
+  delay: 5
+  until: node_oreg_auth_credentials_create.rc == 0
 
 # Container images may need the registry credentials
 - name: Setup ro mount of /root/.docker for containerized hosts
@@ -41,6 +34,4 @@
     - oreg_auth_user is defined
     - >
         (node_oreg_auth_credentials_stat.stat.exists
-        or oreg_auth_credentials_replace
-        or node_oreg_auth_credentials_create.changed
-        or node_oreg_auth_credentials_create_alt.changed) | bool
+        or node_oreg_auth_credentials_create.changed) | bool
