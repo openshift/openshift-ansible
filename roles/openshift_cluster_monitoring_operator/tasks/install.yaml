@@ -12,12 +12,24 @@
   register: mktemp
   changed_when: False
 
+- set_fact:
+    tempdir: "{{ mktemp.stdout }}"
+
 - name: Copy files to temp directory
   copy:
     src: "{{ item }}"
-    dest: "{{ mktemp.stdout }}/{{ item }}"
+    dest: "{{ tempdir }}/{{ item }}"
   with_items:
   - cluster-monitoring-operator.yaml
+
+- name: Create templates subdirectory
+  file:
+    state: directory
+    path: "{{ tempdir }}/{{ item }}"
+    mode: 0755
+  changed_when: False
+  with_items:
+  - templates
 
 - name: Copy admin client config
   command: >
@@ -57,23 +69,48 @@
     command: >
       {{ openshift_client_binary }} --config={{ mktemp.stdout }}/admin.kubeconfig adm pod-network make-projects-global openshift-monitoring
 
-- name: Apply the cluster monitoring operator template
+- name: Apply the cluster monitoring operator ServiceAccount, Roles and Alertmanager config
   shell: >
     {{ openshift_client_binary }} process -n openshift-monitoring -f "{{ mktemp.stdout 	}}/{{ item }}"
-    --param OPERATOR_IMAGE="{{ openshift_cluster_monitoring_operator_image }}"
-    --param PROMETHEUS_OPERATOR_IMAGE="{{ openshift_cluster_monitoring_operator_prometheus_operator_repo }}"
-    --param ALERTMANAGER_IMAGE="{{ openshift_cluster_monitoring_operator_alertmanager_repo }}"
-    --param PROMETHEUS_IMAGE="{{ openshift_cluster_monitoring_operator_prometheus_repo }}"
-    --param PROMETHEUS_CONFIG_RELOADER_IMAGE="{{ openshift_cluster_monitoring_operator_prometheus_reloader_repo }}"
-    --param CONFIG_RELOADER_IMAGE="{{ openshift_cluster_monitoring_operator_configmap_reloader_repo }}"
     --param ALERTMANAGER_CONFIG="{{ openshift_cluster_monitoring_operator_alertmanager_config | b64encode }}"
-    --param CLUSTER_ID="{{ openshift_cluster_monitoring_operator_cluster_id }}"
-    --param PROMETHEUS_STORAGE_CAPACITY="{{ openshift_cluster_monitoring_operator_prometheus_storage_capacity }}"
-    --param ALERTMANAGER_STORAGE_CAPACITY="{{ openshift_cluster_monitoring_operator_alertmanager_storage_capacity }}"
+    --param NAMESPACE="{{ openshift_cluster_monitoring_operator_namespace }}"
     --config={{ mktemp.stdout }}/admin.kubeconfig
     | {{ openshift_client_binary }} apply --config={{ mktemp.stdout }}/admin.kubeconfig -f -
   with_items:
   - cluster-monitoring-operator.yaml
+
+- name: Set cluster-monitoring-operator configmap template
+  template:
+    src: cluster-monitoring-operator-config.j2
+    dest: "{{ tempdir }}/templates/cluster-monitoring-operator-config.yaml"
+  changed_when: no
+
+- name: Set cluster-monitoring-operator configmap
+  oc_obj:
+    state: present
+    name: "cluster-monitoring-config"
+    namespace: "{{ openshift_cluster_monitoring_operator_namespace }}"
+    kind: configmap
+    files:
+    - "{{ tempdir }}/templates/cluster-monitoring-operator-config.yaml"
+    delete_after: true
+
+- name: Set cluster-monitoring-operator template
+  template:
+    src: cluster-monitoring-operator-deployment.j2
+    dest: "{{ tempdir }}/templates/cluster-monitoring-operator-deployment.yaml"
+  vars:
+    namespace: "{{ openshift_cluster_monitoring_operator_namespace }}"
+
+- name: Set cluster-monitoring-operator template
+  oc_obj:
+    state: present
+    name: "cluster-monitoring-operator"
+    namespace: "{{ openshift_cluster_monitoring_operator_namespace }}"
+    kind: deployment
+    files:
+    - "{{ tempdir }}/templates/cluster-monitoring-operator-deployment.yaml"
+    delete_after: true
 
 - name: Wait for the ServiceMonitor CRD to be created
   command: "{{ openshift_client_binary }} get crd servicemonitors.monitoring.coreos.com -n openshift-monitoring --config={{ mktemp.stdout }}/admin.kubeconfig"
