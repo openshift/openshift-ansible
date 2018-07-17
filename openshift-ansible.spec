@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.32
+Version:        3.9.36
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,62 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 17 2018 Tim Bielawa <tbielawa@redhat.com> 3.9.36-1
+- oreg url fix (m.judeikis@gmail.com)
+- Defining a default for logging_elasticsearch_rollout_override var in es
+  handler (ewolinet@redhat.com)
+- Remove openshift_is_atomic check as redundant (nakayamakenjiro@gmail.com)
+- Add EAP CD 13 to OS 3.9 examples (ken@zaptillion.net)
+- Don't call check_available_rpms.yml when containeriazed installation
+  (nakayamakenjiro@gmail.com)
+- filter_plugins: handle lazy loaded hostvars (arun.neelicattu@gmail.com)
+- fix metrics become syntax (eduardas@redhat.com)
+- change become syntax (m.judeikis@gmail.com)
+- add node get-node-logs script (m.judeikis@gmail.com)
+- Get precise openshift version with containerized installation
+  (nakayamakenjiro@gmail.com)
+- webconsole redeploy: Remove service annotations (vrutkovs@redhat.com)
+- Disable the wifi collector in node_exporter (spasquie@redhat.com)
+- Reconfigure web console after certificates were redeployed
+  (vrutkovs@redhat.com)
+- Copying acs-engine output to know location. (kwoodson@redhat.com)
+- clean-up RPM generated conf from preinstalled openshift packages
+  (iacopo.rozzo@amadeus.com)
+- Make regex for the openshift_pkg_version simpler (nakayamakenjiro@gmail.com)
+- Add unit tests for check_pkg_version_format and check_release_format
+  (nakayamakenjiro@gmail.com)
+- Add format check of openshift_pkg_version and openshift_release
+  (nakayamakenjiro@gmail.com)
+- Get acs-engine from new CI namespace (kargakis@protonmail.ch)
+- Persist build artifacts. (kwoodson@redhat.com)
+- Variablizing vm size for azure. (kwoodson@redhat.com)
+- Only dump oreg_url when value is defined. (kwoodson@redhat.com)
+- Port 10256 must be open for service load balancers to work
+  (ccoleman@redhat.com)
+- azure 3.9: disable waagent data disk management (jminter@redhat.com)
+- bump xpaas to 1.4.14 (rcernich@redhat.com)
+- Persist oreg_url in node image (kargakis@protonmail.ch)
+- Bug 1558689 - Add iproute to Dockerfile.rhel7 (rteague@redhat.com)
+- Allow fully qualified provisioner names (sean.dawson@environment.gov.au)
+- Enable container_manage_crgroup sebool (sdodson@redhat.com)
+- bug 1575546. Fix logging eventrouter cpu requests (jcantril@redhat.com)
+- Fixed add_container_provider.yaml so it uses openshift_management_project
+  variable name instead of set name (dluong@redhat.com)
+- Bug 1555214 - Increase retry for controller restart (rteague@redhat.com)
+- Fix flexvolume installation in containarized installs (hekumar@redhat.com)
+- Add comment (dymurray@redhat.com)
+- Bug 1564499 - Change imagePullPolicy for Broker images to Always
+  (dymurray@redhat.com)
+- registry-console: limit pods to masters (vrutkovs@redhat.com)
+- azure: pass image_name into tasks/create_blob_from_vm.yml
+  (jminter@redhat.com)
+- azure: tag image as valid=true, not valid=True (jminter@redhat.com)
+- azure: don't try to print deployment failure message when there isn't one
+  (jminter@redhat.com)
+- Azure: use empty dict if input image has no tags (pschiffe@redhat.com)
+- GlusterFS: Add GlusterFS hosts to openshift-hosted/config.yml playbook
+  (jarrpa@redhat.com)
+
 * Tue Jun 12 2018 Scott Dodson <sdodson@redhat.com> 3.9.32-1
 - Remove unused registry-console's imagestream (nakayamakenjiro@gmail.com)
 - [WIP] Azure: calculate input image for base and node image
