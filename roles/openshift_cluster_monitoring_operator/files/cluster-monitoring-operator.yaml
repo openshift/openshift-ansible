@@ -12,61 +12,15 @@ metadata:
     openshift.io/support-url: https://access.redhat.com
 openshift.io/provider-display-name: Red Hat, Inc.
 parameters:
-- name: OPERATOR_IMAGE
-  value: quay.io/coreos/cluster-monitoring-operator:v0.0.6
-- name: PROMETHEUS_OPERATOR_IMAGE
-  value: quay.io/coreos/prometheus-operator
-- name: ALERTMANAGER_IMAGE
-  value: quay.io/prometheus/alertmanager
-- name: ALERTMANAGER_STORAGE_CAPACITY
-  required: true
-- name: PROMETHEUS_IMAGE
-  value: quay.io/prometheus/prometheus
-- name: PROMETHEUS_STORAGE_CAPACITY
-  required: true
-- name: PROMETHEUS_CONFIG_RELOADER_IMAGE
-  value: quay.io/coreos/prometheus-config-reloader
-- name: CONFIG_RELOADER_IMAGE
-  value: quay.io/coreos/configmap-reload
 - name: ALERTMANAGER_CONFIG
   required: true
   description: A complete (base64-encoded) Alertmanager configuration YAML file.
-- name: CLUSTER_ID
-  description: Identifies the cluster being monitored; the value is added to a `cluster` label in every alert.
-  required: true
 - name: NAMESPACE
   # This namespace cannot be changed. Only `openshift-monitoring` is supported.
+  required: true
   value: openshift-monitoring
 
 objects:
-# Configures the Cluster Monitoring Operator.
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: cluster-monitoring-config
-    namespace: ${NAMESPACE}
-  data:
-    config.yaml: |+
-      prometheusOperator:
-        baseImage: ${PROMETHEUS_OPERATOR_IMAGE}
-        prometheusConfigReloaderBaseImage: ${PROMETHEUS_CONFIG_RELOADER_IMAGE}
-        configReloaderBaseImage: ${CONFIG_RELOADER_IMAGE}
-      prometheusK8s:
-        baseImage: ${PROMETHEUS_IMAGE}
-        externalLabels:
-          cluster: ${CLUSTER_ID}
-        volumeClaimTemplate:
-          spec:
-            resources:
-              requests:
-                storage: "${PROMETHEUS_STORAGE_CAPACITY}"
-      alertmanagerMain:
-        baseImage: ${ALERTMANAGER_IMAGE}
-        volumeClaimTemplate:
-          spec:
-            resources:
-              requests:
-                storage: "${ALERTMANAGER_STORAGE_CAPACITY}"
 
 # Configures Alertmanager.
 - apiVersion: v1
@@ -199,36 +153,3 @@ objects:
   - kind: ServiceAccount
     name: cluster-monitoring-operator
     namespace: ${NAMESPACE}
-- apiVersion: extensions/v1beta1
-  kind: Deployment
-  metadata:
-    name: cluster-monitoring-operator
-    namespace: ${NAMESPACE}
-    labels:
-      app: cluster-monitoring-operator
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        app: cluster-monitoring-operator
-    template:
-      metadata:
-        labels:
-          app: cluster-monitoring-operator
-      spec:
-        serviceAccountName: cluster-monitoring-operator
-        containers:
-        - image: ${OPERATOR_IMAGE}
-          name: cluster-monitoring-operator
-          args:
-          - "-namespace=${NAMESPACE}"
-          - "-configmap=cluster-monitoring-config"
-          - "-logtostderr=true"
-          - "-v=4"
-          resources:
-            limits:
-              cpu: 20m
-              memory: 50Mi
-            requests:
-              cpu: 20m
-              memory: 50Mi
