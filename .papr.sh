@@ -54,10 +54,18 @@ ansible -vv -i $PAPR_INVENTORY nodes -m setup -a "gather_subset=min"
 
 upload_journals() {
   mkdir journals
+  ansible -vvv -i $PAPR_INVENTORY all -m file -a 'path=/tmp/journals state=directory'
   ansible -vvv -i $PAPR_INVENTORY all \
-    -m shell -a 'journalctl --no-pager > /tmp/journal'
+    -m shell -a 'journalctl --no-pager > /tmp/journals/{{ inventory_hostname }}.log'
   ansible -vvv -i $PAPR_INVENTORY all \
-    -m fetch -a "src=/tmp/journal dest=journals/{{ inventory_hostname }}.log flat=yes"
+    -m synchronize -a "src=/tmp/journals/ dest=journals mode=pull"
+
+  mkdir container_logs
+  ansible -vvv -i $PAPR_INVENTORY all -m file -a 'path=/tmp/container_logs state=directory'
+  ansible -vvv -i $PAPR_INVENTORY all -m shell -a \
+    "docker ps --format {% raw %}'{{.Names}}'{% endraw %} | xargs -I{} -n 1 sh -c \"docker logs {} > /tmp/container_logs/{}.log 2>&1\" _"
+  ansible -vvv -i $PAPR_INVENTORY all \
+    -m synchronize -a "src=/tmp/container_logs/ dest=./container_logs/{{ inventory_hostname }} mode=pull"
 
   # Split large files into parts, extracting a basename and preserving extention
   find . -iname "*.log" -execdir sh -c 'split -b 4m --numeric-suffixes --additional-suffix=.log {} $(basename {} .log)_' \; -execdir rm -rf {} \;
