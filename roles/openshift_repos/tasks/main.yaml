@@ -1,10 +1,6 @@
 ---
-- name: openshift_repos detect ostree
-  stat:
-    path: /run/ostree-booted
-  register: ostree_booted
 
-- when: not ostree_booted.stat.exists
+- when: not openshift_is_atomic
   block:
   # TODO: This needs to be removed and placed into a role
   - name: Ensure libselinux-python is installed
