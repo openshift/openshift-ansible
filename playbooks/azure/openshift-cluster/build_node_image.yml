@@ -54,10 +54,24 @@
     vars:
       os_update_latest_reboot: True
 
-- name: install openshift
+- name: install openshift GA
   import_playbook: ../../openshift-node/private/image_prep.yml
   vars:
     etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
+  when: openshift_azure_dev_registry_token == ""
+
+- name: install openshift DEV
+  import_playbook: ../../openshift-node/private/image_prep.yml
+  vars:
+    etcd_image: "{{ etcd_image_dict[openshift_deployment_type] }}"
+    openshift_image_tag: "v{{ openshift_azure_release }}"
+    openshift_version: "{{ openshift_azure_release }}"
+    openshift_release: "{{ openshift_azure_release }}"
+    # This is only for dev rhel branch (non GA)
+    oreg_url: "registry.reg-aws.openshift.com/openshift3/ose-${component}:${version}"
+    oreg_auth_user: notused
+    oreg_auth_password: "{{ openshift_azure_dev_registry_token }}"
+  when: openshift_azure_dev_registry_token != ""
 
 - hosts: nodes
   tasks:
