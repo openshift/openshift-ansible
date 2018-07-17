@@ -9,7 +9,7 @@ XPAAS_VERSION=ose-v1.4.14
 RHDM70_VERSION=7.0.1.GA
 RHPAM70_VERSION=7.0.0.GA
 DG_72_VERSION=datagrid72-dev
-ORIGIN_VERSION=${1:-v3.9}
+ORIGIN_VERSION=${1:-v3.11}
 ORIGIN_BRANCH=${2:-master}
 RHAMP_TAG=2.0.0.GA
 EXAMPLES_BASE=$(pwd)/files/examples/${ORIGIN_VERSION}
@@ -34,10 +34,10 @@ unzip rhpam-application-templates.zip
 unzip fis-GA.zip
 unzip amp.zip
 unzip dg-application-templates.zip
-mv origin-${ORIGIN_BRANCH}/examples/db-templates/* ${EXAMPLES_BASE}/db-templates/
-mv origin-${ORIGIN_BRANCH}/examples/quickstarts/* ${EXAMPLES_BASE}/quickstart-templates/
+mv origin-${ORIGIN_BRANCH}/examples/db-templates/*.{yaml,json} ${EXAMPLES_BASE}/db-templates/
+mv origin-${ORIGIN_BRANCH}/examples/quickstarts/*.{yaml,json} ${EXAMPLES_BASE}/quickstart-templates/
 mv origin-${ORIGIN_BRANCH}/examples/jenkins/jenkins-*template.json ${EXAMPLES_BASE}/quickstart-templates/
-mv origin-${ORIGIN_BRANCH}/examples/image-streams/* ${EXAMPLES_BASE}/image-streams/
+mv origin-${ORIGIN_BRANCH}/examples/image-streams/*.{yaml,json} ${EXAMPLES_BASE}/image-streams/
 mv application-templates-${XPAAS_VERSION}/jboss-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/
 mv rhdm-7-openshift-image-${RHDM70_VERSION}/rhdm70-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
 mv rhpam-7-openshift-image-${RHPAM70_VERSION}/rhpam70-image-streams.yaml ${EXAMPLES_BASE}/xpaas-streams/
@@ -45,7 +45,7 @@ mv jboss-datagrid-7-openshift-image-${DG_72_VERSION}/templates/datagrid72-image-
 # fis content from jboss-fuse/application-templates-GA would collide with jboss-openshift/application-templates
 # as soon as they use the same branch/tag names
 mv application-templates-GA/fis-image-streams.json ${EXAMPLES_BASE}/xpaas-streams/fis-image-streams.json
-mv application-templates-GA/quickstarts/* ${EXAMPLES_BASE}/xpaas-templates/
+mv application-templates-GA/quickstarts/*.{yaml,json} ${EXAMPLES_BASE}/xpaas-templates/
 mv application-templates-GA/fis-console-namespace-template.json application-templates-GA/fis-console-cluster-template.json ${EXAMPLES_BASE}/xpaas-templates/
 find application-templates-${XPAAS_VERSION}/ -name '*.json' ! -wholename '*secret*' ! -wholename '*demo*' ! -wholename '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-templates/ \;
 find application-templates-${XPAAS_VERSION}/ -name '*image-stream.json' -exec mv {} ${EXAMPLES_BASE}/xpaas-streams/ \;
