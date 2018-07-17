@@ -10,6 +10,7 @@
     command: rpm -q chrony
     failed_when: false
     register: chrony_installed
+    when: not openshift_is_atomic | bool
 
   # chrony is installed on atomic host by default, so no need to worry about
   # atomic here.
@@ -20,6 +21,7 @@
     - chrony_installed.rc != 0
     register: result
     until: result is succeeded
+    when: not openshift_is_atomic | bool
 
   - name: Start and enable ntpd/chronyd
     command: timedatectl set-ntp true
