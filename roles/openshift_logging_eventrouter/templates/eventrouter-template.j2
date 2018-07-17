@@ -65,7 +65,7 @@ objects:
               imagePullPolicy: IfNotPresent
               resources:
                 limits:
-{% if cpu_limit is defined %}
+{% if cpu_limit is not none and cpu_limit != '' %}
                   cpu: ${CPU_LIMIT}
 {% endif %}
                   memory: ${MEMORY}
