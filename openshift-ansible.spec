@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.36
+Version:        3.9.37
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Tue Jul 17 2018 Tim Bielawa <tbielawa@redhat.com> 3.9.37-1
+- 
+
 * Tue Jul 17 2018 Tim Bielawa <tbielawa@redhat.com> 3.9.36-1
 - oreg url fix (m.judeikis@gmail.com)
 - Defining a default for logging_elasticsearch_rollout_override var in es
