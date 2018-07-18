@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.19
+Version:        3.10.20
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Wed Jul 18 2018 Tim Bielawa <tbielawa@redhat.com> 3.10.20-1
+- Adds openshift_fs_inotify_max_user_instances to the node tuned profile.
+  (jtudelag@redhat.com)
+- Make fs_inotify_max_user_watches configurable. (avesh.ncsu@gmail.com)
+
 * Tue Jul 17 2018 Tim Bielawa <tbielawa@redhat.com> 3.10.19-1
 - Add max-size to docker log opts (umohnani@redhat.com)
 - Remove old service files before masking them (sdodson@redhat.com)
