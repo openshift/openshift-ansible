@@ -7,7 +7,7 @@ openshift_master_debug_level: "{{ debug_level | default(2) }}"
 r_openshift_master_firewall_enabled: "{{ os_firewall_enabled | default(True) }}"
 r_openshift_master_use_firewalld: "{{ os_firewall_use_firewalld | default(False) }}"
 
-openshift_imageconfig_format: "{{ oreg_url_master | default(oreg_url) | default(l_osm_registry_url_default) }}"
+openshift_imageconfig_format: "{{ oreg_url | default(l_osm_registry_url_default) }}"
 
 l_osm_id_providers_dict:
   openshift-enterprise:

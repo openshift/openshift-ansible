@@ -46,7 +46,7 @@ openshift_hosted_router_edits:
   value: 21600
   action: put
 
-openshift_hosted_router_registryurl: "{{ oreg_url_master | default(oreg_url) | default(openshift_hosted_images_dict[openshift_deployment_type]) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
+openshift_hosted_router_registryurl: "{{ oreg_url | default(openshift_hosted_images_dict[openshift_deployment_type]) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 openshift_hosted_routers:
 - name: router
   replicas: "{{ replicas | default(1) }}"
@@ -73,7 +73,7 @@ r_openshift_hosted_router_os_firewall_allow: []
 ############
 
 openshift_hosted_registry_selector: "{{ openshift_registry_selector | default(openshift_hosted_infra_selector) }}"
-openshift_hosted_registry_registryurl: "{{ oreg_url_master | default(oreg_url) | default(openshift_hosted_images_dict[openshift_deployment_type]) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
+openshift_hosted_registry_registryurl: "{{ oreg_url | default(openshift_hosted_images_dict[openshift_deployment_type]) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
 openshift_hosted_registry_routecertificates: {}
 openshift_hosted_registry_routetermination: "passthrough"
 

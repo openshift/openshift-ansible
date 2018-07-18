@@ -30,4 +30,4 @@ registry_host: "{{ openshift_examples_registryurl.split('/')[0] if '.' in opensh
 openshift_hosted_images_dict:
   origin: 'docker.io/openshift/origin-${component}:${version}'
   openshift-enterprise: 'registry.redhat.io/openshift3/ose-${component}:${version}'
-openshift_examples_registryurl: "{{ oreg_url_master | default(oreg_url) | default(openshift_hosted_images_dict[openshift_deployment_type]) }}"
+openshift_examples_registryurl: "{{ oreg_url | default(openshift_hosted_images_dict[openshift_deployment_type]) }}"

@@ -56,8 +56,8 @@
   yedit:
     src: "{{ openshift.common.config_base }}/master/master-config.yaml"
     key: 'imageConfig.format'
-    value: "{{ oreg_url | default(oreg_url_master) }}"
-  when: oreg_url is defined or oreg_url_master is defined
+    value: "{{ oreg_url }}"
+  when: oreg_url is defined
 
 - name: Change default node selector to compute=true
   yedit:
