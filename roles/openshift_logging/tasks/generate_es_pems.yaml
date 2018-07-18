@@ -1,0 +1,37 @@
+---
+# is_client
+# add_oid
+# certs
+
+- name: Checking for {{ component }}.key
+  stat: path="{{ generated_certs_dir }}/{{ component }}.key"
+  register: key_file
+  check_mode: no
+
+- name: Checking for {{ component }}.crt
+  stat: path="{{ generated_certs_dir }}/{{ component }}.crt"
+  register: cert_file
+  check_mode: no
+
+- set_fact:
+    cert_ext: "{{ certs | strflist(pattern='DNS.{@}:{}', index_start=2, ignore_empty_key=True) }}"
+
+- set_fact:
+    cert_ext: "{{ cert_ext + ['RID.1:1.2.3.4.5.5'] }}"
+  when: add_oid | bool
+
+- name: Creating cert req for {{ component }}
+  command: >
+    openssl req -out {{ generated_certs_dir }}/{{ component }}.csr -new -newkey rsa:2048 -keyout {{ generated_certs_dir }}/{{ component }}.key
+    -subj "/CN={{ component }}/OU=OpenShift/O=Logging/subjectAltName=DNS.1=localhost{{ cert_ext | join(',') }}" -days 712 -nodes
+  when:
+    - not key_file.stat.exists
+  check_mode: no
+
+- name: Sign cert request with CA for {{ component }}
+  command: >
+    openssl ca -in {{ generated_certs_dir }}/{{ component }}.csr -notext -out {{ generated_certs_dir }}/{{ component }}.crt
+    -config {{ generated_certs_dir }}/signing.conf -extensions v3_req -batch -extensions server_ext
+  when:
+    - not cert_file.stat.exists
+  check_mode: no

@@ -134,8 +134,35 @@
     loop_var: node_name
   when: openshift_logging_es_allow_external | bool
 
-- name: Creating necessary JKS certs
-  include_tasks: generate_jks.yaml
+- name: Creating necessary ES certs
+  include_tasks: generate_es_pems.yaml
+  vars:
+    is_client: "{{ node_name.is_client | default(false) }}"
+    add_oid: "{{ node_name.add_oid | default(false) }}"
+    certs: "{{ node_name.certs | default([]) }}"
+    component: "{{ node_name.name }}"
+  with_items:
+    - name: system.admin
+      is_client: true
+    - name: elasticsearch
+      add_oid: true
+      certs:
+        - "logging-es"
+        - "logging-es-ops"
+    - name: logging-es
+      certs:
+        - "logging-es"
+        - "logging-es-cluster"
+        - "logging-es.{{openshift_logging_namespace}}.svc.cluster.local"
+        - "logging-es-ops"
+        - "logging-es-cluster-ops"
+        - "logging-es-ops.{{openshift_logging_namespace}}.svc.cluster.local"
+        - "{{ openshift_logging_es_hostname | default('') }}"
+        - "{{ openshift_logging_es_ops_hostname | default('') }}"
+  loop_control:
+    loop_var: node_name
+
+- debug: var={{ blah.blah }}
 
 # TODO: make idempotent
 - name: Generate proxy session

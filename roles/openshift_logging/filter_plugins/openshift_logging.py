@@ -126,6 +126,24 @@ def flatten_dict(data, parent_key=None):
     return merged
 
 
+def strflist(data, pattern='{}', index_start=0, ignore_empty_key=False):
+    """ This filter plugin will apply a format to each element in a list and return a new list
+    """
+
+    if not isinstance(data, list):
+        raise RuntimeError("strflist failed, expects list")
+
+    formatted = []
+    index = index_start
+
+    for element in data:
+        if not ignore_empty_key or element:
+            formatted_element = pattern.replace('{@}', str(index)).format(element)
+            formatted = formatted + [formatted_element]
+            index += 1
+
+    return formatted
+
 # pylint: disable=too-few-public-methods
 class FilterModule(object):
     ''' OpenShift Logging Filters '''
@@ -142,5 +160,6 @@ class FilterModule(object):
             'serviceaccount_name': serviceaccount_name,
             'serviceaccount_namespace': serviceaccount_namespace,
             'walk': walk,
-            "flatten_dict": flatten_dict
+            "flatten_dict": flatten_dict,
+            "strflist": strflist
         }

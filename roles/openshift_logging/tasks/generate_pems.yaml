@@ -12,20 +12,9 @@
 - name: Creating cert req for {{component}}
   command: >
     openssl req -out {{generated_certs_dir}}/{{component}}.csr -new -newkey rsa:2048 -keyout {{generated_certs_dir}}/{{component}}.key
-    -subj "/CN={{component}}/OU=OpenShift/O=Logging/subjectAltName=DNS.1=localhost{{cert_ext.stdout}}" -days 712 -nodes
-  when:
-    - not key_file.stat.exists
-    - cert_ext is defined
-    - cert_ext.stdout is defined
-  check_mode: no
-
-- name: Creating cert req for {{component}}
-  command: >
-    openssl req -out {{generated_certs_dir}}/{{component}}.csr -new -newkey rsa:2048 -keyout {{generated_certs_dir}}/{{component}}.key
     -subj "/CN={{component}}/OU=OpenShift/O=Logging" -days 712 -nodes
   when:
     - not key_file.stat.exists
-    - cert_ext is undefined or cert_ext is defined and cert_ext.stdout is undefined
   check_mode: no
 
 - name: Sign cert request with CA for {{component}}
