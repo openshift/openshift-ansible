@@ -3,7 +3,7 @@
   fail:
     msg: "Firewalld is not supported on Atomic Host"
   when:
-    - r_os_firewall_is_atomic | bool
+    - openshift_is_atomic | bool
     - not openshift_enable_unsupported_configurations | default(false)
 
 - name: Install firewalld packages
@@ -12,7 +12,7 @@
     state: present
   register: result
   until: result is succeeded
-  when: not r_os_firewall_is_atomic | bool
+  when: not openshift_is_atomic | bool
 
 - name: Ensure iptables services are not enabled
   systemd:

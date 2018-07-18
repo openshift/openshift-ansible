@@ -27,12 +27,7 @@
 # For non containerized we should have the correct version of
 # etcd installed already. So don't do anything.
 #
-# For containerized installs we now exec into etcd_container
-
-- name: Detecting Atomic Host Operating System
-  stat:
-    path: /run/ostree-booted
-  register: l_ostree_booted
+# For static pod installs we now exec into etcd_container
 
 - name: Check selinux label of '{{ etcd_data_dir }}'
   command: >

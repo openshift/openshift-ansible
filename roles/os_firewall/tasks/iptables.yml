@@ -23,7 +23,7 @@
   with_items:
     - iptables
     - iptables-services
-  when: not r_os_firewall_is_atomic | bool
+  when: not openshift_is_atomic | bool
   register: result
   until: result is succeeded
 
