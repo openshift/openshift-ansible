@@ -3,7 +3,7 @@
   ec2_vpc_net_facts:
     region: "{{ openshift_aws_region }}"
     filters:
-      "tag:Name": "{{ openshift_aws_clusterid }}"
+      "tag:Name": "{{ openshift_aws_vpc_name }}"
   register: vpcout
 
 - name: create the node group sgs
