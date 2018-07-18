@@ -75,6 +75,7 @@ ansible-playbook -vvv -i $PAPR_INVENTORY $PAPR_EXTRAVARS playbooks/deploy_cluste
 if [[ "${PAPR_UPGRADE_FROM}" != "0" ]]; then
   git checkout new-code
   git clean -fdx
+  pip install -r requirements.txt
 fi
 
 # Run upgrade playbook
