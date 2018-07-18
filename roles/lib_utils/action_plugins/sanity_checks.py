@@ -392,12 +392,12 @@ class ActionModule(ActionBase):
     def check_for_oreg_password(self, hostvars, host, odt):
         """Ensure oreg_password is defined when using registry.redhat.io"""
         reg_to_check = 'registry.redhat.io'
-        err_msg = ("oreg_user and oreg_password must be provided when"
+        err_msg = ("oreg_auth_user and oreg_auth_password must be provided when"
                    "deploying openshift-enterprise")
-        err_msg2 = ("oreg_user and oreg_password must be provided when using"
+        err_msg2 = ("oreg_auth_user and oreg_auth_password must be provided when using"
                     "{}".format(reg_to_check))
 
-        oreg_password = self.template_var(hostvars, host, 'oreg_password')
+        oreg_password = self.template_var(hostvars, host, 'oreg_auth_password')
         if oreg_password is not None:
             # A password is defined, so we're good to go.
             return None
@@ -414,7 +414,7 @@ class ActionModule(ActionBase):
 
         if not oreg_url_found and odt == 'openshift-enterprise':
             # We're not using an oreg_url, we're using default enterprise
-            # registry.  We require oreg_user and oreg_password
+            # registry.  We require oreg_auth_user and oreg_auth_password
             raise errors.AnsibleModuleError(err_msg)
 
     def run_checks(self, hostvars, host):
