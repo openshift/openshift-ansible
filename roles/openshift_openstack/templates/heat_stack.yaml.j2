@@ -1,4 +1,4 @@
-heat_template_version: 2016-10-14
+heat_template_version: {{ openshift_openstack_heat_template_version }}
 
 description: OpenShift cluster
 
@@ -53,9 +53,6 @@ outputs:
   infra_floating_ips:
     description: Floating IPs of the nodes
     value: { get_attr: [ infra_nodes, floating_ip ] }
-
-conditions:
-  no_floating: {% if openshift_openstack_provider_network_name %}true{% else %}false{% endif %}
 
 resources:
 
@@ -517,11 +514,11 @@ resources:
           secgrp:
             - { get_resource: {% if openshift_openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}etcd-secgrp{% endif %} }
             - { get_resource: common-secgrp }
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          floating_network: ''
+{% else %}
+          floating_network: {{ openshift_openstack_external_network_name }}
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -586,11 +583,11 @@ resources:
           secgrp:
             - { get_resource: lb-secgrp }
             - { get_resource: common-secgrp }
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          floating_network: ''
+{% else %}
+          floating_network: {{ openshift_openstack_external_network_name }}
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -654,11 +651,11 @@ resources:
 {% endif %}
 {% endif %}
             - { get_resource: common-secgrp }
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          floating_network: ''
+{% else %}
+          floating_network: {{ openshift_openstack_external_network_name }}
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -724,11 +721,11 @@ resources:
           secgrp:
             - { get_resource: {% if openshift_openstack_flat_secgrp|default(False)|bool %}flat-secgrp{% else %}node-secgrp{% endif %} }
             - { get_resource: common-secgrp }
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          floating_network: ''
+{% else %}
+          floating_network: {{ openshift_openstack_external_network_name }}
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
@@ -794,11 +791,11 @@ resources:
 {% endif %}
             - { get_resource: infra-secgrp }
             - { get_resource: common-secgrp }
-          floating_network:
-            if:
-              - no_floating
-              - ''
-              - {{ openshift_openstack_external_network_name }}
+{% if openshift_openstack_provider_network_name %}
+          floating_network: ''
+{% else %}
+          floating_network: {{ openshift_openstack_external_network_name }}
+{% endif %}
 {% if openshift_openstack_provider_network_name %}
           attach_float_net: false
 {% endif %}
