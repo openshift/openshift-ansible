@@ -1,0 +1,126 @@
+---
+
+- name: create operator-lifecycle-manager project
+  oc_project:
+    name: operator-lifecycle-manager
+    state: present
+    node_selector:
+      - ""
+
+- name: Make temp directory for manifests
+  command: mktemp -d /tmp/olm-ansible-XXXXXX
+  register: mktemp
+  changed_when: False
+
+- name: Copy manifests to temp directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ mktemp.stdout }}"
+  with_fileglob: files/*.yaml
+- name: Apply alm-operator-serviceaccount ServiceAccount manifest
+  oc_obj:
+    state: present
+    kind: ServiceAccount
+    name: alm-operator-serviceaccount
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/01-alm-operator.serviceaccount.yaml"
+
+- name: Apply alm-operator-binding ClusterRoleBinding manifest
+  oc_obj:
+    state: present
+    kind: ClusterRoleBinding
+    name: alm-operator-binding
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/02-alm-operator.rolebinding.yaml"
+
+- name: Apply clusterserviceversion-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: present
+    kind: CustomResourceDefinition
+    name: clusterserviceversion-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/03-clusterserviceversion.crd.yaml"
+
+- name: Apply catalogsource-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: present
+    kind: CustomResourceDefinition
+    name: catalogsource-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/05-catalogsource.crd.yaml"
+
+- name: Apply installplan-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: present
+    kind: CustomResourceDefinition
+    name: installplan-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/06-installplan.crd.yaml"
+
+- name: Apply subscription-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: present
+    kind: CustomResourceDefinition
+    name: subscription-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/07-subscription.crd.yaml"
+
+- name: Apply tectonic-ocs ConfigMap manifest
+  oc_obj:
+    state: present
+    kind: ConfigMap
+    name: tectonic-ocs
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/08-tectonicocs.configmap.yaml"
+
+- name: Apply tectonic-ocs CatalogSource-v1 manifest
+  oc_obj:
+    state: present
+    kind: CatalogSource-v1
+    name: tectonic-ocs
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/10-tectonicocs.catalogsource.yaml"
+
+- name: Apply alm-operator Deployment manifest
+  oc_obj:
+    state: present
+    kind: Deployment
+    name: alm-operator
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/12-alm-operator.deployment.yaml"
+
+- name: Apply catalog-operator Deployment manifest
+  oc_obj:
+    state: present
+    kind: Deployment
+    name: catalog-operator
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/13-catalog-operator.deployment.yaml"
+
+- name: Apply upstream-components ConfigMap manifest
+  oc_obj:
+    state: present
+    kind: ConfigMap
+    name: upstream-components
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/18-upstreamcomponents.configmap.yaml"
+
+- name: Apply upstream-components CatalogSource-v1 manifest
+  oc_obj:
+    state: present
+    kind: CatalogSource-v1
+    name: upstream-components
+    namespace: operator-lifecycle-manager
+    files:
+      - "{{ mktemp.stdout }}/19-upstreamcomponents.catalogsource.yaml"

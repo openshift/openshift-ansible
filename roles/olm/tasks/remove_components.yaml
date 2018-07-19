@@ -1,0 +1,84 @@
+---
+- name: Remove alm-operator-serviceaccount ServiceAccount manifest
+  oc_obj:
+    state: absent
+    kind: ServiceAccount
+    name: alm-operator-serviceaccount
+    namespace: operator-lifecycle-manager
+
+- name: Remove alm-operator-binding ClusterRoleBinding manifest
+  oc_obj:
+    state: absent
+    kind: ClusterRoleBinding
+    name: alm-operator-binding
+    namespace: operator-lifecycle-manager
+
+- name: Remove clusterserviceversion-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: clusterserviceversion-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove catalogsource-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: catalogsource-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove installplan-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: installplan-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove subscription-v1s.app.coreos.com CustomResourceDefinition manifest
+  oc_obj:
+    state: absent
+    kind: CustomResourceDefinition
+    name: subscription-v1s.app.coreos.com
+    namespace: operator-lifecycle-manager
+
+- name: Remove tectonic-ocs ConfigMap manifest
+  oc_obj:
+    state: absent
+    kind: ConfigMap
+    name: tectonic-ocs
+    namespace: operator-lifecycle-manager
+
+- name: Remove tectonic-ocs CatalogSource-v1 manifest
+  oc_obj:
+    state: absent
+    kind: CatalogSource-v1
+    name: tectonic-ocs
+    namespace: operator-lifecycle-manager
+
+- name: Remove alm-operator Deployment manifest
+  oc_obj:
+    state: absent
+    kind: Deployment
+    name: alm-operator
+    namespace: operator-lifecycle-manager
+
+- name: Remove catalog-operator Deployment manifest
+  oc_obj:
+    state: absent
+    kind: Deployment
+    name: catalog-operator
+    namespace: operator-lifecycle-manager
+
+- name: Remove upstream-components ConfigMap manifest
+  oc_obj:
+    state: absent
+    kind: ConfigMap
+    name: upstream-components
+    namespace: operator-lifecycle-manager
+
+- name: Remove upstream-components CatalogSource-v1 manifest
+  oc_obj:
+    state: absent
+    kind: CatalogSource-v1
+    name: upstream-components
+    namespace: operator-lifecycle-manager
