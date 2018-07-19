@@ -3,9 +3,7 @@
 # l_etcd_scale_up_crt_hosts may be passed in via prerequisites.yml during etcd
 # scaleup plays.
 
-- hosts: "{{ l_etcd_scale_up_crt_hosts | default(l_scale_up_hosts) | default(l_default_container_runtime_hosts) }}"
-  vars:
-    l_default_container_runtime_hosts: "oo_nodes_to_config"
+- hosts: "{{ l_etcd_scale_up_crt_hosts | default(l_scale_up_hosts) | default('oo_nodes_to_config') }}"
   roles:
     - role: container_runtime
   tasks:
@@ -25,4 +23,3 @@
         tasks_from: package_crio.yml
       when:
         - openshift_use_crio | bool
-        - openshift_docker_is_node_or_master | bool
