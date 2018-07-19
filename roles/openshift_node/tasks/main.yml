@@ -61,6 +61,10 @@
     name: container_manage_cgroup
     state: yes
     persistent: yes
+  # add the following lines to skip the task if we do not need it
+  when:
+    - ansible_selinux
+    - ansible_selinux.status == 'enabled'
 
 - import_tasks: registry_auth.yml
 

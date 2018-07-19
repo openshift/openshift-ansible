@@ -1,4 +1,4 @@
-heat_template_version: 2016-10-14
+heat_template_version: {{ openshift_openstack_heat_template_version }}
 
 description: OpenShift cluster server
 
@@ -111,7 +111,7 @@ parameters:
   availability_zone:
     type: string
     description: The Availability Zone to launch the instance.
-    default: nova
+    default: cn-north-1a
 
   volume_size:
     type: number
@@ -161,25 +161,18 @@ outputs:
 {% endif %}
         - addr
 
-conditions:
-  no_floating: {not: { get_param: attach_float_net} }
-{% if openshift_use_flannel|default(False)|bool %}
-  no_data_subnet: {not: { get_param: attach_data_net} }
-{% endif %}
-
 resources:
 
   server:
     type: OS::Nova::Server
     properties:
+      availability_zone: { get_param: availability_zone }
       name:      { get_param: name }
       key_name:  { get_param: key_name }
       image:     { get_param: image }
       flavor:    { get_param: flavor }
       networks:
 {% if openshift_use_flannel|default(False)|bool %}
-        if:
-          - no_data_subnet
 {% if use_trunk_ports|default(false)|bool %}
           - - port:  { get_attr: [trunk-port, port_id] }
 {% else %}
@@ -236,7 +229,6 @@ resources:
 {% if openshift_use_flannel|default(False)|bool %}
   data_port:
     type: OS::Neutron::Port
-    condition: { not: no_data_subnet }
     properties:
       network: { get_param: data_net }
       port_security_enabled: false
@@ -248,7 +240,6 @@ resources:
 
 {% if not openshift_openstack_provider_network_name %}
   floating-ip:
-    condition: { not: no_floating }
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: floating_network }

@@ -1,0 +1,11 @@
+
+export OS_USERNAME=wangkunpeng
+export OS_PASSWORD=******
+export OS_TENANT_NAME=cn-north-1
+export OS_AUTH_URL="https://iam.cn-north-1.myhwclouds.com"
+export OS_IDENTITY_API_VERSION=3
+export OS_USER_DOMAIN_NAME=wangkunpeng
+export OS_PROJECT_DOMAIN_NAME=wangkunpeng
+export OS_DOMAIN_NAME=wangkunpeng
+export OS_REGION_NAME="cn-north-1"
+

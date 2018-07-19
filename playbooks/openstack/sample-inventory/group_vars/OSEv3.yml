@@ -3,7 +3,7 @@
 openshift_deployment_type: origin
 #openshift_repos_enable_testing: true
 #openshift_deployment_type: openshift-enterprise
-#openshift_release: v3.5
+openshift_release: v3.9
 openshift_master_default_subdomain: "apps.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
 
 openshift_master_cluster_public_hostname: "console.{{ openshift_openstack_clusterid }}.{{ openshift_openstack_public_dns_domain }}"
@@ -47,7 +47,7 @@ openshift_hostname_check: false
 
 # For POCs or demo environments that are using smaller instances than
 # the official recommended values for RAM and DISK, uncomment the line below.
-#openshift_disable_check: disk_availability,memory_availability
+openshift_disable_check: disk_availability,memory_availability,docker_storage
 
 # NOTE(shadower): Always switch to root on the OSEv3 nodes.
 # openshift-ansible requires an explicit `become`.
