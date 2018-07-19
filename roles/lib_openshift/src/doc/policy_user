@@ -26,6 +26,12 @@ options:
     required: false
     default: None
     aliases: []
+  rolebinding_name:
+    description:
+    - The name of the rolebinding object for roles
+    required: false
+    default: None
+    aliases: []
   debug:
     description:
     - Turn on debug output.
