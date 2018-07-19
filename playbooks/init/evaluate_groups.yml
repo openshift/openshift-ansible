@@ -7,40 +7,10 @@
   - name: Load group name mapping variables
     include_vars: vars/cluster_hosts.yml
 
-  - name: Evaluate groups - g_etcd_hosts or g_new_etcd_hosts required
-    fail:
-      msg: This playbook requires g_etcd_hosts or g_new_etcd_hosts to be set
-    when: g_etcd_hosts is not defined and g_new_etcd_hosts is not defined
-
-  - name: Evaluate groups - g_master_hosts or g_new_master_hosts required
-    fail:
-      msg: This playbook requires g_master_hosts or g_new_master_hosts to be set
-    when: g_master_hosts is not defined and g_new_master_hosts is not defined
-
-  - name: Evaluate groups - g_node_hosts or g_new_node_hosts required
-    fail:
-      msg: This playbook requires g_node_hosts or g_new_node_hosts to be set
-    when: g_node_hosts is not defined and g_new_node_hosts is not defined
-
-  - name: Evaluate groups - g_lb_hosts required
-    fail:
-      msg: This playbook requires g_lb_hosts to be set
-    when: g_lb_hosts is not defined
-
-  - name: Evaluate groups - g_nfs_hosts required
-    fail:
-      msg: This playbook requires g_nfs_hosts to be set
-    when: g_nfs_hosts is not defined
-
   - name: Evaluate groups - g_nfs_hosts is single host
     fail:
       msg: The nfs group must be limited to one host
-    when: g_nfs_hosts | default([]) | length > 1
-
-  - name: Evaluate groups - g_glusterfs_hosts required
-    fail:
-      msg: This playbook requires g_glusterfs_hosts to be set
-    when: g_glusterfs_hosts is not defined
+    when: g_nfs_hosts | length > 1
 
   - name: Evaluate oo_all_hosts
     add_host:
