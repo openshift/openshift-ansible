@@ -1,0 +1,26 @@
+---
+- debug: msg="{{ l_dnsrecords_dict_item }}"
+
+- name: querying elb
+  ec2_elb_facts:
+    names: "{{ l_dnsrecords_dict_item.value }}"
+    region: "{{ openshift_aws_region }}"
+  register: elb_facts
+  when:
+    - "'elb' in l_dnsrecords_dict_item.kind"
+    - "'CNAME' in l_dnsrecords_dict_item.type"
+
+- name: creating record
+  dyn_record:
+    customer_name: "{{ l_dns_dict_item.value.customer_name }}"
+    user_name: "{{ l_dns_dict_item.value.user_name }}"
+    user_password: "{{ l_dns_dict_item.value.user_passwd }}"
+    state: "present"
+    record_type: "{{ l_dnsrecords_dict_item.type }}"
+    zone: "{{ l_dns_dict_item.value.zone }}"
+    record_value: "{{ value | trim }}"
+    record_fqdn: "{{ l_dnsrecords_dict_item.name }}.{{ openshift_aws_clusterid }}.{{ l_dns_dict_item.value['zone'] }}"
+    record_ttl: 120
+  vars:
+    value: "{% if 'CNAME' in l_dnsrecords_dict_item.type -%} {{ elb_facts.elbs[0].dns_name }} \
+            {% endif -%}"

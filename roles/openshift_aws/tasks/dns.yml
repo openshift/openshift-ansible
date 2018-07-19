@@ -1,0 +1,14 @@
+---
+- name: provision route53
+  include_tasks: dns_route53_zone.yml
+  with_items: "{{ l_dns_dict_item.key }}"
+  loop_control:
+    loop_var: l_dnszones_dict_item
+  when: "'route53' in l_dns_dict_item.value['provider']"
+
+- name: provision dyn
+  include_tasks: dns_dyn_zone.yml
+  with_items: "{{ l_dns_dict_item.key }}"
+  loop_control:
+    loop_var: l_dnszones_dict_item
+  when: "'dyn' in l_dns_dict_item.value['provider']"

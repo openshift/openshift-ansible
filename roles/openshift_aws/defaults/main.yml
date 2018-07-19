@@ -6,6 +6,7 @@ openshift_aws_create_iam_role: False
 openshift_aws_create_security_groups: True
 openshift_aws_create_launch_config: True
 openshift_aws_create_scale_group: True
+openshift_aws_create_dns: False
 
 openshift_aws_node_group_upgrade: False
 openshift_aws_wait_for_ssh: True
@@ -318,6 +319,54 @@ openshift_aws_vpc:
       az: "us-east-1e"
     - cidr: 172.31.16.0/20
       az: "us-east-1a"
+
+#openshift_aws_dns_dict:
+#  external:
+#    provider: '' # [ dyn, route53 ]
+#    zone: 'zone.example.com'
+#    #customer_name: 'customer_name' # reqd for provider: dyn
+#    #user_name: 'user_name' # reqd for provider: dyn
+#    #user_passwd: 'user_passwd' # reqd for provider: dyn
+#    records:
+#      # Pertains to hosts[openshift_master_cluster_public_hostname]
+#      - name: 'api'
+#        value: "{{ openshift_aws_elb_dict['master']['external']['name'] | default('') }}"
+#        type: "CNAME"
+#        kind: "elb"
+#      - name: 'logs'
+#        value: "{{ openshift_aws_elb_dict['infra']['external']['name'] | default('') }}"
+#        type: "CNAME"
+#        kind: "elb"
+#      - name: 'metrics'
+#        value: "{{ openshift_aws_elb_dict['infra']['external']['name'] | default('') }}"
+#        type: "CNAME"
+#        kind: "elb"
+#      - name: 'registry'
+#        value: "{{ openshift_aws_elb_dict['infra']['external']['name'] | default('') }}"
+#        type: "CNAME"
+#        kind: "elb"
+#      # Pertains to hosts[openshift_master_default_subdomain]
+#      - name: "*.apps"
+#        value: "{{ openshift_aws_elb_dict['infra']['external']['name'] | default('') }}"
+#        type: "CNAME"
+#        kind: "elb"
+#  internal:
+#    provider: '' # [ dyn, route53 ]
+#    zone: 'zone.example.com'
+#    #customer_name: 'customer_name' # reqd for provider: dyn
+#    #user_name: 'user_name' # reqd for provider: dyn
+#    #user_passwd: 'user_passwd' # reqd for provider: dyn
+#    records:
+#      # Pertains to hosts[openshift_master_cluster_hostname]
+#      - name: 'internal.api'
+#        value: "{{ openshift_aws_elb_dict['master']['internal']['name'] | default('') }}"
+#        type: 'CNAME'
+#        kind: 'elb'
+#      # Pertains to hosts[openshift_master_default_subdomain]
+#      - name: '*.apps'
+#        value: "{{ openshift_aws_elb_dict['infra']['external']['name'] | default('') }}"
+#        type: 'CNAME'
+#        kind: 'elb'
 
 openshift_aws_subnet_az: "{{ openshift_aws_vpc.subnets[openshift_aws_region] | get_default_az }}"
 

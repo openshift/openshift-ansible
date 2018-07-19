@@ -1,0 +1,7 @@
+---
+- name: provision dns
+  include_tasks: dns.yml
+  when: openshift_aws_create_dns | bool
+  with_dict: "{{ openshift_aws_dns_dict }}"
+  loop_control:
+    loop_var: l_dns_dict_item
