@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.20
+Version:        3.10.21
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Jul 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.21-1
+- glusterfs: bind created volume to the claim (vrutkovs@redhat.com)
+- Wait for existing nodes to go Ready before approval (sdodson@redhat.com)
+- Fix ordering of etcd stop and mask (mgugino@redhat.com)
+
 * Wed Jul 18 2018 Tim Bielawa <tbielawa@redhat.com> 3.10.20-1
 - Adds openshift_fs_inotify_max_user_instances to the node tuned profile.
   (jtudelag@redhat.com)
