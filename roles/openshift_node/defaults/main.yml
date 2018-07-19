@@ -16,12 +16,6 @@ system_images_registry: "docker"
 l_osn_image: "{{ (system_images_registry == 'docker') | ternary(osn_image, (osn_image.split('/')|length==2) | ternary(system_images_registry + '/' + osn_image, osn_image)) }}"
 system_osn_image: "{{ (system_images_registry == 'docker') | ternary('docker:' + l_osn_image, l_osn_image) }}"
 
-openshift_oreg_url_default_dict:
-  origin: "docker.io/openshift/origin-${component}:${version}"
-  openshift-enterprise: "registry.access.redhat.com/openshift3/ose-${component}:${version}"
-openshift_oreg_url_default: "{{ openshift_oreg_url_default_dict[openshift_deployment_type] }}"
-oreg_url_node: "{{ oreg_url | default(openshift_oreg_url_default) | regex_replace('${version}' | regex_escape, openshift_image_tag | default('${version}')) }}"
-
 openshift_node_env_vars: {}
 
 # Create list of 'k=v' pairs.

@@ -64,7 +64,10 @@ ALLOWED_REGISTRIES_VAR = "openshift_master_image_policy_allowed_registries_for_i
 
 REMOVED_VARIABLES = (
     # TODO(michaelgugino): Remove in 3.12
-    ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated')
+    ('oreg_auth_credentials_replace', 'Removed: Credentials are now always updated'),
+    ('oreg_url_master', 'oreg_url'),
+    ('oreg_url_node', 'oreg_url'),
+
 )
 
 # JSON_FORMAT_VARIABLES does not intende to cover all json variables, but
@@ -189,7 +192,7 @@ class ActionModule(ActionBase):
 
         unmatched_registries = []
         for regvar in (
-                "oreg_url_master", "oreg_url_node", "oreg_url"
+                "oreg_url"
                 "openshift_cockpit_deployer_prefix",
                 "openshift_metrics_image_prefix",
                 "openshift_logging_image_prefix",
@@ -403,16 +406,12 @@ class ActionModule(ActionBase):
             return None
 
         oreg_url = self.template_var(hostvars, host, 'oreg_url')
-        oreg_url_master = self.template_var(hostvars, host, 'oreg_url_master')
-        oreg_url_node = self.template_var(hostvars, host, 'oreg_url_node')
-        oreg_url_found = False
-        for url in (oreg_url, oreg_url_master, oreg_url_node):
-            if url is not None:
-                oreg_url_found = True
-                if reg_to_check in url:
-                    raise errors.AnsibleModuleError(err_msg2)
 
-        if not oreg_url_found and odt == 'openshift-enterprise':
+        if oreg_url is not None:
+            if reg_to_check in oreg_url:
+                raise errors.AnsibleModuleError(err_msg2)
+
+        elif odt == 'openshift-enterprise':
             # We're not using an oreg_url, we're using default enterprise
             # registry.  We require oreg_auth_user and oreg_auth_password
             raise errors.AnsibleModuleError(err_msg)

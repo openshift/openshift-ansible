@@ -19,7 +19,6 @@ From this role:
 |------------------------------------------|-----------------------|----------------------------------------------------------|
 | openshift_node_start_options             | UNDEF (Optional)      | Options to pass to node start cmdline                    |
 | oreg_url                                 | UNDEF (Optional)      | Default docker registry to use                           |
-| oreg_url_node                            | UNDEF (Optional)      | Default docker registry to use, specifically on the node |
 | openshift_persistentlocalstorage_enabled | false                 | Enable the persistent local storage                      |
 
 openshift_node_start_options can be used for passing any start node option, e.g.:
