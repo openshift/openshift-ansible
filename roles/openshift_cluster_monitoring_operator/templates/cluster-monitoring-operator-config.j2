@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: {{ openshift_cluster_monitoring_operator_namespace }}
+data:
+  config.yaml: |+
+    prometheusOperator:
+      baseImage: {{ openshift_cluster_monitoring_operator_prometheus_operator_repo }}
+      prometheusConfigReloaderBaseImage: {{ openshift_cluster_monitoring_operator_prometheus_reloader_repo }}
+      configReloaderBaseImage: {{ openshift_cluster_monitoring_operator_configmap_reloader_repo }}
+{% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in openshift_cluster_monitoring_operator_node_selector.items() %}
+        {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+    prometheusK8s:
+      baseImage: {{ openshift_cluster_monitoring_operator_prometheus_repo }}
+{% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in openshift_cluster_monitoring_operator_node_selector.items() %}
+        {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+      externalLabels:
+        cluster: {{ openshift_cluster_monitoring_operator_cluster_id }}
+      volumeClaimTemplate:
+        spec:
+          resources:
+            requests:
+              storage: {{ openshift_cluster_monitoring_operator_prometheus_storage_capacity }}
+    alertmanagerMain:
+      baseImage: {{ openshift_cluster_monitoring_operator_alertmanager_repo }}
+{% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in openshift_cluster_monitoring_operator_node_selector.items() %}
+        {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+      volumeClaimTemplate:
+        spec:
+          resources:
+            requests:
+              storage: {{ openshift_cluster_monitoring_operator_alertmanager_storage_capacity }}
+    nodeExporter:
+      baseImage: {{ openshift_cluster_monitoring_operator_node_exporter_repo }}
+    grafana:
+      baseImage: {{ openshift_cluster_monitoring_operator_grafana_image }}
+{% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in openshift_cluster_monitoring_operator_node_selector.items() %}
+        {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+    kubeStateMetrics:
+      baseImage: {{ openshift_cluster_monitoring_operator_kube_state_metrics_image }}
+{% if openshift_cluster_monitoring_operator_node_selector is iterable and openshift_cluster_monitoring_operator_node_selector | length > 0 %}
+      nodeSelector:
+{% for key, value in openshift_cluster_monitoring_operator_node_selector.items() %}
+        {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+    kubeRbacProxy:
+      baseImage: {{ openshift_cluster_monitoring_operator_kube_rbac_proxy_image }}
+    auth:
+      baseImage: {{ openshift_cluster_monitoring_operator_proxy_image }}
