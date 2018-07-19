@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.6.0
+Release:        0.7.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,10 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Jul 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.7.0
+- adding 3.11 tito releaser (aos-team-art@redhat.com)
+- Remove alternative oreg vars and update logic (mgugino@redhat.com)
+
 * Thu Jul 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.6.0
 - Refactor vars in container-runtime/private (vrutkovs@redhat.com)
 - Remove openshift_docker_is_node_or_master - all masters and etcd hosts are
