@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.1.0
+Release:        0.6.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,313 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Jul 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.6.0
+- Refactor vars in container-runtime/private (vrutkovs@redhat.com)
+- Remove openshift_docker_is_node_or_master - all masters and etcd hosts are
+  now nodes (vrutkovs@redhat.com)
+- Fix cpu_limit check in eventrouter template (vrutkovs@redhat.com)
+- Wait for existing nodes to go Ready before approval (sdodson@redhat.com)
+- Fix sanity checks for oreg_auth_user and oreg_auth_password
+  (sdodson@redhat.com)
+- Remove extra atomic checks (mgugino@redhat.com)
+- Remove l_default_container_storage_hosts var (vrutkovs@redhat.com)
+- Remove mentions of oo_hosts_containerized_managed_true group
+  (vrutkovs@redhat.com)
+- only sync actual resource files (bparees@redhat.com)
+- update the default oauth-proxy image for logging (jcantril@redhat.com)
+- glusterfs: bind created volume to the claim (vrutkovs@redhat.com)
+- Adds openshift_fs_inotify_max_user_instances to the node tuned profile.
+  (jtudelag@redhat.com)
+- use local reference policy for dotnet imagestreams (bparees@redhat.com)
+- use local ref policy for all xpaas imagestreams (bparees@redhat.com)
+- Adding aggregate rule for new user authorization (smhurley00@gmail.com)
+- switch imagestreams to registry.redhat.io (bparees@redhat.com)
+- Rename console logoImageName -> branding (spadgett@redhat.com)
+- Add scaleup playbook and docs for OpenStack (tomas@sedovic.cz)
+- Fix the Neutron DNS docs (tomas@sedovic.cz)
+- Uses cluster-wide settings for registry URL and credentials as default values
+  for ASB. (mhrivnak@redhat.com)
+- Add playbook to update reg-auth credentials (mgugino@redhat.com)
+- CLOUD-2699 remove EAP 7.0 templates (ken@zaptillion.net)
+- Reconfigure admin console after certificates were redeployed
+  (spadgett@redhat.com)
+- Add max-size to docker log opts (umohnani@redhat.com)
+- Various openshift-cluster-autoscaler changes (amcdermo@redhat.com)
+- Remove Get heketi route tasks (nakayamakenjiro@gmail.com)
+- generate_pv_pvcs_list: set claimRef for NFS volumes (vrutkovs@redhat.com)
+- Fix storageclass setting for NFS (vrutkovs@redhat.com)
+- Add support for OpenStack internal DNS (tomas@sedovic.cz)
+- oreg url fix (m.judeikis@gmail.com)
+- Use glusterfs_name and glusterfs_namespace for heketi url
+  (nakayamakenjiro@gmail.com)
+- Use service name for heketi url (nakayamakenjiro@gmail.com)
+- Update sdn, sdn-ovs, sync, fluentd, descheduler to have system-cluster/node-
+  critical priority classes. (avesh.ncsu@gmail.com)
+- Install metrics-server pre-upgrade, if metrics (sross@redhat.com)
+- Split metrics-server into its own playbook/role (sross@redhat.com)
+- bug 1590920. Bump fluent default memory to 756M (jcantril@redhat.com)
+- documentation regarding creating and using a static inventory
+  (tzumainn@redhat.com)
+- Allow openstack inventory.py to output a static inventory
+  (tzumainn@redhat.com)
+- Update docker registry auth to idempotent (mgugino@redhat.com)
+- Force rebuild of config when upgrading to es5 (ewolinet@redhat.com)
+- Replace node.js proxy with oauth-proxy (jkarasek@redhat.com)
+- Addressing tox failures (ewolinet@redhat.com)
+- sdn: don't blow away all existing CNI plugins or config (dcbw@redhat.com)
+- Add openshift_docker_gc role to upgrade path (rteague@redhat.com)
+- PAPR: install new requirements during upgrade (vrutkovs@redhat.com)
+- Remove ec2_group - available upstream (vrutkovs@redhat.com)
+- Remove rpm_q - not used (vrutkovs@redhat.com)
+- Defining a default for logging_elasticsearch_rollout_override var in es
+  handler (ewolinet@redhat.com)
+- Only gather hosts when installing logging, otherwise remove sysctl file from
+  all (ewolinet@redhat.com)
+- Updating to require es node selectors for es5 install, only create sysctl
+  files for nodes es will run on and clean up sysctl files when uninstalling
+  logging (ewolinet@redhat.com)
+- Exclude existing masters from node list for CSR approval during node and
+  master scaleup. (abutcher@redhat.com)
+- Fixup various TODO sections of code (mgugino@redhat.com)
+- Add check for oreg_password by default (mgugino@redhat.com)
+- Setup logrotate on nodes once (vrutkovs@redhat.com)
+- Add openshift_metering role and playbook (chance.zibolski@coreos.com)
+- Remove callback plugin, artifact of a quick installer (vrutkovs@redhat.com)
+- Update README (vrutkovs@redhat.com)
+- Fix version requirements (vrutkovs@redhat.com)
+- Fixing missing _es_version variable (ewolinet@redhat.com)
+- action_plugin_test: add necessary vars to support unittests in ansible 2.6
+  (vrutkovs@redhat.com)
+- ASB migrate: impove result checking (vrutkovs@redhat.com)
+- Use ansible 2.6 (vrutkovs@redhat.com)
+- Remove old service files before masking them (sdodson@redhat.com)
+- switch to registry.redhat.io for infra images (bparees@redhat.com)
+- Fix to shebang in bootstrap script (mazzystr@gmail.com)
+- Do not delete IAM cert if explicitely requested (jchaloup@redhat.com)
+- Ensure nodes created by a scale group have a Name tag (amcdermo@redhat.com)
+- gcp: add custom repo when building base image (runcom@redhat.com)
+- Sync Fuse console templates (antonin@stefanutti.fr)
+- Remove unused node config (mgugino@redhat.com)
+- Remove system container bits from etcd (mgugino@redhat.com)
+- Allow installs of Node Problem Detector during upgrades (joesmith@redhat.com)
+- Clean cloud-init path (mazzystr@gmail.com)
+- Add atomic package to base and debug package lists
+  (nakayamakenjiro@gmail.com)
+- make logging rely on a single SG index (jcantril@redhat.com)
+- Accept client certs from node, system:admin, and bootstrap SA
+  (sdodson@redhat.com)
+- Make openshift_control_plane/check_master_api_is_ready.yml generic
+  (sdodson@redhat.com)
+- Install OpenShift admin console (spadgett@redhat.com)
+- Add a components public playbook (sdodson@redhat.com)
+- Wait for API availability before migrating storage, add retries
+  (sdodson@redhat.com)
+- Uninstall playbook respects openshift_use_openshift_sdn.
+  (jtudelag@redhat.com)
+- Suppress unexpected error caused by non-English locale during CRI-O
+  installation (bysnupy@hotmail.com)
+- google-cloud-sdk is x86_64 only (sdodson@redhat.com)
+- Add SDN health check (miciah.masters@gmail.com)
+- [RHDM-662] - Update RHDM templates on OCP and OSO (fspolti@redhat.com)
+- [RHDM-662] - Update RHDM templates on OCP and OSO (fspolti@redhat.com)
+- Add simonpasquier to the OWNERS file for prometheus installer
+  (pgier@redhat.com)
+- hardcode flexvolume path on atomic hosts (hekumar@redhat.com)
+- add EAP CD 13 to OS 3.10 (ken@zaptillion.net)
+- Allow the 9k-10k port range for Prometheus (spasquie@redhat.com)
+- Use OPENSHIFT_CLUSTER env in OpenStack uninstall (tomas@sedovic.cz)
+- Azure: update create_and_publish_offer to match new offer/SKUs
+  (jminter@redhat.com)
+- Add EAP CD 13 imagestream and templates. (ken@zaptillion.net)
+- Fix scalegroup upgrades so don't have to delete ASG's. (mwoodson@redhat.com)
+- prometheus: upgrade prometheus to 2.3.1 (pgier@redhat.com)
+- prometheus: upgrade alertmanager to 0.15.0 (pgier@redhat.com)
+- prometheus: upgrade node_exporter to 0.16.0 (pgier@redhat.com)
+- add node get-node-logs script (m.judeikis@gmail.com)
+- Dedicated etcd nodes should not be added to oo_nodes_to_upgrade
+  (vrutkovs@redhat.com)
+- Don't upgrade nodes which only have dedicated etcd (vrutkovs@redhat.com)
+- fix metrics become syntax (eduardas@redhat.com)
+- standalone etcds: make sure etcd facts are set before applying etcd config
+  (vrutkovs@redhat.com)
+- additional changes to remove discovery plugin from logging
+  (jcantril@redhat.com)
+- Convert rbac v1beta to v1 (sdodson@redhat.com)
+- Increate lbaas_activation_timeout for kuryr-controller (ltomasbo@redhat.com)
+- Change multipath prio from const to alua (jarrpa@redhat.com)
+- Certificates signed by admins should be approved (ccoleman@redhat.com)
+- change become syntax (m.judeikis@gmail.com)
+- Migrate old master env files to new location (mgugino@redhat.com)
+- Make sure that we use rslave mount propagation (hekumar@redhat.com)
+- Update ansible code to preseve path on non-atomic hosts (hekumar@redhat.com)
+- Add kubelet-plugins to allowed locations (hekumar@redhat.com)
+- Mount kubelet plugins inside controller (hekumar@redhat.com)
+- Fix volume location in containarized installs (hekumar@redhat.com)
+- updating link to Origin install documentation for latest
+  (collins.christopher@gmail.com)
+- PAPR: tee update log in a separate file so that it won't be truncated
+  (vrutkovs@redhat.com)
+- Make fs_inotify_max_user_watches configurable. (avesh.ncsu@gmail.com)
+- change heketi logic (m.judeikis@gmail.com)
+- Mark ready nodes as accepted during oc_adm_csr approval.
+  (abutcher@redhat.com)
+- Remove the extra OpenStack network tasks (tomas@sedovic.cz)
+- Add infra secgroup rules to the flat secgrp rules (ltomasbo@redhat.com)
+- Stop throwing exception except ValueError (nakayamakenjiro@gmail.com)
+- Add unit test for validate_json_format_vars (nakayamakenjiro@gmail.com)
+- Validate json variable in sanity check (nakayamakenjiro@gmail.com)
+- create an imagestream import secret for importing samples
+  (bparees@redhat.com)
+- Use openshift_is_atomic fact from delegated host (vrutkovs@redhat.com)
+- Update etcd pod to 3.2.22 (sdodson@redhat.com)
+- Add build_image playbook for OpenStack (tomas@sedovic.cz)
+- Enable extended validation of routes by default (miciah.masters@gmail.com)
+- Configure node proxy settings on bootstrapped nodes (vrutkovs@redhat.com)
+- Bind the node-proxier role to the SDN SA (sross@redhat.com)
+- Copying acs-engine output to know location. (kwoodson@redhat.com)
+- Disable the wifi collector in node_exporter (spasquie@redhat.com)
+- etcd: add clientAuth to server usage (rphillips@redhat.com)
+- Bug 1589134- Namespace the CRD variable to prevent collision
+  (fabian@fabianism.us)
+- Allowing for build artifacts to persist. (kwoodson@redhat.com)
+- Gather master facts to make sure cluster_hostname gets appended to no_proxy
+  list on nodes (vrutkovs@redhat.com)
+- Get acs-engine from new CI namespace (kargakis@protonmail.ch)
+- Add Data Grid 7.2 to OpenShift Cloud Platform (remerson@redhat.com)
+- Discourage use of openshift_docker_additional_registries (sdodson@redhat.com)
+- Ensure SkyDNS is enabled with Kuryr SDN (ltomasbo@redhat.com)
+- Make regex for the openshift_pkg_version simpler (nakayamakenjiro@gmail.com)
+- Add unit tests for check_pkg_version_format and check_release_format
+  (nakayamakenjiro@gmail.com)
+- Add format check of openshift_pkg_version and openshift_release
+  (nakayamakenjiro@gmail.com)
+- Fix openshift_logging on Python3 (christoffer.reijer@basalt.se)
+- Correct tests used as filters (rteague@redhat.com)
+- Only dump oreg_url when value is defined. (kwoodson@redhat.com)
+- openshift-logging use headless service for node discovery
+  (jcantril@redhat.com)
+- Variablizing vm size for azure. (kwoodson@redhat.com)
+- Add a debug statement to the image build to dump tag information.
+  (kwoodson@redhat.com)
+- Fix openshift_node_config_name in bootstrap.yml. (abutcher@redhat.com)
+- Move os_sdn_network_plugin_name into openshift_facts (sdodson@redhat.com)
+- Update routers that are defined in openshift_hosted_routers
+  (sdodson@redhat.com)
+- Clarify example for osm_etcd_image (rteague@redhat.com)
+- Bump grafana version (mrsiano@gmail.com)
+- Increase watch_retry_timeout for kuryr-daemon (mdulko@redhat.com)
+- Find router pods with fully qualified prefixes during upgrade
+  (sdodson@redhat.com)
+- Grafana: convert grafana_service_targetport in annotations
+  (vrutkovs@redhat.com)
+- bump xpaas to 1.4.14 (rcernich@redhat.com)
+- Deploy grafana if openshift_hosted_grafana_deploy is set
+  (vrutkovs@redhat.com)
+- Add configmap-generator templates (simaishi@redhat.com)
+- Adding owners file for openshift_logging_defaults role (ewolinet@redhat.com)
+- Change metrics-server project to "openshift-monitoring" (amcdermo@redhat.com)
+- Unify openshift_metrics_server image to standard format (amcdermo@redhat.com)
+- Remove openshift_version_gte_3_9 conditions (amcdermo@redhat.com)
+- Revert "Revert "Add metrics-server to openshift-metrics playbook""
+  (amcdermo@redhat.com)
+- Remove haproxy from node package set (sdodson@redhat.com)
+- Reconfigure web console after certificates were redeployed
+  (vrutkovs@redhat.com)
+- azure: disable waagent data disk management (jminter@redhat.com)
+- Bug 1558689 - Add iproute to Dockerfile.rhel7 (rteague@redhat.com)
+- configure imagePolicyConfig:allowedRegistriesForImport (miminar@redhat.com)
+- Deprecate openshift_node_kubelet_args and openshift_node_labels
+  (vrutkovs@redhat.com)
+- "Fixed ns_update var check" (erj826@bu.edu)
+- check_htpasswd_provider: throw error if openshift_master_identity_providers
+  is not parsed into a list (vrutkovs@redhat.com)
+- no_proxy: use 'append' to properly add a string to a list
+  (vrutkovs@redhat.com)
+- Update Kuryr CNI template to 3.11 (mdulko@redhat.com)
+- change from none to len of the string (davis.phillips@gmail.com)
+- manage_node: don't add extra labels to infra/compute/master nodes
+  (vrutkovs@redhat.com)
+- Maybe the symlink is slightly off? (sdodson@redhat.com)
+- openshift_aws: enabled different instance type to be used
+  (mwoodson@redhat.com)
+- Persist oreg_url in node image (kargakis@protonmail.ch)
+- default_storage: configure rolebindings for azure-file storage backend
+  (arun.neelicattu@gmail.com)
+- default_storage: allow configuring mountOptions and reclaimPolicy
+  (arun.neelicattu@gmail.com)
+- lib_openshift/oc_storageclass: support mountOptions and reclaimPolicy
+  (arun.neelicattu@gmail.com)
+- Add node_group_checks to openshift_node_group.yml (rteague@redhat.com)
+- Fully qualify all openshift/origin and openshift3/ose images
+  (sdodson@redhat.com)
+- Change the order of template_var calls in check_htpasswd_provider
+  (vrutkovs@redhat.com)
+- Set UID,fsGroup and Linux options to cassandra RC's (ruben.vp8510@gmail.com)
+- Removing var openshift_logging_es5_techpreview and multi-version structures
+  in logging roles (ewolinet@redhat.com)
+- Sync grafana deployment. to openshift-monitoring. (mrsiano@gmail.com)
+- Set `openshift_node_group_name` for the CNS nodes (tomas@sedovic.cz)
+- Revert "Migrate hawkular metrics to a new namespace" (ruben.vp8510@gmail.com)
+- Add doc link to check_for_config (adellape@redhat.com)
+- Fix invalid openshift_master_audit_config in hosts.example
+  (vrutkovs@redhat.com)
+- Record etcd static pod version only if master-exec has stdout
+  (vrutkovs@redhat.com)
+- Revert update to 3.10 registry console template (rteague@redhat.com)
+- Fix registry gluster storage variable (bliemli@users.noreply.github.com)
+- Add openshift_master_cluster_hostname to no_proxy list (vrutkovs@redhat.com)
+- Remove umount /var/lib/docker as docker-storage-setup --reset umount it
+  (nakayamakenjiro@gmail.com)
+- Fix wrong path to docker storage (nakayamakenjiro@gmail.com)
+- Clean up docker-storage in a reliable mannger (nakayamakenjiro@gmail.com)
+- bug 1575546. Fix logging eventrouter cpu requests (jcantril@redhat.com)
+- PAPR: set docker log driver to journald so that journal artifacts contain
+  docker logs too (vrutkovs@redhat.com)
+- PAPR: upgrade from 3.10 branch (vrutkovs@redhat.com)
+- Fixed add_container_provider.yaml so it uses openshift_management_project
+  variable name instead of set name (dluong@redhat.com)
+- Add openshift-node entry-point playbooks (rteague@redhat.com)
+- Update README.md (SaravanaStorageNetwork@users.noreply.github.com)
+- Update README.md (SaravanaStorageNetwork@users.noreply.github.com)
+- Updating node group mappings to use an openshift specific tag.
+  (kwoodson@redhat.com)
+- Add extensions to included task file directives (rteague@redhat.com)
+- upgrade: storage migrations should use 'until' to properly retry migrations
+  (vrutkovs@redhat.com)
+- upgrade: init facts on nodes so that NO_PROXY would include nodes
+  (vrutkovs@redhat.com)
+- bug 1575903. Default ES memory to 8G (jcantril@redhat.com)
+- Appease yamllint (tomas@sedovic.cz)
+- Fix nsupdate with allinone (tomas@sedovic.cz)
+- master config: join bootstrap settings and sync DS tasks
+  (vrutkovs@redhat.com)
+- Add prometheus port annotation for Grafana service (pat2man@gmail.com)
+- add missing backticks (tzumainn@redhat.com)
+- Use ansible systemd module to check service status
+  (nakayamakenjiro@gmail.com)
+- Fix OpenStack all-in-one cluster deployment (tomas@sedovic.cz)
+- Confirm iptables service status by checking command status
+  (nakayamakenjiro@gmail.com)
+- Makes redeploy-registry-certificates consistent with
+  openshift_hosted_manage_registry. (jtudelag@redhat.com)
+- Allow for overriding of the elb names to support shorter endings for the
+  names (staebler@redhat.com)
+- When: openshift_use_kuryr --> all instances updated (i.am.emilio@gmail.com)
+- no longer checks if default(false) == true, casts to int
+  (i.am.emilio@gmail.com)
+- Enable container_manage_crgroup sebool (sdodson@redhat.com)
+- Get Kuryr Services checks openshift_use_kuryr==true before starting
+  (i.am.emilio@gmail.com)
+- Fix S3 storage class path (sarumuga@redhat.com)
+- add openstack docs about swift/ceph rados gw backed registry
+  (tzumainn@redhat.com)
+- Add support for subnet per namespace kuryr feature (ltomasbo@redhat.com)
+- [RHPAM-859] - Include RHPAM templates in OpenShift release
+  (fspolti@redhat.com)
+- Add Prometheus scrape config for openshift-logging (lukas.vlcek@gmail.com)
+- Adding sslcacert to additional repos (craig.munro@gmail.com)
+- Update glusterfs README about uninstall playbook (sarumuga@redhat.com)
+
 * Fri Jun 15 2018 Scott Dodson <sdodson@redhat.com> 3.11.0-0.1.0
 - Initial 3.11 support (sdodson@redhat.com)
 - bump to 3.11 (tbielawa@redhat.com)
