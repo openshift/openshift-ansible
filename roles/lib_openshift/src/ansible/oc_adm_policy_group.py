@@ -18,6 +18,7 @@ def main():
 
             group=dict(required=True, type='str'),
             resource_kind=dict(required=True, choices=['role', 'cluster-role', 'scc'], type='str'),
+            rolebinding_name=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
     )

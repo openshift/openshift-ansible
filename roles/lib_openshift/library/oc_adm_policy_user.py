@@ -79,6 +79,12 @@ options:
     required: false
     default: None
     aliases: []
+  rolebinding_name:
+    description:
+    - The name of the rolebinding object for roles
+    required: false
+    default: None
+    aliases: []
   debug:
     description:
     - Turn on debug output.
@@ -2093,6 +2099,9 @@ class PolicyUser(OpenShiftCLI):
             return False
 
         for binding in bindings:
+            if self.config.config_options['rolebinding_name']['value'] is not None and \
+                    binding['metadata']['name'] != self.config.config_options['rolebinding_name']['value']:
+                continue
             if binding['roleRef']['name'] == self.config.config_options['name']['value'] and \
                     binding['userNames'] is not None and \
                     self.config.config_options['user']['value'] in binding['userNames']:
@@ -2137,6 +2146,9 @@ class PolicyUser(OpenShiftCLI):
         if self.config.config_options['role_namespace']['value'] is not None:
             cmd.extend(['--role-namespace', self.config.config_options['role_namespace']['value']])
 
+        if self.config.config_options['rolebinding_name']['value'] is not None:
+            cmd.extend(['--rolebinding-name', self.config.config_options['rolebinding_name']['value']])
+
         return self.openshift_cmd(cmd, oadm=True)
 
     @staticmethod
@@ -2158,6 +2170,7 @@ class PolicyUser(OpenShiftCLI):
                                     'resource_kind': {'value': params['resource_kind'], 'include': False},
                                     'name': {'value': params['resource_name'], 'include': False},
                                     'role_namespace': {'value': params['role_namespace'], 'include': False},
+                                    'rolebinding_name': {'value': params['rolebinding_name'], 'include': False},
                                    })
 
         policyuser = PolicyUser(nconfig, params['debug'])
@@ -2223,6 +2236,7 @@ def main():
             resource_name=dict(required=True, type='str'),
             namespace=dict(default='default', type='str'),
             role_namespace=dict(default=None, type='str'),
+            rolebinding_name=dict(default=None, type='str'),
             kubeconfig=dict(default='/etc/origin/master/admin.kubeconfig', type='str'),
 
             user=dict(required=True, type='str'),
