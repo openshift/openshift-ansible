@@ -14,6 +14,8 @@ items:
     labels:
       app: dockergc
   spec:
+    updateStrategy:
+      type: RollingUpdate
     template:
       metadata:
         labels:
