@@ -24,21 +24,22 @@ class CallbackModule(CallbackBase):
         # Find the longest phase title
         max_column = 0
         for phase in phases:
-            max_column = max(max_column, len(phases[phase]['title']))
+            max_column = max(max_column, len(phases[phase].get('title', '')))
 
         # Sort the phases by start time
-        ordered_phases = sorted(phases, key=lambda x: (phases[x]['start']))
+        ordered_phases = sorted(phases, key=lambda x: (phases[x].get('start', 0)))
 
         self._display.banner('INSTALLER STATUS')
         # Display status information for each phase
         for phase in ordered_phases:
-            phase_title = phases[phase]['title']
+            phase_title = phases[phase].get('title', '')
             padding = max_column - len(phase_title) + 2
             phase_status = phases[phase]['status']
             phase_time = phase_time_delta(phases[phase])
-            self._display.display(
-                '{}{}: {} ({})'.format(phase_title, ' ' * padding, phase_status, phase_time),
-                color=self.phase_color(phase_status))
+            if phase_title:
+                self._display.display(
+                    '{}{}: {} ({})'.format(phase_title, ' ' * padding, phase_status, phase_time),
+                    color=self.phase_color(phase_status))
             # If the phase is not complete, tell the user what playbook to rerun
             if phase_status == 'In Progress' and phase != 'installer_phase_initialize':
                 self._display.display(
@@ -72,6 +73,8 @@ class CallbackModule(CallbackBase):
 
 def phase_time_delta(phase):
     """ Calculate the difference between phase start and end times """
+    if not phase.get('start'):
+        return ''
     time_format = '%Y%m%d%H%M%SZ'
     phase_start = datetime.strptime(phase['start'], time_format)
     if 'end' not in phase:
