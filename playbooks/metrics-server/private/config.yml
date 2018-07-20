@@ -26,6 +26,6 @@
     run_once: true
     set_stats:
       data:
-        installer_phase_metrics_service:
+        installer_phase_metrics_server:
           status: "Complete"
           end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
