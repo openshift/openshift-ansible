@@ -38,7 +38,7 @@ spec:
         scheme: HTTPS
         port: 8443
         path: healthz
-      initialDelaySeconds: 45
+      initialDelaySeconds: 60
       timeoutSeconds: 10
     readinessProbe:
       httpGet:
