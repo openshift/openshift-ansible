@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.21
+Version:        3.10.22
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Jul 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.22-1
+- Support specifying the rolebinding name (mchappel@redhat.com)
+
 * Thu Jul 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.21-1
 - glusterfs: bind created volume to the claim (vrutkovs@redhat.com)
 - Wait for existing nodes to go Ready before approval (sdodson@redhat.com)
