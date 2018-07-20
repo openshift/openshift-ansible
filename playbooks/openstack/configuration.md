@@ -754,75 +754,20 @@ volumes.
 
 ### Validation
 
-1. Log in and create a new project (with `oc login` and `oc new-project`)
-2. Create a file called `cinder-claim.yaml` with the following contents:
-
-```yaml
-apiVersion: "v1"
-kind: "PersistentVolumeClaim"
-metadata:
-  name: "claim1"
-spec:
-  accessModes:
-    - "ReadWriteOnce"
-  resources:
-    requests:
-      storage: "1Gi"
-```
-3. Run `oc create -f cinder-claim.yaml` to create the Persistent Volume Claim object in OpenShift
-4. Run `oc describe pvc claim1` to verify that the claim was created and its Status is `Bound`
-5. Run `openstack volume list`
+1. Log in and create a new project (with `oc login` and `oc new-project persistent`)
+2. Run the persistent Django example: `oc new-app --template=django-psql-persistent`
+3. Wait until both pods of the deployment are running
+4. Run `openstack volume list`
    * A new volume called `kubernetes-dynamic-pvc-UUID` should be created
-   * Its size should be `1`
-   * It should not be attached to any server
-6. Create a file called `mysql-pod.yaml` with the following contents:
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mysql
-  labels:
-    name: mysql
-spec:
-  containers:
-    - resources:
-        limits :
-          cpu: 0.5
-      image: openshift/mysql-55-centos7
-      name: mysql
-      env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: yourpassword
-        - name: MYSQL_USER
-          value: wp_user
-        - name: MYSQL_PASSWORD
-          value: wp_pass
-        - name: MYSQL_DATABASE
-          value: wp_db
-      ports:
-        - containerPort: 3306
-          name: mysql
-      volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql/data
-  volumes:
-    - name: mysql-persistent-storage
-      persistentVolumeClaim:
-        claimName: claim1
-```
-
-7. Run `oc create -f mysql-pod.yaml` to create the pod
-8. Run `oc describe pod mysql`
-   * Its events should show that the pod has successfully attached the volume above
-   * It should show no errors
-   * `openstack volume list` should show the volume attached to an OpenShift app node
-   * NOTE: this can take several seconds
-9. After a while, `oc get pod` should show the `mysql` pod as running
-10. Run `oc delete pod mysql` to remove the pod
-   * The Cinder volume should no longer be attached
-11. Run `oc delete pvc claim1` to remove the volume claim
-   * The Cinder volume should be deleted
+   * It should be attached to an OpenShift app node
+5. Open the app's URL in your web browser
+6. Note that the `Page views` counter increases with each reload
+7. Delete both pods (`oc delete pod <name>`)
+8. Wait for both to be recreated
+9. Refresh the Django website again
+10. Verify that the `Page views` number is not lost and still goes up
+11. Delete the project (`oc delete project persistent`)
+12. Verify that the pods get deleted and not recreated
 
 
 ## Cinder-Backed Registry Configuration
