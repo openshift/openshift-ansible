@@ -48,24 +48,24 @@ export ANSIBLE_STDOUT_CALLBACK=debug
 ansible -vv -i $PAPR_INVENTORY nodes -a 'rpm-ostree status'
 
 # Make sure hostname -f returns correct node name
-ansible -vv -i $PAPR_INVENTORY nodes -m setup
-ansible -vv -i $PAPR_INVENTORY nodes -a "hostnamectl set-hostname {{ ansible_default_ipv4.address }}"
-ansible -vv -i $PAPR_INVENTORY nodes -m setup -a "gather_subset=min"
+ansible -vv -i $PAPR_INVENTORY nodes -m setup > /dev/null
+ansible -vv -i $PAPR_INVENTORY nodes -a "hostnamectl set-hostname {{ ansible_default_ipv4.address }}" > /dev/null
+ansible -vv -i $PAPR_INVENTORY nodes -m setup -a "gather_subset=min" > /dev/null
 
 upload_journals() {
   mkdir journals
-  ansible -vvv -i $PAPR_INVENTORY all -m file -a 'path=/tmp/journals state=directory'
+  ansible -vvv -i $PAPR_INVENTORY all -m file -a 'path=/tmp/journals state=directory' > /dev/null
   ansible -vvv -i $PAPR_INVENTORY all \
-    -m shell -a 'journalctl --no-pager > /tmp/journals/{{ inventory_hostname }}.log'
+    -m shell -a 'journalctl --no-pager > /tmp/journals/{{ inventory_hostname }}.log' > /dev/null
   ansible -vvv -i $PAPR_INVENTORY all \
-    -m synchronize -a "src=/tmp/journals/ dest=journals mode=pull"
+    -m synchronize -a "src=/tmp/journals/ dest=journals mode=pull" > /dev/null
 
   mkdir container_logs
-  ansible -vvv -i $PAPR_INVENTORY all -m file -a 'path=/tmp/container_logs state=directory'
+  ansible -vvv -i $PAPR_INVENTORY all -m file -a 'path=/tmp/container_logs state=directory' > /dev/null
   ansible -vvv -i $PAPR_INVENTORY all -m shell -a \
-    "docker ps --format {% raw %}'{{.Names}}'{% endraw %} | xargs -I{} -n 1 sh -c \"docker logs {} > /tmp/container_logs/{}.log 2>&1\" _"
+    "docker ps --format {% raw %}'{{.Names}}'{% endraw %} | xargs -I{} -n 1 sh -c \"docker logs {} > /tmp/container_logs/{}.log 2>&1\" _" > /dev/null
   ansible -vvv -i $PAPR_INVENTORY all \
-    -m synchronize -a "src=/tmp/container_logs/ dest=./container_logs/{{ inventory_hostname }} mode=pull"
+    -m synchronize -a "src=/tmp/container_logs/ dest=./container_logs/{{ inventory_hostname }} mode=pull" > /dev/null
 
   # Split large files into parts, extracting a basename and preserving extention
   find . -iname "*.log" -execdir sh -c 'split -b 4m --numeric-suffixes --additional-suffix=.log {} $(basename {} .log)_' \; -execdir rm -rf {} \;
