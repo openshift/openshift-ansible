@@ -239,6 +239,10 @@
     failed_when: False
     with_items: "{{ exited_containers_to_delete.results }}"
 
+  - name: Remove k8s_ containters
+    shell: docker ps -a -q -f name=k8s_ | xargs docker rm -f
+    failed_when: False
+
   - block:
     - block:
       - shell: docker images | egrep {{ item }} | awk '{ print $3 }'
