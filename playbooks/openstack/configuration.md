@@ -398,7 +398,6 @@ openshift_use_kuryr: true
 openshift_use_openshift_sdn: false
 os_sdn_network_plugin_name: cni
 openshift_node_proxy_mode: userspace
-openshift_hosted_manage_registry: false
 use_trunk_ports: true
 
 openshift_master_open_ports:
@@ -494,21 +493,6 @@ openshift_node_groups:
       - 'pod_vif=nested-vlan'
     edits: []
 ```
-
-
-### Deploying OpenShift Registry
-
-Since we've disabled the OpenShift registry creation, you will have to create
-it manually afterwards. SSH to a master node and run this as root:
-
-```yaml
-oadm registry --config=/etc/origin/master/admin.kubeconfig --service-account=registry
-```
-
-For more information (e.g. how to use a specific storage backend), please
-follow the OpenShift documentation on the registry:
-
-https://docs.openshift.org/latest/install_config/registry/index.html
 
 
 ### Kuryr Controller and CNI healthchecks probes
