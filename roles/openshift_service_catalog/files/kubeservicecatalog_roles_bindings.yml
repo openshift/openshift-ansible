@@ -138,6 +138,9 @@ objects:
     - servicebindings/status
     - servicebindings/finalizers
     - serviceinstances/reference
+    - servicebrokers/status
+    - serviceclasses/status
+    - serviceplans/status
     verbs:
     - update
   - apiGroups:
@@ -146,6 +149,7 @@ objects:
     - clusterservicebrokers
     - serviceinstances
     - servicebindings
+    - servicebrokers
     verbs:
     - list
     - get
@@ -162,6 +166,8 @@ objects:
     resources:
     - clusterserviceclasses
     - clusterserviceplans
+    - serviceclasses
+    - serviceplans
     verbs:
     - create
     - delete
