@@ -51,7 +51,6 @@ RELEASE_REGEX = {'re': '(^v?\\d+(\\.\\d+(\\.\\d+)?)?$)',
                  'error_msg': RELEASE_REGEX_ERROR}
 
 STORAGE_KIND_TUPLE = (
-    'openshift_hosted_registry_storage_kind',
     'openshift_loggingops_storage_kind',
     'openshift_logging_storage_kind',
     'openshift_metrics_storage_kind',
