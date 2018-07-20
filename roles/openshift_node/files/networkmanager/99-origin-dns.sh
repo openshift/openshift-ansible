@@ -64,7 +64,7 @@ EOF
     # watermark
     if ! grep -q '99-origin-dns.sh' /etc/resolv.conf; then
       if [[ -z "${IP4_NAMESERVERS}" || "${IP4_NAMESERVERS}" == "${def_route_ip}" ]]; then
-            IP4_NAMESERVERS=`grep '^nameserver ' /etc/resolv.conf | awk '{ print $2 }'`
+            IP4_NAMESERVERS=`grep '^nameserver[[:blank:]]' /etc/resolv.conf | awk '{ print $2 }'`
       fi
       ######################################################################
       # Write out default nameservers for /etc/dnsmasq.d/origin-upstream-dns.conf
@@ -116,7 +116,7 @@ EOF
         echo 'search cluster.local' >> ${NEW_RESOLV_CONF}
       elif ! grep -q 'search cluster.local' ${NEW_RESOLV_CONF}; then
         # cluster.local should be in first three DNS names so that glibc resolver would work
-        sed -i -e 's/^search \(.\+\)\( cluster\.local\)\{0,1\}$/search cluster.local \1/' ${NEW_RESOLV_CONF}
+        sed -i -e 's/^search[[:blank:]]\(.\+\)\( cluster\.local\)\{0,1\}$/search cluster.local \1/' ${NEW_RESOLV_CONF}
       fi
       cp -Z ${NEW_RESOLV_CONF} /etc/resolv.conf
     fi
