@@ -162,8 +162,6 @@
   loop_control:
     loop_var: node_name
 
-- debug: var={{ blah.blah }}
-
 # TODO: make idempotent
 - name: Generate proxy session
   set_fact: session_secret={{ 200 | lib_utils_oo_random_word}}
