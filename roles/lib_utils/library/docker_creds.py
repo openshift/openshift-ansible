@@ -224,7 +224,7 @@ def run_module():
     if changed:
         write_config(module, docker_config, dest)
 
-    result = {'changed': changed}
+    result = {'changed': changed, 'rc': 0}
 
     module.exit_json(**result)
 
