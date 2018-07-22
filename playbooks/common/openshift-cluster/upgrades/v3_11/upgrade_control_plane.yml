@@ -16,6 +16,7 @@
     l_upgrade_no_switch_firewall_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_init_fact_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
     l_base_packages_hosts: "oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config"
+    l_upgrade_cert_check_hosts: "oo_masters_to_config:oo_etcd_to_config"
 
 - name: Configure the upgrade target for the common upgrade tasks 3.11
   hosts: oo_masters_to_config:oo_etcd_to_config:oo_lb_to_config

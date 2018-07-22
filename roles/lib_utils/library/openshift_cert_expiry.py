@@ -779,7 +779,7 @@ an OpenShift Container Platform cluster
     ######################################################################
 
     res = tabulate_summary(ocp_certs, kubeconfigs, etcd_certs, router_certs, registry_certs)
-
+    warn_certs = bool(res['expired'] + res['warning'])
     msg = "Checked {count} total certificates. Expired/Warning/OK: {exp}/{warn}/{ok}. Warning window: {window} days".format(
         count=res['total'],
         exp=res['expired'],
@@ -822,6 +822,7 @@ an OpenShift Container Platform cluster
     # error we noticed earlier
     module.exit_json(
         check_results=check_results,
+        warn_certs=warn_certs,
         summary=res,
         msg=msg,
         rc=0,
