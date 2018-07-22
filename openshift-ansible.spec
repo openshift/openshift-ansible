@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.22
+Version:        3.10.23
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,11 @@ BuildArch:     noarch
 
 
 %changelog
+* Sun Jul 22 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.23-1
+- add firewall rules for node exporter (m.judeikis@gmail.com)
+- AWS: use vpc name instead of cluster id when creating security groups
+  (cewong@redhat.com)
+
 * Fri Jul 20 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.22-1
 - Support specifying the rolebinding name (mchappel@redhat.com)
 
