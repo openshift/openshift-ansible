@@ -20,6 +20,9 @@ spec:
     spec:
       serviceAccount: cassandra
       securityContext:
+        fsGroup: {{ fsgroup }}
+        seLinuxOptions:
+          level: {{ selinux_level }}
         supplementalGroups:
         - {{openshift_metrics_cassandra_storage_group}}
 {% if node_selector is iterable and node_selector | length > 0 %}
@@ -82,6 +85,8 @@ spec:
           mountPath: "/cassandra_data"
         - name: hawkular-cassandra-certs
           mountPath: "/hawkular-cassandra-certs"
+        securityContext:
+          runAsUser: {{ run_as_uid }}
 {% if ((openshift_metrics_cassandra_limits_cpu is defined and openshift_metrics_cassandra_limits_cpu is not none)
    or (openshift_metrics_cassandra_limits_memory is defined and openshift_metrics_cassandra_limits_memory is not none)
    or (openshift_metrics_cassandra_requests_cpu is defined and openshift_metrics_cassandra_requests_cpu is not none)
