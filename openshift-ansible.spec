@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.8.0
+Release:        0.9.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,10 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Jul 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.9.0
+- Fix order for invoking the hostpath storage task for registry
+  (ngompa@datto.com)
+
 * Mon Jul 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.8.0
 - metrics-server: fix a typo in installer path (vrutkovs@redhat.com)
 - installer_checkpoint: use .get to avoid warnings printed in 2.6
