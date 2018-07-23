@@ -13,6 +13,8 @@
 - when:
     - _metrics_pvc.results.stderr is defined
   block:
+    # storageclasses are used by default but if static then disable
+    # storageclasses with the storageClassName set to "" in pvc.j2
     - name: generate hawkular-cassandra persistent volume claims
       template:
         src: pvc.j2
@@ -30,6 +32,7 @@
         - openshift_metrics_cassandra_storage_type != 'dynamic'
       changed_when: false
 
+    # Storageclasses are used by default if configured
     - name: generate hawkular-cassandra persistent volume claims (dynamic)
       template:
         src: pvc.j2
@@ -41,6 +44,5 @@
         access_modes: "{{ openshift_metrics_cassandra_pvc_access | list }}"
         size: "{{ openshift_metrics_cassandra_pvc_size }}"
         pv_selector: "{{ openshift_metrics_cassandra_pv_selector }}"
-        storage_class_name: "{{ openshift_metrics_cassanda_pvc_storage_class_name | default('', true) }}"
       when: openshift_metrics_cassandra_storage_type == 'dynamic'
       changed_when: false
