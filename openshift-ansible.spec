@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.7.0
+Release:        0.8.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,27 @@ BuildArch:     noarch
 
 
 %changelog
+* Mon Jul 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.8.0
+- metrics-server: fix a typo in installer path (vrutkovs@redhat.com)
+- installer_checkpoint: use .get to avoid warnings printed in 2.6
+  (vrutkovs@redhat.com)
+- add firewall rules for node exporter (m.judeikis@gmail.com)
+- Add rc code to docker_creds module (mgugino@redhat.com)
+- Cope with OpenShift returning no value when an environment variable is an
+  empty string (mchappel@redhat.com)
+- catalog: add RBAC rules for namespaced brokers (jpeeler@redhat.com)
+- allow NFS to be used for registry without marking cluster unsupported
+  (bparees@redhat.com)
+- Adapt role to latest version of cluster-monitoring-operator
+  (fbranczyk@gmail.com)
+- Support specifying the rolebinding name (mchappel@redhat.com)
+- update imagestreams from origin (bparees@redhat.com)
+- AWS: use vpc name instead of cluster id when creating security groups
+  (cewong@redhat.com)
+- Set log-path = ~/openshift-ansible.log (sdodson@redhat.com)
+- Add OLM install scripts (cordell.evan@gmail.com)
+- Update the OpenStack Cinder PV example (tomas@sedovic.cz)
+
 * Thu Jul 19 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.7.0
 - adding 3.11 tito releaser (aos-team-art@redhat.com)
 - Remove alternative oreg vars and update logic (mgugino@redhat.com)
