@@ -33,6 +33,21 @@ and *rndc* key, the entire installation may be performed unattended.
 
 #### Step 1 Inventory
 #### Step 2 RHV Provisioning Variables
+
+Fill out a provisioning variables file (example [`provisioning-vars.yaml.example`](provisioning-vars.yaml.example)
+with values from your RHV environment, making sure to fill in all commented values.
+
+*Red Hat Virtualization Certificate*
+
+A copy of the `/etc/pki/ovirt-engine/ca.pem` from the RHV engine will need to
+be added to the `reference-architecture/rhv-ansible` directory. Replace the
+example server in the following command to download the certificate:
+
+```
+$ curl --output ca.pem 'http://engine.example.com/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA'
+
+```
+
 #### Step 3 Provision Virtual Machines in RHV
 #### Step 4 Register (for RHEL) and Subscribe Virtual Machines
 #### Step 5 Install Prerequisite Services
