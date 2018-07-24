@@ -38,14 +38,15 @@ spec:
         scheme: HTTPS
         port: 8443
         path: healthz
-      initialDelaySeconds: 60
+      initialDelaySeconds: 30
       timeoutSeconds: 10
     readinessProbe:
       httpGet:
         scheme: HTTPS
         port: 8443
         path: healthz/ready
-      initialDelaySeconds: 10
+      initialDelaySeconds: 30
+      failureThreshold: 10
       timeoutSeconds: 10
   volumes:
   - name: master-config
