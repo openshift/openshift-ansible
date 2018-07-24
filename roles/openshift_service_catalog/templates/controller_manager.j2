@@ -47,6 +47,10 @@ spec:
         - --feature-gates
         - AsyncBindingOperations=true
 {% endif %}
+{% if openshift_service_catalog_namespaced_service_brokers_enabled | bool %}
+        - --feature-gates
+        - NamespacedServiceBroker=true
+{% endif %}
         image: {{ openshift_service_catalog_image }}
         command: ["/usr/bin/service-catalog"]
         imagePullPolicy: IfNotPresent
