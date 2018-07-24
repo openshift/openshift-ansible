@@ -106,6 +106,13 @@
     selector: "glusterblock"
   failed_when: False
 
+- name: Delete pre-existing glusterblock config
+  file:
+    path: /etc/target
+    state: absent
+  delegate_to: "{{ item }}"
+  with_items: "{{ glusterfs_nodes | default([]) }}"
+
 - name: Delete gluster-s3 resources
   oc_obj:
     namespace: "{{ glusterfs_namespace }}"
