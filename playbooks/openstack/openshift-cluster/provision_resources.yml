@@ -10,3 +10,8 @@
     import_role:
       name: openshift_openstack
       tasks_from: provision.yml
+    vars:
+      l_hostname_domain_suffix: >-
+        {% if openshift_openstack_fqdn_nodes -%}
+        .{{ openshift_openstack_full_dns_domain }}
+        {%- endif -%}

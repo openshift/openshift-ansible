@@ -113,12 +113,15 @@ your deployment, you must set `OPENSHIFT_CLUSTER` to your stack name to avoid er
 
 ## DNS Configuration
 
-OpenStack deployments require an external DNS server for now. This
-server must be able to resolve the the OpenShift node names to their
-internal IP addresses.
+For its installation, OpenShift requires that the nodes can resolve each other
+by their hostnames. Specifically, the hostname must resolve to the private
+(i.e. nonfloating) IP address.
 
-We will be looking into using the internal Neutron DNS and/or the
-Designate project in the future.
+Most OpenStack deployments do not support this out of the box. If you have a
+control over your OpenStack, you can set this up in the [OpenStack Internal
+DNS](#openstack-internal-dns) section.
+
+Otherwise, you need an external DNS server.
 
 While we do not create a DNS for you, if it supports nsupdate (RFC
 2136[nsupdate-rfc]), we can populate it with the cluster records
@@ -150,13 +153,102 @@ to these DNS servers. Which means that any server running in that subnet will
 use the DNS automatically, without any extra configuration.
 
 
+### OpenStack Internal DNS
+
+This is the preferred way to handle internal node name resolution.
+
+OpenStack Neutron is capable of resolving its servers by name, but it needs to
+be configured to do so. This requires operator access to the OpenStack servers
+and services.
+
+
+#### Configure Neutron Internal DNS
+
+In `/etc/neutron/neutron.conf`, set the `dns_domain` option. For example:
+
+    dns_domain = internal.
+
+Note the trailing dot. This can be a domain name or any string and it does
+not have to be externally resolvable. Values such as `openshift.cool.`,
+`example.com.` or `openstack-internal.` are all fine.
+
+It must not be `openshiftlocal.` however. That is the default value and it does
+not provide the behaviour we need.
+
+Next, in `/etc/neutron/plugins/ml2/ml2_conf.ini`, add the `dns_domain_ports`
+extension driver:
+
+    extension_drivers=dns_domain_ports
+
+If you already have other drivers set, just add it at the end, separated by a
+coma. E.g.:
+
+    extension_drivers=port_security,dns_domain_ports
+
+Finally, restart the `neutron-server` service:
+
+    systemctl restart neutron-server
+
+(or `systemctl restart 'devstack@q-svc'` in DevStack)
+
+
+To verify that it works, you should create two servers, SSH into one of them
+and ping the other one by name. For example
+
+    $ openstack server create .... --network private test1
+    $ openstack server create .... --network private test2
+    $ openstack floating ip create external
+    $ openstack server add floating ip test1 <floating ip>
+    $ ssh centos@<floating ip>
+      $ ping test2
+
+If the ping succeeds, everything is set up correctly.
+
+For more information, read the relevant OpenStack documentation:
+
+https://docs.openstack.org/neutron/latest/admin/config-dns-int.html
+
+
+#### Configure Playbooks To Use Internal DNS
+
+Since the internal DNS does not use the domain name suffix our OpenShift
+cluster will work with, we must make sure that our Nodes' hostnames
+do not have it either. Nor should they use any other internal DNS server.
+
+Put this in your `inventory/group_vars/all.yml`:
+
+```yaml
+openshift_openstack_fqdn_nodes: false
+openshift_openstack_dns_nameservers: []
+```
+
+The nodes will now be called `master-0` instead of
+`master-0.openshift.example.com`. Neutron's DNS resolution requires these short
+hostnames.
+
+If you were using a private DNS before, you'll also want to remove the
+`private` section of `openshift_openstack_external_nsupdate_keys` (the `public`
+one is okay). The internal name resolution is handled by Neutron so the DNS and
+its private records are no longer necessary.
+
+If you're setting `openshift_master_cluster_hostname` to a master node, it must
+be updated accordingly, too (e.g. `openshift_master_cluster_hostname:
+master-0`).
+
+And finally, run the `provision_install.yml` playbooks as you normally would.
+
+
 ### Adding the DNS Records Automatically
 
+If you don't have operator access to your OpenStack, it may still be configured
+to provide server name resolution anyway. Try running the validation steps from
+the [OpenStack Internal DNS](#openstack-internal-dns) section. If ping fails,
+you will need to use an external DNS server.
+
 If your DNS supports nsupdate, you can set up the
-`openshift_openstack_external_nsupdate_keys` variable and all the
-necessary DNS records will be added during the provisioning phase
-(after the OpenShift nodes are created, but before we install anything
-on them).
+`openshift_openstack_external_nsupdate_keys` variable and all the necessary DNS
+records will be added during the provisioning phase (after the OpenShift nodes
+are created, but before we install anything on them).
 
 Add this to your `inventory/group_vars/all.yml`:
 

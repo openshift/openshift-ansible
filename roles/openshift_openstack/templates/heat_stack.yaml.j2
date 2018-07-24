@@ -500,10 +500,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: k8s_type-%index%.cluster_id
+              template: hostname-%index%domain_suffix
               params:
-                cluster_id: {{ openshift_openstack_full_dns_domain }}
-                k8s_type: {{ openshift_openstack_etcd_hostname }}
+                hostname: {{ openshift_openstack_etcd_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
           cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
@@ -577,10 +577,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: k8s_type-%index%.cluster_id
+              template: hostname-%index%domain_suffix
               params:
-                cluster_id: {{ openshift_openstack_full_dns_domain }}
-                k8s_type: {{ openshift_openstack_lb_hostname }}
+                hostname: {{ openshift_openstack_lb_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
           cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
@@ -640,10 +640,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: k8s_type-%index%.cluster_id
+              template: hostname-%index%domain_suffix
               params:
-                cluster_id: {{ openshift_openstack_full_dns_domain }}
-                k8s_type: {{ openshift_openstack_master_hostname }}
+                hostname: {{ openshift_openstack_master_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
           cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
@@ -728,10 +728,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: sub_type_k8s_type-%index%.cluster_id
+              template: hostname-%index%domain_suffix
               params:
-                cluster_id: {{ openshift_openstack_full_dns_domain }}
-                sub_type_k8s_type: {{ openshift_openstack_node_hostname }}
+                hostname: {{ openshift_openstack_node_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
           cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
@@ -797,10 +797,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: sub_type_k8s_type-%index%.cluster_id
+              template: hostname-%index%domain_suffix
               params:
-                cluster_id: {{ openshift_openstack_full_dns_domain }}
-                sub_type_k8s_type: {{ openshift_openstack_infra_hostname }}
+                hostname: {{ openshift_openstack_infra_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
           cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
@@ -880,10 +880,10 @@ resources:
         properties:
           name:
             str_replace:
-              template: sub_type_k8s_type-%index%.cluster_id
+              template: hostname-%index%domain_suffix
               params:
-                cluster_id: {{ openshift_openstack_full_dns_domain }}
-                sub_type_k8s_type: {{ openshift_openstack_cns_hostname }}
+                hostname: {{ openshift_openstack_cns_hostname }}
+                domain_suffix: {{ l_hostname_domain_suffix }}
           cluster_env: {{ openshift_openstack_public_dns_domain }}
           cluster_id:  {{ openshift_openstack_full_dns_domain }}
           group:
