@@ -128,11 +128,16 @@ spec:
                   fi
                 fi
               else
-                echo "error: The downloaded node configuration is invalid, exiting" 2>&1
-                exit 1
+                echo "error: The downloaded node configuration is invalid, retrying later" 2>&1
+                sleep 10 &
+                wait $!
+                continue
               fi
-              if ! kill $(pgrep -U 0 -f '^/usr/bin/hyperkube kubelet ' | head -n1); then
+              if ! pkill -U 0 -f '(^|/)hyperkube kubelet '; then
                 echo "error: Unable to restart Kubelet" 2>&1
+                sleep 10 &
+                wait $!
+                continue
               fi
             fi
             cp -f /tmp/.new /tmp/.old
