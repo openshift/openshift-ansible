@@ -9,6 +9,13 @@
 - import_playbook: ../../../init/base_packages.yml
 - import_playbook: ../../../init/cluster_facts.yml
 
+- name: Inspect cluster certificates
+  hosts: "{{ l_upgrade_cert_check_hosts }}"
+  tasks:
+  - import_role:
+      name: openshift_certificate_expiry
+      tasks_from: main.yml
+
 - name: Ensure essential node configmaps are present
   hosts: oo_first_master
   tasks:

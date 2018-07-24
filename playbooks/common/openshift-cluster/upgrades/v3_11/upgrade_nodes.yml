@@ -5,6 +5,8 @@
 # Upgrades nodes only, but requires the control plane to have already been upgraded.
 #
 - import_playbook: ../init.yml
+  vars:
+    l_upgrade_cert_check_hosts: "oo_nodes_to_config"
 
 - name: Configure the upgrade target for the common upgrade tasks
   hosts: oo_all_hosts

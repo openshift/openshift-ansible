@@ -16,6 +16,8 @@
 
 - name: initialize upgrade bits
   import_playbook: init.yml
+  vars:
+    l_upgrade_cert_check_hosts: "oo_masters_to_config:oo_etcd_to_config"
 
 - name: unschedule nodes
   hosts: oo_sg_current_nodes
