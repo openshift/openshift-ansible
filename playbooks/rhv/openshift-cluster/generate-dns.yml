@@ -5,9 +5,20 @@
     - import_role:
         name: openshift_rhv
         tasks_from: build_vm_list.yml
+    - name: Log in to oVirt
+      ovirt_auth:
+        url: "{{ engine_url }}"
+        username: "{{ engine_user }}"
+        password: "{{ engine_password }}"
+        ca_file: "{{ engine_cafile | default(omit) }}"
+        insecure: "{{ engine_insecure | default(true) }}"
     - import_role:
         name: oVirt.vm-infra
         tasks_from: create_inventory.yml
+    - name: Logout from oVirt
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
     - import_role:
         name: openshift_rhv
         tasks_from: generate_nsupdate.yml

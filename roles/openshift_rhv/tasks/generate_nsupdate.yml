@@ -8,15 +8,7 @@
 #       name: rndc-key
 #       secret: 'xxxxxxXxxxXxxxXxxxXx+x=='
 #       algorithm: hmac-md5
-#
-- name: Create load balancer facts
-  set_fact:
-    lb_ip: "{{hostvars[groups['lb'].0]['ansible_host'] }}"
-    lb_host: "{{groups['lb'].0}}"
-  tags:
-    - openshift_rhv
 
-###############################
 # Reverse entries
 - name: Create NSUPDATE reverse pointer entries
   set_fact:
@@ -35,7 +27,8 @@
   tags:
     - openshift_rhv
 
-- name: Create NSUPDATE wildcard A entry
+# Public interface A records
+- name: Create NSUPDATE wildcard A entries
   set_fact:
     records: >-
       {{ records|default([]) }} + [
@@ -43,11 +36,14 @@
       'record': '*.{{ app_dns_prefix }}',
       'zone': '{{ public_hosted_zone }}',
       'type': 'A',
-      'value': '{{lb_ip}}'
+      'value': {{ groups["infras"] | map("extract", hostvars, ["ansible_host"] ) | list }},
       },
       ]
   tags:
     - openshift_rhv
+
+- debug:
+    var: records
 
 - name: Create NSUPDATE public hostname entry
   set_fact:
@@ -57,12 +53,13 @@
       'record': '{{ openshift_master_cluster_public_hostname.split(".")[0] }}',
       'zone': '{{ ".".join(openshift_master_cluster_public_hostname.split(".")[1:]) }}',
       'type': 'A',
-      'value': '{{ lb_ip }}'
+      'value': '{{ hostvars[groups["lb"].0]["ansible_host"] }}'
       },
       ]
   tags:
     - openshift_rhv
 
+# host A entries
 - name: Create NSUPDATE host A entries
   set_fact:
     records: >-

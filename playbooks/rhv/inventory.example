@@ -55,10 +55,6 @@ rhsub_pool=Red Hat OpenShift Container Platform*
 rhsub_user="{{ vault_rhsub_user }}"
 rhsub_password="{{ vault_rhsub_password }}"
 
-# Load Balancer Config
-openshift_loadbalancer_additional_frontends=[{"name":"apps-http","option":"tcplog","binds":["*:80"],"default_backend":"apps-http"},{"name":"apps-https","option":"tcplog","binds":["*:443"],"default_backend":"apps-http"}]
-openshift_loadbalancer_additional_backends=[{"name":"apps-http","balance":"source","servers":[{"name":"infra0","address":"{{ groups['infras'].0 }}:80","opts":"check"},{"name":"infra1","address":"{{ groups['infras'].1 }}:80","opts":"check"},{"name":"infra2","address":"{{ groups['infras'].2 }}:80","opts":"check"}]},{"name":"apps-https","balance":"source","servers":[{"name":"infra0","address":"{{ groups['infras'].0 }}:443","opts":"check"},{"name":"infra1","address":"{{ groups['infras'].1 }}:443","opts":"check"},{"name":"infra2","address":"{{ groups['infras'].2 }}:443","opts":"check"}]}]
-
 # Docker
 container_runtime_docker_storage_setup_device=/dev/vdb
 container_runtime_docker_storage_type=overlay2
