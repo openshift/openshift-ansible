@@ -400,6 +400,16 @@
     when:
     - openshift_logging_elasticsearch_pvc_dynamic | bool
 
+  - name: Set claimRef for NFS PV
+    oc_edit:
+      kind: PersistentVolume
+      name: "logging-volume"
+      separator: '#'
+      content:
+        spec#claimRef#name: "{{ openshift_logging_elasticsearch_pvc_name }}"
+        spec#claimRef#namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    when: openshift_logging_storage_kind == "nfs"
+
   - name: Set ES storage
     oc_obj:
       state: present
