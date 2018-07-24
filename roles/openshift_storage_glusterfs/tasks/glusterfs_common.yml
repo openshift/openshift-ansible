@@ -185,7 +185,9 @@
 - name: Generate heketi user key
   set_fact:
     glusterfs_heketi_user_key: "{{ 32 | lib_utils_oo_generate_secret }}"
-  until: "glusterfs_heketi_user_key != glusterfs_heketi_admin_key"
+  until:
+  - glusterfs_heketi_user_key is defined
+  - glusterfs_heketi_user_key != glusterfs_heketi_admin_key
   delay: 1
   retries: 10
   when:
