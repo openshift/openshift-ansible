@@ -134,9 +134,10 @@ class OCObject(OpenShiftCLI):
         # Delete
         ########
         if state == 'absent':
-            # verify its not in our results
+            # verify it's not in our results
             if (params['name'] is not None or params['selector'] is not None) and \
                (len(api_rval['results']) == 0 or \
+               (not api_rval['results'][0]) or \
                ('items' in api_rval['results'][0] and len(api_rval['results'][0]['items']) == 0)):
                 return {'changed': False, 'state': state}
 
