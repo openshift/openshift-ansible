@@ -1,2 +1,2 @@
 ---
-etcd_ca_host_group: "oo_etcd_to_config"
+etcd_ca_host_group: "{{ 'oo_etcd_to_config' if groups.oo_etcd_to_config is defined and groups.oo_etcd_to_config | length > 0 else 'oo_first_master' }}"
