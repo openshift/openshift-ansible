@@ -29,4 +29,4 @@
     msg: "Available {{ excluder }} version {{ excluder_version }} is higher than the upgrade target version"
   when:
   - excluder_version != ''
-  - excluder_version.split('.')[0:2] | join('.') is version_compare(r_openshift_excluder_upgrade_target.split('.')[0:2] | join('.'), '>', strict=True)
+  - excluder_version.split('.')[0:2] | join('.') is version(r_openshift_excluder_upgrade_target.split('.')[0:2] | join('.'), '>', strict=True)
