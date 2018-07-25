@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.37
+Version:        3.9.38
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,14 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Wed Jul 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.38-1
+- Avoid undefined variable glusterfs_heketi_user_key (sdodson@redhat.com)
+- Cope with OpenShift returning no value when an environment variable is an
+  empty string (mchappel@redhat.com)
+- Set UID,fsGroup and Linux options to cassandra RC's (ruben.vp8510@gmail.com)
+- Support specifying the rolebinding name (mchappel@redhat.com)
+- Add Prometheus scrape config for openshift-logging (lukas.vlcek@gmail.com)
+
 * Tue Jul 17 2018 Tim Bielawa <tbielawa@redhat.com> 3.9.37-1
 - 
 
