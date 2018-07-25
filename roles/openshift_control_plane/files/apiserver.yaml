@@ -46,6 +46,7 @@ spec:
         port: 8443
         path: healthz/ready
       initialDelaySeconds: 10
+      failureThreshold: 10
       timeoutSeconds: 10
   volumes:
   - name: master-config
