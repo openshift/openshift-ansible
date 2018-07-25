@@ -42,6 +42,9 @@ tests:
 artifacts:
   - journals/
 
+pulls: false
+required: false
+
 ---
 inherit: true
 context: 'fedora/27/atomic/upgrade_minor'
