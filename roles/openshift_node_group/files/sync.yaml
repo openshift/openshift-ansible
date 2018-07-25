@@ -117,7 +117,7 @@ spec:
               echo "info: Configuration changed, restarting kubelet" 2>&1
               # TODO: kubelet doesn't relabel nodes, best effort for now
               # https://github.com/kubernetes/kubernetes/issues/59314
-              if args="$(openshift start node --write-flags --config /etc/origin/node/node-config.yaml)"; then
+              if args="$(openshift-node-config --config /etc/origin/node/node-config.yaml)"; then
                 labels=$(tr ' ' '\n' <<<$args | sed -ne '/^--node-labels=/ { s/^--node-labels=//; p; }' | tr ',\n' ' ')
                 if [[ -n "${labels}" ]]; then
                   echo "info: Applying node labels $labels" 2>&1
