@@ -16,6 +16,7 @@
     state: present
     name: "{{ openshift_management_project }}"
     display_name: "{{ openshift_management_project_description }}"
+    node_selector: "{{ openshift_management_nodeselector }}"
 
 - name: Create and Authorize Management Accounts
   include_tasks: accounts.yml
@@ -64,22 +65,19 @@
 # For local/external NFS backed installations
 - name: "Create the required App and DB PVs using {{ openshift_management_storage_class }}"
   include_tasks: storage/create_nfs_pvs.yml
-  when:
-    - openshift_management_storage_class in ['nfs', 'nfs_external']
+  when: openshift_management_storage_class in ['nfs', 'nfs_external']
 
 ######################################################################
 # CREATE APP
 - name: Note the correct ext-db template name
   set_fact:
     openshift_management_template_name: "{{ __openshift_management_flavor }}-ext-db"
-  when:
-    - __openshift_management_use_ext_db
+  when: __openshift_management_use_ext_db
 
 - name: Note the correct podified db template name
   set_fact:
     openshift_management_template_name: "{{ __openshift_management_flavor }}"
-  when:
-    - not __openshift_management_use_ext_db
+  when: not __openshift_management_use_ext_db
 
 - name: Ensure the Management App is created
   oc_process:
