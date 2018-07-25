@@ -142,8 +142,6 @@
     certs: "{{ node_name.certs | default([]) }}"
     component: "{{ node_name.name }}"
   with_items:
-    - name: system.admin
-      is_client: true
     - name: elasticsearch
       add_oid: true
       certs:

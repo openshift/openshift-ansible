@@ -1,0 +1,15 @@
+[ req ]
+default_bits = 2048
+prompt = no
+encrypt_key = yes
+default_md = sha1
+distinguished_name = dn
+req_extensions = req_ext
+
+[ dn ]
+CN = {{ component }}
+OU = OpenShift
+O = Logging
+
+[ req_ext ]
+subjectAltName = {{ cert_extensions }}
