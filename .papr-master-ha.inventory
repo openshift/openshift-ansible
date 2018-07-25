@@ -14,7 +14,8 @@ openshift_check_min_host_memory_gb=1.9
 openshift_portal_net=172.30.0.0/16
 openshift_enable_service_catalog=false
 debug_level=4
-openshift_docker_options="--log-driver=journald"
+openshift_docker_log_driver="journald"
+openshift_docker_options="--mtu 1300"
 
 my_node_group1_labels=['node-role.kubernetes.io/master=true', 'node-role.kubernetes.io/infra=true', 'node-role.kubernetes.io/compute=true']
 my_node_group1={'name': 'node-config-all-in-one', 'labels': {{ my_node_group1_labels }} }
