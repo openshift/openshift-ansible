@@ -20,7 +20,7 @@
   tasks:
   - import_role:
       name: olm
-    when: openshift_version | version_compare('3.9', '>=')
+    when: openshift_version is version_compare('3.9', '>=')
 
 - name: OLM Install Checkpoint End
   hosts: all
