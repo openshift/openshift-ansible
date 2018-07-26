@@ -23,7 +23,7 @@
 - name: Remove trunk subports
   os_subports_deletion:
     trunk_name: "{{ item }}"
-  with_items: "{{ groups['cluster_hosts'] }}"
+  with_items: "{{ groups['OSEv3'] }}"
   when:
     - openshift_use_kuryr | default(false) | bool
 

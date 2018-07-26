@@ -1,5 +1,8 @@
 ---
-- name: evaluate groups
+- name: Evaluate basic OpenStack groups
+  import_playbook: evaluate_groups.yml
+
+- name: Evaluate remaining cluster groups
   import_playbook: ../../init/evaluate_groups.yml
 
 - name: Unsubscribe RHEL instances
@@ -21,7 +24,10 @@
   - name: Clean DNS entries
     import_role:
       name: openshift_openstack
-      tasks_from: clean-dns.yml
+      tasks_from: populate-dns.yml
+    vars:
+      l_openshift_openstack_dns_update_nodes: "{{ groups.OSEv3 }}"
+      l_dns_record_state: absent
     when:
     - openshift_openstack_external_nsupdate_keys is defined
     - openshift_openstack_external_nsupdate_keys.private is defined or openshift_openstack_external_nsupdate_keys.public is defined

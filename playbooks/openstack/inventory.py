@@ -44,25 +44,22 @@ def base_openshift_inventory(cluster_hosts):
     cns = [server.name for server in cluster_hosts
            if server.metadata['host-type'] == 'cns']
 
-    nodes = list(set(masters + infra_hosts + app + cns))
-
-    dns = [server.name for server in cluster_hosts
-           if server.metadata['host-type'] == 'dns']
-
     load_balancers = [server.name for server in cluster_hosts
                       if server.metadata['host-type'] == 'lb']
 
-    osev3 = list(set(nodes + etcd + load_balancers))
+    # NOTE: everything that should go to the `[nodes]` group:
+    nodes = list(set(masters + etcd + infra_hosts + app + cns))
 
-    inventory['cluster_hosts'] = {'hosts': [s.name for s in cluster_hosts]}
+    # NOTE: all OpenShift nodes, including `[lb]`, `[nfs]`, etc.:
+    osev3 = list(set(nodes + load_balancers))
+
     inventory['OSEv3'] = {'hosts': osev3, 'vars': {}}
-    inventory['masters'] = {'hosts': masters}
-    inventory['etcd'] = {'hosts': etcd}
-    inventory['nodes'] = {'hosts': nodes}
-    inventory['infra_hosts'] = {'hosts': infra_hosts}
-    inventory['app'] = {'hosts': app}
-    inventory['glusterfs'] = {'hosts': cns}
-    inventory['dns'] = {'hosts': dns}
+    inventory['openstack_nodes'] = {'hosts': nodes}
+    inventory['openstack_master_nodes'] = {'hosts': masters}
+    inventory['openstack_etcd_nodes'] = {'hosts': etcd}
+    inventory['openstack_infra_nodes'] = {'hosts': infra_hosts}
+    inventory['openstack_compute_nodes'] = {'hosts': app}
+    inventory['openstack_cns_nodes'] = {'hosts': cns}
     inventory['lb'] = {'hosts': load_balancers}
     inventory['localhost'] = {'ansible_connection': 'local'}
 
@@ -131,13 +128,6 @@ def build_inventory():
         if 'metadata' in server and 'clusterid' in server.metadata]
 
     inventory = base_openshift_inventory(cluster_hosts)
-
-    for server in cluster_hosts:
-        if 'group' in server.metadata:
-            group = server.metadata.get('group')
-            if group not in inventory:
-                inventory[group] = {'hosts': []}
-            inventory[group]['hosts'].append(server.name)
 
     inventory['_meta'] = {'hostvars': {}}
 

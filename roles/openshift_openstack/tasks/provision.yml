@@ -102,8 +102,8 @@
 - name: Create the Cinder volume for OpenShift Registry
   include_tasks: create-registry-volume.yml
   when:
-  - groups.infra_hosts is defined
-  - groups.infra_hosts.0 is defined
-  - hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_volume_name is defined
-  - hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_volume_size is defined
-  - hostvars[groups.infra_hosts.0].openshift_hosted_registry_storage_openstack_volumeID is not defined
+  - groups.openstack_infra_nodes is defined
+  - groups.openstack_infra_nodes.0 is defined
+  - hostvars[groups.openstack_infra_nodes.0].openshift_hosted_registry_storage_volume_name is defined
+  - hostvars[groups.openstack_infra_nodes.0].openshift_hosted_registry_storage_volume_size is defined
+  - hostvars[groups.openstack_infra_nodes.0].openshift_hosted_registry_storage_openstack_volumeID is not defined
