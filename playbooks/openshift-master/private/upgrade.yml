@@ -185,8 +185,8 @@
 - name: Reconcile Cluster Roles and Cluster Role Bindings and Security Context Constraints
   hosts: oo_masters_to_config
   roles:
-  - { role: openshift_cli }
-  - { role: openshift_facts }
+  - openshift_cli
+  - openshift_facts
   vars:
     __master_shared_resource_viewer_file: "shared_resource_viewer_role.yaml"
   tasks:
@@ -243,16 +243,10 @@
   # and is evaluated early. Values such as "20%" can also be used.
   serial: "{{ openshift_upgrade_control_plane_nodes_serial | default(1) }}"
   max_fail_percentage: "{{ openshift_upgrade_control_plane_nodes_max_fail_percentage | default(0) }}"
-
-  pre_tasks:
-  - name: Load lib_openshift modules
-    import_role:
-      name: lib_openshift
-
   roles:
+  - lib_openshift
   - openshift_facts
-
-  post_tasks:
+  tasks:
   - import_role:
       name: openshift_manage_node
       tasks_from: config.yml
