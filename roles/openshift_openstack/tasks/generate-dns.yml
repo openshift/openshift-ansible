@@ -18,6 +18,9 @@
     - openshift_openstack_public_router_ip is defined
     - openshift_openstack_public_router_ip is not none
     - openshift_openstack_public_router_ip | string
+    - hostvars[item]['private_v4'] is defined
+    - hostvars[item]['private_v4'] is not none
+    - hostvars[item]['private_v4'] | string
 
 - debug: var=openshift_openstack_private_api_ip
 - name: "Add public master cluster hostname records to the private A records"
