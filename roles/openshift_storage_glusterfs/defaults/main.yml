@@ -113,3 +113,6 @@ r_openshift_storage_glusterfs_os_firewall_allow:
   port: "3260/tcp"
 - service: rpcbind
   port: "111/tcp"
+
+# One retry every 10 seconds.
+openshift_glusterfs_cluster_health_check_retries: 120
