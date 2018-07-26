@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.24
+Version:        3.10.25
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,9 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Jul 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.25-1
+- Add RollingUpdate strategy to dockergc deployment config (rteague@redhat.com)
+
 * Tue Jul 24 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.24-1
 - Avoid undefined variable glusterfs_heketi_user_key (sdodson@redhat.com)
 - When the node process is down, don't exit (ccoleman@redhat.com)
