@@ -102,6 +102,12 @@
   - import_role:
       name: openshift_node
       tasks_from: upgrade
+  - import_role:
+      name: openshift_storage_glusterfs
+      tasks_from: check_cluster_health.yml
+    when: >
+          inventory_hostname in groups['glusterfs']
+          or inventory_hostname in groups['glusterfs_registry']
 
 - import_playbook: ../upgrade_control_plane.yml
   vars:
