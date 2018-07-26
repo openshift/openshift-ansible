@@ -17,6 +17,7 @@
 
 - name: Clean DNS entries
   hosts: localhost
+  ignore_errors: True
   tasks:
   - name: Clean DNS entries
     import_role:
