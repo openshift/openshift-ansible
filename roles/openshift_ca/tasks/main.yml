@@ -70,6 +70,14 @@
   delegate_to: "{{ openshift_ca_host }}"
   run_once: true
 
+# Upload additional CA if necessary
+- name: Deploy additional ca
+  copy:
+    src: "{{ openshift_additional_ca }}"
+    dest: "{{ openshift.common.config_base }}/master/additional_ca.crt"
+    mode: 0644
+  when: openshift_additional_ca is defined
+
 - name: Create ca serial
   copy:
     content: "00"
@@ -95,6 +103,9 @@
     {% for legacy_ca_certificate in g_master_legacy_ca_result.files | default([]) | lib_utils_oo_collect('path') %}
     --certificate-authority {{ legacy_ca_certificate }}
     {% endfor %}
+    {% if openshift_additional_ca is defined %}
+    --certificate-authority {{ openshift.common.config_base }}/master/additional_ca.crt
+    {% endif %}
     --hostnames={{ hostvars[openshift_ca_host].openshift.common.all_hostnames | join(',') }}
     --master={{ openshift.master.api_url }}
     --public-master={{ openshift.master.public_api_url }}
