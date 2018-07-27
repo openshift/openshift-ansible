@@ -18,12 +18,14 @@
     password: "{{ oreg_auth_password }}"
     # Test that we can actually connect with provided info
     test_login: "{{ oreg_test_login | default(True) }}"
+    proxy_vars: "{{ l_docker_creds_proxy_vars }}"
+    image_name: "{{ l_docker_creds_image_name }}"
   when:
     - oreg_auth_user is defined
   register: node_oreg_auth_credentials_create
   retries: 3
   delay: 5
-  until: node_oreg_auth_credentials_create.rc == 0
+  until: node_oreg_auth_credentials_create is succeeded
 
 # Container images may need the registry credentials
 - name: Setup ro mount of /root/.docker for containerized hosts

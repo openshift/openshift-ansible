@@ -21,7 +21,6 @@ import json
 import os
 
 from ansible.module_utils.basic import AnsibleModule
-from six.moves import urllib
 
 DOCUMENTATION = '''
 ---
@@ -131,15 +130,22 @@ def load_config_file(module, dest):
         return {}
 
 
-def validate_registry_login(module, registry, encoded_auth):
+def gen_skopeo_cmd(registry, username, password, proxy_vars, image_name):
+    '''Generate skopeo command to run'''
+    skopeo_temp = ("{proxy_vars} timeout 10 skopeo inspect"
+                   " {creds} docker://{registry}/{image_name}")
+    creds = '--creds {}:{}'.format(username, password)
+    skopeo_args = {'proxy_vars': proxy_vars, 'creds': creds,
+                   'registry': registry, 'image_name': image_name}
+    return skopeo_temp.format(**skopeo_args).strip()
+
+
+def validate_registry_login(module, skopeo_command):
     '''Attempt to use credentials to log into registry'''
-    url = 'https://' + registry + '/v2/'
-    auth_header = 'Basic {}'.format(encoded_auth)
-    headers = {'Authorization': auth_header}
-    req = urllib.request.Request(url=url, headers=headers)
-    try:
-        urllib.request.urlopen(req)
-    except urllib.error.HTTPError as err:
+    # skopeo doesn't honor docker config file proxy settings; need to specify
+    # proxy vars on the cli.
+    rtnc, _, err = module.run_command(skopeo_command, use_unsafe_shell=True)
+    if rtnc:
         result = {'failed': True,
                   'changed': False,
                   'msg': str(err),
@@ -189,6 +195,8 @@ def run_module():
         username=dict(type='str', required=True),
         password=dict(type='str', required=True, no_log=True),
         test_login=dict(type='str', required=False, default=True),
+        proxy_vars=dict(type='str', required=False, default=''),
+        image_name=dict(type='str', required=True),
     )
 
     module = AnsibleModule(
@@ -202,6 +210,8 @@ def run_module():
     username = module.params['username']
     password = module.params['password']
     test_login = module.params['test_login']
+    proxy_vars = module.params['proxy_vars']
+    image_name = module.params['image_name']
 
     if not check_dest_dir_exists(module, dest):
         create_dest_dir(module, dest)
@@ -211,13 +221,14 @@ def run_module():
         # in case there are other registries/settings already present.
         docker_config = load_config_file(module, dest)
 
-    # base64 encode our username:password string
-    encoded_auth = base64.b64encode('{}:{}'.format(username, password).encode())
-
     # Test the credentials
     if test_login:
-        validate_registry_login(module, registry, encoded_auth)
+        skopeo_command = gen_skopeo_cmd(registry, username, password,
+                                        proxy_vars, image_name)
+        validate_registry_login(module, skopeo_command)
 
+    # base64 encode our username:password string
+    encoded_auth = base64.b64encode('{}:{}'.format(username, password).encode())
     # Put the registry auth info into the config dict.
     changed = update_config(docker_config, registry, encoded_auth)
 
