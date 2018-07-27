@@ -23,11 +23,11 @@
   service:
     name: cri-o
     state: stopped
-  when: openshift_use_crio | default(False)
+  when: openshift_use_crio | bool
 
 # TODO: Need to determine if this is needed long term or just 3.9 to 3.10
 # Upgrading cri-o, at least from 1.9 to 1.10, requires that all
 # pods be stopped
 - name: Clean up cri-o pods
   script: clean-up-crio-pods.sh
-  when: openshift_use_crio | default(False)
+  when: openshift_use_crio | bool
