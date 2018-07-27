@@ -1,5 +1,4 @@
 ---
-openshift_use_crio: False
 l_crio_var_sock: "/var/run/crio/crio.sock"
 
 openshift_node_group_cloud_provider: "{{ openshift_cloudprovider_kind | default('') }}"
