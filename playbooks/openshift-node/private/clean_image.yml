@@ -1,4 +1,19 @@
 ---
+- name: Reboot instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  # After installing certain packages rebooting the instance is a must before all
+  # changes (e.g. new Selinux rules) get properly applied and propagated.
+  # Must be done before the cloud-init is cleaned.
+  # Otherwise, the cloud-init will be run again.
+  - name: Reboot instance
+    import_role:
+      name: openshift_aws
+      tasks_from: reboot_instance.yml
+    when: openshift_node_reboot_instance_before_cleanup | default(false)
+
 - name: Configure nodes
   hosts: "{{ l_node_group }}"
   tasks:
