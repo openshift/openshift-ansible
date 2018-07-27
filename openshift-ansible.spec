@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.38
+Version:        3.9.39
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,10 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.39-1
+- Add support for adding an additional trusted CA (sdodson@redhat.com)
+- Add hostname package to RHEL image (rteague@redhat.com)
+
 * Wed Jul 25 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.38-1
 - Avoid undefined variable glusterfs_heketi_user_key (sdodson@redhat.com)
 - Cope with OpenShift returning no value when an environment variable is an
