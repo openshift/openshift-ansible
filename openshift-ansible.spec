@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.9.0
+Release:        0.10.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,38 @@ BuildArch:     noarch
 
 
 %changelog
+* Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.10.0
+- Disable yum-cron by default on GCP (ccoleman@redhat.com)
+- Revert "logging configure fluent to merge_json_log" (jcantril@redhat.com)
+- logging configure fluent to merge_json_log (jcantril@redhat.com)
+- How to deploy the cluster autoscaler (jchaloup@redhat.com)
+- Switch to openshift-node-config in prep for removing openshift start node
+  (ccoleman@redhat.com)
+- Fix glusterfs storageclass heketi url (mgugino@redhat.com)
+- Disable papr on pull requests (sdodson@redhat.com)
+- Fedora: Install kernel-modules (mgugino@redhat.com)
+- Allow to autoname scale group instances (jchaloup@redhat.com)
+- Add cert expiry check to upgrades (mgugino@redhat.com)
+- handle symlinks in openshift-ansible container image (jdiaz@redhat.com)
+- Add FeatureGates for NamespacedServiceBrokers (jaboyd@redhat.com)
+- When the node process is down, don't exit (ccoleman@redhat.com)
+- Avoid undefined variable glusterfs_heketi_user_key (sdodson@redhat.com)
+- Default openshift_is_atomic to false for openshift_repos.
+  (kwoodson@redhat.com)
+- Added node selector option for CFME role and fixed formatting issues
+  (dluong@redhat.com)
+- Remove sections of kuryr documentation that tell user to disable registry
+  creation (tzumainn@redhat.com)
+- Add step to remove all k8s_ containers (mgugino@redhat.com)
+- Add RollingUpdate strategy to dockergc deployment config (rteague@redhat.com)
+- Support tabs in resolv.conf (vrutkovs@redhat.com)
+- Add boolean to uninstall for docker (mgugino@redhat.com)
+- Remove evaluations if group vars are defined or not
+  (nakayamakenjiro@gmail.com)
+- Add OpenStack node scaleup (tomas@sedovic.cz)
+- Run DNS and RHN tasks on new masters only (tomas@sedovic.cz)
+- Add the OpenStack master scaleup playbook (tomas@sedovic.cz)
+
 * Mon Jul 23 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.9.0
 - Fix order for invoking the hostpath storage task for registry
   (ngompa@datto.com)
