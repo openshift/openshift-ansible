@@ -11,15 +11,11 @@
     vars:
       create_args: --data-disk-sizes-gb 128
 
-  - set_fact:
-      openshift_node_bootstrap: True
-
 - hosts: nodes
   tasks:
   - set_fact:
       openshift_deployment_type: "{{ 'openshift-enterprise' if ansible_distribution == 'RedHat' else 'origin' }}"
       openshift_enable_origin_repo: False
-      openshift_node_bootstrap: True
       skip_node_svc_handlers: True
       openshift_additional_repos: "{{ azure_node_repos[ansible_distribution] }}"
       openshift_node_open_ports: [{"service":"Node exporter metrics", "port":"9100/tcp"}]

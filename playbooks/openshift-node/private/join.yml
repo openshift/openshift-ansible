@@ -14,7 +14,7 @@
           start: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
 
 - name: Distribute bootstrap and start nodes
-  hosts: oo_nodes_to_bootstrap
+  hosts: oo_nodes_to_config
   gather_facts: no
   tasks:
   - import_role:
@@ -27,11 +27,11 @@
   tasks:
   - name: Dump all candidate bootstrap hostnames
     debug:
-      msg: "{{ groups['oo_nodes_to_bootstrap'] | default([]) }}"
+      msg: "{{ groups['oo_nodes_to_config'] | default([]) }}"
 
   - name: Find all hostnames for bootstrapping
     set_fact:
-      l_nodes_to_join: "{{ groups['oo_nodes_to_bootstrap'] | default([]) | map('extract', hostvars) | map(attribute='openshift.node.nodename') | list }}"
+      l_nodes_to_join: "{{ groups['oo_nodes_to_config'] | default([]) | map('extract', hostvars) | map(attribute='openshift.node.nodename') | list }}"
 
   - name: Dump the bootstrap hostnames
     debug:
@@ -57,7 +57,7 @@
         msg: Node approval failed
 
 - name: Ensure any inventory labels are applied to the nodes
-  hosts: oo_nodes_to_bootstrap
+  hosts: oo_nodes_to_config
   vars:
     openshift_node_master_api_url: "{{ hostvars[groups.oo_first_master.0].openshift.master.api_url }}"
   roles:
