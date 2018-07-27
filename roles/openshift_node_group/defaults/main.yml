@@ -1,6 +1,4 @@
 ---
-l_crio_var_sock: "/var/run/crio/crio.sock"
-
 openshift_node_group_cloud_provider: "{{ openshift_cloudprovider_kind | default('') }}"
 openshift_node_group_network_plugin_default: "{{ os_sdn_network_plugin_name }}"
 openshift_node_group_network_plugin: "{{ openshift_node_group_network_plugin_default }}"
