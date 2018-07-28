@@ -16,9 +16,9 @@ Role Variables
 
 | Name               | Default value         |                            |
 |--------------------|-----------------------|----------------------------|
-| qcow_url           | UNDEF (mandatory if glance is not used)                | The URL of the QCOW2 image. |
+| ovirt_qcow_url           | UNDEF (mandatory if glance is not used)                | The URL of the QCOW2 image. |
 | ovirt_image_path         | /tmp/                 | Path where the QCOW2 image will be downloaded to. If directory the base name of the URL on the remote server will be used. |
-| image_checksum     | UNDEF                 | If a checksum is defined, the digest of the destination file will be calculated after it is downloaded to ensure its integrity and verify that the transfer completed successfully. Format: <algorithm>:<checksum>, e.g. checksum="sha256:D98291AC[...]B6DC7B97". |
+| ovirt_image_checksum     | UNDEF                 | If a checksum is defined, the digest of the destination file will be calculated after it is downloaded to ensure its integrity and verify that the transfer completed successfully. Format: <algorithm>:<checksum>, e.g. checksum="sha256:D98291AC[...]B6DC7B97". |
 | ovirt_image_cache_download | true                | When set to false will delete ovirt_image_path at the start and end of execution |
 | ovirt_template_cluster   | Default               | Name of the cluster where template must be created. |
 | ovirt_template_name      | mytemplate            | Name of the template. |
@@ -35,8 +35,8 @@ Role Variables
 | ovirt_template_type      | UNDEF                 | The type of the template: desktop, server or high_performance (for qcow2 based templates only) |
 | ovirt_template_nics      | {name: nic1, profile_name: ovirtmgmt, interface: virtio} | List of dictionaries that specify the NICs of template. |
 | ovirt_template_operating_system | UNDEF | Operating system of the template like: other, rhel_7x64, debian_7, see others in ovirt_template module. |
-| ovirt_glance_image_provider        | UNDEF (mandatory if qcow_url is not used)            | Name of the glance image provider.                    |
-| ovirt_glance_image            | UNDEF (mandatory if qcow_url is not used)               | This parameter specifies the name of disk in glance provider to be imported as template. |
+| ovirt_glance_image_provider        | UNDEF (mandatory if ovirt_qcow_url is not used)            | Name of the glance image provider.                    |
+| ovirt_glance_image            | UNDEF (mandatory if ovirt_qcow_url is not used)               | This parameter specifies the name of disk in glance provider to be imported as template. |
 
 
 Dependencies
@@ -55,12 +55,12 @@ Example Playbook
   gather_facts: false
 
   vars:
-    engine_url: https://ovirt-engine.example.com/ovirt-engine/api
-    engine_user: admin@internal
-    engine_password: 123456
-    engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    ovirt_engine_user: admin@internal
+    ovirt_engine_password: 123456
+    ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
 
-    qcow_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+    ovirt_qcow_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
     ovirt_template_cluster: production
     ovirt_template_name: centos7_template
     ovirt_template_memory: 4GiB
@@ -78,10 +78,10 @@ Example Playbook
   gather_facts: false
 
   vars:
-    engine_url: https://ovirt-engine.example.com/ovirt-engine/api
-    engine_user: admin@internal
-    engine_password: 123456
-    engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    ovirt_engine_user: admin@internal
+    ovirt_engine_password: 123456
+    ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
 
     ovirt_glance_image_provider: qe-infra-glance
     ovirt_glance_image: rhel7.4_ovirt4.2_guest_disk

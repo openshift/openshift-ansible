@@ -7,11 +7,11 @@
 
     - name: Login to oVirt
       ovirt_auth:
-        url: "{{ engine_url | default(omit) }}"
-        username: "{{ engine_user | default(omit) }}"
-        password: "{{ engine_password | default(omit) }}"
-        ca_file: "{{ engine_cafile | default(omit) }}"
-        insecure: "{{ engine_insecure | default(true) }}"
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
       when: ovirt_auth is undefined or not ovirt_auth
       register: loggedin
       tags:

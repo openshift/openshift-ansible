@@ -1,8 +1,8 @@
 ---
 - name: Check if template is correct
   fail:
-    msg: "mandatory parameter 'qcow_url' is not defined"
-  when: "qcow_url is undefined"
+    msg: "mandatory parameter 'ovirt_qcow_url' is not defined"
+  when: "ovirt_qcow_url is undefined"
 
 - name: Check if {{ ovirt_image_path }} is directory
   stat:
@@ -11,10 +11,10 @@
 
 - name: Download the qcow image
   get_url:
-    url: "{{ qcow_url }}"
-    dest: "{{ ovirt_image_path_st.stat.isdir | ternary(ovirt_image_path~'/'~qcow_url.rpartition('/')[-1], ovirt_image_path) | regex_replace('//', '/') }}"
+    url: "{{ ovirt_qcow_url }}"
+    dest: "{{ ovirt_image_path_st.stat.isdir | ternary(ovirt_image_path~'/'~ovirt_qcow_url.rpartition('/')[-1], ovirt_image_path) | regex_replace('//', '/') }}"
     force: "{{ not ovirt_image_cache_download }}"
-    checksum: "{{ image_checksum | default(omit) }}"
+    checksum: "{{ ovirt_image_checksum | default(omit) }}"
   register: downloaded_file
   tags:
     - ovirt-template-image
@@ -40,11 +40,11 @@
 - block:
     - name: Login to oVirt
       ovirt_auth:
-        url: "{{ engine_url | default(omit) }}"
-        username: "{{ engine_user | default(omit) }}"
-        password: "{{ engine_password | default(omit) }}"
-        ca_file: "{{ engine_cafile | default(omit) }}"
-        insecure: "{{ engine_insecure | default(true) }}"
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
       when: ovirt_auth is undefined or not ovirt_auth
       register: loggedin
       tags:
@@ -85,7 +85,7 @@
         name: "{{ ovirt_template_disk_name | default(ovirt_template_name) }}"
         size: "{{ qcow2_size }}"
         format: "{{ ovirt_template_disk_format | default(omit) }}"
-        ovirt_image_path: "{{ downloaded_file.dest }}"
+        image_path: "{{ downloaded_file.dest }}"
         storage_domain: "{{ ovirt_template_disk_storage | default(ovirt_disk_storage_domain.name) }}"
         force: "{{ ovirt_templates | length == 0 }}"
       register: ovirt_disk
@@ -96,7 +96,7 @@
     - name: Create vm
       ovirt_vms:
         auth: "{{ ovirt_auth }}"
-        name: "{{ vm_name }}"
+        name: "{{ ovirt_vm_name }}"
         state: stopped
         cluster: "{{ ovirt_template_cluster }}"
         memory: "{{ ovirt_template_memory | default(omit) }}"
@@ -118,7 +118,7 @@
         - name: Resize disk if smaller than ovirt_template_disk_size
           ovirt_disks:
             id: "{{ ovirt_disk.id }}"
-            vm_name: "{{ vm_name }}"
+            vm_name: "{{ ovirt_vm_name }}"
             auth: "{{ ovirt_auth }}"
             size: "{{ ovirt_template_disk_size }}"
 
@@ -138,7 +138,7 @@
       ovirt_templates:
         auth: "{{ ovirt_auth }}"
         name: "{{ ovirt_template_name }}"
-        vm: "{{ vm_name }}"
+        vm: "{{ ovirt_vm_name }}"
         cluster: "{{ ovirt_template_cluster }}"
         timeout: "{{ ovirt_template_timeout }}"
       when: ovirt_templates | length == 0
@@ -156,7 +156,7 @@
       ovirt_vms:
         auth: "{{ ovirt_auth }}"
         state: absent
-        name: "{{ vm_name }}"
+        name: "{{ ovirt_vm_name }}"
       when: ovirt_templates | length == 0
       tags:
         - ovirt-template-image
