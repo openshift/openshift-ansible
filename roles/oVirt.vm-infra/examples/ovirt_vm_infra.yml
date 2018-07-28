@@ -5,15 +5,15 @@
   gather_facts: false
 
   vars_files:
-    # Contains encrypted `engine_password` varibale using ansible-vault
+    # Contains encrypted `ovirt_engine_password` varibale using ansible-vault
     - passwords.yml
 
   vars:
-    #engine_url: https://ovirt-engine.example.com/ovirt-engine/api
-    #engine_user: admin@internal
-    #engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    #ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    #ovirt_engine_user: admin@internal
+    #ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
 
-    debug_vm_create: yes
+    ovirt_debug_vm_create: yes
     db_vm:
       state: running
       cluster: mycluster
@@ -30,7 +30,7 @@
           storage_domain: data
           interface: virtio
 
-    vms:
+    ovirt_vm_infra_vms:
       - name: postgresql-vm-0
         memory: 2GiB
         cloud_init:

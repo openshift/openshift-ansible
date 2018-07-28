@@ -2,7 +2,7 @@
 - name: Fetch created VMs
   ovirt_vms_facts:
     auth: "{{ ovirt_auth }}"
-    pattern: "name={{ vms | map(attribute='name') | join(' or name=') }}"
+    pattern: "name={{ ovirt_vm_infra_vms | map(attribute='name') | join(' or name=') }}"
     fetch_nested: true
     nested_attributes:
       - ips
@@ -14,8 +14,6 @@
     ansible_host: "{{ item | ovirtvmipv4 }}"
     groups: "{{ (['ovirt_tag_'] * item.tags | length) | zip(item.tags | map(attribute='name') | list) | map('join') | list + ['ovirt_vm'] }}"
     name: "{{ item.name }}"
-    ansible_user: root
-    ansible_password: "{{ vms_passwords | selectattr('name', 'equalto', item.name) | map(attribute='root_password') | first | default(omit) }}"
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   with_items: "{{ ovirt_vms }}"
   changed_when: false

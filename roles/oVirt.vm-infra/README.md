@@ -3,7 +3,7 @@ oVirt Virtual Machine Infrastructure
 
 The `oVirt.vm-infra` role manages the virtual machine infrastructure in oVirt.
 This role also creates inventory of created virtual machines it defines if
-`wait_for_ip` is set to `true`. All defined virtual machine are part of `ovirt_vm`
+`ovirt_vm_infra_wait_for_ip` is set to `true`. All defined virtual machine are part of `ovirt_vm`
 inventory group. Role also create `ovirt_tag_{tag_name}` groups if there are any
 tags assigned to the virtual machine and place all virtual machine with that tag
 to that inventory group.
@@ -11,7 +11,7 @@ to that inventory group.
 For example for following variable structure:
 
 ```yaml
-vms:
+ovirt_vm_infra_vms:
   - name: myvm1
     tag: mytag1
     profile: myprofile
@@ -37,18 +37,18 @@ Role Variables
 
 | Name                           | Default value |                                              |
 |--------------------------------|---------------|----------------------------------------------| 
-| vms                            | UNDEF         | List of dictionaries with virtual machine specifications.   |
-| affinity_groups                | UNDEF         | List of dictionaries with affinity groups specifications.   |
-| wait_for_ip                    | false         | If true, the playbook should wait for the virtual machine IP reported by the guest agent.  |
-| debug_vm_create                | false         | If true, logs the tasks of the virtual machine being created. The log can contain passwords. |
-| vm_infra_create_single_timeout | 180           | Time in seconds to wait for VM to be created and started (if state is running). |
-| vm_infra_create_poll_interval  | 15            | Polling interval. Time in seconds to wait between check of state of VM.  |
-| vm_infra_create_all_timeout    | vm_infra_create_single_timeout * (vms.length) | Total time to wait for all VMs to be created/started. |
-| vm_infra_wait_for_ip_retries   | 5             | Number of retries to check if VM is reporting it's IP address. |
-| vm_infra_wait_for_ip_delay     | 5             | Polling interval of IP address. Time in seconds to wait between check if VM reports IP address. |
+| ovirt_vm_infra_vms                            | UNDEF         | List of dictionaries with virtual machine specifications.   |
+| ovirt_affinity_groups                | UNDEF         | List of dictionaries with affinity groups specifications.   |
+| ovirt_vm_infra_wait_for_ip                    | false         | If true, the playbook should wait for the virtual machine IP reported by the guest agent.  |
+| ovirt_ovirt_debug_vm_create                | false         | If true, logs the tasks of the virtual machine being created. The log can contain passwords. |
+| ovirt_vm_infra_create_single_timeout | 180           | Time in seconds to wait for VM to be created and started (if state is running). |
+| ovirt_vm_infra_create_poll_interval  | 15            | Polling interval. Time in seconds to wait between check of state of VM.  |
+| ovirt_vm_infra_create_all_timeout    | ovirt_vm_infra_create_single_timeout * (ovirt_vm_infra_vms.length) | Total time to wait for all VMs to be created/started. |
+| ovirt_vm_infra_ovirt_vm_infra_wait_for_ip_retries   | 5             | Number of retries to check if VM is reporting it's IP address. |
+| ovirt_vm_infra_ovirt_vm_infra_wait_for_ip_delay     | 5             | Polling interval of IP address. Time in seconds to wait between check if VM reports IP address. |
 
 
-The `vms` and `profile` variables can contain following attributes, note that if you define same variable in both the value in `vms` has precendence:
+The `ovirt_vm_infra_vms` and `profile` variables can contain following attributes, note that if you define same variable in both the value in `ovirt_vm_infra_vms` has precendence:
 
 | Name               | Default value         |                                            |
 |--------------------|-----------------------|--------------------------------------------| 
@@ -104,7 +104,7 @@ The item in `nics` list of `profile` dictionary can contain following attributes
 | network            | UNDEF          | Logical network which the VM network interface should use. If network is not specified, then Empty network is used. |
 | profile            | UNDEF          | Virtual network interface profile to be attached to VM network interface. |
 
-The `affinity_groups` list can contain following attributes:
+The `ovirt_affinity_groups` list can contain following attributes:
 
 | Name               | Default value       |                                              |
 |--------------------|---------------------|----------------------------------------------|
@@ -116,8 +116,8 @@ The `affinity_groups` list can contain following attributes:
 | name               | UNDEF (Required)    |  Name of affinity group.                     |
 | state              | UNDEF               |  Whether group should be present or absent.  |
 | vm_enforcing       | false               |  <ul><li>true - VM cannot start if it cannot satisfy the `vm_rule`.</li><li>false - VM will follow `vm_rule` with soft enforcement.</li></ul> |
-| vm_rule            | UNDEF               |  <ul><li>positive - all vms in this group try to run on the same host.</li><li>negative - all vms in this group try to run on separate hosts.</li><li>disabled - this affinity group does not take effect.</li></ul> |
-| vms                | UNDEF               |  List of VM's to be assigned to this affinity group. |
+| vm_rule            | UNDEF               |  <ul><li>positive - all ovirt_vm_infra_vms in this group try to run on the same host.</li><li>negative - all ovirt_vm_infra_vms in this group try to run on separate hosts.</li><li>disabled - this affinity group does not take effect.</li></ul> |
+| ovirt_vm_infra_vms                | UNDEF               |  List of VM's to be assigned to this affinity group. |
 | wait               | true                |  If true, the module will wait for the desired state. |
 
 The `cloud_init` dictionary can contain following attributes:
@@ -168,13 +168,13 @@ Example Playbook
   gather_facts: false
 
   vars_files:
-    # Contains encrypted `engine_password` varibale using ansible-vault
+    # Contains encrypted `ovirt_engine_password` varibale using ansible-vault
     - passwords.yml
 
   vars:
-    engine_url: https://ovirt-engine.example.com/ovirt-engine/api
-    engine_user: admin@internal
-    engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    ovirt_engine_user: admin@internal
+    ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
 
     httpd_vm:
       cluster: production
@@ -206,7 +206,7 @@ Example Playbook
           network: ovirtmgmt
           profile: ovirtmgmt
 
-    vms:
+    ovirt_vm_infra_vms:
       - name: postgresql-vm-0
         tag: postgresql_vm
         profile: "{{ db_vm }}"
@@ -217,12 +217,12 @@ Example Playbook
         tag: httpd_vm
         profile: "{{ httpd_vm }}"
 
-    affinity_groups:
+    ovirt_affinity_groups:
       - name: db-ag
         cluster: production
         vm_enforcing: true
         vm_rule: negative
-        vms:
+        ovirt_vm_infra_vms:
           - postgresql-vm-0
           - postgresql-vm-1
 
@@ -240,11 +240,11 @@ The example below shows how to use inventory created by `oVirt.vm-infra` role in
   gather_facts: false
 
   vars_files:
-    # Contains encrypted `engine_password` varibale using ansible-vault
+    # Contains encrypted `ovirt_engine_password` varibale using ansible-vault
     - passwords.yml
 
   vars:
-    wait_for_ip: true
+    ovirt_vm_infra_wait_for_ip: true
 
     httpd_vm:
       cluster: production
@@ -260,7 +260,7 @@ The example below shows how to use inventory created by `oVirt.vm-infra` role in
           storage_domain: mynfsstorage
           interface: virtio
 
-    vms:
+    ovirt_vm_infra_vms:
       - name: apache-vm
         tag: apache
         profile: "{{ httpd_vm }}"
