@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.52
+Version:        3.7.60
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,44 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.60-1
+- bug 1601307. replace oc_client_binary (jcantril@redhat.com)
+- bug 1601606. Quote selector to make it valid json (jcantril@redhat.com)
+- Use openshift.common.is_containerized instead of openshift_is_containerized
+  (vrutkovs@redhat.com)
+- Updating fluentd label and wait to be in a single shell rather than running a
+  script from /tmp (ewolinet@redhat.com)
+- Set default TSB selector to infra node selector (vrutkovs@redhat.com)
+- Fix improper backport for lib_utils_oo_dict_to_list_of_dict
+  (sdodson@redhat.com)
+- hosts.example: document openshift_hosted_infra_selector and TSB selector
+  (vrutkovs@redhat.com)
+- Port 10256 must be open for service load balancers to work
+  (ccoleman@redhat.com)
+- Add iptables save handler (ichavero@redhat.com)
+- Fix wrong indentation (ichavero@redhat.com)
+- Fix yaml indentation (ichavero@redhat.com)
+- Add iptables rules for flannel (ichavero@redhat.com)
+- bump xpaas to 1.4.14 (rcernich@redhat.com)
+- Don't verify java-1.8.0-openjdk (sdodson@redhat.com)
+- Bug 1544694 - Specfify all packages during upgrade (rteague@redhat.com)
+- clean-up RPM generated conf from preinstalled openshift packages
+  (iacopo.rozzo@amadeus.com)
+- Honor openshift_hosted_manage_registry (farandac@redhat.com)
+- Remove unused registry-console's imagestream (nakayamakenjiro@gmail.com)
+- Splitting output over using stdout_lines due to name formatting
+  (ewolinet@redhat.com)
+- Don't remove pvs when uninstalling openshift_management (ncarboni@redhat.com)
+- Splitting output over using stdout_lines due to name formatting
+  (ewolinet@redhat.com)
+- Updating logic when we are scaling up to skip health checks
+  (ewolinet@redhat.com)
+- Maintaining the same user for removing temp dir (ewolinet@redhat.com)
+- Adding checks to make sure we dont fail if .failed doesnt exist
+  (ewolinet@redhat.com)
+- Updating process for doing a rolling and full cluster upgrades
+  (ewolinet@redhat.com)
+
 * Thu May 31 2018 Justin Pierce <jupierce@redhat.com> 3.7.52-1
 - Control plain upgrade: fix adm typo (vrutkovs@redhat.com)
 - Fix check for upgrading ops pods from 3.6 to 3.7 (ewolinet@redhat.com)
