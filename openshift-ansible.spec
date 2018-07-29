@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.10.25
+Version:        3.10.26
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -163,6 +163,10 @@ BuildArch:     noarch
 
 
 %changelog
+* Sun Jul 29 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.26-1
+- Allow to autoname scale group instances (jchaloup@redhat.com)
+- re-enable 3.10 repos (m.judeikis@gmail.com)
+
 * Thu Jul 26 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.10.25-1
 - Add RollingUpdate strategy to dockergc deployment config (rteague@redhat.com)
 
