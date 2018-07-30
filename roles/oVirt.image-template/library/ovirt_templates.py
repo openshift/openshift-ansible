@@ -18,38 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 #
-# pylint: skip-file
-
-# import time
-import traceback
-
-try:
-    import ovirtsdk4.types as otypes
-except ImportError:
-    pass
-
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.ovirt import (
-    BaseModule,
-    check_sdk,
-    convert_to_bytes,
-    create_connection,
-    equal,
-    get_dict_of_struct,
-    get_link_name,
-    get_id_by_name,
-    ovirt_full_argument_spec,
-    search_by_attributes,
-    search_by_name,
-)
-
-
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
-
-
-DOCUMENTATION = '''
+'''
 ---
 module: ovirt_templates
 short_description: Module to manage virtual machine templates in oVirt/RHV
@@ -91,32 +60,35 @@ options:
         version_added: "2.4"
     vnic_profile_mappings:
         description:
-            - "Mapper which maps an external virtual NIC profile to one that exists in the engine when C(state) is registered.
-               vnic_profile is described by the following dictionary:"
+            - "Mapper which maps an external virtual NIC profile to one that
+              exists in the engine when C(state) is registered.  vnic_profile
+is described by the following dictionary:"
             - "C(source_network_name): The network name of the source network."
             - "C(source_profile_name): The prfile name related to the source network."
             - "C(target_profile_id): The id of the target profile id to be mapped to in the engine."
         version_added: "2.5"
     cluster_mappings:
         description:
-            - "Mapper which maps cluster name between Template's OVF and the destination cluster this Template should be registered to,
-               relevant when C(state) is registered.
+            - "Mapper which maps cluster name between Template's OVF and the
+              destination cluster this Template should be registered to,
+              relevant when C(state) is registered.
                Cluster mapping is described by the following dictionary:"
             - "C(source_name): The name of the source cluster."
             - "C(dest_name): The name of the destination cluster."
         version_added: "2.5"
     role_mappings:
         description:
-            - "Mapper which maps role name between Template's OVF and the destination role this Template should be registered to,
-               relevant when C(state) is registered.
-               Role mapping is described by the following dictionary:"
+            - "Mapper which maps role name between Template's OVF and the destination role this Template should be
+              registered to, relevant when C(state) is registered.
+              Role mapping is described by the following dictionary:"
             - "C(source_name): The name of the source role."
             - "C(dest_name): The name of the destination role."
         version_added: "2.5"
     domain_mappings:
         description:
-            - "Mapper which maps aaa domain name between Template's OVF and the destination aaa domain this Template should be registered to,
-               relevant when C(state) is registered.
+            - "Mapper which maps aaa domain name between Template's OVF and the
+              destination aaa domain this Template should be registered to,
+              relevant when C(state) is registered.
                The aaa domain mapping is described by the following dictionary:"
             - "C(source_name): The name of the source aaa domain."
             - "C(dest_name): The name of the destination aaa domain."
@@ -139,14 +111,17 @@ options:
         aliases: ['glance_image_disk_name']
     template_image_disk_name:
         description:
-            - "When C(state) is I(imported) and C(image_provider) is used this parameter specifies the new name for imported disk,
-               if omitted then I(image_disk) name is used by default.
-               This parameter is used only in case of importing disk image from Glance domain."
+            - "When C(state) is I(imported) and C(image_provider) is used this
+              parameter specifies the new name for imported disk, if omitted
+              then I(image_disk) name is used by default.
+              This parameter is used only in case of importing disk image from Glance domain."
         version_added: "2.4"
     storage_domain:
         description:
-            - "When C(state) is I(imported) this parameter specifies the name of the destination data storage domain.
-               When C(state) is I(registered) this parameter specifies the name of the data storage domain of the unregistered template."
+            - "When C(state) is I(imported) this parameter specifies the name
+              of the destination data storage domain.  When C(state) is
+              I(registered) this parameter specifies the name of the data storage domain of
+              the unregistered template."
     clone_permissions:
         description:
             - "If I(True) then the permissions of the VM (only the direct ones, not the inherited ones)
@@ -191,6 +166,33 @@ options:
         version_added: "2.6"
 extends_documentation_fragment: ovirt
 '''
+import traceback
+
+try:
+    import ovirtsdk4.types as otypes
+except ImportError:
+    pass
+
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.ovirt import (
+    BaseModule,
+    check_sdk,
+    convert_to_bytes,
+    create_connection,
+    equal,
+    get_dict_of_struct,
+    get_link_name,
+    get_id_by_name,
+    ovirt_full_argument_spec,
+    search_by_attributes,
+    search_by_name,
+)
+
+
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
 
 EXAMPLES = '''
 # Examples don't contain auth parameter for simplicity,
@@ -295,6 +297,9 @@ template:
 
 
 class TemplatesModule(BaseModule):
+    """
+    TemplatesModule base class for ovirt_templates
+    """
 
     def build_entity(self):
         return otypes.Template(
@@ -338,7 +343,10 @@ class TemplatesModule(BaseModule):
             equal(self._module.params.get('cpu_profile'), get_link_name(self._connection, entity.cpu_profile))
         )
 
-    def _get_export_domain_service(self):
+    def get_export_domain_service(self):
+        """
+        Returns export storage domain service
+        """
         provider_name = self._module.params['export_domain'] or self._module.params['image_provider']
         export_sds_service = self._connection.system_service().storage_domains_service()
         export_sd = search_by_name(export_sds_service, provider_name)
@@ -349,79 +357,194 @@ class TemplatesModule(BaseModule):
 
         return export_sds_service.service(export_sd.id)
 
-    def post_export_action(self, entity):
-        self._service = self._get_export_domain_service().templates_service()
+    def post_export_action(self):
+        """
+        Provides export storage domain
+        """
+        self._service = self.get_export_domain_service().templates_service()
 
-    def post_import_action(self, entity):
+    def post_import_action(self):
+        """
+        Provides import action
+        """
         self._service = self._connection.system_service().templates_service()
 
 
 def _get_role_mappings(module):
-    roleMappings = list()
+    role_mappings = list()
 
-    for roleMapping in module.params['role_mappings']:
-        roleMappings.append(
+    for role_mapping in module.params['role_mappings']:
+        role_mappings.append(
             otypes.RegistrationRoleMapping(
                 from_=otypes.Role(
-                    name=roleMapping['source_name'],
-                ) if roleMapping['source_name'] else None,
+                    name=role_mapping['source_name'],
+                ) if role_mapping['source_name'] else None,
                 to=otypes.Role(
-                    name=roleMapping['dest_name'],
-                ) if roleMapping['dest_name'] else None,
+                    name=role_mapping['dest_name'],
+                ) if role_mapping['dest_name'] else None,
             )
         )
-    return roleMappings
+    return role_mappings
 
 
 def _get_domain_mappings(module):
-    domainMappings = list()
+    domain_mappings = list()
 
-    for domainMapping in module.params['domain_mappings']:
-        domainMappings.append(
+    for domain_mapping in module.params['domain_mappings']:
+        domain_mappings.append(
             otypes.RegistrationDomainMapping(
                 from_=otypes.Domain(
-                    name=domainMapping['source_name'],
-                ) if domainMapping['source_name'] else None,
+                    name=domain_mapping['source_name'],
+                ) if domain_mapping['source_name'] else None,
                 to=otypes.Domain(
-                    name=domainMapping['dest_name'],
-                ) if domainMapping['dest_name'] else None,
+                    name=domain_mapping['dest_name'],
+                ) if domain_mapping['dest_name'] else None,
             )
         )
-    return domainMappings
+    return domain_mappings
 
 
 def _get_cluster_mappings(module):
-    clusterMappings = list()
+    cluster_mappings = list()
 
-    for clusterMapping in module.params['cluster_mappings']:
-        clusterMappings.append(
+    for cluster_mapping in module.params['cluster_mappings']:
+        cluster_mappings.append(
             otypes.RegistrationClusterMapping(
                 from_=otypes.Cluster(
-                    name=clusterMapping['source_name'],
+                    name=cluster_mapping['source_name'],
                 ),
                 to=otypes.Cluster(
-                    name=clusterMapping['dest_name'],
+                    name=cluster_mapping['dest_name'],
                 ),
             )
         )
-    return clusterMappings
+    return cluster_mappings
 
 
 def _get_vnic_profile_mappings(module):
-    vnicProfileMappings = list()
+    vnic_profile_mappings = list()
 
-    for vnicProfileMapping in module.params['vnic_profile_mappings']:
-        vnicProfileMappings.append(
+    for vnic_profile_mapping in module.params['vnic_profile_mappings']:
+        vnic_profile_mappings.append(
             otypes.VnicProfileMapping(
-                source_network_name=vnicProfileMapping['source_network_name'],
-                source_network_profile_name=vnicProfileMapping['source_profile_name'],
+                source_network_name=vnic_profile_mapping['source_network_name'],
+                source_network_profile_name=vnic_profile_mapping['source_profile_name'],
                 target_vnic_profile=otypes.VnicProfile(
-                    id=vnicProfileMapping['target_profile_id'],
-                ) if vnicProfileMapping['target_profile_id'] else None,
+                    id=vnic_profile_mapping['target_profile_id'],
+                ) if vnic_profile_mapping['target_profile_id'] else None,
             )
         )
 
-    return vnicProfileMappings
+    return vnic_profile_mappings
+
+
+def _do_state_imported(module, connection, templates_module):
+    template = templates_module.search_entity()
+    if template:
+        ret = templates_module.create(
+            result_state=otypes.TemplateStatus.OK,
+        )
+    else:
+        kwargs = {}
+        if module.params['image_provider']:
+            kwargs.update(
+                disk=otypes.Disk(
+                    name=module.params['template_image_disk_name'] or module.params['image_disk']
+                ),
+                template=otypes.Template(
+                    name=module.params['name'],
+                ),
+                import_as_template=True,
+            )
+
+        if module.params['image_disk']:
+            # We need to refresh storage domain to get list of images:
+            templates_module.get_export_domain_service().images_service().list()
+
+            glance_service = connection.system_service().openstack_image_providers_service()
+            image_provider = search_by_name(glance_service, module.params['image_provider'])
+            images_service = glance_service.service(image_provider.id).images_service()
+        else:
+            images_service = templates_module.get_export_domain_service().templates_service()
+        template_name = module.params['image_disk'] or module.params['name']
+        entity = search_by_name(images_service, template_name)
+        if entity is None:
+            raise Exception("Image/template '%s' was not found." % template_name)
+
+        images_service.service(entity.id).import_(
+            storage_domain=otypes.StorageDomain(
+                name=module.params['storage_domain']
+            ) if module.params['storage_domain'] else None,
+            cluster=otypes.Cluster(
+                name=module.params['cluster']
+            ) if module.params['cluster'] else None,
+            **kwargs
+        )
+        # Wait for template to appear in system:
+        template = templates_module.wait_for_import(
+            condition=lambda t: t.status == otypes.TemplateStatus.OK
+        )
+        ret = templates_module.create(result_state=otypes.TemplateStatus.OK)
+        ret = {
+            'changed': True,
+            'id': template.id,
+            'template': get_dict_of_struct(template),
+        }
+        return ret
+
+
+def _do_state_registered(module, connection, templates_module):
+    storage_domains_service = connection.system_service().storage_domains_service()
+    # Find the storage domain with unregistered template:
+    sd_id = get_id_by_name(storage_domains_service, module.params['storage_domain'])
+    storage_domain_service = storage_domains_service.storage_domain_service(sd_id)
+    templates_service = storage_domain_service.templates_service()
+
+    # Find the unregistered Template we want to register:
+    templates = templates_service.list(unregistered=True)
+    template = next(
+        (t for t in templates if t.id == module.params['id'] or t.name == module.params['name']),
+        None
+    )
+    changed = False
+    if template is None:
+        template = templates_module.search_entity()
+        if template is None:
+            raise ValueError(
+                "Template '%s(%s)' wasn't found." % (module.params['name'], module.params['id'])
+            )
+    else:
+        # Register the template into the system:
+        changed = True
+        template_service = templates_service.template_service(template.id)
+        template_service.register(
+            allow_partial_import=module.params['allow_partial_import'],
+            cluster=otypes.Cluster(
+                name=module.params['cluster']
+            ) if module.params['cluster'] else None,
+            vnic_profile_mappings=_get_vnic_profile_mappings(module)
+            if module.params['vnic_profile_mappings'] else None,
+            registration_configuration=otypes.RegistrationConfiguration(
+                cluster_mappings=_get_cluster_mappings(module),
+                role_mappings=_get_role_mappings(module),
+                domain_mappings=_get_domain_mappings(module),
+            ) if (module.params['cluster_mappings'] or
+                  module.params['role_mappings'] or module.params['domain_mappings'])
+            else None
+        )
+
+        if module.params['wait']:
+            template = templates_module.wait_for_import()
+        else:
+            # Fetch template to initialize return.
+            template = template_service.get()
+        ret = templates_module.create(result_state=otypes.TemplateStatus.OK)
+    ret = {
+        'changed': changed,
+        'id': template.id,
+        'template': get_dict_of_struct(template)
+    }
+    return ret
 
 
 def searchable_attributes(module):
@@ -436,6 +559,9 @@ def searchable_attributes(module):
 
 
 def main():
+    """
+    Main function
+    """
     argument_spec = ovirt_full_argument_spec(
         state=dict(
             choices=['present', 'absent', 'exported', 'imported', 'registered'],
@@ -476,6 +602,7 @@ def main():
     try:
         auth = module.params.pop('auth')
         connection = create_connection(auth)
+
         templates_service = connection.system_service().templates_service()
         templates_module = TemplatesModule(
             connection=connection,
@@ -495,7 +622,7 @@ def main():
             ret = templates_module.remove()
         elif state == 'exported':
             template = templates_module.search_entity()
-            export_service = templates_module._get_export_domain_service()
+            export_service = templates_module.get_export_domain_service()
             export_template = search_by_attributes(export_service.templates_service(), id=template.id)
 
             ret = templates_module.action(
@@ -508,111 +635,15 @@ def main():
                 exclusive=module.params['exclusive'],
             )
         elif state == 'imported':
-            template = templates_module.search_entity()
-            if template:
-                ret = templates_module.create(
-                    result_state=otypes.TemplateStatus.OK,
-                )
-            else:
-                kwargs = {}
-                if module.params['image_provider']:
-                    kwargs.update(
-                        disk=otypes.Disk(
-                            name=module.params['template_image_disk_name'] or module.params['image_disk']
-                        ),
-                        template=otypes.Template(
-                            name=module.params['name'],
-                        ),
-                        import_as_template=True,
-                    )
-
-                if module.params['image_disk']:
-                    # We need to refresh storage domain to get list of images:
-                    templates_module._get_export_domain_service().images_service().list()
-
-                    glance_service = connection.system_service().openstack_image_providers_service()
-                    image_provider = search_by_name(glance_service, module.params['image_provider'])
-                    images_service = glance_service.service(image_provider.id).images_service()
-                else:
-                    images_service = templates_module._get_export_domain_service().templates_service()
-                template_name = module.params['image_disk'] or module.params['name']
-                entity = search_by_name(images_service, template_name)
-                if entity is None:
-                    raise Exception("Image/template '%s' was not found." % template_name)
-
-                images_service.service(entity.id).import_(
-                    storage_domain=otypes.StorageDomain(
-                        name=module.params['storage_domain']
-                    ) if module.params['storage_domain'] else None,
-                    cluster=otypes.Cluster(
-                        name=module.params['cluster']
-                    ) if module.params['cluster'] else None,
-                    **kwargs
-                )
-                # Wait for template to appear in system:
-                template = templates_module.wait_for_import(
-                    condition=lambda t: t.status == otypes.TemplateStatus.OK
-                )
-                ret = templates_module.create(result_state=otypes.TemplateStatus.OK)
-                ret = {
-                    'changed': True,
-                    'id': template.id,
-                    'template': get_dict_of_struct(template),
-                }
+            ret = _do_state_imported(module, connection, templates_module)
         elif state == 'registered':
-            storage_domains_service = connection.system_service().storage_domains_service()
-            # Find the storage domain with unregistered template:
-            sd_id = get_id_by_name(storage_domains_service, module.params['storage_domain'])
-            storage_domain_service = storage_domains_service.storage_domain_service(sd_id)
-            templates_service = storage_domain_service.templates_service()
+            ret = _do_state_registered(module, connection, templates_module)
 
-            # Find the unregistered Template we want to register:
-            templates = templates_service.list(unregistered=True)
-            template = next(
-                (t for t in templates if (t.id == module.params['id'] or t.name == module.params['name'])),
-                None
-            )
-            changed = False
-            if template is None:
-                template = templates_module.search_entity()
-                if template is None:
-                    raise ValueError(
-                        "Template '%s(%s)' wasn't found." % (module.params['name'], module.params['id'])
-                    )
-            else:
-                # Register the template into the system:
-                changed = True
-                template_service = templates_service.template_service(template.id)
-                template_service.register(
-                    allow_partial_import=module.params['allow_partial_import'],
-                    cluster=otypes.Cluster(
-                        name=module.params['cluster']
-                    ) if module.params['cluster'] else None,
-                    vnic_profile_mappings=_get_vnic_profile_mappings(module)
-                    if module.params['vnic_profile_mappings'] else None,
-                    registration_configuration=otypes.RegistrationConfiguration(
-                        cluster_mappings=_get_cluster_mappings(module),
-                        role_mappings=_get_role_mappings(module),
-                        domain_mappings=_get_domain_mappings(module),
-                    ) if (module.params['cluster_mappings'] or module.params['role_mappings'] or module.params['domain_mappings']) else None
-                )
-
-                if module.params['wait']:
-                    template = templates_module.wait_for_import()
-                else:
-                    # Fetch template to initialize return.
-                    template = template_service.get()
-                ret = templates_module.create(result_state=otypes.TemplateStatus.OK)
-            ret = {
-                'changed': changed,
-                'id': template.id,
-                'template': get_dict_of_struct(template)
-            }
-        module.exit_json(**ret)
-    except Exception as e:
-        module.fail_json(msg=str(e), exception=traceback.format_exc())
+    except Exception as error:  # pylint: disable=broad-except
+        module.fail_json(msg=str(error), exception=traceback.format_exc())
     finally:
         connection.close(logout=auth.get('token') is None)
+    module.exit_json(**ret)
 
 
 if __name__ == "__main__":
