@@ -9,8 +9,6 @@ spec:
     spec:
       template:
         metadata:
-          annotations:
-            scheduler.alpha.kubernetes.io/critical-pod: ''
           name: "{{ openshift_descheduler_cronjob_name }}"
         spec:
           priorityClassName: system-cluster-critical

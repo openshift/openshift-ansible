@@ -15,9 +15,8 @@ spec:
       namespace: kube-system
       labels:
         name: contiv-api-proxy
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ""
     spec:
+      priorityClassName: system-cluster-critical
       serviceAccountName: contiv-api-proxy
       hostNetwork: true
       affinity:

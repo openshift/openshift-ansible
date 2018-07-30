@@ -123,9 +123,8 @@ spec:
     metadata:
       labels:
         k8s-app: calico-node
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+      priorityClassName: system-node-critical
       nodeSelector:
         projectcalico.org/ds-ready: "true"
       hostNetwork: true
@@ -316,8 +315,6 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: calico-kube-controllers
-  annotations:
-    scheduler.alpha.kubernetes.io/critical-pod: ''
 spec:
   # The controllers can only have a single active instance.
   replicas: 1
@@ -330,6 +327,7 @@ spec:
       labels:
         k8s-app: calico-kube-controllers
     spec:
+      priorityClassName: system-cluster-critical
       # The controllers must run in the host network namespace so that
       # it isn't governed by policy that would prevent it from working.
       hostNetwork: true

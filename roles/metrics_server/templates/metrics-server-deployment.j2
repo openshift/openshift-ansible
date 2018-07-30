@@ -16,8 +16,6 @@ spec:
       name: metrics-server
       labels:
         k8s-app: metrics-server
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server

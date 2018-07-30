@@ -21,8 +21,6 @@ spec:
         app: {{ openshift_daemonset_config_daemonset_name }}
         confighosts: ops
         ops.openshift.io/role: operations
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
 {% if openshift_daemonset_config_node_selector is defined and openshift_daemonset_config_node_selector != {} %}
       nodeSelector: {{ openshift_daemonset_config_node_selector | to_json }}
