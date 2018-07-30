@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.7.60
+Version:        3.7.61
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -286,6 +286,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.61-1
+- 
+
 * Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.7.60-1
 - bug 1601307. replace oc_client_binary (jcantril@redhat.com)
 - bug 1601606. Quote selector to make it valid json (jcantril@redhat.com)
