@@ -1,5 +1,9 @@
 ---
-- import_playbook: config.yml
+- import_playbook: setup_nodes.yml
+
+- import_playbook: gluster_hosts.yml
+
+- import_playbook: gluster_main.yml
 
 - name: Create persistent volumes
   hosts: oo_first_master

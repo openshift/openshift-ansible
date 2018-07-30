@@ -71,7 +71,7 @@
   import_tasks: storage_plugins/nfs.yml
 
 - name: GlusterFS storage plugin configuration
-  import_tasks: storage_plugins/glusterfs.yml
+  import_tasks: glusterfs.yml
   when: "'glusterfs' in osn_storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
