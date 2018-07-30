@@ -2,19 +2,19 @@
 ###########################
 # Engine Connection
 ###########################
-compatibility_version: 4.2
-engine_url:       # https://engine.example.com/ovirt-engine/api
-engine_user:      # admin@internal
-engine_password:  # secret
+ovirt_compatibility_version: 4.2
+ovirt_engine_url:       # https://engine.example.com/ovirt-engine/api
+ovirt_engine_user:      # admin@internal
+ovirt_engine_password:  # secret
 
 # CA file copied from engine:/etc/pki/ovirt-engine/ca.pem
 # path is relative to openshift-cluster directory
-engine_cafile:    # ../ca.pem
+ovirt_engine_cafile:    # ../ca.pem
 
-data_center_name: # Default
-rhv_cluster:      # Default
-rhv_data_storage: # vmstore
-root_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+ovirt_data_center_name: # Default
+openshift_rhv_cluster:      # Default
+openshift_rhv_data_store: # vmstore
+openshift_rhv_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
 # If desired to create DNS entries automatically
 #openshift_rhv_nsupdate_server:  localhost
@@ -28,15 +28,15 @@ root_ssh_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 # Template Creation
 # https://github.com/oVirt/ovirt-ansible-image-template
 ##########################
-qcow_url: # https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2c
-image_path: "{{ lookup('env', 'HOME') }}/Downloads/{{ template_name }}.qcow2"
-template_name: # rhel75
-template_cluster: "{{ rhv_cluster }}"
-template_memory: 8GiB
-template_cpu: 1
-template_disk_storage: "{{ rhv_data_storage }}"
-template_disk_size: 60GiB
-template_nics:
+ovirt_qcow_url: # https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2c
+ovirt_image_path: "{{ lookup('env', 'HOME') }}/Downloads/{{ ovirt_template_name }}.qcow2"
+ovirt_template_name: # rhel75
+ovirt_template_cluster: "{{ openshift_rhv_cluster }}"
+ovirt_template_memory: 8GiB
+ovirt_template_cpu: 1
+ovirt_template_disk_storage: "{{ openshift_rhv_data_store }}"
+ovirt_template_disk_size: 60GiB
+ovirt_template_nics:
   - name: nic1
     profile_name: # ovirtmgmt
     interface: virtio
@@ -44,46 +44,46 @@ template_nics:
 ##########################
 # Virtual Machines
 ##########################
-wait_for_ip: true # Required to gather IP addresses from amchines after
-vm_infra_wait_for_ip_retries: 10 # Higher than default to wait for all IPs on all VMs
-vm_infra_wait_for_ip_delay: 8
+ovirt_vm_infra_wait_for_ip: true # Required to gather IP addresses from amchines after
+ovirt_vm_infra_wait_for_ip_retries: 10 # Higher than default to wait for all IPs on all VMs
+ovirt_vm_infra_wait_for_ip_delay: 8
 
 # Virtual machine profile for master nodes
 # Differs from node profile by 16GiB RAM, extra disk for etcd
 master_vm:
-  cluster: "{{ rhv_cluster }}"
-  template: "{{ template_name }}"
+  cluster: "{{ openshift_rhv_cluster }}"
+  template: "{{ ovirt_template_name }}"
   memory: 16GiB
   cores: 2
   high_availability: true
   disks:
     - size: 15GiB
-      storage_domain: "{{ rhv_data_storage }}"
+      storage_domain: "{{ openshift_rhv_data_store }}"
       name: docker_disk
       interface: virtio
     - size: 30GiB
-      storage_domain: "{{ rhv_data_storage }}"
+      storage_domain: "{{ openshift_rhv_data_store }}"
       name: localvol_disk
       interface: virtio
     - size: 25GiB
-      storage_domain: "{{ rhv_data_storage }}"
+      storage_domain: "{{ openshift_rhv_data_store }}"
       name: etcd_disk
       interface: virtio
   state: running
 
 # Virtual Machine profile for rest of nodes
 node_vm:
-  cluster: "{{ rhv_cluster }}"
-  template: "{{ template_name }}"
+  cluster: "{{ openshift_rhv_cluster }}"
+  template: "{{ ovirt_template_name }}"
   memory: 8GiB
   cores: 2
   disks:
     - size: 15GiB
-      storage_domain: "{{ rhv_data_storage }}"
+      storage_domain: "{{ openshift_rhv_data_store }}"
       name: docker_disk
       interface: virtio
     - size: 30GiB
-      storage_domain: "{{ rhv_data_storage }}"
+      storage_domain: "{{ openshift_rhv_data_store }}"
       name: localvol_disk
       interface: virtio
   state: running

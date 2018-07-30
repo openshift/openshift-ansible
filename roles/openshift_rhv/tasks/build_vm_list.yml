@@ -3,8 +3,8 @@
 # https://github.com/oVirt/ovirt-ansible-vm-infra
 - name: Create virtual machine list fact
   set_fact:
-    vms: >-
-      {{ vms|default([]) }} + [
+    ovirt_vm_infra_vms: >-
+      {{ ovirt_vm_infra_vms|default([]) }} + [
       {% for iter in range(item.count) -%}
       {% if iter > 0 -%},{% endif -%}
       {
@@ -13,7 +13,7 @@
       'cloud_init':
       {
       'host_name': '{{ item.name }}{{ iter }}.{{ public_hosted_zone }}',
-      'authorized_ssh_keys': '{{ root_ssh_key }}'
+      'authorized_ssh_keys': '{{ openshift_rhv_ssh_key }}'
       },
       'profile':  {{ openshift_rhv_vm_profile[ item.profile ] }} ,
       }
@@ -24,7 +24,7 @@
       {% if item.count > 1 -%}
       {
       'name': '{{ item.name }}_ag',
-      'cluster': '{{ rhv_cluster }}',
+      'cluster': '{{ openshift_rhv_cluster }}',
       'vm_enforcing': 'false',
       'vm_rule': 'negative',
       'vms': [

@@ -1,46 +1,46 @@
 ---
 # Defaults for oVirt/RHV provider integration
-compatibility_version: 4.2
-data_center_name: Default
-wait_for_ip: true
-rhv_cluster: Default
-template_name: openshift_node
+ovirt_compatibility_version: 4.2
+ovirt_data_center_name: Default
+ovirt_vm_infra_wait_for_ip: true
+openshift_rhv_cluster: Default
+ovirt_template_name: openshift_node
 
 # oVirt VM Profiles
 openshift_rhv_vm_profile:
   master:
-    cluster: "{{ rhv_cluster }}"
-    template: "{{ template_name }}"
+    cluster: "{{ openshift_rhv_cluster }}"
+    template: "{{ ovirt_template_name }}"
     memory: 16GiB
     cores: 2
     high_availability: true
     disks:
       - size: 15GiB
-        storage_domain: "{{ rhv_data_storage }}"
+        storage_domain: "{{ openshift_rhv_data_store }}"
         name: docker_disk
         interface: virtio
       - size: 30GiB
-        storage_domain: "{{ rhv_data_storage }}"
+        storage_domain: "{{ openshift_rhv_data_store }}"
         name: localvol_disk
         interface: virtio
       - size: 25GiB
-        storage_domain: "{{ rhv_data_storage }}"
+        storage_domain: "{{ openshift_rhv_data_store }}"
         name: etcd_disk
         interface: virtio
     state: running
   node:
-    cluster: "{{ rhv_cluster }}"
-    template: "{{ template_name }}"
+    cluster: "{{ openshift_rhv_cluster }}"
+    template: "{{ ovirt_template_name }}"
     memory: 8GiB
     cores: 2
     high_availability: true
     disks:
       - size: 15GiB
-        storage_domain: "{{ rhv_data_storage }}"
+        storage_domain: "{{ openshift_rhv_data_store }}"
         name: docker_disk
         interface: virtio
       - size: 30GiB
-        storage_domain: "{{ rhv_data_storage }}"
+        storage_domain: "{{ openshift_rhv_data_store }}"
         name: localvol_disk
         interface: virtio
     state: running
