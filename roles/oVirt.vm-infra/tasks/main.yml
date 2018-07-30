@@ -127,8 +127,8 @@
           with_items:
             - "{{ ovirt_vm_infra_vms }}"
           until: "ovirt_vms | ovirtvmipv4| length > 0"
-          retries: "{{ ovirt_vm_infra_ovirt_vm_infra_wait_for_ip_retries }}"
-          delay: "{{ ovirt_vm_infra_ovirt_vm_infra_wait_for_ip_delay }}"
+          retries: "{{ ovirt_vm_infra_wait_for_ip_retries }}"
+          delay: "{{ ovirt_vm_infra_wait_for_ip_delay }}"
           vars:
             query: "reported_devices[*].ips[*].address"
           when: "item.profile.state | default('present') != 'stopped'"

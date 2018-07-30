@@ -44,8 +44,8 @@ Role Variables
 | ovirt_vm_infra_create_single_timeout | 180           | Time in seconds to wait for VM to be created and started (if state is running). |
 | ovirt_vm_infra_create_poll_interval  | 15            | Polling interval. Time in seconds to wait between check of state of VM.  |
 | ovirt_vm_infra_create_all_timeout    | ovirt_vm_infra_create_single_timeout * (ovirt_vm_infra_vms.length) | Total time to wait for all VMs to be created/started. |
-| ovirt_vm_infra_ovirt_vm_infra_wait_for_ip_retries   | 5             | Number of retries to check if VM is reporting it's IP address. |
-| ovirt_vm_infra_ovirt_vm_infra_wait_for_ip_delay     | 5             | Polling interval of IP address. Time in seconds to wait between check if VM reports IP address. |
+| ovirt_vm_infra_wait_for_ip_retries   | 5             | Number of retries to check if VM is reporting it's IP address. |
+| ovirt_vm_infra_wait_for_ip_delay     | 5             | Polling interval of IP address. Time in seconds to wait between check if VM reports IP address. |
 
 
 The `ovirt_vm_infra_vms` and `profile` variables can contain following attributes, note that if you define same variable in both the value in `ovirt_vm_infra_vms` has precendence:
