@@ -30,11 +30,3 @@ Then run:
 ```bash
 ansible-playbook playbooks/openshift-metering/config.yml
 ```
-
-## GCP Development
-
-The `gcp-config.yml` playbook is useful for ad-hoc installation in an existing GCE cluster:
-
-```bash
-ansible-playbook playbooks/openshift-metering/gcp-config.yml
-```

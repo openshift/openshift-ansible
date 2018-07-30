@@ -1,6 +1,0 @@
----
-- include_tasks: install.yaml
-  when: openshift_metering_install | default(true) | bool
-
-- include_tasks: uninstall.yaml
-  when: not openshift_metering_install | default(true) | bool

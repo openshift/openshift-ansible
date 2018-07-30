@@ -42,6 +42,8 @@ openshift_metering_operator_image: quay.io/coreos/chargeback-helm-operator:lates
 
 Using a custom project/namespace can be done by specifying `__openshift_metering_namespace`.
 
+For a full list of variables, and descriptions of what they do see the [defaults/main.yml](defaults/main.yml) variables file.
+
 ## License
 
 Apache License, Version 2.0
