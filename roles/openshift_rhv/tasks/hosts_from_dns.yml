@@ -3,4 +3,4 @@
   add_host:
     name: "{{ item.name }}"
     ansible_host: "{{ lookup('dig', item.name) }}"
-  with_items: "{{ vms }}"
+  with_items: "{{ ovirt_vm_infra_vms }}"
