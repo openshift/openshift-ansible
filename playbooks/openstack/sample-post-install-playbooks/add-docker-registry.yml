@@ -1,0 +1,90 @@
+---
+- hosts: OSEv3
+  become: true
+  vars:
+    registries: []
+    insecure_registries: []
+
+  tasks:
+  - name: Check if docker is even installed
+    command: docker
+
+  - name: Install atomic-registries package
+    yum:
+      name: atomic-registries
+      state: latest
+
+  - name: Get registry configuration file
+    register: file_result
+    stat:
+      path: /etc/containers/registries.conf
+
+  - name: Check if it exists
+    assert:
+      that: 'file_result.stat.exists'
+      msg: "Configuration file does not exist."
+
+  - name: Load configuration file
+    shell: cat /etc/containers/registries.conf
+    register: file_content
+
+  - name: Store file content into a variable
+    set_fact:
+      docker_conf: "{{ file_content.stdout | from_yaml }}"
+
+  - name: Make sure that docker file content is a dictionary
+    when: '(docker_conf is string) and (not docker_conf)'
+    set_fact:
+      docker_conf: {}
+
+  - name: Make sure that registries is a list
+    when: 'registries is string'
+    set_fact:
+      registries_list: [ "{{ registries }}" ]
+
+  - name: Make sure that insecure_registries is a list
+    when: 'insecure_registries is string'
+    set_fact:
+      insecure_registries_list: [ "{{ insecure_registries }}" ]
+
+  - name: Set default values if there are no registries defined
+    set_fact:
+      docker_conf_registries: "{{ [] if docker_conf['registries'] is not defined else docker_conf['registries'] }}"
+      docker_conf_insecure_registries: "{{ [] if docker_conf['insecure_registries'] is not defined else docker_conf['insecure_registries'] }}"
+
+  - name: Add other registries
+    when: 'registries_list is not defined'
+    register: registries_merge_result
+    set_fact:
+      docker_conf: "{{ docker_conf | combine({'registries': (docker_conf_registries + registries) | unique}, recursive=True) }}"
+
+  - name: Add other registries (if registries had to be converted)
+    when: 'registries_merge_result|skipped'
+    set_fact:
+      docker_conf: "{{ docker_conf | combine({'registries': (docker_conf_registries + registries_list) | unique}, recursive=True) }}"
+
+  - name: Add insecure registries
+    when: 'insecure_registries_list is not defined'
+    register: insecure_registries_merge_result
+    set_fact:
+      docker_conf: "{{ docker_conf | combine({'insecure_registries': (docker_conf_insecure_registries + insecure_registries) | unique }, recursive=True) }}"
+
+  - name: Add insecure registries (if insecure_registries had to be converted)
+    when: 'insecure_registries_merge_result|skipped'
+    set_fact:
+      docker_conf: "{{ docker_conf | combine({'insecure_registries': (docker_conf_insecure_registries + insecure_registries_list) | unique }, recursive=True) }}"
+
+  - name: Load variable back to file
+    copy:
+      content: "{{ docker_conf | to_yaml }}"
+      dest: /etc/containers/registries.conf
+
+  - name: Restart registries service
+    service:
+      name: registries
+      state: restarted
+
+  - name: Restart docker
+    service:
+      name: docker
+      state: restarted
