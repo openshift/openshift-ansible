@@ -9,7 +9,7 @@
 %global __requires_exclude ^/usr/bin/ansible-playbook$
 
 Name:           openshift-ansible
-Version:        3.9.39
+Version:        3.9.40
 Release:        1%{?dist}
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
@@ -202,6 +202,9 @@ Atomic OpenShift Utilities includes
 
 
 %changelog
+* Mon Jul 30 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.40-1
+- 
+
 * Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.9.39-1
 - Add support for adding an additional trusted CA (sdodson@redhat.com)
 - Add hostname package to RHEL image (rteague@redhat.com)
