@@ -21,6 +21,7 @@
       service_name: registry-console
       state: present
       tls_termination: passthrough
+      host: "{{ openshift_hosted_registry_console_hostname | default(omit, true) }}"
     register: registry_console_cockpit_kube
 
   # XXX: Required for items still using command
