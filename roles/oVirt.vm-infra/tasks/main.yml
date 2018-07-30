@@ -2,25 +2,25 @@
 - block:
     - name: Check if VMs are correct
       fail:
-        msg:"'vms' variable does not contain mandatory parameter '{{ item[1] }}' "
+        msg:"'ovirt_vm_infra_vms' variable does not contain mandatory parameter '{{ item[1] }}' "
       when: item[1] not in item[0]
       with_nested:
-        - "{{ vms }}"
+        - "{{ ovirt_vm_infra_vms }}"
         - ['name', 'profile']
 
     - name: Login to oVirt
       ovirt_auth:
-        url: "{{ engine_url | default(omit) }}"
-        username: "{{ engine_user | default(omit) }}"
-        password: "{{ engine_password | default(omit) }}"
-        ca_file: "{{ engine_cafile | default(omit) }}"
-        insecure: "{{ engine_insecure | default(true) }}"
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
       when: ovirt_auth is undefined
       register: loggedin
 
     - name: Create VMs
       include_tasks: create_vms.yml
-      with_items: "{{ vms }}"
+      with_items: "{{ ovirt_vm_infra_vms }}"
       loop_control:
         loop_var: "current_vm"
 
@@ -29,8 +29,8 @@
       register: job_result
       with_items: "{{ all_vms }}"
       until: job_result.finished
-      retries: "{{ (vm_infra_create_all_timeout|int // vm_infra_create_poll_interval) + 1  }}"
-      delay: "{{ vm_infra_create_poll_interval }}"
+      retries: "{{ (ovirt_vm_infra_create_all_timeout|int // ovirt_vm_infra_create_poll_interval) + 1  }}"
+      delay: "{{ ovirt_vm_infra_create_poll_interval }}"
 
     - name: Manage disks
       ovirt_disks:
@@ -44,7 +44,7 @@
         bootable: "{{ item.1.bootable | default(omit) }}"
         wait: true
       with_subelements:
-        - "{{ vms }}"
+        - "{{ ovirt_vm_infra_vms }}"
         - "profile.disks"
         - flags:
           skip_missing: true
@@ -59,7 +59,7 @@
         profile: "{{ item.1.profile | default(omit) }}"
         network: "{{ item.1.network | default(omit) }}"
       with_subelements:
-        - "{{ vms }}"
+        - "{{ ovirt_vm_infra_vms }}"
         - "profile.nics"
         - flags:
           skip_missing: true
@@ -74,33 +74,33 @@
         profile: "{{ item.1.profile | default(omit) }}"
         network: "{{ item.1.network | default(omit) }}"
       with_subelements:
-        - "{{ vms }}"
+        - "{{ ovirt_vm_infra_vms }}"
         - "nics"
         - flags:
           skip_missing: true
 
     - name: Manage VMs state
       include_tasks: manage_state.yml
-      with_items: "{{ vms }}"
+      with_items: "{{ ovirt_vm_infra_vms }}"
       loop_control:
         loop_var: "current_vm"
 
     - name: Wait for VMs to be started
-      no_log: "{{ not debug_vm_create }}"
+      no_log: "{{ not ovirt_debug_vm_create }}"
       async_status: "jid={{ item.ansible_job_id }}"
       register: job_result
       with_items: "{{ started_vms }}"
       until: job_result.finished
-      retries: "{{ (vm_infra_create_all_timeout|int // vm_infra_create_poll_interval) + 1  }}"
-      delay: "{{ vm_infra_create_poll_interval }}"
+      retries: "{{ (ovirt_vm_infra_create_all_timeout|int // ovirt_vm_infra_create_poll_interval) + 1  }}"
+      delay: "{{ ovirt_vm_infra_create_poll_interval }}"
 
     # to_json|from_json in vms is WA for: https://github.com/ansible/ansible/issues/27299
     - name: Apply tags from VM profiles
       ovirt_tags:
         auth: "{{ ovirt_auth }}"
         name: "{{ item }}"
-        vms: "{{ vms|to_json|from_json|json_query(query)|map(attribute='name') | list }}"
-      with_items: "{{ vms | selectattr('tag', 'defined') | map(attribute='tag') | list | unique }}"
+        vms: "{{ ovirt_vm_infra_vms|to_json|from_json|json_query(query)|map(attribute='name') | list }}"
+      with_items: "{{ ovirt_vm_infra_vms | selectattr('tag', 'defined') | map(attribute='tag') | list | unique }}"
       vars:
         query: "[?contains(tag, '{{ item }}')]"
 
@@ -108,11 +108,11 @@
       ovirt_tags:
         auth: "{{ ovirt_auth }}"
         name: "{{ item }}"
-        vms: "{{ vms|to_json|from_json|json_query(query)|map(attribute='name') | list }}"
-      with_items: "{{ vms | selectattr('profile', 'defined') | map(attribute='profile') | selectattr('tag', 'defined') | map(attribute='tag') | list | unique }}"
+        vms: "{{ ovirt_vm_infra_vms|to_json|from_json|json_query(query)|map(attribute='name') | list }}"
+      with_items: "{{ ovirt_vm_infra_vms | selectattr('profile', 'defined') | map(attribute='profile') | selectattr('tag', 'defined') | map(attribute='tag') | list | unique }}"
       vars:
         query: "[?contains(profile.tag, '{{ item }}')]"
-        defined_vms: "{{ vms | selectattr('profile.tag', 'defined') | list | unique }}"
+        defined_vms: "{{ ovirt_vm_infra_vms | selectattr('profile.tag', 'defined') | list | unique }}"
 
     - name: Apply any Affinity Groups
       import_tasks: affinity_groups.yml
@@ -125,10 +125,10 @@
             fetch_nested: true
             nested_attributes: ips
           with_items:
-            - "{{ vms }}"
+            - "{{ ovirt_vm_infra_vms }}"
           until: "ovirt_vms | ovirtvmipv4| length > 0"
-          retries: "{{ vm_infra_wait_for_ip_retries }}"
-          delay: "{{ vm_infra_wait_for_ip_delay }}"
+          retries: "{{ ovirt_vm_infra_wait_for_ip_retries }}"
+          delay: "{{ ovirt_vm_infra_wait_for_ip_delay }}"
           vars:
             query: "reported_devices[*].ips[*].address"
           when: "item.profile.state | default('present') != 'stopped'"
@@ -136,7 +136,7 @@
         - name: Create inventory
           include_tasks: create_inventory.yml
 
-      when: "wait_for_ip"
+      when: "ovirt_vm_infra_wait_for_ip"
 
   always:
     - name: Logout from oVirt

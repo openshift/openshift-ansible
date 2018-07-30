@@ -20,9 +20,9 @@
     high_availability: "{{ current_vm.high_availability | default(current_vm.profile.high_availability) | default(omit) }}"
     high_availability_priority: "{{ current_vm.high_availability_priority | default(current_vm.profile.high_availability_priority) | default(omit) }}"
     storage_domain: "{{ current_vm.storage_domain | default(current_vm.profile.storage_domain) | default(omit) }}"
-    timeout: "{{ vm_infra_create_single_timeout }}"
+    timeout: "{{ ovirt_vm_infra_create_single_timeout }}"
   changed_when: false
-  async: "{{ vm_infra_create_single_timeout }}"
+  async: "{{ ovirt_vm_infra_create_single_timeout }}"
   poll: 0
   register: added_vm
 

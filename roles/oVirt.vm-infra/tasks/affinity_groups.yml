@@ -17,6 +17,6 @@
     vms: "{{ item.vms | default([]) }}"
     wait: "{{ item.wait | default(omit) }}"
   with_items:
-    - "{{ affinity_groups | default([]) }}"
+    - "{{ ovirt_affinity_groups | default([]) }}"
   tags:
-    - affinity_groups
+    - ovirt_affinity_groups

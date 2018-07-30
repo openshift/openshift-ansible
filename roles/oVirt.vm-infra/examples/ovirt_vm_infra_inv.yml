@@ -5,15 +5,15 @@
   gather_facts: false
 
   vars_files:
-    # Contains encrypted `engine_password` varibale using ansible-vault
+    # Contains encrypted `ovirt_engine_password` varibale using ansible-vault
     - passwords.yml
 
   vars:
-    engine_url: https://ovirt-engine.example.com/ovirt-engine/api
-    engine_user: admin@internal
-    engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    ovirt_engine_url: https://ovirt-engine.example.com/ovirt-engine/api
+    ovirt_engine_user: admin@internal
+    ovirt_engine_cafile: /etc/pki/ovirt-engine/ca.pem
 
-    wait_for_ip: true
+    ovirt_vm_infra_wait_for_ip: true
     httpd_vm:
       state: running
       cluster: mycluster
@@ -33,7 +33,7 @@
       tag: db
       ssh_key: ssh-rsa AAAAB...Gx ondra@ondra
 
-    vms:
+    ovirt_vm_infra_vms:
       - name: httpd-vm-1
         profile: httpd_vm
         tag: httpd

@@ -2,16 +2,16 @@
 - block:
     - name: Check if template is correct
       fail:
-        msg: "one of mandatory parameters glance_image_provider or glance_image is not defined"
-      when: "glance_image_provider is undefined or glance_image is undefined"
+        msg: "one of mandatory parameters ovirt_glance_image_provider or ovirt_glance_image is not defined"
+      when: "ovirt_glance_image_provider is undefined or ovirt_glance_image is undefined"
 
     - name: Login to oVirt
       ovirt_auth:
-        url: "{{ engine_url | default(omit) }}"
-        username: "{{ engine_user | default(omit) }}"
-        password: "{{ engine_password | default(omit) }}"
-        ca_file: "{{ engine_cafile | default(omit) }}"
-        insecure: "{{ engine_insecure | default(true) }}"
+        url: "{{ ovirt_engine_url | default(omit) }}"
+        username: "{{ ovirt_engine_user | default(omit) }}"
+        password: "{{ ovirt_engine_password | default(omit) }}"
+        ca_file: "{{ ovirt_engine_cafile | default(omit) }}"
+        insecure: "{{ ovirt_engine_insecure | default(true) }}"
       when: ovirt_auth is undefined or not ovirt_auth
       register: loggedin
       tags:
@@ -25,7 +25,7 @@
 
     - name: Find data domain
       set_fact:
-        disk_storage_domain: "{{ ovirt_storage_domains|json_query(the_query)|list|first}}"
+        ovirt_disk_storage_domain: "{{ ovirt_storage_domains|json_query(the_query)|list|first}}"
       vars:
         the_query: "[?type=='data']"
       tags:
@@ -35,16 +35,16 @@
       ovirt_templates:
         auth: "{{ ovirt_auth }}"
         state: imported
-        name: "{{ template_name }}"
-        template_image_disk_name: "{{ template_disk_name | default(omit) }}"
-        image_provider: "{{ glance_image_provider }}"
-        image_disk: "{{ glance_image }}"
-        storage_domain: "{{ template_disk_storage | default(disk_storage_domain.name) }}"
-        cluster: "{{ template_cluster }}"
-        operating_system: "{{ template_operating_system | default(omit) }}"
-        memory: "{{ template_memory | default(omit) }}"
-        memory_guaranteed: "{{ template_memory_guaranteed | default(omit) }}"
-        memory_max: "{{ template_memory_max | default(omit) }}"
+        name: "{{ ovirt_template_name }}"
+        template_image_disk_name: "{{ ovirt_template_disk_name | default(omit) }}"
+        image_provider: "{{ ovirt_glance_image_provider }}"
+        image_disk: "{{ ovirt_glance_image }}"
+        storage_domain: "{{ ovirt_template_disk_storage | default(ovirt_disk_storage_domain.name) }}"
+        cluster: "{{ ovirt_template_cluster }}"
+        operating_system: "{{ ovirt_template_operating_system | default(omit) }}"
+        memory: "{{ ovirt_template_memory | default(omit) }}"
+        memory_guaranteed: "{{ ovirt_template_memory_guaranteed | default(omit) }}"
+        memory_max: "{{ ovirt_template_memory_max | default(omit) }}"
 
   always:
     - name: Logout from oVirt
