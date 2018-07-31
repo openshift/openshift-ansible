@@ -65,8 +65,11 @@ objects:
               imagePullPolicy: IfNotPresent
               resources:
                 limits:
+{% if cpu_limit is defined %}
+                  cpu: ${CPU_LIMIT}
+{% endif %}
                   memory: ${MEMORY}
-                requires:
+                requests:
                   cpu: ${CPU}
                   memory: ${MEMORY}
               volumeMounts:
@@ -104,6 +107,11 @@ parameters:
   - name: CPU
     displayName: CPU
     value: "100m"
+{% if cpu_limit is defined %}
+  - name: CPU_LIMIT
+    displayName: CPU_LIMIT
+    value: "100m"
+{% endif %}
   - name: NAMESPACE
     displayName: Namespace
     value: default
