@@ -25,7 +25,7 @@
     name: "{{ crio_pkgs | join (',') }}"
     state: latest
   when:
-  - openshift_use_crio | default(False)
+  - openshift_use_crio | bool
   register: crio_update
   vars:
     crio_pkgs:

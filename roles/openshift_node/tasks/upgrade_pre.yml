@@ -39,7 +39,7 @@
   register: result
   until: result is succeeded
   when:
-  - openshift_use_crio | default(False)
+  - openshift_use_crio | bool
   vars:
     crio_pkgs:
     - "cri-o"
