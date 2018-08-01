@@ -1,0 +1,6 @@
+---
+- import_tasks: vpc_and_subnet_id.yml
+
+- name: provision route53
+  import_tasks: dns_route53.yml
+  when: "'route53' in openshift_aws_dns_provider"

@@ -1,0 +1,22 @@
+---
+- debug: msg="{{ l_openshift_aws_dns_element }}"
+
+- name: querying elb
+  ec2_elb_facts:
+    names: "{{ l_openshift_aws_dns_element['elb_name'] }}"
+    region: "{{ openshift_aws_region }}"
+  register: elb_facts
+  when:
+    - "l_openshift_aws_dns_element.kind == 'elb'"
+    - "l_openshift_aws_dns_element.type == 'CNAME'"
+
+- name: creating record
+  route53:
+    command: create
+    overwrite: no
+    private_zone: "{{ l_openshift_aws_dns_element['private_zone'] }}"
+    record: "{{ l_openshift_aws_dns_element['record'] }}.{{ openshift_aws_dns_zone }}"
+    type: "{{ l_openshift_aws_dns_element['type'] }}"
+    ttl: 300
+    value: "{{ elb_facts.elbs[0].dns_name }}"
+    zone: "{{ openshift_aws_dns_zone }}"

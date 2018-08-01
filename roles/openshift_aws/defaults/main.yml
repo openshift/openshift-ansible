@@ -61,6 +61,48 @@ openshift_aws_vpc:
 #    - cidr: 172.31.16.0/20
 #      az: "us-east-1a"
 
+openshift_aws_create_dns: False
+openshift_aws_dns_provider: "route53"
+# openshift_aws_dns_zone: ""
+# ie. openshift_aws_dns_zone: "{{ openshift_aws_clusterid }}.example.com"
+
+openshift_aws_dns_records:
+# Pertains to inventory file key: openshift_master_cluster_public_hostname
+- record: 'api'
+  elb_name: "{{ openshift_aws_elb_dict['master']['external']['name'] }}"
+  type: 'CNAME'
+  kind: 'elb'
+  private_zone: False
+# Pertains to inventory file key: openshift_master_cluster_hostname
+- record: 'internal.api'
+  elb_name: "{{ openshift_aws_elb_dict['master']['internal']['name'] }}"
+  type: 'CNAME'
+  kind: 'elb'
+  private_zone: False
+# Pertains to inventory file key: openshift_master_default_subdomain
+- record: '*.apps'
+  elb_name: "{{ openshift_aws_elb_dict['infra']['external']['name'] }}"
+  type: "CNAME"
+  kind: "elb"
+  private_zone: False
+- record: 'logs'
+  elb_name: "{{ openshift_aws_elb_dict['infra']['external']['name'] }}"
+  type: "CNAME"
+  kind: "elb"
+  private_zone: False
+- record: 'metrics'
+  elb_name: "{{ openshift_aws_elb_dict['infra']['external']['name'] }}"
+  type: "CNAME"
+  kind: "elb"
+  private_zone: False
+- record: 'registry'
+  elb_name: "{{ openshift_aws_elb_dict['infra']['external']['name'] }}"
+  type: "CNAME"
+  kind: "elb"
+  private_zone: False
+# A public or private vpc attached Route53 zone will be created based on
+# private_zone boolean.  Split-tier dns is supported.
+
 openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}"
 openshift_aws_elb_master_external_name: "{{ openshift_aws_elb_basename }}-master-external"
 openshift_aws_elb_master_internal_name: "{{ openshift_aws_elb_basename }}-master-internal"

@@ -1,0 +1,17 @@
+---
+- name: creating route53 zone(s)
+  route53_zone:
+    comment: "{{ openshift_aws_dns_zone }}"
+    state: present
+    vpc_id: "{{ ( l_openshift_aws_route53_scheme | ternary(vpcout.vpcs.0.id, '') ) }}"
+    vpc_region: "{{ openshift_aws_region }}"
+    zone: "{{ openshift_aws_dns_zone }}"
+  loop: "{{ openshift_aws_dns_records | selectattr('private_zone','defined') | map(attribute='private_zone') | list | unique  }}"
+  loop_control:
+    loop_var: l_openshift_aws_route53_scheme
+
+- name: creating route53 record(s)
+  include_task: dns_route53_record.yml
+  with_items: "{{ openshift_aws_dns_records }}"
+  loop_control:
+    loop_var: l_openshift_aws_dns_element
