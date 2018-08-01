@@ -83,6 +83,9 @@ spec:
         - name: dockercfg
           mountPath: /etc/sysconfig/docker
           readOnly: true
+        - name: originnodecfg
+          mountPath: /etc/origin/node
+          readOnly: true
         - name: dockerdaemoncfg
           mountPath: /etc/docker
           readOnly: true
@@ -241,6 +244,9 @@ spec:
       - name: dockercfg
         hostPath:
           path: /etc/sysconfig/docker
+      - name: originnodecfg
+        hostPath:
+          path: /etc/origin/node
       - name: dockerdaemoncfg
         hostPath:
           path: /etc/docker
