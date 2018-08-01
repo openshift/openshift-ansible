@@ -12,8 +12,7 @@
     security_group_names: "{{ l_elb_security_groups[l_elb_dict_item.key] }}"
     idle_timeout: "{{ item.value.idle_timeout }}"
     region: "{{ openshift_aws_region }}"
-    subnets:
-    - "{{ subnetout.subnets[0].id }}"
+    subnets: "{{ subnetout.results | map(attribute='subnets.0.subnet_id') | list }}"
     health_check: "{{ item.value.health_check }}"
     instance_ids: "{{ item.value.instance_ids | default(omit) }}"
     listeners: "{{ item.value.listeners }}"

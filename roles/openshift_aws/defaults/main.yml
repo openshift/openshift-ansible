@@ -46,6 +46,21 @@ openshift_aws_ami_tags:
 openshift_aws_s3_mode: create
 openshift_aws_s3_bucket_name: "{{ openshift_aws_clusterid }}-docker-registry"
 
+openshift_aws_vpc_tags:
+  Name: "{{ openshift_aws_vpc_name }}"
+
+openshift_aws_vpc:
+  name: "{{ openshift_aws_vpc_name }}"
+  cidr: 172.31.0.0/16
+  subnets:
+    us-east-1:
+    - cidr: 172.31.48.0/20
+      az: "us-east-1c"
+#    - cidr: 172.31.32.0/20
+#      az: "us-east-1e"
+#    - cidr: 172.31.16.0/20
+#      az: "us-east-1a"
+
 openshift_aws_elb_basename: "{{ openshift_aws_clusterid }}"
 openshift_aws_elb_master_external_name: "{{ openshift_aws_elb_basename }}-master-external"
 openshift_aws_elb_master_internal_name: "{{ openshift_aws_elb_basename }}-master-internal"
@@ -265,8 +280,8 @@ openshift_aws_node_security_groups:
       to_port: 22
       cidr_ip: 0.0.0.0/0
     - proto: all
-      from_port: all
-      to_port: all
+      from_port: 1
+      to_port: 65535
       group_name: "{{ openshift_aws_clusterid }}"
   master:
     name: "{{ openshift_aws_clusterid }}_master"
@@ -302,24 +317,6 @@ openshift_aws_node_security_groups:
   etcd:
     name: "{{ openshift_aws_clusterid }}_etcd"
     desc: "{{ openshift_aws_clusterid }} etcd instances"
-
-openshift_aws_vpc_tags:
-  Name: "{{ openshift_aws_vpc_name }}"
-
-openshift_aws_vpc:
-  name: "{{ openshift_aws_vpc_name }}"
-  cidr: 172.31.0.0/16
-  subnets:
-    us-east-1:
-    - cidr: 172.31.48.0/20
-      az: "us-east-1c"
-      default_az: true
-    - cidr: 172.31.32.0/20
-      az: "us-east-1e"
-    - cidr: 172.31.16.0/20
-      az: "us-east-1a"
-
-openshift_aws_subnet_az: "{{ openshift_aws_vpc.subnets[openshift_aws_region] | get_default_az }}"
 
 openshift_aws_node_run_bootstrap_startup: True
 openshift_aws_node_user_data: ''
