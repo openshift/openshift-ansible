@@ -10,10 +10,12 @@
     password: "{{ oreg_auth_password }}"
     # Test that we can actually connect with provided info
     test_login: "{{ oreg_test_login | default(True) }}"
+    proxy_vars: "{{ l_docker_creds_proxy_vars }}"
+    image_name: "{{ l_docker_creds_image_name }}"
   when:
   - oreg_auth_user is defined
   register: master_oreg_auth_credentials_create
   notify: restart master
   retries: 3
   delay: 5
-  until: master_oreg_auth_credentials_create.rc == 0
+  until: master_oreg_auth_credentials_create is succeeded
