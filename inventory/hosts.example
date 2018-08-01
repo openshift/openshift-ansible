@@ -294,6 +294,10 @@ debug_level=2
 # openshift_gcp_prefix is a unique string to identify each openshift cluster.
 #openshift_gcp_prefix=
 #openshift_gcp_multizone=False
+# Note: To enable nested virtualization in gcp use the following variable and url
+#openshift_gcp_licenses="https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx"
+# Additional details regarding nested virtualization are available:
+# https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances
 #
 # vSphere
 #openshift_cloudprovider_kind=vsphere
