@@ -877,19 +877,14 @@ parameters.
 
 ## Scaling The OpenShift Cluster
 
-Adding more nodes to the cluster is a three-step process: we need to create the
-new nodes, mark them for scale up and then run the appropriate playbook.
+Adding more nodes to the cluster is a simple process: we need to update the
+node cloud in `inventory/group_vars/all/yml`, then run the appropriate
+scaleup playbook.
 
-Note that the scaling playbooks are different from the installation ones. If
-you just change the number of nodes in your inventory and re-run
-`provision_install.yml`, the playbooks will fail.
 
-### Scaling the Compute and Infra Nodes
+### 1. Update The Inventory
 
-#### 1. Adding Extra Nodes
-
-Edit your `inventory/group_vars/all.yml` and set the new node total in
-`openshift_openstack_num_nodes`.
+Edit your `inventory/group_vars/all.yml` and set the new node total.
 
 For example, if your cluster has currently 3 masters, 2 infra and 5 app nodes
 and you want to add another 3 compute nodes, `all.yml` should contain this:
@@ -900,88 +895,32 @@ openshift_openstack_num_infra: 2
 openshift_openstack_num_nodes: 8  # 5 existing and 3 new
 ```
 
-**NOTE**: scaling the infra nodes is exactly the same. Just update the
-`openshift_openstack_num_infra` var instead.
 
-Then run the `provision.yml` playbook only (*do not run*
-`provision_install.yml` -- it can mess up your cluster!).
+### 2. Scale the Cluster
+
+Next, run the appropriate playbook - either 
+`openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml`
+for master nodes or
+`openshift-ansible/playbooks/openstack/openshift-cluster/node-scaleup.yml`
+for other nodes. For example:
 
 ```
 $ ansible-playbook --user openshift \
   -i openshift-ansible/playbooks/openstack/inventory.py \
   -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/provision.yml
+  openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
 ```
 
-This will create the new nodes while leaving everything else as is.
+This will create the new OpenStack nodes, optionally create the DNS records
+and subscribe them to RHN, configure the `new_masters`, `new_nodes` and
+`new_etcd` groups and run the OpenShift scaleup tasks.
+
+When the playbook finishes, you should have new nodes up and running.
+
+Run `oc get nodes` to verify.
 
 
-#### 2. Marking The Nodes For Scaleup
-
-You can see all nodes (old as well as new) by running:
-
-```
-openstack server list
-```
-
-Note the names of the newly created nodes.
-
-Then create a new text file called `new-nodes` with the following contents:
-
-```
-[new_nodes]
-app-node-5.openshift.example.com
-app-node-6.openshift.example.com
-app-node-7.openshift.example.com
-
-[OSEv3:children]
-new_nodes
-```
-
-That is, an ini group section called `new_nodes` and the name of every new node
-on its own line. If you're scaling the infra nodes, they should go into the
-`new_nodes` section as well.
-
-You must also run the `configure-new-nodes.yml` playbook to run a few
-OpenStack-specific configurations. Don't forget to pass the `new-nodes` file
-in.
-
-```
-$ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i new-nodes \
-  -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/configure-new-nodes.yml
-```
-
-#### 3. Adding The Nodes To OpenShift
-
-The final step is running the `scaleup.yml` playbook and passing in the
-`new-nodes` file:
-
-```
-$ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i new-nodes \
-  -i inventory \
-  openshift-ansible/playbooks/openshift-node/scaleup.yml
-```
-
-After that, your OpenShift cluster will be configured with the extra nodes. Be
-sure to **remove the `-i new-nodes` parameter from any subsequent Ansible
-runs** as these "new nodes" are now "regular nodes".
-
-For any subsequent scaling operations, you will have to update the `new-nodes`
-file. The `new_nodes` group should only contain nodes that were not deployed.
-So you would remove the previously added nodes and put in the new ones.
-
-For more information on scaling, please visit the [OpenShift Admin
-Guide][admin-guide].
-
-[admin-guide]: https://docs.openshift.org/latest/admin_guide/manage_nodes.html#adding-cluster-hosts_manage-nodes
-
-
-#### 4. Updating The Registry and Router Replicas
+### 3. Update The Registry and Router Replicas (Infra only)
 
 If you have added new infra nodes, the extra `docker-registry` and `router`
 pods may not have been created automatically. E.g. if you started with a single
@@ -998,43 +937,6 @@ oc scale --replicas=<count> dc/router
 
 Where `<count>` is the number of the pods you want (i.e. the number of your
 infra nodes).
-
-
-### Scaling the Master Nodes
-
-Adding master nodes is similar to adding compute/infra nodes, but we need to
-run a different playbook at the end.
-
-You must have a fully working OpenShift cluster before you start scaling.
-
-#### 1. Adding Extra Master Nodes
-
-Edit your `inventory/group_vars/all.yml` and set the new master node total in
-`openshift_openstack_num_masters`.
-
-For example if you started with a single master node and you want to add two
-more (for a grand total of three), you should set:
-
-    openshift_openstack_num_masters: 3
-
-#### 2. Scaling the Cluster
-
-Then run the `master-scaleup.yml` playbook:
-
-```
-$ ansible-playbook --user openshift \
-  -i openshift-ansible/playbooks/openstack/inventory.py \
-  -i inventory \
-  openshift-ansible/playbooks/openstack/openshift-cluster/master-scaleup.yml
-```
-
-This will create the new OpenStack nodes, optionally create the DNS records
-and subscribe them to RHN, configure the `new_masters`, `new_nodes` and
-`new_etcd` groups and run the OpenShift master scaleup tasks.
-
-When the playbook finishes, you should have new master nodes up and running.
-
-Run `oc get nodes` to verify.
 
 
 ## Deploying At Scale
