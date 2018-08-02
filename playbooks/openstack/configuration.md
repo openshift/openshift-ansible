@@ -568,6 +568,9 @@ to the UUID of the public subnet in your OpenStack.
 **NOTE**: A lot of OpenStack deployments do not make the public subnet
 accessible to regular users.
 
+Finally, you *must* set up an OpenStack cloud provider as specified in
+ [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration).
+
 ### Port pooling
 
 It is possible to pre-create Neutron ports for later use. This means that
