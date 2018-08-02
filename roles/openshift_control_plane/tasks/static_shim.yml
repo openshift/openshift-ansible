@@ -3,7 +3,7 @@
 - name: Copy static master scripts
   copy:
     src: "{{ item }}"
-    dest: "/usr/local/bin/"
+    dest: "/usr/local/sbin/"
     mode: 0500
   with_items:
   - "scripts/{{ l_runtime }}/master-exec"
