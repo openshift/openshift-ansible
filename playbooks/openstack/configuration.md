@@ -22,7 +22,6 @@ Environment variables may also be used.
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
-* [OpenStack Credential Configuration](#openstack-credential-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 * [Swift or Ceph Rados GW Backed Registry Configuration](#swift-or-ceph-rados-gw-backed-registry-configuration)
@@ -105,24 +104,23 @@ https://github.com/openshift/openshift-ansible/blob/master/inventory/hosts.examp
 
 ## OpenStack Cloud Provider Configuration
 
-The base OpenStack cloud provider configuration file provides limited parameters:
+Some features require you to configure the OpenStack cloud provider. For example, in
+`inventory/group_vars/OSEv3.yml`:
 
-```
-[Global]
-auth-url
-username
-password
-tenant-id / tenant-name
-domain-id (optional)
-domain-name (optional)
-region (optional)
+* `openshift_cloudprovider_kind`: openstack
+* `openshift_cloudprovider_openstack_auth_url`: "{{ lookup('env','OS_AUTH_URL') }}"
+* `openshift_cloudprovider_openstack_username`: "{{ lookup('env','OS_USERNAME') }}"
+* `openshift_cloudprovider_openstack_password`: "{{ lookup('env','OS_PASSWORD') }}"
+* `openshift_cloudprovider_openstack_tenant_name`: "{{ lookup('env','OS_PROJECT_NAME') }}"
+* `openshift_cloudprovider_openstack_domain_name`: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
 
-[LoadBalancer]
-subnet-id (optional)
+The full range of openshift-ansible OpenStack cloud provider options can be found at:
 
-[BlockStorage]
-bs-version (optional)
-```
+https://github.com/openshift/openshift-ansible/blob/master/roles/openshift_cloud_provider/templates/openstack.conf.j2
+
+For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
+
+[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
 
 If you would like to use additional parameters, create a custom cloud provider
 configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:
@@ -747,7 +745,6 @@ This means that regardless of the load balancing solution, you can use these
 two entries to provide access to your cluster.
 
 
-
 ## Provider Network Configuration
 
 Normally, the playbooks create a new Neutron network and subnet and attach
@@ -765,32 +762,9 @@ In `inventory/group_vars/all.yml`:
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
 
 
-## OpenStack Credential Configuration
-
-Some features require you to configure OpenStack credentials. In `inventory/group_vars/OSEv3.yml`:
-
-* `openshift_cloudprovider_kind: openstack
-* `openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OS_AUTH_URL') }}"
-* `openshift_cloudprovider_openstack_username: "{{ lookup('env','OS_USERNAME') }}"
-* `openshift_cloudprovider_openstack_password: "{{ lookup('env','OS_PASSWORD') }}"
-* `openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
-* `openshift_cloudprovider_openstack_domain_name: "{{ lookup('env','OS_USER_DOMAIN_NAME') }}"
-
-For more information, consult the [Configuring for OpenStack page in the OpenShift documentation][openstack-credentials].
-
-[openstack-credentials]: https://docs.openshift.org/latest/install_config/configuring_openstack.html#install-config-configuring-openstack
-
-**NOTE** the OpenStack integration currently requires DNS to be configured and
-running and the `openshift_hostname` variable must match the Nova server name
-for each node. The cluster deployment will fail without it. If you use the
-provided OpenStack dynamic inventory and configure the
-`openshift_openstack_dns_nameservers` Ansible variable, this will be handled
-for you.
-
-
 ## Cinder-Backed Persistent Volumes Configuration
 
-In addition to [setting up OpenStack credentials](#openstack-credential-configuration),
+In addition to [setting up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
 you must set the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_cloudprovider_openstack_blockstorage_version`: v2
@@ -832,9 +806,8 @@ openstack volume create --size <volume size in gb> <volume name>
 Alternatively, the playbooks can create the volume created automatically if you
 specify its name and size.
 
-In either case, you have to [set up OpenStack
-credentials](#openstack-credential-configuration), and then set the following
-in `inventory/group_vars/OSEv3.yml`:
+In either case, you have to [set up an OpenStack cloud provider](#openstack-cloud-provider-configuration),
+and then set the following in `inventory/group_vars/OSEv3.yml`:
 
 * `openshift_hosted_registry_storage_kind`: openstack
 * `openshift_hosted_registry_storage_access_modes`: ['ReadWriteOnce']
