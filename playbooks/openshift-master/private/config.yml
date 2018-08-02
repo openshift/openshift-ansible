@@ -91,7 +91,6 @@
     when: openshift_cloudprovider_kind is defined
   - role: openshift_builddefaults
   - role: openshift_buildoverrides
-  - role: nickhammond.logrotate
 
   - role: openshift_control_plane
   - role: tuned
