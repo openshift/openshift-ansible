@@ -41,25 +41,3 @@
       msg: "{{ logs_node.stdout_lines }}"
   - fail:
       msg: Node start failed.
-
-# The restart above triggers previously approved nodes to go NotReady
-# We should wait for previously approved nodes to go Ready again
-- name: Wait for node to be ready
-  oc_obj:
-    state: list
-    kind: node
-    name: "{{ openshift.node.nodename | lower }}"
-  register: node_output
-  delegate_to: "{{ groups.oo_first_master.0 }}"
-  when: inventory_hostname in groups.oo_nodes_to_config
-  until:
-  - node_output.results is defined
-  - node_output.results.returncode is defined
-  - node_output.results.results is defined
-  - node_output.results.returncode == 0
-  - node_output.results.results[0].status is defined
-  - node_output.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
-  # Give the node three minutes to come back online.
-  retries: 36
-  delay: 5
-  failed_when: False

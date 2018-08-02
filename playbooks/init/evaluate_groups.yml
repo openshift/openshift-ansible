@@ -131,28 +131,6 @@
     with_items: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
     changed_when: no
 
-  - name: Evaluate oo_nodes_to_bootstrap
-    add_host:
-      name: "{{ item }}"
-      groups: oo_nodes_to_bootstrap
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_new_node_hosts | default(g_node_hosts | default([], true), true) }}"
-    changed_when: no
-
-  - name: Add masters to oo_nodes_to_bootstrap
-    add_host:
-      name: "{{ item }}"
-      groups: oo_nodes_to_bootstrap
-      ansible_ssh_user: "{{ g_ssh_user | default(omit) }}"
-      ansible_become: "{{ g_sudo | default(omit) }}"
-    with_items: "{{ g_new_master_hosts | default(g_master_hosts | default([], true), true) }}"
-    when:
-    # Add masters to oo_nodes_to_bootstrap when we are not scaling up.
-    # Add new masters to oo_nodes_to_bootstrap when we are scaling up masters.
-    - g_new_node_hosts | length == 0 or g_new_master_hosts | length > 0
-    changed_when: no
-
   - name: Evaluate oo_lb_to_config
     add_host:
       name: "{{ item }}"
