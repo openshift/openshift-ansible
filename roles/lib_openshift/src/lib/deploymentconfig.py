@@ -88,8 +88,12 @@ spec:
             return False
 
         for result in results:
-            if result['name'] == key and result['value'] == value:
-                return True
+            if result['name'] == key:
+                if 'value' not in result:
+                    if value == "" or value is None:
+                        return True
+                elif result['value'] == value:
+                    return True
 
         return False
 
