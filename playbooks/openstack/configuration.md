@@ -127,34 +127,16 @@ configuration file locally and specify it in `inventory/group_vars/OSEv3.yml`:
 ## OpenStack With SSL Configuration
 
 In order to configure your OpenShift cluster to work properly with OpenStack with
-SSL-endpoints, you must do the following:
-
-### 1. Specify a custom OpenStack cloud provider configuration file
-
-Follow the instructions in [OpenStack Cloud Provider Configuration](#openstack-cloud-provider-configuration)
-and create a custom OpenStack cloud provider configuration file. In the Global
-section, add:
-
-```
-[Global]
-.
-.
-ca-file = /path/to/ca-bundle.crt
-.
-.
-```
-
-Make sure you set `openshift_cloudprovider_openstack_conf_file` in 
-`inventory/group_vars/OSEv3.yml`.
-
-### 2. Add Parameters to OSEv3.yml
-
-Add the following to `inventory/group_vars/OSEv3.yml`:
+SSL-endpoints, add the following to `inventory/group_vars/OSEv3.yml`:
 
 ```
 openshift_certificates_redeploy: true
 openshift_additional_ca: /path/to/ca.crt.pem
 kuryr_openstack_ca: /path/to/ca.crt.pem (optional)
+openshift_cloudprovider_openstack_ca_file: |
+  -----BEGIN CERTIFICATE-----
+  CONTENTS OF OPENSTACK SSL CERTIFICATE
+  -----END CERTIFICATE-----
 ```
 
 ## Stack Name Configuration
