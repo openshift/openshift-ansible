@@ -43,10 +43,6 @@ openshift_openstack_external_network_name: "public"
 #use_trunk_ports: True
 #os_sdn_network_plugin_name: cni
 #openshift_node_proxy_mode: userspace
-# # Kuryr needs to have the pod based registry (if desired in the cluster)
-# deployed after kuryr is up and running. This can be done with oadm
-# #Disable management of the OpenShift Registry
-#openshift_hosted_manage_registry: false
 
 # # Kuryr needs to know the network or the subnet you will be taking Floating
 # IPs for the loadbalancer services from.
