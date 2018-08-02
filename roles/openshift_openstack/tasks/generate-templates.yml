@@ -23,6 +23,11 @@
     src: heat_stack_server.yaml.j2
     dest: "{{ stack_template_pre.path }}/server.yaml"
 
+- name: generate HOT baremetal_server template from jinja2 template
+  template:
+    src: heat_stack_baremetal_server.yaml.j2
+    dest: "{{ stack_template_pre.path }}/baremetal_server.yaml"
+
 - name: generate user_data from jinja2 template
   template:
     src: user_data.j2
