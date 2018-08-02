@@ -10,7 +10,7 @@
 
 Name:           openshift-ansible
 Version:        3.11.0
-Release:        0.10.0
+Release:        0.11.0
 Summary:        Openshift and Atomic Enterprise Ansible
 License:        ASL 2.0
 URL:            https://github.com/openshift/openshift-ansible
@@ -163,6 +163,36 @@ BuildArch:     noarch
 
 
 %changelog
+* Thu Aug 02 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.11.0
+- Reorganized OpenStack cloud provider documentation (tzumainn@redhat.com)
+- Add doc note that kuryr requires openstack cloud provider
+  (tzumainn@redhat.com)
+- Beginning deprecation of INSTANCE_RAM var in favor of downwardAPI provided
+  mem limit vol mount (ewolinet@redhat.com)
+- Adding documentation in hosts.example (jcallen@redhat.com)
+- Fix ASB user and password defaults (jmontleo@redhat.com)
+- Add a license parameter to gcloud command (jcallen@redhat.com)
+- adding unmount task below the backup task (bysnupy@hotmail.com)
+- Bug 1610224 - Unable to find container log in Elasticsearch when using cri-o
+  (rmeggins@redhat.com)
+- Added OpenStack security group requirements section (tzumainn@redhat.com)
+- Add containerized glusterfs cluster health check (mgugino@redhat.com)
+- Allow user to specify local openstack.conf (tzumainn@redhat.com)
+- Avoid to call install_node_exporter task during uninstallation.
+  (gbsalinetti@extraordy.com)
+- Add bool filter to all instances of openshift_use_crio (rteague@redhat.com)
+- Cleanup node bootstrap / scaleup code (mgugino@redhat.com)
+- Allow shared_non_ops as kibana index mode (farandac@redhat.com)
+- AWS: reboot instance before sealing (jchaloup@redhat.com)
+- Fix docker reg auth bugs (mgugino@redhat.com)
+- Clarified scaling docs, combining master/infra/app sections
+  (tzumainn@redhat.com)
+- ignore failing dns clean errors when running openstack uninstall playbook
+  (tzumainn@redhat.com)
+- Updating how we get node names for logging hosts to build sysctl for
+  (ewolinet@redhat.com)
+- Allow disabling Network Manager managed dns (arun.neelicattu@gmail.com)
+
 * Fri Jul 27 2018 AOS Automation Release Team <aos-team-art@redhat.com> 3.11.0-0.10.0
 - Disable yum-cron by default on GCP (ccoleman@redhat.com)
 - Revert "logging configure fluent to merge_json_log" (jcantril@redhat.com)
